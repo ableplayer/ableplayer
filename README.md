@@ -101,7 +101,26 @@ your web page be sure you have the HTML5 doctype:
 <!DOCTYPE html>
 ```
 
-More documentation to come...
--------------------------------
+Setup Step 2: Add JavaScript and CSS
+------------------------------------
 
+Copy and paste the following code into your web page. This code applies
+to all use cases, both audio and video.
+
+```HTML
+\<!– Dependencies –\> \<script
+src=“thirdparty/modernizr.custom.js”\>\</script\> \<script
+src=“http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js”\>\</script\>
+\<script
+src=“//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js”\>\</script\>
+\<script src=“thirdparty/jquery.cookie.js”\>\</script\> \<link
+rel=“stylesheet”
+href=“http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css”\> \<!–
+CSS –\> \<link rel=“stylesheet” href=“styles/ableplayer.css”
+type=“text/css”/\> \<!– JavaScript –\> \<script
+src=“scripts/ableplayer.js”\>\</script\>
+```
+
+More documentation coming soon!
+------------------------------------
 
