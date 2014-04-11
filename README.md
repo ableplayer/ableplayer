@@ -3,7 +3,9 @@ Able Player
 
 *Able Player* is a fully accessible cross-browser media player. It uses
 the HTML5 \<audio\> or \<video\> element for browsers that support them,
-and the JW Player as a fallback for those that don’t.
+and (optionally) the JW Player as a fallback for those that don’t.
+
+Functioning examples of the player are available at [terrillthompson.com][example page].
 
 Features
 --------
@@ -501,7 +503,7 @@ users can control the following:
 -   Keyboard-enable transcript
 
 
-
+  [example page]: http://terrillthompson.com/ableplayer/
   [jQuery]: http://jquery.com/
   [jQuery UI]: http://jqueryui.com/
   [Modernizr]: http://modernizr.com/
