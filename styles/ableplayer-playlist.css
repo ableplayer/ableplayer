@@ -1,0 +1,68 @@
+/* 
+	Universal Media Player (UMP) playlist styles
+	http://terrillthompson.com/ump
+*/
+
+/* 
+ *
+ * playlist embedded into player 
+ *
+ */
+ 
+.ump .ump-playlist { 
+	font-size: 0.9em;
+	list-style-type: none;
+	margin: 0;
+	background-color: #FFFFFF;
+	padding: 5px 0;
+}
+.ump .ump-playlist li { 
+	background-color: #DDDDDD; /* default background color of each item in playlist */
+	margin: 5px;
+	padding: 5px 10px;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+}
+.ump .ump-playlist li:hover, 
+.ump .ump-playlist li:focus, 
+.ump .ump-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+	color: #FFFFFF; 
+	background-color: #340449;  
+	text-decoration: none;
+}
+.ump .ump-playlist li.ump-current { /* currently selected playlist item */
+	color: #000000; 
+	background-color: #FFEEB3; 
+	font-weight: bold; 
+	outline: none;
+	text-decoration: none;
+}
+.ump .ump-playlist li.ump-current:after { 
+	content: ' *';
+}
+
+/* 
+ *
+ * external playlist 
+ *
+ */
+ 
+.ump-playlist { 
+}
+.ump-playlist li { 
+}
+.ump-playlist li:hover, 
+.ump-playlist li:focus, 
+.ump-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+	text-decoration: none;
+	color: white;
+	background-color: black;
+}
+.ump-playlist li.ump-current { /* currently selected playlist item */
+	font-weight: bold; 
+  text-decoration: underline;
+}
+.ump-playlist li.ump-current:after { 
+	content: ' *';
+}
+

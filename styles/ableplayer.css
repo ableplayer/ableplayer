@@ -1,0 +1,263 @@
+/* 
+	Universal Media Player (UMP) core styles
+	http://terrillthompson.com/ump
+*/
+.ump { 
+	border: 2px solid #FFFFFF; /* masked against background until audio has focus */
+	margin: 1em 0;
+	min-width: 480px; 
+	width: 480px; /* will be changed dynamically as player is contructed */
+}
+.ump .ump-vidcap-container {
+  background-color: black;
+  height: 360px;
+  left: 0;
+  margin: 0;
+  position: relative;
+  top: 0;
+  width: 480px;
+}
+.ump-player { 
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #000000; /* background color of player (appears on top & bottom) */
+	border: 1px solid #000000; /* border around entire player */
+	border-bottom-left-radius: 15px;
+	border-bottom-right-radius: 15px;
+}
+.ump-audio { 
+	border-top-left-radius: 15px;
+	border-top-right-radius: 15px;
+}
+.ump-video { 
+	margin-top: -0.25em;
+}
+.ump-video .ump-now-playing { 
+	display: none; /* not currently used for video */
+}
+.ump-controller { 
+	position: relative;
+	border-top: 2px solid #4c4c4c; 
+	border-bottom: 2px solid #4c4c4c; 
+	background-color: #3D3D3D; /* background color of controller bar */
+	height: 34px; /* height of button img (30px) + 2px top + 2px bottom borders */
+	line-height: 30px;
+}
+.ump-controller input:focus, 
+.ump-controller input:hover, 
+.ump-controller input:active  {
+	border-color: #ffff00; /* color of border when a control receives focus */
+}
+
+/* Controller Buttons & Controls */
+
+.ump-left-controls, .ump-right-controls { 
+	position: absolute;
+}
+.ump-controller input { 
+	border: 2px solid #3D3D3D; /* masked against background until input has focus*/
+	position: absolute;
+	top: 0;
+}
+.ump-controller input[type="image"] { 
+	width: 30px; 
+	height: 30px;
+}
+input.ump-play, 
+input.ump-pause,
+input.ump-stop, 
+input.ump-rewind,
+input.ump-forward,
+input.ump-slower,
+input.ump-faster { 
+	/* float: left; */
+}
+input.ump-cc, 
+input.ump-ad, 
+input.ump-asl,
+input.ump-mute,
+input.ump-volumeUp, 
+input.ump-volumeDown { 
+	/* float: right; */
+}
+.ump-controller .ump-seekBar { 
+	height: 26px;
+	background-color: transparent; 
+}
+.ump-controller input.buttonOff { 
+	opacity: 0.5;
+	filter:alpha(opacity=50); /* for IE */
+}
+
+/* Status Bar */
+
+.ump-status-bar { 
+	height: 2em;
+	min-height: 2em;
+	color: #FFFFFF;
+	font-size: 0.9em;
+	background-color: transparent;
+	padding: 0.5em 0.5em 0.25em;
+}	
+.ump-status-bar span.ump-timer { 
+	/* contains both span.elapsedTime and span.duration */	
+	color: #ffffff;
+	text-align: left;
+	float: left;
+}
+.ump-status { 
+	font-style: italic;
+	float: right;
+}
+
+/* Captions and Descriptions */
+
+.ump-captions {
+  background-color: black;
+  font-size: 1.1em;
+  bottom: 0;
+  color: white;
+  margin: 0;
+  opacity: 0.7;
+  padding: 0 0 0.5em;
+  position: absolute;
+  text-align: center;
+  width: 480px; /* same as video */
+  display: none;
+  z-index: 1000;
+}
+.ump-descriptions { 
+	position: relative;
+	color: #FF0; /* yellow, to differentiate it from captions */
+	background-color: black;
+	min-height: 3em; 
+  border-top: 1px solid white;
+  margin-top: -10px;
+  padding: 1em 0;
+  text-align: center;
+}
+
+/* Now Playing */
+
+.ump-now-playing {
+	text-align: center;
+	font-weight: bold;
+	font-size: 1.1em;
+	color: #FFFFFF;
+	background-color: transparent; 
+	padding: 0.5em 0.5em 1em;
+}
+.ump-now-playing span { 
+	font-size: 0.9em;
+}
+.ump-now-playing span span { 
+	display: block;
+}
+
+/* ???
+.ump-player span.ump-status-bar { 
+	background-color: transparent;
+	color: #FFFFFF;
+	font-size: 0.9em;
+	font-style: italic;
+	text-align: right;
+	padding: 0.5em 1em;
+}	
+*/
+
+/* Preferences Form */ 
+button.ump-prefsButton { 
+	font-size: 0.9em;
+	margin: 2px 0 0 1em;
+	padding: 0.25em;
+	color: black;
+	background-color: #E0E0EB;
+	border-top: 1px solid #999;
+	border-left: 1px solid #999;
+	border-right: 2px solid #666;
+	border-bottom: 2px solid #666;	
+	border-radius: 15px;
+}
+.ump-prefsButton:hover, 
+.ump-prefsButton:focus, 
+.ump-prefsButton:active { 
+	background-color: #ffc; 
+}
+.ump-prefs-form, .ump-help-div { 
+	background-color: #F5F5F5; 
+	border: medium solid #ccc;
+	padding: 0.5em 1em;
+	margin: 0 0 0 1em; 
+	width: 25em;
+	display: none;
+}
+.ump-prefs-form fieldset { 
+	border: none;
+}
+.ump-prefs-form legend { 
+	color: black;
+	font-weight: bold;	
+}
+.ump-prefs-form input { 
+	padding-right: 1em;
+}
+.ui-dialog .ui-dialog-buttonpane button {
+  width: 5em;
+}
+.ui-widget { 
+	font-size: 1em;
+}
+
+/* Help Dialog */ 
+.ump-help-div { 
+	background-color: #F5F5F5; 
+	border: medium solid #ccc;
+	padding: 0.5em 0;
+	margin: 0 0 0 1em; 
+	width: 25em;
+}
+.ump-help-div p { 
+	margin: 0.25em -1em;
+}
+.ump-help-div ul { 
+	list-style-type: none;
+	padding-left: 0.25em;
+}
+
+/* Alert Dialog */ 
+.ump-alert-div { 
+	background-color: #F5F5F5; 
+	border: medium solid #ccc;
+	padding: 0.5em 0;
+	margin: 0 0 0 1em; 
+	width: 25em;
+	/* display: none; */
+}
+
+/* Misc */
+
+.ump-clipped { 
+	/* hide from sighted users, but not screen reader users */
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);	
+}
+.ump-error { 
+	display: block;
+	background: #ffc;
+	border: 2px solid #000;
+	color: #FF0000;
+	margin: 0.75em;
+	padding: 0.5em;
+}
+.ump-fallback { 
+  display: table;
+  text-align: center;
+  vertical-align: middle;
+  border: 2px solid #333355;
+  background-color: #FFFFCC;
+  color: #000000;
+  font-weight: bold;
+  font-size: 1.1em;
+  padding: 1em;  
+  margin-bottom: 1em;
+}

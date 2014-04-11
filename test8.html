@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+<meta charset="UTF-8">
+<title>Able Player Test #8</title>
+<link rel="stylesheet" href="thissite.css" type="text/css">
+
+<!-- Dependencies --> 
+<script src="thirdparty/modernizr.custom.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+<script src="thirdparty/jquery.cookie.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
+
+<!-- Able Player CSS -->  
+<link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="scripts/ableplayer.js"></script>
+
+<!-- initialize media player. --> 
+<!-- to initialize all media elements on the page, call init() with no parameters -->
+<!-- to initialize only one media element, pass its id to init() --> 
+<script>
+$(document).ready(function() { 
+	$('.ump-media').each(function(index) { 
+		new AblePlayer($(this).attr('id'),index);				
+	});
+});
+</script>
+  
+</head>
+
+<body>
+
+<h1>Able Player Test #8:<br/>Multiple audio players (one track each)</h1>
+
+<p>Having multiple players on a single page might be fun for producing on-the-fly mashups. However, only the first player can be operated with keystrokes, which might be confusing for users. Although UMP supports multiple player instances, they're discouraged. Use <a href="test6.html">playlists</a> instead.</p>
+
+<p>For additional test see the <a href="index.html#examples">Index of <em>Able Player</em> Tests</a>.</p>
+
+<h2>Player #1: Every Day</h2>
+<!-- use the following markup for each media element -->
+<audio id="audio1" class="ump-media" preload="auto">
+  <source type="audio/ogg" src="media/everyday.ogg"/>
+	<source type="audio/mpeg" src="media/everyday.mp3"/>
+</audio>
+
+<h2>Player #2: Man With Small F (The Inaccessible PDF Song)</h2>
+<!-- use the following markup for each media element -->
+<audio id="audio2" class="ump-media" preload="auto">
+  <source type="audio/ogg" src="media/smallf.ogg"/>
+	<source type="audio/mpeg" src="media/smallf.mp3"/>
+</audio>
+
+</body>
+</html>
