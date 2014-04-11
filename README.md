@@ -249,7 +249,7 @@ document ready function to be sure the DOM has fully loaded.
 
 In the first example, a single player is initialized:
 
-```JavaScript
+```HTML
 <script>
   $(document).ready(function() {
     new AblePlayer('audio1');  
@@ -259,7 +259,7 @@ In the first example, a single player is initialized:
 
 In the next example, all players on the page are initialized. This same code could optionally be used universally, even on pages that just have one player.
 
-```JavaScript
+```HTML
 <script>
     $(document).ready(function() { 
       $('.ump-media').each(function(index) { 
@@ -271,7 +271,7 @@ In the next example, all players on the page are initialized. This same code cou
 
 In the next example, a single player is initialized and starts playing at 2 minutes (120 seconds).
 
-```JavaScript
+```HTML
 <script>
   $(document).ready(function() {
     new AblePlayer('audio1',0,120);  
