@@ -46,6 +46,7 @@
 .ump-controller input:hover, 
 .ump-controller input:active  {
 	border-color: #ffff00; /* color of border when a control receives focus */
+	outline: none;
 }
 
 /* Controller Buttons & Controls */
