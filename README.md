@@ -33,8 +33,11 @@ technologies.
 -   Google Chrome 7.0 and higher
 -   Opera 10.63 and higher
 -   Safari 5.0 on Mac OS X
--   Safari on IOS 3.2.2 and higher
+-   Safari on IOS 7 and higher (does not currently work on IOS 6 or earlier)
 -   Chrome on Android 4.2 and higher
+
+Note that mobile browsers have limitations (e.g., iOS takes control of interface 
+after clicking play; volume control and autostart are not supported) 
 
 Dependencies
 ------------
