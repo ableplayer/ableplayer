@@ -1738,7 +1738,6 @@ AblePlayer.prototype.browserSupportsVolume = function() {
   // However, that doesn't seem to be reliable 
   // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
   var userAgent = navigator.userAgent.toLowerCase();
-  alert (userAgent);
   var noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
   if (noVolume) {
     if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
