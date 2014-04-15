@@ -1053,6 +1053,9 @@ AblePlayer.prototype.showAlert = function(msg) {
 }
 AblePlayer.prototype.isUserAgent = function(which) {
   var userAgent = navigator.userAgent.toLowerCase();
+  if (this.debug) { 
+    console.log('User agent: ' + userAgent);
+  }  
   if (userAgent.indexOf(which) != -1) {
     return true;
   } 
@@ -1574,10 +1577,8 @@ AblePlayer.prototype.addControls = function() {
       rightControls.push('sign'); // sign language
     }
   }
-  if (!(this.isUserAgent('iphone') || this.isUserAgent('ipad'))) { 
-    // iphones and ipads don't support HTML5 audio volume control
-    // (confirmed true as of iOS 5.1)
-    // so don't display volume-related buttons
+  // test for browser support for volume before displaying volume-related buttons 
+  if (this.browserSupportsVolume()) { 
     rightControls.push('mute');
     rightControls.push('volumeUp');
     rightControls.push('volumeDown'); 
@@ -1731,6 +1732,23 @@ AblePlayer.prototype.addControls = function() {
 
   // construct help dialog that includes keystrokes for operating the included controls 
   this.addHelp();     
+}
+AblePlayer.prototype.browserSupportsVolume = function() { 
+  // ideally we could test for volume support 
+  // However, that doesn't seem to be reliable 
+  // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
+  var userAgent = navigator.userAgent.toLowerCase();
+  alert (userAgent);
+  var noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
+  if (noVolume) {
+    if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
+      // Firefox on android DOES support changing the volume:
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 }
 AblePlayer.prototype.handlePlay = function(e) { 
   if (this.player === 'html5') {       
