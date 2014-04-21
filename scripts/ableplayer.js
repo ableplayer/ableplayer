@@ -139,73 +139,84 @@ function AblePlayer(mediaId, umpIndex, startTime) {
       }
 
       if (this.mediaType === 'audio' || this.mediaType === 'video') { 
-      
-        // get data from source elements
-        this.$sources = this.$media.find('source');       
-        if (this.debug) { 
-          console.log('found ' + this.$sources.length + ' media sources');
+
+        // Don't use custom AblePlayer interface for IOS video 
+        // IOS always plays video in its own player - don't know a way around that  
+        if (this.mediaType == 'video' && this.isIOS()) { 
+          // do nothing 
+          // *could* perhaps build in support for user preferances & described versions  
+          if (this.debug) { 
+            console.log ('Stopping here. IOS will handle your video.');
+          }
         }
+        else {       
+          // get data from source elements
+          this.$sources = this.$media.find('source');       
+          if (this.debug) { 
+            console.log('found ' + this.$sources.length + ' media sources');
+          }
 
-        // get playlist for this media element   
-        this.getPlaylist();
+          // get playlist for this media element   
+          this.getPlaylist();
         
-        // determine which player can play media, and define this.player 
-        this.getPlayer(); 
+          // determine which player can play media, and define this.player 
+          this.getPlayer(); 
 
-        if (this.player) {
+          if (this.player) {
 
-          // do a bunch of stuff to setup player 
-          this.getDimensions();
-          this.getPrefs();
-          this.injectPlayerCode();          
-          this.setButtons();
-          this.setupAlert();
-          this.initPlaylist();
+            // do a bunch of stuff to setup player 
+            this.getDimensions();
+            this.getPrefs();
+            this.injectPlayerCode();          
+            this.setButtons();
+            this.setupAlert();
+            this.initPlaylist();
         
-          // initialize player to support captions &/or description (from track elements)
-          this.initTracks();
+            // initialize player to support captions &/or description (from track elements)
+            this.initTracks();
         
-          // initialize description based on available sources + user prefs 
-          this.initDescription(); 
+            // initialize description based on available sources + user prefs 
+            this.initDescription(); 
       
-          this.initializing = false;
+            this.initializing = false;
         
        
-          if (this.player == 'html5') { 
-            if (this.initPlayer('html5')) { 
-              this.addControls(this.mediaType);  
-              this.addEventListeners();
+            if (this.player == 'html5') { 
+              if (this.initPlayer('html5')) { 
+                this.addControls(this.mediaType);  
+                this.addEventListeners();
+              }
             }
+            else if (this.player === 'jw') { 
+              // attempt to load jwplayer script
+              var thisObj = this;
+              $.getScript('thirdparty/jwplayer.js') 
+                .done(function( script, textStatus ) {
+                  if (thisObj.debug) {
+                    console.log ('Successfully loaded the JW Player');
+                  }
+                  if (thisObj.initPlayer('jw')) { 
+                    thisObj.addControls(thisObj.mediaType);  
+                    thisObj.addEventListeners();
+                  }
+                })
+                .fail(function( jqxhr, settings, exception ) {
+                  if (thisObj.debug) { 
+                    console.log ("Unable to load JW Player.");
+                  }
+                  thisObj.player = null;
+                  return;
+                });
+            }
+            if (this.debug && this.player) { 
+              console.log ('Using the ' + this.player + ' media player');
+            }
+          }        
+          else { 
+            // no player can play this media
+            this.provideFallback(); 
           }
-          else if (this.player === 'jw') { 
-            // attempt to load jwplayer script
-            var thisObj = this;
-            $.getScript('thirdparty/jwplayer.js') 
-              .done(function( script, textStatus ) {
-                if (thisObj.debug) {
-                  console.log ('Successfully loaded the JW Player');
-                }
-                if (thisObj.initPlayer('jw')) { 
-                  thisObj.addControls(thisObj.mediaType);  
-                  thisObj.addEventListeners();
-                }
-              })
-              .fail(function( jqxhr, settings, exception ) {
-                if (thisObj.debug) { 
-                  console.log ("Unable to load JW Player.");
-                }
-                thisObj.player = null;
-                return;
-              });
-          }
-          if (this.debug && this.player) { 
-            console.log ('Using the ' + this.player + ' media player');
-          }
-        }        
-        else { 
-          // no player can play this media
-          this.provideFallback(); 
-        }
+        } // end else if this is not IOS video 
       } // end if mediaId matches an audio or video element 
       else { 
         if (this.debug) {
@@ -292,52 +303,107 @@ AblePlayer.prototype.getPlayer = function() {
 AblePlayer.prototype.injectPlayerCode = function() { 
 
   // create and inject surrounding HTML structure 
-  this.$mediaContainer = this.$media.wrap('<div class="ump-media-container"></div>').parent();         
-  this.$umpDiv = this.$mediaContainer.wrap('<div class="ump"></div>').parent();
+  // If IOS: 
+  //  If video: 
+  //   IOS does not support any of the player's functionality 
+  //   - everything plays in its own player 
+  //   Therefore, AblePlayer is not loaded & all functionality is disabled 
+  //   (this all determined. If this is IOS && video, this function is never called) 
+  //  If audio: 
+  //   HTML cannot be injected as a *parent* of the <audio> element 
+  //   It is therefore injected *after* the <audio> element 
+  //   This is only a problem in IOS 6 and earlier, 
+  //   & is a known bug, fixed in IOS 7      
+  
+  var injectMethod; 
+  
+  if (this.isIOS()) { // this is audio; otherwise function would not have been called for IOS
+    if (this.isIOS('7')) { // IOS7 can handle the default injection method
+      injectMethod = 'default'; 
+    }
+    else { // earlier versions of IOS require a modified method
+      injectMethod = 'ios';          
+    }
+  }
+  else { 
+    injectMethod = 'default';
+  }
 
-  this.$playerDiv = $('<div>', {
-    'class' : 'ump-player',
-    'role' : 'region',
-    'aria-label' : this.mediaType + ' player'
-  });
-  this.$playerDiv.addClass('ump-'+this.mediaType);
+  if (this.debug) {   
+    console.log ('using the ' + injectMethod + ' inject method');
+  }
+  
+  
+  if (injectMethod) {
+   
+    if (injectMethod == 'default') {   
+    
+      // create $mediaContainer and $umpDiv and wrap them around the media element
+      this.$mediaContainer = this.$media.wrap('<div class="ump-media-container"></div>').parent();         
+      this.$umpDiv = this.$mediaContainer.wrap('<div class="ump"></div>').parent();
 
-  // The default skin depends a bit on a Now Playing div 
-  // so go ahead and add one 
-  // However, it's only populated if this.showNowPlaying = true 
-  this.$nowPlayingDiv = $('<div>',{
-    'class' : 'ump-now-playing',
-    'role' : 'alert'
-  });
+    }
+    else if (injectMethod == 'ios') { 
+    
+      // create new $umpDiv and $mediaContainer, but do NOT wrap them 
+      this.$umpDiv = $('<div>', { 
+        'class' : 'ump'
+      });
+  
+      this.$mediaContainer = $('<div>',{
+        'class' : 'ump-media-container'
+      })
+    }
+    
+    this.$playerDiv = $('<div>', {
+      'class' : 'ump-player',
+      'role' : 'region',
+      'aria-label' : this.mediaType + ' player'
+    });
+    this.$playerDiv.addClass('ump-'+this.mediaType);
 
-  this.$controllerDiv = $('<div>',{
-    'class' : 'ump-controller'
-  });
+    // The default skin depends a bit on a Now Playing div 
+    // so go ahead and add one 
+    // However, it's only populated if this.showNowPlaying = true 
+    this.$nowPlayingDiv = $('<div>',{
+      'class' : 'ump-now-playing',
+      'role' : 'alert'
+    });
 
-  this.$statusBarDiv = $('<div>',{
-    'class' : 'ump-status-bar'
-  });
-  this.$timer = $('<span>',{
-    'class' : 'ump-timer'
-  });
-  this.$status = $('<span>',{
-    'class' : 'ump-status',
-    'role' : 'alert'
-  });
-  this.$statusBarDiv.append(this.$timer).append(this.$status);
+    this.$controllerDiv = $('<div>',{
+      'class' : 'ump-controller'
+    });
 
-  // append new divs to $playerDiv
-  this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+    this.$statusBarDiv = $('<div>',{
+      'class' : 'ump-status-bar'
+    });
+    this.$timer = $('<span>',{
+      'class' : 'ump-timer'
+    });
+    this.$status = $('<span>',{
+      'class' : 'ump-status',
+      'role' : 'alert'
+    });
+    this.$statusBarDiv.append(this.$timer).append(this.$status);
 
-  // and finally, append $playerDiv to umpDiv 
-  this.$umpDiv.append(this.$playerDiv);
+    // append new divs to $playerDiv
+    this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+
+    // and finally, append playerDiv to umpDiv  
+    this.$umpDiv.append(this.$playerDiv);      
         
-  // oh, anb also add div for displaying alerts and error messages 
-  this.$alertDiv = $('<div>',{
-    'class' : 'ump-alert',
-    'role' : 'alert'
-  });   
-  this.$umpDiv.after(this.$alertDiv);
+    // oh, and also add div for displaying alerts and error messages 
+    this.$alertDiv = $('<div>',{
+      'class' : 'ump-alert',
+      'role' : 'alert'
+    });   
+    this.$umpDiv.after(this.$alertDiv);
+
+    if (injectMethod == 'ios') {
+      // inject all of this *after* the original HTML5 media element 
+      this.$media.after(this.$umpDiv);
+    }
+  }
 }
 AblePlayer.prototype.initTracks = function() { 
        
@@ -351,6 +417,7 @@ AblePlayer.prototype.initTracks = function() {
         'class' : 'ump-vidcap-container'
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();  
+      // this.$umpDiv.prepend(vidcapContainer);
     }
     // UMP currently only supports one caption and one description track 
     for (var i=0; i<this.$tracks.length; i++) { 
@@ -1051,18 +1118,6 @@ AblePlayer.prototype.showAlert = function(msg) {
   // show alert message in jQuery dialog
   this.$alertBox.text(msg).dialog('open');
 }
-AblePlayer.prototype.isUserAgent = function(which) {
-  var userAgent = navigator.userAgent.toLowerCase();
-  if (this.debug) { 
-    console.log('User agent: ' + userAgent);
-  }  
-  if (userAgent.indexOf(which) != -1) {
-    return true;
-  } 
-  else {
-    return false;
-  }
-}
 AblePlayer.prototype.addEventListeners = function() { 
 
   // Save the current object context in thisObj for use with inner functions.
@@ -1733,6 +1788,43 @@ AblePlayer.prototype.addControls = function() {
   // construct help dialog that includes keystrokes for operating the included controls 
   this.addHelp();     
 }
+AblePlayer.prototype.isUserAgent = function(which) {
+  var userAgent = navigator.userAgent.toLowerCase();
+  if (this.debug) { 
+    console.log('User agent: ' + userAgent);
+  }  
+  if (userAgent.indexOf(which) != -1) {
+    return true;
+  } 
+  else {
+    return false;
+  }
+}
+AblePlayer.prototype.isIOS = function(version) { 
+  // return true if this is IOS  
+  // if version is provided check for a particular version  
+  var userAgent = navigator.userAgent.toLowerCase();
+  var iOS = /ipad|iphone|ipod/.exec(userAgent);
+  if (iOS) { 
+    if (typeof version !== 'undefined') {
+      if (userAgent.indexOf('os ' + version) != -1) { 
+        // this is the target version of iOS
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else { 
+      // no version was specified 
+      return true;
+    }
+  }
+  else { 
+    // this is not IOS
+    return false;
+  }
+}
 AblePlayer.prototype.browserSupportsVolume = function() { 
   // ideally we could test for volume support 
   // However, that doesn't seem to be reliable 
@@ -1747,6 +1839,10 @@ AblePlayer.prototype.browserSupportsVolume = function() {
     else {
       return false;
     }
+  }
+  else { 
+    // as far as we know, this userAgent supports volume control 
+    return true; 
   }
 }
 AblePlayer.prototype.handlePlay = function(e) { 
