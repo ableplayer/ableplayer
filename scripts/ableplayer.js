@@ -78,7 +78,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
   // testFallback - set to true to force browser to use the fallback player (for testing)
 	// Note: JW Player does not support offline playback (a Flash restriction)
 	// Therefore testing must be performed on a web server 
-  this.testFallback = true;
+  this.testFallback = false;
      
   // loop - if true, will start again at top after last item in playlist has ended
   // NOTE: This is not fully supported yet - needs work 
