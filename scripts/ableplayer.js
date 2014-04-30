@@ -163,6 +163,14 @@ function AblePlayer(mediaId, umpIndex, startTime) {
           this.getPlayer(); 
 
           if (this.player) {
+          
+            // see if there's a transcript (supported for both video and audio) 
+            if ($('.ump-transcript')) { 
+              this.hasTranscript = true;
+            }
+            else { 
+              this.hasTranscript = false;
+            }
 
             // do a bunch of stuff to setup player 
             this.getDimensions();
@@ -769,8 +777,7 @@ AblePlayer.prototype.addPrefsForm = function() {
   var prefsIntro = $('<p>',{ 
     html: introText
   });
-  if (this.mediaType === 'video') { 
-    // currently only video has a Features fieldset 
+  if (this.mediaType === 'video' || this.hasTranscript === true) { 
     var featuresFieldset = $('<fieldset>');
     var featuresLegend = $('<legend>Features</legend>');      
     featuresFieldset.append(featuresLegend);  
@@ -806,7 +813,7 @@ AblePlayer.prototype.addPrefsForm = function() {
   prefsDiv
     .append(prefsIntro)
     .append(keysFieldset);
-  if (this.mediaType === 'video') { 
+  if (this.mediaType === 'video' || this.hasTranscript === true) { 
     prefsDiv
       .append(featuresFieldset);
   }         
@@ -989,16 +996,31 @@ AblePlayer.prototype.getPrefs = function() {
     this.prefs[5]['name'] = 'prefVisibleDesc'; // visibly show closed description (if avilable and used)
     this.prefs[5]['label'] = 'If using text-based description, make it visible';
     this.prefs[5]['default'] = 1; // on because sighted users probably want to see this cool feature in action 
+    
+    if (this.hasTranscript === true) { 
 
-    this.prefs[6] = [];
-    this.prefs[6]['name'] = 'prefHighlight'; // highlight transcript as video plays
-    this.prefs[6]['label'] = 'Highlight transcript as video plays';
-    this.prefs[6]['default'] = 1; // on because many users can benefit
+      this.prefs[6] = [];
+      this.prefs[6]['name'] = 'prefHighlight'; // highlight transcript as media plays
+      this.prefs[6]['label'] = 'Highlight transcript as media plays';
+      this.prefs[6]['default'] = 1; // on because many users can benefit
 
-    this.prefs[7] = [];
-    this.prefs[7]['name'] = 'prefTabbable'; // tab-enable transcript 
-    this.prefs[7]['label'] = 'Keyboard-enable transcript';
-    this.prefs[7]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page
+      this.prefs[7] = [];
+      this.prefs[7]['name'] = 'prefTabbable'; // tab-enable transcript 
+      this.prefs[7]['label'] = 'Keyboard-enable transcript';
+      this.prefs[7]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page
+    }
+  }
+  else if (this.hasTranscript === true) { 
+
+    this.prefs[2] = [];
+    this.prefs[2]['name'] = 'prefHighlight'; // highlight transcript as media plays
+    this.prefs[2]['label'] = 'Highlight transcript as media plays';
+    this.prefs[2]['default'] = 1; // on because many users can benefit
+
+    this.prefs[3] = [];
+    this.prefs[3]['name'] = 'prefTabbable'; // tab-enable transcript 
+    this.prefs[3]['label'] = 'Keyboard-enable transcript';
+    this.prefs[3]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page    
   }
     
   // see if user has prefs stored in a cookie   
