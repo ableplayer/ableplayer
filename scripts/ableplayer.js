@@ -78,7 +78,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
   // testFallback - set to true to force browser to use the fallback player (for testing)
 	// Note: JW Player does not support offline playback (a Flash restriction)
 	// Therefore testing must be performed on a web server 
-  this.testFallback = false;
+  this.testFallback = true;
      
   // loop - if true, will start again at top after last item in playlist has ended
   // NOTE: This is not fully supported yet - needs work 
@@ -1305,6 +1305,8 @@ AblePlayer.prototype.addEventListeners = function() {
         // jw player 
         jwplayer(thisObj.jwId).seek(spanStart);
       }
+      // change play button to pause button
+      thisObj.$playpauseButton.attr('title','Pause').attr('src',thisObj.pauseButtonImg);        
     });
   }
 
@@ -2646,8 +2648,15 @@ AblePlayer.prototype.highlightTranscript = function (currentTime) {
         $('.ump-highlight').removeClass('ump-highlight');
         $(this).addClass('ump-highlight');
         // scroll this item to the top of the transcript div
-        // NOT WORKING GRACEFULLY AS IMPLEMENTED - NEEDS WORK
-        // $('.ump-transcript').scrollTop(thisSpan.position().top);         
+        // NOT CURRENTLY IMPLEMENTED - requires further thought about implementation 
+        // If user has manually scrolled down, they probably don't want auto-scrolling to occur 
+        // So, should detect whether user has scrolled (ever? Or just recently?) 
+        // If user has scrolled, don't auto-scroll 
+        // If they haven't, auto-scroll 
+        // Also, the current code scrolls highlighted text to top as soon as it's highlighted 
+        // which means the highlighted text is always at the top of the transcript container 
+        // Would be preferable to scroll only when the highlight reaches the bottom of the visible container             
+        // $('.ump-transcript').scrollTop($('.ump-transcript').scrollTop() + $(this).position().top);
       }
       return false;
     }
