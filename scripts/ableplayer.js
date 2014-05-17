@@ -672,6 +672,35 @@ AblePlayer.prototype.getDimensions = function() {
   }
 }
 AblePlayer.prototype.setButtons = function() { 
+
+  // determine button color (white or black) based on user's background color 
+  // This overrides default buttonColor if there is too little contrast due to:  
+  // - user having enabled high contrast mode 
+  // - user having a custom style sheet that overwrites author's background color 
+  // - author has made a bad design decision that compromises contrast (NOT ALLOWED)
+  var controllerColor, colorsOnly, red, green, blue, grayscale; 
+  
+  if (document.defaultView) { // get computed background-color from most browsers 
+    controllerColor = document.defaultView.getComputedStyle(this.$controllerDiv.get(0), null).getPropertyValue('background-color');
+  }
+  else { // get computed background-color from IE 
+    controllerColor = this.$controllerDiv.get(0).currentStyle.getPropertyValue('background-color');
+  }
+  colorsOnly = controllerColor.substring(controllerColor.indexOf('(') + 1, controllerColor.lastIndexOf(')')).split(/,\s*/);
+  red = colorsOnly[0];
+  green = colorsOnly[1];
+  blue = colorsOnly[2];
+  // convert RGB to grayscale (one value, range = 0-255) using the luminosity method
+  // http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
+  grayscale = (red * 0.21) + (green * 0.72) + (blue * 0.07); 
+  if (grayscale < 128) { 
+    // background is dark. Use white buttons
+    this.buttonColor = 'white';
+  }     
+  else { 
+    // background is light. Use black buttons
+    this.buttonColor = 'black';
+  }
   this.playButtonImg = 'images/media-play-' +  this.buttonColor + '.png';
   this.pauseButtonImg = 'images/media-pause-' +  this.buttonColor + '.png';
   this.rewindButtonImg = 'images/media-rewind-' +  this.buttonColor + '.png';
