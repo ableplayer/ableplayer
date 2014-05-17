@@ -3,7 +3,6 @@
 	http://terrillthompson.com/ump
 */
 .ump { 
-	border: 2px solid #FFFFFF; /* masked against background until audio has focus */
 	margin: 1em 0;
 	min-width: 480px; 
 	width: 480px; /* will be changed dynamically as player is contructed */
@@ -39,14 +38,19 @@
 	border-top: 2px solid #4c4c4c; 
 	border-bottom: 2px solid #4c4c4c; 
 	background-color: #3D3D3D; /* background color of controller bar */
-	height: 34px; /* height of button img (30px) + 2px top + 2px bottom borders */
+	height: 38px; /* height of button img (30px) + 4px top & bottom outline */
 	line-height: 30px;
 }
 .ump-controller input:focus, 
-.ump-controller input:hover, 
-.ump-controller input:active  {
-	border-color: #ffff00; /* color of border when a control receives focus */
-	outline: none;
+.ump-controller input:hover {
+  outline-style: solid;
+  outline-width: 4px;
+}
+.ump-controller input:focus {  
+	outline-color: #ffff00; /* yellow */
+}
+.ump-controller input:hover {
+	outline-color: #cc0000; /* red */
 }
 
 /* Controller Buttons & Controls */
@@ -55,38 +59,22 @@
 	position: absolute;
 }
 .ump-controller input { 
-	border: 2px solid #3D3D3D; /* masked against background until input has focus*/
 	position: absolute;
-	top: 0;
+	top: 5px;
 }
 .ump-controller input[type="image"] { 
 	width: 30px; 
 	height: 30px;
 }
-input.ump-play, 
-input.ump-pause,
-input.ump-stop, 
-input.ump-rewind,
-input.ump-forward,
-input.ump-slower,
-input.ump-faster { 
-	/* float: left; */
-}
-input.ump-cc, 
-input.ump-ad, 
-input.ump-asl,
-input.ump-mute,
-input.ump-volumeUp, 
-input.ump-volumeDown { 
-	/* float: right; */
-}
-.ump-controller .ump-seekBar { 
-	height: 26px;
-	background-color: transparent; 
-}
-.ump-controller input.buttonOff { 
+.ump-controller div.buttonOff { 
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
+}
+.ump-white-controls { 
+  color: white;
+}
+.ump-black-controls { 
+  color: black;
 }
 
 /* Status Bar */
@@ -112,7 +100,7 @@ input.ump-volumeDown {
 
 /* Captions and Descriptions */
 
-.ump-captions {
+div.ump-captions {
   background-color: black;
   font-size: 1.1em;
   bottom: 0;
@@ -126,7 +114,7 @@ input.ump-volumeDown {
   display: none;
   z-index: 1000;
 }
-.ump-descriptions { 
+div.ump-descriptions { 
 	position: relative;
 	color: #FF0; /* yellow, to differentiate it from captions */
 	background-color: black;
@@ -139,7 +127,7 @@ input.ump-volumeDown {
 
 /* Now Playing */
 
-.ump-now-playing {
+div.ump-now-playing {
 	text-align: center;
 	font-weight: bold;
 	font-size: 1.1em;
@@ -147,10 +135,10 @@ input.ump-volumeDown {
 	background-color: transparent; 
 	padding: 0.5em 0.5em 1em;
 }
-.ump-now-playing span { 
+div.ump-now-playing span { 
 	font-size: 0.9em;
 }
-.ump-now-playing span span { 
+div.ump-now-playing span span { 
 	display: block;
 }
 
@@ -233,6 +221,91 @@ button.ump-prefsButton {
 	width: 25em;
 	/* display: none; */
 }
+
+/* icomoon.io font styling */
+@font-face {
+	font-family: 'icomoon';
+	src:url('../fonts/icomoon.eot?2sbdo1');
+	src:url('../fonts/icomoon.eot?#iefix2sbdo1') format('embedded-opentype'),
+		url('../fonts/icomoon.woff?2sbdo1') format('woff'),
+		url('../fonts/icomoon.ttf?2sbdo1') format('truetype'),
+		url('../fonts/icomoon.svg?2sbdo1#icomoon') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: 'icomoon';
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-help:before {
+	content: "\e611";
+}
+.icon-sign:before {
+	content: "\e60a";
+}
+.icon-descriptions:before {
+	content: "\e60b";
+}
+.icon-captions:before {
+	content: "\e609";
+}
+.icon-fullscreen:before {
+	content: "\e612";
+}
+.icon-preferences:before {
+	content: "\e610";
+}
+.icon-play:before {
+	content: "\e600";
+}
+.icon-pause:before {
+	content: "\e601";
+}
+.icon-stop:before {
+	content: "\e602";
+}
+.icon-rewind:before {
+	content: "\e603";
+}
+.icon-forward:before {
+	content: "\e604";
+}
+.icon-toStart:before {
+	content: "\e605";
+}
+.icon-toEnd:before {
+	content: "\e606";
+}
+.icon-previous:before {
+	content: "\e607";
+}
+.icon-next:before {
+	content: "\e608";
+}
+.icon-volume:before {
+	content: "\e60c";
+}
+.icon-mute:before {
+	content: "\e60d";
+}
+.icon-volumeUp:before {
+	content: "\e60e";
+}
+.icon-volumeDown:before {
+	content: "\e60f";
+}
+
 
 /* Misc */
 

@@ -48,3 +48,10 @@ p.goback {
   border: 1px solid #999;
   background-color: #DDD;
 }
+a:hover, a:focus, a:active {
+	outline-color: #cc0000; /* red */
+  outline-style: solid;
+  outline-width: thick;
+  text-decoration: none;
+}
+

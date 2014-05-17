@@ -696,10 +696,12 @@ AblePlayer.prototype.setButtons = function() {
   if (grayscale < 128) { 
     // background is dark. Use white buttons
     this.buttonColor = 'white';
+    this.$controllerDiv.addClass('ump-white-controls');
   }     
   else { 
     // background is light. Use black buttons
     this.buttonColor = 'black';
+    this.$controllerDiv.addClass('ump-black-controls');
   }
   this.playButtonImg = 'images/media-play-' +  this.buttonColor + '.png';
   this.pauseButtonImg = 'images/media-pause-' +  this.buttonColor + '.png';
@@ -912,11 +914,11 @@ AblePlayer.prototype.addHelp = function() {
       var label = 'Volume Down';
       var key = 'd </b><em>or</em><b> 1-5';
     }
-    else if (this.controls[i] === 'cc') { 
+    else if (this.controls[i] === 'captions') { 
       var label = 'Toggle captions';
       var key = 'c';
     }
-    else if (this.controls[i] === 'desc') { 
+    else if (this.controls[i] === 'descriptions') { 
       var label = 'Toggle narration (description)';
       var key = 'n';
     }
@@ -1176,7 +1178,7 @@ AblePlayer.prototype.addEventListeners = function() {
     
   // handle clicks on player buttons 
   this.$controllerDiv.find('input').click(function(){  
-    var whichButton = $(this).attr('class').substr(4);
+    var whichButton = $(this).attr('class').split(' ')[0].substr(4); 
     if (whichButton === 'play') { 
       thisObj.handlePlay();
     }
@@ -1204,10 +1206,10 @@ AblePlayer.prototype.addEventListeners = function() {
     else if (whichButton === 'slower') { // experimental. Not currently used
       thisObj.handleSpeed('slower');
     }     
-    else if (whichButton.substr(0,2) === 'cc') { 
+    else if (whichButton === 'captions') { 
       thisObj.handleCaptionToggle();
     }
-    else if (whichButton.substr(0,4) === 'desc') { 
+    else if (whichButton === 'descriptions') { 
       thisObj.handleDescriptionToggle();
     }
     else if (whichButton.substr(0,4) === 'sign') { 
@@ -1676,10 +1678,10 @@ AblePlayer.prototype.addControls = function() {
   var rightControls = [];
   if (this.mediaType === 'video') { 
     if (this.hasCaptions) {
-      rightControls.push('cc'); //closed captions
+      rightControls.push('captions'); //closed captions
     }
     if (this.hasOpenDesc || this.hasClosedDesc) { 
-      rightControls.push('description'); //audio description 
+      rightControls.push('descriptions'); //audio description 
     }
     if (this.hasSignLanguage) { 
       rightControls.push('sign'); // sign language
@@ -1747,13 +1749,36 @@ AblePlayer.prototype.addControls = function() {
           src: buttonImg,
           'class': 'ump-' + control 
         });         
-        if (control === 'cc') { 
+        /* 
+          // Experimental button alternative - not yet implemented
+          // Use icomoon.io fonts 
+          // Fonts are already contained in fonts directory 
+          // CSS is already in place within ableplayer.css 
+          // Just need the right HTML          
+        var newButton = $('<div>',{ 
+          'role': 'button',
+          'tabindex': '0',
+          'title': buttonTitle,          
+          'style': 'left:' + hPos + 'px',
+          'class': 'ump-' + control 
+        });         
+        var buttonIcon = $('<span>',{ // add data-icon programatically
+          'class': 'icon-' + control,
+          'data-icon': this.getIconHexValue(control)
+        })        
+        var buttonLabel = control.charAt(0).toUpperCase() + control.slice(1);
+        var buttonLabelSpan = $('<span>',{
+          'class': 'ump-clipped'
+        }).text(buttonLabel);
+        newButton.append(buttonIcon,buttonLabelSpan);
+        */
+        if (control === 'captions') { 
           if (!this.prefCaptions || this.prefCaptions != 1) { 
             // captions are available, but user has them turned off 
             newButton.addClass('buttonOff').attr('title','Turn on captions');
           }
         }
-        else if (control === 'description') {      
+        else if (control === 'descriptions') {      
           if (!this.prefDesc || this.prefDesc != 1) { 
             // user prefer non-audio described version 
             // Therefore, load media without description 
@@ -1767,10 +1792,10 @@ AblePlayer.prototype.addControls = function() {
         if (control === 'play') { 
           this.$playpauseButton = newButton;
         }
-        else if (control === 'cc') { 
+        else if (control === 'captions') { 
           this.$ccButton = newButton;
         }
-        else if (control === 'description') {        
+        else if (control === 'descriptions') {        
           this.$descButton = newButton; 
           // gray out description button if description is not active 
           if (!(this.openDescOn || this.closedDescOn)) {  
@@ -1840,6 +1865,50 @@ AblePlayer.prototype.addControls = function() {
 
   // construct help dialog that includes keystrokes for operating the included controls 
   this.addHelp();     
+}
+AblePlayer.prototype.getIconHexValue =  function(control) { 
+  // returns hex value of character in icomoon font
+  switch (control) { 
+    case 'play': 
+      return '&#xe600';
+    case 'pause': 
+      return '&#xe601';
+    case 'stop': 
+      return '&#xe602';
+    case 'rewind': 
+      return '&#xe603';
+    case 'forward': 
+      return '&#xe604';
+    case 'toStart': 
+      return '&#xe605';
+    case 'toEnd': 
+      return '&#xe606';
+    case 'previous': 
+      return '&#xe607';
+    case 'next': 
+      return '&#xe608';
+    case 'captions': 
+      return '&#xe609';
+    case 'sign': 
+      return '&#xe60a';
+    case 'descriptions': 
+      return '&#xe60b';
+    case 'volume': 
+      return '&#xe60c';
+    case 'mute': 
+      return '&#xe60d';
+    case 'volumeUp': 
+      return '&#xe60e';
+    case 'volumeDown': 
+      return '&#xe60f';
+    case 'preferences': 
+      return '&#xe610';
+    case 'help': 
+      return '&#xe611';
+    case 'fullscreen': 
+      return '&#xe612';
+  }   
+  return false;
 }
 AblePlayer.prototype.isUserAgent = function(which) {
   var userAgent = navigator.userAgent.toLowerCase();
@@ -2098,6 +2167,7 @@ AblePlayer.prototype.handleSpeed = function(direction) {
   this.media.playbackRate = targetSpeed;
 }
 AblePlayer.prototype.handleCaptionToggle = function() { 
+console.log('you clicked captions button');
   if (this.captionsOn === true) { 
     // captions are on. Turn them off. 
     this.captionsOn = false;
@@ -2265,7 +2335,11 @@ AblePlayer.prototype.addSeekControls = function(leftPos) {
   }
     
   else { //if not useSlider
-      
+
+    /* 
+      // Old code - these buttons are added in this.setButtons() ... 
+      // Preserved here until sure we can delete it
+*/           
     // Add rewind and fast forward buttons (even if a slider is also shown)
     // These will be hidden from users who have sliders, but visible to users who don't
     // We still want them, even if hidden, so users can benefit from their keyboard functionality   
@@ -2296,6 +2370,7 @@ AblePlayer.prototype.addSeekControls = function(leftPos) {
       this.seekBack.css('visibility','hidden');
       this.seekForward.css('visibility','hidden');
     }
+/*    */
   }
 }
 AblePlayer.prototype.getButtonTitle = function(control) { 
@@ -2308,7 +2383,7 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   else if (control === 'forward') { 
     return 'Advance ' + this.seekInterval + ' seconds';
   }
-  else if (control === 'cc') {  
+  else if (control === 'captions') {  
     if (this.captionsOn) {
       return 'Hide captions';
     }
