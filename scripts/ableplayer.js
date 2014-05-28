@@ -33,22 +33,22 @@ function AblePlayer(mediaId, umpIndex, startTime) {
    */
 
   // Debug - set to true to write messages to console; otherwise false
-  this.debug = false;
+  this.debug = true;
 
   // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
   this.volume = 0.5;
 
   // Default video height and width 
   // Can be overwritten with height and width attributes on HTML <video> element
-  this.videoWidth = 480;
-  this.videoHeight = 360; 
+  this.playerWidth = 480;
+  this.playerHeight = 360; 
 
   // Button color 
   // Media controller background color can be customized in ump.css 
   // Choose 'white' if your controller has a dark background, 'black' if a light background
   // Use a contrast checker to ensure your color scheme has sufficient contrast
   // e.g., http://www.paciellogroup.com/resources/contrastAnalyser
-  this.buttonColor = 'white';
+  this.iconColor = 'white';
 
   // Browsers that don't support seekbar sliders will use rewind and forward buttons 
   // seekInterval = Number of seconds to seek forward or back with these buttons    
@@ -173,10 +173,13 @@ function AblePlayer(mediaId, umpIndex, startTime) {
             }
 
             // do a bunch of stuff to setup player 
+            this.getIconType();
             this.getDimensions();
             this.getPrefs();
             this.injectPlayerCode();          
-            this.setButtons();
+            if (this.iconType == 'image') {
+              this.setButtons();
+            }
             this.setupAlert();
             this.initPlaylist();
         
@@ -411,6 +414,10 @@ AblePlayer.prototype.injectPlayerCode = function() {
       // inject all of this *after* the original HTML5 media element 
       this.$media.after(this.$umpDiv);
     }
+
+    // Can't get computed style in webkit until after controllerDiv has been added to the DOM     
+    this.getBestColor(this.$controllerDiv); // getBestColor() defines this.iconColor
+    this.$controllerDiv.addClass('ump-' + this.iconColor + '-controls');    
   }
 }
 AblePlayer.prototype.initTracks = function() { 
@@ -518,6 +525,7 @@ AblePlayer.prototype.getPlaylist = function() {
   }); 
 }
 AblePlayer.prototype.initPlaylist = function() { 
+
   if (this.playlistEmbed === true) { 
     // move playlist into player, immediately before statusBarDiv
     this.$playlist.parent().insertBefore(this.$statusBarDiv);          
@@ -578,8 +586,8 @@ AblePlayer.prototype.initPlayer = function(player) {
         image: poster, 
         controls: false,
         volume: this.volume,
-        height: this.videoHeight,
-        width: this.videoWidth,
+        height: this.playerHeight,
+        width: this.playerWidth,
         fallback: false, 
         primary: 'flash',
         wmode: 'transparent' // necessary to get HTML captions to appear as overlay 
@@ -663,62 +671,33 @@ AblePlayer.prototype.provideFallback = function() {
   msgContainer.text(msg);  
 }
 AblePlayer.prototype.getDimensions = function() { 
+
   // override default dimensions with width and height attributes of media element, if present
   if (this.$media.attr('width')) { 
-    this.videoWidth = this.$media.attr('width');
+    this.playerWidth = this.$media.attr('width');
     if (this.$media.attr('height')) { 
-      this.videoHeight = this.$media.attr('height');
+      this.playerHeight = this.$media.attr('height');
     }
   }
 }
 AblePlayer.prototype.setButtons = function() { 
 
-  // determine button color (white or black) based on user's background color 
-  // This overrides default buttonColor if there is too little contrast due to:  
-  // - user having enabled high contrast mode 
-  // - user having a custom style sheet that overwrites author's background color 
-  // - author has made a bad design decision that compromises contrast (NOT ALLOWED)
-  var controllerColor, colorsOnly, red, green, blue, grayscale; 
-  
-  if (document.defaultView) { // get computed background-color from most browsers 
-    controllerColor = document.defaultView.getComputedStyle(this.$controllerDiv.get(0), null).getPropertyValue('background-color');
-  }
-  else { // get computed background-color from IE 
-    controllerColor = this.$controllerDiv.get(0).currentStyle.getPropertyValue('background-color');
-  }
-  colorsOnly = controllerColor.substring(controllerColor.indexOf('(') + 1, controllerColor.lastIndexOf(')')).split(/,\s*/);
-  red = colorsOnly[0];
-  green = colorsOnly[1];
-  blue = colorsOnly[2];
-  // convert RGB to grayscale (one value, range = 0-255) using the luminosity method
-  // http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
-  grayscale = (red * 0.21) + (green * 0.72) + (blue * 0.07); 
-  if (grayscale < 128) { 
-    // background is dark. Use white buttons
-    this.buttonColor = 'white';
-    this.$controllerDiv.addClass('ump-white-controls');
-  }     
-  else { 
-    // background is light. Use black buttons
-    this.buttonColor = 'black';
-    this.$controllerDiv.addClass('ump-black-controls');
-  }
-  this.playButtonImg = 'images/media-play-' +  this.buttonColor + '.png';
-  this.pauseButtonImg = 'images/media-pause-' +  this.buttonColor + '.png';
-  this.rewindButtonImg = 'images/media-rewind-' +  this.buttonColor + '.png';
-  this.forwardButtonImg = 'images/media-forward-' +  this.buttonColor + '.png';
-  this.slowerButtonImg = 'images/media-slower-' +  this.buttonColor + '.png';
-  this.fasterButtonImg = 'images/media-faster-' +  this.buttonColor + '.png';
-  this.muteButtonImg = 'images/media-mute-' +  this.buttonColor + '.png';
-  this.volumeButtonImg = 'images/media-volume-' +  this.buttonColor + '.png';
-  this.volumeUpButtonImg = 'images/media-volumeUp-' +  this.buttonColor + '.png';
-  this.volumeDownButtonImg = 'images/media-volumeDown-' +  this.buttonColor + '.png';
-  this.ccButtonImg = 'images/media-cc-' +  this.buttonColor + '.png';
-  this.descriptionButtonImg = 'images/media-description-' +  this.buttonColor + '.png';
-  this.signButtonImg = 'images/media-sign-' +  this.buttonColor + '.png';
-  this.fullscreenButtonImg = 'images/media-fullscreen-' +  this.buttonColor + '.png';
-  this.settingsButtonImg = 'images/settings/media-settings-' +  this.buttonColor + '.png';
-  this.helpButtonImg = 'images/settings/media-help-' +  this.buttonColor + '.png';
+  this.playButtonImg = 'images/media-play-' +  this.iconColor + '.png';
+  this.pauseButtonImg = 'images/media-pause-' +  this.iconColor + '.png';
+  this.rewindButtonImg = 'images/media-rewind-' +  this.iconColor + '.png';
+  this.forwardButtonImg = 'images/media-forward-' +  this.iconColor + '.png';
+  this.slowerButtonImg = 'images/media-slower-' +  this.iconColor + '.png';
+  this.fasterButtonImg = 'images/media-faster-' +  this.iconColor + '.png';
+  this.muteButtonImg = 'images/media-mute-' +  this.iconColor + '.png';
+  this.volumeButtonImg = 'images/media-volume-' +  this.iconColor + '.png';
+  this.volumeUpButtonImg = 'images/media-volumeUp-' +  this.iconColor + '.png';
+  this.volumeDownButtonImg = 'images/media-volumeDown-' +  this.iconColor + '.png';
+  this.ccButtonImg = 'images/media-captions-' +  this.iconColor + '.png';
+  this.descriptionButtonImg = 'images/media-descriptions-' +  this.iconColor + '.png';
+  this.signButtonImg = 'images/media-sign-' +  this.iconColor + '.png';
+  this.fullscreenButtonImg = 'images/media-fullscreen-' +  this.iconColor + '.png';
+  this.settingsButtonImg = 'images/media-settings-' +  this.iconColor + '.png';
+  this.helpButtonImg = 'images/media-help-' +  this.iconColor + '.png';
 }
 AblePlayer.prototype.initDescription = function() { 
 
@@ -1177,7 +1156,7 @@ AblePlayer.prototype.addEventListeners = function() {
   var thisObj = this;
     
   // handle clicks on player buttons 
-  this.$controllerDiv.find('input').click(function(){  
+  this.$controllerDiv.find('button').click(function(){  
     var whichButton = $(this).attr('class').split(' ')[0].substr(4); 
     if (whichButton === 'play') { 
       thisObj.handlePlay();
@@ -1337,7 +1316,13 @@ AblePlayer.prototype.addEventListeners = function() {
         jwplayer(thisObj.jwId).seek(spanStart);
       }
       // change play button to pause button
-      thisObj.$playpauseButton.attr('title','Pause').attr('src',thisObj.pauseButtonImg);        
+      thisObj.$playpauseButton.attr('title','Pause'); 
+      if (thisObj.controllerFont === 'icomoon') {
+        thisObj.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+      }
+      else { 
+        thisObj.$playpauseButton.find('img').attr('src',thisObj.pauseButtonImg); 
+      }
     });
   }
 
@@ -1654,7 +1639,10 @@ AblePlayer.prototype.addControls = function() {
   // user preferences (???)      
   // some controls are aligned on the left, and others on the right 
     
+  var buttonWidth = 40; // in pixels, including margins, padding + cusion for outline 
+
   var leftControls = ['play','stop','rewind','forward'];  
+  
   if (this.$media.playbackRate) {     
     // browser supports playbackRate! 
     // so far, confirmed that Chrome 23.x supports faster playback without sound (i.e., fast forward)
@@ -1704,9 +1692,9 @@ AblePlayer.prototype.addControls = function() {
   this.addPrefsForm();        
 
   rightControls.push('help');
-
+  
   // now step separately through left and right controls
-  var totalWidth = 0;
+
   for (var i=1; i<=2; i++) {
     var hPos = 0; // horizontal position
     if (i ==1) {        
@@ -1733,45 +1721,50 @@ AblePlayer.prototype.addControls = function() {
       }
       else { 
         // this control is a button 
+        var buttonImgSrc = 'images/media-' + control + '-' + this.iconColor + '.png';
         var buttonTitle = this.getButtonTitle(control); 
-        if (control === 'mute') { 
-          var buttonImg = this.volumeButtonImg;
+        var newButton = $('<button>',{ 
+          'type': 'button',
+          'tabindex': '0',
+          'title': buttonTitle,
+          'class': 'ump-' + control 
+        });        
+        if (this.iconType === 'font') { 
+          // add span for icon fonts 
+          if (control == 'mute') { 
+            if (this.volume > 0) { 
+              var iconClass = 'icon-volume';
+            }
+            else { 
+              var iconClass = 'icon-mute';
+            }
+          }
+          else { 
+            var iconClass = 'icon-' + control;
+          }
+          var buttonIcon = $('<span>',{ 
+            'class': iconClass,
+            'aria-hidden': 'true'
+          })   
+/*        // this is recommended for a11y in the documentation 
+          // but we have title on the container <button>, so I don't think this is needed
+          var buttonLabel = $('<span>',{
+            'class': 'ump-clipped'
+          }).text(buttonTitle);
+          newButton.append(buttonIcon,buttonLabel);
+*/          
+
+          newButton.append(buttonIcon);
         }
         else { 
-          var buttonImg = 'images/media-' + control + '-' + this.buttonColor + '.png';
+          // use images
+          var buttonImg = $('<img>',{ 
+            'src': buttonImgSrc,
+            'alt': '',
+            'role': 'presentation'
+          });
+          newButton.append(buttonImg);
         }
-        var newButton = $('<input>',{ 
-          type: 'image',
-          // alt: buttonTitle, 
-          title: buttonTitle,
-          style: 'left:' + hPos + 'px',
-          value: '',
-          src: buttonImg,
-          'class': 'ump-' + control 
-        });         
-        /* 
-          // Experimental button alternative - not yet implemented
-          // Use icomoon.io fonts 
-          // Fonts are already contained in fonts directory 
-          // CSS is already in place within ableplayer.css 
-          // Just need the right HTML          
-        var newButton = $('<div>',{ 
-          'role': 'button',
-          'tabindex': '0',
-          'title': buttonTitle,          
-          'style': 'left:' + hPos + 'px',
-          'class': 'ump-' + control 
-        });         
-        var buttonIcon = $('<span>',{ // add data-icon programatically
-          'class': 'icon-' + control,
-          'data-icon': this.getIconHexValue(control)
-        })        
-        var buttonLabel = control.charAt(0).toUpperCase() + control.slice(1);
-        var buttonLabelSpan = $('<span>',{
-          'class': 'ump-clipped'
-        }).text(buttonLabel);
-        newButton.append(buttonIcon,buttonLabelSpan);
-        */
         if (control === 'captions') { 
           if (!this.prefCaptions || this.prefCaptions != 1) { 
             // captions are available, but user has them turned off 
@@ -1808,44 +1801,54 @@ AblePlayer.prototype.addControls = function() {
         hPos += 34; // button width + 1px border + 1px margin
       }
     }
-    if (i === 1) { // left controls 
-      controllerSpan.css('left',0);       
-    }
-    else { // right controls
-      var rightPos = hPos + 2;
-      controllerSpan.css('right',rightPos+'px');
-    }
     this.$controllerDiv.append(controllerSpan);
-    totalWidth += hPos;
   }
+
+  // calculate widths of left and right controls   
+  var leftWidth = leftControls.length * buttonWidth; 
+  var rightWidth = rightControls.length * buttonWidth;  
+  var totalWidth = leftWidth + rightWidth;
+  if (totalWidth <= this.playerWidth) { 
+    // express left and right width in pixels 
+    var leftWidthStyle = leftWidth + 'px';
+    var rightWidthStyle = rightWidth + 'px';    
+  }    
+  else { 
+    // express left and right width as a percentage 
+    var leftWidthStyle = Math.floor((leftWidth/totalWidth)*100) + '%';
+    var rightWidthStyle = Math.floor((rightWidth/totalWidth)*100) + '%';
+    // reduce button size to fit container ??? 
+    // or wrap buttons onto new line ??? 
+  }
+  $('.ump-left-controls').css('width',leftWidthStyle);       
+  $('.ump-right-controls').css('width',rightWidthStyle);       
+  
   if (this.mediaType === 'video') { 
     // set controller to width of video
     var controllerStyles = {
-      'width': this.videoWidth+'px',
-      'height': this.videoHeight+'px'
+      'width': this.playerWidth+'px',
+      'height': this.playerHeight+'px'
     } 
     this.$umpDiv.css(controllerStyles); 
     // also set width and height of div.ump-vidcap-container
     var vidcapStyles = {
-      'width': this.videoWidth+'px',
-      'height': this.videoHeight+'px'
+      'width': this.playerWidth+'px',
+      'height': this.playerHeight+'px'
     }     
     if (this.$vidcapContainer) { 
       this.$vidcapContainer.css(vidcapStyles); 
     }   
     // also set width of the captions and descriptions containers 
     if (this.$captionDiv) { 
-      this.$captionDiv.css('width',this.videoWidth+'px');
+      this.$captionDiv.css('width',this.playerWidth+'px');
     }
     if (this.$descDiv) {
-      this.$descDiv.css('width',this.videoWidth+'px');
+      this.$descDiv.css('width',this.playerWidth+'px');
     }
   }
   else { 
     // set controller to combined width of all controls
     // plus 10px separation between left and right controls
-    totalWidth += 10;
-    this.$umpDiv.css('width',totalWidth+'px'); 
   }
     
   // also add a timer to the status bar
@@ -1866,8 +1869,114 @@ AblePlayer.prototype.addControls = function() {
   // construct help dialog that includes keystrokes for operating the included controls 
   this.addHelp();     
 }
+AblePlayer.prototype.getIconType = function() { 
+  // returns either "font" or "image" 
+  // create a temporary play span and check to see if button has font-family == "icomoon" (the default) 
+  // if it doesn't, user has a custom style sheet and icon fonts will not display properly 
+  // use images as fallback 
+  
+  // Note: webkit doesn't return calculated styles unless element has been added to the DOM 
+  // and is visible; use clip method to satisfy this need yet hide it  
+  var $tempButton = $('<span>',{ 
+    'class': 'icon-play ump-clipped'
+  });
+  $('body').append($tempButton);
+  
+  if (window.getComputedStyle) {
+    // the following retrieves the computed value of font-family
+    // tested in Firefox with "Allow pages to choose their own fonts" unchecked - works! 
+    // tested in IE with user-defined style sheet enables - works! 
+    // It does NOT account for users who have "ignore font styles on web pages" checked in IE 
+    // There is no known way to check for that 
+    this.controllerFont = window.getComputedStyle($tempButton.get(0), null).getPropertyValue('font-family');
+    if (this.controllerFont) {
+      this.controllerFont = this.controllerFont.replace(/["']/g, ''); // strip out single or double quotes 
+      if (this.controllerFont === 'icomoon') { 
+        this.iconType = 'font';
+      }
+      else { 
+        this.iconType = 'image';
+      }
+    }
+    else { 
+      this.iconType = 'image';
+    }
+  }
+  else { // IE 8 and earlier  
+    // There is no known way to detect computed font in IE8 and earlier  
+    // The following retrieves the value from the style sheet, not the computed font 
+    // this.controllerFont = $tempButton.get(0).currentStyle.fontFamily;
+    // It will therefore return "icomoon", even if the user is overriding that with a custom style sheet 
+    // To be safe, use images   
+    this.iconType = 'image';
+  }
+  if (this.debug) {
+    console.log("User font for controller is " + this.controllerFont);
+  }
+  $tempButton.remove();
+}
+AblePlayer.prototype.getBestColor = function($element) { 
+  // determine best color (white or black) based on computed background color of jQuery object $element
+  // This overrides default iconColor if there is too little contrast due to:  
+  // - user having enabled high contrast mode 
+  // - user having a custom style sheet that overwrites author's background color 
+  // - author has made a bad design decision that compromises contrast (NOT ALLOWED)
+  var e, bgColor, useCurrentStyle, colorsOnly, red, green, blue, grayscale; 
+  
+  e = $element.get(0);
+  if (window.getComputedStyle) { // most browsers 
+    bgColor = window.getComputedStyle(e, null).getPropertyValue('background-color');
+  }
+  else { // IE 8 and earlier 
+    // use default colors specified in CSS 
+    // There is no known way to check for computed styles (i.e., Windows high contrast mode) in IE8 and earlier   
+    // Can get current style as defined in CSS, and hope user hasn't overriden them 
+    // Also, the color could be expressed in any valid CSS format. Need to convert to RGB to calculate lightness 
+    bgColor = e.currentStyle.backgroundColor;
+console.log("HEY! bgColor is " + bgColor);    
+    if (bgColor.indexOf('rgb') === -1) { 
+      // this is not an RGB value
+      // is it a valid hex value with 3 or 6 characters preceded by #?  
+      var regex = /.#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+      if (regex.test(bgColor)) { 
+        // this is a hex value. Convert to RGB 
+        bgColor = colorHexToRGB(bgColor);
+      }
+      else if (colorNameToHex(bgColor) != false ) {
+        // this is a color name 
+        bgColor = colorHexToRGB(colorNameToHex(bgColor));
+      }
+      else { 
+        bgColor = false;
+      }
+    }
+  }
+  if (bgColor) { 
+    // split RGB value into individual colors
+    colorsOnly = bgColor.substring(bgColor.indexOf('(') + 1, bgColor.lastIndexOf(')')).split(/,\s*/);
+    red = colorsOnly[0];
+    green = colorsOnly[1];
+    blue = colorsOnly[2];
+    // convert to grayscale (one value, range = 0-255) using the luminosity method
+    // http://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
+    grayscale = (red * 0.21) + (green * 0.72) + (blue * 0.07); 
+    if (grayscale < 128) { 
+      // background is dark. Use white buttons
+      this.iconColor = 'white';
+    }     
+    else { 
+      // background is light. Use black buttons
+      this.iconColor = 'black';
+    }
+  }
+  else { 
+    // unable to determine background color. Internet stats favor black... 
+    this.iconColor = 'black';
+  }
+}
 AblePlayer.prototype.getIconHexValue =  function(control) { 
   // returns hex value of character in icomoon font
+  // may not actually be needed
   switch (control) { 
     case 'play': 
       return '&#xe600';
@@ -1973,14 +2082,26 @@ AblePlayer.prototype.handlePlay = function(e) {
       this.media.play();
       this.$status.text('Playing');
       // change play button to pause button
-      this.$playpauseButton.attr('title','Pause').attr('src',this.pauseButtonImg);
+      this.$playpauseButton.attr('title','Pause'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+      }
     } 
     else { 
       // audio is playing. Pause it
       this.media.pause(); 
       this.$status.text('Paused');
       // change pause button to play button
-      this.$playpauseButton.attr('title','Play').attr('src',this.playButtonImg);
+      this.$playpauseButton.attr('title','Play'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+      }
     }
   }
   else { 
@@ -1989,12 +2110,24 @@ AblePlayer.prototype.handlePlay = function(e) {
     if (playerState === 'IDLE' || playerState === 'PAUSED') { 
       jwplayer(this.jwId).play(); 
       // change play button to pause button
-      this.$playpauseButton.attr('title','Pause').attr('src',this.pauseButtonImg);
+      this.$playpauseButton.attr('title','Pause'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+      }
     }
     else { // playerState is 'PLAYING' or 'BUFFERING'. Pause it
       jwplayer(this.jwId).pause(); 
       // change pause button to play button
-      this.$playpauseButton.attr('title','Play').attr('src',this.playButtonImg);
+      this.$playpauseButton.attr('title','Play'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+      }
     }
   } 
 }
@@ -2013,7 +2146,13 @@ AblePlayer.prototype.handleStop = function() {
   this.updateTime('current',0); 
   this.$status.text('Stopped');
   // change pause button to play button
-  this.$playpauseButton.attr('title','Play').attr('src',this.playButtonImg);  
+  this.$playpauseButton.attr('title','Play'); 
+  if (this.controllerFont === 'icomoon') {
+    this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
+  }
+  else { 
+    this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+  }
 }
 AblePlayer.prototype.handleRewind = function() { 
   if (this.player === 'html5') {             
@@ -2063,30 +2202,54 @@ AblePlayer.prototype.handleMute = function() {
   if (this.player === 'html5') {             
     if (this.media.muted) { // unmute
       this.media.muted = false; 
-      // change image on mute button
-      this.$muteButton.attr('title','Mute').attr('src',this.volumeButtonImg);
+      // change button
+      this.$muteButton.attr('title','Mute'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
+      }
+      else { 
+        this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+      }
       // restore volume to its previous setting
       this.media.volume = this.volume;
     }
     else { // mute 
       this.media.muted = true; 
       // change mute button
-      this.$muteButton.attr('title','UnMute').attr('src',this.muteButtonImg);
+      this.$muteButton.attr('title','Unmute'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.muteButtonImg); 
+      }
     }
   }
   else { 
     // jw player
     if (jwplayer(this.jwId).getMute()) { // true if muted. unmute
       jwplayer(this.jwId).setMute(false); 
-      // change image on mute button
-      this.$muteButton.attr('title','Mute').attr('src',this.volumeButtonImg);
+      // change button
+      this.$muteButton.attr('title','Mute'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
+      }
+      else { 
+        this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+      }
       // restore volume to its previous setting
       jwplayer(this.jwId).setVolume(this.volume);
     }
     else { // mute 
       jwplayer(this.jwId).setMute(true); 
       // change mute button
-      this.$muteButton.attr('title','UnMute').attr('src',this.muteButtonImg);
+      this.$muteButton.attr('title','Unmute'); 
+      if (this.controllerFont === 'icomoon') {
+        this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.muteButtonImg); 
+      }
     }
   } 
 }
@@ -2098,7 +2261,14 @@ AblePlayer.prototype.handleVolume = function(direction) {
     if (direction === 'up') {    
       if (this.media.muted) { // unmute
         this.media.muted = false; 
-        this.$muteButton.attr('title','Mute').attr('src',this.volumeButtonImg);
+        // change button
+        this.$muteButton.attr('title','Mute'); 
+        if (this.controllerFont === 'icomoon') {
+          this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
+        }
+        else { 
+          this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+        }
       }
       if (this.volume < 0.9) {        
         this.volume = Math.round((this.volume + 0.1) * 10) / 10;
@@ -2115,7 +2285,14 @@ AblePlayer.prototype.handleVolume = function(direction) {
       else {
         this.volume = 0;
         this.media.muted = true;
-        this.$muteButton.attr('title','UnMute').attr('src',this.muteButtonImg);
+        // change button
+        this.$muteButton.attr('title','Unmute'); 
+        if (this.controllerFont === 'icomoon') {
+          this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
+        }
+        else { 
+          this.$muteButton.find('img').attr('src',this.muteButtonImg); 
+        }
       }
     }
     else if (direction >= 49 || direction <= 53) { 
@@ -2130,7 +2307,14 @@ AblePlayer.prototype.handleVolume = function(direction) {
     if (direction === 'up') {
       if (jwplayer(this.jwId).getMute()) { // currently muted. unmute
         jwplayer(this.jwId).setMute(false); 
-        this.$muteButton.attr('title','Mute').attr('src',this.volumeButtonImg);
+        // change button
+        this.$muteButton.attr('title','Mute'); 
+        if (this.controllerFont === 'icomoon') {
+          this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
+        }
+        else { 
+          this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+        }
       }
       if (this.volume < 90) {       
         this.volume = this.volume + 10;
@@ -2146,7 +2330,14 @@ AblePlayer.prototype.handleVolume = function(direction) {
       else {
         this.volume = 0;
         jwplayer(this.jwId).setMute(true); 
-        this.$muteButton.attr('title','UnMute').attr('src',this.muteButtonImg);
+        // change button
+        this.$muteButton.attr('title','Unmute'); 
+        if (this.controllerFont === 'icomoon') {
+          this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
+        }
+        else { 
+          this.$muteButton.find('img').attr('src',this.muteButtonImg); 
+        }
       }     
     }
     else if (direction >= 49 || direction <= 53) { 
@@ -2370,7 +2561,6 @@ AblePlayer.prototype.addSeekControls = function(leftPos) {
       this.seekBack.css('visibility','hidden');
       this.seekForward.css('visibility','hidden');
     }
-/*    */
   }
 }
 AblePlayer.prototype.getButtonTitle = function(control) { 
@@ -2391,7 +2581,7 @@ AblePlayer.prototype.getButtonTitle = function(control) {
       return 'Show captions';
     }
   }   
-  else if (control === 'description') { 
+  else if (control === 'descriptions') { 
     if (this.closedDescOn) {
       return 'Turn off description';
     }
@@ -2401,6 +2591,14 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   }   
   else if (control === 'sign') { // not yet supported 
     return 'Sign language';
+  }
+  else if (control === 'mute') { 
+    if (this.volume > 0) { 
+      return 'Mute';
+    }
+    else { 
+      return 'Unmute';
+    }
   }
   else if (control === 'volumeUp') { 
     return 'Volume Up';
@@ -2422,7 +2620,13 @@ AblePlayer.prototype.seekTo = function (newTime) {
     this.media.play(true);
     this.startedPlaying = true;
     // change play button to pause button
-    this.$playpauseButton.attr('title','Pause').attr('src',this.pauseButton);     
+    this.$playpauseButton.attr('title','Pause'); 
+    if (this.controllerFont === 'icomoon') {
+      this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+    }
+    else { 
+      this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+    }
   } 
 }
 AblePlayer.prototype.updateTime = function(whichTime, time) {
@@ -2788,4 +2992,165 @@ AblePlayer.prototype.debugDescription = function(e) {
   console.log('closedDescOn: ' + this.closedDescOn);
   console.log('openDescOn: ' + this.openDescOn);
   console.log('useDescType: ' + this.useDescType);  
+}
+AblePlayer.prototype.colorNameToHex = function(color) { 
+  var colors = {
+    "aliceblue": "#f0f8ff",
+    "antiquewhite": "#faebd7",
+    "aqua": "#00ffff",
+    "aquamarine": "#7fffd4",
+    "azure": "#f0ffff",
+    "beige": "#f5f5dc",
+    "bisque": "#ffe4c4",
+    "black": "#000000",
+    "blanchedalmond": "#ffebcd",
+    "blue": "#0000ff",
+    "blueviolet": "#8a2be2",
+    "brown": "#a52a2a",
+    "burlywood": "#deb887",
+    "cadetblue": "#5f9ea0",
+    "chartreuse": "#7fff00",
+    "chocolate": "#d2691e",
+    "coral": "#ff7f50",
+    "cornflowerblue": "#6495ed",
+    "cornsilk": "#fff8dc",
+    "crimson": "#dc143c",
+    "cyan": "#00ffff",
+    "darkblue": "#00008b",
+    "darkcyan": "#008b8b",
+    "darkgoldenrod": "#b8860b",
+    "darkgray": "#a9a9a9",
+    "darkgreen": "#006400",
+    "darkkhaki": "#bdb76b",
+    "darkmagenta": "#8b008b",
+    "darkolivegreen": "#556b2f",
+    "darkorange": "#ff8c00",
+    "darkorchid": "#9932cc",
+    "darkred": "#8b0000",
+    "darksalmon": "#e9967a",
+    "darkseagreen": "#8fbc8f",
+    "darkslateblue": "#483d8b",
+    "darkslategray": "#2f4f4f",
+    "darkturquoise": "#00ced1",
+    "darkviolet": "#9400d3",
+    "deeppink": "#ff1493",
+    "deepskyblue": "#00bfff",
+    "dimgray": "#696969",
+    "dodgerblue": "#1e90ff",
+    "firebrick": "#b22222",
+    "floralwhite": "#fffaf0",
+    "forestgreen": "#228b22",
+    "fuchsia": "#ff00ff",
+    "gainsboro": "#dcdcdc",
+    "ghostwhite": "#f8f8ff",
+    "gold": "#ffd700",
+    "goldenrod": "#daa520",
+    "gray": "#808080",
+    "green": "#008000",
+    "greenyellow": "#adff2f",
+    "honeydew": "#f0fff0",
+    "hotpink": "#ff69b4",
+    "indianred ": "#cd5c5c",
+    "indigo": "#4b0082",
+    "ivory": "#fffff0",
+    "khaki": "#f0e68c",
+    "lavender": "#e6e6fa",
+    "lavenderblush": "#fff0f5",
+    "lawngreen": "#7cfc00",
+    "lemonchiffon": "#fffacd",
+    "lightblue": "#add8e6",
+    "lightcoral": "#f08080",
+    "lightcyan": "#e0ffff",
+    "lightgoldenrodyellow": "#fafad2",
+    "lightgrey": "#d3d3d3",
+    "lightgreen": "#90ee90",
+    "lightpink": "#ffb6c1",
+    "lightsalmon": "#ffa07a",
+    "lightseagreen": "#20b2aa",
+    "lightskyblue": "#87cefa",
+    "lightslategray": "#778899",
+    "lightsteelblue": "#b0c4de",
+    "lightyellow": "#ffffe0",
+    "lime": "#00ff00",
+    "limegreen": "#32cd32",
+    "linen": "#faf0e6",
+    "magenta": "#ff00ff",
+    "maroon": "#800000",
+    "mediumaquamarine": "#66cdaa",
+    "mediumblue": "#0000cd",
+    "mediumorchid": "#ba55d3",
+    "mediumpurple": "#9370d8",
+    "mediumseagreen": "#3cb371",
+    "mediumslateblue": "#7b68ee",
+    "mediumspringgreen": "#00fa9a",
+    "mediumturquoise": "#48d1cc",
+    "mediumvioletred": "#c71585",
+    "midnightblue": "#191970",
+    "mintcream": "#f5fffa",
+    "mistyrose": "#ffe4e1",
+    "moccasin": "#ffe4b5",
+    "navajowhite": "#ffdead",
+    "navy": "#000080",
+    "oldlace": "#fdf5e6",
+    "olive": "#808000",
+    "olivedrab": "#6b8e23",
+    "orange": "#ffa500",
+    "orangered": "#ff4500",
+    "orchid": "#da70d6",
+    "palegoldenrod": "#eee8aa",
+    "palegreen": "#98fb98",
+    "paleturquoise": "#afeeee",
+    "palevioletred": "#d87093",
+    "papayawhip": "#ffefd5",
+    "peachpuff": "#ffdab9",
+    "peru": "#cd853f",
+    "pink": "#ffc0cb",
+    "plum": "#dda0dd",
+    "powderblue": "#b0e0e6",
+    "purple": "#800080",
+    "red": "#ff0000",
+    "rosybrown": "#bc8f8f",
+    "royalblue": "#4169e1",
+    "saddlebrown": "#8b4513",
+    "salmon": "#fa8072",
+    "sandybrown": "#f4a460",
+    "seagreen": "#2e8b57",
+    "seashell": "#fff5ee",
+    "sienna": "#a0522d",
+    "silver": "#c0c0c0",
+    "skyblue": "#87ceeb",
+    "slateblue": "#6a5acd",
+    "slategray": "#708090",
+    "snow": "#fffafa",
+    "springgreen": "#00ff7f",
+    "steelblue": "#4682b4",
+    "tan": "#d2b48c",
+    "teal": "#008080",
+    "thistle": "#d8bfd8",
+    "tomato": "#ff6347",
+    "turquoise": "#40e0d0",
+    "violet": "#ee82ee",
+    "wheat": "#f5deb3",
+    "white": "#ffffff",
+    "whitesmoke": "#f5f5f5",
+    "yellow": "#ffff00",
+    "yellowgreen": "#9acd32"
+  };
+  if (typeof colors[color.toLowerCase()] != 'undefined') { 
+    return colors[color.toLowerCase()];
+  }
+  return false;
+}
+AblePlayer.prototype.colorHexToRGB = function(color) { 
+  var r, g, b;
+  if (col.charAt(0) == '#') {
+    col = col.substr(1);
+  }
+  r = col.charAt(0) + col.charAt(1);
+  g = col.charAt(2) + col.charAt(3);
+  b = col.charAt(4) + col.charAt(5);
+  r = parseInt(r, 16);
+  g = parseInt(g, 16);
+  b = parseInt(b, 16);
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
 }

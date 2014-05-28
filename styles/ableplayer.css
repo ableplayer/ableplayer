@@ -1,6 +1,5 @@
 /* 
-	Universal Media Player (UMP) core styles
-	http://terrillthompson.com/ump
+	Able Player core styles
 */
 .ump { 
 	margin: 1em 0;
@@ -38,42 +37,67 @@
 	border-top: 2px solid #4c4c4c; 
 	border-bottom: 2px solid #4c4c4c; 
 	background-color: #3D3D3D; /* background color of controller bar */
-	height: 38px; /* height of button img (30px) + 4px top & bottom outline */
-	line-height: 30px;
+	/* min-height: 2.6em; */ /* height of button (1.4em) + padding (0.2em) + margin (0.5em) + outline (0.5em) */
+	/* line-height: 2.6em; */
+	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
+	padding: 5px 0 0; 
 }
-.ump-controller input:focus, 
-.ump-controller input:hover {
-  outline-style: solid;
-  outline-width: 4px;
-}
-.ump-controller input:focus {  
-	outline-color: #ffff00; /* yellow */
-}
-.ump-controller input:hover {
-	outline-color: #cc0000; /* red */
+.ump-controller > span { 
+  width: 50%;
 }
 
 /* Controller Buttons & Controls */
 
+
 .ump-left-controls, .ump-right-controls { 
-	position: absolute;
 }
-.ump-controller input { 
-	position: absolute;
-	top: 5px;
+.ump-left-controls { 
+  float: left;
 }
-.ump-controller input[type="image"] { 
-	width: 30px; 
-	height: 30px;
+.ump-right-controls { 
+  float: right;
 }
-.ump-controller div.buttonOff { 
+.ump-controller button {
+  background: none;
+  position: relative;
+  display: inline-block;
+  border-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ump-controller button:focus, 
+.ump-controller button:hover { 
+  outline-style: solid;
+  outline-width: 5px;
+}
+.ump-controller button:focus {  
+	outline-color: #ffff00; /* yellow */
+}
+.ump-controller button:hover {
+	outline-color: #66ff66; /* green */
+}
+.ump-controller button > span { 
+  /* icomoon font icon */
+  font-size: 24px; 
+  width: 24px;
+  margin: 0 5px;
+  padding: 0;
+}
+.ump-controller button > img { 
+  /* image icon */
+  width: 30px; 
+  height: 30px;
+  margin: 0 2px;
+  padding: 0;
+}
+.ump-controller .buttonOff { 
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
 }
-.ump-white-controls { 
+.ump-white-controls button { 
   color: white;
 }
-.ump-black-controls { 
+.ump-black-controls button { 
   color: black;
 }
 
@@ -225,11 +249,11 @@ button.ump-prefsButton {
 /* icomoon.io font styling */
 @font-face {
 	font-family: 'icomoon';
-	src:url('../fonts/icomoon.eot?2sbdo1');
-	src:url('../fonts/icomoon.eot?#iefix2sbdo1') format('embedded-opentype'),
-		url('../fonts/icomoon.woff?2sbdo1') format('woff'),
-		url('../fonts/icomoon.ttf?2sbdo1') format('truetype'),
-		url('../fonts/icomoon.svg?2sbdo1#icomoon') format('svg');
+	src:url('../fonts/icomoon.eot?-ix7ifj');
+	src:url('../fonts/icomoon.eot?#iefix-ix7ifj') format('embedded-opentype'),
+		url('../fonts/icomoon.woff?-ix7ifj') format('woff'),
+		url('../fonts/icomoon.ttf?-ix7ifj') format('truetype'),
+		url('../fonts/icomoon.svg?-ix7ifj#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -248,14 +272,14 @@ button.ump-prefsButton {
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.icon-descriptions:before {
+	content: "\e60b";
+}
 .icon-help:before {
 	content: "\e611";
 }
 .icon-sign:before {
 	content: "\e60a";
-}
-.icon-descriptions:before {
-	content: "\e60b";
 }
 .icon-captions:before {
 	content: "\e609";
@@ -263,7 +287,7 @@ button.ump-prefsButton {
 .icon-fullscreen:before {
 	content: "\e612";
 }
-.icon-preferences:before {
+.icon-settings:before {
 	content: "\e610";
 }
 .icon-play:before {
