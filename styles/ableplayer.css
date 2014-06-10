@@ -50,6 +50,7 @@
 
 
 .ump-left-controls, .ump-right-controls { 
+    overflow: visible;
 }
 .ump-left-controls { 
   float: left;
@@ -64,6 +65,7 @@
   border-style: none;
   margin: 0;
   padding: 0;
+  min-width: 40px;
 }
 .ump-controller button:focus, 
 .ump-controller button:hover { 
