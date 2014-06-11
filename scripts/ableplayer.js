@@ -2701,9 +2701,9 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
         }
       }
     });
+    //done with temp div. Can remove it now. 
+    tempDiv.remove();     
   } 
-  //done with temp div. Can remove it now. 
-  tempDiv.remove(); 
 }
 AblePlayer.prototype.showCaptions = function() { 
   if (this.player === 'html5') {
