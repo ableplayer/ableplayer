@@ -510,7 +510,8 @@ AblePlayer.prototype.getPlaylist = function() {
       thisObj.hasPlaylist = true;        
       thisObj.$playlist = $(this).find('li');
       // add tabindex to each list item 
-      thisObj.$playlist.attr('tabindex','0');
+      thisObj.$playlist.attr('tabindex','0
+      thisObj.$playlist.attr('role','button');      
       thisObj.playlistSize = thisObj.$playlist.length;
       thisObj.playlistIndex = 0;        
       var dataEmbedded = $(this).attr('data-embedded');
