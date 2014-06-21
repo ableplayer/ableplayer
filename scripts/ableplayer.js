@@ -85,7 +85,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
 	// Note: JW Player does not support offline playback (a Flash restriction)
 	// Therefore testing must be performed on a web server 
   this.testFallback = false;
-     
+    
   // loop - if true, will start again at top after last item in playlist has ended
   // NOTE: This is not fully supported yet - needs work 
   this.loop = true; 
@@ -485,18 +485,18 @@ AblePlayer.prototype.initTracks = function() {
           this.$descDiv.addClass('ump-clipped');                
         }
         this.$umpDiv.append(this.$descDiv); 
-        this.description = []; //temp array for storing data from source file
+        this.descriptions = []; //temp array for storing data from source file
         this.currentDescription = -1;
         if ((this.prefDesc === 1) && (this.prefClosedDesc === 1)) { 
           this.closedDescOn = true; 
         }
-        this.setupTimedText('description',track);
+        this.setupTimedText('descriptions',track);
       }
       else if (kind === 'subtitles') { 
         // not yet supported
       }
       else if (kind === 'chapters') { 
-        // not supported
+        // not yet supported
       }
       else if (kind === 'metadata') { 
         // not supported
@@ -2773,8 +2773,8 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
                 if (kind === 'captions') { 
                   thisObj.captions.push({'start':start,'end':end,'text':cueText}); 
                 }
-                else if (kind === 'description') { 
-                  thisObj.description.push({'start':start,'end':end,'text':cueText});                   
+                else if (kind === 'descriptions') { 
+                  thisObj.descriptions.push({'start':start,'end':end,'text':cueText});                   
                 }
               }
             }
@@ -2832,8 +2832,8 @@ AblePlayer.prototype.showDescription = function() {
   else { // jw player
     now = jwplayer(this.jwId).getPosition();
   }
-  for (d in this.description) {
-    if ((this.description[d].start <= now) && (this.description[d].end > now)) {      
+  for (d in this.descriptions) {
+    if ((this.descriptions[d].start <= now) && (this.descriptions[d].end > now)) {      
       thisDescription = d;
       break;
     }
@@ -2841,7 +2841,7 @@ AblePlayer.prototype.showDescription = function() {
   if (typeof thisDescription !== 'undefined') {  
     if (this.currentDescription !== thisDescription) { 
       // load the new description into the container div 
-      this.$descDiv.html(this.description[thisDescription].text);
+      this.$descDiv.html(this.descriptions[thisDescription].text);
       this.currentDescription = thisDescription;
       if (this.$descDiv.is(':hidden')) { 
         this.$descDiv.show();
