@@ -855,7 +855,8 @@ AblePlayer.prototype.addPrefsForm = function() {
     modal: true,
     resizable: true,
     title: 'Preferences',
-    width: '32em'
+    width: '32em',
+    close: function( event, ui ) {$('.ump-settings').focus();}
   });
 }
 AblePlayer.prototype.addHelp = function() {   
@@ -952,7 +953,8 @@ AblePlayer.prototype.addHelp = function() {
     modal: true,
     resizable: true,
     title: 'Help',
-    width: '32em'
+    width: '32em',
+    close: function( event, ui ) {$('.ump-help').focus();}
   });
 }
 AblePlayer.prototype.setCookie = function(cookieValue) { 
