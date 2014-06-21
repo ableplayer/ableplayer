@@ -33,7 +33,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
    */
 
   // Debug - set to true to write messages to console; otherwise false
-  this.debug = true;
+  this.debug = false;
 
   // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
   this.volume = 0.5;
@@ -50,6 +50,12 @@ function AblePlayer(mediaId, umpIndex, startTime) {
   // e.g., http://www.paciellogroup.com/resources/contrastAnalyser
   this.iconColor = 'white';
 
+  // Icon type 
+  // By default, AblePlayer uses scalable icomoon fonts for the player controls 
+  // and falls back to images if the user has a custom style sheet that overrides font-family 
+  // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
+  this.iconType = 'font';   
+  
   // Browsers that don't support seekbar sliders will use rewind and forward buttons 
   // seekInterval = Number of seconds to seek forward or back with these buttons    
   this.seekInterval = 10;
@@ -1881,37 +1887,44 @@ AblePlayer.prototype.getIconType = function() {
     'class': 'icon-play ump-clipped'
   });
   $('body').append($tempButton);
-  
-  if (window.getComputedStyle) {
-    // the following retrieves the computed value of font-family
-    // tested in Firefox with "Allow pages to choose their own fonts" unchecked - works! 
-    // tested in IE with user-defined style sheet enables - works! 
-    // It does NOT account for users who have "ignore font styles on web pages" checked in IE 
-    // There is no known way to check for that 
-    this.controllerFont = window.getComputedStyle($tempButton.get(0), null).getPropertyValue('font-family');
-    if (this.controllerFont) {
-      this.controllerFont = this.controllerFont.replace(/["']/g, ''); // strip out single or double quotes 
-      if (this.controllerFont === 'icomoon') { 
-        this.iconType = 'font';
+
+  if (this.iconType == 'font') {   
+    // check to be sure user can display icomoon fonts 
+    // if not, fall back to images 
+    if (window.getComputedStyle) {
+      // the following retrieves the computed value of font-family
+      // tested in Firefox with "Allow pages to choose their own fonts" unchecked - works! 
+      // tested in IE with user-defined style sheet enables - works! 
+      // It does NOT account for users who have "ignore font styles on web pages" checked in IE 
+      // There is no known way to check for that 
+      this.controllerFont = window.getComputedStyle($tempButton.get(0), null).getPropertyValue('font-family');
+      if (this.controllerFont) {
+        this.controllerFont = this.controllerFont.replace(/["']/g, ''); // strip out single or double quotes 
+        if (this.controllerFont === 'icomoon') { 
+          this.iconType = 'font';
+        }
+        else { 
+          this.iconType = 'image';
+        }
       }
       else { 
         this.iconType = 'image';
       }
     }
-    else { 
+    else { // IE 8 and earlier  
+      // There is no known way to detect computed font in IE8 and earlier  
+      // The following retrieves the value from the style sheet, not the computed font 
+      // this.controllerFont = $tempButton.get(0).currentStyle.fontFamily;
+      // It will therefore return "icomoon", even if the user is overriding that with a custom style sheet 
+      // To be safe, use images   
       this.iconType = 'image';
     }
   }
-  else { // IE 8 and earlier  
-    // There is no known way to detect computed font in IE8 and earlier  
-    // The following retrieves the value from the style sheet, not the computed font 
-    // this.controllerFont = $tempButton.get(0).currentStyle.fontFamily;
-    // It will therefore return "icomoon", even if the user is overriding that with a custom style sheet 
-    // To be safe, use images   
-    this.iconType = 'image';
-  }
   if (this.debug) {
-    console.log("User font for controller is " + this.controllerFont);
+    console.log('Using ' + this.iconType + 's for player controls');
+    if (this.iconType == 'font') { 
+      console.log("User font for controller is " + this.controllerFont);
+    }
   }
   $tempButton.remove();
 }
