@@ -496,11 +496,14 @@ AblePlayer.prototype.initTracks = function() {
         // not yet supported, but data from source file is available in this array 
         this.subtitles = []; 
         this.currentSubtitle = -1; 
+        // NOTE: subtitles could alternatively be stored in captions array 
       }
       else if (kind === 'chapters') { 
         // not yet supported, but data from source file is available in this array 
         this.chapters = []; 
         this.currentChapter = -1; 
+        // NOTE: WebVTT supports nested timestamps (to form an outline) 
+        // setupTimedText() cannot currently handle this 
       }
       else if (kind === 'metadata') { 
         // not yet supported, but data from source file is available in this array 
@@ -2738,7 +2741,7 @@ AblePlayer.prototype.updateTime = function(whichTime, time) {
 AblePlayer.prototype.setupTimedText = function(kind,track) {  
 
   var trackSrc, trackLang, $tempDiv, thisObj, 
-    cues, c, cue, start, end, cueText, i; 
+    cues, c, cue, timeValues, start, end, cueText, i; 
      
   // Only supports timed text in VTT format
   trackSrc = track.getAttribute('src');
@@ -2764,33 +2767,42 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
         cues = trackText.split('\n\n'); //creates an array
         for (c in cues) {
           cue = cues[c].split('\n');
-          if(cue.length >=2) {
-            start = thisObj.strip(cue[0].split(' --> ')[0]);
-            end = thisObj.strip(cue[0].split(' --> ')[1]);
-            cueText = cue[1];
-            if (cue.length > 2) {
-              for (i=2; i<cue.length;i++) { 
-                cueText += '<br/>'+cue[i];
+          if (cue.length >= 2) { // cue must have one timestamp line + at least one cue text line
+            if (cue[0].indexOf(' --> ') !== -1) { // first line of block includes a timestamp 
+              timeValues = cue[0].split(' --> ');
+              start = thisObj.strip(timeValues[0]);
+              end = thisObj.strip(timeValues[1]);
+              if (end.indexOf(' ') !== -1) { 
+                // this end value includes a cue property. 
+                // Remove it. Eventually support it  
+                end = end.substr(0,end.indexOf(' '));
               }
-            }
-            if (typeof cueText !== 'undefined') {
-              if (cueText.length > 1) { 
-                start = thisObj.toSeconds(start);
-                end = thisObj.toSeconds(end);
-                if (kind === 'captions') { 
-                  thisObj.captions.push({'start':start,'end':end,'text':cueText}); 
+              
+              cueText = cue[1].replace( /<.*?>/g, '' ); // strip out any cue span tags (always in angle brackets <>) 
+              if (cue.length > 2) {
+                for (i=2; i<cue.length; i++) { 
+                  cueText += '<br/>'+cue[i].replace( /<.*?>/g, '' );
                 }
-                else if (kind === 'descriptions') { 
-                  thisObj.descriptions.push({'start':start,'end':end,'text':cueText});                   
-                }
-                else if (kind === 'subtitles') { 
-                  thisObj.subtitles.push({'start':start,'end':end,'text':cueText});                   
-                }
-                else if (kind === 'chapters') { 
-                  thisObj.chapters.push({'start':start,'end':end,'text':cueText});                   
-                }
-                else if (kind === 'metadata') { 
-                  thisObj.metadata.push({'start':start,'end':end,'text':cueText});                   
+              }
+              if (typeof cueText !== 'undefined') {
+                if (cueText.length > 1) { 
+                  start = thisObj.toSeconds(start);
+                  end = thisObj.toSeconds(end);
+                  if (kind === 'captions') { 
+                    thisObj.captions.push({'start':start,'end':end,'text':cueText});      
+                  }
+                  else if (kind === 'descriptions') { 
+                    thisObj.descriptions.push({'start':start,'end':end,'text':cueText});                   
+                  }
+                  else if (kind === 'subtitles') { 
+                    thisObj.subtitles.push({'start':start,'end':end,'text':cueText});                   
+                  }
+                  else if (kind === 'chapters') { 
+                    thisObj.chapters.push({'start':start,'end':end,'text':cueText});                   
+                  }
+                  else if (kind === 'metadata') { 
+                    thisObj.metadata.push({'start':start,'end':end,'text':cueText});                   
+                  }
                 }
               }
             }
@@ -2799,7 +2811,7 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
       }
     });
     //done with temp div. Can remove it now. 
-    $tempDiv.remove();     
+    $tempDiv.remove();    
   } 
 };
 AblePlayer.prototype.showCaptions = function() { 
