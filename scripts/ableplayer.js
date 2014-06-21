@@ -15,7 +15,7 @@
   
 */
 
-/*jslint node: true, browser: true, white: true, indent: 2 */
+/*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
 "use strict";
 
@@ -148,7 +148,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
 
         // Don't use custom AblePlayer interface for IOS video 
         // IOS always plays video in its own player - don't know a way around that  
-        if (this.mediaType == 'video' && this.isIOS()) { 
+        if (this.mediaType === 'video' && this.isIOS()) { 
           // do nothing 
           // *could* perhaps build in support for user preferances & described versions  
           if (this.debug) { 
@@ -183,7 +183,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
             this.getDimensions();
             this.getPrefs();
             this.injectPlayerCode();          
-            if (this.iconType == 'image') {
+            if (this.iconType === 'image') {
               this.setButtons();
             }
             this.setupAlert();
@@ -198,7 +198,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
             this.initializing = false;
         
        
-            if (this.player == 'html5') { 
+            if (this.player === 'html5') { 
               if (this.initPlayer('html5')) { 
                 this.addControls(this.mediaType);  
                 this.addEventListeners();
@@ -259,7 +259,7 @@ AblePlayer.prototype.getPlayer = function() {
   // Determine which player to use, if any 
   // return 'html5', 'jw' or null 
   
-  var i, sourceType, $jwSource;
+  var i, sourceType, $newItem;
   if (this.testFallback || (this.isUserAgent('msie 9') && this.mediaType === 'video')) {
     // the user wants to test the fallback player, or  
     // the user is using IE9, which has buggy implementation of HTML5 video 
@@ -284,7 +284,7 @@ AblePlayer.prototype.getPlayer = function() {
       }
       else if (this.playlistSize > 0) { 
         // see if the first item in the playlist is a type JW player an play 
-        var $newItem = this.$playlist.eq(0);
+        $newItem = this.$playlist.eq(0);
         // check data-* attributes for a type JW can play  
         if (this.mediaType === 'audio') { 
           if ($newItem.attr('data-mp3')) { 
@@ -316,7 +316,7 @@ AblePlayer.prototype.getPlayer = function() {
   else { 
     this.player = null;
   }
-}
+};
 AblePlayer.prototype.injectPlayerCode = function() { 
 
   // create and inject surrounding HTML structure 
@@ -353,14 +353,14 @@ AblePlayer.prototype.injectPlayerCode = function() {
   
   if (injectMethod) {
    
-    if (injectMethod == 'default') {   
+    if (injectMethod === 'default') {   
     
       // create $mediaContainer and $umpDiv and wrap them around the media element
       this.$mediaContainer = this.$media.wrap('<div class="ump-media-container"></div>').parent();         
       this.$umpDiv = this.$mediaContainer.wrap('<div class="ump"></div>').parent();
 
     }
-    else if (injectMethod == 'ios') { 
+    else if (injectMethod === 'ios') { 
     
       // create new $umpDiv and $mediaContainer, but do NOT wrap them 
       this.$umpDiv = $('<div>', { 
@@ -369,7 +369,7 @@ AblePlayer.prototype.injectPlayerCode = function() {
   
       this.$mediaContainer = $('<div>',{
         'class' : 'ump-media-container'
-      })
+      });
     }
     
     this.$playerDiv = $('<div>', {
@@ -416,7 +416,7 @@ AblePlayer.prototype.injectPlayerCode = function() {
     });   
     this.$umpDiv.after(this.$alertDiv);
 
-    if (injectMethod == 'ios') {
+    if (injectMethod === 'ios') {
       // inject all of this *after* the original HTML5 media element 
       this.$media.after(this.$umpDiv);
     }
@@ -425,25 +425,27 @@ AblePlayer.prototype.injectPlayerCode = function() {
     this.getBestColor(this.$controllerDiv); // getBestColor() defines this.iconColor
     this.$controllerDiv.addClass('ump-' + this.iconColor + '-controls');    
   }
-}
+};
 AblePlayer.prototype.initTracks = function() { 
-       
+
+  var vidcapContainer, i, track, kind;
+         
   // check for tracks (e.g., captions, description)
   this.$tracks = this.$media.find('track'); 
   if (this.$tracks.length > 0) { 
     if (this.mediaType === 'video') { 
       // add container that captions or description will be appended to
       // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-      var vidcapContainer = $('<div>',{ 
+      vidcapContainer = $('<div>',{ 
         'class' : 'ump-vidcap-container'
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();  
       // this.$umpDiv.prepend(vidcapContainer);
     }
     // UMP currently only supports one caption and one description track 
-    for (var i=0; i<this.$tracks.length; i++) { 
-      var track = this.$tracks[i];
-      var kind = track.getAttribute('kind');
+    for (i=0; i<this.$tracks.length; i++) { 
+      track = this.$tracks[i];
+      kind = track.getAttribute('kind');
       if (kind === 'captions') { 
         this.hasCaptions = true;
         // create a div for displaying captions  
@@ -501,15 +503,17 @@ AblePlayer.prototype.initTracks = function() {
       }
     }
   }
-}
+};
 AblePlayer.prototype.getPlaylist = function() { 
 
   // find a matching playlist and set this.hasPlaylist
   // if there is one, also set this.$playlist, this.$playlistSize, this.$playlistIndex, & this.$playlistEmbed
 
+  var thisObj, dataEmbedded;
+  
   this.hasPlaylist = false; // will change to true if a matching playlist is found
 
-  var thisObj = this;
+  thisObj = this;
   $('.ump-playlist').each(function() { 
     if ($(this).attr('data-player') === thisObj.mediaId) { 
       // this is the playlist for the current player 
@@ -519,7 +523,7 @@ AblePlayer.prototype.getPlaylist = function() {
       thisObj.$playlist.attr('tabindex','0');
       thisObj.playlistSize = thisObj.$playlist.length;
       thisObj.playlistIndex = 0;        
-      var dataEmbedded = $(this).attr('data-embedded');
+      dataEmbedded = $(this).attr('data-embedded');
       if (typeof dataEmbedded !== 'undefined' && dataEmbedded !== false) {
         // embed playlist within player 
         thisObj.playlistEmbed = true;             
@@ -529,7 +533,7 @@ AblePlayer.prototype.getPlaylist = function() {
       }
     }
   }); 
-}
+};
 AblePlayer.prototype.initPlaylist = function() { 
 
   if (this.playlistEmbed === true) { 
@@ -546,13 +550,13 @@ AblePlayer.prototype.initPlaylist = function() {
       console.log('after initializing playlist, there are ' + this.$sources.length + ' media sources');
     }
   } 
-}
+};
 AblePlayer.prototype.initPlayer = function(player) { 
 
   // player is either 'html' or 'jw' 
   // might ultimately support others too, e.g., 'youtube' 
   
-  var poster, $jwSource, jwHeight, captionFile, i, sourceType;            
+  var poster, jwHeight, i, sourceType;            
 
   // set the default volume  
   if (player === 'html5') { 
@@ -568,7 +572,7 @@ AblePlayer.prototype.initPlayer = function(player) {
     poster = this.$media.attr('poster');
   }
  
-  if (player == 'jw') {
+  if (player === 'jw') {
     // remove the media element - we're done with it
     // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
     this.$media.remove();           
@@ -659,23 +663,23 @@ AblePlayer.prototype.initPlayer = function(player) {
     this.hasSignLanguage = false; //if true, adds a non-functional button to control bar 
   }     
   return true;  
-} 
+}; 
 AblePlayer.prototype.provideFallback = function() { 
           
   // provide ultimate fallback for users with no HTML media support, nor JW Player support 
   // this could be links to download the media file(s) 
   // but for now is just a message   
   
-  var msg, width, height, msgContainer; 
+  var msg, msgContainer; 
   
   msg = 'Sorry, your browser is unable to play this ' + this.mediaType + '. ';
-  var msgContainer = $('<div>',{
+  msgContainer = $('<div>',{
     'class' : 'ump-fallback',
     'role' : 'alert'
   });
   this.$media.before(msgContainer);     
   msgContainer.text(msg);  
-}
+};
 AblePlayer.prototype.getDimensions = function() { 
 
   // override default dimensions with width and height attributes of media element, if present
@@ -685,7 +689,7 @@ AblePlayer.prototype.getDimensions = function() {
       this.playerHeight = this.$media.attr('height');
     }
   }
-}
+};
 AblePlayer.prototype.setButtons = function() { 
 
   this.playButtonImg = 'images/media-play-' +  this.iconColor + '.png';
@@ -704,7 +708,7 @@ AblePlayer.prototype.setButtons = function() {
   this.fullscreenButtonImg = 'images/media-fullscreen-' +  this.iconColor + '.png';
   this.settingsButtonImg = 'images/media-settings-' +  this.iconColor + '.png';
   this.helpButtonImg = 'images/media-help-' +  this.iconColor + '.png';
-}
+};
 AblePlayer.prototype.initDescription = function() { 
 
   // set default mode for delivering description (open vs closed) 
@@ -780,34 +784,40 @@ AblePlayer.prototype.initDescription = function() {
   if (this.debug) { 
     this.debugDescription();
   }
-}
+};
 AblePlayer.prototype.addPrefsForm = function() { 
 
+  var prefsDiv, introText, prefsIntro, 
+    featuresFieldset, featuresLegend, 
+    keysFieldset, keysLegend, 
+    i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
+    thisObj; 
+     
   // define all the parts
-  var prefsDiv = $('<div>',{ 
+  prefsDiv = $('<div>',{ 
     'class': 'ump-prefs-form',
     role: 'form'
   });
-  var introText = "<p>Saving your preferences requires cookies.</p>\n";
+  introText = "<p>Saving your preferences requires cookies.</p>\n";
     
-  var prefsIntro = $('<p>',{ 
+  prefsIntro = $('<p>',{ 
     html: introText
   });
   if (this.mediaType === 'video' || this.hasTranscript === true) { 
-    var featuresFieldset = $('<fieldset>');
-    var featuresLegend = $('<legend>Features</legend>');      
+    featuresFieldset = $('<fieldset>');
+    featuresLegend = $('<legend>Features</legend>');      
     featuresFieldset.append(featuresLegend);  
   }
-  var keysFieldset = $('<fieldset>');
-  var keysLegend = $('<legend>Modifier Keys</legend>');       
+  keysFieldset = $('<fieldset>');
+  keysLegend = $('<legend>Modifier Keys</legend>');       
   keysFieldset.append(keysLegend);  
 
-  for (var i=0; i<this.prefs.length; i++) { 
-    var thisPref = this.prefs[i]['name'];
-    var thisDiv = $('<div>');
-    var thisId = this.mediaId + '_' + thisPref;   
-    var thisLabel = $('<label for="' + thisId + '"> ' + this.prefs[i]['label'] + '</label>');
-    var thisCheckbox = $('<input>',{
+  for (i=0; i<this.prefs.length; i++) { 
+    thisPref = this.prefs[i]['name'];
+    thisDiv = $('<div>');
+    thisId = this.mediaId + '_' + thisPref;   
+    thisLabel = $('<label for="' + thisId + '"> ' + this.prefs[i]['label'] + '</label>');
+    thisCheckbox = $('<input>',{
       type: 'checkbox',
       name: thisPref,
       id: thisId,
@@ -837,7 +847,7 @@ AblePlayer.prototype.addPrefsForm = function() {
 
   // initiate form as a JQuery-UI dialog 
   // documentation: http://api.jqueryui.com/dialog 
-  var thisObj = this;
+  thisObj = this;
   $( ".ump-prefs-form" ).dialog({ 
     autoOpen: false,
     buttons: [
@@ -864,60 +874,63 @@ AblePlayer.prototype.addPrefsForm = function() {
     width: '32em',
     close: function( event, ui ) {$('.ump-settings').focus();}
   });
-}
+};
 AblePlayer.prototype.addHelp = function() {   
   // create help text that will be displayed in a JQuery-UI dialog 
   // if user clicks the Help button   
-  var helpText = "<p>The media player on this web page can be operated ";
+  
+  var helpText, i, label, key, helpDiv; 
+  
+  helpText = "<p>The media player on this web page can be operated ";
   helpText += "from anywhere on the page using the following keystrokes:</p>\n";
   helpText += "<ul>\n";
-  for (var i=0; i<this.controls.length; i++) { 
+  for (i=0; i<this.controls.length; i++) { 
     if (this.controls[i] === 'play') { 
-      var label = 'Play/Pause';
-      var key = 'p </b><em>or</em><b> spacebar';
+      label = 'Play/Pause';
+      key = 'p </b><em>or</em><b> spacebar';
     }
     else if (this.controls[i] === 'stop') { 
-      var label = 'Stop';
-      var key = 's';
+      label = 'Stop';
+      key = 's';
     }
     else if (this.controls[i] === 'rewind') { 
-      var label = 'Rewind ' + this.seekInterval + ' seconds';
-      var key = 'r';
+      label = 'Rewind ' + this.seekInterval + ' seconds';
+      key = 'r';
     }
     else if (this.controls[i] === 'forward') { 
-      var label = 'Forward' + this.seekInterval + ' seconds';;
-      var key = 'f';
+      label = 'Forward' + this.seekInterval + ' seconds';
+      key = 'f';
     }
     else if (this.controls[i] === 'mute') { 
-      var label = 'Mute';
-      var key = 'm';
+      label = 'Mute';
+      key = 'm';
     }
     else if (this.controls[i] === 'volumeUp') { 
-      var label = 'Volume Up';
-      var key = 'u </b><em>or</em><b> 1-5';
+      label = 'Volume Up';
+      key = 'u </b><em>or</em><b> 1-5';
     }
     else if (this.controls[i] === 'volumeDown') { 
-      var label = 'Volume Down';
-      var key = 'd </b><em>or</em><b> 1-5';
+      label = 'Volume Down';
+      key = 'd </b><em>or</em><b> 1-5';
     }
     else if (this.controls[i] === 'captions') { 
-      var label = 'Toggle captions';
-      var key = 'c';
+      label = 'Toggle captions';
+      key = 'c';
     }
     else if (this.controls[i] === 'descriptions') { 
-      var label = 'Toggle narration (description)';
-      var key = 'n';
+      label = 'Toggle narration (description)';
+      key = 'n';
     }
     else if (this.controls[i] === 'settings') { 
-      var label = 'Settings';
-      var key = 't';
+      label = 'Settings';
+      key = 't';
     }
     else if (this.controls[i] === 'help') { 
-      var label = 'Help';
-      var key = 'h';
+      label = 'Help';
+      key = 'h';
     }
     else { 
-      var label = false;
+      label = false;
     }
     if (label) { 
       helpText += '<li><b><span class="ump-help-modifiers">'; 
@@ -937,7 +950,7 @@ AblePlayer.prototype.addHelp = function() {
   helpText += "but might be buggy in other browsers. ";
   helpText += "We hope to improve this soon so that it works more reliably across all browsers.</p>";
 
-  var helpDiv = $('<div>',{ 
+  helpDiv = $('<div>',{ 
     'class': 'ump-help-div',
     'html': helpText
   });
@@ -962,23 +975,25 @@ AblePlayer.prototype.addHelp = function() {
     width: '32em',
     close: function( event, ui ) {$('.ump-help').focus();}
   });
-}
+};
 AblePlayer.prototype.setCookie = function(cookieValue) { 
   if ($.isFunction($.cookie)) { 
     // set cookie that expires in 90 days 
     $.cookie('Able-Player',cookieValue,90);  
   }
-}
+};
 AblePlayer.prototype.getCookie = function() { 
   if ($.isFunction($.cookie)) { 
     return $.cookie('Able-Player');
   }
-}
+};
 AblePlayer.prototype.getPrefs = function() { 
 
   // defines the User Preferences array and set default user variables 
   // get prefs from cookie if one exists; otherwise use defaults 
   // store prefs to cookie for future reference
+  
+  var cookie, cookieLength, i, thisPref, thisValue, defaultValue;
   
   this.prefs = [];
 
@@ -1042,39 +1057,42 @@ AblePlayer.prototype.getPrefs = function() {
   }
     
   // see if user has prefs stored in a cookie   
-  var cookieLength = this.prefs.length;
-  var cookie = this.getCookie();
+  cookieLength = this.prefs.length;
+  cookie = this.getCookie();
   if (typeof cookie === 'string') { 
     if (cookie.length === cookieLength) { 
-      for (var i=0; i<cookieLength; i++) { 
-        var thisPref = this.prefs[i]['name'];
-        var thisValue = parseInt(cookie.substr(i,1)); // cookie is a sting ("1" or "0"), convert to integer
+      for (i=0; i<cookieLength; i++) { 
+        thisPref = this.prefs[i]['name'];
+        thisValue = parseInt(cookie.substr(i,1)); // cookie is a sting ("1" or "0"), convert to integer
         // the following defines all pref variables, e.g., this.prefCaptions, this.prefDesc 
         this[thisPref] = thisValue; 
       }
     }
     else { // cookie is wrong size. Use defaults
-      var cookie = false;
+      cookie = false;
     }
   }
   if (!cookie) { 
-    var cookie = '';
-    for (var i=0; i<this.prefs.length; i++) { 
-      var thisPref = this.prefs[i]['name'];
-      var defaultValue = this.prefs[i]['default'];
+    cookie = '';
+    for (i=0; i<this.prefs.length; i++) { 
+      thisPref = this.prefs[i]['name'];
+      defaultValue = this.prefs[i]['default'];
       cookie += defaultValue;
       this[thisPref] = defaultValue; 
     }
     this.setCookie(cookie);     
   }
-}
+};
 AblePlayer.prototype.savePrefs = function() { 
   // called when user saves the Preferences form
   // update cookie with new value 
-  var numChanges = 0;
-  var cookie = '';
-  for (var i=0; i<this.prefs.length; i++) {
-    var thisPref = this.prefs[i]['name'];
+  
+  var numChanges, cookie, i, thisPref, modHelp;  
+
+  numChanges = 0;
+  cookie = '';
+  for (i=0; i<this.prefs.length; i++) {
+    thisPref = this.prefs[i]['name'];
     if ($('input[name="' + thisPref + '"]').is(':checked')) { 
       cookie += '1';
       if (this[thisPref] === 1) { 
@@ -1104,10 +1122,10 @@ AblePlayer.prototype.savePrefs = function() {
 
     // modifier keys (update help text) 
     if (this.prefAltKey === 1) { 
-      var modHelp = 'Alt + ';
+      modHelp = 'Alt + ';
     }
     else { 
-      var modHelp = '';
+      modHelp = '';
     }
     if (this.prefCtrlKey === 1) { 
       modHelp += 'Control + ';
@@ -1134,7 +1152,7 @@ AblePlayer.prototype.savePrefs = function() {
   else { 
     this.showAlert("You didn't make any changes.");   
   }
-}
+};
 AblePlayer.prototype.setupAlert = function() { 
   // setup JQuery hidden dialog in which to show alert messages via showAlert()
   this.$alertBox = $('#ump-alert').dialog({
@@ -1153,19 +1171,21 @@ AblePlayer.prototype.setupAlert = function() {
     title: 'Done.',
     width: '20em'
   });
-}
+};
 AblePlayer.prototype.showAlert = function(msg) { 
   // show alert message in jQuery dialog
   this.$alertBox.text(msg).dialog('open');
-}
+};
 AblePlayer.prototype.addEventListeners = function() { 
 
+  var thisObj, whichButton, thisElement, spanStart; 
+  
   // Save the current object context in thisObj for use with inner functions.
-  var thisObj = this;
+  thisObj = this;
     
   // handle clicks on player buttons 
   this.$controllerDiv.find('button').click(function(){  
-    var whichButton = $(this).attr('class').split(' ')[0].substr(4); 
+    whichButton = $(this).attr('class').split(' ')[0].substr(4); 
     if (whichButton === 'play') { 
       thisObj.handlePlay();
     }
@@ -1288,7 +1308,7 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       }     
       else if (e.which === 13) { // Enter 
-        var thisElement = $(document.activeElement);
+        thisElement = $(document.activeElement);
         if (thisElement.prop('tagName') === 'SPAN') { 
           // register a click on this SPAN 
           // if it's a transcript span the transcript span click handler will take over
@@ -1315,7 +1335,7 @@ AblePlayer.prototype.addEventListeners = function() {
   // Forcing this elsewhere, in the keyboard handler section  
   if ($('.ump-transcript').length > 0) {  
     $('.ump-transcript span').click(function() { 
-      var spanStart = $(this).attr('data-start');
+      spanStart = $(this).attr('data-start');
       if (thisObj.player === 'html5') { 
         thisObj.seekTo(spanStart);
       }
@@ -1638,7 +1658,7 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       });
   }   
-}
+};
 AblePlayer.prototype.addControls = function() {   
   // determine which controls to show based on several factors: 
   // mediaType (audio vs video) 
@@ -1646,10 +1666,16 @@ AblePlayer.prototype.addControls = function() {
   // browser support (e.g., for sliders and speedButtons) 
   // user preferences (???)      
   // some controls are aligned on the left, and others on the right 
+  
+  var buttonWidth, leftControls, rightControls, useSpeedButtons, useFullScreen, 
+    i, j, hPos, controls, controllerSpan, control, 
+    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
+    leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
+    controllerStyles, vidcapStyles;  
     
-  var buttonWidth = 40; // in pixels, including margins, padding + cusion for outline 
+  buttonWidth = 40; // in pixels, including margins, padding + cusion for outline 
 
-  var leftControls = ['play','stop','rewind','forward'];  
+  leftControls = ['play','stop','rewind','forward'];  
   
   if (this.$media.playbackRate) {     
     // browser supports playbackRate! 
@@ -1661,17 +1687,17 @@ AblePlayer.prototype.addControls = function() {
     // "If the effective playback rate is positive or zero, then the direction of playback is forwards. "
     // "Otherwise, it is backwards." 
     // So, I'm concluding that no browsers support backwards playback 
-    var useSpeedButtons = false; // until better understood &/or supported, not using
+    useSpeedButtons = false; // until better understood &/or supported, not using
   }
   else { 
-    var useSpeedButtons = false;
+    useSpeedButtons = false;
   }
   if (useSpeedButtons) { 
     leftControls.push('slower'); 
     leftControls.push('faster');
   }
     
-  var rightControls = [];
+  rightControls = [];
   if (this.mediaType === 'video') { 
     if (this.hasCaptions) {
       rightControls.push('captions'); //closed captions
@@ -1690,7 +1716,7 @@ AblePlayer.prototype.addControls = function() {
     rightControls.push('volumeDown'); 
   }
   if (this.mediaType === 'video') { 
-    var useFullScreen = false; // set to true if browser supports full screen (need to work on this)
+    useFullScreen = false; // set to true if browser supports full screen (need to work on this)
     if (useFullScreen) { 
       rightControls.push('fullscreen');       
     }
@@ -1702,23 +1728,22 @@ AblePlayer.prototype.addControls = function() {
   rightControls.push('help');
   
   // now step separately through left and right controls
-
-  for (var i=1; i<=2; i++) {
-    var hPos = 0; // horizontal position
+  for (i=1; i<=2; i++) {
+    hPos = 0; // horizontal position
     if (i ==1) {        
-      var controls = leftControls;
-      var controllerSpan = $('<span>',{
+      controls = leftControls;
+      controllerSpan = $('<span>',{
         'class': 'ump-left-controls'
       });
     }
     else { 
-      var controls = rightControls;
-      var controllerSpan = $('<span>',{
+      controls = rightControls;
+      controllerSpan = $('<span>',{
         'class': 'ump-right-controls'
       });
     }     
-    for (var j=0; j<controls.length; j++) { 
-      var control = controls[j];
+    for (j=0; j<controls.length; j++) { 
+      control = controls[j];
       if (control === 'seek') { 
         this.addSeekControls(hPos);
         if (this.useSlider) {
@@ -1729,9 +1754,9 @@ AblePlayer.prototype.addControls = function() {
       }
       else { 
         // this control is a button 
-        var buttonImgSrc = 'images/media-' + control + '-' + this.iconColor + '.png';
-        var buttonTitle = this.getButtonTitle(control); 
-        var newButton = $('<button>',{ 
+        buttonImgSrc = 'images/media-' + control + '-' + this.iconColor + '.png';
+        buttonTitle = this.getButtonTitle(control); 
+        newButton = $('<button>',{ 
           'type': 'button',
           'tabindex': '0',
           'title': buttonTitle,
@@ -1739,18 +1764,18 @@ AblePlayer.prototype.addControls = function() {
         });        
         if (this.iconType === 'font') { 
           // add span for icon fonts 
-          if (control == 'mute') { 
+          if (control === 'mute') { 
             if (this.volume > 0) { 
-              var iconClass = 'icon-volume';
+              iconClass = 'icon-volume';
             }
             else { 
-              var iconClass = 'icon-mute';
+              iconClass = 'icon-mute';
             }
           }
           else { 
-            var iconClass = 'icon-' + control;
+            iconClass = 'icon-' + control;
           }
-          var buttonIcon = $('<span>',{ 
+          buttonIcon = $('<span>',{ 
             'class': iconClass,
             'aria-hidden': 'true'
           })   
@@ -1766,7 +1791,7 @@ AblePlayer.prototype.addControls = function() {
         }
         else { 
           // use images
-          var buttonImg = $('<img>',{ 
+          buttonImg = $('<img>',{ 
             'src': buttonImgSrc,
             'alt': '',
             'role': 'presentation'
@@ -1774,13 +1799,13 @@ AblePlayer.prototype.addControls = function() {
           newButton.append(buttonImg);
         }
         if (control === 'captions') { 
-          if (!this.prefCaptions || this.prefCaptions != 1) { 
+          if (!this.prefCaptions || this.prefCaptions !== 1) { 
             // captions are available, but user has them turned off 
             newButton.addClass('buttonOff').attr('title','Turn on captions');
           }
         }
         else if (control === 'descriptions') {      
-          if (!this.prefDesc || this.prefDesc != 1) { 
+          if (!this.prefDesc || this.prefDesc !== 1) { 
             // user prefer non-audio described version 
             // Therefore, load media without description 
             // Description can be toggled on later with this button  
@@ -1813,18 +1838,18 @@ AblePlayer.prototype.addControls = function() {
   }
 
   // calculate widths of left and right controls   
-  var leftWidth = leftControls.length * buttonWidth; 
-  var rightWidth = rightControls.length * buttonWidth;  
-  var totalWidth = leftWidth + rightWidth;
+  leftWidth = leftControls.length * buttonWidth; 
+  rightWidth = rightControls.length * buttonWidth;  
+  totalWidth = leftWidth + rightWidth;
   if (totalWidth <= this.playerWidth) { 
     // express left and right width in pixels 
-    var leftWidthStyle = leftWidth + 'px';
-    var rightWidthStyle = rightWidth + 'px';    
+    leftWidthStyle = leftWidth + 'px';
+    rightWidthStyle = rightWidth + 'px';    
   }    
   else { 
     // express left and right width as a percentage 
-    var leftWidthStyle = Math.floor((leftWidth/totalWidth)*100) + '%';
-    var rightWidthStyle = Math.floor((rightWidth/totalWidth)*100) + '%';
+    leftWidthStyle = Math.floor((leftWidth/totalWidth)*100) + '%';
+    rightWidthStyle = Math.floor((rightWidth/totalWidth)*100) + '%';
     // reduce button size to fit container ??? 
     // or wrap buttons onto new line ??? 
   }
@@ -1833,13 +1858,13 @@ AblePlayer.prototype.addControls = function() {
   
   if (this.mediaType === 'video') { 
     // set controller to width of video
-    var controllerStyles = {
+    controllerStyles = {
       'width': this.playerWidth+'px',
       'height': this.playerHeight+'px'
     } 
     this.$umpDiv.css(controllerStyles); 
     // also set width and height of div.ump-vidcap-container
-    var vidcapStyles = {
+    vidcapStyles = {
       'width': this.playerWidth+'px',
       'height': this.playerHeight+'px'
     }     
@@ -1876,21 +1901,23 @@ AblePlayer.prototype.addControls = function() {
 
   // construct help dialog that includes keystrokes for operating the included controls 
   this.addHelp();     
-}
+};
 AblePlayer.prototype.getIconType = function() { 
   // returns either "font" or "image" 
   // create a temporary play span and check to see if button has font-family == "icomoon" (the default) 
   // if it doesn't, user has a custom style sheet and icon fonts will not display properly 
   // use images as fallback 
-  
+
+  var $tempButton;
+     
   // Note: webkit doesn't return calculated styles unless element has been added to the DOM 
   // and is visible; use clip method to satisfy this need yet hide it  
-  var $tempButton = $('<span>',{ 
+  $tempButton = $('<span>',{ 
     'class': 'icon-play ump-clipped'
   });
   $('body').append($tempButton);
 
-  if (this.iconType == 'font') {   
+  if (this.iconType === 'font') {   
     // check to be sure user can display icomoon fonts 
     // if not, fall back to images 
     if (window.getComputedStyle) {
@@ -1924,19 +1951,19 @@ AblePlayer.prototype.getIconType = function() {
   }
   if (this.debug) {
     console.log('Using ' + this.iconType + 's for player controls');
-    if (this.iconType == 'font') { 
+    if (this.iconType === 'font') { 
       console.log("User font for controller is " + this.controllerFont);
     }
   }
   $tempButton.remove();
-}
+};
 AblePlayer.prototype.getBestColor = function($element) { 
   // determine best color (white or black) based on computed background color of jQuery object $element
   // This overrides default iconColor if there is too little contrast due to:  
   // - user having enabled high contrast mode 
   // - user having a custom style sheet that overwrites author's background color 
   // - author has made a bad design decision that compromises contrast (NOT ALLOWED)
-  var e, bgColor, useCurrentStyle, colorsOnly, red, green, blue, grayscale; 
+  var e, bgColor, regex, useCurrentStyle, colorsOnly, red, green, blue, grayscale; 
   
   e = $element.get(0);
   if (window.getComputedStyle) { // most browsers 
@@ -1948,11 +1975,10 @@ AblePlayer.prototype.getBestColor = function($element) {
     // Can get current style as defined in CSS, and hope user hasn't overriden them 
     // Also, the color could be expressed in any valid CSS format. Need to convert to RGB to calculate lightness 
     bgColor = e.currentStyle.backgroundColor;
-console.log("HEY! bgColor is " + bgColor);    
     if (bgColor.indexOf('rgb') === -1) { 
       // this is not an RGB value
       // is it a valid hex value with 3 or 6 characters preceded by #?  
-      var regex = /.#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+      regex = /.#([0-9a-f]{3}|[0-9a-f]{6})$/i;
       if (regex.test(bgColor)) { 
         // this is a hex value. Convert to RGB 
         bgColor = colorHexToRGB(bgColor);
@@ -1988,7 +2014,7 @@ console.log("HEY! bgColor is " + bgColor);
     // unable to determine background color. Internet stats favor black... 
     this.iconColor = 'black';
   }
-}
+};
 AblePlayer.prototype.getIconHexValue =  function(control) { 
   // returns hex value of character in icomoon font
   // may not actually be needed
@@ -2033,27 +2059,34 @@ AblePlayer.prototype.getIconHexValue =  function(control) {
       return '&#xe612';
   }   
   return false;
-}
+};
 AblePlayer.prototype.isUserAgent = function(which) {
-  var userAgent = navigator.userAgent.toLowerCase();
+
+  var userAgent; 
+  
+  userAgent = navigator.userAgent.toLowerCase();
   if (this.debug) { 
     console.log('User agent: ' + userAgent);
   }  
-  if (userAgent.indexOf(which) != -1) {
+  if (userAgent.indexOf(which) !== -1) {
     return true;
   } 
   else {
     return false;
   }
-}
+};
 AblePlayer.prototype.isIOS = function(version) { 
+
   // return true if this is IOS  
   // if version is provided check for a particular version  
-  var userAgent = navigator.userAgent.toLowerCase();
-  var iOS = /ipad|iphone|ipod/.exec(userAgent);
+
+  var userAgent, iOS; 
+  
+  userAgent = navigator.userAgent.toLowerCase();
+  iOS = /ipad|iphone|ipod/.exec(userAgent);
   if (iOS) { 
     if (typeof version !== 'undefined') {
-      if (userAgent.indexOf('os ' + version) != -1) { 
+      if (userAgent.indexOf('os ' + version) !== -1) { 
         // this is the target version of iOS
         return true;
       }
@@ -2070,13 +2103,17 @@ AblePlayer.prototype.isIOS = function(version) {
     // this is not IOS
     return false;
   }
-}
+};
 AblePlayer.prototype.browserSupportsVolume = function() { 
+
   // ideally we could test for volume support 
   // However, that doesn't seem to be reliable 
   // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
-  var userAgent = navigator.userAgent.toLowerCase();
-  var noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
+
+  var userAgent, noVolume; 
+  
+  userAgent = navigator.userAgent.toLowerCase();
+  noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
   if (noVolume) {
     if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
       // Firefox on android DOES support changing the volume:
@@ -2090,8 +2127,11 @@ AblePlayer.prototype.browserSupportsVolume = function() {
     // as far as we know, this userAgent supports volume control 
     return true; 
   }
-}
+};
 AblePlayer.prototype.handlePlay = function(e) { 
+
+  var playerState; 
+  
   if (this.player === 'html5') {       
     if (this.media.paused || this.media.ended) { 
       this.media.play();
@@ -2121,7 +2161,7 @@ AblePlayer.prototype.handlePlay = function(e) {
   }
   else { 
     // jw player
-    var playerState = jwplayer(this.jwId).getState();
+    playerState = jwplayer(this.jwId).getState();
     if (playerState === 'IDLE' || playerState === 'PAUSED') { 
       jwplayer(this.jwId).play(); 
       // change play button to pause button
@@ -2145,8 +2185,9 @@ AblePlayer.prototype.handlePlay = function(e) {
       }
     }
   } 
-}
+};
 AblePlayer.prototype.handleStop = function() { 
+
   if (this.player === 'html5') {             
     // reset media
     this.media.pause(); 
@@ -2168,10 +2209,13 @@ AblePlayer.prototype.handleStop = function() {
   else { 
     this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
   }
-}
+};
 AblePlayer.prototype.handleRewind = function() { 
+
+  var targetTime; 
+  
   if (this.player === 'html5') {             
-    var targetTime = this.media.currentTime - this.seekInterval;    
+    targetTime = this.media.currentTime - this.seekInterval;    
     if (targetTime < 0) {
       this.media.currentTime = 0;
     }
@@ -2181,7 +2225,7 @@ AblePlayer.prototype.handleRewind = function() {
   }
   else { 
     // jw player                    
-    var targetTime = jwplayer(this.jwId).getPosition() - this.seekInterval;     
+    targetTime = jwplayer(this.jwId).getPosition() - this.seekInterval;     
     if (targetTime < 0) {
       jwplayer(this.jwId).seek(0);
     }
@@ -2189,10 +2233,13 @@ AblePlayer.prototype.handleRewind = function() {
       jwplayer(this.jwId).seek(targetTime);
     }
   } 
-}
+};
 AblePlayer.prototype.handleForward = function() { 
+
+  var targetTime; 
+  
   if (this.player === 'html5') {             
-    var targetTime = this.media.currentTime + this.seekInterval;    
+    targetTime = this.media.currentTime + this.seekInterval;    
     if (targetTime > this.duration) {
       // targetTime would advance beyond the end. Just advance to the end.
       this.media.currentTime = this.duration;
@@ -2203,7 +2250,7 @@ AblePlayer.prototype.handleForward = function() {
   }
   else { 
     // jw player                    
-    var targetTime = jwplayer(this.jwId).getPosition() + this.seekInterval;     
+    targetTime = jwplayer(this.jwId).getPosition() + this.seekInterval;     
     if (targetTime > this.duration) {
       // targetTime would advance beyond the end. Just advance to the end.
       jwplayer(this.jwId).seek(this.duration);
@@ -2212,7 +2259,7 @@ AblePlayer.prototype.handleForward = function() {
       jwplayer(this.jwId).seek(targetTime);
     }
   } 
-}
+};
 AblePlayer.prototype.handleMute = function() { 
   if (this.player === 'html5') {             
     if (this.media.muted) { // unmute
@@ -2267,7 +2314,7 @@ AblePlayer.prototype.handleMute = function() {
       }
     }
   } 
-}
+};
 AblePlayer.prototype.handleVolume = function(direction) {   
   // direction is either 'up', 'down' or an integer 1-5
   if (this.player === 'html5') {             
@@ -2360,20 +2407,24 @@ AblePlayer.prototype.handleVolume = function(direction) {
     }
     jwplayer(this.jwId).setVolume(this.volume);       
   }
-}
+};
 AblePlayer.prototype.handleSpeed = function(direction) { 
+
   // playback speed is support by HTML5, but not supported well by browsers 
   // currently experimenting with this feature 
+
+  var targetSpeed; 
+  
   if (direction === 'faster') { 
-    var targetSpeed = this.media.playbackRate + 1;
+    targetSpeed = this.media.playbackRate + 1;
   }
   else if (direction === 'slower') { 
-    var targetSpeed = this.media.playbackRate - 1;
+    targetSpeed = this.media.playbackRate - 1;
   }
   this.media.playbackRate = targetSpeed;
-}
+};
 AblePlayer.prototype.handleCaptionToggle = function() { 
-console.log('you clicked captions button');
+
   if (this.captionsOn === true) { 
     // captions are on. Turn them off. 
     this.captionsOn = false;
@@ -2386,9 +2437,11 @@ console.log('you clicked captions button');
     this.$captionDiv.show();
     this.$ccButton.removeClass('buttonOff').attr('title','Hide captions');          
   }
-}
+};
 AblePlayer.prototype.handleDescriptionToggle = function() { 
 
+  var useDescType; 
+  
   if (this.debug) { 
     console.log('toggling description');
     this.debugDescription();
@@ -2442,7 +2495,7 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
   } 
   else if (this.hasClosedDesc) { 
     // only closed description is available
-    var useDescType = 'closed';
+    useDescType = 'closed';
     if (this.closedDescOn === true) { 
       // closed descriptions are on. Turn them off 
       this.closedDescOn = false;
@@ -2459,16 +2512,19 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
       this.$descButton.removeClass('buttonOff').attr('title','Turn off description');               
     }
   }
-}
+};
 AblePlayer.prototype.handleSettingsClick = function() { 
   $('.ump-prefs-form').dialog('open');  
-}
+};
 AblePlayer.prototype.handleHelpClick = function() { 
   $('.ump-help-div').dialog('open');
-}
+};
 AblePlayer.prototype.addSeekControls = function(leftPos) { 
+
+  var sliderWidth, testRange; 
+  
   if (this.useSlider) {
-    var sliderWidth = 200;
+    sliderWidth = 200;
     // the following code was updated for UMP, but is not currently used 
 
     // Don't display a slider in browsers that tell you they can handle it but really can't
@@ -2479,7 +2535,7 @@ AblePlayer.prototype.addSeekControls = function(leftPos) {
     }
     else { 
       // Check remaining browsers for range support
-      var testRange = document.createElement('input');
+      testRange = document.createElement('input');
       testRange.setAttribute('type','range');
       if (testRange.type === 'text') { 
         this.rangeSupported = false;      
@@ -2577,7 +2633,7 @@ AblePlayer.prototype.addSeekControls = function(leftPos) {
       this.seekForward.css('visibility','hidden');
     }
   }
-}
+};
 AblePlayer.prototype.getButtonTitle = function(control) { 
   if (control === 'playpause') { 
     return 'Play'; 
@@ -2624,11 +2680,14 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   else { 
     return control.charAt(0).toUpperCase() + control.slice(1);
   }   
-}
+};
 AblePlayer.prototype.seekTo = function (newTime) { 
+
+  var seekable; 
+  
   this.startTime = newTime;
   // Check HTML5 media "seekable" property to be sure media is seekable to startTime
-  var seekable = this.media.seekable;
+  seekable = this.media.seekable;
   if (this.startTime > seekable.start(0) && this.startTime <= seekable.end(0)) { 
     // startTime is seekable. Seek to startTime, then start playing
     this.media.currentTime = this.startTime;          
@@ -2643,8 +2702,11 @@ AblePlayer.prototype.seekTo = function (newTime) {
       this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
     }
   } 
-}
+};
 AblePlayer.prototype.updateTime = function(whichTime, time) {
+
+  var minutes, seconds; 
+  
   // whichTime is either current (media.currentTime) or duration
   // both are expected to be in seconds
   if (isNaN(time)) { 
@@ -2653,8 +2715,8 @@ AblePlayer.prototype.updateTime = function(whichTime, time) {
     // when time is known (esp. duration, which might be unknown initially)
   }
   else { 
-    var minutes = Math.floor(time / 60);
-    var seconds = Math.floor(time % 60);
+    minutes = Math.floor(time / 60);
+    seconds = Math.floor(time % 60);
     if (seconds < 10) { 
       seconds = '0' + seconds;
     }
@@ -2665,21 +2727,25 @@ AblePlayer.prototype.updateTime = function(whichTime, time) {
       this.$durationContainer.text(' / ' + minutes + ':' + seconds); 
     }       
   }
-}
+};
 AblePlayer.prototype.setupTimedText = function(kind,track) {  
+
+  var trackSrc, trackLang, $tempDiv, thisObj, 
+    cues, c, cue, start, end, cueText, i; 
+     
   // Only supports timed text in VTT format
-  var trackSrc = track.getAttribute('src');
-  var trackLang = track.getAttribute('srclang');
+  trackSrc = track.getAttribute('src');
+  trackLang = track.getAttribute('srclang');
   if (trackSrc) { 
     // create a temp div for holding track data
-    var tempDiv = $('<div>',{ 
+    $tempDiv = $('<div>',{ 
       style: 'display:none'
     });
     // Save the current object context in thisObj for use with inner functions.
-    var thisObj = this; 
+    thisObj = this; 
 
     // load  file and store captions into array 
-    tempDiv.load(trackSrc, function (trackText, status, req) { 
+    $tempDiv.load(trackSrc, function (trackText, status, req) { 
       if (status === 'error') { 
         if (this.debug) {
           console.log ('error reading ' + kind + ' file:' + status);
@@ -2688,15 +2754,15 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
       else {
         //stanardize on \n for eol character
         trackText = thisObj.strip(trackText.replace(/\r\n|\r|\n/g, '\n'));
-        var cues = trackText.split('\n\n'); //creates an array
-        for (var c in cues) {
-          var cue = cues[c].split('\n');
+        cues = trackText.split('\n\n'); //creates an array
+        for (c in cues) {
+          cue = cues[c].split('\n');
           if(cue.length >=2) {
-            var start = thisObj.strip(cue[0].split(' --> ')[0]);
-            var end = thisObj.strip(cue[0].split(' --> ')[1]);
-            var cueText = cue[1];
+            start = thisObj.strip(cue[0].split(' --> ')[0]);
+            end = thisObj.strip(cue[0].split(' --> ')[1]);
+            cueText = cue[1];
             if (cue.length > 2) {
-              for (var i=2; i<cue.length;i++) { 
+              for (i=2; i<cue.length;i++) { 
                 cueText += '<br/>'+cue[i];
               }
             }
@@ -2717,19 +2783,22 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
       }
     });
     //done with temp div. Can remove it now. 
-    tempDiv.remove();     
+    $tempDiv.remove();     
   } 
-}
+};
 AblePlayer.prototype.showCaptions = function() { 
+
+  var now, c, thisCaption; 
+  
   if (this.player === 'html5') {
-    var now = this.media.currentTime;
+    now = this.media.currentTime;
   }
   else { // jw player
-    var now = jwplayer(this.jwId).getPosition();
+    now = jwplayer(this.jwId).getPosition();
   }
-  for (var c in this.captions) {
+  for (c in this.captions) {
     if ((this.captions[c].start <= now) && (this.captions[c].end > now)) {      
-      var thisCaption = c;
+      thisCaption = c;
       break;
     }
   }
@@ -2739,7 +2808,7 @@ AblePlayer.prototype.showCaptions = function() {
       this.$captionDiv.show();
       this.captionsStarted = true;
     }     
-    if (this.currentCaption != thisCaption) { 
+    if (this.currentCaption !== thisCaption) { 
       // it's time to load the new caption into the container div 
       this.$captionDiv.html(this.captions[thisCaption].text);       
       this.currentCaption = thisCaption;
@@ -2749,24 +2818,28 @@ AblePlayer.prototype.showCaptions = function() {
     this.$captionDiv.html('');
     this.currentCaption = -1;
   } 
-}
+};
 AblePlayer.prototype.showDescription = function() { 
+
   // there's a lot of redundancy between this function and showCaptions 
   // Trying to combine them ended up in a mess though. Keeping as is for now. 
+
+  var now, d, thisDescription; 
+  
   if (this.player === 'html5') {
-    var now = this.media.currentTime;
+    now = this.media.currentTime;
   }
   else { // jw player
-    var now = jwplayer(this.jwId).getPosition();
+    now = jwplayer(this.jwId).getPosition();
   }
-  for (var d in this.description) {
+  for (d in this.description) {
     if ((this.description[d].start <= now) && (this.description[d].end > now)) {      
-      var thisDescription = d;
+      thisDescription = d;
       break;
     }
   }
   if (typeof thisDescription !== 'undefined') {  
-    if (this.currentDescription != thisDescription) { 
+    if (this.currentDescription !== thisDescription) { 
       // load the new description into the container div 
       this.$descDiv.html(this.description[thisDescription].text);
       this.currentDescription = thisDescription;
@@ -2779,25 +2852,29 @@ AblePlayer.prototype.showDescription = function() {
     this.$descDiv.html('');
     this.currentDescription = -1;
   } 
-}
+};
 AblePlayer.prototype.swapDescription = function() { 
+
   // swap described and non-described source media, depending on which is playing
   // this function is only called in two circumstances: 
   // 1. Swapping to described version when initializing player (based on user prefs & availability)
   // 2. User is toggling description 
+
+  var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+
   if (this.initializing || this.openDescOn === false) {
-    for (var i=0; i < this.$sources.length; i++) { 
+    for (i=0; i < this.$sources.length; i++) { 
       // for all <source> elements, replace src with data-desc-src (if one exists)
       // then store original source in a new data-orig-src attribute 
-      var origSrc = this.$sources[i].getAttribute('src');
-      var descSrc = this.$sources[i].getAttribute('data-desc-src'); 
-      var srcType = this.$sources[i].getAttribute('type');
+      origSrc = this.$sources[i].getAttribute('src');
+      descSrc = this.$sources[i].getAttribute('data-desc-src'); 
+      srcType = this.$sources[i].getAttribute('type');
       if (descSrc) {
         this.$sources[i].setAttribute('src',descSrc);
         this.$sources[i].setAttribute('data-orig-src',origSrc);
       }       
       if (srcType === 'video/mp4') { 
-        var jwSourceIndex = i;
+        jwSourceIndex = i;
       }       
     }
     this.openDescOn = true;
@@ -2813,15 +2890,15 @@ AblePlayer.prototype.swapDescription = function() {
   else { 
     // the described version is currently playing
     // swap back to the original 
-    for (var i=0; i < this.$sources.length; i++) { 
+    for (i=0; i < this.$sources.length; i++) { 
       // for all <source> elements, replace src with data-orig-src
-      var origSrc = this.$sources[i].getAttribute('data-orig-src');
-      var srcType = this.$sources[i].getAttribute('type');        
+      origSrc = this.$sources[i].getAttribute('data-orig-src');
+      srcType = this.$sources[i].getAttribute('type');        
       if (origSrc) {
         this.$sources[i].setAttribute('src',origSrc);
       }       
       if (srcType === 'video/mp4') { 
-        var jwSourceIndex = i;
+        jwSourceIndex = i;
       }
     }
     this.openDescOn = false;
@@ -2836,23 +2913,26 @@ AblePlayer.prototype.swapDescription = function() {
     this.media.load();
   }
   else { 
-    var newSource = this.$sources[jwSourceIndex].getAttribute('src');
+    newSource = this.$sources[jwSourceIndex].getAttribute('src');
     this.jwPlayer.load({file: newSource}); 
   }
-}
+};
 AblePlayer.prototype.swapSource = function(sourceIndex) { 
+
   // replace default media source elements with those from playlist   
+  var $newItem, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan; 
+
   this.$media.find('source').remove();
-  var $newItem = this.$playlist.eq(sourceIndex);
-  var itemTitle = $newItem.html();  
+  $newItem = this.$playlist.eq(sourceIndex);
+  itemTitle = $newItem.html();  
   if ($newItem.attr('lang')) { 
-    var itemLang = $newItem.attr('lang');
+    itemLang = $newItem.attr('lang');
   }
-  var sources = [];
-  var s = 0; // index 
+  sources = [];
+  s = 0; // index 
   if (this.mediaType === 'audio') { 
     if ($newItem.attr('data-mp3')) {
-      var jwSource = $newItem.attr('data-mp3'); // JW Player can play this 
+      jwSource = $newItem.attr('data-mp3'); // JW Player can play this 
       sources[s] =  new Array('audio/mpeg',jwSource); 
       s++;
     }
@@ -2879,7 +2959,7 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
   }
   else if (this.mediaType === 'video') { 
     if ($newItem.attr('data-mp4')) {
-      var jwSource = $newItem.attr('data-mp4'); // JW Player can play this 
+      jwSource = $newItem.attr('data-mp4'); // JW Player can play this 
       sources[s] =  new Array('video/mp4',jwSource); 
       s++; 
     }
@@ -2900,8 +2980,8 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
       s++; 
     }   
   }     
-  for (var i=0; i<sources.length; i++) { 
-    var $newSource = $('<source>',{ 
+  for (i=0; i<sources.length; i++) { 
+    $newSource = $('<source>',{ 
       type: sources[i][0],
       src: sources[i][1] 
     });         
@@ -2915,7 +2995,7 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
     
   // update Now Playing div 
   if (this.showNowPlaying === true) {
-    var nowPlayingSpan = $('<span>');
+    nowPlayingSpan = $('<span>');
     if (typeof itemLang !== 'undefined') { 
       nowPlayingSpan.attr('lang',itemLang); 
     }
@@ -2938,32 +3018,37 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
       this.jwPlayer.load({file: jwSource}); 
     }
   }
-}
+};
 AblePlayer.prototype.toSeconds = function(t) {
-  var s = 0.0
+
+  var s, p, i; 
+  
+  s = 0.0;
   if (t) {
-    var p = t.split(':');
-    for (var i=0; i < p.length; i++) {
+    p = t.split(':');
+    for (i=0; i < p.length; i++) {
       s = s * 60 + parseFloat(p[i].replace(',', '.'));
     }
   }
   return s;
-}
+};
 AblePlayer.prototype.strip = function(s) { 
   if (s) { 
     return s.replace(/^\s+|\s+$/g,"");
   }
-}
+};
 AblePlayer.prototype.playAtTime = function(seconds) { 
   //seeking = true;
   //seekVideo(seconds);
-}
+};
 AblePlayer.prototype.highlightTranscript = function (currentTime) { 
+
   //show highlight in transcript marking current caption
+  var start, end; 
+
   $('.ump-transcript span').each(function() { 
-    var thisSpan = $(this); // we need this later 
-    var start = $(this).attr('data-start');
-    var end = $(this).attr('data-end');
+    start = $(this).attr('data-start');
+    end = $(this).attr('data-end');
     if (currentTime >= start && currentTime <= end) { 
       if (this.currentHighlight != $(this).index()) {           
         // this is a new highlight. 
@@ -2984,7 +3069,7 @@ AblePlayer.prototype.highlightTranscript = function (currentTime) {
       return false;
     }
   });
-}
+};
 AblePlayer.prototype.usingModifierKeys = function(e) { 
   // return true if user is holding down required modifier keys 
   if ((this.prefAltKey === 1) && !e.altKey) { 
@@ -2994,7 +3079,7 @@ AblePlayer.prototype.usingModifierKeys = function(e) {
     return false;
   }
   return true; 
-}
+};
 AblePlayer.prototype.debugDescription = function(e) { 
   // description is a bit confusing due to the number of variables involved
   // this function can be called to assist in troubleshooting
@@ -3007,7 +3092,7 @@ AblePlayer.prototype.debugDescription = function(e) {
   console.log('closedDescOn: ' + this.closedDescOn);
   console.log('openDescOn: ' + this.openDescOn);
   console.log('useDescType: ' + this.useDescType);  
-}
+};
 AblePlayer.prototype.colorNameToHex = function(color) { 
   var colors = {
     "aliceblue": "#f0f8ff",
@@ -3151,21 +3236,21 @@ AblePlayer.prototype.colorNameToHex = function(color) {
     "yellow": "#ffff00",
     "yellowgreen": "#9acd32"
   };
-  if (typeof colors[color.toLowerCase()] != 'undefined') { 
+  if (typeof colors[color.toLowerCase()] !== 'undefined') { 
     return colors[color.toLowerCase()];
   }
   return false;
-}
+};
 AblePlayer.prototype.colorHexToRGB = function(color) { 
   var r, g, b;
-  if (col.charAt(0) == '#') {
-    col = col.substr(1);
+  if (color.charAt(0) === '#') {
+    color = color.substr(1);
   }
-  r = col.charAt(0) + col.charAt(1);
-  g = col.charAt(2) + col.charAt(3);
-  b = col.charAt(4) + col.charAt(5);
+  r = color.charAt(0) + color.charAt(1);
+  g = color.charAt(2) + color.charAt(3);
+  b = color.charAt(4) + color.charAt(5);
   r = parseInt(r, 16);
   g = parseInt(g, 16);
   b = parseInt(b, 16);
   return 'rgb(' + r + ',' + g + ',' + b + ')';
-}
+};
