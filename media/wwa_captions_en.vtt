@@ -1,10 +1,23 @@
 WEBVTT 
+kind: captions
+lang: en
 
-00:00:00.429 --> 00:00:09.165
+NOTE This VTT file includes a few extras: 
+- Meta data at the top (lines 2 and 3)
+- The current comment block, identified with NOTE and surrounded by spaces 
+- cue settings at the end of the first timestamp 
+- A cue span at the start of the second cue payload 
+- (in this case, a "voice span" <v> identifying the speaker)
+- Currently AblePlayer does not support these extra features 
+- but the parser needs to be able to filter them out 
+- More info in the WebVTT spec (still evolving):
+- http://dev.w3.org/html5/webvtt
+
+00:00:00.429 --> 00:00:09.165 position:45%,end align:middle size:35%
 [ music ]
 
 00:00:09.165 --> 00:00:10.792
-[narrator] You want these people.
+<v Narrator>[narrator] You want these people.
 
 00:00:10.792 --> 00:00:13.759
 They order your products, sign up for your services,
