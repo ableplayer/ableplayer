@@ -493,14 +493,21 @@ AblePlayer.prototype.initTracks = function() {
         this.setupTimedText('descriptions',track);
       }
       else if (kind === 'subtitles') { 
-        // not yet supported
+        // not yet supported, but data from source file is available in this array 
+        this.subtitles = []; 
+        this.currentSubtitle = -1; 
       }
       else if (kind === 'chapters') { 
-        // not yet supported
+        // not yet supported, but data from source file is available in this array 
+        this.chapters = []; 
+        this.currentChapter = -1; 
       }
       else if (kind === 'metadata') { 
-        // not supported
+        // not yet supported, but data from source file is available in this array 
+        this.metadata = []; 
+        this.currentMetadata = -1; 
       }
+      this.setupTimedText(kind,track); 
     }
   }
 };
@@ -2775,6 +2782,15 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
                 }
                 else if (kind === 'descriptions') { 
                   thisObj.descriptions.push({'start':start,'end':end,'text':cueText});                   
+                }
+                else if (kind === 'subtitles') { 
+                  thisObj.subtitles.push({'start':start,'end':end,'text':cueText});                   
+                }
+                else if (kind === 'chapters') { 
+                  thisObj.chapters.push({'start':start,'end':end,'text':cueText});                   
+                }
+                else if (kind === 'metadata') { 
+                  thisObj.metadata.push({'start':start,'end':end,'text':cueText});                   
                 }
               }
             }
