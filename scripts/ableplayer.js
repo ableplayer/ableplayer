@@ -89,6 +89,13 @@ function AblePlayer(mediaId, umpIndex, startTime) {
   // loop - if true, will start again at top after last item in playlist has ended
   // NOTE: This is not fully supported yet - needs work 
   this.loop = true; 
+  
+  // lang - default language of the player
+  this.lang = 'en'; 
+  
+  // langOverride - set to true to reset this.lang to language of the web page, if detectable  
+  // set to false to force player to use this.lang
+  this.langOverride = true; 
 
   /* 
    *
