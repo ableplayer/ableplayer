@@ -112,6 +112,10 @@ function AblePlayer(mediaId, umpIndex, startTime) {
   if (this.debug) {    
     console.log('initalizing player with mediaId ' + mediaId);  
   }
+  
+  if (this.langOverride) { 
+    this.getPageLang();
+  }
 
   if (mediaId) { 
     this.mediaId = mediaId;   
@@ -261,6 +265,24 @@ function AblePlayer(mediaId, umpIndex, startTime) {
     }
   }
 } 
+AblePlayer.prototype.getPageLang = function() { 
+  
+  // override this.lang to language of the web page, if known 
+  // otherwise this.lang will continue using default  
+  var lang; 
+  
+  if ($('body').attr('lang')) { 
+    lang = $('body').attr('lang');
+  }
+  else if ($('html').attr('lang')) { 
+    lang = $('html').attr('lang');
+  }
+  if (this.debug) { 
+    console.log ('Language of this web page is ' + lang);
+  }
+  // add code to check translation table to see if this language is supported 
+  // if it is, set this.lang to lang 
+}
 AblePlayer.prototype.getPlayer = function() { 
 
   // Determine which player to use, if any 
