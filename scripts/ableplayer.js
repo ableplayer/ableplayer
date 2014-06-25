@@ -2744,10 +2744,10 @@ AblePlayer.prototype.getButtonTitle = function(control) {
     return this.tt.stop; 
   }
   else if (control === 'rewind') { 
-    return this.tt.rewind + ' ' + this.seekInterval + this.tt.seconds;
+    return this.tt.rewind + ' ' + this.seekInterval + ' ' + this.tt.seconds;
   }
   else if (control === 'forward') { 
-    return this.tt.forward + ' ' + this.seekInterval + this.tt.seconds;
+    return this.tt.forward + ' ' + this.seekInterval + ' ' + this.tt.seconds;
   }
   else if (control === 'captions') {  
     if (this.captionsOn) {
