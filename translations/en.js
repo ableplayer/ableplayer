@@ -42,6 +42,8 @@
 
 "settings": "Settings",
 
+"help": "Help",
+
 "fullScreen": "Full screen",
 
 "audio": "audio",

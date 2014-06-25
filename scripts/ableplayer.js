@@ -2759,10 +2759,10 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   }   
   else if (control === 'descriptions') { 
     if (this.closedDescOn) {
-      return this.tt.turnOff + ' ' + this.tt.description;
+      return this.tt.turnOff + ' ' + this.tt.descriptions;
     }
     else { 
-      return this.tt.turnOn + ' ' + this.tt.description;
+      return this.tt.turnOn + ' ' + this.tt.descriptions;
     }
   }   
   else if (control === 'sign') { // not yet supported 
@@ -2777,10 +2777,10 @@ AblePlayer.prototype.getButtonTitle = function(control) {
     }
   }
   else if (control === 'volumeUp') { 
-    return this.tt.volume + ' ' + this.tt.up;
+    return this.tt.volumeUp;
   }   
   else if (control === 'volumeDown') { 
-    return this.tt.volume + ' ' + this.tt.down;
+    return this.tt.volumeDown;
   }
   else if (control === 'settings') { 
     return this.tt.settings; 
