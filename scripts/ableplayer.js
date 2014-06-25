@@ -113,176 +113,238 @@ function AblePlayer(mediaId, umpIndex, startTime) {
     console.log('initalizing player with mediaId ' + mediaId);  
   }
   
-  if (this.langOverride) { 
-    this.getPageLang();
-  }
-
-  if (mediaId) { 
-    this.mediaId = mediaId;   
-    if (umpIndex) {
-      this.umpIndex = umpIndex;
-    }
-    else { 
-      this.umpIndex = 0;
-    }
-    if (startTime) { 
-      this.startTime = startTime; 
-    }
-    else { 
-      this.startTime = 0;
-    }
-    if (this.debug && startTime > 0) { 
-      console.log('Will start media at ' + startTime + ' seconds');
-    }
-    this.startedPlaying = false;
-
-    // be sure media exists, and is a valid type       
-    if ($('#' + mediaId)) { 
-      // an element exists with this mediaId
-      this.$media = $('#' + mediaId); // jquery object 
-      this.media = this.$media[0]; // html element
-      if (this.$media.is('audio')) { 
-        this.mediaType = 'audio';
+  // populate translation object with localized versions of all labels and prompts 
+  // use defer method to defer additional processing until text is retrieved    
+  this.tt = []; 
+  var thisObj = this;
+  $.when(this.getText()).then(
+    function () { 
+      if (thisObj.countProperties(thisObj.tt) > 50) { 
+        // close enough to ensure that most text variables are populated 
+        thisObj.setup(mediaId, umpIndex, startTime);
+      } 
+      else { 
+        // can't continue loading player with no text
+        console.log('ERROR: Failed to load translation table');         
       }
-      else if (this.$media.is('video')) { 
-        this.mediaType = 'video';
+    }
+  );
+}
+AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime) { 
+
+    if (mediaId) { 
+      this.mediaId = mediaId;   
+      if (umpIndex) {
+        this.umpIndex = umpIndex;
       }
       else { 
-        this.mediaType = this.$media.get(0).tagName;
-        if (this.debug) { 
-          console.log('You initialized Able Player with ' + mediaId + ', which is a ' + this.mediaType + ' element.'); 
-          console.log('Able Player only works with HTML audio or video elements.');
-        }
+        this.umpIndex = 0;
       }
+      if (startTime) { 
+        this.startTime = startTime; 
+      }
+      else { 
+        this.startTime = 0;
+      }
+      if (this.debug && startTime > 0) { 
+        console.log('Will start media at ' + startTime + ' seconds');
+      }
+      this.startedPlaying = false;
 
-      if (this.mediaType === 'audio' || this.mediaType === 'video') { 
-
-        // Don't use custom AblePlayer interface for IOS video 
-        // IOS always plays video in its own player - don't know a way around that  
-        if (this.mediaType === 'video' && this.isIOS()) { 
-          // do nothing 
-          // *could* perhaps build in support for user preferances & described versions  
+      // be sure media exists, and is a valid type       
+      if ($('#' + mediaId)) { 
+        // an element exists with this mediaId
+        this.$media = $('#' + mediaId); // jquery object 
+        this.media = this.$media[0]; // html element
+        if (this.$media.is('audio')) { 
+          this.mediaType = 'audio';
+        }
+        else if (this.$media.is('video')) { 
+          this.mediaType = 'video';
+        }
+        else { 
+          this.mediaType = this.$media.get(0).tagName;
           if (this.debug) { 
-            console.log ('Stopping here. IOS will handle your video.');
+            console.log('You initialized Able Player with ' + mediaId + ', which is a ' + this.mediaType + ' element.'); 
+            console.log('Able Player only works with HTML audio or video elements.');
           }
         }
-        else {       
-          // get data from source elements
-          this.$sources = this.$media.find('source');       
-          if (this.debug) { 
-            console.log('found ' + this.$sources.length + ' media sources');
+
+        if (this.mediaType === 'audio' || this.mediaType === 'video') { 
+
+          // Don't use custom AblePlayer interface for IOS video 
+          // IOS always plays video in its own player - don't know a way around that  
+          if (this.mediaType === 'video' && this.isIOS()) { 
+            // do nothing 
+            // *could* perhaps build in support for user preferances & described versions  
+            if (this.debug) { 
+              console.log ('Stopping here. IOS will handle your video.');
+            }
           }
+          else {       
+            // get data from source elements
+            this.$sources = this.$media.find('source');       
+            if (this.debug) { 
+              console.log('found ' + this.$sources.length + ' media sources');
+            }
 
-          // get playlist for this media element   
-          this.getPlaylist();
+            // get playlist for this media element   
+            this.getPlaylist();
         
-          // determine which player can play media, and define this.player 
-          this.getPlayer(); 
+            // determine which player can play media, and define this.player 
+            this.getPlayer(); 
 
-          if (this.player) {
+            if (this.player) {
           
-            // see if there's a transcript (supported for both video and audio) 
-            if ($('.ump-transcript')) { 
-              this.hasTranscript = true;
-            }
-            else { 
-              this.hasTranscript = false;
-            }
+              // see if there's a transcript (supported for both video and audio) 
+              if ($('.ump-transcript')) { 
+                this.hasTranscript = true;
+              }
+              else { 
+                this.hasTranscript = false;
+              }
 
-            // do a bunch of stuff to setup player 
-            this.getIconType();
-            this.getDimensions();
-            this.getPrefs();
-            this.injectPlayerCode();          
-            if (this.iconType === 'image') {
-              this.setButtons();
-            }
-            this.setupAlert();
-            this.initPlaylist();
+              // do a bunch of stuff to setup player 
+              this.getIconType();
+              this.getDimensions();
+              this.getPrefs();
+              this.injectPlayerCode();          
+              if (this.iconType === 'image') {
+                this.setButtons();
+              }
+              this.setupAlert();
+              this.initPlaylist();
         
-            // initialize player to support captions &/or description (from track elements)
-            this.initTracks();
+              // initialize player to support captions &/or description (from track elements)
+              this.initTracks();
         
-            // initialize description based on available sources + user prefs 
-            this.initDescription(); 
+              // initialize description based on available sources + user prefs 
+              this.initDescription(); 
       
-            this.initializing = false;
+              this.initializing = false;
         
        
-            if (this.player === 'html5') { 
-              if (this.initPlayer('html5')) { 
-                this.addControls(this.mediaType);  
-                this.addEventListeners();
+              if (this.player === 'html5') { 
+                if (this.initPlayer('html5')) { 
+                  this.addControls(this.mediaType);  
+                  this.addEventListeners();
+                }
               }
+              else if (this.player === 'jw') { 
+                // attempt to load jwplayer script
+                var thisObj = this;
+                $.getScript('thirdparty/jwplayer.js') 
+                  .done(function( script, textStatus ) {
+                    if (thisObj.debug) {
+                      console.log ('Successfully loaded the JW Player');
+                    }
+                    if (thisObj.initPlayer('jw')) { 
+                      thisObj.addControls(thisObj.mediaType);  
+                      thisObj.addEventListeners();
+                    }
+                  })
+                  .fail(function( jqxhr, settings, exception ) {
+                    if (thisObj.debug) { 
+                      console.log ("Unable to load JW Player.");
+                    }
+                    thisObj.player = null;
+                    return;
+                  });
+              }
+              if (this.debug && this.player) { 
+                console.log ('Using the ' + this.player + ' media player');
+              }
+            }        
+            else { 
+              // no player can play this media
+              this.provideFallback(); 
             }
-            else if (this.player === 'jw') { 
-              // attempt to load jwplayer script
-              var thisObj = this;
-              $.getScript('thirdparty/jwplayer.js') 
-                .done(function( script, textStatus ) {
-                  if (thisObj.debug) {
-                    console.log ('Successfully loaded the JW Player');
-                  }
-                  if (thisObj.initPlayer('jw')) { 
-                    thisObj.addControls(thisObj.mediaType);  
-                    thisObj.addEventListeners();
-                  }
-                })
-                .fail(function( jqxhr, settings, exception ) {
-                  if (thisObj.debug) { 
-                    console.log ("Unable to load JW Player.");
-                  }
-                  thisObj.player = null;
-                  return;
-                });
-            }
-            if (this.debug && this.player) { 
-              console.log ('Using the ' + this.player + ' media player');
-            }
+          } // end else if this is not IOS video 
+        } // end if mediaId matches an audio or video element 
+        else { 
+          if (this.debug) {
+            console.log('The element with id ' + mediaId + ' is a ' + this.mediaType + ' element.');
+            console.log('Expecting an audio or video element.'); 
           }        
-          else { 
-            // no player can play this media
-            this.provideFallback(); 
-          }
-        } // end else if this is not IOS video 
-      } // end if mediaId matches an audio or video element 
+        } 
+      } // end if no media is found that matches mediaId 
       else { 
         if (this.debug) {
-          console.log('The element with id ' + mediaId + ' is a ' + this.mediaType + ' element.');
-          console.log('Expecting an audio or video element.'); 
-        }        
-      } 
-    } // end if no media is found that matches mediaId 
+          console.log('No media was found with an id of ' + mediaId + '.'); 
+        }
+      }
+    } //end if media ID was passed to object
     else { 
       if (this.debug) {
-        console.log('No media was found with an id of ' + mediaId + '.'); 
+        console.log('Able Player is missing a required parameter (media ID).'); 
       }
     }
-  } //end if media ID was passed to object
-  else { 
-    if (this.debug) {
-      console.log('Able Player is missing a required parameter (media ID).'); 
+}; 
+AblePlayer.prototype.getSupportedLangs = function() { 
+
+  // returns an array of languages for which AblePlayer has translation tables 
+  var langs = ['en'];
+  return langs;
+};
+AblePlayer.prototype.getText = function() { 
+
+  // determine language, then get labels and prompts from corresponding translation file (in JSON)
+  // finally, populate this.tt object with JSON data
+  // return true if successful, otherwise false 
+  var gettingText, lang, thisObj, msg; 
+
+  gettingText = $.Deferred(); 
+  
+  // override this.lang to language of the web page, if known and supported
+  // otherwise this.lang will continue using default    
+  if (this.langOverride) {   
+    if ($('body').attr('lang')) { 
+      lang = $('body').attr('lang');
     }
-  }
-} 
-AblePlayer.prototype.getPageLang = function() { 
-  
-  // override this.lang to language of the web page, if known 
-  // otherwise this.lang will continue using default  
-  var lang; 
-  
-  if ($('body').attr('lang')) { 
-    lang = $('body').attr('lang');
-  }
-  else if ($('html').attr('lang')) { 
-    lang = $('html').attr('lang');
-  }
-  if (this.debug) { 
-    console.log ('Language of this web page is ' + lang);
-  }
-  // add code to check translation table to see if this language is supported 
-  // if it is, set this.lang to lang 
-}
+    else if ($('html').attr('lang')) { 
+      lang = $('html').attr('lang');
+    }    
+    if (lang !== this.lang) {
+      msg = 'Language of web page (' + lang +') ';
+      if ($.inArray(lang,this.getSupportedLangs()) !== -1) { 
+        // this is a supported lang
+        msg += ' has a translation table available.';
+        this.lang = lang; 
+      }
+      else { 
+        msg += ' is not currently supported. Using default language (' + this.lang + ')';
+      }
+      if (this.debug) {
+        console.log(msg);
+      }
+    }
+  } 
+  thisObj = this;
+  // get content of JSON file 
+  $.getJSON('./translations/' + this.lang + '.js',
+    function(data, textStatus, jqxhr) { 
+      if (textStatus === 'success') { 
+        thisObj.tt = data;
+        if (thisObj.debug) { 
+          console.log('Successfully assigned JSON data to trans');
+          console.log(thisObj.tt);           
+        }
+      }
+      else { 
+        return false; 
+      }
+    }
+  ).then( 
+    function(){ // success 
+      // resolve deferred variable
+      gettingText.resolve();  
+    },
+    function() { // failure 
+      return false; 
+    }
+  );
+  return gettingText.promise(); 
+};  
 AblePlayer.prototype.getPlayer = function() { 
 
   // Determine which player to use, if any 
@@ -711,7 +773,7 @@ AblePlayer.prototype.provideFallback = function() {
   
   var msg, msgContainer; 
   
-  msg = 'Sorry, your browser is unable to play this ' + this.mediaType + '. ';
+  msg = this.tt['errorNoPlay'] + ' ' + this.tt[this.mediaType] + '. ';
   msgContainer = $('<div>',{
     'class' : 'ump-fallback',
     'role' : 'alert'
@@ -920,12 +982,13 @@ AblePlayer.prototype.addHelp = function() {
   
   var helpText, i, label, key, helpDiv; 
   
+console.log('building helpText using ' + this.tt);  
   helpText = "<p>The media player on this web page can be operated ";
   helpText += "from anywhere on the page using the following keystrokes:</p>\n";
   helpText += "<ul>\n";
   for (i=0; i<this.controls.length; i++) { 
     if (this.controls[i] === 'play') { 
-      label = 'Play/Pause';
+      label = this.tt['play'] + '/' + this.tt['pause'];
       key = 'p </b><em>or</em><b> spacebar';
     }
     else if (this.controls[i] === 'stop') { 
@@ -1459,7 +1522,7 @@ AblePlayer.prototype.addEventListeners = function() {
         thisObj.$status.text('End of track'); 
         thisObj.updateTime('current',0);
         // reset play button
-        thisObj.$playpauseButton.attr('title','Play').attr('src',thisObj.playButtonImg);
+        thisObj.$playpauseButton.attr('title',thisObj.t.play).attr('src',thisObj.playButtonImg);
         // if there's a playlist, advance to next item and start playing  
         if (thisObj.hasPlaylist) { 
           if (thisObj.playlistIndex === (thisObj.playlistSize - 1)) { 
@@ -1581,7 +1644,7 @@ AblePlayer.prototype.addEventListeners = function() {
         thisObj.$status.text('End of track'); 
         thisObj.updateTime('current',0);
         //reset play button
-        thisObj.$playpauseButton.attr('title','Play').attr('src',thisObj.playButtonImg);
+        thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
         // if there's a playlist, advance to next item and start playing  
         if (thisObj.hasPlaylist) { 
           if (thisObj.playlistIndex === (thisObj.playlistSize - 1)) { 
@@ -2189,7 +2252,7 @@ AblePlayer.prototype.handlePlay = function(e) {
       this.media.pause(); 
       this.$status.text('Paused');
       // change pause button to play button
-      this.$playpauseButton.attr('title','Play'); 
+      this.$playpauseButton.attr('title',thisObj.tt.play); 
       if (this.controllerFont === 'icomoon') {
         this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
       }
@@ -2215,7 +2278,7 @@ AblePlayer.prototype.handlePlay = function(e) {
     else { // playerState is 'PLAYING' or 'BUFFERING'. Pause it
       jwplayer(this.jwId).pause(); 
       // change pause button to play button
-      this.$playpauseButton.attr('title','Play'); 
+      this.$playpauseButton.attr('title',this.tt.play); 
       if (this.controllerFont === 'icomoon') {
         this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
       }
@@ -2241,7 +2304,7 @@ AblePlayer.prototype.handleStop = function() {
   this.updateTime('current',0); 
   this.$status.text('Stopped');
   // change pause button to play button
-  this.$playpauseButton.attr('title','Play'); 
+  this.$playpauseButton.attr('title',this.tt.play); 
   if (this.controllerFont === 'icomoon') {
     this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
   }
@@ -2675,48 +2738,48 @@ AblePlayer.prototype.addSeekControls = function(leftPos) {
 };
 AblePlayer.prototype.getButtonTitle = function(control) { 
   if (control === 'playpause') { 
-    return 'Play'; 
+    return this.tt.play; 
   }
   else if (control === 'rewind') { 
-    return 'Rewind ' + this.seekInterval + ' seconds';
+    return this.tt.rewind + ' ' + this.seekInterval + this.tt.seconds;
   }
   else if (control === 'forward') { 
-    return 'Advance ' + this.seekInterval + ' seconds';
+    return this.tt.forward + ' ' + this.seekInterval + this.tt.seconds;
   }
   else if (control === 'captions') {  
     if (this.captionsOn) {
-      return 'Hide captions';
+      return this.tt.hide + ' ' + this.tt.captions;
     }
     else { 
-      return 'Show captions';
+      return this.tt.show + ' ' + this.tt.captions;
     }
   }   
   else if (control === 'descriptions') { 
     if (this.closedDescOn) {
-      return 'Turn off description';
+      return this.tt.turnOff + ' ' + this.tt.description;
     }
     else { 
-      return 'Turn on description';
+      return this.tt.turnOn + ' ' + this.tt.description;
     }
   }   
   else if (control === 'sign') { // not yet supported 
-    return 'Sign language';
+    return this.tt.sign;
   }
   else if (control === 'mute') { 
     if (this.volume > 0) { 
-      return 'Mute';
+      return this.tt.mute;
     }
     else { 
-      return 'Unmute';
+      return this.tt.unmute;
     }
   }
   else if (control === 'volumeUp') { 
-    return 'Volume Up';
+    return this.tt.volume + ' ' + this.tt.up;
   }   
   else if (control === 'volumeDown') { 
-    return 'Volume Down';
+    return this.tt.volume + ' ' + this.tt.down;
   }
-  else { 
+  else { // need to check this against translation table ???
     return control.charAt(0).toUpperCase() + control.slice(1);
   }   
 };
@@ -2733,7 +2796,7 @@ AblePlayer.prototype.seekTo = function (newTime) {
     this.media.play(true);
     this.startedPlaying = true;
     // change play button to pause button
-    this.$playpauseButton.attr('title','Pause'); 
+    this.$playpauseButton.attr('title',this.tt.pause); 
     if (this.controllerFont === 'icomoon') {
       this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
     }
@@ -3310,4 +3373,16 @@ AblePlayer.prototype.colorHexToRGB = function(color) {
   g = parseInt(g, 16);
   b = parseInt(b, 16);
   return 'rgb(' + r + ',' + g + ',' + b + ')';
+};
+AblePlayer.prototype.countProperties = function(obj) { 
+ 
+  // returns the number of properties in an object 
+  var count, prop; 
+  count = 0;
+  for (prop in obj) {
+    if (obj.hasOwnProperty(prop)) { 
+      ++count;
+    }
+  }
+  return count;
 };
