@@ -982,53 +982,51 @@ AblePlayer.prototype.addHelp = function() {
   
   var helpText, i, label, key, helpDiv; 
   
-console.log('building helpText using ' + this.tt);  
-  helpText = "<p>The media player on this web page can be operated ";
-  helpText += "from anywhere on the page using the following keystrokes:</p>\n";
+  helpText = '<p>' + this.tt.helpKeys + "</p>\n";
   helpText += "<ul>\n";
   for (i=0; i<this.controls.length; i++) { 
     if (this.controls[i] === 'play') { 
-      label = this.tt['play'] + '/' + this.tt['pause'];
-      key = 'p </b><em>or</em><b> spacebar';
+      label = this.tt.play + '/' + this.tt.pause;
+      key = 'p </b><em>' + this.tt.or + '</em><b> ' + this.tt.spacebar;
     }
     else if (this.controls[i] === 'stop') { 
-      label = 'Stop';
+      label = this.tt.stop;
       key = 's';
     }
     else if (this.controls[i] === 'rewind') { 
-      label = 'Rewind ' + this.seekInterval + ' seconds';
+      label = this.tt.rewind + ' ' + this.seekInterval + ' ' + this.tt.seconds;
       key = 'r';
     }
     else if (this.controls[i] === 'forward') { 
-      label = 'Forward' + this.seekInterval + ' seconds';
+      label = this.tt.forward + ' ' + this.seekInterval + ' ' + this.tt.seconds;
       key = 'f';
     }
     else if (this.controls[i] === 'mute') { 
-      label = 'Mute';
+      label = this.tt.mute;
       key = 'm';
     }
     else if (this.controls[i] === 'volumeUp') { 
-      label = 'Volume Up';
-      key = 'u </b><em>or</em><b> 1-5';
+      label = this.tt.volumeUp;
+      key = 'u </b><em>' + this.tt.or + '</em><b> 1-5';
     }
     else if (this.controls[i] === 'volumeDown') { 
-      label = 'Volume Down';
-      key = 'd </b><em>or</em><b> 1-5';
+      label = this.tt.volumeDown;
+      key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
     }
     else if (this.controls[i] === 'captions') { 
-      label = 'Toggle captions';
+      label = this.tt.toggle + ' ' + this.tt.captions;
       key = 'c';
     }
     else if (this.controls[i] === 'descriptions') { 
-      label = 'Toggle narration (description)';
+      label = this.tt.toggle + ' ' + this.tt.descriptions;
       key = 'n';
     }
     else if (this.controls[i] === 'settings') { 
-      label = 'Settings';
+      label = this.tt.settings;
       key = 't';
     }
     else if (this.controls[i] === 'help') { 
-      label = 'Help';
+      label = this.tt.help;
       key = 'h';
     }
     else { 
@@ -1046,11 +1044,7 @@ console.log('building helpText using ' + this.tt);
     }
   }
   helpText += "</ul>\n";
-  helpText += "<p>Note that modifier keys (Alt and Control) can be assigned ";
-  helpText += "within <em>Preferences</em>. "; 
-  helpText += "Also, support for shortcut keys has been thoroughly tested in Firefox ";
-  helpText += "but might be buggy in other browsers. ";
-  helpText += "We hope to improve this soon so that it works more reliably across all browsers.</p>";
+  helpText += '<p>' + this.tt.helpKeysDisclaimer + "</p>\n";
 
   helpDiv = $('<div>',{ 
     'class': 'ump-help-div',
@@ -1063,7 +1057,7 @@ console.log('building helpText using ' + this.tt);
   $('.ump-help-div').dialog({ 
     autoOpen: false,
     buttons: [{ 
-      text: 'ok',
+      text: this.tt.ok,
       click: function() { 
         $(this).dialog('close');
       }
@@ -1073,7 +1067,7 @@ console.log('building helpText using ' + this.tt);
     draggable: true,
     modal: true,
     resizable: true,
-    title: 'Help',
+    title: this.tt.helpTitle,
     width: '32em',
     close: function( event, ui ) {$('.ump-help').focus();}
   });
@@ -1102,46 +1096,46 @@ AblePlayer.prototype.getPrefs = function() {
   // modifier keys preferences apply to both audio and video 
   this.prefs[0] = [];
   this.prefs[0]['name'] = 'prefAltKey'; // use alt key with shortcuts 
-  this.prefs[0]['label'] = 'Alt key';
+  this.prefs[0]['label'] = this.tt.prefAltKey;
   this.prefs[0]['default'] = 0; // off because currently not capturing this reliably across all browsers
 
   this.prefs[1] = [];
   this.prefs[1]['name'] = 'prefCtrlKey'; // use ctrl key with shortcuts
-  this.prefs[1]['label'] = 'Control key';
+  this.prefs[1]['label'] = this.tt.prefCtrlKey;
   this.prefs[1]['default'] = 0;  // // off because currently not capturing this reliably across all browsers
 
   if (this.mediaType === 'video') { // features prefs apply only to video
 
     this.prefs[2] = [];
     this.prefs[2]['name'] = 'prefCaptions'; // closed captions default state 
-    this.prefs[2]['label'] = 'Closed captions on by default';
+    this.prefs[2]['label'] = this.tt.prefCaptions;
     this.prefs[2]['default'] = 1; // on because many users can benefit
 
     this.prefs[3] = [];
     this.prefs[3]['name'] = 'prefDesc'; // audio description default state 
-    this.prefs[3]['label'] = 'Description on by default';
+    this.prefs[3]['label'] = this.tt.prefDesc;
     this.prefs[3]['default'] = 0; // off because users who don't need it might find it distracting
 
     this.prefs[4] = [];
     this.prefs[4]['name'] = 'prefClosedDesc'; // use closed description if available
-    this.prefs[4]['label'] = 'Use text-based description if available';
+    this.prefs[4]['label'] = this.tt.prefClosedDesc;
     this.prefs[4]['default'] = 0; // off because experimental
 
     this.prefs[5] = [];
     this.prefs[5]['name'] = 'prefVisibleDesc'; // visibly show closed description (if avilable and used)
-    this.prefs[5]['label'] = 'If using text-based description, make it visible';
+    this.prefs[5]['label'] = this.tt.prefVisibleDesc;
     this.prefs[5]['default'] = 1; // on because sighted users probably want to see this cool feature in action 
     
     if (this.hasTranscript === true) { 
 
       this.prefs[6] = [];
       this.prefs[6]['name'] = 'prefHighlight'; // highlight transcript as media plays
-      this.prefs[6]['label'] = 'Highlight transcript as media plays';
+      this.prefs[6]['label'] = this.tt.prefHighlight;
       this.prefs[6]['default'] = 1; // on because many users can benefit
 
       this.prefs[7] = [];
       this.prefs[7]['name'] = 'prefTabbable'; // tab-enable transcript 
-      this.prefs[7]['label'] = 'Keyboard-enable transcript';
+      this.prefs[7]['label'] = this.tt.prefTabbable;
       this.prefs[7]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page
     }
   }
@@ -1149,12 +1143,12 @@ AblePlayer.prototype.getPrefs = function() {
 
     this.prefs[2] = [];
     this.prefs[2]['name'] = 'prefHighlight'; // highlight transcript as media plays
-    this.prefs[2]['label'] = 'Highlight transcript as media plays';
+    this.prefs[2]['label'] = this.tt.prefHighlight;
     this.prefs[2]['default'] = 1; // on because many users can benefit
 
     this.prefs[3] = [];
     this.prefs[3]['name'] = 'prefTabbable'; // tab-enable transcript 
-    this.prefs[3]['label'] = 'Keyboard-enable transcript';
+    this.prefs[3]['label'] = this.tt.prefTabbable;
     this.prefs[3]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page    
   }
     
@@ -1241,7 +1235,7 @@ AblePlayer.prototype.savePrefs = function() {
     else { 
       $('.ump-descriptions').addClass('ump-clipped');     
     }
-    this.showAlert('Your changes have been saved.');
+    this.showAlert(this.tt.prefSuccess);
       
     // tabbable transcript 
     if (this.prefTabbable === 1) { 
@@ -1252,7 +1246,7 @@ AblePlayer.prototype.savePrefs = function() {
     }
   } 
   else { 
-    this.showAlert("You didn't make any changes.");   
+    this.showAlert(this.tt.prefNoChange);   
   }
 };
 AblePlayer.prototype.setupAlert = function() { 
@@ -1260,7 +1254,7 @@ AblePlayer.prototype.setupAlert = function() {
   this.$alertBox = $('#ump-alert').dialog({
     autoOpen: false,
     buttons: [{
-      text: 'ok', 
+      text: this.tt.ok, 
       click: function() { 
         $(this).dialog("close");
       }
@@ -1270,7 +1264,7 @@ AblePlayer.prototype.setupAlert = function() {
     draggable: true,
     modal: false,
     resizable: false,
-    title: 'Done.',
+    title: this.tt.done + '.',
     width: '20em'
   });
 };
@@ -1446,7 +1440,7 @@ AblePlayer.prototype.addEventListeners = function() {
         jwplayer(thisObj.jwId).seek(spanStart);
       }
       // change play button to pause button
-      thisObj.$playpauseButton.attr('title','Pause'); 
+      thisObj.$playpauseButton.attr('title',thisObj.tt.pause); 
       if (thisObj.controllerFont === 'icomoon') {
         thisObj.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
       }
@@ -1491,15 +1485,15 @@ AblePlayer.prototype.addEventListeners = function() {
           // new source file has just been loaded 
           // should be able to play 
           thisObj.media.play();
-          thisObj.$status.text('Playing');        
+          thisObj.$status.text(thisObj.tt.statusPlaying);        
           thisObj.swappingSrc = false; // swapping is finished                      
-          thisObj.$playpauseButton.attr('title','Pause').attr('src',thisObj.pauseButtonImg); 
+          thisObj.$playpauseButton.attr('title',thisObj.tt.pause).attr('src',thisObj.pauseButtonImg); 
           if (thisObj.$descButton) { 
             if (thisObj.openDescOn || thisObj.closedDescOn) { 
-              thisObj.$descButton.removeClass('buttonOff').attr('title','Turn off description');
+              thisObj.$descButton.removeClass('buttonOff').attr('title',thisObj.tt.turnOff + ' ' + thisObj.tt.descriptions);
             }
             else { 
-              thisObj.$descButton.addClass('buttonOff').attr('title','Turn on description');            
+              thisObj.$descButton.addClass('buttonOff').attr('title',thisObj.tt.turnOn + ' ' + thisObj.tt.descriptions);            
             }
           }
         }
@@ -1516,13 +1510,13 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       })
       .on('playing',function() { 
-        thisObj.$status.text('Playing'); 
+        thisObj.$status.text(thisObj.tt.statusPlaying); 
       })
       .on('ended',function() { 
-        thisObj.$status.text('End of track'); 
+        thisObj.$status.text(thisObj.tt.statusEnd); 
         thisObj.updateTime('current',0);
         // reset play button
-        thisObj.$playpauseButton.attr('title',thisObj.t.play).attr('src',thisObj.playButtonImg);
+        thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
         // if there's a playlist, advance to next item and start playing  
         if (thisObj.hasPlaylist) { 
           if (thisObj.playlistIndex === (thisObj.playlistSize - 1)) { 
@@ -1540,7 +1534,7 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       })
       .on('waiting',function() { 
-        thisObj.$status.text('Waiting'); // same as buffering???  
+        thisObj.$status.text(thisObj.tt.statusWaiting); // same as buffering???  
       })
       .on('durationchange',function() { 
         thisObj.updateTime('duration',thisObj.media.duration);
@@ -1641,7 +1635,7 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       })
       .onComplete(function() {          
-        thisObj.$status.text('End of track'); 
+        thisObj.$status.text(thisObj.tt.statusEnd); 
         thisObj.updateTime('current',0);
         //reset play button
         thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
@@ -1699,25 +1693,25 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) { 
           console.log('JW Player onPlay event fired');
         }
-        thisObj.$status.text('Playing'); 
+        thisObj.$status.text(thisObj.tt.statusPlaying); 
       })
       .onPause(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPause event fired');
         }       
-        thisObj.$status.text('Paused'); 
+        thisObj.$status.text(thisObj.tt.statusPaused); 
       })
       .onBuffer(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onBuffer event fired');
         }       
-        thisObj.$status.text('Buffering'); 
+        thisObj.$status.text(thisObj.tt.statusBuffering); 
       })
       .onIdle(function(e) { 
         if (thisObj.debug) { 
           console.log('JW Player onIdle event fired');
         }
-        thisObj.$status.text('Stopped'); // Idle?
+        thisObj.$status.text(thisObj.tt.statusStopped); // Idle?
       })
       .onMeta(function() { 
         if (thisObj.debug) { 
@@ -1746,15 +1740,15 @@ AblePlayer.prototype.addEventListeners = function() {
           }
           // should be able to play 
           jwplayer(thisObj.jwId).play(true);
-          thisObj.$status.text('Playing');        
+          thisObj.$status.text(thisObj.tt.statusPlaying);        
           thisObj.swappingSrc = false; // swapping is finished                      
-          thisObj.$playpauseButton.attr('title','Pause').attr('src',thisObj.pauseButtonImg); 
+          thisObj.$playpauseButton.attr('title',thisObj.tt.pause).attr('src',thisObj.pauseButtonImg); 
           if (thisObj.$descButton) { 
             if (thisObj.openDescOn || thisObj.closedDescOn) { 
-              thisObj.$descButton.removeClass('buttonOff').attr('title','Turn off description');
+              thisObj.$descButton.removeClass('buttonOff').attr('title',thisObj.tt.turnOff + ' ' + thisObj.tt.descriptions);
             }
             else { 
-              thisObj.$descButton.addClass('buttonOff').attr('title','Turn on description');            
+              thisObj.$descButton.addClass('buttonOff').attr('title',thisObj.tt.turnOn + ' ' + thisObj.tt.descriptions);            
             }
           }
         }
@@ -1903,7 +1897,7 @@ AblePlayer.prototype.addControls = function() {
         if (control === 'captions') { 
           if (!this.prefCaptions || this.prefCaptions !== 1) { 
             // captions are available, but user has them turned off 
-            newButton.addClass('buttonOff').attr('title','Turn on captions');
+            newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
           }
         }
         else if (control === 'descriptions') {      
@@ -1911,7 +1905,7 @@ AblePlayer.prototype.addControls = function() {
             // user prefer non-audio described version 
             // Therefore, load media without description 
             // Description can be toggled on later with this button  
-            newButton.addClass('buttonOff').attr('title','Turn on description');              
+            newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);              
           }         
         }
           
@@ -1927,7 +1921,7 @@ AblePlayer.prototype.addControls = function() {
           this.$descButton = newButton; 
           // gray out description button if description is not active 
           if (!(this.openDescOn || this.closedDescOn)) {  
-            this.$descButton.addClass('buttonOff').attr('title','Turn on description');
+            this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);
           }
         }
         else if (control === 'mute') { 
@@ -2237,9 +2231,9 @@ AblePlayer.prototype.handlePlay = function(e) {
   if (this.player === 'html5') {       
     if (this.media.paused || this.media.ended) { 
       this.media.play();
-      this.$status.text('Playing');
+      this.$status.text(this.tt.statusPlaying);
       // change play button to pause button
-      this.$playpauseButton.attr('title','Pause'); 
+      this.$playpauseButton.attr('title',this.tt.pause); 
       if (this.controllerFont === 'icomoon') {
         this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
       }
@@ -2250,9 +2244,9 @@ AblePlayer.prototype.handlePlay = function(e) {
     else { 
       // audio is playing. Pause it
       this.media.pause(); 
-      this.$status.text('Paused');
+      this.$status.text(this.tt.statusPaused);
       // change pause button to play button
-      this.$playpauseButton.attr('title',thisObj.tt.play); 
+      this.$playpauseButton.attr('title',this.tt.play); 
       if (this.controllerFont === 'icomoon') {
         this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
       }
@@ -2267,7 +2261,7 @@ AblePlayer.prototype.handlePlay = function(e) {
     if (playerState === 'IDLE' || playerState === 'PAUSED') { 
       jwplayer(this.jwId).play(); 
       // change play button to pause button
-      this.$playpauseButton.attr('title','Pause'); 
+      this.$playpauseButton.attr('title',this.tt.pause); 
       if (this.controllerFont === 'icomoon') {
         this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
       }
@@ -2302,7 +2296,7 @@ AblePlayer.prototype.handleStop = function() {
   // reset timer text (same code for both players)
   this.elapsedTime = 0;
   this.updateTime('current',0); 
-  this.$status.text('Stopped');
+  this.$status.text(this.tt.statusStopped);
   // change pause button to play button
   this.$playpauseButton.attr('title',this.tt.play); 
   if (this.controllerFont === 'icomoon') {
@@ -2367,7 +2361,7 @@ AblePlayer.prototype.handleMute = function() {
     if (this.media.muted) { // unmute
       this.media.muted = false; 
       // change button
-      this.$muteButton.attr('title','Mute'); 
+      this.$muteButton.attr('title',this.tt.mute); 
       if (this.controllerFont === 'icomoon') {
         this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
       }
@@ -2380,7 +2374,7 @@ AblePlayer.prototype.handleMute = function() {
     else { // mute 
       this.media.muted = true; 
       // change mute button
-      this.$muteButton.attr('title','Unmute'); 
+      this.$muteButton.attr('title',this.tt.unmute); 
       if (this.controllerFont === 'icomoon') {
         this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
       }
@@ -2394,7 +2388,7 @@ AblePlayer.prototype.handleMute = function() {
     if (jwplayer(this.jwId).getMute()) { // true if muted. unmute
       jwplayer(this.jwId).setMute(false); 
       // change button
-      this.$muteButton.attr('title','Mute'); 
+      this.$muteButton.attr('title',this.tt.mute); 
       if (this.controllerFont === 'icomoon') {
         this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
       }
@@ -2407,7 +2401,7 @@ AblePlayer.prototype.handleMute = function() {
     else { // mute 
       jwplayer(this.jwId).setMute(true); 
       // change mute button
-      this.$muteButton.attr('title','Unmute'); 
+      this.$muteButton.attr('title',this.tt.unmute); 
       if (this.controllerFont === 'icomoon') {
         this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
       }
@@ -2426,7 +2420,7 @@ AblePlayer.prototype.handleVolume = function(direction) {
       if (this.media.muted) { // unmute
         this.media.muted = false; 
         // change button
-        this.$muteButton.attr('title','Mute'); 
+        this.$muteButton.attr('title',this.tt.mute); 
         if (this.controllerFont === 'icomoon') {
           this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
         }
@@ -2450,7 +2444,7 @@ AblePlayer.prototype.handleVolume = function(direction) {
         this.volume = 0;
         this.media.muted = true;
         // change button
-        this.$muteButton.attr('title','Unmute'); 
+        this.$muteButton.attr('title',this.tt.unmute); 
         if (this.controllerFont === 'icomoon') {
           this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
         }
@@ -2472,7 +2466,7 @@ AblePlayer.prototype.handleVolume = function(direction) {
       if (jwplayer(this.jwId).getMute()) { // currently muted. unmute
         jwplayer(this.jwId).setMute(false); 
         // change button
-        this.$muteButton.attr('title','Mute'); 
+        this.$muteButton.attr('title',this.tt.mute); 
         if (this.controllerFont === 'icomoon') {
           this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
         }
@@ -2495,7 +2489,7 @@ AblePlayer.prototype.handleVolume = function(direction) {
         this.volume = 0;
         jwplayer(this.jwId).setMute(true); 
         // change button
-        this.$muteButton.attr('title','Unmute'); 
+        this.$muteButton.attr('title',this.tt.unmute); 
         if (this.controllerFont === 'icomoon') {
           this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
         }
@@ -2531,13 +2525,13 @@ AblePlayer.prototype.handleCaptionToggle = function() {
     // captions are on. Turn them off. 
     this.captionsOn = false;
     this.$captionDiv.hide();
-    this.$ccButton.addClass('buttonOff').attr('title','Show captions');
+    this.$ccButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.captions);
   }
   else { 
     // captions are off. Turn them on. 
     this.captionsOn = true;
     this.$captionDiv.show();
-    this.$ccButton.removeClass('buttonOff').attr('title','Hide captions');          
+    this.$ccButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.captions);          
   }
 };
 AblePlayer.prototype.handleDescriptionToggle = function() { 
@@ -2557,13 +2551,13 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
         // closed descriptions are on. Turn them off 
         this.closedDescOn = false;
         this.$descDiv.hide(); 
-        this.$descButton.addClass('buttonOff').attr('title','Turn on description');       
+        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);       
       }
       else { 
         // closed descriptions are off. Turn them on 
         this.closedDescOn = true;
         this.$descDiv.show(); 
-        this.$descButton.removeClass('buttonOff').attr('title','Turn off description');               
+        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);               
       }
     }
     else { 
@@ -2571,12 +2565,12 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
       if (this.openDescOn) { 
         // open description is on. Turn it off (swap to non-described video)
         // don't toggle this.openDescOn - that's handled by swapDescription()
-        this.$descButton.addClass('buttonOff').attr('title','Turn on description');             
+        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);             
       }
       else { 
         // open description is off. Turn it on (swap to described version)
         // don't toggle this.openDescOn - that's handled by swapDescription()
-        this.$descButton.removeClass('buttonOff').attr('title','Turn off description');                     
+        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);                     
       }
       this.swapDescription();
     }
@@ -2586,12 +2580,12 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
     if (this.openDescOn) { 
        // open description is on. Turn it off (swap to non-described video)
       this. openDescOn = false;
-      this.$descButton.addClass('buttonOff').attr('title','Turn on description');             
+      this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);             
     }
     else { 
       // open description is off. Turn it on (swap to described version)
       this. openDescOn = true;
-      this.$descButton.removeClass('buttonOff').attr('title','Turn off description');                     
+      this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);                     
     }
     this.swapDescription();
   } 
@@ -2602,7 +2596,7 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
       // closed descriptions are on. Turn them off 
       this.closedDescOn = false;
       this.$descDiv.hide(); 
-      this.$descButton.addClass('buttonOff').attr('title','Turn on description');       
+      this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);       
     }
     else { 
       // closed descriptions are off. Turn them on 
@@ -2611,7 +2605,7 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
       if (this.prefVisibleDesc === 1) { 
         this.$descDiv.removeClass('ump-clipped'); 
       } 
-      this.$descButton.removeClass('buttonOff').attr('title','Turn off description');               
+      this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);               
     }
   }
 };
@@ -2740,6 +2734,15 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   if (control === 'playpause') { 
     return this.tt.play; 
   }
+  else if (control === 'play') { 
+    return this.tt.play; 
+  }
+  else if (control === 'pause') { 
+    return this.tt.pause; 
+  }
+  else if (control === 'stop') { 
+    return this.tt.stop; 
+  }
   else if (control === 'rewind') { 
     return this.tt.rewind + ' ' + this.seekInterval + this.tt.seconds;
   }
@@ -2779,7 +2782,19 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   else if (control === 'volumeDown') { 
     return this.tt.volume + ' ' + this.tt.down;
   }
-  else { // need to check this against translation table ???
+  else if (control === 'settings') { 
+    return this.tt.settings; 
+  }
+  else if (control === 'help') { 
+    return this.tt.help; 
+  }
+  else { 
+    // there should be no other controls, but just in case: 
+    // return the name of the control with first letter in upper case 
+    // ultimately will need to get a translated label from this.tt 
+    if (this.debug) { 
+      console.log('Found an untranslated label: ' + control);   
+    }
     return control.charAt(0).toUpperCase() + control.slice(1);
   }   
 };
@@ -3000,11 +3015,11 @@ AblePlayer.prototype.swapDescription = function() {
     this.openDescOn = true;
     if (this.initializing) { // user hasn't pressed play yet 
       this.swappingSrc = false; 
-      this.$status.text('Using described version'); 
+      this.$status.text(this.tt.statusUsingDesc); 
     }
     else { 
       this.swappingSrc = true; 
-      this.$status.text('Loading described version'); 
+      this.$status.text(this.tt.statusLoadingDesc); 
     }
   }   
   else { 
@@ -3026,7 +3041,7 @@ AblePlayer.prototype.swapDescription = function() {
     // This function is only called during initialization 
     // if swapping from non-described to described
     this.swappingSrc = true; 
-    this.$status.text('Loading non-described version'); 
+    this.$status.text(this.tt.statusLoadingNoDesc); 
   }
   // now reload the player 
   if (this.player === 'html5') {
@@ -3130,7 +3145,7 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
   }
   else { 
     this.swappingSrc = true; 
-    this.$status.text('Loading next track');  
+    this.$status.text(this.tt.statusLoadingNext);  
     if (this.player === 'html5') {
       this.media.load();
     }   

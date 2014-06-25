@@ -18,17 +18,13 @@
 
 "turnOff": "Turn off",
 
-"up": "up",
-
-"down": "down",
-
 "show": "Show",
 
 "hide": "Hide",
 
 "captions": "captions",
 
-"descriptions": "description",
+"descriptions": "descriptions",
 
 "sign": "sign language",
 
@@ -40,6 +36,10 @@
 
 "volume": "Volume", 
 
+"volumeUp": "Volume up",
+
+"volumeDown": "Volume down",
+
 "settings": "Settings",
 
 "fullScreen": "Full screen",
@@ -47,6 +47,10 @@
 "audio": "audio",
 
 "video": "video",
+
+"or": "or", 
+
+"spacebar": "spacebar",
 
 "statusPlaying": "Playing",
 
@@ -56,11 +60,15 @@
 
 "statusWaiting": "Waiting",
 
+"statusBuffering": "Buffering",
+
 "statusUsingDesc": "Using described version",
 
 "statusLoadingDesc": "Loading described version",
 
-"statusUsingNodesc": "Using non-described version",
+"statusUsingNoDesc": "Using non-described version",
+
+"statusLoadingNoDesc": "Loading non-described version",
 
 "statusLoadingNext": "Loading next track",
 
@@ -102,12 +110,14 @@
 
 "helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
 
-"helpKeysDisclaimer1": "Note that modifier keys (Alt and Control) can be assigned within <em>Preferences</em>. Also, some shortcut key combinations might conflict with keys used by your browser and/or assistive technologies. Try various combinations of modifier keys to find one that works for you.",
+"helpKeysDisclaimer": "Note that modifier keys (Alt and Control) can be assigned within <em>Preferences</em>. Also, some shortcut key combinations might conflict with keys used by your browser and/or assistive technologies. Try various combinations of modifier keys to find one that works for you.",
 
 "save": "Save",
 
 "cancel": "Cancel",
 
-"ok": "ok"
+"ok": "ok", 
+
+"done": "Done"
 
 }
