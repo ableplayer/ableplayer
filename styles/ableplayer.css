@@ -168,35 +168,7 @@ div.ump-now-playing span span {
 	display: block;
 }
 
-/* ???
-.ump-player span.ump-status-bar { 
-	background-color: transparent;
-	color: #FFFFFF;
-	font-size: 0.9em;
-	font-style: italic;
-	text-align: right;
-	padding: 0.5em 1em;
-}	
-*/
-
 /* Preferences Form */ 
-button.ump-prefsButton { 
-	font-size: 0.9em;
-	margin: 2px 0 0 1em;
-	padding: 0.25em;
-	color: black;
-	background-color: #E0E0EB;
-	border-top: 1px solid #999;
-	border-left: 1px solid #999;
-	border-right: 2px solid #666;
-	border-bottom: 2px solid #666;	
-	border-radius: 15px;
-}
-.ump-prefsButton:hover, 
-.ump-prefsButton:focus, 
-.ump-prefsButton:active { 
-	background-color: #ffc; 
-}
 .ump-prefs-form, .ump-help-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
@@ -289,7 +261,7 @@ button.ump-prefsButton {
 .icon-fullscreen:before {
 	content: "\e612";
 }
-.icon-settings:before {
+.icon-preferences:before {
 	content: "\e610";
 }
 .icon-play:before {

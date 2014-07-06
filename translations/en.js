@@ -40,7 +40,7 @@
 
 "volumeDown": "Volume down",
 
-"settings": "Settings",
+"preferences": "Preferences",
 
 "help": "Help",
 

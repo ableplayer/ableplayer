@@ -243,7 +243,7 @@ AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime) {
                       thisObj.addEventListeners();
                     }
                   })
-                  .fail(function( jqxhr, settings, exception ) {
+                  .fail(function( jqxhr, preferences, exception ) {
                     if (thisObj.debug) { 
                       console.log ("Unable to load JW Player.");
                     }
@@ -807,7 +807,7 @@ AblePlayer.prototype.setButtons = function() {
   this.descriptionButtonImg = 'images/media-descriptions-' +  this.iconColor + '.png';
   this.signButtonImg = 'images/media-sign-' +  this.iconColor + '.png';
   this.fullscreenButtonImg = 'images/media-fullscreen-' +  this.iconColor + '.png';
-  this.settingsButtonImg = 'images/media-settings-' +  this.iconColor + '.png';
+  this.prefsButtonImg = 'images/media-prefs-' +  this.iconColor + '.png';
   this.helpButtonImg = 'images/media-help-' +  this.iconColor + '.png';
 };
 AblePlayer.prototype.initDescription = function() { 
@@ -973,7 +973,7 @@ AblePlayer.prototype.addPrefsForm = function() {
     resizable: true,
     title: 'Preferences',
     width: '32em',
-    close: function( event, ui ) {$('.ump-settings').focus();}
+    close: function( event, ui ) {$('.ump-preferences').focus();}
   });
 };
 AblePlayer.prototype.addHelp = function() {   
@@ -1021,8 +1021,8 @@ AblePlayer.prototype.addHelp = function() {
       label = this.tt.toggle + ' ' + this.tt.descriptions;
       key = 'n';
     }
-    else if (this.controls[i] === 'settings') { 
-      label = this.tt.settings;
+    else if (this.controls[i] === 'prefs') { 
+      label = this.tt.preferences;
       key = 't';
     }
     else if (this.controls[i] === 'help') { 
@@ -1235,7 +1235,7 @@ AblePlayer.prototype.savePrefs = function() {
     else { 
       $('.ump-descriptions').addClass('ump-clipped');     
     }
-    this.showAlert(this.tt.prefSuccess);
+    this.showAlert(this.tt.preferencesuccess);
       
     // tabbable transcript 
     if (this.prefTabbable === 1) { 
@@ -1318,8 +1318,8 @@ AblePlayer.prototype.addEventListeners = function() {
     else if (whichButton.substr(0,4) === 'sign') { 
       // not yet supported
     }
-    else if (whichButton === 'settings') { 
-      thisObj.handleSettingsClick();
+    else if (whichButton === 'preferences') { 
+      thisObj.handlePrefsClick();
     }
     else if (whichButton === 'help') { 
       thisObj.handleHelpClick();
@@ -1393,9 +1393,9 @@ AblePlayer.prototype.addEventListeners = function() {
           thisObj.handleHelpClick();
         }
       }     
-      else if (e.which === 116) { // t = seTTings
+      else if (e.which === 116) { // t = preferences
         if (thisObj.usingModifierKeys(e)) { 
-          thisObj.handleSettingsClick();
+          thisObj.handlePrefsClick();
         }
       }     
       else if (e.which === 104) { // h = help
@@ -1817,8 +1817,8 @@ AblePlayer.prototype.addControls = function() {
       rightControls.push('fullscreen');       
     }
   }
-  rightControls.push('settings');
-  // create the hidden form that will be triggered by a click on the Settings button
+  rightControls.push('preferences');
+  // create the hidden form that will be triggered by a click on the Preferences button
   this.addPrefsForm();        
 
   rightControls.push('help');
@@ -2609,7 +2609,7 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
     }
   }
 };
-AblePlayer.prototype.handleSettingsClick = function() { 
+AblePlayer.prototype.handlePrefsClick = function() { 
   $('.ump-prefs-form').dialog('open');  
 };
 AblePlayer.prototype.handleHelpClick = function() { 
@@ -2782,8 +2782,8 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   else if (control === 'volumeDown') { 
     return this.tt.volumeDown;
   }
-  else if (control === 'settings') { 
-    return this.tt.settings; 
+  else if (control === 'preferences') { 
+    return this.tt.preferences; 
   }
   else if (control === 'help') { 
     return this.tt.help; 
