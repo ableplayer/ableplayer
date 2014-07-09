@@ -2,19 +2,23 @@
 function parseWebVTT(text) {
     // Normalize line ends to \n.
     text.replace("\r\n", "\n").replace("\r", "\n");
+    // Remove any cue tags.
+    text.replace( /<.*?>/g, '' )
 
     var parserState = {
 	text: text,
 	error: null,
-	metadata: {}
+	metadata: {},
+	cues: []
     };
 
-    // TODO: Error handling.
-    eatBOM(state);
-    eatSignature(state);
-    
+    try {
+	act(parseState, parseFileBody);
+    }
+    catch (err) {
+    }
 
-    
+    return parserState;
 }
 
 function actList(state, list) {
@@ -82,23 +86,45 @@ function parseMetadataHeaders(state) {
 	    return;
 	}
 	else {
-	    act(state, parseMetadataHeader);
+	    var keyValue = act(state, getKeyValue);
+	    state.metadata[keyValue[0]] = keyValue[1];
+	    act(state, eatUntilEOLInclusive);
 	}
     }
 }
 
+function nextSpaceOrNewline(s) {
+    var possible = [];
+    var spaceIndex = s.index(" ");
+    if (spaceIndex >= 0) {
+	possible.push(spaceIndex);
+    }
+    var tabIndex = s.index("\t");
+    if (tabIndex >= 0) {
+	possible.push(tabIndex);
+    }
+    var lineIndex = s.index("\n");
+    if (lineIndex >= 0) {
+	possible.push(lineIndex);
+    }
+
+    return Math.max.apply(null, possible);
+}
+
 // Parses a single metadata header; assumes the next line is a metadata header.
-function parseMetadataHeader(state) {
-    var header = cutLine(state);
-    var colon = header.index(":");
+function getKeyValue(state) {
+    var next = nextSpaceOrNewline(state.text);
+    var pair = cut(state, next);
+    cut(state, 1);
+    var colon = pair.index(":");
     if (colon === -1) {
 	state.error = "Missing colon.";
 	return;
     }
     else {
-	var headerName = header.substring(0, colon);
-	var headerValue = header.substring(colon + 1);
-	state.metadata[headerName] = headerValue;
+	var pairName = pair.substring(0, colon);
+	var pairValue = pair.substring(colon + 1);
+	return [pairName, pairValue];
     }
 }
 
@@ -136,6 +162,42 @@ function parseCue(state) {
 	state.error = "Start time is not sooner than end time.";
 	return;
     }
+
+    act(state, eatSpacesOrTabs);
+    var cueSettings = act(state, getCueSettings);
+    // Cut the newline.
+    cut(state, 1);
+    var payload = act(state, getCuePayload);
+
+    state.cues.push({
+	id: cueId,
+	start: startTime,
+	end: endTime,
+	settings: cueSettings,
+	payload: payload
+    });
+}
+
+function getCueSettings(state) {
+    var cueSettings = {};
+    while (state.text.length > 0 && state.text[0] !== "\n") {
+	var keyValue = act(state, getKeyValue);
+	cueSettings[keyValue[0]] = keyValue[1];
+    }
+    return cueSettings;
+}
+
+
+function getCuePayload(state) {
+    var contents = [];
+    while (state.text.length > 0) {
+	var nextLine = peekLine(state);
+	if (nextLine.index("-->") !== -!) {
+	    break;
+	}
+	contents.push(nextLine);
+    }
+    return contents.join("\n");
 }
 
 function eatComment(state) {
@@ -179,12 +241,27 @@ function eatSignature(state) {
     }
 }
 
+function eatArrow(state) {
+    if (state.text.length < 3 || state.text.substring(0,3) !== "-->") {
+	state.error = "Missing -->";
+    }
+    else {
+	cut(state, 3);
+    }
+}
+
 function eatSingleSpaceOrTab(state) {
     if (state.text[0] === "\t" || state.text[0] === " ") {
 	cut(state, 1);
     }
     else {
 	state.error = "Missing space.";
+    }
+}
+
+function eatSpacesOrTabs(state) {
+    while (state.text[0] === "\t" || state.text[0] === " ") {
+	cut(state, 1);
     }
 }
 
@@ -235,6 +312,48 @@ function eatAtLeast1EmptyLines(state) {
 	}
     }
     if (linesEaten === 0) {
-	state.error = "Missing empty line.
+	state.error = "Missing empty line.";
     }
+}
+
+function getTiming(state) {
+    var nextSpace = nextSpaceOrNewline(state.text);
+    if (nextSpace === -1) {
+	state.error("Missing timing.");
+	return;
+    }
+
+    results = /((\d\d):)?((\d\d):)(\d\d).(\d\d\d)|(\d+).(\d\d\d)/.exec(timestamp);
+    
+    if (!results) {
+	state.error("Unable to parse timestamp.");
+    }
+    var time = 0;
+    var hours = results[2];
+    var minutes = results[4];
+
+    if (minutes) {
+	if (int(minutes) > 59) {
+	    state.error = "Invalid minute range.";
+	    return;
+	}
+	if (hours) {
+	    time += 3600 * int(hours);
+	}
+	time += 60 * int(minutes);
+	var seconds = results[5];
+	if (int(seconds) > 59) {
+	    state.error = "Invalid second range.";
+	    return;
+	}
+
+	time += int(seconds);
+	time += int(results[6] / 1000);
+    }
+    else {
+	time += int(results[7]);
+	time += int(results[8]) / 1000;
+    }
+
+    return time;
 }
