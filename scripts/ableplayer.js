@@ -601,7 +601,6 @@ AblePlayer.prototype.initTracks = function() {
         this.metadata = []; 
         this.currentMetadata = -1; 
       }
-      this.setupTimedText(kind,track); 
     }
   }
 };
