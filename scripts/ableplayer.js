@@ -522,7 +522,7 @@ AblePlayer.prototype.injectPlayerCode = function() {
         
     // oh, and also add div for displaying alerts and error messages 
     this.$alertDiv = $('<div>',{
-      'class' : 'ump-alert',
+      'class' : 'ump-alert-div',
       'role' : 'alert'
     });   
     this.$umpDiv.after(this.$alertDiv);
@@ -904,7 +904,8 @@ AblePlayer.prototype.addPrefsForm = function() {
     keysFieldset, keysLegend, 
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
     thisObj; 
-     
+
+  thisObj = this;
   // define all the parts
   prefsDiv = $('<div>',{ 
     'class': 'ump-prefs-form',
@@ -957,36 +958,25 @@ AblePlayer.prototype.addPrefsForm = function() {
   }         
   this.$umpDiv.append(prefsDiv); 
 
-  // initiate form as a JQuery-UI dialog 
-  // documentation: http://api.jqueryui.com/dialog 
-  thisObj = this;
-  $( ".ump-prefs-form" ).dialog({ 
-    autoOpen: false,
-    buttons: [
-      { 
-        text: 'Save',
-        click: function() { 
-          thisObj.savePrefs(); 
-          $(this).dialog('close');
-        }
-      },
-      {
-        text: 'Cancel',
-        click: function() { 
-          $(this).dialog('close');
-        }
-      }
-    ],
-    closeOnEscape: true,
-    dialogClass: 'ump-prefs-dialog',
-    draggable: true,
-    modal: true,
-    resizable: true,
-    title: 'Preferences',
-    width: '32em',
-    close: function( event, ui ) {$('.ump-preferences').focus();}
+  var dialog = new AccessibleDialog(prefsDiv, "Preferences", "Modal dialog of player preferences.");
+
+  // Add save and cancel buttons.
+  prefsDiv.append('<hr>');
+  var saveButton = $('<button>Save</button>');
+  var cancelButton = $('<button>Cancel</button>');
+  saveButton.click(function () {
+    dialog.hide();
+    thisObj.savePrefs();
   });
+  cancelButton.click(function () {
+    dialog.hide();
+  });
+
+  prefsDiv.append(saveButton);
+  prefsDiv.append(cancelButton);
+  this.prefsDialog = dialog;
 };
+
 AblePlayer.prototype.addHelp = function() {   
   // create help text that will be displayed in a JQuery-UI dialog 
   // if user clicks the Help button   
@@ -1063,25 +1053,17 @@ AblePlayer.prototype.addHelp = function() {
   });
   this.$umpDiv.append(helpDiv); 
     
-  // initiate as a JQuery-UI dialog 
-  // documentation: http://api.jqueryui.com/dialog 
-  $('.ump-help-div').dialog({ 
-    autoOpen: false,
-    buttons: [{ 
-      text: this.tt.ok,
-      click: function() { 
-        $(this).dialog('close');
-      }
-    }],
-    closeOnEscape: true,
-    dialogClass: 'ump-help-dialog',
-    draggable: true,
-    modal: true,
-    resizable: true,
-    title: this.tt.helpTitle,
-    width: '32em',
-    close: function( event, ui ) {$('.ump-help').focus();}
+
+  var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, "Modal dialog of help information.");
+
+  helpDiv.append('<hr>');
+  var okButton = $('<button>' + this.tt.ok + '</button>');
+  okButton.click(function () {
+    dialog.hide();
   });
+
+  helpDiv.append(okButton);
+  this.helpDialog = dialog;
 };
 AblePlayer.prototype.setCookie = function(cookieValue) { 
   if ($.isFunction($.cookie)) { 
@@ -1258,27 +1240,24 @@ AblePlayer.prototype.savePrefs = function() {
   }
 };
 AblePlayer.prototype.setupAlert = function() { 
-  // setup JQuery hidden dialog in which to show alert messages via showAlert()
-  this.$alertBox = $('#ump-alert').dialog({
-    autoOpen: false,
-    buttons: [{
-      text: this.tt.ok, 
-      click: function() { 
-        $(this).dialog("close");
-      }
-    }],
-    closeOnEscape: true,
-    dialogClass: 'ump-alert-dialog',
-    draggable: true,
-    modal: false,
-    resizable: false,
-    title: this.tt.done + '.',
-    width: '20em'
+  var alertElement = $('.ump-alert-div');
+  var dialog = new AccessibleDialog(alertElement, this.tt.done + '.', "Modal dialog alert.");
+  this.alertBox = $('<div></div>');
+  
+  alertElement.append(this.alertBox);
+  alertElement.append('<hr>');
+  var okButton = $('<button>' + this.tt.ok + '</button>');
+  okButton.click(function () {
+    dialog.hide();
   });
+
+  alertElement.append(okButton);
+  this.alertDialog = dialog;
 };
+
 AblePlayer.prototype.showAlert = function(msg) { 
-  // show alert message in jQuery dialog
-  this.$alertBox.text(msg).dialog('open');
+  this.alertBox.text(msg);
+  this.alertDialog.show();
 };
 
 AblePlayer.prototype.updateTranscript = function() {
@@ -2627,10 +2606,10 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
   }
 };
 AblePlayer.prototype.handlePrefsClick = function() { 
-  $('.ump-prefs-form').dialog('open');  
+  this.prefsDialog.show();
 };
 AblePlayer.prototype.handleHelpClick = function() { 
-  $('.ump-help-div').dialog('open');
+  this.helpDialog.show();
 };
 AblePlayer.prototype.addSeekControls = function(leftPos) { 
 
@@ -3487,8 +3466,6 @@ function parseWebVTT(text) {
   //throw "ASDF";
   // Normalize line ends to \n.
   text.replace("\r\n", "\n").replace("\r", "\n");
-  // Remove any cue tags.
-  text.replace( /<.*?>/g, '' )
   
   var parserState = {
     text: text,
@@ -4300,3 +4277,128 @@ function generateTranscript(captions, descriptions) {
 
   return main;
 }
+
+
+var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+
+// Based on the incredible accessible modal dialog.
+function AccessibleDialog(modalDiv, title, description) {
+  this.title = title;
+  this.description = description;
+  
+  var thisObj = this;
+  var modal = modalDiv;
+  this.modal = modal;
+  modal.css({
+    width: "50%",
+    "margin-left": "auto",
+    "margin-right": "auto",
+    "z-index": 3,
+    position: "fixed",
+    top: "25%",
+    left: "25%",
+    display: "none"
+  });
+  modal.addClass("modalDialog");
+
+  var descriptionDiv = $('<div id="modalDescription"></div>');
+  descriptionDiv.text(description);
+  // Move off-screen.
+  descriptionDiv.css({
+    position: "absolute",
+    left: "-999px",
+    width: "1px",
+    height: "1px",
+    top: "auto"
+  });
+
+  var titleH1 = $('<h1 id="modalTitle"></h1>');
+  titleH1.css("text-align", "center");
+  titleH1.text(title);
+
+  modal.prepend(titleH1);
+  modal.prepend(descriptionDiv);
+
+  modal.attr("aria-hidden", "true");
+  modal.attr("aria-labelledby", "modalTitle");
+  modal.attr("aria-describedb", "modalDescription");
+  modal.attr("role", "dialog");
+
+  modal.keydown(function (event) {
+    // Escape
+    if (event.which === 27) {
+      thisObj.hide();
+      event.preventDefault();
+    }
+    // Tab
+    else if (event.which === 9) {
+      // Manually loop tab navigation inside the modal.
+      var parts = modal.find('*');
+      var focusable = parts.filter(focusableElementsSelector).filter(':visible');
+
+      if (focusable.length === 0) {
+	return;
+      }
+
+      var focused = $(':focus');
+      var currentIndex = focusable.index(focused);
+      if (event.shiftKey) {
+	// If backwards from first element, go to last.
+	if (currentIndex === 0) {
+	  focusable.get(focusable.length - 1).focus();
+	  event.preventDefault();
+	}
+      }
+      else {
+	if (currentIndex === focusable.length - 1) {
+	  focusable.get(0).focus();
+	  event.preventDefault();
+	}
+      }
+    }
+  });
+
+  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "false");
+}
+
+AccessibleDialog.prototype.show = function () {
+  if (!this.overlay) {
+    // Generate overlay.
+    var overlay = $('<div class="modalOverlay"></div>');
+    overlay.attr("tabindex", "-1");
+    this.overlay = overlay;
+    overlay.css({
+      width: "100%",
+      height: "100%",
+      "z-index": 2,
+      "background-color": "#000",
+      opacity: 0.5,
+      position: "fixed",
+      top: 0,
+      left: 0,
+      display: "none",
+      margin: 0,
+      padding: 0
+    });
+    $('body').append(overlay);
+  }
+
+  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "true");
+  this.overlay.css('display', 'block');
+  this.modal.css('display', 'block');
+  this.modal.attr('aria-hidden', 'false');
+
+  this.focusedElementBeforeModal = $(':focus');
+  this.modal.find("*").filter(focusableElementsSelector).filter(':visible').first().focus();
+};
+
+AccessibleDialog.prototype.hide = function () {
+  if (this.overlay) {
+    this.overlay.css('display', 'none');
+  }
+  this.modal.css('display', 'none');
+  this.modal.attr('aria-hidden', 'true');
+  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "false");
+
+  this.focusedElementBeforeModal.focus();
+};
