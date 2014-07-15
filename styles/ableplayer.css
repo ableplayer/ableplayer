@@ -169,7 +169,7 @@ div.ump-now-playing span span {
 }
 
 /* Preferences Form */ 
-.ump-prefs-form, .ump-help-div { 
+.ump-prefs-form, .ump-help-div, .ump-alert-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
 	padding: 0.5em 1em;
@@ -198,26 +198,11 @@ div.ump-now-playing span span {
 .ump-help-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
-	padding: 0.5em 0;
-	margin: 0 0 0 1em; 
 	width: 25em;
-}
-.ump-help-div p { 
-	margin: 0.25em -1em;
-}
-.ump-help-div ul { 
-	list-style-type: none;
-	padding-left: 0.25em;
 }
 
-/* Alert Dialog */ 
-.ump-alert-div { 
-	background-color: #F5F5F5; 
-	border: medium solid #ccc;
-	padding: 0.5em 0;
-	margin: 0 0 0 1em; 
-	width: 25em;
-	/* display: none; */
+.ump-help-div ul { 
+	list-style-type: none;
 }
 
 /* icomoon.io font styling */

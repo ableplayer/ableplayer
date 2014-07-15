@@ -24,7 +24,7 @@
 // mediaId - the id attribute of the <audio> or <video> element 
 // umpIndex - the index of this Able Player instance (if page includes only one player, umpIndex = 0) 
 // startTime - the time at which to begin playing the media       
-function AblePlayer(mediaId, umpIndex, startTime) {
+function AblePlayer(mediaId, umpIndex, startTime, includeTranscript) {
 
   /* 
    *
@@ -121,7 +121,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
     function () { 
       if (thisObj.countProperties(thisObj.tt) > 50) { 
         // close enough to ensure that most text variables are populated 
-        thisObj.setup(mediaId, umpIndex, startTime);
+        thisObj.setup(mediaId, umpIndex, startTime, includeTranscript);
       } 
       else { 
         // can't continue loading player with no text
@@ -130,7 +130,7 @@ function AblePlayer(mediaId, umpIndex, startTime) {
     }
   );
 }
-AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime) { 
+AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime, includeTranscript) { 
 
     if (mediaId) { 
       this.mediaId = mediaId;   
@@ -146,6 +146,14 @@ AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime) {
       else { 
         this.startTime = 0;
       }
+
+      if (includeTranscript) {
+	this.includeTranscript = true;
+      }
+      else {
+	this.includeTranscript = false;
+      }
+
       if (this.debug && startTime > 0) { 
         console.log('Will start media at ' + startTime + ' seconds');
       }
@@ -196,14 +204,6 @@ AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime) {
 
             if (this.player) {
           
-              // see if there's a transcript (supported for both video and audio) 
-              if ($('.ump-transcript')) { 
-                this.hasTranscript = true;
-              }
-              else { 
-                this.hasTranscript = false;
-              }
-
               // do a bunch of stuff to setup player 
               this.getIconType();
               this.getDimensions();
@@ -470,6 +470,26 @@ AblePlayer.prototype.injectPlayerCode = function() {
     });
     this.$playerDiv.addClass('ump-'+this.mediaType);
 
+    // create a div for exposing description
+    // description will be exposed via role="alert" & announced by screen readers  
+    this.$descDiv = $('<div>',{
+      'class': 'ump-descriptions',
+      'role': 'alert'
+    });
+    // Start off with description hidden.
+    this.$descDiv.hide();
+    // TODO: Does this need to be changed when preference is changed?
+    if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
+      this.$descDiv.addClass('ump-clipped');                
+    }
+
+    this.$transcriptDiv = $('<div>', {
+      'class' : 'ump-transcript'
+    });
+    if (!this.includeTranscript) {
+      this.$transcriptDiv.hide();
+    }
+
     // The default skin depends a bit on a Now Playing div 
     // so go ahead and add one 
     // However, it's only populated if this.showNowPlaying = true 
@@ -498,11 +518,11 @@ AblePlayer.prototype.injectPlayerCode = function() {
     this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
 
     // and finally, append playerDiv to umpDiv  
-    this.$umpDiv.append(this.$playerDiv);      
+    this.$umpDiv.append(this.$playerDiv, this.$descDiv, this.$transcriptDiv);      
         
     // oh, and also add div for displaying alerts and error messages 
     this.$alertDiv = $('<div>',{
-      'class' : 'ump-alert',
+      'class' : 'ump-alert-div',
       'role' : 'alert'
     });   
     this.$umpDiv.after(this.$alertDiv);
@@ -566,16 +586,8 @@ AblePlayer.prototype.initTracks = function() {
         // prepare closed description, even if user doesn't prefer it 
         // this way it's available if needed 
         this.hasClosedDesc = true;
-        // create a div for exposing description
-        // description will be exposed via role="alert" & announced by screen readers  
-        this.$descDiv = $('<div>',{
-          'class': 'ump-descriptions',
-          'role': 'alert'
-        });
-        if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
-          this.$descDiv.addClass('ump-clipped');                
-        }
-        this.$umpDiv.append(this.$descDiv); 
+	// Display the description div.
+	this.$descDiv.show();
         this.descriptions = []; //temp array for storing data from source file
         this.currentDescription = -1;
         if ((this.prefDesc === 1) && (this.prefClosedDesc === 1)) { 
@@ -601,7 +613,6 @@ AblePlayer.prototype.initTracks = function() {
         this.metadata = []; 
         this.currentMetadata = -1; 
       }
-      this.setupTimedText(kind,track); 
     }
   }
 };
@@ -893,7 +904,8 @@ AblePlayer.prototype.addPrefsForm = function() {
     keysFieldset, keysLegend, 
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
     thisObj; 
-     
+
+  thisObj = this;
   // define all the parts
   prefsDiv = $('<div>',{ 
     'class': 'ump-prefs-form',
@@ -904,11 +916,11 @@ AblePlayer.prototype.addPrefsForm = function() {
   prefsIntro = $('<p>',{ 
     html: introText
   });
-  if (this.mediaType === 'video' || this.hasTranscript === true) { 
-    featuresFieldset = $('<fieldset>');
-    featuresLegend = $('<legend>Features</legend>');      
-    featuresFieldset.append(featuresLegend);  
-  }
+
+  featuresFieldset = $('<fieldset>');
+  featuresLegend = $('<legend>Features</legend>');      
+  featuresFieldset.append(featuresLegend);  
+
   keysFieldset = $('<fieldset>');
   keysLegend = $('<legend>Modifier Keys</legend>');       
   keysFieldset.append(keysLegend);  
@@ -940,42 +952,31 @@ AblePlayer.prototype.addPrefsForm = function() {
   prefsDiv
     .append(prefsIntro)
     .append(keysFieldset);
-  if (this.mediaType === 'video' || this.hasTranscript === true) { 
+  if (this.mediaType === 'video') { 
     prefsDiv
       .append(featuresFieldset);
   }         
   this.$umpDiv.append(prefsDiv); 
 
-  // initiate form as a JQuery-UI dialog 
-  // documentation: http://api.jqueryui.com/dialog 
-  thisObj = this;
-  $( ".ump-prefs-form" ).dialog({ 
-    autoOpen: false,
-    buttons: [
-      { 
-        text: 'Save',
-        click: function() { 
-          thisObj.savePrefs(); 
-          $(this).dialog('close');
-        }
-      },
-      {
-        text: 'Cancel',
-        click: function() { 
-          $(this).dialog('close');
-        }
-      }
-    ],
-    closeOnEscape: true,
-    dialogClass: 'ump-prefs-dialog',
-    draggable: true,
-    modal: true,
-    resizable: true,
-    title: 'Preferences',
-    width: '32em',
-    close: function( event, ui ) {$('.ump-preferences').focus();}
+  var dialog = new AccessibleDialog(prefsDiv, "Preferences", "Modal dialog of player preferences.");
+
+  // Add save and cancel buttons.
+  prefsDiv.append('<hr>');
+  var saveButton = $('<button>Save</button>');
+  var cancelButton = $('<button>Cancel</button>');
+  saveButton.click(function () {
+    dialog.hide();
+    thisObj.savePrefs();
   });
+  cancelButton.click(function () {
+    dialog.hide();
+  });
+
+  prefsDiv.append(saveButton);
+  prefsDiv.append(cancelButton);
+  this.prefsDialog = dialog;
 };
+
 AblePlayer.prototype.addHelp = function() {   
   // create help text that will be displayed in a JQuery-UI dialog 
   // if user clicks the Help button   
@@ -1052,25 +1053,17 @@ AblePlayer.prototype.addHelp = function() {
   });
   this.$umpDiv.append(helpDiv); 
     
-  // initiate as a JQuery-UI dialog 
-  // documentation: http://api.jqueryui.com/dialog 
-  $('.ump-help-div').dialog({ 
-    autoOpen: false,
-    buttons: [{ 
-      text: this.tt.ok,
-      click: function() { 
-        $(this).dialog('close');
-      }
-    }],
-    closeOnEscape: true,
-    dialogClass: 'ump-help-dialog',
-    draggable: true,
-    modal: true,
-    resizable: true,
-    title: this.tt.helpTitle,
-    width: '32em',
-    close: function( event, ui ) {$('.ump-help').focus();}
+
+  var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, "Modal dialog of help information.");
+
+  helpDiv.append('<hr>');
+  var okButton = $('<button>' + this.tt.ok + '</button>');
+  okButton.click(function () {
+    dialog.hide();
   });
+
+  helpDiv.append(okButton);
+  this.helpDialog = dialog;
 };
 AblePlayer.prototype.setCookie = function(cookieValue) { 
   if ($.isFunction($.cookie)) { 
@@ -1126,20 +1119,17 @@ AblePlayer.prototype.getPrefs = function() {
     this.prefs[5]['label'] = this.tt.prefVisibleDesc;
     this.prefs[5]['default'] = 1; // on because sighted users probably want to see this cool feature in action 
     
-    if (this.hasTranscript === true) { 
+    this.prefs[6] = [];
+    this.prefs[6]['name'] = 'prefHighlight'; // highlight transcript as media plays
+    this.prefs[6]['label'] = this.tt.prefHighlight;
+    this.prefs[6]['default'] = 1; // on because many users can benefit
 
-      this.prefs[6] = [];
-      this.prefs[6]['name'] = 'prefHighlight'; // highlight transcript as media plays
-      this.prefs[6]['label'] = this.tt.prefHighlight;
-      this.prefs[6]['default'] = 1; // on because many users can benefit
-
-      this.prefs[7] = [];
-      this.prefs[7]['name'] = 'prefTabbable'; // tab-enable transcript 
-      this.prefs[7]['label'] = this.tt.prefTabbable;
-      this.prefs[7]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page
-    }
+    this.prefs[7] = [];
+    this.prefs[7]['name'] = 'prefTabbable'; // tab-enable transcript 
+    this.prefs[7]['label'] = this.tt.prefTabbable;
+    this.prefs[7]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page
   }
-  else if (this.hasTranscript === true) { 
+  else { 
 
     this.prefs[2] = [];
     this.prefs[2]['name'] = 'prefHighlight'; // highlight transcript as media plays
@@ -1250,31 +1240,62 @@ AblePlayer.prototype.savePrefs = function() {
   }
 };
 AblePlayer.prototype.setupAlert = function() { 
-  // setup JQuery hidden dialog in which to show alert messages via showAlert()
-  this.$alertBox = $('#ump-alert').dialog({
-    autoOpen: false,
-    buttons: [{
-      text: this.tt.ok, 
-      click: function() { 
-        $(this).dialog("close");
-      }
-    }],
-    closeOnEscape: true,
-    dialogClass: 'ump-alert-dialog',
-    draggable: true,
-    modal: false,
-    resizable: false,
-    title: this.tt.done + '.',
-    width: '20em'
+  var alertElement = $('.ump-alert-div');
+  var dialog = new AccessibleDialog(alertElement, this.tt.done + '.', "Modal dialog alert.");
+  this.alertBox = $('<div></div>');
+  
+  alertElement.append(this.alertBox);
+  alertElement.append('<hr>');
+  var okButton = $('<button>' + this.tt.ok + '</button>');
+  okButton.click(function () {
+    dialog.hide();
   });
+
+  alertElement.append(okButton);
+  this.alertDialog = dialog;
 };
+
 AblePlayer.prototype.showAlert = function(msg) { 
-  // show alert message in jQuery dialog
-  this.$alertBox.text(msg).dialog('open');
+  this.alertBox.text(msg);
+  this.alertDialog.show();
 };
+
+AblePlayer.prototype.updateTranscript = function() {
+  // Update transcript.
+  var div = generateTranscript(this.captions || [], this.descriptions || []);
+  this.$transcriptDiv.html(div);
+
+  var thisObj = this;
+
+  // handle clicks on text within transcript 
+  // Note #1: Only one transcript per page is supported
+  // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
+  // Forcing this elsewhere, in the keyboard handler section  
+  if ($('.ump-transcript').length > 0) {  
+    $('.ump-transcript span').click(function() { 
+      var spanStart = $(this).attr('data-start');
+      if (thisObj.player === 'html5') { 
+        thisObj.seekTo(spanStart);
+      }
+      else { 
+        // jw player 
+        jwplayer(thisObj.jwId).seek(spanStart);
+      }
+      // change play button to pause button
+      thisObj.$playpauseButton.attr('title',thisObj.tt.pause); 
+      if (thisObj.controllerFont === 'icomoon') {
+        thisObj.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+      }
+      else { 
+        thisObj.$playpauseButton.find('img').attr('src',thisObj.pauseButtonImg); 
+      }
+    });
+  }
+}
+
 AblePlayer.prototype.addEventListeners = function() { 
 
-  var thisObj, whichButton, thisElement, spanStart; 
+  var thisObj, whichButton, thisElement; 
   
   // Save the current object context in thisObj for use with inner functions.
   thisObj = this;
@@ -1422,31 +1443,6 @@ AblePlayer.prototype.addEventListeners = function() {
     this.$playlist.click(function() { 
       thisObj.playlistIndex = $(this).index();
       thisObj.swapSource(thisObj.playlistIndex);  
-    });
-  }
-    
-  // handle clicks on text within transcript 
-  // Note #1: Only one transcript per page is supported
-  // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
-  // Forcing this elsewhere, in the keyboard handler section  
-  if ($('.ump-transcript').length > 0) {  
-    $('.ump-transcript span').click(function() { 
-      spanStart = $(this).attr('data-start');
-      if (thisObj.player === 'html5') { 
-        thisObj.seekTo(spanStart);
-      }
-      else { 
-        // jw player 
-        jwplayer(thisObj.jwId).seek(spanStart);
-      }
-      // change play button to pause button
-      thisObj.$playpauseButton.attr('title',thisObj.tt.pause); 
-      if (thisObj.controllerFont === 'icomoon') {
-        thisObj.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
-      }
-      else { 
-        thisObj.$playpauseButton.find('img').attr('src',thisObj.pauseButtonImg); 
-      }
     });
   }
 
@@ -2610,10 +2606,10 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
   }
 };
 AblePlayer.prototype.handlePrefsClick = function() { 
-  $('.ump-prefs-form').dialog('open');  
+  this.prefsDialog.show();
 };
 AblePlayer.prototype.handleHelpClick = function() { 
-  $('.ump-help-div').dialog('open');
+  this.helpDialog.show();
 };
 AblePlayer.prototype.addSeekControls = function(leftPos) { 
 
@@ -2805,7 +2801,7 @@ AblePlayer.prototype.seekTo = function (newTime) {
   this.startTime = newTime;
   // Check HTML5 media "seekable" property to be sure media is seekable to startTime
   seekable = this.media.seekable;
-  if (this.startTime > seekable.start(0) && this.startTime <= seekable.end(0)) { 
+  if (seekable.length > 0 && this.startTime > seekable.start(0) && this.startTime <= seekable.end(0)) { 
     // startTime is seekable. Seek to startTime, then start playing
     this.media.currentTime = this.startTime;          
     this.media.play(true);
@@ -2849,7 +2845,7 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
 
   var trackSrc, trackLang, $tempDiv, thisObj, 
     cues, c, cue, timeValues, start, end, cueText, i; 
-     
+  
   // Only supports timed text in VTT format
   trackSrc = track.getAttribute('src');
   trackLang = track.getAttribute('srclang');
@@ -2859,16 +2855,35 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
       style: 'display:none'
     });
     // Save the current object context in thisObj for use with inner functions.
-    thisObj = this; 
+    var thisObj = this; 
 
     // load  file and store captions into array 
     $tempDiv.load(trackSrc, function (trackText, status, req) { 
       if (status === 'error') { 
-        if (this.debug) {
+        if (thisObj.debug) {
           console.log ('error reading ' + kind + ' file:' + status);
         }
       }
       else {
+	var cues = parseWebVTT(trackText).cues;
+	if (kind === "captions") {
+	  thisObj.captions = cues;
+	}
+	else if (kind === "descriptions") {
+	  thisObj.descriptions = cues;
+	}
+	else if (kind === "subtitles") {
+	  thisObj.subtitles = cues;
+	}
+	else if (kind === "chapters") {
+	  thisObj.chapters = cues;
+	}
+	else if (kind === "metadata") {
+	  thisObj.metadata = cues;
+	}
+
+	thisObj.updateTranscript();
+/*
         //stanardize on \n for eol character
         trackText = thisObj.strip(trackText.replace(/\r\n|\r|\n/g, '\n'));
         cues = trackText.split('\n\n'); //creates an array
@@ -2913,14 +2928,44 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
                 }
               }
             }
-          }
-        }
+          }*/
       }
     });
-    //done with temp div. Can remove it now. 
-    $tempDiv.remove();    
-  } 
+  }
+  //done with temp div. Can remove it now. 
+  $tempDiv.remove();    
 };
+
+// Takes a cue and returns the caption text to display for it.
+AblePlayer.prototype.flattenCueForCaption = function (cue) {
+  var result = [];
+
+  var flattenComponent = function (component) {
+    var result = [];
+    if (component.type === "string") {
+      result.push(component.value);
+    }
+    else if (component.type === "voice") {
+      result.push("[" + component.value + "]");
+      for (var ii in component.children) {
+	flattenComponent(component.children[ii]);
+      }
+    }
+    else {
+      for (var ii in component.children) {
+	flattenComponent(component.children[ii]);
+      }
+    }
+    return result.join("");
+  }
+
+  for (var ii in cue.components.children) {
+    result.push(flattenComponent(cue.components.children[ii]));
+  }
+
+  return result.join("");
+}
+
 AblePlayer.prototype.showCaptions = function() { 
 
   var now, c, thisCaption; 
@@ -2945,7 +2990,7 @@ AblePlayer.prototype.showCaptions = function() {
     }     
     if (this.currentCaption !== thisCaption) { 
       // it's time to load the new caption into the container div 
-      this.$captionDiv.html(this.captions[thisCaption].text);       
+      this.$captionDiv.html(this.flattenCueForCaption(this.captions[thisCaption]));
       this.currentCaption = thisCaption;
     } 
   }
@@ -2959,7 +3004,20 @@ AblePlayer.prototype.showDescription = function() {
   // there's a lot of redundancy between this function and showCaptions 
   // Trying to combine them ended up in a mess though. Keeping as is for now. 
 
-  var now, d, thisDescription; 
+  var now, d, thisDescription;
+
+  var flattenComponentForDescription = function (component) {
+    var result = [];
+    if (component.type === "string") {
+      result.push(component.value);
+    }
+    else {
+      for (var ii in component.children) {
+	result.push(flattenComponentForDescription(component.children[ii]));
+      }
+    }
+    return result.join("");
+  }
   
   if (this.player === 'html5') {
     now = this.media.currentTime;
@@ -2976,7 +3034,7 @@ AblePlayer.prototype.showDescription = function() {
   if (typeof thisDescription !== 'undefined') {  
     if (this.currentDescription !== thisDescription) { 
       // load the new description into the container div 
-      this.$descDiv.html(this.descriptions[thisDescription].text);
+      this.$descDiv.html(flattenComponentForDescription(this.descriptions[thisDescription].components));
       this.currentDescription = thisDescription;
       if (this.$descDiv.is(':hidden')) { 
         this.$descDiv.show();
@@ -3400,4 +3458,947 @@ AblePlayer.prototype.countProperties = function(obj) {
     }
   }
   return count;
+};
+
+
+// See section 4.1 of dev.w3.org/html5/webvtt for format details.
+function parseWebVTT(text) {
+  //throw "ASDF";
+  // Normalize line ends to \n.
+  text.replace("\r\n", "\n").replace("\r", "\n");
+  
+  var parserState = {
+    text: text,
+    error: null,
+    metadata: {},
+    cues: [],
+    line: 1,
+    column: 1
+  };
+
+  try {
+    act(parserState, parseFileBody);
+  }
+  catch (err) {
+    console.log("Line: " + parserState.line + "\nColumn: " + parserState.column);
+    console.log(err);
+  }
+
+  return parserState;
+}
+
+function actList(state, list) {
+  var results = [];
+  for (var ii in list) {
+    results.push(act(state, list[ii]));
+  }
+  return results;
+}
+
+// Applies the action and checks for errors.
+function act(state, action) {
+  var val = action(state);
+  if (state.error !== null) {
+    throw state.error;
+  }
+  return val;
+}
+
+function updatePosition(state, cutText) {
+  for (var ii in cutText) {
+    if (cutText[ii] === "\n") {
+      state.column = 1;
+      state.line += 1;
+    }
+    else {
+      state.column += 1;
+    }
+  }
+}
+
+function cut(state, length) {
+  var returnText = state.text.substring(0, length);
+  updatePosition(state, returnText);
+  state.text = state.text.substring(length);
+  return returnText;
+}
+
+function cutLine(state, length) {
+  var nextEOL = state.text.indexOf("\n");
+  var returnText;
+  if (nextEOL === -1) {
+    returnText = state.text;
+    updatePosition(state, returnText);
+    state.text = "";
+  }
+  else {
+    returnText = state.text.substring(0, nextEOL);
+    updatePosition(state, returnText + "\n");
+    state.text = state.text.substring(nextEOL + 1);
+  }
+  return returnText;
+}
+
+function peekLine(state) {
+  var nextEOL = state.text.indexOf("\n");
+  if (nextEOL === -1) {
+    return state.text;
+  }
+  else {
+    return state.text.substring(0, nextEOL);
+  }
+}
+
+function parseFileBody(state) {
+  actList(state, [
+    eatOptionalBOM,
+    eatSignature,
+    eatSingleSpaceOrTab,
+    eatUntilEOLInclusive,
+    parseMetadataHeaders,
+    eatAtLeast1EmptyLines,
+    parseCuesAndComments]);
+}
+
+// Parses all metadata headers until a cue is discovered.
+function parseMetadataHeaders(state) {
+  while (true) {
+    var nextLine = peekLine(state);
+    if (nextLine.indexOf("-->") !== -1) {
+      return;
+    }
+    else if (nextLine.length === 0) {
+      return;
+    }
+    else {
+      var keyValue = act(state, getKeyValue);
+      state.metadata[keyValue[0]] = keyValue[1];
+      act(state, eatUntilEOLInclusive);
+    }
+  }
+}
+
+function nextSpaceOrNewline(s) {
+  var possible = [];
+  var spaceIndex = s.indexOf(" ");
+  if (spaceIndex >= 0) {
+    possible.push(spaceIndex);
+  }
+  var tabIndex = s.indexOf("\t");
+  if (tabIndex >= 0) {
+    possible.push(tabIndex);
+  }
+  var lineIndex = s.indexOf("\n");
+  if (lineIndex >= 0) {
+    possible.push(lineIndex);
+  }
+  
+  return Math.min.apply(null, possible);
+}
+
+function getKeyValue(state) {
+  var next = nextSpaceOrNewline(state.text);
+  var pair = cut(state, next);
+  var colon = pair.indexOf(":");
+  if (colon === -1) {
+    state.error = "Missing colon.";
+    return;
+  }
+  else {
+    var pairName = pair.substring(0, colon);
+    var pairValue = pair.substring(colon + 1);
+    return [pairName, pairValue];
+  }
+}
+
+function parseCuesAndComments(state) {
+  while (true) {
+    var nextLine = peekLine(state);
+    // If NOTE is not on a line all its own, it must be followed by a space or tab.
+    if (nextLine.indexOf("NOTE") === 0 && ((nextLine.length === 4) || (nextLine[4] === " ") || (nextLine[4] === "\t"))) {
+      actList(state, [eatComment, eatEmptyLines]);
+    }
+    else if (nextLine.trim().length !== 0) {
+      parseCue(state);
+    }
+    else {
+      // Everythings parsed!
+      return;
+    }
+  }
+}
+
+function parseCue(state) {
+  var nextLine = peekLine(state);
+  var cueId;
+  if (nextLine.indexOf("-->") === -1) {
+    cueId = cutLine(state);
+  }
+  var cueTimings = actList(state, [getTiming, 
+				   eatAtLeast1SpacesOrTabs,
+				   eatArrow,
+				   eatAtLeast1SpacesOrTabs,
+				   getTiming]);
+  var startTime = cueTimings[0];
+  var endTime = cueTimings[4];
+  if (startTime >= endTime) {
+    state.error = "Start time is not sooner than end time.";
+    return;
+  }
+  
+  act(state, eatSpacesOrTabs);
+  var cueSettings = act(state, getCueSettings);
+  // Cut the newline.
+  cut(state, 1);
+  var components = act(state, getCuePayload);
+  
+  state.cues.push({
+    id: cueId,
+    start: startTime,
+    end: endTime,
+    settings: cueSettings,
+    components: components
+  });
+}
+
+function getCueSettings(state) {
+  var cueSettings = {};
+  while (state.text.length > 0 && state.text[0] !== "\n") {
+    var keyValue = act(state, getKeyValue);
+    cueSettings[keyValue[0]] = keyValue[1];
+    act(state, eatSpacesOrTabs);
+  }
+  return cueSettings;
+}
+
+
+function getCuePayload(state) {
+  // Parser based on instructions in draft.
+  var result = {type: "internal", tagName: "", value: "", classes: [], annotation: "", parent: null, children: [], language: ""};
+  var current = result;
+  var languageStack = [];
+  while (state.text.length > 0) {
+    var nextLine = peekLine(state);
+    if (nextLine.indexOf("-->") !== -1) {
+      break;
+    }
+
+    var token = getCueToken(state);
+    // We'll use the tokens themselves as objects where possible.
+    if (token.type === "string") {
+      current.children.push(token);
+    }
+    else if (token.type === "startTag") {
+      token.type = token.tagName;
+      if (["c", "i", "b", "u", "ruby"].indexOf(token.tagName) !== -1) {
+	if (languageStack.length > 0) {
+	  current.language = languageStack[languageStack.length - 1];
+	}
+	current.children.push(token);
+	current = token;
+      }
+      else if (token.tagName === "rt" && current.tagName === "ruby") {
+	if (languageStack.length > 0) {
+	  current.language = languageStack[languageStack.length - 1];
+	}
+	current.children.push(token);
+	current = token;
+      }
+      else if (token.tagName === "v") {
+	token.value = token.annotation;
+	if (languageStack.length > 0) {
+	  current.language = languageStack[languageStack.length - 1];
+	}
+	current.children.push(token);
+	current = token;
+      }
+      else if (token.tagName === "lang") {
+	languageStack.push(token.annotation);
+	if (languageStack.length > 0) {
+	  current.language = languageStack[languageStack.length - 1];
+	}
+	current.children.push(token);
+	current = token;
+      }
+    }
+    else if (token.type === "endTag") {
+      if (token.tagName === current.type && ["c", "i", "b", "u", "ruby", "rt", "v"].indexOf(token.tagName) !== -1) {
+	current = current.parent;
+      }
+      else if (token.tagName === "lang" && current.type === "lang") {
+	current = current.parent;
+	languageStack.pop();
+      }
+      else if (token.tagName === "ruby" && current.type === "rt") {
+	current = current.parent.parent;
+      }
+    }
+    else if (token.type === "timestampTag") {
+      var tempState = {
+	text: token.value,
+	error: null,
+	metadata: {},
+	cues: [],
+	line: 1,
+	column: 1
+      };
+      try {
+	var timing = act(tempState, getTiming);
+	if (tempState.text.length === 0) {
+	  token.value = timing;
+	  current.push(token);
+	}
+      }
+      catch (err) {
+      }
+    }
+  }
+  
+  return result;
+}
+
+// Gets a single cue token; uses the method in the w3 specification.
+function getCueToken(state) {
+  var tokenState = "data";
+  var result = [];
+  var buffer = "";
+  var token = {type: "", tagName: "", value: "", classes: [], annotation: "", children: []}
+
+  while (true) {
+    var c;
+    // Double newlines indicate end of token.
+    if (state.text.length >= 2 && state.text[0] === "\n" && state.text[1] === "\n") {
+      cut(state, 2);
+      c = "\u0004";
+    }
+    else if (state.text.length > 0) {
+      c = state.text[0];
+    }
+    else {
+      // End of file.
+      c = "\u0004";
+    }
+
+    if (tokenState === "data") {
+      if (c === "&") {
+	buffer = "&";
+      }
+      else if (c === "<") {
+	if (result.length === 0) {
+	  tokenState = "tag";
+	}
+	else {
+	  token.type = "string";
+	  token.value = result.join("");
+	  return token;
+	}
+      }
+      else if (c === "\u0004") {
+	return {type: "string", value: result.join("")};
+      }
+      else {
+	result.push(c);
+      }
+    }
+    else if (tokenState === "escape") {
+      if (c === "&") {
+	result.push(buffer);
+	buffer = "&";
+      }
+      else if (c.match(/[0-9a-z]/)) {
+	buffer += c;
+      }
+      else if (c === ";") {
+	if (buffer === "&amp") {
+	  result.push("&");
+	}
+	else if (buffer === "&lt") {
+	  result.push("<");
+	}
+	else if (buffer === "&gt") {
+	  result.push(">");
+	}
+	else if (buffer === "&lrm") {
+	  result.push("\u200e");
+	}
+	else if (buffer === "&rlm") {
+	  result.push("\u200f");
+	}
+	else if (buffer === "&nbsp") {
+	  result.push("\u00a0");
+	}
+	else {
+	  result.push(buffer);
+	  result.push(";");
+	}
+	tokenState = "data";
+      }
+      else if (c === "<" || c === "\u0004") {
+	result.push(buffer);
+	token.type = "string";
+	token.value = result.join("");
+	return token;
+      }
+      else {
+	result.push(buffer);
+	tokenState = "data";
+      }
+    }
+    else if (tokenState === "tag") {
+      if (c === "\t" || c === "\n" || c === "\u000c" || c === " ") {
+	tokenState = "startTagAnnotation";
+      }
+      else if (c === ".") {
+	tokenState = "startTagClass";
+      }
+      else if (c === "/") {
+	tokenState = "endTag";
+      }
+      else if (c.match("[0-9]")) {
+	tokenState = "timestampTag";
+	result.push(c);
+      }
+      else if (c === ">") {
+	cut(state, 1);
+	break;
+      }
+      else if (c === "\u0004") {
+	token.tagName = "";
+	token.type = "startTag";
+	return token;
+      }
+      else {
+	result.push(c);
+	tokenState = "startTag";
+      }
+    }
+    else if (tokenState === "startTag") {
+      if (c === "\t" || c === "\u000c" || c === " ") {
+	tokenState = "startTagAnnotation";
+      }
+      else if (c === "\n") {
+	buffer = c;
+	tokenState = "startTagAnnotation";
+      }
+      else if (c === ".") {
+	tokenState = "startTagClass";
+      }
+      else if (c === ">") {
+	cut(state, 1);
+	token.tagName = result.join("");
+	token.type = "startTag";
+	return token;
+      }
+      else if (c === "\u0004") {
+	token.tagName = result.join("");
+	token.type = "startTag";
+	return token;
+      }
+      else {
+	result.push(c);
+      }
+    }
+    else if (tokenState === "startTagClass") {
+      if (c === "\t" || c === "\u000c" || c === " ") {
+	token.classes.push(buffer);
+	buffer = "";
+	tokenState = "startTagAnnotation";
+      }
+      else if (c === "\n") {
+	token.classes.push(buffer);
+	buffer = c;
+	tokenState = "startTagAnnotation";
+      }
+      else if (c === ".") {
+	token.classes.push(buffer);
+	buffer = "";
+      }
+      else if (c === ">") {
+	cut(state, 1);
+	token.classes.push(buffer);
+	token.type = "startTag";
+	token.tagName = result.join("");
+	return token;
+      }
+      else if (c === "\u0004") {
+	token.classes.push(buffer);
+	token.type = "startTag";
+	token.tagName = result.join("");
+	return token;
+      }
+      else {
+	buffer += "c";
+      }
+    }
+    else if (tokenState === "startTagAnnotation") {
+      if (c === ">") {
+	cut(state, 1);
+	buffer = buffer.trim().replace(/ +/, " ");
+	token.type = "startTag";
+	token.tagName = result.join("");
+	token.annotation = buffer;
+	return token;
+      }
+      else if (c === "\u0004") {
+	buffer = buffer.trim().replace(/ +/, " ");
+	token.type = "startTag";
+	token.tagName = result.join("");
+	token.annotation = buffer;
+	return token;
+      }
+      else {
+	buffer += c;
+      }
+    }
+    else if (tokenState === "endTag") {
+      if (c === ">") {
+	cut(state, 1);
+	token.type = "endTag";
+	token.tagName = result.join("");
+	return token;
+      }
+      else if (c === "\u0004") {
+	token.type = "endTag";
+	token.tagName = result.join("");
+	return token;
+      }
+      else {
+	result.push(c);
+      }
+    }
+    else if (tokenState === "timestampTag") {
+      if (c === ">") {
+	cut(state, 1);
+	token.type = "timestampTag";
+	token.name = result.join("");
+	return token;
+      }
+      else if (c === "\u0004") {
+	token.type = "timestampTag";
+	token.name = result.join("");
+	return token;
+      }
+      else {
+	result.push(c);
+      }
+    }
+    else {
+      throw "Unknown tokenState " + tokenState;
+    }
+
+    cut(state, 1);
+  }
+}
+
+function eatComment(state) {
+  // Cut the NOTE line.
+  var noteLine = cutLine(state);
+  if (noteLine.indexOf("-->") !== -1) {
+    state.error = "Invalid syntax: --> in NOTE line.";
+    return;
+  }
+  while (true) {
+    var nextLine = peekLine(state);
+    if (nextLine.trim().length === 0) {
+      // End of comment.
+      return;
+    }
+    else if (nextLine.indexOf("-->") !== -1) {
+      state.error = "Invalid syntax: --> in comment.";
+      return;
+    }
+    else {
+      cutLine(state);
+    }
+  }
+}
+
+// Initial byte order mark.
+function eatOptionalBOM(state) {
+  if (state.text[0] === "\ufeff") {
+    cut(state, 1);
+  }
+  
+}
+
+// "WEBVTT" string.
+function eatSignature(state) {
+  if (state.text.substring(0,6) === "WEBVTT") {
+    cut(state, 6);
+  }
+  else {
+    state.error = "Invalid signature.";
+  }
+}
+
+function eatArrow(state) {
+  if (state.text.length < 3 || state.text.substring(0,3) !== "-->") {
+    state.error = "Missing -->";
+  }
+  else {
+    cut(state, 3);
+  }
+}
+
+function eatSingleSpaceOrTab(state) {
+  if (state.text[0] === "\t" || state.text[0] === " ") {
+    cut(state, 1);
+  }
+  else {
+    state.error = "Missing space.";
+  }
+}
+
+function eatSpacesOrTabs(state) {
+  while (state.text[0] === "\t" || state.text[0] === " ") {
+    cut(state, 1);
+  }
+}
+
+function eatAtLeast1SpacesOrTabs(state) {
+  var numEaten = 0;
+  while (state.text[0] === "\t" || state.text[0] === " ") {
+    cut(state, 1);
+    numEaten += 1;
+  }
+  if (numEaten === 0) {
+    state.error = "Missing space.";
+  }
+}
+
+function eatUntilEOLInclusive(state) {
+  var nextEOL = state.text.indexOf("\n");
+  if (nextEOL === -1) {
+    state.error = "Missing EOL.";
+  }
+  else {
+    cut(state, nextEOL + 1);
+  }
+}
+
+function eatEmptyLines(state) {
+  while (state.text.length > 0) {
+    var nextLine = peekLine(state);
+    if (nextLine.trim().length === 0) {
+      cutLine(state);
+    }
+    else {
+      break;
+    }
+  }
+}
+
+// Eats empty lines, but throws an error if there's not at least one.
+function eatAtLeast1EmptyLines(state) {
+  var linesEaten = 0;
+  while (state.text.length > 0) {
+    var nextLine = peekLine(state);
+    if (nextLine.trim().length === 0) {
+      cutLine(state);
+      linesEaten += 1;
+    }
+    else {
+      break;
+    }
+  }
+  if (linesEaten === 0) {
+    state.error = "Missing empty line.";
+  }
+}
+
+function getTiming(state) {
+  var nextSpace = nextSpaceOrNewline(state.text);
+  if (nextSpace === -1) {
+    state.error("Missing timing.");
+    return;
+  }
+  var timestamp = cut(state, nextSpace);
+  
+  var results = /((\d\d):)?((\d\d):)(\d\d).(\d\d\d)|(\d+).(\d\d\d)/.exec(timestamp);
+  
+  if (!results) {
+    state.error = "Unable to parse timestamp.";
+    return;
+  }
+  var time = 0;
+  var hours = results[2];
+  var minutes = results[4];
+  
+  if (minutes) {
+    if (parseInt(minutes) > 59) {
+      state.error = "Invalid minute range.";
+      return;
+    }
+    if (hours) {
+      time += 3600 * parseInt(hours);
+    }
+    time += 60 * parseInt(minutes);
+    var seconds = results[5];
+    if (parseInt(seconds) > 59) {
+      state.error = "Invalid second range.";
+      return;
+    }
+    
+    time += parseInt(seconds);
+    time += parseInt(results[6]) / 1000;
+  }
+  else {
+    time += parseInt(results[7]);
+    time += parseInt(results[8]) / 1000;
+  }
+  
+  return time;
+}
+
+function generateTranscript(captions, descriptions) {
+  var main = $('<div></div>');
+  main.append('<h2>Transcript</h2>');
+
+  var nextCap = 0;
+  var nextDesc = 0;
+
+  var addDescription = function(div, desc) {
+    var descDiv = $('<div class="ump-desc"><span class="hidden">Description: </span></div>');
+
+    var flattenComponentForDescription = function(comp) {
+      var result = [];
+      if (comp.type === 'string') {
+	result.push(comp.value);
+      }
+      else {
+	for (var ii in comp.children) {
+	  result = result.concat(flattenComponentForDescription(comp.children[ii]));
+	}
+      }
+      return result;
+    }
+
+    var descSpan = $('<span></span>');
+    for (var ii in desc.components.children) {
+      var results = flattenComponentForDescription(desc.components.children[ii]);
+      for (var jj in results) {
+	descSpan.append(results[jj]);
+      }
+    }
+    descDiv.append(descSpan);
+
+    div.append(descDiv);
+  };
+
+  var addCaption = function(div, cap) {
+    var capSpan = $('<span></span>');
+
+    var flattenComponentForCaption = function(comp) {
+      var result = [];
+      var flattenString = function (str) {
+	var result = [];
+	if (str === "") {
+	  return result;
+	}
+	var openBracket = str.indexOf('[');
+	var closeBracket = str.indexOf(']');
+	var openParen = str.indexOf('(');
+	var closeParen = str.indexOf(')');
+
+	var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+	var hasParens = openParen !== -1 && closeParen !== -1;
+
+	if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
+	  result = result.concat(flattenString(str.substring(0, openBracket)));
+	  result.push($('<span class="ump-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
+	  result = result.concat(flattenString(str.substring(closeBracket + 1)));
+	}
+	else if (hasParens) {
+	  result = result.concat(flattenString(str.substring(0, openParen)));
+	  result.push($('<span class="ump-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
+	  result = result.concat(flattenString(str.substring(closeParen + 1)));
+	}
+	else {
+	  result.push(str);
+	}
+	return result;
+      }
+
+      if (comp.type === 'string') {
+	result = result.concat(flattenString(comp.value));
+      }
+      else if (comp.type === "v") {
+	var vSpan = $('<span class="ump-unspoken">[' + comp.value + ']</span>');
+	result.push(vSpan);
+	for (var ii in comp.children) {
+	  var subResults = flattenComponentForCaption(comp.children[ii]);
+	  for (var jj in subResults) {
+	    result.push(subResults[jj]);
+	  }
+	}
+      }
+      else {
+	for (var ii in comp.children) {
+	  result = result.concat(flattenComponentForCaption(comp.children[ii]));
+	}
+      }
+      return result;
+    }
+
+
+    for (var ii in cap.components.children) {
+      var results = flattenComponentForCaption(cap.components.children[ii]);
+      for (var jj in results) {
+	capSpan.append(results[jj]);
+      }
+    }
+
+    capSpan.attr('data-start', cap.start.toString());
+    capSpan.attr('data-end', cap.end.toString());
+    div.append(capSpan);
+    div.append("\n");
+  };
+
+  while ((nextCap < captions.length) || (nextDesc < descriptions.length)) {
+    if ((nextCap < captions.length) && (nextDesc < descriptions.length)) {
+      if (descriptions[nextDesc].start <= captions[nextCap].start) {
+	addDescription(main, descriptions[nextDesc]);
+	nextDesc += 1;
+      }
+      else {
+	addCaption(main, captions[nextCap]);
+	nextCap += 1;
+      }
+    }
+    else if (nextCap < captions.length) {
+      addCaption(main, captions[nextCap]);
+      nextCap += 1;
+    }
+    else if (nextDesc < descriptions.length) {
+      addDescription(main, descriptions[nextDesc]);
+      nextDesc += 1;
+    }
+  }
+
+  return main;
+}
+
+
+var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+
+// Based on the incredible accessible modal dialog.
+function AccessibleDialog(modalDiv, title, description) {
+  this.title = title;
+  this.description = description;
+  
+  var thisObj = this;
+  var modal = modalDiv;
+  this.modal = modal;
+  modal.css({
+    width: "50%",
+    "margin-left": "auto",
+    "margin-right": "auto",
+    "z-index": 3,
+    position: "fixed",
+    top: "25%",
+    left: "25%",
+    display: "none"
+  });
+  modal.addClass("modalDialog");
+
+  var descriptionDiv = $('<div id="modalDescription"></div>');
+  descriptionDiv.text(description);
+  // Move off-screen.
+  descriptionDiv.css({
+    position: "absolute",
+    left: "-999px",
+    width: "1px",
+    height: "1px",
+    top: "auto"
+  });
+
+  var titleH1 = $('<h1 id="modalTitle"></h1>');
+  titleH1.css("text-align", "center");
+  titleH1.text(title);
+
+  modal.prepend(titleH1);
+  modal.prepend(descriptionDiv);
+
+  modal.attr("aria-hidden", "true");
+  modal.attr("aria-labelledby", "modalTitle");
+  modal.attr("aria-describedb", "modalDescription");
+  modal.attr("role", "dialog");
+
+  modal.keydown(function (event) {
+    // Escape
+    if (event.which === 27) {
+      thisObj.hide();
+      event.preventDefault();
+    }
+    // Tab
+    else if (event.which === 9) {
+      // Manually loop tab navigation inside the modal.
+      var parts = modal.find('*');
+      var focusable = parts.filter(focusableElementsSelector).filter(':visible');
+
+      if (focusable.length === 0) {
+	return;
+      }
+
+      var focused = $(':focus');
+      var currentIndex = focusable.index(focused);
+      if (event.shiftKey) {
+	// If backwards from first element, go to last.
+	if (currentIndex === 0) {
+	  focusable.get(focusable.length - 1).focus();
+	  event.preventDefault();
+	}
+      }
+      else {
+	if (currentIndex === focusable.length - 1) {
+	  focusable.get(0).focus();
+	  event.preventDefault();
+	}
+      }
+    }
+  });
+
+  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "false");
+}
+
+AccessibleDialog.prototype.show = function () {
+  if (!this.overlay) {
+    // Generate overlay.
+    var overlay = $('<div class="modalOverlay"></div>');
+    overlay.attr("tabindex", "-1");
+    this.overlay = overlay;
+    overlay.css({
+      width: "100%",
+      height: "100%",
+      "z-index": 2,
+      "background-color": "#000",
+      opacity: 0.5,
+      position: "fixed",
+      top: 0,
+      left: 0,
+      display: "none",
+      margin: 0,
+      padding: 0
+    });
+    $('body').append(overlay);
+  }
+
+  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "true");
+  this.overlay.css('display', 'block');
+  this.modal.css('display', 'block');
+  this.modal.attr('aria-hidden', 'false');
+
+  this.focusedElementBeforeModal = $(':focus');
+  this.modal.find("*").filter(focusableElementsSelector).filter(':visible').first().focus();
+};
+
+AccessibleDialog.prototype.hide = function () {
+  if (this.overlay) {
+    this.overlay.css('display', 'none');
+  }
+  this.modal.css('display', 'none');
+  this.modal.attr('aria-hidden', 'true');
+  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "false");
+
+  this.focusedElementBeforeModal.focus();
 };

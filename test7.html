@@ -39,7 +39,7 @@
 
 <script>
 $(document).ready(function() { 
-	new AblePlayer('video1');		
+	new AblePlayer('video1', 0, 0, true);		
 });
 </script>
 
@@ -81,45 +81,6 @@ $(document).ready(function() {
 	</div>	
 </div>
 -->
-
-<!-- Steps for creating an interactive transcript: --> 
-<!-- Transcript must be wrapped in a container with class="ump-transcript" -->
-<!-- each caption must be wrapped in a <span> with data-start and data-end expressed in seconds --> 
-<div class="ump-transcript">
-  <h2>Transcript</h2>
-  <div>
-	  <span class="ump-unspoken">[Music]</span>
-  </div>
-  <div class="ump-desc">
-	  <span class="hidden">Description: </span>
-    <span>A blue circle has pairs of arching pairs inside. Underneath, DO-IT.</span>
-    <span>Words appear in a white box: World Wide Access.</span> 
-  </div>
-  <div>
-	  <span class="ump-unspoken">[Narrator]</span>
-    <span  data-start="9.165" data-end="10.792"> You want these people.</span> 
-    <span  data-start="10.792" data-end="13.759">They order your products, sign up for your services,</span>
-    <span  data-start="13.759" data-end="16.627">enroll in your classes, read your opinions,</span> 
-    <span  data-start="16.627" data-end="18.561">and watch your videos.</span> 
-    <span  data-start="18.561" data-end="24.165">You'll never see them, but they know you- through your website.</span> 
-    <span  data-start="24.165" data-end="25.891">Or maybe not.</span> 
-    <span  data-start="25.891" data-end="30.396">Your website's visitors aren't a  faceless mass of identical mouse-clickers</span> 
-    <span  data-start="30.396" data-end="32.363">but a vibrant community of individuals</span> 
-    <span  data-start="32.363" data-end="35.297">with varying tastes, styles, and abilities.</span> 
-    <span  data-start="35.297" data-end="39.132">This includes people with disabilities.</span> 
-  </div>
-  <div class="ump-desc">
-	  <span class="hidden">Description:</span>
-    <span>Terrill Thompson, Technology Accessibility Specialist:</span> 
-  </div>
-  <div>
-	  <span class="ump-unspoken">[Terrill]</span>
-    <span  data-start="39.132" data-end="41"> It's important for web designers and developers</span> 
-    <span  data-start="41" data-end="45.5">to realize that what they see currently on their computer,</span>
-    <span  data-start="45.5" data-end="49.264">at their resolution, with their browser and their operating system</span> 
-    <span  data-start="49.264" data-end="52">is not going to be necessarily  the same thing that everybody else sees.</span> 
-  </div>
-</div><!-- end transcript -->
 
 <!-- the following div is used for displaying errors and other messages--> 
 <div id="ump-alert" role="alert"></div>
