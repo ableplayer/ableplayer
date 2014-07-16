@@ -4302,6 +4302,22 @@ function AccessibleDialog(modalDiv, title, description, width) {
   });
   modal.addClass("modalDialog");
 
+  var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog"><img id="cancel" src="images/x.png" alt="close the modal dialog"></a>');
+  closeButton.css({
+    float: "right",
+    position: "absolute",
+    top: "10px",
+    left: "95%"
+  });
+  closeButton.keydown(function (event) {
+    // Space key down
+    if (event.which === 32) {
+      thisObj.hide();
+    }
+  }).click(function () {
+    thisObj.hide();
+  });
+
   var descriptionDiv = $('<div id="modalDescription"></div>');
   descriptionDiv.text(description);
   // Move off-screen.
@@ -4317,6 +4333,7 @@ function AccessibleDialog(modalDiv, title, description, width) {
   titleH1.css("text-align", "center");
   titleH1.text(title);
 
+  modal.prepend(closeButton);
   modal.prepend(titleH1);
   modal.prepend(descriptionDiv);
 
@@ -4397,7 +4414,6 @@ AccessibleDialog.prototype.show = function () {
   this.modal.attr('aria-hidden', 'false');
 
   this.focusedElementBeforeModal = $(':focus');
-//  focusedElementBeforeModal.blur();
   var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
   if (focusable.length === 0) {
     this.focusedElementBeforeModal.blur();
