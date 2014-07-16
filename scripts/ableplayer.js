@@ -82,8 +82,8 @@ function AblePlayer(mediaId, umpIndex, startTime, includeTranscript) {
   this.fallback = 'jw'; 
   
   // testFallback - set to true to force browser to use the fallback player (for testing)
-	// Note: JW Player does not support offline playback (a Flash restriction)
-	// Therefore testing must be performed on a web server 
+        // Note: JW Player does not support offline playback (a Flash restriction)
+        // Therefore testing must be performed on a web server 
   this.testFallback = false;
     
   // loop - if true, will start again at top after last item in playlist has ended
@@ -148,10 +148,10 @@ AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime, includeTrans
       }
 
       if (includeTranscript) {
-	this.includeTranscript = true;
+        this.includeTranscript = true;
       }
       else {
-	this.includeTranscript = false;
+        this.includeTranscript = false;
       }
 
       if (this.debug && startTime > 0) { 
@@ -586,8 +586,8 @@ AblePlayer.prototype.initTracks = function() {
         // prepare closed description, even if user doesn't prefer it 
         // this way it's available if needed 
         this.hasClosedDesc = true;
-	// Display the description div.
-	this.$descDiv.show();
+        // Display the description div.
+        this.$descDiv.show();
         this.descriptions = []; //temp array for storing data from source file
         this.currentDescription = -1;
         if ((this.prefDesc === 1) && (this.prefClosedDesc === 1)) { 
@@ -2865,24 +2865,24 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
         }
       }
       else {
-	var cues = parseWebVTT(trackText).cues;
-	if (kind === "captions") {
-	  thisObj.captions = cues;
-	}
-	else if (kind === "descriptions") {
-	  thisObj.descriptions = cues;
-	}
-	else if (kind === "subtitles") {
-	  thisObj.subtitles = cues;
-	}
-	else if (kind === "chapters") {
-	  thisObj.chapters = cues;
-	}
-	else if (kind === "metadata") {
-	  thisObj.metadata = cues;
-	}
+        var cues = parseWebVTT(trackText).cues;
+        if (kind === "captions") {
+          thisObj.captions = cues;
+        }
+        else if (kind === "descriptions") {
+          thisObj.descriptions = cues;
+        }
+        else if (kind === "subtitles") {
+          thisObj.subtitles = cues;
+        }
+        else if (kind === "chapters") {
+          thisObj.chapters = cues;
+        }
+        else if (kind === "metadata") {
+          thisObj.metadata = cues;
+        }
 
-	thisObj.updateTranscript();
+        thisObj.updateTranscript();
 /*
         //stanardize on \n for eol character
         trackText = thisObj.strip(trackText.replace(/\r\n|\r|\n/g, '\n'));
@@ -2948,12 +2948,12 @@ AblePlayer.prototype.flattenCueForCaption = function (cue) {
     else if (component.type === "voice") {
       result.push("[" + component.value + "]");
       for (var ii in component.children) {
-	flattenComponent(component.children[ii]);
+        flattenComponent(component.children[ii]);
       }
     }
     else {
       for (var ii in component.children) {
-	flattenComponent(component.children[ii]);
+        flattenComponent(component.children[ii]);
       }
     }
     return result.join("");
@@ -3013,7 +3013,7 @@ AblePlayer.prototype.showDescription = function() {
     }
     else {
       for (var ii in component.children) {
-	result.push(flattenComponentForDescription(component.children[ii]));
+        result.push(flattenComponentForDescription(component.children[ii]));
       }
     }
     return result.join("");
@@ -3635,10 +3635,10 @@ function parseCue(state) {
     cueId = cutLine(state);
   }
   var cueTimings = actList(state, [getTiming, 
-				   eatAtLeast1SpacesOrTabs,
-				   eatArrow,
-				   eatAtLeast1SpacesOrTabs,
-				   getTiming]);
+                                   eatAtLeast1SpacesOrTabs,
+                                   eatArrow,
+                                   eatAtLeast1SpacesOrTabs,
+                                   getTiming]);
   var startTime = cueTimings[0];
   var endTime = cueTimings[4];
   if (startTime >= endTime) {
@@ -3691,63 +3691,63 @@ function getCuePayload(state) {
     else if (token.type === "startTag") {
       token.type = token.tagName;
       if (["c", "i", "b", "u", "ruby"].indexOf(token.tagName) !== -1) {
-	if (languageStack.length > 0) {
-	  current.language = languageStack[languageStack.length - 1];
-	}
-	current.children.push(token);
-	current = token;
+        if (languageStack.length > 0) {
+          current.language = languageStack[languageStack.length - 1];
+        }
+        current.children.push(token);
+        current = token;
       }
       else if (token.tagName === "rt" && current.tagName === "ruby") {
-	if (languageStack.length > 0) {
-	  current.language = languageStack[languageStack.length - 1];
-	}
-	current.children.push(token);
-	current = token;
+        if (languageStack.length > 0) {
+          current.language = languageStack[languageStack.length - 1];
+        }
+        current.children.push(token);
+        current = token;
       }
       else if (token.tagName === "v") {
-	token.value = token.annotation;
-	if (languageStack.length > 0) {
-	  current.language = languageStack[languageStack.length - 1];
-	}
-	current.children.push(token);
-	current = token;
+        token.value = token.annotation;
+        if (languageStack.length > 0) {
+          current.language = languageStack[languageStack.length - 1];
+        }
+        current.children.push(token);
+        current = token;
       }
       else if (token.tagName === "lang") {
-	languageStack.push(token.annotation);
-	if (languageStack.length > 0) {
-	  current.language = languageStack[languageStack.length - 1];
-	}
-	current.children.push(token);
-	current = token;
+        languageStack.push(token.annotation);
+        if (languageStack.length > 0) {
+          current.language = languageStack[languageStack.length - 1];
+        }
+        current.children.push(token);
+        current = token;
       }
     }
     else if (token.type === "endTag") {
       if (token.tagName === current.type && ["c", "i", "b", "u", "ruby", "rt", "v"].indexOf(token.tagName) !== -1) {
-	current = current.parent;
+        current = current.parent;
       }
       else if (token.tagName === "lang" && current.type === "lang") {
-	current = current.parent;
-	languageStack.pop();
+        current = current.parent;
+        languageStack.pop();
       }
       else if (token.tagName === "ruby" && current.type === "rt") {
-	current = current.parent.parent;
+        current = current.parent.parent;
       }
     }
     else if (token.type === "timestampTag") {
       var tempState = {
-	text: token.value,
-	error: null,
-	metadata: {},
-	cues: [],
-	line: 1,
-	column: 1
+        text: token.value,
+        error: null,
+        metadata: {},
+        cues: [],
+        line: 1,
+        column: 1
       };
       try {
-	var timing = act(tempState, getTiming);
-	if (tempState.text.length === 0) {
-	  token.value = timing;
-	  current.push(token);
-	}
+        var timing = act(tempState, getTiming);
+        if (tempState.text.length === 0) {
+          token.value = timing;
+          current.push(token);
+        }
       }
       catch (err) {
       }
@@ -3781,205 +3781,205 @@ function getCueToken(state) {
 
     if (tokenState === "data") {
       if (c === "&") {
-	buffer = "&";
+        buffer = "&";
       }
       else if (c === "<") {
-	if (result.length === 0) {
-	  tokenState = "tag";
-	}
-	else {
-	  token.type = "string";
-	  token.value = result.join("");
-	  return token;
-	}
+        if (result.length === 0) {
+          tokenState = "tag";
+        }
+        else {
+          token.type = "string";
+          token.value = result.join("");
+          return token;
+        }
       }
       else if (c === "\u0004") {
-	return {type: "string", value: result.join("")};
+        return {type: "string", value: result.join("")};
       }
       else {
-	result.push(c);
+        result.push(c);
       }
     }
     else if (tokenState === "escape") {
       if (c === "&") {
-	result.push(buffer);
-	buffer = "&";
+        result.push(buffer);
+        buffer = "&";
       }
       else if (c.match(/[0-9a-z]/)) {
-	buffer += c;
+        buffer += c;
       }
       else if (c === ";") {
-	if (buffer === "&amp") {
-	  result.push("&");
-	}
-	else if (buffer === "&lt") {
-	  result.push("<");
-	}
-	else if (buffer === "&gt") {
-	  result.push(">");
-	}
-	else if (buffer === "&lrm") {
-	  result.push("\u200e");
-	}
-	else if (buffer === "&rlm") {
-	  result.push("\u200f");
-	}
-	else if (buffer === "&nbsp") {
-	  result.push("\u00a0");
-	}
-	else {
-	  result.push(buffer);
-	  result.push(";");
-	}
-	tokenState = "data";
+        if (buffer === "&amp") {
+          result.push("&");
+        }
+        else if (buffer === "&lt") {
+          result.push("<");
+        }
+        else if (buffer === "&gt") {
+          result.push(">");
+        }
+        else if (buffer === "&lrm") {
+          result.push("\u200e");
+        }
+        else if (buffer === "&rlm") {
+          result.push("\u200f");
+        }
+        else if (buffer === "&nbsp") {
+          result.push("\u00a0");
+        }
+        else {
+          result.push(buffer);
+          result.push(";");
+        }
+        tokenState = "data";
       }
       else if (c === "<" || c === "\u0004") {
-	result.push(buffer);
-	token.type = "string";
-	token.value = result.join("");
-	return token;
+        result.push(buffer);
+        token.type = "string";
+        token.value = result.join("");
+        return token;
       }
       else {
-	result.push(buffer);
-	tokenState = "data";
+        result.push(buffer);
+        tokenState = "data";
       }
     }
     else if (tokenState === "tag") {
       if (c === "\t" || c === "\n" || c === "\u000c" || c === " ") {
-	tokenState = "startTagAnnotation";
+        tokenState = "startTagAnnotation";
       }
       else if (c === ".") {
-	tokenState = "startTagClass";
+        tokenState = "startTagClass";
       }
       else if (c === "/") {
-	tokenState = "endTag";
+        tokenState = "endTag";
       }
       else if (c.match("[0-9]")) {
-	tokenState = "timestampTag";
-	result.push(c);
+        tokenState = "timestampTag";
+        result.push(c);
       }
       else if (c === ">") {
-	cut(state, 1);
-	break;
+        cut(state, 1);
+        break;
       }
       else if (c === "\u0004") {
-	token.tagName = "";
-	token.type = "startTag";
-	return token;
+        token.tagName = "";
+        token.type = "startTag";
+        return token;
       }
       else {
-	result.push(c);
-	tokenState = "startTag";
+        result.push(c);
+        tokenState = "startTag";
       }
     }
     else if (tokenState === "startTag") {
       if (c === "\t" || c === "\u000c" || c === " ") {
-	tokenState = "startTagAnnotation";
+        tokenState = "startTagAnnotation";
       }
       else if (c === "\n") {
-	buffer = c;
-	tokenState = "startTagAnnotation";
+        buffer = c;
+        tokenState = "startTagAnnotation";
       }
       else if (c === ".") {
-	tokenState = "startTagClass";
+        tokenState = "startTagClass";
       }
       else if (c === ">") {
-	cut(state, 1);
-	token.tagName = result.join("");
-	token.type = "startTag";
-	return token;
+        cut(state, 1);
+        token.tagName = result.join("");
+        token.type = "startTag";
+        return token;
       }
       else if (c === "\u0004") {
-	token.tagName = result.join("");
-	token.type = "startTag";
-	return token;
+        token.tagName = result.join("");
+        token.type = "startTag";
+        return token;
       }
       else {
-	result.push(c);
+        result.push(c);
       }
     }
     else if (tokenState === "startTagClass") {
       if (c === "\t" || c === "\u000c" || c === " ") {
-	token.classes.push(buffer);
-	buffer = "";
-	tokenState = "startTagAnnotation";
+        token.classes.push(buffer);
+        buffer = "";
+        tokenState = "startTagAnnotation";
       }
       else if (c === "\n") {
-	token.classes.push(buffer);
-	buffer = c;
-	tokenState = "startTagAnnotation";
+        token.classes.push(buffer);
+        buffer = c;
+        tokenState = "startTagAnnotation";
       }
       else if (c === ".") {
-	token.classes.push(buffer);
-	buffer = "";
+        token.classes.push(buffer);
+        buffer = "";
       }
       else if (c === ">") {
-	cut(state, 1);
-	token.classes.push(buffer);
-	token.type = "startTag";
-	token.tagName = result.join("");
-	return token;
+        cut(state, 1);
+        token.classes.push(buffer);
+        token.type = "startTag";
+        token.tagName = result.join("");
+        return token;
       }
       else if (c === "\u0004") {
-	token.classes.push(buffer);
-	token.type = "startTag";
-	token.tagName = result.join("");
-	return token;
+        token.classes.push(buffer);
+        token.type = "startTag";
+        token.tagName = result.join("");
+        return token;
       }
       else {
-	buffer += "c";
+        buffer += "c";
       }
     }
     else if (tokenState === "startTagAnnotation") {
       if (c === ">") {
-	cut(state, 1);
-	buffer = buffer.trim().replace(/ +/, " ");
-	token.type = "startTag";
-	token.tagName = result.join("");
-	token.annotation = buffer;
-	return token;
+        cut(state, 1);
+        buffer = buffer.trim().replace(/ +/, " ");
+        token.type = "startTag";
+        token.tagName = result.join("");
+        token.annotation = buffer;
+        return token;
       }
       else if (c === "\u0004") {
-	buffer = buffer.trim().replace(/ +/, " ");
-	token.type = "startTag";
-	token.tagName = result.join("");
-	token.annotation = buffer;
-	return token;
+        buffer = buffer.trim().replace(/ +/, " ");
+        token.type = "startTag";
+        token.tagName = result.join("");
+        token.annotation = buffer;
+        return token;
       }
       else {
-	buffer += c;
+        buffer += c;
       }
     }
     else if (tokenState === "endTag") {
       if (c === ">") {
-	cut(state, 1);
-	token.type = "endTag";
-	token.tagName = result.join("");
-	return token;
+        cut(state, 1);
+        token.type = "endTag";
+        token.tagName = result.join("");
+        return token;
       }
       else if (c === "\u0004") {
-	token.type = "endTag";
-	token.tagName = result.join("");
-	return token;
+        token.type = "endTag";
+        token.tagName = result.join("");
+        return token;
       }
       else {
-	result.push(c);
+        result.push(c);
       }
     }
     else if (tokenState === "timestampTag") {
       if (c === ">") {
-	cut(state, 1);
-	token.type = "timestampTag";
-	token.name = result.join("");
-	return token;
+        cut(state, 1);
+        token.type = "timestampTag";
+        token.name = result.join("");
+        return token;
       }
       else if (c === "\u0004") {
-	token.type = "timestampTag";
-	token.name = result.join("");
-	return token;
+        token.type = "timestampTag";
+        token.name = result.join("");
+        return token;
       }
       else {
-	result.push(c);
+        result.push(c);
       }
     }
     else {
@@ -4163,12 +4163,12 @@ function generateTranscript(captions, descriptions) {
     var flattenComponentForDescription = function(comp) {
       var result = [];
       if (comp.type === 'string') {
-	result.push(comp.value);
+        result.push(comp.value);
       }
       else {
-	for (var ii in comp.children) {
-	  result = result.concat(flattenComponentForDescription(comp.children[ii]));
-	}
+        for (var ii in comp.children) {
+          result = result.concat(flattenComponentForDescription(comp.children[ii]));
+        }
       }
       return result;
     }
@@ -4177,7 +4177,7 @@ function generateTranscript(captions, descriptions) {
     for (var ii in desc.components.children) {
       var results = flattenComponentForDescription(desc.components.children[ii]);
       for (var jj in results) {
-	descSpan.append(results[jj]);
+        descSpan.append(results[jj]);
       }
     }
     descDiv.append(descSpan);
@@ -4191,51 +4191,51 @@ function generateTranscript(captions, descriptions) {
     var flattenComponentForCaption = function(comp) {
       var result = [];
       var flattenString = function (str) {
-	var result = [];
-	if (str === "") {
-	  return result;
-	}
-	var openBracket = str.indexOf('[');
-	var closeBracket = str.indexOf(']');
-	var openParen = str.indexOf('(');
-	var closeParen = str.indexOf(')');
+        var result = [];
+        if (str === "") {
+          return result;
+        }
+        var openBracket = str.indexOf('[');
+        var closeBracket = str.indexOf(']');
+        var openParen = str.indexOf('(');
+        var closeParen = str.indexOf(')');
 
-	var hasBrackets = openBracket !== -1 && closeBracket !== -1;
-	var hasParens = openParen !== -1 && closeParen !== -1;
+        var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+        var hasParens = openParen !== -1 && closeParen !== -1;
 
-	if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
-	  result = result.concat(flattenString(str.substring(0, openBracket)));
-	  result.push($('<span class="ump-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
-	  result = result.concat(flattenString(str.substring(closeBracket + 1)));
-	}
-	else if (hasParens) {
-	  result = result.concat(flattenString(str.substring(0, openParen)));
-	  result.push($('<span class="ump-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
-	  result = result.concat(flattenString(str.substring(closeParen + 1)));
-	}
-	else {
-	  result.push(str);
-	}
-	return result;
+        if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
+          result = result.concat(flattenString(str.substring(0, openBracket)));
+          result.push($('<span class="ump-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
+          result = result.concat(flattenString(str.substring(closeBracket + 1)));
+        }
+        else if (hasParens) {
+          result = result.concat(flattenString(str.substring(0, openParen)));
+          result.push($('<span class="ump-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
+          result = result.concat(flattenString(str.substring(closeParen + 1)));
+        }
+        else {
+          result.push(str);
+        }
+        return result;
       }
 
       if (comp.type === 'string') {
-	result = result.concat(flattenString(comp.value));
+        result = result.concat(flattenString(comp.value));
       }
       else if (comp.type === "v") {
-	var vSpan = $('<span class="ump-unspoken">[' + comp.value + ']</span>');
-	result.push(vSpan);
-	for (var ii in comp.children) {
-	  var subResults = flattenComponentForCaption(comp.children[ii]);
-	  for (var jj in subResults) {
-	    result.push(subResults[jj]);
-	  }
-	}
+        var vSpan = $('<span class="ump-unspoken">[' + comp.value + ']</span>');
+        result.push(vSpan);
+        for (var ii in comp.children) {
+          var subResults = flattenComponentForCaption(comp.children[ii]);
+          for (var jj in subResults) {
+            result.push(subResults[jj]);
+          }
+        }
       }
       else {
-	for (var ii in comp.children) {
-	  result = result.concat(flattenComponentForCaption(comp.children[ii]));
-	}
+        for (var ii in comp.children) {
+          result = result.concat(flattenComponentForCaption(comp.children[ii]));
+        }
       }
       return result;
     }
@@ -4244,7 +4244,7 @@ function generateTranscript(captions, descriptions) {
     for (var ii in cap.components.children) {
       var results = flattenComponentForCaption(cap.components.children[ii]);
       for (var jj in results) {
-	capSpan.append(results[jj]);
+        capSpan.append(results[jj]);
       }
     }
 
@@ -4257,12 +4257,12 @@ function generateTranscript(captions, descriptions) {
   while ((nextCap < captions.length) || (nextDesc < descriptions.length)) {
     if ((nextCap < captions.length) && (nextDesc < descriptions.length)) {
       if (descriptions[nextDesc].start <= captions[nextCap].start) {
-	addDescription(main, descriptions[nextDesc]);
-	nextDesc += 1;
+        addDescription(main, descriptions[nextDesc]);
+        nextDesc += 1;
       }
       else {
-	addCaption(main, captions[nextCap]);
-	nextCap += 1;
+        addCaption(main, captions[nextCap]);
+        nextCap += 1;
       }
     }
     else if (nextCap < captions.length) {
@@ -4337,23 +4337,23 @@ function AccessibleDialog(modalDiv, title, description) {
       var focusable = parts.filter(focusableElementsSelector).filter(':visible');
 
       if (focusable.length === 0) {
-	return;
+        return;
       }
 
       var focused = $(':focus');
       var currentIndex = focusable.index(focused);
       if (event.shiftKey) {
-	// If backwards from first element, go to last.
-	if (currentIndex === 0) {
-	  focusable.get(focusable.length - 1).focus();
-	  event.preventDefault();
-	}
+        // If backwards from first element, go to last.
+        if (currentIndex === 0) {
+          focusable.get(focusable.length - 1).focus();
+          event.preventDefault();
+        }
       }
       else {
-	if (currentIndex === focusable.length - 1) {
-	  focusable.get(0).focus();
-	  event.preventDefault();
-	}
+        if (currentIndex === focusable.length - 1) {
+          focusable.get(0).focus();
+          event.preventDefault();
+        }
       }
     }
   });
