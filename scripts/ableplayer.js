@@ -4293,7 +4293,7 @@ function AccessibleDialog(modalDiv, title, description) {
     width: "50%",
     "margin-left": "auto",
     "margin-right": "auto",
-    "z-index": 3,
+    "z-index": 2000,
     position: "fixed",
     top: "25%",
     left: "25%",
@@ -4370,7 +4370,7 @@ AccessibleDialog.prototype.show = function () {
     overlay.css({
       width: "100%",
       height: "100%",
-      "z-index": 2,
+      "z-index": 1500,
       "background-color": "#000",
       opacity: 0.5,
       position: "fixed",
