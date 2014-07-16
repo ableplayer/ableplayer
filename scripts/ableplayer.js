@@ -958,7 +958,7 @@ AblePlayer.prototype.addPrefsForm = function() {
   }         
   this.$umpDiv.append(prefsDiv); 
 
-  var dialog = new AccessibleDialog(prefsDiv, "Preferences", "Modal dialog of player preferences.");
+  var dialog = new AccessibleDialog(prefsDiv, "Preferences", "Modal dialog of player preferences.", "25em");
 
   // Add save and cancel buttons.
   prefsDiv.append('<hr>');
@@ -1054,7 +1054,7 @@ AblePlayer.prototype.addHelp = function() {
   this.$umpDiv.append(helpDiv); 
     
 
-  var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, "Modal dialog of help information.");
+  var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, "Modal dialog of help information.", "40em");
 
   helpDiv.append('<hr>');
   var okButton = $('<button>' + this.tt.ok + '</button>');
@@ -4282,7 +4282,7 @@ function generateTranscript(captions, descriptions) {
 var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 // Based on the incredible accessible modal dialog.
-function AccessibleDialog(modalDiv, title, description) {
+function AccessibleDialog(modalDiv, title, description, width) {
   this.title = title;
   this.description = description;
   
@@ -4290,13 +4290,14 @@ function AccessibleDialog(modalDiv, title, description) {
   var modal = modalDiv;
   this.modal = modal;
   modal.css({
-    width: "50%",
+    width: width || "50%",
     "margin-left": "auto",
     "margin-right": "auto",
     "z-index": 2000,
     position: "fixed",
+    left: 0,
+    right: 0,
     top: "25%",
-    left: "25%",
     display: "none"
   });
   modal.addClass("modalDialog");
@@ -4381,7 +4382,14 @@ AccessibleDialog.prototype.show = function () {
       padding: 0
     });
     $('body').append(overlay);
+
+    // Keep from moving focus out of dialog when clicking outside of it.
+    overlay.on("mousedown.accessibleModal", function (event) {
+      event.preventDefault();
+    });
   }
+
+
 
   $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "true");
   this.overlay.css('display', 'block');
@@ -4389,7 +4397,13 @@ AccessibleDialog.prototype.show = function () {
   this.modal.attr('aria-hidden', 'false');
 
   this.focusedElementBeforeModal = $(':focus');
-  this.modal.find("*").filter(focusableElementsSelector).filter(':visible').first().focus();
+//  focusedElementBeforeModal.blur();
+  var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
+  if (focusable.length === 0) {
+    this.focusedElementBeforeModal.blur();
+  }
+  focusable.first().focus();
+
 };
 
 AccessibleDialog.prototype.hide = function () {
