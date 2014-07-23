@@ -24,7 +24,7 @@
 // mediaId - the id attribute of the <audio> or <video> element 
 // umpIndex - the index of this Able Player instance (if page includes only one player, umpIndex = 0) 
 // startTime - the time at which to begin playing the media       
-function AblePlayer(mediaId, umpIndex, startTime, includeTranscript) {
+function AblePlayer(mediaId, umpIndex, startTime, includeTranscript, transcriptDiv) {
 
   /* 
    *
@@ -66,7 +66,7 @@ function AblePlayer(mediaId, umpIndex, startTime, includeTranscript) {
   // The following variable can be used in the future to add conditional slider support if desired
   // Note that the related code has not been updated for UMP. 
   // Therefore, this should NOT be set to true at this point. 
-  this.useSlider = false;
+  this.useSlider = true;
   
   // showNowPlaying - set to true to show 'Now Playing:' plus title of current track above player 
   // Otherwise set to false 
@@ -121,7 +121,7 @@ function AblePlayer(mediaId, umpIndex, startTime, includeTranscript) {
     function () { 
       if (thisObj.countProperties(thisObj.tt) > 50) { 
         // close enough to ensure that most text variables are populated 
-        thisObj.setup(mediaId, umpIndex, startTime, includeTranscript);
+        thisObj.setup(mediaId, umpIndex, startTime, includeTranscript, transcriptDiv);
       } 
       else { 
         // can't continue loading player with no text
@@ -130,7 +130,7 @@ function AblePlayer(mediaId, umpIndex, startTime, includeTranscript) {
     }
   );
 }
-AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime, includeTranscript) { 
+AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime, includeTranscript, transcriptDiv) { 
 
     if (mediaId) { 
       this.mediaId = mediaId;   
@@ -152,6 +152,10 @@ AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime, includeTrans
       }
       else {
         this.includeTranscript = false;
+      }
+
+      if (transcriptDiv) {
+        this.$transcriptDiv = $(transcriptDiv)
       }
 
       if (this.debug && startTime > 0) { 
@@ -245,7 +249,7 @@ AblePlayer.prototype.setup = function(mediaId, umpIndex, startTime, includeTrans
                   })
                   .fail(function( jqxhr, preferences, exception ) {
                     if (thisObj.debug) { 
-                      console.log ("Unable to load JW Player.");
+                      console.log ('Unable to load JW Player.');
                     }
                     thisObj.player = null;
                     return;
@@ -483,9 +487,11 @@ AblePlayer.prototype.injectPlayerCode = function() {
       this.$descDiv.addClass('ump-clipped');                
     }
 
-    this.$transcriptDiv = $('<div>', {
-      'class' : 'ump-transcript'
-    });
+    if (!this.$transcriptDiv) {
+      this.$transcriptDiv = $('<div>', {
+        'class' : 'ump-transcript'
+      });
+    }
     if (!this.includeTranscript) {
       this.$transcriptDiv.hide();
     }
@@ -671,10 +677,10 @@ AblePlayer.prototype.initPlayer = function(player) {
   var poster, jwHeight, i, sourceType;            
 
   // set the default volume  
-  if (player === 'html5') { 
+  if (this.player === 'html5') { 
     this.media.volume = this.volume;
   }
-  else if (player === 'jw') { 
+  else if (this.player === 'jw') { 
     // Default is 1 to 10, but JW Player uses 0 to 100 for volume. Need to convert
     this.volume = this.volume * 100; 
   }      
@@ -684,7 +690,7 @@ AblePlayer.prototype.initPlayer = function(player) {
     poster = this.$media.attr('poster');
   }
  
-  if (player === 'jw') {
+  if (this.player === 'jw') {
     // remove the media element - we're done with it
     // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
     this.$media.remove();           
@@ -713,7 +719,7 @@ AblePlayer.prototype.initPlayer = function(player) {
         fallback: false, 
         primary: 'flash',
         wmode: 'transparent' // necessary to get HTML captions to appear as overlay 
-      });               
+      });
     }
     else { // if this is an audio player
       this.jwPlayer = jwplayer(this.jwId).setup({
@@ -729,23 +735,8 @@ AblePlayer.prototype.initPlayer = function(player) {
     }
   }
 
-  // get media duration 
-  if (player === 'html5') {
-    this.duration = this.media.duration;
-  }
-  else { // jw player
-    this.duration = jwplayer(this.jwId).getDuration();        
-  }
-  
   // synch elapsedTime with startTime      
   this.elapsedTime = this.startTime;
-        
-  // If there's a transcript and user wants to make it tabbable, do that now
-  if (this.prefTabbable === 1) { 
-    if ($('.ump-transcript').length > 0) { 
-      $('.ump-transcript span').attr('tabindex','0');
-    }       
-  }     
 
   // define mediaFile, descFile, and hasOpenDesc 
   for (i = 0; i < this.$sources.length; i++) {
@@ -911,7 +902,7 @@ AblePlayer.prototype.addPrefsForm = function() {
     'class': 'ump-prefs-form',
     role: 'form'
   });
-  introText = "<p>Saving your preferences requires cookies.</p>\n";
+  introText = '<p>Saving your preferences requires cookies.</p>\n';
     
   prefsIntro = $('<p>',{ 
     html: introText
@@ -958,7 +949,7 @@ AblePlayer.prototype.addPrefsForm = function() {
   }         
   this.$umpDiv.append(prefsDiv); 
 
-  var dialog = new AccessibleDialog(prefsDiv, "Preferences", "Modal dialog of player preferences.", "25em");
+  var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '25em');
 
   // Add save and cancel buttons.
   prefsDiv.append('<hr>');
@@ -983,8 +974,8 @@ AblePlayer.prototype.addHelp = function() {
   
   var helpText, i, label, key, helpDiv; 
   
-  helpText = '<p>' + this.tt.helpKeys + "</p>\n";
-  helpText += "<ul>\n";
+  helpText = '<p>' + this.tt.helpKeys + '</p>\n';
+  helpText += '<ul>\n';
   for (i=0; i<this.controls.length; i++) { 
     if (this.controls[i] === 'play') { 
       label = this.tt.play + '/' + this.tt.pause;
@@ -1041,11 +1032,11 @@ AblePlayer.prototype.addHelp = function() {
       if (this.prefCtrlKey === 1) { 
         helpText += 'Control + ';
       }
-      helpText += '</span>' + key + "</b> = " + label + "</li>\n";
+      helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
     }
   }
-  helpText += "</ul>\n";
-  helpText += '<p>' + this.tt.helpKeysDisclaimer + "</p>\n";
+  helpText += '</ul>\n';
+  helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
 
   helpDiv = $('<div>',{ 
     'class': 'ump-help-div',
@@ -1054,7 +1045,7 @@ AblePlayer.prototype.addHelp = function() {
   this.$umpDiv.append(helpDiv); 
     
 
-  var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, "Modal dialog of help information.", "40em");
+  var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
 
   helpDiv.append('<hr>');
   var okButton = $('<button>' + this.tt.ok + '</button>');
@@ -1241,7 +1232,7 @@ AblePlayer.prototype.savePrefs = function() {
 };
 AblePlayer.prototype.setupAlert = function() { 
   var alertElement = $('.ump-alert-div');
-  var dialog = new AccessibleDialog(alertElement, this.tt.done + '.', "Modal dialog alert.");
+  var dialog = new AccessibleDialog(alertElement, this.tt.done + '.', 'Modal dialog alert.');
   this.alertBox = $('<div></div>');
   
   alertElement.append(this.alertBox);
@@ -1267,12 +1258,17 @@ AblePlayer.prototype.updateTranscript = function() {
 
   var thisObj = this;
 
+  // Make transcript tabbable if preference is turned on.
+  if (this.prefTabbable === 1) { 
+    $('.ump-transcript span.ump-transcript-seekpoint').attr('tabindex','0');
+  }     
+
   // handle clicks on text within transcript 
   // Note #1: Only one transcript per page is supported
   // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
   // Forcing this elsewhere, in the keyboard handler section  
   if ($('.ump-transcript').length > 0) {  
-    $('.ump-transcript span').click(function() { 
+    $('.ump-transcript span.ump-transcript-seekpoint').click(function() { 
       var spanStart = $(this).attr('data-start');
       if (thisObj.player === 'html5') { 
         thisObj.seekTo(spanStart);
@@ -1299,7 +1295,17 @@ AblePlayer.prototype.addEventListeners = function() {
   
   // Save the current object context in thisObj for use with inner functions.
   thisObj = this;
-    
+
+  // Handle seek bar events.
+  
+
+  this.seekBar.bodyDiv.on('startTracking', function (event) {
+    thisObj.media.pause();
+  }).on('stopTracking', function (event, position) {
+    // Seek will automatically call play.
+    thisObj.seekTo(position);
+  });
+
   // handle clicks on player buttons 
   this.$controllerDiv.find('button').click(function(){  
     whichButton = $(this).attr('class').split(' ')[0].substr(4); 
@@ -1460,23 +1466,6 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) {
           console.log('meta data has loaded');  
         }
-        //should be able to get duration now
-        if (this.useSlider) {
-          // the following AAP code has not been updated for UMP
-          // It's preserved here for reference in case UMP supports sliders in the future
-          if (!isNaN(thisObj.audio.duration)) { 
-            thisObj.duration = thisObj.audio.duration;
-          }
-          if (thisObj.duration > 0) {
-            thisObj.updateTime(thisObj.duration, thisObj.durationContainer, thisObj.rangeSupported);
-            if (thisObj.rangeSupported) {
-              thisObj.seekBar.setAttribute('min', 0);
-              thisObj.seekBar.setAttribute('max', thisObj.duration);
-            }
-          }
-          thisObj.toggleSeekControls('on');
-          // end code that has not been updated
-        }
         if (thisObj.swappingSrc === true) { 
           // new source file has just been loaded 
           // should be able to play 
@@ -1510,7 +1499,6 @@ AblePlayer.prototype.addEventListeners = function() {
       })
       .on('ended',function() { 
         thisObj.$status.text(thisObj.tt.statusEnd); 
-        thisObj.updateTime('current',0);
         // reset play button
         thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
         // if there's a playlist, advance to next item and start playing  
@@ -1533,14 +1521,14 @@ AblePlayer.prototype.addEventListeners = function() {
         thisObj.$status.text(thisObj.tt.statusWaiting); // same as buffering???  
       })
       .on('durationchange',function() { 
-        thisObj.updateTime('duration',thisObj.media.duration);
+        // Display new duration.
+        thisObj.refreshControls();
       })
       .on('timeupdate',function() { 
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           // try seeking again, if seeking failed on canplay or canplaythrough
           thisObj.seekTo(thisObj.startTime);
         }       
-        thisObj.updateTime('current',thisObj.media.currentTime);
         if (thisObj.captionsOn) { 
           thisObj.showCaptions();
         }
@@ -1550,6 +1538,8 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.prefHighlight === 1) {
           thisObj.highlightTranscript(thisObj.media.currentTime); 
         }
+
+        thisObj.refreshControls();
       })
       .on('play',function() { 
         if (thisObj.debug) { 
@@ -1594,25 +1584,6 @@ AblePlayer.prototype.addEventListeners = function() {
     // add listeners for JW Player events 
     jwplayer(thisObj.jwId)
       .onTime(function() {
-        if (this.getState() === 'IDLE') { 
-          // necessary to force this to 0 
-          // Otherwise, when user presses Stop button JW Player rewinds to 0 
-          // and current time tends to show descending time values, but never reaches 0
-          thisObj.updateTime('current',0);  
-        }
-        else { 
-          thisObj.updateTime('current',this.getPosition()); 
-        }
-        // get and set duration, if it hasn't already been set 
-        // ideally this would happen when .onMeta() is fired 
-        // i.e., before media starts playing 
-        // So far no luck getting onMeta() to fire though 
-        if (typeof thisObj.duration === 'undefined' || thisObj.duration === -1) { 
-          thisObj.duration = this.getDuration();
-          if (thisObj.duration > 0) { 
-            thisObj.updateTime('duration',thisObj.duration); 
-          }
-        }
         // show captions 
         // We're doing this ourself because JW Player's caption support is not great 
         // e.g., there's no way to toggle JW captions via the JavaScript API  
@@ -1632,7 +1603,6 @@ AblePlayer.prototype.addEventListeners = function() {
       })
       .onComplete(function() {          
         thisObj.$status.text(thisObj.tt.statusEnd); 
-        thisObj.updateTime('current',0);
         //reset play button
         thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
         // if there's a playlist, advance to next item and start playing  
@@ -1713,11 +1683,6 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) { 
           console.log('JW Player onMeta event fired');
         }       
-        // NOTE: onMeta() never fires.
-        if (this.getDuration() > 0) { 
-          thisObj.duration = this.getDuration();
-          thisObj.updateTime('duration',thisObj.duration); 
-        }
       })
       .onPlaylist(function() { 
         if (thisObj.debug) { 
@@ -1726,14 +1691,6 @@ AblePlayer.prototype.addEventListeners = function() {
         // onPlaylist is fired when a new playlist is loaded into the player 
         // A playlist includes any new media source 
         if (thisObj.swappingSrc === true) { 
-          // new source file has just been loaded 
-          thisObj.updateTime('duration',thisObj.media.duration);
-          // _might_ be able to get duration of new source
-          // if not, getDuration returns -1
-          thisObj.duration = this.getDuration();
-          if (thisObj.duration > 0) { 
-            thisObj.updateTime('duration',thisObj.duration);  
-          }
           // should be able to play 
           jwplayer(thisObj.jwId).play(true);
           thisObj.$status.text(thisObj.tt.statusPlaying);        
@@ -1760,14 +1717,36 @@ AblePlayer.prototype.addControls = function() {
   // some controls are aligned on the left, and others on the right 
   
   var buttonWidth, leftControls, rightControls, useSpeedButtons, useFullScreen, 
-    i, j, hPos, controls, controllerSpan, control, 
+    i, j, controls, controllerSpan, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
     controllerStyles, vidcapStyles;  
-    
+
   buttonWidth = 40; // in pixels, including margins, padding + cusion for outline 
 
-  leftControls = ['play','stop','rewind','forward'];  
+  var baseSliderWidth = 100 // Base width for slider.
+  // Not all controls are buttons; store their widths independetly.
+  var controlWidths = {
+    'play': buttonWidth,
+    'stop': buttonWidth,
+    'rewind': buttonWidth,
+    'forward': buttonWidth,
+    'slower': buttonWidth,
+    'faster': buttonWidth,
+    'seek': baseSliderWidth + 12,
+    'captions': buttonWidth,
+    'descriptions': buttonWidth,
+    'sign': buttonWidth,
+    'mute': buttonWidth,
+    'volumeUp': buttonWidth,
+    'volumeDown': buttonWidth,
+    'fullscreen': buttonWidth,
+    'preferences': buttonWidth,
+    'help': buttonWidth
+  };
+
+  // Removed rewind/forward in favor of seek bar.
+  leftControls = ['play','stop' /*,'rewind','forward'*/];
   
   if (this.$media.playbackRate) {     
     // browser supports playbackRate! 
@@ -1787,6 +1766,11 @@ AblePlayer.prototype.addControls = function() {
   if (useSpeedButtons) { 
     leftControls.push('slower'); 
     leftControls.push('faster');
+  }
+
+  // TODO: Check whether this works.
+  if (this.useSlider) {
+    leftControls.push('seek');
   }
     
   rightControls = [];
@@ -1821,7 +1805,6 @@ AblePlayer.prototype.addControls = function() {
   
   // now step separately through left and right controls
   for (i=1; i<=2; i++) {
-    hPos = 0; // horizontal position
     if (i ==1) {        
       controls = leftControls;
       controllerSpan = $('<span>',{
@@ -1837,12 +1820,9 @@ AblePlayer.prototype.addControls = function() {
     for (j=0; j<controls.length; j++) { 
       control = controls[j];
       if (control === 'seek') { 
-        this.addSeekControls(hPos);
-        if (this.useSlider) {
-          if (this.rangeSupported) { 
-            hPos += sliderWidth;
-          }
-        }
+        var sliderDiv = $('<div class="ump-seekbar"></div>');
+        controllerSpan.append(sliderDiv);
+        this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
       }
       else { 
         // this control is a button 
@@ -1923,15 +1903,21 @@ AblePlayer.prototype.addControls = function() {
         else if (control === 'mute') { 
           this.$muteButton = newButton;
         }
-        hPos += 34; // button width + 1px border + 1px margin
       }
     }
     this.$controllerDiv.append(controllerSpan);
   }
 
-  // calculate widths of left and right controls   
-  leftWidth = leftControls.length * buttonWidth; 
-  rightWidth = rightControls.length * buttonWidth;  
+  // calculate widths of left and right controls
+  leftWidth = 0;
+  for (var ii in leftControls) {
+    leftWidth += controlWidths[leftControls[ii]];
+  }
+
+  rightWidth = 0;
+  for (var ii in rightControls) {
+    rightWidth += controlWidths[rightControls[ii]];
+  }
   totalWidth = leftWidth + rightWidth;
   if (totalWidth <= this.playerWidth) { 
     // express left and right width in pixels 
@@ -1945,8 +1931,10 @@ AblePlayer.prototype.addControls = function() {
     // reduce button size to fit container ??? 
     // or wrap buttons onto new line ??? 
   }
-  $('.ump-left-controls').css('width',leftWidthStyle);       
-  $('.ump-right-controls').css('width',rightWidthStyle);       
+
+  // TODO: Switched away from percentages to raw pixel values; any reason to use percentage?
+  $('.ump-left-controls').css('width',leftWidth);       
+  $('.ump-right-controls').css('width',rightWidth);       
   
   if (this.mediaType === 'video') { 
     // set controller to width of video
@@ -1985,14 +1973,15 @@ AblePlayer.prototype.addControls = function() {
     'class': 'ump-duration'
   }); 
   this.$timer.append(this.$elapsedTimeContainer).append(this.$durationContainer);       
-  // populate duration if known
-  this.updateTime('duration',this.duration);  
     
   // combine left and right controls arrays for future reference 
   this.controls = leftControls.concat(rightControls);
 
   // construct help dialog that includes keystrokes for operating the included controls 
   this.addHelp();     
+
+  // Update state-based display of controls.
+  this.refreshControls();
 };
 AblePlayer.prototype.getIconType = function() { 
   // returns either "font" or "image" 
@@ -2044,7 +2033,7 @@ AblePlayer.prototype.getIconType = function() {
   if (this.debug) {
     console.log('Using ' + this.iconType + 's for player controls');
     if (this.iconType === 'font') { 
-      console.log("User font for controller is " + this.controllerFont);
+      console.log('User font for controller is ' + this.controllerFont);
     }
   }
   $tempButton.remove();
@@ -2221,34 +2210,15 @@ AblePlayer.prototype.browserSupportsVolume = function() {
   }
 };
 AblePlayer.prototype.handlePlay = function(e) { 
-
   var playerState; 
   
   if (this.player === 'html5') {       
     if (this.media.paused || this.media.ended) { 
       this.media.play();
-      this.$status.text(this.tt.statusPlaying);
-      // change play button to pause button
-      this.$playpauseButton.attr('title',this.tt.pause); 
-      if (this.controllerFont === 'icomoon') {
-        this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
-      }
-      else { 
-        this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
-      }
     } 
     else { 
       // audio is playing. Pause it
       this.media.pause(); 
-      this.$status.text(this.tt.statusPaused);
-      // change pause button to play button
-      this.$playpauseButton.attr('title',this.tt.play); 
-      if (this.controllerFont === 'icomoon') {
-        this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
-      }
-      else { 
-        this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
-      }
     }
   }
   else { 
@@ -2256,28 +2226,15 @@ AblePlayer.prototype.handlePlay = function(e) {
     playerState = jwplayer(this.jwId).getState();
     if (playerState === 'IDLE' || playerState === 'PAUSED') { 
       jwplayer(this.jwId).play(); 
-      // change play button to pause button
-      this.$playpauseButton.attr('title',this.tt.pause); 
-      if (this.controllerFont === 'icomoon') {
-        this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
-      }
-      else { 
-        this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
-      }
     }
     else { // playerState is 'PLAYING' or 'BUFFERING'. Pause it
       jwplayer(this.jwId).pause(); 
-      // change pause button to play button
-      this.$playpauseButton.attr('title',this.tt.play); 
-      if (this.controllerFont === 'icomoon') {
-        this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
-      }
-      else { 
-        this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
-      }
     }
   } 
+
+  this.refreshControls();
 };
+
 AblePlayer.prototype.handleStop = function() { 
 
   if (this.player === 'html5') {             
@@ -2289,18 +2246,8 @@ AblePlayer.prototype.handleStop = function() {
     // jw player
     jwplayer(this.jwId).stop(); // unloads the currently playing media file
   }     
-  // reset timer text (same code for both players)
-  this.elapsedTime = 0;
-  this.updateTime('current',0); 
-  this.$status.text(this.tt.statusStopped);
-  // change pause button to play button
-  this.$playpauseButton.attr('title',this.tt.play); 
-  if (this.controllerFont === 'icomoon') {
-    this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
-  }
-  else { 
-    this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
-  }
+
+  this.refreshControls();
 };
 AblePlayer.prototype.handleRewind = function() { 
 
@@ -2332,9 +2279,9 @@ AblePlayer.prototype.handleForward = function() {
   
   if (this.player === 'html5') {             
     targetTime = this.media.currentTime + this.seekInterval;    
-    if (targetTime > this.duration) {
+    if (targetTime > this.getDuration()) {
       // targetTime would advance beyond the end. Just advance to the end.
-      this.media.currentTime = this.duration;
+      this.media.currentTime = this.getDuration();
     }
     else {
       this.media.currentTime = targetTime;
@@ -2343,9 +2290,9 @@ AblePlayer.prototype.handleForward = function() {
   else { 
     // jw player                    
     targetTime = jwplayer(this.jwId).getPosition() + this.seekInterval;     
-    if (targetTime > this.duration) {
+    if (targetTime > this.getDuration()) {
       // targetTime would advance beyond the end. Just advance to the end.
-      jwplayer(this.jwId).seek(this.duration);
+      jwplayer(this.jwId).seek(this.getDuration());
     }
     else {
       jwplayer(this.jwId).seek(targetTime);
@@ -2611,121 +2558,7 @@ AblePlayer.prototype.handlePrefsClick = function() {
 AblePlayer.prototype.handleHelpClick = function() { 
   this.helpDialog.show();
 };
-AblePlayer.prototype.addSeekControls = function(leftPos) { 
 
-  var sliderWidth, testRange; 
-  
-  if (this.useSlider) {
-    sliderWidth = 200;
-    // the following code was updated for UMP, but is not currently used 
-
-    // Don't display a slider in browsers that tell you they can handle it but really can't
-    // Safari on iOS acknowledges seekBar.type = 'range', but displays it as a text input, not a slider
-    // Chrome crashes if user moves the slider too rapidly
-    if (this.isUserAgent('iphone') || this.isUserAgent('ipad') || this.isUserAgent('chromex')) {
-      this.rangeSupported = false;
-    }
-    else { 
-      // Check remaining browsers for range support
-      testRange = document.createElement('input');
-      testRange.setAttribute('type','range');
-      if (testRange.type === 'text') { 
-        this.rangeSupported = false;      
-      }
-      else { 
-        this.rangeSupported = true;
-      }
-    }
-    if (this.rangeSupported) {
-      this.seekBar = $('<input>',{
-        type: 'range',
-        'class': 'ump-seekbar',
-        value: '0',
-        step: 'any',
-        width: sliderWidth,
-        style: 'left:' + leftPos + 'px'
-      });
-      this.$controllerDiv.append(this.seekBar);      
-    }
-      
-    // the following AAP code has not been updated for UMP
-    // If used, would need to be incorporated into the above
-    if (this.player === 'html5') {
-      if (!isNaN(this.media.duration)) { 
-        this.duration = Math.floor(this.media.duration);
-      }
-    } 
-    // If duration is unknown, can't define the slider's max attribute yet
-    if (isNaN(this.duration) || this.duration === 0) {
-      if (this.player === 'html5') { 
-
-        // chopped some stuff out here 
-      
-      } 
-      else {
-        // do the same for JW Player 
-        // max will be set when duration is known
-        // min can be set now
-        if (this.rangeSupported) {
-          this.seekBar.setAttribute('min', 0);
-        }
-      }
-    }
-    else { //duration is known
-      if (this.rangeSupported) {
-        this.seekBar.setAttribute('min', 0);
-        this.seekBar.setAttribute('max', Math.floor(this.duration));
-      }
-      if (this.player === 'html5') { //duration is in seconds
-        this.updateTime(this.duration, this.durationContainer, this.rangeSupported);
-      } 
-      else { 
-        //duration is in ms & must be converted
-        this.updateTime(this.duration / 1000, this.durationContainer, this.rangeSupported);
-      }
-      this.toggleSeekControls('on');
-    }
-    // end code that has not been updated for UMP
-  }
-    
-  else { //if not useSlider
-
-    /* 
-      // Old code - these buttons are added in this.setButtons() ... 
-      // Preserved here until sure we can delete it
-*/           
-    // Add rewind and fast forward buttons (even if a slider is also shown)
-    // These will be hidden from users who have sliders, but visible to users who don't
-    // We still want them, even if hidden, so users can benefit from their keyboard functionality   
-    this.seekBack = $('<input>',{ 
-      type: 'image',
-      src: 'images/media-rewind.gif',
-      style: 'left:' + leftPos + 'px',
-      value: '',
-      title: this.getButtonTitle('rewind'),
-      'class': 'ump-rewind' 
-    });
-    this.$controllerDiv.append(this.seekBack);
-    leftPos += 34;
-    this.seekForward = $('<input>',{ 
-      type: 'image',
-      src: 'images/media-forward.gif',
-      style: 'left:' + leftPos + 'px',
-      value: '',
-      title: this.getButtonTitle('forward'),
-      'class': 'ump-forward' 
-    });
-    this.$controllerDiv.append(this.seekForward);
-    // initially, seekBar, seekBack, & seekForward should be disabled
-    // they will be enabled once the duration of the media file is known
-    this.toggleSeekControls('off');
-    if (this.rangeSupported === true) { 
-      // Invisible elements can still be controlled with keyboard
-      this.seekBack.css('visibility','hidden');
-      this.seekForward.css('visibility','hidden');
-    }
-  }
-};
 AblePlayer.prototype.getButtonTitle = function(control) { 
   if (control === 'playpause') { 
     return this.tt.play; 
@@ -2795,52 +2628,119 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   }   
 };
 AblePlayer.prototype.seekTo = function (newTime) { 
-
-  var seekable; 
+  var seekable;
   
   this.startTime = newTime;
   // Check HTML5 media "seekable" property to be sure media is seekable to startTime
   seekable = this.media.seekable;
-  if (seekable.length > 0 && this.startTime > seekable.start(0) && this.startTime <= seekable.end(0)) { 
+  if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
     // startTime is seekable. Seek to startTime, then start playing
-    this.media.currentTime = this.startTime;          
-    this.media.play(true);
-    this.startedPlaying = true;
-    // change play button to pause button
-    this.$playpauseButton.attr('title',this.tt.pause); 
-    if (this.controllerFont === 'icomoon') {
-      this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+    // Unless startTime == seekable.end(0), since then it will actually set the time to the start of the video.  In this case, do so but don't keep playing.
+    this.media.currentTime = this.startTime;
+    if (seekable.end(0) !== this.startTime) {
+      this.media.play(true);
+      this.startedPlaying = true;
     }
-    else { 
-      this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
-    }
+
+    this.refreshControls();
   } 
 };
-AblePlayer.prototype.updateTime = function(whichTime, time) {
 
-  var minutes, seconds; 
-  
-  // whichTime is either current (media.currentTime) or duration
-  // both are expected to be in seconds
-  if (isNaN(time)) { 
-    // do nothing 
-    // this function should be called again via event listeners 
-    // when time is known (esp. duration, which might be unknown initially)
+AblePlayer.prototype.getDuration = function () {
+  if (this.player === 'html5') {
+    return this.media.duration;
   }
-  else { 
-    minutes = Math.floor(time / 60);
-    seconds = Math.floor(time % 60);
-    if (seconds < 10) { 
-      seconds = '0' + seconds;
-    }
-    if (whichTime === 'current') {
-      this.$elapsedTimeContainer.text(minutes + ':' + seconds); 
-    }
-    else if (whichTime === 'duration') { 
-      this.$durationContainer.text(' / ' + minutes + ':' + seconds); 
-    }       
+  else { // jw player
+    return jwplayer(this.jwId).getDuration();        
   }
 };
+
+AblePlayer.prototype.getElapsed = function () {
+  if (this.player === 'html5') {
+    return this.media.currentTime;
+  }
+  else {
+    var jw = jwplayer(this.jwId);
+    if (jw.getState() === 'IDLE') {
+      return 0;
+    }
+    return jwplayer(this.jwId).getPosition();
+  }
+};
+
+// Right now, update the seekBar values based on current duration and time.
+// Later, move all non-destructive control updates based on state into this function?
+AblePlayer.prototype.refreshControls = function() {
+  var duration = this.getDuration();
+  var elapsed = this.getElapsed();
+
+  if (this.seekBar) {
+    this.seekBar.setDuration(duration);
+    if (!this.seekBar.tracking) {
+      this.seekBar.setPosition(elapsed);
+    }
+  }
+
+  // Update time display.
+  var dMinutes = Math.floor(duration / 60);
+  var dSeconds = Math.floor(duration % 60);
+  if (dSeconds < 10) { 
+    dSeconds = '0' + dSeconds;
+  }
+
+  var displayElapsed;
+  // When seeking, display the seek bar time instead of the actual elapsed time.
+  if (this.seekBar.tracking) {
+    displayElapsed = this.seekBar.lastTrackPosition;
+  }
+  else {
+    displayElapsed = elapsed;
+  }
+
+  var eMinutes = Math.floor(displayElapsed / 60);
+  var eSeconds = Math.floor(displayElapsed % 60);
+  if (eSeconds < 10) {
+    eSeconds = '0' + eSeconds;
+  }
+
+  this.$durationContainer.text(' / ' + dMinutes + ':' + dSeconds);
+  this.$elapsedTimeContainer.text(eMinutes + ':' + eSeconds);
+
+  // Don't change play/pause button display while using the seek bar.
+  if (!this.seekBar.tracking) {
+    if (this.media.paused) {
+
+      this.$playpauseButton.attr('title',this.tt.play); 
+      
+      if (this.controllerFont === 'icomoon') {
+        this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+      }
+
+      if (elapsed === 0) {
+        this.$status.text(this.tt.statusStopped);
+      }
+      else {
+        this.$status.text(this.tt.statusPaused);
+      }
+    }
+    else {
+      this.$playpauseButton.attr('title',this.tt.pause); 
+      
+      if (this.controllerFont === 'icomoon') {
+        this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
+      }
+      else { 
+        this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+      }
+
+      this.$status.text(this.tt.statusPlaying);
+    }
+  }
+};
+
 AblePlayer.prototype.setupTimedText = function(kind,track) {  
 
   var trackSrc, trackLang, $tempDiv, thisObj, 
@@ -2866,19 +2766,19 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
       }
       else {
         var cues = parseWebVTT(trackText).cues;
-        if (kind === "captions") {
+        if (kind === 'captions') {
           thisObj.captions = cues;
         }
-        else if (kind === "descriptions") {
+        else if (kind === 'descriptions') {
           thisObj.descriptions = cues;
         }
-        else if (kind === "subtitles") {
+        else if (kind === 'subtitles') {
           thisObj.subtitles = cues;
         }
-        else if (kind === "chapters") {
+        else if (kind === 'chapters') {
           thisObj.chapters = cues;
         }
-        else if (kind === "metadata") {
+        else if (kind === 'metadata') {
           thisObj.metadata = cues;
         }
 
@@ -2942,11 +2842,11 @@ AblePlayer.prototype.flattenCueForCaption = function (cue) {
 
   var flattenComponent = function (component) {
     var result = [];
-    if (component.type === "string") {
+    if (component.type === 'string') {
       result.push(component.value);
     }
-    else if (component.type === "voice") {
-      result.push("[" + component.value + "]");
+    else if (component.type === 'voice') {
+      result.push('[' + component.value + ']');
       for (var ii in component.children) {
         flattenComponent(component.children[ii]);
       }
@@ -2956,14 +2856,14 @@ AblePlayer.prototype.flattenCueForCaption = function (cue) {
         flattenComponent(component.children[ii]);
       }
     }
-    return result.join("");
+    return result.join('');
   }
 
   for (var ii in cue.components.children) {
     result.push(flattenComponent(cue.components.children[ii]));
   }
 
-  return result.join("");
+  return result.join('');
 }
 
 AblePlayer.prototype.showCaptions = function() { 
@@ -3008,7 +2908,7 @@ AblePlayer.prototype.showDescription = function() {
 
   var flattenComponentForDescription = function (component) {
     var result = [];
-    if (component.type === "string") {
+    if (component.type === 'string') {
       result.push(component.value);
     }
     else {
@@ -3016,7 +2916,7 @@ AblePlayer.prototype.showDescription = function() {
         result.push(flattenComponentForDescription(component.children[ii]));
       }
     }
-    return result.join("");
+    return result.join('');
   }
   
   if (this.player === 'html5') {
@@ -3227,7 +3127,7 @@ AblePlayer.prototype.toSeconds = function(t) {
 };
 AblePlayer.prototype.strip = function(s) { 
   if (s) { 
-    return s.replace(/^\s+|\s+$/g,"");
+    return s.replace(/^\s+|\s+$/g, '');
   }
 };
 AblePlayer.prototype.playAtTime = function(seconds) { 
@@ -3239,7 +3139,8 @@ AblePlayer.prototype.highlightTranscript = function (currentTime) {
   //show highlight in transcript marking current caption
   var start, end; 
 
-  $('.ump-transcript span').each(function() { 
+  // Highlight the 
+  $('.ump-transcript span.ump-transcript-caption').each(function() { 
     start = $(this).attr('data-start');
     end = $(this).attr('data-end');
     if (currentTime >= start && currentTime <= end) { 
@@ -3463,9 +3364,8 @@ AblePlayer.prototype.countProperties = function(obj) {
 
 // See section 4.1 of dev.w3.org/html5/webvtt for format details.
 function parseWebVTT(text) {
-  //throw "ASDF";
   // Normalize line ends to \n.
-  text.replace("\r\n", "\n").replace("\r", "\n");
+  text.replace('\r\n', '\n').replace('\r', '\n');
   
   var parserState = {
     text: text,
@@ -3480,7 +3380,7 @@ function parseWebVTT(text) {
     act(parserState, parseFileBody);
   }
   catch (err) {
-    console.log("Line: " + parserState.line + "\nColumn: " + parserState.column);
+    console.log('Line: ' + parserState.line + '\nColumn: ' + parserState.column);
     console.log(err);
   }
 
@@ -3506,7 +3406,7 @@ function act(state, action) {
 
 function updatePosition(state, cutText) {
   for (var ii in cutText) {
-    if (cutText[ii] === "\n") {
+    if (cutText[ii] === '\n') {
       state.column = 1;
       state.line += 1;
     }
@@ -3524,23 +3424,23 @@ function cut(state, length) {
 }
 
 function cutLine(state, length) {
-  var nextEOL = state.text.indexOf("\n");
+  var nextEOL = state.text.indexOf('\n');
   var returnText;
   if (nextEOL === -1) {
     returnText = state.text;
     updatePosition(state, returnText);
-    state.text = "";
+    state.text = '';
   }
   else {
     returnText = state.text.substring(0, nextEOL);
-    updatePosition(state, returnText + "\n");
+    updatePosition(state, returnText + '\n');
     state.text = state.text.substring(nextEOL + 1);
   }
   return returnText;
 }
 
 function peekLine(state) {
-  var nextEOL = state.text.indexOf("\n");
+  var nextEOL = state.text.indexOf('\n');
   if (nextEOL === -1) {
     return state.text;
   }
@@ -3564,7 +3464,7 @@ function parseFileBody(state) {
 function parseMetadataHeaders(state) {
   while (true) {
     var nextLine = peekLine(state);
-    if (nextLine.indexOf("-->") !== -1) {
+    if (nextLine.indexOf('-->') !== -1) {
       return;
     }
     else if (nextLine.length === 0) {
@@ -3580,15 +3480,15 @@ function parseMetadataHeaders(state) {
 
 function nextSpaceOrNewline(s) {
   var possible = [];
-  var spaceIndex = s.indexOf(" ");
+  var spaceIndex = s.indexOf(' ');
   if (spaceIndex >= 0) {
     possible.push(spaceIndex);
   }
-  var tabIndex = s.indexOf("\t");
+  var tabIndex = s.indexOf('\t');
   if (tabIndex >= 0) {
     possible.push(tabIndex);
   }
-  var lineIndex = s.indexOf("\n");
+  var lineIndex = s.indexOf('\n');
   if (lineIndex >= 0) {
     possible.push(lineIndex);
   }
@@ -3599,9 +3499,9 @@ function nextSpaceOrNewline(s) {
 function getKeyValue(state) {
   var next = nextSpaceOrNewline(state.text);
   var pair = cut(state, next);
-  var colon = pair.indexOf(":");
+  var colon = pair.indexOf(':');
   if (colon === -1) {
-    state.error = "Missing colon.";
+    state.error = 'Missing colon.';
     return;
   }
   else {
@@ -3615,7 +3515,7 @@ function parseCuesAndComments(state) {
   while (true) {
     var nextLine = peekLine(state);
     // If NOTE is not on a line all its own, it must be followed by a space or tab.
-    if (nextLine.indexOf("NOTE") === 0 && ((nextLine.length === 4) || (nextLine[4] === " ") || (nextLine[4] === "\t"))) {
+    if (nextLine.indexOf('NOTE') === 0 && ((nextLine.length === 4) || (nextLine[4] === ' ') || (nextLine[4] === '\t'))) {
       actList(state, [eatComment, eatEmptyLines]);
     }
     else if (nextLine.trim().length !== 0) {
@@ -3631,7 +3531,7 @@ function parseCuesAndComments(state) {
 function parseCue(state) {
   var nextLine = peekLine(state);
   var cueId;
-  if (nextLine.indexOf("-->") === -1) {
+  if (nextLine.indexOf('-->') === -1) {
     cueId = cutLine(state);
   }
   var cueTimings = actList(state, [getTiming, 
@@ -3642,7 +3542,7 @@ function parseCue(state) {
   var startTime = cueTimings[0];
   var endTime = cueTimings[4];
   if (startTime >= endTime) {
-    state.error = "Start time is not sooner than end time.";
+    state.error = 'Start time is not sooner than end time.';
     return;
   }
   
@@ -3663,7 +3563,7 @@ function parseCue(state) {
 
 function getCueSettings(state) {
   var cueSettings = {};
-  while (state.text.length > 0 && state.text[0] !== "\n") {
+  while (state.text.length > 0 && state.text[0] !== '\n') {
     var keyValue = act(state, getKeyValue);
     cueSettings[keyValue[0]] = keyValue[1];
     act(state, eatSpacesOrTabs);
@@ -3674,37 +3574,37 @@ function getCueSettings(state) {
 
 function getCuePayload(state) {
   // Parser based on instructions in draft.
-  var result = {type: "internal", tagName: "", value: "", classes: [], annotation: "", parent: null, children: [], language: ""};
+  var result = {type: 'internal', tagName: '', value: '', classes: [], annotation: '', parent: null, children: [], language: ''};
   var current = result;
   var languageStack = [];
   while (state.text.length > 0) {
     var nextLine = peekLine(state);
-    if (nextLine.indexOf("-->") !== -1) {
+    if (nextLine.indexOf('-->') !== -1) {
       break;
     }
 
     var token = getCueToken(state);
     // We'll use the tokens themselves as objects where possible.
-    if (token.type === "string") {
+    if (token.type === 'string') {
       current.children.push(token);
     }
-    else if (token.type === "startTag") {
+    else if (token.type === 'startTag') {
       token.type = token.tagName;
-      if (["c", "i", "b", "u", "ruby"].indexOf(token.tagName) !== -1) {
+      if (['c', 'i', 'b', 'u', 'ruby'].indexOf(token.tagName) !== -1) {
         if (languageStack.length > 0) {
           current.language = languageStack[languageStack.length - 1];
         }
         current.children.push(token);
         current = token;
       }
-      else if (token.tagName === "rt" && current.tagName === "ruby") {
+      else if (token.tagName === 'rt' && current.tagName === 'ruby') {
         if (languageStack.length > 0) {
           current.language = languageStack[languageStack.length - 1];
         }
         current.children.push(token);
         current = token;
       }
-      else if (token.tagName === "v") {
+      else if (token.tagName === 'v') {
         token.value = token.annotation;
         if (languageStack.length > 0) {
           current.language = languageStack[languageStack.length - 1];
@@ -3712,7 +3612,7 @@ function getCuePayload(state) {
         current.children.push(token);
         current = token;
       }
-      else if (token.tagName === "lang") {
+      else if (token.tagName === 'lang') {
         languageStack.push(token.annotation);
         if (languageStack.length > 0) {
           current.language = languageStack[languageStack.length - 1];
@@ -3721,19 +3621,19 @@ function getCuePayload(state) {
         current = token;
       }
     }
-    else if (token.type === "endTag") {
-      if (token.tagName === current.type && ["c", "i", "b", "u", "ruby", "rt", "v"].indexOf(token.tagName) !== -1) {
+    else if (token.type === 'endTag') {
+      if (token.tagName === current.type && ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v'].indexOf(token.tagName) !== -1) {
         current = current.parent;
       }
-      else if (token.tagName === "lang" && current.type === "lang") {
+      else if (token.tagName === 'lang' && current.type === 'lang') {
         current = current.parent;
         languageStack.pop();
       }
-      else if (token.tagName === "ruby" && current.type === "rt") {
+      else if (token.tagName === 'ruby' && current.type === 'rt') {
         current = current.parent.parent;
       }
     }
-    else if (token.type === "timestampTag") {
+    else if (token.type === 'timestampTag') {
       var tempState = {
         text: token.value,
         error: null,
@@ -3759,190 +3659,190 @@ function getCuePayload(state) {
 
 // Gets a single cue token; uses the method in the w3 specification.
 function getCueToken(state) {
-  var tokenState = "data";
+  var tokenState = 'data';
   var result = [];
-  var buffer = "";
-  var token = {type: "", tagName: "", value: "", classes: [], annotation: "", children: []}
+  var buffer = '';
+  var token = {type: '', tagName: '', value: '', classes: [], annotation: '', children: []}
 
   while (true) {
     var c;
     // Double newlines indicate end of token.
-    if (state.text.length >= 2 && state.text[0] === "\n" && state.text[1] === "\n") {
+    if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
       cut(state, 2);
-      c = "\u0004";
+      c = '\u0004';
     }
     else if (state.text.length > 0) {
       c = state.text[0];
     }
     else {
       // End of file.
-      c = "\u0004";
+      c = '\u0004';
     }
 
-    if (tokenState === "data") {
-      if (c === "&") {
-        buffer = "&";
+    if (tokenState === 'data') {
+      if (c === '&') {
+        buffer = '&';
       }
-      else if (c === "<") {
+      else if (c === '<') {
         if (result.length === 0) {
-          tokenState = "tag";
+          tokenState = 'tag';
         }
         else {
-          token.type = "string";
-          token.value = result.join("");
+          token.type = 'string';
+          token.value = result.join('');
           return token;
         }
       }
-      else if (c === "\u0004") {
-        return {type: "string", value: result.join("")};
+      else if (c === '\u0004') {
+        return {type: 'string', value: result.join('')};
       }
       else {
         result.push(c);
       }
     }
-    else if (tokenState === "escape") {
-      if (c === "&") {
+    else if (tokenState === 'escape') {
+      if (c === '&') {
         result.push(buffer);
-        buffer = "&";
+        buffer = '&';
       }
       else if (c.match(/[0-9a-z]/)) {
         buffer += c;
       }
-      else if (c === ";") {
-        if (buffer === "&amp") {
-          result.push("&");
+      else if (c === ';') {
+        if (buffer === '&amp') {
+          result.push('&');
         }
-        else if (buffer === "&lt") {
-          result.push("<");
+        else if (buffer === '&lt') {
+          result.push('<');
         }
-        else if (buffer === "&gt") {
-          result.push(">");
+        else if (buffer === '&gt') {
+          result.push('>');
         }
-        else if (buffer === "&lrm") {
-          result.push("\u200e");
+        else if (buffer === '&lrm') {
+          result.push('\u200e');
         }
-        else if (buffer === "&rlm") {
-          result.push("\u200f");
+        else if (buffer === '&rlm') {
+          result.push('\u200f');
         }
-        else if (buffer === "&nbsp") {
-          result.push("\u00a0");
+        else if (buffer === '&nbsp') {
+          result.push('\u00a0');
         }
         else {
           result.push(buffer);
-          result.push(";");
+          result.push(';');
         }
-        tokenState = "data";
+        tokenState = 'data';
       }
-      else if (c === "<" || c === "\u0004") {
+      else if (c === '<' || c === '\u0004') {
         result.push(buffer);
-        token.type = "string";
-        token.value = result.join("");
+        token.type = 'string';
+        token.value = result.join('');
         return token;
       }
       else {
         result.push(buffer);
-        tokenState = "data";
+        tokenState = 'data';
       }
     }
-    else if (tokenState === "tag") {
-      if (c === "\t" || c === "\n" || c === "\u000c" || c === " ") {
-        tokenState = "startTagAnnotation";
+    else if (tokenState === 'tag') {
+      if (c === '\t' || c === '\n' || c === '\u000c' || c === ' ') {
+        tokenState = 'startTagAnnotation';
       }
-      else if (c === ".") {
-        tokenState = "startTagClass";
+      else if (c === '.') {
+        tokenState = 'startTagClass';
       }
-      else if (c === "/") {
-        tokenState = "endTag";
+      else if (c === '/') {
+        tokenState = 'endTag';
       }
-      else if (c.match("[0-9]")) {
-        tokenState = "timestampTag";
+      else if (c.match('[0-9]')) {
+        tokenState = 'timestampTag';
         result.push(c);
       }
-      else if (c === ">") {
+      else if (c === '>') {
         cut(state, 1);
         break;
       }
-      else if (c === "\u0004") {
-        token.tagName = "";
-        token.type = "startTag";
+      else if (c === '\u0004') {
+        token.tagName = '';
+        token.type = 'startTag';
         return token;
       }
       else {
         result.push(c);
-        tokenState = "startTag";
+        tokenState = 'startTag';
       }
     }
-    else if (tokenState === "startTag") {
-      if (c === "\t" || c === "\u000c" || c === " ") {
-        tokenState = "startTagAnnotation";
+    else if (tokenState === 'startTag') {
+      if (c === '\t' || c === '\u000c' || c === ' ') {
+        tokenState = 'startTagAnnotation';
       }
-      else if (c === "\n") {
+      else if (c === '\n') {
         buffer = c;
-        tokenState = "startTagAnnotation";
+        tokenState = 'startTagAnnotation';
       }
-      else if (c === ".") {
-        tokenState = "startTagClass";
+      else if (c === '.') {
+        tokenState = 'startTagClass';
       }
-      else if (c === ">") {
+      else if (c === '>') {
         cut(state, 1);
-        token.tagName = result.join("");
-        token.type = "startTag";
+        token.tagName = result.join('');
+        token.type = 'startTag';
         return token;
       }
-      else if (c === "\u0004") {
-        token.tagName = result.join("");
-        token.type = "startTag";
+      else if (c === '\u0004') {
+        token.tagName = result.join('');
+        token.type = 'startTag';
         return token;
       }
       else {
         result.push(c);
       }
     }
-    else if (tokenState === "startTagClass") {
-      if (c === "\t" || c === "\u000c" || c === " ") {
+    else if (tokenState === 'startTagClass') {
+      if (c === '\t' || c === '\u000c' || c === ' ') {
         token.classes.push(buffer);
-        buffer = "";
-        tokenState = "startTagAnnotation";
+        buffer = '';
+        tokenState = 'startTagAnnotation';
       }
-      else if (c === "\n") {
+      else if (c === '\n') {
         token.classes.push(buffer);
         buffer = c;
-        tokenState = "startTagAnnotation";
+        tokenState = 'startTagAnnotation';
       }
-      else if (c === ".") {
+      else if (c === '.') {
         token.classes.push(buffer);
         buffer = "";
       }
-      else if (c === ">") {
+      else if (c === '>') {
         cut(state, 1);
         token.classes.push(buffer);
-        token.type = "startTag";
-        token.tagName = result.join("");
+        token.type = 'startTag';
+        token.tagName = result.join('');
         return token;
       }
-      else if (c === "\u0004") {
+      else if (c === '\u0004') {
         token.classes.push(buffer);
-        token.type = "startTag";
-        token.tagName = result.join("");
+        token.type = 'startTag';
+        token.tagName = result.join('');
         return token;
       }
       else {
-        buffer += "c";
+        buffer += 'c';
       }
     }
-    else if (tokenState === "startTagAnnotation") {
-      if (c === ">") {
+    else if (tokenState === 'startTagAnnotation') {
+      if (c === '>') {
         cut(state, 1);
-        buffer = buffer.trim().replace(/ +/, " ");
-        token.type = "startTag";
-        token.tagName = result.join("");
+        buffer = buffer.trim().replace(/ +/, ' ');
+        token.type = 'startTag';
+        token.tagName = result.join('');
         token.annotation = buffer;
         return token;
       }
-      else if (c === "\u0004") {
-        buffer = buffer.trim().replace(/ +/, " ");
-        token.type = "startTag";
-        token.tagName = result.join("");
+      else if (c === '\u0004') {
+        buffer = buffer.trim().replace(/ +/, ' ');
+        token.type = 'startTag';
+        token.tagName = result.join('');
         token.annotation = buffer;
         return token;
       }
@@ -3950,32 +3850,32 @@ function getCueToken(state) {
         buffer += c;
       }
     }
-    else if (tokenState === "endTag") {
-      if (c === ">") {
+    else if (tokenState === 'endTag') {
+      if (c === '>') {
         cut(state, 1);
-        token.type = "endTag";
-        token.tagName = result.join("");
+        token.type = 'endTag';
+        token.tagName = result.join('');
         return token;
       }
-      else if (c === "\u0004") {
-        token.type = "endTag";
-        token.tagName = result.join("");
+      else if (c === '\u0004') {
+        token.type = 'endTag';
+        token.tagName = result.join('');
         return token;
       }
       else {
         result.push(c);
       }
     }
-    else if (tokenState === "timestampTag") {
-      if (c === ">") {
+    else if (tokenState === 'timestampTag') {
+      if (c === '>') {
         cut(state, 1);
-        token.type = "timestampTag";
-        token.name = result.join("");
+        token.type = 'timestampTag';
+        token.name = result.join('');
         return token;
       }
-      else if (c === "\u0004") {
-        token.type = "timestampTag";
-        token.name = result.join("");
+      else if (c === '\u0004') {
+        token.type = 'timestampTag';
+        token.name = result.join('');
         return token;
       }
       else {
@@ -3983,7 +3883,7 @@ function getCueToken(state) {
       }
     }
     else {
-      throw "Unknown tokenState " + tokenState;
+      throw 'Unknown tokenState ' + tokenState;
     }
 
     cut(state, 1);
@@ -3993,8 +3893,8 @@ function getCueToken(state) {
 function eatComment(state) {
   // Cut the NOTE line.
   var noteLine = cutLine(state);
-  if (noteLine.indexOf("-->") !== -1) {
-    state.error = "Invalid syntax: --> in NOTE line.";
+  if (noteLine.indexOf('-->') !== -1) {
+    state.error = 'Invalid syntax: --> in NOTE line.';
     return;
   }
   while (true) {
@@ -4003,8 +3903,8 @@ function eatComment(state) {
       // End of comment.
       return;
     }
-    else if (nextLine.indexOf("-->") !== -1) {
-      state.error = "Invalid syntax: --> in comment.";
+    else if (nextLine.indexOf('-->') !== -1) {
+      state.error = 'Invalid syntax: --> in comment.';
       return;
     }
     else {
@@ -4015,7 +3915,7 @@ function eatComment(state) {
 
 // Initial byte order mark.
 function eatOptionalBOM(state) {
-  if (state.text[0] === "\ufeff") {
+  if (state.text[0] === '\ufeff') {
     cut(state, 1);
   }
   
@@ -4023,17 +3923,17 @@ function eatOptionalBOM(state) {
 
 // "WEBVTT" string.
 function eatSignature(state) {
-  if (state.text.substring(0,6) === "WEBVTT") {
+  if (state.text.substring(0,6) === 'WEBVTT') {
     cut(state, 6);
   }
   else {
-    state.error = "Invalid signature.";
+    state.error = 'Invalid signature.';
   }
 }
 
 function eatArrow(state) {
-  if (state.text.length < 3 || state.text.substring(0,3) !== "-->") {
-    state.error = "Missing -->";
+  if (state.text.length < 3 || state.text.substring(0,3) !== '-->') {
+    state.error = 'Missing -->';
   }
   else {
     cut(state, 3);
@@ -4041,35 +3941,35 @@ function eatArrow(state) {
 }
 
 function eatSingleSpaceOrTab(state) {
-  if (state.text[0] === "\t" || state.text[0] === " ") {
+  if (state.text[0] === '\t' || state.text[0] === ' ') {
     cut(state, 1);
   }
   else {
-    state.error = "Missing space.";
+    state.error = 'Missing space.';
   }
 }
 
 function eatSpacesOrTabs(state) {
-  while (state.text[0] === "\t" || state.text[0] === " ") {
+  while (state.text[0] === '\t' || state.text[0] === ' ') {
     cut(state, 1);
   }
 }
 
 function eatAtLeast1SpacesOrTabs(state) {
   var numEaten = 0;
-  while (state.text[0] === "\t" || state.text[0] === " ") {
+  while (state.text[0] === '\t' || state.text[0] === ' ') {
     cut(state, 1);
     numEaten += 1;
   }
   if (numEaten === 0) {
-    state.error = "Missing space.";
+    state.error = 'Missing space.';
   }
 }
 
 function eatUntilEOLInclusive(state) {
-  var nextEOL = state.text.indexOf("\n");
+  var nextEOL = state.text.indexOf('\n');
   if (nextEOL === -1) {
-    state.error = "Missing EOL.";
+    state.error = 'Missing EOL.';
   }
   else {
     cut(state, nextEOL + 1);
@@ -4102,14 +4002,14 @@ function eatAtLeast1EmptyLines(state) {
     }
   }
   if (linesEaten === 0) {
-    state.error = "Missing empty line.";
+    state.error = 'Missing empty line.';
   }
 }
 
 function getTiming(state) {
   var nextSpace = nextSpaceOrNewline(state.text);
   if (nextSpace === -1) {
-    state.error("Missing timing.");
+    state.error('Missing timing.');
     return;
   }
   var timestamp = cut(state, nextSpace);
@@ -4117,7 +4017,7 @@ function getTiming(state) {
   var results = /((\d\d):)?((\d\d):)(\d\d).(\d\d\d)|(\d+).(\d\d\d)/.exec(timestamp);
   
   if (!results) {
-    state.error = "Unable to parse timestamp.";
+    state.error = 'Unable to parse timestamp.';
     return;
   }
   var time = 0;
@@ -4126,7 +4026,7 @@ function getTiming(state) {
   
   if (minutes) {
     if (parseInt(minutes) > 59) {
-      state.error = "Invalid minute range.";
+      state.error = 'Invalid minute range.';
       return;
     }
     if (hours) {
@@ -4135,7 +4035,7 @@ function getTiming(state) {
     time += 60 * parseInt(minutes);
     var seconds = results[5];
     if (parseInt(seconds) > 59) {
-      state.error = "Invalid second range.";
+      state.error = 'Invalid second range.';
       return;
     }
     
@@ -4155,7 +4055,7 @@ function generateTranscript(captions, descriptions) {
   main.append('<h2>Transcript</h2>');
 
   var nextCap = 0;
-  var nextDesc = 0;
+  var nextDesc = 0;  
 
   var addDescription = function(div, desc) {
     var descDiv = $('<div class="ump-desc"><span class="hidden">Description: </span></div>');
@@ -4173,26 +4073,28 @@ function generateTranscript(captions, descriptions) {
       return result;
     }
 
-    var descSpan = $('<span></span>');
+    var descSpan = $('<span class="ump-transcript-seekpoint"></span>');
     for (var ii in desc.components.children) {
       var results = flattenComponentForDescription(desc.components.children[ii]);
       for (var jj in results) {
         descSpan.append(results[jj]);
       }
     }
+    descSpan.attr('data-start', desc.start.toString());
+    descSpan.attr('data-end', desc.end.toString());
     descDiv.append(descSpan);
 
     div.append(descDiv);
   };
 
   var addCaption = function(div, cap) {
-    var capSpan = $('<span></span>');
+    var capSpan = $('<span class="ump-transcript-seekpoint ump-transcript-caption"></span>');
 
     var flattenComponentForCaption = function(comp) {
       var result = [];
       var flattenString = function (str) {
         var result = [];
-        if (str === "") {
+        if (str === '') {
           return result;
         }
         var openBracket = str.indexOf('[');
@@ -4222,7 +4124,7 @@ function generateTranscript(captions, descriptions) {
       if (comp.type === 'string') {
         result = result.concat(flattenString(comp.value));
       }
-      else if (comp.type === "v") {
+      else if (comp.type === 'v') {
         var vSpan = $('<span class="ump-unspoken">[' + comp.value + ']</span>');
         result.push(vSpan);
         for (var ii in comp.children) {
@@ -4251,7 +4153,7 @@ function generateTranscript(captions, descriptions) {
     capSpan.attr('data-start', cap.start.toString());
     capSpan.attr('data-end', cap.end.toString());
     div.append(capSpan);
-    div.append("\n");
+    div.append('\n');
   };
 
   while ((nextCap < captions.length) || (nextDesc < descriptions.length)) {
@@ -4290,24 +4192,24 @@ function AccessibleDialog(modalDiv, title, description, width) {
   var modal = modalDiv;
   this.modal = modal;
   modal.css({
-    width: width || "50%",
-    "margin-left": "auto",
-    "margin-right": "auto",
-    "z-index": 2000,
-    position: "fixed",
+    width: width || '50%',
+    'margin-left': 'auto',
+    'margin-right': 'auto',
+    'z-index': 2000,
+    position: 'fixed',
     left: 0,
     right: 0,
-    top: "25%",
-    display: "none"
+    top: '25%',
+    display: 'none'
   });
-  modal.addClass("modalDialog");
+  modal.addClass('modalDialog');
 
   var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog"><img id="cancel" src="images/x.png" alt="close the modal dialog"></a>');
   closeButton.css({
-    float: "right",
-    position: "absolute",
-    top: "10px",
-    left: "95%"
+    float: 'right',
+    position: 'absolute',
+    top: '10px',
+    left: '95%'
   });
   closeButton.keydown(function (event) {
     // Space key down
@@ -4322,25 +4224,25 @@ function AccessibleDialog(modalDiv, title, description, width) {
   descriptionDiv.text(description);
   // Move off-screen.
   descriptionDiv.css({
-    position: "absolute",
-    left: "-999px",
-    width: "1px",
-    height: "1px",
-    top: "auto"
+    position: 'absolute',
+    left: '-999px',
+    width: '1px',
+    height: '1px',
+    top: 'auto'
   });
 
   var titleH1 = $('<h1 id="modalTitle"></h1>');
-  titleH1.css("text-align", "center");
+  titleH1.css('text-align', 'center');
   titleH1.text(title);
 
   modal.prepend(closeButton);
   modal.prepend(titleH1);
   modal.prepend(descriptionDiv);
 
-  modal.attr("aria-hidden", "true");
-  modal.attr("aria-labelledby", "modalTitle");
-  modal.attr("aria-describedb", "modalDescription");
-  modal.attr("role", "dialog");
+  modal.attr('aria-hidden', 'true');
+  modal.attr('aria-labelledby', 'modalTitle');
+  modal.attr('aria-describedby', 'modalDescription');
+  modal.attr('role', 'dialog');
 
   modal.keydown(function (event) {
     // Escape
@@ -4376,39 +4278,39 @@ function AccessibleDialog(modalDiv, title, description, width) {
     }
   });
 
-  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "false");
+  $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
 }
 
 AccessibleDialog.prototype.show = function () {
   if (!this.overlay) {
     // Generate overlay.
     var overlay = $('<div class="modalOverlay"></div>');
-    overlay.attr("tabindex", "-1");
+    overlay.attr('tabindex', '-1');
     this.overlay = overlay;
     overlay.css({
-      width: "100%",
-      height: "100%",
-      "z-index": 1500,
-      "background-color": "#000",
+      width: '100%',
+      height: '100%',
+      'z-index': 1500,
+      'background-color': '#000',
       opacity: 0.5,
-      position: "fixed",
+      position: 'fixed',
       top: 0,
       left: 0,
-      display: "none",
+      display: 'none',
       margin: 0,
       padding: 0
     });
     $('body').append(overlay);
 
     // Keep from moving focus out of dialog when clicking outside of it.
-    overlay.on("mousedown.accessibleModal", function (event) {
+    overlay.on('mousedown.accessibleModal', function (event) {
       event.preventDefault();
     });
   }
 
 
 
-  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "true");
+  $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'true');
   this.overlay.css('display', 'block');
   this.modal.css('display', 'block');
   this.modal.attr('aria-hidden', 'false');
@@ -4428,7 +4330,263 @@ AccessibleDialog.prototype.hide = function () {
   }
   this.modal.css('display', 'none');
   this.modal.attr('aria-hidden', 'true');
-  $('body > *').not('modalOverlay').not('modalDialog').attr("aria-hidden", "false");
+  $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
 
   this.focusedElementBeforeModal.focus();
 };
+
+
+
+
+
+// Events:
+//   startTracking(event, position)
+//   tracking(event, position)
+//   stopTracking(event, position)
+
+
+function AccessibleSeekBar(div, width) {
+  var thisObj = this;
+
+  // Initialize some variables.
+  this.position = 0; // Note: position does not change while tracking.
+  this.duration = 100;
+  this.tracking = false;
+  this.trackDevice = null; // 'mouse' or 'keyboard'
+  this.keyTrackPosition = 0;
+  this.lastTrackPosition = 0;
+  this.nextStep = 1;
+  this.inertiaCount = 0;
+
+  this.bodyDiv = $(div);
+  // Make slider focusable.
+  this.bodyDiv.attr('tabindex', '0');
+
+  // Add a loaded indicator and a seek head.
+  this.loadedDiv = $('<div></div>');
+  this.seekHead = $('<div></div>');
+
+  this.bodyDiv.append(this.loadedDiv);
+  this.bodyDiv.append(this.seekHead);
+
+  this.bodyDiv.wrap('<div></div>');
+  var wrapperDiv = this.bodyDiv.parent();
+
+  var radius = '5px';
+  wrapperDiv.width(width);
+  wrapperDiv.css({
+    'display': 'inline-block'
+  });
+
+  this.bodyDiv.css({
+    'position': 'relative',
+    'height': '0.5em',
+    'border': '1px solid',
+    'border-radius': radius,
+    '-webkit-border-radius': radius,
+    '-moz-border-radius': radius,
+    '-o-border-radius': radius,
+    'background-color': '#666666',
+    'top': '6px',
+    'left': '12px'
+  });
+
+  this.loadedDiv.width(0);
+  this.loadedDiv.css({
+    'display': 'inline-block',
+    'position': 'relative',
+    'left': 0,
+    'height': '0.5em',
+    'border-radius': radius,
+    '-webkit-border-radius': radius,
+    '-moz-border-radius': radius,
+    '-o-border-radius': radius,
+    'background-color': '#CCCCCC'
+  });
+
+  this.seekHead.css({
+    'display': 'inline-block',
+    'position': 'relative',
+    'left': 0,
+    'top': '-0.35em',
+    'height': '1.2em',
+    'width': '1em',
+    'border': '1px solid',
+    'background-color': '#555555'
+  });
+
+  this.seekHead.hover(function (event) {
+    thisObj.seekHead.css('background-color', '#777777');
+    thisObj.overHead = true;
+  }, function (event) {
+    thisObj.seekHead.css('background-color', '#555555');
+    thisObj.overHead = false;
+
+    if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+      thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+    }
+  });
+
+  this.seekHead.mousemove(function (event) {
+    if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+      thisObj.trackHeadAtPageX(event.pageX);
+    }
+  });
+
+  this.bodyDiv.hover(function () {
+    thisObj.overBody = true;
+  }, function (event) {
+    thisObj.overBody = false;
+
+    if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+      thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+    }
+  });
+
+  this.bodyDiv.mousemove(function (event) {
+    if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+      thisObj.trackHeadAtPageX(event.pageX);
+    }
+  });
+
+  this.bodyDiv.mousedown(function (event) {
+    thisObj.startTracking('mouse', thisObj.pageXToPosition(event.pageX));
+    thisObj.trackHeadAtPageX(event.pageX);
+    if (!thisObj.bodyDiv.is(':focus')) {
+      thisObj.bodyDiv.focus();
+    }
+    event.preventDefault();
+  });
+
+  this.seekHead.mousedown(function (event) {
+    thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
+    if (!thisObj.bodyDiv.is(':focus')) {
+      thisObj.bodyDiv.focus();
+    }
+    event.preventDefault();
+  });
+
+  this.bodyDiv.mouseup(function (event) {
+    if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+      thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+    }
+  })
+
+  this.seekHead.mouseup(function (event) {
+    if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+      thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+    }
+  });
+
+  this.bodyDiv.keydown(function (event) {
+    // Home
+    if (event.which === 36) {
+      thisObj.trackImmediatelyTo(0);
+    }
+    // End
+    else if (event.which === 35) {
+      thisObj.trackImmediatelyTo(this.duration);
+    }
+    // Left arrow
+    else if (event.which === 37) {
+      thisObj.arrowKeyDown(-1);
+    }
+    // Right arrow
+    else if (event.which === 39) {
+      thisObj.arrowKeyDown(1);
+    }
+  });
+
+  this.bodyDiv.keyup(function (event) {
+    if (event.which === 37 || event.which === 39) {
+      if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
+        thisObj.stopTracking(thisObj.keyTrackPosition);
+      }
+    }
+  });
+}
+
+// TODO: trackImmediatelyTo
+
+
+AccessibleSeekBar.prototype.arrowKeyDown = function (multiplier) {
+  if (this.tracking && this.trackDevice === 'keyboard') {
+    this.keyTrackPosition = this.boundPos(this.keyTrackPosition + (this.nextStep * multiplier));
+    this.inertiaCount += 1;
+    if (this.inertiaCount === 20) {
+      this.inertiaCount = 0;
+      this.nextStep *= 2;
+    }
+    this.trackHeadAtPosition(this.keyTrackPosition);
+  }
+  else {
+    this.nextStep = 1;
+    this.inertiaCount = 0;
+    this.keyTrackPosition = this.boundPos(this.position + (this.nextStep * multiplier));
+    this.startTracking('keyboard', this.keyTrackPosition);
+    this.trackHeadAtPosition(this.keyTrackPosition);
+  }
+};
+
+AccessibleSeekBar.prototype.pageXToPosition = function (pageX) {
+  var offset = pageX - this.bodyDiv.offset().left;
+  var position = this.duration * (offset / this.bodyDiv.width());
+  return this.boundPos(position);
+};
+
+AccessibleSeekBar.prototype.boundPos = function (position) {
+  return Math.max(0, Math.min(position, this.duration));
+}
+
+AccessibleSeekBar.prototype.setDuration = function (duration) {
+  if (duration !== this.duration) {
+    this.duration = duration;
+    this.resetHeadLocation();
+  }
+};
+
+// Stops tracking, sets the head location to the current position.
+AccessibleSeekBar.prototype.resetHeadLocation = function () {
+  var ratio = this.position / this.duration;
+  var center = this.bodyDiv.width() * ratio;
+  this.seekHead.css('left', center - (this.seekHead.width() / 2));
+
+  if (this.tracking) {
+    this.stopTracking(this.position);
+  }
+};
+
+AccessibleSeekBar.prototype.setPosition = function (position) {
+  this.position = position;
+  this.resetHeadLocation();
+}
+
+AccessibleSeekBar.prototype.startTracking = function (device, position) {
+  this.trackDevice = device;
+  this.tracking = true;
+  this.bodyDiv.trigger('startTracking', [position]);
+};
+
+AccessibleSeekBar.prototype.stopTracking = function (position) {
+  this.trackDevice = null;
+  this.tracking = false;
+  this.bodyDiv.trigger('stopTracking', [position]);
+  this.setPosition(position);
+};
+
+AccessibleSeekBar.prototype.trackHeadAtPageX = function (pageX) {
+  var position = this.pageXToPosition(pageX);
+  var newLeft = pageX - this.bodyDiv.offset().left - (this.seekHead.width() / 2);
+  newLeft = Math.max(0, Math.min(newLeft, this.bodyDiv.width() - this.seekHead.width()));
+  this.lastTrackPosition = position;
+  this.seekHead.css('left', newLeft);
+  this.bodyDiv.trigger('tracking', [position]);
+};
+
+AccessibleSeekBar.prototype.trackHeadAtPosition = function (position) {
+  var ratio = position / this.duration;
+  var center = this.bodyDiv.width() * ratio;
+  this.lastTrackPosition = position;
+  this.seekHead.css('left', center - (this.seekHead.width() / 2));
+  this.bodyDiv.trigger('tracking', [position]);
+}
