@@ -235,7 +235,9 @@ div.ump-now-playing span span {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
-
+.icon-transcript:before {
+	content: "\e600";
+}
 .icon-descriptions:before {
 	content: "\e60b";
 }
@@ -255,45 +257,44 @@ div.ump-now-playing span span {
 	content: "\e610";
 }
 .icon-play:before {
-	content: "\e600";
-}
-.icon-pause:before {
 	content: "\e601";
 }
-.icon-stop:before {
+.icon-pause:before {
 	content: "\e602";
 }
-.icon-rewind:before {
+.icon-stop:before {
 	content: "\e603";
 }
-.icon-forward:before {
+.icon-rewind:before {
 	content: "\e604";
 }
-.icon-toStart:before {
+.icon-forward:before {
 	content: "\e605";
 }
-.icon-toEnd:before {
+.icon-toStart:before {
 	content: "\e606";
 }
-.icon-previous:before {
+.icon-toEnd:before {
 	content: "\e607";
 }
-.icon-next:before {
+.icon-previous:before {
 	content: "\e608";
 }
-.icon-volume:before {
+.icon-next:before {
 	content: "\e60c";
 }
-.icon-mute:before {
+.icon-volume:before {
 	content: "\e60d";
 }
-.icon-volumeUp:before {
+.icon-mute:before {
 	content: "\e60e";
 }
-.icon-volumeDown:before {
+.icon-volumeUp:before {
 	content: "\e60f";
 }
-
+.icon-volumeDown:before {
+	content: "\e613";
+}
 
 /* Misc */
 

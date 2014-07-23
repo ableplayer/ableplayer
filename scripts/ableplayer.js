@@ -806,6 +806,7 @@ AblePlayer.prototype.setButtons = function() {
   this.volumeUpButtonImg = 'images/media-volumeUp-' +  this.iconColor + '.png';
   this.volumeDownButtonImg = 'images/media-volumeDown-' +  this.iconColor + '.png';
   this.ccButtonImg = 'images/media-captions-' +  this.iconColor + '.png';
+  this.transcriptButtonImg = 'images/media-transcript-' +  this.iconColor + '.png';
   this.descriptionButtonImg = 'images/media-descriptions-' +  this.iconColor + '.png';
   this.signButtonImg = 'images/media-sign-' +  this.iconColor + '.png';
   this.fullscreenButtonImg = 'images/media-fullscreen-' +  this.iconColor + '.png';
