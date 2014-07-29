@@ -4,6 +4,10 @@
 */
 .ump-transcript { 
 	position: relative; /* must be positioned for scrolling */
+        overflow-y: scroll;
+        padding-left: 20px;
+        padding-right: 20px;
+        height: 400px;
 }
 .ump-transcript div { 
 	margin: 1em 0;

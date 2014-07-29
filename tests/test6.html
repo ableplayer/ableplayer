@@ -3,31 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <title>Able Player Test #6</title>
-<link rel="stylesheet" href="thissite.css" type="text/css">
+<link rel="stylesheet" href="../thissite.css" type="text/css">
 
 <!-- Dependencies --> 
-<script src="thirdparty/modernizr.custom.js"></script>
+<script src="../thirdparty/modernizr.custom.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-<script src="thirdparty/jquery.cookie.js"></script>
+<script src="../thirdparty/jquery.cookie.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
 
 <!-- Able Player CSS -->  
-<link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
+<link rel="stylesheet" href="../styles/ableplayer.css" type="text/css"/>
 
 <!-- Additional CSS for Playlist -->  
-<link rel="stylesheet" href="styles/ableplayer-playlist.css" type="text/css"/>
+<link rel="stylesheet" href="../styles/ableplayer-playlist.css" type="text/css"/>
 
 
 <!-- Able Player JavaScript -->
-<script src="scripts/ableplayer.js"></script>
+<script src="../scripts/ableplayer.js"></script>
 
-<script>
-$(document).ready(function() { 
-	new AblePlayer('audio1');		
-});
-</script>
-  
 </head>
 
 <body>
@@ -37,7 +31,7 @@ $(document).ready(function() {
 <p>For additional tests see the <a href="index.html#examples">Index of <em>Able Player</em> Tests</a>.</p>
 
 <!-- use the following markup for each media element -->
-		<audio id="audio1" class="ump-media" preload="auto">
+		<audio id="audio1" class="ump-media" preload="auto" data-able-player>
 			<!-- source elements are optional when there's a playlist. --> 
 			<!-- If ommitted, they will be constructed from the first playlist item -->
 		</audio>
@@ -49,20 +43,20 @@ $(document).ready(function() {
 <!-- see documentation for additional details about markup --> 
 <ul class="ump-playlist" data-player="audio1" data-embedded>
   <li 
-	  data-mp3="media/paulallen.mp3"
-		data-ogg="media/paulallen.ogg">The Paul Allen Song</li>
+	  data-mp3="../media/paulallen.mp3"
+		data-ogg="../media/paulallen.ogg">The Paul Allen Song</li>
   <li 
-	  data-mp3="media/php70alpha.mp3"
-		data-ogg="media/php70alpha.ogg">PHP 7.0 Alpha</li>
+	  data-mp3="../media/php70alpha.mp3"
+		data-ogg="../media/php70alpha.ogg">PHP 7.0 Alpha</li>
   <li 
-	  data-mp3="media/frenchsong.mp3"
-		data-ogg="media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
+	  data-mp3="../media/frenchsong.mp3"
+		data-ogg="../media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
   <li 
-	  data-mp3="media/smallf.mp3"
-		data-ogg="media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
+	  data-mp3="../media/smallf.mp3"
+		data-ogg="../media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
   <li 
-	  data-mp3="media/everyday.mp3"
-		data-ogg="media/everyday.ogg">Every Day</li>
+	  data-mp3="../media/everyday.mp3"
+		data-ogg="../media/everyday.ogg">Every Day</li>
 </ul>
 
 

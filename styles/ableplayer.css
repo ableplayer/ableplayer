@@ -22,10 +22,10 @@
 /*	border-bottom-left-radius: 15px;
 	border-bottom-right-radius: 15px;*/
 }
-.ump-audio { 
+/*.ump-audio { 
 	border-top-left-radius: 15px;
 	border-top-right-radius: 15px;
-}
+}*/
 .ump-video { 
 	margin-top: -0.25em;
 }
@@ -68,16 +68,22 @@
   min-width: 40px;
 }
 .ump-controller button:focus, 
-.ump-controller button:hover { 
+.ump-controller button:hover,
+.able-seek-head:focus,
+.able-seek-head:hover { 
   outline-style: solid;
   outline-width: 5px;
 }
-.ump-controller button:focus {  
+.ump-controller button:focus,
+.able-seek-head:focus {  
 	outline-color: #ffff00; /* yellow */
 }
-.ump-controller button:hover {
+.ump-controller button:hover,
+.able-seek-head:hover {
 	outline-color: #66ff66; /* green */
 }
+
+
 .ump-controller button > span { 
   /* icomoon font icon */
   font-size: 24px; 
@@ -101,12 +107,16 @@
   margin: 0 5px
 }
 
+.ump-controller button {
+  color: white;
+}
+/*
 .ump-white-controls button { 
   color: white;
 }
 .ump-black-controls button { 
   color: black;
-}
+}*/
 
 /* Status Bar */
 

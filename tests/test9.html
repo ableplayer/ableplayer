@@ -3,33 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <title>Able Player Test #9</title>
-<link rel="stylesheet" href="thissite.css" type="text/css">
+<link rel="stylesheet" href="../thissite.css" type="text/css">
 
 <!-- Dependencies --> 
-<script src="thirdparty/modernizr.custom.js"></script>
+<script src="../thirdparty/modernizr.custom.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-<script src="thirdparty/jquery.cookie.js"></script>
+<script src="../thirdparty/jquery.cookie.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
 
 <!-- Able Player CSS -->  
-<link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
+<link rel="stylesheet" href="../styles/ableplayer.css" type="text/css"/>
 <!-- Playlist CSS is optional, used for default Able Player-style playlists --> 
-<link rel="stylesheet" href="styles/ableplayer-playlist.css" type="text/css"/>
+<link rel="stylesheet" href="../styles/ableplayer-playlist.css" type="text/css"/>
 
 <!-- Able Player JavaScript -->
-<script src="scripts/ableplayer.js"></script>
-
-<!-- initialize media player. --> 
-<!-- to initialize all media elements on the page, call init() with no parameters -->
-<!-- to initialize only one media element, pass its id to init() --> 
-<script>
-$(document).ready(function() { 
-	$('.ump-media').each(function(index) { 
-		new AblePlayer($(this).attr('id'),index);				
-	});
-});
-</script>
+<script src="../scripts/ableplayer.js"></script>
 
 <!-- style for this page only -->
 <style>
@@ -52,7 +41,7 @@ $(document).ready(function() {
 <div class="column">
   
   <h2>Player with Embedded Playlist</h2>
-  <audio id="audio1" class="ump-media" preload="auto">
+  <audio id="audio1" class="ump-media" preload="auto" data-able-player>
     <!-- source elements are optional when there's a playlist. --> 
     <!-- If ommitted, they will be constructed from the first playlist item -->
   </audio>
@@ -60,18 +49,18 @@ $(document).ready(function() {
   <!-- first playlist (embedded) -->
   <ul class="ump-playlist" data-player="audio1" data-embedded>
     <li 
-      data-mp3="media/everyday.mp3"
-      data-ogg="media/everyday.ogg">Every Day</li>
+      data-mp3="../media/everyday.mp3"
+      data-ogg="../media/everyday.ogg">Every Day</li>
     <li 
-	    data-mp3="media/php70alpha.mp3"
-      data-ogg="media/php70alpha.ogg">PHP 7.0 Alpha</li>
+	    data-mp3="../media/php70alpha.mp3"
+      data-ogg="../media/php70alpha.ogg">PHP 7.0 Alpha</li>
   </ul>
 </div>
 
 <div class="column">
 
   <h2>Player with External Playlist</h2>
-  <audio id="audio2" class="ump-media" preload="auto">
+  <audio id="audio2" class="ump-media" preload="auto" data-able-player>
     <!-- source elements are optional when there's a playlist. --> 
     <!-- If ommitted, they will be constructed from the first playlist item -->
   </audio>
@@ -79,14 +68,14 @@ $(document).ready(function() {
   <!-- second playlist (external) -->
   <ul class="ump-playlist" data-player="audio2">
     <li 
-	    data-mp3="media/frenchsong.mp3"
-      data-ogg="media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
+	    data-mp3="../media/frenchsong.mp3"
+      data-ogg="../media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
     <li 
-	    data-mp3="media/paulallen.mp3"
-      data-ogg="media/paulallen.ogg">The Paul Allen Song</li>
+	    data-mp3="../media/paulallen.mp3"
+      data-ogg="../media/paulallen.ogg">The Paul Allen Song</li>
     <li 
-	    data-mp3="media/smallf.mp3"
-      data-ogg="media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
+	    data-mp3="../media/smallf.mp3"
+      data-ogg="../media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
   </ul>
 </div>
 
