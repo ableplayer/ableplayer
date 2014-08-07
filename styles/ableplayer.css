@@ -6,6 +6,17 @@
 	min-width: 480px; 
 	width: 480px; /* will be changed dynamically as player is contructed */
 }
+
+.ump-column-left {
+    float: left;
+    width: 50%;
+}
+
+.ump-column-right {
+    float: right;
+    width: 50%;
+}
+
 .ump .ump-vidcap-container {
   background-color: black;
   height: 360px;
@@ -14,6 +25,7 @@
   position: relative;
   top: 0;
   width: 480px;
+  margin-bottom: 10px;
 }
 .ump-player { 
 	font-family: Arial, Helvetica, sans-serif;
@@ -67,6 +79,11 @@
   padding: 0;
   min-width: 40px;
 }
+
+.ump-transcript-toolbar input:focus,
+.ump-transcript-toolbar input:hover,
+.ump-controller input:focus,
+.ump-controller input:hover,
 .ump-controller button:focus, 
 .ump-controller button:hover,
 .able-seek-head:focus,
@@ -74,10 +91,16 @@
   outline-style: solid;
   outline-width: 5px;
 }
+
+.ump-transcript-toolbar input:focus,
+.ump-controller input:focus,
 .ump-controller button:focus,
 .able-seek-head:focus {  
 	outline-color: #ffff00; /* yellow */
 }
+
+.ump-transcript-toolbar input:hover,
+.ump-controller input:hover,
 .ump-controller button:hover,
 .able-seek-head:hover {
 	outline-color: #66ff66; /* green */

@@ -40,3 +40,19 @@
 	cursor: pointer;
 }
 
+.ump-transcript-toolbar {
+    padding: 10px;
+    background-color: #DDDDDD;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+}
+
+.ump-transcript-toolbar label {
+    margin-right: 10px;
+}
+
+.ump-transcript-area {
+    margin-left: 10px;
+    border-width: 1px;
+    border-style: solid;
+}

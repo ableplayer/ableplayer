@@ -192,7 +192,7 @@ AblePlayer.prototype.setup = function() {
     console.log('Will start media at ' + startTime + ' seconds');
   }
   this.startedPlaying = false;
-  this.transcriptLocked = true;
+  this.autoScrollTranscript = true;
 
   // be sure media exists, and is a valid type       
   if ($('#' + this.mediaId)) { 
@@ -291,6 +291,11 @@ AblePlayer.prototype.setup = function() {
           if (this.debug && this.player) { 
             console.log ('Using the ' + this.player + ' media player');
           }
+
+          // After done messing with the player, this is necessary to fix playback on iOS
+          if (this.isIOS()) { 
+            this.$media[0].load();
+          }
         }        
         else { 
           // no player can play this media
@@ -383,7 +388,8 @@ AblePlayer.prototype.getPlayer = function() {
   
   var i, sourceType, $newItem;
   if (this.testFallback || 
-      ((this.isUserAgent('msie 7') || this.isUserAgent('msie 8') || this.isUserAgent('msie 9')) && this.mediaType === 'video')) {
+      ((this.isUserAgent('msie 7') || this.isUserAgent('msie 8') || this.isUserAgent('msie 9')) && this.mediaType === 'video') ||
+      (this.isIOS() && !this.isIOS(7))) {
     // the user wants to test the fallback player, or  
     // the user is using IE9, which has buggy implementation of HTML5 video 
     // e.g., plays only a few seconds of MP4 than stops and resets to 0
@@ -455,154 +461,119 @@ AblePlayer.prototype.injectPlayerCode = function() {
   //   This is only a problem in IOS 6 and earlier, 
   //   & is a known bug, fixed in IOS 7      
   
-  var injectMethod;
-  var thisObj = this;
+  var thisObj = this;  
   
-  if (this.isIOS()) { // this is audio; otherwise function would not have been called for IOS
-    if (this.isIOS('7')) { // IOS7 can handle the default injection method
-      injectMethod = 'default'; 
-    }
-    else { // earlier versions of IOS require a modified method
-      injectMethod = 'ios';          
-    }
-  }
-  else { 
-    injectMethod = 'default';
-  }
-
-  if (this.debug) {   
-    console.log ('using the ' + injectMethod + ' inject method');
-  }
-  
-  
-  if (injectMethod) {
-   
-    if (injectMethod === 'default') {   
+  // create $mediaContainer and $umpDiv and wrap them around the media element
+  this.$mediaContainer = this.$media.wrap('<div class="ump-media-container"></div>').parent();        
+  this.$umpDiv = this.$mediaContainer.wrap('<div class="ump"></div>').parent();
     
-      // create $mediaContainer and $umpDiv and wrap them around the media element
-      this.$mediaContainer = this.$media.wrap('<div class="ump-media-container"></div>').parent();         
-      this.$umpDiv = this.$mediaContainer.wrap('<div class="ump"></div>').parent();
+  this.$playerDiv = $('<div>', {
+    'class' : 'ump-player',
+    'role' : 'region',
+    'aria-label' : this.mediaType + ' player'
+  });
+  this.$playerDiv.addClass('ump-'+this.mediaType);
 
-    }
-    else if (injectMethod === 'ios') { 
-    
-      // create new $umpDiv and $mediaContainer, but do NOT wrap them 
-      this.$umpDiv = $('<div>', { 
-        'class' : 'ump'
-      });
-  
-      this.$mediaContainer = $('<div>',{
-        'class' : 'ump-media-container'
-      });
-    }
-    
-    this.$playerDiv = $('<div>', {
-      'class' : 'ump-player',
-      'role' : 'region',
-      'aria-label' : this.mediaType + ' player'
+  // create a div for exposing description
+  // description will be exposed via role="alert" & announced by screen readers  
+  this.$descDiv = $('<div>',{
+    'class': 'ump-descriptions',
+    'role': 'alert'
+  });
+  // Start off with description hidden.
+  this.$descDiv.hide();
+  // TODO: Does this need to be changed when preference is changed?
+  if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
+    this.$descDiv.addClass('ump-clipped');                
+  }
+
+  if (this.includeTranscript) {
+    this.$transcriptArea = $('<div>', {
+      'class': 'ump-transcript-area'
     });
-    this.$playerDiv.addClass('ump-'+this.mediaType);
-
-    // create a div for exposing description
-    // description will be exposed via role="alert" & announced by screen readers  
-    this.$descDiv = $('<div>',{
-      'class': 'ump-descriptions',
-      'role': 'alert'
-    });
-    // Start off with description hidden.
-    this.$descDiv.hide();
-    // TODO: Does this need to be changed when preference is changed?
-    if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
-      this.$descDiv.addClass('ump-clipped');                
-    }
-
-
-
-    this.$transcriptContainer = $('<div>', {
-      'class': 'ump-transcript-container'
-    });
-
+      
     this.$transcriptToolbar = $('<div>', {
-      'class': 'ump-controller'
+      'class': 'ump-transcript-toolbar'
     });
 
     this.$transcriptDiv = $('<div>', {
       'class' : 'ump-transcript'
     });
-    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click', function (event) {
+    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
       // Propagation is stopped in seekpoint click handler, so clicks are on the scrollbar
       // or outside of a seekpoint.
-      thisObj.transcriptLocked = false;
-      thisObj.refreshControls();
+      if (!thisObj.scrollingTranscript) {
+        thisObj.autoScrollTranscript = false;
+        thisObj.refreshControls();
+      }
+      thisObj.scrollingTranscript = false;
     });
 
-    // Transcript toolbar buttons:
-    this.$transcriptLockButton = $('<button tabindex="0"><span class="icon-transcript" aria-hidden="true"></button>');
-    this.$transcriptLockButton.click(function () {
-      thisObj.handleTranscriptLockToggle();
+    // Transcript toolbar content:
+    this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
+    this.$autoScrollTranscriptCheckbox.click(function () {
+      thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
     });
-    this.$transcriptToolbar.append(this.$transcriptLockButton);
+    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll</label>'), this.$autoScrollTranscriptCheckbox);
 
-    this.$transcriptContainer.append(this.$transcriptToolbar, this.$transcriptDiv);
+    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
+  }
 
-    if (!this.includeTranscript) {
-      this.$transcriptDiv.hide();
-    }
-
-    // The default skin depends a bit on a Now Playing div 
-    // so go ahead and add one 
-    // However, it's only populated if this.showNowPlaying = true 
-    this.$nowPlayingDiv = $('<div>',{
-      'class' : 'ump-now-playing',
-      'role' : 'alert'
-    });
-
-    this.$controllerDiv = $('<div>',{
-      'class' : 'ump-controller'
-    });
-
-    this.$statusBarDiv = $('<div>',{
-      'class' : 'ump-status-bar'
-    });
-    this.$timer = $('<span>',{
-      'class' : 'ump-timer'
-    });
-    this.$status = $('<span>',{
-      'class' : 'ump-status',
-      'role' : 'alert'
-    });
-    this.$statusBarDiv.append(this.$timer).append(this.$status);
-
-    // append new divs to $playerDiv
-    this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
-
-    // and finally, append playerDiv to umpDiv  
-    this.$umpDiv.append(this.$playerDiv, this.$descDiv);
-
+  // The default skin depends a bit on a Now Playing div 
+  // so go ahead and add one 
+  // However, it's only populated if this.showNowPlaying = true 
+  this.$nowPlayingDiv = $('<div>',{
+    'class' : 'ump-now-playing',
+    'role' : 'alert'
+  });
+  
+  this.$controllerDiv = $('<div>',{
+    'class' : 'ump-controller'
+  });
+  
+  this.$statusBarDiv = $('<div>',{
+    'class' : 'ump-status-bar'
+  });
+  this.$timer = $('<span>',{
+    'class' : 'ump-timer'
+  });
+  this.$status = $('<span>',{
+    'class' : 'ump-status',
+    'role' : 'alert'
+  });
+  this.$statusBarDiv.append(this.$timer).append(this.$status);
+  
+  // append new divs to $playerDiv
+  this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+  
+  // and finally, append playerDiv to umpDiv  
+  this.$umpDiv.append(this.$playerDiv, this.$descDiv);
+  
+  if (this.includeTranscript) {
     // If client has provided separate transcript location, put it there instead.
     if (this.transcriptDivLocation) {
-      $(this.transcriptDivLocation).append(this.$transcriptContainer);
+      $(this.transcriptDivLocation).append(this.$transcriptArea);
     }
     else {
-      this.$umpDiv.append(this.$transcriptContainer);
+      // TODO: Is this always what we want?
+      // Place adjacent to player.
+      this.$umpDiv.width(this.$umpDiv.width() * 2);
+      this.$umpDiv.children().wrapAll('<div class="ump-column-left">');
+      this.$umpDiv.append(this.$transcriptArea);
+      this.$transcriptArea.wrap('<div class="ump-column-right">');
     }
-        
-    // oh, and also add div for displaying alerts and error messages 
-    this.$alertDiv = $('<div>',{
-      'class' : 'ump-alert-div',
-      'role' : 'alert'
-    });   
-    this.$umpDiv.after(this.$alertDiv);
-
-    if (injectMethod === 'ios') {
-      // inject all of this *after* the original HTML5 media element 
-      this.$media.after(this.$umpDiv);
-    }
-
-    // Can't get computed style in webkit until after controllerDiv has been added to the DOM     
-    this.getBestColor(this.$controllerDiv); // getBestColor() defines this.iconColor
-    this.$controllerDiv.addClass('ump-' + this.iconColor + '-controls');    
   }
+  
+  // oh, and also add div for displaying alerts and error messages 
+  this.$alertDiv = $('<div>',{
+    'class' : 'ump-alert-div',
+    'role' : 'alert'
+  });   
+  this.$umpDiv.after(this.$alertDiv);
+  
+  // Can't get computed style in webkit until after controllerDiv has been added to the DOM     
+  this.getBestColor(this.$controllerDiv); // getBestColor() defines this.iconColor
+  this.$controllerDiv.addClass('ump-' + this.iconColor + '-controls');
 };
 AblePlayer.prototype.initTracks = function() { 
 
@@ -1293,10 +1264,10 @@ AblePlayer.prototype.savePrefs = function() {
       
     // tabbable transcript 
     if (this.prefTabbable === 1) { 
-      $('.ump-transcript span').attr('tabindex','0');     
+      $('.ump-transcript span.ump-transcript-seekpoint').attr('tabindex','0');     
     } 
     else { 
-      $('.ump-transcript span').removeAttr('tabindex');
+      $('.ump-transcript span.ump-transcript-seekpoint').removeAttr('tabindex');
     }
   } 
   else { 
@@ -1680,6 +1651,7 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) { 
           console.log('JW Player onIdle event fired');
         }
+
         thisObj.refreshControls();
       })
       .onMeta(function() { 
@@ -1690,9 +1662,9 @@ AblePlayer.prototype.addEventListeners = function() {
       .onPlaylist(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlaylist event fired');
-        }       
-        // onPlaylist is fired when a new playlist is loaded into the player 
-        // A playlist includes any new media source 
+        }
+
+        // Playlist change includes new media source.
         thisObj.onMediaNewSourceLoad();
       });
   }   
@@ -1767,8 +1739,13 @@ AblePlayer.prototype.onMediaNewSourceLoad = function () {
     if (this.player === 'html5') {
       this.media.play();
     }
-    else {
-      this.jwPlayer.play(true);
+    else if (this.player === 'jw') {
+      var player = this.jwPlayer;
+      // Seems to be a bug in JW player, where this doesn't work when fired immediately.
+      // Thus have to use a setTimeout
+      setTimeout(function () {
+        player.play(true);
+      }, 500);
     }
     this.swappingSrc = false; // swapping is finished
     this.refreshControls();
@@ -1981,7 +1958,7 @@ AblePlayer.prototype.addControls = function() {
     }
     this.$controllerDiv.append(controllerSpan);
     if ((i % 2) == 1) {
-      this.$controllerDiv.append('<br>');
+      this.$controllerDiv.append('<div style="clear:both;"></div>');
       var width = this.playerWidth - lastWidth - widthRemaining - 10;
       controllerSpan.css('width', width);
       widthRemaining = this.playerWidth;
@@ -2023,12 +2000,6 @@ AblePlayer.prototype.addControls = function() {
   //$('.ump-right-controls').css('width',rightWidth);       
   
   if (this.mediaType === 'video') { 
-    // set controller to width of video
-    controllerStyles = {
-      'width': this.playerWidth+'px',
-      'height': this.playerHeight+'px'
-    } 
-    this.$umpDiv.css(controllerStyles); 
     // also set width and height of div.ump-vidcap-container
     vidcapStyles = {
       'width': this.playerWidth+'px',
@@ -2643,17 +2614,17 @@ AblePlayer.prototype.handleHelpClick = function() {
 
 AblePlayer.prototype.handleTranscriptToggle = function () {
   if (this.$transcriptDiv.is(':visible')) {
-    this.$transcriptDiv.hide();
+    this.$transcriptArea.hide();
     this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' transcript');
   }
   else {
-    this.$transcriptDiv.show();
+    this.$transcriptArea.show();
     this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' transcript');
   }
 };
 
-AblePlayer.prototype.handleTranscriptLockToggle = function () {
-  this.transcriptLocked = !this.transcriptLocked;
+AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
+  this.autoScrollTranscript = val;
   this.refreshControls();
 };
 
@@ -2925,21 +2896,22 @@ AblePlayer.prototype.refreshControls = function() {
 
 
   // TODO: Move all button updates here.
-  if (this.transcriptLocked) {
-    // TODO: Localize
-    this.$transcriptLockButton.removeClass('buttonOff').attr('title', 'Unlock transcript');
-  }
-  else {
-    this.$transcriptLockButton.addClass('buttonOff').attr('title', 'Lock transcript');
+  if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
+    this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
   }
 
+
   // If transcript locked, scroll transcript to current highlight location.
-  if (this.transcriptLocked && this.currentHighlight) {
-    // scroll this item to the middle of the transcript div
-    $('.ump-transcript').scrollTop($('.ump-transcript').scrollTop() +
-                                   $(this.currentHighlight).position().top -
-                                   ($('.ump-transcript').height() / 2) +
-                                   ($(this.currentHighlight).height() / 2));
+  if (this.autoScrollTranscript && this.currentHighlight) {
+    var newTop = Math.floor($('.ump-transcript').scrollTop() +
+                            $(this.currentHighlight).position().top -
+                            ($('.ump-transcript').height() / 2) +
+                            ($(this.currentHighlight).height() / 2));
+    if (newTop !== Math.floor($('.ump-transcript').scrollTop())) {
+      // Set a flag to ignore the coming scroll event.
+      this.scrollingTranscript = true;
+      $('.ump-transcript').scrollTop(newTop);
+    }
   }
 };
 
@@ -4303,12 +4275,12 @@ function generateTranscript(captions, descriptions) {
 
         if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
           result = result.concat(flattenString(str.substring(0, openBracket)));
-          result.push($('<span class="ump-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
+          result.push($('<div></div><span class="ump-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
           result = result.concat(flattenString(str.substring(closeBracket + 1)));
         }
         else if (hasParens) {
           result = result.concat(flattenString(str.substring(0, openParen)));
-          result.push($('<span class="ump-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
+          result.push($('<div></div><span class="ump-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
           result = result.concat(flattenString(str.substring(closeParen + 1)));
         }
         else {
@@ -4321,7 +4293,7 @@ function generateTranscript(captions, descriptions) {
         result = result.concat(flattenString(comp.value));
       }
       else if (comp.type === 'v') {
-        var vSpan = $('<span class="ump-unspoken">[' + comp.value + ']</span>');
+        var vSpan = $('<div></div><span class="ump-unspoken">[' + comp.value + ']</span>');
         result.push(vSpan);
         for (var ii in comp.children) {
           var subResults = flattenComponentForCaption(comp.children[ii]);
@@ -4589,7 +4561,8 @@ function AccessibleSeekBar(div, width) {
   var radius = '5px';
   wrapperDiv.width(width);
   wrapperDiv.css({
-    'display': 'inline-block'
+    'display': 'inline-block',
+    'vertical-align': 'middle'
   });
 
   this.bodyDiv.css({
@@ -4601,7 +4574,6 @@ function AccessibleSeekBar(div, width) {
     '-moz-border-radius': radius,
     '-o-border-radius': radius,
     'background-color': '#666666',
-    'top': '6px',
     'margin': '0 20px'
   });
 
