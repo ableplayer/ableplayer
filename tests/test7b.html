@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Able Player Test #7b</title>
-<link rel="stylesheet" href="thissite.css" type="text/css">
+<link rel="stylesheet" href="../thissite.css" type="text/css">
 
 <!-- Dependencies --> 
-<script src="thirdparty/modernizr.custom.js"></script>
+<script src="../thirdparty/modernizr.custom.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-<script src="thirdparty/jquery.cookie.js"></script>
+<script src="../thirdparty/jquery.cookie.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
 
 <!-- Able Player CSS -->  
-<link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
+<link rel="stylesheet" href="../styles/ableplayer.css" type="text/css"/>
 
 <!-- CSS for interactive transcript --> 
-<link rel="stylesheet" href="styles/ableplayer-transcript.css" type="text/css"/>
+<link rel="stylesheet" href="../styles/ableplayer-transcript.css" type="text/css"/>
 
 <!-- additional styles for positioning transcript on this page. Not included in the UMP package -->
 <style>
@@ -50,13 +50,7 @@
 </style>
  
 <!-- Able Player JavaScript -->
-<script src="scripts/ableplayer.js"></script>
-
-<script>
-$(document).ready(function() { 
-	new AblePlayer('audio1');		
-});
-</script>
+<script src="../scripts/ableplayer.js"></script>
 
 </head>
 
@@ -67,9 +61,9 @@ $(document).ready(function() {
 <p>For additional tests see the <a href="index.html#examples">Index of <em>Able Player</em> Tests</a>.</p>
 
 <!-- use the following markup for each media element -->
-<audio id="audio1" class="ump-media" preload="auto">
-  <source type="audio/ogg" src="media/paulallen.ogg"/>
-  <source type="audio/mpeg" src="media/paulallen.mp3"/>
+<audio id="audio1" class="ump-media" preload="auto" data-able-player>
+  <source type="audio/ogg" src="../media/paulallen.ogg"/>
+  <source type="audio/mpeg" src="../media/paulallen.mp3"/>
 </audio>
 
 
