@@ -3015,7 +3015,9 @@ AblePlayer.prototype.refreshControls = function() {
     'ended': this.tt.statusEnd
   }
 
-  this.$status.text(textByState[this.getPlayerState()]);
+  if (this.$status.text() !== textByState[this.getPlayerState()]) {
+    this.$status.text(textByState[this.getPlayerState()]);
+  }
 
   // Don't change play/pause button display while using the seek bar.
   if (!this.seekBar.tracking) {
