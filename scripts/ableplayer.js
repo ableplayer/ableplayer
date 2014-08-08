@@ -2658,11 +2658,11 @@ AblePlayer.prototype.handleHelpClick = function() {
 AblePlayer.prototype.handleTranscriptToggle = function () {
   if (this.$transcriptDiv.is(':visible')) {
     this.$transcriptArea.hide();
-    this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' transcript');
+    this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
   }
   else {
     this.$transcriptArea.show();
-    this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' transcript');
+    this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
   }
 };
 
@@ -2819,6 +2819,14 @@ AblePlayer.prototype.getButtonTitle = function(control) {
     }
     else { 
       return this.tt.turnOn + ' ' + this.tt.descriptions;
+    }
+  }
+  else if (control === 'transcript') {  
+    if (this.$transcriptDiv.is(':visible')) {
+      return this.tt.hide + ' ' + this.tt.transcript;
+    }
+    else { 
+      return this.tt.show + ' ' + this.tt.transcript;
     }
   }   
   else if (control === 'sign') { // not yet supported 
