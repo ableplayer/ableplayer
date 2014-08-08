@@ -4516,6 +4516,7 @@ function AccessibleDialog(modalDiv, title, description, width, fullscreen, escap
   this.title = title;
   this.description = description;
   this.escapeHook = escapeHook;
+  this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
   
   var thisObj = this;
   var modal = modalDiv;
@@ -4549,18 +4550,21 @@ function AccessibleDialog(modalDiv, title, description, width, fullscreen, escap
     }).click(function () {
       thisObj.hide();
     });
-    modal.prepend(closeButton);
 
-    var titleH1 = $('<h1 id="modalTitle"></h1>');
+    var titleH1 = $('<h1></h1>');
+    titleH1.attr('id', 'modalTitle-' + this.baseId);
     titleH1.css('text-align', 'center');
     titleH1.text(title);
     
+    modal.attr('aria-labelledby', 'modalTitle-' + this.baseId);
+
     modal.prepend(titleH1);
-    modal.attr('aria-labelledby', 'modalTitle');
+    modal.prepend(closeButton);
   }
 
 
-  var descriptionDiv = $('<div id="modalDescription"></div>');
+  var descriptionDiv = $('<div></div>');
+  descriptionDiv.attr('id', 'modalDescription-' + this.baseId);
   descriptionDiv.text(description);
   // Move off-screen.
   descriptionDiv.css({
@@ -4575,7 +4579,7 @@ function AccessibleDialog(modalDiv, title, description, width, fullscreen, escap
   modal.prepend(descriptionDiv);
 
   modal.attr('aria-hidden', 'true');
-  modal.attr('aria-describedby', 'modalDescription');
+  modal.attr('aria-describedby', 'modalDescription-' + this.baseId);
   modal.attr('role', 'dialog');
 
   modal.keydown(function (event) {
