@@ -558,7 +558,7 @@ AblePlayer.prototype.injectPlayerCode = function() {
       // TODO: Is this always what we want?
       // Place adjacent to player.
       this.$umpDiv.width(this.$umpDiv.width() * 2);
-      this.$umpDiv.children().wrapAll('<div class="ump-column-left">');
+      this.$umpColumnLeft = this.$umpDiv.children().wrapAll('<div class="ump-column-left">').parent();
       this.$umpDiv.append(this.$transcriptArea);
       this.$transcriptArea.wrap('<div class="ump-column-right">');
     }
@@ -1336,6 +1336,26 @@ AblePlayer.prototype.updateTranscript = function() {
   }
 }
 
+// Resizes all relevant player attributes.
+AblePlayer.prototype.resizePlayer = function (width, height) {
+  this.$media.height(height);
+  this.$media.width(width);
+  this.$captionDiv.width(width);
+  this.$descDiv.width(width);
+  if (this.$vidcapContainer) {
+    this.$vidcapContainer.height(height);
+    this.$vidcapContainer.width(width); 
+  }
+
+  if (this.jwPlayer) {
+    this.jwPlayer.resize(width, height);
+  }
+
+  if (this.resizeSeekBar) {
+    this.seekBar.setWidth(width - this.widthUsedBeforeSeekBar);
+  }
+};
+
 AblePlayer.prototype.addEventListeners = function() { 
 
   var thisObj, whichButton, thisElement; 
@@ -1343,9 +1363,22 @@ AblePlayer.prototype.addEventListeners = function() {
   // Save the current object context in thisObj for use with inner functions.
   thisObj = this;
 
-  // Handle seek bar events.
-  
+  // Appropriately resize media player for full screen.
+  $(window).resize(function () {
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        thisObj.modalFullscreenActive) {
+      var newHeight = $(window).height() - thisObj.$playerDiv.height() - thisObj.$descDiv.height();
+      thisObj.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);
+    }
+  });
 
+  // Handle seek bar events.
   this.seekBar.bodyDiv.on('startTracking', function (event) {
     thisObj.pauseMedia();
   }).on('tracking', function (event, position) {
@@ -1402,6 +1435,9 @@ AblePlayer.prototype.addEventListeners = function() {
     }
     else if (whichButton === 'transcript') {
       thisObj.handleTranscriptToggle();
+    }
+    else if (whichButton === 'fullscreen') {
+      thisObj.handleFullscreenToggle();
     }
   });
     
@@ -1827,10 +1863,7 @@ AblePlayer.prototype.addControls = function() {
     controlLayout['bl'].push('volumeDown'); 
   }
   if (this.mediaType === 'video') { 
-    useFullScreen = false; // set to true if browser supports full screen (need to work on this)
-    if (useFullScreen) { 
-      controlLayout['bl'].push('fullscreen');       
-    }
+    controlLayout['bl'].push('fullscreen');
   }
   controlLayout['br'].push('preferences');
   // create the hidden form that will be triggered by a click on the Preferences button
@@ -1842,7 +1875,7 @@ AblePlayer.prototype.addControls = function() {
   var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
   // now step separately through left and right controls
   var lastWidth = 0;
-  var widthRemaining = this.playerWidth;
+  var widthUsed = 0;
   for (i = 0; i <= 3; i++) {
     controls = controlLayout[sectionByOrder[i]];
     if ((i % 2) === 0) {        
@@ -1860,19 +1893,25 @@ AblePlayer.prototype.addControls = function() {
       if (control === 'seek') { 
         var sliderDiv = $('<div class="ump-seekbar"></div>');
         controllerSpan.append(sliderDiv);
+
         var width;
         if ((i % 2) === 0) {
-          width = Math.min(baseSliderWidth, widthRemaining - 50);
+          width = Math.min(baseSliderWidth, this.playerWidth - widthUsed - 50);
+          this.resizeSeekBar = false;
         }
         else {
           // When on right hand side, consume available width.
-          width = widthRemaining - 50;
+          width = this.playerWidth - widthUsed - 50;
+          this.resizeSeekBar = true;
+          // We store this for later to assist in resizing without having to recalculate button widths.
+          // Only the slider changes sizes on resizing, and only if it's on the right hand side.
+          this.widthUsedBeforeSeekBar = widthUsed;
         }
-        widthRemaining -= width;
+        widthUsed += width;
         this.seekBar = new AccessibleSeekBar(sliderDiv, width);
       }
       else {
-        widthRemaining -= buttonWidth;
+        widthUsed += buttonWidth;
         // this control is a button 
         buttonImgSrc = 'images/media-' + control + '-' + this.iconColor + '.png';
         buttonTitle = this.getButtonTitle(control); 
@@ -1954,20 +1993,23 @@ AblePlayer.prototype.addControls = function() {
         else if (control === 'transcript') {
           this.$transcriptButton = newButton;
         }
+        else if (control === 'fullscreen') {
+          this.$fullscreenButton = newButton;
+        }
       }
     }
     this.$controllerDiv.append(controllerSpan);
     if ((i % 2) == 1) {
       this.$controllerDiv.append('<div style="clear:both;"></div>');
-      var width = this.playerWidth - lastWidth - widthRemaining - 10;
-      controllerSpan.css('width', width);
-      widthRemaining = this.playerWidth;
+      var width = widthUsed - lastWidth - 10;
+      //controllerSpan.css('width', width);
+      widthUsed = 0;
       lastWidth = width;
     }
     else {
-      var width = this.playerWidth - widthRemaining;
-      controllerSpan.css('width', width);
-      widthRemaining -= 10;
+      var width = widthUsed;
+      //controllerSpan.css('width', width);
+      widthUsed += 10;
       lastWidth = width;
     }
   }
@@ -2045,6 +2087,7 @@ AblePlayer.prototype.addControls = function() {
   // Update state-based display of controls.
   this.refreshControls();
 };
+
 AblePlayer.prototype.getIconType = function() { 
   // returns either "font" or "image" 
   // create a temporary play span and check to see if button has font-family == "icomoon" (the default) 
@@ -2622,6 +2665,121 @@ AblePlayer.prototype.handleTranscriptToggle = function () {
     this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' transcript');
   }
 };
+
+AblePlayer.prototype.handleFullscreenToggle = function () {
+  var thisObj = this;
+  var $el;
+  if (this.$umpColumnLeft) {
+    // If there's two columns (player + transcript), only expand the lefthand column.
+    $el = this.$umpColumnLeft;
+  }
+  else {
+    $el = this.$umpDiv;
+  }
+  var el = $el[0];
+
+  if (this.nativeFullscreenSupported()) {
+    // Note: many varying names for options for browser compatibility.
+    // Exit if already in fullscreen.
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.webkitCurrentFullScreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement) {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
+      else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      }
+      else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+
+    // If not in full screen, initialize it.
+    if (el.requestFullscreen) {
+      el.requestFullscreen();
+    }
+    else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    }
+    else if (el.mozRequestFullScreen) {
+      el.mozRequestFullScreen();
+    }
+    else if (el.msRequestFullscreen) {
+      el.msRequestFullscreen();
+    }
+  }
+  else {
+    // Non-native fullscreen support through modal dialog.
+
+    // Create dialog on first run through.
+    if (!this.fullscreenDialog) {
+      var dialogDiv = $('<div>');
+      this.fullscreenDialog = new AccessibleDialog(dialogDiv, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
+      this.$umpDiv.append(dialogDiv);
+    }
+
+    // Track whether paused/playing before moving element; moving the element can stop playback.
+    var wasPaused = this.isPaused();
+
+    if (!this.modalFullscreenActive) {
+      this.modalFullscreenActive = true;
+      this.fullscreenDialog.show();
+
+      // Move player element into fullscreen dialog, then show.
+      // Put a placeholder element where player was.
+      this.$modalFullscreenPlaceholder = $('<div class="placeholder">');
+      this.$modalFullscreenPlaceholder.insertAfter($el);
+      $el.appendTo(this.fullscreenDialog.modal);
+
+      // Column left css is 50% by default; set to 100% for full screen.
+      if ($el === this.$umpColumnLeft) {
+        $el.width('100%');
+      }
+      var newHeight = $(window).height() - this.$playerDiv.height() - this.$descDiv.height();
+      this.resizePlayer($(window).width(), newHeight);
+
+    }
+    else {
+      this.modalFullscreenActive = false;
+      if ($el === this.$umpColumnLeft) {
+        $el.width('50%');
+      }
+      $el.insertAfter(this.$modalFullscreenPlaceholder);
+      this.$modalFullscreenPlaceholder.remove();
+      this.fullscreenDialog.hide();
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+
+    // TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
+    // Need to call setup again after moving?
+
+    // Resume playback if moving stopped it.
+    if (!wasPaused && this.isPaused()) {
+      if (this.player === 'html5') {
+        this.media.play(true);
+      }
+      else if (this.player === 'jw') {
+        this.jwPlayer.play(true);
+      }
+    }
+  }
+};
+
+AblePlayer.prototype.nativeFullscreenSupported = function () {
+  return document.fullscreenEnabled ||
+    document.webkitFullscreenEnabled ||
+    document.mozFullScreenEnabled ||
+    document.msFullscreenEnabled;
+}
 
 AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
   this.autoScrollTranscript = val;
@@ -4352,9 +4510,10 @@ function generateTranscript(captions, descriptions) {
 var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 // Based on the incredible accessible modal dialog.
-function AccessibleDialog(modalDiv, title, description, width) {
+function AccessibleDialog(modalDiv, title, description, width, fullscreen, escapeHook) {
   this.title = title;
   this.description = description;
+  this.escapeHook = escapeHook;
   
   var thisObj = this;
   var modal = modalDiv;
@@ -4367,26 +4526,37 @@ function AccessibleDialog(modalDiv, title, description, width) {
     position: 'fixed',
     left: 0,
     right: 0,
-    top: '25%',
+    top: (fullscreen ? '0' : '25%'),
     display: 'none'
   });
   modal.addClass('modalDialog');
 
-  var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
-  closeButton.css({
-    float: 'right',
-    position: 'absolute',
-    top: '10px',
-    left: '95%'
-  });
-  closeButton.keydown(function (event) {
-    // Space key down
-    if (event.which === 32) {
+  if (!fullscreen) {
+    var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
+    closeButton.css({
+      float: 'right',
+      position: 'absolute',
+      top: '10px',
+      left: '95%'
+    });
+    closeButton.keydown(function (event) {
+      // Space key down
+      if (event.which === 32) {
+        thisObj.hide();
+      }
+    }).click(function () {
       thisObj.hide();
-    }
-  }).click(function () {
-    thisObj.hide();
-  });
+    });
+    modal.prepend(closeButton);
+
+    var titleH1 = $('<h1 id="modalTitle"></h1>');
+    titleH1.css('text-align', 'center');
+    titleH1.text(title);
+    
+    modal.prepend(titleH1);
+    modal.attr('aria-labelledby', 'modalTitle');
+  }
+
 
   var descriptionDiv = $('<div id="modalDescription"></div>');
   descriptionDiv.text(description);
@@ -4399,24 +4569,23 @@ function AccessibleDialog(modalDiv, title, description, width) {
     top: 'auto'
   });
 
-  var titleH1 = $('<h1 id="modalTitle"></h1>');
-  titleH1.css('text-align', 'center');
-  titleH1.text(title);
 
-  modal.prepend(closeButton);
-  modal.prepend(titleH1);
   modal.prepend(descriptionDiv);
 
   modal.attr('aria-hidden', 'true');
-  modal.attr('aria-labelledby', 'modalTitle');
   modal.attr('aria-describedby', 'modalDescription');
   modal.attr('role', 'dialog');
 
   modal.keydown(function (event) {
     // Escape
     if (event.which === 27) {
-      thisObj.hide();
-      event.preventDefault();
+      if (thisObj.escapeHook) {
+        thisObj.escapeHook(event, this);
+      }
+      else {
+        thisObj.hide();
+        event.preventDefault();
+      }
     }
     // Tab
     else if (event.which === 9) {
@@ -4556,11 +4725,11 @@ function AccessibleSeekBar(div, width) {
   this.bodyDiv.append(this.seekHead);
 
   this.bodyDiv.wrap('<div></div>');
-  var wrapperDiv = this.bodyDiv.parent();
+  this.wrapperDiv = this.bodyDiv.parent();
 
   var radius = '5px';
-  wrapperDiv.width(width);
-  wrapperDiv.css({
+  this.wrapperDiv.width(width);
+  this.wrapperDiv.css({
     'display': 'inline-block',
     'vertical-align': 'middle'
   });
@@ -4745,6 +4914,11 @@ AccessibleSeekBar.prototype.setDuration = function (duration) {
     this.resetHeadLocation();
     this.seekHead.attr('aria-value-max', duration);
   }
+};
+
+AccessibleSeekBar.prototype.setWidth = function (width) {
+  this.wrapperDiv.width(width);
+  this.resetHeadLocation();
 };
 
 // Stops tracking, sets the head location to the current position.

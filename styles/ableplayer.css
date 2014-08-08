@@ -54,9 +54,7 @@
 	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
 	padding: 5px 0 0; 
 }
-.ump-controller > span { 
-  width: 50%;
-}
+
 
 /* Controller Buttons & Controls */
 
@@ -356,4 +354,13 @@ div.ump-now-playing span span {
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
+}
+
+/* Fullscreen settings */
+
+:-webkit-full-screen {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background: none;
 }
