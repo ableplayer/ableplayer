@@ -1416,12 +1416,16 @@ AblePlayer.prototype.addEventListeners = function() {
 
   // Handle seek bar events.
   this.seekBar.bodyDiv.on('startTracking', function (event) {
+    thisObj.pausedBeforeTracking = thisObj.isPaused();
     thisObj.pauseMedia();
   }).on('tracking', function (event, position) {
     thisObj.refreshControls();
   }).on('stopTracking', function (event, position) {
-    // Seek will automatically call play.
     thisObj.seekTo(position);
+
+    if (!thisObj.pausedBeforeTracking) {
+      thisObj.playMedia();
+    }
   });
 
   // handle clicks on player buttons 
@@ -1754,6 +1758,7 @@ AblePlayer.prototype.onMediaUpdateTime = function () {
   if (this.startTime && !this.startedPlaying) { 
     // try seeking again, if seeking failed on canplay or canplaythrough
     this.seekTo(this.startTime);
+    this.playMedia();
   }       
 
   // show captions, even for JW Player.
@@ -2935,17 +2940,10 @@ AblePlayer.prototype.seekTo = function (newTime) {
     // Check HTML5 media "seekable" property to be sure media is seekable to startTime
     seekable = this.media.seekable;
     if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
-      // startTime is seekable. Seek to startTime, then start playing
-      // Unless startTime == seekable.end(0), since then it will actually set the time to the start of the video.  In this case, do so but don't keep playing.
       this.media.currentTime = this.startTime;
-      if (seekable.end(0) !== this.startTime) {
-        this.media.play(true);
-        this.startedPlaying = true;
-      }
     } 
   }
   else { // jw player
-    this.jwPlayer.play(true);
     this.jwPlayer.seek(newTime);
     this.startedPlaying = true;
   }
@@ -3039,6 +3037,16 @@ AblePlayer.prototype.pauseMedia = function () {
   else if (this.player === 'jw') {
     this.jwPlayer.pause(true);
   }
+};
+
+AblePlayer.prototype.playMedia = function () {
+  if (this.player === 'html5') {
+    this.media.play(true);
+  }
+  else if (this.player === 'jw') {
+    this.jwPlayer.play(true);
+  }
+  this.startedPlaying = true;
 };
 
 // Right now, update the seekBar values based on current duration and time.
@@ -5043,9 +5051,11 @@ AccessibleSeekBar.prototype.setPosition = function (position) {
 }
 
 AccessibleSeekBar.prototype.startTracking = function (device, position) {
-  this.trackDevice = device;
-  this.tracking = true;
-  this.bodyDiv.trigger('startTracking', [position]);
+  if (!this.tracking) {
+    this.trackDevice = device;
+    this.tracking = true;
+    this.bodyDiv.trigger('startTracking', [position]);
+  }
 };
 
 AccessibleSeekBar.prototype.stopTracking = function (position) {
