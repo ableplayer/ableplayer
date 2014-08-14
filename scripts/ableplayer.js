@@ -1620,6 +1620,9 @@ AblePlayer.prototype.addEventListeners = function() {
       .on('ended',function() {
         thisObj.onMediaComplete();
       })
+      .on('progress', function() {
+        thisObj.refreshControls();
+      })
       .on('waiting',function() { 
         thisObj.refreshControls();
       })
@@ -1728,6 +1731,9 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) { 
           console.log('JW Player onBuffer event fired');
         }       
+        thisObj.refreshControls();
+      })
+      .onBufferChange(function() {
         thisObj.refreshControls();
       })
       .onIdle(function(e) { 
@@ -3174,6 +3180,16 @@ AblePlayer.prototype.refreshControls = function() {
       this.scrollingTranscript = true;
       $('.able-transcript').scrollTop(newTop);
     }
+  }
+
+  // Update buffering progress.
+  if (this.player === 'html5') {
+    if (this.media.buffered.length > 0) {
+      this.seekBar.setBuffered(this.media.buffered.end(0) / this.getDuration())
+    }
+  }
+  else if (this.player === 'jw') {
+    this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
   }
 };
 
@@ -4860,8 +4876,9 @@ function AccessibleSeekBar(div, width) {
   this.loadedDiv.width(0);
   this.loadedDiv.css({
     'display': 'inline-block',
-    'position': 'relative',
+    'position': 'absolute',
     'left': 0,
+    'top': 0,
     'height': '0.5em',
     'border-radius': radius,
     '-webkit-border-radius': radius,
@@ -5048,6 +5065,11 @@ AccessibleSeekBar.prototype.setPosition = function (position) {
   this.resetHeadLocation();
   this.refreshTooltip();
   this.updateAriaValues(position);
+}
+
+AccessibleSeekBar.prototype.setBuffered = function (ratio) {
+  this.loadedDiv.width(this.bodyDiv.width() * ratio);
+  console.log(ratio);
 }
 
 AccessibleSeekBar.prototype.startTracking = function (device, position) {
