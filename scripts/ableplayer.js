@@ -198,6 +198,8 @@ AblePlayer.prototype.setup = function() {
   if ($('#' + this.mediaId)) { 
     // an element exists with this mediaId
     this.$media = $('#' + this.mediaId); // jquery object 
+    // Firefox puts videos in tab order; remove.
+    this.$media.attr('tabindex', -1);
     this.media = this.$media[0]; // html element
     if (this.$media.is('audio')) { 
       this.mediaType = 'audio';
