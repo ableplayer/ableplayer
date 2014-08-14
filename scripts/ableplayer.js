@@ -2103,8 +2103,6 @@ AblePlayer.prototype.addControls = function() {
     // set controller to combined width of all controls
     // plus 10px separation between left and right controls
   }
-
-  this.$controllerDiv.css('min-height', Math.ceil(i / 2) * 28);
     
   // also add a timer to the status bar
   this.$elapsedTimeContainer = $('<span>',{

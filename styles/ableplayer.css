@@ -25,7 +25,7 @@
   position: relative;
   top: 0;
   width: 480px;
-  margin-bottom: 10px;
+/*  margin-bottom: 10px;*/
 }
 .able-player { 
 	font-family: Arial, Helvetica, sans-serif;
@@ -39,7 +39,7 @@
 	border-top-right-radius: 15px;
 }*/
 .able-video { 
-	margin-top: -0.75em;
+/*	margin-top: -0.75em;*/
 }
 .able-video .able-now-playing { 
 	display: none; /* not currently used for video */
@@ -52,7 +52,7 @@
 	/* min-height: 2.6em; */ /* height of button (1.4em) + padding (0.2em) + margin (0.5em) + outline (0.5em) */
 	/* line-height: 2.6em; */
 	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
-	padding: 5px 0 0; 
+	padding: 0; 
 }
 
 
@@ -62,6 +62,10 @@
 .able-left-controls, .able-right-controls { 
     overflow: visible;
 }
+.able-left-controls button, .able-right-controls button {
+    vertical-align: middle;
+}
+
 .able-left-controls { 
   float: left;
 }
