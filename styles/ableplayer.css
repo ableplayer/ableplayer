@@ -1,12 +1,23 @@
 /* 
 	Able Player core styles
 */
-.ump { 
+.able { 
 	margin: 1em 0;
 	min-width: 480px; 
 	width: 480px; /* will be changed dynamically as player is contructed */
 }
-.ump .ump-vidcap-container {
+
+.able-column-left {
+    float: left;
+    width: 50%;
+}
+
+.able-column-right {
+    float: right;
+    width: 50%;
+}
+
+.able .able-vidcap-container {
   background-color: black;
   height: 360px;
   left: 0;
@@ -14,25 +25,26 @@
   position: relative;
   top: 0;
   width: 480px;
+  margin-bottom: 10px;
 }
-.ump-player { 
+.able-player { 
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #000000; /* background color of player (appears on top & bottom) */
 	border: 1px solid #000000; /* border around entire player */
 /*	border-bottom-left-radius: 15px;
 	border-bottom-right-radius: 15px;*/
 }
-/*.ump-audio { 
+/*.able-audio { 
 	border-top-left-radius: 15px;
 	border-top-right-radius: 15px;
 }*/
-.ump-video { 
-	margin-top: -0.25em;
+.able-video { 
+	margin-top: -0.75em;
 }
-.ump-video .ump-now-playing { 
+.able-video .able-now-playing { 
 	display: none; /* not currently used for video */
 }
-.ump-controller { 
+.able-controller { 
 	position: relative;
 	border-top: 2px solid #4c4c4c; 
 	border-bottom: 2px solid #4c4c4c; 
@@ -42,23 +54,21 @@
 	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
 	padding: 5px 0 0; 
 }
-.ump-controller > span { 
-  width: 50%;
-}
+
 
 /* Controller Buttons & Controls */
 
 
-.ump-left-controls, .ump-right-controls { 
+.able-left-controls, .able-right-controls { 
     overflow: visible;
 }
-.ump-left-controls { 
+.able-left-controls { 
   float: left;
 }
-.ump-right-controls { 
+.able-right-controls { 
   float: right;
 }
-.ump-controller button {
+.able-controller button {
   background: none;
   position: relative;
   display: inline-block;
@@ -67,60 +77,71 @@
   padding: 0;
   min-width: 40px;
 }
-.ump-controller button:focus, 
-.ump-controller button:hover,
+
+.able-transcript-toolbar input:focus,
+.able-transcript-toolbar input:hover,
+.able-controller input:focus,
+.able-controller input:hover,
+.able-controller button:focus, 
+.able-controller button:hover,
 .able-seek-head:focus,
 .able-seek-head:hover { 
   outline-style: solid;
   outline-width: 5px;
 }
-.ump-controller button:focus,
+
+.able-transcript-toolbar input:focus,
+.able-controller input:focus,
+.able-controller button:focus,
 .able-seek-head:focus {  
 	outline-color: #ffff00; /* yellow */
 }
-.ump-controller button:hover,
+
+.able-transcript-toolbar input:hover,
+.able-controller input:hover,
+.able-controller button:hover,
 .able-seek-head:hover {
 	outline-color: #66ff66; /* green */
 }
 
 
-.ump-controller button > span { 
+.able-controller button > span { 
   /* icomoon font icon */
   font-size: 24px; 
   width: 24px;
   margin: 0 5px;
   padding: 0;
 }
-.ump-controller button > img { 
+.able-controller button > img { 
   /* image icon */
   width: 30px; 
   height: 30px;
   margin: 0 2px;
   padding: 0;
 }
-.ump-controller .buttonOff { 
+.able-controller .buttonOff { 
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
 }
 
-.ump-controller .ump-seekbar {
+.able-controller .able-seekbar {
   margin: 0 5px
 }
 
-.ump-controller button {
+.able-controller button {
   color: white;
 }
 /*
-.ump-white-controls button { 
+.able-white-controls button { 
   color: white;
 }
-.ump-black-controls button { 
+.able-black-controls button { 
   color: black;
 }*/
 
 /* Status Bar */
 
-.ump-status-bar { 
+.able-status-bar { 
 	height: 2em;
 	min-height: 2em;
 	color: #FFFFFF;
@@ -128,20 +149,20 @@
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
 }	
-.ump-status-bar span.ump-timer { 
+.able-status-bar span.able-timer { 
 	/* contains both span.elapsedTime and span.duration */	
 	color: #ffffff;
 	text-align: left;
 	float: left;
 }
-.ump-status { 
+.able-status { 
 	font-style: italic;
 	float: right;
 }
 
 /* Captions and Descriptions */
 
-div.ump-captions {
+div.able-captions {
   background-color: black;
   font-size: 1.1em;
   bottom: 0;
@@ -155,7 +176,7 @@ div.ump-captions {
   display: none;
   z-index: 1000;
 }
-div.ump-descriptions { 
+div.able-descriptions { 
 	position: relative;
 	color: #FF0; /* yellow, to differentiate it from captions */
 	background-color: black;
@@ -168,7 +189,7 @@ div.ump-descriptions {
 
 /* Now Playing */
 
-div.ump-now-playing {
+div.able-now-playing {
 	text-align: center;
 	font-weight: bold;
 	font-size: 1.1em;
@@ -176,15 +197,15 @@ div.ump-now-playing {
 	background-color: transparent; 
 	padding: 0.5em 0.5em 1em;
 }
-div.ump-now-playing span { 
+div.able-now-playing span { 
 	font-size: 0.9em;
 }
-div.ump-now-playing span span { 
+div.able-now-playing span span { 
 	display: block;
 }
 
 /* Preferences Form */ 
-.ump-prefs-form, .ump-help-div, .ump-alert-div { 
+.able-prefs-form, .able-help-div, .able-alert-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
 	padding: 0.5em 1em;
@@ -192,14 +213,14 @@ div.ump-now-playing span span {
 	width: 25em;
 	display: none;
 }
-.ump-prefs-form fieldset { 
+.able-prefs-form fieldset { 
 	border: none;
 }
-.ump-prefs-form legend { 
+.able-prefs-form legend { 
 	color: black;
 	font-weight: bold;	
 }
-.ump-prefs-form input { 
+.able-prefs-form input { 
 	padding-right: 1em;
 }
 .ui-dialog .ui-dialog-buttonpane button {
@@ -210,13 +231,13 @@ div.ump-now-playing span span {
 }
 
 /* Help Dialog */ 
-.ump-help-div { 
+.able-help-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
 	width: 25em;
 }
 
-.ump-help-div ul { 
+.able-help-div ul { 
 	list-style-type: none;
 }
 
@@ -308,13 +329,13 @@ div.ump-now-playing span span {
 
 /* Misc */
 
-.ump-clipped { 
+.able-clipped { 
 	/* hide from sighted users, but not screen reader users */
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);	
 }
-.ump-error { 
+.able-error { 
 	display: block;
 	background: #ffc;
 	border: 2px solid #000;
@@ -322,7 +343,7 @@ div.ump-now-playing span span {
 	margin: 0.75em;
 	padding: 0.5em;
 }
-.ump-fallback { 
+.able-fallback { 
   display: table;
   text-align: center;
   vertical-align: middle;
@@ -333,4 +354,13 @@ div.ump-now-playing span span {
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
+}
+
+/* Fullscreen settings */
+
+:-webkit-full-screen {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background: none;
 }

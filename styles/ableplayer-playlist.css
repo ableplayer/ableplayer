@@ -1,6 +1,6 @@
 /* 
-	Universal Media Player (UMP) playlist styles
-	http://terrillthompson.com/ump
+	Able Player playlist styles
+	http://terrillthompson.com/ableplayer
 */
 
 /* 
@@ -9,35 +9,35 @@
  *
  */
  
-.ump .ump-playlist { 
+.able .able-playlist { 
 	font-size: 0.9em;
 	list-style-type: none;
 	margin: 0;
 	background-color: #FFFFFF;
 	padding: 5px 0;
 }
-.ump .ump-playlist li { 
+.able .able-playlist li { 
 	background-color: #DDDDDD; /* default background color of each item in playlist */
 	margin: 5px;
 	padding: 5px 10px;
 	border-radius: 15px;
 	-moz-border-radius: 15px;
 }
-.ump .ump-playlist li:hover, 
-.ump .ump-playlist li:focus, 
-.ump .ump-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+.able .able-playlist li:hover, 
+.able .able-playlist li:focus, 
+.able .able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
 	color: #FFFFFF; 
 	background-color: #340449;  
 	text-decoration: none;
 }
-.ump .ump-playlist li.ump-current { /* currently selected playlist item */
+.able .able-playlist li.able-current { /* currently selected playlist item */
 	color: #000000; 
 	background-color: #FFEEB3; 
 	font-weight: bold; 
 	outline: none;
 	text-decoration: none;
 }
-.ump .ump-playlist li.ump-current:after { 
+.able .able-playlist li.able-current:after { 
 	content: ' *';
 }
 
@@ -47,22 +47,22 @@
  *
  */
  
-.ump-playlist { 
+.able-playlist { 
 }
-.ump-playlist li { 
+.able-playlist li { 
 }
-.ump-playlist li:hover, 
-.ump-playlist li:focus, 
-.ump-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+.able-playlist li:hover, 
+.able-playlist li:focus, 
+.able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
 	text-decoration: none;
 	color: white;
 	background-color: black;
 }
-.ump-playlist li.ump-current { /* currently selected playlist item */
+.able-playlist li.able-current { /* currently selected playlist item */
 	font-weight: bold; 
   text-decoration: underline;
 }
-.ump-playlist li.ump-current:after { 
+.able-playlist li.able-current:after { 
 	content: ' *';
 }
 

@@ -1,3 +1,4 @@
+
 /* 
   // JavaScript for Able Player 
   
@@ -19,6 +20,14 @@
 /*global $, jQuery */
 "use strict";
 
+// IE8 Compatibility
+if(typeof String.prototype.trim !== 'function') {
+  String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g, ''); 
+  }
+}
+// End IE8 Compatibility
+
 $(document).ready(function () {
   $('video, audio').each(function (index, element) {
     if ($(element).data('able-player') !== undefined) {
@@ -39,9 +48,9 @@ $(document).ready(function () {
 // Construct an AblePlayer object 
 // Parameters are: 
 // media - jQuery selector or element identifying the media.
-// umpIndex - the index of this Able Player instance (if page includes only one player, umpIndex = 0) 
+// ableIndex - the index of this Able Player instance (if page includes only one player, ableIndex = 0) 
 // startTime - the time at which to begin playing the media       
-function AblePlayer(media, umpIndex, startTime, includeTranscript, transcriptDiv, translationDir) {
+function AblePlayer(media, ableIndex, startTime, includeTranscript, transcriptDiv, translationDir) {
 
   /* 
    *
@@ -61,7 +70,7 @@ function AblePlayer(media, umpIndex, startTime, includeTranscript, transcriptDiv
   this.playerHeight = 360; 
 
   // Button color 
-  // Media controller background color can be customized in ump.css 
+  // Media controller background color can be customized in able.css 
   // Choose 'white' if your controller has a dark background, 'black' if a light background
   // Use a contrast checker to ensure your color scheme has sufficient contrast
   // e.g., http://www.paciellogroup.com/resources/contrastAnalyser
@@ -77,11 +86,11 @@ function AblePlayer(media, umpIndex, startTime, includeTranscript, transcriptDiv
   // seekInterval = Number of seconds to seek forward or back with these buttons    
   this.seekInterval = 10;
 
-  // In UMP's predecessor (AAP) progress sliders were included in supporting browsers 
+  // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
   // However, this results in an inconsistent interface across browsers 
   // most notably, Firefox as of 16.x still did not support input[type="range"] (i.e., sliders)
   // The following variable can be used in the future to add conditional slider support if desired
-  // Note that the related code has not been updated for UMP. 
+  // Note that the related code has not been updated for ABLE. 
   // Therefore, this should NOT be set to true at this point. 
   this.useSlider = true;
   
@@ -144,18 +153,18 @@ function AblePlayer(media, umpIndex, startTime, includeTranscript, transcriptDiv
     this.startTime = 0;
   }
 
-  if (umpIndex) {
-    this.umpIndex = umpIndex;
+  if (ableIndex) {
+    this.ableIndex = ableIndex;
   }
   else { 
-    this.umpIndex = 0;
+    this.ableIndex = 0;
   }
 
   if ($(media).attr('id')) {
     this.mediaId = $(media).attr('id');
   }
   else {
-    this.mediaId = "ableMediaId_" + this.umpIndex;
+    this.mediaId = "ableMediaId_" + this.ableIndex;
     $(media).attr('id', this.mediaId);
   }
 
@@ -179,11 +188,11 @@ function AblePlayer(media, umpIndex, startTime, includeTranscript, transcriptDiv
   );
 }
 AblePlayer.prototype.setup = function() { 
-  if (this.debug && startTime > 0) { 
+  if (this.debug && this.startTime > 0) { 
     console.log('Will start media at ' + startTime + ' seconds');
   }
   this.startedPlaying = false;
-  this.transcriptLocked = true;
+  this.autoScrollTranscript = true;
 
   // be sure media exists, and is a valid type       
   if ($('#' + this.mediaId)) { 
@@ -208,7 +217,8 @@ AblePlayer.prototype.setup = function() {
       
       // Don't use custom AblePlayer interface for IOS video 
       // IOS always plays video in its own player - don't know a way around that  
-      if (this.mediaType === 'video' && this.isIOS()) { 
+//      if (this.mediaType === 'video' && this.isIOS()) { 
+      if (false) {
         // do nothing 
         // *could* perhaps build in support for user preferances & described versions  
         if (this.debug) { 
@@ -259,7 +269,8 @@ AblePlayer.prototype.setup = function() {
           else if (this.player === 'jw') { 
             // attempt to load jwplayer script
             var thisObj = this;
-            $.getScript('thirdparty/jwplayer.js') 
+            // TODO: Allow dynamically setting thirdparty folder.
+            $.getScript('../thirdparty/jwplayer.js') 
               .done(function( script, textStatus ) {
                 if (thisObj.debug) {
                   console.log ('Successfully loaded the JW Player');
@@ -279,6 +290,11 @@ AblePlayer.prototype.setup = function() {
           }
           if (this.debug && this.player) { 
             console.log ('Using the ' + this.player + ' media player');
+          }
+
+          // After done messing with the player, this is necessary to fix playback on iOS
+          if (this.isIOS()) { 
+            this.$media[0].load();
           }
         }        
         else { 
@@ -371,7 +387,9 @@ AblePlayer.prototype.getPlayer = function() {
   // return 'html5', 'jw' or null 
   
   var i, sourceType, $newItem;
-  if (this.testFallback || (this.isUserAgent('msie 9') && this.mediaType === 'video')) {
+  if (this.testFallback || 
+      ((this.isUserAgent('msie 7') || this.isUserAgent('msie 8') || this.isUserAgent('msie 9')) && this.mediaType === 'video') ||
+      (this.isIOS() && !this.isIOS(7))) {
     // the user wants to test the fallback player, or  
     // the user is using IE9, which has buggy implementation of HTML5 video 
     // e.g., plays only a few seconds of MP4 than stops and resets to 0
@@ -384,13 +402,13 @@ AblePlayer.prototype.getPlayer = function() {
       if (this.$sources.length > 0) { // this media has one or more <source> elements
         for (i = 0; i < this.$sources.length; i++) { 
           sourceType = this.$sources[i].getAttribute('type'); 
-          if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
-            (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
+          //if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
+          //  (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
               // JW Player can play this 
               this.player = 'jw';
               this.mediaFile = this.$sources[i].getAttribute('src');
               return;
-          }
+          //}
         }
       }
       else if (this.playlistSize > 0) { 
@@ -443,154 +461,119 @@ AblePlayer.prototype.injectPlayerCode = function() {
   //   This is only a problem in IOS 6 and earlier, 
   //   & is a known bug, fixed in IOS 7      
   
-  var injectMethod;
-  var thisObj = this;
+  var thisObj = this;  
   
-  if (this.isIOS()) { // this is audio; otherwise function would not have been called for IOS
-    if (this.isIOS('7')) { // IOS7 can handle the default injection method
-      injectMethod = 'default'; 
-    }
-    else { // earlier versions of IOS require a modified method
-      injectMethod = 'ios';          
-    }
-  }
-  else { 
-    injectMethod = 'default';
-  }
-
-  if (this.debug) {   
-    console.log ('using the ' + injectMethod + ' inject method');
-  }
-  
-  
-  if (injectMethod) {
-   
-    if (injectMethod === 'default') {   
+  // create $mediaContainer and $ableDiv and wrap them around the media element
+  this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
+  this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     
-      // create $mediaContainer and $umpDiv and wrap them around the media element
-      this.$mediaContainer = this.$media.wrap('<div class="ump-media-container"></div>').parent();         
-      this.$umpDiv = this.$mediaContainer.wrap('<div class="ump"></div>').parent();
+  this.$playerDiv = $('<div>', {
+    'class' : 'able-player',
+    'role' : 'region',
+    'aria-label' : this.mediaType + ' player'
+  });
+  this.$playerDiv.addClass('able-'+this.mediaType);
 
-    }
-    else if (injectMethod === 'ios') { 
-    
-      // create new $umpDiv and $mediaContainer, but do NOT wrap them 
-      this.$umpDiv = $('<div>', { 
-        'class' : 'ump'
-      });
-  
-      this.$mediaContainer = $('<div>',{
-        'class' : 'ump-media-container'
-      });
-    }
-    
-    this.$playerDiv = $('<div>', {
-      'class' : 'ump-player',
-      'role' : 'region',
-      'aria-label' : this.mediaType + ' player'
+  // create a div for exposing description
+  // description will be exposed via role="alert" & announced by screen readers  
+  this.$descDiv = $('<div>',{
+    'class': 'able-descriptions',
+    'role': 'alert'
+  });
+  // Start off with description hidden.
+  this.$descDiv.hide();
+  // TODO: Does this need to be changed when preference is changed?
+  if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
+    this.$descDiv.addClass('able-clipped');                
+  }
+
+  if (this.includeTranscript) {
+    this.$transcriptArea = $('<div>', {
+      'class': 'able-transcript-area'
     });
-    this.$playerDiv.addClass('ump-'+this.mediaType);
-
-    // create a div for exposing description
-    // description will be exposed via role="alert" & announced by screen readers  
-    this.$descDiv = $('<div>',{
-      'class': 'ump-descriptions',
-      'role': 'alert'
-    });
-    // Start off with description hidden.
-    this.$descDiv.hide();
-    // TODO: Does this need to be changed when preference is changed?
-    if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
-      this.$descDiv.addClass('ump-clipped');                
-    }
-
-
-
-    this.$transcriptContainer = $('<div>', {
-      'class': 'ump-transcript-container'
-    });
-
+      
     this.$transcriptToolbar = $('<div>', {
-      'class': 'ump-controller'
+      'class': 'able-transcript-toolbar'
     });
 
     this.$transcriptDiv = $('<div>', {
-      'class' : 'ump-transcript'
+      'class' : 'able-transcript'
     });
-    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click', function (event) {
+    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
       // Propagation is stopped in seekpoint click handler, so clicks are on the scrollbar
       // or outside of a seekpoint.
-      thisObj.transcriptLocked = false;
-      thisObj.refreshControls();
+      if (!thisObj.scrollingTranscript) {
+        thisObj.autoScrollTranscript = false;
+        thisObj.refreshControls();
+      }
+      thisObj.scrollingTranscript = false;
     });
 
-    // Transcript toolbar buttons:
-    this.$transcriptLockButton = $('<button tabindex="0"><span class="icon-transcript" aria-hidden="true"></button>');
-    this.$transcriptLockButton.click(function () {
-      thisObj.handleTranscriptLockToggle();
+    // Transcript toolbar content:
+    this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
+    this.$autoScrollTranscriptCheckbox.click(function () {
+      thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
     });
-    this.$transcriptToolbar.append(this.$transcriptLockButton);
+    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll</label>'), this.$autoScrollTranscriptCheckbox);
 
-    this.$transcriptContainer.append(this.$transcriptToolbar, this.$transcriptDiv);
+    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
+  }
 
-    if (!this.includeTranscript) {
-      this.$transcriptDiv.hide();
-    }
-
-    // The default skin depends a bit on a Now Playing div 
-    // so go ahead and add one 
-    // However, it's only populated if this.showNowPlaying = true 
-    this.$nowPlayingDiv = $('<div>',{
-      'class' : 'ump-now-playing',
-      'role' : 'alert'
-    });
-
-    this.$controllerDiv = $('<div>',{
-      'class' : 'ump-controller'
-    });
-
-    this.$statusBarDiv = $('<div>',{
-      'class' : 'ump-status-bar'
-    });
-    this.$timer = $('<span>',{
-      'class' : 'ump-timer'
-    });
-    this.$status = $('<span>',{
-      'class' : 'ump-status',
-      'role' : 'alert'
-    });
-    this.$statusBarDiv.append(this.$timer).append(this.$status);
-
-    // append new divs to $playerDiv
-    this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
-
-    // and finally, append playerDiv to umpDiv  
-    this.$umpDiv.append(this.$playerDiv, this.$descDiv);
-
+  // The default skin depends a bit on a Now Playing div 
+  // so go ahead and add one 
+  // However, it's only populated if this.showNowPlaying = true 
+  this.$nowPlayingDiv = $('<div>',{
+    'class' : 'able-now-playing',
+    'role' : 'alert'
+  });
+  
+  this.$controllerDiv = $('<div>',{
+    'class' : 'able-controller'
+  });
+  
+  this.$statusBarDiv = $('<div>',{
+    'class' : 'able-status-bar'
+  });
+  this.$timer = $('<span>',{
+    'class' : 'able-timer'
+  });
+  this.$status = $('<span>',{
+    'class' : 'able-status',
+    'role' : 'alert'
+  });
+  this.$statusBarDiv.append(this.$timer).append(this.$status);
+  
+  // append new divs to $playerDiv
+  this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+  
+  // and finally, append playerDiv to ableDiv  
+  this.$ableDiv.append(this.$playerDiv, this.$descDiv);
+  
+  if (this.includeTranscript) {
     // If client has provided separate transcript location, put it there instead.
     if (this.transcriptDivLocation) {
-      $(this.transcriptDivLocation).append(this.$transcriptContainer);
+      $(this.transcriptDivLocation).append(this.$transcriptArea);
     }
     else {
-      this.$umpDiv.append(this.$transcriptContainer);
+      // TODO: Is this always what we want?
+      // Place adjacent to player.
+      this.$ableDiv.width(this.$ableDiv.width() * 2);
+      this.$ableColumnLeft = this.$ableDiv.children().wrapAll('<div class="able-column-left">').parent();
+      this.$ableDiv.append(this.$transcriptArea);
+      this.$transcriptArea.wrap('<div class="able-column-right">');
     }
-        
-    // oh, and also add div for displaying alerts and error messages 
-    this.$alertDiv = $('<div>',{
-      'class' : 'ump-alert-div',
-      'role' : 'alert'
-    });   
-    this.$umpDiv.after(this.$alertDiv);
-
-    if (injectMethod === 'ios') {
-      // inject all of this *after* the original HTML5 media element 
-      this.$media.after(this.$umpDiv);
-    }
-
-    // Can't get computed style in webkit until after controllerDiv has been added to the DOM     
-    this.getBestColor(this.$controllerDiv); // getBestColor() defines this.iconColor
-    this.$controllerDiv.addClass('ump-' + this.iconColor + '-controls');    
   }
+  
+  // oh, and also add div for displaying alerts and error messages 
+  this.$alertDiv = $('<div>',{
+    'class' : 'able-alert-div',
+    'role' : 'alert'
+  });   
+  this.$ableDiv.after(this.$alertDiv);
+  
+  // Can't get computed style in webkit until after controllerDiv has been added to the DOM     
+  this.getBestColor(this.$controllerDiv); // getBestColor() defines this.iconColor
+  this.$controllerDiv.addClass('able-' + this.iconColor + '-controls');
 };
 AblePlayer.prototype.initTracks = function() { 
 
@@ -603,12 +586,12 @@ AblePlayer.prototype.initTracks = function() {
       // add container that captions or description will be appended to
       // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
       vidcapContainer = $('<div>',{ 
-        'class' : 'ump-vidcap-container'
+        'class' : 'able-vidcap-container'
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();  
-      // this.$umpDiv.prepend(vidcapContainer);
+      // this.$ableDiv.prepend(vidcapContainer);
     }
-    // UMP currently only supports one caption and one description track 
+    // ABLE currently only supports one caption and one description track 
     for (i=0; i<this.$tracks.length; i++) { 
       track = this.$tracks[i];
       kind = track.getAttribute('kind');
@@ -619,7 +602,7 @@ AblePlayer.prototype.initTracks = function() {
         // captions being added and removed causes sporadic changes to focus in JAWS
         // (not a problem in NVDA or VoiceOver)
         this.$captionDiv = $('<div>',{
-          'class': 'ump-captions',
+          'class': 'able-captions',
           'aria-hidden': 'true' 
         });
         this.$vidcapContainer.append(this.$captionDiv);
@@ -642,7 +625,7 @@ AblePlayer.prototype.initTracks = function() {
         // this way it's available if needed 
         this.hasClosedDesc = true;
         // Display the description div.
-        this.$descDiv.show();
+        //this.$descDiv.show();
         this.descriptions = []; //temp array for storing data from source file
         this.currentDescription = -1;
         if ((this.prefDesc === 1) && (this.prefClosedDesc === 1)) { 
@@ -681,7 +664,7 @@ AblePlayer.prototype.getPlaylist = function() {
   this.hasPlaylist = false; // will change to true if a matching playlist is found
 
   thisObj = this;
-  $('.ump-playlist').each(function() { 
+  $('.able-playlist').each(function() { 
     if ($(this).attr('data-player') === thisObj.mediaId) { 
       // this is the playlist for the current player 
       thisObj.hasPlaylist = true;        
@@ -740,11 +723,7 @@ AblePlayer.prototype.initPlayer = function(player) {
   }
  
   if (this.player === 'jw') {
-    // remove the media element - we're done with it
-    // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
-    this.$media.remove();           
-
-    // add an id to div.ump-media-container (JW Player needs this) 
+    // add an id to div.able-media-container (JW Player needs this) 
     this.jwId = this.mediaId + '_fallback';            
     this.$mediaContainer.attr('id',this.jwId);
 
@@ -755,11 +734,19 @@ AblePlayer.prototype.initPlayer = function(player) {
       // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
       jwHeight = '0px';   
     }
+    var sources = [];
+    $.each(this.$sources, function (ii, source) {
+      sources.push({file: $(source).attr('src')});      
+    });
+
     if (this.mediaType === 'video') { 
       this.jwPlayer = jwplayer(this.jwId).setup({
-        file: this.mediaFile,
-        flashplayer: 'thirdparty/jwplayer.flash.swf',
-        html5player: 'thirdparty/jwplayer.html5.js',
+        playlist: [{
+          sources: sources
+        }],
+        // TODO: allow dynamically setting thirdparty folder
+        flashplayer: '../thirdparty/jwplayer.flash.swf',
+        html5player: '../thirdparty/jwplayer.html5.js',
         image: poster, 
         controls: false,
         volume: this.volume,
@@ -772,9 +759,11 @@ AblePlayer.prototype.initPlayer = function(player) {
     }
     else { // if this is an audio player
       this.jwPlayer = jwplayer(this.jwId).setup({
-        file: this.mediaFile,
-        flashplayer: 'thirdparty/jwplayer.flash.swf',
-        html5player: 'thirdparty/jwplayer.html5.js',
+        playlist: [{
+          sources: sources
+        }],
+        flashplayer: '../thirdparty/jwplayer.flash.swf',
+        html5player: '../thirdparty/jwplayer.html5.js',
         controls: false,
         volume: this.volume,
         height: jwHeight,
@@ -782,13 +771,18 @@ AblePlayer.prototype.initPlayer = function(player) {
         primary: 'flash'
       });                             
     }
+
+    // remove the media element - we're done with it
+    // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
+    this.$media.remove();           
   }
 
   // synch elapsedTime with startTime      
   this.elapsedTime = this.startTime;
 
   // define mediaFile, descFile, and hasOpenDesc 
-  for (i = 0; i < this.$sources.length; i++) {
+  // TODO: Remove?
+/*  for (i = 0; i < this.$sources.length; i++) {
     sourceType = this.$sources[i].getAttribute('type');
     if (this.media.canPlayType(sourceType)) {
       this.mediaFile = this.$sources[i].getAttribute('src'); 
@@ -800,7 +794,7 @@ AblePlayer.prototype.initPlayer = function(player) {
         this.hasOpenDesc = false;
       }
     }
-  }
+  }*/
         
   // If using open description (as determined previously based on prefs & availability) 
   // swap media file now 
@@ -826,7 +820,7 @@ AblePlayer.prototype.provideFallback = function() {
   
   msg = this.tt['errorNoPlay'] + ' ' + this.tt[this.mediaType] + '. ';
   msgContainer = $('<div>',{
-    'class' : 'ump-fallback',
+    'class' : 'able-fallback',
     'role' : 'alert'
   });
   this.$media.before(msgContainer);     
@@ -836,31 +830,31 @@ AblePlayer.prototype.getDimensions = function() {
 
   // override default dimensions with width and height attributes of media element, if present
   if (this.$media.attr('width')) { 
-    this.playerWidth = this.$media.attr('width');
+    this.playerWidth = parseInt(this.$media.attr('width'));
     if (this.$media.attr('height')) { 
-      this.playerHeight = this.$media.attr('height');
+      this.playerHeight = parseInt(this.$media.attr('height'));
     }
   }
 };
 AblePlayer.prototype.setButtons = function() { 
 
-  this.playButtonImg = 'images/media-play-' +  this.iconColor + '.png';
-  this.pauseButtonImg = 'images/media-pause-' +  this.iconColor + '.png';
-  this.rewindButtonImg = 'images/media-rewind-' +  this.iconColor + '.png';
-  this.forwardButtonImg = 'images/media-forward-' +  this.iconColor + '.png';
-  this.slowerButtonImg = 'images/media-slower-' +  this.iconColor + '.png';
-  this.fasterButtonImg = 'images/media-faster-' +  this.iconColor + '.png';
-  this.muteButtonImg = 'images/media-mute-' +  this.iconColor + '.png';
-  this.volumeButtonImg = 'images/media-volume-' +  this.iconColor + '.png';
-  this.volumeUpButtonImg = 'images/media-volumeUp-' +  this.iconColor + '.png';
-  this.volumeDownButtonImg = 'images/media-volumeDown-' +  this.iconColor + '.png';
-  this.ccButtonImg = 'images/media-captions-' +  this.iconColor + '.png';
-  this.transcriptButtonImg = 'images/media-transcript-' +  this.iconColor + '.png';
-  this.descriptionButtonImg = 'images/media-descriptions-' +  this.iconColor + '.png';
-  this.signButtonImg = 'images/media-sign-' +  this.iconColor + '.png';
-  this.fullscreenButtonImg = 'images/media-fullscreen-' +  this.iconColor + '.png';
-  this.prefsButtonImg = 'images/media-prefs-' +  this.iconColor + '.png';
-  this.helpButtonImg = 'images/media-help-' +  this.iconColor + '.png';
+  this.playButtonImg = '../images/media-play-' +  this.iconColor + '.png';
+  this.pauseButtonImg = '../images/media-pause-' +  this.iconColor + '.png';
+  this.rewindButtonImg = '../images/media-rewind-' +  this.iconColor + '.png';
+  this.forwardButtonImg = '../images/media-forward-' +  this.iconColor + '.png';
+  this.slowerButtonImg = '../images/media-slower-' +  this.iconColor + '.png';
+  this.fasterButtonImg = '../images/media-faster-' +  this.iconColor + '.png';
+  this.muteButtonImg = '../images/media-mute-' +  this.iconColor + '.png';
+  this.volumeButtonImg = '../images/media-volume-' +  this.iconColor + '.png';
+  this.volumeUpButtonImg = '../images/media-volumeUp-' +  this.iconColor + '.png';
+  this.volumeDownButtonImg = '../images/media-volumeDown-' +  this.iconColor + '.png';
+  this.ccButtonImg = '../images/media-captions-' +  this.iconColor + '.png';
+  this.transcriptButtonImg = '../images/media-transcript-' +  this.iconColor + '.png';
+  this.descriptionButtonImg = '../images/media-descriptions-' +  this.iconColor + '.png';
+  this.signButtonImg = '../images/media-sign-' +  this.iconColor + '.png';
+  this.fullscreenButtonImg = '../images/media-fullscreen-' +  this.iconColor + '.png';
+  this.prefsButtonImg = '../images/media-prefs-' +  this.iconColor + '.png';
+  this.helpButtonImg = '../images/media-help-' +  this.iconColor + '.png';
 };
 AblePlayer.prototype.initDescription = function() { 
 
@@ -949,7 +943,7 @@ AblePlayer.prototype.addPrefsForm = function() {
   thisObj = this;
   // define all the parts
   prefsDiv = $('<div>',{ 
-    'class': 'ump-prefs-form',
+    'class': 'able-prefs-form',
     role: 'form'
   });
   introText = '<p>Saving your preferences requires cookies.</p>\n';
@@ -982,7 +976,8 @@ AblePlayer.prototype.addPrefsForm = function() {
     if (this[thisPref] === 1) { 
       thisCheckbox.prop('checked',true);
     }     
-    if (i === 0 || i === 1) { // this is a key preference
+    // TODO: We need to indicate this in the prefs structure itself.
+    if (i === 0 || i === 1 || i === 2) { // this is a key preference
       keysFieldset.append(thisDiv);     
     }
     else { // this is a feature preference
@@ -997,7 +992,7 @@ AblePlayer.prototype.addPrefsForm = function() {
     prefsDiv
       .append(featuresFieldset);
   }         
-  this.$umpDiv.append(prefsDiv); 
+  this.$ableDiv.append(prefsDiv); 
 
   var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '25em');
 
@@ -1075,12 +1070,15 @@ AblePlayer.prototype.addHelp = function() {
       label = false;
     }
     if (label) { 
-      helpText += '<li><b><span class="ump-help-modifiers">'; 
+      helpText += '<li><b><span class="able-help-modifiers">'; 
       if (this.prefAltKey === 1) { 
         helpText += 'Alt + ';
       }
       if (this.prefCtrlKey === 1) { 
         helpText += 'Control + ';
+      }
+      if (this.prefShiftKey === 1) {
+        helpText += 'Shift + ';
       }
       helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
     }
@@ -1089,10 +1087,10 @@ AblePlayer.prototype.addHelp = function() {
   helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
 
   helpDiv = $('<div>',{ 
-    'class': 'ump-help-div',
+    'class': 'able-help-div',
     'html': helpText
   });
-  this.$umpDiv.append(helpDiv); 
+  this.$ableDiv.append(helpDiv); 
     
 
   var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
@@ -1128,59 +1126,73 @@ AblePlayer.prototype.getPrefs = function() {
   this.prefs = [];
 
   // modifier keys preferences apply to both audio and video 
-  this.prefs[0] = [];
-  this.prefs[0]['name'] = 'prefAltKey'; // use alt key with shortcuts 
-  this.prefs[0]['label'] = this.tt.prefAltKey;
-  this.prefs[0]['default'] = 0; // off because currently not capturing this reliably across all browsers
+  this.prefs.push({
+    'name': 'prefAltKey', // use alt key with shortcuts 
+    'label': this.tt.prefAltKey,
+    'default': 0  // off because currently not capturing this reliably across all browsers
+  });
 
-  this.prefs[1] = [];
-  this.prefs[1]['name'] = 'prefCtrlKey'; // use ctrl key with shortcuts
-  this.prefs[1]['label'] = this.tt.prefCtrlKey;
-  this.prefs[1]['default'] = 0;  // // off because currently not capturing this reliably across all browsers
+  this.prefs.push({
+    'name': 'prefCtrlKey', // use ctrl key with shortcuts
+    'label': this.tt.prefCtrlKey,
+    'default': 1  // On per conversation with Ken
+  });
+
+  this.prefs.push({
+    'name': 'prefShiftKey',
+    'label': this.tt.prefShiftKey,
+    'default': 0
+  });
 
   if (this.mediaType === 'video') { // features prefs apply only to video
+    this.prefs.push({
+      'name': 'prefCaptions', // closed captions default state 
+      'label': this.tt.prefCaptions,
+      'default': 1 // on because many users can benefit
+    });
 
-    this.prefs[2] = [];
-    this.prefs[2]['name'] = 'prefCaptions'; // closed captions default state 
-    this.prefs[2]['label'] = this.tt.prefCaptions;
-    this.prefs[2]['default'] = 1; // on because many users can benefit
+    this.prefs.push({
+      'name': 'prefDesc', // audio description default state 
+      'label': this.tt.prefDesc,
+      'default': 0 // off because users who don't need it might find it distracting
+    });
 
-    this.prefs[3] = [];
-    this.prefs[3]['name'] = 'prefDesc'; // audio description default state 
-    this.prefs[3]['label'] = this.tt.prefDesc;
-    this.prefs[3]['default'] = 0; // off because users who don't need it might find it distracting
+    this.prefs.push({
+      'name': 'prefClosedDesc', // use closed description if available
+      'label': this.tt.prefClosedDesc,
+      'default': 0 // off because experimental
+    });
 
-    this.prefs[4] = [];
-    this.prefs[4]['name'] = 'prefClosedDesc'; // use closed description if available
-    this.prefs[4]['label'] = this.tt.prefClosedDesc;
-    this.prefs[4]['default'] = 0; // off because experimental
+    this.prefs.push({
+      'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
+      'label': this.tt.prefVisibleDesc,
+      'default': 1 // on because sighted users probably want to see this cool feature in action 
+    });
 
-    this.prefs[5] = [];
-    this.prefs[5]['name'] = 'prefVisibleDesc'; // visibly show closed description (if avilable and used)
-    this.prefs[5]['label'] = this.tt.prefVisibleDesc;
-    this.prefs[5]['default'] = 1; // on because sighted users probably want to see this cool feature in action 
+    this.prefs.push({
+      'name': 'prefHighlight', // highlight transcript as media plays
+      'label': this.tt.prefHighlight,
+      'default': 1 // on because many users can benefit
+    });
     
-    this.prefs[6] = [];
-    this.prefs[6]['name'] = 'prefHighlight'; // highlight transcript as media plays
-    this.prefs[6]['label'] = this.tt.prefHighlight;
-    this.prefs[6]['default'] = 1; // on because many users can benefit
-
-    this.prefs[7] = [];
-    this.prefs[7]['name'] = 'prefTabbable'; // tab-enable transcript 
-    this.prefs[7]['label'] = this.tt.prefTabbable;
-    this.prefs[7]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page
+    this.prefs.push({
+      'name': 'prefTabbable', // tab-enable transcript 
+      'label': this.tt.prefTabbable,
+      'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
+    });
   }
   else { 
+    this.prefs.push({
+      'name': 'prefHighlight', // highlight transcript as media plays
+      'label': this.tt.prefHighlight,
+      'default': 1 // on because many users can benefit
+    });
 
-    this.prefs[2] = [];
-    this.prefs[2]['name'] = 'prefHighlight'; // highlight transcript as media plays
-    this.prefs[2]['label'] = this.tt.prefHighlight;
-    this.prefs[2]['default'] = 1; // on because many users can benefit
-
-    this.prefs[3] = [];
-    this.prefs[3]['name'] = 'prefTabbable'; // tab-enable transcript 
-    this.prefs[3]['label'] = this.tt.prefTabbable;
-    this.prefs[3]['default'] = 0; // off because if users don't need it, it impedes tabbing elsewhere on the page    
+    this.prefs.push({
+      'name': 'prefTabbable', // tab-enable transcript 
+      'label': this.tt.prefTabbable,
+      'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page    
+    });
   }
     
   // see if user has prefs stored in a cookie   
@@ -1257,23 +1269,26 @@ AblePlayer.prototype.savePrefs = function() {
     if (this.prefCtrlKey === 1) { 
       modHelp += 'Control + ';
     }
-    $('.ump-help-modifiers').text(modHelp);     
+    if (this.prefShiftKey === 1) {
+      modHelp += 'Shift + ';
+    }
+    $('.able-help-modifiers').text(modHelp);     
 
     // description visibility 
     if (this.prefVisibleDesc === 1) { 
-      $('.ump-descriptions').removeClass('ump-clipped');      
+      $('.able-descriptions').removeClass('able-clipped');      
     }
     else { 
-      $('.ump-descriptions').addClass('ump-clipped');     
+      $('.able-descriptions').addClass('able-clipped');     
     }
     this.showAlert(this.tt.preferencesuccess);
       
     // tabbable transcript 
     if (this.prefTabbable === 1) { 
-      $('.ump-transcript span').attr('tabindex','0');     
+      $('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');     
     } 
     else { 
-      $('.ump-transcript span').removeAttr('tabindex');
+      $('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
     }
   } 
   else { 
@@ -1281,7 +1296,7 @@ AblePlayer.prototype.savePrefs = function() {
   }
 };
 AblePlayer.prototype.setupAlert = function() { 
-  var alertElement = $('.ump-alert-div');
+  var alertElement = $('.able-alert-div');
   var dialog = new AccessibleDialog(alertElement, this.tt.done + '.', 'Modal dialog alert.');
   this.alertBox = $('<div></div>');
   
@@ -1310,15 +1325,15 @@ AblePlayer.prototype.updateTranscript = function() {
 
   // Make transcript tabbable if preference is turned on.
   if (this.prefTabbable === 1) { 
-    $('.ump-transcript span.ump-transcript-seekpoint').attr('tabindex','0');
+    $('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
   }     
 
   // handle clicks on text within transcript 
   // Note #1: Only one transcript per page is supported
   // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
   // Forcing this elsewhere, in the keyboard handler section  
-  if ($('.ump-transcript').length > 0) {  
-    $('.ump-transcript span.ump-transcript-seekpoint').click(function(event) { 
+  if ($('.able-transcript').length > 0) {  
+    $('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
       var spanStart = $(this).attr('data-start');
       if (thisObj.player === 'html5') { 
         thisObj.seekTo(spanStart);
@@ -1342,6 +1357,38 @@ AblePlayer.prototype.updateTranscript = function() {
   }
 }
 
+// Resizes all relevant player attributes.
+AblePlayer.prototype.resizePlayer = function (width, height) {
+  this.$media.height(height);
+  this.$media.width(width);
+  this.$captionDiv.width(width);
+
+  this.$descDiv.width(width);
+  if (this.$vidcapContainer) {
+    this.$vidcapContainer.height(height);
+    this.$vidcapContainer.width(width); 
+  }
+
+  if (this.jwPlayer) {
+    this.jwPlayer.resize(width, height);
+  }
+
+  if (this.resizeSeekBar) {
+    this.seekBar.setWidth(width - this.widthUsedBeforeSeekBar);
+  }
+
+  // TODO: Font-size is currently stored in CSS and is not calculable cross-browser.
+  // Instead, store it just here and update appropriately.
+  // For now, just clear font-size when player is reset to default height, so at least it'll be consistent in that case.
+  if (height !== this.playerHeight) {
+    this.$captionDiv.css('font-size', (height / this.playerHeight) * 18);
+  }
+  else {
+    this.$captionDiv.css('font-size', '');
+  }
+
+};
+
 AblePlayer.prototype.addEventListeners = function() { 
 
   var thisObj, whichButton, thisElement; 
@@ -1349,11 +1396,27 @@ AblePlayer.prototype.addEventListeners = function() {
   // Save the current object context in thisObj for use with inner functions.
   thisObj = this;
 
-  // Handle seek bar events.
-  
+  // Appropriately resize media player for full screen.
+  $(window).resize(function () {
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        thisObj.modalFullscreenActive) {
+      var newHeight = $(window).height() - thisObj.$playerDiv.height();
+      if (!thisObj.$descDiv.is(':hidden')) {
+        newHeight -= thisObj.$descDiv.height();
+      }
+      thisObj.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);
+    }
+  });
 
+  // Handle seek bar events.
   this.seekBar.bodyDiv.on('startTracking', function (event) {
-    thisObj.media.pause();
+    thisObj.pauseMedia();
   }).on('tracking', function (event, position) {
     thisObj.refreshControls();
   }).on('stopTracking', function (event, position) {
@@ -1363,7 +1426,8 @@ AblePlayer.prototype.addEventListeners = function() {
 
   // handle clicks on player buttons 
   this.$controllerDiv.find('button').click(function(){  
-    whichButton = $(this).attr('class').split(' ')[0].substr(19); 
+    // TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
+    whichButton = $(this).attr('class').split(' ')[0].substr(20); 
     if (whichButton === 'play') { 
       thisObj.handlePlay();
     }
@@ -1409,6 +1473,9 @@ AblePlayer.prototype.addEventListeners = function() {
     else if (whichButton === 'transcript') {
       thisObj.handleTranscriptToggle();
     }
+    else if (whichButton === 'fullscreen') {
+      thisObj.handleFullscreenToggle();
+    }
   });
     
   // handle keystrokes (using DHTML Style Guide recommended key combinations) 
@@ -1418,77 +1485,83 @@ AblePlayer.prototype.addEventListeners = function() {
   // The rest are reasonable best choices  
   // NOTE #2: If there are multiple players on a single page, keystroke handlers 
   // are only bound to the FIRST player 
-  if (this.umpIndex === 0) { 
-    $(window).keypress(function(e) {    
-      if (e.which === 32) { // spacebar = play/pause
+  if (this.ableIndex === 0) { 
+    $(window).keypress(function(e) {
+      // Convert to lower case.
+      var which = e.which;
+      if (which >= 65 && which <= 90) {
+        which += 32;
+      }
+
+      if (which === 32) { // spacebar = play/pause
         thisObj.handlePlay();
       }
-      else if (e.which === 112) { // p = play/pause        
+      else if (which === 112) { // p = play/pause        
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handlePlay();
         }
       }
-      else if (e.which === 115) { // s = stop 
+      else if (which === 115) { // s = stop 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleStop();
         }
       }
-      else if (e.which === 109) { // m = mute 
+      else if (which === 109) { // m = mute 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleMute();
         }
       }
-      else if (e.which === 117) { // u = volume up 
+      else if (which === 117) { // u = volume up 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleVolume('up');
         }
       }
-      else if (e.which === 100) { // d = volume down 
+      else if (which === 100) { // d = volume down 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleVolume('down');
         }
       }
-      else if (e.which >= 49 && e.which <= 53) { // set volume 1-5
+      else if (which >= 49 && which <= 53) { // set volume 1-5
         if (thisObj.usingModifierKeys(e)) { 
-          thisObj.handleVolume(e.which);
+          thisObj.handleVolume(which);
         }
       }
-      else if (e.which === 99) { // c = caption toggle 
+      else if (which === 99) { // c = caption toggle 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleCaptionToggle();      
         }
       }
-      else if (e.which === 102) { // f = forward 
+      else if (which === 102) { // f = forward 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleForward();
         }
       }
-      else if (e.which === 114) { // r = rewind (could use B for back???) 
+      else if (which === 114) { // r = rewind (could use B for back???) 
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleRewind();
         }
       }
-      else if (e.which === 110) { // n = narration (description)
+      else if (which === 110) { // n = narration (description)
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleDescriptionToggle();
         }
       }     
-      else if (e.which === 104) { // h = help
+      else if (which === 104) { // h = help
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleHelpClick();
         }
       }     
-      else if (e.which === 116) { // t = preferences
+      else if (which === 116) { // t = preferences
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handlePrefsClick();
         }
       }     
-      else if (e.which === 104) { // h = help
+      else if (which === 104) { // h = help
         if (thisObj.usingModifierKeys(e)) { 
           thisObj.handleHelpClick();
         }
       }     
-      else if (e.which === 13) { // Enter 
+      else if (which === 13) { // Enter 
         thisElement = $(document.activeElement);
         if (thisElement.prop('tagName') === 'SPAN') { 
           // register a click on this SPAN 
@@ -1524,22 +1597,7 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) {
           console.log('meta data has loaded');  
         }
-        if (thisObj.swappingSrc === true) { 
-          // new source file has just been loaded 
-          // should be able to play 
-          thisObj.media.play();
-          thisObj.$status.text(thisObj.tt.statusPlaying);        
-          thisObj.swappingSrc = false; // swapping is finished                      
-          thisObj.$playpauseButton.attr('title',thisObj.tt.pause).attr('src',thisObj.pauseButtonImg); 
-          if (thisObj.$descButton) { 
-            if (thisObj.openDescOn || thisObj.closedDescOn) { 
-              thisObj.$descButton.removeClass('buttonOff').attr('title',thisObj.tt.turnOff + ' ' + thisObj.tt.descriptions);
-            }
-            else { 
-              thisObj.$descButton.addClass('buttonOff').attr('title',thisObj.tt.turnOn + ' ' + thisObj.tt.descriptions);            
-            }
-          }
-        }
+        thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() { 
         if (thisObj.startTime && !thisObj.startedPlaying) { 
@@ -1553,51 +1611,20 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       })
       .on('playing',function() { 
-        thisObj.$status.text(thisObj.tt.statusPlaying); 
+        thisObj.refreshControls();
       })
-      .on('ended',function() { 
-        thisObj.$status.text(thisObj.tt.statusEnd); 
-        // reset play button
-        thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
-        // if there's a playlist, advance to next item and start playing  
-        if (thisObj.hasPlaylist) { 
-          if (thisObj.playlistIndex === (thisObj.playlistSize - 1)) { 
-            // this is the last track in the playlist
-            if (thisObj.loop) { 
-              thisObj.playlistIndex = 0;              
-              thisObj.swapSource(0);
-            }             
-          }
-          else { 
-            // this is not the last track. Play the next one. 
-            thisObj.playlistIndex++;
-            thisObj.swapSource(thisObj.playlistIndex)
-          }
-        }
+      .on('ended',function() {
+        thisObj.onMediaComplete();
       })
       .on('waiting',function() { 
-        thisObj.$status.text(thisObj.tt.statusWaiting); // same as buffering???  
+        thisObj.refreshControls();
       })
       .on('durationchange',function() { 
         // Display new duration.
         thisObj.refreshControls();
       })
       .on('timeupdate',function() { 
-        if (thisObj.startTime && !thisObj.startedPlaying) { 
-          // try seeking again, if seeking failed on canplay or canplaythrough
-          thisObj.seekTo(thisObj.startTime);
-        }       
-        if (thisObj.captionsOn) { 
-          thisObj.showCaptions();
-        }
-        if (thisObj.closedDescOn && thisObj.useDescType === 'closed') { 
-          thisObj.showDescription();
-        }
-        if (thisObj.prefHighlight === 1) {
-          thisObj.highlightTranscript(thisObj.media.currentTime); 
-        }
-
-        thisObj.refreshControls();
+        thisObj.onMediaUpdateTime();
       })
       .on('play',function() { 
         if (thisObj.debug) { 
@@ -1605,9 +1632,7 @@ AblePlayer.prototype.addEventListeners = function() {
         }
       })
       .on('pause',function() { 
-        if (thisObj.debug) { 
-          console.log('media pause event');       
-        }
+        thisObj.onMediaPause();
       })
       .on('ratechange',function() { 
         if (thisObj.debug) { 
@@ -1642,42 +1667,10 @@ AblePlayer.prototype.addEventListeners = function() {
     // add listeners for JW Player events 
     jwplayer(thisObj.jwId)
       .onTime(function() {
-        // show captions 
-        // We're doing this ourself because JW Player's caption support is not great 
-        // e.g., there's no way to toggle JW captions via the JavaScript API  
-        if (thisObj.captionsOn) { 
-          thisObj.showCaptions();
-        }
-        // show description 
-        // Using our own description solutions rather than JW Player's MP3 solution 
-        // JW's solution, though innovative, doesn't seem to be a high priority for JW devlopers
-        if (thisObj.closedDescOn) { 
-          thisObj.showDescription();
-        }
-        // show highlight in transcript 
-        if (thisObj.prefHighlight === 1) {
-          thisObj.highlightTranscript(this.getPosition()); 
-        }
+        thisObj.onMediaUpdateTime();
       })
-      .onComplete(function() {          
-        thisObj.$status.text(thisObj.tt.statusEnd); 
-        //reset play button
-        thisObj.$playpauseButton.attr('title',thisObj.tt.play).attr('src',thisObj.playButtonImg);
-        // if there's a playlist, advance to next item and start playing  
-        if (thisObj.hasPlaylist) { 
-          if (thisObj.playlistIndex === (thisObj.playlistSize - 1)) { 
-            // this is the last track in the playlist
-            if (thisObj.loop) { 
-              thisObj.playlistIndex = 0;              
-              thisObj.swapSource(0);
-            }             
-          }
-          else { 
-            // this is not the last track. Play the next one. 
-            thisObj.playlistIndex++;
-            thisObj.swapSource(thisObj.playlistIndex)
-          }
-        }
+      .onComplete(function() {
+        thisObj.onMediaComplete();
       })
       .onReady(function() { 
         if (thisObj.debug) { 
@@ -1688,7 +1681,7 @@ AblePlayer.prototype.addEventListeners = function() {
         $('#' + thisObj.jwId).removeAttr('tabindex'); 
 
         if (thisObj.startTime > 0) { 
-          // UMP has been initialized with a startTime 
+          // ABLE has been initialized with a startTime 
           // e.g., from a search result or link in a transcript
           // ONE TIME ONLY - set currentTime to startTime and begin playing
           if (!thisObj.startedPlaying) {          
@@ -1704,6 +1697,8 @@ AblePlayer.prototype.addEventListeners = function() {
             thisObj.startedPlaying = true;
           }
         }
+
+        thisObj.refreshControls();
       })
       .onSeek(function(event) { 
         // this is called when user scrubs ahead or back 
@@ -1712,30 +1707,31 @@ AblePlayer.prototype.addEventListeners = function() {
         if (thisObj.debug) { 
           console.log('Seeking to ' + event.position + '; target: ' + event.offset);          
         }
+
+        thisObj.refreshControls();
       })
       .onPlay(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlay event fired');
         }
-        thisObj.$status.text(thisObj.tt.statusPlaying); 
+
+        thisObj.refreshControls();
       })
       .onPause(function() { 
-        if (thisObj.debug) { 
-          console.log('JW Player onPause event fired');
-        }       
-        thisObj.$status.text(thisObj.tt.statusPaused); 
+        thisObj.onMediaPause();
       })
       .onBuffer(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onBuffer event fired');
         }       
-        thisObj.$status.text(thisObj.tt.statusBuffering); 
+        thisObj.refreshControls();
       })
       .onIdle(function(e) { 
         if (thisObj.debug) { 
           console.log('JW Player onIdle event fired');
         }
-        thisObj.$status.text(thisObj.tt.statusStopped); // Idle?
+
+        thisObj.refreshControls();
       })
       .onMeta(function() { 
         if (thisObj.debug) { 
@@ -1745,27 +1741,98 @@ AblePlayer.prototype.addEventListeners = function() {
       .onPlaylist(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlaylist event fired');
-        }       
-        // onPlaylist is fired when a new playlist is loaded into the player 
-        // A playlist includes any new media source 
-        if (thisObj.swappingSrc === true) { 
-          // should be able to play 
-          jwplayer(thisObj.jwId).play(true);
-          thisObj.$status.text(thisObj.tt.statusPlaying);        
-          thisObj.swappingSrc = false; // swapping is finished                      
-          thisObj.$playpauseButton.attr('title',thisObj.tt.pause).attr('src',thisObj.pauseButtonImg); 
-          if (thisObj.$descButton) { 
-            if (thisObj.openDescOn || thisObj.closedDescOn) { 
-              thisObj.$descButton.removeClass('buttonOff').attr('title',thisObj.tt.turnOff + ' ' + thisObj.tt.descriptions);
-            }
-            else { 
-              thisObj.$descButton.addClass('buttonOff').attr('title',thisObj.tt.turnOn + ' ' + thisObj.tt.descriptions);            
-            }
-          }
         }
+
+        // Playlist change includes new media source.
+        thisObj.onMediaNewSourceLoad();
       });
   }   
 };
+
+// Media events
+AblePlayer.prototype.onMediaUpdateTime = function () {
+  if (this.startTime && !this.startedPlaying) { 
+    // try seeking again, if seeking failed on canplay or canplaythrough
+    this.seekTo(this.startTime);
+  }       
+
+  // show captions, even for JW Player.
+  // We're doing this ourself because JW Player's caption support is not great 
+  // e.g., there's no way to toggle JW captions via the JavaScript API  
+  if (this.captionsOn) { 
+    this.showCaptions();
+  }
+
+  // show highlight in transcript 
+  if (this.prefHighlight === 1) {
+    this.highlightTranscript(this.getElapsed()); 
+  }
+
+  if (this.player === 'html5') {
+    if (this.closedDescOn && this.useDescType === 'closed') { 
+      this.showDescription();
+    }
+  }
+  else { // JW player
+    // show description 
+    // Using our own description solutions rather than JW Player's MP3 solution 
+    // JW's solution, though innovative, doesn't seem to be a high priority for JW devlopers
+    if (this.closedDescOn) { 
+      this.showDescription();
+    }    
+  }
+
+  this.refreshControls();
+}
+
+AblePlayer.prototype.onMediaPause = function () {
+  if (this.debug) { 
+    console.log('media pause event');       
+  }
+}
+
+AblePlayer.prototype.onMediaComplete = function () {
+  // if there's a playlist, advance to next item and start playing  
+  if (this.hasPlaylist) { 
+    if (this.playlistIndex === (this.playlistSize - 1)) { 
+      // this is the last track in the playlist
+      if (this.loop) { 
+        this.playlistIndex = 0;              
+        this.swapSource(0);
+      }             
+    }
+    else { 
+      // this is not the last track. Play the next one. 
+      this.playlistIndex++;
+      this.swapSource(this.playlistIndex)
+    }
+  }
+
+  this.refreshControls();
+}
+
+AblePlayer.prototype.onMediaNewSourceLoad = function () {
+  if (this.swappingSrc === true) { 
+    // new source file has just been loaded 
+    // should be able to play 
+    if (this.player === 'html5') {
+      this.media.play();
+    }
+    else if (this.player === 'jw') {
+      var player = this.jwPlayer;
+      // Seems to be a bug in JW player, where this doesn't work when fired immediately.
+      // Thus have to use a setTimeout
+      setTimeout(function () {
+        player.play(true);
+      }, 500);
+    }
+    this.swappingSrc = false; // swapping is finished
+    this.refreshControls();
+  }
+}
+
+// End Media events
+
 AblePlayer.prototype.addControls = function() {   
   // determine which controls to show based on several factors: 
   // mediaType (audio vs video) 
@@ -1839,10 +1906,7 @@ AblePlayer.prototype.addControls = function() {
     controlLayout['bl'].push('volumeDown'); 
   }
   if (this.mediaType === 'video') { 
-    useFullScreen = false; // set to true if browser supports full screen (need to work on this)
-    if (useFullScreen) { 
-      controlLayout['bl'].push('fullscreen');       
-    }
+    controlLayout['bl'].push('fullscreen');
   }
   controlLayout['br'].push('preferences');
   // create the hidden form that will be triggered by a click on the Preferences button
@@ -1854,37 +1918,43 @@ AblePlayer.prototype.addControls = function() {
   var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
   // now step separately through left and right controls
   var lastWidth = 0;
-  var widthRemaining = this.playerWidth;
+  var widthUsed = 0;
   for (i = 0; i <= 3; i++) {
     controls = controlLayout[sectionByOrder[i]];
     if ((i % 2) === 0) {        
       controllerSpan = $('<span>',{
-        'class': 'ump-left-controls'
+        'class': 'able-left-controls'
       });
     }
     else { 
       controllerSpan = $('<span>',{
-        'class': 'ump-right-controls'
+        'class': 'able-right-controls'
       });
     }
     for (j=0; j<controls.length; j++) { 
       control = controls[j];
       if (control === 'seek') { 
-        var sliderDiv = $('<div class="ump-seekbar"></div>');
+        var sliderDiv = $('<div class="able-seekbar"></div>');
         controllerSpan.append(sliderDiv);
+
         var width;
         if ((i % 2) === 0) {
-          width = Math.min(baseSliderWidth, widthRemaining - 50);
+          width = Math.min(baseSliderWidth, this.playerWidth - widthUsed - 50);
+          this.resizeSeekBar = false;
         }
         else {
           // When on right hand side, consume available width.
-          width = widthRemaining - 50;
+          width = this.playerWidth - widthUsed - 50;
+          this.resizeSeekBar = true;
+          // We store this for later to assist in resizing without having to recalculate button widths.
+          // Only the slider changes sizes on resizing, and only if it's on the right hand side.
+          this.widthUsedBeforeSeekBar = widthUsed;
         }
-        widthRemaining -= width;
+        widthUsed += width;
         this.seekBar = new AccessibleSeekBar(sliderDiv, width);
       }
       else {
-        widthRemaining -= buttonWidth;
+        widthUsed += buttonWidth;
         // this control is a button 
         buttonImgSrc = 'images/media-' + control + '-' + this.iconColor + '.png';
         buttonTitle = this.getButtonTitle(control); 
@@ -1892,7 +1962,7 @@ AblePlayer.prototype.addControls = function() {
           'type': 'button',
           'tabindex': '0',
           'title': buttonTitle,
-          'class': 'ump-button-handler-' + control
+          'class': 'able-button-handler-' + control
         });        
         if (this.iconType === 'font') { 
           // add span for icon fonts 
@@ -1914,7 +1984,7 @@ AblePlayer.prototype.addControls = function() {
 /*        // this is recommended for a11y in the documentation 
           // but we have title on the container <button>, so I don't think this is needed
           var buttonLabel = $('<span>',{
-            'class': 'ump-clipped'
+            'class': 'able-clipped'
           }).text(buttonTitle);
           newButton.append(buttonIcon,buttonLabel);
 */          
@@ -1966,20 +2036,23 @@ AblePlayer.prototype.addControls = function() {
         else if (control === 'transcript') {
           this.$transcriptButton = newButton;
         }
+        else if (control === 'fullscreen') {
+          this.$fullscreenButton = newButton;
+        }
       }
     }
     this.$controllerDiv.append(controllerSpan);
     if ((i % 2) == 1) {
-      this.$controllerDiv.append('<br>');
-      var width = this.playerWidth - lastWidth - widthRemaining - 10;
-      controllerSpan.css('width', width);
-      widthRemaining = this.playerWidth;
+      this.$controllerDiv.append('<div style="clear:both;"></div>');
+      var width = widthUsed - lastWidth - 10;
+      //controllerSpan.css('width', width);
+      widthUsed = 0;
       lastWidth = width;
     }
     else {
-      var width = this.playerWidth - widthRemaining;
-      controllerSpan.css('width', width);
-      widthRemaining -= 10;
+      var width = widthUsed;
+      //controllerSpan.css('width', width);
+      widthUsed += 10;
       lastWidth = width;
     }
   }
@@ -2008,17 +2081,11 @@ AblePlayer.prototype.addControls = function() {
     // or wrap buttons onto new line ??? 
   }*/
 
-  //$('.ump-left-controls').css('width',leftWidth);       
-  //$('.ump-right-controls').css('width',rightWidth);       
+  //$('.able-left-controls').css('width',leftWidth);       
+  //$('.able-right-controls').css('width',rightWidth);       
   
   if (this.mediaType === 'video') { 
-    // set controller to width of video
-    controllerStyles = {
-      'width': this.playerWidth+'px',
-      'height': this.playerHeight+'px'
-    } 
-    this.$umpDiv.css(controllerStyles); 
-    // also set width and height of div.ump-vidcap-container
+    // also set width and height of div.able-vidcap-container
     vidcapStyles = {
       'width': this.playerWidth+'px',
       'height': this.playerHeight+'px'
@@ -2043,11 +2110,11 @@ AblePlayer.prototype.addControls = function() {
     
   // also add a timer to the status bar
   this.$elapsedTimeContainer = $('<span>',{
-    'class': 'ump-elapsedTime',
+    'class': 'able-elapsedTime',
     text: '0:00'
   });
   this.$durationContainer = $('<span>',{
-    'class': 'ump-duration'
+    'class': 'able-duration'
   }); 
   this.$timer.append(this.$elapsedTimeContainer).append(this.$durationContainer);       
   
@@ -2063,6 +2130,7 @@ AblePlayer.prototype.addControls = function() {
   // Update state-based display of controls.
   this.refreshControls();
 };
+
 AblePlayer.prototype.getIconType = function() { 
   // returns either "font" or "image" 
   // create a temporary play span and check to see if button has font-family == "icomoon" (the default) 
@@ -2074,7 +2142,7 @@ AblePlayer.prototype.getIconType = function() {
   // Note: webkit doesn't return calculated styles unless element has been added to the DOM 
   // and is visible; use clip method to satisfy this need yet hide it  
   $tempButton = $('<span>',{ 
-    'class': 'icon-play ump-clipped'
+    'class': 'icon-play able-clipped'
   });
   $('body').append($tempButton);
 
@@ -2119,6 +2187,12 @@ AblePlayer.prototype.getIconType = function() {
   $tempButton.remove();
 };
 AblePlayer.prototype.getBestColor = function($element) { 
+  // TODO: Icon color is currently always white when not using images.
+  // Using white here as well for consistency.
+  // Remove?
+  this.iconColor = 'white';
+  return;
+
   // determine best color (white or black) based on computed background color of jQuery object $element
   // This overrides default iconColor if there is too little contrast due to:  
   // - user having enabled high contrast mode 
@@ -2142,11 +2216,11 @@ AblePlayer.prototype.getBestColor = function($element) {
       regex = /.#([0-9a-f]{3}|[0-9a-f]{6})$/i;
       if (regex.test(bgColor)) { 
         // this is a hex value. Convert to RGB 
-        bgColor = colorHexToRGB(bgColor);
+        bgColor = this.colorHexToRGB(bgColor);
       }
-      else if (colorNameToHex(bgColor) != false ) {
+      else if (this.colorNameToHex(bgColor) != false ) {
         // this is a color name 
-        bgColor = colorHexToRGB(colorNameToHex(bgColor));
+        bgColor = this.colorHexToRGB(this.colorNameToHex(bgColor));
       }
       else { 
         bgColor = false;
@@ -2178,7 +2252,7 @@ AblePlayer.prototype.getBestColor = function($element) {
 };
 AblePlayer.prototype.getIconHexValue =  function(control) { 
   // returns hex value of character in icomoon font
-  // may not actually be needed
+  // may not actually be needde
   switch (control) { 
     case 'play': 
       return '&#xe600';
@@ -2316,15 +2390,16 @@ AblePlayer.prototype.handlePlay = function(e) {
 };
 
 AblePlayer.prototype.handleStop = function() { 
-
   if (this.player === 'html5') {             
     // reset media
-    this.media.pause(); 
+    this.media.pause(true); 
     this.media.currentTime = 0;
   }
   else { 
     // jw player
-    jwplayer(this.jwId).stop(); // unloads the currently playing media file
+    // Instead of calling stop (which unloads the media file), pause and seek to 0 mimicing HTML5 behavior.
+    this.jwPlayer.pause(true);
+    this.jwPlayer.seek(0);
   }     
 
   this.refreshControls();
@@ -2402,7 +2477,7 @@ AblePlayer.prototype.handleMute = function() {
         this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
       }
       else { 
-        this.$playpauseButton.find('img').attr('src',this.muteButtonImg); 
+        this.$muteButton.find('img').attr('src',this.muteButtonImg); 
       }
     }
   }
@@ -2429,7 +2504,7 @@ AblePlayer.prototype.handleMute = function() {
         this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
       }
       else { 
-        this.$playpauseButton.find('img').attr('src',this.muteButtonImg); 
+        this.$muteButton.find('img').attr('src',this.muteButtonImg); 
       }
     }
   } 
@@ -2558,7 +2633,6 @@ AblePlayer.prototype.handleCaptionToggle = function() {
   }
 };
 AblePlayer.prototype.handleDescriptionToggle = function() { 
-
   var useDescType; 
   
   if (this.debug) { 
@@ -2574,27 +2648,15 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
         // closed descriptions are on. Turn them off 
         this.closedDescOn = false;
         this.$descDiv.hide(); 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);       
       }
       else { 
         // closed descriptions are off. Turn them on 
         this.closedDescOn = true;
         this.$descDiv.show(); 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);               
       }
     }
     else { 
       // user prefers open description, and it's available 
-      if (this.openDescOn) { 
-        // open description is on. Turn it off (swap to non-described video)
-        // don't toggle this.openDescOn - that's handled by swapDescription()
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);             
-      }
-      else { 
-        // open description is off. Turn it on (swap to described version)
-        // don't toggle this.openDescOn - that's handled by swapDescription()
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);                     
-      }
       this.swapDescription();
     }
   }
@@ -2603,12 +2665,10 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
     if (this.openDescOn) { 
        // open description is on. Turn it off (swap to non-described video)
       this. openDescOn = false;
-      this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);             
     }
     else { 
       // open description is off. Turn it on (swap to described version)
       this. openDescOn = true;
-      this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);                     
     }
     this.swapDescription();
   } 
@@ -2619,39 +2679,177 @@ AblePlayer.prototype.handleDescriptionToggle = function() {
       // closed descriptions are on. Turn them off 
       this.closedDescOn = false;
       this.$descDiv.hide(); 
-      this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);       
     }
     else { 
       // closed descriptions are off. Turn them on 
       this.closedDescOn = true; 
       this.$descDiv.show();      
       if (this.prefVisibleDesc === 1) { 
-        this.$descDiv.removeClass('ump-clipped'); 
+        this.$descDiv.removeClass('able-clipped'); 
       } 
-      this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);               
     }
   }
+  this.refreshControls();
 };
 AblePlayer.prototype.handlePrefsClick = function() { 
+  this.setFullscreen(false);
   this.prefsDialog.show();
 };
 AblePlayer.prototype.handleHelpClick = function() { 
+  this.setFullscreen(false);
   this.helpDialog.show();
 };
 
 AblePlayer.prototype.handleTranscriptToggle = function () {
   if (this.$transcriptDiv.is(':visible')) {
-    this.$transcriptDiv.hide();
-    this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' transcript');
+    this.$transcriptArea.hide();
+    this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
   }
   else {
-    this.$transcriptDiv.show();
-    this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' transcript');
+    this.$transcriptArea.show();
+    this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
   }
 };
 
-AblePlayer.prototype.handleTranscriptLockToggle = function () {
-  this.transcriptLocked = !this.transcriptLocked;
+AblePlayer.prototype.isFullscreen = function () {
+  if (this.nativeFullscreenSupported()) {
+    return (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.webkitCurrentFullScreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement) ? true : false;
+  }
+  else {
+    return this.modalFullscreenActive
+  }
+}
+
+AblePlayer.prototype.setFullscreen = function (fullscreen) {
+  if (this.isFullscreen() == fullscreen) {
+    return;
+  }
+
+  var thisObj = this;
+  var $el;
+  if (this.$ableColumnLeft) {
+    // If there's two columns (player + transcript), only expand the lefthand column.
+    $el = this.$ableColumnLeft;
+  }
+  else {
+    $el = this.$ableDiv;
+  }
+  var el = $el[0];
+
+  if (this.nativeFullscreenSupported()) {
+    // Note: many varying names for options for browser compatibility.
+    if (fullscreen) {
+      // If not in full screen, initialize it.
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      }
+      else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      }
+      else if (el.mozRequestFullScreen) {
+        el.mozRequestFullScreen();
+      }
+      else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen();
+      }
+    }
+    else {
+      // If in fullscreen, exit it.
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+      else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      else if (document.webkitCancelFullScreen) {
+        document.webkitCancelFullScreen();
+      }
+      else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      }
+      else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }
+  else {
+    // Non-native fullscreen support through modal dialog.
+
+    // Create dialog on first run through.
+    if (!this.fullscreenDialog) {
+      var dialogDiv = $('<div>');
+      this.fullscreenDialog = new AccessibleDialog(dialogDiv, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
+      this.$ableDiv.append(dialogDiv);
+    }
+
+    // Track whether paused/playing before moving element; moving the element can stop playback.
+    var wasPaused = this.isPaused();
+
+    if (!fullscreen) {
+      this.modalFullscreenActive = true;
+      this.fullscreenDialog.show();
+
+      // Move player element into fullscreen dialog, then show.
+      // Put a placeholder element where player was.
+      this.$modalFullscreenPlaceholder = $('<div class="placeholder">');
+      this.$modalFullscreenPlaceholder.insertAfter($el);
+      $el.appendTo(this.fullscreenDialog.modal);
+
+      // Column left css is 50% by default; set to 100% for full screen.
+      if ($el === this.$ableColumnLeft) {
+        $el.width('100%');
+      }
+      var newHeight = $(window).height() - this.$playerDiv.height();
+      if (!this.$descDiv.is(':hidden')) {
+        newHeight -= thisObj.$descDiv.height();
+      }
+      this.resizePlayer($(window).width(), newHeight);
+
+    }
+    else {
+      this.modalFullscreenActive = false;
+      if ($el === this.$ableColumnLeft) {
+        $el.width('50%');
+      }
+      $el.insertAfter(this.$modalFullscreenPlaceholder);
+      this.$modalFullscreenPlaceholder.remove();
+      this.fullscreenDialog.hide();
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+
+    // TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
+    // Need to call setup again after moving?
+
+    // Resume playback if moving stopped it.
+    if (!wasPaused && this.isPaused()) {
+      if (this.player === 'html5') {
+        this.media.play(true);
+      }
+      else if (this.player === 'jw') {
+        this.jwPlayer.play(true);
+      }
+    }
+  }
+  
+}
+
+AblePlayer.prototype.handleFullscreenToggle = function () {
+  this.setFullscreen(!this.isFullscreen());
+};
+
+AblePlayer.prototype.nativeFullscreenSupported = function () {
+  return document.fullscreenEnabled ||
+    document.webkitFullscreenEnabled ||
+    document.mozFullScreenEnabled ||
+    document.msFullscreenEnabled;
+}
+
+AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
+  this.autoScrollTranscript = val;
   this.refreshControls();
 };
 
@@ -2689,6 +2887,14 @@ AblePlayer.prototype.getButtonTitle = function(control) {
     else { 
       return this.tt.turnOn + ' ' + this.tt.descriptions;
     }
+  }
+  else if (control === 'transcript') {  
+    if (this.$transcriptDiv.is(':visible')) {
+      return this.tt.hide + ' ' + this.tt.transcript;
+    }
+    else { 
+      return this.tt.show + ' ' + this.tt.transcript;
+    }
   }   
   else if (control === 'sign') { // not yet supported 
     return this.tt.sign;
@@ -2724,49 +2930,123 @@ AblePlayer.prototype.getButtonTitle = function(control) {
   }   
 };
 AblePlayer.prototype.seekTo = function (newTime) { 
-  var seekable;
+  if (this.player === 'html5') {
+    var seekable;
   
-  this.startTime = newTime;
-  // Check HTML5 media "seekable" property to be sure media is seekable to startTime
-  seekable = this.media.seekable;
-  if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
-    // startTime is seekable. Seek to startTime, then start playing
-    // Unless startTime == seekable.end(0), since then it will actually set the time to the start of the video.  In this case, do so but don't keep playing.
-    this.media.currentTime = this.startTime;
-    if (seekable.end(0) !== this.startTime) {
-      this.media.play(true);
-      this.startedPlaying = true;
-    }
+    this.startTime = newTime;
+    // Check HTML5 media "seekable" property to be sure media is seekable to startTime
+    seekable = this.media.seekable;
+    if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
+      // startTime is seekable. Seek to startTime, then start playing
+      // Unless startTime == seekable.end(0), since then it will actually set the time to the start of the video.  In this case, do so but don't keep playing.
+      this.media.currentTime = this.startTime;
+      if (seekable.end(0) !== this.startTime) {
+        this.media.play(true);
+        this.startedPlaying = true;
+      }
+    } 
+  }
+  else { // jw player
+    this.jwPlayer.play(true);
+    this.jwPlayer.seek(newTime);
+    this.startedPlaying = true;
+  }
 
-    this.refreshControls();
-  } 
+  this.refreshControls();
 };
 
 AblePlayer.prototype.getDuration = function () {
+  var duration;
   if (this.player === 'html5') {
-    return this.media.duration;
+    duration = this.media.duration;
   }
-  else { // jw player
-    return jwplayer(this.jwId).getDuration();        
+  else if (this.player === 'jw') {
+    duration = this.jwPlayer.getDuration();
   }
+
+  if (duration === undefined || isNaN(duration) || duration === -1) {
+    return 0;
+  }
+  return duration;
 };
 
 AblePlayer.prototype.getElapsed = function () {
+  var position;
   if (this.player === 'html5') {
-    return this.media.currentTime;
+    position = this.media.currentTime;
   }
-  else {
-    var jw = jwplayer(this.jwId);
-    if (jw.getState() === 'IDLE') {
+  else if (this.player === 'jw') {
+    if (this.jwPlayer.getState() === 'IDLE') {
       return 0;
     }
-    return jwplayer(this.jwId).getPosition();
+    position = this.jwPlayer.getPosition();
+  }
+
+  if (position === undefined || isNaN(position) || position === -1) {
+    return 0;
+  }
+  return position;
+};
+
+AblePlayer.prototype.getPlayerState = function () {
+  if (this.player === 'html5') {
+    if (this.media.paused) {
+      if (this.getElapsed() === 0) {
+        return 'stopped';
+      }
+      else if (this.media.ended) {
+        return 'ended';
+      }
+      else {
+        return 'paused';
+      }
+    }
+    else if (this.media.readyState !== 4) {
+      return 'buffering';
+    }
+    else {
+      return 'playing';
+    }
+  }
+  else if (this.player === 'jw') {
+    if (this.jwPlayer.getState() === 'PAUSED' || this.jwPlayer.getState() === 'IDLE' || this.jwPlayer.getState() === undefined) {
+      if (this.getElapsed() === 0) {
+        return 'stopped';
+      }
+      else if (this.getElapsed() === this.getDuration()) {
+        return 'ended';
+      }
+      else {
+        return 'paused';
+      }
+    }
+    else if (this.jwPlayer.getState() === 'BUFFERING') {
+      return 'buffering';
+    }
+    else if (this.jwPlayer.getState() === 'PLAYING') {
+      return 'playing';
+    }
+  }
+}
+
+AblePlayer.prototype.isPaused = function () {
+  var state = this.getPlayerState();
+  return state === 'paused' || state === 'stopped' || state === 'ended';
+};
+
+AblePlayer.prototype.pauseMedia = function () {
+  if (this.player === 'html5') {
+    this.media.pause(true);
+  }
+  else if (this.player === 'jw') {
+    this.jwPlayer.pause(true);
   }
 };
 
 // Right now, update the seekBar values based on current duration and time.
 // Later, move all non-destructive control updates based on state into this function?
 AblePlayer.prototype.refreshControls = function() {
+  var thisObj = this;
   var duration = this.getDuration();
   var elapsed = this.getElapsed();
 
@@ -2802,9 +3082,42 @@ AblePlayer.prototype.refreshControls = function() {
   this.$durationContainer.text(' / ' + dMinutes + ':' + dSeconds);
   this.$elapsedTimeContainer.text(eMinutes + ':' + eSeconds);
 
+  // TODO: Re-add status lines for various loading states?
+  var textByState = {
+    'stopped': this.tt.statusStopped,
+    'paused': this.tt.statusPaused,
+    'playing': this.tt.statusPlaying,
+    'buffering': this.tt.statusBuffering,
+    'ended': this.tt.statusEnd
+  }
+
+  // Update the text only if it's changed since it has role="alert"; also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+  if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
+    // Debounce updates; only update after status has stayed steadily different for 250ms.
+    var timestamp = (new Date()).getTime();
+    if (!this.statusDebounceStart) {
+      this.statusDebounceStart = timestamp;
+      // Make sure refreshControls gets called again at the appropriate time to check.
+      this.statusTimeout = setTimeout(function () {
+        thisObj.refreshControls();
+      }, 300);
+    }
+    else if ((timestamp - this.statusDebounceStart) > 250) {
+      this.$status.text(textByState[this.getPlayerState()]);
+      this.statusDebounceStart = null;
+      clearTimeout(this.statusTimeout);
+      this.statusTimeout = null;
+    }
+  }
+  else {
+    this.statusDebounceStart = null;
+    clearTimeout(this.statusTimeout);
+    this.statusTimeout = null;
+  }
+
   // Don't change play/pause button display while using the seek bar.
   if (!this.seekBar.tracking) {
-    if (this.media.paused) {
+    if (this.isPaused()) {
 
       this.$playpauseButton.attr('title',this.tt.play); 
       
@@ -2813,13 +3126,6 @@ AblePlayer.prototype.refreshControls = function() {
       }
       else { 
         this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
-      }
-
-      if (elapsed === 0) {
-        this.$status.text(this.tt.statusStopped);
-      }
-      else {
-        this.$status.text(this.tt.statusPaused);
       }
     }
     else {
@@ -2831,28 +3137,37 @@ AblePlayer.prototype.refreshControls = function() {
       else { 
         this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
       }
-
-      this.$status.text(this.tt.statusPlaying);
     }
   }
 
   // Update buttons on/off display.
-  // TODO: Move all button updates here.
-  if (this.transcriptLocked) {
-    // TODO: Localzie
-    this.$transcriptLockButton.removeClass('buttonOff').attr('title', 'Unlock transcript');
-  }
-  else {
-    this.$transcriptLockButton.addClass('buttonOff').attr('title', 'Lock transcript');
+  if (this.$descButton) { 
+    if (this.openDescOn || this.closedDescOn) { 
+      this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);
+    }
+    else { 
+      this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);            
+    }
   }
 
+
+  // TODO: Move all button updates here.
+  if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
+    this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
+  }
+
+
   // If transcript locked, scroll transcript to current highlight location.
-  if (this.transcriptLocked && this.currentHighlight) {
-    // scroll this item to the middle of the transcript div
-    $('.ump-transcript').scrollTop($('.ump-transcript').scrollTop() +
-                                   $(this.currentHighlight).position().top -
-                                   ($('.ump-transcript').height() / 2) +
-                                   ($(this.currentHighlight).height() / 2));
+  if (this.autoScrollTranscript && this.currentHighlight) {
+    var newTop = Math.floor($('.able-transcript').scrollTop() +
+                            $(this.currentHighlight).position().top -
+                            ($('.able-transcript').height() / 2) +
+                            ($(this.currentHighlight).height() / 2));
+    if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
+      // Set a flag to ignore the coming scroll event.
+      this.scrollingTranscript = true;
+      $('.able-transcript').scrollTop(newTop);
+    }
   }
 };
 
@@ -3088,11 +3403,9 @@ AblePlayer.prototype.swapDescription = function() {
     this.openDescOn = true;
     if (this.initializing) { // user hasn't pressed play yet 
       this.swappingSrc = false; 
-      this.$status.text(this.tt.statusUsingDesc); 
     }
     else { 
       this.swappingSrc = true; 
-      this.$status.text(this.tt.statusLoadingDesc); 
     }
   }   
   else { 
@@ -3114,7 +3427,6 @@ AblePlayer.prototype.swapDescription = function() {
     // This function is only called during initialization 
     // if swapping from non-described to described
     this.swappingSrc = true; 
-    this.$status.text(this.tt.statusLoadingNoDesc); 
   }
   // now reload the player 
   if (this.player === 'html5') {
@@ -3197,9 +3509,9 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
   }
 
   // update playlist to indicate which item is playing 
-  //$('.ump-playlist li').removeClass('ump-current');
-  this.$playlist.removeClass('ump-current');
-  $newItem.addClass('ump-current'); 
+  //$('.able-playlist li').removeClass('able-current');
+  this.$playlist.removeClass('able-current');
+  $newItem.addClass('able-current'); 
     
   // update Now Playing div 
   if (this.showNowPlaying === true) {
@@ -3218,7 +3530,6 @@ AblePlayer.prototype.swapSource = function(sourceIndex) {
   }
   else { 
     this.swappingSrc = true; 
-    this.$status.text(this.tt.statusLoadingNext);  
     if (this.player === 'html5') {
       this.media.load();
     }   
@@ -3258,17 +3569,17 @@ AblePlayer.prototype.highlightTranscript = function (currentTime) {
   currentTime = parseFloat(currentTime);
 
   // Highlight the current transcript item.
-  $('.ump-transcript span.ump-transcript-caption').each(function() { 
+  $('.able-transcript span.able-transcript-caption').each(function() { 
     start = parseFloat($(this).attr('data-start'));
     end = parseFloat($(this).attr('data-end'));
     if (currentTime >= start && currentTime <= end) { 
       // move all previous highlights before adding one to current span
-      $('.ump-highlight').removeClass('ump-highlight');
-      $(this).addClass('ump-highlight');
+      $('.able-highlight').removeClass('able-highlight');
+      $(this).addClass('able-highlight');
       return false;
     }
   });
-  thisObj.currentHighlight = $('.ump-highlight');
+  thisObj.currentHighlight = $('.able-highlight');
   if (thisObj.currentHighlight.length === 0) {
     // Nothing highlighted.
     thisObj.currentHighlight = null;
@@ -3280,6 +3591,9 @@ AblePlayer.prototype.usingModifierKeys = function(e) {
     return false;
   } 
   if ((this.prefCtrlKey === 1) && !e.ctrlKey) { 
+    return false;
+  }
+  if ((this.prefShiftKey === 1) && !e.shiftKey) {
     return false;
   }
   return true; 
@@ -4161,7 +4475,7 @@ function getTiming(state) {
 }
 
 function generateTranscript(captions, descriptions) {
-  var main = $('<div class="ump-transcript-container"></div>');
+  var main = $('<div class="able-transcript-container"></div>');
 
   // TODO: Make scrolling optional?
 
@@ -4171,7 +4485,7 @@ function generateTranscript(captions, descriptions) {
   var nextDesc = 0;  
 
   var addDescription = function(div, desc) {
-    var descDiv = $('<div class="ump-desc"><span class="hidden">Description: </span></div>');
+    var descDiv = $('<div class="able-desc"><span class="hidden">Description: </span></div>');
 
     var flattenComponentForDescription = function(comp) {
       var result = [];
@@ -4186,7 +4500,7 @@ function generateTranscript(captions, descriptions) {
       return result;
     }
 
-    var descSpan = $('<span class="ump-transcript-seekpoint"></span>');
+    var descSpan = $('<span class="able-transcript-seekpoint"></span>');
     for (var ii in desc.components.children) {
       var results = flattenComponentForDescription(desc.components.children[ii]);
       for (var jj in results) {
@@ -4201,7 +4515,7 @@ function generateTranscript(captions, descriptions) {
   };
 
   var addCaption = function(div, cap) {
-    var capSpan = $('<span class="ump-transcript-seekpoint ump-transcript-caption"></span>');
+    var capSpan = $('<span class="able-transcript-seekpoint able-transcript-caption"></span>');
 
     var flattenComponentForCaption = function(comp) {
       var result = [];
@@ -4220,12 +4534,12 @@ function generateTranscript(captions, descriptions) {
 
         if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
           result = result.concat(flattenString(str.substring(0, openBracket)));
-          result.push($('<span class="ump-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
+          result.push($('<div></div><span class="able-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
           result = result.concat(flattenString(str.substring(closeBracket + 1)));
         }
         else if (hasParens) {
           result = result.concat(flattenString(str.substring(0, openParen)));
-          result.push($('<span class="ump-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
+          result.push($('<div></div><span class="able-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
           result = result.concat(flattenString(str.substring(closeParen + 1)));
         }
         else {
@@ -4238,7 +4552,7 @@ function generateTranscript(captions, descriptions) {
         result = result.concat(flattenString(comp.value));
       }
       else if (comp.type === 'v') {
-        var vSpan = $('<span class="ump-unspoken">[' + comp.value + ']</span>');
+        var vSpan = $('<div></div><span class="able-unspoken">[' + comp.value + ']</span>');
         result.push(vSpan);
         for (var ii in comp.children) {
           var subResults = flattenComponentForCaption(comp.children[ii]);
@@ -4297,9 +4611,11 @@ function generateTranscript(captions, descriptions) {
 var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 // Based on the incredible accessible modal dialog.
-function AccessibleDialog(modalDiv, title, description, width) {
+function AccessibleDialog(modalDiv, title, description, width, fullscreen, escapeHook) {
   this.title = title;
   this.description = description;
+  this.escapeHook = escapeHook;
+  this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
   
   var thisObj = this;
   var modal = modalDiv;
@@ -4312,28 +4628,42 @@ function AccessibleDialog(modalDiv, title, description, width) {
     position: 'fixed',
     left: 0,
     right: 0,
-    top: '25%',
+    top: (fullscreen ? '0' : '25%'),
     display: 'none'
   });
   modal.addClass('modalDialog');
 
-  var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
-  closeButton.css({
-    float: 'right',
-    position: 'absolute',
-    top: '10px',
-    left: '95%'
-  });
-  closeButton.keydown(function (event) {
-    // Space key down
-    if (event.which === 32) {
+  if (!fullscreen) {
+    var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
+    closeButton.css({
+      float: 'right',
+      position: 'absolute',
+      top: '10px',
+      left: '95%'
+    });
+    closeButton.keydown(function (event) {
+      // Space key down
+      if (event.which === 32) {
+        thisObj.hide();
+      }
+    }).click(function () {
       thisObj.hide();
-    }
-  }).click(function () {
-    thisObj.hide();
-  });
+    });
 
-  var descriptionDiv = $('<div id="modalDescription"></div>');
+    var titleH1 = $('<h1></h1>');
+    titleH1.attr('id', 'modalTitle-' + this.baseId);
+    titleH1.css('text-align', 'center');
+    titleH1.text(title);
+    
+    modal.attr('aria-labelledby', 'modalTitle-' + this.baseId);
+
+    modal.prepend(titleH1);
+    modal.prepend(closeButton);
+  }
+
+
+  var descriptionDiv = $('<div></div>');
+  descriptionDiv.attr('id', 'modalDescription-' + this.baseId);
   descriptionDiv.text(description);
   // Move off-screen.
   descriptionDiv.css({
@@ -4344,24 +4674,23 @@ function AccessibleDialog(modalDiv, title, description, width) {
     top: 'auto'
   });
 
-  var titleH1 = $('<h1 id="modalTitle"></h1>');
-  titleH1.css('text-align', 'center');
-  titleH1.text(title);
 
-  modal.prepend(closeButton);
-  modal.prepend(titleH1);
   modal.prepend(descriptionDiv);
 
   modal.attr('aria-hidden', 'true');
-  modal.attr('aria-labelledby', 'modalTitle');
-  modal.attr('aria-describedby', 'modalDescription');
+  modal.attr('aria-describedby', 'modalDescription-' + this.baseId);
   modal.attr('role', 'dialog');
 
   modal.keydown(function (event) {
     // Escape
     if (event.which === 27) {
-      thisObj.hide();
-      event.preventDefault();
+      if (thisObj.escapeHook) {
+        thisObj.escapeHook(event, this);
+      }
+      else {
+        thisObj.hide();
+        event.preventDefault();
+      }
     }
     // Tab
     else if (event.which === 9) {
@@ -4501,12 +4830,13 @@ function AccessibleSeekBar(div, width) {
   this.bodyDiv.append(this.seekHead);
 
   this.bodyDiv.wrap('<div></div>');
-  var wrapperDiv = this.bodyDiv.parent();
+  this.wrapperDiv = this.bodyDiv.parent();
 
   var radius = '5px';
-  wrapperDiv.width(width);
-  wrapperDiv.css({
-    'display': 'inline-block'
+  this.wrapperDiv.width(width);
+  this.wrapperDiv.css({
+    'display': 'inline-block',
+    'vertical-align': 'middle'
   });
 
   this.bodyDiv.css({
@@ -4518,7 +4848,6 @@ function AccessibleSeekBar(div, width) {
     '-moz-border-radius': radius,
     '-o-border-radius': radius,
     'background-color': '#666666',
-    'top': '6px',
     'margin': '0 20px'
   });
 
@@ -4692,6 +5021,11 @@ AccessibleSeekBar.prototype.setDuration = function (duration) {
   }
 };
 
+AccessibleSeekBar.prototype.setWidth = function (width) {
+  this.wrapperDiv.width(width);
+  this.resetHeadLocation();
+};
+
 // Stops tracking, sets the head location to the current position.
 AccessibleSeekBar.prototype.resetHeadLocation = function () {
   var ratio = this.position / this.duration;
@@ -4707,6 +5041,7 @@ AccessibleSeekBar.prototype.setPosition = function (position) {
   this.position = position;
   this.resetHeadLocation();
   this.refreshTooltip();
+  this.updateAriaValues(position);
 }
 
 AccessibleSeekBar.prototype.startTracking = function (device, position) {
@@ -4741,24 +5076,40 @@ AccessibleSeekBar.prototype.trackHeadAtPosition = function (position) {
 
 AccessibleSeekBar.prototype.reportTrackAtPosition = function (position) {
   this.bodyDiv.trigger('tracking', [position]);
+  this.updateAriaValues(position);
+}
 
+AccessibleSeekBar.prototype.updateAriaValues = function (position) {
   // TODO: Localize, move to another function.
-  var pMinutes = Math.floor(position / 60);
+  var pHours = Math.floor(position / 3600);
+  var pMinutes = Math.floor((position % 3600) / 60);
   var pSeconds = Math.floor(position % 60);
-  var dMinutes = Math.floor(this.duration / 60);
-  var dSeconds = Math.floor(this.duration % 60);
 
+  var pHourWord = pHours === 1 ? 'hour' : 'hours';
   var pMinuteWord = pMinutes === 1 ? 'minute' : 'minutes';
   var pSecondWord = pSeconds === 1 ? 'second' : 'seconds';
 
-  var descriptionText = pMinutes +
-    ' ' + pMinuteWord +
-    ', ' + pSeconds +
-    ' ' + pSecondWord;
+  var descriptionText;
+  if (pHours > 0) {
+    descriptionText = pHours +
+      ' ' + pHourword +
+      ', ' + pMinutes +
+      ' ' + pMinuteWord +
+      ', ' + pSeconds +
+      ' ' + pSecondWord;
+  }
+  else if (pMinutes > 0) {
+    descriptionText  = pMinutes +
+      ' ' + pMinuteWord +
+      ', ' + pSeconds +
+      ' ' + pSecondWord;
+  }
+  else {
+    descriptionText = pSeconds + ' ' + pSecondWord;
+  }
 
-  this.seekHead.attr('title', descriptionText);
   this.seekHead.attr('aria-value-text', descriptionText);
-  this.seekHead.attr('aria-valuenow', position);
+  this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
 }
 
 AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {
@@ -4776,19 +5127,19 @@ AccessibleSeekBar.prototype.refreshTooltip = function () {
       this.timeTooltip.text(this.positionToStr(this.position));
     }
     this.timeTooltip.show();
-    this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2), 0);
+    this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
   }
   else if (this.overBody && this.overBodyMousePos) {
     this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
     this.timeTooltip.show();
-    this.setTooltipPosition(this.overBodyMousePos.x - this.bodyDiv.offset().left, this.overBodyMousePos.y - this.bodyDiv.offset().top);
+    this.setTooltipPosition(this.overBodyMousePos.x - this.bodyDiv.offset().left);
   }
   else {
     this.timeTooltip.hide();
   }
 };
 
-AccessibleSeekBar.prototype.setTooltipPosition = function (x, y) {
+AccessibleSeekBar.prototype.setTooltipPosition = function (x) {
   this.timeTooltip.css({
     width: this.timeTooltip.width(),
     height: this.timeTooltip.height(),
