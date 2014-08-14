@@ -1362,7 +1362,6 @@ AblePlayer.prototype.resizePlayer = function (width, height) {
   this.$media.height(height);
   this.$media.width(width);
   this.$captionDiv.width(width);
-
   this.$descDiv.width(width);
   if (this.$vidcapContainer) {
     this.$vidcapContainer.height(height);
@@ -1386,7 +1385,6 @@ AblePlayer.prototype.resizePlayer = function (width, height) {
   else {
     this.$captionDiv.css('font-size', '');
   }
-
 };
 
 AblePlayer.prototype.addEventListeners = function() { 
