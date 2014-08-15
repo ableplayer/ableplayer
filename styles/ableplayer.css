@@ -285,6 +285,7 @@ div.able-now-playing span span {
 .icon-captions:before {
 	content: "\e609";
 }
+
 .icon-fullscreen:before {
 	content: "\e612";
 }
@@ -330,7 +331,9 @@ div.able-now-playing span span {
 .icon-volumeDown:before {
 	content: "\e613";
 }
-
+.icon-chapters:before {
+    content: "\e614";
+}
 /* Misc */
 
 .able-clipped { 

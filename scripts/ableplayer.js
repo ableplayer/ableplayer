@@ -643,8 +643,9 @@ AblePlayer.prototype.initTracks = function() {
       }
       else if (kind === 'chapters') { 
         // not yet supported, but data from source file is available in this array 
+        this.hasChapters = true;
         this.chapters = []; 
-        this.currentChapter = -1; 
+        this.setupTimedText('chapters', track);
         // NOTE: WebVTT supports nested timestamps (to form an outline) 
         // setupTimedText() cannot currently handle this 
       }
@@ -851,6 +852,7 @@ AblePlayer.prototype.setButtons = function() {
   this.volumeUpButtonImg = '../images/media-volumeUp-' +  this.iconColor + '.png';
   this.volumeDownButtonImg = '../images/media-volumeDown-' +  this.iconColor + '.png';
   this.ccButtonImg = '../images/media-captions-' +  this.iconColor + '.png';
+  this.chaptersButtonImg = '../images/media-chapters-' + this.iconColor + '.png';
   this.transcriptButtonImg = '../images/media-transcript-' +  this.iconColor + '.png';
   this.descriptionButtonImg = '../images/media-descriptions-' +  this.iconColor + '.png';
   this.signButtonImg = '../images/media-sign-' +  this.iconColor + '.png';
@@ -1462,6 +1464,9 @@ AblePlayer.prototype.addEventListeners = function() {
     else if (whichButton === 'captions') { 
       thisObj.handleCaptionToggle();
     }
+    else if (whichButton === 'chapters') {
+      thisObj.handleChapters();
+    }
     else if (whichButton === 'descriptions') { 
       thisObj.handleDescriptionToggle();
     }
@@ -1900,6 +1905,9 @@ AblePlayer.prototype.addControls = function() {
     if (this.hasCaptions) {
       controlLayout['bl'].push('captions'); //closed captions
     }
+    if (this.hasChapters) {
+      controlLayout['bl'].push('chapters');
+    }
     if (this.hasOpenDesc || this.hasClosedDesc) { 
       controlLayout['bl'].push('descriptions'); //audio description 
     }
@@ -2049,6 +2057,9 @@ AblePlayer.prototype.addControls = function() {
         }
         else if (control === 'fullscreen') {
           this.$fullscreenButton = newButton;
+        }
+        else if (control === 'chapters') {
+          this.$chaptersButton = newButton;
         }
       }
     }
@@ -2641,6 +2652,56 @@ AblePlayer.prototype.handleCaptionToggle = function() {
     this.$ccButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.captions);          
   }
 };
+AblePlayer.prototype.handleChapters = function () {
+  var thisObj = this;
+  if (!this.chaptersTooltip) {
+    // Create first time around.
+    this.chaptersTooltip = $('<div>');
+    this.chaptersTooltip.attr('role', 'tooltip');
+    this.chaptersTooltip.css({
+      position: 'absolute',
+      padding: '10px',
+      'border-color': 'black',
+      'border-width': '1px',
+      'background-color': '#CCCCCC',
+      '-webkit-border-radius': '5px',
+      '-moz-border-radius': '5px',
+      'border-radius': '5px',
+      display: 'none',
+      'z-index': '2000'
+    });
+    $('body').append(this.chaptersTooltip);
+
+    for (var ii in this.chapters) {
+      var chapterButton = $('<button>');
+      chapterButton.html(this.flattenCueForCaption(this.chapters[ii]) + ' - ' + this.formatSecondsAsColonTime(this.chapters[ii].start));
+      chapterButton.attr('tabindex', 0);
+      var getClickFunction = function (time) {
+        return function () {
+          thisObj.seekTo(time);
+          thisObj.chaptersTooltip.hide();
+          thisObj.$chaptersButton.focus();
+        }
+      }
+      chapterButton.click(getClickFunction(this.chapters[ii].start));
+      
+      this.chaptersTooltip.append(chapterButton);
+      this.chaptersTooltip.append('<br>');
+    }
+  }
+
+  if (this.chaptersTooltip.is(':visible')) {
+    this.chaptersTooltip.hide();
+    thisObj.$chaptersButton.focus();
+  }
+  else {
+    this.chaptersTooltip.show();
+    this.chaptersTooltip.css('top', this.$chaptersButton.offset().top - this.chaptersTooltip.outerHeight());
+    this.chaptersTooltip.css('left', this.$chaptersButton.offset().left)
+    // Focus the first chapter.
+    this.chaptersTooltip.children().first().focus();
+  }
+};
 AblePlayer.prototype.handleDescriptionToggle = function() { 
   var useDescType; 
   
@@ -3055,6 +3116,18 @@ AblePlayer.prototype.playMedia = function () {
   this.startedPlaying = true;
 };
 
+// Takes seconds and converts to string of form mm:ss
+AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
+  var dMinutes = Math.floor(seconds / 60);
+  var dSeconds = Math.floor(seconds % 60);
+  if (dSeconds < 10) { 
+    dSeconds = '0' + dSeconds;
+  }
+
+  return dMinutes + ':' + dSeconds;
+};
+
+
 // Right now, update the seekBar values based on current duration and time.
 // Later, move all non-destructive control updates based on state into this function?
 AblePlayer.prototype.refreshControls = function() {
@@ -3069,13 +3142,6 @@ AblePlayer.prototype.refreshControls = function() {
     }
   }
 
-  // Update time display.
-  var dMinutes = Math.floor(duration / 60);
-  var dSeconds = Math.floor(duration % 60);
-  if (dSeconds < 10) { 
-    dSeconds = '0' + dSeconds;
-  }
-
   var displayElapsed;
   // When seeking, display the seek bar time instead of the actual elapsed time.
   if (this.seekBar.tracking) {
@@ -3085,14 +3151,8 @@ AblePlayer.prototype.refreshControls = function() {
     displayElapsed = elapsed;
   }
 
-  var eMinutes = Math.floor(displayElapsed / 60);
-  var eSeconds = Math.floor(displayElapsed % 60);
-  if (eSeconds < 10) {
-    eSeconds = '0' + eSeconds;
-  }
-
-  this.$durationContainer.text(' / ' + dMinutes + ':' + dSeconds);
-  this.$elapsedTimeContainer.text(eMinutes + ':' + eSeconds);
+  this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(duration));
+  this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 
   // TODO: Re-add status lines for various loading states?
   var textByState = {
@@ -3898,12 +3958,18 @@ function peekLine(state) {
 function parseFileBody(state) {
   actList(state, [
     eatOptionalBOM,
-    eatSignature,
-    eatSingleSpaceOrTab,
-    eatUntilEOLInclusive,
-    parseMetadataHeaders,
-    eatAtLeast1EmptyLines,
-    parseCuesAndComments]);
+    eatSignature]);
+  var c = state.text[0];
+  if (c === ' ' || c === '\t' || c === '\n') {
+    actList(state, [
+      eatUntilEOLInclusive,
+      parseMetadataHeaders,
+      eatAtLeast1EmptyLines,
+      parseCuesAndComments]);
+  }
+  else {
+    state.error = "WEBVTT signature not followed by whitespace.";
+  }
 }
 
 // Parses all metadata headers until a cue is discovered.
@@ -4029,6 +4095,13 @@ function getCuePayload(state) {
       break;
     }
 
+    // Have to separately detect double-lines ending cue due to our non-standard parsing.
+    // TODO: Redo outer algorithm to conform to W3 spec?
+    if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
+      cut(state, 2);
+      break;
+    }
+
     var token = getCueToken(state);
     // We'll use the tokens themselves as objects where possible.
     if (token.type === 'string') {
@@ -4114,7 +4187,6 @@ function getCueToken(state) {
     var c;
     // Double newlines indicate end of token.
     if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
-      cut(state, 2);
       c = '\u0004';
     }
     else if (state.text.length > 0) {
