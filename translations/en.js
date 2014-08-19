@@ -92,6 +92,8 @@
 
 "prefCtrlKey": "Control key",
 
+"prefShiftKey": "Shift key",
+
 "prefCaptions": "Closed captions on by default",
 
 "prefDesc": "Description on by default",

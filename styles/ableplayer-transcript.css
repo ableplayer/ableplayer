@@ -1,57 +1,57 @@
 /* 
-	Universal Media Player (UMP) interactive transcript styles
-	http://terrillthompson.com/ump
+	Able Player interactive transcript styles
+	http://terrillthompson.com/ableplayer
 */
-.ump-transcript { 
+.able-transcript { 
 	position: relative; /* must be positioned for scrolling */
         overflow-y: scroll;
         padding-left: 20px;
         padding-right: 20px;
         height: 400px;
 }
-.ump-transcript div { 
+.able-transcript div { 
 	margin: 1em 0;
 }
-.ump-transcript div.ump-desc { 
+.able-transcript div.able-desc { 
 	background-color: #FEE;
 	border: thin solid #336;
 	font-style: italic;
 	padding: 1em;
 }
-.ump-transcript span.ump-unspoken { 
+.able-transcript span.able-unspoken { 
 	font-weight: bold;
 }
-.ump-transcript span.hidden { 
+.able-transcript span.hidden { 
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
 }
-.ump-highlight { 
+.able-highlight { 
 	background: #FF6; /* light yellow */
 }
-.ump-previous { 
+.able-previous { 
 	background: black !important;
 	font-style: italic;
 }
-.ump-transcript span:hover, 
-.ump-transcript span:focus, 
-.ump-transcript span:active { 
+.able-transcript span:hover, 
+.able-transcript span:focus, 
+.able-transcript span:active { 
 	background: #CF6; /* light green */
 	cursor: pointer;
 }
 
-.ump-transcript-toolbar {
+.able-transcript-toolbar {
     padding: 10px;
     background-color: #DDDDDD;
     border-style: solid;
     border-width: 0 0 1px 0;
 }
 
-.ump-transcript-toolbar label {
+.able-transcript-toolbar label {
     margin-right: 10px;
 }
 
-.ump-transcript-area {
+.able-transcript-area {
     margin-left: 10px;
     border-width: 1px;
     border-style: solid;
