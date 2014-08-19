@@ -3,18 +3,15 @@
 */
 .able { 
 	margin: 1em 0;
-	min-width: 480px; 
-	width: 480px; /* will be changed dynamically as player is contructed */
+	width: 100%; /* will be changed dynamically as player is contructed */
 }
 
 .able-column-left {
     float: left;
-    width: 50%;
 }
 
 .able-column-right {
-    float: right;
-    width: 50%;
+    float: left;
 }
 
 .able .able-vidcap-container {
@@ -370,4 +367,19 @@ div.able-now-playing span span {
     width: 100%;
     top: 0;
     background: none;
+}
+
+
+/* Tooltips */
+.able-tooltip {
+    position: absolute;
+    padding: 10px;
+    border-color: black;
+    border-width: 1px;
+    background-color: #CCCCCC;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: none;
+    z-index: 2000;
 }
