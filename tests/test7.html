@@ -23,43 +23,20 @@
 
 <body>
 
-<h1>Able Player Test #7:<br/>Video player with interactive transcript</h1>
+<h1>Able Player Test #7:<br/>Video player with interactive transcript, subtitles, and chapters</h1>
 
 <p>For additional test see the <a href="index.html">Index of <em>Able Player</em> Tests</a>.</p>
 
 <!-- use the following markup for each media element -->
-<video id="video1" class="ump-media" preload="auto" width="480" height="360" poster="http://www.terrillthompson.com/tests/video/wwa.jpg" data-able-player>
-  <source type="video/webm" src="../media/wwa.webm" data-desc-src="http://www.terrillthompson.com/tests/video/wwa_described.webm"/>
-	<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="http://www.terrillthompson.com/tests/video/wwa_described.mp4"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-        <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
-	<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-        <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-        <track kind="chapters" src="../media/wwa_chapters_en.vtt"/>
+<video id="video1" class="ump-media" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
+  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+  <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+  <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+  <track kind="chapters" src="../media/wwa_chapters_en.vtt"/>
 </video>
-
-
-<!-- The following structure will be created via ableplayer.js : 
-<div class="ump">		
-	<div class="ump-vidcap-container">
-		<div class="ump-media-container">
-			<video id="video1" class="ump-media" preload="auto" width="480" height="360" poster="http://www.terrillthompson.com/tests/video/wwa.jpg">
-				<source type="video/webm" src="media/wwa.webm" data-desc-src="http://www.terrillthompson.com/tests/video/wwa_described.webm"/>
-				<source type="video/mp4" src="media/wwa_test3.mp4" data-desc-src="http://www.terrillthompson.com/tests/video/wwa_described.mp4"/>
-				<track kind="captions" src="media/wwa_captions_en.vtt"/>
-				<track kind="descriptions" src="media/wwa_description_en.vtt"/>
-			</video>
-		</div>
-	</div>
-	<div class="ump-player" role="region" aria-label="Video player">
-		<div class="ump-controller"></div>
-		<div class="ump-status-bar">
-			<span class="ump-timer"></span>
-			<span class="ump-status" aria-live="polite" aria-relevant="text"></span>
-		</div>
-	</div>	
-</div>
--->
 
 <!-- the following div is used for displaying errors and other messages--> 
 <div id="ump-alert" role="alert"></div>
