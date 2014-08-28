@@ -240,7 +240,8 @@ AblePlayer.prototype.setup = function() {
           this.getPrefs();
           this.injectPlayerCode();          
           if (this.iconType === 'image') {
-            this.setButtons();
+            this.icons=[]; 
+            this.setIcons();
           }
           this.setupAlert();
           this.initPlaylist();
@@ -868,26 +869,34 @@ AblePlayer.prototype.getDimensions = function() {
     }
   }
 };
-AblePlayer.prototype.setButtons = function() { 
+AblePlayer.prototype.setIcons = function() { 
 
-  this.playButtonImg = '../images/media-play-' +  this.iconColor + '.png';
-  this.pauseButtonImg = '../images/media-pause-' +  this.iconColor + '.png';
-  this.rewindButtonImg = '../images/media-rewind-' +  this.iconColor + '.png';
-  this.forwardButtonImg = '../images/media-forward-' +  this.iconColor + '.png';
-  this.slowerButtonImg = '../images/media-slower-' +  this.iconColor + '.png';
-  this.fasterButtonImg = '../images/media-faster-' +  this.iconColor + '.png';
-  this.muteButtonImg = '../images/media-mute-' +  this.iconColor + '.png';
-  this.volumeButtonImg = '../images/media-volume-' +  this.iconColor + '.png';
-  this.volumeUpButtonImg = '../images/media-volumeUp-' +  this.iconColor + '.png';
-  this.volumeDownButtonImg = '../images/media-volumeDown-' +  this.iconColor + '.png';
-  this.ccButtonImg = '../images/media-captions-' +  this.iconColor + '.png';
-  this.chaptersButtonImg = '../images/media-chapters-' + this.iconColor + '.png';
-  this.transcriptButtonImg = '../images/media-transcript-' +  this.iconColor + '.png';
-  this.descriptionButtonImg = '../images/media-descriptions-' +  this.iconColor + '.png';
-  this.signButtonImg = '../images/media-sign-' +  this.iconColor + '.png';
-  this.fullscreenButtonImg = '../images/media-fullscreen-' +  this.iconColor + '.png';
-  this.prefsButtonImg = '../images/media-prefs-' +  this.iconColor + '.png';
-  this.helpButtonImg = '../images/media-help-' +  this.iconColor + '.png';
+  // create an array of image file paths  
+  var iconDir = '../images/' + this.iconColor + '/';
+  this.icons['play'] = iconDir + 'play.png';
+  this.icons['pause'] = iconDir + 'pause.png';
+  this.icons['stop'] = iconDir + 'stop.png';
+  this.icons['rewind'] = iconDir + 'rewind.png';
+  this.icons['forward'] = iconDir + 'forward.png';
+  this.icons['slower'] = iconDir + 'slower.png';
+  this.icons['faster'] = iconDir + 'faster.png';
+  this.icons['mute'] = iconDir + 'volume-mute.png';
+  this.icons['volumeLoud'] = iconDir + 'volume-loud.png'; // default volume button
+  this.icons['volumeMedium'] = iconDir + 'volume-medium.png'; // not yet supported
+  this.icons['volumeSoft'] = iconDir + 'volume-soft.png'; // not yet supported  
+  this.icons['volumeUp'] = iconDir + 'volume-up.png';
+  this.icons['volumeDown'] = iconDir + 'volume-down.png';
+  this.icons['captions'] = iconDir + 'captions.png';
+  this.icons['chapters'] = iconDir + 'chapters.png';
+  this.icons['transcript'] = iconDir + 'transcript.png';
+  this.icons['descriptions'] = iconDir + 'descriptions.png';
+  this.icons['sign'] = iconDir + 'sign.png'; 
+  this.icons['fullscreen'] = iconDir + 'fullscreen-expand.png';
+  this.icons['fullscreenCollapse'] = iconDir + 'fullscreen-collapse.png';
+  this.icons['preferences'] = iconDir + 'preferences.png';
+  this.icons['help'] = iconDir + 'help.png';
+  this.icons['close'] = iconDir + 'close.png';
+  this.icons['pipe'] = iconDir + 'pipe.png';
 };
 AblePlayer.prototype.initDescription = function() { 
   // set default mode for delivering description (open vs closed) 
@@ -1386,11 +1395,11 @@ AblePlayer.prototype.updateTranscript = function() {
       }
       // change play button to pause button
       thisObj.$playpauseButton.attr('title',thisObj.tt.pause); 
-      if (thisObj.controllerFont === 'icomoon') {
+      if (thisObj.controllerFont === 'able') {
         thisObj.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
       }
       else { 
-        thisObj.$playpauseButton.find('img').attr('src',thisObj.pauseButtonImg); 
+        thisObj.$playpauseButton.find('img').attr('src',thisObj.icons['pause']); 
       }
       
       // A hack for now: this keeps clicks on seekpoints from unlocking the scrollbar.
@@ -1985,6 +1994,7 @@ AblePlayer.prototype.addControls = function() {
     }
     for (j=0; j<controls.length; j++) { 
       control = controls[j];
+console.log('adding control ' + control);      
       if (control === 'seek') { 
         var sliderDiv = $('<div class="able-seekbar"></div>');
         controllerSpan.append(sliderDiv);
@@ -2008,7 +2018,6 @@ AblePlayer.prototype.addControls = function() {
       else {
         widthUsed += buttonWidth;
         // this control is a button 
-        buttonImgSrc = '../images/media-' + control + '-' + this.iconColor + '.png';
         buttonTitle = this.getButtonTitle(control); 
         newButton = $('<button>',{ 
           'type': 'button',
@@ -2018,17 +2027,7 @@ AblePlayer.prototype.addControls = function() {
         });        
         if (this.iconType === 'font') { 
           // add span for icon fonts 
-          if (control === 'mute') { 
-            if (this.volume > 0) { 
-              iconClass = 'icon-volume';
-            }
-            else { 
-              iconClass = 'icon-mute';
-            }
-          }
-          else { 
-            iconClass = 'icon-' + control;
-          }
+          iconClass = this.getIconClass(control);
           buttonIcon = $('<span>',{ 
             'class': iconClass,
             'aria-hidden': 'true'
@@ -2046,7 +2045,7 @@ AblePlayer.prototype.addControls = function() {
         else { 
           // use images
           buttonImg = $('<img>',{ 
-            'src': buttonImgSrc,
+            'src': this.icons[control],
             'alt': '',
             'role': 'presentation'
           });
@@ -2186,7 +2185,7 @@ AblePlayer.prototype.addControls = function() {
 
 AblePlayer.prototype.getIconType = function() { 
   // returns either "font" or "image" 
-  // create a temporary play span and check to see if button has font-family == "icomoon" (the default) 
+  // create a temporary play span and check to see if button has font-family == "able" (the default) 
   // if it doesn't, user has a custom style sheet and icon fonts will not display properly 
   // use images as fallback 
 
@@ -2211,7 +2210,7 @@ AblePlayer.prototype.getIconType = function() {
       this.controllerFont = window.getComputedStyle($tempButton.get(0), null).getPropertyValue('font-family');
       if (this.controllerFont) {
         this.controllerFont = this.controllerFont.replace(/["']/g, ''); // strip out single or double quotes 
-        if (this.controllerFont === 'icomoon') { 
+        if (this.controllerFont === 'able') { 
           this.iconType = 'font';
         }
         else { 
@@ -2226,7 +2225,7 @@ AblePlayer.prototype.getIconType = function() {
       // There is no known way to detect computed font in IE8 and earlier  
       // The following retrieves the value from the style sheet, not the computed font 
       // this.controllerFont = $tempButton.get(0).currentStyle.fontFamily;
-      // It will therefore return "icomoon", even if the user is overriding that with a custom style sheet 
+      // It will therefore return "able", even if the user is overriding that with a custom style sheet 
       // To be safe, use images   
       this.iconType = 'image';
     }
@@ -2238,6 +2237,41 @@ AblePlayer.prototype.getIconType = function() {
     }
   }
   $tempButton.remove();
+};
+
+AblePlayer.prototype.getIconClass = function(control) { 
+
+  // return CSS class that's used for displaying icon font 
+  // generally classes are named to match control, but there are a few exceptions  
+  switch (control) { 
+    case 'mute':  
+      if (this.volume > 0) { 
+        return 'icon-volume-loud';
+      }
+      else { 
+        return 'icon-volume-mute';
+      }
+      break; 
+    
+    case 'volumeUp': 
+      return 'icon-volume-up';
+      break; 
+      
+    case 'volumeDown': 
+      return 'icon-volume-down';
+      break; 
+
+    case 'fullscreen': 
+      return 'icon-fullscreen-expand';
+      break; 
+      
+    case 'fullscreenCollapse': 
+      return 'icon-fullscreen-collapse';
+      break; 
+    
+    default: 
+      return 'icon-' + control;
+  }
 };
 AblePlayer.prototype.getBestColor = function($element) { 
   // TODO: Icon color is currently always white when not using images.
@@ -2302,51 +2336,6 @@ AblePlayer.prototype.getBestColor = function($element) {
     // unable to determine background color. Internet stats favor black... 
     this.iconColor = 'black';
   }
-};
-AblePlayer.prototype.getIconHexValue =  function(control) { 
-  // returns hex value of character in icomoon font
-  // may not actually be needde
-  switch (control) { 
-    case 'play': 
-      return '&#xe600';
-    case 'pause': 
-      return '&#xe601';
-    case 'stop': 
-      return '&#xe602';
-    case 'rewind': 
-      return '&#xe603';
-    case 'forward': 
-      return '&#xe604';
-    case 'toStart': 
-      return '&#xe605';
-    case 'toEnd': 
-      return '&#xe606';
-    case 'previous': 
-      return '&#xe607';
-    case 'next': 
-      return '&#xe608';
-    case 'captions': 
-      return '&#xe609';
-    case 'sign': 
-      return '&#xe60a';
-    case 'descriptions': 
-      return '&#xe60b';
-    case 'volume': 
-      return '&#xe60c';
-    case 'mute': 
-      return '&#xe60d';
-    case 'volumeUp': 
-      return '&#xe60e';
-    case 'volumeDown': 
-      return '&#xe60f';
-    case 'preferences': 
-      return '&#xe610';
-    case 'help': 
-      return '&#xe611';
-    case 'fullscreen': 
-      return '&#xe612';
-  }   
-  return false;
 };
 AblePlayer.prototype.isUserAgent = function(which) {
 
@@ -2513,11 +2502,11 @@ AblePlayer.prototype.handleMute = function() {
       this.media.muted = false; 
       // change button
       this.$muteButton.attr('title',this.tt.mute); 
-      if (this.controllerFont === 'icomoon') {
+      if (this.controllerFont === 'able') {
         this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
       }
       else { 
-        this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+        this.$muteButton.find('img').attr('src',this.icons['volumeLoud']); 
       }
       // restore volume to its previous setting
       this.media.volume = this.volume;
@@ -2526,11 +2515,11 @@ AblePlayer.prototype.handleMute = function() {
       this.media.muted = true; 
       // change mute button
       this.$muteButton.attr('title',this.tt.unmute); 
-      if (this.controllerFont === 'icomoon') {
+      if (this.controllerFont === 'able') {
         this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
       }
       else { 
-        this.$muteButton.find('img').attr('src',this.muteButtonImg); 
+        this.$muteButton.find('img').attr('src',this.icons['volumeMute']); 
       }
     }
   }
@@ -2540,11 +2529,11 @@ AblePlayer.prototype.handleMute = function() {
       jwplayer(this.jwId).setMute(false); 
       // change button
       this.$muteButton.attr('title',this.tt.mute); 
-      if (this.controllerFont === 'icomoon') {
+      if (this.controllerFont === 'able') {
         this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
       }
       else { 
-        this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+        this.$muteButton.find('img').attr('src',this.icons['volumeLoud']); 
       }
       // restore volume to its previous setting
       jwplayer(this.jwId).setVolume(this.volume);
@@ -2553,11 +2542,11 @@ AblePlayer.prototype.handleMute = function() {
       jwplayer(this.jwId).setMute(true); 
       // change mute button
       this.$muteButton.attr('title',this.tt.unmute); 
-      if (this.controllerFont === 'icomoon') {
+      if (this.controllerFont === 'able') {
         this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
       }
       else { 
-        this.$muteButton.find('img').attr('src',this.muteButtonImg); 
+        this.$muteButton.find('img').attr('src',this.icons['volumeMute']); 
       }
     }
   } 
@@ -2572,11 +2561,11 @@ AblePlayer.prototype.handleVolume = function(direction) {
         this.media.muted = false; 
         // change button
         this.$muteButton.attr('title',this.tt.mute); 
-        if (this.controllerFont === 'icomoon') {
+        if (this.controllerFont === 'able') {
           this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
         }
         else { 
-          this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+          this.$muteButton.find('img').attr('src',this.icons['volumeLoud']); 
         }
       }
       if (this.volume < 0.9) {        
@@ -2596,11 +2585,11 @@ AblePlayer.prototype.handleVolume = function(direction) {
         this.media.muted = true;
         // change button
         this.$muteButton.attr('title',this.tt.unmute); 
-        if (this.controllerFont === 'icomoon') {
+        if (this.controllerFont === 'able') {
           this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
         }
         else { 
-          this.$muteButton.find('img').attr('src',this.muteButtonImg); 
+          this.$muteButton.find('img').attr('src',this.icons['volumeMute']); 
         }
       }
     }
@@ -2618,11 +2607,11 @@ AblePlayer.prototype.handleVolume = function(direction) {
         jwplayer(this.jwId).setMute(false); 
         // change button
         this.$muteButton.attr('title',this.tt.mute); 
-        if (this.controllerFont === 'icomoon') {
+        if (this.controllerFont === 'able') {
           this.$muteButton.find('span').removeClass('icon-mute').addClass('icon-volume'); 
         }
         else { 
-          this.$muteButton.find('img').attr('src',this.volumeButtonImg); 
+          this.$muteButton.find('img').attr('src',this.icons['volumeLoud']); 
         }
       }
       if (this.volume < 90) {       
@@ -2641,11 +2630,11 @@ AblePlayer.prototype.handleVolume = function(direction) {
         jwplayer(this.jwId).setMute(true); 
         // change button
         this.$muteButton.attr('title',this.tt.unmute); 
-        if (this.controllerFont === 'icomoon') {
+        if (this.controllerFont === 'able') {
           this.$muteButton.find('span').removeClass('icon-volume').addClass('icon-mute'); 
         }
         else { 
-          this.$muteButton.find('img').attr('src',this.muteButtonImg); 
+          this.$muteButton.find('img').attr('src',this.icons['volumeMute']); 
         }
       }     
     }
@@ -3250,21 +3239,21 @@ AblePlayer.prototype.refreshControls = function() {
 
       this.$playpauseButton.attr('title',this.tt.play); 
       
-      if (this.controllerFont === 'icomoon') {
+      if (this.controllerFont === 'able') {
         this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play'); 
       }
       else { 
-        this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+        this.$playpauseButton.find('img').attr('src',this.icons['play']); 
       }
     }
     else {
       this.$playpauseButton.attr('title',this.tt.pause); 
       
-      if (this.controllerFont === 'icomoon') {
+      if (this.controllerFont === 'able') {
         this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause'); 
       }
       else { 
-        this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+        this.$playpauseButton.find('img').attr('src',this.icons['pause']); 
       }
     }
   }
