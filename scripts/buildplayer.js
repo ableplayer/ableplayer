@@ -1,0 +1,922 @@
+(function () {
+  AblePlayer.prototype.injectPlayerCode = function() { 
+    // create and inject surrounding HTML structure 
+    // If IOS: 
+    //  If video: 
+    //   IOS does not support any of the player's functionality 
+    //   - everything plays in its own player 
+    //   Therefore, AblePlayer is not loaded & all functionality is disabled 
+    //   (this all determined. If this is IOS && video, this function is never called) 
+    //  If audio: 
+    //   HTML cannot be injected as a *parent* of the <audio> element 
+    //   It is therefore injected *after* the <audio> element 
+    //   This is only a problem in IOS 6 and earlier, 
+    //   & is a known bug, fixed in IOS 7      
+    
+    var thisObj = this;
+
+    // create $mediaContainer and $ableDiv and wrap them around the media element
+    this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
+    this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    this.$ableDiv.width(this.playerWidth);
+
+    this.injectOffscreenTitle();
+    this.injectBigPlayButton();
+
+    // add container that captions or description will be appended to
+    // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
+    var vidcapContainer = $('<div>',{ 
+      'class' : 'able-vidcap-container'
+    });
+
+    if (this.mediaType === 'video') { 
+      this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
+    }
+
+        
+    this.injectPlayerControlArea();
+    this.injectTextDescriptionArea();
+    
+    if (this.includeTranscript) {
+      this.injectTranscriptArea();
+      this.addTranscriptAreaEvents();
+    }    
+
+    this.injectAlert();
+    this.injectPlaylist();
+    // create the hidden form that will be triggered by a click on the Preferences button
+    this.injectPrefsForm();        
+
+  };
+
+  AblePlayer.prototype.injectOffscreenTitle = function () {
+    // Add offscreen title to the media container.
+    var tempTitle = $('<h1>');
+    this.$ableDiv.prepend(tempTitle);
+    // Find the previous header in the DOM.
+    var headers = $('body').find('h1, h2, h3, h4, h5, h6');
+    var prevHeader = headers.eq(headers.index(this.$titleDiv));
+    var titleType = 'h1';
+    if (prevHeader.length > 0) {
+      // Increment by one if less than 6.
+      var headerNumber = parseInt(prevHeader.prop('tagName')[1]);
+      headerNumber += 1;
+      if (headerNumber > 6) {
+        headerNumber = 6;
+      }
+      titleType = 'h' + headerNumber.toString();
+    }
+    tempTitle.remove();
+    this.$titleDiv = $('<' + titleType + '>');
+    this.$ableDiv.prepend(this.$titleDiv);
+    this.$titleDiv.addClass('able-offscreen');
+    // TODO: Localize
+    this.$titleDiv.text(this.title || 'Able Media Player');
+  };
+
+  AblePlayer.prototype.injectBigPlayButton = function () {
+    this.$bigPlayButton = $('<button>', {
+      'class': 'able-big-play-button icon-play',
+      'aria-hidden': true,
+      'tabindex': -1
+    });
+
+    var thisObj = this;
+    this.$bigPlayButton.click(function () {
+      thisObj.handlePlay();
+    });
+
+    this.$mediaContainer.prepend(this.$bigPlayButton);
+  };
+
+  AblePlayer.prototype.injectPlayerControlArea = function () {
+    this.$playerDiv = $('<div>', {
+      'class' : 'able-player',
+      'role' : 'region',
+      'aria-label' : this.mediaType + ' player'
+    });
+    this.$playerDiv.addClass('able-'+this.mediaType);
+
+    // The default skin depends a bit on a Now Playing div 
+    // so go ahead and add one 
+    // However, it's only populated if this.showNowPlaying = true 
+    this.$nowPlayingDiv = $('<div>',{
+      'class' : 'able-now-playing',
+      'role' : 'alert'
+    });
+    
+    this.$controllerDiv = $('<div>',{
+      'class' : 'able-controller'
+    });
+    this.$controllerDiv.addClass('able-' + this.iconColor + '-controls');    
+
+    this.$statusBarDiv = $('<div>',{
+      'class' : 'able-status-bar'
+    });
+    this.$timer = $('<span>',{
+      'class' : 'able-timer'
+    });
+    this.$elapsedTimeContainer = $('<span>',{
+      'class': 'able-elapsedTime',
+      text: '0:00'
+    });
+    this.$durationContainer = $('<span>',{
+      'class': 'able-duration'
+    }); 
+    this.$timer.append(this.$elapsedTimeContainer).append(this.$durationContainer);       
+
+    this.$status = $('<span>',{
+      'class' : 'able-status',
+      'role' : 'alert'
+    });
+
+    // Put everything together.
+    this.$statusBarDiv.append(this.$timer, this.$status);
+    this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+    this.$ableDiv.append(this.$playerDiv);
+  };
+
+  AblePlayer.prototype.injectTextDescriptionArea = function () {
+    // create a div for exposing description
+    // description will be exposed via role="alert" & announced by screen readers  
+    this.$descDiv = $('<div>',{
+      'class': 'able-descriptions',
+      'role': 'alert'
+    });
+    // Start off with description hidden.
+    this.$descDiv.hide();
+    // TODO: Does this need to be changed when preference is changed?
+    if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
+      this.$descDiv.addClass('able-clipped');                
+    }
+
+    this.$ableDiv.append(this.$descDiv);
+  };
+
+  AblePlayer.prototype.injectTranscriptArea = function() {
+    this.$transcriptArea = $('<div>', {
+      'class': 'able-transcript-area'
+    });
+    
+    this.$transcriptToolbar = $('<div>', {
+      'class': 'able-transcript-toolbar'
+    });
+    
+    this.$transcriptDiv = $('<div>', {
+      'class' : 'able-transcript'
+    });
+    
+    // Transcript toolbar content:
+    // TODO: Localize
+    this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
+    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll: </label>'), this.$autoScrollTranscriptCheckbox);
+    this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
+    this.$transcriptLanguageSelect.prop('disabled', true);
+
+    var floatRight = $('<div style="float: right;">');
+    this.$transcriptLanguageSelectContainer = floatRight;
+    this.$transcriptLanguageSelectContainer.css({
+      display: "none"
+    });
+    
+    floatRight.append($('<label for="transcript-language-select">Language: </label>'), this.$transcriptLanguageSelect);
+    this.$transcriptToolbar.append(floatRight);
+    
+    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
+
+    // If client has provided separate transcript location, put it there instead.
+    if (this.transcriptDivLocation) {
+      $(this.transcriptDivLocation).append(this.$transcriptArea);
+    }
+    else {
+      // Place adjacent to player with reactive flow.
+      this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
+      this.$ableColumnLeft.width(this.playerWidth);
+      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
+      this.$ableColumnRight.width(this.playerWidth);
+    }
+  };
+
+  AblePlayer.prototype.injectAlert = function () {
+    this.alertBox = $('<div role="alert"></div>');
+    this.alertBox.addClass('able-tooltip');
+    this.alertBox.appendTo(this.$ableDiv);
+    this.alertBox.css({
+      top: this.$mediaContainer.offset().top
+    });
+
+  };
+
+  AblePlayer.prototype.injectPlaylist = function () {
+    if (this.playlistEmbed === true) { 
+      // move playlist into player, immediately before statusBarDiv
+      var playlistClone = this.$playlistDom.clone();
+      playlistClone.insertBefore(this.$statusBarDiv);          
+      // Update to the new playlist copy.
+      this.$playlist = playlistClone.find('li');
+    }
+
+    if (this.hasPlaylist && this.$sources.length === 0) { 
+      // no source elements were provided. Construct them from the first playlist item
+      this.initializing = true;
+      this.swapSource(0);       
+      // redefine this.$sources now that media contains one or more <source> elements
+      this.$sources = this.$media.find('source');       
+      if (this.debug) { 
+        console.log('after initializing playlist, there are ' + this.$sources.length + ' media sources');
+      }
+    } 
+
+  };
+  
+  AblePlayer.prototype.addTranscriptAreaEvents = function() {
+    var thisObj = this;
+
+    this.$autoScrollTranscriptCheckbox.click(function () {
+      thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
+    });
+
+    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
+      // Propagation is stopped in seekpoint click handler, so clicks are on the scrollbar
+      // or outside of a seekpoint.
+      if (!thisObj.scrollingTranscript) {
+        thisObj.autoScrollTranscript = false;
+        thisObj.refreshControls();
+      }
+      thisObj.scrollingTranscript = false;
+    });
+
+    this.$transcriptLanguageSelect.change(function () {
+      var language = thisObj.$transcriptLanguageSelect.val();
+      for (var ii in thisObj.captions) {
+        if (thisObj.captions[ii].language === language) {
+          thisObj.transcriptCaptions = thisObj.captions[ii];
+        }
+      }
+      for (var ii in thisObj.descriptions) {
+        if (thisObj.descriptions[ii].language === language) {
+          thisObj.transcriptDescriptions = thisObj.descriptions[ii];
+        }
+      }
+      thisObj.updateTranscript();
+    });
+  };
+
+  // Create tooltip with appropriate CSS styling and add to body.
+  AblePlayer.prototype.createTooltip = function () {
+    var tooltip = $('<div>');
+    tooltip.attr('role', 'tooltip');
+    tooltip.addClass('able-tooltip');
+
+    // If tabbing off the tooltip, close it.
+    tooltip.keydown(function (e) {
+      // Tab
+      if (e.which === 9) {
+        if (e.shiftKey) {
+          if (tooltip.find('button').first().is(':focus')) {
+            tooltip.hide();
+          }
+        }
+        else {
+          if (tooltip.find('button').last().is(':focus')) {
+            tooltip.hide();
+          }
+        }
+      }
+    });
+
+
+    this.$ableDiv.append(tooltip);
+    return tooltip;
+  };
+
+  AblePlayer.prototype.closeTooltips = function () {
+    if (this.chaptersTooltip) {
+      this.chaptersTooltip.hide();
+    }
+    if (this.captionsTooltip) {
+      this.captionsTooltip.hide();
+    }
+  };
+
+  // Create and fill in the tooltip forms for various controls.
+  AblePlayer.prototype.setupTooltips = function () {
+    this.setupCaptionsTooltip();
+    this.setupChaptersTooltip();
+  };
+
+  AblePlayer.prototype.setupCaptionsTooltip = function () {
+    var thisObj = this;
+    this.captionsTooltip = this.createTooltip();
+      
+    for (var ii in this.captions) {
+      var track = this.captions[ii];
+      var trackButton = $('<button>');
+      trackButton.html(track.label || track.language);
+      trackButton.attr('tabindex', 0);
+      trackButton.click(this.getCaptionClickFunction(track));
+      
+      this.captionsTooltip.append(trackButton);
+      this.captionsTooltip.append('<br>');
+    }
+    
+    // Off option
+    var offButton = $('<button>');
+    offButton.attr('tabindex', 0);
+    // TODO: Localize
+    offButton.html('Captions off');
+    offButton.click(this.getCaptionOffFunction());
+
+    this.captionsTooltip.append(offButton);
+  };
+
+  AblePlayer.prototype.setupChaptersTooltip = function () {
+    var thisObj = this;
+    this.chaptersTooltip = this.createTooltip();
+
+    for (var ii in this.chapters) {
+      var chapterButton = $('<button>');
+      chapterButton.html(this.flattenCueForCaption(this.chapters[ii]) + ' - ' + this.formatSecondsAsColonTime(this.chapters[ii].start));
+      chapterButton.attr('tabindex', 0);
+      var getClickFunction = function (time) {
+        return function () {
+          thisObj.seekTo(time);
+          thisObj.chaptersTooltip.hide();
+          thisObj.$chaptersButton.focus();
+        }
+      }
+      chapterButton.click(getClickFunction(this.chapters[ii].start));
+      
+      this.chaptersTooltip.append(chapterButton);
+      this.chaptersTooltip.append('<br>');
+    }
+  };
+
+  AblePlayer.prototype.provideFallback = function() {         
+    // provide ultimate fallback for users with no HTML media support, nor JW Player support 
+    // this could be links to download the media file(s) 
+    // but for now is just a message   
+  
+    var msg, msgContainer; 
+    
+    msg = this.tt['errorNoPlay'] + ' ' + this.tt[this.mediaType] + '. ';
+    msgContainer = $('<div>',{
+      'class' : 'able-fallback',
+      'role' : 'alert'
+    });
+    this.$media.before(msgContainer);     
+    msgContainer.text(msg);  
+  };
+
+  AblePlayer.prototype.addHelp = function() {   
+    // create help text that will be displayed in a JQuery-UI dialog 
+    // if user clicks the Help button   
+  
+    var helpText, i, label, key, helpDiv; 
+  
+    helpText = '<p>' + this.tt.helpKeys + '</p>\n';
+    helpText += '<ul>\n';
+    for (i=0; i<this.controls.length; i++) { 
+      if (this.controls[i] === 'play') { 
+        label = this.tt.play + '/' + this.tt.pause;
+        key = 'p </b><em>' + this.tt.or + '</em><b> ' + this.tt.spacebar;
+      }
+      else if (this.controls[i] === 'stop') { 
+        label = this.tt.stop;
+        key = 's';
+      }
+      else if (this.controls[i] === 'rewind') { 
+        label = this.tt.rewind;
+        key = 'r';
+      }
+      else if (this.controls[i] === 'fast-forward') { 
+        label = this.tt.forward;
+        key = 'f';
+      }
+      else if (this.controls[i] === 'mute') { 
+        label = this.tt.mute;
+        key = 'm';
+      }
+      else if (this.controls[i] === 'volumeUp') { 
+        label = this.tt.volumeUp;
+        key = 'u </b><em>' + this.tt.or + '</em><b> 1-5';
+      }
+      else if (this.controls[i] === 'volumeDown') { 
+        label = this.tt.volumeDown;
+        key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
+      }
+      else if (this.controls[i] === 'captions') { 
+        label = this.tt.toggle + ' ' + this.tt.captions;
+        key = 'c';
+      }
+      else if (this.controls[i] === 'descriptions') { 
+        label = this.tt.toggle + ' ' + this.tt.descriptions;
+        key = 'n';
+      }
+      else if (this.controls[i] === 'prefs') { 
+        label = this.tt.preferences;
+        key = 't';
+      }
+      else if (this.controls[i] === 'help') { 
+        label = this.tt.help;
+        key = 'h';
+      }
+      else { 
+        label = false;
+      }
+      if (label) { 
+        helpText += '<li><b><span class="able-help-modifiers">'; 
+        if (this.prefAltKey === 1) { 
+          helpText += 'Alt + ';
+        }
+        if (this.prefCtrlKey === 1) { 
+          helpText += 'Control + ';
+        }
+        if (this.prefShiftKey === 1) {
+          helpText += 'Shift + ';
+        }
+        helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
+      }
+    }
+    helpText += '</ul>\n';
+    helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
+    
+    helpDiv = $('<div>',{ 
+      'class': 'able-help-div',
+      'html': helpText
+    });
+    this.$ableDiv.append(helpDiv); 
+    
+    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
+
+    helpDiv.append('<hr>');
+    var okButton = $('<button>' + this.tt.ok + '</button>');
+    okButton.click(function () {
+      dialog.hide();
+    });
+
+    helpDiv.append(okButton);
+    this.helpDialog = dialog;
+  };
+
+  // Calculates the layout for controls based on media and options.
+  // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
+  // Each associated value is array of control names to put at that location.
+  AblePlayer.prototype.calculateControlLayout = function () {
+    // Removed rewind/forward in favor of seek bar.
+    var controlLayout = {
+      'ul': ['play','stop'],
+      'ur': [],
+      'bl': [],
+      'br': []
+    }
+        
+    if (this.useSlider) {
+      controlLayout['ur'].push('rewind');
+      controlLayout['ur'].push('seek');
+      controlLayout['ur'].push('fast-forward');
+    }
+    
+    // Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
+    var bll = [];
+    // test for browser support for volume before displaying volume-related buttons 
+    if (this.browserSupportsVolume()) { 
+      bll.push('mute');
+      bll.push('volume-increase');
+      bll.push('volume-decrease');
+    }
+
+    var blr = [];
+    if (this.mediaType === 'video') { 
+      if (this.hasCaptions) {
+        blr.push('closed-captions'); //closed captions
+      }
+      if (this.hasOpenDesc || this.hasClosedDesc) { 
+        blr.push('audio-description'); //audio description 
+      }
+      if (this.hasSignLanguage) { 
+        blr.push('sign'); // sign language
+      }
+    }
+
+    if (this.includeTranscript) {
+      blr.push('transcript');
+    }
+
+    if (this.isPlaybackRateSupported()) {
+      blr.push('rate-decrease'); 
+      blr.push('rate-display');
+      blr.push('rate-increase');
+    }
+
+    if (this.mediaType === 'video' && this.hasChapters) {
+      blr.push('chapters');
+    }
+
+
+    // Include the pipe only if we need to.
+    if (bll.length > 0 && blr.length > 0) {
+      controlLayout['bl'] = bll;
+      controlLayout['bl'].push('pipe');
+      controlLayout['bl'] = controlLayout['bl'].concat(blr);
+    }
+    else {
+      controlLayout['bl'] = bll.concat(blr);
+    }
+        
+    controlLayout['br'].push('preferences');
+    controlLayout['br'].push('help');
+
+    // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
+    if (this.mediaType === 'video' && this.player !== 'jw') {
+      controlLayout['br'].push('fullscreen');
+    }
+
+    return controlLayout;
+  };
+
+  AblePlayer.prototype.addControls = function() {   
+    // determine which controls to show based on several factors: 
+    // mediaType (audio vs video) 
+    // availability of tracks (e.g., for closed captions & audio description) 
+    // browser support (e.g., for sliders and speedButtons) 
+    // user preferences (???)      
+    // some controls are aligned on the left, and others on the right 
+  
+    var useSpeedButtons, useFullScreen, 
+    i, j, controls, controllerSpan, control, 
+    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
+    leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
+    controllerStyles, vidcapStyles;  
+    
+    var baseSliderWidth = 100;
+
+    // Initializes the layout into the this.controlLayout variable.
+    var controlLayout = this.calculateControlLayout();
+    
+    var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
+    // now step separately through left and right controls
+    for (i = 0; i <= 3; i++) {
+      controls = controlLayout[sectionByOrder[i]];
+      if ((i % 2) === 0) {        
+        controllerSpan = $('<span>',{
+          'class': 'able-left-controls'
+        });
+      }
+      else { 
+        controllerSpan = $('<span>',{
+          'class': 'able-right-controls'
+        });
+      }
+      this.$controllerDiv.append(controllerSpan);
+      for (j=0; j<controls.length; j++) { 
+        control = controls[j];
+        if (control === 'seek') { 
+          var sliderDiv = $('<div class="able-seekbar"></div>');
+          controllerSpan.append(sliderDiv);
+          
+          this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
+        }
+        else if (control === 'rate-display') {
+          this.$rateDisplayContainer = $('<span>');
+          this.$rateDisplayContainer.attr('aria-live', 'polite');
+          this.$rateDisplaySpan = $('<span>');
+          var rateOffscreen = $('<span>', {
+            'class': 'able-offscreen'
+          });
+          rateOffscreen.text('Rate ');
+          this.$rateDisplayContainer.append(rateOffscreen);
+          this.$rateDisplayContainer.append(this.$rateDisplaySpan);
+          controllerSpan.append(this.$rateDisplayContainer);
+          // Call setPlaybackRate to update the control display.
+          this.setPlaybackRate(this.media.playbackRate);
+        }
+        else if (control === 'pipe') {
+          // TODO: Unify this with buttons somehow to avoid code duplication
+          var pipe = $('<span>', {
+            'tabindex': '-1',
+            'aria-hidden': 'true'
+          });
+          if (this.iconType === 'font') {
+            pipe.addClass('icon-pipe');
+          }
+          else {
+            var pipeImg = $('<img>', {
+              src: '../images/pipe-' + this.iconColor + '.png',
+              alt: '',
+              role: 'presentation'
+            });
+            pipe.append(pipeImg);
+          }
+          controllerSpan.append(pipe);
+        }
+        else {
+          // this control is a button 
+          buttonImgSrc = '../images/' + control + '-' + this.iconColor + '.png';
+          buttonTitle = this.getButtonTitle(control); 
+          newButton = $('<button>',{ 
+            'type': 'button',
+            'tabindex': '0',
+            'title': buttonTitle,
+            'class': 'able-button-handler-' + control
+          });        
+          if (this.iconType === 'font') {
+            iconClass = 'icon-' + control; 
+            buttonIcon = $('<span>',{ 
+              'class': iconClass,
+              'aria-hidden': 'true'
+            })   
+            /*        // this is recommended for a11y in the documentation 
+            // but we have title on the container <button>, so I don't think this is needed
+            var buttonLabel = $('<span>',{
+            'class': 'able-clipped'
+            }).text(buttonTitle);
+            newButton.append(buttonIcon,buttonLabel);
+            */          
+            
+            newButton.append(buttonIcon);
+          }
+          else { 
+            // use images
+            buttonImg = $('<img>',{ 
+              'src': buttonImgSrc,
+              'alt': '',
+              'role': 'presentation'
+            });
+            newButton.append(buttonImg);
+          }
+          if (control === 'closed-captions') { 
+            if (!this.prefCaptions || this.prefCaptions !== 1) { 
+              // captions are available, but user has them turned off 
+              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
+            }
+          }
+          else if (control === 'audio-description') {      
+            if (!this.prefDesc || this.prefDesc !== 1) { 
+              // user prefer non-audio described version 
+              // Therefore, load media without description 
+              // Description can be toggled on later with this button  
+              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);              
+            }         
+          }
+          
+          controllerSpan.append(newButton);
+          // create variables of buttons that are referenced throughout the class 
+          if (control === 'play') { 
+            this.$playpauseButton = newButton;
+          }
+          else if (control === 'closed-captions') { 
+            this.$ccButton = newButton;
+          }
+          else if (control === 'audio-description') {        
+            this.$descButton = newButton; 
+            // gray out description button if description is not active 
+            if (!this.descOn) {  
+              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);
+            }
+          }
+          else if (control === 'mute') { 
+            this.$muteButton = newButton;
+          }
+          else if (control === 'transcript') {
+            this.$transcriptButton = newButton;
+          }
+          else if (control === 'fullscreen') {
+            this.$fullscreenButton = newButton;
+          }
+          else if (control === 'chapters') {
+            this.$chaptersButton = newButton;
+          }
+        }
+      }
+      if ((i % 2) == 1) {
+        this.$controllerDiv.append('<div style="clear:both;"></div>');
+      }
+    }
+  
+    if (this.mediaType === 'video') { 
+      // also set width and height of div.able-vidcap-container
+      vidcapStyles = {
+        'width': this.playerWidth+'px',
+        'height': this.playerHeight+'px'
+      }     
+      if (this.$vidcapContainer) { 
+        this.$vidcapContainer.css(vidcapStyles); 
+      }   
+      // also set width of the captions and descriptions containers 
+      if (this.$captionDiv) { 
+        this.$captionDiv.css('width',this.playerWidth+'px');
+      }
+      if (this.$descDiv) {
+        this.$descDiv.css('width',this.playerWidth+'px');
+      }
+    }
+    
+    
+    // combine left and right controls arrays for future reference 
+    this.controls = [];
+    for (var sec in controlLayout) {
+      this.controls = this.controls.concat(controlLayout[sec]);
+    }
+    
+    // construct help dialog that includes keystrokes for operating the included controls 
+    this.addHelp();     
+    
+    // Update state-based display of controls.
+    this.refreshControls();
+  };
+
+  // Change media player source file, for instance when moving to the next element in a playlist.
+  // TODO: Add some sort of playlist support for tracks?
+  AblePlayer.prototype.swapSource = function(sourceIndex) { 
+    
+    // replace default media source elements with those from playlist   
+    var $newItem, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan; 
+    
+    this.$media.find('source').remove();
+    $newItem = this.$playlist.eq(sourceIndex);
+    itemTitle = $newItem.html();  
+    if ($newItem.attr('lang')) { 
+      itemLang = $newItem.attr('lang');
+    }
+    sources = [];
+    s = 0; // index 
+    if (this.mediaType === 'audio') { 
+      if ($newItem.attr('data-mp3')) {
+        jwSource = $newItem.attr('data-mp3'); // JW Player can play this 
+        sources[s] =  new Array('audio/mpeg',jwSource); 
+        s++;
+      }
+      if ($newItem.attr('data-webm')) {
+        sources[s] = new Array('audio/webm',$newItem.attr('data-webm'));
+        s++; 
+      }
+      if ($newItem.attr('data-webma')) {
+        sources[s] = new Array('audio/webm',$newItem.attr('data-webma')); 
+        s++; 
+      }
+      if ($newItem.attr('data-ogg')) {
+        sources[s] = new Array('audio/ogg',$newItem.attr('data-ogg')); 
+        s++; 
+      }
+      if ($newItem.attr('data-oga')) {
+        sources[s] = new Array('audio/ogg',$newItem.attr('data-oga')); 
+        s++; 
+      }
+      if ($newItem.attr('data-wav')) {
+        sources[s] = new Array('audio/wav',$newItem.attr('data-wav')); 
+        s++; 
+      }
+    }
+    else if (this.mediaType === 'video') { 
+      if ($newItem.attr('data-mp4')) {
+        jwSource = $newItem.attr('data-mp4'); // JW Player can play this 
+        sources[s] =  new Array('video/mp4',jwSource); 
+        s++; 
+      }
+      if ($newItem.attr('data-webm')) {
+        sources[s] = new Array('video/webm',$newItem.attr('data-webm')); 
+        s++; 
+      }
+      if ($newItem.attr('data-webmv')) {
+        sources[s] = new Array('video/webm',$newItem.attr('data-webmv')); 
+        s++; 
+      }
+      if ($newItem.attr('data-ogg')) {
+        sources[s] = new Array('video/ogg',$newItem.attr('data-ogg')); 
+        s++; 
+      }   
+      if ($newItem.attr('data-ogv')) {
+        sources[s] = new Array('video/ogg',$newItem.attr('data-ogv')); 
+        s++; 
+      }   
+    }     
+    for (i=0; i<sources.length; i++) { 
+      $newSource = $('<source>',{ 
+        type: sources[i][0],
+        src: sources[i][1] 
+      });         
+      this.$media.append($newSource);
+    }
+    
+    // update playlist to indicate which item is playing 
+    //$('.able-playlist li').removeClass('able-current');
+    this.$playlist.removeClass('able-current');
+    $newItem.addClass('able-current'); 
+    
+    // update Now Playing div 
+    if (this.showNowPlaying === true) {
+      nowPlayingSpan = $('<span>');
+      if (typeof itemLang !== 'undefined') { 
+        nowPlayingSpan.attr('lang',itemLang); 
+      }
+      nowPlayingSpan.html('<span>Selected track:</span>' + itemTitle); 
+      this.$nowPlayingDiv.html(nowPlayingSpan);
+    }
+    
+    // reload audio after sources have been updated
+    // if this.swappingSrc is true, media will autoplay when ready
+    if (this.initializing) { // this is the first track - user hasn't pressed play yet 
+      this.swappingSrc = false; 
+    }
+    else { 
+      this.swappingSrc = true; 
+      if (this.player === 'html5') {
+        this.media.load();
+      }   
+      else if (this.player === 'jw') { 
+        this.jwPlayer.load({file: jwSource}); 
+      }
+      else if (this.player === 'youtube') {
+        // Does nothing, can't swap source with youtube.
+        // TODO: Anything we need to do to prevent this happening?
+      }
+    }
+  };
+
+  AblePlayer.prototype.getButtonTitle = function(control) { 
+    if (control === 'playpause') { 
+      return this.tt.play; 
+    }
+    else if (control === 'play') { 
+      return this.tt.play; 
+    }
+    else if (control === 'pause') { 
+      return this.tt.pause; 
+    }
+    else if (control === 'stop') { 
+      return this.tt.stop; 
+    }
+    else if (control === 'rewind') { 
+      return this.tt.rewind;
+    }
+    else if (control === 'fast-forward') { 
+      return this.tt.forward;
+    }
+    else if (control === 'closed-captions') {  
+      if (this.captionsOn) {
+        return this.tt.hide + ' ' + this.tt.captions;
+      }
+      else { 
+        return this.tt.show + ' ' + this.tt.captions;
+      }
+    }   
+    else if (control === 'audio-description') { 
+      if (this.descOn) {
+        return this.tt.turnOff + ' ' + this.tt.descriptions;
+      }
+      else { 
+        return this.tt.turnOn + ' ' + this.tt.descriptions;
+      }
+    }
+    else if (control === 'transcript') {  
+      if (this.$transcriptDiv.is(':visible')) {
+        return this.tt.hide + ' ' + this.tt.transcript;
+      }
+      else { 
+        return this.tt.show + ' ' + this.tt.transcript;
+      }
+    }   
+    else if (control === 'sign') { // not yet supported 
+      return this.tt.sign;
+    }
+    else if (control === 'mute') { 
+      if (this.getVolume() > 0) { 
+        return this.tt.mute;
+      }
+      else { 
+        return this.tt.unmute;
+      }
+    }
+    else if (control === 'volume-increase') { 
+      return this.tt.volumeUp;
+    }   
+    else if (control === 'volume-decrease') { 
+      return this.tt.volumeDown;
+    }
+    else if (control === 'rate-increase') {
+      return this.tt.increaseRate;
+    }
+    else if (control === 'rate-decrease') {
+      return this.tt.decreaseRate;
+    }
+    else if (control === 'preferences') { 
+      return this.tt.preferences; 
+    }
+    else if (control === 'help') { 
+      return this.tt.help; 
+    }
+    else { 
+      // there should be no other controls, but just in case: 
+      // return the name of the control with first letter in upper case 
+      // ultimately will need to get a translated label from this.tt 
+      if (this.debug) { 
+        console.log('Found an untranslated label: ' + control);   
+      }
+      return control.charAt(0).toUpperCase() + control.slice(1);
+    }   
+  };
+
+
+})();
