@@ -2874,6 +2874,13 @@ AblePlayer.prototype.setupTimedText = function(kind,track) {
         cues = trackText.split('\n\n'); //creates an array
         for (c in cues) {
           cue = cues[c].split('\n');
+
+          // cue may have an optional identifier
+          // we don't care about this identifier, so first strip that out (if it's present)
+          if (cue[0].indexOf(' --> ') === -1) {
+            cue = cue.splice(1);
+          }
+
           if (cue.length >= 2) { // cue must have one timestamp line + at least one cue text line
             if (cue[0].indexOf(' --> ') !== -1) { // first line of block includes a timestamp
               timeValues = cue[0].split(' --> ');
