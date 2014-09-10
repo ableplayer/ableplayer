@@ -1,4 +1,7 @@
 {
+"increaseRate": "Increase Rate",
+
+"decreaseRate": "Decrease Rate",
 
 "play": "Play", 
 
@@ -43,6 +46,10 @@
 "preferences": "Preferences",
 
 "help": "Help",
+
+"enterFullScreen": "Enter full screen",
+
+"exitFullScreen": "Exit full screen",
 
 "fullScreen": "Full screen",
 

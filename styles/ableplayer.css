@@ -2,8 +2,9 @@
 	Able Player core styles
 */
 .able { 
-	margin: 1em 0;
-	width: 100%; /* will be changed dynamically as player is contructed */
+    margin: 1em 0;
+    width: 100%; /* will be changed dynamically as player is contructed */
+    box-shadow: 0px 0px 16px #262626;
 }
 
 .able-column-left {
@@ -26,8 +27,8 @@
 }
 .able-player { 
 	font-family: Arial, Helvetica, sans-serif;
-	background-color: #000000; /* background color of player (appears on top & bottom) */
-	border: 1px solid #000000; /* border around entire player */
+	background-color: #262626; /* background color of player (appears on top & bottom) */
+/*	border: 1px solid #000000; border around entire player */
 /*	border-bottom-left-radius: 15px;
 	border-bottom-right-radius: 15px;*/
 }
@@ -35,6 +36,14 @@
 	border-top-left-radius: 15px;
 	border-top-right-radius: 15px;
 }*/
+.able-offscreen { 
+	position:absolute;
+	left:-10000px;
+	top:auto;
+	width:1px;
+	height:1px;
+	overflow:hidden;
+}
 .able-video { 
 /*	margin-top: -0.75em;*/
 }
@@ -45,7 +54,7 @@
 	position: relative;
 	border-top: 2px solid #4c4c4c; 
 	border-bottom: 2px solid #4c4c4c; 
-	background-color: #3D3D3D; /* background color of controller bar */
+	background-color: #464646; /* background color of controller bar */
 	/* min-height: 2.6em; */ /* height of button (1.4em) + padding (0.2em) + margin (0.5em) + outline (0.5em) */
 	/* line-height: 2.6em; */
 	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
@@ -54,7 +63,25 @@
 
 
 /* Controller Buttons & Controls */
+.able-big-play-button {
+    position: absolute;
+    font-size: 8em;
+    opacity: 0.5;
+    filter:alpha(opacity=50); /* for IE */
+    color: #fdfdfd;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    padding: 0;
+}
 
+.able-big-play-button:hover {
+    opacity: 100;
+    filter:alpha(opacity=100); /* for IE */
+}
 
 .able-left-controls, .able-right-controls { 
     overflow: visible;
@@ -69,6 +96,12 @@
 .able-right-controls { 
   float: right;
 }
+
+.able-left-controls span,
+.able-right-controls span {
+  color: #fdfdfd;
+}
+
 .able-controller button {
   background: none;
   position: relative;
@@ -76,7 +109,8 @@
   border-style: none;
   margin: 0;
   padding: 0;
-  min-width: 20px;
+  color: #fdfdfd;
+  min-width: 30px;
 }
 
 .able-transcript-toolbar input:focus,
@@ -88,35 +122,35 @@
 .able-seek-head:focus,
 .able-seek-head:hover { 
   outline-style: solid;
-  outline-width: 5px;
+  outline-width: 2px;
 }
 
 .able-transcript-toolbar input:focus,
 .able-controller input:focus,
 .able-controller button:focus,
 .able-seek-head:focus {  
-	outline-color: #ffff00; /* yellow */
+	outline-color: #ffbb37; /* yellow */
 }
 
 .able-transcript-toolbar input:hover,
 .able-controller input:hover,
 .able-controller button:hover,
 .able-seek-head:hover {
-	outline-color: #66ff66; /* green */
+	outline-color: #8AB839; /* green */
 }
 
 
 .able-controller button > span { 
   /* icomoon font icon */
-  font-size: 24px; 
+  font-size: 20px; 
   width: 24px;
   margin: 0 5px;
   padding: 0;
 }
 .able-controller button > img { 
   /* image icon */
-  /* width: 20px; */
-  height: 20px;
+  width: 20px; 
+  height: 30px;
   margin: 0 2px;
   padding: 0;
 }
@@ -129,9 +163,6 @@
   margin: 0 5px
 }
 
-.able-controller button {
-  color: white;
-}
 /*
 .able-white-controls button { 
   color: white;
@@ -143,10 +174,10 @@
 /* Status Bar */
 
 .able-status-bar { 
-	height: 2em;
-	min-height: 2em;
+	height: 1.5em;
+	min-height: 1.5em;
 	color: #FFFFFF;
-	font-size: 0.9em;
+	font-size: 1.0em;
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
 }	
@@ -178,14 +209,14 @@ div.able-captions {
   z-index: 1000;
 }
 div.able-descriptions { 
-	position: relative;
-	color: #FF0; /* yellow, to differentiate it from captions */
-	background-color: black;
-	min-height: 3em; 
-  border-top: 1px solid white;
-  margin-top: -10px;
-  padding: 1em 0;
-  text-align: center;
+    position: relative;
+    color: #FF0; /* yellow, to differentiate it from captions */
+    background-color: #262626;
+    min-height: 3em; 
+    border-top: 1px solid white;
+    margin-top: -10px;
+    padding: 1em 0;
+    text-align: center;
 }
 
 /* Now Playing */
@@ -242,14 +273,13 @@ div.able-now-playing span span {
 	list-style-type: none;
 }
 
-/* icomoon.io font styling */
 @font-face {
 	font-family: 'able';
-	src:url('../fonts/able.eot?sn5rkg');
-	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
-		url('../fonts/able.woff?sn5rkg') format('woff'),
-		url('../fonts/able.ttf?sn5rkg') format('truetype'),
-		url('../fonts/able.svg?sn5rkg#able') format('svg');
+	src:url('../fonts/able.eot?-6r3ae4');
+	src:url('../fonts/able.eot?#iefix-6r3ae4') format('embedded-opentype'),
+		url('../fonts/able.woff?-6r3ae4') format('woff'),
+		url('../fonts/able.ttf?-6r3ae4') format('truetype'),
+		url('../fonts/able.svg?-6r3ae4#able') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -257,7 +287,7 @@ div.able-now-playing span span {
 [class^="icon-"], [class*=" icon-"] {
 	font-family: 'able';
 	speak: none;
-	font-style: normal;
+ 	font-style: normal;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
@@ -286,19 +316,19 @@ div.able-now-playing span span {
 .icon-pipe:before {
 	content: "\e600";
 }
-.icon-captions:before {
+.icon-closed-captions:before {
 	content: "\e601";
 }
-.icon-descriptions:before {
+.icon-audio-description:before {
 	content: "\e602";
 }
 .icon-transcript:before {
 	content: "\f15c";
 }
-.icon-slower:before {
+.icon-rate-decrease:before {
 	content: "\f0dd";
 }
-.icon-faster:before {
+.icon-rate-increase:before {
 	content: "\f0de";
 }
 .icon-help:before {
@@ -310,34 +340,25 @@ div.able-now-playing span span {
 .icon-rewind:before {
 	content: "\e603";
 }
-.icon-foward:before {
+.icon-fast-forward:before {
 	content: "\e604";
 }
-.icon-volume-loud:before {
-	content: "\e60b";
-}
-.icon-volume-medium:before {
+.icon-volume-unmuted:before {
 	content: "\e605";
 }
-.icon-volume-soft:before {
-	content: "\e60c";
-}
-.icon-volume-mute:before {
+.icon-volume-muted:before {
 	content: "\e606";
 }
-.icon-volume-up:before {
+.icon-volume-increase:before {
 	content: "\e607";
 }
-.icon-volume-down:before {
+.icon-volume-decrease:before {
 	content: "\e608";
 }
 .icon-chapters:before {
 	content: "\e609";
 }
 .icon-preferences:before {
-	content: "\e60d";
-}
-.icon-sign:before {
 	content: "\e60a";
 }
 
@@ -392,5 +413,5 @@ div.able-now-playing span span {
     -moz-border-radius: 5px;
     border-radius: 5px;
     display: none;
-    z-index: 2000;
+    z-index: 3000;
 }
