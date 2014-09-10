@@ -1947,13 +1947,14 @@
     this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
     this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll: </label>'), this.$autoScrollTranscriptCheckbox);
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
+    // Add a default "Unknown" option; this will be deleted later if there are any
+    // elements with a language.
+    this.$unknownTranscriptOption = $('<option val="unknown">Unknown</option>');
+    this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
     var floatRight = $('<div style="float: right;">');
     this.$transcriptLanguageSelectContainer = floatRight;
-    this.$transcriptLanguageSelectContainer.css({
-      display: "none"
-    });
     
     floatRight.append($('<label for="transcript-language-select">Language: </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(floatRight);
@@ -2041,6 +2042,7 @@
 
   // Create tooltip with appropriate CSS styling and add to body.
   AblePlayer.prototype.createTooltip = function () {
+    var thisObj = this;
     var tooltip = $('<div>');
     tooltip.attr('role', 'tooltip');
     tooltip.addClass('able-tooltip');
@@ -2051,12 +2053,14 @@
       if (e.which === 9) {
         if (e.shiftKey) {
           if (tooltip.find('button').first().is(':focus')) {
-            tooltip.hide();
+            thisObj.closeTooltips();
+            e.preventDefault();
           }
         }
         else {
           if (tooltip.find('button').last().is(':focus')) {
-            tooltip.hide();
+            thisObj.closeTooltips();
+            e.preventDefault();
           }
         }
       }
@@ -2068,11 +2072,13 @@
   };
 
   AblePlayer.prototype.closeTooltips = function () {
-    if (this.chaptersTooltip) {
+    if (this.chaptersTooltip && this.chaptersTooltip.is(':visible')) {
       this.chaptersTooltip.hide();
+      this.$chaptersButton.focus();
     }
-    if (this.captionsTooltip) {
+    if (this.captionsTooltip && this.captionsTooltip.is(':visible')) {
       this.captionsTooltip.hide();
+      this.$ccButton.focus();
     }
   };
 
@@ -2783,7 +2789,13 @@
     // TODO: Apply this sorting to captions as well.
     if (trackLang && this.includeTranscript) {
       // TODO: Move the refresh of the transcript select box to a central location?
-      this.$transcriptLanguageSelectContainer.show();
+      
+      // Remove the "Unknown" option from the select box.
+      if (this.$unknownTranscriptOption) {
+        this.$unknownTranscriptOption.remove();
+        this.$unknownTranscriptOption = null;
+      }
+
       var option = $('<option value="' + trackLang + '">' + trackLabel + '</option>');
       // TODO: This is a terrible hack, but I can't find a better way to detect whether we have a default track already entered in the list...
       if ($(track).attr('default') !== undefined) {
@@ -3148,12 +3160,12 @@
     }
   };
   
-  AccessibleSeekBar.prototype.setPosition = function (position) {
+  AccessibleSeekBar.prototype.setPosition = function (position, updateLive) {
     this.position = position;
     this.resetHeadLocation();
     this.refreshTooltip();
     this.resizeDivs();
-    this.updateAriaValues(position);
+    this.updateAriaValues(position, updateLive);
   }
   
   // TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.  Change this to display them all.
@@ -3174,7 +3186,7 @@
     this.trackDevice = null;
     this.tracking = false;
     this.bodyDiv.trigger('stopTracking', [position]);
-    this.setPosition(position);
+    this.setPosition(position, true);
   };
   
   AccessibleSeekBar.prototype.trackHeadAtPageX = function (pageX) {
@@ -3196,10 +3208,10 @@
   
   AccessibleSeekBar.prototype.reportTrackAtPosition = function (position) {
     this.bodyDiv.trigger('tracking', [position]);
-    this.updateAriaValues(position);
+    this.updateAriaValues(position, true);
   };
   
-  AccessibleSeekBar.prototype.updateAriaValues = function (position) {
+  AccessibleSeekBar.prototype.updateAriaValues = function (position, updateLive) {
     // TODO: Localize, move to another function.
     var pHours = Math.floor(position / 3600);
     var pMinutes = Math.floor((position % 3600) / 60);
@@ -3236,7 +3248,7 @@
       });
       this.wrapperDiv.append(this.liveAriaRegion);
     }
-    if (this.liveAriaRegion.text() !== descriptionText) {
+    if (updateLive && (this.liveAriaRegion.text() !== descriptionText)) {
       this.liveAriaRegion.text(descriptionText);
     }
 
@@ -3773,6 +3785,8 @@
       this.youtubePlayer.seekTo(newTime);
     }
 
+    this.liveUpdatePending = true;
+
     this.refreshControls();
   };
 
@@ -4048,7 +4062,13 @@
     if (this.seekBar) {
       this.seekBar.setDuration(duration);
       if (!this.seekBar.tracking) {
-        this.seekBar.setPosition(elapsed);
+        // Only update the aria live region if we have an update pending (from a 
+        // seek button control) or if the seekBar has focus.
+        // We use document.activeElement instead of $(':focus') due to a strange bug:
+        //  When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
+        var updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+        this.liveUpdatePending = false;
+        this.seekBar.setPosition(elapsed, updateLive);
       }
     }
 
@@ -4162,11 +4182,24 @@
     }
     
     if (this.$ccButton) {
+      // Button has a different title depending on the number of captions.
+      // If only one caption track, this is "Show captions" and "Hide captions"
+      // Otherwise, it is just always "Captions"
       if (!this.captionsOn) {
-        this.$ccButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.captions);
+        this.$ccButton.addClass('buttonOff');
+        if (this.captions.length === 1) {
+          this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
+        }
       }
       else {
-        this.$ccButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.captions);
+        this.$ccButton.removeClass('buttonOff');
+        if (this.captions.length === 1) {
+          this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
+        }
+      }
+
+      if (this.captions.length > 1) {
+        this.$ccButton.attr('title', this.tt.captions);
       }
     }
 

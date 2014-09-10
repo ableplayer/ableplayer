@@ -171,13 +171,14 @@
     this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
     this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll: </label>'), this.$autoScrollTranscriptCheckbox);
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
+    // Add a default "Unknown" option; this will be deleted later if there are any
+    // elements with a language.
+    this.$unknownTranscriptOption = $('<option val="unknown">Unknown</option>');
+    this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
     var floatRight = $('<div style="float: right;">');
     this.$transcriptLanguageSelectContainer = floatRight;
-    this.$transcriptLanguageSelectContainer.css({
-      display: "none"
-    });
     
     floatRight.append($('<label for="transcript-language-select">Language: </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(floatRight);
@@ -265,6 +266,7 @@
 
   // Create tooltip with appropriate CSS styling and add to body.
   AblePlayer.prototype.createTooltip = function () {
+    var thisObj = this;
     var tooltip = $('<div>');
     tooltip.attr('role', 'tooltip');
     tooltip.addClass('able-tooltip');
@@ -275,12 +277,14 @@
       if (e.which === 9) {
         if (e.shiftKey) {
           if (tooltip.find('button').first().is(':focus')) {
-            tooltip.hide();
+            thisObj.closeTooltips();
+            e.preventDefault();
           }
         }
         else {
           if (tooltip.find('button').last().is(':focus')) {
-            tooltip.hide();
+            thisObj.closeTooltips();
+            e.preventDefault();
           }
         }
       }
@@ -292,11 +296,13 @@
   };
 
   AblePlayer.prototype.closeTooltips = function () {
-    if (this.chaptersTooltip) {
+    if (this.chaptersTooltip && this.chaptersTooltip.is(':visible')) {
       this.chaptersTooltip.hide();
+      this.$chaptersButton.focus();
     }
-    if (this.captionsTooltip) {
+    if (this.captionsTooltip && this.captionsTooltip.is(':visible')) {
       this.captionsTooltip.hide();
+      this.$ccButton.focus();
     }
   };
 

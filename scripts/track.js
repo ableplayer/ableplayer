@@ -85,7 +85,13 @@
     // TODO: Apply this sorting to captions as well.
     if (trackLang && this.includeTranscript) {
       // TODO: Move the refresh of the transcript select box to a central location?
-      this.$transcriptLanguageSelectContainer.show();
+      
+      // Remove the "Unknown" option from the select box.
+      if (this.$unknownTranscriptOption) {
+        this.$unknownTranscriptOption.remove();
+        this.$unknownTranscriptOption = null;
+      }
+
       var option = $('<option value="' + trackLang + '">' + trackLabel + '</option>');
       // TODO: This is a terrible hack, but I can't find a better way to detect whether we have a default track already entered in the list...
       if ($(track).attr('default') !== undefined) {

@@ -20,6 +20,8 @@
       this.youtubePlayer.seekTo(newTime);
     }
 
+    this.liveUpdatePending = true;
+
     this.refreshControls();
   };
 
@@ -295,7 +297,13 @@
     if (this.seekBar) {
       this.seekBar.setDuration(duration);
       if (!this.seekBar.tracking) {
-        this.seekBar.setPosition(elapsed);
+        // Only update the aria live region if we have an update pending (from a 
+        // seek button control) or if the seekBar has focus.
+        // We use document.activeElement instead of $(':focus') due to a strange bug:
+        //  When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
+        var updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+        this.liveUpdatePending = false;
+        this.seekBar.setPosition(elapsed, updateLive);
       }
     }
 
@@ -409,11 +417,24 @@
     }
     
     if (this.$ccButton) {
+      // Button has a different title depending on the number of captions.
+      // If only one caption track, this is "Show captions" and "Hide captions"
+      // Otherwise, it is just always "Captions"
       if (!this.captionsOn) {
-        this.$ccButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.captions);
+        this.$ccButton.addClass('buttonOff');
+        if (this.captions.length === 1) {
+          this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
+        }
       }
       else {
-        this.$ccButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.captions);
+        this.$ccButton.removeClass('buttonOff');
+        if (this.captions.length === 1) {
+          this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
+        }
+      }
+
+      if (this.captions.length > 1) {
+        this.$ccButton.attr('title', this.tt.captions);
       }
     }
 

@@ -270,12 +270,12 @@
     }
   };
   
-  AccessibleSeekBar.prototype.setPosition = function (position) {
+  AccessibleSeekBar.prototype.setPosition = function (position, updateLive) {
     this.position = position;
     this.resetHeadLocation();
     this.refreshTooltip();
     this.resizeDivs();
-    this.updateAriaValues(position);
+    this.updateAriaValues(position, updateLive);
   }
   
   // TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.  Change this to display them all.
@@ -296,7 +296,7 @@
     this.trackDevice = null;
     this.tracking = false;
     this.bodyDiv.trigger('stopTracking', [position]);
-    this.setPosition(position);
+    this.setPosition(position, true);
   };
   
   AccessibleSeekBar.prototype.trackHeadAtPageX = function (pageX) {
@@ -318,10 +318,10 @@
   
   AccessibleSeekBar.prototype.reportTrackAtPosition = function (position) {
     this.bodyDiv.trigger('tracking', [position]);
-    this.updateAriaValues(position);
+    this.updateAriaValues(position, true);
   };
   
-  AccessibleSeekBar.prototype.updateAriaValues = function (position) {
+  AccessibleSeekBar.prototype.updateAriaValues = function (position, updateLive) {
     // TODO: Localize, move to another function.
     var pHours = Math.floor(position / 3600);
     var pMinutes = Math.floor((position % 3600) / 60);
@@ -358,7 +358,7 @@
       });
       this.wrapperDiv.append(this.liveAriaRegion);
     }
-    if (this.liveAriaRegion.text() !== descriptionText) {
+    if (updateLive && (this.liveAriaRegion.text() !== descriptionText)) {
       this.liveAriaRegion.text(descriptionText);
     }
 
