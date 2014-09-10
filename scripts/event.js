@@ -251,7 +251,7 @@
       }
     }     
     else if (which === 13) { // Enter 
-      thisElement = $(document.activeElement);
+      var thisElement = $(document.activeElement);
       if (thisElement.prop('tagName') === 'SPAN') { 
         // register a click on this SPAN 
         // if it's a transcript span the transcript span click handler will take over
