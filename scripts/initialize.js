@@ -65,6 +65,9 @@
     // langOverride - set to true to reset this.lang to language of the web page, if detectable  
     // set to false to force player to use this.lang
     this.langOverride = true;
+    
+    // translationDir - specify path to translation files 
+    this.translationDir = '/translations/';
 
     this.setButtonImages();
   };

@@ -1,4 +1,3 @@
-
 /* 
   // JavaScript for Able Player 
   
@@ -35,7 +34,6 @@
                        $(element).data('start-time') || 0,
                        includeTranscript,
                        $(element).data('transcript-div'),
-                       $(element).data('translation-dir') || '/translations/',
                        $(element).data('youtube-id'));
       }
     });
@@ -60,7 +58,7 @@
   // Parameters are: 
   // media - jQuery selector or element identifying the media.
   // startTime - the time at which to begin playing the media       
-  window.AblePlayer = function(media, startTime, includeTranscript, transcriptDiv, translationDir, youtubeId) {
+  window.AblePlayer = function(media, startTime, includeTranscript, transcriptDiv, youtubeId) {
     // Keep track of the last player created for use with global events.
     AblePlayer.lastCreated = this;
 
@@ -93,7 +91,6 @@
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 
-    this.translationDir = translationDir || '/translations/';
     this.youtubeId = youtubeId;
 
     this.title = $(media).attr('title');
@@ -254,6 +251,9 @@
     // langOverride - set to true to reset this.lang to language of the web page, if detectable  
     // set to false to force player to use this.lang
     this.langOverride = true;
+    
+    // translationDir - specify path to translation files 
+    this.translationDir = '../translations/';
 
     this.setButtonImages();
   };
@@ -4810,6 +4810,7 @@
     } 
     thisObj = this;
     // get content of JSON file 
+console.log('translationDir is ' + this.translationDir);    
     $.getJSON(this.translationDir + this.lang + '.js',
               function(data, textStatus, jqxhr) { 
                 if (textStatus === 'success') { 
