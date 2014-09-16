@@ -119,31 +119,31 @@
     else if (whichButton === 'rewind') { 
       this.handleRewind();
     }
-    else if (whichButton === 'fast-forward') { 
+    else if (whichButton === 'forward') { 
       this.handleFastForward();        
     }
     else if (whichButton === 'mute') { 
       this.handleMute();
     }
-    else if (whichButton === 'volume-increase') { 
+    else if (whichButton === 'volume-up') { 
       this.handleVolume('up');
     }
-    else if (whichButton === 'volume-decrease') { 
+    else if (whichButton === 'volume-down') { 
       this.handleVolume('down');
     }
-    else if (whichButton === 'rate-increase') {
+    else if (whichButton === 'faster') {
       this.handleRateIncrease();
     }
-    else if (whichButton === 'rate-decrease') {
+    else if (whichButton === 'slower') {
       this.handleRateDecrease();
     }     
-    else if (whichButton === 'closed-captions') { 
+    else if (whichButton === 'captions') { 
       this.handleCaptionToggle();
     }
     else if (whichButton === 'chapters') {
       this.handleChapters();
     }
-    else if (whichButton === 'audio-description') { 
+    else if (whichButton === 'descriptions') { 
       this.handleDescriptionToggle();
     }
     else if (whichButton.substr(0,4) === 'sign') { 

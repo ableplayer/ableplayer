@@ -253,30 +253,34 @@
     this.langOverride = true;
     
     // translationDir - specify path to translation files 
-    this.translationDir = '../translations/';
+    this.translationDir = '/translations/';
 
     this.setButtonImages();
   };
 
   AblePlayer.prototype.setButtonImages = function() { 
-    this.playButtonImg = '../images/play-' +  this.iconColor + '.png';
-    this.pauseButtonImg = '../images/pause-' +  this.iconColor + '.png';
-    this.rewindButtonImg = '../images/rewind-' +  this.iconColor + '.png';
-    this.forwardButtonImg = '../images/fast-forward-' +  this.iconColor + '.png';
-    this.rateDecreaseButtonImg = '../images/rate-decrease-' +  this.iconColor + '.png';
-    this.rateIncreaseButtonImg = '../images/rate-increase-' +  this.iconColor + '.png';
-    this.volumeMutedButtonImg = '../images/volume-muted-' +  this.iconColor + '.png';
-    this.volumeUnmutedButtonImg = '../images/volume-unmuted-' +  this.iconColor + '.png';
-    this.volumeIncreaseButtonImg = '../images/volume-increase-' +  this.iconColor + '.png';
-    this.volumeDecreaseButtonImg = '../images/volume-decrease-' +  this.iconColor + '.png';
-    this.closedCaptionsButtonImg = '../images/closed-captions-' +  this.iconColor + '.png';
-    this.chaptersButtonImg = '../images/chapters-' + this.iconColor + '.png';
-    this.transcriptButtonImg = '../images/transcript-' +  this.iconColor + '.png';
-    this.descriptionButtonImg = '../images/audio-description-' +  this.iconColor + '.png';
-    this.fullscreenExpandButtonImg = '../images/fullscreen-expand-' +  this.iconColor + '.png';
-    this.fullscreenCollapseButtonImg = '../images/fullscreen-collapse-' + this.iconColor + '.png';
-    this.prefsButtonImg = '../images/preferences-' +  this.iconColor + '.png';
-    this.helpButtonImg = '../images/help-' +  this.iconColor + '.png';
+  
+    var imgPath = '../images/' + this.iconColor + '/';
+    
+    this.playButtonImg = imgPath + 'play.png';
+    this.pauseButtonImg = imgPath + 'pause.png';
+    this.rewindButtonImg = imgPath + 'rewind.png';
+    this.forwardButtonImg = imgPath + 'forward.png';
+    this.fasterButtonImg = imgPath + 'slower.png';
+    this.slowerButtonImg = imgPath + 'faster.png';
+    this.volumeMuteButtonImg = imgPath + 'volume-mute.png';
+    this.volumeLoudButtonImg = imgPath + 'volume-loud.png';
+    this.volumeIncreaseButtonImg = imgPath + 'volume-up.png';
+    this.volumeDecreaseButtonImg = imgPath + 'volume-down.png';
+    this.captionsButtonImg = imgPath + 'captions.png';
+    this.chaptersButtonImg = imgPath + 'chapters.png';
+    this.signButtonImg = imgPath + 'sign.png';
+    this.transcriptButtonImg = imgPath + 'transcript.png';
+    this.descriptionsButtonImg = imgPath + 'descriptions.png';
+    this.fullscreenExpandButtonImg = imgPath + 'fullscreen-expand.png';
+    this.fullscreenCollapseButtonImg = imgPath + 'fullscreen-collapse.png';
+    this.prefsButtonImg = imgPath + 'preferences.png';
+    this.helpButtonImg = imgPath + 'help.png';
   };
   
   // Initialize player based on data on page.
@@ -2172,7 +2176,7 @@
         label = this.tt.rewind;
         key = 'r';
       }
-      else if (this.controls[i] === 'fast-forward') { 
+      else if (this.controls[i] === 'forward') { 
         label = this.tt.forward;
         key = 'f';
       }
@@ -2257,7 +2261,7 @@
     if (this.useSlider) {
       controlLayout['ur'].push('rewind');
       controlLayout['ur'].push('seek');
-      controlLayout['ur'].push('fast-forward');
+      controlLayout['ur'].push('forward');
     }
     
     // Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
@@ -2265,17 +2269,17 @@
     // test for browser support for volume before displaying volume-related buttons 
     if (this.browserSupportsVolume()) { 
       bll.push('mute');
-      bll.push('volume-increase');
-      bll.push('volume-decrease');
+      bll.push('volume-up');
+      bll.push('volume-down');
     }
 
     var blr = [];
     if (this.mediaType === 'video') { 
       if (this.hasCaptions) {
-        blr.push('closed-captions'); //closed captions
+        blr.push('captions'); //closed captions
       }
       if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('audio-description'); //audio description 
+        blr.push('descriptions'); //audio description 
       }
       if (this.hasSignLanguage) { 
         blr.push('sign'); // sign language
@@ -2287,9 +2291,9 @@
     }
 
     if (this.isPlaybackRateSupported()) {
-      blr.push('rate-decrease'); 
+      blr.push('slower'); 
       blr.push('rate-display');
-      blr.push('rate-increase');
+      blr.push('faster');
     }
 
     if (this.mediaType === 'video' && this.hasChapters) {
@@ -2385,7 +2389,7 @@
           }
           else {
             var pipeImg = $('<img>', {
-              src: '../images/pipe-' + this.iconColor + '.png',
+              src: '../images/' + this.iconColor + '/pipe.png',
               alt: '',
               role: 'presentation'
             });
@@ -2395,7 +2399,15 @@
         }
         else {
           // this control is a button 
-          buttonImgSrc = '../images/' + control + '-' + this.iconColor + '.png';
+          if (control === 'mute') { 
+            buttonImgSrc = '../images/' + this.iconColor + '/volume-mute.png';
+          }
+          else if (control === 'fullscreen') { 
+            buttonImgSrc = '../images/' + this.iconColor + '/fullscreen-expand.png';            
+          }
+          else { 
+            buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
+          }
           buttonTitle = this.getButtonTitle(control); 
           newButton = $('<button>',{ 
             'type': 'button',
@@ -2428,13 +2440,13 @@
             });
             newButton.append(buttonImg);
           }
-          if (control === 'closed-captions') { 
+          if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
               newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
             }
           }
-          else if (control === 'audio-description') {      
+          else if (control === 'descriptions') {      
             if (!this.prefDesc || this.prefDesc !== 1) { 
               // user prefer non-audio described version 
               // Therefore, load media without description 
@@ -2448,10 +2460,10 @@
           if (control === 'play') { 
             this.$playpauseButton = newButton;
           }
-          else if (control === 'closed-captions') { 
+          else if (control === 'captions') { 
             this.$ccButton = newButton;
           }
-          else if (control === 'audio-description') {        
+          else if (control === 'descriptions') {        
             this.$descButton = newButton; 
             // gray out description button if description is not active 
             if (!this.descOn) {  
@@ -2633,10 +2645,10 @@
     else if (control === 'rewind') { 
       return this.tt.rewind;
     }
-    else if (control === 'fast-forward') { 
+    else if (control === 'forward') { 
       return this.tt.forward;
     }
-    else if (control === 'closed-captions') {  
+    else if (control === 'captions') {  
       if (this.captionsOn) {
         return this.tt.hide + ' ' + this.tt.captions;
       }
@@ -2644,7 +2656,7 @@
         return this.tt.show + ' ' + this.tt.captions;
       }
     }   
-    else if (control === 'audio-description') { 
+    else if (control === 'descriptions') { 
       if (this.descOn) {
         return this.tt.turnOff + ' ' + this.tt.descriptions;
       }
@@ -2671,16 +2683,16 @@
         return this.tt.unmute;
       }
     }
-    else if (control === 'volume-increase') { 
+    else if (control === 'volume-up') { 
       return this.tt.volumeUp;
     }   
-    else if (control === 'volume-decrease') { 
+    else if (control === 'volume-down') { 
       return this.tt.volumeDown;
     }
-    else if (control === 'rate-increase') {
+    else if (control === 'faster') {
       return this.tt.increaseRate;
     }
-    else if (control === 'rate-decrease') {
+    else if (control === 'slower') {
       return this.tt.decreaseRate;
     }
     else if (control === 'preferences') { 
@@ -3914,7 +3926,6 @@
     if (!this.browserSupportsVolume()) {
       return;
     }
-
     if (!mute) {
       this.$muteButton.attr('title',this.tt.mute); 
     }
@@ -4206,18 +4217,18 @@
     if (this.$muteButton) {
       if (!this.isMuted()) {
         if (this.iconType === 'font') {
-          this.$muteButton.find('span').removeClass('icon-volume-muted').addClass('icon-volume-unmuted'); 
+          this.$muteButton.find('span').removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
         }
         else { 
-          this.$muteButton.find('img').attr('src',this.volumeUnmutedButtonImg); 
+          this.$muteButton.find('img').attr('src',this.volumeLoudButtonImg); 
         }
       }
       else {
         if (this.iconType === 'font') {
-          this.$muteButton.find('span').removeClass('icon-volume-unmuted').addClass('icon-volume-muted'); 
+          this.$muteButton.find('span').removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
       }
         else { 
-          this.$muteButton.find('img').attr('src',this.volumeMutedButtonImg); 
+          this.$muteButton.find('img').attr('src',this.volumeMuteButtonImg); 
         }
       }
     }
@@ -4810,7 +4821,6 @@
     } 
     thisObj = this;
     // get content of JSON file 
-console.log('translationDir is ' + this.translationDir);    
     $.getJSON(this.translationDir + this.lang + '.js',
               function(data, textStatus, jqxhr) { 
                 if (textStatus === 'success') { 
@@ -5175,31 +5185,31 @@ console.log('translationDir is ' + this.translationDir);
     else if (whichButton === 'rewind') { 
       this.handleRewind();
     }
-    else if (whichButton === 'fast-forward') { 
+    else if (whichButton === 'forward') { 
       this.handleFastForward();        
     }
     else if (whichButton === 'mute') { 
       this.handleMute();
     }
-    else if (whichButton === 'volume-increase') { 
+    else if (whichButton === 'volume-up') { 
       this.handleVolume('up');
     }
-    else if (whichButton === 'volume-decrease') { 
+    else if (whichButton === 'volume-down') { 
       this.handleVolume('down');
     }
-    else if (whichButton === 'rate-increase') {
+    else if (whichButton === 'faster') {
       this.handleRateIncrease();
     }
-    else if (whichButton === 'rate-decrease') {
+    else if (whichButton === 'slower') {
       this.handleRateDecrease();
     }     
-    else if (whichButton === 'closed-captions') { 
+    else if (whichButton === 'captions') { 
       this.handleCaptionToggle();
     }
     else if (whichButton === 'chapters') {
       this.handleChapters();
     }
-    else if (whichButton === 'audio-description') { 
+    else if (whichButton === 'descriptions') { 
       this.handleDescriptionToggle();
     }
     else if (whichButton.substr(0,4) === 'sign') { 

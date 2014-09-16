@@ -57,7 +57,7 @@
 	background-color: #464646; /* background color of controller bar */
 	/* min-height: 2.6em; */ /* height of button (1.4em) + padding (0.2em) + margin (0.5em) + outline (0.5em) */
 	/* line-height: 2.6em; */
-	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
+	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
 	padding: 0; 
 }
 
@@ -110,7 +110,7 @@
   margin: 0;
   padding: 0;
   color: #fdfdfd;
-  min-width: 30px;
+  min-width: 20px;
 }
 
 .able-transcript-toolbar input:focus,
@@ -149,8 +149,8 @@
 }
 .able-controller button > img { 
   /* image icon */
-  width: 20px; 
-  height: 30px;
+  /* width: 20px; 
+  height: 20px; */
   margin: 0 2px;
   padding: 0;
 }
@@ -162,14 +162,6 @@
 .able-controller .able-seekbar {
   margin: 0 5px
 }
-
-/*
-.able-white-controls button { 
-  color: white;
-}
-.able-black-controls button { 
-  color: black;
-}*/
 
 /* Status Bar */
 
@@ -273,13 +265,14 @@ div.able-now-playing span span {
 	list-style-type: none;
 }
 
+/* icomoon.io font styling */
 @font-face {
 	font-family: 'able';
-	src:url('../fonts/able.eot?-6r3ae4');
-	src:url('../fonts/able.eot?#iefix-6r3ae4') format('embedded-opentype'),
-		url('../fonts/able.woff?-6r3ae4') format('woff'),
-		url('../fonts/able.ttf?-6r3ae4') format('truetype'),
-		url('../fonts/able.svg?-6r3ae4#able') format('svg');
+	src:url('../fonts/able.eot?sn5rkg');
+	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
+		url('../fonts/able.woff?sn5rkg') format('woff'),
+		url('../fonts/able.ttf?sn5rkg') format('truetype'),
+		url('../fonts/able.svg?sn5rkg#able') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -287,7 +280,7 @@ div.able-now-playing span span {
 [class^="icon-"], [class*=" icon-"] {
 	font-family: 'able';
 	speak: none;
- 	font-style: normal;
+	font-style: normal;
 	font-weight: normal;
 	font-variant: normal;
 	text-transform: none;
@@ -316,19 +309,19 @@ div.able-now-playing span span {
 .icon-pipe:before {
 	content: "\e600";
 }
-.icon-closed-captions:before {
+.icon-captions:before {
 	content: "\e601";
 }
-.icon-audio-description:before {
+.icon-descriptions:before {
 	content: "\e602";
 }
 .icon-transcript:before {
 	content: "\f15c";
 }
-.icon-rate-decrease:before {
+.icon-slower:before {
 	content: "\f0dd";
 }
-.icon-rate-increase:before {
+.icon-faster:before {
 	content: "\f0de";
 }
 .icon-help:before {
@@ -340,28 +333,36 @@ div.able-now-playing span span {
 .icon-rewind:before {
 	content: "\e603";
 }
-.icon-fast-forward:before {
+.icon-forward:before {
 	content: "\e604";
 }
-.icon-volume-unmuted:before {
+.icon-volume-loud:before {
+	content: "\e60b";
+}
+.icon-volume-medium:before {
 	content: "\e605";
 }
-.icon-volume-muted:before {
+.icon-volume-soft:before {
+	content: "\e60c";
+}
+.icon-volume-mute:before {
 	content: "\e606";
 }
-.icon-volume-increase:before {
+.icon-volume-up:before {
 	content: "\e607";
 }
-.icon-volume-decrease:before {
+.icon-volume-down:before {
 	content: "\e608";
 }
 .icon-chapters:before {
 	content: "\e609";
 }
 .icon-preferences:before {
+	content: "\e60d";
+}
+.icon-sign:before {
 	content: "\e60a";
 }
-
 
 /* Misc */
 

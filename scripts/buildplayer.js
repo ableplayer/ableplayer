@@ -396,7 +396,7 @@
         label = this.tt.rewind;
         key = 'r';
       }
-      else if (this.controls[i] === 'fast-forward') { 
+      else if (this.controls[i] === 'forward') { 
         label = this.tt.forward;
         key = 'f';
       }
@@ -481,7 +481,7 @@
     if (this.useSlider) {
       controlLayout['ur'].push('rewind');
       controlLayout['ur'].push('seek');
-      controlLayout['ur'].push('fast-forward');
+      controlLayout['ur'].push('forward');
     }
     
     // Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
@@ -489,17 +489,17 @@
     // test for browser support for volume before displaying volume-related buttons 
     if (this.browserSupportsVolume()) { 
       bll.push('mute');
-      bll.push('volume-increase');
-      bll.push('volume-decrease');
+      bll.push('volume-up');
+      bll.push('volume-down');
     }
 
     var blr = [];
     if (this.mediaType === 'video') { 
       if (this.hasCaptions) {
-        blr.push('closed-captions'); //closed captions
+        blr.push('captions'); //closed captions
       }
       if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('audio-description'); //audio description 
+        blr.push('descriptions'); //audio description 
       }
       if (this.hasSignLanguage) { 
         blr.push('sign'); // sign language
@@ -511,9 +511,9 @@
     }
 
     if (this.isPlaybackRateSupported()) {
-      blr.push('rate-decrease'); 
+      blr.push('slower'); 
       blr.push('rate-display');
-      blr.push('rate-increase');
+      blr.push('faster');
     }
 
     if (this.mediaType === 'video' && this.hasChapters) {
@@ -609,7 +609,7 @@
           }
           else {
             var pipeImg = $('<img>', {
-              src: '../images/pipe-' + this.iconColor + '.png',
+              src: '../images/' + this.iconColor + '/pipe.png',
               alt: '',
               role: 'presentation'
             });
@@ -619,7 +619,15 @@
         }
         else {
           // this control is a button 
-          buttonImgSrc = '../images/' + control + '-' + this.iconColor + '.png';
+          if (control === 'mute') { 
+            buttonImgSrc = '../images/' + this.iconColor + '/volume-mute.png';
+          }
+          else if (control === 'fullscreen') { 
+            buttonImgSrc = '../images/' + this.iconColor + '/fullscreen-expand.png';            
+          }
+          else { 
+            buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
+          }
           buttonTitle = this.getButtonTitle(control); 
           newButton = $('<button>',{ 
             'type': 'button',
@@ -652,13 +660,13 @@
             });
             newButton.append(buttonImg);
           }
-          if (control === 'closed-captions') { 
+          if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
               newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
             }
           }
-          else if (control === 'audio-description') {      
+          else if (control === 'descriptions') {      
             if (!this.prefDesc || this.prefDesc !== 1) { 
               // user prefer non-audio described version 
               // Therefore, load media without description 
@@ -672,10 +680,10 @@
           if (control === 'play') { 
             this.$playpauseButton = newButton;
           }
-          else if (control === 'closed-captions') { 
+          else if (control === 'captions') { 
             this.$ccButton = newButton;
           }
-          else if (control === 'audio-description') {        
+          else if (control === 'descriptions') {        
             this.$descButton = newButton; 
             // gray out description button if description is not active 
             if (!this.descOn) {  
@@ -857,10 +865,10 @@
     else if (control === 'rewind') { 
       return this.tt.rewind;
     }
-    else if (control === 'fast-forward') { 
+    else if (control === 'forward') { 
       return this.tt.forward;
     }
-    else if (control === 'closed-captions') {  
+    else if (control === 'captions') {  
       if (this.captionsOn) {
         return this.tt.hide + ' ' + this.tt.captions;
       }
@@ -868,7 +876,7 @@
         return this.tt.show + ' ' + this.tt.captions;
       }
     }   
-    else if (control === 'audio-description') { 
+    else if (control === 'descriptions') { 
       if (this.descOn) {
         return this.tt.turnOff + ' ' + this.tt.descriptions;
       }
@@ -895,16 +903,16 @@
         return this.tt.unmute;
       }
     }
-    else if (control === 'volume-increase') { 
+    else if (control === 'volume-up') { 
       return this.tt.volumeUp;
     }   
-    else if (control === 'volume-decrease') { 
+    else if (control === 'volume-down') { 
       return this.tt.volumeDown;
     }
-    else if (control === 'rate-increase') {
+    else if (control === 'faster') {
       return this.tt.increaseRate;
     }
-    else if (control === 'rate-decrease') {
+    else if (control === 'slower') {
       return this.tt.decreaseRate;
     }
     else if (control === 'preferences') { 

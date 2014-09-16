@@ -149,7 +149,6 @@
     if (!this.browserSupportsVolume()) {
       return;
     }
-
     if (!mute) {
       this.$muteButton.attr('title',this.tt.mute); 
     }
@@ -441,18 +440,18 @@
     if (this.$muteButton) {
       if (!this.isMuted()) {
         if (this.iconType === 'font') {
-          this.$muteButton.find('span').removeClass('icon-volume-muted').addClass('icon-volume-unmuted'); 
+          this.$muteButton.find('span').removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
         }
         else { 
-          this.$muteButton.find('img').attr('src',this.volumeUnmutedButtonImg); 
+          this.$muteButton.find('img').attr('src',this.volumeLoudButtonImg); 
         }
       }
       else {
         if (this.iconType === 'font') {
-          this.$muteButton.find('span').removeClass('icon-volume-unmuted').addClass('icon-volume-muted'); 
+          this.$muteButton.find('span').removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
       }
         else { 
-          this.$muteButton.find('img').attr('src',this.volumeMutedButtonImg); 
+          this.$muteButton.find('img').attr('src',this.volumeMuteButtonImg); 
         }
       }
     }

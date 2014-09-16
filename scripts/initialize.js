@@ -73,24 +73,28 @@
   };
 
   AblePlayer.prototype.setButtonImages = function() { 
-    this.playButtonImg = '../images/play-' +  this.iconColor + '.png';
-    this.pauseButtonImg = '../images/pause-' +  this.iconColor + '.png';
-    this.rewindButtonImg = '../images/rewind-' +  this.iconColor + '.png';
-    this.forwardButtonImg = '../images/fast-forward-' +  this.iconColor + '.png';
-    this.rateDecreaseButtonImg = '../images/rate-decrease-' +  this.iconColor + '.png';
-    this.rateIncreaseButtonImg = '../images/rate-increase-' +  this.iconColor + '.png';
-    this.volumeMutedButtonImg = '../images/volume-muted-' +  this.iconColor + '.png';
-    this.volumeUnmutedButtonImg = '../images/volume-unmuted-' +  this.iconColor + '.png';
-    this.volumeIncreaseButtonImg = '../images/volume-increase-' +  this.iconColor + '.png';
-    this.volumeDecreaseButtonImg = '../images/volume-decrease-' +  this.iconColor + '.png';
-    this.closedCaptionsButtonImg = '../images/closed-captions-' +  this.iconColor + '.png';
-    this.chaptersButtonImg = '../images/chapters-' + this.iconColor + '.png';
-    this.transcriptButtonImg = '../images/transcript-' +  this.iconColor + '.png';
-    this.descriptionButtonImg = '../images/audio-description-' +  this.iconColor + '.png';
-    this.fullscreenExpandButtonImg = '../images/fullscreen-expand-' +  this.iconColor + '.png';
-    this.fullscreenCollapseButtonImg = '../images/fullscreen-collapse-' + this.iconColor + '.png';
-    this.prefsButtonImg = '../images/preferences-' +  this.iconColor + '.png';
-    this.helpButtonImg = '../images/help-' +  this.iconColor + '.png';
+  
+    var imgPath = '../images/' + this.iconColor + '/';
+    
+    this.playButtonImg = imgPath + 'play.png';
+    this.pauseButtonImg = imgPath + 'pause.png';
+    this.rewindButtonImg = imgPath + 'rewind.png';
+    this.forwardButtonImg = imgPath + 'forward.png';
+    this.fasterButtonImg = imgPath + 'slower.png';
+    this.slowerButtonImg = imgPath + 'faster.png';
+    this.volumeMuteButtonImg = imgPath + 'volume-mute.png';
+    this.volumeLoudButtonImg = imgPath + 'volume-loud.png';
+    this.volumeIncreaseButtonImg = imgPath + 'volume-up.png';
+    this.volumeDecreaseButtonImg = imgPath + 'volume-down.png';
+    this.captionsButtonImg = imgPath + 'captions.png';
+    this.chaptersButtonImg = imgPath + 'chapters.png';
+    this.signButtonImg = imgPath + 'sign.png';
+    this.transcriptButtonImg = imgPath + 'transcript.png';
+    this.descriptionsButtonImg = imgPath + 'descriptions.png';
+    this.fullscreenExpandButtonImg = imgPath + 'fullscreen-expand.png';
+    this.fullscreenCollapseButtonImg = imgPath + 'fullscreen-collapse.png';
+    this.prefsButtonImg = imgPath + 'preferences.png';
+    this.helpButtonImg = imgPath + 'help.png';
   };
   
   // Initialize player based on data on page.
