@@ -617,7 +617,7 @@
           }
           controllerSpan.append(pipe);
         }
-        else {
+        else {        
           // this control is a button 
           if (control === 'mute') { 
             buttonImgSrc = '../images/' + this.iconColor + '/volume-mute.png';
@@ -641,15 +641,12 @@
               'class': iconClass,
               'aria-hidden': 'true'
             })   
-            /*        // this is recommended for a11y in the documentation 
-            // but we have title on the container <button>, so I don't think this is needed
+            // JAWS doesn't announce title on <button> this in some browsers/contexts
+            // Solution is to add hidden text for screen readers only  
             var buttonLabel = $('<span>',{
             'class': 'able-clipped'
             }).text(buttonTitle);
             newButton.append(buttonIcon,buttonLabel);
-            */          
-            
-            newButton.append(buttonIcon);
           }
           else { 
             // use images

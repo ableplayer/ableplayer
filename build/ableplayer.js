@@ -2397,7 +2397,7 @@
           }
           controllerSpan.append(pipe);
         }
-        else {
+        else {        
           // this control is a button 
           if (control === 'mute') { 
             buttonImgSrc = '../images/' + this.iconColor + '/volume-mute.png';
@@ -2421,15 +2421,12 @@
               'class': iconClass,
               'aria-hidden': 'true'
             })   
-            /*        // this is recommended for a11y in the documentation 
-            // but we have title on the container <button>, so I don't think this is needed
+            // JAWS doesn't announce title on <button> this in some browsers/contexts
+            // Solution is to add hidden text for screen readers only  
             var buttonLabel = $('<span>',{
             'class': 'able-clipped'
             }).text(buttonTitle);
             newButton.append(buttonIcon,buttonLabel);
-            */          
-            
-            newButton.append(buttonIcon);
           }
           else { 
             // use images
@@ -3928,9 +3925,11 @@
     }
     if (!mute) {
       this.$muteButton.attr('title',this.tt.mute); 
+      this.$muteButton.find('span.able-clipped').text(this.tt.mute);
     }
     else {
       this.$muteButton.attr('title',this.tt.unmute); 
+      this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
     if (this.player === 'html5') {
@@ -4133,7 +4132,8 @@
         this.$playpauseButton.attr('title',this.tt.play); 
         
         if (this.iconType === 'font') {
-          this.$playpauseButton.find('span').removeClass('icon-pause').addClass('icon-play');
+          this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
+          this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
         }
         else { 
           this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
@@ -4143,7 +4143,8 @@
         this.$playpauseButton.attr('title',this.tt.pause); 
         
         if (this.iconType === 'font') {
-          this.$playpauseButton.find('span').removeClass('icon-play').addClass('icon-pause');
+          this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+          this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
         }
         else { 
           this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
@@ -4186,10 +4187,12 @@
     if (this.$descButton) { 
       if (this.descOn) { 
         this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOff + ' ' + this.tt.descriptions);
       }
       else { 
         this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);            
-      }
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOn + ' ' + this.tt.descriptions);
+      }  
     }
     
     if (this.$ccButton) {
@@ -4200,24 +4203,28 @@
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
           this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.captions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
           this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.captions);
         }
       }
 
       if (this.captions.length > 1) {
         this.$ccButton.attr('title', this.tt.captions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
       }
     }
 
     if (this.$muteButton) {
       if (!this.isMuted()) {
         if (this.iconType === 'font') {
-          this.$muteButton.find('span').removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
+          this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
+          this.$muteButton.find('span.able-clipped').text(this.tt.mute);
         }
         else { 
           this.$muteButton.find('img').attr('src',this.volumeLoudButtonImg); 
@@ -4225,8 +4232,9 @@
       }
       else {
         if (this.iconType === 'font') {
-          this.$muteButton.find('span').removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
-      }
+          this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
+          this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
+        }
         else { 
           this.$muteButton.find('img').attr('src',this.volumeMuteButtonImg); 
         }
@@ -4237,7 +4245,8 @@
       if (!this.isFullscreen()) {
         this.$fullscreenButton.attr('title', this.tt.enterFullScreen); 
         if (this.iconType === 'font') {
-          this.$fullscreenButton.find('span').removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
+          this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
+          this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
         }
         else { 
           this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg); 
@@ -4246,7 +4255,8 @@
       else {
         this.$fullscreenButton.attr('title',this.tt.exitFullScreen); 
         if (this.iconType === 'font') {
-          this.$fullscreenButton.find('span').removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
+          this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
+          this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
         }
         else { 
           this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg); 
@@ -4490,10 +4500,12 @@
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
       this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.transcript);
     }
     else {
       this.$transcriptArea.show();
       this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.transcript);
     }
   };
 
