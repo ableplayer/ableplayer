@@ -163,6 +163,19 @@
     }
   };
 
+  AblePlayer.prototype.okToHandleKeyPress = function () {
+
+    // returns true unless user's focus is on a UI element 
+    // that is likely to need supported keystrokes, including space     
+    var activeElement = $(document.activeElement).prop('tagName');    
+    if (activeElement === 'INPUT') {
+      return false; 
+    }
+    else { 
+      return true;
+    }
+  }
+
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
     // handle keystrokes (using DHTML Style Guide recommended key combinations) 
     // http://dev.aol.com/dhtml_style_guide/#mediaplayer
@@ -172,6 +185,10 @@
     // NOTE #2: If there are multiple players on a single page, keystroke handlers 
     // are only bound to the FIRST player 
 
+    if (!this.okToHandleKeyPress()) { 
+      return false;     
+    }
+    
     // Convert to lower case.
     var which = e.which;
     if (which >= 65 && which <= 90) {
