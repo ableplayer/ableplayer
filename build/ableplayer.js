@@ -5260,8 +5260,12 @@
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
       this.closeTooltips();
     }
-    else if (which === 32) { // spacebar = play/pause
-      this.handlePlay();
+    else if (which === 32) { // spacebar = play/pause     
+      if (!($('.able-controller button').is(':focus'))) { 
+        // only toggle play if a button does not have focus 
+        // if a button has focus, space should activate that button
+        this.handlePlay(); 
+      }
     }
     else if (which === 112) { // p = play/pause        
       if (this.usingModifierKeys(e)) { 
