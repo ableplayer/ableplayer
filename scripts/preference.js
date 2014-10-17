@@ -76,6 +76,12 @@
       });
       
       prefs.push({
+        'name': 'prefDescPause', // automatically pause when closed description starts
+        'label': this.tt.prefDescPause,
+        'default': 0 // off because it burdens user with restarting after every pause 
+      });
+
+      prefs.push({
         'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
         'label': this.tt.prefVisibleDesc,
         'default': 1 // on because sighted users probably want to see this cool feature in action 
@@ -195,7 +201,7 @@
     }         
     this.$ableDiv.append(prefsDiv); 
     
-    var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '25em');
+    var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');

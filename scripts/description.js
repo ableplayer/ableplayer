@@ -133,7 +133,6 @@
     // Trying to combine them ended up in a mess though. Keeping as is for now. 
 
     var d, thisDescription;
-
     var flattenComponentForDescription = function (component) {
       var result = [];
       if (component.type === 'string') {
@@ -167,6 +166,9 @@
       if (this.currentDescription !== thisDescription) { 
         // load the new description into the container div 
         this.$descDiv.html(flattenComponentForDescription(cues[thisDescription].components));
+        if (this.prefDescPause) { 
+          this.pauseMedia();
+        }
         this.currentDescription = thisDescription;
         if (this.$descDiv.is(':hidden')) { 
           this.$descDiv.show();

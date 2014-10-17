@@ -107,6 +107,8 @@
 
 "prefClosedDesc": "Use text-based description if available",
 
+"prefDescPause": "Automatically pause video when text-based description starts",
+
 "prefVisibleDesc": "If using text-based description,make it visible",
 
 "prefHighlight": "Highlight transcript as media plays",
