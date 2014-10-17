@@ -1,7 +1,7 @@
 {
-"increaseRate": "Increase Rate",
+"faster": "Faster",
 
-"decreaseRate": "Decrease Rate",
+"slower": "Slower",
 
 "play": "Play", 
 

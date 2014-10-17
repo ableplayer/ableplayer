@@ -907,10 +907,10 @@
       return this.tt.volumeDown;
     }
     else if (control === 'faster') {
-      return this.tt.increaseRate;
+      return this.tt.faster;
     }
     else if (control === 'slower') {
-      return this.tt.decreaseRate;
+      return this.tt.slower;
     }
     else if (control === 'preferences') { 
       return this.tt.preferences; 
