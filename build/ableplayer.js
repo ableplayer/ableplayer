@@ -1911,13 +1911,18 @@
     }); 
     this.$timer.append(this.$elapsedTimeContainer).append(this.$durationContainer);       
 
+    this.$speed = $('<span>',{
+      'class' : 'able-speed',
+      'role' : 'alert'
+    }).text('Speed: 1x'); 
+
     this.$status = $('<span>',{
       'class' : 'able-status',
       'role' : 'alert'
     });
 
     // Put everything together.
-    this.$statusBarDiv.append(this.$timer, this.$status);
+    this.$statusBarDiv.append(this.$timer, this.$speed, this.$status);
     this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
     this.$ableDiv.append(this.$playerDiv);
   };
@@ -2298,7 +2303,6 @@
 
     if (this.isPlaybackRateSupported()) {
       blr.push('slower'); 
-      blr.push('rate-display');
       blr.push('faster');
     }
 
@@ -2369,20 +2373,6 @@
           controllerSpan.append(sliderDiv);
           
           this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
-        }
-        else if (control === 'rate-display') {
-          this.$rateDisplayContainer = $('<span>');
-          this.$rateDisplayContainer.attr('aria-live', 'polite');
-          this.$rateDisplaySpan = $('<span>');
-          var rateOffscreen = $('<span>', {
-            'class': 'able-offscreen'
-          });
-          rateOffscreen.text('Rate ');
-          this.$rateDisplayContainer.append(rateOffscreen);
-          this.$rateDisplayContainer.append(this.$rateDisplaySpan);
-          controllerSpan.append(this.$rateDisplayContainer);
-          // Call setPlaybackRate to update the control display.
-          this.setPlaybackRate(this.media.playbackRate);
         }
         else if (control === 'pipe') {
           // TODO: Unify this with buttons somehow to avoid code duplication
@@ -2693,10 +2683,10 @@
       return this.tt.volumeDown;
     }
     else if (control === 'faster') {
-      return this.tt.increaseRate;
+      return this.tt.faster;
     }
     else if (control === 'slower') {
-      return this.tt.decreaseRate;
+      return this.tt.slower;
     }
     else if (control === 'preferences') { 
       return this.tt.preferences; 
@@ -4020,8 +4010,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.setPlaybackRate(rate);
     }
-
-    this.$rateDisplaySpan.text(rate.toFixed(2).toString() + 'x');
+    this.$speed.text('Speed: ' + rate.toFixed(2).toString() + 'x');
   };
 
   AblePlayer.prototype.getPlaybackRate = function () {

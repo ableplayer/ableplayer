@@ -178,10 +178,18 @@
 	color: #ffffff;
 	text-align: left;
 	float: left;
+	width: 32%;
+}
+.able-status-bar span.able-speed { 
+  float: left;
+  width: 32%;
+  text-align: center;
 }
 .able-status { 
 	font-style: italic;
 	float: right;
+	width: 32%;
+	text-align :right;
 }
 
 /* Captions and Descriptions */

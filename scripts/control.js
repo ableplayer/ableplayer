@@ -238,8 +238,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.setPlaybackRate(rate);
     }
-
-    this.$rateDisplaySpan.text(rate.toFixed(2).toString() + 'x');
+    this.$speed.text('Speed: ' + rate.toFixed(2).toString() + 'x');
   };
 
   AblePlayer.prototype.getPlaybackRate = function () {
