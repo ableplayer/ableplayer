@@ -1,13 +1,13 @@
 /* 
 	Able Player interactive transcript styles
-	http://terrillthompson.com/ableplayer
 */
 .able-transcript { 
 	position: relative; /* must be positioned for scrolling */
-        overflow-y: scroll;
-        padding-left: 20px;
-        padding-right: 20px;
-        height: 400px;
+  overflow-y: scroll;
+  padding-left: 5%;
+  padding-right: 5%;
+  width: 90%;
+  height: 400px;
 }
 .able-transcript div { 
 	margin: 1em 0;
@@ -56,3 +56,30 @@
     border-width: 1px;
     border-style: solid;
 }
+
+.able-transcript-toolbar input:focus,
+.able-transcript-toolbar input:hover,
+.able-controller input:focus,
+.able-controller input:hover,
+.able-controller button:focus, 
+.able-controller button:hover,
+.able-seek-head:focus,
+.able-seek-head:hover { 
+  outline-style: solid;
+  outline-width: 2px;
+}
+
+.able-transcript-toolbar input:focus,
+.able-controller input:focus,
+.able-controller button:focus,
+.able-seek-head:focus {  
+	outline-color: #ffbb37; /* yellow */
+}
+
+.able-transcript-toolbar input:hover,
+.able-controller input:hover,
+.able-controller button:hover,
+.able-seek-head:hover {
+	outline-color: #8AB839; /* green */
+}
+

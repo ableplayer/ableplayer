@@ -113,33 +113,6 @@
   min-width: 20px;
 }
 
-.able-transcript-toolbar input:focus,
-.able-transcript-toolbar input:hover,
-.able-controller input:focus,
-.able-controller input:hover,
-.able-controller button:focus, 
-.able-controller button:hover,
-.able-seek-head:focus,
-.able-seek-head:hover { 
-  outline-style: solid;
-  outline-width: 2px;
-}
-
-.able-transcript-toolbar input:focus,
-.able-controller input:focus,
-.able-controller button:focus,
-.able-seek-head:focus {  
-	outline-color: #ffbb37; /* yellow */
-}
-
-.able-transcript-toolbar input:hover,
-.able-controller input:hover,
-.able-controller button:hover,
-.able-seek-head:hover {
-	outline-color: #8AB839; /* green */
-}
-
-
 .able-controller button > span { 
   /* icomoon font icon */
   font-size: 20px; 

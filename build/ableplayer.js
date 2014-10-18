@@ -1930,7 +1930,7 @@
       'class' : 'able-speed',
       'role' : 'alert'
     }).text('Speed: 1x'); 
-
+    
     this.$status = $('<span>',{
       'class' : 'able-status',
       'role' : 'alert'
