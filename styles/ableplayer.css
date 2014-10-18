@@ -239,10 +239,28 @@ div.able-now-playing span span {
 /* Modal Dialogs */ 
 
 button.modalCloseButton { 
-  float: right;
+  /* float: right; */
   position: absolute;
-  top: 10px;
-  left: 95%;
+  top: 5px;
+  right: 5px;
+}
+button.modal-button { 
+  margin-right: 5px;
+}
+div.modalDialog input:hover, 
+div.modalDialog input:focus,   
+div.modalDialog button:hover,
+div.modalDialog button:focus {  
+  outline-style: solid;
+  outline-width: 2px;
+}
+div.modalDialog input:hover, 
+div.modalDialog button:hover { 
+	outline-color: #8AB839; /* green */
+}
+div.modalDialog input:focus, 
+div.modalDialog button:focus { 
+	outline-color: #ffbb37; /* yellow */
 }
 
 /* Preferences Form */ 

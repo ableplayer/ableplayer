@@ -217,8 +217,8 @@
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
-    var saveButton = $('<button>Save</button>');
-    var cancelButton = $('<button>Cancel</button>');
+    var saveButton = $('<button class="modal-button">Save</button>');
+    var cancelButton = $('<button class="modal-button">Cancel</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();

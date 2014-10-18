@@ -3,6 +3,7 @@
   
   // HTML5 Media API: 
   // http://www.w3.org/TR/html5/embedded-content-0.html#htmlmediaelement
+
   // W3C API Test Page: 
   // http://www.w3.org/2010/05/video/mediaevents.html
   
@@ -12,7 +13,9 @@
   // (NOTE: some options are not documented, e.g., volume) 
   // JW Player API reference: 
   // http://www.longtailvideo.com/support/jw-player/28851/javascript-api-reference
-  
+
+  // YouTube Player API for iframe Embeds 
+  https://developers.google.com/youtube/iframe_api_reference  
 */
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
