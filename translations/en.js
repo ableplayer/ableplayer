@@ -1,4 +1,6 @@
 {
+"playerHeading": "Media player",
+
 "faster": "Faster",
 
 "slower": "Slower",

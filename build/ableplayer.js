@@ -1821,7 +1821,7 @@
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableDiv.width(this.playerWidth);
 
-    this.injectOffscreenTitle();
+    this.injectOffscreenHeading();
     this.injectBigPlayButton();
 
     // add container that captions or description will be appended to
@@ -1850,29 +1850,56 @@
 
   };
 
-  AblePlayer.prototype.injectOffscreenTitle = function () {
-    // Add offscreen title to the media container.
-    var tempTitle = $('<h1>');
-    this.$ableDiv.prepend(tempTitle);
-    // Find the previous header in the DOM.
-    var headers = $('body').find('h1, h2, h3, h4, h5, h6');
-    var prevHeader = headers.eq(headers.index(this.$titleDiv));
-    var titleType = 'h1';
-    if (prevHeader.length > 0) {
-      // Increment by one if less than 6.
-      var headerNumber = parseInt(prevHeader.prop('tagName')[1]);
-      headerNumber += 1;
-      if (headerNumber > 6) {
-        headerNumber = 6;
+  AblePlayer.prototype.injectOffscreenHeading = function () {
+    // Add offscreen heading to the media container.
+    // To fine the nearest heading in the ancestor tree, 
+    // loop over each parent of $ableDiv until a heading is found 
+    // If multiple headings are found beneath a given parent, get the closest
+    // The heading injected in $ableDiv is one level deeper than the closest heading 
+    var headingType; 
+    
+    var $parents = this.$ableDiv.parents();
+    $parents.each(function(){
+      var $this = $(this); 
+      var $thisHeadings = $this.find('h1, h2, h3, h4, h5, h6'); 
+      var numHeadings = $thisHeadings.length;
+      if(numHeadings){
+        headingType = $thisHeadings.eq(numHeadings-1).prop('tagName');
+        return false;
       }
-      titleType = 'h' + headerNumber.toString();
+    });
+    if (typeof headingType === 'undefined') { 
+      var headingType = 'h1';
     }
-    tempTitle.remove();
-    this.$titleDiv = $('<' + titleType + '>');
-    this.$ableDiv.prepend(this.$titleDiv);
-    this.$titleDiv.addClass('able-offscreen');
-    // TODO: Localize
-    this.$titleDiv.text(this.title || 'Able Media Player');
+    else { 
+      // Increment closest heading by one if less than 6.
+      var headingNumber = parseInt(headingType[1]);
+      headingNumber += 1;
+      if (headingNumber > 6) {
+        headingNumber = 6;
+      }
+      headingType = 'h' + headingNumber.toString();
+    }
+    this.$headingDiv = $('<' + headingType + '>'); 
+    this.$ableDiv.prepend(this.$headingDiv);
+    this.$headingDiv.addClass('able-offscreen');
+    this.$headingDiv.text(this.tt.playerHeading); 
+    
+/*
+    var tempHeading = $('<h1>');
+
+//    this.$ableDiv.prepend(tempHeading);
+    // to get the nearest heading, look at siblings first 
+    // then, if no headings are found, look up the DOM tree 
+
+    var prevHeading = this.$ableDiv.prevAll('h1, h2, h3, h4, h5, h6').first();
+console.log('number of matching sibling elements: ' + prevHeading.length);
+    if (prevHeading.length === 0) { 
+      var prevHeading = this.$ableDiv.closest('h1, h2, h3, h4, h5, h6');
+console.log('number of matching parent elements: ' + prevHeading.length);
+    }
+*/
+    
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
