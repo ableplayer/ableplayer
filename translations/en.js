@@ -111,6 +111,8 @@
 
 "prefVisibleDesc": "If using text-based description,make it visible",
 
+"prefTranscript": "Transcript on by default",
+
 "prefHighlight": "Highlight transcript as media plays",
 
 "prefTabbable": "Keyboard-enable transcript",

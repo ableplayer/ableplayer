@@ -322,7 +322,7 @@
       deferred.fail();
       return promise;
     }
-
+    
     this.$sources = this.$media.find('source');
     if (this.debug) { 
       console.log('found ' + this.$sources.length + ' media sources');
@@ -812,7 +812,6 @@
       'label': this.tt.prefShiftKey,
       'default': 0
     });
-    
     if (this.mediaType === 'video') { // features prefs apply only to video
       prefs.push({
         'name': 'prefCaptions', // closed captions default state 
@@ -845,6 +844,12 @@
       });
       
       prefs.push({
+        'name': 'prefTranscript', // transcript default state
+        'label': this.tt.prefTranscript,
+        'default': 0 // off because turning it on has a certain WOW factor 
+      });
+
+      prefs.push({
         'name': 'prefHighlight', // highlight transcript as media plays
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
@@ -857,12 +862,19 @@
       });
     }
     else { 
+
+      prefs.push({
+        'name': 'prefTranscript', // transcript default state
+        'label': this.tt.prefTranscript,
+        'default': 0 // off because turning it on has a certain WOW factor 
+      });
+
       prefs.push({
         'name': 'prefHighlight', // highlight transcript as media plays
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
-      });
-      
+      });      
+
       prefs.push({
         'name': 'prefTabbable', // tab-enable transcript 
         'label': this.tt.prefTabbable,
@@ -1988,6 +2000,10 @@
       this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
       this.$ableColumnRight.width(this.playerWidth);
     }
+    
+    if (!this.prefTranscript) { 
+      this.$transcriptArea.hide(); 
+    }
   };
 
   AblePlayer.prototype.injectAlert = function () {
@@ -2509,9 +2525,9 @@
     
     // construct help dialog that includes keystrokes for operating the included controls 
     this.addHelp();     
-    
+console.log('about to refresh controls...');    
     // Update state-based display of controls.
-    this.refreshControls();
+    // this.refreshControls();
   };
 
   // Change media player source file, for instance when moving to the next element in a playlist.
@@ -4494,6 +4510,7 @@
   };
 
   AblePlayer.prototype.handleTranscriptToggle = function () {
+console.log('toggling transcript already');    
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
       this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);

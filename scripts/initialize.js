@@ -136,7 +136,7 @@
       deferred.fail();
       return promise;
     }
-
+    
     this.$sources = this.$media.find('source');
     if (this.debug) { 
       console.log('found ' + this.$sources.length + ' media sources');

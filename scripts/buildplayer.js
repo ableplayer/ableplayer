@@ -202,6 +202,10 @@
       this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
       this.$ableColumnRight.width(this.playerWidth);
     }
+    
+    if (!this.prefTranscript) { 
+      this.$transcriptArea.hide(); 
+    }
   };
 
   AblePlayer.prototype.injectAlert = function () {
@@ -723,7 +727,6 @@
     
     // construct help dialog that includes keystrokes for operating the included controls 
     this.addHelp();     
-    
     // Update state-based display of controls.
     this.refreshControls();
   };

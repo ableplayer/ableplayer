@@ -55,7 +55,6 @@
       'label': this.tt.prefShiftKey,
       'default': 0
     });
-    
     if (this.mediaType === 'video') { // features prefs apply only to video
       prefs.push({
         'name': 'prefCaptions', // closed captions default state 
@@ -88,6 +87,12 @@
       });
       
       prefs.push({
+        'name': 'prefTranscript', // transcript default state
+        'label': this.tt.prefTranscript,
+        'default': 0 // off because turning it on has a certain WOW factor 
+      });
+
+      prefs.push({
         'name': 'prefHighlight', // highlight transcript as media plays
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
@@ -100,12 +105,19 @@
       });
     }
     else { 
+
+      prefs.push({
+        'name': 'prefTranscript', // transcript default state
+        'label': this.tt.prefTranscript,
+        'default': 0 // off because turning it on has a certain WOW factor 
+      });
+
       prefs.push({
         'name': 'prefHighlight', // highlight transcript as media plays
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
-      });
-      
+      });      
+
       prefs.push({
         'name': 'prefTabbable', // tab-enable transcript 
         'label': this.tt.prefTabbable,
