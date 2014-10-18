@@ -494,16 +494,17 @@
     
     // TODO: Move all button updates here.
 
-    // Choose show/hide for big play button and adjust position.
-    if (this.isPaused() && !this.seekBar.tracking) {
-      this.$bigPlayButton.show();
-      this.$bigPlayButton.width(this.$mediaContainer.width());
-      this.$bigPlayButton.height(this.$mediaContainer.height());
+    if (typeof this.$bigPlayButton !== 'undefined') { 
+      // Choose show/hide for big play button and adjust position.
+      if (this.isPaused() && !this.seekBar.tracking) {
+        this.$bigPlayButton.show();
+        this.$bigPlayButton.width(this.$mediaContainer.width());
+        this.$bigPlayButton.height(this.$mediaContainer.height());
+      }
+      else {
+        this.$bigPlayButton.hide();
+      }
     }
-    else {
-      this.$bigPlayButton.hide();
-    }
-    
 
     if (this.includeTranscript) {
       // Sync checkbox with autoScrollTranscript variable.

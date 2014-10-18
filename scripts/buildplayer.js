@@ -21,7 +21,10 @@
     this.$ableDiv.width(this.playerWidth);
 
     this.injectOffscreenHeading();
-    this.injectBigPlayButton();
+    
+    if (this.mediaType === 'video') {
+      this.injectBigPlayButton();
+    }
 
     // add container that captions or description will be appended to
     // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  

@@ -1822,7 +1822,10 @@
     this.$ableDiv.width(this.playerWidth);
 
     this.injectOffscreenHeading();
-    this.injectBigPlayButton();
+    
+    if (this.mediaType === 'video') {
+      this.injectBigPlayButton();
+    }
 
     // add container that captions or description will be appended to
     // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
@@ -4308,16 +4311,17 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     
     // TODO: Move all button updates here.
 
-    // Choose show/hide for big play button and adjust position.
-    if (this.isPaused() && !this.seekBar.tracking) {
-      this.$bigPlayButton.show();
-      this.$bigPlayButton.width(this.$mediaContainer.width());
-      this.$bigPlayButton.height(this.$mediaContainer.height());
+    if (typeof this.$bigPlayButton !== 'undefined') { 
+      // Choose show/hide for big play button and adjust position.
+      if (this.isPaused() && !this.seekBar.tracking) {
+        this.$bigPlayButton.show();
+        this.$bigPlayButton.width(this.$mediaContainer.width());
+        this.$bigPlayButton.height(this.$mediaContainer.height());
+      }
+      else {
+        this.$bigPlayButton.hide();
+      }
     }
-    else {
-      this.$bigPlayButton.hide();
-    }
-    
 
     if (this.includeTranscript) {
       // Sync checkbox with autoScrollTranscript variable.
