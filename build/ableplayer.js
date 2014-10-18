@@ -2525,9 +2525,8 @@
     
     // construct help dialog that includes keystrokes for operating the included controls 
     this.addHelp();     
-console.log('about to refresh controls...');    
     // Update state-based display of controls.
-    // this.refreshControls();
+    this.refreshControls();
   };
 
   // Change media player source file, for instance when moving to the next element in a playlist.
@@ -3350,13 +3349,11 @@ console.log('about to refresh controls...');
     modal.addClass('modalDialog');
 
     if (!fullscreen) {
-      var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
-      closeButton.css({
-        float: 'right',
-        position: 'absolute',
-        top: '10px',
-        left: '95%'
-      });
+//      var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
+      var closeButton = $('<button>',{
+         'class': 'modalCloseButton',
+         'title': 'Close dialog'
+      }).text('X');
       closeButton.keydown(function (event) {
         // Space key down
         if (event.which === 32) {
@@ -4510,7 +4507,6 @@ console.log('about to refresh controls...');
   };
 
   AblePlayer.prototype.handleTranscriptToggle = function () {
-console.log('toggling transcript already');    
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
       this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);

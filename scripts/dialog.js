@@ -25,13 +25,10 @@
     modal.addClass('modalDialog');
 
     if (!fullscreen) {
-      var closeButton = $('<a class="modalCloseButton" href="javascript:void(0)" title="Close modal dialog">X</a>');
-      closeButton.css({
-        float: 'right',
-        position: 'absolute',
-        top: '10px',
-        left: '95%'
-      });
+      var closeButton = $('<button>',{
+         'class': 'modalCloseButton',
+         'title': 'Close dialog'
+      }).text('X');
       closeButton.keydown(function (event) {
         // Space key down
         if (event.which === 32) {

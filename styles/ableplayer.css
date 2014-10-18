@@ -236,7 +236,17 @@ div.able-now-playing span span {
 	display: block;
 }
 
+/* Modal Dialogs */ 
+
+button.modalCloseButton { 
+  float: right;
+  position: absolute;
+  top: 10px;
+  left: 95%;
+}
+
 /* Preferences Form */ 
+
 .able-prefs-form, .able-help-div, .able-alert-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
@@ -255,14 +265,9 @@ div.able-now-playing span span {
 .able-prefs-form input { 
 	padding-right: 1em;
 }
-.ui-dialog .ui-dialog-buttonpane button {
-  width: 5em;
-}
-.ui-widget { 
-	font-size: 1em;
-}
 
 /* Help Dialog */ 
+
 .able-help-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
