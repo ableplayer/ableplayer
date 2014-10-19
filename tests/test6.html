@@ -29,17 +29,17 @@
 <p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Tests</a>.</p>
 
 <!-- use the following markup for each media element -->
-		<audio id="audio1" class="ump-media" preload="auto" data-able-player>
-			<!-- source elements are optional when there's a playlist. --> 
-			<!-- If ommitted, they will be constructed from the first playlist item -->
-		</audio>
+<audio id="audio1" preload="auto" data-able-player>
+  <!-- source elements are optional when there's a playlist. --> 
+	<!-- If ommitted, they will be constructed from the first playlist item -->
+</audio>
 
 <!-- use the following markup for each playlist --> 
-<!-- an UMP playlist is any <ul> with class="ump-playlist" -->
+<!-- an AblePlayer playlist is any <ul> with class="able-playlist" -->
 <!-- The value of data-player must match the id of the media element --> 
 <!-- Add data-embedded to embed the playlist into the media player -->  
 <!-- see documentation for additional details about markup --> 
-<ul class="ump-playlist" data-player="audio1" data-embedded>
+<ul class="able-playlist" data-player="audio1" data-embedded>
   <li 
 	  data-mp3="../media/paulallen.mp3"
 		data-ogg="../media/paulallen.ogg">The Paul Allen Song</li>
