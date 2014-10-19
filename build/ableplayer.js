@@ -435,7 +435,7 @@
         // this is the playlist for the current player 
         thisObj.hasPlaylist = true;        
         // If using an embedded player, we'll replace $playlist with the clone later.
-        this.$playlist = $(this).find('li');
+        thisObj.$playlist = $(this).find('li');
         // add tabindex to each list item
         $(this).find('li').attr('tabindex', '0');        
         thisObj.playlistIndex = 0;        
