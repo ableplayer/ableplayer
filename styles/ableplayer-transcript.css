@@ -1,38 +1,85 @@
 /* 
-	Universal Media Player (UMP) interactive transcript styles
-	http://terrillthompson.com/ump
+	Able Player interactive transcript styles
 */
-.ump-transcript { 
+.able-transcript { 
 	position: relative; /* must be positioned for scrolling */
+  overflow-y: scroll;
+  padding-left: 5%;
+  padding-right: 5%;
+  width: 90%;
+  height: 400px;
 }
-.ump-transcript div { 
+.able-transcript div { 
 	margin: 1em 0;
 }
-.ump-transcript div.ump-desc { 
+.able-transcript div.able-desc { 
 	background-color: #FEE;
 	border: thin solid #336;
 	font-style: italic;
 	padding: 1em;
 }
-.ump-transcript span.ump-unspoken { 
+.able-transcript span.able-unspoken { 
 	font-weight: bold;
 }
-.ump-transcript span.hidden { 
+.able-transcript span.hidden { 
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
 }
-.ump-highlight { 
+.able-highlight { 
 	background: #FF6; /* light yellow */
 }
-.ump-previous { 
+.able-previous { 
 	background: black !important;
 	font-style: italic;
 }
-.ump-transcript span:hover, 
-.ump-transcript span:focus, 
-.ump-transcript span:active { 
+.able-transcript span:hover, 
+.able-transcript span:focus, 
+.able-transcript span:active { 
 	background: #CF6; /* light green */
 	cursor: pointer;
+}
+
+.able-transcript-toolbar {
+    padding: 10px;
+    background-color: #DDDDDD;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+}
+
+.able-transcript-toolbar label {
+    margin-right: 10px;
+}
+
+.able-transcript-area {
+    margin: 1em;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.able-transcript-toolbar input:focus,
+.able-transcript-toolbar input:hover,
+.able-controller input:focus,
+.able-controller input:hover,
+.able-controller button:focus, 
+.able-controller button:hover,
+.able-seek-head:focus,
+.able-seek-head:hover { 
+  outline-style: solid;
+  outline-width: 2px;
+}
+
+.able-transcript-toolbar input:focus,
+.able-controller input:focus,
+.able-controller button:focus,
+.able-seek-head:focus {  
+	outline-color: #ffbb37; /* yellow */
+}
+
+.able-transcript-toolbar input:hover,
+.able-controller input:hover,
+.able-controller button:hover,
+.able-seek-head:hover {
+	outline-color: #8AB839; /* green */
 }
 

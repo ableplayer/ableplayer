@@ -1,4 +1,9 @@
 {
+"playerHeading": "Media player",
+
+"faster": "Faster",
+
+"slower": "Slower",
 
 "play": "Play", 
 
@@ -43,6 +48,10 @@
 "preferences": "Preferences",
 
 "help": "Help",
+
+"enterFullScreen": "Enter full screen",
+
+"exitFullScreen": "Exit full screen",
 
 "fullScreen": "Full screen",
 
@@ -92,13 +101,19 @@
 
 "prefCtrlKey": "Control key",
 
+"prefShiftKey": "Shift key",
+
 "prefCaptions": "Closed captions on by default",
 
 "prefDesc": "Description on by default",
 
 "prefClosedDesc": "Use text-based description if available",
 
+"prefDescPause": "Automatically pause video when text-based description starts",
+
 "prefVisibleDesc": "If using text-based description,make it visible",
+
+"prefTranscript": "Transcript on by default",
 
 "prefHighlight": "Highlight transcript as media plays",
 

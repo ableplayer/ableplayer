@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Test #7c</title>
+<link rel="stylesheet" href="tests.css" type="text/css">
+
+<!-- Dependencies --> 
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="../thirdparty/jquery.cookie.js"></script>
+
+<!-- Able Player CSS -->  
+<link rel="stylesheet" href="../styles/ableplayer.css" type="text/css"/>
+
+<!-- CSS for interactive transcript --> 
+<link rel="stylesheet" href="../styles/ableplayer-transcript.css" type="text/css"/>
+
+<!-- additional styles for positioning transcript on this page. Not included in the UMP package -->
+<style>
+	div.ump { 
+		float: left;
+		margin-top: 0;
+	}
+	div.ump-transcript h2 { 
+		font-size: 1.2em;
+		margin: 0;
+	}
+	div.ump-transcript { 
+		height: 300px; 
+		overflow: auto;
+		position: relative;
+		padding: 0.25em 1em;
+		border: 1px solid #CCC; 
+	}
+	div.ump-transcript p.help { 
+  	font-style: italic;
+  	color: #555555;
+	}
+	/* styles particularly designed for lyrics or poetry, with forced line breaks */
+	div.ump-transcript div { 
+  	margin-bottom: 1em;
+	} 
+	div.ump-transcript span { 
+  	display: block; 
+	}
+	
+</style>
+ 
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+
+<h1>Able Player Test #7c:<br/>Audio player with interactive transcript</h1>
+
+<p>This test is a work in progress. The transcript (in this case, song lyrics) is provided in 
+  a WebVTT file and linked using a &lt;track&gt; element, just as with video.</p>
+
+<p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Tests</a>.</p>
+
+<!-- use the following markup for each media element -->
+<audio id="audio1" class="ump-media" preload="auto" data-able-player>
+  <source type="audio/ogg" src="../media/paulallen.ogg"/>
+  <source type="audio/mpeg" src="../media/paulallen.mp3"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+</audio>
+
+</body>
+</html>

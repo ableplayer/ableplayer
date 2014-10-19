@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Test #11</title>
+<link rel="stylesheet" href="tests.css" type="text/css">
+
+<!-- Dependencies --> 
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="../thirdparty/jquery.cookie.js"></script>
+
+<!-- Able Player CSS -->  
+<link rel="stylesheet" href="../styles/ableplayer.css" type="text/css"/>
+
+<!-- CSS for interactive transcript --> 
+<link rel="stylesheet" href="../styles/ableplayer-transcript.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- Load JW Player in case its needed as a fallback solution --> 
+<!-- This has minimal overhead - better to load it now than dynamically as it's needed --> 
+<script src="../thirdparty/jwplayer.js"></script>
+  
+</head>
+
+<body>
+
+<h1>Able Player Test #11:<br/>Larger Sized Player</h1>
+
+<p>This player includes captions and text-based description. Whether these appear visually depends on your Preferences (click the Preferences button on the controller). It's the same as <a href="test4.html">this earlier test</a>, but the width and height of the video (as specified by width and height attributes on the &lt;video&gt; element) are greater than in previous tests.</p>
+   
+<p>For additional tests see the <a href="index.html">Index of UMP Tests</a>.</p>
+
+<!-- use the following markup for each media element -->
+<video id="video1" preload="auto" width="800" height="600" poster="../media/wwa.jpg" data-able-player>
+  <source type="video/webm" src="../media/wwa.webm"/>
+	<source type="video/mp4" src="../media/wwa.mp4"/>
+	<track kind="captions" src="../media/wwa_captions_en.vtt"/>
+	<track kind="descriptions" src="../media/wwa_description_en.vtt"/>
+</video>
+
+</body>
+</html>

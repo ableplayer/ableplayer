@@ -1,12 +1,21 @@
 /* 
 	Able Player core styles
 */
-.ump { 
-	margin: 1em 0;
-	min-width: 480px; 
-	width: 480px; /* will be changed dynamically as player is contructed */
+.able { 
+    margin: 1em 0;
+    width: 100%; /* will be changed dynamically as player is contructed */
+    box-shadow: 0px 0px 16px #262626;
 }
-.ump .ump-vidcap-container {
+
+.able-column-left {
+    float: left;
+}
+
+.able-column-right {
+    float: left;
+}
+
+.able .able-vidcap-container {
   background-color: black;
   height: 360px;
   left: 0;
@@ -14,119 +23,151 @@
   position: relative;
   top: 0;
   width: 480px;
+/*  margin-bottom: 10px;*/
 }
-.ump-player { 
+.able-player { 
 	font-family: Arial, Helvetica, sans-serif;
-	background-color: #000000; /* background color of player (appears on top & bottom) */
-	border: 1px solid #000000; /* border around entire player */
-	border-bottom-left-radius: 15px;
-	border-bottom-right-radius: 15px;
+	background-color: #262626; /* background color of player (appears on top & bottom) */
+/*	border: 1px solid #000000; border around entire player */
+/*	border-bottom-left-radius: 15px;
+	border-bottom-right-radius: 15px;*/
 }
-.ump-audio { 
+/*.able-audio { 
 	border-top-left-radius: 15px;
 	border-top-right-radius: 15px;
+}*/
+.able-offscreen { 
+	position:absolute;
+	left:-10000px;
+	top:auto;
+	width:1px;
+	height:1px;
+	overflow:hidden;
 }
-.ump-video { 
-	margin-top: -0.25em;
+.able-video { 
+/*	margin-top: -0.75em;*/
 }
-.ump-video .ump-now-playing { 
+.able-video .able-now-playing { 
 	display: none; /* not currently used for video */
 }
-.ump-controller { 
+.able-controller { 
 	position: relative;
 	border-top: 2px solid #4c4c4c; 
 	border-bottom: 2px solid #4c4c4c; 
-	background-color: #3D3D3D; /* background color of controller bar */
+	background-color: #464646; /* background color of controller bar */
 	/* min-height: 2.6em; */ /* height of button (1.4em) + padding (0.2em) + margin (0.5em) + outline (0.5em) */
 	/* line-height: 2.6em; */
-	min-height: 38px; /* height of button (30px) + 4px border + 4px padding */
-	padding: 5px 0 0; 
+	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
+	padding: 0; 
 }
-.ump-controller > span { 
-  width: 50%;
-}
+
 
 /* Controller Buttons & Controls */
+.able-big-play-button {
+    position: absolute;
+    font-size: 8em;
+    opacity: 0.5;
+    filter:alpha(opacity=50); /* for IE */
+    color: #fdfdfd;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    padding: 0;
+}
 
+.able-big-play-button:hover {
+    opacity: 100;
+    filter:alpha(opacity=100); /* for IE */
+}
 
-.ump-left-controls, .ump-right-controls { 
+.able-left-controls, .able-right-controls { 
     overflow: visible;
 }
-.ump-left-controls { 
+.able-left-controls button, .able-right-controls button {
+    vertical-align: middle;
+}
+
+.able-left-controls { 
   float: left;
 }
-.ump-right-controls { 
+.able-right-controls { 
   float: right;
 }
-.ump-controller button {
+
+.able-left-controls span,
+.able-right-controls span {
+  color: #fdfdfd;
+}
+
+.able-controller button {
   background: none;
   position: relative;
   display: inline-block;
   border-style: none;
   margin: 0;
   padding: 0;
-  min-width: 40px;
+  color: #fdfdfd;
+  min-width: 20px;
 }
-.ump-controller button:focus, 
-.ump-controller button:hover { 
-  outline-style: solid;
-  outline-width: 5px;
-}
-.ump-controller button:focus {  
-	outline-color: #ffff00; /* yellow */
-}
-.ump-controller button:hover {
-	outline-color: #66ff66; /* green */
-}
-.ump-controller button > span { 
+
+.able-controller button > span { 
   /* icomoon font icon */
-  font-size: 24px; 
+  font-size: 20px; 
   width: 24px;
   margin: 0 5px;
   padding: 0;
 }
-.ump-controller button > img { 
+.able-controller button > img { 
   /* image icon */
-  width: 30px; 
-  height: 30px;
+  /* width: 20px; 
+  height: 20px; */
   margin: 0 2px;
   padding: 0;
 }
-.ump-controller .buttonOff { 
+.able-controller .buttonOff { 
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
 }
-.ump-white-controls button { 
-  color: white;
-}
-.ump-black-controls button { 
-  color: black;
+
+.able-controller .able-seekbar {
+  margin: 0 5px
 }
 
 /* Status Bar */
 
-.ump-status-bar { 
-	height: 2em;
-	min-height: 2em;
+.able-status-bar { 
+	height: 1.5em;
+	min-height: 1.5em;
 	color: #FFFFFF;
-	font-size: 0.9em;
+	font-size: 1.0em;
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
 }	
-.ump-status-bar span.ump-timer { 
+.able-status-bar span.able-timer { 
 	/* contains both span.elapsedTime and span.duration */	
 	color: #ffffff;
 	text-align: left;
 	float: left;
+	width: 32%;
 }
-.ump-status { 
+.able-status-bar span.able-speed { 
+  float: left;
+  width: 32%;
+  text-align: center;
+}
+.able-status { 
 	font-style: italic;
 	float: right;
+	width: 32%;
+	text-align :right;
 }
 
 /* Captions and Descriptions */
 
-div.ump-captions {
+div.able-captions {
   background-color: black;
   font-size: 1.1em;
   bottom: 0;
@@ -140,20 +181,20 @@ div.ump-captions {
   display: none;
   z-index: 1000;
 }
-div.ump-descriptions { 
-	position: relative;
-	color: #FF0; /* yellow, to differentiate it from captions */
-	background-color: black;
-	min-height: 3em; 
-  border-top: 1px solid white;
-  margin-top: -10px;
-  padding: 1em 0;
-  text-align: center;
+div.able-descriptions { 
+    position: relative;
+    color: #FF0; /* yellow, to differentiate it from captions */
+    background-color: #262626;
+    min-height: 3em; 
+    border-top: 1px solid white;
+    margin-top: -10px;
+    padding: 1em 0;
+    text-align: center;
 }
 
 /* Now Playing */
 
-div.ump-now-playing {
+div.able-now-playing {
 	text-align: center;
 	font-weight: bold;
 	font-size: 1.1em;
@@ -161,15 +202,43 @@ div.ump-now-playing {
 	background-color: transparent; 
 	padding: 0.5em 0.5em 1em;
 }
-div.ump-now-playing span { 
+div.able-now-playing span { 
 	font-size: 0.9em;
 }
-div.ump-now-playing span span { 
+div.able-now-playing span span { 
 	display: block;
 }
 
+/* Modal Dialogs */ 
+
+button.modalCloseButton { 
+  /* float: right; */
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+button.modal-button { 
+  margin-right: 5px;
+}
+div.modalDialog input:hover, 
+div.modalDialog input:focus,   
+div.modalDialog button:hover,
+div.modalDialog button:focus {  
+  outline-style: solid;
+  outline-width: 2px;
+}
+div.modalDialog input:hover, 
+div.modalDialog button:hover { 
+	outline-color: #8AB839; /* green */
+}
+div.modalDialog input:focus, 
+div.modalDialog button:focus { 
+	outline-color: #ffbb37; /* yellow */
+}
+
 /* Preferences Form */ 
-.ump-prefs-form, .ump-help-div { 
+
+.able-prefs-form, .able-help-div, .able-alert-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
 	padding: 0.5em 1em;
@@ -177,63 +246,43 @@ div.ump-now-playing span span {
 	width: 25em;
 	display: none;
 }
-.ump-prefs-form fieldset { 
+.able-prefs-form fieldset { 
 	border: none;
 }
-.ump-prefs-form legend { 
+.able-prefs-form legend { 
 	color: black;
 	font-weight: bold;	
 }
-.ump-prefs-form input { 
+.able-prefs-form input { 
 	padding-right: 1em;
-}
-.ui-dialog .ui-dialog-buttonpane button {
-  width: 5em;
-}
-.ui-widget { 
-	font-size: 1em;
 }
 
 /* Help Dialog */ 
-.ump-help-div { 
+
+.able-help-div { 
 	background-color: #F5F5F5; 
 	border: medium solid #ccc;
-	padding: 0.5em 0;
-	margin: 0 0 0 1em; 
 	width: 25em;
-}
-.ump-help-div p { 
-	margin: 0.25em -1em;
-}
-.ump-help-div ul { 
-	list-style-type: none;
-	padding-left: 0.25em;
 }
 
-/* Alert Dialog */ 
-.ump-alert-div { 
-	background-color: #F5F5F5; 
-	border: medium solid #ccc;
-	padding: 0.5em 0;
-	margin: 0 0 0 1em; 
-	width: 25em;
-	/* display: none; */
+.able-help-div ul { 
+	list-style-type: none;
 }
 
 /* icomoon.io font styling */
 @font-face {
-	font-family: 'icomoon';
-	src:url('../fonts/icomoon.eot?-ix7ifj');
-	src:url('../fonts/icomoon.eot?#iefix-ix7ifj') format('embedded-opentype'),
-		url('../fonts/icomoon.woff?-ix7ifj') format('woff'),
-		url('../fonts/icomoon.ttf?-ix7ifj') format('truetype'),
-		url('../fonts/icomoon.svg?-ix7ifj#icomoon') format('svg');
+	font-family: 'able';
+	src:url('../fonts/able.eot?sn5rkg');
+	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
+		url('../fonts/able.woff?sn5rkg') format('woff'),
+		url('../fonts/able.ttf?sn5rkg') format('truetype'),
+		url('../fonts/able.svg?sn5rkg#able') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
 
 [class^="icon-"], [class*=" icon-"] {
-	font-family: 'icomoon';
+	font-family: 'able';
 	speak: none;
 	font-style: normal;
 	font-weight: normal;
@@ -246,32 +295,44 @@ div.ump-now-playing span span {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.icon-descriptions:before {
-	content: "\e60b";
-}
-.icon-help:before {
-	content: "\e611";
-}
-.icon-sign:before {
-	content: "\e60a";
-}
-.icon-captions:before {
-	content: "\e609";
-}
-.icon-fullscreen:before {
-	content: "\e612";
-}
-.icon-preferences:before {
-	content: "\e610";
-}
 .icon-play:before {
-	content: "\e600";
+	content: "\f04b";
 }
 .icon-pause:before {
-	content: "\e601";
+	content: "\f04c";
 }
 .icon-stop:before {
+	content: "\f04d";
+}
+.icon-fullscreen-expand:before {
+	content: "\f065";
+}
+.icon-fullscreen-collapse:before {
+	content: "\f066";
+}
+.icon-pipe:before {
+	content: "\e600";
+}
+.icon-captions:before {
+	content: "\e601";
+}
+.icon-descriptions:before {
 	content: "\e602";
+}
+.icon-transcript:before {
+	content: "\f15c";
+}
+.icon-slower:before {
+	content: "\f0dd";
+}
+.icon-faster:before {
+	content: "\f0de";
+}
+.icon-help:before {
+	content: "\f128";
+}
+.icon-close:before {
+	content: "\f00d";
 }
 .icon-rewind:before {
 	content: "\e603";
@@ -279,41 +340,43 @@ div.ump-now-playing span span {
 .icon-forward:before {
 	content: "\e604";
 }
-.icon-toStart:before {
+.icon-volume-loud:before {
+	content: "\e60b";
+}
+.icon-volume-medium:before {
 	content: "\e605";
 }
-.icon-toEnd:before {
-	content: "\e606";
-}
-.icon-previous:before {
-	content: "\e607";
-}
-.icon-next:before {
-	content: "\e608";
-}
-.icon-volume:before {
+.icon-volume-soft:before {
 	content: "\e60c";
 }
-.icon-mute:before {
+.icon-volume-mute:before {
+	content: "\e606";
+}
+.icon-volume-up:before {
+	content: "\e607";
+}
+.icon-volume-down:before {
+	content: "\e608";
+}
+.icon-chapters:before {
+	content: "\e609";
+}
+.icon-preferences:before {
 	content: "\e60d";
 }
-.icon-volumeUp:before {
-	content: "\e60e";
+.icon-sign:before {
+	content: "\e60a";
 }
-.icon-volumeDown:before {
-	content: "\e60f";
-}
-
 
 /* Misc */
 
-.ump-clipped { 
+.able-clipped { 
 	/* hide from sighted users, but not screen reader users */
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);	
 }
-.ump-error { 
+.able-error { 
 	display: block;
 	background: #ffc;
 	border: 2px solid #000;
@@ -321,7 +384,7 @@ div.ump-now-playing span span {
 	margin: 0.75em;
 	padding: 0.5em;
 }
-.ump-fallback { 
+.able-fallback { 
   display: table;
   text-align: center;
   vertical-align: middle;
@@ -332,4 +395,28 @@ div.ump-now-playing span span {
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
+}
+
+/* Fullscreen settings */
+
+:-webkit-full-screen {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background: none;
+}
+
+
+/* Tooltips */
+.able-tooltip {
+    position: absolute;
+    padding: 10px;
+    border-color: black;
+    border-width: 1px;
+    background-color: #CCCCCC;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: none;
+    z-index: 3000;
 }
