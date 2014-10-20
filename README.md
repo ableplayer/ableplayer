@@ -415,7 +415,7 @@ users can control the following:
 -   Keyboard-enable transcript
 
 
-  [examples]: examples/index.html
+  [examples]: http://ableplayer.github.io/ableplayer/tests/
   [jQuery]: http://jquery.com/
   [Modernizr]: http://modernizr.com/
   [jquery.cookie]: https://github.com/carhartl/jquery-cookie
