@@ -5,22 +5,27 @@ Able Player
 the HTML5 \<audio\> or \<video\> element for browsers that support them,
 and (optionally) the JW Player as a fallback for those that don’t.
 
-Functioning examples of the player are available at [terrillthompson.com][example page].
+To see the player in action check our [Able Player Examples][examples] page.
 
 Features
 --------
 
 -   Supports both audio and video.
 -   Supports either a single audio track or an entire playlist.
--   Includes a custom media controller, with HTML buttons that are fully
-    accessible to keyboard users and people using non-visual
-    technologies such as screen readers and Braille output devices.
--   Supports closed captions for video
--   Supports audio description either by swapping out the video with a
-    separate audio described version or by text.
--   Both the HTML5 player and fallback player use the same custom
-    interface, so users whose browsers don’t support HTML5 media get a
-    virtually identical experience.
+-   A full set of player controls that are keyboard-accessible, properly labeled for screen reader users, and controllable by speech recognition users. 
+-   Customizable keyboard shortcuts that enable the player to be operated from anywhere on the web page (unless there are multiple instances of the player on a given page; then the player must have focus for keyboard shortcuts to work).  
+-   High contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus. 
+-   Support for closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.   
+-   Support for chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated. 
+-   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by screen readers.  Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio. 
+-   Support for audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions. 
+-   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so. 
+-   An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. 
+-   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. 
+-   Support for playing YouTube videos within the AblePlayer chrome.  
+-   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
+-   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
+    
 
 Compatibility
 -------------
@@ -46,7 +51,7 @@ Dependencies
 exception is the fallback player—see the *Fallback* section below for
 details.
 
--   *Able Player* uses [jQuery][] and [jQuery UI][]. The example code
+-   *Able Player* uses [jQuery][]. The example code
     below uses Google’s hosted libraries; no download required.
 -   *Able Player* uses [Modernizr][] to enable styling of HTML5 elements
     in Internet Explorer 6 through 8. A Modernizr 2.6.2 Custom Build is
@@ -81,7 +86,7 @@ Here’s a breakdown:
 
 At some point we may decide that it’s reasonable to stop supporting a
 fallback player. However, according to [WebAIM’s 2014 Screen Reader User
-Survey][] 19.8% of screen reader users are still using Internet Explorer 8, 7, or 6. Until these users catch up, I think we have to provide a
+Survey][] 19.8% of screen reader users are still using Internet Explorer 8, 7, or 6. Until these users catch up, we think we have to provide a
 working fallback.
 
 As an alternative fallback, you could link to the media file so users
@@ -108,15 +113,13 @@ to all use cases, both audio and video.
 <!-- Dependencies -->
 <script src="thirdparty/modernizr.custom.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 <script src="thirdparty/jquery.cookie.js"></script>
-<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css">
  
 <!-- CSS --> 
 <link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
  
 <!-- JavaScript -->
-<script src="scripts/ableplayer.js"></script>
+<script src="build/ableplayer.js"></script>
 ```
 
 Setup Step 3: Add HTML
@@ -133,7 +136,7 @@ to ensure cross-browser compatibility, since some browsers don’t support
 MP3.
 
 ```HTML
-<audio id="audio1" class="ump-media" preload="auto">
+<audio id="audio1" data-able-player preload="auto">
   <source type="audio/ogg" src="path_to_audio_file.ogg"/>
   <source type="audio/mpeg" src="path_to_audio_file.mp3"/>
 </audio>
@@ -142,7 +145,8 @@ MP3.
 The following attributes are supported on the \<audio\> element:
 
 -   **id** - required; any unique ID
--   **class** - required; must be **ump-media**
+-   **data-able-player** - required 
+-   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to
@@ -156,7 +160,7 @@ Copy and paste the following code into your web page, replacing the
 source files with the path to your own media files.
 
 ```HTML
-<video id="video1" class="ump-media" preload="auto" width="480" height="360" poster="path_to_image.jpg">
+<video id="video1" data-able-player preload="auto" width="480" height="360" poster="path_to_image.jpg">
   <source type="video/webm" src="path_to_video.webm" data-desc-src="path_to_described_video.webm"/>
   <source type="video/mp4" src="path_to_video.mp4" data-desc-src="path_to_described_video.mp4"/>
   <track kind="captions" src="path_to_captions.vtt"/>
@@ -167,7 +171,13 @@ source files with the path to your own media files.
 The following attributes are supported on the \<video\> element:
 
 -   **id** - required; any unique ID
--   **class** - required; must be **ump-media**
+-   **data-able-player** - required
+-   **data-start-time** - optional; time at which you want the video to start playing (in seconds)
+-   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
+    The transcript is generated automatically if captions and/or descriptions are available. 
+    If this attribute is not provided the transcript will be displayed in its default container  
+    adjacent to the player.  
+-   **data-youtube-id** - optional; 11-character YouTube id 
 -   **preload** - optional; use “auto” or “metadata”. See explanation
     above under *Audio*.
 -   **width** - width of the video in pixels. If not provided will
@@ -187,11 +197,11 @@ MP4. Browsers will play the first media source that they support.
 
 #### Closed Captions
 
-Captions are added using the <track> element with kind=“captions”.
-Captions must be in [Web Video Text Tracks (WebVTT)][] format. WebVTT
-tags within captions are not currently supported.
+Captions are added using the \<track\> element with kind=“captions”.
+Captions must be in Web Video Text Tracks format ([WebVTT][http://dev.w3.org/html5/webvtt/]). WebVTT
+tags within captions are currently ignored.  
 
-If captions are provided for a video, a CC button will be added to the
+If captions are provided, a CC button will be added to the
 *Able Player* controller.
 
 #### Audio Description
@@ -199,7 +209,7 @@ If captions are provided for a video, a CC button will be added to the
 Supplemental description of key visual content for blind users can be
 added using one of two methods.
 
-The first method is the same as closed captions, a <track> element, with
+The first method is the same as closed captions, a \<track\> element, with
 kind=“descriptions”. This points to a WebVTT file, which is essentially
 the same as a closed caption file, but its contents are description text
 rather than captions. With this method, description text is written to a
@@ -211,7 +221,7 @@ The second method is to produce a separate video with description mixed
 in. If multiple video sources are already provided (e.g., an MP4 and
 WebM file), then the described version must be available in both of
 these formats. For each video source that has a described version
-available, add a **data-desc-src** attribute to the <source> element for
+available, add a **data-desc-src** attribute to the \<source\> element for
 that video. The value of this attribute is a path pointing to the
 described version of the video. With this method, the described version
 of the video can be played instead of the non-described version, and the
@@ -224,71 +234,22 @@ universal Description symbol, the letter “D”). How descriptions are
 ultimately delivered depends on which of the above methods is used, and
 on user preference. If a user prefers text-based description announced
 by their screen reader, that’s what they’ll get. If they prefer an
-alternate video with description mixed it, that’s what they’ll get. See
+alternate video with description mixed in, that’s what they’ll get. See
 the section below on *User Preferences* for additional information about
 preferences.
 
-Setup Step 4: Initialize the Media Player
------------------------------------------
-
-Initialize the player with the following JavaScript command, replacing
-*audio1* if needed with the id of your media player.
-
-```JavaScript
-new AblePlayer(id,index,startTime); 
-```
-
-The AblePlayer object accepts the following parameters:
-
--   **id** of the media element
--   **index** of this *Able Player* instance (optional; if page includes
-    only one player, index = 0)
--   **startTime** in seconds (optional; default of 0 begins playing at
-    the beginning)
-
-In the following examples, the player is initialized inside a jQuery
-document ready function to be sure the DOM has fully loaded.
-
-In the first example, a single player is initialized:
-
-```HTML
-<script>
-  $(document).ready(function() {
-    new AblePlayer('audio1');  
-  });
-</script>
-```
-
-In the next example, all players on the page are initialized. This same code could optionally be used universally, even on pages that just have one player.
-
-```HTML
-<script>
-    $(document).ready(function() { 
-      $('.ump-media').each(function(index) { 
-        new AblePlayer($(this).attr('id'),index);       
-      });
-    });
-</script>
-```
-
-In the next example, a single player is initialized and starts playing at 2 minutes (120 seconds).
-
-```HTML
-<script>
-  $(document).ready(function() {
-    new AblePlayer('audio1',0,120);  
-  });
-</script>
-```
-
-Setup Step 5: Review User-Defined Variables in *ableplayer.js*
+Setup Step 4: Review User-Defined Variables in *ableplayer.js*
 --------------------------------------------------------------
 
-The JavaScript file *ableplayer.js* includes a block of user-defined
+The JavaScript file *initialize.js* includes a block of user-defined
 variables that can be modified from their default settings, such as
 volume, color of controller buttons, seek interval for rewind and
 forward buttons, and others. Explanations of each variable are provided
 in the comments.
+
+If you make changes to this or any other JavaScript script files,  
+the player will need to be recompiled before your changes will take effect. 
+To do so, run the shell script *compile.sh*. 
 
 Playlists
 ---------
@@ -297,7 +258,7 @@ An *Able Player* playlist is an HTML list of tracks. The list can be
 either ordered (\<ol\>) or unordered (\<ul\>). The following attributes
 are supported on the list element:
 
--   **class** - required; must be **ump-playlist**
+-   **class** - required; must be **able-playlist**
 -   **data-player** - required; must reference the ID of the media
     player in which the playlist should be played.
 -   **data-embedded** - optional; add this attribute if you want your
@@ -312,7 +273,7 @@ audio playlist includes three songs, each of which is available in MP3
 and OGG:
 
 ```HTML
-<ul class="ump-playlist" data-player="audio1" data-embedded>
+<ul class="able-playlist" data-player="audio1" data-embedded>
   <li data-mp3="song1.mp3" data-ogg="song1.ogg">My First Song</li>
   <li data-mp3="song2.mp3" data-ogg="song2.ogg">My Second Song</li>
   <li data-mp3="song3.mp3" data-ogg="song3.ogg">My Third Song</li>
@@ -345,7 +306,11 @@ If your web page includes a playlist, you should also link to the
 Interactive Transcript
 ----------------------
 
-*Able Player* interactive transcripts include the following features:
+*Able Player* interactive transcripts are generated automatically from 
+WebVTT caption and description files. If a transcript is available, a Transcript 
+button will be added to the *Able Player* controller. 
+
+Features of the interactive transcript include the following:  
 
 -   Clicking anywhere in the transcript starts playing the media at that
     point.
@@ -357,76 +322,18 @@ Interactive Transcript
     in the Preferences dialog.
 -   Text in the transcript is highlighted as the media plays. This can
     be toggled on/off in the Preferences dialog.
+-   If subtitles are available, the transcript can be displayed in any supported language. 
+    Available languages can be selected from a dropdown select field.      
 
-### Setting up a Transcript
+YouTube Support
+---------------
 
-The transcript can appear anywhere on the page, but must be wrapped in a
-container with **class=“ump-transcript”**
+To play a YouTube video in *Able Player*, simply include the **data-youtube-id** attribute 
+on the \<video\> element. The value of this attribute must be the video's 11-character YouTube ID. 
 
-The transcript is comprised of small blocks of text, each with its own
-start and end time. These text blocks most likely correspond with
-captions and descriptions. Each block of text must be wrapped in a
-\<span\> with **data-start** and **data-end** attributes. The values of
-these attributes are expressed in seconds. These attributes are
-optional, but if a \<span\> does not include these attributes it will
-not be clickable.
-
-For full accessibility, the transcript should include both captions and
-descriptions. To differentiate the two, blocks of uninterrupted
-description text should be wrapped in a \<div\> with the following
-markup:
-
-```HTML
-<div class="ump-desc">
-  <span class="hidden">Description: </span>
-  <span>Description text goes here.</span>
-</div>
-```
-
-The following is an example transcript that includes both captions and description.
-
-```HTML
-<div class="ump-transcript">
-  <h2>Transcript</h2>
-  <div>
-    <span class="ump-unspoken">[Music]</span>
-  </div>
-  <div class="ump-desc">
-    <span class="hidden">Description: </span>
-    <span>A blue circle has pairs of arching pairs inside. Underneath, DO-IT.</span>
-    <span>Words appear in a white box: World Wide Access.</span>
-  </div>
-  <div>
-    <span class="ump-unspoken">[Narrator]</span>
-    <span  data-start="9.165" data-end="10.792"> You want these people.</span>
-    <span  data-start="10.792" data-end="13.759">They order your products, sign up for your services,</span>
-    <span  data-start="13.759" data-end="16.627">enroll in your classes, read your opinions,</span>
-    <span  data-start="16.627" data-end="18.561">and watch your videos.</span>
-    <span  data-start="18.561" data-end="24.165">You'll never see them, but they know you- through your website.</span>
-    <span  data-start="24.165" data-end="25.891">Or maybe not.</span>
-    <span  data-start="25.891" data-end="30.396">Your website's visitors aren't a  faceless mass of identical mouse-clickers</span>
-    <span  data-start="30.396" data-end="32.363">but a vibrant community of individuals</span>
-    <span  data-start="32.363" data-end="35.297">with varying tastes, styles, and abilities.</span>
-    <span  data-start="35.297" data-end="39.132">This includes people with disabilities.</span>
-  </div>
-  <div class="ump-desc">
-    <span class="hidden">Description:</span>
-    <span>Terrill Thompson, Technology Accessibility Specialist:</span>
-  </div>
-  <div>
-    <span class="ump-unspoken">[Terrill]</span>
-    <span  data-start="39.132" data-end="41"> It's important for web designers and developers</span>
-    <span  data-start="41" data-end="45.5">to realize that what they see currently on their computer,</span>
-    <span  data-start="45.5" data-end="49.264">at their resolution, with their browser and their operating system</span>
-    <span  data-start="49.264" data-end="52">is not going to be necessarily  the same thing that everybody else sees.</span>
-  </div>
-</div><!-- end transcript -->
-```
-
-*Able Player* includes a PHP utility *ableplayer-transcript-maker.php*,
-located in the *php* directory, that converts one or more WebVTT files
-into an UMP transcript. Consult the source code of this file for
-instructions.
+Currently we are unable to access captions via the YouTube API, so even if the video is already 
+captioned on YouTube, captions will need to be included redundantly within *Able Player* 
+as described above in the Closed Captions section.  
 
 MIME Types
 ----------
@@ -464,9 +371,8 @@ from Microsoft. For example:
 Keyboard Shortcuts
 ------------------
 
-UMP includes several keyboard shortcuts that enable users to control the
-player from anywhere on the web page. By default, each of these is a
-single keystroke, as follows:
+*Able Player* includes several keyboard shortcuts that enable users to control the
+player from anywhere on the web page, as follows:
 
 -   **p or spacebar** = Play/Pause
 -   **s** = Stop
@@ -479,11 +385,13 @@ single keystroke, as follows:
 -   **t** = Settings
 -   **h** = Help
 
-Note that modifier keys (Alt and Control) can be assigned by clicking
+Note that modifier keys (Alt, Control, and Shift) can be assigned by clicking
 the Preferences button on the player. If users find that shortcut keys
 aren’t working as advertised, they might have better success by
 selecting different combinations of modifier keys to accompany the
 default shortcut keys.
+
+By default, keyboard shortcuts must be accompanied by Alt + Control. 
 
 User Preferences
 ----------------
@@ -495,19 +403,20 @@ Their changes are stored in a browser cookie and in most cases should
 therefore be preserved the next time they visit the site. Specifically,
 users can control the following:
 
--   Modifier keys: Add *Alt*, *Ctrl*, or both to the UMP keyboard
+-   Modifier keys: Add *Alt*, *Ctrl*, or *Shift* to the Able Player keyboard
     shortcuts to avoid conflicts with other applications.
 -   Closed captions on by default
 -   Description on by default
 -   Use text-based description if available.
--   If using text-based description, make it visible.
+-   Automatically pause video when text-based description starts
+-   If using text-based description, make it visible
+-   Transcript on by default 
 -   Highlight transcript as video plays
 -   Keyboard-enable transcript
 
 
-  [example page]: http://terrillthompson.com/ableplayer/
+  [examples]: http://ableplayer.github.io/ableplayer/tests/
   [jQuery]: http://jquery.com/
-  [jQuery UI]: http://jqueryui.com/
   [Modernizr]: http://modernizr.com/
   [jquery.cookie]: https://github.com/carhartl/jquery-cookie
   [JW Player]: http://www.jwplayer.com/
