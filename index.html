@@ -31,11 +31,14 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p><em>Able Player</em> is a fully accessible cross-browser media player. 
-          It uses the HTML5 &lt;audio&gt; or &lt;video&gt; element for browsers that support them, 
-          and (optionally) the JW Player as a fallback for those that don’t.</p>
+        <h1>
+<a name="able-player" class="anchor" href="#able-player"><span class="octicon octicon-link"></span></a>Able Player</h1>
 
-<p>Functioning examples of the player are available at <a href="http://terrillthompson.com/ableplayer/">terrillthompson.com</a>.</p>
+<p><em>Able Player</em> is a fully accessible cross-browser media player. It uses
+the HTML5 &lt;audio&gt; or &lt;video&gt; element for browsers that support them,
+and (optionally) the JW Player as a fallback for those that don’t.</p>
+
+<p>To see the player in action check our <a href="http://ableplayer.github.io/ableplayer/tests/">Able Player Examples</a> page.</p>
 
 <h2>
 <a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
@@ -43,16 +46,25 @@
 <ul>
 <li>  Supports both audio and video.</li>
 <li>  Supports either a single audio track or an entire playlist.</li>
-<li>  Includes a custom media controller, with HTML buttons that are fully
-accessible to keyboard users and people using non-visual
-technologies such as screen readers and Braille output devices.</li>
-<li>  Supports closed captions for video</li>
-<li>  Supports audio description either by swapping out the video with a
-separate audio described version or by text.</li>
-<li>  Both the HTML5 player and fallback player use the same custom
-interface, so users whose browsers don’t support HTML5 media get a
-virtually identical experience.</li>
-</ul><h2>
+<li>  A full set of player controls that are keyboard-accessible, properly labeled for screen reader users, and controllable by speech recognition users. </li>
+<li>  Customizable keyboard shortcuts that enable the player to be operated from anywhere on the web page (unless there are multiple instances of the player on a given page; then the player must have focus for keyboard shortcuts to work).<br>
+</li>
+<li>  High contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus. </li>
+<li>  Support for closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.<br>
+</li>
+<li>  Support for chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated. </li>
+<li>  Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by screen readers.  Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio. </li>
+<li>  Support for audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions. </li>
+<li>  Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so. </li>
+<li>  An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. </li>
+<li>  Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. </li>
+<li>  Support for playing YouTube videos within the AblePlayer chrome.<br>
+</li>
+<li>  Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.</li>
+<li>  Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. </li>
+</ul>
+
+<h2>
 <a name="compatibility" class="anchor" href="#compatibility"><span class="octicon octicon-link"></span></a>Compatibility</h2>
 
 <p><em>Able Player</em> has been tested with the following browsers and assistive
@@ -66,7 +78,9 @@ technologies.</p>
 <li>  Safari 5.0 on Mac OS X</li>
 <li>  Safari on IOS 3.2.2 and higher (audio only, video plays in default IOS player)</li>
 <li>  Chrome on Android 4.2 and higher</li>
-</ul><p>Note that mobile browsers have limitations (e.g., volume control and autostart are not supported) </p>
+</ul>
+
+<p>Note that mobile browsers have limitations (e.g., volume control and autostart are not supported) </p>
 
 <h2>
 <a name="dependencies" class="anchor" href="#dependencies"><span class="octicon octicon-link"></span></a>Dependencies</h2>
@@ -85,7 +99,9 @@ distributed with <em>Able Player</em>, and is all that <em>Able Player</em> need
 <li>  <em>Able Player</em> uses <a href="https://github.com/carhartl/jquery-cookie">jquery.cookie</a> to store and retrieve user
 preferences in cookies. This script is distributed with <em>Able
 Player</em>.</li>
-</ul><h2>
+</ul>
+
+<h2>
 <a name="fallback" class="anchor" href="#fallback"><span class="octicon octicon-link"></span></a>Fallback</h2>
 
 <p>For older browsers that don’t support HTML5 media elements, you need a
@@ -109,9 +125,11 @@ Here’s a breakdown:</p>
 <li>  Safari since 3.1</li>
 <li>  Opera since 10.5</li>
 <li>  Internet Explorer since 9.0</li>
-</ul><p>At some point we may decide that it’s reasonable to stop supporting a
+</ul>
+
+<p>At some point we may decide that it’s reasonable to stop supporting a
 fallback player. However, according to <a href="http://webaim.org/projects/screenreadersurvey5/#browsers">WebAIM’s 2014 Screen Reader User
-Survey</a> 19.8% of screen reader users are still using Internet Explorer 8, 7, or 6. Until these users catch up, I think we have to provide a
+Survey</a> 19.8% of screen reader users are still using Internet Explorer 8, 7, or 6. Until these users catch up, we think we have to provide a
 working fallback.</p>
 
 <p>As an alternative fallback, you could link to the media file so users
@@ -136,15 +154,13 @@ to all use cases, both audio and video.</p>
 <div class="highlight highlight-HTML"><pre><span class="c">&lt;!-- Dependencies --&gt;</span>
 <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"thirdparty/modernizr.custom.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 <span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"thirdparty/jquery.cookie.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
-<span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css"</span><span class="nt">&gt;</span>
 
 <span class="c">&lt;!-- CSS --&gt;</span> 
 <span class="nt">&lt;link</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="na">href=</span><span class="s">"styles/ableplayer.css"</span> <span class="na">type=</span><span class="s">"text/css"</span><span class="nt">/&gt;</span>
 
 <span class="c">&lt;!-- JavaScript --&gt;</span>
-<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"scripts/ableplayer.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"build/ableplayer.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
 </pre></div>
 
 <h2>
@@ -161,7 +177,7 @@ source files with the path to your own media files. Use both OGG and MP3
 to ensure cross-browser compatibility, since some browsers don’t support
 MP3.</p>
 
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;audio</span> <span class="na">id=</span><span class="s">"audio1"</span> <span class="na">class=</span><span class="s">"ump-media"</span> <span class="na">preload=</span><span class="s">"auto"</span><span class="nt">&gt;</span>
+<div class="highlight highlight-HTML"><pre><span class="nt">&lt;audio</span> <span class="na">id=</span><span class="s">"audio1"</span> <span class="na">data-able-player</span> <span class="na">preload=</span><span class="s">"auto"</span><span class="nt">&gt;</span>
   <span class="nt">&lt;source</span> <span class="na">type=</span><span class="s">"audio/ogg"</span> <span class="na">src=</span><span class="s">"path_to_audio_file.ogg"</span><span class="nt">/&gt;</span>
   <span class="nt">&lt;source</span> <span class="na">type=</span><span class="s">"audio/mpeg"</span> <span class="na">src=</span><span class="s">"path_to_audio_file.mp3"</span><span class="nt">/&gt;</span>
 <span class="nt">&lt;/audio&gt;</span>
@@ -171,21 +187,23 @@ MP3.</p>
 
 <ul>
 <li>  <strong>id</strong> - required; any unique ID</li>
-<li>  <strong>class</strong> - required; must be <strong>ump-media</strong>
-</li>
+<li>  <strong>data-able-player</strong> - required </li>
+<li>  <strong>data-start-time</strong> - optional; time at which you want the audio to start playing (in seconds)</li>
 <li>  <strong>preload</strong> - optional; tells the browser how much media to download
 when the page loads. If the media is the central focus of the web
 page, use <strong>preload=“auto”</strong>, which instructs the browser to
 download as much of the media as possible. If the media is not a
 central focus, downloading the entire media resource can consume
 valuable bandwidth, so preload=“metadata” would be a better option.</li>
-</ul><h3>
+</ul>
+
+<h3>
 <a name="video" class="anchor" href="#video"><span class="octicon octicon-link"></span></a>Video</h3>
 
 <p>Copy and paste the following code into your web page, replacing the
 source files with the path to your own media files.</p>
 
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;video</span> <span class="na">id=</span><span class="s">"video1"</span> <span class="na">class=</span><span class="s">"ump-media"</span> <span class="na">preload=</span><span class="s">"auto"</span> <span class="na">width=</span><span class="s">"480"</span> <span class="na">height=</span><span class="s">"360"</span> <span class="na">poster=</span><span class="s">"path_to_image.jpg"</span><span class="nt">&gt;</span>
+<div class="highlight highlight-HTML"><pre><span class="nt">&lt;video</span> <span class="na">id=</span><span class="s">"video1"</span> <span class="na">data-able-player</span> <span class="na">preload=</span><span class="s">"auto"</span> <span class="na">width=</span><span class="s">"480"</span> <span class="na">height=</span><span class="s">"360"</span> <span class="na">poster=</span><span class="s">"path_to_image.jpg"</span><span class="nt">&gt;</span>
   <span class="nt">&lt;source</span> <span class="na">type=</span><span class="s">"video/webm"</span> <span class="na">src=</span><span class="s">"path_to_video.webm"</span> <span class="na">data-desc-src=</span><span class="s">"path_to_described_video.webm"</span><span class="nt">/&gt;</span>
   <span class="nt">&lt;source</span> <span class="na">type=</span><span class="s">"video/mp4"</span> <span class="na">src=</span><span class="s">"path_to_video.mp4"</span> <span class="na">data-desc-src=</span><span class="s">"path_to_described_video.mp4"</span><span class="nt">/&gt;</span>
   <span class="nt">&lt;track</span> <span class="na">kind=</span><span class="s">"captions"</span> <span class="na">src=</span><span class="s">"path_to_captions.vtt"</span><span class="nt">/&gt;</span>
@@ -197,8 +215,14 @@ source files with the path to your own media files.</p>
 
 <ul>
 <li>  <strong>id</strong> - required; any unique ID</li>
-<li>  <strong>class</strong> - required; must be <strong>ump-media</strong>
+<li>  <strong>data-able-player</strong> - required</li>
+<li>  <strong>data-start-time</strong> - optional; time at which you want the video to start playing (in seconds)</li>
+<li>  <strong>data-transcript-div</strong> - optional; id of an external div in which to display the interactive transcript. 
+The transcript is generated automatically if captions and/or descriptions are available. 
+If this attribute is not provided the transcript will be displayed in its default container<br>
+adjacent to the player.<br>
 </li>
+<li>  <strong>data-youtube-id</strong> - optional; 11-character YouTube id </li>
 <li>  <strong>preload</strong> - optional; use “auto” or “metadata”. See explanation
 above under <em>Audio</em>.</li>
 <li>  <strong>width</strong> - width of the video in pixels. If not provided will
@@ -207,7 +231,9 @@ default to 480.</li>
 default to 360.</li>
 <li>  <strong>poster</strong> - path to an image file. Will be displayed in the player
 until the video is played.</li>
-</ul><p>The following additional features are supported by <em>Able Player</em>:</p>
+</ul>
+
+<p>The following additional features are supported by <em>Able Player</em>:</p>
 
 <h4>
 <a name="multiple-source-files" class="anchor" href="#multiple-source-files"><span class="octicon octicon-link"></span></a>Multiple source files</h4>
@@ -219,11 +245,11 @@ MP4. Browsers will play the first media source that they support.</p>
 <h4>
 <a name="closed-captions" class="anchor" href="#closed-captions"><span class="octicon octicon-link"></span></a>Closed Captions</h4>
 
-<p>Captions are added using the  element with kind=“captions”.
-Captions must be in [Web Video Text Tracks (WebVTT)][] format. WebVTT
-tags within captions are not currently supported.</p>
+<p>Captions are added using the &lt;track&gt; element with kind=“captions”.
+Captions must be in Web Video Text Tracks format ([WebVTT][<a href="http://dev.w3.org/html5/webvtt/">http://dev.w3.org/html5/webvtt/</a>]). WebVTT
+tags within captions are currently ignored.  </p>
 
-<p>If captions are provided for a video, a CC button will be added to the
+<p>If captions are provided, a CC button will be added to the
 <em>Able Player</em> controller.</p>
 
 <h4>
@@ -232,7 +258,7 @@ tags within captions are not currently supported.</p>
 <p>Supplemental description of key visual content for blind users can be
 added using one of two methods.</p>
 
-<p>The first method is the same as closed captions, a  element, with
+<p>The first method is the same as closed captions, a &lt;track&gt; element, with
 kind=“descriptions”. This points to a WebVTT file, which is essentially
 the same as a closed caption file, but its contents are description text
 rather than captions. With this method, description text is written to a
@@ -244,7 +270,7 @@ page.</p>
 in. If multiple video sources are already provided (e.g., an MP4 and
 WebM file), then the described version must be available in both of
 these formats. For each video source that has a described version
-available, add a <strong>data-desc-src</strong> attribute to the  element for
+available, add a <strong>data-desc-src</strong> attribute to the &lt;source&gt; element for
 that video. The value of this attribute is a path pointing to the
 described version of the video. With this method, the described version
 of the video can be played instead of the non-described version, and the
@@ -257,68 +283,23 @@ universal Description symbol, the letter “D”). How descriptions are
 ultimately delivered depends on which of the above methods is used, and
 on user preference. If a user prefers text-based description announced
 by their screen reader, that’s what they’ll get. If they prefer an
-alternate video with description mixed it, that’s what they’ll get. See
+alternate video with description mixed in, that’s what they’ll get. See
 the section below on <em>User Preferences</em> for additional information about
 preferences.</p>
 
 <h2>
-<a name="setup-step-4-initialize-the-media-player" class="anchor" href="#setup-step-4-initialize-the-media-player"><span class="octicon octicon-link"></span></a>Setup Step 4: Initialize the Media Player</h2>
-
-<p>Initialize the player with the following JavaScript command, replacing
-<em>audio1</em> if needed with the id of your media player.</p>
-
-<div class="highlight highlight-JavaScript"><pre><span class="k">new</span> <span class="nx">AblePlayer</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="nx">index</span><span class="p">,</span><span class="nx">startTime</span><span class="p">);</span> 
-</pre></div>
-
-<p>The AblePlayer object accepts the following parameters:</p>
-
-<ul>
-<li>  <strong>id</strong> of the media element</li>
-<li>  <strong>index</strong> of this <em>Able Player</em> instance (optional; if page includes
-only one player, index = 0)</li>
-<li>  <strong>startTime</strong> in seconds (optional; default of 0 begins playing at
-the beginning)</li>
-</ul><p>In the following examples, the player is initialized inside a jQuery
-document ready function to be sure the DOM has fully loaded.</p>
-
-<p>In the first example, a single player is initialized:</p>
-
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;script&gt;</span>
-  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">new</span> <span class="nx">AblePlayer</span><span class="p">(</span><span class="s1">'audio1'</span><span class="p">);</span>  
-  <span class="p">});</span>
-<span class="nt">&lt;/script&gt;</span>
-</pre></div>
-
-<p>In the next example, all players on the page are initialized. This same code could optionally be used universally, even on pages that just have one player.</p>
-
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;script&gt;</span>
-    <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> 
-      <span class="nx">$</span><span class="p">(</span><span class="s1">'.ump-media'</span><span class="p">).</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span> 
-        <span class="k">new</span> <span class="nx">AblePlayer</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">attr</span><span class="p">(</span><span class="s1">'id'</span><span class="p">),</span><span class="nx">index</span><span class="p">);</span>       
-      <span class="p">});</span>
-    <span class="p">});</span>
-<span class="nt">&lt;/script&gt;</span>
-</pre></div>
-
-<p>In the next example, a single player is initialized and starts playing at 2 minutes (120 seconds).</p>
-
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;script&gt;</span>
-  <span class="nx">$</span><span class="p">(</span><span class="nb">document</span><span class="p">).</span><span class="nx">ready</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-    <span class="k">new</span> <span class="nx">AblePlayer</span><span class="p">(</span><span class="s1">'audio1'</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">120</span><span class="p">);</span>  
-  <span class="p">});</span>
-<span class="nt">&lt;/script&gt;</span>
-</pre></div>
-
-<h2>
-<a name="setup-step-5-review-user-defined-variables-in-ableplayerjs" class="anchor" href="#setup-step-5-review-user-defined-variables-in-ableplayerjs"><span class="octicon octicon-link"></span></a>Setup Step 5: Review User-Defined Variables in <em>ableplayer.js</em>
+<a name="setup-step-4-review-user-defined-variables-in-ableplayerjs" class="anchor" href="#setup-step-4-review-user-defined-variables-in-ableplayerjs"><span class="octicon octicon-link"></span></a>Setup Step 4: Review User-Defined Variables in <em>ableplayer.js</em>
 </h2>
 
-<p>The JavaScript file <em>ableplayer.js</em> includes a block of user-defined
+<p>The JavaScript file <em>initialize.js</em> includes a block of user-defined
 variables that can be modified from their default settings, such as
 volume, color of controller buttons, seek interval for rewind and
 forward buttons, and others. Explanations of each variable are provided
 in the comments.</p>
+
+<p>If you make changes to this or any other JavaScript script files,<br>
+the player will need to be recompiled before your changes will take effect. 
+To do so, run the shell script <em>compile.sh</em>. </p>
 
 <h2>
 <a name="playlists" class="anchor" href="#playlists"><span class="octicon octicon-link"></span></a>Playlists</h2>
@@ -328,7 +309,7 @@ either ordered (&lt;ol&gt;) or unordered (&lt;ul&gt;). The following attributes
 are supported on the list element:</p>
 
 <ul>
-<li>  <strong>class</strong> - required; must be <strong>ump-playlist</strong>
+<li>  <strong>class</strong> - required; must be <strong>able-playlist</strong>
 </li>
 <li>  <strong>data-player</strong> - required; must reference the ID of the media
 player in which the playlist should be played.</li>
@@ -336,13 +317,15 @@ player in which the playlist should be played.</li>
 playlist to be embedded into the media player. If this attribute is
 omitted, the playlist will be external to the player and will appear
 wherever you place it on the web page.</li>
-</ul><p>Within the playlist, each list item must include data-* attributes
+</ul>
+
+<p>Within the playlist, each list item must include data-* attributes
 where * is the media type and the value of the attribute is the URL
 pointing to the media file of that type. For example, the following
 audio playlist includes three songs, each of which is available in MP3
 and OGG:</p>
 
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"ump-playlist"</span> <span class="na">data-player=</span><span class="s">"audio1"</span> <span class="na">data-embedded</span><span class="nt">&gt;</span>
+<div class="highlight highlight-HTML"><pre><span class="nt">&lt;ul</span> <span class="na">class=</span><span class="s">"able-playlist"</span> <span class="na">data-player=</span><span class="s">"audio1"</span> <span class="na">data-embedded</span><span class="nt">&gt;</span>
   <span class="nt">&lt;li</span> <span class="na">data-mp3=</span><span class="s">"song1.mp3"</span> <span class="na">data-ogg=</span><span class="s">"song1.ogg"</span><span class="nt">&gt;</span>My First Song<span class="nt">&lt;/li&gt;</span>
   <span class="nt">&lt;li</span> <span class="na">data-mp3=</span><span class="s">"song2.mp3"</span> <span class="na">data-ogg=</span><span class="s">"song2.ogg"</span><span class="nt">&gt;</span>My Second Song<span class="nt">&lt;/li&gt;</span>
   <span class="nt">&lt;li</span> <span class="na">data-mp3=</span><span class="s">"song3.mp3"</span> <span class="na">data-ogg=</span><span class="s">"song3.ogg"</span><span class="nt">&gt;</span>My Third Song<span class="nt">&lt;/li&gt;</span>
@@ -355,13 +338,17 @@ and OGG:</p>
 <li>  mp3</li>
 <li>  ogg or oga</li>
 <li>  wav</li>
-</ul><p><strong>Supported data-* video types:</strong></p>
+</ul>
+
+<p><strong>Supported data-* video types:</strong></p>
 
 <ul>
 <li>  mp4</li>
 <li>  webm or webmv</li>
 <li>  ogg or ogv</li>
-</ul><p>When a playlist is included on a page, the &lt;source&gt; elements within
+</ul>
+
+<p>When a playlist is included on a page, the &lt;source&gt; elements within
 the &lt;audio&gt; or &lt;video&gt; tags are optional. If they are provided, they
 should match the first item in the playlist.</p>
 
@@ -374,7 +361,11 @@ should match the first item in the playlist.</p>
 <h2>
 <a name="interactive-transcript" class="anchor" href="#interactive-transcript"><span class="octicon octicon-link"></span></a>Interactive Transcript</h2>
 
-<p><em>Able Player</em> interactive transcripts include the following features:</p>
+<p><em>Able Player</em> interactive transcripts are generated automatically from 
+WebVTT caption and description files. If a transcript is available, a Transcript 
+button will be added to the <em>Able Player</em> controller. </p>
+
+<p>Features of the interactive transcript include the following:  </p>
 
 <ul>
 <li>  Clicking anywhere in the transcript starts playing the media at that
@@ -387,74 +378,20 @@ keyboard users so it’s disabled by default. It can be toggled on/off
 in the Preferences dialog.</li>
 <li>  Text in the transcript is highlighted as the media plays. This can
 be toggled on/off in the Preferences dialog.</li>
-</ul><h3>
-<a name="setting-up-a-transcript" class="anchor" href="#setting-up-a-transcript"><span class="octicon octicon-link"></span></a>Setting up a Transcript</h3>
+<li>  If subtitles are available, the transcript can be displayed in any supported language. 
+Available languages can be selected from a dropdown select field.<br>
+</li>
+</ul>
 
-<p>The transcript can appear anywhere on the page, but must be wrapped in a
-container with <strong>class=“ump-transcript”</strong></p>
+<h2>
+<a name="youtube-support" class="anchor" href="#youtube-support"><span class="octicon octicon-link"></span></a>YouTube Support</h2>
 
-<p>The transcript is comprised of small blocks of text, each with its own
-start and end time. These text blocks most likely correspond with
-captions and descriptions. Each block of text must be wrapped in a
-&lt;span&gt; with <strong>data-start</strong> and <strong>data-end</strong> attributes. The values of
-these attributes are expressed in seconds. These attributes are
-optional, but if a &lt;span&gt; does not include these attributes it will
-not be clickable.</p>
+<p>To play a YouTube video in <em>Able Player</em>, simply include the <strong>data-youtube-id</strong> attribute 
+on the &lt;video&gt; element. The value of this attribute must be the video's 11-character YouTube ID. </p>
 
-<p>For full accessibility, the transcript should include both captions and
-descriptions. To differentiate the two, blocks of uninterrupted
-description text should be wrapped in a &lt;div&gt; with the following
-markup:</p>
-
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"ump-desc"</span><span class="nt">&gt;</span>
-  <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"hidden"</span><span class="nt">&gt;</span>Description: <span class="nt">&lt;/span&gt;</span>
-  <span class="nt">&lt;span&gt;</span>Description text goes here.<span class="nt">&lt;/span&gt;</span>
-<span class="nt">&lt;/div&gt;</span>
-</pre></div>
-
-<p>The following is an example transcript that includes both captions and description.</p>
-
-<div class="highlight highlight-HTML"><pre><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"ump-transcript"</span><span class="nt">&gt;</span>
-  <span class="nt">&lt;h2&gt;</span>Transcript<span class="nt">&lt;/h2&gt;</span>
-  <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"ump-unspoken"</span><span class="nt">&gt;</span>[Music]<span class="nt">&lt;/span&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"ump-desc"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"hidden"</span><span class="nt">&gt;</span>Description: <span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span&gt;</span>A blue circle has pairs of arching pairs inside. Underneath, DO-IT.<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span&gt;</span>Words appear in a white box: World Wide Access.<span class="nt">&lt;/span&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"ump-unspoken"</span><span class="nt">&gt;</span>[Narrator]<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"9.165"</span> <span class="na">data-end=</span><span class="s">"10.792"</span><span class="nt">&gt;</span> You want these people.<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"10.792"</span> <span class="na">data-end=</span><span class="s">"13.759"</span><span class="nt">&gt;</span>They order your products, sign up for your services,<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"13.759"</span> <span class="na">data-end=</span><span class="s">"16.627"</span><span class="nt">&gt;</span>enroll in your classes, read your opinions,<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"16.627"</span> <span class="na">data-end=</span><span class="s">"18.561"</span><span class="nt">&gt;</span>and watch your videos.<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"18.561"</span> <span class="na">data-end=</span><span class="s">"24.165"</span><span class="nt">&gt;</span>You'll never see them, but they know you- through your website.<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"24.165"</span> <span class="na">data-end=</span><span class="s">"25.891"</span><span class="nt">&gt;</span>Or maybe not.<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"25.891"</span> <span class="na">data-end=</span><span class="s">"30.396"</span><span class="nt">&gt;</span>Your website's visitors aren't a  faceless mass of identical mouse-clickers<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"30.396"</span> <span class="na">data-end=</span><span class="s">"32.363"</span><span class="nt">&gt;</span>but a vibrant community of individuals<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"32.363"</span> <span class="na">data-end=</span><span class="s">"35.297"</span><span class="nt">&gt;</span>with varying tastes, styles, and abilities.<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"35.297"</span> <span class="na">data-end=</span><span class="s">"39.132"</span><span class="nt">&gt;</span>This includes people with disabilities.<span class="nt">&lt;/span&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"ump-desc"</span><span class="nt">&gt;</span>
-    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"hidden"</span><span class="nt">&gt;</span>Description:<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span&gt;</span>Terrill Thompson, Technology Accessibility Specialist:<span class="nt">&lt;/span&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-  <span class="nt">&lt;div&gt;</span>
-    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">"ump-unspoken"</span><span class="nt">&gt;</span>[Terrill]<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"39.132"</span> <span class="na">data-end=</span><span class="s">"41"</span><span class="nt">&gt;</span> It's important for web designers and developers<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"41"</span> <span class="na">data-end=</span><span class="s">"45.5"</span><span class="nt">&gt;</span>to realize that what they see currently on their computer,<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"45.5"</span> <span class="na">data-end=</span><span class="s">"49.264"</span><span class="nt">&gt;</span>at their resolution, with their browser and their operating system<span class="nt">&lt;/span&gt;</span>
-    <span class="nt">&lt;span</span>  <span class="na">data-start=</span><span class="s">"49.264"</span> <span class="na">data-end=</span><span class="s">"52"</span><span class="nt">&gt;</span>is not going to be necessarily  the same thing that everybody else sees.<span class="nt">&lt;/span&gt;</span>
-  <span class="nt">&lt;/div&gt;</span>
-<span class="nt">&lt;/div&gt;</span><span class="c">&lt;!-- end transcript --&gt;</span>
-</pre></div>
-
-<p><em>Able Player</em> includes a PHP utility <em>ableplayer-transcript-maker.php</em>,
-located in the <em>php</em> directory, that converts one or more WebVTT files
-into an UMP transcript. Consult the source code of this file for
-instructions.</p>
+<p>Currently we are unable to access captions via the YouTube API, so even if the video is already 
+captioned on YouTube, captions will need to be included redundantly within <em>Able Player</em> 
+as described above in the Closed Captions section.  </p>
 
 <h2>
 <a name="mime-types" class="anchor" href="#mime-types"><span class="octicon octicon-link"></span></a>MIME Types</h2>
@@ -490,12 +427,13 @@ from Microsoft. For example:</p>
 </li>
 <li>  <a href="http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx">How to add MIME Types with IIS7 Web.config</a>
 </li>
-</ul><h2>
+</ul>
+
+<h2>
 <a name="keyboard-shortcuts" class="anchor" href="#keyboard-shortcuts"><span class="octicon octicon-link"></span></a>Keyboard Shortcuts</h2>
 
-<p>UMP includes several keyboard shortcuts that enable users to control the
-player from anywhere on the web page. By default, each of these is a
-single keystroke, as follows:</p>
+<p><em>Able Player</em> includes several keyboard shortcuts that enable users to control the
+player from anywhere on the web page, as follows:</p>
 
 <ul>
 <li>  <strong>p or spacebar</strong> = Play/Pause</li>
@@ -508,11 +446,15 @@ single keystroke, as follows:</p>
 <li>  <strong>d or 1-5</strong> = Volume Down</li>
 <li>  <strong>t</strong> = Settings</li>
 <li>  <strong>h</strong> = Help</li>
-</ul><p>Note that modifier keys (Alt and Control) can be assigned by clicking
+</ul>
+
+<p>Note that modifier keys (Alt, Control, and Shift) can be assigned by clicking
 the Preferences button on the player. If users find that shortcut keys
 aren’t working as advertised, they might have better success by
 selecting different combinations of modifier keys to accompany the
 default shortcut keys.</p>
+
+<p>By default, keyboard shortcuts must be accompanied by Alt + Control. </p>
 
 <h2>
 <a name="user-preferences" class="anchor" href="#user-preferences"><span class="octicon octicon-link"></span></a>User Preferences</h2>
@@ -525,12 +467,14 @@ therefore be preserved the next time they visit the site. Specifically,
 users can control the following:</p>
 
 <ul>
-<li>  Modifier keys: Add <em>Alt</em>, <em>Ctrl</em>, or both to the UMP keyboard
+<li>  Modifier keys: Add <em>Alt</em>, <em>Ctrl</em>, or <em>Shift</em> to the Able Player keyboard
 shortcuts to avoid conflicts with other applications.</li>
 <li>  Closed captions on by default</li>
 <li>  Description on by default</li>
 <li>  Use text-based description if available.</li>
-<li>  If using text-based description, make it visible.</li>
+<li>  Automatically pause video when text-based description starts</li>
+<li>  If using text-based description, make it visible</li>
+<li>  Transcript on by default </li>
 <li>  Highlight transcript as video plays</li>
 <li>  Keyboard-enable transcript</li>
 </ul>
