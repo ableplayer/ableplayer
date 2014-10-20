@@ -256,7 +256,7 @@
     this.langOverride = true;
     
     // translationDir - specify path to translation files 
-    this.translationDir = '/translations/';
+    this.translationDir = '../translations/';
 
     this.setButtonImages();
   };
