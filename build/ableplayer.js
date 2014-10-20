@@ -801,13 +801,13 @@
     prefs.push({
       'name': 'prefAltKey', // use alt key with shortcuts 
       'label': this.tt.prefAltKey,
-      'default': 0  // off because currently not capturing this reliably across all browsers
+      'default': 1 
     });
     
     prefs.push({
       'name': 'prefCtrlKey', // use ctrl key with shortcuts
       'label': this.tt.prefCtrlKey,
-      'default': 1  // On per conversation with Ken
+      'default': 1 
     });
     
     prefs.push({
