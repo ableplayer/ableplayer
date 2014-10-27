@@ -1,6 +1,7 @@
 (function () {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
+
     // Debug - set to true to write messages to console; otherwise false
     this.debug = false;
 
@@ -67,7 +68,7 @@
     this.langOverride = true;
     
     // translationDir - specify path to translation files 
-    this.translationDir = '/translations/';
+    this.translationDir = '../translations/';
 
     this.setButtonImages();
   };
