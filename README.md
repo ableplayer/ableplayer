@@ -147,6 +147,19 @@ The following attributes are supported on the \<audio\> element:
 -   **id** - required; any unique ID
 -   **data-able-player** - required 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
+    The transcript is generated automatically if captions and/or descriptions are available. 
+    If this attribute is not provided the transcript will be displayed in its default container  
+    adjacent to the player.  
+-   **data-debug** - optional; if present will write messages to the developer console   
+-   **data-volume** - optional; set the default volume (0 to 1; default is 0.5 to avoid overpowering screen reader audio)
+-   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
+-   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons (default is 10)  
+-   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
+-   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
+-   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
+-   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
+-   **data-lang-override** - optional; override default player language with language of the web page or (if that's unknown) user's default browser language. On by default.
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to
@@ -186,6 +199,21 @@ The following attributes are supported on the \<video\> element:
     default to 360.
 -   **poster** - path to an image file. Will be displayed in the player
     until the video is played.
+-   **data-volume** - optional; set the default volume (0 to 1; default is 0.5 to avoid overpowering screen reader audio)
+-   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
+-   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons (default is 10)  
+-   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
+-   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
+-   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
+-   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
+-   **data-lang-override** - optional; override default player language with language of the web page or (if that's unknown) user's default browser language. On by default.
+-   **preload** - optional; tells the browser how much media to download
+    when the page loads. If the media is the central focus of the web
+    page, use **preload=“auto”**, which instructs the browser to
+    download as much of the media as possible. If the media is not a
+    central focus, downloading the entire media resource can consume
+    valuable bandwidth, so preload=“metadata” would be a better option.
+-   **data-debug** - optional; if present will write messages to the developer console   
 
 The following additional features are supported by *Able Player*:
 
