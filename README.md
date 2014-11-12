@@ -160,6 +160,7 @@ The following attributes are supported on the \<audio\> element:
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
 -   **data-lang-override** - optional; override default player language with language of the web page or (if that's unknown) user's default browser language. On by default.
+-   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to
@@ -207,6 +208,7 @@ The following attributes are supported on the \<video\> element:
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
 -   **data-lang-override** - optional; override default player language with language of the web page or (if that's unknown) user's default browser language. On by default.
+-   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to

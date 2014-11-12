@@ -116,7 +116,6 @@
       // add validation 
       this.seekInterval = $(media).data('seek-interval'); 
     }
-console.log('seekInterval is ' + this.seekInterval);    
     
     if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") { 
       this.showNowPlaying = true; 
@@ -137,6 +136,10 @@ console.log('seekInterval is ' + this.seekInterval);
     
     if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
       this.langOverride = true; 
+    }
+
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
     }
     
     this.ableIndex = AblePlayer.nextIndex;
@@ -302,8 +305,8 @@ console.log('seekInterval is ' + this.seekInterval);
     // set to false to force player to use this.lang
     this.langOverride = true;
     
-    // translationDir - specify path to translation files 
-    this.translationDir = '../translations/';
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
 
     this.setButtonImages();
   };
@@ -4923,7 +4926,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     } 
     thisObj = this;
     // get content of JSON file 
-    $.getJSON(this.translationDir + this.lang + '.js',
+    $.getJSON(this.translationPath + this.lang + '.js',
               function(data, textStatus, jqxhr) { 
                 if (textStatus === 'success') { 
                   thisObj.tt = data;

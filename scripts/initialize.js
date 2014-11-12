@@ -67,8 +67,8 @@
     // set to false to force player to use this.lang
     this.langOverride = true;
     
-    // translationDir - specify path to translation files 
-    this.translationDir = '../translations/';
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
 
     this.setButtonImages();
   };
