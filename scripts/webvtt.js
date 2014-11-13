@@ -1,6 +1,7 @@
 (function () {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
+
     // Normalize line ends to \n.
     text.replace('\r\n', '\n').replace('\r', '\n');
     
@@ -249,6 +250,7 @@
       }
       
       var token = getCueToken(state);
+
       // We'll use the tokens themselves as objects where possible.
       if (token.type === 'string') {
         current.children.push(token);
@@ -318,7 +320,6 @@
         }
       }
     }
-    
     return result;
   }
   
@@ -342,7 +343,7 @@
         // End of file.
         c = '\u0004';
       }
-      
+
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';

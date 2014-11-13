@@ -98,23 +98,30 @@
     }
 
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
-      // add validation 
+      // move this to <source> element
       this.youtubeId = $(media).data('youtube-id'); 
     }
 
     if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") { 
-      // add validation 
-      this.defaultVolume = $(media).data('volume'); 
+      var volume = $(media).data('volume'); 
+      if (volume >= 0 && volume <= 1) {  
+        this.defaultVolume = volume;
+      } 
     }
     
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") { 
-      // add validation 
-      this.iconType = $(media).data('icon-type'); 
+      var iconType = $(media).data('icon-type');
+      if (iconType === 'font' || iconType == 'image') {
+        this.iconType = iconType; 
+      }
     }
     
     if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") { 
-      // add validation 
-      this.seekInterval = $(media).data('seek-interval'); 
+      var seekInterval = $(media).data('seek-interval');
+      if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
+        this.seekInterval = seekInterval; 
+        this.useFixedSeekInterval = true; // do not override with 1/10 of duration 
+      }
     }
     
     if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") { 
@@ -122,8 +129,10 @@
     }
     
     if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") { 
-      // add validation 
-      this.fallback = $(media).data('fallback'); 
+      var fallback =  $(media).data('fallback');
+      if (fallback === 'jw') { 
+        this.fallback = fallback; 
+      }
     }
     
     if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") { 
@@ -131,7 +140,10 @@
     }
     
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
-      this.lang = $(media).data('lang'); 
+      var lang = $(media).data('lang'); 
+      if (lang.length == 2) { 
+        this.lang = lang;
+      }
     }
     
     if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 

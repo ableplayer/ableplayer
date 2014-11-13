@@ -98,23 +98,30 @@
     }
 
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
-      // add validation 
+      // move this to <source> element
       this.youtubeId = $(media).data('youtube-id'); 
     }
 
     if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") { 
-      // add validation 
-      this.defaultVolume = $(media).data('volume'); 
+      var volume = $(media).data('volume'); 
+      if (volume >= 0 && volume <= 1) {  
+        this.defaultVolume = volume;
+      } 
     }
     
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") { 
-      // add validation 
-      this.iconType = $(media).data('icon-type'); 
+      var iconType = $(media).data('icon-type');
+      if (iconType === 'font' || iconType == 'image') {
+        this.iconType = iconType; 
+      }
     }
     
     if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") { 
-      // add validation 
-      this.seekInterval = $(media).data('seek-interval'); 
+      var seekInterval = $(media).data('seek-interval');
+      if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
+        this.seekInterval = seekInterval; 
+        this.useFixedSeekInterval = true; // do not override with 1/10 of duration 
+      }
     }
     
     if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") { 
@@ -122,8 +129,10 @@
     }
     
     if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") { 
-      // add validation 
-      this.fallback = $(media).data('fallback'); 
+      var fallback =  $(media).data('fallback');
+      if (fallback === 'jw') { 
+        this.fallback = fallback; 
+      }
     }
     
     if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") { 
@@ -131,7 +140,10 @@
     }
     
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
-      this.lang = $(media).data('lang'); 
+      var lang = $(media).data('lang'); 
+      if (lang.length == 2) { 
+        this.lang = lang;
+      }
     }
     
     if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
@@ -266,6 +278,8 @@
   
     // Browsers that don't support seekbar sliders will use rewind and forward buttons 
     // seekInterval = Number of seconds to seek forward or back with these buttons    
+    // NOTE: Unless user overrides this default with data-seek-interval attribute, 
+    // this value is replaced by 1/10 the duration of the media file, once the duration is known 
     this.seekInterval = 10;
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
@@ -572,9 +586,11 @@
         thisObj.$media[0].load();
       }
 
-      // 10 steps in seek interval; wait until the end so that we can fetch a duration.
-      thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
-
+      if (this.useFixedSeekInterval === false) { 
+        // 10 steps in seek interval; wait until the end so that we can fetch a duration.
+        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+      }
+      
       deferred.resolve();
     });
     
@@ -1136,6 +1152,7 @@
 (function () {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
+
     // Normalize line ends to \n.
     text.replace('\r\n', '\n').replace('\r', '\n');
     
@@ -1384,6 +1401,7 @@
       }
       
       var token = getCueToken(state);
+
       // We'll use the tokens themselves as objects where possible.
       if (token.type === 'string') {
         current.children.push(token);
@@ -1453,7 +1471,6 @@
         }
       }
     }
-    
     return result;
   }
   
@@ -1477,7 +1494,7 @@
         // End of file.
         c = '\u0004';
       }
-      
+
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';
@@ -4427,6 +4444,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.handleRewind = function() { 
+console.log('rewinding ' + this.seekInterval + ' seconds');
     var targetTime = this.getElapsed() - this.seekInterval;
     if (targetTime < 0) {
       this.seekTo(0);
@@ -4437,6 +4455,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.handleFastForward = function() { 
+console.log('fast forwarding ' + this.seekInterval + ' seconds');    
     var targetTime = this.getElapsed() + this.seekInterval;    
     
     if (targetTime > this.getDuration()) {
