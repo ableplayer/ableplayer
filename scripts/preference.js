@@ -206,11 +206,8 @@
     // Now assemble all the parts   
     prefsDiv
       .append(prefsIntro)
-      .append(keysFieldset);
-    if (this.mediaType === 'video') { 
-      prefsDiv
-        .append(featuresFieldset);
-    }         
+      .append(keysFieldset)
+      .append(featuresFieldset);
     this.$ableDiv.append(prefsDiv); 
     
     var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');

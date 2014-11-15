@@ -89,6 +89,15 @@
       this.transcriptDivLocation = $(media).data('transcript-div'); 
     }
 
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
+      this.lyricsMode = true; 
+    }
+
+    if ($(media).data('transcript-title') !== undefined) { 
+      // NOTE: empty string is valid; results in no title being displayed  
+      this.transcriptTitle = $(media).data('transcript-title'); 
+    }
+
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
       this.youtubeId = $(media).data('youtube-id'); 
     }
@@ -321,6 +330,15 @@
     
     // translationPath - specify path to translation files 
     this.translationPath = '../translations/';
+    
+    // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
+    // but they're removed by default form transcripts in order to form a more seamless reading experience 
+    // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
+    this.lyricsMode = false; 
+    
+    // transcriptTitle - override default transcript title 
+    // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
+    this.transcriptTitle = 'Transcript';
 
     this.setButtonImages();
   };
@@ -1032,11 +1050,8 @@
     // Now assemble all the parts   
     prefsDiv
       .append(prefsIntro)
-      .append(keysFieldset);
-    if (this.mediaType === 'video') { 
-      prefsDiv
-        .append(featuresFieldset);
-    }         
+      .append(keysFieldset)
+      .append(featuresFieldset);
     this.$ableDiv.append(prefsDiv); 
     
     var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');
@@ -1894,22 +1909,18 @@
     
     if (this.mediaType === 'video') {
       this.injectBigPlayButton();
-    }
 
-    // add container that captions or description will be appended to
-    // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-    var vidcapContainer = $('<div>',{ 
-      'class' : 'able-vidcap-container'
-    });
-
-    if (this.mediaType === 'video') { 
+      // add container that captions or description will be appended to
+      // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
+      var vidcapContainer = $('<div>',{ 
+        'class' : 'able-vidcap-container'
+      });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
 
-        
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
-    
+
     if (this.includeTranscript) {
       this.injectTranscriptArea();
       this.addTranscriptAreaEvents();
@@ -2879,35 +2890,42 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   AblePlayer.prototype.setupCaptions = function (track, cues) {
     var trackLang = track.getAttribute('srclang');
     var trackLabel = track.getAttribute('label') || trackLang;
-    this.hasCaptions = true;
 
-    // create a div for displaying captions  
-    // includes aria-hidden="true" because otherwise 
-    // captions being added and removed causes sporadic changes to focus in JAWS
-    // (not a problem in NVDA or VoiceOver)
-    if (!this.$captionDiv) {
-      this.$captionDiv = $('<div>',{
-        'class': 'able-captions',
-        'aria-hidden': 'true' 
-      });
-      this.$vidcapContainer.append(this.$captionDiv);
-    }
+      this.hasCaptions = true;
 
-    this.currentCaption = -1;
-    if (this.prefCaptions === 1) { 
-      // Captions default to on.
-      this.captionsOn = true; 
-    }
-    else { 
-      this.captionsOn = false;
-    }
+      // caption cues from WebVTT are used to build a transcript for both audio and video 
+      // but captions are currently only supported for video 
+      if (this.mediaType === 'video') { 
+
+        // create a div for displaying captions  
+        // includes aria-hidden="true" because otherwise 
+        // captions being added and removed causes sporadic changes to focus in JAWS
+        // (not a problem in NVDA or VoiceOver)
+        if (!this.$captionDiv) {
+          this.$captionDiv = $('<div>',{
+            'class': 'able-captions',
+            'aria-hidden': 'true' 
+          });
+          this.$vidcapContainer.append(this.$captionDiv);
+        }
+      }
+
+      this.currentCaption = -1;
+      if (this.prefCaptions === 1) { 
+        // Captions default to on.
+        this.captionsOn = true; 
+      }
+      else { 
+        this.captionsOn = false;
+      }
     
-    this.captions.push({
-      cues: cues,
-      language: trackLang,
-      label: trackLabel
-    });
-      
+      this.captions.push({
+        cues: cues,
+        language: trackLang,
+        label: trackLabel
+      });
+//    }
+    
     // TODO: Apply this sorting to captions as well.
     if (trackLang && this.includeTranscript) {
       // TODO: Move the refresh of the transcript select box to a central location?
@@ -5007,6 +5025,7 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
     }
     var div = this.generateTranscript(captions || [], descriptions || []);
     this.$transcriptDiv.html(div);
+    
     var thisObj = this;
     
     // Make transcript tabbable if preference is turned on.
@@ -5058,11 +5077,23 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
   };
 
   AblePlayer.prototype.generateTranscript = function(captions, descriptions) {
+    
+    var thisObj = this; 
+    
     var main = $('<div class="able-transcript-container"></div>');
     
     // TODO: Make scrolling optional?
     
-    main.append('<h2>Transcript</h2>');
+    var transcriptTitle = 'Transcript';
+    if (this.transcriptTitle !== undefined) { 
+      transcriptTitle = this.transcriptTitle;
+    }
+    else if (this.lyricsMode) { 
+      transcriptTitle = 'Lyrics';
+    }
+    if (transcriptTitle != '') { 
+      main.append('<h2>' + transcriptTitle + '</h2>');
+    }
     
     var nextCap = 0;
     var nextDesc = 0;  
@@ -5152,17 +5183,21 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
         return result;
       };
       
-      
       for (var ii in cap.components.children) {
         var results = flattenComponentForCaption(cap.components.children[ii]);
         for (var jj in results) {
-          capSpan.append(results[jj]);
+          var result = results[jj];
+          if (typeof result === 'string' && thisObj.lyricsMode) {    
+            // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n") 
+            result = result.replace('\n','<br>') + '<br>';
+          }
+          capSpan.append(result);
         }
       }
       
       capSpan.attr('data-start', cap.start.toString());
       capSpan.attr('data-end', cap.end.toString());
-      div.append(capSpan);
+      div.append(capSpan);      
       div.append('\n');
     };
     

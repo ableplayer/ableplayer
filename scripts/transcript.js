@@ -33,6 +33,7 @@
     }
     var div = this.generateTranscript(captions || [], descriptions || []);
     this.$transcriptDiv.html(div);
+    
     var thisObj = this;
     
     // Make transcript tabbable if preference is turned on.
@@ -84,11 +85,23 @@
   };
 
   AblePlayer.prototype.generateTranscript = function(captions, descriptions) {
+    
+    var thisObj = this; 
+    
     var main = $('<div class="able-transcript-container"></div>');
     
     // TODO: Make scrolling optional?
     
-    main.append('<h2>Transcript</h2>');
+    var transcriptTitle = 'Transcript';
+    if (this.transcriptTitle !== undefined) { 
+      transcriptTitle = this.transcriptTitle;
+    }
+    else if (this.lyricsMode) { 
+      transcriptTitle = 'Lyrics';
+    }
+    if (transcriptTitle != '') { 
+      main.append('<h2>' + transcriptTitle + '</h2>');
+    }
     
     var nextCap = 0;
     var nextDesc = 0;  
@@ -178,17 +191,21 @@
         return result;
       };
       
-      
       for (var ii in cap.components.children) {
         var results = flattenComponentForCaption(cap.components.children[ii]);
         for (var jj in results) {
-          capSpan.append(results[jj]);
+          var result = results[jj];
+          if (typeof result === 'string' && thisObj.lyricsMode) {    
+            // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n") 
+            result = result.replace('\n','<br>') + '<br>';
+          }
+          capSpan.append(result);
         }
       }
       
       capSpan.attr('data-start', cap.start.toString());
       capSpan.attr('data-end', cap.end.toString());
-      div.append(capSpan);
+      div.append(capSpan);      
       div.append('\n');
     };
     

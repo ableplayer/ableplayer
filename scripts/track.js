@@ -53,35 +53,42 @@
   AblePlayer.prototype.setupCaptions = function (track, cues) {
     var trackLang = track.getAttribute('srclang');
     var trackLabel = track.getAttribute('label') || trackLang;
-    this.hasCaptions = true;
 
-    // create a div for displaying captions  
-    // includes aria-hidden="true" because otherwise 
-    // captions being added and removed causes sporadic changes to focus in JAWS
-    // (not a problem in NVDA or VoiceOver)
-    if (!this.$captionDiv) {
-      this.$captionDiv = $('<div>',{
-        'class': 'able-captions',
-        'aria-hidden': 'true' 
-      });
-      this.$vidcapContainer.append(this.$captionDiv);
-    }
+      this.hasCaptions = true;
 
-    this.currentCaption = -1;
-    if (this.prefCaptions === 1) { 
-      // Captions default to on.
-      this.captionsOn = true; 
-    }
-    else { 
-      this.captionsOn = false;
-    }
+      // caption cues from WebVTT are used to build a transcript for both audio and video 
+      // but captions are currently only supported for video 
+      if (this.mediaType === 'video') { 
+
+        // create a div for displaying captions  
+        // includes aria-hidden="true" because otherwise 
+        // captions being added and removed causes sporadic changes to focus in JAWS
+        // (not a problem in NVDA or VoiceOver)
+        if (!this.$captionDiv) {
+          this.$captionDiv = $('<div>',{
+            'class': 'able-captions',
+            'aria-hidden': 'true' 
+          });
+          this.$vidcapContainer.append(this.$captionDiv);
+        }
+      }
+
+      this.currentCaption = -1;
+      if (this.prefCaptions === 1) { 
+        // Captions default to on.
+        this.captionsOn = true; 
+      }
+      else { 
+        this.captionsOn = false;
+      }
     
-    this.captions.push({
-      cues: cues,
-      language: trackLang,
-      label: trackLabel
-    });
-      
+      this.captions.push({
+        cues: cues,
+        language: trackLang,
+        label: trackLabel
+      });
+//    }
+    
     // TODO: Apply this sorting to captions as well.
     if (trackLang && this.includeTranscript) {
       // TODO: Move the refresh of the transcript select box to a central location?

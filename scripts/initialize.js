@@ -71,6 +71,15 @@
     
     // translationPath - specify path to translation files 
     this.translationPath = '../translations/';
+    
+    // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
+    // but they're removed by default form transcripts in order to form a more seamless reading experience 
+    // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
+    this.lyricsMode = false; 
+    
+    // transcriptTitle - override default transcript title 
+    // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
+    this.transcriptTitle = 'Transcript';
 
     this.setButtonImages();
   };

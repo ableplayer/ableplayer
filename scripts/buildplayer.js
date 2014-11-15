@@ -24,22 +24,18 @@
     
     if (this.mediaType === 'video') {
       this.injectBigPlayButton();
-    }
 
-    // add container that captions or description will be appended to
-    // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-    var vidcapContainer = $('<div>',{ 
-      'class' : 'able-vidcap-container'
-    });
-
-    if (this.mediaType === 'video') { 
+      // add container that captions or description will be appended to
+      // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
+      var vidcapContainer = $('<div>',{ 
+        'class' : 'able-vidcap-container'
+      });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
 
-        
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
-    
+
     if (this.includeTranscript) {
       this.injectTranscriptArea();
       this.addTranscriptAreaEvents();

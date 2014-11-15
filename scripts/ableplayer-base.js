@@ -89,6 +89,15 @@
       this.transcriptDivLocation = $(media).data('transcript-div'); 
     }
 
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
+      this.lyricsMode = true; 
+    }
+
+    if ($(media).data('transcript-title') !== undefined) { 
+      // NOTE: empty string is valid; results in no title being displayed  
+      this.transcriptTitle = $(media).data('transcript-title'); 
+    }
+
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
       this.youtubeId = $(media).data('youtube-id'); 
     }
