@@ -1153,8 +1153,11 @@
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
 
+//console.log('before normalization:');
+//console.log(text);
+
     // Normalize line ends to \n.
-    text.replace('\r\n', '\n').replace('\r', '\n');
+    text = text.replace(/(\r\n|\n|\r)/g,'\n');
     
     var parserState = {
       text: text,
