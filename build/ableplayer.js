@@ -1407,9 +1407,8 @@
       }
       else if (token.type === 'startTag') {
         token.type = token.tagName;
-console.log('this is a start tag. setting parent to current, which is:');        
-console.log(current);
-        token.parent = current; // added this fuck
+        // Define token.parent; added by Terrill to fix bug on Line 296
+        token.parent = current; 
         if ($.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby']) !== -1) {
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
@@ -1442,14 +1441,10 @@ console.log(current);
         }
       }
       else if (token.type === 'endTag') {
-        // BUG: In this else block, current is set to current.parent or current.parent.parent 
-        // However, current has no parent. Attempting to reset current to something that works. 
         if (token.tagName === current.type && $.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v']) !== -1) {
-console.log('resetting to parent; current is:');
-console.log(current);
+          // NOTE from Terrill: This was resulting in an error because current.parent was undefined 
+          // Fixed (I think) by assigning current token to token.parent  on Line 260
           current = current.parent;
-console.log('after reset to parent, current is: ');
-console.log(current);          
         }
         else if (token.tagName === 'lang' && current.type === 'lang') {
           current = current.parent;
@@ -2858,8 +2853,6 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       loadingPromise.then((function (track, kind) {
         return function (trackText) {
           var cues = thisObj.parseWebVTT(trackText).cues;
-console.log('CUES:');
-console.log(cues);
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }
