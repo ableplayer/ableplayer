@@ -1153,9 +1153,6 @@
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
 
-//console.log('before normalization:');
-//console.log(text);
-
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
     
@@ -1241,7 +1238,7 @@
     }
   }
   
-  function parseFileBody(state) {
+  function parseFileBody(state) {    
     actList(state, [
       eatOptionalBOM,
       eatSignature]);
@@ -1390,27 +1387,29 @@
     var result = {type: 'internal', tagName: '', value: '', classes: [], annotation: '', parent: null, children: [], language: ''};
     var current = result;
     var languageStack = [];
-    while (state.text.length > 0) {
+    while (state.text.length > 0) {      
       var nextLine = peekLine(state);
       if (nextLine.indexOf('-->') !== -1) {
         break;
       }
-      
+
       // Have to separately detect double-lines ending cue due to our non-standard parsing.
       // TODO: Redo outer algorithm to conform to W3 spec?
       if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
         cut(state, 2);
         break;
       }
-      
-      var token = getCueToken(state);
 
+      var token = getCueToken(state);
       // We'll use the tokens themselves as objects where possible.
       if (token.type === 'string') {
         current.children.push(token);
       }
       else if (token.type === 'startTag') {
         token.type = token.tagName;
+console.log('this is a start tag. setting parent to current, which is:');        
+console.log(current);
+        token.parent = current; // added this fuck
         if ($.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby']) !== -1) {
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
@@ -1443,8 +1442,14 @@
         }
       }
       else if (token.type === 'endTag') {
+        // BUG: In this else block, current is set to current.parent or current.parent.parent 
+        // However, current has no parent. Attempting to reset current to something that works. 
         if (token.tagName === current.type && $.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v']) !== -1) {
+console.log('resetting to parent; current is:');
+console.log(current);
           current = current.parent;
+console.log('after reset to parent, current is: ');
+console.log(current);          
         }
         else if (token.tagName === 'lang' && current.type === 'lang') {
           current = current.parent;
@@ -1497,7 +1502,6 @@
         // End of file.
         c = '\u0004';
       }
-
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';
@@ -2854,6 +2858,8 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       loadingPromise.then((function (track, kind) {
         return function (trackText) {
           var cues = thisObj.parseWebVTT(trackText).cues;
+console.log('CUES:');
+console.log(cues);
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }

@@ -2,9 +2,6 @@
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
 
-//console.log('before normalization:');
-//console.log(text);
-
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
     
@@ -90,7 +87,7 @@
     }
   }
   
-  function parseFileBody(state) {
+  function parseFileBody(state) {    
     actList(state, [
       eatOptionalBOM,
       eatSignature]);
@@ -239,27 +236,28 @@
     var result = {type: 'internal', tagName: '', value: '', classes: [], annotation: '', parent: null, children: [], language: ''};
     var current = result;
     var languageStack = [];
-    while (state.text.length > 0) {
+    while (state.text.length > 0) {      
       var nextLine = peekLine(state);
       if (nextLine.indexOf('-->') !== -1) {
         break;
       }
-      
+
       // Have to separately detect double-lines ending cue due to our non-standard parsing.
       // TODO: Redo outer algorithm to conform to W3 spec?
       if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
         cut(state, 2);
         break;
       }
-      
-      var token = getCueToken(state);
 
+      var token = getCueToken(state);
       // We'll use the tokens themselves as objects where possible.
       if (token.type === 'string') {
         current.children.push(token);
       }
       else if (token.type === 'startTag') {
         token.type = token.tagName;
+        // Define token.parent; added by Terrill to fix bug on Line 296
+        token.parent = current; 
         if ($.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby']) !== -1) {
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
@@ -293,6 +291,8 @@
       }
       else if (token.type === 'endTag') {
         if (token.tagName === current.type && $.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v']) !== -1) {
+          // NOTE from Terrill: This was resulting in an error because current.parent was undefined 
+          // Fixed (I think) by assigning current token to token.parent  on Line 260
           current = current.parent;
         }
         else if (token.tagName === 'lang' && current.type === 'lang') {
@@ -346,7 +346,6 @@
         // End of file.
         c = '\u0004';
       }
-
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';
