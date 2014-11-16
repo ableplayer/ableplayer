@@ -85,7 +85,6 @@
   };
 
   AblePlayer.prototype.generateTranscript = function(captions, descriptions) {
-    
     var thisObj = this; 
     
     var main = $('<div class="able-transcript-container"></div>');

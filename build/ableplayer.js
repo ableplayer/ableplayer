@@ -2103,7 +2103,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
 
     // If client has provided separate transcript location, put it there instead.
     if (this.transcriptDivLocation) {
-      $(this.transcriptDivLocation).append(this.$transcriptArea);
+      $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
     else {
       // Place adjacent to player with reactive flow.
@@ -2114,7 +2114,8 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       this.$ableColumnRight.width(this.playerWidth);
     }
     
-    if (!this.prefTranscript) { 
+    // If client has provided separate transcript location, override user's preference for hiding transcript
+    if (!this.prefTranscript && !this.transcriptDivLocation) { 
       this.$transcriptArea.hide(); 
     }
   };
@@ -5077,7 +5078,6 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
   };
 
   AblePlayer.prototype.generateTranscript = function(captions, descriptions) {
-    
     var thisObj = this; 
     
     var main = $('<div class="able-transcript-container"></div>');
