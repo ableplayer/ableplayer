@@ -102,13 +102,12 @@
       this.youtubeId = $(media).data('youtube-id'); 
     }
 
-    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
-      this.debug = true; 
+    if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") { 
+      this.youtubeDescId = $(media).data('youtube-desc-id'); 
     }
 
-    if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
-      // move this to <source> element
-      this.youtubeId = $(media).data('youtube-id'); 
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
+      this.debug = true; 
     }
 
     if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") { 

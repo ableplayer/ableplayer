@@ -643,6 +643,8 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
     }
     else if (this.player === 'youtube') {
       var rates = this.youtubePlayer.getAvailablePlaybackRates();
+console.log('available playback rates:');
+console.log(rates);
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {

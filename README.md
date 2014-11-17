@@ -198,6 +198,8 @@ The following attributes are supported on the \<video\> element only:
     default to 360.
 -   **poster** - path to an image file. Will be displayed in the player
     until the video is played.
+-   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
+-   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information. 
 
 The following additional features are supported by *Able Player*:
 
@@ -340,12 +342,20 @@ Features of the interactive transcript include the following:
 YouTube Support
 ---------------
 
-To play a YouTube video in *Able Player*, simply include the **data-youtube-id** attribute 
+To play a YouTube video in *Able Player*, simply include a **data-youtube-id** attribute 
 on the \<video\> element. The value of this attribute must be the video's 11-character YouTube ID. 
 
-Currently we are unable to access captions via the YouTube API, so even if the video is already 
-captioned on YouTube, captions will need to be included redundantly within *Able Player* 
-as described above in the Closed Captions section.  
+If captions are available on the YouTube video, they will be displayed automatically for users 
+who have captions turned on when watching other YouTube videos. 
+
+If a described version is available of the video, include a **data-youtube-desc-id** attribute 
+on the \<video\> element as well. The value of this attribute must be the 11-character YouTube ID
+of the described version. If users have "Description on by Default" checked within their *Able Player* 
+preferences, the described version of the video will automatically play by default. 
+
+Adjustable playback rate is available for some videos, but only if the user has opted in on using 
+the HTML5 player in YouTube. 
+To opt in, visit the <a href="https://www.youtube.com/html5">YouTube HTML5 Video Player</a> page.   
 
 MIME Types
 ----------

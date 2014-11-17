@@ -22,7 +22,8 @@
 
     this.injectOffscreenHeading();
     
-    if (this.mediaType === 'video') {
+    // youtube adds its own big play button
+    if (this.mediaType === 'video' && this.player !== 'youtube') {
       this.injectBigPlayButton();
 
       // add container that captions or description will be appended to

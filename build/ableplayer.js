@@ -102,13 +102,12 @@
       this.youtubeId = $(media).data('youtube-id'); 
     }
 
-    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
-      this.debug = true; 
+    if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") { 
+      this.youtubeDescId = $(media).data('youtube-desc-id'); 
     }
 
-    if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
-      // move this to <source> element
-      this.youtubeId = $(media).data('youtube-id'); 
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
+      this.debug = true; 
     }
 
     if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") { 
@@ -715,8 +714,19 @@
       var containerId = thisObj.mediaId + '_youtube';
       thisObj.$mediaContainer.prepend($('<div>').attr('id', containerId));
 
+      var youTubeId; 
+      // if a described version is available && user prefers desription 
+      // give them the described version 
+      if (thisObj.youtubeDescId && thisObj.prefDesc) { 
+        youTubeId = thisObj.youtubeDescId; 
+        // TODO: add alert informing the user that the described version is being loaded
+      }
+      else { 
+        youTubeId = thisObj.youtubeId;
+      }
+      
       thisObj.youtubePlayer = new YT.Player(containerId, {
-        videoId: thisObj.youtubeId,
+        videoId: youTubeId,
         height: thisObj.playerHeight.toString(),
         width: thisObj.playerWidth.toString(),
         playerVars: {
@@ -1907,7 +1917,8 @@
 
     this.injectOffscreenHeading();
     
-    if (this.mediaType === 'video') {
+    // youtube adds its own big play button
+    if (this.mediaType === 'video' && this.player !== 'youtube') {
       this.injectBigPlayButton();
 
       // add container that captions or description will be appended to
@@ -4131,6 +4142,10 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     else if (this.player === 'youtube') {
       // Youtube always supports a finite list of playback rates.  Only expose controls if more than one is available.
+console.log('how many playbackrates are supported?');
+var ytrates = this.youtubePlayer.getAvailablePlaybackRates(); 
+console.log(ytrates.length + '. They are: ');
+console.log(ytrates);
       return (this.youtubePlayer.getAvailablePlaybackRates().length > 1);
     }
   };
@@ -4548,6 +4563,8 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
     }
     else if (this.player === 'youtube') {
       var rates = this.youtubePlayer.getAvailablePlaybackRates();
+console.log('available playback rates:');
+console.log(rates);
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {

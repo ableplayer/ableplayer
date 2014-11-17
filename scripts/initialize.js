@@ -456,8 +456,19 @@
       var containerId = thisObj.mediaId + '_youtube';
       thisObj.$mediaContainer.prepend($('<div>').attr('id', containerId));
 
+      var youTubeId; 
+      // if a described version is available && user prefers desription 
+      // give them the described version 
+      if (thisObj.youtubeDescId && thisObj.prefDesc) { 
+        youTubeId = thisObj.youtubeDescId; 
+        // TODO: add alert informing the user that the described version is being loaded
+      }
+      else { 
+        youTubeId = thisObj.youtubeId;
+      }
+      
       thisObj.youtubePlayer = new YT.Player(containerId, {
-        videoId: thisObj.youtubeId,
+        videoId: youTubeId,
         height: thisObj.playerHeight.toString(),
         width: thisObj.playerWidth.toString(),
         playerVars: {
