@@ -3472,7 +3472,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       'margin-left': 'auto',
       'margin-right': 'auto',
       'z-index': 6000,
-      position: 'fixed',
+      position: 'absolute',
       left: 0,
       right: 0,
       top: (fullscreen ? '0' : '25%'),
@@ -3599,7 +3599,10 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
-    this.modal.attr('aria-hidden', 'false');
+    this.modal.attr({
+      'aria-hidden': 'false', 
+      'tabindex': '0'
+    });
     
     this.focusedElementBeforeModal = $(':focus');
     var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
@@ -3608,7 +3611,12 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     var thisObj = this;
     setTimeout(function () {
-      thisObj.modal.find('input').first().focus();
+      // originally set focus on first input element
+      // thisObj.modal.find('input').first().focus();
+      // but if we do this users miss the help text at the top, + Help dialog has no input elements 
+      // Instead, placing focus on dialog itself 
+      // Ref: http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+      thisObj.modal.focus();
     }, 300);
   };
 
@@ -4142,10 +4150,6 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     else if (this.player === 'youtube') {
       // Youtube always supports a finite list of playback rates.  Only expose controls if more than one is available.
-console.log('how many playbackrates are supported?');
-var ytrates = this.youtubePlayer.getAvailablePlaybackRates(); 
-console.log(ytrates.length + '. They are: ');
-console.log(ytrates);
       return (this.youtubePlayer.getAvailablePlaybackRates().length > 1);
     }
   };

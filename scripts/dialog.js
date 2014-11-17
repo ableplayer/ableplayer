@@ -16,7 +16,7 @@
       'margin-left': 'auto',
       'margin-right': 'auto',
       'z-index': 6000,
-      position: 'fixed',
+      position: 'absolute',
       left: 0,
       right: 0,
       top: (fullscreen ? '0' : '25%'),
@@ -143,7 +143,10 @@
     
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
-    this.modal.attr('aria-hidden', 'false');
+    this.modal.attr({
+      'aria-hidden': 'false', 
+      'tabindex': '0'
+    });
     
     this.focusedElementBeforeModal = $(':focus');
     var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
@@ -152,7 +155,12 @@
     }
     var thisObj = this;
     setTimeout(function () {
-      thisObj.modal.find('input').first().focus();
+      // originally set focus on first input element
+      // thisObj.modal.find('input').first().focus();
+      // but if we do this users miss the help text at the top, + Help dialog has no input elements 
+      // Instead, placing focus on dialog itself 
+      // Ref: http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+      thisObj.modal.focus();
     }, 300);
   };
 
