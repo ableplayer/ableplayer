@@ -184,18 +184,15 @@
     // The rest are reasonable best choices  
     // NOTE #2: If there are multiple players on a single page, keystroke handlers 
     // are only bound to the FIRST player 
-
     if (!this.okToHandleKeyPress()) { 
       return false;     
     }
-    
     // Convert to lower case.
     var which = e.which;
     if (which >= 65 && which <= 90) {
       which += 32;
     }
 
-      
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
       this.closeTooltips();
     }

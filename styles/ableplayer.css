@@ -217,8 +217,31 @@ div.able-now-playing span span {
 
 /* Modal Dialogs */ 
 
+div.modalDialog { 
+  position: absolute;
+  z-index: 6000;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0px;
+  right: 0px;
+  outline: 0px none;
+  display: none;
+}
+div.modalOverlay { 
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 5000;
+  background-color: #000;
+  opacity: 0.5;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 0;
+  display: none;
+}
 button.modalCloseButton { 
-  /* float: right; */
   position: absolute;
   top: 5px;
   right: 5px;
@@ -270,9 +293,11 @@ div.modalDialog button:focus {
 	border: medium solid #ccc;
 	width: 25em;
 }
-
 .able-help-div ul { 
 	list-style-type: none;
+}
+.able-help-modifiers { 
+  font-weight: bold;
 }
 
 /* icomoon.io font styling */

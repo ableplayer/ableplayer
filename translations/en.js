@@ -135,6 +135,8 @@
 
 "ok": "ok", 
 
-"done": "Done"
+"done": "Done",
+
+"closeButtonLabel": "Close dialog"
 
 }

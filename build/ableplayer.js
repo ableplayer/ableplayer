@@ -1006,7 +1006,7 @@
 
   // Creates the preferences form and injects it.
   AblePlayer.prototype.injectPrefsForm = function () {
-    var prefsDiv, introText, prefsIntro, 
+    var prefsDiv, prefsShim, introText, prefsIntro, 
     featuresFieldset, featuresLegend, 
     keysFieldset, keysLegend, 
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
@@ -1014,11 +1014,18 @@
     
     thisObj = this;
     available = this.getAvailablePreferences();
-    // define all the parts
+
+    // outer container, will be assigned role="dialog"
     prefsDiv = $('<div>',{ 
-      'class': 'able-prefs-form',
-      role: 'form'
+      'class': 'able-prefs-form'
     });
+    
+    // inner container, a shim for getting some screen readers to read dialog 
+    prefsShim = $('<div>',{ 
+      'role': 'form',
+      'class': 'able-prefs-shim'
+    });
+    
     introText = '<p>Saving your preferences requires cookies.</p>\n';
     
     prefsIntro = $('<p>',{ 
@@ -1058,13 +1065,20 @@
       }     
     }
     // Now assemble all the parts   
-    prefsDiv
+    prefsShim
       .append(prefsIntro)
       .append(keysFieldset)
       .append(featuresFieldset);
-    this.$ableDiv.append(prefsDiv); 
+    prefsDiv.append(prefsShim);
+
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    // this.$ableDiv.append(prefsDiv); 
+    $('body').append(prefsDiv);
     
-    var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');
+    var dialog = new AccessibleDialog(prefsDiv, thisObj.tt.prefTitle, thisObj.tt.closeButtonLabel, '32em');
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
@@ -2308,17 +2322,29 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.addHelp = function() {   
-    // create help text that will be displayed in a JQuery-UI dialog 
+    // create help text that will be displayed in a modal dialog 
     // if user clicks the Help button   
   
-    var helpText, i, label, key, helpDiv; 
+    var helpDiv, helpShim, helpText, i, label, key; 
   
+    // outer container, will be assigned role="dialog"  
+    helpDiv = $('<div>',{ 
+      'class': 'able-help-div'
+    });
+    
+    // inner container, a shim for getting some screen readers to read dialog 
+    helpShim = $('<div>',{ 
+      'role': 'document',
+      'tabindex': '-1',
+      'class': 'able-help-shim'
+    });
+    
     helpText = '<p>' + this.tt.helpKeys + '</p>\n';
     helpText += '<ul>\n';
     for (i=0; i<this.controls.length; i++) { 
       if (this.controls[i] === 'play') { 
         label = this.tt.play + '/' + this.tt.pause;
-        key = 'p </b><em>' + this.tt.or + '</em><b> ' + this.tt.spacebar;
+        key = 'p </span><em>' + this.tt.or + '</em><span class="able-help-modifiers"> ' + this.tt.spacebar;
       }
       else if (this.controls[i] === 'stop') { 
         label = this.tt.stop;
@@ -2364,7 +2390,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         label = false;
       }
       if (label) { 
-        helpText += '<li><b><span class="able-help-modifiers">'; 
+        helpText += '<li><span class="able-help-modifiers">'; 
         if (this.prefAltKey === 1) { 
           helpText += 'Alt + ';
         }
@@ -2374,19 +2400,23 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         if (this.prefShiftKey === 1) {
           helpText += 'Shift + ';
         }
-        helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
+        helpText += key + '</span> = ' + label + '</li>\n';
       }
     }
     helpText += '</ul>\n';
     helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
     
-    helpDiv = $('<div>',{ 
-      'class': 'able-help-div',
-      'html': helpText
-    });
-    this.$ableDiv.append(helpDiv); 
-    
-    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
+    // Now assemble all the parts   
+    helpShim.append(helpText);
+    helpDiv.append(helpShim);
+
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    $('body').append(helpDiv);
+
+    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, this.tt.closeButtonLabel, '40em');
 
     helpDiv.append('<hr>');
     var okButton = $('<button>' + this.tt.ok + '</button>');
@@ -3458,32 +3488,26 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, title, description, width, fullscreen, escapeHook) {
+  window.AccessibleDialog = function(modalDiv, title, closeButtonLabel, width, fullscreen, escapeHook) {
     this.title = title;
-    this.description = description;
+    this.closeButtonLabel = closeButtonLabel;
     this.escapeHook = escapeHook;
     this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
-  
     var thisObj = this;
     var modal = modalDiv;
     this.modal = modal;
+    var $modalShim = modal.find('div').first();
     modal.css({
-      width: width || '50%',
-      'margin-left': 'auto',
-      'margin-right': 'auto',
-      'z-index': 6000,
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: (fullscreen ? '0' : '25%'),
-      display: 'none'
+      'width': width || '50%',
+      'top': (fullscreen ? '0' : '25%'),
     });
     modal.addClass('modalDialog');
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
          'class': 'modalCloseButton',
-         'title': 'Close dialog'
+         'title': thisObj.closeButtonLabel,
+         'aria-label': thisObj.closeButtonLabel
       }).text('X');
       closeButton.keydown(function (event) {
         // Space key down
@@ -3500,29 +3524,12 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       titleH1.text(title);
       
       modal.attr('aria-labelledby', 'modalTitle-' + this.baseId);
-      
-      modal.prepend(titleH1);
-      modal.prepend(closeButton);
+
+      $modalShim.prepend(titleH1);
+      $modalShim.prepend(closeButton);
     }
-
-
-    var descriptionDiv = $('<div></div>');
-    descriptionDiv.attr('id', 'modalDescription-' + this.baseId);
-    descriptionDiv.text(description);
-    // Move off-screen.
-    descriptionDiv.css({
-      position: 'absolute',
-      left: '-999px',
-      width: '1px',
-      height: '1px',
-      top: 'auto'
-    });
-
-
-    modal.prepend(descriptionDiv);
     
     modal.attr('aria-hidden', 'true');
-    modal.attr('aria-describedby', 'modalDescription-' + this.baseId);
     modal.attr('role', 'dialog');
     
     modal.keydown(function (event) {
@@ -3565,28 +3572,17 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       event.stopPropagation();
     });
     
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
   };
   
   AccessibleDialog.prototype.show = function () {
     if (!this.overlay) {
       // Generate overlay.
-      var overlay = $('<div class="modalOverlay"></div>');
-      overlay.attr('tabindex', '-1');
-      this.overlay = overlay;
-      overlay.css({
-        width: '100%',
-        height: '100%',
-        'z-index': 5000,
-        'background-color': '#000',
-        opacity: 0.5,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        display: 'none',
-        margin: 0,
-        padding: 0
+      var overlay = $('<div></div>').attr({
+         'class': 'modalOverlay', 
+         'tabindex': '-1'
       });
+      this.overlay = overlay;
       $('body').append(overlay);
       
       // Keep from moving focus out of dialog when clicking outside of it.
@@ -3595,7 +3591,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       });
     }
     
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'true');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'true');
     
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
@@ -3611,11 +3607,9 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     var thisObj = this;
     setTimeout(function () {
-      // originally set focus on first input element
-      // thisObj.modal.find('input').first().focus();
-      // but if we do this users miss the help text at the top, + Help dialog has no input elements 
-      // Instead, placing focus on dialog itself 
-      // Ref: http://www.nczonline.net/blog/2013/02/12/making-an-accessible-dialog-box/
+      // originally set focus on the first focusable element 
+      // thisObj.modal.find('button.modalCloseButton').first().focus();
+      // but setting focus on dialog seems to provide more reliable access to ALL content within 
       thisObj.modal.focus();
     }, 300);
   };
@@ -3626,7 +3620,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     this.modal.css('display', 'none');
     this.modal.attr('aria-hidden', 'true');
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
     
     this.focusedElementBeforeModal.focus();
   };
@@ -5432,22 +5426,23 @@ console.log(rates);
     // The rest are reasonable best choices  
     // NOTE #2: If there are multiple players on a single page, keystroke handlers 
     // are only bound to the FIRST player 
-
+console.log('you pressed ' + e.which + '. ok to handle this keypress?');
     if (!this.okToHandleKeyPress()) { 
+console.log('No!');      
       return false;     
     }
-    
+console.log('Yes!');    
     // Convert to lower case.
     var which = e.which;
     if (which >= 65 && which <= 90) {
       which += 32;
     }
 
-      
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
       this.closeTooltips();
     }
     else if (which === 32) { // spacebar = play/pause     
+console.log('you pressed space');      
       if (!($('.able-controller button').is(':focus'))) { 
         // only toggle play if a button does not have focus 
         // if a button has focus, space should activate that button

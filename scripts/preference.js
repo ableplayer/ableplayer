@@ -152,7 +152,7 @@
 
   // Creates the preferences form and injects it.
   AblePlayer.prototype.injectPrefsForm = function () {
-    var prefsDiv, introText, prefsIntro, 
+    var prefsDiv, prefsShim, introText, prefsIntro, 
     featuresFieldset, featuresLegend, 
     keysFieldset, keysLegend, 
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
@@ -160,11 +160,18 @@
     
     thisObj = this;
     available = this.getAvailablePreferences();
-    // define all the parts
+
+    // outer container, will be assigned role="dialog"
     prefsDiv = $('<div>',{ 
-      'class': 'able-prefs-form',
-      role: 'form'
+      'class': 'able-prefs-form'
     });
+    
+    // inner container, a shim for getting some screen readers to read dialog 
+    prefsShim = $('<div>',{ 
+      'role': 'form',
+      'class': 'able-prefs-shim'
+    });
+    
     introText = '<p>Saving your preferences requires cookies.</p>\n';
     
     prefsIntro = $('<p>',{ 
@@ -204,13 +211,20 @@
       }     
     }
     // Now assemble all the parts   
-    prefsDiv
+    prefsShim
       .append(prefsIntro)
       .append(keysFieldset)
       .append(featuresFieldset);
-    this.$ableDiv.append(prefsDiv); 
+    prefsDiv.append(prefsShim);
+
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    // this.$ableDiv.append(prefsDiv); 
+    $('body').append(prefsDiv);
     
-    var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');
+    var dialog = new AccessibleDialog(prefsDiv, thisObj.tt.prefTitle, thisObj.tt.closeButtonLabel, '32em');
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');

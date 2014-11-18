@@ -413,17 +413,29 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.addHelp = function() {   
-    // create help text that will be displayed in a JQuery-UI dialog 
+    // create help text that will be displayed in a modal dialog 
     // if user clicks the Help button   
   
-    var helpText, i, label, key, helpDiv; 
+    var helpDiv, helpShim, helpText, i, label, key; 
   
+    // outer container, will be assigned role="dialog"  
+    helpDiv = $('<div>',{ 
+      'class': 'able-help-div'
+    });
+    
+    // inner container, a shim for getting some screen readers to read dialog 
+    helpShim = $('<div>',{ 
+      'role': 'document',
+      'tabindex': '-1',
+      'class': 'able-help-shim'
+    });
+    
     helpText = '<p>' + this.tt.helpKeys + '</p>\n';
     helpText += '<ul>\n';
     for (i=0; i<this.controls.length; i++) { 
       if (this.controls[i] === 'play') { 
         label = this.tt.play + '/' + this.tt.pause;
-        key = 'p </b><em>' + this.tt.or + '</em><b> ' + this.tt.spacebar;
+        key = 'p </span><em>' + this.tt.or + '</em><span class="able-help-modifiers"> ' + this.tt.spacebar;
       }
       else if (this.controls[i] === 'stop') { 
         label = this.tt.stop;
@@ -469,7 +481,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         label = false;
       }
       if (label) { 
-        helpText += '<li><b><span class="able-help-modifiers">'; 
+        helpText += '<li><span class="able-help-modifiers">'; 
         if (this.prefAltKey === 1) { 
           helpText += 'Alt + ';
         }
@@ -479,19 +491,23 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         if (this.prefShiftKey === 1) {
           helpText += 'Shift + ';
         }
-        helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
+        helpText += key + '</span> = ' + label + '</li>\n';
       }
     }
     helpText += '</ul>\n';
     helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
     
-    helpDiv = $('<div>',{ 
-      'class': 'able-help-div',
-      'html': helpText
-    });
-    this.$ableDiv.append(helpDiv); 
-    
-    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
+    // Now assemble all the parts   
+    helpShim.append(helpText);
+    helpDiv.append(helpShim);
+
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    $('body').append(helpDiv);
+
+    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, this.tt.closeButtonLabel, '40em');
 
     helpDiv.append('<hr>');
     var okButton = $('<button>' + this.tt.ok + '</button>');
