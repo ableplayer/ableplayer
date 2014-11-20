@@ -560,6 +560,7 @@
   };
 
   AblePlayer.prototype.handleRewind = function() { 
+console.log('rewinding ' + this.seekInterval + ' seconds');
     var targetTime = this.getElapsed() - this.seekInterval;
     if (targetTime < 0) {
       this.seekTo(0);
@@ -570,6 +571,7 @@
   };
 
   AblePlayer.prototype.handleFastForward = function() { 
+console.log('fast forwarding ' + this.seekInterval + ' seconds');    
     var targetTime = this.getElapsed() + this.seekInterval;    
     
     if (targetTime > this.getDuration()) {
@@ -641,6 +643,8 @@
     }
     else if (this.player === 'youtube') {
       var rates = this.youtubePlayer.getAvailablePlaybackRates();
+console.log('available playback rates:');
+console.log(rates);
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {

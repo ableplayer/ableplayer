@@ -1,6 +1,7 @@
 (function () {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
+
     // Debug - set to true to write messages to console; otherwise false
     this.debug = false;
 
@@ -27,6 +28,8 @@
   
     // Browsers that don't support seekbar sliders will use rewind and forward buttons 
     // seekInterval = Number of seconds to seek forward or back with these buttons    
+    // NOTE: Unless user overrides this default with data-seek-interval attribute, 
+    // this value is replaced by 1/10 the duration of the media file, once the duration is known 
     this.seekInterval = 10;
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
@@ -66,8 +69,17 @@
     // set to false to force player to use this.lang
     this.langOverride = true;
     
-    // translationDir - specify path to translation files 
-    this.translationDir = '../translations/';
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
+    
+    // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
+    // but they're removed by default form transcripts in order to form a more seamless reading experience 
+    // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
+    this.lyricsMode = false; 
+    
+    // transcriptTitle - override default transcript title 
+    // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
+    this.transcriptTitle = 'Transcript';
 
     this.setButtonImages();
   };
@@ -333,9 +345,11 @@
         thisObj.$media[0].load();
       }
 
-      // 10 steps in seek interval; wait until the end so that we can fetch a duration.
-      thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
-
+      if (this.useFixedSeekInterval === false) { 
+        // 10 steps in seek interval; wait until the end so that we can fetch a duration.
+        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+      }
+      
       deferred.resolve();
     });
     
@@ -442,8 +456,19 @@
       var containerId = thisObj.mediaId + '_youtube';
       thisObj.$mediaContainer.prepend($('<div>').attr('id', containerId));
 
+      var youTubeId; 
+      // if a described version is available && user prefers desription 
+      // give them the described version 
+      if (thisObj.youtubeDescId && thisObj.prefDesc) { 
+        youTubeId = thisObj.youtubeDescId; 
+        // TODO: add alert informing the user that the described version is being loaded
+      }
+      else { 
+        youTubeId = thisObj.youtubeId;
+      }
+      
       thisObj.youtubePlayer = new YT.Player(containerId, {
-        videoId: thisObj.youtubeId,
+        videoId: youTubeId,
         height: thisObj.playerHeight.toString(),
         width: thisObj.playerWidth.toString(),
         playerVars: {

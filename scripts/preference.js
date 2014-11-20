@@ -160,11 +160,12 @@
     
     thisObj = this;
     available = this.getAvailablePreferences();
-    // define all the parts
+
+    // outer container, will be assigned role="dialog"
     prefsDiv = $('<div>',{ 
-      'class': 'able-prefs-form',
-      role: 'form'
+      'class': 'able-prefs-form'
     });
+
     introText = '<p>Saving your preferences requires cookies.</p>\n';
     
     prefsIntro = $('<p>',{ 
@@ -206,14 +207,17 @@
     // Now assemble all the parts   
     prefsDiv
       .append(prefsIntro)
-      .append(keysFieldset);
-    if (this.mediaType === 'video') { 
-      prefsDiv
-        .append(featuresFieldset);
-    }         
-    this.$ableDiv.append(prefsDiv); 
+      .append(keysFieldset)
+      .append(featuresFieldset);
+
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    // this.$ableDiv.append(prefsDiv); 
+    $('body').append(prefsDiv);
     
-    var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');
+    var dialog = new AccessibleDialog(prefsDiv, 'dialog', thisObj.tt.prefTitle, prefsIntro, thisObj.tt.closeButtonLabel, '32em');
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
