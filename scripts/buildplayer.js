@@ -22,24 +22,21 @@
 
     this.injectOffscreenHeading();
     
-    if (this.mediaType === 'video') {
+    // youtube adds its own big play button
+    if (this.mediaType === 'video' && this.player !== 'youtube') {
       this.injectBigPlayButton();
-    }
 
-    // add container that captions or description will be appended to
-    // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-    var vidcapContainer = $('<div>',{ 
-      'class' : 'able-vidcap-container'
-    });
-
-    if (this.mediaType === 'video') { 
+      // add container that captions or description will be appended to
+      // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
+      var vidcapContainer = $('<div>',{ 
+        'class' : 'able-vidcap-container'
+      });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
 
-        
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
-    
+
     if (this.includeTranscript) {
       this.injectTranscriptArea();
       this.addTranscriptAreaEvents();
@@ -86,21 +83,6 @@
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
     this.$headingDiv.text(this.tt.playerHeading); 
-    
-/*
-    var tempHeading = $('<h1>');
-
-//    this.$ableDiv.prepend(tempHeading);
-    // to get the nearest heading, look at siblings first 
-    // then, if no headings are found, look up the DOM tree 
-
-    var prevHeading = this.$ableDiv.prevAll('h1, h2, h3, h4, h5, h6').first();
-console.log('number of matching sibling elements: ' + prevHeading.length);
-    if (prevHeading.length === 0) { 
-      var prevHeading = this.$ableDiv.closest('h1, h2, h3, h4, h5, h6');
-console.log('number of matching parent elements: ' + prevHeading.length);
-    }
-*/
     
   };
 
@@ -222,7 +204,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
 
     // If client has provided separate transcript location, put it there instead.
     if (this.transcriptDivLocation) {
-      $(this.transcriptDivLocation).append(this.$transcriptArea);
+      $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
     else {
       // Place adjacent to player with reactive flow.
@@ -233,7 +215,8 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       this.$ableColumnRight.width(this.playerWidth);
     }
     
-    if (!this.prefTranscript) { 
+    // If client has provided separate transcript location, override user's preference for hiding transcript
+    if (!this.prefTranscript && !this.transcriptDivLocation) { 
       this.$transcriptArea.hide(); 
     }
   };
@@ -415,17 +398,26 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.addHelp = function() {   
-    // create help text that will be displayed in a JQuery-UI dialog 
+    // create help text that will be displayed in a modal dialog 
     // if user clicks the Help button   
   
-    var helpText, i, label, key, helpDiv; 
+    var $helpDiv, $helpTextWrapper, $helpIntro, $helpDisclaimer, helpText, i, label, key, $okButton; 
   
-    helpText = '<p>' + this.tt.helpKeys + '</p>\n';
-    helpText += '<ul>\n';
+    // outer container, will be assigned role="dialog"  
+    $helpDiv = $('<div></div>',{ 
+      'class': 'able-help-div'
+    });
+    
+    // inner container for all text, will be assigned to modal div's aria-describedby 
+    $helpTextWrapper = $('<div></div>');
+    
+    $helpIntro = $('<p></p>').text(this.tt.helpKeys);    
+    $helpDisclaimer = $('<p></p>').text(this.tt.helpKeysDisclaimer);
+    helpText = '<ul>\n';
     for (i=0; i<this.controls.length; i++) { 
       if (this.controls[i] === 'play') { 
         label = this.tt.play + '/' + this.tt.pause;
-        key = 'p </b><em>' + this.tt.or + '</em><b> ' + this.tt.spacebar;
+        key = 'p </span><em>' + this.tt.or + '</em><span class="able-help-modifiers"> ' + this.tt.spacebar;
       }
       else if (this.controls[i] === 'stop') { 
         label = this.tt.stop;
@@ -471,7 +463,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         label = false;
       }
       if (label) { 
-        helpText += '<li><b><span class="able-help-modifiers">'; 
+        helpText += '<li><span class="able-help-modifiers">'; 
         if (this.prefAltKey === 1) { 
           helpText += 'Alt + ';
         }
@@ -481,27 +473,34 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         if (this.prefShiftKey === 1) {
           helpText += 'Shift + ';
         }
-        helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
+        helpText += key + '</span> = ' + label + '</li>\n';
       }
     }
     helpText += '</ul>\n';
-    helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
     
-    helpDiv = $('<div>',{ 
-      'class': 'able-help-div',
-      'html': helpText
-    });
-    this.$ableDiv.append(helpDiv); 
+    // Now assemble all the parts   
+    $helpTextWrapper.append($helpIntro);
+    $helpTextWrapper.append(helpText);
+    $helpTextWrapper.append($helpDisclaimer);
+    $helpDiv.append($helpTextWrapper);
     
-    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    $('body').append($helpDiv);
 
-    helpDiv.append('<hr>');
-    var okButton = $('<button>' + this.tt.ok + '</button>');
-    okButton.click(function () {
+    // Tip from Billy Gregory at AHG2014: 
+    // If dialog does not collect information, use role="alertdialog" 
+    var dialog = new AccessibleDialog($helpDiv, 'alertdialog', this.tt.helpTitle, $helpTextWrapper, this.tt.closeButtonLabel, '40em');
+
+    $helpDiv.append('<hr>');
+    $okButton = $('<button>' + this.tt.ok + '</button>');
+    $okButton.click(function () {
       dialog.hide();
     });
 
-    helpDiv.append(okButton);
+    $helpDiv.append($okButton);
     this.helpDialog = dialog;
   };
 
@@ -665,12 +664,31 @@ console.log('number of matching parent elements: ' + prevHeading.length);
               'class': iconClass,
               'aria-hidden': 'true'
             })   
-            // JAWS doesn't announce title on <button> this in some browsers/contexts
-            // Solution is to add hidden text for screen readers only  
+            // icomoon documentation recommends the following markup for screen readers: 
+            // 1. link element (or in our case, button). Nested inside this element: 
+            // 2. span that contains the icon font (in our case, buttonIcon)
+            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+            // Screen reader test results: 
+            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
+            // - JAWS 15 in IE11 reads "Play button" 
+            // - NVDA 2014.3 in IE11 reads "Play button" 
+            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
+            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
+            //   when a button has focus and user presses space or enter, focus moves to the next button 
+            //   and the keypress is NOT handled. 
+            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
+            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
+            // we get better results: 
+            // - NVDA/Firefox bug is fixed 
+            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
+            // - All other test results are the same as above
+            
             var buttonLabel = $('<span>',{
             'class': 'able-clipped'
             }).text(buttonTitle);
-            newButton.append(buttonIcon,buttonLabel);
+            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
+            // newButton.append(buttonIcon,buttonLabel);
+            newButton.append(buttonIcon);
           }
           else { 
             // use images

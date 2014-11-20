@@ -3,6 +3,7 @@
   
   // HTML5 Media API: 
   // http://www.w3.org/TR/html5/embedded-content-0.html#htmlmediaelement
+  // http://dev.w3.org/html5/spec-author-view/video.html
 
   // W3C API Test Page: 
   // http://www.w3.org/2010/05/video/mediaevents.html
@@ -26,18 +27,7 @@
   $(document).ready(function () {
     $('video, audio').each(function (index, element) {
       if ($(element).data('able-player') !== undefined) {
-        var includeTranscript = $(element).data('include-transcript');
-        if (includeTranscript === undefined || includeTranscript === "")  {
-          // If there are caption tracks and no default provided, include transcript.
-          if ($(element).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
-            includeTranscript = true;
-          }
-        }
-        new AblePlayer($(this),
-                       $(element).data('start-time') || 0,
-                       includeTranscript,
-                       $(element).data('transcript-div'),
-                       $(element).data('youtube-id'));
+        new AblePlayer($(this),$(element));
       }
     });
   });
@@ -60,8 +50,7 @@
   // Construct an AblePlayer object 
   // Parameters are: 
   // media - jQuery selector or element identifying the media.
-  // startTime - the time at which to begin playing the media       
-  window.AblePlayer = function(media, startTime, includeTranscript, transcriptDiv, youtubeId) {
+  window.AblePlayer = function(media) {
     // Keep track of the last player created for use with global events.
     AblePlayer.lastCreated = this;
 
@@ -73,28 +62,108 @@
       return;
     }
 
-    if (transcriptDiv) {
-      this.transcriptDivLocation = transcriptDiv;
+    // override defaults with values of data-* attributes 
+    
+    var includeTranscript = media.data('include-transcript');
+    if (includeTranscript === undefined || includeTranscript === "")  {
+      // If there are caption tracks and no default provided, include transcript.
+      if (media.find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
+        includeTranscript = true;
+      }
     }
-
     if (includeTranscript) {
       this.includeTranscript = true;
     }
     else {
       this.includeTranscript = false;
     }
-
-    if (startTime) { 
-      this.startTime = startTime; 
+    
+    if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") { 
+      this.startTime = $(media).data('start-time'); 
     }
     else { 
       this.startTime = 0;
     }
 
+    if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") { 
+      this.transcriptDivLocation = $(media).data('transcript-div'); 
+    }
+
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
+      this.lyricsMode = true; 
+    }
+
+    if ($(media).data('transcript-title') !== undefined) { 
+      // NOTE: empty string is valid; results in no title being displayed  
+      this.transcriptTitle = $(media).data('transcript-title'); 
+    }
+
+    if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
+      this.youtubeId = $(media).data('youtube-id'); 
+    }
+
+    if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") { 
+      this.youtubeDescId = $(media).data('youtube-desc-id'); 
+    }
+
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
+      this.debug = true; 
+    }
+
+    if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") { 
+      var volume = $(media).data('volume'); 
+      if (volume >= 0 && volume <= 1) {  
+        this.defaultVolume = volume;
+      } 
+    }
+    
+    if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") { 
+      var iconType = $(media).data('icon-type');
+      if (iconType === 'font' || iconType == 'image') {
+        this.iconType = iconType; 
+      }
+    }
+    
+    if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") { 
+      var seekInterval = $(media).data('seek-interval');
+      if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
+        this.seekInterval = seekInterval; 
+        this.useFixedSeekInterval = true; // do not override with 1/10 of duration 
+      }
+    }
+    
+    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") { 
+      this.showNowPlaying = true; 
+    }
+    
+    if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") { 
+      var fallback =  $(media).data('fallback');
+      if (fallback === 'jw') { 
+        this.fallback = fallback; 
+      }
+    }
+    
+    if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") { 
+      this.testFallback = true; 
+    }
+    
+    if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
+      var lang = $(media).data('lang'); 
+      if (lang.length == 2) { 
+        this.lang = lang;
+      }
+    }
+    
+    if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
+      this.langOverride = true; 
+    }
+
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
+    }
+    
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
-
-    this.youtubeId = youtubeId;
 
     this.title = $(media).attr('title');
 

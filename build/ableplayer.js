@@ -3,6 +3,7 @@
   
   // HTML5 Media API: 
   // http://www.w3.org/TR/html5/embedded-content-0.html#htmlmediaelement
+  // http://dev.w3.org/html5/spec-author-view/video.html
 
   // W3C API Test Page: 
   // http://www.w3.org/2010/05/video/mediaevents.html
@@ -26,18 +27,7 @@
   $(document).ready(function () {
     $('video, audio').each(function (index, element) {
       if ($(element).data('able-player') !== undefined) {
-        var includeTranscript = $(element).data('include-transcript');
-        if (includeTranscript === undefined || includeTranscript === "")  {
-          // If there are caption tracks and no default provided, include transcript.
-          if ($(element).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
-            includeTranscript = true;
-          }
-        }
-        new AblePlayer($(this),
-                       $(element).data('start-time') || 0,
-                       includeTranscript,
-                       $(element).data('transcript-div'),
-                       $(element).data('youtube-id'));
+        new AblePlayer($(this),$(element));
       }
     });
   });
@@ -60,8 +50,7 @@
   // Construct an AblePlayer object 
   // Parameters are: 
   // media - jQuery selector or element identifying the media.
-  // startTime - the time at which to begin playing the media       
-  window.AblePlayer = function(media, startTime, includeTranscript, transcriptDiv, youtubeId) {
+  window.AblePlayer = function(media) {
     // Keep track of the last player created for use with global events.
     AblePlayer.lastCreated = this;
 
@@ -73,28 +62,108 @@
       return;
     }
 
-    if (transcriptDiv) {
-      this.transcriptDivLocation = transcriptDiv;
+    // override defaults with values of data-* attributes 
+    
+    var includeTranscript = media.data('include-transcript');
+    if (includeTranscript === undefined || includeTranscript === "")  {
+      // If there are caption tracks and no default provided, include transcript.
+      if (media.find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
+        includeTranscript = true;
+      }
     }
-
     if (includeTranscript) {
       this.includeTranscript = true;
     }
     else {
       this.includeTranscript = false;
     }
-
-    if (startTime) { 
-      this.startTime = startTime; 
+    
+    if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") { 
+      this.startTime = $(media).data('start-time'); 
     }
     else { 
       this.startTime = 0;
     }
 
+    if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") { 
+      this.transcriptDivLocation = $(media).data('transcript-div'); 
+    }
+
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
+      this.lyricsMode = true; 
+    }
+
+    if ($(media).data('transcript-title') !== undefined) { 
+      // NOTE: empty string is valid; results in no title being displayed  
+      this.transcriptTitle = $(media).data('transcript-title'); 
+    }
+
+    if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
+      this.youtubeId = $(media).data('youtube-id'); 
+    }
+
+    if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") { 
+      this.youtubeDescId = $(media).data('youtube-desc-id'); 
+    }
+
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
+      this.debug = true; 
+    }
+
+    if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") { 
+      var volume = $(media).data('volume'); 
+      if (volume >= 0 && volume <= 1) {  
+        this.defaultVolume = volume;
+      } 
+    }
+    
+    if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") { 
+      var iconType = $(media).data('icon-type');
+      if (iconType === 'font' || iconType == 'image') {
+        this.iconType = iconType; 
+      }
+    }
+    
+    if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") { 
+      var seekInterval = $(media).data('seek-interval');
+      if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
+        this.seekInterval = seekInterval; 
+        this.useFixedSeekInterval = true; // do not override with 1/10 of duration 
+      }
+    }
+    
+    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") { 
+      this.showNowPlaying = true; 
+    }
+    
+    if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") { 
+      var fallback =  $(media).data('fallback');
+      if (fallback === 'jw') { 
+        this.fallback = fallback; 
+      }
+    }
+    
+    if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") { 
+      this.testFallback = true; 
+    }
+    
+    if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
+      var lang = $(media).data('lang'); 
+      if (lang.length == 2) { 
+        this.lang = lang;
+      }
+    }
+    
+    if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
+      this.langOverride = true; 
+    }
+
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
+    }
+    
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
-
-    this.youtubeId = youtubeId;
 
     this.title = $(media).attr('title');
 
@@ -190,6 +259,7 @@
 (function () {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
+
     // Debug - set to true to write messages to console; otherwise false
     this.debug = false;
 
@@ -216,6 +286,8 @@
   
     // Browsers that don't support seekbar sliders will use rewind and forward buttons 
     // seekInterval = Number of seconds to seek forward or back with these buttons    
+    // NOTE: Unless user overrides this default with data-seek-interval attribute, 
+    // this value is replaced by 1/10 the duration of the media file, once the duration is known 
     this.seekInterval = 10;
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
@@ -255,8 +327,17 @@
     // set to false to force player to use this.lang
     this.langOverride = true;
     
-    // translationDir - specify path to translation files 
-    this.translationDir = '../translations/';
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
+    
+    // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
+    // but they're removed by default form transcripts in order to form a more seamless reading experience 
+    // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
+    this.lyricsMode = false; 
+    
+    // transcriptTitle - override default transcript title 
+    // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
+    this.transcriptTitle = 'Transcript';
 
     this.setButtonImages();
   };
@@ -522,9 +603,11 @@
         thisObj.$media[0].load();
       }
 
-      // 10 steps in seek interval; wait until the end so that we can fetch a duration.
-      thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
-
+      if (this.useFixedSeekInterval === false) { 
+        // 10 steps in seek interval; wait until the end so that we can fetch a duration.
+        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+      }
+      
       deferred.resolve();
     });
     
@@ -631,8 +714,19 @@
       var containerId = thisObj.mediaId + '_youtube';
       thisObj.$mediaContainer.prepend($('<div>').attr('id', containerId));
 
+      var youTubeId; 
+      // if a described version is available && user prefers desription 
+      // give them the described version 
+      if (thisObj.youtubeDescId && thisObj.prefDesc) { 
+        youTubeId = thisObj.youtubeDescId; 
+        // TODO: add alert informing the user that the described version is being loaded
+      }
+      else { 
+        youTubeId = thisObj.youtubeId;
+      }
+      
       thisObj.youtubePlayer = new YT.Player(containerId, {
-        videoId: thisObj.youtubeId,
+        videoId: youTubeId,
         height: thisObj.playerHeight.toString(),
         width: thisObj.playerWidth.toString(),
         playerVars: {
@@ -801,13 +895,13 @@
     prefs.push({
       'name': 'prefAltKey', // use alt key with shortcuts 
       'label': this.tt.prefAltKey,
-      'default': 0  // off because currently not capturing this reliably across all browsers
+      'default': 1 
     });
     
     prefs.push({
       'name': 'prefCtrlKey', // use ctrl key with shortcuts
       'label': this.tt.prefCtrlKey,
-      'default': 1  // On per conversation with Ken
+      'default': 1 
     });
     
     prefs.push({
@@ -920,11 +1014,12 @@
     
     thisObj = this;
     available = this.getAvailablePreferences();
-    // define all the parts
+
+    // outer container, will be assigned role="dialog"
     prefsDiv = $('<div>',{ 
-      'class': 'able-prefs-form',
-      role: 'form'
+      'class': 'able-prefs-form'
     });
+
     introText = '<p>Saving your preferences requires cookies.</p>\n';
     
     prefsIntro = $('<p>',{ 
@@ -966,14 +1061,17 @@
     // Now assemble all the parts   
     prefsDiv
       .append(prefsIntro)
-      .append(keysFieldset);
-    if (this.mediaType === 'video') { 
-      prefsDiv
-        .append(featuresFieldset);
-    }         
-    this.$ableDiv.append(prefsDiv); 
+      .append(keysFieldset)
+      .append(featuresFieldset);
+
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    // this.$ableDiv.append(prefsDiv); 
+    $('body').append(prefsDiv);
     
-    var dialog = new AccessibleDialog(prefsDiv, 'Preferences', 'Modal dialog of player preferences.', '32em');
+    var dialog = new AccessibleDialog(prefsDiv, 'dialog', thisObj.tt.prefTitle, prefsIntro, thisObj.tt.closeButtonLabel, '32em');
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
@@ -1086,8 +1184,9 @@
 (function () {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
+
     // Normalize line ends to \n.
-    text.replace('\r\n', '\n').replace('\r', '\n');
+    text = text.replace(/(\r\n|\n|\r)/g,'\n');
     
     var parserState = {
       text: text,
@@ -1171,7 +1270,7 @@
     }
   }
   
-  function parseFileBody(state) {
+  function parseFileBody(state) {    
     actList(state, [
       eatOptionalBOM,
       eatSignature]);
@@ -1320,19 +1419,19 @@
     var result = {type: 'internal', tagName: '', value: '', classes: [], annotation: '', parent: null, children: [], language: ''};
     var current = result;
     var languageStack = [];
-    while (state.text.length > 0) {
+    while (state.text.length > 0) {      
       var nextLine = peekLine(state);
       if (nextLine.indexOf('-->') !== -1) {
         break;
       }
-      
+
       // Have to separately detect double-lines ending cue due to our non-standard parsing.
       // TODO: Redo outer algorithm to conform to W3 spec?
       if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
         cut(state, 2);
         break;
       }
-      
+
       var token = getCueToken(state);
       // We'll use the tokens themselves as objects where possible.
       if (token.type === 'string') {
@@ -1340,6 +1439,8 @@
       }
       else if (token.type === 'startTag') {
         token.type = token.tagName;
+        // Define token.parent; added by Terrill to fix bug on Line 296
+        token.parent = current; 
         if ($.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby']) !== -1) {
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
@@ -1373,6 +1474,8 @@
       }
       else if (token.type === 'endTag') {
         if (token.tagName === current.type && $.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v']) !== -1) {
+          // NOTE from Terrill: This was resulting in an error because current.parent was undefined 
+          // Fixed (I think) by assigning current token to token.parent  on Line 260
           current = current.parent;
         }
         else if (token.tagName === 'lang' && current.type === 'lang') {
@@ -1403,7 +1506,6 @@
         }
       }
     }
-    
     return result;
   }
   
@@ -1427,7 +1529,6 @@
         // End of file.
         c = '\u0004';
       }
-      
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';
@@ -1823,24 +1924,21 @@
 
     this.injectOffscreenHeading();
     
-    if (this.mediaType === 'video') {
+    // youtube adds its own big play button
+    if (this.mediaType === 'video' && this.player !== 'youtube') {
       this.injectBigPlayButton();
-    }
 
-    // add container that captions or description will be appended to
-    // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-    var vidcapContainer = $('<div>',{ 
-      'class' : 'able-vidcap-container'
-    });
-
-    if (this.mediaType === 'video') { 
+      // add container that captions or description will be appended to
+      // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
+      var vidcapContainer = $('<div>',{ 
+        'class' : 'able-vidcap-container'
+      });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
 
-        
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
-    
+
     if (this.includeTranscript) {
       this.injectTranscriptArea();
       this.addTranscriptAreaEvents();
@@ -1887,21 +1985,6 @@
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
     this.$headingDiv.text(this.tt.playerHeading); 
-    
-/*
-    var tempHeading = $('<h1>');
-
-//    this.$ableDiv.prepend(tempHeading);
-    // to get the nearest heading, look at siblings first 
-    // then, if no headings are found, look up the DOM tree 
-
-    var prevHeading = this.$ableDiv.prevAll('h1, h2, h3, h4, h5, h6').first();
-console.log('number of matching sibling elements: ' + prevHeading.length);
-    if (prevHeading.length === 0) { 
-      var prevHeading = this.$ableDiv.closest('h1, h2, h3, h4, h5, h6');
-console.log('number of matching parent elements: ' + prevHeading.length);
-    }
-*/
     
   };
 
@@ -2023,7 +2106,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
 
     // If client has provided separate transcript location, put it there instead.
     if (this.transcriptDivLocation) {
-      $(this.transcriptDivLocation).append(this.$transcriptArea);
+      $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
     else {
       // Place adjacent to player with reactive flow.
@@ -2034,7 +2117,8 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       this.$ableColumnRight.width(this.playerWidth);
     }
     
-    if (!this.prefTranscript) { 
+    // If client has provided separate transcript location, override user's preference for hiding transcript
+    if (!this.prefTranscript && !this.transcriptDivLocation) { 
       this.$transcriptArea.hide(); 
     }
   };
@@ -2216,17 +2300,26 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.addHelp = function() {   
-    // create help text that will be displayed in a JQuery-UI dialog 
+    // create help text that will be displayed in a modal dialog 
     // if user clicks the Help button   
   
-    var helpText, i, label, key, helpDiv; 
+    var $helpDiv, $helpTextWrapper, $helpIntro, $helpDisclaimer, helpText, i, label, key, $okButton; 
   
-    helpText = '<p>' + this.tt.helpKeys + '</p>\n';
-    helpText += '<ul>\n';
+    // outer container, will be assigned role="dialog"  
+    $helpDiv = $('<div></div>',{ 
+      'class': 'able-help-div'
+    });
+    
+    // inner container for all text, will be assigned to modal div's aria-describedby 
+    $helpTextWrapper = $('<div></div>');
+    
+    $helpIntro = $('<p></p>').text(this.tt.helpKeys);    
+    $helpDisclaimer = $('<p></p>').text(this.tt.helpKeysDisclaimer);
+    helpText = '<ul>\n';
     for (i=0; i<this.controls.length; i++) { 
       if (this.controls[i] === 'play') { 
         label = this.tt.play + '/' + this.tt.pause;
-        key = 'p </b><em>' + this.tt.or + '</em><b> ' + this.tt.spacebar;
+        key = 'p </span><em>' + this.tt.or + '</em><span class="able-help-modifiers"> ' + this.tt.spacebar;
       }
       else if (this.controls[i] === 'stop') { 
         label = this.tt.stop;
@@ -2272,7 +2365,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         label = false;
       }
       if (label) { 
-        helpText += '<li><b><span class="able-help-modifiers">'; 
+        helpText += '<li><span class="able-help-modifiers">'; 
         if (this.prefAltKey === 1) { 
           helpText += 'Alt + ';
         }
@@ -2282,27 +2375,34 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         if (this.prefShiftKey === 1) {
           helpText += 'Shift + ';
         }
-        helpText += '</span>' + key + '</b> = ' + label + '</li>\n';
+        helpText += key + '</span> = ' + label + '</li>\n';
       }
     }
     helpText += '</ul>\n';
-    helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
     
-    helpDiv = $('<div>',{ 
-      'class': 'able-help-div',
-      'html': helpText
-    });
-    this.$ableDiv.append(helpDiv); 
+    // Now assemble all the parts   
+    $helpTextWrapper.append($helpIntro);
+    $helpTextWrapper.append(helpText);
+    $helpTextWrapper.append($helpDisclaimer);
+    $helpDiv.append($helpTextWrapper);
     
-    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, 'Modal dialog of help information.', '40em');
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    $('body').append($helpDiv);
 
-    helpDiv.append('<hr>');
-    var okButton = $('<button>' + this.tt.ok + '</button>');
-    okButton.click(function () {
+    // Tip from Billy Gregory at AHG2014: 
+    // If dialog does not collect information, use role="alertdialog" 
+    var dialog = new AccessibleDialog($helpDiv, 'alertdialog', this.tt.helpTitle, $helpTextWrapper, this.tt.closeButtonLabel, '40em');
+
+    $helpDiv.append('<hr>');
+    $okButton = $('<button>' + this.tt.ok + '</button>');
+    $okButton.click(function () {
       dialog.hide();
     });
 
-    helpDiv.append(okButton);
+    $helpDiv.append($okButton);
     this.helpDialog = dialog;
   };
 
@@ -2466,12 +2566,31 @@ console.log('number of matching parent elements: ' + prevHeading.length);
               'class': iconClass,
               'aria-hidden': 'true'
             })   
-            // JAWS doesn't announce title on <button> this in some browsers/contexts
-            // Solution is to add hidden text for screen readers only  
+            // icomoon documentation recommends the following markup for screen readers: 
+            // 1. link element (or in our case, button). Nested inside this element: 
+            // 2. span that contains the icon font (in our case, buttonIcon)
+            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+            // Screen reader test results: 
+            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
+            // - JAWS 15 in IE11 reads "Play button" 
+            // - NVDA 2014.3 in IE11 reads "Play button" 
+            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
+            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
+            //   when a button has focus and user presses space or enter, focus moves to the next button 
+            //   and the keypress is NOT handled. 
+            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
+            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
+            // we get better results: 
+            // - NVDA/Firefox bug is fixed 
+            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
+            // - All other test results are the same as above
+            
             var buttonLabel = $('<span>',{
             'class': 'able-clipped'
             }).text(buttonTitle);
-            newButton.append(buttonIcon,buttonLabel);
+            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
+            // newButton.append(buttonIcon,buttonLabel);
+            newButton.append(buttonIcon);
           }
           else { 
             // use images
@@ -2810,35 +2929,42 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   AblePlayer.prototype.setupCaptions = function (track, cues) {
     var trackLang = track.getAttribute('srclang');
     var trackLabel = track.getAttribute('label') || trackLang;
-    this.hasCaptions = true;
 
-    // create a div for displaying captions  
-    // includes aria-hidden="true" because otherwise 
-    // captions being added and removed causes sporadic changes to focus in JAWS
-    // (not a problem in NVDA or VoiceOver)
-    if (!this.$captionDiv) {
-      this.$captionDiv = $('<div>',{
-        'class': 'able-captions',
-        'aria-hidden': 'true' 
-      });
-      this.$vidcapContainer.append(this.$captionDiv);
-    }
+      this.hasCaptions = true;
 
-    this.currentCaption = -1;
-    if (this.prefCaptions === 1) { 
-      // Captions default to on.
-      this.captionsOn = true; 
-    }
-    else { 
-      this.captionsOn = false;
-    }
+      // caption cues from WebVTT are used to build a transcript for both audio and video 
+      // but captions are currently only supported for video 
+      if (this.mediaType === 'video') { 
+
+        // create a div for displaying captions  
+        // includes aria-hidden="true" because otherwise 
+        // captions being added and removed causes sporadic changes to focus in JAWS
+        // (not a problem in NVDA or VoiceOver)
+        if (!this.$captionDiv) {
+          this.$captionDiv = $('<div>',{
+            'class': 'able-captions',
+            'aria-hidden': 'true' 
+          });
+          this.$vidcapContainer.append(this.$captionDiv);
+        }
+      }
+
+      this.currentCaption = -1;
+      if (this.prefCaptions === 1) { 
+        // Captions default to on.
+        this.captionsOn = true; 
+      }
+      else { 
+        this.captionsOn = false;
+      }
     
-    this.captions.push({
-      cues: cues,
-      language: trackLang,
-      label: trackLabel
-    });
-      
+      this.captions.push({
+        cues: cues,
+        language: trackLang,
+        label: trackLabel
+      });
+//    }
+    
     // TODO: Apply this sorting to captions as well.
     if (trackLang && this.includeTranscript) {
       // TODO: Move the refresh of the transcript select box to a central location?
@@ -3359,32 +3485,26 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, title, description, width, fullscreen, escapeHook) {
+  window.AccessibleDialog = function(modalDiv, dialogRole, title, descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+
     this.title = title;
-    this.description = description;
+    this.closeButtonLabel = closeButtonLabel;
     this.escapeHook = escapeHook;
     this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
-  
     var thisObj = this;
     var modal = modalDiv;
-    this.modal = modal;
+    this.modal = modal;    
     modal.css({
-      width: width || '50%',
-      'margin-left': 'auto',
-      'margin-right': 'auto',
-      'z-index': 6000,
-      position: 'fixed',
-      left: 0,
-      right: 0,
-      top: (fullscreen ? '0' : '25%'),
-      display: 'none'
+      'width': width || '50%',
+      'top': (fullscreen ? '0' : '25%')
     });
     modal.addClass('modalDialog');
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
          'class': 'modalCloseButton',
-         'title': 'Close dialog'
+         'title': thisObj.closeButtonLabel,
+         'aria-label': thisObj.closeButtonLabel
       }).text('X');
       closeButton.keydown(function (event) {
         // Space key down
@@ -3400,31 +3520,20 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       titleH1.css('text-align', 'center');
       titleH1.text(title);
       
-      modal.attr('aria-labelledby', 'modalTitle-' + this.baseId);
+      descDiv.attr('id', 'modalDesc-' + this.baseId);
       
+      modal.attr({
+        'aria-labelledby': 'modalTitle-' + this.baseId, 
+        'aria-describedby': 'modalDesc-' + this.baseId
+      });
       modal.prepend(titleH1);
       modal.prepend(closeButton);
     }
-
-
-    var descriptionDiv = $('<div></div>');
-    descriptionDiv.attr('id', 'modalDescription-' + this.baseId);
-    descriptionDiv.text(description);
-    // Move off-screen.
-    descriptionDiv.css({
-      position: 'absolute',
-      left: '-999px',
-      width: '1px',
-      height: '1px',
-      top: 'auto'
-    });
-
-
-    modal.prepend(descriptionDiv);
     
-    modal.attr('aria-hidden', 'true');
-    modal.attr('aria-describedby', 'modalDescription-' + this.baseId);
-    modal.attr('role', 'dialog');
+    modal.attr({ 
+      'aria-hidden': 'true',
+      'role': dialogRole
+    });
     
     modal.keydown(function (event) {
       // Escape
@@ -3466,28 +3575,17 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       event.stopPropagation();
     });
     
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
   };
   
   AccessibleDialog.prototype.show = function () {
     if (!this.overlay) {
       // Generate overlay.
-      var overlay = $('<div class="modalOverlay"></div>');
-      overlay.attr('tabindex', '-1');
-      this.overlay = overlay;
-      overlay.css({
-        width: '100%',
-        height: '100%',
-        'z-index': 5000,
-        'background-color': '#000',
-        opacity: 0.5,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        display: 'none',
-        margin: 0,
-        padding: 0
+      var overlay = $('<div></div>').attr({
+         'class': 'modalOverlay', 
+         'tabindex': '-1'
       });
+      this.overlay = overlay;
       $('body').append(overlay);
       
       // Keep from moving focus out of dialog when clicking outside of it.
@@ -3496,11 +3594,14 @@ console.log('number of matching parent elements: ' + prevHeading.length);
       });
     }
     
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'true');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'true');
     
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
-    this.modal.attr('aria-hidden', 'false');
+    this.modal.attr({
+      'aria-hidden': 'false', 
+      'tabindex': '-1'
+    });
     
     this.focusedElementBeforeModal = $(':focus');
     var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
@@ -3509,7 +3610,10 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     var thisObj = this;
     setTimeout(function () {
-      thisObj.modal.find('input').first().focus();
+      // originally set focus on the first focusable element 
+      // thisObj.modal.find('button.modalCloseButton').first().focus();
+      // but setting focus on dialog seems to provide more reliable access to ALL content within 
+      thisObj.modal.focus();
     }, 300);
   };
 
@@ -3519,7 +3623,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     this.modal.css('display', 'none');
     this.modal.attr('aria-hidden', 'true');
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
     
     this.focusedElementBeforeModal.focus();
   };
@@ -4377,6 +4481,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.handleRewind = function() { 
+console.log('rewinding ' + this.seekInterval + ' seconds');
     var targetTime = this.getElapsed() - this.seekInterval;
     if (targetTime < 0) {
       this.seekTo(0);
@@ -4387,6 +4492,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.handleFastForward = function() { 
+console.log('fast forwarding ' + this.seekInterval + ' seconds');    
     var targetTime = this.getElapsed() + this.seekInterval;    
     
     if (targetTime > this.getDuration()) {
@@ -4458,6 +4564,8 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     else if (this.player === 'youtube') {
       var rates = this.youtubePlayer.getAvailablePlaybackRates();
+console.log('available playback rates:');
+console.log(rates);
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {
@@ -4876,7 +4984,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     } 
     thisObj = this;
     // get content of JSON file 
-    $.getJSON(this.translationDir + this.lang + '.js',
+    $.getJSON(this.translationPath + this.lang + '.js',
               function(data, textStatus, jqxhr) { 
                 if (textStatus === 'success') { 
                   thisObj.tt = data;
@@ -4936,6 +5044,7 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     }
     var div = this.generateTranscript(captions || [], descriptions || []);
     this.$transcriptDiv.html(div);
+    
     var thisObj = this;
     
     // Make transcript tabbable if preference is turned on.
@@ -4987,11 +5096,22 @@ console.log('number of matching parent elements: ' + prevHeading.length);
   };
 
   AblePlayer.prototype.generateTranscript = function(captions, descriptions) {
+    var thisObj = this; 
+    
     var main = $('<div class="able-transcript-container"></div>');
     
     // TODO: Make scrolling optional?
     
-    main.append('<h2>Transcript</h2>');
+    var transcriptTitle = 'Transcript';
+    if (this.transcriptTitle !== undefined) { 
+      transcriptTitle = this.transcriptTitle;
+    }
+    else if (this.lyricsMode) { 
+      transcriptTitle = 'Lyrics';
+    }
+    if (transcriptTitle != '') { 
+      main.append('<h2>' + transcriptTitle + '</h2>');
+    }
     
     var nextCap = 0;
     var nextDesc = 0;  
@@ -5081,17 +5201,21 @@ console.log('number of matching parent elements: ' + prevHeading.length);
         return result;
       };
       
-      
       for (var ii in cap.components.children) {
         var results = flattenComponentForCaption(cap.components.children[ii]);
         for (var jj in results) {
-          capSpan.append(results[jj]);
+          var result = results[jj];
+          if (typeof result === 'string' && thisObj.lyricsMode) {    
+            // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n") 
+            result = result.replace('\n','<br>') + '<br>';
+          }
+          capSpan.append(result);
         }
       }
       
       capSpan.attr('data-start', cap.start.toString());
       capSpan.attr('data-end', cap.end.toString());
-      div.append(capSpan);
+      div.append(capSpan);      
       div.append('\n');
     };
     
@@ -5305,18 +5429,15 @@ console.log('number of matching parent elements: ' + prevHeading.length);
     // The rest are reasonable best choices  
     // NOTE #2: If there are multiple players on a single page, keystroke handlers 
     // are only bound to the FIRST player 
-
     if (!this.okToHandleKeyPress()) { 
       return false;     
     }
-    
     // Convert to lower case.
     var which = e.which;
     if (which >= 65 && which <= 90) {
       which += 32;
     }
 
-      
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
       this.closeTooltips();
     }

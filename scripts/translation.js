@@ -39,7 +39,7 @@
     } 
     thisObj = this;
     // get content of JSON file 
-    $.getJSON(this.translationDir + this.lang + '.js',
+    $.getJSON(this.translationPath + this.lang + '.js',
               function(data, textStatus, jqxhr) { 
                 if (textStatus === 'success') { 
                   thisObj.tt = data;

@@ -2,32 +2,26 @@
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, title, description, width, fullscreen, escapeHook) {
+  window.AccessibleDialog = function(modalDiv, dialogRole, title, descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+
     this.title = title;
-    this.description = description;
+    this.closeButtonLabel = closeButtonLabel;
     this.escapeHook = escapeHook;
     this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
-  
     var thisObj = this;
     var modal = modalDiv;
-    this.modal = modal;
+    this.modal = modal;    
     modal.css({
-      width: width || '50%',
-      'margin-left': 'auto',
-      'margin-right': 'auto',
-      'z-index': 6000,
-      position: 'fixed',
-      left: 0,
-      right: 0,
-      top: (fullscreen ? '0' : '25%'),
-      display: 'none'
+      'width': width || '50%',
+      'top': (fullscreen ? '0' : '25%')
     });
     modal.addClass('modalDialog');
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
          'class': 'modalCloseButton',
-         'title': 'Close dialog'
+         'title': thisObj.closeButtonLabel,
+         'aria-label': thisObj.closeButtonLabel
       }).text('X');
       closeButton.keydown(function (event) {
         // Space key down
@@ -43,31 +37,20 @@
       titleH1.css('text-align', 'center');
       titleH1.text(title);
       
-      modal.attr('aria-labelledby', 'modalTitle-' + this.baseId);
+      descDiv.attr('id', 'modalDesc-' + this.baseId);
       
+      modal.attr({
+        'aria-labelledby': 'modalTitle-' + this.baseId, 
+        'aria-describedby': 'modalDesc-' + this.baseId
+      });
       modal.prepend(titleH1);
       modal.prepend(closeButton);
     }
-
-
-    var descriptionDiv = $('<div></div>');
-    descriptionDiv.attr('id', 'modalDescription-' + this.baseId);
-    descriptionDiv.text(description);
-    // Move off-screen.
-    descriptionDiv.css({
-      position: 'absolute',
-      left: '-999px',
-      width: '1px',
-      height: '1px',
-      top: 'auto'
-    });
-
-
-    modal.prepend(descriptionDiv);
     
-    modal.attr('aria-hidden', 'true');
-    modal.attr('aria-describedby', 'modalDescription-' + this.baseId);
-    modal.attr('role', 'dialog');
+    modal.attr({ 
+      'aria-hidden': 'true',
+      'role': dialogRole
+    });
     
     modal.keydown(function (event) {
       // Escape
@@ -109,28 +92,17 @@
       event.stopPropagation();
     });
     
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
   };
   
   AccessibleDialog.prototype.show = function () {
     if (!this.overlay) {
       // Generate overlay.
-      var overlay = $('<div class="modalOverlay"></div>');
-      overlay.attr('tabindex', '-1');
-      this.overlay = overlay;
-      overlay.css({
-        width: '100%',
-        height: '100%',
-        'z-index': 5000,
-        'background-color': '#000',
-        opacity: 0.5,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        display: 'none',
-        margin: 0,
-        padding: 0
+      var overlay = $('<div></div>').attr({
+         'class': 'modalOverlay', 
+         'tabindex': '-1'
       });
+      this.overlay = overlay;
       $('body').append(overlay);
       
       // Keep from moving focus out of dialog when clicking outside of it.
@@ -139,11 +111,14 @@
       });
     }
     
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'true');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'true');
     
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
-    this.modal.attr('aria-hidden', 'false');
+    this.modal.attr({
+      'aria-hidden': 'false', 
+      'tabindex': '-1'
+    });
     
     this.focusedElementBeforeModal = $(':focus');
     var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
@@ -152,7 +127,10 @@
     }
     var thisObj = this;
     setTimeout(function () {
-      thisObj.modal.find('input').first().focus();
+      // originally set focus on the first focusable element 
+      // thisObj.modal.find('button.modalCloseButton').first().focus();
+      // but setting focus on dialog seems to provide more reliable access to ALL content within 
+      thisObj.modal.focus();
     }, 300);
   };
 
@@ -162,7 +140,7 @@
     }
     this.modal.css('display', 'none');
     this.modal.attr('aria-hidden', 'true');
-    $('body > *').not('modalOverlay').not('modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
     
     this.focusedElementBeforeModal.focus();
   };
