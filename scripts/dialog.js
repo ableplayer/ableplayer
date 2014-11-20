@@ -2,15 +2,15 @@
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, title, closeButtonLabel, width, fullscreen, escapeHook) {
+  window.AccessibleDialog = function(modalDiv, dialogRole, title, descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+
     this.title = title;
     this.closeButtonLabel = closeButtonLabel;
     this.escapeHook = escapeHook;
     this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
     var thisObj = this;
     var modal = modalDiv;
-    this.modal = modal;
-    var modalShim = modal.find('div').first();
+    this.modal = modal;    
     modal.css({
       'width': width || '50%',
       'top': (fullscreen ? '0' : '25%')
@@ -37,14 +37,20 @@
       titleH1.css('text-align', 'center');
       titleH1.text(title);
       
-      modal.attr('aria-labelledby', 'modalTitle-' + this.baseId);
-
-      modalShim.prepend(titleH1);
-      modalShim.prepend(closeButton);
+      descDiv.attr('id', 'modalDesc-' + this.baseId);
+      
+      modal.attr({
+        'aria-labelledby': 'modalTitle-' + this.baseId, 
+        'aria-describedby': 'modalDesc-' + this.baseId
+      });
+      modal.prepend(titleH1);
+      modal.prepend(closeButton);
     }
     
-    modal.attr('aria-hidden', 'true');
-    modal.attr('role', 'dialog');
+    modal.attr({ 
+      'aria-hidden': 'true',
+      'role': dialogRole
+    });
     
     modal.keydown(function (event) {
       // Escape
@@ -111,7 +117,7 @@
     this.modal.css('display', 'block');
     this.modal.attr({
       'aria-hidden': 'false', 
-      'tabindex': '0'
+      'tabindex': '-1'
     });
     
     this.focusedElementBeforeModal = $(':focus');

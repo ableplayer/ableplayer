@@ -152,7 +152,7 @@
 
   // Creates the preferences form and injects it.
   AblePlayer.prototype.injectPrefsForm = function () {
-    var prefsDiv, prefsShim, introText, prefsIntro, 
+    var prefsDiv, introText, prefsIntro, 
     featuresFieldset, featuresLegend, 
     keysFieldset, keysLegend, 
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
@@ -165,13 +165,7 @@
     prefsDiv = $('<div>',{ 
       'class': 'able-prefs-form'
     });
-    
-    // inner container, a shim for getting some screen readers to read dialog 
-    prefsShim = $('<div>',{ 
-      'role': 'form',
-      'class': 'able-prefs-shim'
-    });
-    
+
     introText = '<p>Saving your preferences requires cookies.</p>\n';
     
     prefsIntro = $('<p>',{ 
@@ -211,11 +205,10 @@
       }     
     }
     // Now assemble all the parts   
-    prefsShim
+    prefsDiv
       .append(prefsIntro)
       .append(keysFieldset)
       .append(featuresFieldset);
-    prefsDiv.append(prefsShim);
 
     // must be appended to the BODY! 
     // otherwise when aria-hidden="true" is applied to all background content
@@ -224,7 +217,7 @@
     // this.$ableDiv.append(prefsDiv); 
     $('body').append(prefsDiv);
     
-    var dialog = new AccessibleDialog(prefsDiv, thisObj.tt.prefTitle, thisObj.tt.closeButtonLabel, '32em');
+    var dialog = new AccessibleDialog(prefsDiv, 'dialog', thisObj.tt.prefTitle, prefsIntro, thisObj.tt.closeButtonLabel, '32em');
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');

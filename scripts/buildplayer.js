@@ -401,22 +401,19 @@
     // create help text that will be displayed in a modal dialog 
     // if user clicks the Help button   
   
-    var helpDiv, helpShim, helpText, i, label, key; 
+    var $helpDiv, $helpTextWrapper, $helpIntro, $helpDisclaimer, helpText, i, label, key, $okButton; 
   
     // outer container, will be assigned role="dialog"  
-    helpDiv = $('<div>',{ 
+    $helpDiv = $('<div></div>',{ 
       'class': 'able-help-div'
     });
     
-    // inner container, a shim for getting some screen readers to read dialog 
-    helpShim = $('<div>',{ 
-      'role': 'document',
-      'tabindex': '-1',
-      'class': 'able-help-shim'
-    });
+    // inner container for all text, will be assigned to modal div's aria-describedby 
+    $helpTextWrapper = $('<div></div>');
     
-    helpText = '<p>' + this.tt.helpKeys + '</p>\n';
-    helpText += '<ul>\n';
+    $helpIntro = $('<p></p>').text(this.tt.helpKeys);    
+    $helpDisclaimer = $('<p></p>').text(this.tt.helpKeysDisclaimer);
+    helpText = '<ul>\n';
     for (i=0; i<this.controls.length; i++) { 
       if (this.controls[i] === 'play') { 
         label = this.tt.play + '/' + this.tt.pause;
@@ -480,27 +477,30 @@
       }
     }
     helpText += '</ul>\n';
-    helpText += '<p>' + this.tt.helpKeysDisclaimer + '</p>\n';
     
     // Now assemble all the parts   
-    helpShim.append(helpText);
-    helpDiv.append(helpShim);
-
+    $helpTextWrapper.append($helpIntro);
+    $helpTextWrapper.append(helpText);
+    $helpTextWrapper.append($helpDisclaimer);
+    $helpDiv.append($helpTextWrapper);
+    
     // must be appended to the BODY! 
     // otherwise when aria-hidden="true" is applied to all background content
     // that will include an ancestor of the dialog, 
     // which will render the dialog unreadable by screen readers 
-    $('body').append(helpDiv);
+    $('body').append($helpDiv);
 
-    var dialog = new AccessibleDialog(helpDiv, this.tt.helpTitle, this.tt.closeButtonLabel, '40em');
+    // Tip from Billy Gregory at AHG2014: 
+    // If dialog does not collect information, use role="alertdialog" 
+    var dialog = new AccessibleDialog($helpDiv, 'alertdialog', this.tt.helpTitle, $helpTextWrapper, this.tt.closeButtonLabel, '40em');
 
-    helpDiv.append('<hr>');
-    var okButton = $('<button>' + this.tt.ok + '</button>');
-    okButton.click(function () {
+    $helpDiv.append('<hr>');
+    $okButton = $('<button>' + this.tt.ok + '</button>');
+    $okButton.click(function () {
       dialog.hide();
     });
 
-    helpDiv.append(okButton);
+    $helpDiv.append($okButton);
     this.helpDialog = dialog;
   };
 
