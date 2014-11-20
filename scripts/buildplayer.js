@@ -84,21 +84,6 @@
     this.$headingDiv.addClass('able-offscreen');
     this.$headingDiv.text(this.tt.playerHeading); 
     
-/*
-    var tempHeading = $('<h1>');
-
-//    this.$ableDiv.prepend(tempHeading);
-    // to get the nearest heading, look at siblings first 
-    // then, if no headings are found, look up the DOM tree 
-
-    var prevHeading = this.$ableDiv.prevAll('h1, h2, h3, h4, h5, h6').first();
-console.log('number of matching sibling elements: ' + prevHeading.length);
-    if (prevHeading.length === 0) { 
-      var prevHeading = this.$ableDiv.closest('h1, h2, h3, h4, h5, h6');
-console.log('number of matching parent elements: ' + prevHeading.length);
-    }
-*/
-    
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
@@ -679,12 +664,31 @@ console.log('number of matching parent elements: ' + prevHeading.length);
               'class': iconClass,
               'aria-hidden': 'true'
             })   
-            // JAWS doesn't announce title on <button> this in some browsers/contexts
-            // Solution is to add hidden text for screen readers only  
+            // icomoon documentation recommends the following markup for screen readers: 
+            // 1. link element (or in our case, button). Nested inside this element: 
+            // 2. span that contains the icon font (in our case, buttonIcon)
+            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+            // Screen reader test results: 
+            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
+            // - JAWS 15 in IE11 reads "Play button" 
+            // - NVDA 2014.3 in IE11 reads "Play button" 
+            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
+            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
+            //   when a button has focus and user presses space or enter, focus moves to the next button 
+            //   and the keypress is NOT handled. 
+            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
+            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
+            // we get better results: 
+            // - NVDA/Firefox bug is fixed 
+            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
+            // - All other test results are the same as above
+            
             var buttonLabel = $('<span>',{
             'class': 'able-clipped'
             }).text(buttonTitle);
-            newButton.append(buttonIcon,buttonLabel);
+            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
+            // newButton.append(buttonIcon,buttonLabel);
+            newButton.append(buttonIcon);
           }
           else { 
             // use images
