@@ -162,6 +162,10 @@
       this.translationPath = $(media).data('translation-path'); 
     }
     
+    if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
+      this.metaDiv = $(media).data('meta-div'); 
+    }
+
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 
@@ -2885,7 +2889,8 @@
 
     this.captions = [];
     this.descriptions = [];
-
+    this.meta = []; 
+  
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {
       var track = this.$tracks[ii];
@@ -3038,7 +3043,16 @@
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
-    this.metadata = cues;
+    // NOTE: Metadata is currently only supported if data-meta-div is provided 
+    // The player does not display metadata internally 
+    if (this.metaDiv) {
+      if ($('#' + this.metaDiv)) { 
+        // container exists 
+        this.$metaDiv = $('#' + this.metaDiv); 
+        this.hasMeta = true;
+      }
+    }
+    this.meta = cues;
   }
       
   AblePlayer.prototype.loadTextObject = function(src) {
@@ -4481,7 +4495,6 @@
   };
 
   AblePlayer.prototype.handleRewind = function() { 
-console.log('rewinding ' + this.seekInterval + ' seconds');
     var targetTime = this.getElapsed() - this.seekInterval;
     if (targetTime < 0) {
       this.seekTo(0);
@@ -4492,7 +4505,6 @@ console.log('rewinding ' + this.seekInterval + ' seconds');
   };
 
   AblePlayer.prototype.handleFastForward = function() { 
-console.log('fast forwarding ' + this.seekInterval + ' seconds');    
     var targetTime = this.getElapsed() + this.seekInterval;    
     
     if (targetTime > this.getDuration()) {
@@ -4564,8 +4576,6 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
     }
     else if (this.player === 'youtube') {
       var rates = this.youtubePlayer.getAvailablePlaybackRates();
-console.log('available playback rates:');
-console.log(rates);
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {
@@ -4944,6 +4954,72 @@ console.log(rates);
 
 })();
 (function () {
+  AblePlayer.prototype.updateMeta = function (time) {
+    if (this.hasMeta) {
+      this.$metaDiv.show();
+      this.showMeta(time || this.getElapsed());
+    }
+  };
+
+  AblePlayer.prototype.showMeta = function(now) { 
+    var m, thisMeta, cues; 
+    if (this.meta.length >= 1) {
+      cues = this.meta;
+    }
+    else {
+      cues = [];
+    }
+    for (m in cues) {
+      if ((cues[m].start <= now) && (cues[m].end > now)) {      
+        thisMeta = m;
+        break;
+      }
+    }
+    if (typeof thisMeta !== 'undefined') {  
+      if (this.currentMeta !== thisMeta) { 
+        // it's time to load the new metadata cue into the container div 
+        this.$metaDiv.html(this.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
+        this.currentMeta = thisMeta;
+      } 
+    }
+    else {     
+      this.$metaDiv.html('');
+      this.currentMeta = -1;
+    } 
+  };
+
+  // Takes a cue and returns the metadata text to display for it.
+  AblePlayer.prototype.flattenCueForMeta = function (cue) {
+    var result = [];
+
+    var flattenComponent = function (component) {
+      var result = [];
+      if (component.type === 'string') {
+        result.push(component.value);
+      }
+      else if (component.type === 'v') {
+        result.push('[' + component.value + ']');
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+      }
+      else {
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+      }
+      return result.join('');
+    }
+    
+    for (var ii in cue.components.children) {
+      result.push(flattenComponent(cue.components.children[ii]));
+    }
+    
+    return result.join('');
+  };
+
+})();
+(function () {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
     var langs = ['en'];
@@ -5259,6 +5335,7 @@ console.log(rates);
 
     this.updateCaption();
     this.updateDescription();
+    this.updateMeta();
     this.refreshControls();
   };
 
@@ -5336,10 +5413,11 @@ console.log(rates);
       thisObj.pausedBeforeTracking = thisObj.isPaused();
       thisObj.pauseMedia();
     }).on('tracking', function (event, position) {
-      // Scrub transcript and captions.
+      // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
       thisObj.updateDescription(position);
+      thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {
       thisObj.seekTo(position);

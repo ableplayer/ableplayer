@@ -162,6 +162,10 @@
       this.translationPath = $(media).data('translation-path'); 
     }
     
+    if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
+      this.metaDiv = $(media).data('meta-div'); 
+    }
+
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 

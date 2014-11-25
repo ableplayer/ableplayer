@@ -9,7 +9,8 @@
 
     this.captions = [];
     this.descriptions = [];
-
+    this.meta = []; 
+  
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {
       var track = this.$tracks[ii];
@@ -162,7 +163,16 @@
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
-    this.metadata = cues;
+    // NOTE: Metadata is currently only supported if data-meta-div is provided 
+    // The player does not display metadata internally 
+    if (this.metaDiv) {
+      if ($('#' + this.metaDiv)) { 
+        // container exists 
+        this.$metaDiv = $('#' + this.metaDiv); 
+        this.hasMeta = true;
+      }
+    }
+    this.meta = cues;
   }
       
   AblePlayer.prototype.loadTextObject = function(src) {

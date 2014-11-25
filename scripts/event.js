@@ -14,6 +14,7 @@
 
     this.updateCaption();
     this.updateDescription();
+    this.updateMeta();
     this.refreshControls();
   };
 
@@ -91,10 +92,11 @@
       thisObj.pausedBeforeTracking = thisObj.isPaused();
       thisObj.pauseMedia();
     }).on('tracking', function (event, position) {
-      // Scrub transcript and captions.
+      // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
       thisObj.updateDescription(position);
+      thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {
       thisObj.seekTo(position);
