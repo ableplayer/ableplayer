@@ -142,7 +142,7 @@
         this.fallback = fallback; 
       }
     }
-    
+
     if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") { 
       this.testFallback = true; 
     }
@@ -162,6 +162,10 @@
       this.translationPath = $(media).data('translation-path'); 
     }
     
+    if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
+      this.metaDiv = $(media).data('meta-div'); 
+    }
+
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 
@@ -567,7 +571,6 @@
     if (this.debug && this.player) { 
       console.log ('Using the ' + this.player + ' media player');
     }
-
     // First run player specific initialization.
     if (this.player === 'html5') {
       playerPromise = this.initHtml5Player();
@@ -623,6 +626,8 @@
   };
 
   AblePlayer.prototype.initJwPlayer = function () {
+
+    var jwHeight; 
     var thisObj = this;
     var deferred = new $.Deferred();
     var promise = deferred.promise();
@@ -790,7 +795,6 @@
   AblePlayer.prototype.getPlayer = function() { 
     // Determine which player to use, if any 
     // return 'html5', 'jw' or null 
-  
     var i, sourceType, $newItem;
     if (this.youtubeId) {
       if (this.mediaType !== 'video') {
@@ -802,12 +806,11 @@
     }
     else if (this.testFallback || 
              ((this.isUserAgent('msie 7') || this.isUserAgent('msie 8') || this.isUserAgent('msie 9')) && this.mediaType === 'video') ||
-             (this.isIOS() && !this.isIOS(7))) {
+             (this.isIOS() && (this.isIOS(4) || this.isIOS(5) || this.isIOS(6)))
+            ) {
       // the user wants to test the fallback player, or  
-      // the user is using IE9, which has buggy implementation of HTML5 video 
-      // e.g., plays only a few seconds of MP4 than stops and resets to 0
-      // even in native HTML player with no JavaScript 
-      // Couldn't figure out a solution to this problem - IE10 fixes it. Meanwhile, use JW for IE9 video 
+      // the user is using an older version of IE or IOS, 
+      // both of which had buggy implementation of HTML5 video 
       if (this.fallback === 'jw') {            
         if (this.$sources.length > 0) { // this media has one or more <source> elements
           for (i = 0; i < this.$sources.length; i++) { 
@@ -2885,7 +2888,8 @@
 
     this.captions = [];
     this.descriptions = [];
-
+    this.meta = []; 
+  
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {
       var track = this.$tracks[ii];
@@ -3038,7 +3042,16 @@
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
-    this.metadata = cues;
+    // NOTE: Metadata is currently only supported if data-meta-div is provided 
+    // The player does not display metadata internally 
+    if (this.metaDiv) {
+      if ($('#' + this.metaDiv)) { 
+        // container exists 
+        this.$metaDiv = $('#' + this.metaDiv); 
+        this.hasMeta = true;
+      }
+    }
+    this.meta = cues;
   }
       
   AblePlayer.prototype.loadTextObject = function(src) {
@@ -4481,7 +4494,6 @@
   };
 
   AblePlayer.prototype.handleRewind = function() { 
-console.log('rewinding ' + this.seekInterval + ' seconds');
     var targetTime = this.getElapsed() - this.seekInterval;
     if (targetTime < 0) {
       this.seekTo(0);
@@ -4492,7 +4504,6 @@ console.log('rewinding ' + this.seekInterval + ' seconds');
   };
 
   AblePlayer.prototype.handleFastForward = function() { 
-console.log('fast forwarding ' + this.seekInterval + ' seconds');    
     var targetTime = this.getElapsed() + this.seekInterval;    
     
     if (targetTime > this.getDuration()) {
@@ -4564,8 +4575,6 @@ console.log('fast forwarding ' + this.seekInterval + ' seconds');
     }
     else if (this.player === 'youtube') {
       var rates = this.youtubePlayer.getAvailablePlaybackRates();
-console.log('available playback rates:');
-console.log(rates);
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {
@@ -4944,6 +4953,72 @@ console.log(rates);
 
 })();
 (function () {
+  AblePlayer.prototype.updateMeta = function (time) {
+    if (this.hasMeta) {
+      this.$metaDiv.show();
+      this.showMeta(time || this.getElapsed());
+    }
+  };
+
+  AblePlayer.prototype.showMeta = function(now) { 
+    var m, thisMeta, cues; 
+    if (this.meta.length >= 1) {
+      cues = this.meta;
+    }
+    else {
+      cues = [];
+    }
+    for (m in cues) {
+      if ((cues[m].start <= now) && (cues[m].end > now)) {      
+        thisMeta = m;
+        break;
+      }
+    }
+    if (typeof thisMeta !== 'undefined') {  
+      if (this.currentMeta !== thisMeta) { 
+        // it's time to load the new metadata cue into the container div 
+        this.$metaDiv.html(this.flattenCueForMeta(cues[thisMeta]).replace('\n', '<br>'));
+        this.currentMeta = thisMeta;
+      } 
+    }
+    else {     
+      this.$metaDiv.html('');
+      this.currentMeta = -1;
+    } 
+  };
+
+  // Takes a cue and returns the metadata text to display for it.
+  AblePlayer.prototype.flattenCueForMeta = function (cue) {
+    var result = [];
+
+    var flattenComponent = function (component) {
+      var result = [];
+      if (component.type === 'string') {
+        result.push(component.value);
+      }
+      else if (component.type === 'v') {
+        result.push('[' + component.value + ']');
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+      }
+      else {
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+      }
+      return result.join('');
+    }
+    
+    for (var ii in cue.components.children) {
+      result.push(flattenComponent(cue.components.children[ii]));
+    }
+    
+    return result.join('');
+  };
+
+})();
+(function () {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
     var langs = ['en'];
@@ -5259,6 +5334,7 @@ console.log(rates);
 
     this.updateCaption();
     this.updateDescription();
+    this.updateMeta();
     this.refreshControls();
   };
 
@@ -5336,10 +5412,11 @@ console.log(rates);
       thisObj.pausedBeforeTracking = thisObj.isPaused();
       thisObj.pauseMedia();
     }).on('tracking', function (event, position) {
-      // Scrub transcript and captions.
+      // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
       thisObj.updateDescription(position);
+      thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {
       thisObj.seekTo(position);
@@ -5617,17 +5694,12 @@ console.log(rates);
     // add listeners for JW Player events 
     this.jwPlayer
       .onTime(function() {
-        console.log('a');
         thisObj.onMediaUpdateTime();
-        console.log('b');
       })
       .onComplete(function() {
-        console.log('c');
         thisObj.onMediaComplete();
-        console.log('d');
       })
       .onReady(function() { 
-        console.log('e');
         if (thisObj.debug) { 
           console.log('JW Player onReady event fired');
         }
@@ -5654,7 +5726,6 @@ console.log(rates);
         }
 
         thisObj.refreshControls();
-        console.log('f');
       })
       .onSeek(function(event) { 
         // this is called when user scrubs ahead or back 

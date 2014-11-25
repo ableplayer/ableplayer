@@ -14,6 +14,7 @@ cat scripts/description.js >> build/ableplayer.js
 cat scripts/browser.js >> build/ableplayer.js
 cat scripts/control.js >> build/ableplayer.js
 cat scripts/caption.js >> build/ableplayer.js
+cat scripts/metadata.js >> build/ableplayer.js
 cat scripts/translation.js >> build/ableplayer.js
 cat scripts/transcript.js >> build/ableplayer.js
 cat scripts/event.js >> build/ableplayer.js
