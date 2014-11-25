@@ -23,19 +23,11 @@
   position: relative;
   top: 0;
   width: 480px;
-/*  margin-bottom: 10px;*/
 }
 .able-player { 
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #262626; /* background color of player (appears on top & bottom) */
-/*	border: 1px solid #000000; border around entire player */
-/*	border-bottom-left-radius: 15px;
-	border-bottom-right-radius: 15px;*/
 }
-/*.able-audio { 
-	border-top-left-radius: 15px;
-	border-top-right-radius: 15px;
-}*/
 .able-offscreen { 
 	position:absolute;
 	left:-10000px;
@@ -55,12 +47,9 @@
 	border-top: 2px solid #4c4c4c; 
 	border-bottom: 2px solid #4c4c4c; 
 	background-color: #464646; /* background color of controller bar */
-	/* min-height: 2.6em; */ /* height of button (1.4em) + padding (0.2em) + margin (0.5em) + outline (0.5em) */
-	/* line-height: 2.6em; */
 	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
 	padding: 0; 
 }
-
 
 /* Controller Buttons & Controls */
 .able-big-play-button {
@@ -117,8 +106,6 @@
 }
 .able-controller button > img { 
   /* image icon */
-  /* width: 20px; 
-  height: 20px; */
   margin: 0 2px;
   padding: 0;
 }
@@ -141,8 +128,9 @@
 	outline-color: #ffbb37 !important; /* yellow */
 }
 
-
-/* Status Bar */
+/* 
+  Status Bar 
+*/
 
 .able-status-bar { 
 	height: 1.5em;
@@ -171,7 +159,9 @@
 	text-align :right;
 }
 
-/* Captions and Descriptions */
+/* 
+  Captions and Descriptions 
+*/
 
 div.able-captions {
   background-color: black;
@@ -198,7 +188,9 @@ div.able-descriptions {
     text-align: center;
 }
 
-/* Now Playing */
+/* 
+  Now Playing 
+*/
 
 div.able-now-playing {
 	text-align: center;
@@ -215,7 +207,9 @@ div.able-now-playing span span {
 	display: block;
 }
 
-/* Modal Dialogs */ 
+/* 
+  Modal Dialogs 
+*/ 
 
 div.modalDialog { 
   position: absolute;
@@ -265,7 +259,9 @@ div.modalDialog button:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 
-/* Preferences Form */ 
+/* 
+  Preferences Form 
+*/ 
 
 .able-prefs-form, .able-help-div, .able-alert-div { 
 	background-color: #F5F5F5; 
@@ -286,7 +282,9 @@ div.modalDialog button:focus {
 	padding-right: 1em;
 }
 
-/* Help Dialog */ 
+/* 
+  Help Dialog 
+*/ 
 
 .able-help-div { 
 	background-color: #F5F5F5; 
@@ -300,7 +298,10 @@ div.modalDialog button:focus {
   font-weight: bold;
 }
 
-/* icomoon.io font styling */
+/* 
+  icomoon.io font styling 
+*/
+
 @font-face {
 	font-family: 'able';
 	src:url('../fonts/able.eot?sn5rkg');
@@ -399,7 +400,36 @@ div.modalDialog button:focus {
 	content: "\e60a";
 }
 
-/* Misc */
+/* 
+  Fullscreen settings 
+*/
+
+:-webkit-full-screen {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background: none;
+}
+
+/* 
+  Tooltips 
+*/
+.able-tooltip {
+    position: absolute;
+    padding: 10px;
+    border-color: black;
+    border-width: 1px;
+    background-color: #CCCCCC;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    display: none;
+    z-index: 3000;
+}
+
+/* 
+  Misc 
+*/
 
 .able-clipped { 
 	/* hide from sighted users, but not screen reader users */
@@ -427,27 +457,7 @@ div.modalDialog button:focus {
   padding: 1em;  
   margin-bottom: 1em;
 }
-
-/* Fullscreen settings */
-
-:-webkit-full-screen {
-    position: fixed;
-    width: 100%;
-    top: 0;
-    background: none;
-}
-
-
-/* Tooltips */
-.able-tooltip {
-    position: absolute;
-    padding: 10px;
-    border-color: black;
-    border-width: 1px;
-    background-color: #CCCCCC;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    display: none;
-    z-index: 3000;
+div[id$="_fallback_wrapper"],
+div.able-media-container {
+  height: 0px;
 }
