@@ -374,17 +374,12 @@
     // add listeners for JW Player events 
     this.jwPlayer
       .onTime(function() {
-        console.log('a');
         thisObj.onMediaUpdateTime();
-        console.log('b');
       })
       .onComplete(function() {
-        console.log('c');
         thisObj.onMediaComplete();
-        console.log('d');
       })
       .onReady(function() { 
-        console.log('e');
         if (thisObj.debug) { 
           console.log('JW Player onReady event fired');
         }
@@ -411,7 +406,6 @@
         }
 
         thisObj.refreshControls();
-        console.log('f');
       })
       .onSeek(function(event) { 
         // this is called when user scrubs ahead or back 

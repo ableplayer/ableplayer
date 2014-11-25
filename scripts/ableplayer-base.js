@@ -142,7 +142,7 @@
         this.fallback = fallback; 
       }
     }
-    
+
     if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") { 
       this.testFallback = true; 
     }

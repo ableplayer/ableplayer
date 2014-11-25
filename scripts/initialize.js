@@ -309,7 +309,6 @@
     if (this.debug && this.player) { 
       console.log ('Using the ' + this.player + ' media player');
     }
-
     // First run player specific initialization.
     if (this.player === 'html5') {
       playerPromise = this.initHtml5Player();
@@ -365,6 +364,8 @@
   };
 
   AblePlayer.prototype.initJwPlayer = function () {
+
+    var jwHeight; 
     var thisObj = this;
     var deferred = new $.Deferred();
     var promise = deferred.promise();
@@ -532,7 +533,6 @@
   AblePlayer.prototype.getPlayer = function() { 
     // Determine which player to use, if any 
     // return 'html5', 'jw' or null 
-  
     var i, sourceType, $newItem;
     if (this.youtubeId) {
       if (this.mediaType !== 'video') {
@@ -544,12 +544,11 @@
     }
     else if (this.testFallback || 
              ((this.isUserAgent('msie 7') || this.isUserAgent('msie 8') || this.isUserAgent('msie 9')) && this.mediaType === 'video') ||
-             (this.isIOS() && !this.isIOS(7))) {
+             (this.isIOS() && (this.isIOS(4) || this.isIOS(5) || this.isIOS(6)))
+            ) {
       // the user wants to test the fallback player, or  
-      // the user is using IE9, which has buggy implementation of HTML5 video 
-      // e.g., plays only a few seconds of MP4 than stops and resets to 0
-      // even in native HTML player with no JavaScript 
-      // Couldn't figure out a solution to this problem - IE10 fixes it. Meanwhile, use JW for IE9 video 
+      // the user is using an older version of IE or IOS, 
+      // both of which had buggy implementation of HTML5 video 
       if (this.fallback === 'jw') {            
         if (this.$sources.length > 0) { // this media has one or more <source> elements
           for (i = 0; i < this.$sources.length; i++) { 
