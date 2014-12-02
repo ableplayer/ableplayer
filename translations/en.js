@@ -127,7 +127,7 @@
 
 "helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
 
-"helpKeysDisclaimer": "Note that modifier keys (Alt and Control) can be assigned within <em>Preferences</em>. Also, some shortcut key combinations might conflict with keys used by your browser and/or assistive technologies. Try various combinations of modifier keys to find one that works for you.",
+"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
 
 "save": "Save",
 
