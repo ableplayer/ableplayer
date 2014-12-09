@@ -12,6 +12,10 @@
 .able-transcript div { 
 	margin: 1em 0;
 }
+.able-transcript-heading { 
+  font-size: 1.4em;
+  font-weight: bold;
+}
 .able-transcript div.able-desc { 
 	background-color: #FEE;
 	border: thin solid #336;

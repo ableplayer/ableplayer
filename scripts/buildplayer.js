@@ -79,6 +79,7 @@
       }
       headingType = 'h' + headingNumber.toString();
     }
+    this.playerHeadingLevel = headingNumber;
     this.$headingDiv = $('<' + headingType + '>'); 
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
