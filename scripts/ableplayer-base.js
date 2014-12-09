@@ -89,6 +89,10 @@
       this.transcriptDivLocation = $(media).data('transcript-div'); 
     }
 
+    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) { 
+      this.useTranscriptButton = false; 
+    }
+
     if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
       this.lyricsMode = true; 
     }

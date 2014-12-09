@@ -89,6 +89,10 @@
       this.transcriptDivLocation = $(media).data('transcript-div'); 
     }
 
+    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) { 
+      this.useTranscriptButton = false; 
+    }
+
     if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
       this.lyricsMode = true; 
     }
@@ -342,6 +346,12 @@
     // transcriptTitle - override default transcript title 
     // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
     this.transcriptTitle = 'Transcript';
+    
+    // useTranscriptButton - on by default if there's a transcript 
+    // However, if transcript is written to an external div via data-transcript-div 
+    // it might be desirable for the transcript to always be ON, with no toggle 
+    // This can be overridden with data-transcript-button="false" 
+    this.useTranscriptButton = true; 
 
     this.setButtonImages();
   };
@@ -2449,7 +2459,7 @@
       }
     }
 
-    if (this.includeTranscript) {
+    if (this.includeTranscript && this.useTranscriptButton) {
       blr.push('transcript');
     }
 

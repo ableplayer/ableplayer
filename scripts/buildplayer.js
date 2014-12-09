@@ -544,7 +544,7 @@
       }
     }
 
-    if (this.includeTranscript) {
+    if (this.includeTranscript && this.useTranscriptButton) {
       blr.push('transcript');
     }
 

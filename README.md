@@ -170,6 +170,7 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
     The transcript is generated automatically if captions and/or descriptions are available. 
     If this attribute is not provided the transcript will be displayed in its default container  
     adjacent to the player.  
+-   **data-use-transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container (e.g., on a dedicated transcript page), you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 -   **data-debug** - optional; if present will write messages to the developer console   
