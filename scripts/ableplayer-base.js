@@ -23,7 +23,7 @@
 /*global $, jQuery */
 "use strict";
 
-(function () {
+(function ($) {
   $(document).ready(function () {
     $('video, audio').each(function (index, element) {
       if ($(element).data('able-player') !== undefined) {
@@ -217,7 +217,7 @@
 
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;
-})();
+})(jQuery);
 
 
 
