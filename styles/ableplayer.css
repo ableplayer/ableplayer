@@ -458,5 +458,5 @@ div.modalDialog button:focus {
 }
 div[id$="_fallback_wrapper"],
 div.able-media-container {
-  height: 0px;
+  /* height: 0px; */
 }

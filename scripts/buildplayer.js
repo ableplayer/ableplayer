@@ -18,8 +18,10 @@
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    this.$mediaContainer.width(this.playerWidth);
+    this.$mediaContainer.height(this.playerHeight);
     this.$ableDiv.width(this.playerWidth);
-
+    
     this.injectOffscreenHeading();
     
     // youtube adds its own big play button
