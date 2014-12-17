@@ -15,25 +15,23 @@
 
 "forward": "Forward",
 
-"seconds": "seconds",
+"showCaptions": "Show captions",
 
-"toggle": "Toggle",
+"hideCaptions": "Hide captions",
 
-"turnOn": "Turn on",
+"captionsOff": "Captions off",
 
-"turnOff": "Turn off",
+"showTranscript": "Show transcript",
 
-"show": "Show",
+"hideTranscript": "Hide transcript", 
 
-"hide": "Hide",
+"turnOnDescriptions": "Turn on descriptions", 
 
-"captions": "captions",
+"turnOffDescriptions": "Turn off descriptions", 
 
-"descriptions": "descriptions",
+"language": "Language",
 
-"sign": "sign language",
-
-"transcript": "transcript",
+"sign": "Sign language",
 
 "mute": "Mute",
 
@@ -46,8 +44,6 @@
 "volumeDown": "Volume down",
 
 "preferences": "Preferences",
-
-"help": "Help",
 
 "enterFullScreen": "Enter full screen",
 
@@ -62,6 +58,10 @@
 "or": "or", 
 
 "spacebar": "spacebar",
+
+"autoScroll": "Auto scroll",
+
+"unknown": "Unknown", 
 
 "statusPlaying": "Playing",
 
@@ -122,6 +122,8 @@
 "prefSuccess": "Your changes have been saved.",
 
 "prefNoChange": "You didn't make any changes.",
+
+"help": "Help",
 
 "helpTitle": "Help",
 

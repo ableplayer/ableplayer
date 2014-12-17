@@ -2102,20 +2102,19 @@
     });
     
     // Transcript toolbar content:
-    // TODO: Localize
     this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll: </label>'), this.$autoScrollTranscriptCheckbox);
+    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
     // Add a default "Unknown" option; this will be deleted later if there are any
     // elements with a language.
-    this.$unknownTranscriptOption = $('<option val="unknown">Unknown</option>');
+    this.$unknownTranscriptOption = $('<option val="unknown">' + this.tt.unknown + '</option>');
     this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
     var floatRight = $('<div style="float: right;">');
     this.$transcriptLanguageSelectContainer = floatRight;
     
-    floatRight.append($('<label for="transcript-language-select">Language: </label>'), this.$transcriptLanguageSelect);
+    floatRight.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(floatRight);
     
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
@@ -2267,11 +2266,10 @@
       this.captionsTooltip.append('<br>');
     }
     
-    // Off option
+    // Captions Off option
     var offButton = $('<button>');
     offButton.attr('tabindex', 0);
-    // TODO: Localize
-    offButton.html('Captions off');
+    offButton.html(this.tt.captionsOff);
     offButton.click(this.getCaptionOffFunction());
 
     this.captionsTooltip.append(offButton);
@@ -2362,11 +2360,21 @@
         key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
       }
       else if (this.controls[i] === 'captions') { 
-        label = this.tt.toggle + ' ' + this.tt.captions;
+        if (this.captionsOn) { 
+          label = this.tt.hideCaptions;
+        }
+        else { 
+          label = this.tt.showCaptions;
+        }
         key = 'c';
       }
       else if (this.controls[i] === 'descriptions') { 
-        label = this.tt.toggle + ' ' + this.tt.descriptions;
+        if (this.descOn) {     
+          label = this.tt.turnOffDescriptions;
+        }
+        else { 
+          label = this.tt.turnOnDescriptions;
+        }
         key = 'n';
       }
       else if (this.controls[i] === 'prefs') { 
@@ -2620,7 +2628,7 @@
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
-              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
+              newButton.addClass('buttonOff').attr('title',this.tt.showCaptions);
             }
           }
           else if (control === 'descriptions') {      
@@ -2628,7 +2636,7 @@
               // user prefer non-audio described version 
               // Therefore, load media without description 
               // Description can be toggled on later with this button  
-              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);              
+              newButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);              
             }         
           }
           
@@ -2644,7 +2652,7 @@
             this.$descButton = newButton; 
             // gray out description button if description is not active 
             if (!this.descOn) {  
-              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);
+              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);
             }
           }
           else if (control === 'mute') { 
@@ -2826,26 +2834,26 @@
     }
     else if (control === 'captions') {  
       if (this.captionsOn) {
-        return this.tt.hide + ' ' + this.tt.captions;
+        return this.tt.hideCaptions;
       }
       else { 
-        return this.tt.show + ' ' + this.tt.captions;
+        return this.tt.showCaptions;
       }
     }   
     else if (control === 'descriptions') { 
       if (this.descOn) {
-        return this.tt.turnOff + ' ' + this.tt.descriptions;
+        return this.tt.turnOffDescriptions;
       }
       else { 
-        return this.tt.turnOn + ' ' + this.tt.descriptions;
+        return this.tt.turnOnDescriptions;
       }
     }
     else if (control === 'transcript') {  
       if (this.$transcriptDiv.is(':visible')) {
-        return this.tt.hide + ' ' + this.tt.transcript;
+        return this.tt.hideTranscript;
       }
       else { 
-        return this.tt.show + ' ' + this.tt.transcript;
+        return this.tt.showTranscript;
       }
     }   
     else if (control === 'sign') { // not yet supported 
@@ -3031,6 +3039,9 @@
   AblePlayer.prototype.setupDescriptions = function (track, cues) {
     var trackLang = track.getAttribute('srclang');
 
+    // descriptions are off unless determined to be available & preferred 
+    this.descOn = false;
+    
     // prepare closed description, even if user doesn't prefer it 
     // this way it's available if needed 
     this.hasClosedDesc = true;
@@ -4358,12 +4369,12 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOff + ' ' + this.tt.descriptions);
+        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);            
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOn + ' ' + this.tt.descriptions);
+        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
     
@@ -4374,21 +4385,21 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.captions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
+        this.$ccButton.attr('title', this.tt.showCaptions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
       }
     }
 
@@ -4672,13 +4683,13 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.transcript);
+      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.transcript);
+      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };
 

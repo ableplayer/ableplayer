@@ -411,12 +411,12 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOff + ' ' + this.tt.descriptions);
+        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);            
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOn + ' ' + this.tt.descriptions);
+        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
     
@@ -427,21 +427,21 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.captions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
+        this.$ccButton.attr('title', this.tt.showCaptions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
       }
     }
 
@@ -725,13 +725,13 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.transcript);
+      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.transcript);
+      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };
 
