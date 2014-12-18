@@ -165,8 +165,8 @@
       }
     }
     
-    if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
-      this.langOverride = true; 
+    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
+      this.forceLang = true; 
     }
 
     if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
@@ -344,9 +344,10 @@
     // lang - default language of the player
     this.lang = 'en'; 
   
-    // langOverride - set to true to reset this.lang to language of the web page, if detectable  
-    // set to false to force player to use this.lang
-    this.langOverride = true;
+    // forceLang - set to true to force player to use default player language 
+    // set to false to reset this.lang to language of the web page or user's browser,
+    // if either is detectable and if a matching translation file is available 
+    this.forceLang = false;
     
     // translationPath - specify path to translation files 
     this.translationPath = '../translations/';
@@ -5070,10 +5071,10 @@
     var gettingText, lang, thisObj, msg; 
 
     gettingText = $.Deferred(); 
-  
+
     // override this.lang to language of the web page, if known and supported
     // otherwise this.lang will continue using default    
-    if (this.langOverride) {   
+    if (!this.forceLang) {   
       if ($('body').attr('lang')) { 
         lang = $('body').attr('lang');
       }

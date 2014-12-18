@@ -165,8 +165,8 @@
       }
     }
     
-    if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
-      this.langOverride = true; 
+    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
+      this.forceLang = true; 
     }
 
     if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 

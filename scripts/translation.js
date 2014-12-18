@@ -12,10 +12,10 @@
     var gettingText, lang, thisObj, msg; 
 
     gettingText = $.Deferred(); 
-  
+
     // override this.lang to language of the web page, if known and supported
     // otherwise this.lang will continue using default    
-    if (this.langOverride) {   
+    if (!this.forceLang) {   
       if ($('body').attr('lang')) { 
         lang = $('body').attr('lang');
       }
