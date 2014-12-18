@@ -1,12 +1,28 @@
 (function () {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-    if (this.startTime && !this.startedPlaying) { 
-      // try seeking again, if seeking failed on canplay or canplaythrough
-      this.seekTo(this.startTime);
-      this.playMedia();
-    }       
-
+    if (!this.startedPlaying) {
+      if (this.startTime) { 
+        if (this.startTime === this.media.currentTime) { 
+          // media has already scrubbed to start time
+          if (this.autoplay) { 
+            this.playMedia();
+          }          
+        }
+        else { 
+          // continue seeking ahead until currentTime == startTime 
+          this.seekTo(this.startTime);
+        }
+      }
+      else { 
+        // autoplay should generally be avoided unless a startTime is provided 
+        // but we'll trust the developer to be using this feature responsibly 
+        if (this.autoplay) {
+          this.playMedia();
+        } 
+      }       
+    }
+    
     // show highlight in transcript 
     if (this.prefHighlight === 1) {
       this.highlightTranscript(this.getElapsed()); 
@@ -301,11 +317,17 @@
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() { 
+        if (thisObj.debug) {
+          console.log('canplay event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           thisObj.seekTo(thisObj.startTime);
         }
       })
       .on('canplaythrough',function() { 
+        if (thisObj.debug) {
+          console.log('canplaythrough event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
@@ -320,7 +342,7 @@
       .on('progress', function() {
         thisObj.refreshControls();
       })
-      .on('waiting',function() { 
+      .on('waiting',function() {
         thisObj.refreshControls();
       })
       .on('durationchange',function() { 

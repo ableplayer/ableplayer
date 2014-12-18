@@ -62,6 +62,13 @@
       return;
     }
 
+    if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") { 
+      this.autoplay = true; 
+    }
+    else { 
+      this.autoplay = false;
+    }
+    
     // override defaults with values of data-* attributes 
     
     var includeTranscript = media.data('include-transcript');
@@ -184,6 +191,13 @@
         if (thisObj.countProperties(thisObj.tt) > 50) { 
           // close enough to ensure that most text variables are populated 
           thisObj.setup();
+          if (thisObj.startTime > 0 && !thisObj.autoplay) { 
+            // scrub ahead to startTime, but don't start playing 
+            // can't do this in media event listener   
+            // because in some browsers no media events are fired until media.play is requested 
+            // even if preload="auto" 
+            thisObj.onMediaUpdateTime();            
+          }          
         } 
         else { 
           // can't continue loading player with no text
@@ -199,9 +213,8 @@
   AblePlayer.prototype.setup = function() {
     var thisObj = this;
     if (this.debug && this.startTime > 0) {
-      console.log('Will start media at ' + startTime + ' seconds');
+      console.log('Will start media at ' + this.startTime + ' seconds');
     }
-    
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.

@@ -62,6 +62,13 @@
       return;
     }
 
+    if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") { 
+      this.autoplay = true; 
+    }
+    else { 
+      this.autoplay = false;
+    }
+    
     // override defaults with values of data-* attributes 
     
     var includeTranscript = media.data('include-transcript');
@@ -184,6 +191,13 @@
         if (thisObj.countProperties(thisObj.tt) > 50) { 
           // close enough to ensure that most text variables are populated 
           thisObj.setup();
+          if (thisObj.startTime > 0 && !thisObj.autoplay) { 
+            // scrub ahead to startTime, but don't start playing 
+            // can't do this in media event listener   
+            // because in some browsers no media events are fired until media.play is requested 
+            // even if preload="auto" 
+            thisObj.onMediaUpdateTime();            
+          }          
         } 
         else { 
           // can't continue loading player with no text
@@ -199,9 +213,8 @@
   AblePlayer.prototype.setup = function() {
     var thisObj = this;
     if (this.debug && this.startTime > 0) {
-      console.log('Will start media at ' + startTime + ' seconds');
+      console.log('Will start media at ' + this.startTime + ' seconds');
     }
-    
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
@@ -3960,7 +3973,6 @@
 })();
 (function () {
   AblePlayer.prototype.seekTo = function (newTime) { 
-      // TODO: How do we want startTime functionality to work?
 
     if (this.player === 'html5') {
       var seekable;
@@ -3968,6 +3980,7 @@
       this.startTime = newTime;
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
+      
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
         this.media.currentTime = this.startTime;
       } 
@@ -4244,7 +4257,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.playVideo();
     }
-    this.startedPlaying = true;
+    this.startedPlaying = true;    
   };
 
   // Right now, update the seekBar values based on current duration and time.
@@ -4508,7 +4521,6 @@
     else {
       this.pauseMedia();
     }
-
     this.refreshControls();
   };
 
@@ -5359,12 +5371,28 @@
 (function () {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-    if (this.startTime && !this.startedPlaying) { 
-      // try seeking again, if seeking failed on canplay or canplaythrough
-      this.seekTo(this.startTime);
-      this.playMedia();
-    }       
-
+    if (!this.startedPlaying) {
+      if (this.startTime) { 
+        if (this.startTime === this.media.currentTime) { 
+          // media has already scrubbed to start time
+          if (this.autoplay) { 
+            this.playMedia();
+          }          
+        }
+        else { 
+          // continue seeking ahead until currentTime == startTime 
+          this.seekTo(this.startTime);
+        }
+      }
+      else { 
+        // autoplay should generally be avoided unless a startTime is provided 
+        // but we'll trust the developer to be using this feature responsibly 
+        if (this.autoplay) {
+          this.playMedia();
+        } 
+      }       
+    }
+    
     // show highlight in transcript 
     if (this.prefHighlight === 1) {
       this.highlightTranscript(this.getElapsed()); 
@@ -5659,11 +5687,17 @@
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() { 
+        if (thisObj.debug) {
+          console.log('canplay event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           thisObj.seekTo(thisObj.startTime);
         }
       })
       .on('canplaythrough',function() { 
+        if (thisObj.debug) {
+          console.log('canplaythrough event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
@@ -5678,7 +5712,7 @@
       .on('progress', function() {
         thisObj.refreshControls();
       })
-      .on('waiting',function() { 
+      .on('waiting',function() {
         thisObj.refreshControls();
       })
       .on('durationchange',function() { 

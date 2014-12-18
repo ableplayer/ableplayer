@@ -166,6 +166,7 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **id** - required; any unique ID
 -   **data-able-player** - required 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
 -   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
     The transcript is generated automatically if captions and/or descriptions are available. 
     If this attribute is not provided the transcript will be displayed in its default container  

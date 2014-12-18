@@ -1,6 +1,5 @@
 (function () {
   AblePlayer.prototype.seekTo = function (newTime) { 
-      // TODO: How do we want startTime functionality to work?
 
     if (this.player === 'html5') {
       var seekable;
@@ -8,6 +7,7 @@
       this.startTime = newTime;
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
+      
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
         this.media.currentTime = this.startTime;
       } 
@@ -284,7 +284,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.playVideo();
     }
-    this.startedPlaying = true;
+    this.startedPlaying = true;    
   };
 
   // Right now, update the seekBar values based on current duration and time.
@@ -548,7 +548,6 @@
     else {
       this.pauseMedia();
     }
-
     this.refreshControls();
   };
 
