@@ -397,7 +397,7 @@
           jwHeight = '0px';   
         }
         else { 
-          jwheight = thisObj.playerHeight;
+          jwHeight = thisObj.playerHeight;
         }
         var sources = [];
         $.each(thisObj.$sources, function (ii, source) {
