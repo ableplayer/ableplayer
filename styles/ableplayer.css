@@ -427,6 +427,14 @@ div.modalDialog button:focus {
 }
 
 /* 
+ * Fallback (JW Player) Tweaks
+ */
+ 
+div[id$="_fallback_wrapper"] {
+  height: 0px;
+} 
+
+/* 
   Misc 
 */
 
@@ -455,8 +463,4 @@ div.modalDialog button:focus {
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
-}
-div[id$="_fallback_wrapper"],
-div.able-media-container {
-  /* height: 0px; */
 }

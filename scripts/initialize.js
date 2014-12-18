@@ -396,6 +396,9 @@
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
           jwHeight = '0px';   
         }
+        else { 
+          jwheight = thisObj.playerHeight;
+        }
         var sources = [];
         $.each(thisObj.$sources, function (ii, source) {
           sources.push({file: $(source).attr('src')});      
@@ -412,7 +415,7 @@
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
-            height: thisObj.playerHeight,
+            height: jwHeight,
             width: thisObj.playerWidth,
             fallback: false, 
             primary: 'flash',
