@@ -676,7 +676,7 @@
           jwHeight = '0px';   
         }
         else { 
-          jwheight = thisObj.playerHeight;
+          jwHeight = thisObj.playerHeight;
         }
         var sources = [];
         $.each(thisObj.$sources, function (ii, source) {
@@ -3977,7 +3977,6 @@
 })();
 (function () {
   AblePlayer.prototype.seekTo = function (newTime) { 
-
     if (this.player === 'html5') {
       var seekable;
   
@@ -3990,6 +3989,9 @@
       } 
     }
     else if (this.player === 'jw') {
+      // pause JW Player temporarily. 
+      // When seek has successfully reached newTime, 
+      // onSeek event will be called, and playback will be resumed
       this.jwSeekPause = true;
       this.jwPlayer.seek(newTime);
     }
@@ -4547,7 +4549,6 @@
 
   AblePlayer.prototype.handleFastForward = function() { 
     var targetTime = this.getElapsed() + this.seekInterval;    
-    
     if (targetTime > this.getDuration()) {
       this.seekTo(this.getDuration());
     }
@@ -5804,16 +5805,16 @@
         thisObj.refreshControls();
       })
       .onSeek(function(event) { 
-        // this is called when user scrubs ahead or back 
-        // but not when seek() is called - OR IS IT???
-        // After the target offset is reached, JW Player automatically plays media at that point  
+        // this is called when user scrubs ahead or back, 
+        // after the target offset is reached 
         if (thisObj.debug) { 
           console.log('Seeking to ' + event.position + '; target: ' + event.offset);          
         }
 
-        if (thisObj.jwSeekPause) {
-          thisObj.jwSeekPause = false;
-          thisObj.pauseMedia();
+        if (thisObj.jwSeekPause) {          
+          // media was temporarily paused  
+          thisObj.jwSeekPause = false;          
+          thisObj.playMedia();
         }
 
         setTimeout(function () {

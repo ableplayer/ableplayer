@@ -1,6 +1,5 @@
 (function () {
   AblePlayer.prototype.seekTo = function (newTime) { 
-
     if (this.player === 'html5') {
       var seekable;
   
@@ -13,6 +12,9 @@
       } 
     }
     else if (this.player === 'jw') {
+      // pause JW Player temporarily. 
+      // When seek has successfully reached newTime, 
+      // onSeek event will be called, and playback will be resumed
       this.jwSeekPause = true;
       this.jwPlayer.seek(newTime);
     }
@@ -570,7 +572,6 @@
 
   AblePlayer.prototype.handleFastForward = function() { 
     var targetTime = this.getElapsed() + this.seekInterval;    
-    
     if (targetTime > this.getDuration()) {
       this.seekTo(this.getDuration());
     }
