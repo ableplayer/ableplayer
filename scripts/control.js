@@ -301,7 +301,6 @@
       if (duration > 0) {
         this.seekInterval = Math.max(this.seekInterval, duration / 10);
         this.seekIntervalCalculated = true;
-console.log('new seekInterval is ' + seekInterval);      
       }
     }
         
@@ -563,9 +562,13 @@ console.log('new seekInterval is ' + seekInterval);
   };
 
   AblePlayer.prototype.handleStop = function() { 
-    this.pauseMedia();
-    this.seekTo(0);
-
+    if (this.player == 'html5') {
+      this.pauseMedia();
+      this.seekTo(0);
+    }
+    else if (this.player == 'jw') { 
+      this.jwPlayer.stop();
+    }
     this.refreshControls();
   };
 
