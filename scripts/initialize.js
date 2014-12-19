@@ -353,10 +353,17 @@
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
         thisObj.$media[0].load();
       }
-
       if (thisObj.useFixedSeekInterval === false) { 
         // 10 steps in seek interval; waited until now to set this so we can fetch a duration
-        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+        // If duration is still unavailable (JW Player), try again in refreshControls()
+        var duration = thisObj.getDuration();
+        if (duration > 0) {
+          thisObj.seekInterval = Math.max(thisObj.seekInterval, duration / 10);
+          thisObj.seekIntervalCalculated = true;
+        }
+        else { 
+          thisObj.seekIntervalCalculated = false;
+        }
       }
       
       deferred.resolve();

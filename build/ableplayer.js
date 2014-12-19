@@ -632,10 +632,17 @@
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
         thisObj.$media[0].load();
       }
-
       if (thisObj.useFixedSeekInterval === false) { 
         // 10 steps in seek interval; waited until now to set this so we can fetch a duration
-        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+        // If duration is still unavailable (JW Player), try again in refreshControls()
+        var duration = thisObj.getDuration();
+        if (duration > 0) {
+          thisObj.seekInterval = Math.max(thisObj.seekInterval, duration / 10);
+          thisObj.seekIntervalCalculated = true;
+        }
+        else { 
+          thisObj.seekIntervalCalculated = false;
+        }
       }
       
       deferred.resolve();
@@ -4276,6 +4283,15 @@
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
 
+    if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) { 
+      // couldn't calculate seekInterval previously; try again. 
+      if (duration > 0) {
+        this.seekInterval = Math.max(this.seekInterval, duration / 10);
+        this.seekIntervalCalculated = true;
+console.log('new seekInterval is ' + seekInterval);      
+      }
+    }
+        
     if (this.seekBar) {
       this.seekBar.setDuration(duration);
       if (!this.seekBar.tracking) {
@@ -5814,8 +5830,7 @@
       .onPlay(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlay event fired');
-        }
-
+        }        
         thisObj.refreshControls();
       })
       .onPause(function() { 

@@ -296,6 +296,15 @@
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
 
+    if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) { 
+      // couldn't calculate seekInterval previously; try again. 
+      if (duration > 0) {
+        this.seekInterval = Math.max(this.seekInterval, duration / 10);
+        this.seekIntervalCalculated = true;
+console.log('new seekInterval is ' + seekInterval);      
+      }
+    }
+        
     if (this.seekBar) {
       this.seekBar.setDuration(duration);
       if (!this.seekBar.tracking) {

@@ -436,8 +436,7 @@
       .onPlay(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlay event fired');
-        }
-
+        }        
         thisObj.refreshControls();
       })
       .onPause(function() { 
