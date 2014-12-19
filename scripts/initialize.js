@@ -258,7 +258,6 @@
   AblePlayer.prototype.setupInstancePlaylist = function() {     
     // find a matching playlist and set this.hasPlaylist
     // if there is one, also set this.$playlist, this.playlistIndex, & this.playlistEmbed
-    
     var thisObj = this;
     
     this.hasPlaylist = false; // will change to true if a matching playlist is found
@@ -282,7 +281,7 @@
         }
       }
     });
-
+    
     if (this.hasPlaylist && this.playlistEmbed) {
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
@@ -549,7 +548,7 @@
       }
     }
   };
-
+  
   AblePlayer.prototype.getPlayer = function() { 
     // Determine which player to use, if any 
     // return 'html5', 'jw' or null 
@@ -569,36 +568,8 @@
       // the user wants to test the fallback player, or  
       // the user is using an older version of IE or IOS, 
       // both of which had buggy implementation of HTML5 video 
-      if (this.fallback === 'jw') {            
-        if (this.$sources.length > 0) { // this media has one or more <source> elements
-          for (i = 0; i < this.$sources.length; i++) { 
-            sourceType = this.$sources[i].getAttribute('type'); 
-            //if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
-            //  (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
-            // JW Player can play this 
-            return 'jw';
-            //}
-          }
-        }
-        else if (this.$playlist.length > 0) { 
-          // see if the first item in the playlist is a type JW player an play 
-          $newItem = this.$playlist.eq(0);
-          // check data-* attributes for a type JW can play  
-          if (this.mediaType === 'audio') { 
-            if ($newItem.attr('data-mp3')) { 
-              return 'jw';
-            }
-          }
-          else if (this.mediaType === 'video') {
-            if ($newItem.attr('data-mp4')) { 
-              return 'jw';
-            }
-          }
-        }
-        else { 
-          // there is no source, nor playlist 
-          return null;
-        }
+      if (this.fallback === 'jw' && this.jwCanPlay()) {
+        return 'jw';
       }
       else { 
         return null;
@@ -610,6 +581,42 @@
     else { 
       return null;
     }
+  };
+  
+  AblePlayer.prototype.jwCanPlay = function() { 
+    // Determine whether there are media files that JW supports 
+    if (this.$sources.length > 0) { // this media has one or more <source> elements
+      for (i = 0; i < this.$sources.length; i++) { 
+        sourceType = this.$sources[i].getAttribute('type'); 
+        if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
+            (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
+            // JW Player can play this 
+            return 'jw';
+        }
+      }
+    }
+    // still here? That means there's no source that JW can play 
+    // check for an mp3 or mp4 in a able-playlist 
+    // TODO: Implement this more efficiently 
+    // Playlist is initialized later in setupInstancePlaylist() 
+    // but we can't wait for that... 
+    if ($('.able-playlist')) { 
+      // there's at least one playlist on this page 
+      // get the first item from the first playlist 
+      // if JW Player can play that one, assume it can play all items in all playlists  
+      var $firstItem = $('.able-playlist').eq(0).find('li').eq(0);
+      if (this.mediaType === 'audio') { 
+        if ($firstItem.attr('data-mp3')) { 
+          return true;
+        }
+        else if (this.mediaType === 'video') {
+          if ($firstItem.attr('data-mp4')) { 
+            return true;
+          }
+        }
+      }
+    }    
+    return false; 
   };
 
 })();
