@@ -92,16 +92,28 @@
     // TODO: Make scrolling optional?
     
     var transcriptTitle = 'Transcript';
-    if (this.transcriptTitle !== undefined) { 
+    if (typeof this.transcriptTitle !== 'undefined') { 
       transcriptTitle = this.transcriptTitle;
     }
     else if (this.lyricsMode) { 
       transcriptTitle = 'Lyrics';
     }
-    if (transcriptTitle != '') { 
-      main.append('<h2>' + transcriptTitle + '</h2>');
+
+    if (typeof this.transcriptDivLocation === 'undefined' && transcriptTitle != '') { 
+      // only add an HTML heading to internal transcript 
+      // external transcript is expected to have its own heading  
+      var headingNumber = this.playerHeadingLevel; 
+      headingNumber += 1;
+      if (headingNumber > 6) {
+        headingNumber = 6;
+      }
+      var transcriptHeading = 'h' + headingNumber.toString();
+      var transcriptHeadingTag = '<' + transcriptHeading + ' class="able-transcript-heading">'; 
+      transcriptHeadingTag += transcriptTitle; 
+      transcriptHeadingTag += '</' + transcriptHeading + '>';
+       main.append(transcriptHeadingTag); 
     }
-    
+
     var nextCap = 0;
     var nextDesc = 0;  
 

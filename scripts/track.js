@@ -139,6 +139,9 @@
   AblePlayer.prototype.setupDescriptions = function (track, cues) {
     var trackLang = track.getAttribute('srclang');
 
+    // descriptions are off unless determined to be available & preferred 
+    this.descOn = false;
+    
     // prepare closed description, even if user doesn't prefer it 
     // this way it's available if needed 
     this.hasClosedDesc = true;

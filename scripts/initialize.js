@@ -26,11 +26,14 @@
     // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
     this.iconType = 'font';   
   
-    // Browsers that don't support seekbar sliders will use rewind and forward buttons 
     // seekInterval = Number of seconds to seek forward or back with these buttons    
     // NOTE: Unless user overrides this default with data-seek-interval attribute, 
     // this value is replaced by 1/10 the duration of the media file, once the duration is known 
     this.seekInterval = 10;
+    
+    // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval  
+    // rather than override it with 1/10 the duration of the media file 
+    this.useFixedSeekInterval = false; 
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
     // However, this results in an inconsistent interface across browsers 
@@ -65,14 +68,11 @@
     // lang - default language of the player
     this.lang = 'en'; 
   
-    // langOverride - set to true to reset this.lang to language of the web page, if detectable  
-    // set to false to force player to use this.lang
-    this.langOverride = true;
+    // forceLang - set to true to force player to use default player language 
+    // set to false to reset this.lang to language of the web page or user's browser,
+    // if either is detectable and if a matching translation file is available 
+    this.forceLang = false;
     
-<<<<<<< HEAD
-    // translationDir - specify path to translation files 
-    this.translationDir = '../translations/';
-=======
     // translationPath - specify path to translation files 
     this.translationPath = '../translations/';
     
@@ -84,7 +84,12 @@
     // transcriptTitle - override default transcript title 
     // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
     this.transcriptTitle = 'Transcript';
->>>>>>> master
+    
+    // useTranscriptButton - on by default if there's a transcript 
+    // However, if transcript is written to an external div via data-transcript-div 
+    // it might be desirable for the transcript to always be ON, with no toggle 
+    // This can be overridden with data-transcript-button="false" 
+    this.useTranscriptButton = true; 
 
     this.setButtonImages();
   };
@@ -253,7 +258,6 @@
   AblePlayer.prototype.setupInstancePlaylist = function() {     
     // find a matching playlist and set this.hasPlaylist
     // if there is one, also set this.$playlist, this.playlistIndex, & this.playlistEmbed
-    
     var thisObj = this;
     
     this.hasPlaylist = false; // will change to true if a matching playlist is found
@@ -277,7 +281,7 @@
         }
       }
     });
-
+    
     if (this.hasPlaylist && this.playlistEmbed) {
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
@@ -348,10 +352,17 @@
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
         thisObj.$media[0].load();
       }
-
-      if (this.useFixedSeekInterval === false) { 
-        // 10 steps in seek interval; wait until the end so that we can fetch a duration.
-        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+      if (thisObj.useFixedSeekInterval === false) { 
+        // 10 steps in seek interval; waited until now to set this so we can fetch a duration
+        // If duration is still unavailable (JW Player), try again in refreshControls()
+        var duration = thisObj.getDuration();
+        if (duration > 0) {
+          thisObj.seekInterval = Math.max(thisObj.seekInterval, duration / 10);
+          thisObj.seekIntervalCalculated = true;
+        }
+        else { 
+          thisObj.seekIntervalCalculated = false;
+        }
       }
       
       deferred.resolve();
@@ -394,6 +405,9 @@
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
           jwHeight = '0px';   
         }
+        else { 
+          jwHeight = thisObj.playerHeight;
+        }
         var sources = [];
         $.each(thisObj.$sources, function (ii, source) {
           sources.push({file: $(source).attr('src')});      
@@ -410,7 +424,7 @@
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
-            height: thisObj.playerHeight,
+            height: jwHeight,
             width: thisObj.playerWidth,
             fallback: false, 
             primary: 'flash',
@@ -534,7 +548,7 @@
       }
     }
   };
-
+  
   AblePlayer.prototype.getPlayer = function() { 
     // Determine which player to use, if any 
     // return 'html5', 'jw' or null 
@@ -554,36 +568,8 @@
       // the user wants to test the fallback player, or  
       // the user is using an older version of IE or IOS, 
       // both of which had buggy implementation of HTML5 video 
-      if (this.fallback === 'jw') {            
-        if (this.$sources.length > 0) { // this media has one or more <source> elements
-          for (i = 0; i < this.$sources.length; i++) { 
-            sourceType = this.$sources[i].getAttribute('type'); 
-            //if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
-            //  (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
-            // JW Player can play this 
-            return 'jw';
-            //}
-          }
-        }
-        else if (this.$playlist.length > 0) { 
-          // see if the first item in the playlist is a type JW player an play 
-          $newItem = this.$playlist.eq(0);
-          // check data-* attributes for a type JW can play  
-          if (this.mediaType === 'audio') { 
-            if ($newItem.attr('data-mp3')) { 
-              return 'jw';
-            }
-          }
-          else if (this.mediaType === 'video') {
-            if ($newItem.attr('data-mp4')) { 
-              return 'jw';
-            }
-          }
-        }
-        else { 
-          // there is no source, nor playlist 
-          return null;
-        }
+      if (this.fallback === 'jw' && this.jwCanPlay()) {
+        return 'jw';
       }
       else { 
         return null;
@@ -595,6 +581,42 @@
     else { 
       return null;
     }
+  };
+  
+  AblePlayer.prototype.jwCanPlay = function() { 
+    // Determine whether there are media files that JW supports 
+    if (this.$sources.length > 0) { // this media has one or more <source> elements
+      for (i = 0; i < this.$sources.length; i++) { 
+        sourceType = this.$sources[i].getAttribute('type'); 
+        if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
+            (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
+            // JW Player can play this 
+            return 'jw';
+        }
+      }
+    }
+    // still here? That means there's no source that JW can play 
+    // check for an mp3 or mp4 in a able-playlist 
+    // TODO: Implement this more efficiently 
+    // Playlist is initialized later in setupInstancePlaylist() 
+    // but we can't wait for that... 
+    if ($('.able-playlist')) { 
+      // there's at least one playlist on this page 
+      // get the first item from the first playlist 
+      // if JW Player can play that one, assume it can play all items in all playlists  
+      var $firstItem = $('.able-playlist').eq(0).find('li').eq(0);
+      if (this.mediaType === 'audio') { 
+        if ($firstItem.attr('data-mp3')) { 
+          return true;
+        }
+        else if (this.mediaType === 'video') {
+          if ($firstItem.attr('data-mp4')) { 
+            return true;
+          }
+        }
+      }
+    }    
+    return false; 
   };
 
 })();

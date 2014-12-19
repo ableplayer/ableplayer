@@ -47,12 +47,14 @@
 
 <h1>Able Player Test #7b:<br/>Video player with interactive transcript in an external container</h1>
 
+<p>The <strong>data-transcript-div</strong> attribute is used to identify the <em>id</em> of the container, and the <strong>data-use-transcript-button</strong> attribute is set to <em>false</em> so the external transcript cannot be toggled off.</p>
+
 <p>For additional test see the <a href="index.html">Index of <em>Able Player</em> Tests</a>.</p>
 
 <!-- to write transcript to an external div, pass id of an empty div via data-transcript-div -->
 <main role="main">
   <div id="player">
-    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-transcript-div="transcript">
+    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-transcript-div="transcript" data-use-transcript-button="false">
       <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
       <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
       <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>

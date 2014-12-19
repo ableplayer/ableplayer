@@ -22,7 +22,6 @@
   margin: 0;
   position: relative;
   top: 0;
-  width: 480px;
 }
 .able-player { 
 	font-family: Arial, Helvetica, sans-serif;
@@ -173,9 +172,9 @@ div.able-captions {
   padding: 0 0 0.5em;
   position: absolute;
   text-align: center;
-  width: 480px; /* same as video */
   display: none;
   z-index: 1000;
+  line-height: 1.15em;
 }
 div.able-descriptions { 
     position: relative;
@@ -428,6 +427,14 @@ div.modalDialog button:focus {
 }
 
 /* 
+ * Fallback (JW Player) Tweaks
+ */
+ 
+div[id$="_fallback_wrapper"] {
+  height: 0px;
+} 
+
+/* 
   Misc 
 */
 
@@ -456,8 +463,4 @@ div.modalDialog button:focus {
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
-}
-div[id$="_fallback_wrapper"],
-div.able-media-container {
-  height: 0px;
 }

@@ -18,8 +18,12 @@
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    this.$mediaContainer.width(this.playerWidth);
+    if (this.mediaType == 'video') {     
+      this.$mediaContainer.height(this.playerHeight);
+    }
     this.$ableDiv.width(this.playerWidth);
-
+    
     this.injectOffscreenHeading();
     
     // youtube adds its own big play button
@@ -79,6 +83,7 @@
       }
       headingType = 'h' + headingNumber.toString();
     }
+    this.playerHeadingLevel = headingNumber;
     this.$headingDiv = $('<' + headingType + '>'); 
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
@@ -184,20 +189,19 @@
     });
     
     // Transcript toolbar content:
-    // TODO: Localize
     this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll: </label>'), this.$autoScrollTranscriptCheckbox);
+    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
     // Add a default "Unknown" option; this will be deleted later if there are any
     // elements with a language.
-    this.$unknownTranscriptOption = $('<option val="unknown">Unknown</option>');
+    this.$unknownTranscriptOption = $('<option val="unknown">' + this.tt.unknown + '</option>');
     this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
     var floatRight = $('<div style="float: right;">');
     this.$transcriptLanguageSelectContainer = floatRight;
     
-    floatRight.append($('<label for="transcript-language-select">Language: </label>'), this.$transcriptLanguageSelect);
+    floatRight.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(floatRight);
     
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
@@ -349,11 +353,10 @@
       this.captionsTooltip.append('<br>');
     }
     
-    // Off option
+    // Captions Off option
     var offButton = $('<button>');
     offButton.attr('tabindex', 0);
-    // TODO: Localize
-    offButton.html('Captions off');
+    offButton.html(this.tt.captionsOff);
     offButton.click(this.getCaptionOffFunction());
 
     this.captionsTooltip.append(offButton);
@@ -444,11 +447,21 @@
         key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
       }
       else if (this.controls[i] === 'captions') { 
-        label = this.tt.toggle + ' ' + this.tt.captions;
+        if (this.captionsOn) { 
+          label = this.tt.hideCaptions;
+        }
+        else { 
+          label = this.tt.showCaptions;
+        }
         key = 'c';
       }
       else if (this.controls[i] === 'descriptions') { 
-        label = this.tt.toggle + ' ' + this.tt.descriptions;
+        if (this.descOn) {     
+          label = this.tt.turnOffDescriptions;
+        }
+        else { 
+          label = this.tt.turnOnDescriptions;
+        }
         key = 'n';
       }
       else if (this.controls[i] === 'prefs') { 
@@ -544,7 +557,7 @@
       }
     }
 
-    if (this.includeTranscript) {
+    if (this.includeTranscript && this.useTranscriptButton) {
       blr.push('transcript');
     }
 
@@ -702,7 +715,7 @@
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
-              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
+              newButton.addClass('buttonOff').attr('title',this.tt.showCaptions);
             }
           }
           else if (control === 'descriptions') {      
@@ -710,7 +723,7 @@
               // user prefer non-audio described version 
               // Therefore, load media without description 
               // Description can be toggled on later with this button  
-              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);              
+              newButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);              
             }         
           }
           
@@ -726,7 +739,7 @@
             this.$descButton = newButton; 
             // gray out description button if description is not active 
             if (!this.descOn) {  
-              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);
+              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);
             }
           }
           else if (control === 'mute') { 
@@ -908,26 +921,26 @@
     }
     else if (control === 'captions') {  
       if (this.captionsOn) {
-        return this.tt.hide + ' ' + this.tt.captions;
+        return this.tt.hideCaptions;
       }
       else { 
-        return this.tt.show + ' ' + this.tt.captions;
+        return this.tt.showCaptions;
       }
     }   
     else if (control === 'descriptions') { 
       if (this.descOn) {
-        return this.tt.turnOff + ' ' + this.tt.descriptions;
+        return this.tt.turnOffDescriptions;
       }
       else { 
-        return this.tt.turnOn + ' ' + this.tt.descriptions;
+        return this.tt.turnOnDescriptions;
       }
     }
     else if (control === 'transcript') {  
       if (this.$transcriptDiv.is(':visible')) {
-        return this.tt.hide + ' ' + this.tt.transcript;
+        return this.tt.hideTranscript;
       }
       else { 
-        return this.tt.show + ' ' + this.tt.transcript;
+        return this.tt.showTranscript;
       }
     }   
     else if (control === 'sign') { // not yet supported 

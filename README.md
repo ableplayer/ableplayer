@@ -166,21 +166,23 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **id** - required; any unique ID
 -   **data-able-player** - required 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
 -   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
     The transcript is generated automatically if captions and/or descriptions are available. 
     If this attribute is not provided the transcript will be displayed in its default container  
     adjacent to the player.  
+-   **data-use-transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container (e.g., on a dedicated transcript page), you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 -   **data-debug** - optional; if present will write messages to the developer console   
 -   **data-volume** - optional; set the default volume (0 to 1; default is 0.5 to avoid overpowering screen reader audio)
 -   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
--   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons (default is 10)  
+-   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
 -   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
--   **data-lang-override** - optional; override default player language with language of the web page or (if that's unknown) user's default browser language. On by default.
+-   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
 -   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web

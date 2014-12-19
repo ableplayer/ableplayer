@@ -23,7 +23,7 @@
 /*global $, jQuery */
 "use strict";
 
-(function () {
+(function ($) {
   $(document).ready(function () {
     $('video, audio').each(function (index, element) {
       if ($(element).data('able-player') !== undefined) {
@@ -62,6 +62,13 @@
       return;
     }
 
+    if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") { 
+      this.autoplay = true; 
+    }
+    else { 
+      this.autoplay = false;
+    }
+    
     // override defaults with values of data-* attributes 
     
     var includeTranscript = media.data('include-transcript');
@@ -87,6 +94,10 @@
 
     if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") { 
       this.transcriptDivLocation = $(media).data('transcript-div'); 
+    }
+
+    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) { 
+      this.useTranscriptButton = false; 
     }
 
     if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") { 
@@ -154,8 +165,8 @@
       }
     }
     
-    if ($(media).data('lang-override') !== undefined && $(media).data('lang-override') !== "false") { 
-      this.langOverride = true; 
+    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
+      this.forceLang = true; 
     }
 
     if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
@@ -180,6 +191,13 @@
         if (thisObj.countProperties(thisObj.tt) > 50) { 
           // close enough to ensure that most text variables are populated 
           thisObj.setup();
+          if (thisObj.startTime > 0 && !thisObj.autoplay) { 
+            // scrub ahead to startTime, but don't start playing 
+            // can't do this in media event listener   
+            // because in some browsers no media events are fired until media.play is requested 
+            // even if preload="auto" 
+            thisObj.onMediaUpdateTime();            
+          }          
         } 
         else { 
           // can't continue loading player with no text
@@ -195,9 +213,8 @@
   AblePlayer.prototype.setup = function() {
     var thisObj = this;
     if (this.debug && this.startTime > 0) {
-      console.log('Will start media at ' + startTime + ' seconds');
+      console.log('Will start media at ' + this.startTime + ' seconds');
     }
-    
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
@@ -213,7 +230,7 @@
 
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;
-})();
+})(jQuery);
 
 
 
@@ -288,11 +305,14 @@
     // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
     this.iconType = 'font';   
   
-    // Browsers that don't support seekbar sliders will use rewind and forward buttons 
     // seekInterval = Number of seconds to seek forward or back with these buttons    
     // NOTE: Unless user overrides this default with data-seek-interval attribute, 
     // this value is replaced by 1/10 the duration of the media file, once the duration is known 
     this.seekInterval = 10;
+    
+    // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval  
+    // rather than override it with 1/10 the duration of the media file 
+    this.useFixedSeekInterval = false; 
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
     // However, this results in an inconsistent interface across browsers 
@@ -327,9 +347,10 @@
     // lang - default language of the player
     this.lang = 'en'; 
   
-    // langOverride - set to true to reset this.lang to language of the web page, if detectable  
-    // set to false to force player to use this.lang
-    this.langOverride = true;
+    // forceLang - set to true to force player to use default player language 
+    // set to false to reset this.lang to language of the web page or user's browser,
+    // if either is detectable and if a matching translation file is available 
+    this.forceLang = false;
     
     // translationPath - specify path to translation files 
     this.translationPath = '../translations/';
@@ -342,6 +363,12 @@
     // transcriptTitle - override default transcript title 
     // Note: If lyricsMode is true, default is automatically replaced with "Lyrics" 
     this.transcriptTitle = 'Transcript';
+    
+    // useTranscriptButton - on by default if there's a transcript 
+    // However, if transcript is written to an external div via data-transcript-div 
+    // it might be desirable for the transcript to always be ON, with no toggle 
+    // This can be overridden with data-transcript-button="false" 
+    this.useTranscriptButton = true; 
 
     this.setButtonImages();
   };
@@ -510,7 +537,6 @@
   AblePlayer.prototype.setupInstancePlaylist = function() {     
     // find a matching playlist and set this.hasPlaylist
     // if there is one, also set this.$playlist, this.playlistIndex, & this.playlistEmbed
-    
     var thisObj = this;
     
     this.hasPlaylist = false; // will change to true if a matching playlist is found
@@ -534,7 +560,7 @@
         }
       }
     });
-
+    
     if (this.hasPlaylist && this.playlistEmbed) {
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
@@ -605,10 +631,17 @@
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
         thisObj.$media[0].load();
       }
-
-      if (this.useFixedSeekInterval === false) { 
-        // 10 steps in seek interval; wait until the end so that we can fetch a duration.
-        thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
+      if (thisObj.useFixedSeekInterval === false) { 
+        // 10 steps in seek interval; waited until now to set this so we can fetch a duration
+        // If duration is still unavailable (JW Player), try again in refreshControls()
+        var duration = thisObj.getDuration();
+        if (duration > 0) {
+          thisObj.seekInterval = Math.max(thisObj.seekInterval, duration / 10);
+          thisObj.seekIntervalCalculated = true;
+        }
+        else { 
+          thisObj.seekIntervalCalculated = false;
+        }
       }
       
       deferred.resolve();
@@ -651,6 +684,9 @@
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
           jwHeight = '0px';   
         }
+        else { 
+          jwHeight = thisObj.playerHeight;
+        }
         var sources = [];
         $.each(thisObj.$sources, function (ii, source) {
           sources.push({file: $(source).attr('src')});      
@@ -667,7 +703,7 @@
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
-            height: thisObj.playerHeight,
+            height: jwHeight,
             width: thisObj.playerWidth,
             fallback: false, 
             primary: 'flash',
@@ -791,7 +827,7 @@
       }
     }
   };
-
+  
   AblePlayer.prototype.getPlayer = function() { 
     // Determine which player to use, if any 
     // return 'html5', 'jw' or null 
@@ -811,36 +847,8 @@
       // the user wants to test the fallback player, or  
       // the user is using an older version of IE or IOS, 
       // both of which had buggy implementation of HTML5 video 
-      if (this.fallback === 'jw') {            
-        if (this.$sources.length > 0) { // this media has one or more <source> elements
-          for (i = 0; i < this.$sources.length; i++) { 
-            sourceType = this.$sources[i].getAttribute('type'); 
-            //if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
-            //  (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
-            // JW Player can play this 
-            return 'jw';
-            //}
-          }
-        }
-        else if (this.$playlist.length > 0) { 
-          // see if the first item in the playlist is a type JW player an play 
-          $newItem = this.$playlist.eq(0);
-          // check data-* attributes for a type JW can play  
-          if (this.mediaType === 'audio') { 
-            if ($newItem.attr('data-mp3')) { 
-              return 'jw';
-            }
-          }
-          else if (this.mediaType === 'video') {
-            if ($newItem.attr('data-mp4')) { 
-              return 'jw';
-            }
-          }
-        }
-        else { 
-          // there is no source, nor playlist 
-          return null;
-        }
+      if (this.fallback === 'jw' && this.jwCanPlay()) {
+        return 'jw';
       }
       else { 
         return null;
@@ -852,6 +860,42 @@
     else { 
       return null;
     }
+  };
+  
+  AblePlayer.prototype.jwCanPlay = function() { 
+    // Determine whether there are media files that JW supports 
+    if (this.$sources.length > 0) { // this media has one or more <source> elements
+      for (i = 0; i < this.$sources.length; i++) { 
+        sourceType = this.$sources[i].getAttribute('type'); 
+        if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
+            (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
+            // JW Player can play this 
+            return 'jw';
+        }
+      }
+    }
+    // still here? That means there's no source that JW can play 
+    // check for an mp3 or mp4 in a able-playlist 
+    // TODO: Implement this more efficiently 
+    // Playlist is initialized later in setupInstancePlaylist() 
+    // but we can't wait for that... 
+    if ($('.able-playlist')) { 
+      // there's at least one playlist on this page 
+      // get the first item from the first playlist 
+      // if JW Player can play that one, assume it can play all items in all playlists  
+      var $firstItem = $('.able-playlist').eq(0).find('li').eq(0);
+      if (this.mediaType === 'audio') { 
+        if ($firstItem.attr('data-mp3')) { 
+          return true;
+        }
+        else if (this.mediaType === 'video') {
+          if ($firstItem.attr('data-mp4')) { 
+            return true;
+          }
+        }
+      }
+    }    
+    return false; 
   };
 
 })();
@@ -1923,8 +1967,12 @@
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    this.$mediaContainer.width(this.playerWidth);
+    if (this.mediaType == 'video') {     
+      this.$mediaContainer.height(this.playerHeight);
+    }
     this.$ableDiv.width(this.playerWidth);
-
+    
     this.injectOffscreenHeading();
     
     // youtube adds its own big play button
@@ -1984,6 +2032,7 @@
       }
       headingType = 'h' + headingNumber.toString();
     }
+    this.playerHeadingLevel = headingNumber;
     this.$headingDiv = $('<' + headingType + '>'); 
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
@@ -2089,20 +2138,19 @@
     });
     
     // Transcript toolbar content:
-    // TODO: Localize
     this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">Auto scroll: </label>'), this.$autoScrollTranscriptCheckbox);
+    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
     // Add a default "Unknown" option; this will be deleted later if there are any
     // elements with a language.
-    this.$unknownTranscriptOption = $('<option val="unknown">Unknown</option>');
+    this.$unknownTranscriptOption = $('<option val="unknown">' + this.tt.unknown + '</option>');
     this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
     var floatRight = $('<div style="float: right;">');
     this.$transcriptLanguageSelectContainer = floatRight;
     
-    floatRight.append($('<label for="transcript-language-select">Language: </label>'), this.$transcriptLanguageSelect);
+    floatRight.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(floatRight);
     
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
@@ -2254,11 +2302,10 @@
       this.captionsTooltip.append('<br>');
     }
     
-    // Off option
+    // Captions Off option
     var offButton = $('<button>');
     offButton.attr('tabindex', 0);
-    // TODO: Localize
-    offButton.html('Captions off');
+    offButton.html(this.tt.captionsOff);
     offButton.click(this.getCaptionOffFunction());
 
     this.captionsTooltip.append(offButton);
@@ -2349,11 +2396,21 @@
         key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
       }
       else if (this.controls[i] === 'captions') { 
-        label = this.tt.toggle + ' ' + this.tt.captions;
+        if (this.captionsOn) { 
+          label = this.tt.hideCaptions;
+        }
+        else { 
+          label = this.tt.showCaptions;
+        }
         key = 'c';
       }
       else if (this.controls[i] === 'descriptions') { 
-        label = this.tt.toggle + ' ' + this.tt.descriptions;
+        if (this.descOn) {     
+          label = this.tt.turnOffDescriptions;
+        }
+        else { 
+          label = this.tt.turnOnDescriptions;
+        }
         key = 'n';
       }
       else if (this.controls[i] === 'prefs') { 
@@ -2449,7 +2506,7 @@
       }
     }
 
-    if (this.includeTranscript) {
+    if (this.includeTranscript && this.useTranscriptButton) {
       blr.push('transcript');
     }
 
@@ -2607,7 +2664,7 @@
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
-              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.captions);
+              newButton.addClass('buttonOff').attr('title',this.tt.showCaptions);
             }
           }
           else if (control === 'descriptions') {      
@@ -2615,7 +2672,7 @@
               // user prefer non-audio described version 
               // Therefore, load media without description 
               // Description can be toggled on later with this button  
-              newButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);              
+              newButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);              
             }         
           }
           
@@ -2631,7 +2688,7 @@
             this.$descButton = newButton; 
             // gray out description button if description is not active 
             if (!this.descOn) {  
-              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);
+              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);
             }
           }
           else if (control === 'mute') { 
@@ -2813,26 +2870,26 @@
     }
     else if (control === 'captions') {  
       if (this.captionsOn) {
-        return this.tt.hide + ' ' + this.tt.captions;
+        return this.tt.hideCaptions;
       }
       else { 
-        return this.tt.show + ' ' + this.tt.captions;
+        return this.tt.showCaptions;
       }
     }   
     else if (control === 'descriptions') { 
       if (this.descOn) {
-        return this.tt.turnOff + ' ' + this.tt.descriptions;
+        return this.tt.turnOffDescriptions;
       }
       else { 
-        return this.tt.turnOn + ' ' + this.tt.descriptions;
+        return this.tt.turnOnDescriptions;
       }
     }
     else if (control === 'transcript') {  
       if (this.$transcriptDiv.is(':visible')) {
-        return this.tt.hide + ' ' + this.tt.transcript;
+        return this.tt.hideTranscript;
       }
       else { 
-        return this.tt.show + ' ' + this.tt.transcript;
+        return this.tt.showTranscript;
       }
     }   
     else if (control === 'sign') { // not yet supported 
@@ -3018,6 +3075,9 @@
   AblePlayer.prototype.setupDescriptions = function (track, cues) {
     var trackLang = track.getAttribute('srclang');
 
+    // descriptions are off unless determined to be available & preferred 
+    this.descOn = false;
+    
     // prepare closed description, even if user doesn't prefer it 
     // this way it's available if needed 
     this.hasClosedDesc = true;
@@ -3934,19 +3994,21 @@
 })();
 (function () {
   AblePlayer.prototype.seekTo = function (newTime) { 
-      // TODO: How do we want startTime functionality to work?
-
     if (this.player === 'html5') {
       var seekable;
   
       this.startTime = newTime;
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
+      
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
         this.media.currentTime = this.startTime;
       } 
     }
     else if (this.player === 'jw') {
+      // pause JW Player temporarily. 
+      // When seek has successfully reached newTime, 
+      // onSeek event will be called, and playback will be resumed
       this.jwSeekPause = true;
       this.jwPlayer.seek(newTime);
     }
@@ -4218,7 +4280,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.playVideo();
     }
-    this.startedPlaying = true;
+    this.startedPlaying = true;    
   };
 
   // Right now, update the seekBar values based on current duration and time.
@@ -4228,6 +4290,14 @@
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
 
+    if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) { 
+      // couldn't calculate seekInterval previously; try again. 
+      if (duration > 0) {
+        this.seekInterval = Math.max(this.seekInterval, duration / 10);
+        this.seekIntervalCalculated = true;
+      }
+    }
+        
     if (this.seekBar) {
       this.seekBar.setDuration(duration);
       if (!this.seekBar.tracking) {
@@ -4345,12 +4415,12 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOff + ' ' + this.tt.descriptions);
+        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);            
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOn + ' ' + this.tt.descriptions);
+        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
     
@@ -4361,21 +4431,21 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.captions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
+        this.$ccButton.attr('title', this.tt.showCaptions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
       }
     }
 
@@ -4482,14 +4552,17 @@
     else {
       this.pauseMedia();
     }
-
     this.refreshControls();
   };
 
   AblePlayer.prototype.handleStop = function() { 
-    this.pauseMedia();
-    this.seekTo(0);
-
+    if (this.player == 'html5') {
+      this.pauseMedia();
+      this.seekTo(0);
+    }
+    else if (this.player == 'jw') { 
+      this.jwPlayer.stop();
+    }
     this.refreshControls();
   };
 
@@ -4505,7 +4578,6 @@
 
   AblePlayer.prototype.handleFastForward = function() { 
     var targetTime = this.getElapsed() + this.seekInterval;    
-    
     if (targetTime > this.getDuration()) {
       this.seekTo(this.getDuration());
     }
@@ -4659,13 +4731,13 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.transcript);
+      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.transcript);
+      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };
 
@@ -5021,7 +5093,7 @@
 (function () {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
-    var langs = ['en'];
+    var langs = ['en','de'];
     return langs;
   };
 
@@ -5032,10 +5104,10 @@
     var gettingText, lang, thisObj, msg; 
 
     gettingText = $.Deferred(); 
-  
+
     // override this.lang to language of the web page, if known and supported
     // otherwise this.lang will continue using default    
-    if (this.langOverride) {   
+    if (!this.forceLang) {   
       if ($('body').attr('lang')) { 
         lang = $('body').attr('lang');
       }
@@ -5178,16 +5250,28 @@
     // TODO: Make scrolling optional?
     
     var transcriptTitle = 'Transcript';
-    if (this.transcriptTitle !== undefined) { 
+    if (typeof this.transcriptTitle !== 'undefined') { 
       transcriptTitle = this.transcriptTitle;
     }
     else if (this.lyricsMode) { 
       transcriptTitle = 'Lyrics';
     }
-    if (transcriptTitle != '') { 
-      main.append('<h2>' + transcriptTitle + '</h2>');
+
+    if (typeof this.transcriptDivLocation === 'undefined' && transcriptTitle != '') { 
+      // only add an HTML heading to internal transcript 
+      // external transcript is expected to have its own heading  
+      var headingNumber = this.playerHeadingLevel; 
+      headingNumber += 1;
+      if (headingNumber > 6) {
+        headingNumber = 6;
+      }
+      var transcriptHeading = 'h' + headingNumber.toString();
+      var transcriptHeadingTag = '<' + transcriptHeading + ' class="able-transcript-heading">'; 
+      transcriptHeadingTag += transcriptTitle; 
+      transcriptHeadingTag += '</' + transcriptHeading + '>';
+       main.append(transcriptHeadingTag); 
     }
-    
+
     var nextCap = 0;
     var nextDesc = 0;  
 
@@ -5321,12 +5405,28 @@
 (function () {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-    if (this.startTime && !this.startedPlaying) { 
-      // try seeking again, if seeking failed on canplay or canplaythrough
-      this.seekTo(this.startTime);
-      this.playMedia();
-    }       
-
+    if (!this.startedPlaying) {
+      if (this.startTime) { 
+        if (this.startTime === this.media.currentTime) { 
+          // media has already scrubbed to start time
+          if (this.autoplay) { 
+            this.playMedia();
+          }          
+        }
+        else { 
+          // continue seeking ahead until currentTime == startTime 
+          this.seekTo(this.startTime);
+        }
+      }
+      else { 
+        // autoplay should generally be avoided unless a startTime is provided 
+        // but we'll trust the developer to be using this feature responsibly 
+        if (this.autoplay) {
+          this.playMedia();
+        } 
+      }       
+    }
+    
     // show highlight in transcript 
     if (this.prefHighlight === 1) {
       this.highlightTranscript(this.getElapsed()); 
@@ -5621,11 +5721,17 @@
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() { 
+        if (thisObj.debug) {
+          console.log('canplay event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           thisObj.seekTo(thisObj.startTime);
         }
       })
       .on('canplaythrough',function() { 
+        if (thisObj.debug) {
+          console.log('canplaythrough event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
@@ -5640,7 +5746,7 @@
       .on('progress', function() {
         thisObj.refreshControls();
       })
-      .on('waiting',function() { 
+      .on('waiting',function() {
         thisObj.refreshControls();
       })
       .on('durationchange',function() { 
@@ -5707,37 +5813,24 @@
         // We don't want users tabbing into the Flash object and getting trapped
         $('#' + thisObj.jwId).removeAttr('tabindex'); 
 
-        if (thisObj.startTime > 0) { 
-          // ABLE has been initialized with a startTime 
-          // e.g., from a search result or link in a transcript
-          // ONE TIME ONLY - set currentTime to startTime and begin playing
-          if (!thisObj.startedPlaying) {          
-            // JW Player doesn't download media until it's needed  
-            // Therefore, can't seek() until video has started playing 
-            // This is why seek() works with Forward and Back buttons, but not with startTime 
-            // The following is a hack: Start and immediately stop the player. 
-            // This triggers a media download, which enables seek() to work. 
-            // http pseudo-streaming would probably be a better solution, but isn't supported yet...
-            // jwplayer(thisObj.jwId).play(true);
-            // jwplayer(thisObj.jwId).play(false);
-            // jwplayer(thisObj.jwId).seek(thisObj.startTime);
-            thisObj.startedPlaying = true;
-          }
+        if (thisObj.startTime > 0 && !thisObj.startedPlaying) { 
+          thisObj.seekTo(thisObj.startTime);
+          thisObj.startedPlaying = true;
         }
 
         thisObj.refreshControls();
       })
       .onSeek(function(event) { 
-        // this is called when user scrubs ahead or back 
-        // but not when seek() is called - OR IS IT???
-        // After the target offset is reached, JW Player automatically plays media at that point  
+        // this is called when user scrubs ahead or back, 
+        // after the target offset is reached 
         if (thisObj.debug) { 
           console.log('Seeking to ' + event.position + '; target: ' + event.offset);          
         }
 
-        if (thisObj.jwSeekPause) {
-          thisObj.jwSeekPause = false;
-          thisObj.pauseMedia();
+        if (thisObj.jwSeekPause) {          
+          // media was temporarily paused  
+          thisObj.jwSeekPause = false;          
+          thisObj.playMedia();
         }
 
         setTimeout(function () {
@@ -5747,8 +5840,7 @@
       .onPlay(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlay event fired');
-        }
-
+        }        
         thisObj.refreshControls();
       })
       .onPause(function() { 

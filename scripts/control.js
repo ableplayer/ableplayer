@@ -1,18 +1,20 @@
 (function () {
   AblePlayer.prototype.seekTo = function (newTime) { 
-      // TODO: How do we want startTime functionality to work?
-
     if (this.player === 'html5') {
       var seekable;
   
       this.startTime = newTime;
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
+      
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
         this.media.currentTime = this.startTime;
       } 
     }
     else if (this.player === 'jw') {
+      // pause JW Player temporarily. 
+      // When seek has successfully reached newTime, 
+      // onSeek event will be called, and playback will be resumed
       this.jwSeekPause = true;
       this.jwPlayer.seek(newTime);
     }
@@ -284,7 +286,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.playVideo();
     }
-    this.startedPlaying = true;
+    this.startedPlaying = true;    
   };
 
   // Right now, update the seekBar values based on current duration and time.
@@ -294,6 +296,14 @@
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
 
+    if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) { 
+      // couldn't calculate seekInterval previously; try again. 
+      if (duration > 0) {
+        this.seekInterval = Math.max(this.seekInterval, duration / 10);
+        this.seekIntervalCalculated = true;
+      }
+    }
+        
     if (this.seekBar) {
       this.seekBar.setDuration(duration);
       if (!this.seekBar.tracking) {
@@ -411,12 +421,12 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOff + ' ' + this.tt.descriptions);
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOff + ' ' + this.tt.descriptions);
+        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOn + ' ' + this.tt.descriptions);            
-        this.$descButton.find('span.able-clipped').text(this.tt.turnOn + ' ' + this.tt.descriptions);
+        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
     
@@ -427,21 +437,21 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.show + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hide + ' ' + this.tt.captions);
-          this.$ccButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.captions);
+          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.captions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
+        this.$ccButton.attr('title', this.tt.showCaptions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
       }
     }
 
@@ -548,14 +558,17 @@
     else {
       this.pauseMedia();
     }
-
     this.refreshControls();
   };
 
   AblePlayer.prototype.handleStop = function() { 
-    this.pauseMedia();
-    this.seekTo(0);
-
+    if (this.player == 'html5') {
+      this.pauseMedia();
+      this.seekTo(0);
+    }
+    else if (this.player == 'jw') { 
+      this.jwPlayer.stop();
+    }
     this.refreshControls();
   };
 
@@ -571,7 +584,6 @@
 
   AblePlayer.prototype.handleFastForward = function() { 
     var targetTime = this.getElapsed() + this.seekInterval;    
-    
     if (targetTime > this.getDuration()) {
       this.seekTo(this.getDuration());
     }
@@ -725,13 +737,13 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.show + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.show + ' ' + this.tt.transcript);
+      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hide + ' ' + this.tt.transcript);
-      this.$transcriptButton.find('span.able-clipped').text(this.tt.hide + ' ' + this.tt.transcript);
+      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };
 

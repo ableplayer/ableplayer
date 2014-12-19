@@ -1,12 +1,28 @@
 (function () {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-    if (this.startTime && !this.startedPlaying) { 
-      // try seeking again, if seeking failed on canplay or canplaythrough
-      this.seekTo(this.startTime);
-      this.playMedia();
-    }       
-
+    if (!this.startedPlaying) {
+      if (this.startTime) { 
+        if (this.startTime === this.media.currentTime) { 
+          // media has already scrubbed to start time
+          if (this.autoplay) { 
+            this.playMedia();
+          }          
+        }
+        else { 
+          // continue seeking ahead until currentTime == startTime 
+          this.seekTo(this.startTime);
+        }
+      }
+      else { 
+        // autoplay should generally be avoided unless a startTime is provided 
+        // but we'll trust the developer to be using this feature responsibly 
+        if (this.autoplay) {
+          this.playMedia();
+        } 
+      }       
+    }
+    
     // show highlight in transcript 
     if (this.prefHighlight === 1) {
       this.highlightTranscript(this.getElapsed()); 
@@ -301,11 +317,17 @@
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() { 
+        if (thisObj.debug) {
+          console.log('canplay event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           thisObj.seekTo(thisObj.startTime);
         }
       })
       .on('canplaythrough',function() { 
+        if (thisObj.debug) {
+          console.log('canplaythrough event');  
+        }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
@@ -320,7 +342,7 @@
       .on('progress', function() {
         thisObj.refreshControls();
       })
-      .on('waiting',function() { 
+      .on('waiting',function() {
         thisObj.refreshControls();
       })
       .on('durationchange',function() { 
@@ -387,37 +409,24 @@
         // We don't want users tabbing into the Flash object and getting trapped
         $('#' + thisObj.jwId).removeAttr('tabindex'); 
 
-        if (thisObj.startTime > 0) { 
-          // ABLE has been initialized with a startTime 
-          // e.g., from a search result or link in a transcript
-          // ONE TIME ONLY - set currentTime to startTime and begin playing
-          if (!thisObj.startedPlaying) {          
-            // JW Player doesn't download media until it's needed  
-            // Therefore, can't seek() until video has started playing 
-            // This is why seek() works with Forward and Back buttons, but not with startTime 
-            // The following is a hack: Start and immediately stop the player. 
-            // This triggers a media download, which enables seek() to work. 
-            // http pseudo-streaming would probably be a better solution, but isn't supported yet...
-            // jwplayer(thisObj.jwId).play(true);
-            // jwplayer(thisObj.jwId).play(false);
-            // jwplayer(thisObj.jwId).seek(thisObj.startTime);
-            thisObj.startedPlaying = true;
-          }
+        if (thisObj.startTime > 0 && !thisObj.startedPlaying) { 
+          thisObj.seekTo(thisObj.startTime);
+          thisObj.startedPlaying = true;
         }
 
         thisObj.refreshControls();
       })
       .onSeek(function(event) { 
-        // this is called when user scrubs ahead or back 
-        // but not when seek() is called - OR IS IT???
-        // After the target offset is reached, JW Player automatically plays media at that point  
+        // this is called when user scrubs ahead or back, 
+        // after the target offset is reached 
         if (thisObj.debug) { 
           console.log('Seeking to ' + event.position + '; target: ' + event.offset);          
         }
 
-        if (thisObj.jwSeekPause) {
-          thisObj.jwSeekPause = false;
-          thisObj.pauseMedia();
+        if (thisObj.jwSeekPause) {          
+          // media was temporarily paused  
+          thisObj.jwSeekPause = false;          
+          thisObj.playMedia();
         }
 
         setTimeout(function () {
@@ -427,8 +436,7 @@
       .onPlay(function() { 
         if (thisObj.debug) { 
           console.log('JW Player onPlay event fired');
-        }
-
+        }        
         thisObj.refreshControls();
       })
       .onPause(function() { 

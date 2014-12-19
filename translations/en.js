@@ -15,25 +15,23 @@
 
 "forward": "Forward",
 
-"seconds": "seconds",
+"showCaptions": "Show captions",
 
-"toggle": "Toggle",
+"hideCaptions": "Hide captions",
 
-"turnOn": "Turn on",
+"captionsOff": "Captions off",
 
-"turnOff": "Turn off",
+"showTranscript": "Show transcript",
 
-"show": "Show",
+"hideTranscript": "Hide transcript", 
 
-"hide": "Hide",
+"turnOnDescriptions": "Turn on descriptions", 
 
-"captions": "captions",
+"turnOffDescriptions": "Turn off descriptions", 
 
-"descriptions": "descriptions",
+"language": "Language",
 
-"sign": "sign language",
-
-"transcript": "transcript",
+"sign": "Sign language",
 
 "mute": "Mute",
 
@@ -46,8 +44,6 @@
 "volumeDown": "Volume down",
 
 "preferences": "Preferences",
-
-"help": "Help",
 
 "enterFullScreen": "Enter full screen",
 
@@ -62,6 +58,10 @@
 "or": "or", 
 
 "spacebar": "spacebar",
+
+"autoScroll": "Auto scroll",
+
+"unknown": "Unknown", 
 
 "statusPlaying": "Playing",
 
@@ -123,11 +123,13 @@
 
 "prefNoChange": "You didn't make any changes.",
 
+"help": "Help",
+
 "helpTitle": "Help",
 
 "helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
 
-"helpKeysDisclaimer": "Note that modifier keys (Alt and Control) can be assigned within <em>Preferences</em>. Also, some shortcut key combinations might conflict with keys used by your browser and/or assistive technologies. Try various combinations of modifier keys to find one that works for you.",
+"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
 
 "save": "Save",
 
