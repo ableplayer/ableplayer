@@ -204,25 +204,27 @@ MP4.</p>
 <li>  <strong>id</strong> - required; any unique ID</li>
 <li>  <strong>data-able-player</strong> - required </li>
 <li>  <strong>data-start-time</strong> - optional; time at which you want the audio to start playing (in seconds)</li>
+<li>  <strong>autoplay</strong> - optional; play media automatically when page loads. For accessibility reasons, this is <em>not</em> recommended unless user is sure to <em>expect</em> media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.<br>
+</li>
 <li>  <strong>data-transcript-div</strong> - optional; id of an external div in which to display the interactive transcript. 
 The transcript is generated automatically if captions and/or descriptions are available. 
 If this attribute is not provided the transcript will be displayed in its default container<br>
 adjacent to the player.<br>
 </li>
+<li>  <strong>data-use-transcript-button</strong> - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container (e.g., on a dedicated transcript page), you might not want users to be able to toggle the transcript off. </li>
 <li>  <strong>data-transcript-title</strong> - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) </li>
 <li>  <strong>data-lyrics-mode</strong> - optional; forces a line break between and within captions in the transcript </li>
 <li>  <strong>data-debug</strong> - optional; if present will write messages to the developer console<br>
 </li>
 <li>  <strong>data-volume</strong> - optional; set the default volume (0 to 1; default is 0.5 to avoid overpowering screen reader audio)</li>
 <li>  <strong>data-icon-type</strong> - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. </li>
-<li>  <strong>data-seek-interval</strong> - optional; interval (in seconds) of forward and rewind buttons (default is 10)<br>
-</li>
+<li>  <strong>data-seek-interval</strong> - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. </li>
 <li>  <strong>data-show-now-playing</strong> - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present<br>
 </li>
 <li>  <strong>data-fallback</strong> - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)</li>
 <li>  <strong>data-test-fallback</strong> - optional; force browser to user fallback player (recommended for testing only) </li>
 <li>  <strong>data-lang</strong> - optional; specify language of the player using 2-character language code (default is "en" for English)</li>
-<li>  <strong>data-lang-override</strong> - optional; override default player language with language of the web page or (if that's unknown) user's default browser language. On by default.</li>
+<li>  <strong>data-force-lang</strong> - optional; include this option to force the player to use the value of <em>data-lang</em> as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of <em>data-lang</em> if provided; 3) English. </li>
 <li>  <strong>data-translation-path</strong> - optional; override default path to translations directory (NOTE: the translations directory includes <em>all</em> languages, including English, so the player will fail if it is unable to find this directory)</li>
 <li>  <strong>preload</strong> - optional; tells the browser how much media to download
 when the page loads. If the media is the central focus of the web
