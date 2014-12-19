@@ -177,7 +177,7 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **data-debug** - optional; if present will write messages to the developer console   
 -   **data-volume** - optional; set the default volume (0 to 1; default is 0.5 to avoid overpowering screen reader audio)
 -   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
--   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons (default is 10)  
+-   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
 -   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 

@@ -26,11 +26,14 @@
     // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
     this.iconType = 'font';   
   
-    // Browsers that don't support seekbar sliders will use rewind and forward buttons 
     // seekInterval = Number of seconds to seek forward or back with these buttons    
     // NOTE: Unless user overrides this default with data-seek-interval attribute, 
     // this value is replaced by 1/10 the duration of the media file, once the duration is known 
     this.seekInterval = 10;
+    
+    // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval  
+    // rather than override it with 1/10 the duration of the media file 
+    this.useFixedSeekInterval = false; 
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers 
     // However, this results in an inconsistent interface across browsers 
@@ -351,8 +354,8 @@
         thisObj.$media[0].load();
       }
 
-      if (this.useFixedSeekInterval === false) { 
-        // 10 steps in seek interval; wait until the end so that we can fetch a duration.
+      if (thisObj.useFixedSeekInterval === false) { 
+        // 10 steps in seek interval; waited until now to set this so we can fetch a duration
         thisObj.seekInterval = Math.max(10, thisObj.getDuration() / 10);
       }
       
