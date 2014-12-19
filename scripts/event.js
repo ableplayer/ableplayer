@@ -409,22 +409,9 @@
         // We don't want users tabbing into the Flash object and getting trapped
         $('#' + thisObj.jwId).removeAttr('tabindex'); 
 
-        if (thisObj.startTime > 0) { 
-          // ABLE has been initialized with a startTime 
-          // e.g., from a search result or link in a transcript
-          // ONE TIME ONLY - set currentTime to startTime and begin playing
-          if (!thisObj.startedPlaying) {          
-            // JW Player doesn't download media until it's needed  
-            // Therefore, can't seek() until video has started playing 
-            // This is why seek() works with Forward and Back buttons, but not with startTime 
-            // The following is a hack: Start and immediately stop the player. 
-            // This triggers a media download, which enables seek() to work. 
-            // http pseudo-streaming would probably be a better solution, but isn't supported yet...
-            // jwplayer(thisObj.jwId).play(true);
-            // jwplayer(thisObj.jwId).play(false);
-            // jwplayer(thisObj.jwId).seek(thisObj.startTime);
-            thisObj.startedPlaying = true;
-          }
+        if (thisObj.startTime > 0 && !thisObj.startedPlaying) { 
+          thisObj.seekTo(thisObj.startTime);
+          thisObj.startedPlaying = true;
         }
 
         thisObj.refreshControls();
