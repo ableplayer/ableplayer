@@ -166,7 +166,7 @@
       'class': 'able-prefs-form'
     });
 
-    introText = '<p>Saving your preferences requires cookies.</p>\n';
+    introText = '<p>' + this.tt.prefIntro + '</p>\n';
     
     prefsIntro = $('<p>',{ 
       html: introText
