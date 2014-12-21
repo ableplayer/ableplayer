@@ -1,0 +1,64 @@
+WEBVTT 
+kind: captions
+lang: en
+
+NOTE This VTT file includes a few extras: 
+- Meta data at the top (lines 2 and 3)
+- The current comment block, identified with NOTE and surrounded by spaces 
+- cue settings at the end of the first timestamp 
+- A cue span at the start of the second cue payload 
+- (in this case, a "voice span" <v> identifying the speaker)
+- Currently AblePlayer does not support these extra features 
+- but the parser needs to be able to filter them out 
+- More info in the WebVTT spec (still evolving):
+- http://dev.w3.org/html5/webvtt
+
+00:00:00.429 --> 00:00:09.165
+[ music ]
+
+00:00:09.165 --> 00:00:10.792
+<v Narrator> You want these people.
+
+00:00:10.792 --> 00:00:13.759
+They order your products, sign up for your services,
+
+00:00:13.759 --> 00:00:16.627
+enroll in your classes, read your opinions,
+
+00:00:16.627 --> 00:00:18.561
+and watch your videos.
+
+00:00:18.561 --> 00:00:24.165
+You'll never see them, but they know you-
+through your website.
+
+00:00:24.165 --> 00:00:25.891
+Or maybe not.
+
+00:00:25.891 --> 00:00:30.396
+Your website's visitors aren't a 
+faceless mass of identical mouse-clickers
+
+00:00:30.396 --> 00:00:32.363
+but a vibrant community of individuals 
+
+00:00:32.363 --> 00:00:35.297
+with varying tastes, styles, and abilities.
+
+00:00:35.297 --> 00:00:39.132
+This includes people with disabilities.
+
+00:00:39.132 --> 00:00:41.000
+[Terrill] It's important for web designers and developers
+
+00:00:41.000 --> 00:00:45.500
+to realize that what they see currently on their computer,
+
+00:00:45.500 --> 00:00:49.264
+at their resolution, with their browser
+and their operating system
+
+00:00:49.264 --> 00:00:52.000
+is not going to be necessarily 
+the same thing that everybody else sees.
+

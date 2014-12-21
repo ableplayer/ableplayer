@@ -29,6 +29,8 @@
 
 "turnOffDescriptions": "Turn off descriptions", 
 
+"chapters": "Chapters",
+
 "language": "Language",
 
 "sign": "Sign language",
@@ -97,11 +99,11 @@
 
 "prefKeys": "Modifier Keys",
 
-"prefAltKey": "Alt key",
+"prefAltKey": "Alt",
 
-"prefCtrlKey": "Control key",
+"prefCtrlKey": "Control",
 
-"prefShiftKey": "Shift key",
+"prefShiftKey": "Shift",
 
 "prefCaptions": "Closed captions on by default",
 

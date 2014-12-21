@@ -15,21 +15,23 @@
 
 "forward": "vorwärts springen", 
 
-"showCaptions": "Bildlegenden anzeigen", 
+"showCaptions": "Untertitel anzeigen", 
 
-"hideCaptions": "Bildlegenden verstecken", 
+"hideCaptions": "Untertitel verstecken", 
 
-"captionsOff": "Bildlegenden ausschalten", 
+"captionsOff": "Untertitel ausschalten", 
 
 "showTranscript": "Transkription anzeigen", 
 
 "hideTranscript": "Transkription verstecken", 
 
-"turnOnDescriptions": "Beschreibungen einschalten", 
+"turnOnDescriptions": "Audiodeskription einschalten", 
 
-"turnOffDescriptions": "Beschreibungen Ausschalten", 
+"turnOffDescriptions": "Audiodeskription Ausschalten", 
 
-"language": "Language", 
+"chapters": "Kapitel",
+
+"language": "Sprache", 
 
 "sign": "Gebärdensprache",
 
@@ -45,9 +47,9 @@
 
 "preferences": "Einstellungen",
 
-"enterFullScreen": "Enter full screen", 
+"enterFullScreen": "Vollbildmodus einschalten", 
 
-"exitFullScreen": "Exit full screen", 
+"exitFullScreen": "Vollbildmodus verlassen", 
 
 "fullScreen": "Vollbildmodus",
 
@@ -73,13 +75,13 @@
 
 "statusBuffering": "Es wird gepuffert",
 
-"statusUsingDesc": "Version mit Beschreibung wird verwendet",
+"statusUsingDesc": "Version mit Audiodeskription wird verwendet",
 
-"statusLoadingDesc": "Version mit Beschreibung wird geladen",
+"statusLoadingDesc": "Version mit Audiodeskription wird geladen",
 
-"statusUsingNoDesc": "Version ohne Beschreibung wird verwendet",
+"statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet",
 
-"statusLoadingNoDesc": "Version ohne Beschreibung wird geladen",
+"statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen",
 
 "statusLoadingNext": "Der nächste Titel wird geladen",
 
@@ -87,29 +89,29 @@
 
 "selectedTrack": "Ausgewählter Titel",
 
-"errorNoPlay": "Dieser Browser ist nicht in der Lage, dies abzuspielen",
+"errorNoPlay": "Abspielen ist mit diesem Browser nicht möglich",
 
 "prefTitle": "Einstellungen",
 
-"prefIntro": "Cookies werden benötigt, um Ihre persönliche Einstellungen zu speichern",
+"prefIntro": "Bitte beachten: um Ihre persönliche Einstellungen zu speichern, werden Cookies verwendet.",
 
 "prefFeatures": "Funktionen",
 
 "prefKeys": "Umschalttasten",
 
-"prefAltKey": "Alt-Taste",
+"prefAltKey": "Alt",
 
-"prefCtrlKey": "Strg-Taste",
+"prefCtrlKey": "Strg",
 
-"prefShiftKey": "Umschalttaste", 
+"prefShiftKey": "Umschalt", 
 
-"prefCaptions": "Geschlossene Untertitel per Standardvorgabe eingeschaltet",
+"prefCaptions": "Untertitel automatisch einschalten",
 
-"prefDesc": "Beschreibung per Standardvorgabe eingeschaltet",
+"prefDesc": "Audiodeskription automatisch einschalten",
 
-"prefClosedDesc": "Text-basierte Beschreibung verwenden, wenn vorhanden", 
+"prefClosedDesc": "Audiodeskription verwenden, wenn vorhanden", 
 
-"prefDescPause": "Automatisch pause das video wenn text-basierte Beschreibung beginnt",
+"prefDescPause": "Video automatisch anhalten, wenn Untertitel eingeblendet werden",
 
 "prefVisibleDesc": "Text-basierte Beschreibung automatisch sichtbar machen, wenn diese eingeschaltet ist",
 

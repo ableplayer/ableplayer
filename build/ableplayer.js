@@ -1067,7 +1067,7 @@
       'class': 'able-prefs-form'
     });
 
-    introText = '<p>Saving your preferences requires cookies.</p>\n';
+    introText = '<p>' + this.tt.prefIntro + '</p>\n';
     
     prefsIntro = $('<p>',{ 
       html: introText
@@ -2427,13 +2427,13 @@
       if (label) { 
         helpText += '<li><span class="able-help-modifiers">'; 
         if (this.prefAltKey === 1) { 
-          helpText += 'Alt + ';
+          helpText += this.tt.prefAltKey + ' + ';
         }
         if (this.prefCtrlKey === 1) { 
-          helpText += 'Control + ';
+          helpText += this.tt.prefCtrlKey + ' + ';
         }
         if (this.prefShiftKey === 1) {
-          helpText += 'Shift + ';
+          helpText += this.tt.prefShiftKey + ' + ';
         }
         helpText += key + '</span> = ' + label + '</li>\n';
       }
@@ -2892,6 +2892,9 @@
         return this.tt.showTranscript;
       }
     }   
+    else if (control === 'chapters') { 
+      return this.tt.chapters;
+    }
     else if (control === 'sign') { // not yet supported 
       return this.tt.sign;
     }
