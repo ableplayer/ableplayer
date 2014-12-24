@@ -5,9 +5,10 @@
       if (this.startTime) { 
         if (this.startTime === this.media.currentTime) { 
           // media has already scrubbed to start time
-          if (this.autoplay) { 
+          if (this.autoplay || this.seeking) { 
             this.playMedia();
-          }          
+            this.seeking = false;            
+          }   
         }
         else { 
           // continue seeking ahead until currentTime == startTime 

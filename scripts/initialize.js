@@ -345,6 +345,7 @@
       thisObj.updateDescription();
       thisObj.updateCaption();
       thisObj.updateTranscript();
+      thisObj.showSearchResults();
       thisObj.initializing = false;
       thisObj.refreshControls();
 
