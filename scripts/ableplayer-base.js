@@ -177,6 +177,14 @@
       this.metaDiv = $(media).data('meta-div'); 
     }
 
+    if ($(media).data('search') !== undefined && $(media).data('search') !== "") { 
+      // conducting a search currently requires an external div in which to write the results 
+      if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") { 
+        this.searchString = $(media).data('search'); 
+        this.searchDiv = $(media).data('search-div'); 
+      }
+    }
+
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 

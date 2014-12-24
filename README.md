@@ -190,7 +190,8 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
     download as much of the media as possible. If the media is not a
     central focus, downloading the entire media resource can consume
     valuable bandwidth, so preload=“metadata” would be a better option.
-
+    **data-search** - optional; search terms to search for within the caption tracks, separated by a space  
+    **data-search-div** - optional; id of external container in which to display search results
 
 The following attributes are supported on the \<video\> element only:
     

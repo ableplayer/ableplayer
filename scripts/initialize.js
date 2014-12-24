@@ -345,6 +345,7 @@
       thisObj.updateDescription();
       thisObj.updateCaption();
       thisObj.updateTranscript();
+      thisObj.showSearchResults();
       thisObj.initializing = false;
       thisObj.refreshControls();
 
@@ -585,6 +586,8 @@
   
   AblePlayer.prototype.jwCanPlay = function() { 
     // Determine whether there are media files that JW supports 
+    var i, sourceType, $firstItem;
+    
     if (this.$sources.length > 0) { // this media has one or more <source> elements
       for (i = 0; i < this.$sources.length; i++) { 
         sourceType = this.$sources[i].getAttribute('type'); 
@@ -604,7 +607,7 @@
       // there's at least one playlist on this page 
       // get the first item from the first playlist 
       // if JW Player can play that one, assume it can play all items in all playlists  
-      var $firstItem = $('.able-playlist').eq(0).find('li').eq(0);
+      $firstItem = $('.able-playlist').eq(0).find('li').eq(0);
       if (this.mediaType === 'audio') { 
         if ($firstItem.attr('data-mp3')) { 
           return true;
