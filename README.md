@@ -439,7 +439,34 @@ users can control the following:
 -   Highlight transcript as video plays
 -   Keyboard-enable transcript
 
+Building the Able Player source
+-------------------------------
 
+The source JavaScript files for the ableplayer are in the */scripts* directory, 
+and are combined into several different files (in the */build* directory) using 
+[npm][] and [Grunt][]:
+
+```sh
+npm install
+grunt
+```
+
+The npm and Grunt build process is defined by the *Gruntfile.js* and *package.json*
+files. (Note that the **version number** is specified in *package.json*, and must be 
+updated when a new version is released).
+
+Files created by the build process are put into the */build* directory:
+
+- **build/ableplayer.js** - 
+  the default build of *ableplayer.js*
+- **build/ableplayer.dist.js** - 
+  a build of *ableplayer.js* without console logging
+- **build/ableplayer.min.js** - 
+  a minified version of the *dist* file
+- **build/ableplayer.min.css** - 
+  a minified version of the *styles/ableplayer.css* file
+ 
+ 
   [examples]: http://ableplayer.github.io/ableplayer/tests/
   [jQuery]: http://jquery.com/
   [Modernizr]: http://modernizr.com/
@@ -448,6 +475,7 @@ users can control the following:
   [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
   [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
-  
+  [npm]: https://www.npmjs.com/
+  [grunt]: http://gruntjs.com/
 
 
