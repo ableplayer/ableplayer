@@ -594,7 +594,7 @@
         if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
             (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
             // JW Player can play this 
-            return 'jw';
+            return true;
         }
       }
     }
