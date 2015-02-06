@@ -317,7 +317,7 @@ If your web page includes a playlist, you should also link to the
 *ableplayer-playlist.css* file, as follows:
 
 ```HTML
-<link rel="stylesheet" href="styles/ump-playlist.css" type="text/css"/>
+<link rel="stylesheet" href="styles/ableplayer-playlist.css" type="text/css"/>
 ```
 
 Interactive Transcript
