@@ -152,11 +152,11 @@
       return;
     }
     if (!mute) {
-      this.$muteButton.attr('title',this.tt.mute); 
+      this.$muteButton.attr('aria-label',this.tt.mute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.mute);
     }
     else {
-      this.$muteButton.attr('title',this.tt.unmute); 
+      this.$muteButton.attr('aria-label',this.tt.unmute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
@@ -364,7 +364,7 @@
     // Don't change play/pause button display while using the seek bar.
     if (!this.seekBar.tracking) {
       if (this.isPaused()) {    
-        this.$playpauseButton.attr('title',this.tt.play); 
+        this.$playpauseButton.attr('aria-label',this.tt.play); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
@@ -375,7 +375,7 @@
         }
       }
       else {
-        this.$playpauseButton.attr('title',this.tt.pause); 
+        this.$playpauseButton.attr('aria-label',this.tt.pause); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
@@ -421,11 +421,11 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.removeClass('buttonOff').attr('aria-label',this.tt.turnOffDescriptions);
         this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.addClass('buttonOff').attr('aria-label',this.tt.turnOnDescriptions);            
         this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
@@ -437,20 +437,20 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.showCaptions);
+        this.$ccButton.attr('aria-label', this.tt.showCaptions);
         this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
       }
     }
@@ -478,7 +478,7 @@
 
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
-        this.$fullscreenButton.attr('title', this.tt.enterFullScreen); 
+        this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
@@ -488,7 +488,7 @@
         }
       }
       else {
-        this.$fullscreenButton.attr('title',this.tt.exitFullScreen); 
+        this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
@@ -737,12 +737,12 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };

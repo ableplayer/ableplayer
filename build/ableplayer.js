@@ -2625,10 +2625,20 @@
             buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control); 
+
+          // icomoon documentation recommends the following markup for screen readers: 
+          // 1. link element (or in our case, button). Nested inside this element: 
+          // 2. span that contains the icon font (in our case, buttonIcon)
+          // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+          // In addition, we are adding aria-label to the button (but not title) 
+          // And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
+          // This has been thoroughly tested and works well in all screen reader/browser combinations 
+          // See https://github.com/ableplayer/ableplayer/issues/81
+
           newButton = $('<button>',{ 
             'type': 'button',
             'tabindex': '0',
-            'title': buttonTitle,
+            'aria-label': buttonTitle,
             'class': 'able-button-handler-' + control
           });        
           if (this.iconType === 'font') {
@@ -2636,31 +2646,7 @@
             buttonIcon = $('<span>',{ 
               'class': iconClass,
               'aria-hidden': 'true'
-            })   
-            // icomoon documentation recommends the following markup for screen readers: 
-            // 1. link element (or in our case, button). Nested inside this element: 
-            // 2. span that contains the icon font (in our case, buttonIcon)
-            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
-            // Screen reader test results: 
-            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
-            // - JAWS 15 in IE11 reads "Play button" 
-            // - NVDA 2014.3 in IE11 reads "Play button" 
-            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
-            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
-            //   when a button has focus and user presses space or enter, focus moves to the next button 
-            //   and the keypress is NOT handled. 
-            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
-            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
-            // we get better results: 
-            // - NVDA/Firefox bug is fixed 
-            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
-            // - All other test results are the same as above
-            
-            var buttonLabel = $('<span>',{
-            'class': 'able-clipped'
-            }).text(buttonTitle);
-            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
-            // newButton.append(buttonIcon,buttonLabel);
+            })               
             newButton.append(buttonIcon);
           }
           else { 
@@ -2672,6 +2658,12 @@
             });
             newButton.append(buttonImg);
           }
+          // now add the visibly-hidden label for screen readers that don't support aria-label on the button
+          var buttonLabel = $('<span>',{
+            'class': 'able-clipped'
+          }).text(buttonTitle);
+          newButton.append(buttonLabel);
+          
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
@@ -4160,11 +4152,11 @@
       return;
     }
     if (!mute) {
-      this.$muteButton.attr('title',this.tt.mute); 
+      this.$muteButton.attr('aria-label',this.tt.mute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.mute);
     }
     else {
-      this.$muteButton.attr('title',this.tt.unmute); 
+      this.$muteButton.attr('aria-label',this.tt.unmute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
@@ -4372,7 +4364,7 @@
     // Don't change play/pause button display while using the seek bar.
     if (!this.seekBar.tracking) {
       if (this.isPaused()) {    
-        this.$playpauseButton.attr('title',this.tt.play); 
+        this.$playpauseButton.attr('aria-label',this.tt.play); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
@@ -4383,7 +4375,7 @@
         }
       }
       else {
-        this.$playpauseButton.attr('title',this.tt.pause); 
+        this.$playpauseButton.attr('aria-label',this.tt.pause); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
@@ -4429,11 +4421,11 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.removeClass('buttonOff').attr('aria-label',this.tt.turnOffDescriptions);
         this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.addClass('buttonOff').attr('aria-label',this.tt.turnOnDescriptions);            
         this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
@@ -4445,20 +4437,20 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.showCaptions);
+        this.$ccButton.attr('aria-label', this.tt.showCaptions);
         this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
       }
     }
@@ -4486,7 +4478,7 @@
 
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
-        this.$fullscreenButton.attr('title', this.tt.enterFullScreen); 
+        this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
@@ -4496,7 +4488,7 @@
         }
       }
       else {
-        this.$fullscreenButton.attr('title',this.tt.exitFullScreen); 
+        this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
@@ -4745,12 +4737,12 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };

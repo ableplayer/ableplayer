@@ -665,10 +665,20 @@
             buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control); 
+
+          // icomoon documentation recommends the following markup for screen readers: 
+          // 1. link element (or in our case, button). Nested inside this element: 
+          // 2. span that contains the icon font (in our case, buttonIcon)
+          // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+          // In addition, we are adding aria-label to the button (but not title) 
+          // And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
+          // This has been thoroughly tested and works well in all screen reader/browser combinations 
+          // See https://github.com/ableplayer/ableplayer/issues/81
+
           newButton = $('<button>',{ 
             'type': 'button',
             'tabindex': '0',
-            'title': buttonTitle,
+            'aria-label': buttonTitle,
             'class': 'able-button-handler-' + control
           });        
           if (this.iconType === 'font') {
@@ -676,31 +686,7 @@
             buttonIcon = $('<span>',{ 
               'class': iconClass,
               'aria-hidden': 'true'
-            })   
-            // icomoon documentation recommends the following markup for screen readers: 
-            // 1. link element (or in our case, button). Nested inside this element: 
-            // 2. span that contains the icon font (in our case, buttonIcon)
-            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
-            // Screen reader test results: 
-            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
-            // - JAWS 15 in IE11 reads "Play button" 
-            // - NVDA 2014.3 in IE11 reads "Play button" 
-            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
-            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
-            //   when a button has focus and user presses space or enter, focus moves to the next button 
-            //   and the keypress is NOT handled. 
-            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
-            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
-            // we get better results: 
-            // - NVDA/Firefox bug is fixed 
-            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
-            // - All other test results are the same as above
-            
-            var buttonLabel = $('<span>',{
-            'class': 'able-clipped'
-            }).text(buttonTitle);
-            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
-            // newButton.append(buttonIcon,buttonLabel);
+            })               
             newButton.append(buttonIcon);
           }
           else { 
@@ -712,6 +698,12 @@
             });
             newButton.append(buttonImg);
           }
+          // now add the visibly-hidden label for screen readers that don't support aria-label on the button
+          var buttonLabel = $('<span>',{
+            'class': 'able-clipped'
+          }).text(buttonTitle);
+          newButton.append(buttonLabel);
+          
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
