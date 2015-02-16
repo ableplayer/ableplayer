@@ -508,8 +508,14 @@
       // Choose show/hide for big play button and adjust position.
       if (this.isPaused() && !this.seekBar.tracking) {
         this.$bigPlayButton.show();
-        this.$bigPlayButton.width(this.$mediaContainer.width());
-        this.$bigPlayButton.height(this.$mediaContainer.height());
+        if (this.isFullscreen()) { 
+          this.$bigPlayButton.width($(window).width());
+          this.$bigPlayButton.height($(window).height());
+        }
+        else { 
+          this.$bigPlayButton.width(this.$mediaContainer.width());
+          this.$bigPlayButton.height(this.$mediaContainer.height());
+        }
       }
       else {
         this.$bigPlayButton.hide();
