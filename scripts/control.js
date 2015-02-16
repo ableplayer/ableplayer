@@ -450,9 +450,21 @@
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('aria-label', this.tt.captions);
+        this.$ccButton.attr({ 
+          'aria-label': this.tt.captions,
+          'aria-haspopup': 'true',
+          'aria-controls': this.mediaId + '-captions-menu'
+        });
         this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
       }
+    }
+    
+    if (this.$chaptersButton) { 
+      this.$chaptersButton.attr({ 
+        'aria-label': this.tt.chapters,
+        'aria-haspopup': 'true',
+        'aria-controls': this.mediaId + '-chapters-menu'
+      });
     }
 
     if (this.$muteButton) {
@@ -693,7 +705,7 @@
       }
       this.refreshControls();
     }
-    else {    
+    else {   
       if (this.captionsPopupMenu.is(':visible')) {
         this.captionsPopupMenu.hide();
         this.$ccButton.focus();

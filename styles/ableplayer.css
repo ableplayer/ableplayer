@@ -427,6 +427,22 @@ div.modalDialog button:focus {
 }
 
 /* 
+  Popup Menus
+*/
+.able-popup {
+  position: absolute;
+  padding: 5px 10px;
+  border-color: black;
+  border-width: 1px;
+  background-color: #CCCCCC;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  display: none;
+  z-index: 3000;
+}
+
+/* 
  * Fallback (JW Player) Tweaks
  */
  

@@ -290,26 +290,27 @@
     });
   };
 
-  // Create popup menu with appropriate CSS styling and add to body
-  // (e.g., for captions and chapters menus)
-  AblePlayer.prototype.createPopupMenu = function () {
+  // Create popup menu and append to player 
+  // 'which' parameter is either 'captions' or 'chapters'
+  AblePlayer.prototype.createPopupMenu = function (which) {
     var thisObj = this;
-    var tooltip = $('<div>');
-    // tooltip.attr('role', 'tooltip'); // not really a tooltip
-    tooltip.addClass('able-tooltip');
+    var popupMenu = $('<div>',{
+      'id': this.mediaId + '-' + which + '-menu',
+      'class': 'able-popup' 
+    });
 
     // If tabbing off the menu, close it.
-    tooltip.keydown(function (e) {
+    popupMenu.keydown(function (e) {
       // Tab
       if (e.which === 9) {
         if (e.shiftKey) {
-          if (tooltip.find('button').first().is(':focus')) {
+          if (popupMenu.find('button').first().is(':focus')) {
             thisObj.closePopupMenus();
             e.preventDefault();
           }
         }
         else {
-          if (tooltip.find('button').last().is(':focus')) {
+          if (popupMenu.find('button').last().is(':focus')) {
             thisObj.closePopupMenus();
             e.preventDefault();
           }
@@ -317,9 +318,8 @@
       }
     });
 
-
-    this.$ableDiv.append(tooltip);
-    return tooltip;
+    this.$ableDiv.append(popupMenu);
+    return popupMenu;
   };
 
   AblePlayer.prototype.closePopupMenus = function () {
@@ -341,7 +341,7 @@
 
   AblePlayer.prototype.setupCaptionsPopupMenu = function () {
     var thisObj = this;
-    this.captionsPopupMenu = this.createPopupMenu();
+    this.captionsPopupMenu = this.createPopupMenu('captions');
       
     for (var ii in this.captions) {
       var track = this.captions[ii];
@@ -368,7 +368,7 @@
 
   AblePlayer.prototype.setupChaptersPopupMenu = function () {
     var thisObj = this;
-    this.chaptersPopupMenu = this.createPopupMenu();
+    this.chaptersPopupMenu = this.createPopupMenu('chapters');
 
     for (var ii in this.chapters) {
       var chapterButton = $('<button>');
