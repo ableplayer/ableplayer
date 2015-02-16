@@ -15,6 +15,8 @@
 
 "forward": "Forward",
 
+"captions": "Captions",
+
 "showCaptions": "Show captions",
 
 "hideCaptions": "Hide captions",

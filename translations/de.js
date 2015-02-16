@@ -15,6 +15,8 @@
 
 "forward": "vorwärts springen", 
 
+"captions": "Untertitel",
+
 "showCaptions": "Untertitel anzeigen", 
 
 "hideCaptions": "Untertitel verstecken", 

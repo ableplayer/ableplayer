@@ -450,8 +450,8 @@
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('aria-label', this.tt.showCaptions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
+        this.$ccButton.attr('aria-label', this.tt.captions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
       }
     }
 

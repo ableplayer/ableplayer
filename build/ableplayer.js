@@ -2372,11 +2372,19 @@
         key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
       }
       else if (this.controls[i] === 'captions') { 
-        if (this.captionsOn) { 
-          label = this.tt.hideCaptions;
-        }
+        if (this.captions.length > 1) { 
+          // caption button launches a Captions popup menu
+          label = this.tt.captions;
+        }        
         else { 
-          label = this.tt.showCaptions;
+          // there is only one caption track
+          // therefore caption button is a toggle
+          if (this.captionsOn) { 
+            label = this.tt.hideCaptions;
+          }
+          else { 
+            label = this.tt.showCaptions;
+          }
         }
         key = 'c';
       }
@@ -2529,7 +2537,7 @@
     i, j, controls, controllerSpan, tooltipId, tooltipDiv, tooltipX, tooltipY, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
-    controllerStyles, vidcapStyles;  
+    controllerStyles, vidcapStyles, captionLabel;  
     
     var thisObj = this;
     
@@ -2698,7 +2706,13 @@
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
-              newButton.addClass('buttonOff').attr('title',this.tt.showCaptions);
+              if (this.captions.length > 1) { 
+                captionLabel = this.tt.captions;
+              }
+              else { 
+                captionLabel = this.tt.showCaptions;
+              }
+              newButton.addClass('buttonOff').attr('title',captionLabel);
             }
           }
           else if (control === 'descriptions') {      
@@ -4528,8 +4542,8 @@
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('aria-label', this.tt.showCaptions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
+        this.$ccButton.attr('aria-label', this.tt.captions);
+        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
       }
     }
 
