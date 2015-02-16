@@ -538,16 +538,23 @@
     // Firefox puts videos in tab order; remove.
     this.$media.attr('tabindex', -1);
 
-    // Keep native player from displaying subtitles.
+    // Keep native player from displaying captions/subtitles.
+    // This *should* work but isn't supported in all browsers 
+    // For example, Safari 8.0.2 always displays captions if default attribute is present 
+    // even if textTracks.mode is 'disabled' or 'hidden'  
+    // Still using this here in case it someday is reliable 
+    // Meanwhile, the only reliable way to suppress browser captions is to remove default attribute
+    // We're doing that in track.js > setupCaptions() 
     var textTracks = this.$media.get(0).textTracks;
-    // textTracks is not supported in all browsers, but these browsers also do not automatically display captions.
     if (textTracks) {
-      var ii = 0;
-      while (ii < textTracks.length) {
-        textTracks[ii].mode = 'disabled';
-        ii += 1;
+      var i = 0;
+      while (i < textTracks.length) {
+        // mode is either 'disabled', 'hidden', or 'showing'
+        // neither 'disabled' nor 'hidden' hides default captions in Safari 8.0.2 
+        textTracks[i].mode = 'disabled'; 
+        i += 1;
       }
-    }
+    }    
   };
   
   AblePlayer.prototype.getPlayer = function() { 
