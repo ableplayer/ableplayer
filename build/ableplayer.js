@@ -239,52 +239,6 @@
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 (function () {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
