@@ -98,7 +98,10 @@
         this.$unknownTranscriptOption.remove();
         this.$unknownTranscriptOption = null;
       }
-      var option = $('<option value="' + trackLang + '">' + trackLabel + '</option>');
+      var option = $('<option></option>',{
+        value: trackLang,
+        lang: trackLang
+      }).text(trackLabel); 
     }
   
     if (isDefaultTrack) {

@@ -346,6 +346,9 @@
     for (var ii in this.captions) {
       var track = this.captions[ii];
       var trackButton = $('<button>');
+      if (track.language !== 'undefined') { 
+        trackButton.attr('lang',track.language);
+      }
       trackButton.html(track.label || track.language);
       trackButton.attr('tabindex', 0);
       trackButton.click(this.getCaptionClickFunction(track));
