@@ -213,7 +213,7 @@
     }
 
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
-      this.closeTooltips();
+      this.closePopupMenus();
     }
     else if (which === 32) { // spacebar = play/pause     
       if (!($('.able-controller button').is(':focus'))) { 

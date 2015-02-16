@@ -23,7 +23,7 @@
           thisObj.currentDescription = -1;
         }
       }
-      thisObj.captionsTooltip.hide();
+      thisObj.captionsPopupMenu.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -37,7 +37,7 @@
     return function () {
       thisObj.captionsOn = false;
       thisObj.currentCaption = -1;
-      thisObj.captionsTooltip.hide();
+      thisObj.captionsPopupMenu.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();

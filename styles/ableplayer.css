@@ -414,16 +414,16 @@ div.modalDialog button:focus {
   Tooltips 
 */
 .able-tooltip {
-    position: absolute;
-    padding: 10px;
-    border-color: black;
-    border-width: 1px;
-    background-color: #CCCCCC;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    display: none;
-    z-index: 3000;
+  position: absolute;
+  padding: 5px 10px;
+  border-color: black;
+  border-width: 1px;
+  background-color: #CCCCCC;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  display: none;
+  z-index: 3000;
 }
 
 /* 

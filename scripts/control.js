@@ -688,33 +688,33 @@
       this.refreshControls();
     }
     else {    
-      if (this.captionsTooltip.is(':visible')) {
-        this.captionsTooltip.hide();
+      if (this.captionsPopupMenu.is(':visible')) {
+        this.captionsPopupMenu.hide();
         this.$ccButton.focus();
       }
       else {
-        this.closeTooltips();
-        this.captionsTooltip.show();
-        this.captionsTooltip.css('top', this.$ccButton.offset().top - this.captionsTooltip.outerHeight());
-        this.captionsTooltip.css('left', this.$ccButton.offset().left)
+        this.closePopupMenus();
+        this.captionsPopupMenu.show();
+        this.captionsPopupMenu.css('top', this.$ccButton.offset().top - this.captionsPopupMenu.outerHeight());
+        this.captionsPopupMenu.css('left', this.$ccButton.offset().left)
         // Focus the first chapter.
-        this.captionsTooltip.children().first().focus();
+        this.captionsPopupMenu.children().first().focus();
       }
     }
   };
 
   AblePlayer.prototype.handleChapters = function () {
-    if (this.chaptersTooltip.is(':visible')) {
-      this.chaptersTooltip.hide();
+    if (this.chaptersPopupMenu.is(':visible')) {
+      this.chaptersPopupMenu.hide();
       this.$chaptersButton.focus();
     }
     else {
-      this.closeTooltips();
-      this.chaptersTooltip.show();
-      this.chaptersTooltip.css('top', this.$chaptersButton.offset().top - this.chaptersTooltip.outerHeight());
-      this.chaptersTooltip.css('left', this.$chaptersButton.offset().left)
+      this.closePopupMenus();
+      this.chaptersPopupMenu.show();
+      this.chaptersPopupMenu.css('top', this.$chaptersButton.offset().top - this.chaptersPopupMenu.outerHeight());
+      this.chaptersPopupMenu.css('left', this.$chaptersButton.offset().left)
       // Focus the first chapter.
-      this.chaptersTooltip.children().first().focus();
+      this.chaptersPopupMenu.children().first().focus();
     }
   };
 

@@ -290,26 +290,27 @@
     });
   };
 
-  // Create tooltip with appropriate CSS styling and add to body.
-  AblePlayer.prototype.createTooltip = function () {
+  // Create popup menu with appropriate CSS styling and add to body
+  // (e.g., for captions and chapters menus)
+  AblePlayer.prototype.createPopupMenu = function () {
     var thisObj = this;
     var tooltip = $('<div>');
-    tooltip.attr('role', 'tooltip');
+    // tooltip.attr('role', 'tooltip'); // not really a tooltip
     tooltip.addClass('able-tooltip');
 
-    // If tabbing off the tooltip, close it.
+    // If tabbing off the menu, close it.
     tooltip.keydown(function (e) {
       // Tab
       if (e.which === 9) {
         if (e.shiftKey) {
           if (tooltip.find('button').first().is(':focus')) {
-            thisObj.closeTooltips();
+            thisObj.closePopupMenus();
             e.preventDefault();
           }
         }
         else {
           if (tooltip.find('button').last().is(':focus')) {
-            thisObj.closeTooltips();
+            thisObj.closePopupMenus();
             e.preventDefault();
           }
         }
@@ -321,26 +322,26 @@
     return tooltip;
   };
 
-  AblePlayer.prototype.closeTooltips = function () {
-    if (this.chaptersTooltip && this.chaptersTooltip.is(':visible')) {
-      this.chaptersTooltip.hide();
+  AblePlayer.prototype.closePopupMenus = function () {
+    if (this.chaptersPopupMenu && this.chaptersPopupMenu.is(':visible')) {
+      this.chaptersPopupMenu.hide();
       this.$chaptersButton.focus();
     }
-    if (this.captionsTooltip && this.captionsTooltip.is(':visible')) {
-      this.captionsTooltip.hide();
+    if (this.captionsPopupMenu && this.captionsPopupMenu.is(':visible')) {
+      this.captionsPopupMenu.hide();
       this.$ccButton.focus();
     }
   };
 
-  // Create and fill in the tooltip forms for various controls.
-  AblePlayer.prototype.setupTooltips = function () {
-    this.setupCaptionsTooltip();
-    this.setupChaptersTooltip();
+  // Create and fill in the popup menu forms for various controls.
+  AblePlayer.prototype.setupPopupMenus = function () {
+    this.setupCaptionsPopupMenu();
+    this.setupChaptersPopupMenu();
   };
 
-  AblePlayer.prototype.setupCaptionsTooltip = function () {
+  AblePlayer.prototype.setupCaptionsPopupMenu = function () {
     var thisObj = this;
-    this.captionsTooltip = this.createTooltip();
+    this.captionsPopupMenu = this.createPopupMenu();
       
     for (var ii in this.captions) {
       var track = this.captions[ii];
@@ -349,8 +350,8 @@
       trackButton.attr('tabindex', 0);
       trackButton.click(this.getCaptionClickFunction(track));
       
-      this.captionsTooltip.append(trackButton);
-      this.captionsTooltip.append('<br>');
+      this.captionsPopupMenu.append(trackButton);
+      this.captionsPopupMenu.append('<br>');
     }
     
     // Captions Off option
@@ -359,12 +360,12 @@
     offButton.html(this.tt.captionsOff);
     offButton.click(this.getCaptionOffFunction());
 
-    this.captionsTooltip.append(offButton);
+    this.captionsPopupMenu.append(offButton);
   };
 
-  AblePlayer.prototype.setupChaptersTooltip = function () {
+  AblePlayer.prototype.setupChaptersPopupMenu = function () {
     var thisObj = this;
-    this.chaptersTooltip = this.createTooltip();
+    this.chaptersPopupMenu = this.createPopupMenu();
 
     for (var ii in this.chapters) {
       var chapterButton = $('<button>');
@@ -373,14 +374,14 @@
       var getClickFunction = function (time) {
         return function () {
           thisObj.seekTo(time);
-          thisObj.chaptersTooltip.hide();
+          thisObj.chaptersPopupMenu.hide();
           thisObj.$chaptersButton.focus();
         }
       }
       chapterButton.click(getClickFunction(this.chapters[ii].start));
       
-      this.chaptersTooltip.append(chapterButton);
-      this.chaptersTooltip.append('<br>');
+      this.chaptersPopupMenu.append(chapterButton);
+      this.chaptersPopupMenu.append('<br>');
     }
   };
 
@@ -601,10 +602,12 @@
     // some controls are aligned on the left, and others on the right 
   
     var useSpeedButtons, useFullScreen, 
-    i, j, controls, controllerSpan, control, 
+    i, j, controls, controllerSpan, tooltipId, tooltipDiv, tooltipX, tooltipY, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
     controllerStyles, vidcapStyles;  
+    
+    var thisObj = this;
     
     var baseSliderWidth = 100;
 
@@ -612,7 +615,16 @@
     var controlLayout = this.calculateControlLayout();
     
     var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
-    // now step separately through left and right controls
+    
+    // add an empty div to serve as a tooltip
+    tooltipId = this.mediaId + '-tooltip';
+    tooltipDiv = $('<div>',{
+      'id': tooltipId,
+      'class': 'able-tooltip' 
+    });
+    this.$controllerDiv.append(tooltipDiv);
+    
+    // step separately through left and right controls
     for (i = 0; i <= 3; i++) {
       controls = controlLayout[sectionByOrder[i]];
       if ((i % 2) === 0) {        
@@ -626,6 +638,7 @@
         });
       }
       this.$controllerDiv.append(controllerSpan);
+      
       for (j=0; j<controls.length; j++) { 
         control = controls[j];
         if (control === 'seek') { 
@@ -698,11 +711,65 @@
             });
             newButton.append(buttonImg);
           }
-          // now add the visibly-hidden label for screen readers that don't support aria-label on the button
+          // add the visibly-hidden label for screen readers that don't support aria-label on the button
           var buttonLabel = $('<span>',{
             'class': 'able-clipped'
           }).text(buttonTitle);
           newButton.append(buttonLabel);
+          // add an event listener that displays a tooltip on mouseenter or focus 
+          newButton.on('mouseenter focus',function(event) { 
+            var label = $(this).attr('aria-label');
+            // get position of this button 
+            var position = $(this).position(); 
+            var buttonHeight = $(this).height();
+            var buttonWidth = $(this).width();
+            var tooltipY = position.top - buttonHeight - 15;
+            var centerTooltip = true; 
+            if ($(this).closest('span').hasClass('able-right-controls')) { 
+              // this control is on the right side 
+              if ($(this).is(':last-child')) { 
+                // this is the last control on the right 
+                // position tooltip using the "right" property 
+                centerTooltip = false;
+                // var tooltipX = thisObj.playerWidth - position.left - buttonWidth;
+                var tooltipX = 0; 
+                var tooltipStyle = { 
+                  left: '',
+                  right: tooltipX + 'px',
+                  top: tooltipY + 'px'
+                };
+              }
+            }
+            else { 
+              // this control is on the left side
+              if ($(this).is(':first-child')) { 
+                // this is the first control on the left
+                centerTooltip = false;
+                var tooltipX = position.left;
+                var tooltipStyle = { 
+                  left: tooltipX + 'px',
+                  right: '',
+                  top: tooltipY + 'px'
+                };                
+              }
+            }
+            if (centerTooltip) { 
+              // populate tooltip, then calculate its width before showing it 
+              var tooltipWidth = $('#' + tooltipId).text(label).width();
+              // center the tooltip horizontally over the button
+              var tooltipX = position.left - tooltipWidth/2;
+              var tooltipStyle = { 
+                left: tooltipX + 'px',
+                right: '',
+                top: tooltipY + 'px'
+              };
+            }
+            
+            $('#' + tooltipId).text(label).css(tooltipStyle).show();          
+            $(this).on('mouseleave blur',function() { 
+              $('#' + tooltipId).text('').hide();
+            })
+          });
           
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 

@@ -304,7 +304,7 @@
     this.loadCurrentPreferences();
     this.injectPlayerCode();
     this.setupTracks().then(function () {
-      thisObj.setupTooltips();
+      thisObj.setupPopupMenus();
       thisObj.initDescription();
       thisObj.initializing = false;
       thisObj.initPlayer();
