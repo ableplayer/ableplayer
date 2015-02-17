@@ -173,11 +173,11 @@
     });
     
     featuresFieldset = $('<fieldset>');
-    featuresLegend = $('<legend>Features</legend>');      
+    featuresLegend = $('<legend>' + this.tt.prefFeatures + '</legend>');      
     featuresFieldset.append(featuresLegend);  
     
     keysFieldset = $('<fieldset>');
-    keysLegend = $('<legend>Modifier Keys</legend>');       
+    keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');       
     keysFieldset.append(keysLegend);  
     
     for (i=0; i<available.length; i++) { 
@@ -221,8 +221,8 @@
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
-    var saveButton = $('<button class="modal-button">Save</button>');
-    var cancelButton = $('<button class="modal-button">Cancel</button>');
+    var saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    var cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();
