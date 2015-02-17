@@ -290,102 +290,179 @@
     });
   };
 
-  // Create popup menu and append to player 
+  // Create popup div and append to player 
   // 'which' parameter is either 'captions' or 'chapters'
-  AblePlayer.prototype.createPopupMenu = function (which) {
-    var thisObj = this;
-    var popupMenu = $('<div>',{
+  AblePlayer.prototype.createPopup = function (which) {
+    
+    var thisObj, popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
+        selectedTrackIndex, selectedTrack;
+    thisObj = this;
+    popup = $('<div>',{
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup' 
     });
 
-    // If tabbing off the menu, close it.
-    popupMenu.keydown(function (e) {
-      // Tab
-      if (e.which === 9) {
-        if (e.shiftKey) {
-          if (popupMenu.find('button').first().is(':focus')) {
-            thisObj.closePopupMenus();
-            e.preventDefault();
-          }
+    popup.keydown(function (e) {
+      $thisButton = $(this).find('input:focus');
+      $thisListItem = $thisButton.parent();
+      if ($thisListItem.is(':first-child')) {         
+        // this is the first button
+        $prevButton = $(this).find('input').last(); // wrap to bottom
+        $nextButton = $thisListItem.next().find('input');
+      }  
+      else if ($thisListItem.is(':last-child')) { 
+        // this is the last button 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $(this).find('input').first(); // wrap to top         
+      }
+      else { 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $thisListItem.next().find('input');        
+      }
+      if (e.which === 9) { // Tab
+        if (e.shiftKey) { 
+          $thisListItem.removeClass('able-focus');
+          $prevButton.focus();          
+          $prevButton.parent().addClass('able-focus');
         }
-        else {
-          if (popupMenu.find('button').last().is(':focus')) {
-            thisObj.closePopupMenus();
-            e.preventDefault();
-          }
+        else { 
+          $thisListItem.removeClass('able-focus');
+          $nextButton.focus();
+          $nextButton.parent().addClass('able-focus');          
         }
       }
+      else if (e.which === 40 || e.which === 39) { // down or right arrow
+        $thisListItem.removeClass('able-focus');
+        $nextButton.focus();
+        $nextButton.parent().addClass('able-focus');        
+      }
+      else if (e.which == 38 || e.which === 37) { // up or left arrow
+        $thisListItem.removeClass('able-focus');
+        $prevButton.focus();
+        $prevButton.parent().addClass('able-focus');        
+      }
+      else if (e.which === 32 || e.which === 13) { // space or enter
+        $('input:focus').click();        
+      }
+      else if (e.which === 27) {  // Escape 
+        $thisListItem.removeClass('able-focus');        
+        thisObj.closePopups();
+      }
+      e.preventDefault();
     });
-
-    this.$ableDiv.append(popupMenu);
-    return popupMenu;
+    this.$ableDiv.append(popup);
+    return popup;
   };
 
-  AblePlayer.prototype.closePopupMenus = function () {
-    if (this.chaptersPopupMenu && this.chaptersPopupMenu.is(':visible')) {
-      this.chaptersPopupMenu.hide();
+  AblePlayer.prototype.closePopups = function () {
+    if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
-    if (this.captionsPopupMenu && this.captionsPopupMenu.is(':visible')) {
-      this.captionsPopupMenu.hide();
+    if (this.captionsPopup && this.captionsPopup.is(':visible')) {
+      this.captionsPopup.hide();
       this.$ccButton.focus();
     }
   };
 
   // Create and fill in the popup menu forms for various controls.
-  AblePlayer.prototype.setupPopupMenus = function () {
-    this.setupCaptionsPopupMenu();
-    this.setupChaptersPopupMenu();
-  };
-
-  AblePlayer.prototype.setupCaptionsPopupMenu = function () {
-    var thisObj = this;
-    this.captionsPopupMenu = this.createPopupMenu('captions');
-      
-    for (var ii in this.captions) {
-      var track = this.captions[ii];
-      var trackButton = $('<button>');
-      if (track.language !== 'undefined') { 
-        trackButton.attr('lang',track.language);
-      }
-      trackButton.html(track.label || track.language);
-      trackButton.attr('tabindex', 0);
-      trackButton.click(this.getCaptionClickFunction(track));
-      
-      this.captionsPopupMenu.append(trackButton);
-      this.captionsPopupMenu.append('<br>');
-    }
+  AblePlayer.prototype.setupPopups = function () {
     
-    // Captions Off option
-    var offButton = $('<button>');
-    offButton.attr('tabindex', 0);
-    offButton.html(this.tt.captionsOff);
-    offButton.click(this.getCaptionOffFunction());
-
-    this.captionsPopupMenu.append(offButton);
-  };
-
-  AblePlayer.prototype.setupChaptersPopupMenu = function () {
-    var thisObj = this;
-    this.chaptersPopupMenu = this.createPopupMenu('chapters');
-
-    for (var ii in this.chapters) {
-      var chapterButton = $('<button>');
-      chapterButton.html(this.flattenCueForCaption(this.chapters[ii]) + ' - ' + this.formatSecondsAsColonTime(this.chapters[ii].start));
-      chapterButton.attr('tabindex', 0);
-      var getClickFunction = function (time) {
-        return function () {
-          thisObj.seekTo(time);
-          thisObj.chaptersPopupMenu.hide();
-          thisObj.$chaptersButton.focus();
+    var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
+        radioName, radioId, trackButton, trackLabel; 
+    
+    popups = [];     
+    if (this.captions.length > 0) { 
+      popups.push('captions');
+    }
+    if (this.chapters.length > 0) { 
+      popups.push('chapters');
+    }
+    if (popups.length > 0) { 
+      thisObj = this;
+      for (var i=0; i<popups.length; i++) {         
+        var popup = popups[i];              
+        hasDefault = false;
+        if (popup == 'captions') {
+          this.captionsPopup = this.createPopup('captions');
+          tracks = this.captions;           
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup = this.createPopup('chapters');
+          tracks = this.chapters; 
+        }
+        var trackList = $('<ul></ul>');
+        radioName = this.mediaId + '-' + popup + '-choice';
+        for (j in tracks) {
+          trackItem = $('<li></li>');
+          track = tracks[j];          
+          radioId = this.mediaId + '-' + popup + '-' + j;
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'val': j,
+            'name': radioName,
+            'id': radioId
+          });
+          if (track.default) { 
+            trackButton.attr('checked','checked');            
+            hasDefault = true;
+          }          
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          if (track.language !== 'undefined') { 
+            trackButton.attr('lang',track.language);
+          }
+          if (popup == 'captions') { 
+            trackLabel.text(track.label || track.language);          
+            trackButton.click(this.getCaptionClickFunction(track));
+            //trackButton.click(this.handleCaptionRadioSelect(track));
+            // trackButton.keypress(function() { alert('hey!');});
+          }
+          else if (popup == 'chapters') { 
+            trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+            var getClickFunction = function (time) {
+              return function () {
+                thisObj.seekTo(time);
+                thisObj.hidingPopup = true; 
+                thisObj.chaptersPopup.hide();
+                thisObj.$chaptersButton.focus();
+              }
+            }
+            trackButton.on('click keypress',getClickFunction(track.start));
+          }
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);      
+        }
+        if (popup == 'captions') { 
+          // add a captions off button 
+          radioId = this.mediaId + '-captions-off'; 
+          trackItem = $('<li></li>');
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'name': radioName,
+            'id': radioId
+          });
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          trackLabel.text(this.tt.captionsOff);    
+          trackButton.click(this.getCaptionOffFunction());
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);          
+        }
+        if (!hasDefault) { 
+          // check the first button 
+          trackList.find('input').first().attr('checked','checked');          
+        }
+        if (popup == 'captions') {
+          this.captionsPopup.append(trackList);
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup.append(trackList);
         }
       }
-      chapterButton.click(getClickFunction(this.chapters[ii].start));
-      
-      this.chaptersPopupMenu.append(chapterButton);
-      this.chaptersPopupMenu.append('<br>');
-    }
+    }    
   };
 
   AblePlayer.prototype.provideFallback = function() {         

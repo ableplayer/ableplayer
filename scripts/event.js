@@ -211,9 +211,8 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
-      this.closePopupMenus();
+      this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause     
       if (!($('.able-controller button').is(':focus'))) { 

@@ -545,7 +545,7 @@
     this.loadCurrentPreferences();
     this.injectPlayerCode();
     this.setupTracks().then(function () {
-      thisObj.setupPopupMenus();
+      thisObj.setupPopups();
       thisObj.initDescription();
       thisObj.initializing = false;
       thisObj.initPlayer();
@@ -2211,102 +2211,179 @@
     });
   };
 
-  // Create popup menu and append to player 
+  // Create popup div and append to player 
   // 'which' parameter is either 'captions' or 'chapters'
-  AblePlayer.prototype.createPopupMenu = function (which) {
-    var thisObj = this;
-    var popupMenu = $('<div>',{
+  AblePlayer.prototype.createPopup = function (which) {
+    
+    var thisObj, popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
+        selectedTrackIndex, selectedTrack;
+    thisObj = this;
+    popup = $('<div>',{
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup' 
     });
 
-    // If tabbing off the menu, close it.
-    popupMenu.keydown(function (e) {
-      // Tab
-      if (e.which === 9) {
-        if (e.shiftKey) {
-          if (popupMenu.find('button').first().is(':focus')) {
-            thisObj.closePopupMenus();
-            e.preventDefault();
-          }
+    popup.keydown(function (e) {
+      $thisButton = $(this).find('input:focus');
+      $thisListItem = $thisButton.parent();
+      if ($thisListItem.is(':first-child')) {         
+        // this is the first button
+        $prevButton = $(this).find('input').last(); // wrap to bottom
+        $nextButton = $thisListItem.next().find('input');
+      }  
+      else if ($thisListItem.is(':last-child')) { 
+        // this is the last button 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $(this).find('input').first(); // wrap to top         
+      }
+      else { 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $thisListItem.next().find('input');        
+      }
+      if (e.which === 9) { // Tab
+        if (e.shiftKey) { 
+          $thisListItem.removeClass('able-focus');
+          $prevButton.focus();          
+          $prevButton.parent().addClass('able-focus');
         }
-        else {
-          if (popupMenu.find('button').last().is(':focus')) {
-            thisObj.closePopupMenus();
-            e.preventDefault();
-          }
+        else { 
+          $thisListItem.removeClass('able-focus');
+          $nextButton.focus();
+          $nextButton.parent().addClass('able-focus');          
         }
       }
+      else if (e.which === 40 || e.which === 39) { // down or right arrow
+        $thisListItem.removeClass('able-focus');
+        $nextButton.focus();
+        $nextButton.parent().addClass('able-focus');        
+      }
+      else if (e.which == 38 || e.which === 37) { // up or left arrow
+        $thisListItem.removeClass('able-focus');
+        $prevButton.focus();
+        $prevButton.parent().addClass('able-focus');        
+      }
+      else if (e.which === 32 || e.which === 13) { // space or enter
+        $('input:focus').click();        
+      }
+      else if (e.which === 27) {  // Escape 
+        $thisListItem.removeClass('able-focus');        
+        thisObj.closePopups();
+      }
+      e.preventDefault();
     });
-
-    this.$ableDiv.append(popupMenu);
-    return popupMenu;
+    this.$ableDiv.append(popup);
+    return popup;
   };
 
-  AblePlayer.prototype.closePopupMenus = function () {
-    if (this.chaptersPopupMenu && this.chaptersPopupMenu.is(':visible')) {
-      this.chaptersPopupMenu.hide();
+  AblePlayer.prototype.closePopups = function () {
+    if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
-    if (this.captionsPopupMenu && this.captionsPopupMenu.is(':visible')) {
-      this.captionsPopupMenu.hide();
+    if (this.captionsPopup && this.captionsPopup.is(':visible')) {
+      this.captionsPopup.hide();
       this.$ccButton.focus();
     }
   };
 
   // Create and fill in the popup menu forms for various controls.
-  AblePlayer.prototype.setupPopupMenus = function () {
-    this.setupCaptionsPopupMenu();
-    this.setupChaptersPopupMenu();
-  };
-
-  AblePlayer.prototype.setupCaptionsPopupMenu = function () {
-    var thisObj = this;
-    this.captionsPopupMenu = this.createPopupMenu('captions');
-      
-    for (var ii in this.captions) {
-      var track = this.captions[ii];
-      var trackButton = $('<button>');
-      if (track.language !== 'undefined') { 
-        trackButton.attr('lang',track.language);
-      }
-      trackButton.html(track.label || track.language);
-      trackButton.attr('tabindex', 0);
-      trackButton.click(this.getCaptionClickFunction(track));
-      
-      this.captionsPopupMenu.append(trackButton);
-      this.captionsPopupMenu.append('<br>');
-    }
+  AblePlayer.prototype.setupPopups = function () {
     
-    // Captions Off option
-    var offButton = $('<button>');
-    offButton.attr('tabindex', 0);
-    offButton.html(this.tt.captionsOff);
-    offButton.click(this.getCaptionOffFunction());
-
-    this.captionsPopupMenu.append(offButton);
-  };
-
-  AblePlayer.prototype.setupChaptersPopupMenu = function () {
-    var thisObj = this;
-    this.chaptersPopupMenu = this.createPopupMenu('chapters');
-
-    for (var ii in this.chapters) {
-      var chapterButton = $('<button>');
-      chapterButton.html(this.flattenCueForCaption(this.chapters[ii]) + ' - ' + this.formatSecondsAsColonTime(this.chapters[ii].start));
-      chapterButton.attr('tabindex', 0);
-      var getClickFunction = function (time) {
-        return function () {
-          thisObj.seekTo(time);
-          thisObj.chaptersPopupMenu.hide();
-          thisObj.$chaptersButton.focus();
+    var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
+        radioName, radioId, trackButton, trackLabel; 
+    
+    popups = [];     
+    if (this.captions.length > 0) { 
+      popups.push('captions');
+    }
+    if (this.chapters.length > 0) { 
+      popups.push('chapters');
+    }
+    if (popups.length > 0) { 
+      thisObj = this;
+      for (var i=0; i<popups.length; i++) {         
+        var popup = popups[i];              
+        hasDefault = false;
+        if (popup == 'captions') {
+          this.captionsPopup = this.createPopup('captions');
+          tracks = this.captions;           
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup = this.createPopup('chapters');
+          tracks = this.chapters; 
+        }
+        var trackList = $('<ul></ul>');
+        radioName = this.mediaId + '-' + popup + '-choice';
+        for (j in tracks) {
+          trackItem = $('<li></li>');
+          track = tracks[j];          
+          radioId = this.mediaId + '-' + popup + '-' + j;
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'val': j,
+            'name': radioName,
+            'id': radioId
+          });
+          if (track.default) { 
+            trackButton.attr('checked','checked');            
+            hasDefault = true;
+          }          
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          if (track.language !== 'undefined') { 
+            trackButton.attr('lang',track.language);
+          }
+          if (popup == 'captions') { 
+            trackLabel.text(track.label || track.language);          
+            trackButton.click(this.getCaptionClickFunction(track));
+            //trackButton.click(this.handleCaptionRadioSelect(track));
+            // trackButton.keypress(function() { alert('hey!');});
+          }
+          else if (popup == 'chapters') { 
+            trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+            var getClickFunction = function (time) {
+              return function () {
+                thisObj.seekTo(time);
+                thisObj.hidingPopup = true; 
+                thisObj.chaptersPopup.hide();
+                thisObj.$chaptersButton.focus();
+              }
+            }
+            trackButton.on('click keypress',getClickFunction(track.start));
+          }
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);      
+        }
+        if (popup == 'captions') { 
+          // add a captions off button 
+          radioId = this.mediaId + '-captions-off'; 
+          trackItem = $('<li></li>');
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'name': radioName,
+            'id': radioId
+          });
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          trackLabel.text(this.tt.captionsOff);    
+          trackButton.click(this.getCaptionOffFunction());
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);          
+        }
+        if (!hasDefault) { 
+          // check the first button 
+          trackList.find('input').first().attr('checked','checked');          
+        }
+        if (popup == 'captions') {
+          this.captionsPopup.append(trackList);
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup.append(trackList);
         }
       }
-      chapterButton.click(getClickFunction(this.chapters[ii].start));
-      
-      this.chaptersPopupMenu.append(chapterButton);
-      this.chaptersPopupMenu.append('<br>');
-    }
+    }    
   };
 
   AblePlayer.prototype.provideFallback = function() {         
@@ -2995,9 +3072,11 @@
     this.$tracks = this.$media.find('track');
 
     this.captions = [];
-    this.descriptions = [];
-    this.meta = []; 
     this.captionLabels = []; 
+    this.descriptions = [];
+    this.chapters = [];
+    this.meta = []; 
+    
   
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {      
@@ -3049,6 +3128,9 @@
     var trackLabel = track.getAttribute('label') || trackLang;
     if (typeof track.getAttribute('default') == 'string') { 
       var isDefaultTrack = true; 
+      // Now remove 'default' attribute from <track> 
+      // Otherwise, some browsers will display the track 
+      track.removeAttribute('default'); 
     }
     else { 
       var isDefaultTrack = false;
@@ -3090,82 +3172,70 @@
         lang: trackLang
       }).text(trackLabel); 
     }
-  
-    if (isDefaultTrack) {
-      // insert track at the top of the captions array 
-      this.captions.unshift({
-        cues: cues,
-        language: trackLang,
-        label: trackLabel
+
+    // alphabetize tracks by label
+    if (this.includeTranscript) { 
+      var options = this.$transcriptLanguageSelect.find('option');      
+    }
+    if (this.captions.length === 0) { // this is the first 
+      this.captions.push({
+        'cues': cues,
+        'language': trackLang,
+        'label': trackLabel,
+        'default': isDefaultTrack
       });
       if (this.includeTranscript) { 
-        option.attr('selected', 'selected');
-        this.$transcriptLanguageSelect.prepend(option);
-        this.defaultTrackInsertedToTranscript = 1;
+        if (isDefaultTrack) { 
+          option.attr('selected', 'selected');
+        }
+        this.$transcriptLanguageSelect.append(option);
       }
-      this.captionLabels.unshift(trackLabel);
-      this.defaultTrackInserted = true; 
+      this.captionLabels.push(trackLabel);
     }
-    else {
-      // insert track wherever it fits alphabetically among non-default tracks
-      if (this.includeTranscript) { 
-        var options = this.$transcriptLanguageSelect.find('option');      
+    else { // there are already tracks in the array 
+      var inserted = false;
+      for (var i = 0; i < this.captions.length; i++) {
+        var capLabel = this.captionLabels[i];
+        if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
+          // insert before track i 
+          this.captions.splice(i,0,{
+            'cues': cues,
+            'language': trackLang,
+            'label': trackLabel,
+            'default': isDefaultTrack
+          });
+          if (this.includeTranscript) {
+            if (isDefaultTrack) { 
+              option.attr('selected', 'selected');
+            }
+            option.insertBefore(options.eq(i));
+          }
+          this.captionLabels.splice(i,0,trackLabel);
+          inserted = true;
+          break;
+        }
       }
-      if (this.captions.length === 0) { // this is the first 
+      if (!inserted) {
+        // just add track to the end 
         this.captions.push({
-          cues: cues,
-          language: trackLang,
-          label: trackLabel
+          'cues': cues,
+          'language': trackLang,
+          'label': trackLabel,
+          'default': isDefaultTrack
         });
-        if (this.includeTranscript) { 
+        if (this.includeTranscript) {
+          if (isDefaultTrack) { 
+            option.attr('selected', 'selected');
+          }
           this.$transcriptLanguageSelect.append(option);
         }
         this.captionLabels.push(trackLabel);
       }
-      else { // there are already tracks in the array 
-        var inserted = false;
-        // this.defaultTrackInserted is true if and only if a default track has already been inserted
-        if (this.defaultTrackInserted) { 
-          var startingIndex = 1; 
-        }
-        else { 
-          var startingIndex = 0;
-        }
-        for (var i = startingIndex; i < this.captions.length; i++) {
-          var capLabel = this.captionLabels[i];
-          if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
-            // insert before track i 
-            this.captions.splice(i,0,{
-              cues: cues,
-              language: trackLang,
-              label: trackLabel
-            });
-            if (this.includeTranscript) {
-              option.insertBefore(options.eq(i));
-            }
-            this.captionLabels.splice(i,0,trackLabel);
-            inserted = true;
-            break;
-          }
-        }
-        if (!inserted) {
-          // just add track to the end 
-          this.captions.push({
-            cues: cues,
-            language: trackLang,
-            label: trackLabel
-          });
-          if (this.includeTranscript) {
-            this.$transcriptLanguageSelect.append(option);
-          }
-          this.captionLabels.push(trackLabel);
-        }
-      }
-      if (this.includeTranscript) {
-        if (this.$transcriptLanguageSelect.find('option').length > 1) {
-          // More than one option now, so enable the select.
-          this.$transcriptLanguageSelect.prop('disabled', false);
-        }
+    }
+    if (this.includeTranscript) {
+      if (this.$transcriptLanguageSelect.find('option').length > 1) {
+        // More than one option now, so enable the select.
+        this.$transcriptLanguageSelect.prop('disabled', false);
       }
     }
   };
@@ -4429,7 +4499,8 @@
       'ended': this.tt.statusEnd
     };
 
-    // Update the text only if it's changed since it has role="alert"; also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+    // Update the text only if it's changed since it has role="alert"; 
+    // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
     if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
       // Debounce updates; only update after status has stayed steadily different for 250ms.
       var timestamp = (new Date()).getTime();
@@ -4602,9 +4673,6 @@
         }
       }
     }
-
-
-
     
     // TODO: Move all button updates here.
 
@@ -4639,7 +4707,8 @@
                                 ($('.able-transcript').height() / 2) +
                                 ($(this.currentHighlight).height() / 2));
         if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
-          // Set a flag to ignore the coming scroll event - there's no other way I know of to differentiate programmatic and user-initiated scroll events.
+          // Set a flag to ignore the coming scroll event. 
+          // there's no other way I know of to differentiate programmatic and user-initiated scroll events.
           this.scrollingTranscript = true;
           $('.able-transcript').scrollTop(newTop);
         }
@@ -4779,6 +4848,14 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    
     if (this.captions.length === 1) {
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) { 
@@ -4798,33 +4875,54 @@
       this.refreshControls();
     }
     else {   
-      if (this.captionsPopupMenu.is(':visible')) {
-        this.captionsPopupMenu.hide();
+      if (this.captionsPopup.is(':visible')) {
+        this.captionsPopup.hide();
         this.$ccButton.focus();
       }
       else {
-        this.closePopupMenus();
-        this.captionsPopupMenu.show();
-        this.captionsPopupMenu.css('top', this.$ccButton.offset().top - this.captionsPopupMenu.outerHeight());
-        this.captionsPopupMenu.css('left', this.$ccButton.offset().left)
-        // Focus the first chapter.
-        this.captionsPopupMenu.children().first().focus();
+        this.closePopups();
+        this.captionsPopup.show();
+        this.captionsPopup.css('top', this.$ccButton.offset().top - this.captionsPopup.outerHeight());
+        this.captionsPopup.css('left', this.$ccButton.offset().left)
+        // Focus on the checked button, if any buttons are checked 
+        // Otherwise, focus on the first button 
+        this.captionsPopup.find('li').removeClass('able-focus');
+        if (this.captionsPopup.find('input:checked')) { 
+          this.captionsPopup.find('input:checked').focus().parent().addClass('able-focus');
+        }
+        else { 
+          this.captionsPopup.find('input').first().focus().parent().addClass('able-focus');
+        }
       }
     }
   };
 
   AblePlayer.prototype.handleChapters = function () {
-    if (this.chaptersPopupMenu.is(':visible')) {
-      this.chaptersPopupMenu.hide();
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    if (this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
     else {
-      this.closePopupMenus();
-      this.chaptersPopupMenu.show();
-      this.chaptersPopupMenu.css('top', this.$chaptersButton.offset().top - this.chaptersPopupMenu.outerHeight());
-      this.chaptersPopupMenu.css('left', this.$chaptersButton.offset().left)
-      // Focus the first chapter.
-      this.chaptersPopupMenu.children().first().focus();
+      this.closePopups();
+      this.chaptersPopup.show();
+      this.chaptersPopup.css('top', this.$chaptersButton.offset().top - this.chaptersPopup.outerHeight());
+      this.chaptersPopup.css('left', this.$chaptersButton.offset().left)
+      // Focus on the checked button, if any buttons are checked 
+      // Otherwise, focus on the first button 
+      this.chaptersPopup.find('li').removeClass('able-focus');
+      if (this.chaptersPopup.find('input:checked')) { 
+        this.chaptersPopup.find('input:checked').focus().parent().addClass('able-focus');
+      }
+      else { 
+        this.chaptersPopup.find('input').first().focus().parent().addClass('able-focus');
+      }
     }
   };
 
@@ -5042,7 +5140,7 @@
     }
   };
 
-  // Returns the function used when a caption is clicked in the captions tooltip.
+  // Returns the function used when a caption is clicked in the captions menu.
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
@@ -5056,7 +5154,8 @@
           thisObj.currentDescription = -1;
         }
       }
-      thisObj.captionsPopupMenu.hide();
+      thisObj.hidingPopup = true;     
+      thisObj.captionsPopup.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -5070,7 +5169,7 @@
     return function () {
       thisObj.captionsOn = false;
       thisObj.currentCaption = -1;
-      thisObj.captionsPopupMenu.hide();
+      thisObj.captionsPopup.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -5903,9 +6002,8 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
-      this.closePopupMenus();
+      this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause     
       if (!($('.able-controller button').is(':focus'))) { 

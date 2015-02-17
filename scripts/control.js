@@ -337,7 +337,8 @@
       'ended': this.tt.statusEnd
     };
 
-    // Update the text only if it's changed since it has role="alert"; also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+    // Update the text only if it's changed since it has role="alert"; 
+    // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
     if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
       // Debounce updates; only update after status has stayed steadily different for 250ms.
       var timestamp = (new Date()).getTime();
@@ -510,9 +511,6 @@
         }
       }
     }
-
-
-
     
     // TODO: Move all button updates here.
 
@@ -547,7 +545,8 @@
                                 ($('.able-transcript').height() / 2) +
                                 ($(this.currentHighlight).height() / 2));
         if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
-          // Set a flag to ignore the coming scroll event - there's no other way I know of to differentiate programmatic and user-initiated scroll events.
+          // Set a flag to ignore the coming scroll event. 
+          // there's no other way I know of to differentiate programmatic and user-initiated scroll events.
           this.scrollingTranscript = true;
           $('.able-transcript').scrollTop(newTop);
         }
@@ -687,6 +686,14 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    
     if (this.captions.length === 1) {
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) { 
@@ -706,33 +713,54 @@
       this.refreshControls();
     }
     else {   
-      if (this.captionsPopupMenu.is(':visible')) {
-        this.captionsPopupMenu.hide();
+      if (this.captionsPopup.is(':visible')) {
+        this.captionsPopup.hide();
         this.$ccButton.focus();
       }
       else {
-        this.closePopupMenus();
-        this.captionsPopupMenu.show();
-        this.captionsPopupMenu.css('top', this.$ccButton.offset().top - this.captionsPopupMenu.outerHeight());
-        this.captionsPopupMenu.css('left', this.$ccButton.offset().left)
-        // Focus the first chapter.
-        this.captionsPopupMenu.children().first().focus();
+        this.closePopups();
+        this.captionsPopup.show();
+        this.captionsPopup.css('top', this.$ccButton.offset().top - this.captionsPopup.outerHeight());
+        this.captionsPopup.css('left', this.$ccButton.offset().left)
+        // Focus on the checked button, if any buttons are checked 
+        // Otherwise, focus on the first button 
+        this.captionsPopup.find('li').removeClass('able-focus');
+        if (this.captionsPopup.find('input:checked')) { 
+          this.captionsPopup.find('input:checked').focus().parent().addClass('able-focus');
+        }
+        else { 
+          this.captionsPopup.find('input').first().focus().parent().addClass('able-focus');
+        }
       }
     }
   };
 
   AblePlayer.prototype.handleChapters = function () {
-    if (this.chaptersPopupMenu.is(':visible')) {
-      this.chaptersPopupMenu.hide();
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    if (this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
     else {
-      this.closePopupMenus();
-      this.chaptersPopupMenu.show();
-      this.chaptersPopupMenu.css('top', this.$chaptersButton.offset().top - this.chaptersPopupMenu.outerHeight());
-      this.chaptersPopupMenu.css('left', this.$chaptersButton.offset().left)
-      // Focus the first chapter.
-      this.chaptersPopupMenu.children().first().focus();
+      this.closePopups();
+      this.chaptersPopup.show();
+      this.chaptersPopup.css('top', this.$chaptersButton.offset().top - this.chaptersPopup.outerHeight());
+      this.chaptersPopup.css('left', this.$chaptersButton.offset().left)
+      // Focus on the checked button, if any buttons are checked 
+      // Otherwise, focus on the first button 
+      this.chaptersPopup.find('li').removeClass('able-focus');
+      if (this.chaptersPopup.find('input:checked')) { 
+        this.chaptersPopup.find('input:checked').focus().parent().addClass('able-focus');
+      }
+      else { 
+        this.chaptersPopup.find('input').first().focus().parent().addClass('able-focus');
+      }
     }
   };
 

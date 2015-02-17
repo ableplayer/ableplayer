@@ -8,9 +8,11 @@
     this.$tracks = this.$media.find('track');
 
     this.captions = [];
-    this.descriptions = [];
-    this.meta = []; 
     this.captionLabels = []; 
+    this.descriptions = [];
+    this.chapters = [];
+    this.meta = []; 
+    
   
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {      
@@ -62,6 +64,9 @@
     var trackLabel = track.getAttribute('label') || trackLang;
     if (typeof track.getAttribute('default') == 'string') { 
       var isDefaultTrack = true; 
+      // Now remove 'default' attribute from <track> 
+      // Otherwise, some browsers will display the track 
+      track.removeAttribute('default'); 
     }
     else { 
       var isDefaultTrack = false;
@@ -103,82 +108,70 @@
         lang: trackLang
       }).text(trackLabel); 
     }
-  
-    if (isDefaultTrack) {
-      // insert track at the top of the captions array 
-      this.captions.unshift({
-        cues: cues,
-        language: trackLang,
-        label: trackLabel
+
+    // alphabetize tracks by label
+    if (this.includeTranscript) { 
+      var options = this.$transcriptLanguageSelect.find('option');      
+    }
+    if (this.captions.length === 0) { // this is the first 
+      this.captions.push({
+        'cues': cues,
+        'language': trackLang,
+        'label': trackLabel,
+        'default': isDefaultTrack
       });
       if (this.includeTranscript) { 
-        option.attr('selected', 'selected');
-        this.$transcriptLanguageSelect.prepend(option);
-        this.defaultTrackInsertedToTranscript = 1;
+        if (isDefaultTrack) { 
+          option.attr('selected', 'selected');
+        }
+        this.$transcriptLanguageSelect.append(option);
       }
-      this.captionLabels.unshift(trackLabel);
-      this.defaultTrackInserted = true; 
+      this.captionLabels.push(trackLabel);
     }
-    else {
-      // insert track wherever it fits alphabetically among non-default tracks
-      if (this.includeTranscript) { 
-        var options = this.$transcriptLanguageSelect.find('option');      
+    else { // there are already tracks in the array 
+      var inserted = false;
+      for (var i = 0; i < this.captions.length; i++) {
+        var capLabel = this.captionLabels[i];
+        if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
+          // insert before track i 
+          this.captions.splice(i,0,{
+            'cues': cues,
+            'language': trackLang,
+            'label': trackLabel,
+            'default': isDefaultTrack
+          });
+          if (this.includeTranscript) {
+            if (isDefaultTrack) { 
+              option.attr('selected', 'selected');
+            }
+            option.insertBefore(options.eq(i));
+          }
+          this.captionLabels.splice(i,0,trackLabel);
+          inserted = true;
+          break;
+        }
       }
-      if (this.captions.length === 0) { // this is the first 
+      if (!inserted) {
+        // just add track to the end 
         this.captions.push({
-          cues: cues,
-          language: trackLang,
-          label: trackLabel
+          'cues': cues,
+          'language': trackLang,
+          'label': trackLabel,
+          'default': isDefaultTrack
         });
-        if (this.includeTranscript) { 
+        if (this.includeTranscript) {
+          if (isDefaultTrack) { 
+            option.attr('selected', 'selected');
+          }
           this.$transcriptLanguageSelect.append(option);
         }
         this.captionLabels.push(trackLabel);
       }
-      else { // there are already tracks in the array 
-        var inserted = false;
-        // this.defaultTrackInserted is true if and only if a default track has already been inserted
-        if (this.defaultTrackInserted) { 
-          var startingIndex = 1; 
-        }
-        else { 
-          var startingIndex = 0;
-        }
-        for (var i = startingIndex; i < this.captions.length; i++) {
-          var capLabel = this.captionLabels[i];
-          if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
-            // insert before track i 
-            this.captions.splice(i,0,{
-              cues: cues,
-              language: trackLang,
-              label: trackLabel
-            });
-            if (this.includeTranscript) {
-              option.insertBefore(options.eq(i));
-            }
-            this.captionLabels.splice(i,0,trackLabel);
-            inserted = true;
-            break;
-          }
-        }
-        if (!inserted) {
-          // just add track to the end 
-          this.captions.push({
-            cues: cues,
-            language: trackLang,
-            label: trackLabel
-          });
-          if (this.includeTranscript) {
-            this.$transcriptLanguageSelect.append(option);
-          }
-          this.captionLabels.push(trackLabel);
-        }
-      }
-      if (this.includeTranscript) {
-        if (this.$transcriptLanguageSelect.find('option').length > 1) {
-          // More than one option now, so enable the select.
-          this.$transcriptLanguageSelect.prop('disabled', false);
-        }
+    }
+    if (this.includeTranscript) {
+      if (this.$transcriptLanguageSelect.find('option').length > 1) {
+        // More than one option now, so enable the select.
+        this.$transcriptLanguageSelect.prop('disabled', false);
       }
     }
   };
