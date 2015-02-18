@@ -277,8 +277,17 @@ div.modalDialog button:focus {
 	color: black;
 	font-weight: bold;	
 }
-.able-prefs-form input { 
-	padding-right: 1em;
+.able-prefs-form fieldset div { 
+  display: table; 
+}
+.able-prefs-form fieldset div input { 
+  display: table-cell;
+	width: 1em;
+	vertical-align: middle;
+}
+.able-prefs-form fieldset div label { 
+  display: table-cell;
+	padding-left: 0.5em;
 }
 
 /* 
