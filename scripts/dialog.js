@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
@@ -144,4 +144,4 @@
     
     this.focusedElementBeforeModal.focus();
   };
-})();
+})(jQuery);

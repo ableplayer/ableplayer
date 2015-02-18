@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
@@ -629,4 +629,4 @@
     return false; 
   };
 
-})();
+})(jQuery);

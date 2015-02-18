@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.seekTo = function (newTime) { 
     if (this.player === 'html5') {
       var seekable;
@@ -966,4 +966,4 @@
         
     this.refreshControls();
   };
-})();
+})(jQuery);

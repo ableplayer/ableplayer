@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.initDescription = function() { 
     // set default mode for delivering description (open vs closed) 
     // based on availability and user preference        
@@ -181,4 +181,4 @@
     } 
   };
 
-})();
+})(jQuery);

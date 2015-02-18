@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
 
 
   // Events:
@@ -411,4 +411,4 @@
     
     return minutes + ':' + seconds;
   };
-})();
+})(jQuery);

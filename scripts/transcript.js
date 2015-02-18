@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.updateTranscript = function() {
     if (!this.includeTranscript) {
       return;
@@ -243,4 +243,4 @@
     
     return main;
   };
-})();
+})(jQuery);

@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.injectPlayerCode = function() { 
     // create and inject surrounding HTML structure 
     // If IOS: 
@@ -1140,4 +1140,4 @@
   };
 
 
-})();
+})(jQuery);

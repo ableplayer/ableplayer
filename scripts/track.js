@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
@@ -243,4 +243,4 @@
 
     return promise;
   };
-})();
+})(jQuery);

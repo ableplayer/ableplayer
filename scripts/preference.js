@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.setCookie = function(cookieValue) { 
     $.cookie.json = true;
     if ($.isFunction($.cookie)) { 
@@ -326,4 +326,4 @@
     return true; 
   };
 
-})();
+})(jQuery);

@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
     if (!this.startedPlaying) {
@@ -525,4 +525,4 @@
       }, 300);
     }
   };
-})();
+})(jQuery);

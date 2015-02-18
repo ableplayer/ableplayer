@@ -239,7 +239,7 @@
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
-(function () {
+(function ($) {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
@@ -870,8 +870,8 @@
     return false; 
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.setCookie = function(cookieValue) { 
     $.cookie.json = true;
     if ($.isFunction($.cookie)) { 
@@ -1199,8 +1199,8 @@
     return true; 
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
 
@@ -1918,8 +1918,8 @@
     
     return time;
   }
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.injectPlayerCode = function() { 
     // create and inject surrounding HTML structure 
     // If IOS: 
@@ -3061,8 +3061,8 @@
   };
 
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
@@ -3307,8 +3307,8 @@
 
     return promise;
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
 
 
   // Events:
@@ -3721,8 +3721,8 @@
     
     return minutes + ':' + seconds;
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
@@ -3868,8 +3868,8 @@
     
     this.focusedElementBeforeModal.focus();
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.countProperties = function(obj) { 
     // returns the number of properties in an object 
     var count, prop; 
@@ -3893,8 +3893,8 @@
     return dMinutes + ':' + dSeconds;
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.initDescription = function() { 
     // set default mode for delivering description (open vs closed) 
     // based on availability and user preference        
@@ -4077,8 +4077,8 @@
     } 
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
 
   AblePlayer.prototype.browserSupportsVolume = function() { 
     // ideally we could test for volume support 
@@ -4159,8 +4159,8 @@
       document.msFullscreenEnabled;
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.seekTo = function (newTime) { 
     if (this.player === 'html5') {
       var seekable;
@@ -5128,8 +5128,8 @@
         
     this.refreshControls();
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
     if (this.captionsOn) {
       this.$captionDiv.show();
@@ -5238,8 +5238,8 @@
     return result.join('');
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.updateMeta = function (time) {
     if (this.hasMeta) {
       this.$metaDiv.show();
@@ -5304,8 +5304,8 @@
     return result.join('');
   };
 
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
     var langs = ['en','de'];
@@ -5370,8 +5370,8 @@
              );
     return gettingText.promise(); 
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.updateTranscript = function() {
     if (!this.includeTranscript) {
       return;
@@ -5616,8 +5616,8 @@
     
     return main;
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
   AblePlayer.prototype.showSearchResults = function() {
     
     // search VTT file for all instances of searchTerms 
@@ -5788,8 +5788,8 @@
     time['title'] = title; 
     return time;
   };
-})();
-(function () {
+})(jQuery);
+(function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
     if (!this.startedPlaying) {
@@ -6316,4 +6316,4 @@
       }, 300);
     }
   };
-})();
+})(jQuery);

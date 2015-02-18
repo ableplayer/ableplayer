@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
     if (this.captionsOn) {
       this.$captionDiv.show();
@@ -107,4 +107,4 @@
     return result.join('');
   };
 
-})();
+})(jQuery);
