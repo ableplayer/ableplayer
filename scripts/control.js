@@ -720,8 +720,8 @@
       else {
         this.closePopups();
         this.captionsPopup.show();
-        this.captionsPopup.css('top', this.$ccButton.offset().top - this.captionsPopup.outerHeight());
-        this.captionsPopup.css('left', this.$ccButton.offset().left)
+        this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
+        this.captionsPopup.css('left', this.$ccButton.position().left)
         // Focus on the checked button, if any buttons are checked 
         // Otherwise, focus on the first button 
         this.captionsPopup.find('li').removeClass('able-focus');
@@ -750,8 +750,8 @@
     else {
       this.closePopups();
       this.chaptersPopup.show();
-      this.chaptersPopup.css('top', this.$chaptersButton.offset().top - this.chaptersPopup.outerHeight());
-      this.chaptersPopup.css('left', this.$chaptersButton.offset().left)
+      this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+      this.chaptersPopup.css('left', this.$chaptersButton.position().left)
       // Focus on the checked button, if any buttons are checked 
       // Otherwise, focus on the first button 
       this.chaptersPopup.find('li').removeClass('able-focus');

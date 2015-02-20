@@ -350,7 +350,7 @@
       }
       e.preventDefault();
     });
-    this.$ableDiv.append(popup);
+    this.$controllerDiv.append(popup);
     return popup;
   };
 
