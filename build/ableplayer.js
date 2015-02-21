@@ -2076,7 +2076,7 @@
     this.$speed = $('<span>',{
       'class' : 'able-speed',
       'role' : 'alert'
-    }).text('Speed: 1x'); 
+    }).text(this.tt.speed + ': 1x'); 
     
     this.$status = $('<span>',{
       'class' : 'able-status',
@@ -4412,7 +4412,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.setPlaybackRate(rate);
     }
-    this.$speed.text('Speed: ' + rate.toFixed(2).toString() + 'x');
+    this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
   AblePlayer.prototype.getPlaybackRate = function () {

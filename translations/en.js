@@ -55,6 +55,8 @@
 
 "fullScreen": "Full screen",
 
+"speed": "Speed",
+
 "audio": "audio",
 
 "video": "video",

@@ -145,7 +145,7 @@
     this.$speed = $('<span>',{
       'class' : 'able-speed',
       'role' : 'alert'
-    }).text('Speed: 1x'); 
+    }).text(this.tt.speed + ': 1x'); 
     
     this.$status = $('<span>',{
       'class' : 'able-status',
