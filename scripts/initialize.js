@@ -56,15 +56,17 @@
     // If NOT using JW Player, set to false. An error message will be displayed if browser can't play the media.  
     this.fallback = 'jw'; 
   
+    // fallback path - specify path to fallback player files 
+    this.fallbackPath = '../thirdparty/';  
+    
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
     // Therefore testing must be performed on a web server 
-    this.testFallback = true;
+    this.testFallback = false;
+
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
     
-    // loop - if true, will start again at top after last item in playlist has ended
-    // NOTE: This is not fully supported yet - needs work 
-    this.loop = true; 
-  
     // lang - default language of the player
     this.lang = 'en'; 
   
@@ -72,13 +74,11 @@
     // set to false to reset this.lang to language of the web page or user's browser,
     // if either is detectable and if a matching translation file is available 
     this.forceLang = false;
-    
-    // translationPath - specify path to translation files 
-    this.translationPath = '../translations/';
-    
-    // fallback path - specify path to fallback player files 
-    this.fallbackPath = '../thirdparty/';  
-    
+
+    // loop - if true, will start again at top after last item in playlist has ended
+    // NOTE: This is not fully supported yet - needs work 
+    this.loop = true; 
+          
     // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
     // but they're removed by default form transcripts in order to form a more seamless reading experience 
     // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
@@ -415,14 +415,19 @@
         $.each(thisObj.$sources, function (ii, source) {
           sources.push({file: $(source).attr('src')});      
         });
-
+        
+        var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
+        // var flashplayer = '../thirdparty/jwplayer.flash.swf';
+        var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
+        // var html5player = '../thirdparty/jwplayer.html5.js';
+        
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
               sources: sources
             }],
-            flashplayer: thisObj.fallbackPath + 'jwplayer.flash.swf',
-            html5player: thisObj.fallbackPath + 'jwplayer.html5.js',
+            flashplayer: flashplayer,
+            html5player: html5player,
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
@@ -438,8 +443,8 @@
             playlist: [{
               sources: sources
             }],
-            flashplayer: thisObj.fallbackPath + 'jwplayer.flash.swf',
-            html5player: thisObj.fallbackPath + 'jwplayer.html5.js',
+            flashplayer: flashplayer,
+            html5player: html5player,
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
@@ -447,7 +452,6 @@
             primary: 'flash'
           });                             
         }
-
         // remove the media element - we're done with it
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
         thisObj.$media.remove();

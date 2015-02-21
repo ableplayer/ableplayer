@@ -118,7 +118,7 @@
         'cues': cues,
         'language': trackLang,
         'label': trackLabel,
-        'default': isDefaultTrack
+        'def': isDefaultTrack
       });
       if (this.includeTranscript) { 
         if (isDefaultTrack) { 
@@ -138,7 +138,7 @@
             'cues': cues,
             'language': trackLang,
             'label': trackLabel,
-            'default': isDefaultTrack
+            'def': isDefaultTrack
           });
           if (this.includeTranscript) {
             if (isDefaultTrack) { 
@@ -157,7 +157,7 @@
           'cues': cues,
           'language': trackLang,
           'label': trackLabel,
-          'default': isDefaultTrack
+          'def': isDefaultTrack
         });
         if (this.includeTranscript) {
           if (isDefaultTrack) { 

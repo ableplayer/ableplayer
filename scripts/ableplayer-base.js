@@ -10,10 +10,10 @@
   
   // Uses JW Player as fallback 
   // JW Player configuration options: 
-  // http://www.longtailvideo.com/support/jw-player/28839/embedding-the-player
+  // http://support.jwplayer.com/customer/portal/articles/1413113-configuration-options-reference
   // (NOTE: some options are not documented, e.g., volume) 
-  // JW Player API reference: 
-  // http://www.longtailvideo.com/support/jw-player/28851/javascript-api-reference
+  // JW Player 6 API reference: 
+  // http://support.jwplayer.com/customer/portal/articles/1413089-javascript-api-reference
 
   // YouTube Player API for iframe Embeds 
   https://developers.google.com/youtube/iframe_api_reference  

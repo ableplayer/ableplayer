@@ -15,14 +15,13 @@
 
 <p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
-
 <div id="media1">Loading the player ...</div>
 
 <script>
 
 var startedPlaying = false; 
 
-jwplayer('media1').setup({
+var jw = jwplayer('media1').setup({
   file: "../media/wwa.mp4",
   width: 480,
   height: 360,
@@ -45,7 +44,13 @@ jwplayer('media1').setup({
     // onSeek() is only triggered by the slider
     console.log('seeking to ' + event.position + '; goal: ' + event.offset);    
   });
+
 </script>
+
+<div>
+  <button onclick="jw.play()">Toggle playback</button> 
+  <button onclick="console.log('Volume: ' + jw.getVolume())">Report volume</button>
+</div>
 
 </body>
 </html>

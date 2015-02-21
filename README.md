@@ -65,10 +65,11 @@ Fallback
 
 For older browsers that don’t support HTML5 media elements, you need a
 fallback solution. *Able Player* was developed to work seamlessly with
-[JW Player][], specifically **JW Player 6**. JW Player is free for
-non-commercial use but is licensed separately and is not distributed
-with *Able Player*. If you choose to use JW Player as your fallback
-player, users with older browsers including Internet Explorer 6-8 will
+[JW Player][], specifically **JW Player 6** (successfully tested with  
+versions 6.0 and 6.11). JW Player is free for non-commercial use but 
+is licensed separately and is not distributed with *Able Player*. 
+If you choose to use JW Player as your fallback player, 
+users with older browsers including Internet Explorer 6-8 will
 have the same experience with *Able Player* as users with newer
 browsers. Identical functionality has been attained using both the HTML5
 and JW Player APIs. After licensing and downloading JW PLayer, copy

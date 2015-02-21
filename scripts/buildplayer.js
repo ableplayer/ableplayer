@@ -403,7 +403,7 @@
             'name': radioName,
             'id': radioId
           });
-          if (track.default) { 
+          if (track.def) { 
             trackButton.attr('checked','checked');            
             hasDefault = true;
           }          
