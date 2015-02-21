@@ -853,7 +853,7 @@
               };
             }
             
-            $('#' + tooltipId).text(label).css(tooltipStyle).show();          
+            $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
             $(this).on('mouseleave blur',function() { 
               $('#' + tooltipId).text('').hide();
             })
