@@ -181,9 +181,10 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
 -   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
+-   **data-fallback-path** - optional; override default path to directory in which the fallback player files or stored   
+-   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
 -   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
--   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to

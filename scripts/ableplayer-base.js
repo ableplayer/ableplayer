@@ -158,6 +158,15 @@
       this.testFallback = true; 
     }
     
+    if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") { 
+      this.fallbackPath = $(media).data('fallback-path'); 
+    }
+    
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
+    }
+    
+
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -167,11 +176,7 @@
     
     if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
       this.forceLang = true; 
-    }
-
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
+    }    
     
     if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
       this.metaDiv = $(media).data('meta-div'); 

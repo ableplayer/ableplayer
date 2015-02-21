@@ -158,6 +158,15 @@
       this.testFallback = true; 
     }
     
+    if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") { 
+      this.fallbackPath = $(media).data('fallback-path'); 
+    }
+    
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
+    }
+    
+
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -167,11 +176,7 @@
     
     if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
       this.forceLang = true; 
-    }
-
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
+    }    
     
     if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
       this.metaDiv = $(media).data('meta-div'); 
@@ -300,7 +305,7 @@
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
     // Therefore testing must be performed on a web server 
-    this.testFallback = false;
+    this.testFallback = true;
     
     // loop - if true, will start again at top after last item in playlist has ended
     // NOTE: This is not fully supported yet - needs work 
@@ -316,6 +321,9 @@
     
     // translationPath - specify path to translation files 
     this.translationPath = '../translations/';
+    
+    // fallback path - specify path to fallback player files 
+    this.fallbackPath = '../thirdparty/';  
     
     // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
     // but they're removed by default form transcripts in order to form a more seamless reading experience 
@@ -629,8 +637,7 @@
     var promise = deferred.promise();
 
     // attempt to load jwplayer script
-    // TODO: Allow dynamically setting thirdparty folder.
-    $.getScript('../thirdparty/jwplayer.js') 
+    $.getScript(this.fallbackPath + 'jwplayer.js') 
       .done(function( script, textStatus ) {
         if (thisObj.debug) {
           console.log ('Successfully loaded the JW Player');
@@ -660,9 +667,8 @@
             playlist: [{
               sources: sources
             }],
-            // TODO: allow dynamically setting thirdparty folder
-            flashplayer: '../thirdparty/jwplayer.flash.swf',
-            html5player: '../thirdparty/jwplayer.html5.js',
+            flashplayer: thisObj.fallbackPath + 'jwplayer.flash.swf',
+            html5player: thisObj.fallbackPath + 'jwplayer.html5.js',
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
@@ -678,8 +684,8 @@
             playlist: [{
               sources: sources
             }],
-            flashplayer: '../thirdparty/jwplayer.flash.swf',
-            html5player: '../thirdparty/jwplayer.html5.js',
+            flashplayer: thisObj.fallbackPath + 'jwplayer.flash.swf',
+            html5player: thisObj.fallbackPath + 'jwplayer.html5.js',
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
