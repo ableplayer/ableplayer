@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>JW Player Test</title>
-<link rel="stylesheet" href="thissite.css" type="text/css">
-<script src="thirdparty/jwplayer.js"></script>
+<link rel="stylesheet" href="tests.css" type="text/css">
+<script src="../thirdparty/jwplayer.js"></script>
 </head>
 
 <body>
@@ -13,6 +13,9 @@
 
 <p>This page was created solely as a sandbox for experimenting with the JW Player API.</p>
 
+<p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+
 <div id="media1">Loading the player ...</div>
 
 <script>
@@ -20,10 +23,10 @@
 var startedPlaying = false; 
 
 jwplayer('media1').setup({
-  file: "media/wwa.mp4",
+  file: "../media/wwa.mp4",
   width: 480,
   height: 360,
-  image: "media/wwa.jpg",
+  image: "../media/wwa.jpg",
   controls: true,
   volume: 100,
   fallback: false, 
