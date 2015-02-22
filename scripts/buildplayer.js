@@ -465,21 +465,100 @@
     }    
   };
 
-  AblePlayer.prototype.provideFallback = function() {         
-    // provide ultimate fallback for users with no HTML media support, nor JW Player support 
-    // this could be links to download the media file(s) 
-    // but for now is just a message   
-  
-    var msg, msgContainer; 
+  AblePlayer.prototype.provideFallback = function(reason) {             
+    // provide ultimate fallback for users who are unable to play the media
+    // reason is either 'No Support' or a specific error message     
+
+    var fallback, fallbackText, fallbackContainer, showBrowserList, browsers, i, b, browserList, poster, posterImg;
     
-    msg = this.tt['errorNoPlay'] + ' ' + this.tt[this.mediaType] + '. ';
-    msgContainer = $('<div>',{
+    // use fallback content that's nested inside the HTML5 media element, if there is any
+    // any content other than div, p, and ul is rejected 
+
+    fallback = this.$media.find('div,p,ul');
+    showBrowserList = false;
+
+    if (fallback.length === 0) {       
+      if (reason !== 'No Support' && typeof reason !== 'undefined') { 
+        fallback = $('<p>').text(reason); 
+      }
+      else {
+        fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
+        fallbackText += this.tt.fallbackError2 + ':';
+        fallback = $('<p>').text(fallbackText);
+        showBrowserList = true;         
+      }  
+    }
+    fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
-      'role' : 'alert'
+      'role' : 'alert',
+      'width' : this.playerWidth
     });
-    this.$media.before(msgContainer);     
-    msgContainer.text(msg);  
+    this.$media.before(fallbackContainer);     
+    fallbackContainer.html(fallback);  
+    if (showBrowserList) { 
+      browserList = $('<ul>');
+      browsers = this.getSupportingBrowsers();
+      for (i=0; i<browsers.length; i++) { 
+        b = $('<li>');
+        b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
+        browserList.append(b);
+      }
+      fallbackContainer.append(browserList);      
+    }
+    
+    // if there's a poster, show that as well 
+    if (this.$media.attr('poster')) { 
+      poster = this.$media.attr('poster'); 
+      var posterImg = $('<img>',{
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation"
+      });
+      fallbackContainer.append(posterImg);      
+    }
+    
+    // now remove the media element. 
+    // It doesn't work anyway 
+    this.$media.remove();     
   };
+  
+  AblePlayer.prototype.getSupportingBrowsers = function() { 
+    
+    var browsers = []; 
+    browsers[0] = { 
+      name:'Chrome', 
+      minVersion: '31'
+    };
+    browsers[1] = { 
+      name:'Firefox', 
+      minVersion: '34'
+    };
+    browsers[2] = { 
+      name:'Internet Explorer', 
+      minVersion: '10'
+    };
+    browsers[3] = { 
+      name:'Opera', 
+      minVersion: '26'
+    };
+    browsers[4] = { 
+      name:'Safari for Mac OS X', 
+      minVersion: '7.1'
+    };
+    browsers[5] = { 
+      name:'Safari for iOS', 
+      minVersion: '7.1'
+    };
+    browsers[6] = { 
+      name:'Android Browser', 
+      minVersion: '4.1'
+    };    
+    browsers[7] = { 
+      name:'Chrome for Android', 
+      minVersion: '40' 
+    };
+    return browsers;
+  }
 
   AblePlayer.prototype.addHelp = function() {   
     // create help text that will be displayed in a modal dialog 

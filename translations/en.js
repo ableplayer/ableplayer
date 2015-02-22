@@ -93,7 +93,11 @@
 
 "selectedTrack": "Selected Track",
 
-"errorNoPlay": "Sorry,your browser is unable to play this",
+"fallbackError1": "Sorry, your browser is unable to play this",
+
+"fallbackError2": "The following browsers are known to work with this media player",
+
+"orHigher": "or higher",
 
 "prefTitle": "Preferences",
 

@@ -499,14 +499,26 @@ div[id$="_fallback_wrapper"] {
 	padding: 0.5em;
 }
 .able-fallback { 
-  display: table;
+  display: block;
   text-align: center;
-  vertical-align: middle;
   border: 2px solid #333355;
-  background-color: #FFFFCC;
-  color: #000000;
+  background-color: #EEE;
+  color: #000;
   font-weight: bold;
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
+}
+.able-fallback div, 
+.able-fallback ul, 
+.able-fallback p { 
+  text-align: left;
+} 
+.able-fallback li  { 
+  font-weight: normal;
+}
+.able-fallback img { 
+  width: 90%; 
+  margin: 1em auto;
+  opacity: 0.3;
 }
