@@ -10,10 +10,10 @@
   
   // Uses JW Player as fallback 
   // JW Player configuration options: 
-  // http://www.longtailvideo.com/support/jw-player/28839/embedding-the-player
+  // http://support.jwplayer.com/customer/portal/articles/1413113-configuration-options-reference
   // (NOTE: some options are not documented, e.g., volume) 
-  // JW Player API reference: 
-  // http://www.longtailvideo.com/support/jw-player/28851/javascript-api-reference
+  // JW Player 6 API reference: 
+  // http://support.jwplayer.com/customer/portal/articles/1413089-javascript-api-reference
 
   // YouTube Player API for iframe Embeds 
   https://developers.google.com/youtube/iframe_api_reference  
@@ -158,6 +158,15 @@
       this.testFallback = true; 
     }
     
+    if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") { 
+      this.fallbackPath = $(media).data('fallback-path'); 
+    }
+    
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
+    }
+    
+
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -167,11 +176,7 @@
     
     if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
       this.forceLang = true; 
-    }
-
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
+    }    
     
     if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
       this.metaDiv = $(media).data('meta-div'); 
@@ -239,49 +244,3 @@
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
@@ -8,11 +8,14 @@
     this.$tracks = this.$media.find('track');
 
     this.captions = [];
+    this.captionLabels = []; 
     this.descriptions = [];
+    this.chapters = [];
     this.meta = []; 
+    
   
     var loadingPromises = [];
-    for (var ii = 0; ii < this.$tracks.length; ii++) {
+    for (var ii = 0; ii < this.$tracks.length; ii++) {      
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
@@ -52,83 +55,120 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
-    var trackLang = track.getAttribute('srclang');
+    
+    this.hasCaptions = true;
+    
+    // srcLang should always be included with <track>, but HTML5 spec doesn't require it 
+    // if not provided, assume track is the same language as the default player language
+    var trackLang = track.getAttribute('srclang') || this.lang; 
     var trackLabel = track.getAttribute('label') || trackLang;
-
-      this.hasCaptions = true;
-
-      // caption cues from WebVTT are used to build a transcript for both audio and video 
-      // but captions are currently only supported for video 
-      if (this.mediaType === 'video') { 
-
-        // create a div for displaying captions  
-        // includes aria-hidden="true" because otherwise 
-        // captions being added and removed causes sporadic changes to focus in JAWS
-        // (not a problem in NVDA or VoiceOver)
-        if (!this.$captionDiv) {
-          this.$captionDiv = $('<div>',{
-            'class': 'able-captions',
-            'aria-hidden': 'true' 
-          });
-          this.$vidcapContainer.append(this.$captionDiv);
-        }
-      }
-
-      this.currentCaption = -1;
-      if (this.prefCaptions === 1) { 
-        // Captions default to on.
-        this.captionsOn = true; 
-      }
-      else { 
-        this.captionsOn = false;
-      }
-    
-      this.captions.push({
-        cues: cues,
-        language: trackLang,
-        label: trackLabel
-      });
-//    }
-    
-    // TODO: Apply this sorting to captions as well.
-    if (trackLang && this.includeTranscript) {
-      // TODO: Move the refresh of the transcript select box to a central location?
+    if (typeof track.getAttribute('default') == 'string') { 
+      var isDefaultTrack = true; 
+      // Now remove 'default' attribute from <track> 
+      // Otherwise, some browsers will display the track 
+      track.removeAttribute('default'); 
+    }
+    else { 
+      var isDefaultTrack = false;
+    }
       
+    // caption cues from WebVTT are used to build a transcript for both audio and video 
+    // but captions are currently only supported for video 
+    if (this.mediaType === 'video') { 
+
+      // create a div for displaying captions  
+      // includes aria-hidden="true" because otherwise 
+      // captions being added and removed causes sporadic changes to focus in JAWS
+      // (not a problem in NVDA or VoiceOver)
+      if (!this.$captionDiv) {
+        this.$captionDiv = $('<div>',{
+          'class': 'able-captions',
+          'aria-hidden': 'true' 
+        });
+        this.$vidcapContainer.append(this.$captionDiv);
+      }
+    }
+
+    this.currentCaption = -1;
+    if (this.prefCaptions === 1) { 
+      // Captions default to on.
+      this.captionsOn = true; 
+    }
+    else { 
+      this.captionsOn = false;
+    }
+    if (this.includeTranscript) {
       // Remove the "Unknown" option from the select box.
       if (this.$unknownTranscriptOption) {
         this.$unknownTranscriptOption.remove();
         this.$unknownTranscriptOption = null;
       }
+      var option = $('<option></option>',{
+        value: trackLang,
+        lang: trackLang
+      }).text(trackLabel); 
+    }
 
-      var option = $('<option value="' + trackLang + '">' + trackLabel + '</option>');
-      // TODO: This is a terrible hack, but I can't find a better way to detect whether we have a default track already entered in the list...
-      if ($(track).attr('default') !== undefined) {
-        option.attr('selected', 'selected');
-        this.$transcriptLanguageSelect.prepend(option);
-        this.defaultTrackInsertedToTranscript = 1;
+    // alphabetize tracks by label
+    if (this.includeTranscript) { 
+      var options = this.$transcriptLanguageSelect.find('option');      
+    }
+    if (this.captions.length === 0) { // this is the first 
+      this.captions.push({
+        'cues': cues,
+        'language': trackLang,
+        'label': trackLabel,
+        'def': isDefaultTrack
+      });
+      if (this.includeTranscript) { 
+        if (isDefaultTrack) { 
+          option.attr('selected', 'selected');
+        }
+        this.$transcriptLanguageSelect.append(option);
       }
-      else {
-        var options = this.$transcriptLanguageSelect.find('option');
-        // Alphabetically among non-default languages.
-        if (options.length === 0) {
+      this.captionLabels.push(trackLabel);
+    }
+    else { // there are already tracks in the array 
+      var inserted = false;
+      for (var i = 0; i < this.captions.length; i++) {
+        var capLabel = this.captionLabels[i];
+        if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
+          // insert before track i 
+          this.captions.splice(i,0,{
+            'cues': cues,
+            'language': trackLang,
+            'label': trackLabel,
+            'def': isDefaultTrack
+          });
+          if (this.includeTranscript) {
+            if (isDefaultTrack) { 
+              option.attr('selected', 'selected');
+            }
+            option.insertBefore(options.eq(i));
+          }
+          this.captionLabels.splice(i,0,trackLabel);
+          inserted = true;
+          break;
+        }
+      }
+      if (!inserted) {
+        // just add track to the end 
+        this.captions.push({
+          'cues': cues,
+          'language': trackLang,
+          'label': trackLabel,
+          'def': isDefaultTrack
+        });
+        if (this.includeTranscript) {
+          if (isDefaultTrack) { 
+            option.attr('selected', 'selected');
+          }
           this.$transcriptLanguageSelect.append(option);
         }
-        else {
-          var inserted = false;
-          // this.defaultTrackInserted is 1 if and only if a default track is already in the select.
-          for (var ii = this.defaultTrackInserted || 0; ii < options.length; ii++) {
-            if (trackLabel.toLowerCase() < options.eq(ii).text().toLowerCase()) {
-              option.insertBefore(options.eq(ii));
-              inserted = true;
-              break;
-            }
-          }
-          if (!inserted) {
-            this.$transcriptLanguageSelect.append(option);
-          }
-        }
+        this.captionLabels.push(trackLabel);
       }
-
+    }
+    if (this.includeTranscript) {
       if (this.$transcriptLanguageSelect.find('option').length > 1) {
         // More than one option now, so enable the select.
         this.$transcriptLanguageSelect.prop('disabled', false);
@@ -203,4 +243,4 @@
 
     return promise;
   };
-})();
+})(jQuery);

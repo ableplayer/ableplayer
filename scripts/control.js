@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.seekTo = function (newTime) { 
     if (this.player === 'html5') {
       var seekable;
@@ -152,11 +152,11 @@
       return;
     }
     if (!mute) {
-      this.$muteButton.attr('title',this.tt.mute); 
+      this.$muteButton.attr('aria-label',this.tt.mute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.mute);
     }
     else {
-      this.$muteButton.attr('title',this.tt.unmute); 
+      this.$muteButton.attr('aria-label',this.tt.unmute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
@@ -240,7 +240,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.setPlaybackRate(rate);
     }
-    this.$speed.text('Speed: ' + rate.toFixed(2).toString() + 'x');
+    this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
   AblePlayer.prototype.getPlaybackRate = function () {
@@ -337,7 +337,8 @@
       'ended': this.tt.statusEnd
     };
 
-    // Update the text only if it's changed since it has role="alert"; also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+    // Update the text only if it's changed since it has role="alert"; 
+    // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
     if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
       // Debounce updates; only update after status has stayed steadily different for 250ms.
       var timestamp = (new Date()).getTime();
@@ -364,7 +365,7 @@
     // Don't change play/pause button display while using the seek bar.
     if (!this.seekBar.tracking) {
       if (this.isPaused()) {    
-        this.$playpauseButton.attr('title',this.tt.play); 
+        this.$playpauseButton.attr('aria-label',this.tt.play); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
@@ -375,7 +376,7 @@
         }
       }
       else {
-        this.$playpauseButton.attr('title',this.tt.pause); 
+        this.$playpauseButton.attr('aria-label',this.tt.pause); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
@@ -421,11 +422,11 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.removeClass('buttonOff').attr('aria-label',this.tt.turnOffDescriptions);
         this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.addClass('buttonOff').attr('aria-label',this.tt.turnOnDescriptions);            
         this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
@@ -437,22 +438,34 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.showCaptions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
+        this.$ccButton.attr({ 
+          'aria-label': this.tt.captions,
+          'aria-haspopup': 'true',
+          'aria-controls': this.mediaId + '-captions-menu'
+        });
+        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
       }
+    }
+    
+    if (this.$chaptersButton) { 
+      this.$chaptersButton.attr({ 
+        'aria-label': this.tt.chapters,
+        'aria-haspopup': 'true',
+        'aria-controls': this.mediaId + '-chapters-menu'
+      });
     }
 
     if (this.$muteButton) {
@@ -478,7 +491,7 @@
 
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
-        this.$fullscreenButton.attr('title', this.tt.enterFullScreen); 
+        this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
@@ -488,7 +501,7 @@
         }
       }
       else {
-        this.$fullscreenButton.attr('title',this.tt.exitFullScreen); 
+        this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
@@ -498,9 +511,6 @@
         }
       }
     }
-
-
-
     
     // TODO: Move all button updates here.
 
@@ -508,8 +518,14 @@
       // Choose show/hide for big play button and adjust position.
       if (this.isPaused() && !this.seekBar.tracking) {
         this.$bigPlayButton.show();
-        this.$bigPlayButton.width(this.$mediaContainer.width());
-        this.$bigPlayButton.height(this.$mediaContainer.height());
+        if (this.isFullscreen()) { 
+          this.$bigPlayButton.width($(window).width());
+          this.$bigPlayButton.height($(window).height());
+        }
+        else { 
+          this.$bigPlayButton.width(this.$mediaContainer.width());
+          this.$bigPlayButton.height(this.$mediaContainer.height());
+        }
       }
       else {
         this.$bigPlayButton.hide();
@@ -529,7 +545,8 @@
                                 ($('.able-transcript').height() / 2) +
                                 ($(this.currentHighlight).height() / 2));
         if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
-          // Set a flag to ignore the coming scroll event - there's no other way I know of to differentiate programmatic and user-initiated scroll events.
+          // Set a flag to ignore the coming scroll event. 
+          // there's no other way I know of to differentiate programmatic and user-initiated scroll events.
           this.scrollingTranscript = true;
           $('.able-transcript').scrollTop(newTop);
         }
@@ -669,6 +686,14 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    
     if (this.captions.length === 1) {
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) { 
@@ -687,34 +712,55 @@
       }
       this.refreshControls();
     }
-    else {    
-      if (this.captionsTooltip.is(':visible')) {
-        this.captionsTooltip.hide();
+    else {   
+      if (this.captionsPopup.is(':visible')) {
+        this.captionsPopup.hide();
         this.$ccButton.focus();
       }
       else {
-        this.closeTooltips();
-        this.captionsTooltip.show();
-        this.captionsTooltip.css('top', this.$ccButton.offset().top - this.captionsTooltip.outerHeight());
-        this.captionsTooltip.css('left', this.$ccButton.offset().left)
-        // Focus the first chapter.
-        this.captionsTooltip.children().first().focus();
+        this.closePopups();
+        this.captionsPopup.show();
+        this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
+        this.captionsPopup.css('left', this.$ccButton.position().left)
+        // Focus on the checked button, if any buttons are checked 
+        // Otherwise, focus on the first button 
+        this.captionsPopup.find('li').removeClass('able-focus');
+        if (this.captionsPopup.find('input:checked')) { 
+          this.captionsPopup.find('input:checked').focus().parent().addClass('able-focus');
+        }
+        else { 
+          this.captionsPopup.find('input').first().focus().parent().addClass('able-focus');
+        }
       }
     }
   };
 
   AblePlayer.prototype.handleChapters = function () {
-    if (this.chaptersTooltip.is(':visible')) {
-      this.chaptersTooltip.hide();
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    if (this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
     else {
-      this.closeTooltips();
-      this.chaptersTooltip.show();
-      this.chaptersTooltip.css('top', this.$chaptersButton.offset().top - this.chaptersTooltip.outerHeight());
-      this.chaptersTooltip.css('left', this.$chaptersButton.offset().left)
-      // Focus the first chapter.
-      this.chaptersTooltip.children().first().focus();
+      this.closePopups();
+      this.chaptersPopup.show();
+      this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+      this.chaptersPopup.css('left', this.$chaptersButton.position().left)
+      // Focus on the checked button, if any buttons are checked 
+      // Otherwise, focus on the first button 
+      this.chaptersPopup.find('li').removeClass('able-focus');
+      if (this.chaptersPopup.find('input:checked')) { 
+        this.chaptersPopup.find('input:checked').focus().parent().addClass('able-focus');
+      }
+      else { 
+        this.chaptersPopup.find('input').first().focus().parent().addClass('able-focus');
+      }
     }
   };
 
@@ -737,12 +783,12 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };
@@ -920,4 +966,4 @@
         
     this.refreshControls();
   };
-})();
+})(jQuery);

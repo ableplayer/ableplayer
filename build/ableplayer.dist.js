@@ -10,10 +10,10 @@
   
   // Uses JW Player as fallback 
   // JW Player configuration options: 
-  // http://www.longtailvideo.com/support/jw-player/28839/embedding-the-player
+  // http://support.jwplayer.com/customer/portal/articles/1413113-configuration-options-reference
   // (NOTE: some options are not documented, e.g., volume) 
-  // JW Player API reference: 
-  // http://www.longtailvideo.com/support/jw-player/28851/javascript-api-reference
+  // JW Player 6 API reference: 
+  // http://support.jwplayer.com/customer/portal/articles/1413089-javascript-api-reference
 
   // YouTube Player API for iframe Embeds 
   https://developers.google.com/youtube/iframe_api_reference  
@@ -158,6 +158,15 @@
       this.testFallback = true; 
     }
     
+    if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") { 
+      this.fallbackPath = $(media).data('fallback-path'); 
+    }
+    
+    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
+      this.translationPath = $(media).data('translation-path'); 
+    }
+    
+
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -167,11 +176,7 @@
     
     if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") { 
       this.forceLang = true; 
-    }
-
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
+    }    
     
     if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
       this.metaDiv = $(media).data('meta-div'); 
@@ -240,53 +245,7 @@
   AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(function () {
+(function ($) {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
@@ -344,15 +303,17 @@
     // If NOT using JW Player, set to false. An error message will be displayed if browser can't play the media.  
     this.fallback = 'jw'; 
   
+    // fallback path - specify path to fallback player files 
+    this.fallbackPath = '../thirdparty/';  
+    
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
     // Therefore testing must be performed on a web server 
     this.testFallback = false;
+
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
     
-    // loop - if true, will start again at top after last item in playlist has ended
-    // NOTE: This is not fully supported yet - needs work 
-    this.loop = true; 
-  
     // lang - default language of the player
     this.lang = 'en'; 
   
@@ -360,10 +321,11 @@
     // set to false to reset this.lang to language of the web page or user's browser,
     // if either is detectable and if a matching translation file is available 
     this.forceLang = false;
-    
-    // translationPath - specify path to translation files 
-    this.translationPath = '../translations/';
-    
+
+    // loop - if true, will start again at top after last item in playlist has ended
+    // NOTE: This is not fully supported yet - needs work 
+    this.loop = true; 
+          
     // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
     // but they're removed by default form transcripts in order to form a more seamless reading experience 
     // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
@@ -592,7 +554,7 @@
     this.loadCurrentPreferences();
     this.injectPlayerCode();
     this.setupTracks().then(function () {
-      thisObj.setupTooltips();
+      thisObj.setupPopups();
       thisObj.initDescription();
       thisObj.initializing = false;
       thisObj.initPlayer();
@@ -676,8 +638,7 @@
     var promise = deferred.promise();
 
     // attempt to load jwplayer script
-    // TODO: Allow dynamically setting thirdparty folder.
-    $.getScript('../thirdparty/jwplayer.js') 
+    $.getScript(this.fallbackPath + 'jwplayer.js') 
       .done(function( script, textStatus ) {
         if (thisObj.debug) {
           
@@ -701,15 +662,19 @@
         $.each(thisObj.$sources, function (ii, source) {
           sources.push({file: $(source).attr('src')});      
         });
-
+        
+        var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
+        // var flashplayer = '../thirdparty/jwplayer.flash.swf';
+        var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
+        // var html5player = '../thirdparty/jwplayer.html5.js';
+        
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
               sources: sources
             }],
-            // TODO: allow dynamically setting thirdparty folder
-            flashplayer: '../thirdparty/jwplayer.flash.swf',
-            html5player: '../thirdparty/jwplayer.html5.js',
+            flashplayer: flashplayer,
+            html5player: html5player,
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
@@ -725,8 +690,8 @@
             playlist: [{
               sources: sources
             }],
-            flashplayer: '../thirdparty/jwplayer.flash.swf',
-            html5player: '../thirdparty/jwplayer.html5.js',
+            flashplayer: flashplayer,
+            html5player: html5player,
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
@@ -734,7 +699,6 @@
             primary: 'flash'
           });                             
         }
-
         // remove the media element - we're done with it
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
         thisObj.$media.remove();
@@ -826,16 +790,23 @@
     // Firefox puts videos in tab order; remove.
     this.$media.attr('tabindex', -1);
 
-    // Keep native player from displaying subtitles.
+    // Keep native player from displaying captions/subtitles.
+    // This *should* work but isn't supported in all browsers 
+    // For example, Safari 8.0.2 always displays captions if default attribute is present 
+    // even if textTracks.mode is 'disabled' or 'hidden'  
+    // Still using this here in case it someday is reliable 
+    // Meanwhile, the only reliable way to suppress browser captions is to remove default attribute
+    // We're doing that in track.js > setupCaptions() 
     var textTracks = this.$media.get(0).textTracks;
-    // textTracks is not supported in all browsers, but these browsers also do not automatically display captions.
     if (textTracks) {
-      var ii = 0;
-      while (ii < textTracks.length) {
-        textTracks[ii].mode = 'disabled';
-        ii += 1;
+      var i = 0;
+      while (i < textTracks.length) {
+        // mode is either 'disabled', 'hidden', or 'showing'
+        // neither 'disabled' nor 'hidden' hides default captions in Safari 8.0.2 
+        textTracks[i].mode = 'disabled'; 
+        i += 1;
       }
-    }
+    }    
   };
   
   AblePlayer.prototype.getPlayer = function() { 
@@ -882,7 +853,7 @@
         if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
             (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
             // JW Player can play this 
-            return 'jw';
+            return true;
         }
       }
     }
@@ -910,9 +881,9 @@
     return false; 
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.setCookie = function(cookieValue) { 
     $.cookie.json = true;
     if ($.isFunction($.cookie)) { 
@@ -1087,11 +1058,11 @@
     });
     
     featuresFieldset = $('<fieldset>');
-    featuresLegend = $('<legend>Features</legend>');      
+    featuresLegend = $('<legend>' + this.tt.prefFeatures + '</legend>');      
     featuresFieldset.append(featuresLegend);  
     
     keysFieldset = $('<fieldset>');
-    keysLegend = $('<legend>Modifier Keys</legend>');       
+    keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');       
     keysFieldset.append(keysLegend);  
     
     for (i=0; i<available.length; i++) { 
@@ -1135,8 +1106,8 @@
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
-    var saveButton = $('<button class="modal-button">Save</button>');
-    var cancelButton = $('<button class="modal-button">Cancel</button>');
+    var saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    var cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();
@@ -1240,9 +1211,9 @@
     return true; 
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(text) {
 
@@ -1960,9 +1931,9 @@
     
     return time;
   }
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.injectPlayerCode = function() { 
     // create and inject surrounding HTML structure 
     // If IOS: 
@@ -2109,7 +2080,7 @@
     this.$speed = $('<span>',{
       'class' : 'able-speed',
       'role' : 'alert'
-    }).text('Speed: 1x'); 
+    }).text(this.tt.speed + ': 1x'); 
     
     this.$status = $('<span>',{
       'class' : 'able-status',
@@ -2254,115 +2225,275 @@
     });
   };
 
-  // Create tooltip with appropriate CSS styling and add to body.
-  AblePlayer.prototype.createTooltip = function () {
-    var thisObj = this;
-    var tooltip = $('<div>');
-    tooltip.attr('role', 'tooltip');
-    tooltip.addClass('able-tooltip');
-
-    // If tabbing off the tooltip, close it.
-    tooltip.keydown(function (e) {
-      // Tab
-      if (e.which === 9) {
-        if (e.shiftKey) {
-          if (tooltip.find('button').first().is(':focus')) {
-            thisObj.closeTooltips();
-            e.preventDefault();
-          }
-        }
-        else {
-          if (tooltip.find('button').last().is(':focus')) {
-            thisObj.closeTooltips();
-            e.preventDefault();
-          }
-        }
-      }
+  // Create popup div and append to player 
+  // 'which' parameter is either 'captions' or 'chapters'
+  AblePlayer.prototype.createPopup = function (which) {
+    
+    var thisObj, popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
+        selectedTrackIndex, selectedTrack;
+    thisObj = this;
+    popup = $('<div>',{
+      'id': this.mediaId + '-' + which + '-menu',
+      'class': 'able-popup' 
     });
 
-
-    this.$ableDiv.append(tooltip);
-    return tooltip;
+    popup.keydown(function (e) {
+      $thisButton = $(this).find('input:focus');
+      $thisListItem = $thisButton.parent();
+      if ($thisListItem.is(':first-child')) {         
+        // this is the first button
+        $prevButton = $(this).find('input').last(); // wrap to bottom
+        $nextButton = $thisListItem.next().find('input');
+      }  
+      else if ($thisListItem.is(':last-child')) { 
+        // this is the last button 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $(this).find('input').first(); // wrap to top         
+      }
+      else { 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $thisListItem.next().find('input');        
+      }
+      if (e.which === 9) { // Tab
+        if (e.shiftKey) { 
+          $thisListItem.removeClass('able-focus');
+          $prevButton.focus();          
+          $prevButton.parent().addClass('able-focus');
+        }
+        else { 
+          $thisListItem.removeClass('able-focus');
+          $nextButton.focus();
+          $nextButton.parent().addClass('able-focus');          
+        }
+      }
+      else if (e.which === 40 || e.which === 39) { // down or right arrow
+        $thisListItem.removeClass('able-focus');
+        $nextButton.focus();
+        $nextButton.parent().addClass('able-focus');        
+      }
+      else if (e.which == 38 || e.which === 37) { // up or left arrow
+        $thisListItem.removeClass('able-focus');
+        $prevButton.focus();
+        $prevButton.parent().addClass('able-focus');        
+      }
+      else if (e.which === 32 || e.which === 13) { // space or enter
+        $('input:focus').click();        
+      }
+      else if (e.which === 27) {  // Escape 
+        $thisListItem.removeClass('able-focus');        
+        thisObj.closePopups();
+      }
+      e.preventDefault();
+    });
+    this.$controllerDiv.append(popup);
+    return popup;
   };
 
-  AblePlayer.prototype.closeTooltips = function () {
-    if (this.chaptersTooltip && this.chaptersTooltip.is(':visible')) {
-      this.chaptersTooltip.hide();
+  AblePlayer.prototype.closePopups = function () {
+    if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
-    if (this.captionsTooltip && this.captionsTooltip.is(':visible')) {
-      this.captionsTooltip.hide();
+    if (this.captionsPopup && this.captionsPopup.is(':visible')) {
+      this.captionsPopup.hide();
       this.$ccButton.focus();
     }
   };
 
-  // Create and fill in the tooltip forms for various controls.
-  AblePlayer.prototype.setupTooltips = function () {
-    this.setupCaptionsTooltip();
-    this.setupChaptersTooltip();
-  };
-
-  AblePlayer.prototype.setupCaptionsTooltip = function () {
-    var thisObj = this;
-    this.captionsTooltip = this.createTooltip();
-      
-    for (var ii in this.captions) {
-      var track = this.captions[ii];
-      var trackButton = $('<button>');
-      trackButton.html(track.label || track.language);
-      trackButton.attr('tabindex', 0);
-      trackButton.click(this.getCaptionClickFunction(track));
-      
-      this.captionsTooltip.append(trackButton);
-      this.captionsTooltip.append('<br>');
-    }
+  // Create and fill in the popup menu forms for various controls.
+  AblePlayer.prototype.setupPopups = function () {
     
-    // Captions Off option
-    var offButton = $('<button>');
-    offButton.attr('tabindex', 0);
-    offButton.html(this.tt.captionsOff);
-    offButton.click(this.getCaptionOffFunction());
-
-    this.captionsTooltip.append(offButton);
-  };
-
-  AblePlayer.prototype.setupChaptersTooltip = function () {
-    var thisObj = this;
-    this.chaptersTooltip = this.createTooltip();
-
-    for (var ii in this.chapters) {
-      var chapterButton = $('<button>');
-      chapterButton.html(this.flattenCueForCaption(this.chapters[ii]) + ' - ' + this.formatSecondsAsColonTime(this.chapters[ii].start));
-      chapterButton.attr('tabindex', 0);
-      var getClickFunction = function (time) {
-        return function () {
-          thisObj.seekTo(time);
-          thisObj.chaptersTooltip.hide();
-          thisObj.$chaptersButton.focus();
+    var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
+        radioName, radioId, trackButton, trackLabel; 
+    
+    popups = [];     
+    if (this.captions.length > 0) { 
+      popups.push('captions');
+    }
+    if (this.chapters.length > 0) { 
+      popups.push('chapters');
+    }
+    if (popups.length > 0) { 
+      thisObj = this;
+      for (var i=0; i<popups.length; i++) {         
+        var popup = popups[i];              
+        hasDefault = false;
+        if (popup == 'captions') {
+          this.captionsPopup = this.createPopup('captions');
+          tracks = this.captions;           
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup = this.createPopup('chapters');
+          tracks = this.chapters; 
+        }
+        var trackList = $('<ul></ul>');
+        radioName = this.mediaId + '-' + popup + '-choice';
+        for (j in tracks) {
+          trackItem = $('<li></li>');
+          track = tracks[j];          
+          radioId = this.mediaId + '-' + popup + '-' + j;
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'val': j,
+            'name': radioName,
+            'id': radioId
+          });
+          if (track.def) { 
+            trackButton.attr('checked','checked');            
+            hasDefault = true;
+          }          
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          if (track.language !== 'undefined') { 
+            trackButton.attr('lang',track.language);
+          }
+          if (popup == 'captions') { 
+            trackLabel.text(track.label || track.language);          
+            trackButton.click(this.getCaptionClickFunction(track));
+            //trackButton.click(this.handleCaptionRadioSelect(track));
+            // trackButton.keypress(function() { alert('hey!');});
+          }
+          else if (popup == 'chapters') { 
+            trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+            var getClickFunction = function (time) {
+              return function () {
+                thisObj.seekTo(time);
+                thisObj.hidingPopup = true; 
+                thisObj.chaptersPopup.hide();
+                thisObj.$chaptersButton.focus();
+              }
+            }
+            trackButton.on('click keypress',getClickFunction(track.start));
+          }
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);      
+        }
+        if (popup == 'captions') { 
+          // add a captions off button 
+          radioId = this.mediaId + '-captions-off'; 
+          trackItem = $('<li></li>');
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'name': radioName,
+            'id': radioId
+          });
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          trackLabel.text(this.tt.captionsOff);    
+          trackButton.click(this.getCaptionOffFunction());
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);          
+        }
+        if (!hasDefault) { 
+          // check the first button 
+          trackList.find('input').first().attr('checked','checked');          
+        }
+        if (popup == 'captions') {
+          this.captionsPopup.append(trackList);
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup.append(trackList);
         }
       }
-      chapterButton.click(getClickFunction(this.chapters[ii].start));
-      
-      this.chaptersTooltip.append(chapterButton);
-      this.chaptersTooltip.append('<br>');
-    }
+    }    
   };
 
-  AblePlayer.prototype.provideFallback = function() {         
-    // provide ultimate fallback for users with no HTML media support, nor JW Player support 
-    // this could be links to download the media file(s) 
-    // but for now is just a message   
-  
-    var msg, msgContainer; 
+  AblePlayer.prototype.provideFallback = function(reason) {             
+    // provide ultimate fallback for users who are unable to play the media
+    // reason is either 'No Support' or a specific error message     
+
+    var fallback, fallbackText, fallbackContainer, showBrowserList, browsers, i, b, browserList, poster, posterImg;
     
-    msg = this.tt['errorNoPlay'] + ' ' + this.tt[this.mediaType] + '. ';
-    msgContainer = $('<div>',{
+    // use fallback content that's nested inside the HTML5 media element, if there is any
+    // any content other than div, p, and ul is rejected 
+
+    fallback = this.$media.find('div,p,ul');
+    showBrowserList = false;
+
+    if (fallback.length === 0) {       
+      if (reason !== 'No Support' && typeof reason !== 'undefined') { 
+        fallback = $('<p>').text(reason); 
+      }
+      else {
+        fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
+        fallbackText += this.tt.fallbackError2 + ':';
+        fallback = $('<p>').text(fallbackText);
+        showBrowserList = true;         
+      }  
+    }
+    fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
-      'role' : 'alert'
+      'role' : 'alert',
+      'width' : this.playerWidth
     });
-    this.$media.before(msgContainer);     
-    msgContainer.text(msg);  
+    this.$media.before(fallbackContainer);     
+    fallbackContainer.html(fallback);  
+    if (showBrowserList) { 
+      browserList = $('<ul>');
+      browsers = this.getSupportingBrowsers();
+      for (i=0; i<browsers.length; i++) { 
+        b = $('<li>');
+        b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
+        browserList.append(b);
+      }
+      fallbackContainer.append(browserList);      
+    }
+    
+    // if there's a poster, show that as well 
+    if (this.$media.attr('poster')) { 
+      poster = this.$media.attr('poster'); 
+      var posterImg = $('<img>',{
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation"
+      });
+      fallbackContainer.append(posterImg);      
+    }
+    
+    // now remove the media element. 
+    // It doesn't work anyway 
+    this.$media.remove();     
   };
+  
+  AblePlayer.prototype.getSupportingBrowsers = function() { 
+    
+    var browsers = []; 
+    browsers[0] = { 
+      name:'Chrome', 
+      minVersion: '31'
+    };
+    browsers[1] = { 
+      name:'Firefox', 
+      minVersion: '34'
+    };
+    browsers[2] = { 
+      name:'Internet Explorer', 
+      minVersion: '10'
+    };
+    browsers[3] = { 
+      name:'Opera', 
+      minVersion: '26'
+    };
+    browsers[4] = { 
+      name:'Safari for Mac OS X', 
+      minVersion: '7.1'
+    };
+    browsers[5] = { 
+      name:'Safari for iOS', 
+      minVersion: '7.1'
+    };
+    browsers[6] = { 
+      name:'Android Browser', 
+      minVersion: '4.1'
+    };    
+    browsers[7] = { 
+      name:'Chrome for Android', 
+      minVersion: '40' 
+    };
+    return browsers;
+  }
 
   AblePlayer.prototype.addHelp = function() {   
     // create help text that will be displayed in a modal dialog 
@@ -2411,11 +2542,19 @@
         key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
       }
       else if (this.controls[i] === 'captions') { 
-        if (this.captionsOn) { 
-          label = this.tt.hideCaptions;
-        }
+        if (this.captions.length > 1) { 
+          // caption button launches a Captions popup menu
+          label = this.tt.captions;
+        }        
         else { 
-          label = this.tt.showCaptions;
+          // there is only one caption track
+          // therefore caption button is a toggle
+          if (this.captionsOn) { 
+            label = this.tt.hideCaptions;
+          }
+          else { 
+            label = this.tt.showCaptions;
+          }
         }
         key = 'c';
       }
@@ -2565,10 +2704,12 @@
     // some controls are aligned on the left, and others on the right 
   
     var useSpeedButtons, useFullScreen, 
-    i, j, controls, controllerSpan, control, 
+    i, j, controls, controllerSpan, tooltipId, tooltipDiv, tooltipX, tooltipY, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
-    controllerStyles, vidcapStyles;  
+    controllerStyles, vidcapStyles, captionLabel;  
+    
+    var thisObj = this;
     
     var baseSliderWidth = 100;
 
@@ -2576,7 +2717,16 @@
     var controlLayout = this.calculateControlLayout();
     
     var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
-    // now step separately through left and right controls
+    
+    // add an empty div to serve as a tooltip
+    tooltipId = this.mediaId + '-tooltip';
+    tooltipDiv = $('<div>',{
+      'id': tooltipId,
+      'class': 'able-tooltip' 
+    });
+    this.$controllerDiv.append(tooltipDiv);
+    
+    // step separately through left and right controls
     for (i = 0; i <= 3; i++) {
       controls = controlLayout[sectionByOrder[i]];
       if ((i % 2) === 0) {        
@@ -2590,6 +2740,7 @@
         });
       }
       this.$controllerDiv.append(controllerSpan);
+      
       for (j=0; j<controls.length; j++) { 
         control = controls[j];
         if (control === 'seek') { 
@@ -2629,10 +2780,20 @@
             buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control); 
+
+          // icomoon documentation recommends the following markup for screen readers: 
+          // 1. link element (or in our case, button). Nested inside this element: 
+          // 2. span that contains the icon font (in our case, buttonIcon)
+          // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+          // In addition, we are adding aria-label to the button (but not title) 
+          // And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
+          // This has been thoroughly tested and works well in all screen reader/browser combinations 
+          // See https://github.com/ableplayer/ableplayer/issues/81
+
           newButton = $('<button>',{ 
             'type': 'button',
             'tabindex': '0',
-            'title': buttonTitle,
+            'aria-label': buttonTitle,
             'class': 'able-button-handler-' + control
           });        
           if (this.iconType === 'font') {
@@ -2640,31 +2801,7 @@
             buttonIcon = $('<span>',{ 
               'class': iconClass,
               'aria-hidden': 'true'
-            })   
-            // icomoon documentation recommends the following markup for screen readers: 
-            // 1. link element (or in our case, button). Nested inside this element: 
-            // 2. span that contains the icon font (in our case, buttonIcon)
-            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
-            // Screen reader test results: 
-            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
-            // - JAWS 15 in IE11 reads "Play button" 
-            // - NVDA 2014.3 in IE11 reads "Play button" 
-            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
-            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
-            //   when a button has focus and user presses space or enter, focus moves to the next button 
-            //   and the keypress is NOT handled. 
-            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
-            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
-            // we get better results: 
-            // - NVDA/Firefox bug is fixed 
-            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
-            // - All other test results are the same as above
-            
-            var buttonLabel = $('<span>',{
-            'class': 'able-clipped'
-            }).text(buttonTitle);
-            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
-            // newButton.append(buttonIcon,buttonLabel);
+            })               
             newButton.append(buttonIcon);
           }
           else { 
@@ -2676,10 +2813,76 @@
             });
             newButton.append(buttonImg);
           }
+          // add the visibly-hidden label for screen readers that don't support aria-label on the button
+          var buttonLabel = $('<span>',{
+            'class': 'able-clipped'
+          }).text(buttonTitle);
+          newButton.append(buttonLabel);
+          // add an event listener that displays a tooltip on mouseenter or focus 
+          newButton.on('mouseenter focus',function(event) { 
+            var label = $(this).attr('aria-label');
+            // get position of this button 
+            var position = $(this).position(); 
+            var buttonHeight = $(this).height();
+            var buttonWidth = $(this).width();
+            var tooltipY = position.top - buttonHeight - 15;
+            var centerTooltip = true; 
+            if ($(this).closest('span').hasClass('able-right-controls')) { 
+              // this control is on the right side 
+              if ($(this).is(':last-child')) { 
+                // this is the last control on the right 
+                // position tooltip using the "right" property 
+                centerTooltip = false;
+                // var tooltipX = thisObj.playerWidth - position.left - buttonWidth;
+                var tooltipX = 0; 
+                var tooltipStyle = { 
+                  left: '',
+                  right: tooltipX + 'px',
+                  top: tooltipY + 'px'
+                };
+              }
+            }
+            else { 
+              // this control is on the left side
+              if ($(this).is(':first-child')) { 
+                // this is the first control on the left
+                centerTooltip = false;
+                var tooltipX = position.left;
+                var tooltipStyle = { 
+                  left: tooltipX + 'px',
+                  right: '',
+                  top: tooltipY + 'px'
+                };                
+              }
+            }
+            if (centerTooltip) { 
+              // populate tooltip, then calculate its width before showing it 
+              var tooltipWidth = $('#' + tooltipId).text(label).width();
+              // center the tooltip horizontally over the button
+              var tooltipX = position.left - tooltipWidth/2;
+              var tooltipStyle = { 
+                left: tooltipX + 'px',
+                right: '',
+                top: tooltipY + 'px'
+              };
+            }
+            
+            $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+            $(this).on('mouseleave blur',function() { 
+              $('#' + tooltipId).text('').hide();
+            })
+          });
+          
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
-              newButton.addClass('buttonOff').attr('title',this.tt.showCaptions);
+              if (this.captions.length > 1) { 
+                captionLabel = this.tt.captions;
+              }
+              else { 
+                captionLabel = this.tt.showCaptions;
+              }
+              newButton.addClass('buttonOff').attr('title',captionLabel);
             }
           }
           else if (control === 'descriptions') {      
@@ -2951,9 +3154,9 @@
   };
 
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
@@ -2963,11 +3166,14 @@
     this.$tracks = this.$media.find('track');
 
     this.captions = [];
+    this.captionLabels = []; 
     this.descriptions = [];
+    this.chapters = [];
     this.meta = []; 
+    
   
     var loadingPromises = [];
-    for (var ii = 0; ii < this.$tracks.length; ii++) {
+    for (var ii = 0; ii < this.$tracks.length; ii++) {      
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
@@ -3007,83 +3213,120 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
-    var trackLang = track.getAttribute('srclang');
+    
+    this.hasCaptions = true;
+    
+    // srcLang should always be included with <track>, but HTML5 spec doesn't require it 
+    // if not provided, assume track is the same language as the default player language
+    var trackLang = track.getAttribute('srclang') || this.lang; 
     var trackLabel = track.getAttribute('label') || trackLang;
-
-      this.hasCaptions = true;
-
-      // caption cues from WebVTT are used to build a transcript for both audio and video 
-      // but captions are currently only supported for video 
-      if (this.mediaType === 'video') { 
-
-        // create a div for displaying captions  
-        // includes aria-hidden="true" because otherwise 
-        // captions being added and removed causes sporadic changes to focus in JAWS
-        // (not a problem in NVDA or VoiceOver)
-        if (!this.$captionDiv) {
-          this.$captionDiv = $('<div>',{
-            'class': 'able-captions',
-            'aria-hidden': 'true' 
-          });
-          this.$vidcapContainer.append(this.$captionDiv);
-        }
-      }
-
-      this.currentCaption = -1;
-      if (this.prefCaptions === 1) { 
-        // Captions default to on.
-        this.captionsOn = true; 
-      }
-      else { 
-        this.captionsOn = false;
-      }
-    
-      this.captions.push({
-        cues: cues,
-        language: trackLang,
-        label: trackLabel
-      });
-//    }
-    
-    // TODO: Apply this sorting to captions as well.
-    if (trackLang && this.includeTranscript) {
-      // TODO: Move the refresh of the transcript select box to a central location?
+    if (typeof track.getAttribute('default') == 'string') { 
+      var isDefaultTrack = true; 
+      // Now remove 'default' attribute from <track> 
+      // Otherwise, some browsers will display the track 
+      track.removeAttribute('default'); 
+    }
+    else { 
+      var isDefaultTrack = false;
+    }
       
+    // caption cues from WebVTT are used to build a transcript for both audio and video 
+    // but captions are currently only supported for video 
+    if (this.mediaType === 'video') { 
+
+      // create a div for displaying captions  
+      // includes aria-hidden="true" because otherwise 
+      // captions being added and removed causes sporadic changes to focus in JAWS
+      // (not a problem in NVDA or VoiceOver)
+      if (!this.$captionDiv) {
+        this.$captionDiv = $('<div>',{
+          'class': 'able-captions',
+          'aria-hidden': 'true' 
+        });
+        this.$vidcapContainer.append(this.$captionDiv);
+      }
+    }
+
+    this.currentCaption = -1;
+    if (this.prefCaptions === 1) { 
+      // Captions default to on.
+      this.captionsOn = true; 
+    }
+    else { 
+      this.captionsOn = false;
+    }
+    if (this.includeTranscript) {
       // Remove the "Unknown" option from the select box.
       if (this.$unknownTranscriptOption) {
         this.$unknownTranscriptOption.remove();
         this.$unknownTranscriptOption = null;
       }
+      var option = $('<option></option>',{
+        value: trackLang,
+        lang: trackLang
+      }).text(trackLabel); 
+    }
 
-      var option = $('<option value="' + trackLang + '">' + trackLabel + '</option>');
-      // TODO: This is a terrible hack, but I can't find a better way to detect whether we have a default track already entered in the list...
-      if ($(track).attr('default') !== undefined) {
-        option.attr('selected', 'selected');
-        this.$transcriptLanguageSelect.prepend(option);
-        this.defaultTrackInsertedToTranscript = 1;
+    // alphabetize tracks by label
+    if (this.includeTranscript) { 
+      var options = this.$transcriptLanguageSelect.find('option');      
+    }
+    if (this.captions.length === 0) { // this is the first 
+      this.captions.push({
+        'cues': cues,
+        'language': trackLang,
+        'label': trackLabel,
+        'def': isDefaultTrack
+      });
+      if (this.includeTranscript) { 
+        if (isDefaultTrack) { 
+          option.attr('selected', 'selected');
+        }
+        this.$transcriptLanguageSelect.append(option);
       }
-      else {
-        var options = this.$transcriptLanguageSelect.find('option');
-        // Alphabetically among non-default languages.
-        if (options.length === 0) {
+      this.captionLabels.push(trackLabel);
+    }
+    else { // there are already tracks in the array 
+      var inserted = false;
+      for (var i = 0; i < this.captions.length; i++) {
+        var capLabel = this.captionLabels[i];
+        if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
+          // insert before track i 
+          this.captions.splice(i,0,{
+            'cues': cues,
+            'language': trackLang,
+            'label': trackLabel,
+            'def': isDefaultTrack
+          });
+          if (this.includeTranscript) {
+            if (isDefaultTrack) { 
+              option.attr('selected', 'selected');
+            }
+            option.insertBefore(options.eq(i));
+          }
+          this.captionLabels.splice(i,0,trackLabel);
+          inserted = true;
+          break;
+        }
+      }
+      if (!inserted) {
+        // just add track to the end 
+        this.captions.push({
+          'cues': cues,
+          'language': trackLang,
+          'label': trackLabel,
+          'def': isDefaultTrack
+        });
+        if (this.includeTranscript) {
+          if (isDefaultTrack) { 
+            option.attr('selected', 'selected');
+          }
           this.$transcriptLanguageSelect.append(option);
         }
-        else {
-          var inserted = false;
-          // this.defaultTrackInserted is 1 if and only if a default track is already in the select.
-          for (var ii = this.defaultTrackInserted || 0; ii < options.length; ii++) {
-            if (trackLabel.toLowerCase() < options.eq(ii).text().toLowerCase()) {
-              option.insertBefore(options.eq(ii));
-              inserted = true;
-              break;
-            }
-          }
-          if (!inserted) {
-            this.$transcriptLanguageSelect.append(option);
-          }
-        }
+        this.captionLabels.push(trackLabel);
       }
-
+    }
+    if (this.includeTranscript) {
       if (this.$transcriptLanguageSelect.find('option').length > 1) {
         // More than one option now, so enable the select.
         this.$transcriptLanguageSelect.prop('disabled', false);
@@ -3158,9 +3401,9 @@
 
     return promise;
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
 
 
   // Events:
@@ -3573,9 +3816,9 @@
     
     return minutes + ':' + seconds;
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
@@ -3721,9 +3964,9 @@
     
     this.focusedElementBeforeModal.focus();
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.countProperties = function(obj) { 
     // returns the number of properties in an object 
     var count, prop; 
@@ -3747,9 +3990,9 @@
     return dMinutes + ':' + dSeconds;
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.initDescription = function() { 
     // set default mode for delivering description (open vs closed) 
     // based on availability and user preference        
@@ -3932,9 +4175,9 @@
     } 
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
 
   AblePlayer.prototype.browserSupportsVolume = function() { 
     // ideally we could test for volume support 
@@ -4015,9 +4258,9 @@
       document.msFullscreenEnabled;
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.seekTo = function (newTime) { 
     if (this.player === 'html5') {
       var seekable;
@@ -4171,11 +4414,11 @@
       return;
     }
     if (!mute) {
-      this.$muteButton.attr('title',this.tt.mute); 
+      this.$muteButton.attr('aria-label',this.tt.mute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.mute);
     }
     else {
-      this.$muteButton.attr('title',this.tt.unmute); 
+      this.$muteButton.attr('aria-label',this.tt.unmute); 
       this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
@@ -4259,7 +4502,7 @@
     else if (this.player === 'youtube') {
       this.youtubePlayer.setPlaybackRate(rate);
     }
-    this.$speed.text('Speed: ' + rate.toFixed(2).toString() + 'x');
+    this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
   AblePlayer.prototype.getPlaybackRate = function () {
@@ -4356,7 +4599,8 @@
       'ended': this.tt.statusEnd
     };
 
-    // Update the text only if it's changed since it has role="alert"; also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+    // Update the text only if it's changed since it has role="alert"; 
+    // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
     if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
       // Debounce updates; only update after status has stayed steadily different for 250ms.
       var timestamp = (new Date()).getTime();
@@ -4383,7 +4627,7 @@
     // Don't change play/pause button display while using the seek bar.
     if (!this.seekBar.tracking) {
       if (this.isPaused()) {    
-        this.$playpauseButton.attr('title',this.tt.play); 
+        this.$playpauseButton.attr('aria-label',this.tt.play); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
@@ -4394,7 +4638,7 @@
         }
       }
       else {
-        this.$playpauseButton.attr('title',this.tt.pause); 
+        this.$playpauseButton.attr('aria-label',this.tt.pause); 
         
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
@@ -4440,11 +4684,11 @@
     // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
-        this.$descButton.removeClass('buttonOff').attr('title',this.tt.turnOffDescriptions);
+        this.$descButton.removeClass('buttonOff').attr('aria-label',this.tt.turnOffDescriptions);
         this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
       else { 
-        this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);            
+        this.$descButton.addClass('buttonOff').attr('aria-label',this.tt.turnOnDescriptions);            
         this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
       }  
     }
@@ -4456,22 +4700,34 @@
       if (!this.captionsOn) {
         this.$ccButton.addClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.showCaptions);
+          this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
         if (this.captions.length === 1) {
-          this.$ccButton.attr('title',this.tt.hideCaptions);
+          this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (this.captions.length > 1) {
-        this.$ccButton.attr('title', this.tt.showCaptions);
-        this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);        
+        this.$ccButton.attr({ 
+          'aria-label': this.tt.captions,
+          'aria-haspopup': 'true',
+          'aria-controls': this.mediaId + '-captions-menu'
+        });
+        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
       }
+    }
+    
+    if (this.$chaptersButton) { 
+      this.$chaptersButton.attr({ 
+        'aria-label': this.tt.chapters,
+        'aria-haspopup': 'true',
+        'aria-controls': this.mediaId + '-chapters-menu'
+      });
     }
 
     if (this.$muteButton) {
@@ -4497,7 +4753,7 @@
 
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
-        this.$fullscreenButton.attr('title', this.tt.enterFullScreen); 
+        this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
@@ -4507,7 +4763,7 @@
         }
       }
       else {
-        this.$fullscreenButton.attr('title',this.tt.exitFullScreen); 
+        this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen); 
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
@@ -4517,9 +4773,6 @@
         }
       }
     }
-
-
-
     
     // TODO: Move all button updates here.
 
@@ -4527,8 +4780,14 @@
       // Choose show/hide for big play button and adjust position.
       if (this.isPaused() && !this.seekBar.tracking) {
         this.$bigPlayButton.show();
-        this.$bigPlayButton.width(this.$mediaContainer.width());
-        this.$bigPlayButton.height(this.$mediaContainer.height());
+        if (this.isFullscreen()) { 
+          this.$bigPlayButton.width($(window).width());
+          this.$bigPlayButton.height($(window).height());
+        }
+        else { 
+          this.$bigPlayButton.width(this.$mediaContainer.width());
+          this.$bigPlayButton.height(this.$mediaContainer.height());
+        }
       }
       else {
         this.$bigPlayButton.hide();
@@ -4548,7 +4807,8 @@
                                 ($('.able-transcript').height() / 2) +
                                 ($(this.currentHighlight).height() / 2));
         if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
-          // Set a flag to ignore the coming scroll event - there's no other way I know of to differentiate programmatic and user-initiated scroll events.
+          // Set a flag to ignore the coming scroll event. 
+          // there's no other way I know of to differentiate programmatic and user-initiated scroll events.
           this.scrollingTranscript = true;
           $('.able-transcript').scrollTop(newTop);
         }
@@ -4688,6 +4948,14 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    
     if (this.captions.length === 1) {
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) { 
@@ -4706,34 +4974,55 @@
       }
       this.refreshControls();
     }
-    else {    
-      if (this.captionsTooltip.is(':visible')) {
-        this.captionsTooltip.hide();
+    else {   
+      if (this.captionsPopup.is(':visible')) {
+        this.captionsPopup.hide();
         this.$ccButton.focus();
       }
       else {
-        this.closeTooltips();
-        this.captionsTooltip.show();
-        this.captionsTooltip.css('top', this.$ccButton.offset().top - this.captionsTooltip.outerHeight());
-        this.captionsTooltip.css('left', this.$ccButton.offset().left)
-        // Focus the first chapter.
-        this.captionsTooltip.children().first().focus();
+        this.closePopups();
+        this.captionsPopup.show();
+        this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
+        this.captionsPopup.css('left', this.$ccButton.position().left)
+        // Focus on the checked button, if any buttons are checked 
+        // Otherwise, focus on the first button 
+        this.captionsPopup.find('li').removeClass('able-focus');
+        if (this.captionsPopup.find('input:checked')) { 
+          this.captionsPopup.find('input:checked').focus().parent().addClass('able-focus');
+        }
+        else { 
+          this.captionsPopup.find('input').first().focus().parent().addClass('able-focus');
+        }
       }
     }
   };
 
   AblePlayer.prototype.handleChapters = function () {
-    if (this.chaptersTooltip.is(':visible')) {
-      this.chaptersTooltip.hide();
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    if (this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
     else {
-      this.closeTooltips();
-      this.chaptersTooltip.show();
-      this.chaptersTooltip.css('top', this.$chaptersButton.offset().top - this.chaptersTooltip.outerHeight());
-      this.chaptersTooltip.css('left', this.$chaptersButton.offset().left)
-      // Focus the first chapter.
-      this.chaptersTooltip.children().first().focus();
+      this.closePopups();
+      this.chaptersPopup.show();
+      this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+      this.chaptersPopup.css('left', this.$chaptersButton.position().left)
+      // Focus on the checked button, if any buttons are checked 
+      // Otherwise, focus on the first button 
+      this.chaptersPopup.find('li').removeClass('able-focus');
+      if (this.chaptersPopup.find('input:checked')) { 
+        this.chaptersPopup.find('input:checked').focus().parent().addClass('able-focus');
+      }
+      else { 
+        this.chaptersPopup.find('input').first().focus().parent().addClass('able-focus');
+      }
     }
   };
 
@@ -4756,12 +5045,12 @@
   AblePlayer.prototype.handleTranscriptToggle = function () {
     if (this.$transcriptDiv.is(':visible')) {
       this.$transcriptArea.hide();
-      this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+      this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
     }
     else {
       this.$transcriptArea.show();
-      this.$transcriptButton.removeClass('buttonOff').attr('title',this.tt.hideTranscript);
+      this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
     }
   };
@@ -4939,9 +5228,9 @@
         
     this.refreshControls();
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
     if (this.captionsOn) {
       this.$captionDiv.show();
@@ -4952,7 +5241,7 @@
     }
   };
 
-  // Returns the function used when a caption is clicked in the captions tooltip.
+  // Returns the function used when a caption is clicked in the captions menu.
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
@@ -4966,7 +5255,8 @@
           thisObj.currentDescription = -1;
         }
       }
-      thisObj.captionsTooltip.hide();
+      thisObj.hidingPopup = true;     
+      thisObj.captionsPopup.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -4980,7 +5270,7 @@
     return function () {
       thisObj.captionsOn = false;
       thisObj.currentCaption = -1;
-      thisObj.captionsTooltip.hide();
+      thisObj.captionsPopup.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -5049,9 +5339,9 @@
     return result.join('');
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.updateMeta = function (time) {
     if (this.hasMeta) {
       this.$metaDiv.show();
@@ -5116,9 +5406,9 @@
     return result.join('');
   };
 
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
     var langs = ['en','de'];
@@ -5183,9 +5473,9 @@
              );
     return gettingText.promise(); 
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.updateTranscript = function() {
     if (!this.includeTranscript) {
       return;
@@ -5430,9 +5720,9 @@
     
     return main;
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   AblePlayer.prototype.showSearchResults = function() {
     
     // search VTT file for all instances of searchTerms 
@@ -5603,9 +5893,9 @@
     time['title'] = title; 
     return time;
   };
-})();
+})(jQuery);
 
-(function () {
+(function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
     if (!this.startedPlaying) {
@@ -5818,9 +6108,8 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
-      this.closeTooltips();
+      this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause     
       if (!($('.able-controller button').is(':focus'))) { 
@@ -6133,4 +6422,4 @@
       }, 300);
     }
   };
-})();
+})(jQuery);

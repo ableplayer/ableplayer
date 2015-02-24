@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
@@ -56,15 +56,17 @@
     // If NOT using JW Player, set to false. An error message will be displayed if browser can't play the media.  
     this.fallback = 'jw'; 
   
+    // fallback path - specify path to fallback player files 
+    this.fallbackPath = '../thirdparty/';  
+    
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
     // Therefore testing must be performed on a web server 
     this.testFallback = false;
+
+    // translationPath - specify path to translation files 
+    this.translationPath = '../translations/';
     
-    // loop - if true, will start again at top after last item in playlist has ended
-    // NOTE: This is not fully supported yet - needs work 
-    this.loop = true; 
-  
     // lang - default language of the player
     this.lang = 'en'; 
   
@@ -72,10 +74,11 @@
     // set to false to reset this.lang to language of the web page or user's browser,
     // if either is detectable and if a matching translation file is available 
     this.forceLang = false;
-    
-    // translationPath - specify path to translation files 
-    this.translationPath = '../translations/';
-    
+
+    // loop - if true, will start again at top after last item in playlist has ended
+    // NOTE: This is not fully supported yet - needs work 
+    this.loop = true; 
+          
     // lyricsMode - line breaks in WebVTT caption file are always supported in captions 
     // but they're removed by default form transcripts in order to form a more seamless reading experience 
     // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n" 
@@ -304,7 +307,7 @@
     this.loadCurrentPreferences();
     this.injectPlayerCode();
     this.setupTracks().then(function () {
-      thisObj.setupTooltips();
+      thisObj.setupPopups();
       thisObj.initDescription();
       thisObj.initializing = false;
       thisObj.initPlayer();
@@ -388,8 +391,7 @@
     var promise = deferred.promise();
 
     // attempt to load jwplayer script
-    // TODO: Allow dynamically setting thirdparty folder.
-    $.getScript('../thirdparty/jwplayer.js') 
+    $.getScript(this.fallbackPath + 'jwplayer.js') 
       .done(function( script, textStatus ) {
         if (thisObj.debug) {
           console.log ('Successfully loaded the JW Player');
@@ -413,15 +415,19 @@
         $.each(thisObj.$sources, function (ii, source) {
           sources.push({file: $(source).attr('src')});      
         });
-
+        
+        var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
+        // var flashplayer = '../thirdparty/jwplayer.flash.swf';
+        var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
+        // var html5player = '../thirdparty/jwplayer.html5.js';
+        
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
               sources: sources
             }],
-            // TODO: allow dynamically setting thirdparty folder
-            flashplayer: '../thirdparty/jwplayer.flash.swf',
-            html5player: '../thirdparty/jwplayer.html5.js',
+            flashplayer: flashplayer,
+            html5player: html5player,
             image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
@@ -437,8 +443,8 @@
             playlist: [{
               sources: sources
             }],
-            flashplayer: '../thirdparty/jwplayer.flash.swf',
-            html5player: '../thirdparty/jwplayer.html5.js',
+            flashplayer: flashplayer,
+            html5player: html5player,
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
@@ -446,7 +452,6 @@
             primary: 'flash'
           });                             
         }
-
         // remove the media element - we're done with it
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
         thisObj.$media.remove();
@@ -538,16 +543,23 @@
     // Firefox puts videos in tab order; remove.
     this.$media.attr('tabindex', -1);
 
-    // Keep native player from displaying subtitles.
+    // Keep native player from displaying captions/subtitles.
+    // This *should* work but isn't supported in all browsers 
+    // For example, Safari 8.0.2 always displays captions if default attribute is present 
+    // even if textTracks.mode is 'disabled' or 'hidden'  
+    // Still using this here in case it someday is reliable 
+    // Meanwhile, the only reliable way to suppress browser captions is to remove default attribute
+    // We're doing that in track.js > setupCaptions() 
     var textTracks = this.$media.get(0).textTracks;
-    // textTracks is not supported in all browsers, but these browsers also do not automatically display captions.
     if (textTracks) {
-      var ii = 0;
-      while (ii < textTracks.length) {
-        textTracks[ii].mode = 'disabled';
-        ii += 1;
+      var i = 0;
+      while (i < textTracks.length) {
+        // mode is either 'disabled', 'hidden', or 'showing'
+        // neither 'disabled' nor 'hidden' hides default captions in Safari 8.0.2 
+        textTracks[i].mode = 'disabled'; 
+        i += 1;
       }
-    }
+    }    
   };
   
   AblePlayer.prototype.getPlayer = function() { 
@@ -594,7 +606,7 @@
         if ((this.mediaType === 'video' && sourceType === 'video/mp4') || 
             (this.mediaType === 'audio' && sourceType === 'audio/mpeg')) { 
             // JW Player can play this 
-            return 'jw';
+            return true;
         }
       }
     }
@@ -622,4 +634,4 @@
     return false; 
   };
 
-})();
+})(jQuery);

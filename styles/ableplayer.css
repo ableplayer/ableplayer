@@ -277,8 +277,17 @@ div.modalDialog button:focus {
 	color: black;
 	font-weight: bold;	
 }
-.able-prefs-form input { 
-	padding-right: 1em;
+.able-prefs-form fieldset div { 
+  display: table; 
+}
+.able-prefs-form fieldset div input { 
+  display: table-cell;
+	width: 1em;
+	vertical-align: middle;
+}
+.able-prefs-form fieldset div label { 
+  display: table-cell;
+	padding-left: 0.5em;
 }
 
 /* 
@@ -414,16 +423,53 @@ div.modalDialog button:focus {
   Tooltips 
 */
 .able-tooltip {
-    position: absolute;
-    padding: 10px;
-    border-color: black;
-    border-width: 1px;
-    background-color: #CCCCCC;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    display: none;
-    z-index: 3000;
+  position: absolute;
+  padding: 5px 10px;
+  border-color: black;
+  border-width: 1px;
+  background-color: #CCCCCC;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  display: none;
+  z-index: 3000;
+}
+
+/* 
+  Popup Menus
+*/
+.able-popup {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border-color: black;
+  border-width: 1px;
+  background-color: #000;
+  opacity: 0.85;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  display: none;
+  z-index: 3000;
+}
+.able-popup ul { 
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.able-popup li { 
+  padding: 0.25em 1em 0.25em 0.25em;
+  margin: 1px;
+}
+.able-popup label { 
+  padding-left: 0.25em;
+  color: #FFF;
+}
+.able-popup li.able-focus { 
+  background-color: #CCC;
+}
+.able-popup li.able-focus label { 
+  color: #000;
 }
 
 /* 
@@ -453,14 +499,26 @@ div[id$="_fallback_wrapper"] {
 	padding: 0.5em;
 }
 .able-fallback { 
-  display: table;
+  display: block;
   text-align: center;
-  vertical-align: middle;
   border: 2px solid #333355;
-  background-color: #FFFFCC;
-  color: #000000;
+  background-color: #EEE;
+  color: #000;
   font-weight: bold;
   font-size: 1.1em;
   padding: 1em;  
   margin-bottom: 1em;
+}
+.able-fallback div, 
+.able-fallback ul, 
+.able-fallback p { 
+  text-align: left;
+} 
+.able-fallback li  { 
+  font-weight: normal;
+}
+.able-fallback img { 
+  width: 90%; 
+  margin: 1em auto;
+  opacity: 0.3;
 }

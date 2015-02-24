@@ -22,7 +22,7 @@ Features
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so. 
 -   An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. 
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. 
--   Support for playing YouTube videos within the AblePlayer chrome.  
+-   Support for playing YouTube videos within the Able Player chrome.  
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
     
@@ -65,10 +65,11 @@ Fallback
 
 For older browsers that don’t support HTML5 media elements, you need a
 fallback solution. *Able Player* was developed to work seamlessly with
-[JW Player][], specifically **JW Player 6**. JW Player is free for
-non-commercial use but is licensed separately and is not distributed
-with *Able Player*. If you choose to use JW Player as your fallback
-player, users with older browsers including Internet Explorer 6-8 will
+[JW Player][], specifically **JW Player 6** (successfully tested with  
+versions 6.0 and 6.11). JW Player is free for non-commercial use but 
+is licensed separately and is not distributed with *Able Player*. 
+If you choose to use JW Player as your fallback player, 
+users with older browsers including Internet Explorer 6-8 will
 have the same experience with *Able Player* as users with newer
 browsers. Identical functionality has been attained using both the HTML5
 and JW Player APIs. After licensing and downloading JW PLayer, copy
@@ -181,9 +182,10 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
 -   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
+-   **data-fallback-path** - optional; override default path to directory in which the fallback player files or stored   
+-   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
 -   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
--   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to
@@ -442,7 +444,7 @@ users can control the following:
 Building the Able Player source
 -------------------------------
 
-The source JavaScript files for the ableplayer are in the */scripts* directory, 
+The source JavaScript files for Able Player are in the */scripts* directory, 
 and are combined into several different files (in the */build* directory) using 
 [npm][] and [Grunt][]:
 

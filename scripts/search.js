@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.showSearchResults = function() {
     
     // search VTT file for all instances of searchTerms 
@@ -169,4 +169,4 @@
     time['title'] = title; 
     return time;
   };
-})();
+})(jQuery);
