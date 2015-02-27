@@ -61,6 +61,12 @@
         'label': this.tt.prefCaptions,
         'default': 1 // on because many users can benefit
       });
+
+      prefs.push({
+        'name': 'prefSignLanguage', // use sign language if available 
+        'label': this.tt.prefSignLanguage,
+        'default': 1 // on because in rare cases that it's actually available, users should be exposed to it
+      });
       
       prefs.push({
         'name': 'prefDesc', // audio description default state 

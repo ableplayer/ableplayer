@@ -189,7 +189,7 @@
         this.searchDiv = $(media).data('search-div'); 
       }
     }
-
+    
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 
@@ -553,6 +553,7 @@
 
     this.loadCurrentPreferences();
     this.injectPlayerCode();
+    this.initSignLanguage();
     this.setupTracks().then(function () {
       thisObj.setupPopups();
       thisObj.initDescription();
@@ -945,6 +946,12 @@
         'name': 'prefCaptions', // closed captions default state 
         'label': this.tt.prefCaptions,
         'default': 1 // on because many users can benefit
+      });
+
+      prefs.push({
+        'name': 'prefSignLanguage', // use sign language if available 
+        'label': this.tt.prefSignLanguage,
+        'default': 1 // on because in rare cases that it's actually available, users should be exposed to it
       });
       
       prefs.push({
@@ -2145,21 +2152,35 @@
     if (this.transcriptDivLocation) {
       $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
-    else {
-      // Place adjacent to player with reactive flow.
-      this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
-      this.$ableColumnLeft.width(this.playerWidth);
-      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
-      this.$ableColumnRight.width(this.playerWidth);
+    else if (this.$ableColumnRight) {
+      this.$ableColumnRight.prepend(this.$transcriptArea);
     }
-    
+    else {
+      this.splitPlayerIntoColumns('transcript');
+    }
+        
     // If client has provided separate transcript location, override user's preference for hiding transcript
     if (!this.prefTranscript && !this.transcriptDivLocation) { 
       this.$transcriptArea.hide(); 
     }
   };
 
+  AblePlayer.prototype.splitPlayerIntoColumns = function (feature) { 
+    // feature is either 'transcript' or 'sign' 
+    // if present, player is split into two column, with this feature in the right column
+    this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
+    this.$ableColumnLeft.width(this.playerWidth);
+    if (feature === 'transcript') {
+      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
+    }
+    else if (feature == 'sign') { 
+      this.$signArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$signArea.wrap('<div class="able-column-right">').parent();      
+    }
+    this.$ableColumnRight.width(this.playerWidth);
+  };
+  
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
     this.alertBox.addClass('able-tooltip');
@@ -2652,11 +2673,11 @@
       if (this.hasCaptions) {
         blr.push('captions'); //closed captions
       }
-      if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('descriptions'); //audio description 
-      }
       if (this.hasSignLanguage) { 
         blr.push('sign'); // sign language
+      }
+      if (this.hasOpenDesc || this.hasClosedDesc) { 
+        blr.push('descriptions'); //audio description 
       }
     }
 
@@ -2902,6 +2923,9 @@
           else if (control === 'captions') { 
             this.$ccButton = newButton;
           }
+          else if (control === 'sign') { 
+            this.$signButton = newButton;
+          }
           else if (control === 'descriptions') {        
             this.$descButton = newButton; 
             // gray out description button if description is not active 
@@ -3113,7 +3137,7 @@
     else if (control === 'chapters') { 
       return this.tt.chapters;
     }
-    else if (control === 'sign') { // not yet supported 
+    else if (control === 'sign') { 
       return this.tt.sign;
     }
     else if (control === 'mute') { 
@@ -4271,6 +4295,12 @@
       
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
         this.media.currentTime = this.startTime;
+        
+        if (this.hasSignLanguage && this.signVideo) { 
+          // keep sign languge video in sync
+          this.signVideo.currentTime = this.startTime;
+        }
+        
       } 
     }
     else if (this.player === 'jw') {
@@ -4453,6 +4483,9 @@
 
     if (this.player === 'html5') {
       this.media.volume = volume;
+      if (this.hasSignLanguage && this.signVideo) { 
+        this.signVideo.volume = 0; // always mute
+      }
     }
     else if (this.player === 'jw') {
       this.jwPlayer.setVolume(volume * 100);
@@ -4529,6 +4562,9 @@
   AblePlayer.prototype.pauseMedia = function () {
     if (this.player === 'html5') {
       this.media.pause(true);
+      if (this.hasSignLanguage && this.signVideo) { 
+        this.signVideo.pause(true);
+      }      
     }
     else if (this.player === 'jw') {
       this.jwPlayer.pause(true);
@@ -4541,6 +4577,9 @@
   AblePlayer.prototype.playMedia = function () {
     if (this.player === 'html5') {
       this.media.play(true);
+      if (this.hasSignLanguage && this.signVideo) { 
+        this.signVideo.play(true);
+      }
     }
     else if (this.player === 'jw') {
       this.jwPlayer.play(true);
@@ -5052,6 +5091,19 @@
       this.$transcriptArea.show();
       this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
+    }
+  };
+
+  AblePlayer.prototype.handleSignToggle = function () {
+    if (this.$signWindow.is(':visible')) {
+      this.$signWindow.hide();
+      this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
+      this.$signButton.find('span.able-clipped').text(this.tt.showSign);
+    }
+    else {
+      this.$signWindow.show();
+      this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
+      this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
     }
   };
 
@@ -6062,8 +6114,8 @@
     else if (whichButton === 'descriptions') { 
       this.handleDescriptionToggle();
     }
-    else if (whichButton.substr(0,4) === 'sign') { 
-      // not yet supported
+    else if (whichButton === 'sign') { 
+      this.handleSignToggle();
     }
     else if (whichButton === 'preferences') { 
       this.handlePrefsClick();
@@ -6422,4 +6474,96 @@
       }, 300);
     }
   };
+})(jQuery);
+
+(function ($) {
+  AblePlayer.prototype.initSignLanguage = function() { 
+    
+    // only initialize sign language if user wants it 
+    // since it requires downloading a second video & consumes bandwidth
+    if (this.prefSignLanguage) {     
+      // check to see if there's a sign language video accompanying this video
+      // check only the first source 
+      // If sign language is provided, it must be provided for all sources  
+      this.signFile = this.$sources.first().attr('data-sign-src');
+      if (this.signFile) { 
+        if (this.debug) {
+          console.log('This video has an accompanying sign language video: ' + this.signFile);      
+        }
+        this.hasSignLanguage = true;
+        this.injectSignPlayerCode();
+      }
+      else { 
+        this.hasSignLanguage = false;              
+      }
+    }    
+  };
+
+  AblePlayer.prototype.injectSignPlayerCode = function() { 
+
+    // create and inject surrounding HTML structure 
+    // If IOS: 
+    //  If video: 
+    //   IOS does not support any of the player's functionality 
+    //   - everything plays in its own player 
+    //   Therefore, AblePlayer is not loaded & all functionality is disabled 
+    //   (this all determined. If this is IOS && video, this function is never called) 
+    //  If audio: 
+    //   HTML cannot be injected as a *parent* of the <audio> element 
+    //   It is therefore injected *after* the <audio> element 
+    //   This is only a problem in IOS 6 and earlier, 
+    //   & is a known bug, fixed in IOS 7      
+    
+    var thisObj, signVideoId, i, signSrc, srcType, $signSource; 
+
+    thisObj = this;
+
+    signVideoId = this.mediaId + '-sign';
+    this.$signVideo = $('<video>',{ 
+      'id' : signVideoId,
+      'width' : this.playerWidth      
+    });
+    this.signVideo = this.$signVideo[0];
+    // for each original <source>, add a <source> to the sign <video> 
+    for (i=0; i < this.$sources.length; i++) { 
+      signSrc = this.$sources[i].getAttribute('data-sign-src');
+      srcType = this.$sources[i].getAttribute('type');
+      if (signSrc) {
+        $signSource = $('<source>',{ 
+          'src' : signSrc,
+          'type' : srcType
+        });
+        this.$signVideo.append($signSource);
+      }
+      else { 
+        // source is missing a sign language version 
+        // can't include sign language 
+        this.hasSignLanguage = false;
+        break;
+      }   
+    }
+
+    // TODO: Consider whether width x height should be added to the sign window, or the video element
+    this.$signWindow = $('<div>',{
+      'class' : 'able-sign-window',
+    });
+    this.$signWindow.append(this.$signVideo).hide();
+    
+    // Place sign window in div.able-column-right
+    // If div doesn't exist yet, create it 
+    if (this.$ableColumnRight) { 
+      this.$ableColumnRight.append(this.$signWindow);
+    }
+    else { 
+      this.splitPlayerIntoColumns('sign');
+    }
+
+    this.addSignEvents();    
+  };
+  
+  AblePlayer.prototype.addSignEvents = function() { 
+    
+    // populate with functions to handle click and drag on sign window 
+  };  
+  
 })(jQuery);

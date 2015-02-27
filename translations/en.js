@@ -37,6 +37,10 @@
 
 "sign": "Sign language",
 
+"showSign": "Show sign language",
+
+"hideSign": "Hide sign language",
+
 "mute": "Mute",
 
 "unmute": "Unmute",
@@ -114,6 +118,8 @@
 "prefShiftKey": "Shift",
 
 "prefCaptions": "Closed captions on by default",
+
+"prefSignLanguage": "Show sign language if available",
 
 "prefDesc": "Description on by default",
 

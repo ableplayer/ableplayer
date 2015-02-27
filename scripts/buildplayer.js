@@ -210,21 +210,35 @@
     if (this.transcriptDivLocation) {
       $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
-    else {
-      // Place adjacent to player with reactive flow.
-      this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
-      this.$ableColumnLeft.width(this.playerWidth);
-      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
-      this.$ableColumnRight.width(this.playerWidth);
+    else if (this.$ableColumnRight) {
+      this.$ableColumnRight.prepend(this.$transcriptArea);
     }
-    
+    else {
+      this.splitPlayerIntoColumns('transcript');
+    }
+        
     // If client has provided separate transcript location, override user's preference for hiding transcript
     if (!this.prefTranscript && !this.transcriptDivLocation) { 
       this.$transcriptArea.hide(); 
     }
   };
 
+  AblePlayer.prototype.splitPlayerIntoColumns = function (feature) { 
+    // feature is either 'transcript' or 'sign' 
+    // if present, player is split into two column, with this feature in the right column
+    this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
+    this.$ableColumnLeft.width(this.playerWidth);
+    if (feature === 'transcript') {
+      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
+    }
+    else if (feature == 'sign') { 
+      this.$signArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$signArea.wrap('<div class="able-column-right">').parent();      
+    }
+    this.$ableColumnRight.width(this.playerWidth);
+  };
+  
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
     this.alertBox.addClass('able-tooltip');
@@ -717,11 +731,11 @@
       if (this.hasCaptions) {
         blr.push('captions'); //closed captions
       }
-      if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('descriptions'); //audio description 
-      }
       if (this.hasSignLanguage) { 
         blr.push('sign'); // sign language
+      }
+      if (this.hasOpenDesc || this.hasClosedDesc) { 
+        blr.push('descriptions'); //audio description 
       }
     }
 
@@ -967,6 +981,9 @@
           else if (control === 'captions') { 
             this.$ccButton = newButton;
           }
+          else if (control === 'sign') { 
+            this.$signButton = newButton;
+          }
           else if (control === 'descriptions') {        
             this.$descButton = newButton; 
             // gray out description button if description is not active 
@@ -1178,7 +1195,7 @@
     else if (control === 'chapters') { 
       return this.tt.chapters;
     }
-    else if (control === 'sign') { // not yet supported 
+    else if (control === 'sign') { 
       return this.tt.sign;
     }
     else if (control === 'mute') { 

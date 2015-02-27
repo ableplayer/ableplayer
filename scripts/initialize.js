@@ -306,6 +306,7 @@
 
     this.loadCurrentPreferences();
     this.injectPlayerCode();
+    this.initSignLanguage();
     this.setupTracks().then(function () {
       thisObj.setupPopups();
       thisObj.initDescription();

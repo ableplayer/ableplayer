@@ -189,7 +189,7 @@
         this.searchDiv = $(media).data('search-div'); 
       }
     }
-
+    
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
 

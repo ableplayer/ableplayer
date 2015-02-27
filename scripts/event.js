@@ -165,8 +165,8 @@
     else if (whichButton === 'descriptions') { 
       this.handleDescriptionToggle();
     }
-    else if (whichButton.substr(0,4) === 'sign') { 
-      // not yet supported
+    else if (whichButton === 'sign') { 
+      this.handleSignToggle();
     }
     else if (whichButton === 'preferences') { 
       this.handlePrefsClick();

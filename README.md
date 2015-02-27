@@ -257,6 +257,29 @@ alternate video with description mixed in, that’s what they’ll get. See
 the section below on *User Preferences* for additional information about
 preferences.
 
+#### Sign language
+
+Sign language translation is supported in a separate video player, 
+synchronized with the main player. Tips for filming a sign language 
+interpreter are available from [Signing Books for the Deaf][]: 
+
+* [Filming the Signer][] 
+* [Editing the Signer][]
+
+If multiple video sources are already provided (e.g., an MP4 and
+WebM file), then the sign language video must be available in both of
+these formats. For each video source that has a sign language version
+available, add a **data-sign-src** attribute to the \<source\> element for
+that video. The value of this attribute is a path pointing to the
+sign language version of the video. If a sign language version is available, 
+a sign language button will be added to the media controller. 
+This button will toggle the display of a secondary window in which 
+the sign language video will appear. 
+
+This is an experimental feature and a work in progress. Ultimately 
+the intent is for the user to have full control of the size and position 
+of the sign language video.  
+
 Setup Step 4: Review User-Defined Variables in *ableplayer.js*
 --------------------------------------------------------------
 
@@ -478,6 +501,8 @@ Files created by the build process are put into the */build* directory:
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
   [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
   [npm]: https://www.npmjs.com/
-  [grunt]: http://gruntjs.com/
-
+  [Grunt]: http://gruntjs.com/
+  [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
+  [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
+  [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
 
