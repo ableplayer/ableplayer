@@ -816,6 +816,10 @@
     }
     else {
       this.$signWindow.show();
+      // get starting position of element; used for drag & drop
+      var signWinPos = this.$signWindow.offset();
+      this.dragStartX = signWinPos.left;
+      this.dragStartY = signWinPos.top;      
       this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
       this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
     }
@@ -943,16 +947,41 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.showAlert = function(msg) { 
+  AblePlayer.prototype.showAlert = function( msg, location ) { 
+    
+    // location is either 'main' (default) or 'sign' (i.e., sign language window) 
     var thisObj = this;
-    this.alertBox.show();
-    this.alertBox.text(msg);
-    // Center at top of vidcap container; use vidcap container instead of media container due to an IE8 sizing bug.
-    this.alertBox.css({
-      left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (this.alertBox.width() / 2)
-    });
+    var alertBox, alertLeft; 
+    if (location === 'sign') { 
+      alertBox = this.$windowAlert; 
+    }
+    else { 
+      alertBox = this.alertBox;
+    }
+    alertBox.show();
+    alertBox.text(msg);
+    if (location === 'sign') { 
+      if (this.$signWindow.width() > alertBox.width()) { 
+        alertLeft = this.$signWindow.width() / 2 - alertBox.width() / 2; 
+      }
+      else { 
+        // alert box is wider than its container. Position it far left and let it wrap
+        alertLeft = 10;
+      }
+      // position alert in the lower third of the sign window (to avoid covering the signer) 
+      alertBox.css({
+        top: (this.$signWindow.height() / 3) * 2,
+        left: alertLeft
+      });
+    }
+    else { 
+      // Center at top of vidcap container; use vidcap container instead of media container due to an IE8 sizing bug.
+      alertBox.css({
+        left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
+      });      
+    }
     setTimeout(function () {
-      thisObj.alertBox.fadeOut(300);
+      alertBox.fadeOut(300);
     }, 3000);
   };
 

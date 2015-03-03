@@ -43,63 +43,25 @@
     this.bodyDiv.wrap('<div></div>');
     this.wrapperDiv = this.bodyDiv.parent();
 
-    // TODO: Move this all to CSS file.
     this.wrapperDiv.width(width);
-    this.wrapperDiv.css({
-      'display': 'inline-block',
-      'vertical-align': 'middle'
-    });
-
-    this.bodyDiv.css({
-      'position': 'relative',
-      'height': '0.5em',
-      'border': '1px solid',
-      'background-color': '#000000',
-      'margin': '0 3px',
-      'border-style': 'solid',
-      'border-width': '2px',
-      'border-color': '#ffffff'
-    });
+    this.wrapperDiv.addClass('able-seekbar-wrapper');
 
     this.loadedDiv.width(0);
-    this.loadedDiv.css({
-      'display': 'inline-block',
-      'position': 'absolute',
-      'left': 0,
-      'top': 0,
-      'height': '0.5em',
-      'background-color': '#464646',
-      'z-index': 1
-    });
+    this.loadedDiv.addClass('able-seekbar-loaded'); 
 
     this.playedDiv.width(0);
-    this.playedDiv.css({
-      'display': 'inline-block',
-      'position': 'absolute',
-      'left': 0,
-      'top': 0,
-      'height': '0.5em',
-      'background-color': '#DADADA',
-      'z-index': 2
-    });
+    this.playedDiv.addClass('able-seekbar-played'); 
 
     var seekHeadSize = '0.8em';
-    this.seekHead.css({
-      'display': 'inline-block',
-      'position': 'relative',
-      'left': 0,
-      'top': '-0.45em',
+    this.seekHead.addClass('able-seekhead').css({
       'height': seekHeadSize,
       'width': seekHeadSize,
-      'border': '1px solid',
-      'background-color': '#FDFDFD',
       'border-radius': seekHeadSize,
       '-webkit-border-radius': seekHeadSize,
       '-moz-border-radius': seekHeadSize,
-      '-o-border-radius': seekHeadSize,
-      'z-index': 3
+      '-o-border-radius': seekHeadSize
     });
-
+    
     // Set a default duration.  User should call this and change it.
     this.setDuration(100);
 

@@ -1,4 +1,5 @@
 {
+  
 "playerHeading": "Media player",
 
 "faster": "Faster",
@@ -155,6 +156,30 @@
 
 "done": "Done",
 
-"closeButtonLabel": "Close dialog"
+"closeButtonLabel": "Close dialog",
+
+"windowButtonLabel": "Window options",
+
+"windowMove": "Move", 
+
+"windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
+
+"windowResize": "Resize", 
+
+"windowResizeHeading": "Resize Interpreter Window",
+
+"windowResizeAlert": "The window has been resized.",
+
+"width": "Width",
+
+"height": "Height",
+
+"windowSendBack": "Send to back", 
+
+"windowSendBackAlert": "This window is now behind other objects on the page.",
+
+"windowBringTop": "Bring to front",
+
+"windowBringTopAlert": "This window is now in front of other objects on the page."
 
 }

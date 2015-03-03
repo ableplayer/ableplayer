@@ -1,9 +1,10 @@
 (function ($) {
   AblePlayer.prototype.initSignLanguage = function() { 
     
+    // Sign language is only currently supported in HTML5 player, not fallback or YouTube
     // only initialize sign language if user wants it 
     // since it requires downloading a second video & consumes bandwidth
-    if (this.prefSignLanguage) {     
+    if (this.player === 'html5' && this.prefSignLanguage) {     
       // check to see if there's a sign language video accompanying this video
       // check only the first source 
       // If sign language is provided, it must be provided for all sources  
@@ -43,7 +44,8 @@
     signVideoId = this.mediaId + '-sign';
     this.$signVideo = $('<video>',{ 
       'id' : signVideoId,
-      'width' : this.playerWidth      
+      'width' : this.playerWidth,
+      'tabindex' : '-1' // remove from tab order
     });
     this.signVideo = this.$signVideo[0];
     // for each original <source>, add a <source> to the sign <video> 
@@ -65,9 +67,10 @@
       }   
     }
 
-    // TODO: Consider whether width x height should be added to the sign window, or the video element
     this.$signWindow = $('<div>',{
       'class' : 'able-sign-window',
+      'draggable': 'true',
+      'tabindex': '-1'
     });
     this.$signWindow.append(this.$signVideo).hide();
     
@@ -80,12 +83,7 @@
       this.splitPlayerIntoColumns('sign');
     }
 
-    this.addSignEvents();    
+    this.initDragDrop(this.$signWindow); 
   };
-  
-  AblePlayer.prototype.addSignEvents = function() { 
-    
-    // populate with functions to handle click and drag on sign window 
-  };  
   
 })(jQuery);

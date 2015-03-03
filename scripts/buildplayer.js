@@ -241,7 +241,7 @@
   
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
-    this.alertBox.addClass('able-tooltip');
+    this.alertBox.addClass('able-alert');
     this.alertBox.appendTo(this.$ableDiv);
     this.alertBox.css({
       top: this.$mediaContainer.offset().top
@@ -305,18 +305,19 @@
   };
 
   // Create popup div and append to player 
-  // 'which' parameter is either 'captions' or 'chapters'
+  // 'which' parameter is either 'captions', 'chapters', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
     
-    var thisObj, popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
+    var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
         selectedTrackIndex, selectedTrack;
     thisObj = this;
-    popup = $('<div>',{
+    $popup = $('<div>',{
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup' 
     });
 
-    popup.keydown(function (e) {
+    $popup.on('keydown',function (e) {
+console.log('handling keydown on popup');      
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
       if ($thisListItem.is(':first-child')) {         
@@ -364,8 +365,8 @@
       }
       e.preventDefault();
     });
-    this.$controllerDiv.append(popup);
-    return popup;
+    this.$controllerDiv.append($popup);
+    return $popup;
   };
 
   AblePlayer.prototype.closePopups = function () {
@@ -377,6 +378,10 @@
       this.captionsPopup.hide();
       this.$ccButton.focus();
     }
+    if (this.$windowPopup && this.$windowPopup.is(':visible')) {
+      this.$windowPopup.hide();
+      this.$windowButton.show().focus();
+    }    
   };
 
   // Create and fill in the popup menu forms for various controls.
@@ -674,9 +679,7 @@
     helpText += '</ul>\n';
     
     // Now assemble all the parts   
-    $helpTextWrapper.append($helpIntro);
-    $helpTextWrapper.append(helpText);
-    $helpTextWrapper.append($helpDisclaimer);
+    $helpTextWrapper.append($helpIntro, helpText, $helpDisclaimer);
     $helpDiv.append($helpTextWrapper);
     
     // must be appended to the BODY! 

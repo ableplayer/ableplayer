@@ -2183,7 +2183,7 @@
   
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
-    this.alertBox.addClass('able-tooltip');
+    this.alertBox.addClass('able-alert');
     this.alertBox.appendTo(this.$ableDiv);
     this.alertBox.css({
       top: this.$mediaContainer.offset().top
@@ -2247,18 +2247,19 @@
   };
 
   // Create popup div and append to player 
-  // 'which' parameter is either 'captions' or 'chapters'
+  // 'which' parameter is either 'captions', 'chapters', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
     
-    var thisObj, popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
+    var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
         selectedTrackIndex, selectedTrack;
     thisObj = this;
-    popup = $('<div>',{
+    $popup = $('<div>',{
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup' 
     });
 
-    popup.keydown(function (e) {
+    $popup.on('keydown',function (e) {
+console.log('handling keydown on popup');      
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
       if ($thisListItem.is(':first-child')) {         
@@ -2306,8 +2307,8 @@
       }
       e.preventDefault();
     });
-    this.$controllerDiv.append(popup);
-    return popup;
+    this.$controllerDiv.append($popup);
+    return $popup;
   };
 
   AblePlayer.prototype.closePopups = function () {
@@ -2319,6 +2320,10 @@
       this.captionsPopup.hide();
       this.$ccButton.focus();
     }
+    if (this.$windowPopup && this.$windowPopup.is(':visible')) {
+      this.$windowPopup.hide();
+      this.$windowButton.show().focus();
+    }    
   };
 
   // Create and fill in the popup menu forms for various controls.
@@ -2616,9 +2621,7 @@
     helpText += '</ul>\n';
     
     // Now assemble all the parts   
-    $helpTextWrapper.append($helpIntro);
-    $helpTextWrapper.append(helpText);
-    $helpTextWrapper.append($helpDisclaimer);
+    $helpTextWrapper.append($helpIntro, helpText, $helpDisclaimer);
     $helpDiv.append($helpTextWrapper);
     
     // must be appended to the BODY! 
@@ -3472,63 +3475,25 @@
     this.bodyDiv.wrap('<div></div>');
     this.wrapperDiv = this.bodyDiv.parent();
 
-    // TODO: Move this all to CSS file.
     this.wrapperDiv.width(width);
-    this.wrapperDiv.css({
-      'display': 'inline-block',
-      'vertical-align': 'middle'
-    });
-
-    this.bodyDiv.css({
-      'position': 'relative',
-      'height': '0.5em',
-      'border': '1px solid',
-      'background-color': '#000000',
-      'margin': '0 3px',
-      'border-style': 'solid',
-      'border-width': '2px',
-      'border-color': '#ffffff'
-    });
+    this.wrapperDiv.addClass('able-seekbar-wrapper');
 
     this.loadedDiv.width(0);
-    this.loadedDiv.css({
-      'display': 'inline-block',
-      'position': 'absolute',
-      'left': 0,
-      'top': 0,
-      'height': '0.5em',
-      'background-color': '#464646',
-      'z-index': 1
-    });
+    this.loadedDiv.addClass('able-seekbar-loaded'); 
 
     this.playedDiv.width(0);
-    this.playedDiv.css({
-      'display': 'inline-block',
-      'position': 'absolute',
-      'left': 0,
-      'top': 0,
-      'height': '0.5em',
-      'background-color': '#DADADA',
-      'z-index': 2
-    });
+    this.playedDiv.addClass('able-seekbar-played'); 
 
     var seekHeadSize = '0.8em';
-    this.seekHead.css({
-      'display': 'inline-block',
-      'position': 'relative',
-      'left': 0,
-      'top': '-0.45em',
+    this.seekHead.addClass('able-seekhead').css({
       'height': seekHeadSize,
       'width': seekHeadSize,
-      'border': '1px solid',
-      'background-color': '#FDFDFD',
       'border-radius': seekHeadSize,
       '-webkit-border-radius': seekHeadSize,
       '-moz-border-radius': seekHeadSize,
-      '-o-border-radius': seekHeadSize,
-      'z-index': 3
+      '-o-border-radius': seekHeadSize
     });
-
+    
     // Set a default duration.  User should call this and change it.
     this.setDuration(100);
 
@@ -5102,6 +5067,10 @@
     }
     else {
       this.$signWindow.show();
+      // get starting position of element; used for drag & drop
+      var signWinPos = this.$signWindow.offset();
+      this.dragStartX = signWinPos.left;
+      this.dragStartY = signWinPos.top;      
       this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
       this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
     }
@@ -5229,16 +5198,41 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.showAlert = function(msg) { 
+  AblePlayer.prototype.showAlert = function( msg, location ) { 
+    
+    // location is either 'main' (default) or 'sign' (i.e., sign language window) 
     var thisObj = this;
-    this.alertBox.show();
-    this.alertBox.text(msg);
-    // Center at top of vidcap container; use vidcap container instead of media container due to an IE8 sizing bug.
-    this.alertBox.css({
-      left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (this.alertBox.width() / 2)
-    });
+    var alertBox, alertLeft; 
+    if (location === 'sign') { 
+      alertBox = this.$windowAlert; 
+    }
+    else { 
+      alertBox = this.alertBox;
+    }
+    alertBox.show();
+    alertBox.text(msg);
+    if (location === 'sign') { 
+      if (this.$signWindow.width() > alertBox.width()) { 
+        alertLeft = this.$signWindow.width() / 2 - alertBox.width() / 2; 
+      }
+      else { 
+        // alert box is wider than its container. Position it far left and let it wrap
+        alertLeft = 10;
+      }
+      // position alert in the lower third of the sign window (to avoid covering the signer) 
+      alertBox.css({
+        top: (this.$signWindow.height() / 3) * 2,
+        left: alertLeft
+      });
+    }
+    else { 
+      // Center at top of vidcap container; use vidcap container instead of media container due to an IE8 sizing bug.
+      alertBox.css({
+        left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
+      });      
+    }
     setTimeout(function () {
-      thisObj.alertBox.fadeOut(300);
+      alertBox.fadeOut(300);
     }, 3000);
   };
 
@@ -6477,11 +6471,416 @@
 })(jQuery);
 
 (function ($) {
+  
+  AblePlayer.prototype.initDragDrop = function ( $element ) {
+
+    // Accessible Drag & Drop based on these resources: 
+    // Accessible Drag and Drop Using WAI-ARIA 
+    // http://dev.opera.com/articles/accessible-drag-and-drop/
+    // Accessible Drag and Drop script on quirksmode 
+    // http://www.quirksmode.org/js/this.html
+    var thisObj = this;
+
+    this.$activeWindow = $element;
+    
+    // able-sign-window is currently the only draggable window, 
+    // but this functionality could ultimately be extended to other windows    
+    if ($element.is('.able-sign-window')) { 
+      this.windowName = 'sign-window';
+    }    
+    this.addWindowMenu();    
+  };
+  
+  AblePlayer.prototype.addWindowMenu = function() { 
+
+    var thisObj = this; 
+    
+    // add alert div to window 
+    this.$windowAlert = $('<div role="alert"></div>');
+    this.$windowAlert.addClass('able-alert');
+    this.$windowAlert.appendTo(this.$activeWindow);
+    this.$windowAlert.css({
+      top: this.$activeWindow.offset().top
+    });
+    
+    // add button to draggable window which triggers a popup menu 
+    // for now, re-use preferences icon for this purpose
+    var $newButton = $('<button>',{ 
+      'type': 'button',
+      'tabindex': '0',
+      'aria-label': this.tt.windowButtonLabel,
+      'class': 'able-button-handler-preferences' 
+    });        
+    if (this.iconType === 'font') {
+      var $buttonIcon = $('<span>',{ 
+        'class': 'icon-preferences',
+        'aria-hidden': 'true'
+      });               
+      $newButton.append($buttonIcon);
+    }
+    else { 
+      // use image
+      var buttonImgSrc = '../images/' + this.iconColor + '/preferences.png';
+      var $buttonImg = $('<img>',{ 
+        'src': buttonImgSrc,
+        'alt': '',
+        'role': 'presentation'
+      });
+      $newButton.append($buttonImg);
+    }
+    
+    // add the visibly-hidden label for screen readers that don't support aria-label on the button
+    var $buttonLabel = $('<span>',{
+      'class': 'able-clipped'
+    }).text(this.tt.windowButtonLabel);
+    $newButton.append($buttonLabel);
+
+    // add an event listener that displays a tooltip on mouseenter or focus 
+    var tooltipId = this.mediaId + '-' + this.windowName + '-tooltip';
+    var $tooltip = $('<div>',{ 
+      'class' : 'able-tooltip',
+      'id' : tooltipId
+    });      
+    $newButton.on('mouseenter focus',function(event) {       
+      var label = $(this).attr('aria-label');
+      // get position of this button 
+      var position = $(this).position(); 
+      var buttonHeight = $(this).height();
+      var buttonWidth = $(this).width();
+      var tooltipY = position.top - buttonHeight - 5;
+      var tooltipX = 0; 
+      var tooltipStyle = { 
+        left: '',
+        right: tooltipX + 'px',
+        top: tooltipY + 'px'
+      };
+      $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+      $(this).on('mouseleave blur',function() { 
+        $('#' + tooltipId).text('').hide();
+      });
+    });
+
+    this.addResizeDialog();
+    
+    // add a popup menu 
+    var $popup = this.createPopup(this.windowName);
+    var $optionList = $('<ul></ul>');
+    var radioName = this.mediaId + '-' + this.windowName + '-choice';
+    if (this.windowName == 'sign-window') { 
+      var options = []; 
+      options.push({
+        'name': 'move',
+        'label': this.tt.windowMove
+      });
+      options.push({
+        'name': 'resize',
+        'label': this.tt.windowResize
+      });
+      if (this.$activeWindow.css('z-index') > 0) { 
+        options.push({
+          'name': 'sendBack',
+          'label': this.tt.windowSendBack
+        });
+      }
+      else { 
+        options.push({
+          'name': 'bringTop',
+          'label': this.tt.windowBringTop
+        });        
+      }
+      for (var i in options) {
+        var $optionItem = $('<li></li>');
+        var option = options[i];    
+        var radioId = radioName + '-' + i;
+        var $radioButton = $('<input>',{ 
+          'type': 'radio',
+          'val': option.name,
+          'name': radioName,
+          'id': radioId
+        });
+        var $radioLabel = $('<label>',{ 
+          'for': radioId
+        });
+        $radioLabel.text(option.label);          
+        $radioButton.on('click keypress',function(e) {
+          e.preventDefault();
+          thisObj.handleMenuChoice($(this).val());
+        });
+        $optionItem.append($radioButton,$radioLabel);
+        $optionList.append($optionItem);
+      }      
+    } 
+    $popup.append($optionList);
+    $newButton.on('click keydown',function(e) {   
+      thisObj.handleWindowButtonClick(e);          
+    });
+    this.$activeWindow.append($newButton,$tooltip,$popup);    
+    this.$windowButton = $newButton;
+    this.$windowPopup = $popup;    
+  };
+  
+  AblePlayer.prototype.addResizeDialog = function () { 
+    
+    var thisObj = this; 
+    var widthId = this.mediaId + '-resize-width';
+    var heightId = this.mediaId + '-resize-height'; 
+    var startingWidth = this.$activeWindow.width();
+    var startingHeight = this.$activeWindow.height();
+    
+    var $resizeForm = $('<div></div>',{
+      'class' : 'able-resize-form'
+    }); 
+    
+    // inner container for all content, will be assigned to modal div's aria-describedby 
+    var $resizeWrapper = $('<div></div>');
+
+    // width field
+    var $resizeWidthDiv = $('<div></div>');    
+    var $resizeWidthInput = $('<input>',{ 
+      'type': 'text',
+      'id': widthId,
+      'value': startingWidth      
+    });
+    var $resizeWidthLabel = $('<label>',{ 
+      'for': widthId
+    }).text(this.tt.width);
+
+    /* // Don't prompt for height 
+      
+    // height field
+    var $resizeHeightDiv = $('<div></div>');    
+    var $resizeHeightInput = $('<input>',{ 
+      'type': 'text',
+      'id': heightId,
+      'value': this.$activeWindow.height()      
+    });
+    var $resizeHeightLabel = $('<label>',{ 
+      'for': heightId
+    }).text(this.tt.height);
+    */
+    
+    // Add save and cancel buttons.
+    var $saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    var $cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+    $saveButton.click(function () {
+      var newWidth = $('#' + widthId).val(); 
+      if (newWidth !== startingWidth) { 
+        // var newHeight = Math.round(newWidth * (startingHeight/startingWidth),0);
+        thisObj.$activeWindow.css('width',newWidth);
+        thisObj.$activeWindow.find('video').css({
+          'width' : newWidth + 'px'
+          //'height' : newHeight + 'px'
+        });
+      }
+      thisObj.resizeDialog.hide();
+      thisObj.$windowPopup.hide();
+      thisObj.$windowButton.show().focus();
+    });
+    $cancelButton.click(function () {
+      dialog.hide();
+    });
+
+    // Now assemble all the parts   
+    $resizeWidthDiv.append($resizeWidthLabel,$resizeWidthInput);
+    // $resizeHeightDiv.append($resizeHeightLabel,$resizeHeightInput);
+    $resizeWrapper.append($resizeWidthDiv);
+    $resizeForm.append($resizeWrapper,'<hr>',$saveButton,$cancelButton);
+    
+    // must be appended to the BODY! 
+    // otherwise when aria-hidden="true" is applied to all background content
+    // that will include an ancestor of the dialog, 
+    // which will render the dialog unreadable by screen readers 
+    $('body').append($resizeForm);
+    this.resizeDialog = new AccessibleDialog($resizeForm, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+  };
+  
+  AblePlayer.prototype.handleWindowButtonClick = function (e) { 
+
+    if (e.which > 1) { 
+      // user pressed a key 
+      if (!(e.which === 32 || e.which === 13)) { 
+        // this was not Enter or space. Ignore it 
+        return false;
+      }  
+    } 
+       
+    if (this.hidingPopup) { 
+      // stopgap to prevent keydown from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    
+    this.$windowButton.hide();
+    this.$windowPopup.show();
+    // Focus on the checked button, if any buttons are checked 
+    // Otherwise, focus on the first button 
+    this.$windowPopup.find('li').removeClass('able-focus');
+    if (this.$windowPopup.find('input:checked').val()) { 
+      this.$windowPopup.find('input:checked').focus().parent().addClass('able-focus');
+    }
+    else { 
+      this.$windowPopup.find('input').first().focus().parent().addClass('able-focus');
+    }
+    e.preventDefault();
+  };
+  
+  AblePlayer.prototype.handleMenuChoice = function ( choice ) { 
+
+    var thisObj = this;
+    if (choice == 'move') { 
+      this.showAlert(this.tt.windowMoveAlert,'sign');
+      thisObj.startDrag(); 
+      this.$windowPopup.hide().parent().focus(); 
+    }
+    else if (choice == 'resize') { 
+      this.resizeDialog.show();
+      this.showAlert(this.tt.windowResizeAlert,'sign');
+    }
+    else if (choice == 'sendBack') { 
+      this.$activeWindow.css('z-index','0');
+      // this has the side-effect of making the popup unclickable       
+      this.$windowPopup.css('z-index','4000').hide(); 
+      this.$windowButton.show().focus();
+      this.showAlert(this.tt.windowSendBackAlert,'sign');
+      // change content of radio button       
+      var $thisRadio = this.$windowPopup.find('input:last'); 
+      $thisRadio.val('bringTop'); 
+      $thisRadio.next('label').text(this.tt.windowBringTop);
+    }
+    else if (choice == 'bringTop') { 
+      this.$activeWindow.css({
+        'z-index':'4000'
+      });
+      this.$windowPopup.hide(); 
+      this.$windowButton.show().focus();
+      this.showAlert(this.tt.windowBringTopAlert,'sign');                  
+      // change content of radio button       
+      var $thisRadio = this.$windowPopup.find('input:last'); 
+      $thisRadio.val('sendBack'); 
+      $thisRadio.next('label').text(this.tt.windowSendBack);      
+    }    
+  };
+  
+  AblePlayer.prototype.startDrag = function() { 
+
+    var thisObj, startPos, newX, newY;
+    thisObj = this;
+    
+    // prepare element for dragging
+    this.$activeWindow.addClass('able-drag').css({
+      'position': 'absolute',
+      'top': this.dragStartY + 'px',
+      'left': this.dragStartX + 'px'
+    });
+
+    // get starting position of element
+    startPos = this.$activeWindow.offset();
+    this.dragStartX = this.dXKeys = startPos.left;
+    this.dragStartY = this.dYKeys = startPos.top;     
+    
+    // add listeners 
+    $(document).on('mousedown',function(e) { 
+      thisObj.dragging = true; 
+      
+    // get starting position of mouse 
+      thisObj.startMouseX = e.pageX;
+      thisObj.startMouseY = e.pageY;    
+      // get offset between mouse position and top left corner of draggable element
+      thisObj.dragOffsetX = thisObj.startMouseX - thisObj.dragStartX;
+      thisObj.dragOffsetY = thisObj.startMouseY - thisObj.dragStartY;
+    });
+
+    $(document).on('mousemove',function(e) { 
+      if (thisObj.dragging) { 
+        // calculate new top left based on current mouse position - offset 
+        newX = e.pageX - thisObj.dragOffsetX;
+        newY = e.pageY - thisObj.dragOffsetY;
+        thisObj.resetDraggedObject( newX, newY );
+      }
+    });
+    
+    $(document).on('mouseup',function() { 
+      if (thisObj.dragging) {
+        // finalize the drop
+        thisObj.dragEnd();
+      }
+    });
+
+    this.startingDrag = true;    
+    this.$activeWindow.on('keydown',function(e) { 
+      thisObj.dragKeys(e);
+    });    
+    
+    return false;
+  };
+
+  AblePlayer.prototype.dragKeys = function(e) {
+
+    var key, keySpeed;    
+    // stopgap to prevent firing on initial Enter or space 
+    // that selected "Move" from menu 
+    if (this.startingDrag) { 
+      this.startingDrag = false; 
+      return false;
+    }
+    key = e.which; 
+    keySpeed = 10; // pixels per keypress event
+
+    switch (key) {
+		  case 37:	// left
+      case 63234:
+			  this.dXKeys -= keySpeed;
+        break;
+      case 38:	// up
+      case 63232:
+				this.dYKeys -= keySpeed;
+        break;
+      case 39:	// right
+      case 63235:
+				this.dXKeys += keySpeed;
+        break;
+      case 40:	// down
+      case 63233:
+				this.dYKeys += keySpeed;
+        break;
+      case 13: 	// enter
+      case 27: 	// escape
+				this.dragEnd();
+        return false;
+      default:      
+				return false;
+		}		
+    this.resetDraggedObject(this.dXKeys,this.dYKeys);
+    if (e.preventDefault) {
+  		e.preventDefault();
+    }
+    return false;
+  };
+  AblePlayer.prototype.resetDraggedObject = function ( x, y) {
+    this.$activeWindow.css({ 
+      'left': x + 'px',
+      'top': y + 'px'
+    });
+  },
+  AblePlayer.prototype.dragEnd = function() {
+    $(document).off('mousemove mouseup');
+    this.$activeWindow.off('keydown').removeClass('able-drag'); 
+    this.hidingPopup = true; 
+    this.$windowPopup.hide();
+    this.$windowButton.show().focus();
+    this.dragging = false;
+  };
+  
+})(jQuery);
+
+(function ($) {
   AblePlayer.prototype.initSignLanguage = function() { 
     
+    // Sign language is only currently supported in HTML5 player, not fallback or YouTube
     // only initialize sign language if user wants it 
     // since it requires downloading a second video & consumes bandwidth
-    if (this.prefSignLanguage) {     
+    if (this.player === 'html5' && this.prefSignLanguage) {     
       // check to see if there's a sign language video accompanying this video
       // check only the first source 
       // If sign language is provided, it must be provided for all sources  
@@ -6521,7 +6920,8 @@
     signVideoId = this.mediaId + '-sign';
     this.$signVideo = $('<video>',{ 
       'id' : signVideoId,
-      'width' : this.playerWidth      
+      'width' : this.playerWidth,
+      'tabindex' : '-1' // remove from tab order
     });
     this.signVideo = this.$signVideo[0];
     // for each original <source>, add a <source> to the sign <video> 
@@ -6543,9 +6943,10 @@
       }   
     }
 
-    // TODO: Consider whether width x height should be added to the sign window, or the video element
     this.$signWindow = $('<div>',{
       'class' : 'able-sign-window',
+      'draggable': 'true',
+      'tabindex': '-1'
     });
     this.$signWindow.append(this.$signVideo).hide();
     
@@ -6558,12 +6959,7 @@
       this.splitPlayerIntoColumns('sign');
     }
 
-    this.addSignEvents();    
+    this.initDragDrop(this.$signWindow); 
   };
-  
-  AblePlayer.prototype.addSignEvents = function() { 
-    
-    // populate with functions to handle click and drag on sign window 
-  };  
   
 })(jQuery);
