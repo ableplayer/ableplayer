@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.updateMeta = function (time) {
     if (this.hasMeta) {
       this.$metaDiv.show();
@@ -63,4 +63,4 @@
     return result.join('');
   };
 
-})();
+})(jQuery);

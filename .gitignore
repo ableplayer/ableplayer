@@ -1,2 +1,4 @@
 .DS_Store
 thirdparty/jwplayer.*
+node_modules/
+translations/???.js

@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
 
   AblePlayer.prototype.browserSupportsVolume = function() { 
     // ideally we could test for volume support 
@@ -79,4 +79,4 @@
       document.msFullscreenEnabled;
   };
 
-})();
+})(jQuery);

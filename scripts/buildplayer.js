@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.injectPlayerCode = function() { 
     // create and inject surrounding HTML structure 
     // If IOS: 
@@ -145,7 +145,7 @@
     this.$speed = $('<span>',{
       'class' : 'able-speed',
       'role' : 'alert'
-    }).text('Speed: 1x'); 
+    }).text(this.tt.speed + ': 1x'); 
     
     this.$status = $('<span>',{
       'class' : 'able-status',
@@ -210,24 +210,38 @@
     if (this.transcriptDivLocation) {
       $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
-    else {
-      // Place adjacent to player with reactive flow.
-      this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
-      this.$ableColumnLeft.width(this.playerWidth);
-      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
-      this.$ableColumnRight.width(this.playerWidth);
+    else if (this.$ableColumnRight) {
+      this.$ableColumnRight.prepend(this.$transcriptArea);
     }
-    
+    else {
+      this.splitPlayerIntoColumns('transcript');
+    }
+        
     // If client has provided separate transcript location, override user's preference for hiding transcript
     if (!this.prefTranscript && !this.transcriptDivLocation) { 
       this.$transcriptArea.hide(); 
     }
   };
 
+  AblePlayer.prototype.splitPlayerIntoColumns = function (feature) { 
+    // feature is either 'transcript' or 'sign' 
+    // if present, player is split into two column, with this feature in the right column
+    this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
+    this.$ableColumnLeft.width(this.playerWidth);
+    if (feature === 'transcript') {
+      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
+    }
+    else if (feature == 'sign') { 
+      this.$signArea.insertAfter(this.$ableColumnLeft);
+      this.$ableColumnRight = this.$signArea.wrap('<div class="able-column-right">').parent();      
+    }
+    this.$ableColumnRight.width(this.playerWidth);
+  };
+  
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
-    this.alertBox.addClass('able-tooltip');
+    this.alertBox.addClass('able-alert');
     this.alertBox.appendTo(this.$ableDiv);
     this.alertBox.css({
       top: this.$mediaContainer.offset().top
@@ -274,7 +288,7 @@
       thisObj.scrollingTranscript = false;
     });
 
-    this.$transcriptLanguageSelect.change(function () {
+    this.$transcriptLanguageSelect.change(function () { 
       var language = thisObj.$transcriptLanguageSelect.val();
       for (var ii in thisObj.captions) {
         if (thisObj.captions[ii].language === language) {
@@ -290,115 +304,280 @@
     });
   };
 
-  // Create tooltip with appropriate CSS styling and add to body.
-  AblePlayer.prototype.createTooltip = function () {
-    var thisObj = this;
-    var tooltip = $('<div>');
-    tooltip.attr('role', 'tooltip');
-    tooltip.addClass('able-tooltip');
-
-    // If tabbing off the tooltip, close it.
-    tooltip.keydown(function (e) {
-      // Tab
-      if (e.which === 9) {
-        if (e.shiftKey) {
-          if (tooltip.find('button').first().is(':focus')) {
-            thisObj.closeTooltips();
-            e.preventDefault();
-          }
-        }
-        else {
-          if (tooltip.find('button').last().is(':focus')) {
-            thisObj.closeTooltips();
-            e.preventDefault();
-          }
-        }
-      }
+  // Create popup div and append to player 
+  // 'which' parameter is either 'captions', 'chapters', or 'X-window' (e.g., "sign-window")
+  AblePlayer.prototype.createPopup = function (which) {
+    
+    var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
+        selectedTrackIndex, selectedTrack;
+    thisObj = this;
+    $popup = $('<div>',{
+      'id': this.mediaId + '-' + which + '-menu',
+      'class': 'able-popup' 
     });
 
-
-    this.$ableDiv.append(tooltip);
-    return tooltip;
+    $popup.on('keydown',function (e) {
+console.log('handling keydown on popup');      
+      $thisButton = $(this).find('input:focus');
+      $thisListItem = $thisButton.parent();
+      if ($thisListItem.is(':first-child')) {         
+        // this is the first button
+        $prevButton = $(this).find('input').last(); // wrap to bottom
+        $nextButton = $thisListItem.next().find('input');
+      }  
+      else if ($thisListItem.is(':last-child')) { 
+        // this is the last button 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $(this).find('input').first(); // wrap to top         
+      }
+      else { 
+        $prevButton = $thisListItem.prev().find('input'); 
+        $nextButton = $thisListItem.next().find('input');        
+      }
+      if (e.which === 9) { // Tab
+        if (e.shiftKey) { 
+          $thisListItem.removeClass('able-focus');
+          $prevButton.focus();          
+          $prevButton.parent().addClass('able-focus');
+        }
+        else { 
+          $thisListItem.removeClass('able-focus');
+          $nextButton.focus();
+          $nextButton.parent().addClass('able-focus');          
+        }
+      }
+      else if (e.which === 40 || e.which === 39) { // down or right arrow
+        $thisListItem.removeClass('able-focus');
+        $nextButton.focus();
+        $nextButton.parent().addClass('able-focus');        
+      }
+      else if (e.which == 38 || e.which === 37) { // up or left arrow
+        $thisListItem.removeClass('able-focus');
+        $prevButton.focus();
+        $prevButton.parent().addClass('able-focus');        
+      }
+      else if (e.which === 32 || e.which === 13) { // space or enter
+        $('input:focus').click();        
+      }
+      else if (e.which === 27) {  // Escape 
+        $thisListItem.removeClass('able-focus');        
+        thisObj.closePopups();
+      }
+      e.preventDefault();
+    });
+    this.$controllerDiv.append($popup);
+    return $popup;
   };
 
-  AblePlayer.prototype.closeTooltips = function () {
-    if (this.chaptersTooltip && this.chaptersTooltip.is(':visible')) {
-      this.chaptersTooltip.hide();
+  AblePlayer.prototype.closePopups = function () {
+    if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
+      this.chaptersPopup.hide();
       this.$chaptersButton.focus();
     }
-    if (this.captionsTooltip && this.captionsTooltip.is(':visible')) {
-      this.captionsTooltip.hide();
+    if (this.captionsPopup && this.captionsPopup.is(':visible')) {
+      this.captionsPopup.hide();
       this.$ccButton.focus();
     }
+    if (this.$windowPopup && this.$windowPopup.is(':visible')) {
+      this.$windowPopup.hide();
+      this.$windowButton.show().focus();
+    }    
   };
 
-  // Create and fill in the tooltip forms for various controls.
-  AblePlayer.prototype.setupTooltips = function () {
-    this.setupCaptionsTooltip();
-    this.setupChaptersTooltip();
-  };
-
-  AblePlayer.prototype.setupCaptionsTooltip = function () {
-    var thisObj = this;
-    this.captionsTooltip = this.createTooltip();
-      
-    for (var ii in this.captions) {
-      var track = this.captions[ii];
-      var trackButton = $('<button>');
-      trackButton.html(track.label || track.language);
-      trackButton.attr('tabindex', 0);
-      trackButton.click(this.getCaptionClickFunction(track));
-      
-      this.captionsTooltip.append(trackButton);
-      this.captionsTooltip.append('<br>');
-    }
+  // Create and fill in the popup menu forms for various controls.
+  AblePlayer.prototype.setupPopups = function () {
     
-    // Captions Off option
-    var offButton = $('<button>');
-    offButton.attr('tabindex', 0);
-    offButton.html(this.tt.captionsOff);
-    offButton.click(this.getCaptionOffFunction());
-
-    this.captionsTooltip.append(offButton);
-  };
-
-  AblePlayer.prototype.setupChaptersTooltip = function () {
-    var thisObj = this;
-    this.chaptersTooltip = this.createTooltip();
-
-    for (var ii in this.chapters) {
-      var chapterButton = $('<button>');
-      chapterButton.html(this.flattenCueForCaption(this.chapters[ii]) + ' - ' + this.formatSecondsAsColonTime(this.chapters[ii].start));
-      chapterButton.attr('tabindex', 0);
-      var getClickFunction = function (time) {
-        return function () {
-          thisObj.seekTo(time);
-          thisObj.chaptersTooltip.hide();
-          thisObj.$chaptersButton.focus();
+    var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
+        radioName, radioId, trackButton, trackLabel; 
+    
+    popups = [];     
+    if (this.captions.length > 0) { 
+      popups.push('captions');
+    }
+    if (this.chapters.length > 0) { 
+      popups.push('chapters');
+    }
+    if (popups.length > 0) { 
+      thisObj = this;
+      for (var i=0; i<popups.length; i++) {         
+        var popup = popups[i];              
+        hasDefault = false;
+        if (popup == 'captions') {
+          this.captionsPopup = this.createPopup('captions');
+          tracks = this.captions;           
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup = this.createPopup('chapters');
+          tracks = this.chapters; 
+        }
+        var trackList = $('<ul></ul>');
+        radioName = this.mediaId + '-' + popup + '-choice';
+        for (j in tracks) {
+          trackItem = $('<li></li>');
+          track = tracks[j];          
+          radioId = this.mediaId + '-' + popup + '-' + j;
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'val': j,
+            'name': radioName,
+            'id': radioId
+          });
+          if (track.def) { 
+            trackButton.attr('checked','checked');            
+            hasDefault = true;
+          }          
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          if (track.language !== 'undefined') { 
+            trackButton.attr('lang',track.language);
+          }
+          if (popup == 'captions') { 
+            trackLabel.text(track.label || track.language);          
+            trackButton.click(this.getCaptionClickFunction(track));
+            //trackButton.click(this.handleCaptionRadioSelect(track));
+            // trackButton.keypress(function() { alert('hey!');});
+          }
+          else if (popup == 'chapters') { 
+            trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+            var getClickFunction = function (time) {
+              return function () {
+                thisObj.seekTo(time);
+                thisObj.hidingPopup = true; 
+                thisObj.chaptersPopup.hide();
+                thisObj.$chaptersButton.focus();
+              }
+            }
+            trackButton.on('click keypress',getClickFunction(track.start));
+          }
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);      
+        }
+        if (popup == 'captions') { 
+          // add a captions off button 
+          radioId = this.mediaId + '-captions-off'; 
+          trackItem = $('<li></li>');
+          trackButton = $('<input>',{ 
+            'type': 'radio',
+            'name': radioName,
+            'id': radioId
+          });
+          trackLabel = $('<label>',{ 
+            'for': radioId
+          });
+          trackLabel.text(this.tt.captionsOff);    
+          trackButton.click(this.getCaptionOffFunction());
+          trackItem.append(trackButton,trackLabel);
+          trackList.append(trackItem);          
+        }
+        if (!hasDefault) { 
+          // check the first button 
+          trackList.find('input').first().attr('checked','checked');          
+        }
+        if (popup == 'captions') {
+          this.captionsPopup.append(trackList);
+        }
+        else if (popup == 'chapters') { 
+          this.chaptersPopup.append(trackList);
         }
       }
-      chapterButton.click(getClickFunction(this.chapters[ii].start));
-      
-      this.chaptersTooltip.append(chapterButton);
-      this.chaptersTooltip.append('<br>');
-    }
+    }    
   };
 
-  AblePlayer.prototype.provideFallback = function() {         
-    // provide ultimate fallback for users with no HTML media support, nor JW Player support 
-    // this could be links to download the media file(s) 
-    // but for now is just a message   
-  
-    var msg, msgContainer; 
+  AblePlayer.prototype.provideFallback = function(reason) {             
+    // provide ultimate fallback for users who are unable to play the media
+    // reason is either 'No Support' or a specific error message     
+
+    var fallback, fallbackText, fallbackContainer, showBrowserList, browsers, i, b, browserList, poster, posterImg;
     
-    msg = this.tt['errorNoPlay'] + ' ' + this.tt[this.mediaType] + '. ';
-    msgContainer = $('<div>',{
+    // use fallback content that's nested inside the HTML5 media element, if there is any
+    // any content other than div, p, and ul is rejected 
+
+    fallback = this.$media.find('div,p,ul');
+    showBrowserList = false;
+
+    if (fallback.length === 0) {       
+      if (reason !== 'No Support' && typeof reason !== 'undefined') { 
+        fallback = $('<p>').text(reason); 
+      }
+      else {
+        fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
+        fallbackText += this.tt.fallbackError2 + ':';
+        fallback = $('<p>').text(fallbackText);
+        showBrowserList = true;         
+      }  
+    }
+    fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
-      'role' : 'alert'
+      'role' : 'alert',
+      'width' : this.playerWidth
     });
-    this.$media.before(msgContainer);     
-    msgContainer.text(msg);  
+    this.$media.before(fallbackContainer);     
+    fallbackContainer.html(fallback);  
+    if (showBrowserList) { 
+      browserList = $('<ul>');
+      browsers = this.getSupportingBrowsers();
+      for (i=0; i<browsers.length; i++) { 
+        b = $('<li>');
+        b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
+        browserList.append(b);
+      }
+      fallbackContainer.append(browserList);      
+    }
+    
+    // if there's a poster, show that as well 
+    if (this.$media.attr('poster')) { 
+      poster = this.$media.attr('poster'); 
+      var posterImg = $('<img>',{
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation"
+      });
+      fallbackContainer.append(posterImg);      
+    }
+    
+    // now remove the media element. 
+    // It doesn't work anyway 
+    this.$media.remove();     
   };
+  
+  AblePlayer.prototype.getSupportingBrowsers = function() { 
+    
+    var browsers = []; 
+    browsers[0] = { 
+      name:'Chrome', 
+      minVersion: '31'
+    };
+    browsers[1] = { 
+      name:'Firefox', 
+      minVersion: '34'
+    };
+    browsers[2] = { 
+      name:'Internet Explorer', 
+      minVersion: '10'
+    };
+    browsers[3] = { 
+      name:'Opera', 
+      minVersion: '26'
+    };
+    browsers[4] = { 
+      name:'Safari for Mac OS X', 
+      minVersion: '7.1'
+    };
+    browsers[5] = { 
+      name:'Safari for iOS', 
+      minVersion: '7.1'
+    };
+    browsers[6] = { 
+      name:'Android Browser', 
+      minVersion: '4.1'
+    };    
+    browsers[7] = { 
+      name:'Chrome for Android', 
+      minVersion: '40' 
+    };
+    return browsers;
+  }
 
   AblePlayer.prototype.addHelp = function() {   
     // create help text that will be displayed in a modal dialog 
@@ -447,11 +626,19 @@
         key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
       }
       else if (this.controls[i] === 'captions') { 
-        if (this.captionsOn) { 
-          label = this.tt.hideCaptions;
-        }
+        if (this.captions.length > 1) { 
+          // caption button launches a Captions popup menu
+          label = this.tt.captions;
+        }        
         else { 
-          label = this.tt.showCaptions;
+          // there is only one caption track
+          // therefore caption button is a toggle
+          if (this.captionsOn) { 
+            label = this.tt.hideCaptions;
+          }
+          else { 
+            label = this.tt.showCaptions;
+          }
         }
         key = 'c';
       }
@@ -492,9 +679,7 @@
     helpText += '</ul>\n';
     
     // Now assemble all the parts   
-    $helpTextWrapper.append($helpIntro);
-    $helpTextWrapper.append(helpText);
-    $helpTextWrapper.append($helpDisclaimer);
+    $helpTextWrapper.append($helpIntro, helpText, $helpDisclaimer);
     $helpDiv.append($helpTextWrapper);
     
     // must be appended to the BODY! 
@@ -549,11 +734,11 @@
       if (this.hasCaptions) {
         blr.push('captions'); //closed captions
       }
-      if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('descriptions'); //audio description 
-      }
       if (this.hasSignLanguage) { 
         blr.push('sign'); // sign language
+      }
+      if (this.hasOpenDesc || this.hasClosedDesc) { 
+        blr.push('descriptions'); //audio description 
       }
     }
 
@@ -601,10 +786,12 @@
     // some controls are aligned on the left, and others on the right 
   
     var useSpeedButtons, useFullScreen, 
-    i, j, controls, controllerSpan, control, 
+    i, j, controls, controllerSpan, tooltipId, tooltipDiv, tooltipX, tooltipY, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
-    controllerStyles, vidcapStyles;  
+    controllerStyles, vidcapStyles, captionLabel;  
+    
+    var thisObj = this;
     
     var baseSliderWidth = 100;
 
@@ -612,7 +799,16 @@
     var controlLayout = this.calculateControlLayout();
     
     var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
-    // now step separately through left and right controls
+    
+    // add an empty div to serve as a tooltip
+    tooltipId = this.mediaId + '-tooltip';
+    tooltipDiv = $('<div>',{
+      'id': tooltipId,
+      'class': 'able-tooltip' 
+    });
+    this.$controllerDiv.append(tooltipDiv);
+    
+    // step separately through left and right controls
     for (i = 0; i <= 3; i++) {
       controls = controlLayout[sectionByOrder[i]];
       if ((i % 2) === 0) {        
@@ -626,6 +822,7 @@
         });
       }
       this.$controllerDiv.append(controllerSpan);
+      
       for (j=0; j<controls.length; j++) { 
         control = controls[j];
         if (control === 'seek') { 
@@ -665,10 +862,20 @@
             buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control); 
+
+          // icomoon documentation recommends the following markup for screen readers: 
+          // 1. link element (or in our case, button). Nested inside this element: 
+          // 2. span that contains the icon font (in our case, buttonIcon)
+          // 3. span that contains a visually hidden label for screen readers (buttonLabel)
+          // In addition, we are adding aria-label to the button (but not title) 
+          // And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
+          // This has been thoroughly tested and works well in all screen reader/browser combinations 
+          // See https://github.com/ableplayer/ableplayer/issues/81
+
           newButton = $('<button>',{ 
             'type': 'button',
             'tabindex': '0',
-            'title': buttonTitle,
+            'aria-label': buttonTitle,
             'class': 'able-button-handler-' + control
           });        
           if (this.iconType === 'font') {
@@ -676,31 +883,7 @@
             buttonIcon = $('<span>',{ 
               'class': iconClass,
               'aria-hidden': 'true'
-            })   
-            // icomoon documentation recommends the following markup for screen readers: 
-            // 1. link element (or in our case, button). Nested inside this element: 
-            // 2. span that contains the icon font (in our case, buttonIcon)
-            // 3. span that contains a visually hidden label for screen readers (buttonLabel)
-            // Screen reader test results: 
-            // - VoiceOver (Mac OS X Mountain Lion) reads "Play button" 
-            // - JAWS 15 in IE11 reads "Play button" 
-            // - NVDA 2014.3 in IE11 reads "Play button" 
-            // - JAWS 15 in Firefox 33.1 reads "Play button... play. To activate press space bar" 
-            // - NVDA 2014.3 in Firefox 33.1 reads "Play button play", BUT 
-            //   when a button has focus and user presses space or enter, focus moves to the next button 
-            //   and the keypress is NOT handled. 
-            //   This is a bug that only happens in NVDA/Firefox the visually hidden span is present
-            // If we ommit buttonLabel on rely on screen readers to read aria-label on the button element 
-            // we get better results: 
-            // - NVDA/Firefox bug is fixed 
-            //   (also, NVDA now announces "Button Play" so redundant label annoyance is fixed)
-            // - All other test results are the same as above
-            
-            var buttonLabel = $('<span>',{
-            'class': 'able-clipped'
-            }).text(buttonTitle);
-            // See above note - Not adding buttonLabel in order to fix NVDA/Firefox bug
-            // newButton.append(buttonIcon,buttonLabel);
+            })               
             newButton.append(buttonIcon);
           }
           else { 
@@ -712,10 +895,76 @@
             });
             newButton.append(buttonImg);
           }
+          // add the visibly-hidden label for screen readers that don't support aria-label on the button
+          var buttonLabel = $('<span>',{
+            'class': 'able-clipped'
+          }).text(buttonTitle);
+          newButton.append(buttonLabel);
+          // add an event listener that displays a tooltip on mouseenter or focus 
+          newButton.on('mouseenter focus',function(event) { 
+            var label = $(this).attr('aria-label');
+            // get position of this button 
+            var position = $(this).position(); 
+            var buttonHeight = $(this).height();
+            var buttonWidth = $(this).width();
+            var tooltipY = position.top - buttonHeight - 15;
+            var centerTooltip = true; 
+            if ($(this).closest('span').hasClass('able-right-controls')) { 
+              // this control is on the right side 
+              if ($(this).is(':last-child')) { 
+                // this is the last control on the right 
+                // position tooltip using the "right" property 
+                centerTooltip = false;
+                // var tooltipX = thisObj.playerWidth - position.left - buttonWidth;
+                var tooltipX = 0; 
+                var tooltipStyle = { 
+                  left: '',
+                  right: tooltipX + 'px',
+                  top: tooltipY + 'px'
+                };
+              }
+            }
+            else { 
+              // this control is on the left side
+              if ($(this).is(':first-child')) { 
+                // this is the first control on the left
+                centerTooltip = false;
+                var tooltipX = position.left;
+                var tooltipStyle = { 
+                  left: tooltipX + 'px',
+                  right: '',
+                  top: tooltipY + 'px'
+                };                
+              }
+            }
+            if (centerTooltip) { 
+              // populate tooltip, then calculate its width before showing it 
+              var tooltipWidth = $('#' + tooltipId).text(label).width();
+              // center the tooltip horizontally over the button
+              var tooltipX = position.left - tooltipWidth/2;
+              var tooltipStyle = { 
+                left: tooltipX + 'px',
+                right: '',
+                top: tooltipY + 'px'
+              };
+            }
+            
+            $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+            $(this).on('mouseleave blur',function() { 
+              $('#' + tooltipId).text('').hide();
+            })
+          });
+          
           if (control === 'captions') { 
             if (!this.prefCaptions || this.prefCaptions !== 1) { 
               // captions are available, but user has them turned off 
-              newButton.addClass('buttonOff').attr('title',this.tt.showCaptions);
+              if (this.captions.length > 1) { 
+                captionLabel = this.tt.captions;
+              }
+              else { 
+                captionLabel = this.tt.showCaptions;
+              }
+              newButton.addClass('buttonOff').attr('title',captionLabel);
             }
           }
           else if (control === 'descriptions') {      
@@ -734,6 +983,9 @@
           }
           else if (control === 'captions') { 
             this.$ccButton = newButton;
+          }
+          else if (control === 'sign') { 
+            this.$signButton = newButton;
           }
           else if (control === 'descriptions') {        
             this.$descButton = newButton; 
@@ -946,7 +1198,7 @@
     else if (control === 'chapters') { 
       return this.tt.chapters;
     }
-    else if (control === 'sign') { // not yet supported 
+    else if (control === 'sign') { 
       return this.tt.sign;
     }
     else if (control === 'mute') { 
@@ -987,4 +1239,4 @@
   };
 
 
-})();
+})(jQuery);

@@ -1,5 +1,5 @@
-(function () {
-  AblePlayer.prototype.updateCaption = function (time) {
+(function ($) {
+  AblePlayer.prototype.updateCaption = function (time) {    
     if (this.captionsOn) {
       this.$captionDiv.show();
       this.showCaptions(time || this.getElapsed());
@@ -9,12 +9,13 @@
     }
   };
 
-  // Returns the function used when a caption is clicked in the captions tooltip.
+  // Returns the function used when a caption is clicked in the captions menu.
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
       thisObj.captionsOn = true;
       thisObj.selectedCaptions = track;
+      thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
       // Try and find a matching description track.
       for (var ii in thisObj.descriptions) {
@@ -23,7 +24,8 @@
           thisObj.currentDescription = -1;
         }
       }
-      thisObj.captionsTooltip.hide();
+      thisObj.hidingPopup = true;     
+      thisObj.captionsPopup.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -37,7 +39,7 @@
     return function () {
       thisObj.captionsOn = false;
       thisObj.currentCaption = -1;
-      thisObj.captionsTooltip.hide();
+      thisObj.captionsPopup.hide();
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
@@ -46,7 +48,6 @@
 
   AblePlayer.prototype.showCaptions = function(now) { 
     var c, thisCaption; 
-  
     var cues;
     if (this.selectedCaptions) {
       cues = this.selectedCaptions.cues;
@@ -106,4 +107,4 @@
     return result.join('');
   };
 
-})();
+})(jQuery);

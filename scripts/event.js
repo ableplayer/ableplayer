@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
     if (!this.startedPlaying) {
@@ -165,8 +165,8 @@
     else if (whichButton === 'descriptions') { 
       this.handleDescriptionToggle();
     }
-    else if (whichButton.substr(0,4) === 'sign') { 
-      // not yet supported
+    else if (whichButton === 'sign') { 
+      this.handleSignToggle();
     }
     else if (whichButton === 'preferences') { 
       this.handlePrefsClick();
@@ -211,9 +211,8 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-
     if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
-      this.closeTooltips();
+      this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause     
       if (!($('.able-controller button').is(':focus'))) { 
@@ -526,4 +525,4 @@
       }, 300);
     }
   };
-})();
+})(jQuery);

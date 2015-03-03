@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.setCookie = function(cookieValue) { 
     $.cookie.json = true;
     if ($.isFunction($.cookie)) { 
@@ -60,6 +60,12 @@
         'name': 'prefCaptions', // closed captions default state 
         'label': this.tt.prefCaptions,
         'default': 1 // on because many users can benefit
+      });
+
+      prefs.push({
+        'name': 'prefSignLanguage', // use sign language if available 
+        'label': this.tt.prefSignLanguage,
+        'default': 1 // on because in rare cases that it's actually available, users should be exposed to it
       });
       
       prefs.push({
@@ -173,11 +179,11 @@
     });
     
     featuresFieldset = $('<fieldset>');
-    featuresLegend = $('<legend>Features</legend>');      
+    featuresLegend = $('<legend>' + this.tt.prefFeatures + '</legend>');      
     featuresFieldset.append(featuresLegend);  
     
     keysFieldset = $('<fieldset>');
-    keysLegend = $('<legend>Modifier Keys</legend>');       
+    keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');       
     keysFieldset.append(keysLegend);  
     
     for (i=0; i<available.length; i++) { 
@@ -221,8 +227,8 @@
     
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
-    var saveButton = $('<button class="modal-button">Save</button>');
-    var cancelButton = $('<button class="modal-button">Cancel</button>');
+    var saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    var cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();
@@ -326,4 +332,4 @@
     return true; 
   };
 
-})();
+})(jQuery);

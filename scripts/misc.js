@@ -1,4 +1,4 @@
-(function () {
+(function ($) {
   AblePlayer.prototype.countProperties = function(obj) { 
     // returns the number of properties in an object 
     var count, prop; 
@@ -22,4 +22,4 @@
     return dMinutes + ':' + dSeconds;
   };
 
-})();
+})(jQuery);

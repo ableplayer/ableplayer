@@ -1,4 +1,5 @@
 {
+  
 "playerHeading": "Media player",
 
 "faster": "Faster",
@@ -14,6 +15,8 @@
 "rewind": "Rewind",
 
 "forward": "Forward",
+
+"captions": "Captions",
 
 "showCaptions": "Show captions",
 
@@ -35,6 +38,10 @@
 
 "sign": "Sign language",
 
+"showSign": "Show sign language",
+
+"hideSign": "Hide sign language",
+
 "mute": "Mute",
 
 "unmute": "Unmute",
@@ -52,6 +59,8 @@
 "exitFullScreen": "Exit full screen",
 
 "fullScreen": "Full screen",
+
+"speed": "Speed",
 
 "audio": "audio",
 
@@ -89,7 +98,11 @@
 
 "selectedTrack": "Selected Track",
 
-"errorNoPlay": "Sorry,your browser is unable to play this",
+"fallbackError1": "Sorry, your browser is unable to play this",
+
+"fallbackError2": "The following browsers are known to work with this media player",
+
+"orHigher": "or higher",
 
 "prefTitle": "Preferences",
 
@@ -106,6 +119,8 @@
 "prefShiftKey": "Shift",
 
 "prefCaptions": "Closed captions on by default",
+
+"prefSignLanguage": "Show sign language if available",
 
 "prefDesc": "Description on by default",
 
@@ -141,6 +156,30 @@
 
 "done": "Done",
 
-"closeButtonLabel": "Close dialog"
+"closeButtonLabel": "Close dialog",
+
+"windowButtonLabel": "Window options",
+
+"windowMove": "Move", 
+
+"windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
+
+"windowResize": "Resize", 
+
+"windowResizeHeading": "Resize Interpreter Window",
+
+"windowResizeAlert": "The window has been resized.",
+
+"width": "Width",
+
+"height": "Height",
+
+"windowSendBack": "Send to back", 
+
+"windowSendBackAlert": "This window is now behind other objects on the page.",
+
+"windowBringTop": "Bring to front",
+
+"windowBringTopAlert": "This window is now in front of other objects on the page."
 
 }

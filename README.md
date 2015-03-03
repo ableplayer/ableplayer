@@ -22,7 +22,7 @@ Features
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so. 
 -   An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. 
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. 
--   Support for playing YouTube videos within the AblePlayer chrome.  
+-   Support for playing YouTube videos within the Able Player chrome.  
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
     
@@ -65,10 +65,11 @@ Fallback
 
 For older browsers that don’t support HTML5 media elements, you need a
 fallback solution. *Able Player* was developed to work seamlessly with
-[JW Player][], specifically **JW Player 6**. JW Player is free for
-non-commercial use but is licensed separately and is not distributed
-with *Able Player*. If you choose to use JW Player as your fallback
-player, users with older browsers including Internet Explorer 6-8 will
+[JW Player][], specifically **JW Player 6** (successfully tested with  
+versions 6.0 and 6.11). JW Player is free for non-commercial use but 
+is licensed separately and is not distributed with *Able Player*. 
+If you choose to use JW Player as your fallback player, 
+users with older browsers including Internet Explorer 6-8 will
 have the same experience with *Able Player* as users with newer
 browsers. Identical functionality has been attained using both the HTML5
 and JW Player APIs. After licensing and downloading JW PLayer, copy
@@ -181,9 +182,10 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
 -   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
+-   **data-fallback-path** - optional; override default path to directory in which the fallback player files or stored   
+-   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
 -   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
--   **data-translation-path** - optional; override default path to translations directory (NOTE: the translations directory includes *all* languages, including English, so the player will fail if it is unable to find this directory)
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload=“auto”**, which instructs the browser to
@@ -255,6 +257,29 @@ alternate video with description mixed in, that’s what they’ll get. See
 the section below on *User Preferences* for additional information about
 preferences.
 
+#### Sign language
+
+Sign language translation is supported in a separate video player, 
+synchronized with the main player. Tips for filming a sign language 
+interpreter are available from [Signing Books for the Deaf][]: 
+
+* [Filming the Signer][] 
+* [Editing the Signer][]
+
+If multiple video sources are already provided (e.g., an MP4 and
+WebM file), then the sign language video must be available in both of
+these formats. For each video source that has a sign language version
+available, add a **data-sign-src** attribute to the \<source\> element for
+that video. The value of this attribute is a path pointing to the
+sign language version of the video. If a sign language version is available, 
+a sign language button will be added to the media controller. 
+This button will toggle the display of a secondary window in which 
+the sign language video will appear. 
+
+This is an experimental feature and a work in progress. Ultimately 
+the intent is for the user to have full control of the size and position 
+of the sign language video.  
+
 Setup Step 4: Review User-Defined Variables in *ableplayer.js*
 --------------------------------------------------------------
 
@@ -317,7 +342,7 @@ If your web page includes a playlist, you should also link to the
 *ableplayer-playlist.css* file, as follows:
 
 ```HTML
-<link rel="stylesheet" href="styles/ump-playlist.css" type="text/css"/>
+<link rel="stylesheet" href="styles/ableplayer-playlist.css" type="text/css"/>
 ```
 
 Interactive Transcript
@@ -439,7 +464,34 @@ users can control the following:
 -   Highlight transcript as video plays
 -   Keyboard-enable transcript
 
+Building the Able Player source
+-------------------------------
 
+The source JavaScript files for Able Player are in the */scripts* directory, 
+and are combined into several different files (in the */build* directory) using 
+[npm][] and [Grunt][]:
+
+```sh
+npm install
+grunt
+```
+
+The npm and Grunt build process is defined by the *Gruntfile.js* and *package.json*
+files. (Note that the **version number** is specified in *package.json*, and must be 
+updated when a new version is released).
+
+Files created by the build process are put into the */build* directory:
+
+- **build/ableplayer.js** - 
+  the default build of *ableplayer.js*
+- **build/ableplayer.dist.js** - 
+  a build of *ableplayer.js* without console logging
+- **build/ableplayer.min.js** - 
+  a minified version of the *dist* file
+- **build/ableplayer.min.css** - 
+  a minified version of the *styles/ableplayer.css* file
+ 
+ 
   [examples]: http://ableplayer.github.io/ableplayer/tests/
   [jQuery]: http://jquery.com/
   [Modernizr]: http://modernizr.com/
@@ -448,6 +500,9 @@ users can control the following:
   [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
   [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
-  
-
+  [npm]: https://www.npmjs.com/
+  [Grunt]: http://gruntjs.com/
+  [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
+  [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
+  [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
 
