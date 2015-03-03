@@ -58,7 +58,7 @@ and (optionally) the JW Player as a fallback for those that don’t.</p>
 <li>  Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so. </li>
 <li>  An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. </li>
 <li>  Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. </li>
-<li>  Support for playing YouTube videos within the AblePlayer chrome.<br>
+<li>  Support for playing YouTube videos within the Able Player chrome.<br>
 </li>
 <li>  Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.</li>
 <li>  Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. </li>
@@ -106,10 +106,11 @@ Player</em>.</li>
 
 <p>For older browsers that don’t support HTML5 media elements, you need a
 fallback solution. <em>Able Player</em> was developed to work seamlessly with
-<a href="http://www.jwplayer.com/">JW Player</a>, specifically <strong>JW Player 6</strong>. JW Player is free for
-non-commercial use but is licensed separately and is not distributed
-with <em>Able Player</em>. If you choose to use JW Player as your fallback
-player, users with older browsers including Internet Explorer 6-8 will
+<a href="http://www.jwplayer.com/">JW Player</a>, specifically <strong>JW Player 6</strong> (successfully tested with<br>
+versions 6.0 and 6.11). JW Player is free for non-commercial use but 
+is licensed separately and is not distributed with <em>Able Player</em>. 
+If you choose to use JW Player as your fallback player, 
+users with older browsers including Internet Explorer 6-8 will
 have the same experience with <em>Able Player</em> as users with newer
 browsers. Identical functionality has been attained using both the HTML5
 and JW Player APIs. After licensing and downloading JW PLayer, copy
@@ -223,17 +224,20 @@ adjacent to the player.<br>
 </li>
 <li>  <strong>data-fallback</strong> - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)</li>
 <li>  <strong>data-test-fallback</strong> - optional; force browser to user fallback player (recommended for testing only) </li>
+<li>  <strong>data-fallback-path</strong> - optional; override default path to directory in which the fallback player files or stored<br>
+</li>
+<li>  <strong>data-translation-path</strong> - optional; override default path to translations directory (NOTE: the translations directory includes <em>all</em> languages, including English, so the player will fail if it is unable to find this directory)</li>
 <li>  <strong>data-lang</strong> - optional; specify language of the player using 2-character language code (default is "en" for English)</li>
 <li>  <strong>data-force-lang</strong> - optional; include this option to force the player to use the value of <em>data-lang</em> as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of <em>data-lang</em> if provided; 3) English. </li>
-<li>  <strong>data-translation-path</strong> - optional; override default path to translations directory (NOTE: the translations directory includes <em>all</em> languages, including English, so the player will fail if it is unable to find this directory)</li>
 <li>  <strong>preload</strong> - optional; tells the browser how much media to download
 when the page loads. If the media is the central focus of the web
 page, use <strong>preload=“auto”</strong>, which instructs the browser to
 download as much of the media as possible. If the media is not a
 central focus, downloading the entire media resource can consume
 valuable bandwidth, so preload=“metadata” would be a better option.</li>
-<li><strong>data-search</strong> - optional; search terms to search for within the caption tracks, separated by a space</li>
-<li><strong>data-search-div</strong> - optional; id of external container in which to display search results</li>
+<li>  <strong>data-search</strong> - optional; search terms to search for within the caption tracks, separated by a space<br>
+</li>
+<li>  <strong>data-search-div</strong> - optional; id of external container in which to display search results</li>
 </ul>
 
 <p>The following attributes are supported on the &lt;video&gt; element only:</p>
@@ -303,6 +307,33 @@ alternate video with description mixed in, that’s what they’ll get. See
 the section below on <em>User Preferences</em> for additional information about
 preferences.</p>
 
+<h4>
+<a id="sign-language" class="anchor" href="#sign-language" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sign language</h4>
+
+<p>Sign language translation is supported in a separate video player, 
+synchronized with the main player. Tips for filming a sign language 
+interpreter are available from <a href="http://www.sign-lang.uni-hamburg.de/signingbooks/">Signing Books for the Deaf</a>: </p>
+
+<ul>
+<li>
+<a href="http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm">Filming the Signer</a> </li>
+<li><a href="http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm">Editing the Signer</a></li>
+</ul>
+
+<p>If multiple video sources are already provided (e.g., an MP4 and
+WebM file), then the sign language video must be available in both of
+these formats. For each video source that has a sign language version
+available, add a <strong>data-sign-src</strong> attribute to the &lt;source&gt; element for
+that video. The value of this attribute is a path pointing to the
+sign language version of the video. If a sign language version is available, 
+a sign language button will be added to the media controller. 
+This button will toggle the display of a secondary window in which 
+the sign language video will appear. </p>
+
+<p>This is an experimental feature and a work in progress. Ultimately 
+the intent is for the user to have full control of the size and position 
+of the sign language video.  </p>
+
 <h2>
 <a id="setup-step-4-review-user-defined-variables-in-ableplayerjs" class="anchor" href="#setup-step-4-review-user-defined-variables-in-ableplayerjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup Step 4: Review User-Defined Variables in <em>ableplayer.js</em>
 </h2>
@@ -370,7 +401,7 @@ should match the first item in the playlist.</p>
 <p>If your web page includes a playlist, you should also link to the
 <em>ableplayer-playlist.css</em> file, as follows:</p>
 
-<div class="highlight highlight-HTML"><pre>&lt;<span class="pl-ent">link</span> <span class="pl-e">rel</span>=<span class="pl-s1"><span class="pl-pds">"</span>stylesheet<span class="pl-pds">"</span></span> <span class="pl-e">href</span>=<span class="pl-s1"><span class="pl-pds">"</span>styles/ump-playlist.css<span class="pl-pds">"</span></span> <span class="pl-e">type</span>=<span class="pl-s1"><span class="pl-pds">"</span>text/css<span class="pl-pds">"</span></span>/&gt;</pre></div>
+<div class="highlight highlight-HTML"><pre>&lt;<span class="pl-ent">link</span> <span class="pl-e">rel</span>=<span class="pl-s1"><span class="pl-pds">"</span>stylesheet<span class="pl-pds">"</span></span> <span class="pl-e">href</span>=<span class="pl-s1"><span class="pl-pds">"</span>styles/ableplayer-playlist.css<span class="pl-pds">"</span></span> <span class="pl-e">type</span>=<span class="pl-s1"><span class="pl-pds">"</span>text/css<span class="pl-pds">"</span></span>/&gt;</pre></div>
 
 <h2>
 <a id="interactive-transcript" class="anchor" href="#interactive-transcript" aria-hidden="true"><span class="octicon octicon-link"></span></a>Interactive Transcript</h2>
@@ -499,6 +530,38 @@ shortcuts to avoid conflicts with other applications.</li>
 <li>  Transcript on by default </li>
 <li>  Highlight transcript as video plays</li>
 <li>  Keyboard-enable transcript</li>
+</ul>
+
+<h2>
+<a id="building-the-able-player-source" class="anchor" href="#building-the-able-player-source" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building the Able Player source</h2>
+
+<p>The source JavaScript files for Able Player are in the <em>/scripts</em> directory, 
+and are combined into several different files (in the <em>/build</em> directory) using 
+<a href="https://www.npmjs.com/">npm</a> and <a href="http://gruntjs.com/">Grunt</a>:</p>
+
+<div class="highlight highlight-sh"><pre>npm install
+grunt</pre></div>
+
+<p>The npm and Grunt build process is defined by the <em>Gruntfile.js</em> and <em>package.json</em>
+files. (Note that the <strong>version number</strong> is specified in <em>package.json</em>, and must be 
+updated when a new version is released).</p>
+
+<p>Files created by the build process are put into the <em>/build</em> directory:</p>
+
+<ul>
+<li>
+<strong>build/ableplayer.js</strong> - 
+the default build of <em>ableplayer.js</em>
+</li>
+<li>
+<strong>build/ableplayer.dist.js</strong> - 
+a build of <em>ableplayer.js</em> without console logging</li>
+<li>
+<strong>build/ableplayer.min.js</strong> - 
+a minified version of the <em>dist</em> file</li>
+<li>
+<strong>build/ableplayer.min.css</strong> - 
+a minified version of the <em>styles/ableplayer.css</em> file</li>
 </ul>
       </section>
     </div>
