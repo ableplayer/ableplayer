@@ -310,8 +310,13 @@
     this.setupTracks().then(function () {
       thisObj.setupPopups();
       thisObj.initDescription();
+      thisObj.updateDescription();      
       thisObj.initializing = false;
       thisObj.initPlayer();
+      thisObj.initDefaultCaption(); 
+      thisObj.updateCaption();
+      thisObj.updateTranscript(); 
+      thisObj.showSearchResults();      
     });
   };
 
@@ -344,12 +349,14 @@
       thisObj.setFullscreen(false);
       thisObj.setVolume(thisObj.defaultVolume);
       thisObj.initializing = true;
-      // If using open description (as determined previously based on prefs & availability)
-      // swap media file now 
+      // Moved this block to recreatePlayer() 
+      // Preserved here to ensure there are no problems
+/*
       thisObj.updateDescription();
       thisObj.updateCaption();
       thisObj.updateTranscript();
       thisObj.showSearchResults();
+*/      
       thisObj.initializing = false;
       thisObj.refreshControls();
 
@@ -374,6 +381,32 @@
     });
     
     return promise;
+  };
+  
+  AblePlayer.prototype.initDefaultCaption = function () { 
+    var i; 
+    if (this.captions.length > 0) { 
+      for (i=0; i<this.captions.length; i++) { 
+        if (this.captions[i].def === true) { 
+          this.captionLang = this.captions[i].language;
+          this.selectedCaptions = this.captions[i];
+        }
+      }
+    }
+    if (typeof this.captionLang === 'undefined') { 
+      // find and use a caption language that matches the player language       
+      for (i=0; i<this.captions.length; i++) { 
+        if (this.captions[i].language === this.lang) { 
+          this.captionLang = this.captions[i].language;
+          this.selectedCaptions = this.captions[i];
+        }
+      }
+    }
+    if (typeof this.captionLang === 'undefined') { 
+      // just use the first track 
+      this.captionLang = this.captions[0].language;
+      this.selectedCaptions = this.captions[0];
+    }
   };
 
   AblePlayer.prototype.initHtml5Player = function () {

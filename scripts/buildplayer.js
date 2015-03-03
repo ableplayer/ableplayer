@@ -288,7 +288,7 @@
       thisObj.scrollingTranscript = false;
     });
 
-    this.$transcriptLanguageSelect.change(function () {
+    this.$transcriptLanguageSelect.change(function () { 
       var language = thisObj.$transcriptLanguageSelect.val();
       for (var ii in thisObj.captions) {
         if (thisObj.captions[ii].language === language) {

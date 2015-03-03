@@ -7,13 +7,15 @@
     var captions;
     var descriptions;
     var captionLang;
-    if (this.transcriptCaptions) {
+    if (this.transcriptCaptions) {   
+      // use this independently of this.selectedCaptions 
+      // user might want captions in one language, transcript in another   
       captionLang = this.transcriptCaptions.language;
       captions = this.transcriptCaptions.cues;
     }
-    else if (this.captions.length > 0) {
-      captionLang = this.captions[0].language;
-      captions = this.captions[0].cues;
+    else if (this.selectedCaptions) { 
+      captionLang = this.captionLang; 
+      captions = this.selectedCaptions.cues;
     }
     if (this.transcriptDescriptions) {
       descriptions = this.transcriptDescriptions.cues;

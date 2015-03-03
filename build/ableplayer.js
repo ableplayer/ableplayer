@@ -557,8 +557,13 @@
     this.setupTracks().then(function () {
       thisObj.setupPopups();
       thisObj.initDescription();
+      thisObj.updateDescription();      
       thisObj.initializing = false;
       thisObj.initPlayer();
+      thisObj.initDefaultCaption(); 
+      thisObj.updateCaption();
+      thisObj.updateTranscript(); 
+      thisObj.showSearchResults();      
     });
   };
 
@@ -591,12 +596,14 @@
       thisObj.setFullscreen(false);
       thisObj.setVolume(thisObj.defaultVolume);
       thisObj.initializing = true;
-      // If using open description (as determined previously based on prefs & availability)
-      // swap media file now 
+      // Moved this block to recreatePlayer() 
+      // Preserved here to ensure there are no problems
+/*
       thisObj.updateDescription();
       thisObj.updateCaption();
       thisObj.updateTranscript();
       thisObj.showSearchResults();
+*/      
       thisObj.initializing = false;
       thisObj.refreshControls();
 
@@ -621,6 +628,32 @@
     });
     
     return promise;
+  };
+  
+  AblePlayer.prototype.initDefaultCaption = function () { 
+    var i; 
+    if (this.captions.length > 0) { 
+      for (i=0; i<this.captions.length; i++) { 
+        if (this.captions[i].def === true) { 
+          this.captionLang = this.captions[i].language;
+          this.selectedCaptions = this.captions[i];
+        }
+      }
+    }
+    if (typeof this.captionLang === 'undefined') { 
+      // find and use a caption language that matches the player language       
+      for (i=0; i<this.captions.length; i++) { 
+        if (this.captions[i].language === this.lang) { 
+          this.captionLang = this.captions[i].language;
+          this.selectedCaptions = this.captions[i];
+        }
+      }
+    }
+    if (typeof this.captionLang === 'undefined') { 
+      // just use the first track 
+      this.captionLang = this.captions[0].language;
+      this.selectedCaptions = this.captions[0];
+    }
   };
 
   AblePlayer.prototype.initHtml5Player = function () {
@@ -2230,7 +2263,7 @@
       thisObj.scrollingTranscript = false;
     });
 
-    this.$transcriptLanguageSelect.change(function () {
+    this.$transcriptLanguageSelect.change(function () { 
       var language = thisObj.$transcriptLanguageSelect.val();
       for (var ii in thisObj.captions) {
         if (thisObj.captions[ii].language === language) {
@@ -3204,6 +3237,7 @@ console.log('handling keydown on popup');
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
+      var isDefaultTrack = track.getAttribute('default'); 
 
       if (!trackSrc) {
         // Nothing to load!
@@ -3231,7 +3265,7 @@ console.log('handling keydown on popup');
         }
       })(track, kind));
     }
-
+    
     $.when.apply($, loadingPromises).then(function () {
       deferred.resolve();
     });
@@ -3256,7 +3290,6 @@ console.log('handling keydown on popup');
     else { 
       var isDefaultTrack = false;
     }
-      
     // caption cues from WebVTT are used to build a transcript for both audio and video 
     // but captions are currently only supported for video 
     if (this.mediaType === 'video') { 
@@ -4971,6 +5004,14 @@ console.log('handling keydown on popup');
         // captions are off. Turn them on. 
         this.captionsOn = true;
         this.$captionDiv.show();
+console.log('SelectedCaptions:');
+console.log(typeof this.selectedCaptions);        
+console.log(this.selectedCaptions);
+        for (var i=0; i<this.captions.length; i++) { 
+          if (this.captions[i].def === true) { // this is the default language
+            this.selectedCaptions = this.captions[i];          
+          }
+        }
         this.selectedCaptions = this.captions[0];
         if (this.descriptions.length >= 0) {
           this.selectedDescriptions = this.descriptions[0];
@@ -5277,7 +5318,7 @@ console.log('handling keydown on popup');
 })(jQuery);
 
 (function ($) {
-  AblePlayer.prototype.updateCaption = function (time) {
+  AblePlayer.prototype.updateCaption = function (time) {    
     if (this.captionsOn) {
       this.$captionDiv.show();
       this.showCaptions(time || this.getElapsed());
@@ -5293,6 +5334,7 @@ console.log('handling keydown on popup');
     return function () {
       thisObj.captionsOn = true;
       thisObj.selectedCaptions = track;
+      thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
       // Try and find a matching description track.
       for (var ii in thisObj.descriptions) {
@@ -5325,7 +5367,6 @@ console.log('handling keydown on popup');
 
   AblePlayer.prototype.showCaptions = function(now) { 
     var c, thisCaption; 
-  
     var cues;
     if (this.selectedCaptions) {
       cues = this.selectedCaptions.cues;
@@ -5530,13 +5571,15 @@ console.log('handling keydown on popup');
     var captions;
     var descriptions;
     var captionLang;
-    if (this.transcriptCaptions) {
+    if (this.transcriptCaptions) {   
+      // use this independently of this.selectedCaptions 
+      // user might want captions in one language, transcript in another   
       captionLang = this.transcriptCaptions.language;
       captions = this.transcriptCaptions.cues;
     }
-    else if (this.captions.length > 0) {
-      captionLang = this.captions[0].language;
-      captions = this.captions[0].cues;
+    else if (this.selectedCaptions) { 
+      captionLang = this.captionLang; 
+      captions = this.selectedCaptions.cues;
     }
     if (this.transcriptDescriptions) {
       descriptions = this.transcriptDescriptions.cues;

@@ -720,6 +720,14 @@
         // captions are off. Turn them on. 
         this.captionsOn = true;
         this.$captionDiv.show();
+console.log('SelectedCaptions:');
+console.log(typeof this.selectedCaptions);        
+console.log(this.selectedCaptions);
+        for (var i=0; i<this.captions.length; i++) { 
+          if (this.captions[i].def === true) { // this is the default language
+            this.selectedCaptions = this.captions[i];          
+          }
+        }
         this.selectedCaptions = this.captions[0];
         if (this.descriptions.length >= 0) {
           this.selectedDescriptions = this.descriptions[0];

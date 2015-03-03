@@ -1,5 +1,5 @@
 (function ($) {
-  AblePlayer.prototype.updateCaption = function (time) {
+  AblePlayer.prototype.updateCaption = function (time) {    
     if (this.captionsOn) {
       this.$captionDiv.show();
       this.showCaptions(time || this.getElapsed());
@@ -15,6 +15,7 @@
     return function () {
       thisObj.captionsOn = true;
       thisObj.selectedCaptions = track;
+      thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
       // Try and find a matching description track.
       for (var ii in thisObj.descriptions) {
@@ -47,7 +48,6 @@
 
   AblePlayer.prototype.showCaptions = function(now) { 
     var c, thisCaption; 
-  
     var cues;
     if (this.selectedCaptions) {
       cues = this.selectedCaptions.cues;

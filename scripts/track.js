@@ -19,6 +19,7 @@
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
+      var isDefaultTrack = track.getAttribute('default'); 
 
       if (!trackSrc) {
         // Nothing to load!
@@ -46,7 +47,7 @@
         }
       })(track, kind));
     }
-
+    
     $.when.apply($, loadingPromises).then(function () {
       deferred.resolve();
     });
@@ -71,7 +72,6 @@
     else { 
       var isDefaultTrack = false;
     }
-      
     // caption cues from WebVTT are used to build a transcript for both audio and video 
     // but captions are currently only supported for video 
     if (this.mediaType === 'video') { 
