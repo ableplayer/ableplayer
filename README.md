@@ -113,7 +113,7 @@ to all use cases, both audio and video.
 ```HTML
 <!-- Dependencies -->
 <script src="thirdparty/modernizr.custom.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="thirdparty/jquery.cookie.js"></script>
  
 <!-- CSS --> 
@@ -166,6 +166,7 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 
 -   **id** - required; any unique ID
 -   **data-able-player** - required 
+-   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
 -   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
@@ -197,8 +198,6 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 
 The following attributes are supported on the \<video\> element only:
     
--   **width** - width of the video in pixels. If not provided will
-    default to 480.
 -   **height** - height of the video in pixels. If not provided will
     default to 360.
 -   **poster** - path to an image file. Will be displayed in the player
