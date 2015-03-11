@@ -56,7 +56,6 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
-    
     this.hasCaptions = true;
     
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it 
@@ -108,7 +107,6 @@
         lang: trackLang
       }).text(trackLabel); 
     }
-
     // alphabetize tracks by label
     if (this.includeTranscript) { 
       var options = this.$transcriptLanguageSelect.find('option');      

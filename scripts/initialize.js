@@ -405,20 +405,26 @@
           this.selectedCaptions = this.captions[i];
         }
       }
-    }
-    if (typeof this.captionLang === 'undefined') { 
-      // find and use a caption language that matches the player language       
-      for (i=0; i<this.captions.length; i++) { 
-        if (this.captions[i].language === this.lang) { 
-          this.captionLang = this.captions[i].language;
-          this.selectedCaptions = this.captions[i];
+      if (typeof this.captionLang === 'undefined') { 
+        // No caption track was flagged as default 
+        // find and use a caption language that matches the player language       
+        for (i=0; i<this.captions.length; i++) { 
+          if (this.captions[i].language === this.lang) { 
+            this.captionLang = this.captions[i].language;
+            this.selectedCaptions = this.captions[i];
+          }
         }
       }
-    }
-    if (typeof this.captionLang === 'undefined') { 
-      // just use the first track 
-      this.captionLang = this.captions[0].language;
-      this.selectedCaptions = this.captions[0];
+      if (typeof this.captionLang === 'undefined') { 
+        // Still no matching caption track 
+        // just use the first track 
+        this.captionLang = this.captions[0].language;
+        this.selectedCaptions = this.captions[0];
+      }
+      if (typeof this.captionLang !== 'undefined') { 
+        // reset transcript selected <option> to this.captionLang
+        this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');                
+      }
     }
   };
 

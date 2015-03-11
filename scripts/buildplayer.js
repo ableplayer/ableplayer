@@ -317,7 +317,6 @@
     });
 
     $popup.on('keydown',function (e) {
-console.log('handling keydown on popup');      
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
       if ($thisListItem.is(':first-child')) {         
