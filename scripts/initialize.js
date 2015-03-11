@@ -4,6 +4,9 @@
 
     // Debug - set to true to write messages to console; otherwise false
     this.debug = false;
+    
+    // Path to root directory of referring website 
+    this.rootPath = this.getRootWebSitePath();
 
     // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
     this.defaultVolume = 0.5;
@@ -57,7 +60,7 @@
     this.fallback = 'jw'; 
   
     // fallback path - specify path to fallback player files 
-    this.fallbackPath = '../thirdparty/';  
+    this.fallbackPath = this.rootPath + '/thirdparty/';  
     
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
@@ -65,7 +68,7 @@
     this.testFallback = false;
 
     // translationPath - specify path to translation files 
-    this.translationPath = '../translations/';
+    this.translationPath = this.rootPath + '/translations/';
     
     // lang - default language of the player
     this.lang = 'en'; 
@@ -97,6 +100,16 @@
     this.setButtonImages();
   };
 
+  AblePlayer.prototype.getRootWebSitePath = function() { 
+
+    var _location = document.location.toString();
+    var domainNameIndex = _location.indexOf('/', _location.indexOf('://') + 3);
+    var domainName = _location.substring(0, domainNameIndex) + '/';
+    var webFolderIndex = _location.indexOf('/', _location.indexOf(domainName) + domainName.length);
+    var webFolderFullPath = _location.substring(0, webFolderIndex);
+    return webFolderFullPath;
+  };
+  
   AblePlayer.prototype.setButtonImages = function() { 
   
     var imgPath = '../images/' + this.iconColor + '/';
