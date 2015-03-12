@@ -117,7 +117,7 @@
     if (this.player === 'html5') {
       this.media.load();
     }
-    else if (this.player === 'jw') { 
+    else if (this.player === 'jw' && this.jwPlayer) { 
       newSource = this.$sources[jwSourceIndex].getAttribute('src');
       this.jwPlayer.load({file: newSource}); 
     }

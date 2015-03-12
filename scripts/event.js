@@ -392,7 +392,6 @@
 
   AblePlayer.prototype.addJwMediaListeners = function () {
     var thisObj = this;
-
     // add listeners for JW Player events 
     this.jwPlayer
       .onTime(function() {

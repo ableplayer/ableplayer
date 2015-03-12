@@ -1142,6 +1142,7 @@
         this.media.load();
       }   
       else if (this.player === 'jw') { 
+console.log('this.jwPlayer.load');        
         this.jwPlayer.load({file: jwSource}); 
       }
       else if (this.player === 'youtube') {

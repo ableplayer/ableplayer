@@ -302,7 +302,7 @@
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
       this.$playlistDom = parent.clone();
-      parent.remove();
+      parent.remove(); 
     }
   };
 
@@ -423,7 +423,9 @@
       }
       if (typeof this.captionLang !== 'undefined') { 
         // reset transcript selected <option> to this.captionLang
-        this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');                
+        if (this.$transcriptLanguageSelect) { 
+          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
+        }
       }
     }
   };
@@ -437,7 +439,7 @@
   };
 
   AblePlayer.prototype.initJwPlayer = function () {
-
+    
     var jwHeight; 
     var thisObj = this;
     var deferred = new $.Deferred();
@@ -507,7 +509,7 @@
         }
         // remove the media element - we're done with it
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
-        thisObj.$media.remove();
+        thisObj.$media.remove(); 
 
         // Done with JW Player initialization.
         deferred.resolve();
