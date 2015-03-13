@@ -4,6 +4,9 @@
 
     // Debug - set to true to write messages to console; otherwise false
     this.debug = false;
+    
+    // Path to root directory of referring website 
+    this.rootPath = this.getRootWebSitePath();
 
     // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
     this.defaultVolume = 0.5;
@@ -57,7 +60,7 @@
     this.fallback = 'jw'; 
   
     // fallback path - specify path to fallback player files 
-    this.fallbackPath = '../thirdparty/';  
+    this.fallbackPath = this.rootPath + '/thirdparty/';  
     
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
@@ -65,7 +68,7 @@
     this.testFallback = false;
 
     // translationPath - specify path to translation files 
-    this.translationPath = '../translations/';
+    this.translationPath = this.rootPath + '/translations/';
     
     // lang - default language of the player
     this.lang = 'en'; 
@@ -97,6 +100,16 @@
     this.setButtonImages();
   };
 
+  AblePlayer.prototype.getRootWebSitePath = function() { 
+
+    var _location = document.location.toString();
+    var domainNameIndex = _location.indexOf('/', _location.indexOf('://') + 3);
+    var domainName = _location.substring(0, domainNameIndex) + '/';
+    var webFolderIndex = _location.indexOf('/', _location.indexOf(domainName) + domainName.length);
+    var webFolderFullPath = _location.substring(0, webFolderIndex);
+    return webFolderFullPath;
+  };
+  
   AblePlayer.prototype.setButtonImages = function() { 
   
     var imgPath = '../images/' + this.iconColor + '/';
@@ -289,7 +302,7 @@
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
       this.$playlistDom = parent.clone();
-      parent.remove();
+      parent.remove(); 
     }
   };
 
@@ -392,20 +405,28 @@
           this.selectedCaptions = this.captions[i];
         }
       }
-    }
-    if (typeof this.captionLang === 'undefined') { 
-      // find and use a caption language that matches the player language       
-      for (i=0; i<this.captions.length; i++) { 
-        if (this.captions[i].language === this.lang) { 
-          this.captionLang = this.captions[i].language;
-          this.selectedCaptions = this.captions[i];
+      if (typeof this.captionLang === 'undefined') { 
+        // No caption track was flagged as default 
+        // find and use a caption language that matches the player language       
+        for (i=0; i<this.captions.length; i++) { 
+          if (this.captions[i].language === this.lang) { 
+            this.captionLang = this.captions[i].language;
+            this.selectedCaptions = this.captions[i];
+          }
         }
       }
-    }
-    if (typeof this.captionLang === 'undefined') { 
-      // just use the first track 
-      this.captionLang = this.captions[0].language;
-      this.selectedCaptions = this.captions[0];
+      if (typeof this.captionLang === 'undefined') { 
+        // Still no matching caption track 
+        // just use the first track 
+        this.captionLang = this.captions[0].language;
+        this.selectedCaptions = this.captions[0];
+      }
+      if (typeof this.captionLang !== 'undefined') { 
+        // reset transcript selected <option> to this.captionLang
+        if (this.$transcriptLanguageSelect) { 
+          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
+        }
+      }
     }
   };
 
@@ -418,7 +439,7 @@
   };
 
   AblePlayer.prototype.initJwPlayer = function () {
-
+    
     var jwHeight; 
     var thisObj = this;
     var deferred = new $.Deferred();
@@ -488,7 +509,7 @@
         }
         // remove the media element - we're done with it
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
-        thisObj.$media.remove();
+        thisObj.$media.remove(); 
 
         // Done with JW Player initialization.
         deferred.resolve();

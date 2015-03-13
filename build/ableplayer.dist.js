@@ -251,6 +251,9 @@
 
     // Debug - set to true to write messages to console; otherwise false
     this.debug = false;
+    
+    // Path to root directory of referring website 
+    this.rootPath = this.getRootWebSitePath();
 
     // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
     this.defaultVolume = 0.5;
@@ -304,7 +307,7 @@
     this.fallback = 'jw'; 
   
     // fallback path - specify path to fallback player files 
-    this.fallbackPath = '../thirdparty/';  
+    this.fallbackPath = this.rootPath + '/thirdparty/';  
     
     // testFallback - set to true to force browser to use the fallback player (for testing)
     // Note: JW Player does not support offline playback (a Flash restriction)
@@ -312,7 +315,7 @@
     this.testFallback = false;
 
     // translationPath - specify path to translation files 
-    this.translationPath = '../translations/';
+    this.translationPath = this.rootPath + '/translations/';
     
     // lang - default language of the player
     this.lang = 'en'; 
@@ -344,6 +347,16 @@
     this.setButtonImages();
   };
 
+  AblePlayer.prototype.getRootWebSitePath = function() { 
+
+    var _location = document.location.toString();
+    var domainNameIndex = _location.indexOf('/', _location.indexOf('://') + 3);
+    var domainName = _location.substring(0, domainNameIndex) + '/';
+    var webFolderIndex = _location.indexOf('/', _location.indexOf(domainName) + domainName.length);
+    var webFolderFullPath = _location.substring(0, webFolderIndex);
+    return webFolderFullPath;
+  };
+  
   AblePlayer.prototype.setButtonImages = function() { 
   
     var imgPath = '../images/' + this.iconColor + '/';
@@ -536,7 +549,7 @@
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
       this.$playlistDom = parent.clone();
-      parent.remove();
+      parent.remove(); 
     }
   };
 
@@ -639,20 +652,28 @@
           this.selectedCaptions = this.captions[i];
         }
       }
-    }
-    if (typeof this.captionLang === 'undefined') { 
-      // find and use a caption language that matches the player language       
-      for (i=0; i<this.captions.length; i++) { 
-        if (this.captions[i].language === this.lang) { 
-          this.captionLang = this.captions[i].language;
-          this.selectedCaptions = this.captions[i];
+      if (typeof this.captionLang === 'undefined') { 
+        // No caption track was flagged as default 
+        // find and use a caption language that matches the player language       
+        for (i=0; i<this.captions.length; i++) { 
+          if (this.captions[i].language === this.lang) { 
+            this.captionLang = this.captions[i].language;
+            this.selectedCaptions = this.captions[i];
+          }
         }
       }
-    }
-    if (typeof this.captionLang === 'undefined') { 
-      // just use the first track 
-      this.captionLang = this.captions[0].language;
-      this.selectedCaptions = this.captions[0];
+      if (typeof this.captionLang === 'undefined') { 
+        // Still no matching caption track 
+        // just use the first track 
+        this.captionLang = this.captions[0].language;
+        this.selectedCaptions = this.captions[0];
+      }
+      if (typeof this.captionLang !== 'undefined') { 
+        // reset transcript selected <option> to this.captionLang
+        if (this.$transcriptLanguageSelect) { 
+          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
+        }
+      }
     }
   };
 
@@ -665,7 +686,7 @@
   };
 
   AblePlayer.prototype.initJwPlayer = function () {
-
+    
     var jwHeight; 
     var thisObj = this;
     var deferred = new $.Deferred();
@@ -735,7 +756,7 @@
         }
         // remove the media element - we're done with it
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
-        thisObj.$media.remove();
+        thisObj.$media.remove(); 
 
         // Done with JW Player initialization.
         deferred.resolve();
@@ -2292,7 +2313,6 @@
     });
 
     $popup.on('keydown',function (e) {
-      
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
       if ($thisListItem.is(':first-child')) {         
@@ -3118,6 +3138,7 @@
         this.media.load();
       }   
       else if (this.player === 'jw') { 
+        
         this.jwPlayer.load({file: jwSource}); 
       }
       else if (this.player === 'youtube') {
@@ -3274,7 +3295,6 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
-    
     this.hasCaptions = true;
     
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it 
@@ -3326,7 +3346,6 @@
         lang: trackLang
       }).text(trackLabel); 
     }
-
     // alphabetize tracks by label
     if (this.includeTranscript) { 
       var options = this.$transcriptLanguageSelect.find('option');      
@@ -4133,7 +4152,7 @@
     if (this.player === 'html5') {
       this.media.load();
     }
-    else if (this.player === 'jw') { 
+    else if (this.player === 'jw' && this.jwPlayer) { 
       newSource = this.$sources[jwSourceIndex].getAttribute('src');
       this.jwPlayer.load({file: newSource}); 
     }
@@ -4301,11 +4320,11 @@
         
       } 
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       // pause JW Player temporarily. 
       // When seek has successfully reached newTime, 
       // onSeek event will be called, and playback will be resumed
-      this.jwSeekPause = true;
+      this.jwSeekPause = true;      
       this.jwPlayer.seek(newTime);
     }
     else if (this.player === 'youtube') {
@@ -4322,7 +4341,7 @@
     if (this.player === 'html5') {
       duration = this.media.duration;
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       duration = this.jwPlayer.getDuration();
     }
     else if (this.player === 'youtube') {
@@ -4340,7 +4359,7 @@
     if (this.player === 'html5') {
       position = this.media.currentTime;
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       if (this.jwPlayer.getState() === 'IDLE') {
         return 0;
       }
@@ -4382,7 +4401,7 @@
         return 'playing';
       }
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       if (this.jwPlayer.getState() === 'PAUSED' || this.jwPlayer.getState() === 'IDLE' || this.jwPlayer.getState() === undefined) {
         if (this.getElapsed() === 0) {
           return 'stopped';
@@ -4429,7 +4448,7 @@
     if (this.player === 'html5') {
       return this.media.muted;
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       return this.jwPlayer.getMute();
     }
     else if (this.player === 'youtube') {
@@ -4453,7 +4472,7 @@
     if (this.player === 'html5') {
       this.media.muted = mute;
     }
-    else if (this.player === 'jw') { 
+    else if (this.player === 'jw' && this.jwPlayer) { 
       this.jwPlayer.setMute(mute);
     }
     else if (this.player === 'youtube') {
@@ -4485,7 +4504,7 @@
         this.signVideo.volume = 0; // always mute
       }
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.setVolume(volume * 100);
     }
     else if (this.player === 'youtube') {
@@ -4503,7 +4522,7 @@
     if (this.player === 'html5') {
       return this.media.volume;
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       return this.jwPlayer.getVolume() / 100;
     }
     else if (this.player === 'youtube') {
@@ -4515,7 +4534,7 @@
     if (this.player === 'html5') {
       return this.media.playbackRate ? true : false;
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       // Not directly supported by JW player; can hack for HTML5 version by finding the dynamically generated video tag, but decided not to do that.
       return false;
     }
@@ -4540,7 +4559,7 @@
     if (this.player === 'html5') {
       return this.media.playbackRate;
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       // Unsupported, always the normal rate.
       return 1;
     }
@@ -4564,7 +4583,7 @@
         this.signVideo.pause(true);
       }      
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.pause(true);
     }
     else if (this.player === 'youtube') {
@@ -4579,7 +4598,7 @@
         this.signVideo.play(true);
       }
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.play(true);
     }
     else if (this.player === 'youtube') {
@@ -4859,7 +4878,7 @@
         this.seekBar.setBuffered(this.media.buffered.end(0) / this.getDuration())
       }
     }
-    else if (this.player === 'jw') {
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
     }
     else if (this.player === 'youtube') {
@@ -4882,7 +4901,7 @@
       this.pauseMedia();
       this.seekTo(0);
     }
-    else if (this.player == 'jw') { 
+    else if (this.player === 'jw' && this.jwPlayer) { 
       this.jwPlayer.stop();
     }
     this.refreshControls();
@@ -5004,9 +5023,6 @@
         // captions are off. Turn them on. 
         this.captionsOn = true;
         this.$captionDiv.show();
-
-        
-
         for (var i=0; i<this.captions.length; i++) { 
           if (this.captions[i].def === true) { // this is the default language
             this.selectedCaptions = this.captions[i];          
@@ -6378,7 +6394,6 @@
 
   AblePlayer.prototype.addJwMediaListeners = function () {
     var thisObj = this;
-
     // add listeners for JW Player events 
     this.jwPlayer
       .onTime(function() {

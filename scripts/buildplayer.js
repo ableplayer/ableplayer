@@ -317,7 +317,6 @@
     });
 
     $popup.on('keydown',function (e) {
-console.log('handling keydown on popup');      
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
       if ($thisListItem.is(':first-child')) {         
@@ -1143,6 +1142,7 @@ console.log('handling keydown on popup');
         this.media.load();
       }   
       else if (this.player === 'jw') { 
+console.log('this.jwPlayer.load');        
         this.jwPlayer.load({file: jwSource}); 
       }
       else if (this.player === 'youtube') {

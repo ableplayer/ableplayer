@@ -34,7 +34,8 @@ Compatibility
 technologies.
 
 -   Firefox 3.x and higher
--   Internet Explorer 7 and higher
+-   Internet Explorer 10 and higher without fallback 
+-   Internet Explorer 8 and 9, dependent on JW Player as fallback. 
 -   Google Chrome 7.0 and higher
 -   Opera 10.63 and higher
 -   Safari 5.0 on Mac OS X
@@ -68,22 +69,27 @@ fallback solution. *Able Player* was developed to work seamlessly with
 [JW Player][], specifically **JW Player 6** (successfully tested with  
 versions 6.0 and 6.11). JW Player is free for non-commercial use but 
 is licensed separately and is not distributed with *Able Player*. 
-If you choose to use JW Player as your fallback player, 
-users with older browsers including Internet Explorer 6-8 will
-have the same experience with *Able Player* as users with newer
-browsers. Identical functionality has been attained using both the HTML5
-and JW Player APIs. After licensing and downloading JW PLayer, copy
-*jwplayer.js*, *jwplayer.html5.js*, and *jwplayer.flash.swf* into the
+After licensing and downloading JW PLayer, copy *jwplayer.js*, *jwplayer.html5.js*, 
+and *jwplayer.flash.swf* into the
 *Able Player* */thirdparty* directory.
+
+If you choose to use JW Player as your fallback player, 
+users with some older browsers will have a similar experience with 
+*Able Player* as users with newer browsers. 
 
 Note that *most* browsers in use today support HTML5 media elements.
 Here’s a breakdown:
-
 -   Chrome since 3.0
 -   Firefox since 3.5
 -   Safari since 3.1
 -   Opera since 10.5
--   Internet Explorer since 9.0
+-   Internet Explorer since 9.0 (video was buggy in 9; better in 10)
+
+Note the following limitations in Internet Explorer (IE): 
+- IE10 and higher work fine without a fallback player 
+- IE9 was the first version of IE to support HTML5 media elements. However, its support for video was buggy so Able Player uses the fallback if it's available
+- IE8 works fine with JW Player as fallback 
+- IE6 and 7 are not supported   
 
 At some point we may decide that it’s reasonable to stop supporting a
 fallback player. However, according to [WebAIM’s 2014 Screen Reader User
@@ -113,7 +119,7 @@ to all use cases, both audio and video.
 ```HTML
 <!-- Dependencies -->
 <script src="thirdparty/modernizr.custom.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="thirdparty/jquery.cookie.js"></script>
  
 <!-- CSS --> 
@@ -166,6 +172,7 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 
 -   **id** - required; any unique ID
 -   **data-able-player** - required 
+-   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
 -   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
@@ -197,8 +204,6 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 
 The following attributes are supported on the \<video\> element only:
     
--   **width** - width of the video in pixels. If not provided will
-    default to 480.
 -   **height** - height of the video in pixels. If not provided will
     default to 360.
 -   **poster** - path to an image file. Will be displayed in the player
