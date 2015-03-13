@@ -72,7 +72,8 @@ technologies.</p>
 
 <ul>
 <li>  Firefox 3.x and higher</li>
-<li>  Internet Explorer 7 and higher</li>
+<li>  Internet Explorer 10 and higher without fallback </li>
+<li>  Internet Explorer 8 and 9, dependent on JW Player as fallback. </li>
 <li>  Google Chrome 7.0 and higher</li>
 <li>  Opera 10.63 and higher</li>
 <li>  Safari 5.0 on Mac OS X</li>
@@ -109,13 +110,13 @@ fallback solution. <em>Able Player</em> was developed to work seamlessly with
 <a href="http://www.jwplayer.com/">JW Player</a>, specifically <strong>JW Player 6</strong> (successfully tested with<br>
 versions 6.0 and 6.11). JW Player is free for non-commercial use but 
 is licensed separately and is not distributed with <em>Able Player</em>. 
-If you choose to use JW Player as your fallback player, 
-users with older browsers including Internet Explorer 6-8 will
-have the same experience with <em>Able Player</em> as users with newer
-browsers. Identical functionality has been attained using both the HTML5
-and JW Player APIs. After licensing and downloading JW PLayer, copy
-<em>jwplayer.js</em>, <em>jwplayer.html5.js</em>, and <em>jwplayer.flash.swf</em> into the
+After licensing and downloading JW PLayer, copy <em>jwplayer.js</em>, <em>jwplayer.html5.js</em>, 
+and <em>jwplayer.flash.swf</em> into the
 <em>Able Player</em> <em>/thirdparty</em> directory.</p>
+
+<p>If you choose to use JW Player as your fallback player, 
+users with some older browsers will have a similar experience with 
+<em>Able Player</em> as users with newer browsers. </p>
 
 <p>Note that <em>most</em> browsers in use today support HTML5 media elements.
 Here’s a breakdown:</p>
@@ -125,7 +126,17 @@ Here’s a breakdown:</p>
 <li>  Firefox since 3.5</li>
 <li>  Safari since 3.1</li>
 <li>  Opera since 10.5</li>
-<li>  Internet Explorer since 9.0</li>
+<li>  Internet Explorer since 9.0 (video was buggy in 9; better in 10)</li>
+</ul>
+
+<p>Note the following limitations in Internet Explorer (IE): </p>
+
+<ul>
+<li>IE10 and higher work fine without a fallback player </li>
+<li>IE9 was the first version of IE to support HTML5 media elements. However, its support for video was buggy so Able Player uses the fallback if it's available</li>
+<li>IE8 works fine with JW Player as fallback </li>
+<li>IE6 and 7 are not supported<br>
+</li>
 </ul>
 
 <p>At some point we may decide that it’s reasonable to stop supporting a
@@ -153,7 +164,7 @@ to all use cases, both audio and video.</p>
 
 <div class="highlight highlight-HTML"><pre><span class="pl-c">&lt;!-- Dependencies --&gt;</span>
 &lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>thirdparty/modernizr.custom.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
-&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
 &lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>thirdparty/jquery.cookie.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
 
 <span class="pl-c">&lt;!-- CSS --&gt;</span> 
@@ -204,6 +215,7 @@ MP4.</p>
 <ul>
 <li>  <strong>id</strong> - required; any unique ID</li>
 <li>  <strong>data-able-player</strong> - required </li>
+<li>  <strong>width</strong> - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.</li>
 <li>  <strong>data-start-time</strong> - optional; time at which you want the audio to start playing (in seconds)</li>
 <li>  <strong>autoplay</strong> - optional; play media automatically when page loads. For accessibility reasons, this is <em>not</em> recommended unless user is sure to <em>expect</em> media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.<br>
 </li>
@@ -243,8 +255,6 @@ valuable bandwidth, so preload=“metadata” would be a better option.</li>
 <p>The following attributes are supported on the &lt;video&gt; element only:</p>
 
 <ul>
-<li>  <strong>width</strong> - width of the video in pixels. If not provided will
-default to 480.</li>
 <li>  <strong>height</strong> - height of the video in pixels. If not provided will
 default to 360.</li>
 <li>  <strong>poster</strong> - path to an image file. Will be displayed in the player
