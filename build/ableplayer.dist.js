@@ -4706,34 +4706,47 @@
       }
     }
 
-    // Update seekbar width.
+    // Update seekbar width. 
     // To do this, we need to calculate the width of all elements surrounding it.
-    // NOTE: Would be excellent if there were a way to do this with CSS...
     if (this.seekBar) {
       var widthUsed = 0;
       // Elements on the left side of the control panel.
       var leftControls = this.seekBar.wrapperDiv.parent().prev();
       leftControls.children().each(function () {
-        widthUsed += $(this).width();
+        if ($(this).is(':hidden')) {
+          // jQuery width() returns 0 for hidden elements 
+          // thisObj.getHiddenWidth() is a workaround 
+          widthUsed += thisObj.getHiddenWidth($(this)); 
+        }
+        else { 
+          widthUsed += $(this).width(); 
+        }
       });
-
       // Elements to the left and right of the seekbar on the right side.
       var prev = this.seekBar.wrapperDiv.prev();
       while (prev.length > 0) {
-        widthUsed += prev.width();
+        if (prev.is(':hidden')) { 
+          widthUsed += thisObj.getHiddenWidth(prev); 
+        }
+        else { 
+          widthUsed += prev.width();
+        }
         prev = prev.prev();
       }
-
       var next = this.seekBar.wrapperDiv.next();
       while (next.length > 0) {
-        widthUsed += next.width();
+        if (next.is(':hidden')) { 
+          widthUsed += thisObj.getHiddenWidth(next); 
+        }
+        else { 
+          widthUsed += next.width();
+        }
         next = next.next();
       }
-
-      var width = this.$playerDiv.width() - widthUsed - 20;
+      var seekbarWidth = this.playerWidth - widthUsed - 20;
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-      if (Math.abs(width - this.seekBar.getWidth()) > 5) {
-        this.seekBar.setWidth(width);
+      if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+        this.seekBar.setWidth(seekbarWidth);
       }
     }
 
@@ -4884,6 +4897,23 @@
     else if (this.player === 'youtube') {
       this.seekBar.setBuffered(this.youtubePlayer.getVideoLoadedFraction());
     }
+  };
+  
+  AblePlayer.prototype.getHiddenWidth = function($el) { 
+
+    // jQuery returns for width() if element is hidden 
+    // this function is a workaround 
+    
+    // save a reference to a cloned element that can be measured
+    var $hiddenElement = $el.clone().appendTo('body');
+
+    // calculate the width of the clone
+    var width = $hiddenElement.outerWidth();
+
+    // remove the clone from the DOM
+    $hiddenElement.remove();
+
+    return width;
   };
 
   AblePlayer.prototype.handlePlay = function(e) { 
