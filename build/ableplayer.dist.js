@@ -4441,6 +4441,7 @@
   };
 
   AblePlayer.prototype.isMuted = function () {
+
     if (!this.browserSupportsVolume()) {
       return false;
     }
@@ -4462,10 +4463,12 @@
     }
     if (!mute) {
       this.$muteButton.attr('aria-label',this.tt.mute); 
-      this.$muteButton.find('span.able-clipped').text(this.tt.mute);
+      this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud');       
+      this.$muteButton.find('span.able-clipped').text(this.tt.mute); 
     }
     else {
       this.$muteButton.attr('aria-label',this.tt.unmute); 
+      this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute');       
       this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
