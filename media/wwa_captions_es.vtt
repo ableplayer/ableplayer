@@ -2,9 +2,6 @@ WEBVTT
 kind: captions
 lang: es
 
-NOTE This is obviously not actually in Spanish; just a separate webvtt file for testing.
-
-
 00:00:00.429 --> 00:00:09.165 position:45%,end align:middle size:35%
 [ música ]
 

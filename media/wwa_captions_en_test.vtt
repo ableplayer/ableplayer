@@ -19,11 +19,14 @@ NOTE This VTT file includes a few extras:
 - More info in the WebVTT spec (still evolving):
 - http://dev.w3.org/html5/webvtt
 
+00:00:00.000 --> 00:00:00.429  
+
 00:00:00.429 --> 00:00:09.165  
 [ music ]
 
 00:00:09.165 --> 00:00:10.792 
 <v Narrator> You want these people.
+
 
 00:00:10.792 --> 00:00:13.759 
 They order your products, sign up for your services,
