@@ -25,7 +25,7 @@
       this.jwPlayer.seek(newTime);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.seekTo(newTime);
+      this.youtubePlayer.seekTo(newTime,true);
     }
 
     this.liveUpdatePending = true;
@@ -303,6 +303,7 @@
     }
     else if (this.player === 'youtube') {
       this.youtubePlayer.playVideo();
+      this.stoppingYoutube = false;
     }
     this.startedPlaying = true;    
   };
@@ -354,37 +355,13 @@
       'buffering': this.tt.statusBuffering,
       'ended': this.tt.statusEnd
     };
-
-    // Update the text only if it's changed since it has role="alert"; 
-    // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
-    if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
-      // Debounce updates; only update after status has stayed steadily different for 250ms.
-      var timestamp = (new Date()).getTime();
-      if (!this.statusDebounceStart) {
-        this.statusDebounceStart = timestamp;
-        // Make sure refreshControls gets called again at the appropriate time to check.
-        this.statusTimeout = setTimeout(function () {
-          thisObj.refreshControls();
-        }, 300);
-      }
-      else if ((timestamp - this.statusDebounceStart) > 250) {
-        this.$status.text(textByState[this.getPlayerState()]);
-        this.statusDebounceStart = null;
-        clearTimeout(this.statusTimeout);
-        this.statusTimeout = null;
-      }
-    }
-    else {
-      this.statusDebounceStart = null;
-      clearTimeout(this.statusTimeout);
-      this.statusTimeout = null;
-    }
-
-    // Don't change play/pause button display while using the seek bar.
-    if (!this.seekBar.tracking) {
-      if (this.isPaused()) {    
-        this.$playpauseButton.attr('aria-label',this.tt.play); 
-        
+    
+    if (this.stoppingYoutube) { 
+      // YouTube reports 'paused' but we're trying to emulate 'stopped' 
+      // See notes in handleStop() 
+      // this.stoppingYouTube will be reset when playback resumes in play() 
+      if (this.$status.text() !== this.tt.statusStopped) {
+        this.$status.text(this.tt.statusStopped);
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
@@ -393,19 +370,60 @@
           this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
         }
       }
-      else {
-        this.$playpauseButton.attr('aria-label',this.tt.pause); 
-        
-        if (this.iconType === 'font') {
-          this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
-          this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+    }
+    else { 
+      // Update the text only if it's changed since it has role="alert"; 
+      // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+      if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
+        // Debounce updates; only update after status has stayed steadily different for 250ms.
+        var timestamp = (new Date()).getTime();
+        if (!this.statusDebounceStart) {
+          this.statusDebounceStart = timestamp;
+          // Make sure refreshControls gets called again at the appropriate time to check.
+          this.statusTimeout = setTimeout(function () {
+            thisObj.refreshControls();
+          }, 300);
         }
-        else { 
-          this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+        else if ((timestamp - this.statusDebounceStart) > 250) {
+          this.$status.text(textByState[this.getPlayerState()]);
+          this.statusDebounceStart = null;
+          clearTimeout(this.statusTimeout);
+          this.statusTimeout = null;
+        }
+      }
+      else {
+        this.statusDebounceStart = null;
+        clearTimeout(this.statusTimeout);
+        this.statusTimeout = null;
+      }
+
+      // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
+      if (!this.seekBar.tracking && !this.stoppingYoutube) {
+        if (this.isPaused()) {    
+          this.$playpauseButton.attr('aria-label',this.tt.play); 
+        
+          if (this.iconType === 'font') {
+            this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
+            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+          }
+          else { 
+            this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+          }
+        }
+        else {
+          this.$playpauseButton.attr('aria-label',this.tt.pause); 
+        
+          if (this.iconType === 'font') {
+            this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+          }
+          else { 
+            this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+          }
         }
       }
     }
-
+    
     // Update seekbar width. 
     // To do this, we need to calculate the width of all elements surrounding it.
     if (this.seekBar) {
@@ -633,6 +651,18 @@
     }
     else if (this.player === 'jw' && this.jwPlayer) { 
       this.jwPlayer.stop();
+    }
+    else if (this.player === 'youtube') { 
+      // YouTube API function stopVideo() does not reset video to 0
+      // However, the stopped video is not seekable 
+      // so we can't call seekTo(0) after calling stopVideo() 
+      // Workaround is to use pauseVideo() instead, then seek to 0
+      this.youtubePlayer.pauseVideo();
+      this.seekTo(0);
+      // Unfortunately, pausing the video doesn't change playerState to 'Stopped' 
+      // which has an effect on the player UI. 
+      // the following Boolean is used  in refreshControls() to emulate a 'stopped' state
+      this.stoppingYoutube = true; 
     }
     this.refreshControls();
   };
