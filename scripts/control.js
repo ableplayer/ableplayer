@@ -25,7 +25,7 @@
       this.jwPlayer.seek(newTime);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.seekTo(newTime,true);
+      this.youTubePlayer.seekTo(newTime,true);
     }
 
     this.liveUpdatePending = true;
@@ -42,7 +42,7 @@
       duration = this.jwPlayer.getDuration();
     }
     else if (this.player === 'youtube') {
-      duration = this.youtubePlayer.getDuration();
+      duration = this.youTubePlayer.getDuration();
     }
     
     if (duration === undefined || isNaN(duration) || duration === -1) {
@@ -63,7 +63,9 @@
       position = this.jwPlayer.getPosition();
     }
     else if (this.player === 'youtube') {
-      position = this.youtubePlayer.getCurrentTime();
+      if (this.youTubePlayer) { 
+        position = this.youTubePlayer.getCurrentTime();
+      }      
     }
     
     if (position === undefined || isNaN(position) || position === -1) {
@@ -118,7 +120,7 @@
       }
     }
     else if (this.player === 'youtube') {
-      var state = this.youtubePlayer.getPlayerState();
+      var state = this.youTubePlayer.getPlayerState();
       if (state === -1 || state === 5) {
         return 'stopped';
       }
@@ -150,7 +152,7 @@
       return this.jwPlayer.getMute();
     }
     else if (this.player === 'youtube') {
-      return this.youtubePlayer.isMuted();
+      return this.youTubePlayer.isMuted();
     }
   };
 
@@ -177,10 +179,10 @@
     }
     else if (this.player === 'youtube') {
       if (mute) {
-        this.youtubePlayer.mute();
+        this.youTubePlayer.mute();
       }
       else {
-        this.youtubePlayer.unMute();
+        this.youTubePlayer.unMute();
       }
     }
     
@@ -208,7 +210,7 @@
       this.jwPlayer.setVolume(volume * 100);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.setVolume(volume * 100);
+      this.youTubePlayer.setVolume(volume * 100);
     }
     
     this.lastVolume = volume;
@@ -226,7 +228,7 @@
       return this.jwPlayer.getVolume() / 100;
     }
     else if (this.player === 'youtube') {
-      return this.youtubePlayer.getVolume() / 100;
+      return this.youTubePlayer.getVolume() / 100;
     }
   };
 
@@ -240,7 +242,7 @@
     }
     else if (this.player === 'youtube') {
       // Youtube always supports a finite list of playback rates.  Only expose controls if more than one is available.
-      return (this.youtubePlayer.getAvailablePlaybackRates().length > 1);
+      return (this.youTubePlayer.getAvailablePlaybackRates().length > 1);
     }
   };
 
@@ -250,7 +252,7 @@
       this.media.playbackRate = rate;
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.setPlaybackRate(rate);
+      this.youTubePlayer.setPlaybackRate(rate);
     }
     this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
@@ -264,7 +266,7 @@
       return 1;
     }
     else if (this.player === 'youtube') {
-      return this.youtubePlayer.getPlaybackRate();
+      return this.youTubePlayer.getPlaybackRate();
     }
   };
 
@@ -287,7 +289,7 @@
       this.jwPlayer.pause(true);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.pauseVideo();
+      this.youTubePlayer.pauseVideo();
     }
   };
 
@@ -302,8 +304,8 @@
       this.jwPlayer.play(true);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.playVideo();
-      this.stoppingYoutube = false;
+      this.youTubePlayer.playVideo();
+      this.stoppingYouTube = false;
     }
     this.startedPlaying = true;    
   };
@@ -355,13 +357,15 @@
       'buffering': this.tt.statusBuffering,
       'ended': this.tt.statusEnd
     };
-    
-    if (this.stoppingYoutube) { 
+
+    if (this.stoppingYouTube) { 
       // YouTube reports 'paused' but we're trying to emulate 'stopped' 
       // See notes in handleStop() 
       // this.stoppingYouTube will be reset when playback resumes in play() 
       if (this.$status.text() !== this.tt.statusStopped) {
         this.$status.text(this.tt.statusStopped);
+      }
+      if (this.$playpauseButton.find('span').first().hasClass('icon-pause')) { 
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
@@ -398,7 +402,7 @@
       }
 
       // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
-      if (!this.seekBar.tracking && !this.stoppingYoutube) {
+      if (!this.seekBar.tracking && !this.stoppingYouTube) {
         if (this.isPaused()) {    
           this.$playpauseButton.attr('aria-label',this.tt.play); 
         
@@ -481,25 +485,31 @@
     }
     
     if (this.$ccButton) {
+      if (this.usingYouTubeCaptions) { 
+        var captionsCount = this.ytCaptions.length;
+      }
+      else { 
+        var captionsCount = this.captions.length; 
+      }
       // Button has a different title depending on the number of captions.
       // If only one caption track, this is "Show captions" and "Hide captions"
       // Otherwise, it is just always "Captions"
       if (!this.captionsOn) {
-        this.$ccButton.addClass('buttonOff');
-        if (this.captions.length === 1) {
+        this.$ccButton.addClass('buttonOff');                
+        if (captionsCount === 1) { 
           this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
-        if (this.captions.length === 1) {
+        if (captionsCount === 1) { 
           this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
-      if (this.captions.length > 1) {
+      if (captionsCount > 1) {
         this.$ccButton.attr({ 
           'aria-label': this.tt.captions,
           'aria-haspopup': 'true',
@@ -613,7 +623,7 @@
       this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
     }
     else if (this.player === 'youtube') {
-      this.seekBar.setBuffered(this.youtubePlayer.getVideoLoadedFraction());
+      this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
     }
   };
   
@@ -657,12 +667,12 @@
       // However, the stopped video is not seekable 
       // so we can't call seekTo(0) after calling stopVideo() 
       // Workaround is to use pauseVideo() instead, then seek to 0
-      this.youtubePlayer.pauseVideo();
+      this.youTubePlayer.pauseVideo();
       this.seekTo(0);
       // Unfortunately, pausing the video doesn't change playerState to 'Stopped' 
       // which has an effect on the player UI. 
       // the following Boolean is used  in refreshControls() to emulate a 'stopped' state
-      this.stoppingYoutube = true; 
+      this.stoppingYouTube = true; 
     }
     this.refreshControls();
   };
@@ -747,7 +757,7 @@
       this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
     }
     else if (this.player === 'youtube') {
-      var rates = this.youtubePlayer.getAvailablePlaybackRates();
+      var rates = this.youTubePlayer.getAvailablePlaybackRates();
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {
@@ -765,27 +775,50 @@
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
 
+    var captions; 
+
     if (this.hidingPopup) { 
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it 
       this.hidingPopup = false;      
       return false; 
     }
-    
-    if (this.captions.length === 1) {
+    if (this.usingYouTubeCaptions) { 
+      
+    }
+    if (this.captions.length) { 
+      captions = this.captions;
+    }
+    else if (this.ytCaptions.length) { 
+      captions = this.ytCaptions;
+    }
+    else { 
+      captions = []; 
+    }
+    if (captions.length === 1) {
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) { 
-        // captions are on. Turn them off. 
+        // turn them off
         this.captionsOn = false;
-        this.$captionDiv.hide();
+        if (this.usingYouTubeCaptions) { 
+          this.youTubePlayer.unloadModule(this.ytCaptionModule);       
+        }
+        else { 
+          this.$captionDiv.hide();
+        }
       }
       else { 
         // captions are off. Turn them on. 
         this.captionsOn = true;
-        this.$captionDiv.show();
-        for (var i=0; i<this.captions.length; i++) { 
-          if (this.captions[i].def === true) { // this is the default language
-            this.selectedCaptions = this.captions[i];          
+        if (this.usingYouTubeCaptions) { 
+          this.youTubePlayer.loadModule(this.ytCaptionModule);
+        }
+        else {          
+          this.$captionDiv.show();
+        }
+        for (var i=0; i<captions.length; i++) { 
+          if (captions[i].def === true) { // this is the default language
+            this.selectedCaptions = captions[i];          
           }
         }
         this.selectedCaptions = this.captions[0];
@@ -910,16 +943,17 @@
     if (this.isFullscreen() == fullscreen) {
       return;
     }
-    
+console.log('apparently this is not full screen yet');    
     var thisObj = this;
     var $el = this.$ableDiv;
     var el = $el[0];
     
     if (this.nativeFullscreenSupported()) {
+console.log('full screen is natively supported');      
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
         // If not in full screen, initialize it.
-        if (el.requestFullscreen) {
+        if (el.requestFullscreen) {          
           el.requestFullscreen();
         }
         else if (el.webkitRequestFullscreen) {
@@ -952,6 +986,7 @@
       }
     }
     else {
+console.log('fullscreen is not navitely supported');      
       // Non-native fullscreen support through modal dialog.
       
       // Create dialog on first run through.
@@ -1085,8 +1120,8 @@
     if (this.jwPlayer) {
       this.jwPlayer.resize(width, height);
     }
-    else if (this.youtubePlayer) {
-      this.youtubePlayer.setSize(width, height);
+    else if (this.youTubePlayer) {
+      this.youTubePlayer.setSize(width, height);
     }
         
     this.refreshControls();
