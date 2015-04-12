@@ -831,6 +831,7 @@
     else {   
       if (this.captionsPopup.is(':visible')) {
         this.captionsPopup.hide();
+        this.hidingPopup = false; 
         this.$ccButton.focus();
       }
       else {
@@ -861,6 +862,7 @@
     }
     if (this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
+      this.hidingPopup = false;
       this.$chaptersButton.focus();
     }
     else {

@@ -15,7 +15,6 @@
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
-console.log('caption click?');      
       thisObj.selectedCaptions = track;
       thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
@@ -44,8 +43,15 @@ console.log('caption click?');
         thisObj.updateDescription();
       }
       thisObj.captionsOn = true;
-      thisObj.hidingPopup = true;     
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it (used in handleCaptionToggle())
+      thisObj.hidingPopup = true; 
       thisObj.captionsPopup.hide();
+      // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called 
+      // e.g., if user triggered button with Enter or mouse click, not spacebar 
+      setTimeout(function() { 
+        thisObj.hidingPopup = false;
+      }, 100);
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
     }
@@ -55,13 +61,20 @@ console.log('caption click?');
   AblePlayer.prototype.getCaptionOffFunction = function () {
     var thisObj = this;
     return function () {
-console.log('caption off function?');      
       if (thisObj.player == 'youtube') { 
         thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
       }
       thisObj.captionsOn = false;
       thisObj.currentCaption = -1;
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it (used in handleCaptionToggle())
+      thisObj.hidingPopup = true; 
       thisObj.captionsPopup.hide();
+      // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called 
+      // e.g., if user triggered button with Enter or mouse click, not spacebar 
+      setTimeout(function() { 
+        thisObj.hidingPopup = false;
+      }, 100);
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();
