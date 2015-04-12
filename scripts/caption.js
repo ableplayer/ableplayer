@@ -1,11 +1,13 @@
 (function ($) {
-  AblePlayer.prototype.updateCaption = function (time) {    
-    if (this.captionsOn) {
-      this.$captionDiv.show();
-      this.showCaptions(time || this.getElapsed());
-    }
-    else if (this.$captionDiv) {
-      this.$captionDiv.hide();
+  AblePlayer.prototype.updateCaption = function (time) {   
+    if (!this.usingYouTubeCaptions) {     
+      if (this.captionsOn) {
+        this.$captionDiv.show();
+        this.showCaptions(time || this.getElapsed());
+      }
+      else if (this.$captionDiv) {
+        this.$captionDiv.hide();
+      }
     }
   };
 
@@ -13,23 +15,45 @@
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
-      thisObj.captionsOn = true;
       thisObj.selectedCaptions = track;
       thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
-      // Try and find a matching description track.
-      for (var ii in thisObj.descriptions) {
-        if (thisObj.descriptions[ii].language === track.language) {
-          thisObj.selectedDescriptions = thisObj.descriptions[ii];
-          thisObj.currentDescription = -1;
+      if (thisObj.usingYouTubeCaptions) { 
+        if (thisObj.captionsOn) { 
+          // captions are already on. Just need to change the language 
+          thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang}); 
         }
+        else { 
+          // captions are off (i.e., captions module has been unloaded; need to reload it) 
+          // user's selected language will be reset after module has successfully loaded 
+          // (the onApiChange event will be fired -- see initialize.js > initYouTubePlayer())  
+          thisObj.resettingYouTubeCaptions = true; 
+          thisObj.youTubePlayer.loadModule(thisObj.ytCaptionModule);
+        }        
       }
-      thisObj.hidingPopup = true;     
+      else { 
+        // Try and find a matching description track for rebuilding transcript
+        for (var ii in thisObj.descriptions) {
+          if (thisObj.descriptions[ii].language === track.language) {
+            thisObj.selectedDescriptions = thisObj.descriptions[ii];
+            thisObj.currentDescription = -1;
+          }
+        }
+        thisObj.updateCaption();
+        thisObj.updateDescription();
+      }
+      thisObj.captionsOn = true;
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it (used in handleCaptionToggle())
+      thisObj.hidingPopup = true; 
       thisObj.captionsPopup.hide();
+      // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called 
+      // e.g., if user triggered button with Enter or mouse click, not spacebar 
+      setTimeout(function() { 
+        thisObj.hidingPopup = false;
+      }, 100);
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
-      thisObj.updateCaption();
-      thisObj.updateDescription();
     }
   };
 
@@ -37,9 +61,20 @@
   AblePlayer.prototype.getCaptionOffFunction = function () {
     var thisObj = this;
     return function () {
+      if (thisObj.player == 'youtube') { 
+        thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
+      }
       thisObj.captionsOn = false;
       thisObj.currentCaption = -1;
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it (used in handleCaptionToggle())
+      thisObj.hidingPopup = true; 
       thisObj.captionsPopup.hide();
+      // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called 
+      // e.g., if user triggered button with Enter or mouse click, not spacebar 
+      setTimeout(function() { 
+        thisObj.hidingPopup = false;
+      }, 100);
       thisObj.$ccButton.focus();
       thisObj.refreshControls();
       thisObj.updateCaption();

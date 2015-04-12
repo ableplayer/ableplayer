@@ -25,7 +25,7 @@
       this.jwPlayer.seek(newTime);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.seekTo(newTime);
+      this.youTubePlayer.seekTo(newTime,true);
     }
 
     this.liveUpdatePending = true;
@@ -42,7 +42,7 @@
       duration = this.jwPlayer.getDuration();
     }
     else if (this.player === 'youtube') {
-      duration = this.youtubePlayer.getDuration();
+      duration = this.youTubePlayer.getDuration();
     }
     
     if (duration === undefined || isNaN(duration) || duration === -1) {
@@ -63,7 +63,9 @@
       position = this.jwPlayer.getPosition();
     }
     else if (this.player === 'youtube') {
-      position = this.youtubePlayer.getCurrentTime();
+      if (this.youTubePlayer) { 
+        position = this.youTubePlayer.getCurrentTime();
+      }      
     }
     
     if (position === undefined || isNaN(position) || position === -1) {
@@ -118,7 +120,7 @@
       }
     }
     else if (this.player === 'youtube') {
-      var state = this.youtubePlayer.getPlayerState();
+      var state = this.youTubePlayer.getPlayerState();
       if (state === -1 || state === 5) {
         return 'stopped';
       }
@@ -138,6 +140,7 @@
   };
 
   AblePlayer.prototype.isMuted = function () {
+
     if (!this.browserSupportsVolume()) {
       return false;
     }
@@ -149,7 +152,7 @@
       return this.jwPlayer.getMute();
     }
     else if (this.player === 'youtube') {
-      return this.youtubePlayer.isMuted();
+      return this.youTubePlayer.isMuted();
     }
   };
 
@@ -159,10 +162,12 @@
     }
     if (!mute) {
       this.$muteButton.attr('aria-label',this.tt.mute); 
-      this.$muteButton.find('span.able-clipped').text(this.tt.mute);
+      this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud');       
+      this.$muteButton.find('span.able-clipped').text(this.tt.mute); 
     }
     else {
       this.$muteButton.attr('aria-label',this.tt.unmute); 
+      this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute');       
       this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
     }
     
@@ -174,10 +179,10 @@
     }
     else if (this.player === 'youtube') {
       if (mute) {
-        this.youtubePlayer.mute();
+        this.youTubePlayer.mute();
       }
       else {
-        this.youtubePlayer.unMute();
+        this.youTubePlayer.unMute();
       }
     }
     
@@ -205,7 +210,7 @@
       this.jwPlayer.setVolume(volume * 100);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.setVolume(volume * 100);
+      this.youTubePlayer.setVolume(volume * 100);
     }
     
     this.lastVolume = volume;
@@ -223,7 +228,7 @@
       return this.jwPlayer.getVolume() / 100;
     }
     else if (this.player === 'youtube') {
-      return this.youtubePlayer.getVolume() / 100;
+      return this.youTubePlayer.getVolume() / 100;
     }
   };
 
@@ -237,7 +242,7 @@
     }
     else if (this.player === 'youtube') {
       // Youtube always supports a finite list of playback rates.  Only expose controls if more than one is available.
-      return (this.youtubePlayer.getAvailablePlaybackRates().length > 1);
+      return (this.youTubePlayer.getAvailablePlaybackRates().length > 1);
     }
   };
 
@@ -247,7 +252,7 @@
       this.media.playbackRate = rate;
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.setPlaybackRate(rate);
+      this.youTubePlayer.setPlaybackRate(rate);
     }
     this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
@@ -261,7 +266,7 @@
       return 1;
     }
     else if (this.player === 'youtube') {
-      return this.youtubePlayer.getPlaybackRate();
+      return this.youTubePlayer.getPlaybackRate();
     }
   };
 
@@ -284,7 +289,7 @@
       this.jwPlayer.pause(true);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.pauseVideo();
+      this.youTubePlayer.pauseVideo();
     }
   };
 
@@ -299,7 +304,8 @@
       this.jwPlayer.play(true);
     }
     else if (this.player === 'youtube') {
-      this.youtubePlayer.playVideo();
+      this.youTubePlayer.playVideo();
+      this.stoppingYouTube = false;
     }
     this.startedPlaying = true;    
   };
@@ -352,36 +358,14 @@
       'ended': this.tt.statusEnd
     };
 
-    // Update the text only if it's changed since it has role="alert"; 
-    // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
-    if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
-      // Debounce updates; only update after status has stayed steadily different for 250ms.
-      var timestamp = (new Date()).getTime();
-      if (!this.statusDebounceStart) {
-        this.statusDebounceStart = timestamp;
-        // Make sure refreshControls gets called again at the appropriate time to check.
-        this.statusTimeout = setTimeout(function () {
-          thisObj.refreshControls();
-        }, 300);
+    if (this.stoppingYouTube) { 
+      // YouTube reports 'paused' but we're trying to emulate 'stopped' 
+      // See notes in handleStop() 
+      // this.stoppingYouTube will be reset when playback resumes in play() 
+      if (this.$status.text() !== this.tt.statusStopped) {
+        this.$status.text(this.tt.statusStopped);
       }
-      else if ((timestamp - this.statusDebounceStart) > 250) {
-        this.$status.text(textByState[this.getPlayerState()]);
-        this.statusDebounceStart = null;
-        clearTimeout(this.statusTimeout);
-        this.statusTimeout = null;
-      }
-    }
-    else {
-      this.statusDebounceStart = null;
-      clearTimeout(this.statusTimeout);
-      this.statusTimeout = null;
-    }
-
-    // Don't change play/pause button display while using the seek bar.
-    if (!this.seekBar.tracking) {
-      if (this.isPaused()) {    
-        this.$playpauseButton.attr('aria-label',this.tt.play); 
-        
+      if (this.$playpauseButton.find('span').first().hasClass('icon-pause')) { 
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
@@ -390,47 +374,101 @@
           this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
         }
       }
-      else {
-        this.$playpauseButton.attr('aria-label',this.tt.pause); 
-        
-        if (this.iconType === 'font') {
-          this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
-          this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+    }
+    else { 
+      // Update the text only if it's changed since it has role="alert"; 
+      // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+      if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
+        // Debounce updates; only update after status has stayed steadily different for 250ms.
+        var timestamp = (new Date()).getTime();
+        if (!this.statusDebounceStart) {
+          this.statusDebounceStart = timestamp;
+          // Make sure refreshControls gets called again at the appropriate time to check.
+          this.statusTimeout = setTimeout(function () {
+            thisObj.refreshControls();
+          }, 300);
         }
-        else { 
-          this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+        else if ((timestamp - this.statusDebounceStart) > 250) {
+          this.$status.text(textByState[this.getPlayerState()]);
+          this.statusDebounceStart = null;
+          clearTimeout(this.statusTimeout);
+          this.statusTimeout = null;
+        }
+      }
+      else {
+        this.statusDebounceStart = null;
+        clearTimeout(this.statusTimeout);
+        this.statusTimeout = null;
+      }
+
+      // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
+      if (!this.seekBar.tracking && !this.stoppingYouTube) {
+        if (this.isPaused()) {    
+          this.$playpauseButton.attr('aria-label',this.tt.play); 
+        
+          if (this.iconType === 'font') {
+            this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
+            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+          }
+          else { 
+            this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+          }
+        }
+        else {
+          this.$playpauseButton.attr('aria-label',this.tt.pause); 
+        
+          if (this.iconType === 'font') {
+            this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+          }
+          else { 
+            this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+          }
         }
       }
     }
-
-    // Update seekbar width.
+    
+    // Update seekbar width. 
     // To do this, we need to calculate the width of all elements surrounding it.
-    // NOTE: Would be excellent if there were a way to do this with CSS...
     if (this.seekBar) {
       var widthUsed = 0;
       // Elements on the left side of the control panel.
       var leftControls = this.seekBar.wrapperDiv.parent().prev();
       leftControls.children().each(function () {
-        widthUsed += $(this).width();
+        if ($(this).is(':hidden')) {
+          // jQuery width() returns 0 for hidden elements 
+          // thisObj.getHiddenWidth() is a workaround 
+          widthUsed += thisObj.getHiddenWidth($(this)); 
+        }
+        else { 
+          widthUsed += $(this).width(); 
+        }
       });
-
       // Elements to the left and right of the seekbar on the right side.
       var prev = this.seekBar.wrapperDiv.prev();
       while (prev.length > 0) {
-        widthUsed += prev.width();
+        if (prev.is(':hidden')) { 
+          widthUsed += thisObj.getHiddenWidth(prev); 
+        }
+        else { 
+          widthUsed += prev.width();
+        }
         prev = prev.prev();
       }
-
       var next = this.seekBar.wrapperDiv.next();
       while (next.length > 0) {
-        widthUsed += next.width();
+        if (next.is(':hidden')) { 
+          widthUsed += thisObj.getHiddenWidth(next); 
+        }
+        else { 
+          widthUsed += next.width();
+        }
         next = next.next();
       }
-
-      var width = this.$playerDiv.width() - widthUsed - 20;
+      var seekbarWidth = this.playerWidth - widthUsed - 20;
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-      if (Math.abs(width - this.seekBar.getWidth()) > 5) {
-        this.seekBar.setWidth(width);
+      if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+        this.seekBar.setWidth(seekbarWidth);
       }
     }
 
@@ -447,25 +485,31 @@
     }
     
     if (this.$ccButton) {
+      if (this.usingYouTubeCaptions) { 
+        var captionsCount = this.ytCaptions.length;
+      }
+      else { 
+        var captionsCount = this.captions.length; 
+      }
       // Button has a different title depending on the number of captions.
       // If only one caption track, this is "Show captions" and "Hide captions"
       // Otherwise, it is just always "Captions"
       if (!this.captionsOn) {
-        this.$ccButton.addClass('buttonOff');
-        if (this.captions.length === 1) {
+        this.$ccButton.addClass('buttonOff');                
+        if (captionsCount === 1) { 
           this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
-        if (this.captions.length === 1) {
+        if (captionsCount === 1) { 
           this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
-      if (this.captions.length > 1) {
+      if (captionsCount > 1) {
         this.$ccButton.attr({ 
           'aria-label': this.tt.captions,
           'aria-haspopup': 'true',
@@ -579,8 +623,25 @@
       this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
     }
     else if (this.player === 'youtube') {
-      this.seekBar.setBuffered(this.youtubePlayer.getVideoLoadedFraction());
+      this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
     }
+  };
+  
+  AblePlayer.prototype.getHiddenWidth = function($el) { 
+
+    // jQuery returns for width() if element is hidden 
+    // this function is a workaround 
+    
+    // save a reference to a cloned element that can be measured
+    var $hiddenElement = $el.clone().appendTo('body');
+
+    // calculate the width of the clone
+    var width = $hiddenElement.outerWidth();
+
+    // remove the clone from the DOM
+    $hiddenElement.remove();
+
+    return width;
   };
 
   AblePlayer.prototype.handlePlay = function(e) { 
@@ -600,6 +661,18 @@
     }
     else if (this.player === 'jw' && this.jwPlayer) { 
       this.jwPlayer.stop();
+    }
+    else if (this.player === 'youtube') { 
+      // YouTube API function stopVideo() does not reset video to 0
+      // However, the stopped video is not seekable 
+      // so we can't call seekTo(0) after calling stopVideo() 
+      // Workaround is to use pauseVideo() instead, then seek to 0
+      this.youTubePlayer.pauseVideo();
+      this.seekTo(0);
+      // Unfortunately, pausing the video doesn't change playerState to 'Stopped' 
+      // which has an effect on the player UI. 
+      // the following Boolean is used  in refreshControls() to emulate a 'stopped' state
+      this.stoppingYouTube = true; 
     }
     this.refreshControls();
   };
@@ -684,7 +757,7 @@
       this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
     }
     else if (this.player === 'youtube') {
-      var rates = this.youtubePlayer.getAvailablePlaybackRates();
+      var rates = this.youTubePlayer.getAvailablePlaybackRates();
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {
@@ -702,27 +775,50 @@
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
 
+    var captions; 
+
     if (this.hidingPopup) { 
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it 
       this.hidingPopup = false;      
       return false; 
     }
-    
-    if (this.captions.length === 1) {
+    if (this.usingYouTubeCaptions) { 
+      
+    }
+    if (this.captions.length) { 
+      captions = this.captions;
+    }
+    else if (this.ytCaptions.length) { 
+      captions = this.ytCaptions;
+    }
+    else { 
+      captions = []; 
+    }
+    if (captions.length === 1) {
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) { 
-        // captions are on. Turn them off. 
+        // turn them off
         this.captionsOn = false;
-        this.$captionDiv.hide();
+        if (this.usingYouTubeCaptions) { 
+          this.youTubePlayer.unloadModule(this.ytCaptionModule);       
+        }
+        else { 
+          this.$captionDiv.hide();
+        }
       }
       else { 
         // captions are off. Turn them on. 
         this.captionsOn = true;
-        this.$captionDiv.show();
-        for (var i=0; i<this.captions.length; i++) { 
-          if (this.captions[i].def === true) { // this is the default language
-            this.selectedCaptions = this.captions[i];          
+        if (this.usingYouTubeCaptions) { 
+          this.youTubePlayer.loadModule(this.ytCaptionModule);
+        }
+        else {          
+          this.$captionDiv.show();
+        }
+        for (var i=0; i<captions.length; i++) { 
+          if (captions[i].def === true) { // this is the default language
+            this.selectedCaptions = captions[i];          
           }
         }
         this.selectedCaptions = this.captions[0];
@@ -735,6 +831,7 @@
     else {   
       if (this.captionsPopup.is(':visible')) {
         this.captionsPopup.hide();
+        this.hidingPopup = false; 
         this.$ccButton.focus();
       }
       else {
@@ -765,6 +862,7 @@
     }
     if (this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
+      this.hidingPopup = false;
       this.$chaptersButton.focus();
     }
     else {
@@ -847,7 +945,6 @@
     if (this.isFullscreen() == fullscreen) {
       return;
     }
-    
     var thisObj = this;
     var $el = this.$ableDiv;
     var el = $el[0];
@@ -856,7 +953,7 @@
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
         // If not in full screen, initialize it.
-        if (el.requestFullscreen) {
+        if (el.requestFullscreen) {          
           el.requestFullscreen();
         }
         else if (el.webkitRequestFullscreen) {
@@ -1022,8 +1119,8 @@
     if (this.jwPlayer) {
       this.jwPlayer.resize(width, height);
     }
-    else if (this.youtubePlayer) {
-      this.youtubePlayer.setSize(width, height);
+    else if (this.youTubePlayer) {
+      this.youTubePlayer.setSize(width, height);
     }
         
     this.refreshControls();

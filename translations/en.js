@@ -98,6 +98,8 @@
 
 "selectedTrack": "Selected Track",
 
+"alertDescribedVersion": "Using the audio described version of this video",
+
 "fallbackError1": "Sorry, your browser is unable to play this",
 
 "fallbackError2": "The following browsers are known to work with this media player",

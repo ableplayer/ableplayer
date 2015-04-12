@@ -1,6 +1,7 @@
 (function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
+    
     if (!this.startedPlaying) {
       if (this.startTime) { 
         if (this.startTime === this.media.currentTime) { 
@@ -518,8 +519,8 @@
       this.addJwMediaListeners();
     }
     else if (this.player === 'youtube') {
+      // Youtube doesn't give us time update events, so we just periodically generate them ourselves 
       setInterval(function () {
-        // Youtube doesn't give us time update events, so we just periodically generate them ourselves.
         thisObj.onMediaUpdateTime();
       }, 300);
     }

@@ -17,6 +17,8 @@
 
   // YouTube Player API for iframe Embeds 
   https://developers.google.com/youtube/iframe_api_reference  
+  // YouTube Player Parameters 
+  https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
 */
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */

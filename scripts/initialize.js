@@ -256,14 +256,13 @@
     var promise = deferred.promise();
 
     if (this.$media.attr('id')) {
-      this.mediaId = this.$media.attr('id');
+      this.mediaId = this.$media.attr('id');      
     }
     else {
       // Ensure the base media element always has an ID.
       this.mediaId = "ableMediaId_" + this.ableIndex;
       this.$media.attr('id', this.mediaId);
     }
-
     // get playlist for this media element   
     this.setupInstancePlaylist();
 
@@ -348,7 +347,7 @@
       playerPromise = this.initJwPlayer();
     }
     else if (this.player === 'youtube') {
-      playerPromise = this.initYoutubePlayer();
+      playerPromise = this.initYouTubePlayer();
     }
 
     // After player specific initialization is done, run remaining general initialization.
@@ -397,6 +396,7 @@
   };
   
   AblePlayer.prototype.initDefaultCaption = function () { 
+    
     var i; 
     if (this.captions.length > 0) { 
       for (i=0; i<this.captions.length; i++) { 
@@ -526,8 +526,10 @@
     return promise;
   };
 
-  AblePlayer.prototype.initYoutubePlayer = function () {
+  AblePlayer.prototype.initYouTubePlayer = function () {
     var thisObj = this;
+    
+    var resettingYouTubeCaptions = false;
 
     var deferred = new $.Deferred();
     var promise = deferred.promise();
@@ -542,30 +544,85 @@
       // give them the described version 
       if (thisObj.youtubeDescId && thisObj.prefDesc) { 
         youTubeId = thisObj.youtubeDescId; 
-        // TODO: add alert informing the user that the described version is being loaded
+        thisObj.showAlert(thisObj.tt.alertDescribedVersion);
       }
       else { 
         youTubeId = thisObj.youtubeId;
       }
       
-      thisObj.youtubePlayer = new YT.Player(containerId, {
+      thisObj.youTubeCaptionsReady = false; 
+      // if video already has captions handled by Able Player via <track>, turn off YouTube captions 
+      if (thisObj.hasCaptions) { 
+        // force YouTube captions to be off, despite user's caption preference on YouTube
+        var ccLoadPolicy = 0; 
+      } 
+      else { 
+        // force YouTube captions to be on 
+        // Otherwise the YouTube 'cc' module isn't loaded 
+        // which is needed for determining whether there are captions, & what languages
+        var ccLoadPolicy = 1; 
+      }
+      
+      thisObj.youTubePlayer = new YT.Player(containerId, {
         videoId: youTubeId,
         height: thisObj.playerHeight.toString(),
         width: thisObj.playerWidth.toString(),
         playerVars: {
           start: thisObj.startTime,
-          controls: 0
+          controls: 0, // no controls, using our own
+          cc_load_policy: ccLoadPolicy,
+          // enablejsapi: 1, // deprecated; but we don't even need it???
+          hl: thisObj.lang, // use the default language UI
+          modestbranding: 1, // no YouTube logo in controller
+          rel: 0, // do not show related videos when video ends            
+          html5: 1 // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
         },
         events: {
           onReady: function () {
             deferred.resolve();
+            // In order to trigger onApiChange event (and therefore load captions), play just a little 
+            thisObj.ytPlayingJustEnough = true; 
+            thisObj.playMedia();
           },
           onError: function (x) {
             deferred.fail();
-          }
+          },
+          onStateChange: function () { 
+            // do something
+          },
+          onPlaybackQualityChange: function () { 
+            // do something
+          },
+          onApiChange: function (x) { 
+            // fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
+            // it isn't fired until the video starts playing 
+            // if captions are available for this video (automated captions don't count) 
+            // the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires 
+            if (thisObj.ytPlayingJustEnough) { 
+              thisObj.handleStop();
+              thisObj.ytPlayingJustEnough = false; 
+            } 
+            if (typeof thisObj.ytCaptionModule === 'undefined') { 
+              // YouTube captions have already been initialized 
+              // Only need to do this once 
+              thisObj.initYouTubeCaptions();
+            }
+            if (thisObj.resettingYouTubeCaptions) { 
+              // even though caption module has loaded 
+              // setting the language at this point does not reliable set the caption language to thisObj.captionLang
+              // (the language selected from the popup menu) 
+              // Instead, it sometimes reverts to the most recent language 
+              // This is especially true in Firefox on Mac, which is very slow anyway with the html5 player  
+              // Adding a brief timeout helps, but causes captions to load briefly in the most recent language, then switch 
+              // which creates a flash and is kind of clunky (ommitting the timeout for now) 
+              // setTimeout(function() { 
+                thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang}); 
+                thisObj.resettingYouTubeCaptions = false;
+              // }, 1000);
+            }
+          }          
         }
       });
-
       thisObj.$media.remove();
     };
 
@@ -591,6 +648,284 @@
     }
 
     return promise;
+  };
+
+  AblePlayer.prototype.initYouTubeCaptions = function () {
+
+    // called when YouTube onApiChange event is fired 
+    // fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
+    // it isn't fired until the video starts playing 
+    // and only fires if captions are available for this video (automated captions don't count) 
+    // If no captions are available, onApichange event never fires & this function is never called
+    
+    // YouTube iFrame API documentation is incomplete related to captions 
+    // Found undocumented features on user forums and by playing around 
+    // Details are here: http://terrillthompson.com/blog/
+    // Summary: 
+    // User might get either the AS3 (Flash) or HTML5 YouTube player  
+    // The API uses a different caption module for each player (AS3 = 'cc'; HTML5 = 'captions') 
+    // There are differences in the data exposed by these modules 
+    // Since none of this is mentioned in the API documentation, using it at all is probably risky 
+    // This function is therefore conservative in what data it uses 
+
+    var thisObj, options, module, 
+        defTrack, defLang, tracks, track, trackLang, trackKind, trackName, isDefault,
+        fontSize, displaySettings, 
+        newButton, captionLabel, buttonTitle, buttonLabel, buttonIcon, buttonImg;
+
+    thisObj = this;
+    this.ytCaptions = [];     
+    options = this.youTubePlayer.getOptions(); 
+    if (options.length) {
+      for (var i=0; i<options.length; i++) { 
+        if (options[i] == 'cc') { // this is the AS3 (Flash) player 
+          this.ytCaptionModule = 'cc';          
+          break;
+        }
+        else if (options[i] == 'captions') { // this is the HTML5 player 
+          this.ytCaptionModule = 'captions';
+          break;
+        } 
+      }
+      if (this.ytCaptionModule == 'cc' || this.ytCaptionModule == 'captions') { 
+        // captions are available 
+
+        // check to see if video already has captions handled by Able Player via <track> 
+        if (this.hasCaptions) { 
+          // disable YouTube captions. Local captions take precedence. 
+          this.usingYouTubeCaptions = false; 
+          this.youTubePlayer.unloadModule(this.ytCaptionModule);           
+        }
+        else { // there are no local captions. Use YouTube captions
+          this.usingYouTubeCaptions = true; 
+          // get array of available captions/subtitle tracks
+          tracks = this.youTubePlayer.getOption(this.ytCaptionModule,'tracklist');        
+
+          // get default track 
+          // (this works in the 'cc' module, but in 'captions' the track option always returns an empty object) 
+          defTrack = this.youTubePlayer.getOption(this.ytCaptionModule,'track');
+          if (typeof defTrack.languageCode !== 'undefined') { 
+            defLang = defTrack.languageCode; 
+          }
+          else { 
+            defLang = false; 
+          }
+          if (tracks.length) {       
+            for (var i=0; i<tracks.length; i++) { 
+              trackLang = tracks[i].languageCode; 
+
+              // get track name 
+              if (this.ytCaptionModule == 'cc') { 
+                trackName = tracks[i].name; // this seems to always be an empty string 
+              }
+              else if (this.ytCaptionModule == 'captions') { 
+                trackName = tracks[i].languageName; // displayName seems to have the same value  
+              }
+              if (trackName == '') { 
+                trackName = this.getLanguageName(trackLang);
+              }
+
+              // determine whether this is the default track 
+              if (defLang) { 
+                if (trackLang == defLang) { 
+                  isDefault = true;
+                }
+                else { 
+                  isDefault = false;
+                }
+              }
+              else { 
+                if (tracks[i].is_default) { 
+                  isDefault = true; 
+                  defLang = trackLang;
+                }
+                else { 
+                  isDefault = false;
+                }
+              }
+              // ytCaptions has all the same keys that this.captions has *except* no cues
+              this.ytCaptions.push({
+                'language': trackLang,
+                'label': trackName,
+                'def': isDefault
+              });
+            }
+      
+            if (!defLang) { 
+              // YouTube did not reveal the default track, either with track or tracklist.is_defult  
+              // How does YouTube decide which language to use as default? Terrill's test results:
+              // Set lang to French in browser prefs (Firefox & Chrome); default captions are English 
+              // Set lang to French in OS settings (Mac OS X); default captions are English 
+              // Might be doing some more sophisticated geolocating, or they might just always serve up English 
+              // For now, Able Player will just assume the default captions are in English ... 
+              for (var i in this.ytCaptions) {
+                if (this.ytCaptions[i].language == 'en') {
+                  this.ytCaptions[i].def = true;
+                  break; 
+                }
+              }
+            }
+            
+            // get user's preferred fontSize       
+            fontSize = this.youTubePlayer.getOption(this.ytCaptionModule,'fontSize');
+
+            // get user's displaySettings 
+            displaySettings = this.youTubePlayer.getOption(this.ytCaptionModule,'displaySettings'); 
+      
+            // TODO: Use fontSize and displaySettings to customize appearance of captions 
+
+            // check to see if video already has captions handled by Able Player via <track> 
+            if (typeof this.$ccButton === 'undefined') { 
+
+              // there is no cc button. add one 
+              // TODO: Fix the redundancy with buildplayer.js > addControls() 
+                      
+              if (!this.prefCaptions || this.prefCaptions !== 1) { 
+                // captions are available, but user has them turned off 
+                this.captionsOn = false;
+                if (tracks.length > 1) { 
+                  captionLabel = this.tt.captions;
+                }
+                else { 
+                  captionLabel = this.tt.showCaptions;
+                }
+              }
+              else { 
+                this.captionsOn = true; 
+                if (tracks.length > 1) { 
+                  captionLabel = this.tt.captions;
+                }
+                else { 
+                  captionLabel = this.tt.hideCaptions;
+                }            
+              }
+              buttonTitle = this.getButtonTitle('captions')
+          
+              newButton = $('<button>',{ 
+                'type': 'button',
+                'tabindex': '0',
+                'aria-label': captionLabel,
+                'class': 'able-button-handler-captions'
+              });        
+              
+              if (this.iconType === 'font') {
+                buttonIcon = $('<span>',{ 
+                  'class': 'icon-captions',
+                  'aria-hidden': 'true'
+                });               
+                newButton.append(buttonIcon);
+              }
+              else { 
+                // use images
+                buttonImg = $('<img>',{ 
+                  'src': '../images/' + this.iconColor + '/captions.png',
+                  'alt': '',
+                  'role': 'presentation'
+                });
+                newButton.append(buttonImg);
+              }
+              // add the visibly-hidden label for screen readers that don't support aria-label on the button
+              buttonLabel = $('<span>',{
+                'class': 'able-clipped'
+              }).text(buttonTitle);
+              newButton.append(buttonLabel);
+          
+              if (!this.captionsOn) {
+                newButton.addClass('buttonOff').attr('title',captionLabel);
+              }
+          
+              this.$ccButton = newButton; 
+          
+              // append button to the lower left span in the controller 
+              this.$controllerDiv.children('span.able-left-controls').eq(1).append(this.$ccButton);
+          
+              // add new button to this.controls array for future reference 
+              this.controls.push('captions'); 
+
+              // add a popup menu of caption/subtitle languages            
+              this.setupPopups();
+
+              // add an event listener that displays a tooltip on mouseenter or focus 
+              this.$ccButton.on('mouseenter focus',function(event) { 
+                var label = $(this).attr('aria-label');
+                // get position of this button 
+                var position = $(this).position(); 
+                var buttonHeight = $(this).height();
+                var buttonWidth = $(this).width();
+                var tooltipY = position.top - buttonHeight - 15;
+                var centerTooltip = true; 
+                var tooltipId = thisObj.mediaId + '-tooltip';
+                if ($(this).is(':first-child')) { 
+                  // this is the first control on the left
+                  centerTooltip = false;
+                  var tooltipX = position.left;
+                  var tooltipStyle = { 
+                    left: tooltipX + 'px',
+                    right: '',
+                    top: tooltipY + 'px'
+                  };                
+                }
+                if (centerTooltip) { 
+                  // populate tooltip, then calculate its width before showing it 
+                  var tooltipWidth = $('#' + tooltipId).text(label).width();
+                  // center the tooltip horizontally over the button
+                  var tooltipX = position.left - tooltipWidth/2;
+                  var tooltipStyle = { 
+                    left: tooltipX + 'px',
+                    right: '',
+                    top: tooltipY + 'px'
+                  };
+                }        
+                $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+                $(this).on('mouseleave blur',function() { 
+                  $('#' + tooltipId).text('').hide();
+                });
+              });
+            
+              // add an event listener for a click 
+              this.$ccButton.click(function(){
+                thisObj.onClickPlayerButton(this);
+              });
+
+              // TODO: Ascertain whether this is needed
+              // handle local key-presses if this is not the only player on the page; 
+              // otherwise these are dispatched by global handler.
+              this.$ccButton.keydown(function (e) {
+                if (AblePlayer.nextIndex > 1) {
+                  thisObj.onPlayerKeyPress(e);
+                }
+              });
+          
+              // TODO: might need to adjust width and height of div.able-vidcap-container
+              // Only used if !this.usingYouTubeCaptions
+              /*
+              var vidcapStyles = {
+                'width': this.playerWidth+'px',
+                'height': this.playerHeight+'px'
+              }     
+              if (this.$vidcapContainer) { 
+                this.$vidcapContainer.css(vidcapStyles); 
+              }   
+              // also set width of the captions and descriptions containers 
+              if (this.$captionDiv) { 
+                this.$captionDiv.css('width',this.playerWidth+'px');
+              }
+              if (this.$descDiv) {
+                this.$descDiv.css('width',this.playerWidth+'px');
+              }
+              */
+
+              this.refreshControls();      
+      
+            } // end if there is no cc button 
+          } // end if there is at least one track
+        } // end else if there are no local captions (therefore, using YouTube 
+      } // end if captions are available via YouTube  
+      else { 
+        // onApiChange event fired, but no captions module is available 
+        // must have been some other module being loaded or unloaded
+      }
+    } // end if this.getOptions() returns any modules 
   };
 
   // Sets media/track/source attributes; is called whenever player is recreated since $media may have changed.
