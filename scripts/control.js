@@ -943,13 +943,11 @@
     if (this.isFullscreen() == fullscreen) {
       return;
     }
-console.log('apparently this is not full screen yet');    
     var thisObj = this;
     var $el = this.$ableDiv;
     var el = $el[0];
     
     if (this.nativeFullscreenSupported()) {
-console.log('full screen is natively supported');      
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
         // If not in full screen, initialize it.
@@ -986,7 +984,6 @@ console.log('full screen is natively supported');
       }
     }
     else {
-console.log('fullscreen is not navitely supported');      
       // Non-native fullscreen support through modal dialog.
       
       // Create dialog on first run through.

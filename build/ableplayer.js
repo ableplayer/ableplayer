@@ -2352,10 +2352,15 @@
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    // width and height of this.$mediaContainer are not updated when switching to full screen 
+    // However, I don't think they're needed at all. Commented out on 4/12/15, but 
+    // preserved here just in case there are unanticipated problems... 
+    /*    
     this.$mediaContainer.width(this.playerWidth);
     if (this.mediaType == 'video') {     
       this.$mediaContainer.height(this.playerHeight);
     }
+    */
     this.$ableDiv.width(this.playerWidth);
     
     this.injectOffscreenHeading();
@@ -2977,12 +2982,10 @@
       }
       else if (this.controls[i] === 'captions') { 
         if (this.captions.length > 1) { 
-console.log('There is more than one caption');          
           // caption button launches a Captions popup menu
           label = this.tt.captions;
         }        
         else { 
-console.log('There is only one caption');          
           // there is only one caption track
           // therefore caption button is a toggle
           if (this.captionsOn) { 
@@ -5618,13 +5621,11 @@ console.log('There is only one caption');
     if (this.isFullscreen() == fullscreen) {
       return;
     }
-console.log('apparently this is not full screen yet');    
     var thisObj = this;
     var $el = this.$ableDiv;
     var el = $el[0];
     
     if (this.nativeFullscreenSupported()) {
-console.log('full screen is natively supported');      
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
         // If not in full screen, initialize it.
@@ -5661,7 +5662,6 @@ console.log('full screen is natively supported');
       }
     }
     else {
-console.log('fullscreen is not navitely supported');      
       // Non-native fullscreen support through modal dialog.
       
       // Create dialog on first run through.
