@@ -35,7 +35,8 @@ module.exports = function(grunt) {
                     'scripts/search.js',
                     'scripts/event.js',
                     'scripts/dragdrop.js',
-                    'scripts/sign.js'
+                    'scripts/sign.js',
+                    'scripts/langs.js'
                 ],
                 dest: 'build/<%= pkg.name %>.js'
             },

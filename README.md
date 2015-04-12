@@ -222,8 +222,11 @@ MP4. Browsers will play the first media source that they support.
 #### Closed Captions
 
 Captions are added using the \<track\> element with kind=“captions”.
-Captions must be in Web Video Text Tracks format ([WebVTT][http://dev.w3.org/html5/webvtt/]). WebVTT
-tags within captions are currently ignored.  
+Captions must be in Web Video Text Tracks format ([WebVTT][]). WebVTT
+tags within captions are currently ignored. 
+
+**NOTE:** Able Player only supports valid WebVTT files. Be sure to 
+validate your WebVTT using a [WebVTT Validator][]. 
 
 If captions are provided, a CC button will be added to the
 *Able Player* controller.
@@ -497,17 +500,19 @@ Files created by the build process are put into the */build* directory:
   a minified version of the *styles/ableplayer.css* file
  
  
+  [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
+  [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
   [examples]: http://ableplayer.github.io/ableplayer/tests/
+  [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
+  [Grunt]: http://gruntjs.com/
+  [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
   [jQuery]: http://jquery.com/
-  [Modernizr]: http://modernizr.com/
   [jquery.cookie]: https://github.com/carhartl/jquery-cookie
   [JW Player]: http://www.jwplayer.com/
-  [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
-  [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
-  [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
+  [Modernizr]: http://modernizr.com/
   [npm]: https://www.npmjs.com/
-  [Grunt]: http://gruntjs.com/
   [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
-  [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
-  [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
+  [WebVTT validator]: https://quuz.org/webvtt/
+  [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
+  [WebVTT]: http://dev.w3.org/html5/webvtt/
 

@@ -3,6 +3,7 @@
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
   AblePlayer.prototype.setupTracks = function() {
+    
     var deferred = new $.Deferred();
     var promise = deferred.promise();
     this.$tracks = this.$media.find('track');
@@ -61,7 +62,7 @@
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it 
     // if not provided, assume track is the same language as the default player language
     var trackLang = track.getAttribute('srclang') || this.lang; 
-    var trackLabel = track.getAttribute('label') || trackLang;
+    var trackLabel = track.getAttribute('label') || this.getLanguageName(trackLang);
     if (typeof track.getAttribute('default') == 'string') { 
       var isDefaultTrack = true; 
       // Now remove 'default' attribute from <track> 

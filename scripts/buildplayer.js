@@ -1,4 +1,5 @@
 (function ($) {
+  
   AblePlayer.prototype.injectPlayerCode = function() { 
     // create and inject surrounding HTML structure 
     // If IOS: 
@@ -18,17 +19,25 @@
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    // width and height of this.$mediaContainer are not updated when switching to full screen 
+    // However, I don't think they're needed at all. Commented out on 4/12/15, but 
+    // preserved here just in case there are unanticipated problems... 
+    /*    
     this.$mediaContainer.width(this.playerWidth);
     if (this.mediaType == 'video') {     
       this.$mediaContainer.height(this.playerHeight);
     }
+    */
     this.$ableDiv.width(this.playerWidth);
     
     this.injectOffscreenHeading();
     
     // youtube adds its own big play button
-    if (this.mediaType === 'video' && this.player !== 'youtube') {
-      this.injectBigPlayButton();
+    // if (this.mediaType === 'video' && this.player !== 'youtube') {
+    if (this.mediaType === 'video') { 
+      if (this.player !== 'youtube') {      
+        this.injectBigPlayButton();
+      }
 
       // add container that captions or description will be appended to
       // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
@@ -37,7 +46,7 @@
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
-
+    
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
 
@@ -390,11 +399,23 @@
         radioName, radioId, trackButton, trackLabel; 
     
     popups = [];     
-    if (this.captions.length > 0) { 
-      popups.push('captions');
+    
+    if (typeof this.ytCaptions !== 'undefined') { 
+      // special call to this function for setting up a YouTube caption popup
+      if (this.ytCaptions.length) { 
+        popups.push('ytCaptions');
+      }
+      else { 
+        return false;
+      }
     }
-    if (this.chapters.length > 0) { 
-      popups.push('chapters');
+    else { 
+      if (this.captions.length > 0) { 
+        popups.push('captions');
+      }            
+      if (this.chapters.length > 0) { 
+        popups.push('chapters');
+      }
     }
     if (popups.length > 0) { 
       thisObj = this;
@@ -408,6 +429,10 @@
         else if (popup == 'chapters') { 
           this.chaptersPopup = this.createPopup('chapters');
           tracks = this.chapters; 
+        }
+        else if (popup == 'ytCaptions') { 
+          this.captionsPopup = this.createPopup('captions');
+          tracks = this.ytCaptions;
         }
         var trackList = $('<ul></ul>');
         radioName = this.mediaId + '-' + popup + '-choice';
@@ -431,19 +456,24 @@
           if (track.language !== 'undefined') { 
             trackButton.attr('lang',track.language);
           }
-          if (popup == 'captions') { 
+          if (popup == 'captions' || popup == 'ytCaptions') { 
             trackLabel.text(track.label || track.language);          
             trackButton.click(this.getCaptionClickFunction(track));
-            //trackButton.click(this.handleCaptionRadioSelect(track));
-            // trackButton.keypress(function() { alert('hey!');});
           }
           else if (popup == 'chapters') { 
             trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
             var getClickFunction = function (time) {
               return function () {
                 thisObj.seekTo(time);
+                // stopgap to prevent spacebar in Firefox from reopening popup
+                // immediately after closing it (used in handleChapters())
                 thisObj.hidingPopup = true; 
                 thisObj.chaptersPopup.hide();
+                // Ensure stopgap gets cancelled if handleChapters() isn't called 
+                // e.g., if user triggered button with Enter or mouse click, not spacebar 
+                setTimeout(function() { 
+                  thisObj.hidingPopup = false;
+                }, 100);
                 thisObj.$chaptersButton.focus();
               }
             }
@@ -452,7 +482,7 @@
           trackItem.append(trackButton,trackLabel);
           trackList.append(trackItem);      
         }
-        if (popup == 'captions') { 
+        if (popup == 'captions' || popup == 'ytCaptions') { 
           // add a captions off button 
           radioId = this.mediaId + '-captions-off'; 
           trackItem = $('<li></li>');
@@ -473,7 +503,7 @@
           // check the first button 
           trackList.find('input').first().attr('checked','checked');          
         }
-        if (popup == 'captions') {
+        if (popup == 'captions' || popup == 'ytCaptions') {
           this.captionsPopup.append(trackList);
         }
         else if (popup == 'chapters') { 
@@ -777,6 +807,7 @@
   };
 
   AblePlayer.prototype.addControls = function() {   
+    
     // determine which controls to show based on several factors: 
     // mediaType (audio vs video) 
     // availability of tracks (e.g., for closed captions & audio description) 
@@ -798,7 +829,7 @@
     var controlLayout = this.calculateControlLayout();
     
     var sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
-    
+
     // add an empty div to serve as a tooltip
     tooltipId = this.mediaId + '-tooltip';
     tooltipDiv = $('<div>',{
@@ -1142,7 +1173,6 @@
         this.media.load();
       }   
       else if (this.player === 'jw') { 
-console.log('this.jwPlayer.load');        
         this.jwPlayer.load({file: jwSource}); 
       }
       else if (this.player === 'youtube') {
@@ -1153,6 +1183,9 @@ console.log('this.jwPlayer.load');
   };
 
   AblePlayer.prototype.getButtonTitle = function(control) { 
+    
+    var captionsCount; 
+    
     if (control === 'playpause') { 
       return this.tt.play; 
     }
@@ -1172,11 +1205,22 @@ console.log('this.jwPlayer.load');
       return this.tt.forward;
     }
     else if (control === 'captions') {  
-      if (this.captionsOn) {
-        return this.tt.hideCaptions;
+      if (this.usingYouTubeCaptions) { 
+        captionsCount = this.ytCaptions.length;
       }
       else { 
-        return this.tt.showCaptions;
+        captionsCount = this.captions.length; 
+      }
+      if (captionsCount > 1) { 
+        return this.tt.captions;
+      }
+      else { 
+        if (this.captionsOn) {
+          return this.tt.hideCaptions;
+        }
+        else { 
+          return this.tt.showCaptions;
+        }                    
       }
     }   
     else if (control === 'descriptions') { 
