@@ -836,7 +836,12 @@
           onError: function (x) {
             deferred.fail();
           },
-          onStateChange: function () { 
+          onStateChange: function (x) { 
+            if (thisObj.ytPlayingJustEnough) { 
+              thisObj.handleStop();
+              thisObj.ytPlayingJustEnough = false; 
+            } 
+
             // do something
           },
           onPlaybackQualityChange: function () { 
@@ -847,10 +852,6 @@
             // it isn't fired until the video starts playing 
             // if captions are available for this video (automated captions don't count) 
             // the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires 
-            if (thisObj.ytPlayingJustEnough) { 
-              thisObj.handleStop();
-              thisObj.ytPlayingJustEnough = false; 
-            } 
             if (typeof thisObj.ytCaptionModule === 'undefined') { 
               // YouTube captions have already been initialized 
               // Only need to do this once 
@@ -917,7 +918,7 @@
     // Since none of this is mentioned in the API documentation, using it at all is probably risky 
     // This function is therefore conservative in what data it uses 
 
-    var thisObj, options, module, 
+    var thisObj, options, module, tooltip,
         defTrack, defLang, tracks, track, trackLang, trackKind, trackName, isDefault,
         fontSize, displaySettings, 
         newButton, captionLabel, buttonTitle, buttonLabel, buttonIcon, buttonImg;
@@ -936,6 +937,7 @@
           break;
         } 
       }
+   
       if (this.ytCaptionModule == 'cc' || this.ytCaptionModule == 'captions') { 
         // captions are available 
 
@@ -1125,7 +1127,9 @@
                     top: tooltipY + 'px'
                   };
                 }        
-                $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+                tooltip = $('#' + tooltipId).text(label).css(tooltipStyle); 
+                thisObj.showTooltip(tooltip);
+                
                 $(this).on('mouseleave blur',function() { 
                   $('#' + tooltipId).text('').hide();
                 });
@@ -3311,8 +3315,8 @@
                 top: tooltipY + 'px'
               };
             }
-            
-            $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+            var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle);
+            thisObj.showTooltip(tooltip); 
             $(this).on('mouseleave blur',function() { 
               $('#' + tooltipId).text('').hide();
             })
@@ -5734,6 +5738,16 @@
     this.refreshControls();
   };
 
+  AblePlayer.prototype.showTooltip = function($tooltip) { 
+
+    if (($tooltip).is(':animated')) { 
+      $tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
+    }
+    else { 
+      $tooltip.stop().show().delay(4000).fadeOut(1000);
+    }
+  };
+  
   AblePlayer.prototype.showAlert = function( msg, location ) { 
     
     // location is either 'main' (default) or 'sign' (i.e., sign language window) 
@@ -6028,7 +6042,7 @@
 (function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
-    var langs = ['en','de'];
+    var langs = ['en','de','es'];
     return langs;
   };
 
@@ -7127,7 +7141,8 @@
         right: tooltipX + 'px',
         top: tooltipY + 'px'
       };
-      $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+      var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle); 
+      thisObj.showTooltip(tooltip);
       $(this).on('mouseleave blur',function() { 
         $('#' + tooltipId).text('').hide();
       });

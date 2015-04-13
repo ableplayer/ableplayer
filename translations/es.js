@@ -98,6 +98,8 @@
 
 "selectedTrack": "Pista seleccionada",
 
+"alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
+
 "fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
 
 "fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",

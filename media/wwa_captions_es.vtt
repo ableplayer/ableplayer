@@ -2,7 +2,7 @@ WEBVTT
 kind: captions
 lang: es
 
-NOTA Este fichero VTT incluye algunos extras:
+NOTE Este fichero VTT incluye algunos extras:
 - Meta data en la parte superior (líneas 2 y 3)
 - Este bloque de comentarios, Idenrificado como NOTA y rodeado de espacios 
 - Indicaciones de configuración al final de la primera marca de tiempo 
