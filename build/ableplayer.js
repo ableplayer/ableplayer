@@ -837,6 +837,11 @@
             deferred.fail();
           },
           onStateChange: function () { 
+            if (thisObj.ytPlayingJustEnough) { 
+              thisObj.handleStop();
+              thisObj.ytPlayingJustEnough = false; 
+            } 
+
             // do something
           },
           onPlaybackQualityChange: function () { 
@@ -847,10 +852,6 @@
             // it isn't fired until the video starts playing 
             // if captions are available for this video (automated captions don't count) 
             // the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires 
-            if (thisObj.ytPlayingJustEnough) { 
-              thisObj.handleStop();
-              thisObj.ytPlayingJustEnough = false; 
-            } 
             if (typeof thisObj.ytCaptionModule === 'undefined') { 
               // YouTube captions have already been initialized 
               // Only need to do this once 
