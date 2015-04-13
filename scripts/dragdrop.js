@@ -82,7 +82,8 @@
         right: tooltipX + 'px',
         top: tooltipY + 'px'
       };
-      $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+      var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle); 
+      thisObj.showTooltip(tooltip);
       $(this).on('mouseleave blur',function() { 
         $('#' + tooltipId).text('').hide();
       });

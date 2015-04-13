@@ -1049,6 +1049,16 @@
     this.refreshControls();
   };
 
+  AblePlayer.prototype.showTooltip = function($tooltip) { 
+
+    if (($tooltip).is(':animated')) { 
+      $tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
+    }
+    else { 
+      $tooltip.stop().show().delay(4000).fadeOut(1000);
+    }
+  };
+  
   AblePlayer.prototype.showAlert = function( msg, location ) { 
     
     // location is either 'main' (default) or 'sign' (i.e., sign language window) 

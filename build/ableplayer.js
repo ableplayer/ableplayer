@@ -836,7 +836,7 @@
           onError: function (x) {
             deferred.fail();
           },
-          onStateChange: function () { 
+          onStateChange: function (x) { 
             if (thisObj.ytPlayingJustEnough) { 
               thisObj.handleStop();
               thisObj.ytPlayingJustEnough = false; 
@@ -918,7 +918,7 @@
     // Since none of this is mentioned in the API documentation, using it at all is probably risky 
     // This function is therefore conservative in what data it uses 
 
-    var thisObj, options, module, 
+    var thisObj, options, module, tooltip,
         defTrack, defLang, tracks, track, trackLang, trackKind, trackName, isDefault,
         fontSize, displaySettings, 
         newButton, captionLabel, buttonTitle, buttonLabel, buttonIcon, buttonImg;
@@ -937,6 +937,7 @@
           break;
         } 
       }
+   
       if (this.ytCaptionModule == 'cc' || this.ytCaptionModule == 'captions') { 
         // captions are available 
 
@@ -1126,7 +1127,9 @@
                     top: tooltipY + 'px'
                   };
                 }        
-                $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+                tooltip = $('#' + tooltipId).text(label).css(tooltipStyle); 
+                thisObj.showTooltip(tooltip);
+                
                 $(this).on('mouseleave blur',function() { 
                   $('#' + tooltipId).text('').hide();
                 });
@@ -3312,8 +3315,8 @@
                 top: tooltipY + 'px'
               };
             }
-            
-            $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+            var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle);
+            thisObj.showTooltip(tooltip); 
             $(this).on('mouseleave blur',function() { 
               $('#' + tooltipId).text('').hide();
             })
@@ -5735,6 +5738,16 @@
     this.refreshControls();
   };
 
+  AblePlayer.prototype.showTooltip = function($tooltip) { 
+
+    if (($tooltip).is(':animated')) { 
+      $tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
+    }
+    else { 
+      $tooltip.stop().show().delay(4000).fadeOut(1000);
+    }
+  };
+  
   AblePlayer.prototype.showAlert = function( msg, location ) { 
     
     // location is either 'main' (default) or 'sign' (i.e., sign language window) 
@@ -7128,7 +7141,8 @@
         right: tooltipX + 'px',
         top: tooltipY + 'px'
       };
-      $('#' + tooltipId).text(label).css(tooltipStyle).show().delay(4000).fadeOut(1000);
+      var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle); 
+      thisObj.showTooltip(tooltip);
       $(this).on('mouseleave blur',function() { 
         $('#' + tooltipId).text('').hide();
       });
