@@ -40,14 +40,13 @@
     $('body').trigger('youtubeIframeAPIReady', []);
   };
 
-  // 
+  // If there is only one player on the page, dispatch global keydown events to it 
+  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners()) 
   $(window).keydown(function(e) {
-    if (AblePlayer.nextIndex === 1) {
-      // Only one player on the page; dispatch global key presses to it.
+    if (AblePlayer.nextIndex === 1) { 
       AblePlayer.lastCreated.onPlayerKeyPress(e);
     }
   });
-
 
   // Construct an AblePlayer object 
   // Parameters are: 

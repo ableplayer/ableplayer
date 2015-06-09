@@ -40,14 +40,13 @@
     $('body').trigger('youtubeIframeAPIReady', []);
   };
 
-  // 
+  // If there is only one player on the page, dispatch global keydown events to it 
+  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners()) 
   $(window).keydown(function(e) {
-    if (AblePlayer.nextIndex === 1) {
-      // Only one player on the page; dispatch global key presses to it.
+    if (AblePlayer.nextIndex === 1) { 
       AblePlayer.lastCreated.onPlayerKeyPress(e);
     }
   });
-
 
   // Construct an AblePlayer object 
   // Parameters are: 
@@ -1140,15 +1139,6 @@
                 thisObj.onClickPlayerButton(this);
               });
 
-              // TODO: Ascertain whether this is needed
-              // handle local key-presses if this is not the only player on the page; 
-              // otherwise these are dispatched by global handler.
-              this.$ccButton.keydown(function (e) {
-                if (AblePlayer.nextIndex > 1) {
-                  thisObj.onPlayerKeyPress(e);
-                }
-              });
-          
               // TODO: might need to adjust width and height of div.able-vidcap-container
               // Only used if !this.usingYouTubeCaptions
               /*
@@ -6116,6 +6106,7 @@
 
 (function ($) {
   AblePlayer.prototype.updateTranscript = function() {
+    
     if (!this.includeTranscript) {
       return;
     }
@@ -6160,11 +6151,11 @@
     }     
     
     // handle clicks on text within transcript 
-    // Note #1: Only one transcript per page is supported
-    // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
-    // Forcing this elsewhere, in the keyboard handler section  
-    if ($('.able-transcript').length > 0) {  
-      $('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
+    // Note: This event listeners handles clicks only, not keydown events 
+    // Pressing Enter on an element that is not natively clickable does NOT trigger click() 
+    // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js) 
+    if (this.$transcriptArea.length > 0) { 
+      this.$transcriptArea.find('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
@@ -6185,12 +6176,12 @@
     currentTime = parseFloat(currentTime);
 
     // Highlight the current transcript item.
-    $('.able-transcript span.able-transcript-caption').each(function() { 
+    this.$transcriptArea.find('.able-transcript span.able-transcript-caption').each(function() { 
       start = parseFloat($(this).attr('data-start'));
       end = parseFloat($(this).attr('data-end'));
       if (currentTime >= start && currentTime <= end) { 
         // move all previous highlights before adding one to current span
-        $('.able-highlight').removeClass('able-highlight');
+        thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
         $(this).addClass('able-highlight');
         return false;
       }
@@ -6747,6 +6738,7 @@
     }
     // Convert to lower case.
     var which = e.which;
+    
     if (which >= 65 && which <= 90) {
       which += 32;
     }
@@ -7029,13 +7021,21 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle local key-presses if we're not the only player on the page; otherwise these are dispatched by global handler.
+    // handle local keydown events if this isn't the only player on the page; 
+    // otherwise these are dispatched by global handler (see ableplayer-base,js)
     this.$ableDiv.keydown(function (e) {
       if (AblePlayer.nextIndex > 1) {
         thisObj.onPlayerKeyPress(e);
       }
     });
-    
+    // transcript is not a child of this.$ableDiv 
+    // therefore, must be added separately
+    this.$transcriptArea.keydown(function (e) {
+      if (AblePlayer.nextIndex > 1) {
+        thisObj.onPlayerKeyPress(e);
+      }
+    });
+     
     // handle clicks on playlist items
     if (this.$playlist) {
       this.$playlist.click(function() { 

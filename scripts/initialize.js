@@ -891,15 +891,6 @@
                 thisObj.onClickPlayerButton(this);
               });
 
-              // TODO: Ascertain whether this is needed
-              // handle local key-presses if this is not the only player on the page; 
-              // otherwise these are dispatched by global handler.
-              this.$ccButton.keydown(function (e) {
-                if (AblePlayer.nextIndex > 1) {
-                  thisObj.onPlayerKeyPress(e);
-                }
-              });
-          
               // TODO: might need to adjust width and height of div.able-vidcap-container
               // Only used if !this.usingYouTubeCaptions
               /*
