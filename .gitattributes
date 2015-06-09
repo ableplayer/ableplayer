@@ -1,0 +1,14 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+# Git will always convert line endings to LF on checkout, even on Windows
+* text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.eot binary
+*.ttf binary
+*.woff binary 
+*.png binary
+*.jpg bin
+*.mp3 binary
+*.ogg binary
+*.mp4 binary
+*.webm binary
