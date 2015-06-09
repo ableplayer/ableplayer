@@ -20,6 +20,7 @@
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
+      
       var isDefaultTrack = track.getAttribute('default'); 
 
       if (!trackSrc) {
@@ -30,9 +31,9 @@
       var loadingPromise = this.loadTextObject(trackSrc);
       var thisObj = this;
       loadingPromises.push(loadingPromise);
-      loadingPromise.then((function (track, kind) {
-        return function (trackText) {
-          var cues = thisObj.parseWebVTT(trackText).cues;
+      loadingPromise.then((function (trackSrc, track, kind) {
+        return function (trackSrc, trackText) {
+          var cues = thisObj.parseWebVTT(trackSrc,trackText).cues;
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }
@@ -235,7 +236,7 @@
         deferred.fail();
       }
       else {
-        deferred.resolve(trackText);
+        deferred.resolve(src, trackText);
       }
       $tempDiv.remove();
     });

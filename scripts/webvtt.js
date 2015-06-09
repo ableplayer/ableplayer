@@ -1,11 +1,12 @@
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
-  AblePlayer.prototype.parseWebVTT = function(text) {
+  AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
 
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
     
     var parserState = {
+      src: srcFile,
       text: text,
       error: null,
       metadata: {},
@@ -18,8 +19,11 @@
       act(parserState, parseFileBody);
     }
     catch (err) {
-      console.log('Line: ' + parserState.line + '\nColumn: ' + parserState.column);
-      console.log(err);
+      var errString = 'Error in ' + parserState.src + '\n'; 
+      errString += 'Line: ' + parserState.line + '\n'; 
+      errString += 'Column: ' + parserState.column + '\n';
+      errString += err; 
+      console.log(errString);
     }
     
     return parserState;
@@ -692,7 +696,7 @@
     var results = /((\d\d):)?((\d\d):)(\d\d).(\d\d\d)|(\d+).(\d\d\d)/.exec(timestamp);
     
     if (!results) {
-      state.error = 'Unable to parse timestamp.';
+      state.error = 'Unable to parse timestamp';
       return;
     }
     var time = 0;
@@ -701,7 +705,7 @@
     
     if (minutes) {
       if (parseInt(minutes, 10) > 59) {
-        state.error = 'Invalid minute range.';
+        state.error = 'Invalid minute range';
         return;
       }
       if (hours) {
@@ -710,7 +714,7 @@
       time += 60 * parseInt(minutes, 10);
       var seconds = results[5];
       if (parseInt(seconds, 10) > 59) {
-        state.error = 'Invalid second range.';
+        state.error = 'Invalid second range';
         return;
       }
       
