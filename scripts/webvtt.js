@@ -177,7 +177,7 @@
       if (nextLine.indexOf('NOTE') === 0 && ((nextLine.length === 4) || (nextLine[4] === ' ') || (nextLine[4] === '\t'))) {
         actList(state, [eatComment, eatEmptyLines]);
       }
-      else if ($.trim(nextLine).length !== 0) {
+      else if ($.trim(nextLine).length !== 0 || state.text.length > 0) {        
         act(state, parseCue);
       }
       else {
@@ -190,8 +190,9 @@
   function parseCue(state) {
     var nextLine = peekLine(state);
     var cueId;
-    if (nextLine.indexOf('-->') === -1) {
+    while (nextLine.indexOf('-->') === -1 && state.text.length > 0) {
       cueId = cutLine(state);
+      nextLine = peekLine(state);      
     }
     var cueTimings = actList(state, [getTiming, 
                                      eatAtLeast1SpacesOrTabs,
@@ -238,8 +239,8 @@
     var languageStack = [];
     while (state.text.length > 0) {      
       var nextLine = peekLine(state);
-      if (nextLine.indexOf('-->') !== -1) {
-        break;
+      if (nextLine.indexOf('-->') !== -1 || /^\s*$/.test(nextLine)) {
+        break; // Handle empty cues
       }
 
       // Have to separately detect double-lines ending cue due to our non-standard parsing.
@@ -349,6 +350,7 @@
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';
+          tokenState = 'escape';
         }
         else if (c === '<') {
           if (result.length === 0) {
@@ -401,6 +403,12 @@
           tokenState = 'data';
         }
         else if (c === '<' || c === '\u0004') {
+          result.push(buffer);
+          token.type = 'string';
+          token.value = result.join('');
+          return token;
+        }
+        else if (c === '\t' || c === '\n' || c === '\u000c' || c === ' ') { // Handle unescaped & chars as strings
           result.push(buffer);
           token.type = 'string';
           token.value = result.join('');
