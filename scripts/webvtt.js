@@ -1,7 +1,6 @@
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
-  AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
-
+  AblePlayer.prototype.parseWebVTT = function(srcFile,text) { 
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
     
@@ -194,7 +193,7 @@
   function parseCue(state) {
     var nextLine = peekLine(state);
     var cueId;
-    while (nextLine.indexOf('-->') === -1 && state.text.length > 0) {
+    while (nextLine.indexOf('-->') === -1 && state.text.length > 0) {      
       cueId = cutLine(state);
       nextLine = peekLine(state);      
     }
@@ -203,6 +202,7 @@
                                      eatArrow,
                                      eatAtLeast1SpacesOrTabs,
                                      getTiming]);
+
     var startTime = cueTimings[0];
     var endTime = cueTimings[4];
     if (startTime >= endTime) {

@@ -31,9 +31,9 @@
       var loadingPromise = this.loadTextObject(trackSrc);
       var thisObj = this;
       loadingPromises.push(loadingPromise);
-      loadingPromise.then((function (trackSrc, track, kind) {
-        return function (trackSrc, trackText) {
-          var cues = thisObj.parseWebVTT(trackSrc,trackText).cues;
+      loadingPromise.then((function (track, kind) {
+        return function (trackSrc, trackText) { 
+          var cues = thisObj.parseWebVTT(trackSrc, trackText).cues;
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }
@@ -236,7 +236,7 @@
         deferred.fail();
       }
       else {
-        deferred.resolve(src, trackText);
+        deferred.resolve(src, trackText); 
       }
       $tempDiv.remove();
     });
