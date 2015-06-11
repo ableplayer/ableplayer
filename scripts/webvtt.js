@@ -180,12 +180,21 @@
       if (nextLine.indexOf('NOTE') === 0 && ((nextLine.length === 4) || (nextLine[4] === ' ') || (nextLine[4] === '\t'))) {
         actList(state, [eatComment, eatEmptyLines]);
       }
-      else if ($.trim(nextLine).length !== 0 || state.text.length > 0) {        
+      else if ($.trim(nextLine).length === 0 && state.text.length > 0) {
+        act(state, eatEmptyLines);
+      }
+      else if (nextLine.indexOf('-->') > 0) {
         act(state, parseCue);
       }
-      else {
+      else if (state.text.length === 0) {
         // Everythings parsed!
         return;
+      }
+      else {
+        if(console.warn) {
+          console.warn('Invalid WebVTT file: Unexpected content in ' + state.src + '\non line: ' + state.line + ' at column: ' + state.column + '; Unexpected content is:'+nextLine);
+        }
+        cutLine(state);
       }
     }
   }
@@ -193,10 +202,6 @@
   function parseCue(state) {
     var nextLine = peekLine(state);
     var cueId;
-    while (nextLine.indexOf('-->') === -1 && state.text.length > 0) {      
-      cueId = cutLine(state);
-      nextLine = peekLine(state);      
-    }
     var cueTimings = actList(state, [getTiming, 
                                      eatAtLeast1SpacesOrTabs,
                                      eatArrow,
