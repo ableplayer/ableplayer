@@ -40,14 +40,13 @@
     $('body').trigger('youtubeIframeAPIReady', []);
   };
 
-  // 
+  // If there is only one player on the page, dispatch global keydown events to it 
+  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners()) 
   $(window).keydown(function(e) {
-    if (AblePlayer.nextIndex === 1) {
-      // Only one player on the page; dispatch global key presses to it.
+    if (AblePlayer.nextIndex === 1) { 
       AblePlayer.lastCreated.onPlayerKeyPress(e);
     }
   });
-
 
   // Construct an AblePlayer object 
   // Parameters are: 
@@ -728,11 +727,11 @@
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
+              image: thisObj.$media.attr('poster'),
               sources: sources
             }],
             flashplayer: flashplayer,
             html5player: html5player,
-            image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
             height: jwHeight,
@@ -1140,15 +1139,6 @@
                 thisObj.onClickPlayerButton(this);
               });
 
-              // TODO: Ascertain whether this is needed
-              // handle local key-presses if this is not the only player on the page; 
-              // otherwise these are dispatched by global handler.
-              this.$ccButton.keydown(function (e) {
-                if (AblePlayer.nextIndex > 1) {
-                  thisObj.onPlayerKeyPress(e);
-                }
-              });
-          
               // TODO: might need to adjust width and height of div.able-vidcap-container
               // Only used if !this.usingYouTubeCaptions
               /*
@@ -1617,12 +1607,12 @@
 
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
-  AblePlayer.prototype.parseWebVTT = function(text) {
-
+  AblePlayer.prototype.parseWebVTT = function(srcFile,text) { 
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
 
     var parserState = {
+      src: srcFile,
       text: text,
       error: null,
       metadata: {},
@@ -1635,7 +1625,10 @@
       act(parserState, parseFileBody);
     }
     catch (err) {
-      
+      var errString = 'Error in ' + parserState.src + '\n'; 
+      errString += 'Line: ' + parserState.line + '\n'; 
+      errString += 'Column: ' + parserState.column + '\n';
+      errString += err; 
       
     }
 
@@ -1805,7 +1798,9 @@
         return;
       }
       else {
-        console.warn('Invalid WebVTT file: Unexpected content on line: ' + state.line + ' at column: ' + state.column + '; Unexpected content is:'+nextLine);
+        if(console.warn) {          
+          console.warn('Invalid WebVTT file: Unexpected content in ' + state.src + '\non line: ' + state.line + ' at column: ' + state.column + '; Unexpected content is: '+nextLine);
+        }
         cutLine(state);
       }
     }
@@ -1819,6 +1814,7 @@
                                      eatArrow,
                                      eatAtLeast1SpacesOrTabs,
                                      getTiming]);
+
     var startTime = cueTimings[0];
     var endTime = cueTimings[4];
     if (startTime >= endTime) {
@@ -2312,7 +2308,7 @@
     var results = /((\d\d):)?((\d\d):)(\d\d).(\d\d\d)|(\d+).(\d\d\d)/.exec(timestamp);
 
     if (!results) {
-      state.error = 'Unable to parse timestamp.';
+      state.error = 'Unable to parse timestamp';
       return;
     }
     var time = 0;
@@ -2321,7 +2317,7 @@
 
     if (minutes) {
       if (parseInt(minutes, 10) > 59) {
-        state.error = 'Invalid minute range.';
+        state.error = 'Invalid minute range';
         return;
       }
       if (hours) {
@@ -2330,7 +2326,7 @@
       time += 60 * parseInt(minutes, 10);
       var seconds = results[5];
       if (parseInt(seconds, 10) > 59) {
-        state.error = 'Invalid second range.';
+        state.error = 'Invalid second range';
         return;
       }
 
@@ -3655,6 +3651,7 @@
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
+      
       var isDefaultTrack = track.getAttribute('default'); 
 
       if (!trackSrc) {
@@ -3666,8 +3663,8 @@
       var thisObj = this;
       loadingPromises.push(loadingPromise);
       loadingPromise.then((function (track, kind) {
-        return function (trackText) {
-          var cues = thisObj.parseWebVTT(trackText).cues;
+        return function (trackSrc, trackText) { 
+          var cues = thisObj.parseWebVTT(trackSrc, trackText).cues;
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }
@@ -3870,7 +3867,7 @@
         deferred.fail();
       }
       else {
-        deferred.resolve(trackText);
+        deferred.resolve(src, trackText); 
       }
       $tempDiv.remove();
     });
@@ -6119,6 +6116,7 @@
 
 (function ($) {
   AblePlayer.prototype.updateTranscript = function() {
+    
     if (!this.includeTranscript) {
       return;
     }
@@ -6163,11 +6161,11 @@
     }     
     
     // handle clicks on text within transcript 
-    // Note #1: Only one transcript per page is supported
-    // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
-    // Forcing this elsewhere, in the keyboard handler section  
-    if ($('.able-transcript').length > 0) {  
-      $('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
+    // Note: This event listeners handles clicks only, not keydown events 
+    // Pressing Enter on an element that is not natively clickable does NOT trigger click() 
+    // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js) 
+    if (this.$transcriptArea.length > 0) { 
+      this.$transcriptArea.find('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
@@ -6188,12 +6186,12 @@
     currentTime = parseFloat(currentTime);
 
     // Highlight the current transcript item.
-    $('.able-transcript span.able-transcript-caption').each(function() { 
+    this.$transcriptArea.find('.able-transcript span.able-transcript-caption').each(function() { 
       start = parseFloat($(this).attr('data-start'));
       end = parseFloat($(this).attr('data-end'));
       if (currentTime >= start && currentTime <= end) { 
         // move all previous highlights before adding one to current span
-        $('.able-highlight').removeClass('able-highlight');
+        thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
         $(this).addClass('able-highlight');
         return false;
       }
@@ -6750,6 +6748,7 @@
     }
     // Convert to lower case.
     var which = e.which;
+    
     if (which >= 65 && which <= 90) {
       which += 32;
     }
@@ -7032,13 +7031,21 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle local key-presses if we're not the only player on the page; otherwise these are dispatched by global handler.
+    // handle local keydown events if this isn't the only player on the page; 
+    // otherwise these are dispatched by global handler (see ableplayer-base,js)
     this.$ableDiv.keydown(function (e) {
       if (AblePlayer.nextIndex > 1) {
         thisObj.onPlayerKeyPress(e);
       }
     });
-    
+    // transcript is not a child of this.$ableDiv 
+    // therefore, must be added separately
+    this.$transcriptArea.keydown(function (e) {
+      if (AblePlayer.nextIndex > 1) {
+        thisObj.onPlayerKeyPress(e);
+      }
+    });
+     
     // handle clicks on playlist items
     if (this.$playlist) {
       this.$playlist.click(function() { 

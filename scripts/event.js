@@ -209,6 +209,7 @@
     }
     // Convert to lower case.
     var which = e.which;
+    
     if (which >= 65 && which <= 90) {
       which += 32;
     }
@@ -491,13 +492,21 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle local key-presses if we're not the only player on the page; otherwise these are dispatched by global handler.
+    // handle local keydown events if this isn't the only player on the page; 
+    // otherwise these are dispatched by global handler (see ableplayer-base,js)
     this.$ableDiv.keydown(function (e) {
       if (AblePlayer.nextIndex > 1) {
         thisObj.onPlayerKeyPress(e);
       }
     });
-    
+    // transcript is not a child of this.$ableDiv 
+    // therefore, must be added separately
+    this.$transcriptArea.keydown(function (e) {
+      if (AblePlayer.nextIndex > 1) {
+        thisObj.onPlayerKeyPress(e);
+      }
+    });
+     
     // handle clicks on playlist items
     if (this.$playlist) {
       this.$playlist.click(function() { 
