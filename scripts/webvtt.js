@@ -18,13 +18,17 @@
       act(parserState, parseFileBody);
     }
     catch (err) {
-      var errString = 'Error in ' + parserState.src + '\n'; 
-      errString += 'Line: ' + parserState.line + '\n'; 
+      var errString = 'Invalid WebVTT file: ' + parserState.src + '\n'; 
+      errString += 'Line: ' + parserState.line + ', '; 
       errString += 'Column: ' + parserState.column + '\n';
       errString += err; 
-      console.log(errString);
+      if (console.warn) {          
+        console.warn(errString);
+      }
+      else if (console.log) { 
+        console.log(errString);
+      }
     }
-
     return parserState;
   }
 
@@ -191,11 +195,18 @@
         return;
       }
       else {
-        if(console.warn) {          
-          console.warn('Invalid WebVTT file: Unexpected content in ' + state.src + '\non line: ' + state.line + ' at column: ' + state.column + '; Unexpected content is: '+nextLine);
+        var errString = 'Invalid WebVTT file: ' + state.src + '\n'; 
+        errString += 'Line: ' + state.line + ', '; 
+        errString += 'Column: ' + state.column + '\n';
+        errString += 'Unexpected content: ' + nextLine + '\n';
+        if (console.warn) { 
+          console.warn(errString);
+        }
+        else if (console.log) { 
+          console.log(errString);
         }
         cutLine(state);
-      }
+      }        
     }
   }
 
