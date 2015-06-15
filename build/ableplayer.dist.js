@@ -1823,7 +1823,7 @@
         else if (console.log) { 
           
         }
-        return;
+        return; // Return leaving line for parseCuesAndComments to handle
     	}
     }
     

@@ -216,7 +216,7 @@
         else if (console.log) { 
           console.log(errString);
         }
-        return;
+        return; // Return leaving line for parseCuesAndComments to handle
     	}
     }
     
