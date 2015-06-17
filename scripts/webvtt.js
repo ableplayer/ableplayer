@@ -187,32 +187,39 @@
       else if ($.trim(nextLine).length === 0 && state.text.length > 0) {
         act(state, eatEmptyLines);
       }
-      else if (nextLine.indexOf('-->') > 0) {
+      else if ($.trim(nextLine).length > 0) {
         act(state, parseCue);
       }
-      else if (state.text.length === 0) {
+      else {
         // Everythings parsed!
         return;
       }
-      else {
-        var errString = 'Invalid WebVTT file: ' + state.src + '\n'; 
-        errString += 'Line: ' + state.line + ', '; 
-        errString += 'Column: ' + state.column + '\n';
-        errString += 'Unexpected content: ' + nextLine + '\n';
-        if (console.warn) { 
-          console.warn(errString);
-        }
-        else if (console.log) { 
-          console.log(errString);
-        }
-        cutLine(state);
-      }        
     }
   }
 
   function parseCue(state) {
     var nextLine = peekLine(state);
     var cueId;
+    var errString;
+    
+    if(nextLine.indexOf('-->') === -1) {
+    	cueId = cutLine(state);
+    	nextLine = peekLine(state);
+    	if(nextLine.indexOf('-->') === -1) {
+        errString = 'Invalid WebVTT file: ' + state.src + '\n'; 
+        errString += 'Line: ' + state.line + ', '; 
+        errString += 'Column: ' + state.column + '\n';
+        errString += 'Expected cue timing for cueId \''+cueId+'\' but found: ' + nextLine + '\n';
+        if (console.warn) { 
+          console.warn(errString);
+        }
+        else if (console.log) { 
+          console.log(errString);
+        }
+        return; // Return leaving line for parseCuesAndComments to handle
+    	}
+    }
+    
     var cueTimings = actList(state, [getTiming,
                                      eatAtLeast1SpacesOrTabs,
                                      eatArrow,
