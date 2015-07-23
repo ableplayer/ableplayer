@@ -62,10 +62,6 @@
 
 "speed": "Velocidad",
 
-"audio": "Audio",
-
-"video": "Video",
-
 "or": "o", 
 
 "spacebar": "Barra espaciadora",
