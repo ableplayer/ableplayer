@@ -57,8 +57,9 @@
                  // resolve deferred variable
                  gettingText.resolve();  
                },
-               function() { // failure 
-                 return false; 
+               function(p, err) { // failure
+                 // fail the deferred variable
+                 gettingText.reject(err);
                }
              );
     return gettingText.promise(); 

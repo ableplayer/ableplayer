@@ -214,10 +214,14 @@
             thisObj.onMediaUpdateTime();            
           }          
         } 
-        else { 
+        else {
           // can't continue loading player with no text
-          console.log('ERROR: Failed to load translation table');         
+          console.log('ERROR: Failed to load translation table. Wrong number of properties');
         }
+      },
+      function (err) {
+        // can't continue loading player with no text
+        console.log('ERROR: Failed to load translation table. ' + err);
       }
     );
   };
