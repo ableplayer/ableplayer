@@ -108,6 +108,7 @@
   padding: 0;
   color: #fdfdfd;
   min-width: 20px;
+  overflow: hidden !important;
 }
 .able-controller button > span { 
   /* icomoon font icon */
