@@ -163,11 +163,6 @@
       this.fallbackPath = $(media).data('fallback-path'); 
     }
     
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
-    
-
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -198,7 +193,7 @@
 
     // populate translation object with localized versions of all labels and prompts 
     // use defer method to defer additional processing until text is retrieved    
-    this.tt = []; 
+    this.tt = {};
     var thisObj = this;
     $.when(this.getTranslationText()).then(
       function () { 

@@ -67,9 +67,6 @@
     // Therefore testing must be performed on a web server 
     this.testFallback = false;
 
-    // translationPath - specify path to translation files 
-    this.translationPath = this.rootPath + '/translations/';
-    
     // lang - default language of the player
     this.lang = 'en'; 
   

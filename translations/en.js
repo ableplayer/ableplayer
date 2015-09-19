@@ -1,4 +1,4 @@
-{
+var en = {
   
 "playerHeading": "Media player",
 
@@ -180,4 +180,4 @@
 
 "windowBringTopAlert": "This window is now in front of other objects on the page."
 
-}
+};

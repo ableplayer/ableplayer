@@ -1,4 +1,4 @@
-{
+var nl = {
   
 "playerHeading": "Mediaspeler",
 
@@ -184,4 +184,4 @@
 
 "windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
 
-}
+};

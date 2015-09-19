@@ -30,13 +30,18 @@ module.exports = function(grunt) {
                     'scripts/control.js',
                     'scripts/caption.js',
                     'scripts/metadata.js',
-                    'scripts/translation.js',
                     'scripts/transcript.js',
                     'scripts/search.js',
                     'scripts/event.js',
                     'scripts/dragdrop.js',
                     'scripts/sign.js',
-                    'scripts/langs.js'
+                    'scripts/langs.js',
+                    'scripts/translation1.js',
+                    'translations/de.js',
+                    'translations/en.js',
+                    'translations/es.js',
+                    'translations/nl.js',
+                    'scripts/translation2.js'
                 ],
                 dest: 'build/<%= pkg.name %>.js'
             },

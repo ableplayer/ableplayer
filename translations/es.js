@@ -1,4 +1,4 @@
-{
+var es = {
   
 "playerHeading": "Media player",
 
@@ -180,4 +180,4 @@
 
 "windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
 
-}
+};

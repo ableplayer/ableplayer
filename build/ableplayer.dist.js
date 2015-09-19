@@ -163,11 +163,6 @@
       this.fallbackPath = $(media).data('fallback-path'); 
     }
     
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
-    
-
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -198,11 +193,12 @@
 
     // populate translation object with localized versions of all labels and prompts 
     // use defer method to defer additional processing until text is retrieved    
-    this.tt = []; 
+    this.tt = {};
     var thisObj = this;
     $.when(this.getTranslationText()).then(
       function () { 
         if (thisObj.countProperties(thisObj.tt) > 50) { 
+          
           // close enough to ensure that most text variables are populated 
           thisObj.setup();
           if (thisObj.startTime > 0 && !thisObj.autoplay) { 
@@ -315,9 +311,6 @@
     // Therefore testing must be performed on a web server 
     this.testFallback = false;
 
-    // translationPath - specify path to translation files 
-    this.translationPath = this.rootPath + '/translations/';
-    
     // lang - default language of the player
     this.lang = 'en'; 
   
@@ -6066,73 +6059,6 @@
 })(jQuery);
 
 (function ($) {
-  AblePlayer.prototype.getSupportedLangs = function() {
-    // returns an array of languages for which AblePlayer has translation tables 
-    var langs = ['en','de','es'];
-    return langs;
-  };
-
-  AblePlayer.prototype.getTranslationText = function() { 
-    // determine language, then get labels and prompts from corresponding translation file (in JSON)
-    // finally, populate this.tt object with JSON data
-    // return true if successful, otherwise false 
-    var gettingText, lang, thisObj, msg; 
-
-    gettingText = $.Deferred(); 
-
-    // override this.lang to language of the web page, if known and supported
-    // otherwise this.lang will continue using default    
-    if (!this.forceLang) {   
-      if ($('body').attr('lang')) { 
-        lang = $('body').attr('lang');
-      }
-      else if ($('html').attr('lang')) { 
-        lang = $('html').attr('lang');
-      }    
-      if (lang !== this.lang) {
-        msg = 'Language of web page (' + lang +') ';
-        if ($.inArray(lang,this.getSupportedLangs()) !== -1) { 
-          // this is a supported lang
-          msg += ' has a translation table available.';
-          this.lang = lang; 
-        }
-        else { 
-          msg += ' is not currently supported. Using default language (' + this.lang + ')';
-        }
-        if (this.debug) {
-          
-        }
-      }
-    } 
-    thisObj = this;
-    // get content of JSON file 
-    $.getJSON(this.translationPath + this.lang + '.js',
-              function(data, textStatus, jqxhr) { 
-                if (textStatus === 'success') { 
-                  thisObj.tt = data;
-                  if (thisObj.debug) { 
-                    
-                               
-                  }
-                }
-                else { 
-                  return false; 
-                }
-              }
-             ).then( 
-               function(){ // success 
-                 // resolve deferred variable
-                 gettingText.resolve();  
-               },
-               function() { // failure 
-                 return false; 
-               }
-             );
-    return gettingText.promise(); 
-  };
-})(jQuery);
-
-(function ($) {
   AblePlayer.prototype.updateTranscript = function() {
     
     if (!this.includeTranscript) {
@@ -8345,3 +8271,612 @@
 	}
 	
 })(jQuery);	
+(function ($) {
+  AblePlayer.prototype.getSupportedLangs = function() {
+    // returns an array of languages for which AblePlayer has translation tables 
+    var langs = ['en','de','es','nl'];
+    return langs;
+  };
+
+  AblePlayer.prototype.getTranslationText = function() { 
+
+    // determine language, then get labels and prompts from corresponding translation var
+    var gettingText, lang, thisObj, msg; 
+
+    gettingText = $.Deferred(); 
+
+    // override this.lang to language of the web page, if known and supported
+    // otherwise this.lang will continue using default    
+    if (!this.forceLang) {   
+      if ($('body').attr('lang')) { 
+        lang = $('body').attr('lang');
+      }
+      else if ($('html').attr('lang')) { 
+        lang = $('html').attr('lang');
+      }    
+      if (lang !== this.lang) {
+        msg = 'Language of web page (' + lang +') ';
+        if ($.inArray(lang,this.getSupportedLangs()) !== -1) { 
+          // this is a supported lang
+          msg += ' has a translation table available.';
+          this.lang = lang; 
+        }
+        else { 
+          msg += ' is not currently supported. Using default language (' + this.lang + ')';
+        }
+        if (this.debug) {
+          
+        }
+      }
+    } 
+
+    // in final build, all language variables are contatenated into this function below...
+    // translation2.js is then contanenated onto the end to finish this function
+        
+
+var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefFeatures": "Funktionen","prefKeys": "Tastenkombination für Kurzwahl (siehe Hilfe)","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefCaptions": "Untertitel automatisch einschalten","prefSignLanguage": "Gebärdensprache automatisch einschalten","prefDesc": "Audiodeskription automatisch einschalten","prefClosedDesc": "Textbasierte Szenenbeschreibungen verwenden, wenn vorhanden","prefDescPause": "Video automatisch anhalten, wenn textbasierte Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefTranscript": "Transkription standardmäßig einschalten","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
+var en = {
+  
+"playerHeading": "Media player",
+
+"faster": "Faster",
+
+"slower": "Slower",
+
+"play": "Play", 
+
+"pause": "Pause",
+
+"stop": "Stop",
+
+"rewind": "Rewind",
+
+"forward": "Forward",
+
+"captions": "Captions",
+
+"showCaptions": "Show captions",
+
+"hideCaptions": "Hide captions",
+
+"captionsOff": "Captions off",
+
+"showTranscript": "Show transcript",
+
+"hideTranscript": "Hide transcript", 
+
+"turnOnDescriptions": "Turn on descriptions", 
+
+"turnOffDescriptions": "Turn off descriptions", 
+
+"chapters": "Chapters",
+
+"language": "Language",
+
+"sign": "Sign language",
+
+"showSign": "Show sign language",
+
+"hideSign": "Hide sign language",
+
+"mute": "Mute",
+
+"unmute": "Unmute",
+
+"volume": "Volume", 
+
+"volumeUp": "Volume up",
+
+"volumeDown": "Volume down",
+
+"preferences": "Preferences",
+
+"enterFullScreen": "Enter full screen",
+
+"exitFullScreen": "Exit full screen",
+
+"fullScreen": "Full screen",
+
+"speed": "Speed",
+
+"or": "or", 
+
+"spacebar": "spacebar",
+
+"autoScroll": "Auto scroll",
+
+"unknown": "Unknown", 
+
+"statusPlaying": "Playing",
+
+"statusPaused": "Paused",
+
+"statusStopped": "Stopped",
+
+"statusWaiting": "Waiting",
+
+"statusBuffering": "Buffering",
+
+"statusUsingDesc": "Using described version",
+
+"statusLoadingDesc": "Loading described version",
+
+"statusUsingNoDesc": "Using non-described version",
+
+"statusLoadingNoDesc": "Loading non-described version",
+
+"statusLoadingNext": "Loading next track",
+
+"statusEnd": "End of track",
+
+"selectedTrack": "Selected Track",
+
+"alertDescribedVersion": "Using the audio described version of this video",
+
+"fallbackError1": "Sorry, your browser is unable to play this",
+
+"fallbackError2": "The following browsers are known to work with this media player",
+
+"orHigher": "or higher",
+
+"prefTitle": "Preferences",
+
+"prefIntro": "Saving your preferences requires cookies.",
+
+"prefFeatures": "Features",
+
+"prefKeys": "Modifier keys used for shortcuts (see help)",
+
+"prefAltKey": "Alt",
+
+"prefCtrlKey": "Control",
+
+"prefShiftKey": "Shift",
+
+"prefCaptions": "Closed captions on by default",
+
+"prefSignLanguage": "Show sign language if available",
+
+"prefDesc": "Description on by default",
+
+"prefClosedDesc": "Use text-based description if available",
+
+"prefDescPause": "Automatically pause video when text-based description starts",
+
+"prefVisibleDesc": "If using text-based description,make it visible",
+
+"prefTranscript": "Transcript on by default",
+
+"prefHighlight": "Highlight transcript as media plays",
+
+"prefTabbable": "Keyboard-enable transcript",
+
+"prefSuccess": "Your changes have been saved.",
+
+"prefNoChange": "You didn't make any changes.",
+
+"help": "Help",
+
+"helpTitle": "Help",
+
+"helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
+
+"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"save": "Save",
+
+"cancel": "Cancel",
+
+"ok": "ok", 
+
+"done": "Done",
+
+"closeButtonLabel": "Close dialog",
+
+"windowButtonLabel": "Window options",
+
+"windowMove": "Move", 
+
+"windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
+
+"windowResize": "Resize", 
+
+"windowResizeHeading": "Resize Interpreter Window",
+
+"windowResizeAlert": "The window has been resized.",
+
+"width": "Width",
+
+"height": "Height",
+
+"windowSendBack": "Send to back", 
+
+"windowSendBackAlert": "This window is now behind other objects on the page.",
+
+"windowBringTop": "Bring to front",
+
+"windowBringTopAlert": "This window is now in front of other objects on the page."
+
+};
+
+var es = {
+  
+"playerHeading": "Media player",
+
+"faster": "Rápido",
+
+"slower": "Lento",
+
+"play": "Play", 
+
+"pause": "Pausa",
+
+"stop": "Detener",
+
+"rewind": "Rebobinar",
+
+"forward": "Adelantar",
+
+"captions": "Subtítulos",
+
+"showCaptions": "Mostrar subtítulos",
+
+"hideCaptions": "Ocultar subtítulos",
+
+"captionsOff": "Quitar subtítulos",
+
+"showTranscript": "Mostrar transcripción",
+
+"hideTranscript": "Ocultar transcripción", 
+
+"turnOnDescriptions": "Habilitar descripciones", 
+
+"turnOffDescriptions": "Deshabilitar descripciones", 
+
+"chapters": "Capítulos",
+
+"language": "Idioma",
+
+"sign": "Lengua de señas",
+
+"showSign": "Mostrar lengua de señas",
+
+"hideSign": "Ocultar lengua de señas",
+
+"mute": "Silenciar",
+
+"unmute": "Reactivar sonido",
+
+"volume": "Volumen", 
+
+"volumeUp": "Subir volumen",
+
+"volumeDown": "Bajar volumen",
+
+"preferences": "Preferencias",
+
+"enterFullScreen": "Ver a pantalla completa",
+
+"exitFullScreen": "Salir de pantalla completa",
+
+"fullScreen": "Pantalla completa",
+
+"speed": "Velocidad",
+
+"or": "o", 
+
+"spacebar": "Barra espaciadora",
+
+"autoScroll": "Desplazamiento automático",
+
+"unknown": "Desconocido", 
+
+"statusPlaying": "Reproduciendo",
+
+"statusPaused": "Pausado",
+
+"statusStopped": "Detenido",
+
+"statusWaiting": "Esperando",
+
+"statusBuffering": "Almacenando",
+
+"statusUsingDesc": "Utilizando versión descrita",
+
+"statusLoadingDesc": "Cargando versión descrita",
+
+"statusUsingNoDesc": "Utilizando versión no descrita",
+
+"statusLoadingNoDesc": "Cargando versión no descrita",
+
+"statusLoadingNext": "Cargando la siguiente pista",
+
+"statusEnd": "Fin de pista",
+
+"selectedTrack": "Pista seleccionada",
+
+"alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
+
+"fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
+
+"fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",
+
+"orHigher": "o superior",
+
+"prefTitle": "Preferencias",
+
+"prefIntro": "Guardar sus preferencias requiere el uso de cookies.",
+
+"prefFeatures": "Características",
+
+"prefKeys": "Teclas modificadoras",
+
+"prefAltKey": "Alt",
+
+"prefCtrlKey": "Control",
+
+"prefShiftKey": "Mayúscula",
+
+"prefCaptions": "Subtítulos habilitados por defecto",
+
+"prefSignLanguage": "Mostrar lengua de señas si está disponible",
+
+"prefDesc": "Habilitar descripción por defecto",
+
+"prefClosedDesc": "Utilizar descripciones en texto si están disponibles",
+
+"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción en texto",
+
+"prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
+
+"prefTranscript": "Habilitar transcripción por defecto",
+
+"prefHighlight": "Resaltar la transcripción según avanza el contenido",
+
+"prefTabbable": "Transcripción manejable por teclado",
+
+"prefSuccess": "Los cambios han sido guardados.",
+
+"prefNoChange": "No se ha hecho ningún cambio.",
+
+"help": "Ayuda",
+
+"helpTitle": "Ayuda",
+
+"helpKeys": "El reproductor en esta página pude ser manejado desde cualquier parte de la pa´gina utilizando los siguientes atajos de teclado:",
+
+"helpKeysDisclaimer": "Tengan en cuenta que las teclas modificadoras (Mayúsculas, Alt, y Control) pueden ser asignadas en las preferencias. Algunas combinaaciones de atajos de teclado pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Pruebe varias combinaciones de teclas modificadoras hasta encontrar la que funcione en su caso.",
+
+"save": "Guardar",
+
+"cancel": "Cancelar",
+
+"ok": "ok", 
+
+"done": "Hecho",
+
+"closeButtonLabel": "Cerrar cuadro de diálogo",
+
+"windowButtonLabel": "Opciones en Windows",
+
+"windowMove": "Mover", 
+
+"windowMoveAlert": "Arrastre o use las teclas de flecha para mover la ventana, pulse Enter para parar.",
+
+"windowResize": "Redimensionar", 
+
+"windowResizeHeading": "Redimensionar la ventana con el intérprete",
+
+"windowResizeAlert": "La ventana ha sido redimensionada.",
+
+"width": "Ancho",
+
+"height": "Alto",
+
+"windowSendBack": "Enviar atrás", 
+
+"windowSendBackAlert": "Esta ventana no se encuentra tras otros objetos en la página.",
+
+"windowBringTop": "Traer al frente",
+
+"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
+
+};
+
+var nl = {
+  
+"playerHeading": "Mediaspeler",
+
+"faster": "Sneller",
+
+"slower": "Langzamer",
+
+"play": "Afspelen", 
+
+"pause": "Pauzeren",
+
+"stop": "Stoppen",
+
+"rewind": "Terug",
+
+"forward": "Verder",
+
+"captions": "Ondertiteling",
+
+"showCaptions": "Toon ondertiteling",
+
+"hideCaptions": "Verberg ondertiteling",
+
+"captionsOff": "Ondertiteling uit",
+
+"showTranscript": "Toon transcript",
+
+"hideTranscript": "Vergerg transcript", 
+
+"turnOnDescriptions": "Beschrijvingen aanzetten", 
+
+"turnOffDescriptions": "Beschrijvingen uitzetten", 
+
+"chapters": "Hoofdstukken",
+
+"language": "Taal",
+
+"sign": "Gebarentaal",
+
+"showSign": "Toon gebarentaal",
+
+"hideSign": "Verberg gebarentaal",
+
+"mute": "Dempen",
+
+"unmute": "Dempen uit",
+
+"volume": "Volume", 
+
+"volumeUp": "Volume hoger",
+
+"volumeDown": "Volume lager",
+
+"preferences": "Voorkeuren",
+
+"enterFullScreen": "Ga naar volledig scherm",
+
+"exitFullScreen": "Verlaat volledig scherm",
+
+"fullScreen": "Volledig scherm",
+
+"speed": "Snelheid",
+
+"audio": "audio",
+
+"video": "video",
+
+"or": "of", 
+
+"spacebar": "spatietoets",
+
+"autoScroll": "Auto scroll",
+
+"unknown": "Onbekend", 
+
+"statusPlaying": "Aan het spelen",
+
+"statusPaused": "Gepauzeerd",
+
+"statusStopped": "Gestopt",
+
+"statusWaiting": "Aan het wachten",
+
+"statusBuffering": "Aan het bufferen",
+
+"statusUsingDesc": "Versie met beschrijving wordt gebruikt",
+
+"statusLoadingDesc": "Versie met beschrijving wordt geladen",
+
+"statusUsingNoDesc": "Versie zonder beschrijving wordt gebruikt",
+
+"statusLoadingNoDesc": "Versie zonder beschrijving wordt geladen",
+
+"statusLoadingNext": "Volgende track wordt geladen",
+
+"statusEnd": "Einde van track",
+
+"selectedTrack": "Geselecteerde Track",
+
+"alertDescribedVersion": "Versie met audiobeschrijving wordt gebruikt",
+
+"fallbackError1": "Sorry, je browser kan dit mediabestand niet afspelen",
+
+"fallbackError2": "De volgende browsers kunnen met deze mediaspeler overweg:",
+
+"orHigher": "of hoger",
+
+"prefTitle": "Voorkeuren",
+
+"prefIntro": "Om je voorkeuren op te slaan moet je cookies toestaan",
+
+"prefFeatures": "Kenmerken",
+
+"prefKeys": "Aangepaste toetsen",
+
+"prefAltKey": "Alt",
+
+"prefCtrlKey": "Control",
+
+"prefShiftKey": "Shift",
+
+"prefCaptions": "Ondertiteling standaard aan",
+
+"prefSignLanguage": "Toon gebarentaal als deze beschikbaar is",
+
+"prefDesc": "Beschrijving standaard aan",
+
+"prefClosedDesc": "Gebruik tekst-gebaseerde beschrijving als deze beschikbaar is",
+
+"prefDescPause": "Pauzeer video automatisch als tekst-gebaseerde beschrijving aan wordt gezet",
+
+"prefVisibleDesc": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
+
+"prefTranscript": "Transcript standaard aan",
+
+"prefHighlight": "Transcript highlighten terwijl media speelt",
+
+"prefTabbable": "Maak transcript bedienbaar met toetsenbord",
+
+"prefSuccess": "Je wijzigingen zijn opgeslagen.",
+
+"prefNoChange": "Je hebt geen wijzigingen gemaakt.",
+
+"help": "Help",
+
+"helpTitle": "Help",
+
+"helpKeys": "De mediaspeler op deze pagina kan van elke locatie op de pagina bediend worden met de volgende toetsenbordaanslagen:",
+
+"helpKeysDisclaimer": "De toetsen om te bewerken (Shift, Alt, and Control) kunnen bij Voorkeuren ingesteld worden. Sommige combinaties conflicteren misschien met andere instellingen van uw computer of browser. Probeer een aantal combinaties tot je iets hebt gevonden dat werkt.",
+
+"save": "Opslaan",
+
+"cancel": "Annuleren",
+
+"ok": "ok", 
+
+"done": "Klaar",
+
+"closeButtonLabel": "Sluit venster",
+
+"windowButtonLabel": "Venster instellingen",
+
+"windowMove": "Verplaats", 
+
+"windowMoveAlert": "Versleep of gebruik de pijltjestoetsen om te verplaatsen. Druk op Enter om te stoppen.",
+
+"windowResize": "Verkleinen of vergroten", 
+
+"windowResizeHeading": "Verander grootte van scherm met gebarentolk",
+
+"windowResizeAlert": "Het venster is van grootte veranderd.",
+
+"width": "Breedte",
+
+"height": "Hoogte",
+
+"windowSendBack": "Verplaats naar achteren", 
+
+"windowSendBackAlert": "Het scherm staat nu achter andere objecten op deze pagina.",
+
+"windowBringTop": "Verplaats naar voren",
+
+"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
+
+};
+
+// end getTranslationText function, which began in translation1.js     
+
+    this.tt = eval(this.lang);
+    
+    // resolve deferred variable
+    gettingText.resolve();  
+    return gettingText.promise(); 
+  };
+})(jQuery);
