@@ -606,16 +606,6 @@ div.modalDialog button:focus {
 }
 
 /* 
-  Fallback (JW Player) Tweaks
- */
- 
-div[id$="_fallback_wrapper"], 
-div[id$="_fallback"] {
-  height: 0px !important;
-} 
-
-
-/* 
   Misc 
 */
 

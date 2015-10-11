@@ -98,7 +98,7 @@
       this.resizePlayer($(window).width(), newHeight);
     }
     else {
-      if (!(this.mediaType === 'audio' && this.player === 'jw')) {      
+      if (this.mediaType === 'video') {      
         this.resizePlayer(this.playerWidth, this.playerHeight);
       }
     }
