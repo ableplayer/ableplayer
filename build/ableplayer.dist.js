@@ -198,7 +198,6 @@
     $.when(this.getTranslationText()).then(
       function () { 
         if (thisObj.countProperties(thisObj.tt) > 50) { 
-          
           // close enough to ensure that most text variables are populated 
           thisObj.setup();
           if (thisObj.startTime > 0 && !thisObj.autoplay) { 
@@ -6982,13 +6981,16 @@
         thisObj.onPlayerKeyPress(e);
       }
     });
+    
     // transcript is not a child of this.$ableDiv 
     // therefore, must be added separately
-    this.$transcriptArea.keydown(function (e) {
-      if (AblePlayer.nextIndex > 1) {
-        thisObj.onPlayerKeyPress(e);
-      }
-    });
+    if (this.$transcriptArea) {
+      this.$transcriptArea.keydown(function (e) {
+        if (AblePlayer.nextIndex > 1) {
+          thisObj.onPlayerKeyPress(e);
+        }
+      });
+    }
      
     // handle clicks on playlist items
     if (this.$playlist) {
