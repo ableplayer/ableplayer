@@ -296,7 +296,7 @@
     var descriptionText;
     if (pHours > 0) {
       descriptionText = pHours +
-        ' ' + pHourword +
+        ' ' + pHourWord +
         ', ' + pMinutes +
         ' ' + pMinuteWord +
         ', ' + pSeconds +
@@ -335,7 +335,7 @@
     this.keyTrackPosition = position;
   };
   
-  AccessibleSeekBar.prototype.refreshTooltip = function () {
+  AccessibleSeekBar.prototype.refreshTooltip = function () {    
     if (this.overHead) {
       this.timeTooltip.show();
       if (this.tracking) {
@@ -363,14 +363,24 @@
     });
   };
   
-  AccessibleSeekBar.prototype.positionToStr = function (position) {
-    var minutes = Math.floor(position / 60);
-    var seconds = Math.floor(position % 60);
+  AccessibleSeekBar.prototype.positionToStr = function (seconds) {
     
-    if (seconds < 10) {
-      seconds = '0' + seconds;
+    // same logic as misc.js > formatSecondsAsColonTime()
+    var dHours = Math.floor(seconds / 3600);
+    var dMinutes = Math.floor(seconds / 60) % 60;
+    var dSeconds = Math.floor(seconds % 60);
+    if (dSeconds < 10) { 
+      dSeconds = '0' + dSeconds;
     }
-    
-    return minutes + ':' + seconds;
+    if (dHours > 0) { 
+      if (dMinutes < 10) { 
+        dMinutes = '0' + dMinutes;
+      }
+      return dHours + ':' + dMinutes + ':' + dSeconds;
+    }
+    else { 
+      return dMinutes + ':' + dSeconds;
+    }
   };
+  
 })(jQuery);
