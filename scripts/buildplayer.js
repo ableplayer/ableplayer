@@ -1029,6 +1029,10 @@
           }
           else if (control === 'transcript') {
             this.$transcriptButton = newButton;
+            // gray out transcript button if transcript is not active 
+            if (!(this.$transcriptDiv.is(':visible'))) {
+              this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+            }
           }
           else if (control === 'fullscreen') {
             this.$fullscreenButton = newButton;
