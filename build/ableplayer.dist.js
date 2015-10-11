@@ -429,6 +429,7 @@
   };
 
   AblePlayer.prototype.setDimensions = function() { 
+
     // override default dimensions with width and height attributes of media element, if present
     if (this.$media.attr('width')) { 
       this.playerWidth = parseInt(this.$media.attr('width'), 10);
@@ -701,7 +702,7 @@
           // Must set height to 0 to hide them 
           // My bug report: 
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
-          jwHeight = '0px';   
+          jwHeight = 0;
         }
         else { 
           jwHeight = thisObj.playerHeight;
@@ -715,7 +716,7 @@
         // var flashplayer = '../thirdparty/jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
         // var html5player = '../thirdparty/jwplayer.html5.js';
-        
+
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
@@ -743,6 +744,7 @@
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
+            width: 0,
             fallback: false, 
             primary: 'flash'
           });                             
@@ -5325,7 +5327,7 @@
       if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
         this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
       }
-    
+
       // If transcript locked, scroll transcript to current highlight location.
       if (this.autoScrollTranscript && this.currentHighlight) {
         var newTop = Math.floor($('.able-transcript').scrollTop() +
@@ -6602,7 +6604,9 @@
       this.resizePlayer($(window).width(), newHeight);
     }
     else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
+      if (!(this.mediaType === 'audio' && this.player === 'jw')) {      
+        this.resizePlayer(this.playerWidth, this.playerHeight);
+      }
     }
   };
 

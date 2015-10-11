@@ -98,7 +98,9 @@
       this.resizePlayer($(window).width(), newHeight);
     }
     else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
+      if (!(this.mediaType === 'audio' && this.player === 'jw')) {      
+        this.resizePlayer(this.playerWidth, this.playerHeight);
+      }
     }
   };
 

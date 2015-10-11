@@ -8,7 +8,7 @@
 
   window. AccessibleSeekBar = function(div, width) {
     var thisObj = this;
-
+    
     // Initialize some variables.
     this.position = 0; // Note: position does not change while tracking.
     this.tracking = false;

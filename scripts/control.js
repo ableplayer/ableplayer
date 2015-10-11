@@ -599,7 +599,7 @@
       if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
         this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
       }
-    
+
       // If transcript locked, scroll transcript to current highlight location.
       if (this.autoScrollTranscript && this.currentHighlight) {
         var newTop = Math.floor($('.able-transcript').scrollTop() +
