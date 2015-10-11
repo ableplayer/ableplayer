@@ -3896,7 +3896,7 @@
 
   window. AccessibleSeekBar = function(div, width) {
     var thisObj = this;
-
+    
     // Initialize some variables.
     this.position = 0; // Note: position does not change while tracking.
     this.tracking = false;
@@ -4979,7 +4979,10 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.setPlaybackRate(rate);
-    }
+    }    
+    if (this.hasSignLanguage && this.signVideo) { 
+      this.signVideo.playbackRate = rate; 
+    }    
     this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
@@ -8339,6 +8342,18 @@ var de = {  "playerHeading": "Media Player","faster": "Schneller","slower"
 var en = {
   
 "playerHeading": "Media player",
+
+"hour": "xour", 
+
+"hours": "xours",
+
+"minute": "xinute",
+
+"minutes": "xinutes",
+
+"second": "xecond",
+
+"seconds": "xeconds",
 
 "faster": "Faster",
 
