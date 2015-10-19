@@ -537,9 +537,37 @@ div.modalDialog button:focus {
 :-webkit-full-screen {
     position: fixed;
     width: 100%;
+    height: 100%;
     top: 0;
     background: none;
 }
+/* these style settings below don't seem to have any effect, but leaving them in comments in case we'd need them later. */
+/*
+:-moz-full-screen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 20;
+  background: none;
+}
+
+:-ms-fullscreen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  background: none;
+}
+
+:fullscreen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  background: none;
+}
+*/
 
 /* 
   Tooltips & Alerts

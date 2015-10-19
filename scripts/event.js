@@ -85,22 +85,27 @@
 
   // End Media events
 
-  AblePlayer.prototype.onWindowResize = function () {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        this.modalFullscreenActive) {
-      var newHeight = $(window).height() - this.$playerDiv.height();
-      if (!this.$descDiv.is(':hidden')) {
-        newHeight -= this.$descDiv.height();
-      }
-      this.resizePlayer($(window).width(), newHeight);
-    }
-    else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
-    }
-  };
+    AblePlayer.prototype.onWindowResize = function () {
+        if (document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            this.modalFullscreenActive ) {
+            var isFirefox = /Firefox/i.test(navigator.userAgent);
+            if (isFirefox) {
+                var newHeight = $(window).height() - this.$playerDiv.height();}
+                else {
+                newHeight = $(window).height() - (this.$playerDiv.height()+20);
+             }
+            if (!this.$descDiv.is(':hidden')) {
+                newHeight -= this.$descDiv.height();
+            }
+            this.resizePlayer($(window).width(), newHeight);
+        }
+        else {
+            this.resizePlayer(this.playerWidth, this.playerHeight);
+        }
+    };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
@@ -499,13 +504,16 @@
         thisObj.onPlayerKeyPress(e);
       }
     });
+    
     // transcript is not a child of this.$ableDiv 
     // therefore, must be added separately
-    this.$transcriptArea.keydown(function (e) {
-      if (AblePlayer.nextIndex > 1) {
-        thisObj.onPlayerKeyPress(e);
-      }
-    });
+    if (this.$transcriptArea) {
+      this.$transcriptArea.keydown(function (e) {
+        if (AblePlayer.nextIndex > 1) {
+          thisObj.onPlayerKeyPress(e);
+        }
+      });
+    }
      
     // handle clicks on playlist items
     if (this.$playlist) {

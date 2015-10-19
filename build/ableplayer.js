@@ -198,7 +198,6 @@
     $.when(this.getTranslationText()).then(
       function () { 
         if (thisObj.countProperties(thisObj.tt) > 50) { 
-console.log('translationTable has been loaded');          
           // close enough to ensure that most text variables are populated 
           thisObj.setup();
           if (thisObj.startTime > 0 && !thisObj.autoplay) { 
@@ -430,6 +429,7 @@ console.log('translationTable has been loaded');
   };
 
   AblePlayer.prototype.setDimensions = function() { 
+
     // override default dimensions with width and height attributes of media element, if present
     if (this.$media.attr('width')) { 
       this.playerWidth = parseInt(this.$media.attr('width'), 10);
@@ -702,7 +702,7 @@ console.log('translationTable has been loaded');
           // Must set height to 0 to hide them 
           // My bug report: 
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
-          jwHeight = '0px';   
+          jwHeight = 0;
         }
         else { 
           jwHeight = thisObj.playerHeight;
@@ -716,7 +716,7 @@ console.log('translationTable has been loaded');
         // var flashplayer = '../thirdparty/jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
         // var html5player = '../thirdparty/jwplayer.html5.js';
-        
+
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
@@ -744,6 +744,7 @@ console.log('translationTable has been loaded');
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
+            width: 0,
             fallback: false, 
             primary: 'flash'
           });                             
@@ -3384,6 +3385,10 @@ console.log('translationTable has been loaded');
           }
           else if (control === 'transcript') {
             this.$transcriptButton = newButton;
+            // gray out transcript button if transcript is not active 
+            if (!(this.$transcriptDiv.is(':visible'))) {
+              this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+            }
           }
           else if (control === 'fullscreen') {
             this.$fullscreenButton = newButton;
@@ -3897,7 +3902,7 @@ console.log('translationTable has been loaded');
 
   window. AccessibleSeekBar = function(div, width) {
     var thisObj = this;
-
+    
     // Initialize some variables.
     this.position = 0; // Note: position does not change while tracking.
     this.tracking = false;
@@ -4185,7 +4190,7 @@ console.log('translationTable has been loaded');
     var descriptionText;
     if (pHours > 0) {
       descriptionText = pHours +
-        ' ' + pHourword +
+        ' ' + pHourWord +
         ', ' + pMinutes +
         ' ' + pMinuteWord +
         ', ' + pSeconds +
@@ -4224,7 +4229,7 @@ console.log('translationTable has been loaded');
     this.keyTrackPosition = position;
   };
   
-  AccessibleSeekBar.prototype.refreshTooltip = function () {
+  AccessibleSeekBar.prototype.refreshTooltip = function () {    
     if (this.overHead) {
       this.timeTooltip.show();
       if (this.tracking) {
@@ -4252,16 +4257,26 @@ console.log('translationTable has been loaded');
     });
   };
   
-  AccessibleSeekBar.prototype.positionToStr = function (position) {
-    var minutes = Math.floor(position / 60);
-    var seconds = Math.floor(position % 60);
+  AccessibleSeekBar.prototype.positionToStr = function (seconds) {
     
-    if (seconds < 10) {
-      seconds = '0' + seconds;
+    // same logic as misc.js > formatSecondsAsColonTime()
+    var dHours = Math.floor(seconds / 3600);
+    var dMinutes = Math.floor(seconds / 60) % 60;
+    var dSeconds = Math.floor(seconds % 60);
+    if (dSeconds < 10) { 
+      dSeconds = '0' + dSeconds;
     }
-    
-    return minutes + ':' + seconds;
+    if (dHours > 0) { 
+      if (dMinutes < 10) { 
+        dMinutes = '0' + dMinutes;
+      }
+      return dHours + ':' + dMinutes + ':' + dSeconds;
+    }
+    else { 
+      return dMinutes + ':' + dSeconds;
+    }
   };
+  
 })(jQuery);
 
 (function ($) {
@@ -4425,15 +4440,24 @@ console.log('translationTable has been loaded');
     return count;
   };
 
-  // Takes seconds and converts to string of form mm:ss
+  // Takes seconds and converts to string of form hh:mm:ss
   AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
-    var dMinutes = Math.floor(seconds / 60);
+
+    var dHours = Math.floor(seconds / 3600);
+    var dMinutes = Math.floor(seconds / 60) % 60;
     var dSeconds = Math.floor(seconds % 60);
     if (dSeconds < 10) { 
       dSeconds = '0' + dSeconds;
     }
-
-    return dMinutes + ':' + dSeconds;
+    if (dHours > 0) { 
+      if (dMinutes < 10) { 
+        dMinutes = '0' + dMinutes;
+      }
+      return dHours + ':' + dMinutes + ':' + dSeconds;
+    }
+    else { 
+      return dMinutes + ':' + dSeconds;
+    }
   };
 
 })(jQuery);
@@ -4961,7 +4985,10 @@ console.log('translationTable has been loaded');
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.setPlaybackRate(rate);
-    }
+    }    
+    if (this.hasSignLanguage && this.signVideo) { 
+      this.signVideo.playbackRate = rate; 
+    }    
     this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
@@ -5304,7 +5331,7 @@ console.log('translationTable has been loaded');
       if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
         this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
       }
-    
+
       // If transcript locked, scroll transcript to current highlight location.
       if (this.autoScrollTranscript && this.currentHighlight) {
         var newTop = Math.floor($('.able-transcript').scrollTop() +
@@ -6568,22 +6595,27 @@ console.log('translationTable has been loaded');
 
   // End Media events
 
-  AblePlayer.prototype.onWindowResize = function () {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        this.modalFullscreenActive) {
-      var newHeight = $(window).height() - this.$playerDiv.height();
-      if (!this.$descDiv.is(':hidden')) {
-        newHeight -= this.$descDiv.height();
-      }
-      this.resizePlayer($(window).width(), newHeight);
-    }
-    else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
-    }
-  };
+    AblePlayer.prototype.onWindowResize = function () {
+        if (document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            this.modalFullscreenActive ) {
+            var isFirefox = /Firefox/i.test(navigator.userAgent);
+            if (isFirefox) {
+                var newHeight = $(window).height() - this.$playerDiv.height();}
+            else {
+                newHeight = $(window).height() - (this.$playerDiv.height()+20);
+            }
+            if (!this.$descDiv.is(':hidden')) {
+                newHeight -= this.$descDiv.height();
+            }
+            this.resizePlayer($(window).width(), newHeight);
+        }
+        else {
+            this.resizePlayer(this.playerWidth, this.playerHeight);
+        }
+    };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
@@ -6982,13 +7014,16 @@ console.log('translationTable has been loaded');
         thisObj.onPlayerKeyPress(e);
       }
     });
+    
     // transcript is not a child of this.$ableDiv 
     // therefore, must be added separately
-    this.$transcriptArea.keydown(function (e) {
-      if (AblePlayer.nextIndex > 1) {
-        thisObj.onPlayerKeyPress(e);
-      }
-    });
+    if (this.$transcriptArea) {
+      this.$transcriptArea.keydown(function (e) {
+        if (AblePlayer.nextIndex > 1) {
+          thisObj.onPlayerKeyPress(e);
+        }
+      });
+    }
      
     // handle clicks on playlist items
     if (this.$playlist) {
