@@ -288,11 +288,6 @@
         this.handlePrefsClick();
       }
     }     
-    else if (which === 104) { // h = help
-      if (this.usingModifierKeys(e)) { 
-        this.handleHelpClick();
-      }
-    }     
     else if (which === 13) { // Enter 
       var thisElement = $(document.activeElement);
       if (thisElement.prop('tagName') === 'SPAN') { 
