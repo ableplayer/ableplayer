@@ -67,9 +67,6 @@
     // Therefore testing must be performed on a web server 
     this.testFallback = false;
 
-    // translationPath - specify path to translation files 
-    this.translationPath = this.rootPath + '/translations/';
-    
     // lang - default language of the player
     this.lang = 'en'; 
   
@@ -189,6 +186,7 @@
   };
 
   AblePlayer.prototype.setDimensions = function() { 
+
     // override default dimensions with width and height attributes of media element, if present
     if (this.$media.attr('width')) { 
       this.playerWidth = parseInt(this.$media.attr('width'), 10);
@@ -461,7 +459,7 @@
           // Must set height to 0 to hide them 
           // My bug report: 
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
-          jwHeight = '0px';   
+          jwHeight = 0;
         }
         else { 
           jwHeight = thisObj.playerHeight;
@@ -475,15 +473,15 @@
         // var flashplayer = '../thirdparty/jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
         // var html5player = '../thirdparty/jwplayer.html5.js';
-        
+
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
+              image: thisObj.$media.attr('poster'),
               sources: sources
             }],
             flashplayer: flashplayer,
             html5player: html5player,
-            image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
             height: jwHeight,
@@ -503,6 +501,7 @@
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
+            width: 0,
             fallback: false, 
             primary: 'flash'
           });                             
@@ -891,15 +890,6 @@
                 thisObj.onClickPlayerButton(this);
               });
 
-              // TODO: Ascertain whether this is needed
-              // handle local key-presses if this is not the only player on the page; 
-              // otherwise these are dispatched by global handler.
-              this.$ccButton.keydown(function (e) {
-                if (AblePlayer.nextIndex > 1) {
-                  thisObj.onPlayerKeyPress(e);
-                }
-              });
-          
               // TODO: might need to adjust width and height of div.able-vidcap-container
               // Only used if !this.usingYouTubeCaptions
               /*

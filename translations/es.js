@@ -1,4 +1,4 @@
-{
+var es = {
   
 "playerHeading": "Media player",
 
@@ -61,10 +61,6 @@
 "fullScreen": "Pantalla completa",
 
 "speed": "Velocidad",
-
-"audio": "Audio",
-
-"video": "Video",
 
 "or": "o", 
 
@@ -184,4 +180,4 @@
 
 "windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
 
-}
+};

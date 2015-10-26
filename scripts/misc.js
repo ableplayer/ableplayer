@@ -11,15 +11,24 @@
     return count;
   };
 
-  // Takes seconds and converts to string of form mm:ss
+  // Takes seconds and converts to string of form hh:mm:ss
   AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
-    var dMinutes = Math.floor(seconds / 60);
+
+    var dHours = Math.floor(seconds / 3600);
+    var dMinutes = Math.floor(seconds / 60) % 60;
     var dSeconds = Math.floor(seconds % 60);
     if (dSeconds < 10) { 
       dSeconds = '0' + dSeconds;
     }
-
-    return dMinutes + ':' + dSeconds;
+    if (dHours > 0) { 
+      if (dMinutes < 10) { 
+        dMinutes = '0' + dMinutes;
+      }
+      return dHours + ':' + dMinutes + ':' + dSeconds;
+    }
+    else { 
+      return dMinutes + ':' + dSeconds;
+    }
   };
 
 })(jQuery);

@@ -1,4 +1,4 @@
-{
+var en = {
   
 "playerHeading": "Media player",
 
@@ -62,10 +62,6 @@
 
 "speed": "Speed",
 
-"audio": "audio",
-
-"video": "video",
-
 "or": "or", 
 
 "spacebar": "spacebar",
@@ -112,7 +108,7 @@
 
 "prefFeatures": "Features",
 
-"prefKeys": "Modifier Keys",
+"prefKeys": "Modifier keys used for shortcuts (see help)",
 
 "prefAltKey": "Alt",
 
@@ -184,4 +180,4 @@
 
 "windowBringTopAlert": "This window is now in front of other objects on the page."
 
-}
+};

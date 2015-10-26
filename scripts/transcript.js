@@ -1,5 +1,6 @@
 (function ($) {
   AblePlayer.prototype.updateTranscript = function() {
+    
     if (!this.includeTranscript) {
       return;
     }
@@ -44,11 +45,11 @@
     }     
     
     // handle clicks on text within transcript 
-    // Note #1: Only one transcript per page is supported
-    // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
-    // Forcing this elsewhere, in the keyboard handler section  
-    if ($('.able-transcript').length > 0) {  
-      $('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
+    // Note: This event listeners handles clicks only, not keydown events 
+    // Pressing Enter on an element that is not natively clickable does NOT trigger click() 
+    // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js) 
+    if (this.$transcriptArea.length > 0) { 
+      this.$transcriptArea.find('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
@@ -69,12 +70,12 @@
     currentTime = parseFloat(currentTime);
 
     // Highlight the current transcript item.
-    $('.able-transcript span.able-transcript-caption').each(function() { 
+    this.$transcriptArea.find('.able-transcript span.able-transcript-caption').each(function() { 
       start = parseFloat($(this).attr('data-start'));
       end = parseFloat($(this).attr('data-end'));
       if (currentTime >= start && currentTime <= end) { 
         // move all previous highlights before adding one to current span
-        $('.able-highlight').removeClass('able-highlight');
+        thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
         $(this).addClass('able-highlight');
         return false;
       }

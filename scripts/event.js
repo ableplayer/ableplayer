@@ -85,22 +85,27 @@
 
   // End Media events
 
-  AblePlayer.prototype.onWindowResize = function () {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        this.modalFullscreenActive) {
-      var newHeight = $(window).height() - this.$playerDiv.height();
-      if (!this.$descDiv.is(':hidden')) {
-        newHeight -= this.$descDiv.height();
-      }
-      this.resizePlayer($(window).width(), newHeight);
-    }
-    else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
-    }
-  };
+    AblePlayer.prototype.onWindowResize = function () {
+        if (document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            this.modalFullscreenActive ) {
+            var isFirefox = /Firefox/i.test(navigator.userAgent);
+            if (isFirefox) {
+                var newHeight = $(window).height() - this.$playerDiv.height();}
+                else {
+                newHeight = $(window).height() - (this.$playerDiv.height()+20);
+             }
+            if (!this.$descDiv.is(':hidden')) {
+                newHeight -= this.$descDiv.height();
+            }
+            this.resizePlayer($(window).width(), newHeight);
+        }
+        else {
+            this.resizePlayer(this.playerWidth, this.playerHeight);
+        }
+    };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
@@ -209,6 +214,7 @@
     }
     // Convert to lower case.
     var which = e.which;
+    
     if (which >= 65 && which <= 90) {
       which += 32;
     }
@@ -280,11 +286,6 @@
     else if (which === 116) { // t = preferences
       if (this.usingModifierKeys(e)) { 
         this.handlePrefsClick();
-      }
-    }     
-    else if (which === 104) { // h = help
-      if (this.usingModifierKeys(e)) { 
-        this.handleHelpClick();
       }
     }     
     else if (which === 13) { // Enter 
@@ -491,13 +492,24 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle local key-presses if we're not the only player on the page; otherwise these are dispatched by global handler.
+    // handle local keydown events if this isn't the only player on the page; 
+    // otherwise these are dispatched by global handler (see ableplayer-base,js)
     this.$ableDiv.keydown(function (e) {
       if (AblePlayer.nextIndex > 1) {
         thisObj.onPlayerKeyPress(e);
       }
     });
     
+    // transcript is not a child of this.$ableDiv 
+    // therefore, must be added separately
+    if (this.$transcriptArea) {
+      this.$transcriptArea.keydown(function (e) {
+        if (AblePlayer.nextIndex > 1) {
+          thisObj.onPlayerKeyPress(e);
+        }
+      });
+    }
+     
     // handle clicks on playlist items
     if (this.$playlist) {
       this.$playlist.click(function() { 

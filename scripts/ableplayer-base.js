@@ -40,14 +40,13 @@
     $('body').trigger('youtubeIframeAPIReady', []);
   };
 
-  // 
+  // If there is only one player on the page, dispatch global keydown events to it 
+  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners()) 
   $(window).keydown(function(e) {
-    if (AblePlayer.nextIndex === 1) {
-      // Only one player on the page; dispatch global key presses to it.
+    if (AblePlayer.nextIndex === 1) { 
       AblePlayer.lastCreated.onPlayerKeyPress(e);
     }
   });
-
 
   // Construct an AblePlayer object 
   // Parameters are: 
@@ -164,11 +163,6 @@
       this.fallbackPath = $(media).data('fallback-path'); 
     }
     
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
-    
-
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -199,7 +193,7 @@
 
     // populate translation object with localized versions of all labels and prompts 
     // use defer method to defer additional processing until text is retrieved    
-    this.tt = []; 
+    this.tt = {};
     var thisObj = this;
     $.when(this.getTranslationText()).then(
       function () { 

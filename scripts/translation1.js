@@ -1,14 +1,13 @@
 (function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables 
-    var langs = ['en','de','es'];
+    var langs = ['en','de','es','nl'];
     return langs;
   };
 
   AblePlayer.prototype.getTranslationText = function() { 
-    // determine language, then get labels and prompts from corresponding translation file (in JSON)
-    // finally, populate this.tt object with JSON data
-    // return true if successful, otherwise false 
+
+    // determine language, then get labels and prompts from corresponding translation var
     var gettingText, lang, thisObj, msg; 
 
     gettingText = $.Deferred(); 
@@ -37,30 +36,7 @@
         }
       }
     } 
-    thisObj = this;
-    // get content of JSON file 
-    $.getJSON(this.translationPath + this.lang + '.js',
-              function(data, textStatus, jqxhr) { 
-                if (textStatus === 'success') { 
-                  thisObj.tt = data;
-                  if (thisObj.debug) { 
-                    console.log('Successfully assigned JSON data to trans');
-                    console.log(thisObj.tt);           
-                  }
-                }
-                else { 
-                  return false; 
-                }
-              }
-             ).then( 
-               function(){ // success 
-                 // resolve deferred variable
-                 gettingText.resolve();  
-               },
-               function() { // failure 
-                 return false; 
-               }
-             );
-    return gettingText.promise(); 
-  };
-})(jQuery);
+
+    // in final build, all language variables are contatenated into this function below...
+    // translation2.js is then contanenated onto the end to finish this function
+        

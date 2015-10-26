@@ -40,14 +40,13 @@
     $('body').trigger('youtubeIframeAPIReady', []);
   };
 
-  // 
+  // If there is only one player on the page, dispatch global keydown events to it 
+  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners()) 
   $(window).keydown(function(e) {
-    if (AblePlayer.nextIndex === 1) {
-      // Only one player on the page; dispatch global key presses to it.
+    if (AblePlayer.nextIndex === 1) { 
       AblePlayer.lastCreated.onPlayerKeyPress(e);
     }
   });
-
 
   // Construct an AblePlayer object 
   // Parameters are: 
@@ -164,11 +163,6 @@
       this.fallbackPath = $(media).data('fallback-path'); 
     }
     
-    if ($(media).data('translation-path') !== undefined && $(media).data('translation-path') !== "false") { 
-      this.translationPath = $(media).data('translation-path'); 
-    }
-    
-
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") { 
       var lang = $(media).data('lang'); 
       if (lang.length == 2) { 
@@ -199,7 +193,7 @@
 
     // populate translation object with localized versions of all labels and prompts 
     // use defer method to defer additional processing until text is retrieved    
-    this.tt = []; 
+    this.tt = {};
     var thisObj = this;
     $.when(this.getTranslationText()).then(
       function () { 
@@ -316,9 +310,6 @@
     // Therefore testing must be performed on a web server 
     this.testFallback = false;
 
-    // translationPath - specify path to translation files 
-    this.translationPath = this.rootPath + '/translations/';
-    
     // lang - default language of the player
     this.lang = 'en'; 
   
@@ -438,6 +429,7 @@
   };
 
   AblePlayer.prototype.setDimensions = function() { 
+
     // override default dimensions with width and height attributes of media element, if present
     if (this.$media.attr('width')) { 
       this.playerWidth = parseInt(this.$media.attr('width'), 10);
@@ -710,7 +702,7 @@
           // Must set height to 0 to hide them 
           // My bug report: 
           // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
-          jwHeight = '0px';   
+          jwHeight = 0;
         }
         else { 
           jwHeight = thisObj.playerHeight;
@@ -724,15 +716,15 @@
         // var flashplayer = '../thirdparty/jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
         // var html5player = '../thirdparty/jwplayer.html5.js';
-        
+
         if (thisObj.mediaType === 'video') { 
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
+              image: thisObj.$media.attr('poster'),
               sources: sources
             }],
             flashplayer: flashplayer,
             html5player: html5player,
-            image: thisObj.$media.attr('poster'), 
             controls: false,
             volume: thisObj.defaultVolume * 100,
             height: jwHeight,
@@ -752,6 +744,7 @@
             controls: false,
             volume: this.defaultVolume * 100,
             height: jwHeight,
+            width: 0,
             fallback: false, 
             primary: 'flash'
           });                             
@@ -1140,15 +1133,6 @@
                 thisObj.onClickPlayerButton(this);
               });
 
-              // TODO: Ascertain whether this is needed
-              // handle local key-presses if this is not the only player on the page; 
-              // otherwise these are dispatched by global handler.
-              this.$ccButton.keydown(function (e) {
-                if (AblePlayer.nextIndex > 1) {
-                  thisObj.onPlayerKeyPress(e);
-                }
-              });
-          
               // TODO: might need to adjust width and height of div.able-vidcap-container
               // Only used if !this.usingYouTubeCaptions
               /*
@@ -1617,12 +1601,12 @@
 
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
-  AblePlayer.prototype.parseWebVTT = function(text) {
-
+  AblePlayer.prototype.parseWebVTT = function(srcFile,text) { 
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
-    
+
     var parserState = {
+      src: srcFile,
       text: text,
       error: null,
       metadata: {},
@@ -1630,18 +1614,25 @@
       line: 1,
       column: 1
     };
-    
+
     try {
       act(parserState, parseFileBody);
     }
     catch (err) {
-      
-      
+      var errString = 'Invalid WebVTT file: ' + parserState.src + '\n'; 
+      errString += 'Line: ' + parserState.line + ', '; 
+      errString += 'Column: ' + parserState.column + '\n';
+      errString += err; 
+      if (console.warn) {          
+        
+      }
+      else if (console.log) { 
+        
+      }
     }
-    
     return parserState;
   }
-  
+
   function actList(state, list) {
     var results = [];
     for (var ii in list) {
@@ -1649,7 +1640,7 @@
     }
     return results;
   }
-  
+
   // Applies the action and checks for errors.
   function act(state, action) {
     var val = action(state);
@@ -1658,7 +1649,7 @@
     }
     return val;
   }
-  
+
   function updatePosition(state, cutText) {
     for (var ii in cutText) {
       if (cutText[ii] === '\n') {
@@ -1670,14 +1661,14 @@
       }
     }
   }
-  
+
   function cut(state, length) {
     var returnText = state.text.substring(0, length);
     updatePosition(state, returnText);
     state.text = state.text.substring(length);
     return returnText;
   }
-  
+
   function cutLine(state, length) {
     var nextEOL = state.text.indexOf('\n');
     var returnText;
@@ -1693,7 +1684,7 @@
     }
     return returnText;
   }
-  
+
   function peekLine(state) {
     var nextEOL = state.text.indexOf('\n');
     if (nextEOL === -1) {
@@ -1703,8 +1694,8 @@
       return state.text.substring(0, nextEOL);
     }
   }
-  
-  function parseFileBody(state) {    
+
+  function parseFileBody(state) {
     actList(state, [
       eatOptionalBOM,
       eatSignature]);
@@ -1720,7 +1711,7 @@
       state.error = "WEBVTT signature not followed by whitespace.";
     }
   }
-  
+
   // Parses all metadata headers until a cue is discovered.
   function parseMetadataHeaders(state) {
     while (true) {
@@ -1738,7 +1729,7 @@
       }
     }
   }
-  
+
   function nextSpaceOrNewline(s) {
     var possible = [];
     var spaceIndex = s.indexOf(' ');
@@ -1753,10 +1744,10 @@
     if (lineIndex >= 0) {
       possible.push(lineIndex);
     }
-    
+
     return Math.min.apply(null, possible);
   }
-  
+
   function getMetadataKeyValue(state) {
     var next = state.text.indexOf('\n');
     var pair = cut(state, next);
@@ -1771,7 +1762,7 @@
       return [pairName, pairValue];
     }
   }
-  
+
   function getSettingsKeyValue(state) {
     var next = nextSpaceOrNewline(state.text);
     var pair = cut(state, next);
@@ -1786,7 +1777,7 @@
       return [pairName, pairValue];
     }
   }
-  
+
   function parseCuesAndComments(state) {
     while (true) {
       var nextLine = peekLine(state);
@@ -1794,7 +1785,10 @@
       if (nextLine.indexOf('NOTE') === 0 && ((nextLine.length === 4) || (nextLine[4] === ' ') || (nextLine[4] === '\t'))) {
         actList(state, [eatComment, eatEmptyLines]);
       }
-      else if ($.trim(nextLine).length !== 0) {
+      else if ($.trim(nextLine).length === 0 && state.text.length > 0) {
+        act(state, eatEmptyLines);
+      }
+      else if ($.trim(nextLine).length > 0) {
         act(state, parseCue);
       }
       else {
@@ -1803,31 +1797,49 @@
       }
     }
   }
-  
+
   function parseCue(state) {
     var nextLine = peekLine(state);
     var cueId;
-    if (nextLine.indexOf('-->') === -1) {
-      cueId = cutLine(state);
+    var errString;
+    
+    if(nextLine.indexOf('-->') === -1) {
+    	cueId = cutLine(state);
+    	nextLine = peekLine(state);
+    	if(nextLine.indexOf('-->') === -1) {
+        errString = 'Invalid WebVTT file: ' + state.src + '\n'; 
+        errString += 'Line: ' + state.line + ', '; 
+        errString += 'Column: ' + state.column + '\n';
+        errString += 'Expected cue timing for cueId \''+cueId+'\' but found: ' + nextLine + '\n';
+        if (console.warn) { 
+          
+        }
+        else if (console.log) { 
+          
+        }
+        return; // Return leaving line for parseCuesAndComments to handle
+    	}
     }
-    var cueTimings = actList(state, [getTiming, 
+    
+    var cueTimings = actList(state, [getTiming,
                                      eatAtLeast1SpacesOrTabs,
                                      eatArrow,
                                      eatAtLeast1SpacesOrTabs,
                                      getTiming]);
+
     var startTime = cueTimings[0];
     var endTime = cueTimings[4];
     if (startTime >= endTime) {
       state.error = 'Start time is not sooner than end time.';
       return;
     }
-    
+
     act(state, eatSpacesOrTabs);
     var cueSettings = act(state, getCueSettings);
     // Cut the newline.
     cut(state, 1);
     var components = act(state, getCuePayload);
-    
+
     state.cues.push({
       id: cueId,
       start: startTime,
@@ -1835,8 +1847,8 @@
       settings: cueSettings,
       components: components
     });
-  }
-  
+}
+
   function getCueSettings(state) {
     var cueSettings = {};
     while (state.text.length > 0 && state.text[0] !== '\n') {
@@ -1846,17 +1858,17 @@
     }
     return cueSettings;
   }
-  
-  
+
+
   function getCuePayload(state) {
     // Parser based on instructions in draft.
     var result = {type: 'internal', tagName: '', value: '', classes: [], annotation: '', parent: null, children: [], language: ''};
     var current = result;
     var languageStack = [];
-    while (state.text.length > 0) {      
+    while (state.text.length > 0) {
       var nextLine = peekLine(state);
-      if (nextLine.indexOf('-->') !== -1) {
-        break;
+      if (nextLine.indexOf('-->') !== -1 || /^\s*$/.test(nextLine)) {
+        break; // Handle empty cues
       }
 
       // Have to separately detect double-lines ending cue due to our non-standard parsing.
@@ -1874,7 +1886,7 @@
       else if (token.type === 'startTag') {
         token.type = token.tagName;
         // Define token.parent; added by Terrill to fix bug on Line 296
-        token.parent = current; 
+        token.parent = current;
         if ($.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby']) !== -1) {
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
@@ -1908,7 +1920,7 @@
       }
       else if (token.type === 'endTag') {
         if (token.tagName === current.type && $.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v']) !== -1) {
-          // NOTE from Terrill: This was resulting in an error because current.parent was undefined 
+          // NOTE from Terrill: This was resulting in an error because current.parent was undefined
           // Fixed (I think) by assigning current token to token.parent  on Line 260
           current = current.parent;
         }
@@ -1942,14 +1954,14 @@
     }
     return result;
   }
-  
+
   // Gets a single cue token; uses the method in the w3 specification.
   function getCueToken(state) {
     var tokenState = 'data';
     var result = [];
     var buffer = '';
     var token = {type: '', tagName: '', value: '', classes: [], annotation: '', children: []}
-    
+
     while (true) {
       var c;
       // Double newlines indicate end of token.
@@ -1966,6 +1978,7 @@
       if (tokenState === 'data') {
         if (c === '&') {
           buffer = '&';
+          tokenState = 'escape';
         }
         else if (c === '<') {
           if (result.length === 0) {
@@ -2018,6 +2031,12 @@
           tokenState = 'data';
         }
         else if (c === '<' || c === '\u0004') {
+          result.push(buffer);
+          token.type = 'string';
+          token.value = result.join('');
+          return token;
+        }
+        else if (c === '\t' || c === '\n' || c === '\u000c' || c === ' ') { // Handle unescaped & chars as strings
           result.push(buffer);
           token.type = 'string';
           token.value = result.join('');
@@ -2169,11 +2188,11 @@
       else {
         throw 'Unknown tokenState ' + tokenState;
       }
-      
+
       cut(state, 1);
     }
   }
-  
+
   function eatComment(state) {
     // Cut the NOTE line.
     var noteLine = cutLine(state);
@@ -2202,9 +2221,9 @@
     if (state.text[0] === '\ufeff') {
       cut(state, 1);
     }
-    
+
   }
-  
+
   // "WEBVTT" string.
   function eatSignature(state) {
     if (state.text.substring(0,6) === 'WEBVTT') {
@@ -2214,7 +2233,7 @@
       state.error = 'Invalid signature.';
     }
   }
-  
+
   function eatArrow(state) {
     if (state.text.length < 3 || state.text.substring(0,3) !== '-->') {
       state.error = 'Missing -->';
@@ -2223,7 +2242,7 @@
       cut(state, 3);
     }
   }
-  
+
   function eatSingleSpaceOrTab(state) {
     if (state.text[0] === '\t' || state.text[0] === ' ') {
       cut(state, 1);
@@ -2232,13 +2251,13 @@
       state.error = 'Missing space.';
     }
   }
-  
+
   function eatSpacesOrTabs(state) {
     while (state.text[0] === '\t' || state.text[0] === ' ') {
       cut(state, 1);
     }
   }
-  
+
   function eatAtLeast1SpacesOrTabs(state) {
     var numEaten = 0;
     while (state.text[0] === '\t' || state.text[0] === ' ') {
@@ -2259,7 +2278,7 @@
       cut(state, nextEOL + 1);
     }
   }
-  
+
   function eatEmptyLines(state) {
     while (state.text.length > 0) {
       var nextLine = peekLine(state);
@@ -2271,7 +2290,7 @@
       }
     }
   }
-  
+
   // Eats empty lines, but throws an error if there's not at least one.
   function eatAtLeast1EmptyLines(state) {
     var linesEaten = 0;
@@ -2289,7 +2308,7 @@
       state.error = 'Missing empty line.';
     }
   }
-  
+
   function getTiming(state) {
     var nextSpace = nextSpaceOrNewline(state.text);
     if (nextSpace === -1) {
@@ -2297,20 +2316,20 @@
       return;
     }
     var timestamp = cut(state, nextSpace);
-    
+
     var results = /((\d\d):)?((\d\d):)(\d\d).(\d\d\d)|(\d+).(\d\d\d)/.exec(timestamp);
-    
+
     if (!results) {
-      state.error = 'Unable to parse timestamp.';
+      state.error = 'Unable to parse timestamp';
       return;
     }
     var time = 0;
     var hours = results[2];
     var minutes = results[4];
-    
+
     if (minutes) {
       if (parseInt(minutes, 10) > 59) {
-        state.error = 'Invalid minute range.';
+        state.error = 'Invalid minute range';
         return;
       }
       if (hours) {
@@ -2319,10 +2338,10 @@
       time += 60 * parseInt(minutes, 10);
       var seconds = results[5];
       if (parseInt(seconds, 10) > 59) {
-        state.error = 'Invalid second range.';
+        state.error = 'Invalid second range';
         return;
       }
-      
+
       time += parseInt(seconds, 10);
       time += parseInt(results[6], 10) / 1000;
     }
@@ -2330,7 +2349,7 @@
       time += parseInt(results[7], 10);
       time += parseInt(results[8], 10) / 1000;
     }
-    
+
     return time;
   }
 })(jQuery);
@@ -3366,6 +3385,10 @@
           }
           else if (control === 'transcript') {
             this.$transcriptButton = newButton;
+            // gray out transcript button if transcript is not active 
+            if (!(this.$transcriptDiv.is(':visible'))) {
+              this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+            }
           }
           else if (control === 'fullscreen') {
             this.$fullscreenButton = newButton;
@@ -3644,6 +3667,7 @@
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
+      
       var isDefaultTrack = track.getAttribute('default'); 
 
       if (!trackSrc) {
@@ -3655,8 +3679,8 @@
       var thisObj = this;
       loadingPromises.push(loadingPromise);
       loadingPromise.then((function (track, kind) {
-        return function (trackText) {
-          var cues = thisObj.parseWebVTT(trackText).cues;
+        return function (trackSrc, trackText) { 
+          var cues = thisObj.parseWebVTT(trackSrc, trackText).cues;
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }
@@ -3859,7 +3883,7 @@
         deferred.fail();
       }
       else {
-        deferred.resolve(trackText);
+        deferred.resolve(src, trackText); 
       }
       $tempDiv.remove();
     });
@@ -3878,7 +3902,7 @@
 
   window. AccessibleSeekBar = function(div, width) {
     var thisObj = this;
-
+    
     // Initialize some variables.
     this.position = 0; // Note: position does not change while tracking.
     this.tracking = false;
@@ -4166,7 +4190,7 @@
     var descriptionText;
     if (pHours > 0) {
       descriptionText = pHours +
-        ' ' + pHourword +
+        ' ' + pHourWord +
         ', ' + pMinutes +
         ' ' + pMinuteWord +
         ', ' + pSeconds +
@@ -4205,7 +4229,7 @@
     this.keyTrackPosition = position;
   };
   
-  AccessibleSeekBar.prototype.refreshTooltip = function () {
+  AccessibleSeekBar.prototype.refreshTooltip = function () {    
     if (this.overHead) {
       this.timeTooltip.show();
       if (this.tracking) {
@@ -4233,16 +4257,26 @@
     });
   };
   
-  AccessibleSeekBar.prototype.positionToStr = function (position) {
-    var minutes = Math.floor(position / 60);
-    var seconds = Math.floor(position % 60);
+  AccessibleSeekBar.prototype.positionToStr = function (seconds) {
     
-    if (seconds < 10) {
-      seconds = '0' + seconds;
+    // same logic as misc.js > formatSecondsAsColonTime()
+    var dHours = Math.floor(seconds / 3600);
+    var dMinutes = Math.floor(seconds / 60) % 60;
+    var dSeconds = Math.floor(seconds % 60);
+    if (dSeconds < 10) { 
+      dSeconds = '0' + dSeconds;
     }
-    
-    return minutes + ':' + seconds;
+    if (dHours > 0) { 
+      if (dMinutes < 10) { 
+        dMinutes = '0' + dMinutes;
+      }
+      return dHours + ':' + dMinutes + ':' + dSeconds;
+    }
+    else { 
+      return dMinutes + ':' + dSeconds;
+    }
   };
+  
 })(jQuery);
 
 (function ($) {
@@ -4406,15 +4440,24 @@
     return count;
   };
 
-  // Takes seconds and converts to string of form mm:ss
+  // Takes seconds and converts to string of form hh:mm:ss
   AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
-    var dMinutes = Math.floor(seconds / 60);
+
+    var dHours = Math.floor(seconds / 3600);
+    var dMinutes = Math.floor(seconds / 60) % 60;
     var dSeconds = Math.floor(seconds % 60);
     if (dSeconds < 10) { 
       dSeconds = '0' + dSeconds;
     }
-
-    return dMinutes + ':' + dSeconds;
+    if (dHours > 0) { 
+      if (dMinutes < 10) { 
+        dMinutes = '0' + dMinutes;
+      }
+      return dHours + ':' + dMinutes + ':' + dSeconds;
+    }
+    else { 
+      return dMinutes + ':' + dSeconds;
+    }
   };
 
 })(jQuery);
@@ -4942,7 +4985,10 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.setPlaybackRate(rate);
-    }
+    }    
+    if (this.hasSignLanguage && this.signVideo) { 
+      this.signVideo.playbackRate = rate; 
+    }    
     this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
@@ -5285,7 +5331,7 @@
       if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
         this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
       }
-    
+
       // If transcript locked, scroll transcript to current highlight location.
       if (this.autoScrollTranscript && this.currentHighlight) {
         var newTop = Math.floor($('.able-transcript').scrollTop() +
@@ -6040,74 +6086,8 @@
 })(jQuery);
 
 (function ($) {
-  AblePlayer.prototype.getSupportedLangs = function() {
-    // returns an array of languages for which AblePlayer has translation tables 
-    var langs = ['en','de','es'];
-    return langs;
-  };
-
-  AblePlayer.prototype.getTranslationText = function() { 
-    // determine language, then get labels and prompts from corresponding translation file (in JSON)
-    // finally, populate this.tt object with JSON data
-    // return true if successful, otherwise false 
-    var gettingText, lang, thisObj, msg; 
-
-    gettingText = $.Deferred(); 
-
-    // override this.lang to language of the web page, if known and supported
-    // otherwise this.lang will continue using default    
-    if (!this.forceLang) {   
-      if ($('body').attr('lang')) { 
-        lang = $('body').attr('lang');
-      }
-      else if ($('html').attr('lang')) { 
-        lang = $('html').attr('lang');
-      }    
-      if (lang !== this.lang) {
-        msg = 'Language of web page (' + lang +') ';
-        if ($.inArray(lang,this.getSupportedLangs()) !== -1) { 
-          // this is a supported lang
-          msg += ' has a translation table available.';
-          this.lang = lang; 
-        }
-        else { 
-          msg += ' is not currently supported. Using default language (' + this.lang + ')';
-        }
-        if (this.debug) {
-          
-        }
-      }
-    } 
-    thisObj = this;
-    // get content of JSON file 
-    $.getJSON(this.translationPath + this.lang + '.js',
-              function(data, textStatus, jqxhr) { 
-                if (textStatus === 'success') { 
-                  thisObj.tt = data;
-                  if (thisObj.debug) { 
-                    
-                               
-                  }
-                }
-                else { 
-                  return false; 
-                }
-              }
-             ).then( 
-               function(){ // success 
-                 // resolve deferred variable
-                 gettingText.resolve();  
-               },
-               function() { // failure 
-                 return false; 
-               }
-             );
-    return gettingText.promise(); 
-  };
-})(jQuery);
-
-(function ($) {
   AblePlayer.prototype.updateTranscript = function() {
+    
     if (!this.includeTranscript) {
       return;
     }
@@ -6152,11 +6132,11 @@
     }     
     
     // handle clicks on text within transcript 
-    // Note #1: Only one transcript per page is supported
-    // Note #2: Pressing Enter on an element that is not natively clickable does NOT trigger click() 
-    // Forcing this elsewhere, in the keyboard handler section  
-    if ($('.able-transcript').length > 0) {  
-      $('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
+    // Note: This event listeners handles clicks only, not keydown events 
+    // Pressing Enter on an element that is not natively clickable does NOT trigger click() 
+    // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js) 
+    if (this.$transcriptArea.length > 0) { 
+      this.$transcriptArea.find('.able-transcript span.able-transcript-seekpoint').click(function(event) { 
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
@@ -6177,12 +6157,12 @@
     currentTime = parseFloat(currentTime);
 
     // Highlight the current transcript item.
-    $('.able-transcript span.able-transcript-caption').each(function() { 
+    this.$transcriptArea.find('.able-transcript span.able-transcript-caption').each(function() { 
       start = parseFloat($(this).attr('data-start'));
       end = parseFloat($(this).attr('data-end'));
       if (currentTime >= start && currentTime <= end) { 
         // move all previous highlights before adding one to current span
-        $('.able-highlight').removeClass('able-highlight');
+        thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
         $(this).addClass('able-highlight');
         return false;
       }
@@ -6615,22 +6595,27 @@
 
   // End Media events
 
-  AblePlayer.prototype.onWindowResize = function () {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        this.modalFullscreenActive) {
-      var newHeight = $(window).height() - this.$playerDiv.height();
-      if (!this.$descDiv.is(':hidden')) {
-        newHeight -= this.$descDiv.height();
-      }
-      this.resizePlayer($(window).width(), newHeight);
-    }
-    else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
-    }
-  };
+    AblePlayer.prototype.onWindowResize = function () {
+        if (document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            this.modalFullscreenActive ) {
+            var isFirefox = /Firefox/i.test(navigator.userAgent);
+            if (isFirefox) {
+                var newHeight = $(window).height() - this.$playerDiv.height();}
+            else {
+                newHeight = $(window).height() - (this.$playerDiv.height()+20);
+            }
+            if (!this.$descDiv.is(':hidden')) {
+                newHeight -= this.$descDiv.height();
+            }
+            this.resizePlayer($(window).width(), newHeight);
+        }
+        else {
+            this.resizePlayer(this.playerWidth, this.playerHeight);
+        }
+    };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
@@ -6739,6 +6724,7 @@
     }
     // Convert to lower case.
     var which = e.which;
+    
     if (which >= 65 && which <= 90) {
       which += 32;
     }
@@ -6810,11 +6796,6 @@
     else if (which === 116) { // t = preferences
       if (this.usingModifierKeys(e)) { 
         this.handlePrefsClick();
-      }
-    }     
-    else if (which === 104) { // h = help
-      if (this.usingModifierKeys(e)) { 
-        this.handleHelpClick();
       }
     }     
     else if (which === 13) { // Enter 
@@ -7021,13 +7002,24 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle local key-presses if we're not the only player on the page; otherwise these are dispatched by global handler.
+    // handle local keydown events if this isn't the only player on the page; 
+    // otherwise these are dispatched by global handler (see ableplayer-base,js)
     this.$ableDiv.keydown(function (e) {
       if (AblePlayer.nextIndex > 1) {
         thisObj.onPlayerKeyPress(e);
       }
     });
     
+    // transcript is not a child of this.$ableDiv 
+    // therefore, must be added separately
+    if (this.$transcriptArea) {
+      this.$transcriptArea.keydown(function (e) {
+        if (AblePlayer.nextIndex > 1) {
+          thisObj.onPlayerKeyPress(e);
+        }
+      });
+    }
+     
     // handle clicks on playlist items
     if (this.$playlist) {
       this.$playlist.click(function() { 
@@ -8309,3 +8301,806 @@
 	}
 	
 })(jQuery);	
+(function ($) {
+  AblePlayer.prototype.getSupportedLangs = function() {
+    // returns an array of languages for which AblePlayer has translation tables 
+    var langs = ['en','de','es','nl'];
+    return langs;
+  };
+
+  AblePlayer.prototype.getTranslationText = function() { 
+
+    // determine language, then get labels and prompts from corresponding translation var
+    var gettingText, lang, thisObj, msg; 
+
+    gettingText = $.Deferred(); 
+
+    // override this.lang to language of the web page, if known and supported
+    // otherwise this.lang will continue using default    
+    if (!this.forceLang) {   
+      if ($('body').attr('lang')) { 
+        lang = $('body').attr('lang');
+      }
+      else if ($('html').attr('lang')) { 
+        lang = $('html').attr('lang');
+      }    
+      if (lang !== this.lang) {
+        msg = 'Language of web page (' + lang +') ';
+        if ($.inArray(lang,this.getSupportedLangs()) !== -1) { 
+          // this is a supported lang
+          msg += ' has a translation table available.';
+          this.lang = lang; 
+        }
+        else { 
+          msg += ' is not currently supported. Using default language (' + this.lang + ')';
+        }
+        if (this.debug) {
+          
+        }
+      }
+    } 
+
+    // in final build, all language variables are contatenated into this function below...
+    // translation2.js is then contanenated onto the end to finish this function
+        
+
+var de = {
+  
+"playerHeading": "Media Player",
+
+"faster": "Schneller",
+
+"slower": "Langsamer",
+
+"chapters": "Kapitel",
+
+"play": "Abspielen", 
+
+"pause": "Pause",
+
+"stop": "Anhalten",
+
+"rewind": "Zurück springen", 
+
+"forward": "Vorwärts springen", 
+
+"captions": "Untertitel",
+
+"showCaptions": "Untertitel anzeigen",
+
+"hideCaptions": "Untertitel verstecken",
+
+"captionsOff": "Untertitel ausschalten", 
+
+"showTranscript": "Transkription anzeigen",
+
+"hideTranscript": "Transkription entfernen",
+
+"turnOnDescriptions": "Audiodeskription einschalten",
+
+"turnOffDescriptions": "Audiodeskription ausschalten",
+
+"language": "Sprache",
+
+"sign": "Gebärdensprache",
+
+"showSign": "Gebärdensprache anzeigen",
+
+"hideSign": "Gebärdensprache verstecken",
+
+"mute": "Ton ausschalten",
+
+"unmute": "Ton einschalten",
+
+"volume": "Lautstärke", 
+
+"volumeUp": "Lauter",
+
+"volumeDown": "Leiser",
+
+"preferences": "Einstellungen",
+
+"enterFullScreen": "Vollbildmodus einschalten",
+
+"exitFullScreen": "Vollbildmodus verlassen",
+
+"fullScreen": "Vollbildmodus",
+
+"speed": "Geschwindigkeit",
+
+"or": "oder", 
+
+"spacebar": "Leertaste",
+
+"autoScroll": "Automatisch scrollen",
+
+"unknown": "Unbekannt", 
+
+"statusPlaying": "Gestartet",
+
+"statusPaused": "Pausiert",
+
+"statusStopped": "Angehalten",
+
+"statusWaiting": "Wartend",
+
+"statusBuffering": "Daten werden empfangen...",
+
+"statusUsingDesc": "Version mit Audiodeskription wird verwendet",
+
+"statusLoadingDesc": "Version mit Audiodeskription wird geladen",
+
+"statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet",
+
+"statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen",
+
+"statusLoadingNext": "Der nächste Titel wird geladen",
+
+"statusEnd": "Ende des Titels",
+
+"selectedTrack": "Ausgewählter Titel",
+
+"alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video",
+
+"fallbackError1": "Abspielen ist mit diesem Browser nicht möglich",
+
+"fallbackError2": "Folgende Browser wurden mit AblePlayer getestet",
+
+"orHigher": "oder höher",
+
+"prefTitle": "Einstellungen",
+
+"prefIntro": "Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.",
+
+"prefFeatures": "Funktionen",
+
+"prefKeys": "Tastenkombination für Kurzwahl (siehe Hilfe)",
+
+"prefAltKey": "Alt-Taste",
+
+"prefCtrlKey": "Strg-Taste",
+
+"prefShiftKey": "Umschalttaste", 
+
+"prefCaptions": "Untertitel automatisch einschalten",
+
+"prefSignLanguage": "Gebärdensprache automatisch einschalten",
+
+"prefDesc": "Audiodeskription automatisch einschalten",
+
+"prefClosedDesc": "Textbasierte Szenenbeschreibungen verwenden, wenn vorhanden",
+
+"prefDescPause": "Video automatisch anhalten, wenn textbasierte Szenenbeschreibungen eingeblendet werden", 
+
+"prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind",
+
+"prefTranscript": "Transkription standardmäßig einschalten",
+
+"prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird",
+
+"prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen",
+
+"prefSuccess": "Ihre Änderungen wurden gespeichert.",
+
+"prefNoChange": "Es gab keine Änderungen zu speichern.",
+
+"help": "Hilfe", 
+
+"helpTitle": "Hilfe",
+
+"helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:",
+
+"helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.",
+
+"save": "Speichern",
+
+"cancel": "Abbrechen",
+
+"ok": "Ok", 
+
+"done": "Fertig", 
+
+"closeButtonLabel": "Schließen", 
+
+"windowButtonLabel": "Fenster Manipulationen",
+
+"windowMove": "Verschieben", 
+
+"windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste",
+
+"windowResize": "Größe verändern", 
+
+"windowResizeHeading": "Größe des Gebärdensprache-Fenster",
+
+"windowResizeAlert": "Die Größe wurde angepasst.",
+
+"width": "Breite",
+
+"height": "Höhe",
+
+"windowSendBack": "In den Hintergrund verschieben", 
+
+"windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.",
+
+"windowBringTop": "In den Vordergrund holen",
+
+"windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."
+
+}; 
+var en = {
+  
+"playerHeading": "Media player",
+
+"hour": "xour", 
+
+"hours": "xours",
+
+"minute": "xinute",
+
+"minutes": "xinutes",
+
+"second": "xecond",
+
+"seconds": "xeconds",
+
+"faster": "Faster",
+
+"slower": "Slower",
+
+"play": "Play", 
+
+"pause": "Pause",
+
+"stop": "Stop",
+
+"rewind": "Rewind",
+
+"forward": "Forward",
+
+"captions": "Captions",
+
+"showCaptions": "Show captions",
+
+"hideCaptions": "Hide captions",
+
+"captionsOff": "Captions off",
+
+"showTranscript": "Show transcript",
+
+"hideTranscript": "Hide transcript", 
+
+"turnOnDescriptions": "Turn on descriptions", 
+
+"turnOffDescriptions": "Turn off descriptions", 
+
+"chapters": "Chapters",
+
+"language": "Language",
+
+"sign": "Sign language",
+
+"showSign": "Show sign language",
+
+"hideSign": "Hide sign language",
+
+"mute": "Mute",
+
+"unmute": "Unmute",
+
+"volume": "Volume", 
+
+"volumeUp": "Volume up",
+
+"volumeDown": "Volume down",
+
+"preferences": "Preferences",
+
+"enterFullScreen": "Enter full screen",
+
+"exitFullScreen": "Exit full screen",
+
+"fullScreen": "Full screen",
+
+"speed": "Speed",
+
+"or": "or", 
+
+"spacebar": "spacebar",
+
+"autoScroll": "Auto scroll",
+
+"unknown": "Unknown", 
+
+"statusPlaying": "Playing",
+
+"statusPaused": "Paused",
+
+"statusStopped": "Stopped",
+
+"statusWaiting": "Waiting",
+
+"statusBuffering": "Buffering",
+
+"statusUsingDesc": "Using described version",
+
+"statusLoadingDesc": "Loading described version",
+
+"statusUsingNoDesc": "Using non-described version",
+
+"statusLoadingNoDesc": "Loading non-described version",
+
+"statusLoadingNext": "Loading next track",
+
+"statusEnd": "End of track",
+
+"selectedTrack": "Selected Track",
+
+"alertDescribedVersion": "Using the audio described version of this video",
+
+"fallbackError1": "Sorry, your browser is unable to play this",
+
+"fallbackError2": "The following browsers are known to work with this media player",
+
+"orHigher": "or higher",
+
+"prefTitle": "Preferences",
+
+"prefIntro": "Saving your preferences requires cookies.",
+
+"prefFeatures": "Features",
+
+"prefKeys": "Modifier keys used for shortcuts (see help)",
+
+"prefAltKey": "Alt",
+
+"prefCtrlKey": "Control",
+
+"prefShiftKey": "Shift",
+
+"prefCaptions": "Closed captions on by default",
+
+"prefSignLanguage": "Show sign language if available",
+
+"prefDesc": "Description on by default",
+
+"prefClosedDesc": "Use text-based description if available",
+
+"prefDescPause": "Automatically pause video when text-based description starts",
+
+"prefVisibleDesc": "If using text-based description,make it visible",
+
+"prefTranscript": "Transcript on by default",
+
+"prefHighlight": "Highlight transcript as media plays",
+
+"prefTabbable": "Keyboard-enable transcript",
+
+"prefSuccess": "Your changes have been saved.",
+
+"prefNoChange": "You didn't make any changes.",
+
+"help": "Help",
+
+"helpTitle": "Help",
+
+"helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
+
+"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"save": "Save",
+
+"cancel": "Cancel",
+
+"ok": "ok", 
+
+"done": "Done",
+
+"closeButtonLabel": "Close dialog",
+
+"windowButtonLabel": "Window options",
+
+"windowMove": "Move", 
+
+"windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
+
+"windowResize": "Resize", 
+
+"windowResizeHeading": "Resize Interpreter Window",
+
+"windowResizeAlert": "The window has been resized.",
+
+"width": "Width",
+
+"height": "Height",
+
+"windowSendBack": "Send to back", 
+
+"windowSendBackAlert": "This window is now behind other objects on the page.",
+
+"windowBringTop": "Bring to front",
+
+"windowBringTopAlert": "This window is now in front of other objects on the page."
+
+};
+
+var es = {
+  
+"playerHeading": "Media player",
+
+"faster": "Rápido",
+
+"slower": "Lento",
+
+"play": "Play", 
+
+"pause": "Pausa",
+
+"stop": "Detener",
+
+"rewind": "Rebobinar",
+
+"forward": "Adelantar",
+
+"captions": "Subtítulos",
+
+"showCaptions": "Mostrar subtítulos",
+
+"hideCaptions": "Ocultar subtítulos",
+
+"captionsOff": "Quitar subtítulos",
+
+"showTranscript": "Mostrar transcripción",
+
+"hideTranscript": "Ocultar transcripción", 
+
+"turnOnDescriptions": "Habilitar descripciones", 
+
+"turnOffDescriptions": "Deshabilitar descripciones", 
+
+"chapters": "Capítulos",
+
+"language": "Idioma",
+
+"sign": "Lengua de señas",
+
+"showSign": "Mostrar lengua de señas",
+
+"hideSign": "Ocultar lengua de señas",
+
+"mute": "Silenciar",
+
+"unmute": "Reactivar sonido",
+
+"volume": "Volumen", 
+
+"volumeUp": "Subir volumen",
+
+"volumeDown": "Bajar volumen",
+
+"preferences": "Preferencias",
+
+"enterFullScreen": "Ver a pantalla completa",
+
+"exitFullScreen": "Salir de pantalla completa",
+
+"fullScreen": "Pantalla completa",
+
+"speed": "Velocidad",
+
+"or": "o", 
+
+"spacebar": "Barra espaciadora",
+
+"autoScroll": "Desplazamiento automático",
+
+"unknown": "Desconocido", 
+
+"statusPlaying": "Reproduciendo",
+
+"statusPaused": "Pausado",
+
+"statusStopped": "Detenido",
+
+"statusWaiting": "Esperando",
+
+"statusBuffering": "Almacenando",
+
+"statusUsingDesc": "Utilizando versión descrita",
+
+"statusLoadingDesc": "Cargando versión descrita",
+
+"statusUsingNoDesc": "Utilizando versión no descrita",
+
+"statusLoadingNoDesc": "Cargando versión no descrita",
+
+"statusLoadingNext": "Cargando la siguiente pista",
+
+"statusEnd": "Fin de pista",
+
+"selectedTrack": "Pista seleccionada",
+
+"alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
+
+"fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
+
+"fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",
+
+"orHigher": "o superior",
+
+"prefTitle": "Preferencias",
+
+"prefIntro": "Guardar sus preferencias requiere el uso de cookies.",
+
+"prefFeatures": "Características",
+
+"prefKeys": "Teclas modificadoras",
+
+"prefAltKey": "Alt",
+
+"prefCtrlKey": "Control",
+
+"prefShiftKey": "Mayúscula",
+
+"prefCaptions": "Subtítulos habilitados por defecto",
+
+"prefSignLanguage": "Mostrar lengua de señas si está disponible",
+
+"prefDesc": "Habilitar descripción por defecto",
+
+"prefClosedDesc": "Utilizar descripciones en texto si están disponibles",
+
+"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción en texto",
+
+"prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
+
+"prefTranscript": "Habilitar transcripción por defecto",
+
+"prefHighlight": "Resaltar la transcripción según avanza el contenido",
+
+"prefTabbable": "Transcripción manejable por teclado",
+
+"prefSuccess": "Los cambios han sido guardados.",
+
+"prefNoChange": "No se ha hecho ningún cambio.",
+
+"help": "Ayuda",
+
+"helpTitle": "Ayuda",
+
+"helpKeys": "El reproductor en esta página pude ser manejado desde cualquier parte de la pa´gina utilizando los siguientes atajos de teclado:",
+
+"helpKeysDisclaimer": "Tengan en cuenta que las teclas modificadoras (Mayúsculas, Alt, y Control) pueden ser asignadas en las preferencias. Algunas combinaaciones de atajos de teclado pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Pruebe varias combinaciones de teclas modificadoras hasta encontrar la que funcione en su caso.",
+
+"save": "Guardar",
+
+"cancel": "Cancelar",
+
+"ok": "ok", 
+
+"done": "Hecho",
+
+"closeButtonLabel": "Cerrar cuadro de diálogo",
+
+"windowButtonLabel": "Opciones en Windows",
+
+"windowMove": "Mover", 
+
+"windowMoveAlert": "Arrastre o use las teclas de flecha para mover la ventana, pulse Enter para parar.",
+
+"windowResize": "Redimensionar", 
+
+"windowResizeHeading": "Redimensionar la ventana con el intérprete",
+
+"windowResizeAlert": "La ventana ha sido redimensionada.",
+
+"width": "Ancho",
+
+"height": "Alto",
+
+"windowSendBack": "Enviar atrás", 
+
+"windowSendBackAlert": "Esta ventana no se encuentra tras otros objetos en la página.",
+
+"windowBringTop": "Traer al frente",
+
+"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
+
+};
+
+var nl = {
+  
+"playerHeading": "Mediaspeler",
+
+"faster": "Sneller",
+
+"slower": "Langzamer",
+
+"play": "Afspelen", 
+
+"pause": "Pauzeren",
+
+"stop": "Stoppen",
+
+"rewind": "Terug",
+
+"forward": "Verder",
+
+"captions": "Ondertiteling",
+
+"showCaptions": "Toon ondertiteling",
+
+"hideCaptions": "Verberg ondertiteling",
+
+"captionsOff": "Ondertiteling uit",
+
+"showTranscript": "Toon transcript",
+
+"hideTranscript": "Vergerg transcript", 
+
+"turnOnDescriptions": "Beschrijvingen aanzetten", 
+
+"turnOffDescriptions": "Beschrijvingen uitzetten", 
+
+"chapters": "Hoofdstukken",
+
+"language": "Taal",
+
+"sign": "Gebarentaal",
+
+"showSign": "Toon gebarentaal",
+
+"hideSign": "Verberg gebarentaal",
+
+"mute": "Dempen",
+
+"unmute": "Dempen uit",
+
+"volume": "Volume", 
+
+"volumeUp": "Volume hoger",
+
+"volumeDown": "Volume lager",
+
+"preferences": "Voorkeuren",
+
+"enterFullScreen": "Ga naar volledig scherm",
+
+"exitFullScreen": "Verlaat volledig scherm",
+
+"fullScreen": "Volledig scherm",
+
+"speed": "Snelheid",
+
+"audio": "audio",
+
+"video": "video",
+
+"or": "of", 
+
+"spacebar": "spatietoets",
+
+"autoScroll": "Auto scroll",
+
+"unknown": "Onbekend", 
+
+"statusPlaying": "Aan het spelen",
+
+"statusPaused": "Gepauzeerd",
+
+"statusStopped": "Gestopt",
+
+"statusWaiting": "Aan het wachten",
+
+"statusBuffering": "Aan het bufferen",
+
+"statusUsingDesc": "Versie met beschrijving wordt gebruikt",
+
+"statusLoadingDesc": "Versie met beschrijving wordt geladen",
+
+"statusUsingNoDesc": "Versie zonder beschrijving wordt gebruikt",
+
+"statusLoadingNoDesc": "Versie zonder beschrijving wordt geladen",
+
+"statusLoadingNext": "Volgende track wordt geladen",
+
+"statusEnd": "Einde van track",
+
+"selectedTrack": "Geselecteerde Track",
+
+"alertDescribedVersion": "Versie met audiobeschrijving wordt gebruikt",
+
+"fallbackError1": "Sorry, je browser kan dit mediabestand niet afspelen",
+
+"fallbackError2": "De volgende browsers kunnen met deze mediaspeler overweg:",
+
+"orHigher": "of hoger",
+
+"prefTitle": "Voorkeuren",
+
+"prefIntro": "Om je voorkeuren op te slaan moet je cookies toestaan",
+
+"prefFeatures": "Kenmerken",
+
+"prefKeys": "Aangepaste toetsen",
+
+"prefAltKey": "Alt",
+
+"prefCtrlKey": "Control",
+
+"prefShiftKey": "Shift",
+
+"prefCaptions": "Ondertiteling standaard aan",
+
+"prefSignLanguage": "Toon gebarentaal als deze beschikbaar is",
+
+"prefDesc": "Beschrijving standaard aan",
+
+"prefClosedDesc": "Gebruik tekst-gebaseerde beschrijving als deze beschikbaar is",
+
+"prefDescPause": "Pauzeer video automatisch als tekst-gebaseerde beschrijving aan wordt gezet",
+
+"prefVisibleDesc": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
+
+"prefTranscript": "Transcript standaard aan",
+
+"prefHighlight": "Transcript highlighten terwijl media speelt",
+
+"prefTabbable": "Maak transcript bedienbaar met toetsenbord",
+
+"prefSuccess": "Je wijzigingen zijn opgeslagen.",
+
+"prefNoChange": "Je hebt geen wijzigingen gemaakt.",
+
+"help": "Help",
+
+"helpTitle": "Help",
+
+"helpKeys": "De mediaspeler op deze pagina kan van elke locatie op de pagina bediend worden met de volgende toetsenbordaanslagen:",
+
+"helpKeysDisclaimer": "De toetsen om te bewerken (Shift, Alt, and Control) kunnen bij Voorkeuren ingesteld worden. Sommige combinaties conflicteren misschien met andere instellingen van uw computer of browser. Probeer een aantal combinaties tot je iets hebt gevonden dat werkt.",
+
+"save": "Opslaan",
+
+"cancel": "Annuleren",
+
+"ok": "ok", 
+
+"done": "Klaar",
+
+"closeButtonLabel": "Sluit venster",
+
+"windowButtonLabel": "Venster instellingen",
+
+"windowMove": "Verplaats", 
+
+"windowMoveAlert": "Versleep of gebruik de pijltjestoetsen om te verplaatsen. Druk op Enter om te stoppen.",
+
+"windowResize": "Verkleinen of vergroten", 
+
+"windowResizeHeading": "Verander grootte van scherm met gebarentolk",
+
+"windowResizeAlert": "Het venster is van grootte veranderd.",
+
+"width": "Breedte",
+
+"height": "Hoogte",
+
+"windowSendBack": "Verplaats naar achteren", 
+
+"windowSendBackAlert": "Het scherm staat nu achter andere objecten op deze pagina.",
+
+"windowBringTop": "Verplaats naar voren",
+
+"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
+
+};
+
+// end getTranslationText function, which began in translation1.js     
+
+    this.tt = eval(this.lang);
+    
+    // resolve deferred variable
+    gettingText.resolve();  
+    return gettingText.promise(); 
+  };
+})(jQuery);
