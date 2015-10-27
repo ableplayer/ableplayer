@@ -85,27 +85,28 @@
 
   // End Media events
 
-    AblePlayer.prototype.onWindowResize = function () {
-        if (document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.mozFullScreenElement ||
-            document.msFullscreenElement ||
-            this.modalFullscreenActive ) {
-            var isFirefox = /Firefox/i.test(navigator.userAgent);
-            if (isFirefox) {
-                var newHeight = $(window).height() - this.$playerDiv.height();}
-                else {
-                newHeight = $(window).height() - (this.$playerDiv.height()+20);
-             }
-            if (!this.$descDiv.is(':hidden')) {
-                newHeight -= this.$descDiv.height();
-            }
-            this.resizePlayer($(window).width(), newHeight);
-        }
-        else {
-            this.resizePlayer(this.playerWidth, this.playerHeight);
-        }
-    };
+  AblePlayer.prototype.onWindowResize = function () {
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        this.modalFullscreenActive ) {
+      var isFirefox = (this.isUserAgent(userAgentGlobal.fox));
+      //alert (window.innerHeight);
+      if (isFirefox) {
+        var newHeight = window.innerHeight - this.$playerDiv.height();}
+      else {
+        newHeight = window.innerHeight - (this.$playerDiv.height()+(this.$playerDiv.height()/4.4));
+      }
+      if (!this.$descDiv.is(':hidden')) {
+        newHeight -= this.$descDiv.height();
+      }
+      this.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+  };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
