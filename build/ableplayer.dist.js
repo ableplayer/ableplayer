@@ -4647,6 +4647,7 @@
 
 })(jQuery);
 
+var userAgentGlobal = {};
 (function ($) {
 
   AblePlayer.prototype.browserSupportsVolume = function() { 
@@ -4674,7 +4675,10 @@
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
-    var userAgent; 
+
+    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
+
+    var userAgent;
     
     userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
@@ -4686,6 +4690,7 @@
     else {
       return false;
     }
+
   };
 
   AblePlayer.prototype.isIOS = function(version) { 
@@ -6595,27 +6600,28 @@
 
   // End Media events
 
-    AblePlayer.prototype.onWindowResize = function () {
-        if (document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.mozFullScreenElement ||
-            document.msFullscreenElement ||
-            this.modalFullscreenActive ) {
-            var isFirefox = /Firefox/i.test(navigator.userAgent);
-            if (isFirefox) {
-                var newHeight = $(window).height() - this.$playerDiv.height();}
-            else {
-                newHeight = $(window).height() - (this.$playerDiv.height()+20);
-            }
-            if (!this.$descDiv.is(':hidden')) {
-                newHeight -= this.$descDiv.height();
-            }
-            this.resizePlayer($(window).width(), newHeight);
-        }
-        else {
-            this.resizePlayer(this.playerWidth, this.playerHeight);
-        }
-    };
+  AblePlayer.prototype.onWindowResize = function () {
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        this.modalFullscreenActive ) {
+      var isFirefox = (this.isUserAgent(userAgentGlobal.fox));
+      //alert (window.innerHeight);
+      if (isFirefox) {
+        var newHeight = window.innerHeight - this.$playerDiv.height();}
+      else {
+        newHeight = window.innerHeight - (this.$playerDiv.height()+(this.$playerDiv.height()/4.4));
+      }
+      if (!this.$descDiv.is(':hidden')) {
+        newHeight -= this.$descDiv.height();
+      }
+      this.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+  };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
@@ -6796,6 +6802,11 @@
     else if (which === 116) { // t = preferences
       if (this.usingModifierKeys(e)) { 
         this.handlePrefsClick();
+      }
+    }     
+    else if (which === 104) { // h = help
+      if (this.usingModifierKeys(e)) { 
+        this.handleHelpClick();
       }
     }     
     else if (which === 13) { // Enter 
@@ -8344,204 +8355,10 @@
     // translation2.js is then contanenated onto the end to finish this function
         
 
-var de = {
-  
-"playerHeading": "Media Player",
-
-"faster": "Schneller",
-
-"slower": "Langsamer",
-
-"chapters": "Kapitel",
-
-"play": "Abspielen", 
-
-"pause": "Pause",
-
-"stop": "Anhalten",
-
-"rewind": "Zurück springen", 
-
-"forward": "Vorwärts springen", 
-
-"captions": "Untertitel",
-
-"showCaptions": "Untertitel anzeigen",
-
-"hideCaptions": "Untertitel verstecken",
-
-"captionsOff": "Untertitel ausschalten", 
-
-"showTranscript": "Transkription anzeigen",
-
-"hideTranscript": "Transkription entfernen",
-
-"turnOnDescriptions": "Audiodeskription einschalten",
-
-"turnOffDescriptions": "Audiodeskription ausschalten",
-
-"language": "Sprache",
-
-"sign": "Gebärdensprache",
-
-"showSign": "Gebärdensprache anzeigen",
-
-"hideSign": "Gebärdensprache verstecken",
-
-"mute": "Ton ausschalten",
-
-"unmute": "Ton einschalten",
-
-"volume": "Lautstärke", 
-
-"volumeUp": "Lauter",
-
-"volumeDown": "Leiser",
-
-"preferences": "Einstellungen",
-
-"enterFullScreen": "Vollbildmodus einschalten",
-
-"exitFullScreen": "Vollbildmodus verlassen",
-
-"fullScreen": "Vollbildmodus",
-
-"speed": "Geschwindigkeit",
-
-"or": "oder", 
-
-"spacebar": "Leertaste",
-
-"autoScroll": "Automatisch scrollen",
-
-"unknown": "Unbekannt", 
-
-"statusPlaying": "Gestartet",
-
-"statusPaused": "Pausiert",
-
-"statusStopped": "Angehalten",
-
-"statusWaiting": "Wartend",
-
-"statusBuffering": "Daten werden empfangen...",
-
-"statusUsingDesc": "Version mit Audiodeskription wird verwendet",
-
-"statusLoadingDesc": "Version mit Audiodeskription wird geladen",
-
-"statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet",
-
-"statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen",
-
-"statusLoadingNext": "Der nächste Titel wird geladen",
-
-"statusEnd": "Ende des Titels",
-
-"selectedTrack": "Ausgewählter Titel",
-
-"alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video",
-
-"fallbackError1": "Abspielen ist mit diesem Browser nicht möglich",
-
-"fallbackError2": "Folgende Browser wurden mit AblePlayer getestet",
-
-"orHigher": "oder höher",
-
-"prefTitle": "Einstellungen",
-
-"prefIntro": "Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.",
-
-"prefFeatures": "Funktionen",
-
-"prefKeys": "Tastenkombination für Kurzwahl (siehe Hilfe)",
-
-"prefAltKey": "Alt-Taste",
-
-"prefCtrlKey": "Strg-Taste",
-
-"prefShiftKey": "Umschalttaste", 
-
-"prefCaptions": "Untertitel automatisch einschalten",
-
-"prefSignLanguage": "Gebärdensprache automatisch einschalten",
-
-"prefDesc": "Audiodeskription automatisch einschalten",
-
-"prefClosedDesc": "Textbasierte Szenenbeschreibungen verwenden, wenn vorhanden",
-
-"prefDescPause": "Video automatisch anhalten, wenn textbasierte Szenenbeschreibungen eingeblendet werden", 
-
-"prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind",
-
-"prefTranscript": "Transkription standardmäßig einschalten",
-
-"prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird",
-
-"prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen",
-
-"prefSuccess": "Ihre Änderungen wurden gespeichert.",
-
-"prefNoChange": "Es gab keine Änderungen zu speichern.",
-
-"help": "Hilfe", 
-
-"helpTitle": "Hilfe",
-
-"helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:",
-
-"helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.",
-
-"save": "Speichern",
-
-"cancel": "Abbrechen",
-
-"ok": "Ok", 
-
-"done": "Fertig", 
-
-"closeButtonLabel": "Schließen", 
-
-"windowButtonLabel": "Fenster Manipulationen",
-
-"windowMove": "Verschieben", 
-
-"windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste",
-
-"windowResize": "Größe verändern", 
-
-"windowResizeHeading": "Größe des Gebärdensprache-Fenster",
-
-"windowResizeAlert": "Die Größe wurde angepasst.",
-
-"width": "Breite",
-
-"height": "Höhe",
-
-"windowSendBack": "In den Hintergrund verschieben", 
-
-"windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.",
-
-"windowBringTop": "In den Vordergrund holen",
-
-"windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."
-
-}; 
+var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefFeatures": "Funktionen","prefKeys": "Tastenkombination für Kurzwahl (siehe Hilfe)","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefCaptions": "Untertitel automatisch einschalten","prefSignLanguage": "Gebärdensprache automatisch einschalten","prefDesc": "Audiodeskription automatisch einschalten","prefClosedDesc": "Textbasierte Szenenbeschreibungen verwenden, wenn vorhanden","prefDescPause": "Video automatisch anhalten, wenn textbasierte Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefTranscript": "Transkription standardmäßig einschalten","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
 var en = {
   
 "playerHeading": "Media player",
-
-"hour": "xour", 
-
-"hours": "xours",
-
-"minute": "xinute",
-
-"minutes": "xinutes",
-
-"second": "xecond",
-
-"seconds": "xeconds",
 
 "faster": "Faster",
 
