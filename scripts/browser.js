@@ -1,4 +1,3 @@
-var userAgentGlobal = {};
 (function ($) {
 
   AblePlayer.prototype.browserSupportsVolume = function() { 
@@ -26,10 +25,7 @@ var userAgentGlobal = {};
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
-
-    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
-
-    var userAgent;
+    var userAgent; 
     
     userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
@@ -41,7 +37,6 @@ var userAgentGlobal = {};
     else {
       return false;
     }
-
   };
 
   AblePlayer.prototype.isIOS = function(version) { 
