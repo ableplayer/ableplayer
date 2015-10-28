@@ -4647,6 +4647,7 @@
 
 })(jQuery);
 
+var userAgentGlobal = {};
 (function ($) {
 
   AblePlayer.prototype.browserSupportsVolume = function() { 
@@ -4674,8 +4675,9 @@
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
-    var userAgent; 
-    
+    var userAgent;
+    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
+    //you can add other variable instances to userAgentGlobal as required. For example for IE and so on.
     userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
       console.log('User agent: ' + userAgent);
@@ -6595,27 +6597,32 @@
 
   // End Media events
 
-    AblePlayer.prototype.onWindowResize = function () {
+  AblePlayer.prototype.onWindowResize = function () {
         if (document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.mozFullScreenElement ||
-            document.msFullscreenElement ||
-            this.modalFullscreenActive ) {
-            var isFirefox = /Firefox/i.test(navigator.userAgent);
-            if (isFirefox) {
-                var newHeight = $(window).height() - this.$playerDiv.height();}
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement ||
+                this.modalFullscreenActive ) {
+            var isFirefox = (this.isUserAgent(userAgentGlobal.fox));
+            //making use of isUserAgent function instantiating global variable userAgentGlobal
+            // this can be extended if other browser specific glitches appear in the future
+                if (isFirefox) {
+                var newHeight = window.innerHeight - this.$playerDiv.height();}
             else {
-                newHeight = $(window).height() - (this.$playerDiv.height()+20);
-            }
-            if (!this.$descDiv.is(':hidden')) {
+                newHeight = window.innerHeight - (this.$playerDiv.height()+(this.$playerDiv.height()/4.4));
+                  //turns out that 4.4 is the relative ratio the $playerDiv is off in all browsers except firefox.
+                  // This should scale with screen size.
+
+              }
+           if (!this.$descDiv.is(':hidden')) {
                 newHeight -= this.$descDiv.height();
-            }
+              }
             this.resizePlayer($(window).width(), newHeight);
-        }
+         }
         else {
             this.resizePlayer(this.playerWidth, this.playerHeight);
-        }
-    };
+          }
+      };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
