@@ -1,12 +1,13 @@
+var userAgentGlobal = {};
 (function ($) {
 
-  AblePlayer.prototype.browserSupportsVolume = function() { 
-    // ideally we could test for volume support 
-    // However, that doesn't seem to be reliable 
+  AblePlayer.prototype.browserSupportsVolume = function() {
+    // ideally we could test for volume support
+    // However, that doesn't seem to be reliable
     // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
 
-    var userAgent, noVolume; 
-  
+    var userAgent, noVolume;
+
     userAgent = navigator.userAgent.toLowerCase();
     noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
     if (noVolume) {
@@ -18,15 +19,16 @@
         return false;
       }
     }
-    else { 
-      // as far as we know, this userAgent supports volume control 
-      return true; 
+    else {
+      // as far as we know, this userAgent supports volume control
+      return true;
     }
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
-    var userAgent; 
-    
+    var userAgent;
+    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
+    //you can add other variable instances to userAgentGlobal as required. For example for IE and so on.
     userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
       console.log('User agent: ' + userAgent);
