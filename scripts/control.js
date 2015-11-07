@@ -1042,9 +1042,18 @@
     }
     this.refreshControls();
   };
-  
+
+
   AblePlayer.prototype.handleFullscreenToggle = function () {
+    var stillPaused = this.isPaused();
     this.setFullscreen(!this.isFullscreen());
+    if (stillPaused) {
+      this.pauseMedia();
+    }
+    else if (!stillPaused) {
+      this.playMedia();
+    }
+
   };
   
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
