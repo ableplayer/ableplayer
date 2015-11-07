@@ -1042,9 +1042,17 @@
     }
     this.refreshControls();
   };
-  
+
+
   AblePlayer.prototype.handleFullscreenToggle = function () {
+    var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function
     this.setFullscreen(!this.isFullscreen());
+    if (stillPaused) {
+      this.pauseMedia(); // when toggling fullscreen and media is just paused, keep media paused.
+    }
+    else if (!stillPaused) {
+      this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
+    }
   };
   
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
