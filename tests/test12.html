@@ -26,14 +26,15 @@
 <h1>Able Player Test #12:<br/>Video player with <em>default</em> closed captions</h1>
 
 <p>This test page was designed for testing a bug in which certain browsers display captions even if no <em>controls</em> attribute is present. They only do this if a &lt;track&gt; element has a <em>default</em> attribute. For additional details see <a href="https://github.com/ableplayer/ableplayer/issues/5">Able Player Issue 5</a>.</p>
-
+<p> Update: 11/27/2015: The bug was resolved by modifying the html sourcecode of this test page rather than the javascript itself - the "default" attribute should be avoided when embedding the player in web sites. See <a href="http://stackoverflow.com/questions/13751278/videojs-subtitle-caption-track-showing-twice-in-chrome"> this resource.</a></p>
 <p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
 <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
   <source type="video/webm" src="../media/wwa.webm"/>
 	<source type="video/mp4" src="../media/wwa.mp4"/>
-  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol" default/>
+  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol" hidden/>
+    <!-- this bug is resolved by avoiding using the "default" attribute replaced here with the attribute "hidden" -->
 	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
 </video>
 
