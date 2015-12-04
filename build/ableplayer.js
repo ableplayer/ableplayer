@@ -4648,15 +4648,16 @@
 })(jQuery);
 
 var userAgentGlobal = {};
+
 (function ($) {
 
-  AblePlayer.prototype.browserSupportsVolume = function() { 
-    // ideally we could test for volume support 
-    // However, that doesn't seem to be reliable 
+  AblePlayer.prototype.browserSupportsVolume = function() {
+    // ideally we could test for volume support
+    // However, that doesn't seem to be reliable
     // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
 
-    var userAgent, noVolume; 
-  
+    var userAgent, noVolume;
+
     userAgent = navigator.userAgent.toLowerCase();
     noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
     if (noVolume) {
@@ -4668,9 +4669,25 @@ var userAgentGlobal = {};
         return false;
       }
     }
-    else { 
-      // as far as we know, this userAgent supports volume control 
-      return true; 
+    else {
+      // as far as we know, this userAgent supports volume control
+      return true;
+    }
+  };
+
+  AblePlayer.prototype.isUserAgent = function(which) {
+    var userAgent;
+    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
+    //you can add other variable instances to userAgentGlobal as required. For example for IE and so on.
+    userAgent = navigator.userAgent.toLowerCase();
+    if (this.debug) { 
+      console.log('User agent: ' + userAgent);
+    }  
+    if (userAgent.indexOf(which) !== -1) {
+      return true;
+    } 
+    else {
+      return false;
     }
   };
 
@@ -5776,9 +5793,17 @@ var userAgentGlobal = {};
     }
     this.refreshControls();
   };
-  
+
+
   AblePlayer.prototype.handleFullscreenToggle = function () {
+    var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function
     this.setFullscreen(!this.isFullscreen());
+    if (stillPaused) {
+      this.pauseMedia(); // when toggling fullscreen and media is just paused, keep media paused.
+    }
+    else if (!stillPaused) {
+      this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
+    }
   };
   
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
@@ -6598,31 +6623,33 @@ var userAgentGlobal = {};
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
-        if (document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement ||
-                document.msFullscreenElement ||
-                this.modalFullscreenActive ) {
-            var isFirefox = (this.isUserAgent(userAgentGlobal.fox));
-            //making use of isUserAgent function instantiating global variable userAgentGlobal
-            // this can be extended if other browser specific glitches appear in the future
-                if (isFirefox) {
-                var newHeight = window.innerHeight - this.$playerDiv.height();}
-            else {
-                newHeight = window.innerHeight - (this.$playerDiv.height()+(this.$playerDiv.height()/4.4));
-                  //turns out that 4.4 is the relative ratio the $playerDiv is off in all browsers except firefox.
-                  // This should scale with screen size.
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        this.modalFullscreenActive ) {
 
-              }
-           if (!this.$descDiv.is(':hidden')) {
-                newHeight -= this.$descDiv.height();
-              }
-            this.resizePlayer($(window).width(), newHeight);
-         }
-        else {
-            this.resizePlayer(this.playerWidth, this.playerHeight);
-          }
-      };
+      var newHeight; 
+    
+      if (window.outerHeight >= window.innerHeight) { 
+        newHeight = window.outerHeight - this.$playerDiv.outerHeight();
+      }
+      else { 
+        // not sure why innerHeight > outerHeight, but observed this in Safari 9.0.1
+        // Maybe window is already adjusted for controller height? 
+        // Anyway, no need to subtract player height if window.outerHeight is already reduced
+        newHeight = window.outerHeight;         
+      }
+    
+      if (!this.$descDiv.is(':hidden')) {
+        newHeight -= this.$descDiv.height();
+      }
+      this.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+  };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
