@@ -1402,6 +1402,7 @@
 
   // Loads current/default preferences from cookie into the AblePlayer object.
   AblePlayer.prototype.loadCurrentPreferences = function () {
+    
     var available = this.getAvailablePreferences();
     var cookie = this.getCookie();
 
@@ -1501,15 +1502,54 @@
     });
     cancelButton.click(function () {
       dialog.hide();
+      thisObj.resetPrefsForm(); 
     });
     
     prefsDiv.append(saveButton);
     prefsDiv.append(cancelButton);
     this.prefsDialog = dialog;
+    
+    // Add click handler for dialog close button 
+    // (button is added in dialog.js) 
+    $('div.able-prefs-form button.modalCloseButton').click(function() { 
+      thisObj.resetPrefsForm(); 
+    }) 
+
+    // Add handler for escape key 
+    $('div.able-prefs-form').keydown(function(event) { 
+      if (event.which === 27) { // escape
+        thisObj.resetPrefsForm();
+      }
+    });
+
+  };
+
+  // Reset preferences form with default values from cookie
+  // Called when user clicks cancel or close button in Prefs Dialog
+  // also called when user presses Escape
+   
+  AblePlayer.prototype.resetPrefsForm = function () {
+
+    var thisObj, cookie, available, i, prefName, thisDiv, thisId;  
+    
+    thisObj = this;
+    cookie = this.getCookie();
+    available = this.getAvailablePreferences();
+
+    for (i=0; i<available.length; i++) { 
+      prefName = available[i]['name'];
+      if (this[prefName] === 1) { 
+        $('input[name="' + prefName + '"]').prop('checked',true); 
+      } 
+      else { 
+        $('input[name="' + prefName + '"]').prop('checked',false); 
+      }
+    } 
   };
 
   // Return a prefs object constructed from the form.
   AblePlayer.prototype.savePrefsFromForm = function () {
+    
     // called when user saves the Preferences form
     // update cookie with new value 
   
@@ -1556,6 +1596,7 @@
 
   // Updates player based on current prefs.  Safe to call multiple times.
   AblePlayer.prototype.updatePrefs = function () {
+
     var modHelp;
 
     // modifier keys (update help text) 
