@@ -337,6 +337,7 @@
     // This can be overridden with data-transcript-button="false" 
     this.useTranscriptButton = true; 
 
+    this.getUserAgent();
     this.setButtonImages();
   };
 
@@ -4647,55 +4648,66 @@
 
 })(jQuery);
 
-var userAgentGlobal = {};
-
 (function ($) {
 
-  AblePlayer.prototype.browserSupportsVolume = function() {
-    // ideally we could test for volume support
-    // However, that doesn't seem to be reliable
-    // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
+  AblePlayer.prototype.getUserAgent = function() {
 
-    var userAgent, noVolume;
-
-    userAgent = navigator.userAgent.toLowerCase();
-    noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
-    if (noVolume) {
-      if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
-        // Firefox on android DOES support changing the volume:
-        return true;
-      }
-      else {
-        return false;
-      }
+    // Whenever possible we avoid browser sniffing. Better to do feature detection. 
+    // However, in case it's needed...  
+    // this function defines a userAgent array that can be used to query for common browsers and OSs 
+    // NOTE: This would be much simpler with jQuery.browser but that was removed from jQuery 1.9
+    // http://api.jquery.com/jQuery.browser/
+    this.userAgent = {}; 
+    this.userAgent.browser = {}; 
+    this.userAgent.os = {}; 
+    
+    // Test for common browsers  
+    if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){ //test for Firefox/x.x or Firefox x.x (ignoring remaining digits);
+      this.userAgent.browser.name = 'Firefox';
+      this.userAgent.browser.version = RegExp.$1; // capture x.x portion  
     }
-    else {
-      // as far as we know, this userAgent supports volume control
-      return true;
+    else if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) { //test for MSIE x.x (IE10 or lower)
+      this.userAgent.browser.name = 'Internet Explorer';
+      this.userAgent.browser.version = RegExp.$1; 
     }
-  };
-
-  AblePlayer.prototype.isUserAgent = function(which) {
-    var userAgent;
-    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
-    //you can add other variable instances to userAgentGlobal as required. For example for IE and so on.
-    userAgent = navigator.userAgent.toLowerCase();
+    else if (/Trident.*rv[ :]*(\d+\.\d+)/.test(navigator.userAgent)) { // test for IE11 or higher 
+      this.userAgent.browser.name = 'Internet Explorer';
+      this.userAgent.browser.version = RegExp.$1; 
+    }
+    else if (/Edge[\/\s](\d+\.\d+)/.test(navigator.userAgent)) { // test for MS Edge 
+      this.userAgent.browser.name = 'Edge';
+      this.userAgent.browser.version = RegExp.$1; 
+    }
+    else if (/OPR\/(\d+\.\d+)/i.test(navigator.userAgent)) { // Opera 15 or over 
+      this.userAgent.browser.name = 'Opera';
+      this.userAgent.browser.version = RegExp.$1;         
+    }
+    else if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) { 
+      this.userAgent.browser.name = 'Chrome';
+      if (/Chrome[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {
+        this.userAgent.browser.version = RegExp.$1;
+      }               
+    }
+    else if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) { 
+      this.userAgent.browser.name = 'Safari';
+      if (/Version[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {
+        this.userAgent.browser.version = RegExp.$1;
+      }               
+    }
+    else { 
+      this.userAgent.browser.name = 'Unknown';
+      this.userAgent.browser.version = 'Unknown';       
+    }
     if (this.debug) { 
       
-    }  
-    if (userAgent.indexOf(which) !== -1) {
-      return true;
-    } 
-    else {
-      return false;
+      
+      
+      
     }
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
-    var userAgent;
-    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
-    //you can add other variable instances to userAgentGlobal as required. For example for IE and so on.
-    userAgent = navigator.userAgent.toLowerCase();
+    var userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
       
     }  
@@ -4733,6 +4745,30 @@ var userAgentGlobal = {};
     else { 
       // this is not IOS
       return false;
+    }
+  };
+
+  AblePlayer.prototype.browserSupportsVolume = function() {
+    // ideally we could test for volume support
+    // However, that doesn't seem to be reliable
+    // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
+
+    var userAgent, noVolume;
+
+    userAgent = navigator.userAgent.toLowerCase();
+    noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
+    if (noVolume) {
+      if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
+        // Firefox on android DOES support changing the volume:
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      // as far as we know, this userAgent supports volume control
+      return true;
     }
   };
 

@@ -94,6 +94,7 @@
     // This can be overridden with data-transcript-button="false" 
     this.useTranscriptButton = true; 
 
+    this.getUserAgent();
     this.setButtonImages();
   };
 
