@@ -59,7 +59,7 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      console.log('ERROR: No media specified.');
+      
       return;
     }
 
@@ -210,7 +210,7 @@
         } 
         else { 
           // can't continue loading player with no text
-          console.log('ERROR: Failed to load translation table');         
+                   
         }
       }
     );
@@ -222,7 +222,7 @@
   AblePlayer.prototype.setup = function() {
     var thisObj = this;
     if (this.debug && this.startTime > 0) {
-      console.log('Will start media at ' + this.startTime + ' seconds');
+      
     }
     this.reinitialize().then(function () {
       if (!thisObj.player) {
@@ -407,10 +407,10 @@
     else {
       this.mediaType = this.$media.get(0).tagName;
       if (this.debug) { 
-        console.log('You initialized Able Player with ' + this.mediaId + ', which is a ' + this.mediaType + ' element.'); 
-        console.log('Able Player only works with HTML audio or video elements.');
-        console.log('The element with id ' + this.mediaId + ' is a ' + this.mediaType + ' element.');
-        console.log('Expecting an audio or video element.'); 
+         
+        
+        
+         
       }
       deferred.fail();
       return promise;
@@ -418,7 +418,7 @@
     
     this.$sources = this.$media.find('source');
     if (this.debug) { 
-      console.log('found ' + this.$sources.length + ' media sources');
+      
     }
 
     this.player = this.getPlayer();
@@ -483,9 +483,9 @@
       }
     }
     if (this.debug) {
-      console.log('Using ' + this.iconType + 's for player controls');
+      
       if (this.iconType === 'font') { 
-        console.log('User font for controller is ' + this.controllerFont);
+        
       }
     }
     $tempButton.remove();
@@ -579,7 +579,7 @@
     var playerPromise;
 
     if (this.debug && this.player) { 
-      console.log ('Using the ' + this.player + ' media player');
+      
     }
     // First run player specific initialization.
     if (this.player === 'html5') {
@@ -691,7 +691,7 @@
     $.getScript(this.fallbackPath + 'jwplayer.js') 
       .done(function( script, textStatus ) {
         if (thisObj.debug) {
-          console.log ('Successfully loaded the JW Player');
+          
         }
 
         // add an id to div.able-media-container (JW Player needs this) 
@@ -759,7 +759,7 @@
       })
       .fail(function( jqxhr, preferences, exception ) {
         if (thisObj.debug) { 
-          console.log ('Unable to load JW Player.');
+          
         }
         thisObj.player = null;
         deferred.fail();
@@ -880,7 +880,7 @@
         $.getScript('https://www.youtube.com/iframe_api')
           .fail(function () {
             if (thisObj.debug) {
-              console.log('Unable to load Youtube API.');
+              
             }
           });
       }
@@ -1620,10 +1620,10 @@
       errString += 'Column: ' + parserState.column + '\n';
       errString += err; 
       if (console.warn) {          
-        console.warn(errString);
+        
       }
       else if (console.log) { 
-        console.log(errString);
+        
       }
     }
     return parserState;
@@ -1808,10 +1808,10 @@
         errString += 'Column: ' + state.column + '\n';
         errString += 'Expected cue timing for cueId \''+cueId+'\' but found: ' + nextLine + '\n';
         if (console.warn) { 
-          console.warn(errString);
+          
         }
         else if (console.log) { 
-          console.log(errString);
+          
         }
         return; // Return leaving line for parseCuesAndComments to handle
     	}
@@ -2626,7 +2626,7 @@
       // redefine this.$sources now that media contains one or more <source> elements
       this.$sources = this.$media.find('source');       
       if (this.debug) { 
-        console.log('after initializing playlist, there are ' + this.$sources.length + ' media sources');
+        
       }
     } 
 
@@ -3632,7 +3632,7 @@
       // return the name of the control with first letter in upper case 
       // ultimately will need to get a translated label from this.tt 
       if (this.debug) { 
-        console.log('Found an untranslated label: ' + control);   
+           
       }
       return control.charAt(0).toUpperCase() + control.slice(1);
     }   
@@ -3874,7 +3874,7 @@
     $tempDiv.load(src, function (trackText, status, req) { 
       if (status === 'error') { 
         if (thisObj.debug) {
-          console.log ('error reading file ' + src + ': ' + status);
+          
         }
         deferred.fail();
       }
@@ -4470,7 +4470,7 @@
     this.descFile = this.$sources.first().attr('data-desc-src');
     if (this.descFile) { 
       if (this.debug) {
-        console.log('This video has a described version: ' + this.descFile);      
+              
       }
       this.hasOpenDesc = true;
       if (this.prefDesc) {
@@ -4479,7 +4479,7 @@
     }
     else { 
       if (this.debug) {
-        console.log('This video does not have a described version');      
+              
       }
       this.hasOpenDesc = false;              
     }
@@ -4694,17 +4694,17 @@
       this.userAgent.browser.version = 'Unknown';       
     }
     if (this.debug) { 
-      console.log('User agent:' + navigator.userAgent);
-      console.log('Vendor: ' + navigator.vendor);
-      console.log('Browser: ' + this.userAgent.browser.name);
-      console.log('Version: ' + this.userAgent.browser.version);
+      
+      
+      
+      
     }
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
     var userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
-      console.log('User agent: ' + userAgent);
+      
     }  
     if (userAgent.indexOf(which) !== -1) {
       return true;
@@ -5546,7 +5546,7 @@
       var currentRate = this.getPlaybackRate();
       var index = rates.indexOf(currentRate);
       if (index === -1) {
-        console.log('ERROR: Youtube returning unknown playback rate ' + currentRate.toString());
+        
       }
       else {
         index += dir;
@@ -6606,7 +6606,7 @@
 
   AblePlayer.prototype.onMediaPause = function () {
     if (this.debug) { 
-      console.log('media pause event');       
+             
     }
   };
 
@@ -6884,18 +6884,18 @@
     this.$media
       .on('emptied',function() { 
         if (thisObj.debug) { 
-          console.log('media has been emptied');        
+                  
         }
       })        
       .on('loadedmetadata',function() {
         if (thisObj.debug) {
-          console.log('meta data has loaded');  
+            
         }
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() { 
         if (thisObj.debug) {
-          console.log('canplay event');  
+            
         }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           thisObj.seekTo(thisObj.startTime);
@@ -6903,7 +6903,7 @@
       })
       .on('canplaythrough',function() { 
         if (thisObj.debug) {
-          console.log('canplaythrough event');  
+            
         }
         if (thisObj.startTime && !thisObj.startedPlaying) { 
           // try again, if seeking failed on canplay
@@ -6931,7 +6931,7 @@
       })
       .on('play',function() { 
         if (thisObj.debug) { 
-          console.log('media play event');        
+                  
         }
       })
       .on('pause',function() { 
@@ -6939,28 +6939,28 @@
       })
       .on('ratechange',function() { 
         if (thisObj.debug) { 
-          console.log('media ratechange');        
+                  
         }
       })
       .on('volumechange',function() { 
         if (thisObj.debug) { 
-          console.log('media volume change');       
+                 
         }
       })
       .on('error',function() { 
         if (thisObj.debug) { 
           switch (thisObj.media.error.code) { 
             case 1: 
-              console.log('HTML5 Media Error: MEDIA_ERR_ABORTED');
+              
               break;
             case 2: 
-              console.log('HTML5 Media Error: MEDIA_ERR_NETWORK ');
+              
               break;
             case 3: 
-              console.log('HTML5 Media Error: MEDIA_ERR_DECODE ');
+              
               break;
             case 4: 
-              console.log('HTML5 Media Error: MEDIA_ERR_SRC_NOT_SUPPORTED ');
+              
               break;
           }
         }
@@ -6979,7 +6979,7 @@
       })
       .onReady(function() { 
         if (thisObj.debug) { 
-          console.log('JW Player onReady event fired');
+          
         }
         // remove JW Player from tab order. 
         // We don't want users tabbing into the Flash object and getting trapped
@@ -7011,7 +7011,7 @@
       })
       .onPlay(function() { 
         if (thisObj.debug) { 
-          console.log('JW Player onPlay event fired');
+          
         }        
         thisObj.refreshControls();
       })
@@ -7020,7 +7020,7 @@
       })
       .onBuffer(function() { 
         if (thisObj.debug) { 
-          console.log('JW Player onBuffer event fired');
+          
         }       
         thisObj.refreshControls();
       })
@@ -7029,19 +7029,19 @@
       })
       .onIdle(function(e) { 
         if (thisObj.debug) { 
-          console.log('JW Player onIdle event fired');
+          
         }
 
         thisObj.refreshControls();
       })
       .onMeta(function() { 
         if (thisObj.debug) { 
-          console.log('JW Player onMeta event fired');
+          
         }       
       })
       .onPlaylist(function() { 
         if (thisObj.debug) { 
-          console.log('JW Player onPlaylist event fired');
+          
         }
 
         // Playlist change includes new media source.
@@ -7539,7 +7539,7 @@
       this.signFile = this.$sources.first().attr('data-sign-src');
       if (this.signFile) { 
         if (this.debug) {
-          console.log('This video has an accompanying sign language video: ' + this.signFile);      
+                
         }
         this.hasSignLanguage = true;
         this.injectSignPlayerCode();
@@ -8400,7 +8400,7 @@
           msg += ' is not currently supported. Using default language (' + this.lang + ')';
         }
         if (this.debug) {
-          console.log(msg);
+          
         }
       }
     } 
