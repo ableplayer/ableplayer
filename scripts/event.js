@@ -86,31 +86,33 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
-        if (document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement ||
-                document.msFullscreenElement ||
-                this.modalFullscreenActive ) {
-            var isFirefox = (this.isUserAgent(userAgentGlobal.fox));
-            //making use of isUserAgent function instantiating global variable userAgentGlobal
-            // this can be extended if other browser specific glitches appear in the future
-                if (isFirefox) {
-                var newHeight = window.innerHeight - this.$playerDiv.height();}
-            else {
-                newHeight = window.innerHeight - (this.$playerDiv.height()+(this.$playerDiv.height()/4.4));
-                  //turns out that 4.4 is the relative ratio the $playerDiv is off in all browsers except firefox.
-                  // This should scale with screen size.
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        this.modalFullscreenActive ) {
 
-              }
-           if (!this.$descDiv.is(':hidden')) {
-                newHeight -= this.$descDiv.height();
-              }
-            this.resizePlayer($(window).width(), newHeight);
-         }
-        else {
-            this.resizePlayer(this.playerWidth, this.playerHeight);
-          }
-      };
+      var newHeight; 
+    
+      if (window.outerHeight >= window.innerHeight) { 
+        newHeight = window.outerHeight - this.$playerDiv.outerHeight();
+      }
+      else { 
+        // not sure why innerHeight > outerHeight, but observed this in Safari 9.0.1
+        // Maybe window is already adjusted for controller height? 
+        // Anyway, no need to subtract player height if window.outerHeight is already reduced
+        newHeight = window.outerHeight;         
+      }
+    
+      if (!this.$descDiv.is(':hidden')) {
+        newHeight -= this.$descDiv.height();
+      }
+      this.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+  };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;

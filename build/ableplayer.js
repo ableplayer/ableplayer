@@ -337,6 +337,7 @@
     // This can be overridden with data-transcript-button="false" 
     this.useTranscriptButton = true; 
 
+    this.getUserAgent();
     this.setButtonImages();
   };
 
@@ -1296,24 +1297,24 @@
       }
   };
 
-  AblePlayer.prototype.getAvailablePreferences = function() { 
+  AblePlayer.prototype.getAvailablePreferences = function() {
     // Return the list of currently available preferences.
 
     var prefs = [];
-    
-    // modifier keys preferences apply to both audio and video 
+
+    // modifier keys preferences apply to both audio and video
     prefs.push({
-      'name': 'prefAltKey', // use alt key with shortcuts 
+      'name': 'prefAltKey', // use alt key with shortcuts
       'label': this.tt.prefAltKey,
-      'default': 1 
+      'default': 1
     });
-    
+
     prefs.push({
       'name': 'prefCtrlKey', // use ctrl key with shortcuts
       'label': this.tt.prefCtrlKey,
-      'default': 1 
+      'default': 1
     });
-    
+
     prefs.push({
       'name': 'prefShiftKey',
       'label': this.tt.prefShiftKey,
@@ -1321,45 +1322,45 @@
     });
     if (this.mediaType === 'video') { // features prefs apply only to video
       prefs.push({
-        'name': 'prefCaptions', // closed captions default state 
+        'name': 'prefCaptions', // closed captions default state
         'label': this.tt.prefCaptions,
         'default': 1 // on because many users can benefit
       });
 
       prefs.push({
-        'name': 'prefSignLanguage', // use sign language if available 
+        'name': 'prefSignLanguage', // use sign language if available
         'label': this.tt.prefSignLanguage,
         'default': 1 // on because in rare cases that it's actually available, users should be exposed to it
       });
-      
+
       prefs.push({
-        'name': 'prefDesc', // audio description default state 
+        'name': 'prefDesc', // audio description default state
         'label': this.tt.prefDesc,
         'default': 0 // off because users who don't need it might find it distracting
       });
-      
+
       prefs.push({
         'name': 'prefClosedDesc', // use closed description if available
         'label': this.tt.prefClosedDesc,
         'default': 0 // off because experimental
       });
-      
+
       prefs.push({
         'name': 'prefDescPause', // automatically pause when closed description starts
         'label': this.tt.prefDescPause,
-        'default': 0 // off because it burdens user with restarting after every pause 
+        'default': 0 // off because it burdens user with restarting after every pause
       });
 
       prefs.push({
         'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
         'label': this.tt.prefVisibleDesc,
-        'default': 1 // on because sighted users probably want to see this cool feature in action 
+        'default': 1 // on because sighted users probably want to see this cool feature in action
       });
-      
+
       prefs.push({
         'name': 'prefTranscript', // transcript default state
         'label': this.tt.prefTranscript,
-        'default': 0 // off because turning it on has a certain WOW factor 
+        'default': 0 // off because turning it on has a certain WOW factor
       });
 
       prefs.push({
@@ -1367,31 +1368,31 @@
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
       });
-      
+
       prefs.push({
-        'name': 'prefTabbable', // tab-enable transcript 
+        'name': 'prefTabbable', // tab-enable transcript
         'label': this.tt.prefTabbable,
         'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
       });
     }
-    else { 
+    else {
 
       prefs.push({
         'name': 'prefTranscript', // transcript default state
         'label': this.tt.prefTranscript,
-        'default': 0 // off because turning it on has a certain WOW factor 
+        'default': 0 // off because turning it on has a certain WOW factor
       });
 
       prefs.push({
         'name': 'prefHighlight', // highlight transcript as media plays
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
-      });      
+      });
 
       prefs.push({
-        'name': 'prefTabbable', // tab-enable transcript 
+        'name': 'prefTabbable', // tab-enable transcript
         'label': this.tt.prefTabbable,
-        'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page    
+        'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
       });
     }
 
@@ -1404,7 +1405,7 @@
     var cookie = this.getCookie();
 
     // Copy current cookie values into this object, and fill in any default values.
-    for (var ii = 0; ii < available.length; ii++) { 
+    for (var ii = 0; ii < available.length; ii++) {
       var prefName = available[ii]['name'];
       var defaultValue = available[ii]['default'];
       if (cookie.preferences[prefName] !== undefined) {
@@ -1412,7 +1413,7 @@
       }
       else {
         cookie.preferences[prefName] = defaultValue;
-        this[prefName] = defaultValue; 
+        this[prefName] = defaultValue;
       }
     }
 
@@ -1422,38 +1423,38 @@
 
   // Creates the preferences form and injects it.
   AblePlayer.prototype.injectPrefsForm = function () {
-    var prefsDiv, introText, prefsIntro, 
-    featuresFieldset, featuresLegend, 
-    keysFieldset, keysLegend, 
-    i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox, 
-    thisObj, available; 
-    
+    var prefsDiv, introText, prefsIntro,
+    featuresFieldset, featuresLegend,
+    keysFieldset, keysLegend,
+    i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
+    thisObj, available;
+
     thisObj = this;
     available = this.getAvailablePreferences();
 
     // outer container, will be assigned role="dialog"
-    prefsDiv = $('<div>',{ 
+    prefsDiv = $('<div>',{
       'class': 'able-prefs-form'
     });
 
     introText = '<p>' + this.tt.prefIntro + '</p>\n';
-    
-    prefsIntro = $('<p>',{ 
+
+    prefsIntro = $('<p>',{
       html: introText
     });
-    
+
     featuresFieldset = $('<fieldset>');
-    featuresLegend = $('<legend>' + this.tt.prefFeatures + '</legend>');      
-    featuresFieldset.append(featuresLegend);  
-    
+    featuresLegend = $('<legend>' + this.tt.prefFeatures + '</legend>');
+    featuresFieldset.append(featuresLegend);
+
     keysFieldset = $('<fieldset>');
-    keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');       
-    keysFieldset.append(keysLegend);  
-    
-    for (i=0; i<available.length; i++) { 
+    keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');
+    keysFieldset.append(keysLegend);
+
+    for (i=0; i<available.length; i++) {
       thisPref = available[i]['name'];
       thisDiv = $('<div>');
-      thisId = this.mediaId + '_' + thisPref;   
+      thisId = this.mediaId + '_' + thisPref;
       thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
       thisCheckbox = $('<input>',{
         type: 'checkbox',
@@ -1462,33 +1463,33 @@
         value: 'true'
       });
       thisDiv.append(thisCheckbox).append(thisLabel);
-      // check current active value for this preference 
-      if (this[thisPref] === 1) { 
+      // check current active value for this preference
+      if (this[thisPref] === 1) {
         thisCheckbox.prop('checked',true);
-      }     
+      }
       // TODO: We need to indicate this in the prefs structure itself.
       if (i === 0 || i === 1 || i === 2) { // this is a key preference
-        keysFieldset.append(thisDiv);     
+        keysFieldset.append(thisDiv);
       }
       else { // this is a feature preference
         featuresFieldset.append(thisDiv);
-      }     
+      }
     }
-    // Now assemble all the parts   
+    // Now assemble all the parts
     prefsDiv
       .append(prefsIntro)
       .append(keysFieldset)
       .append(featuresFieldset);
 
-    // must be appended to the BODY! 
+    // must be appended to the BODY!
     // otherwise when aria-hidden="true" is applied to all background content
-    // that will include an ancestor of the dialog, 
-    // which will render the dialog unreadable by screen readers 
-    // this.$ableDiv.append(prefsDiv); 
+    // that will include an ancestor of the dialog,
+    // which will render the dialog unreadable by screen readers
+    // this.$ableDiv.append(prefsDiv);
     $('body').append(prefsDiv);
-    
+
     var dialog = new AccessibleDialog(prefsDiv, 'dialog', thisObj.tt.prefTitle, prefsIntro, thisObj.tt.closeButtonLabel, '32em');
-    
+
     // Add save and cancel buttons.
     prefsDiv.append('<hr>');
     var saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
@@ -1500,7 +1501,7 @@
     cancelButton.click(function () {
       dialog.hide();
     });
-    
+
     prefsDiv.append(saveButton);
     prefsDiv.append(cancelButton);
     this.prefsDialog = dialog;
@@ -1509,44 +1510,44 @@
   // Return a prefs object constructed from the form.
   AblePlayer.prototype.savePrefsFromForm = function () {
     // called when user saves the Preferences form
-    // update cookie with new value 
-  
-    var numChanges;  
+    // update cookie with new value
+
+    var numChanges;
 
     numChanges = 0;
     var cookie = this.getCookie();
     var available = this.getAvailablePreferences();
     for (var ii = 0; ii < available.length; ii++) {
       var prefName = available[ii]['name'];
-      if ($('input[name="' + prefName + '"]').is(':checked')) { 
+      if ($('input[name="' + prefName + '"]').is(':checked')) {
         cookie.preferences[prefName] = 1;
-        if (this[prefName] === 1) { 
-          // nothing has changed 
+        if (this[prefName] === 1) {
+          // nothing has changed
         }
-        else { 
-          // user has just turned this pref on  
+        else {
+          // user has just turned this pref on
           this[prefName] = 1;
           numChanges++;
-        }     
+        }
       }
       else { // thisPref is not checked
         cookie.preferences[prefName] = 0;
-        if (this[prefName] === 1) { 
-          // user has just turned this pref off 
+        if (this[prefName] === 1) {
+          // user has just turned this pref off
           this[prefName] = 0;
           numChanges++;
         }
-        else { 
+        else {
           // nothing has chaged
-        }     
+        }
       }
     }
-    if (numChanges > 0) {     
+    if (numChanges > 0) {
       this.setCookie(cookie);
       this.showAlert(this.tt.prefSuccess);
-    } 
-    else { 
-      this.showAlert(this.tt.prefNoChange);   
+    }
+    else {
+      this.showAlert(this.tt.prefNoChange);
     }
 
     this.updatePrefs();
@@ -4646,9 +4647,9 @@
 
 })(jQuery);
 
-var userAgentGlobal = {};
 (function ($) {
 
+<<<<<<< HEAD
   AblePlayer.prototype.browserSupportsVolume = function() {
     // ideally we could test for volume support
     // However, that doesn't seem to be reliable
@@ -4670,14 +4671,66 @@ var userAgentGlobal = {};
     else {
       // as far as we know, this userAgent supports volume control
       return true;
+=======
+  AblePlayer.prototype.getUserAgent = function() {
+
+    // Whenever possible we avoid browser sniffing. Better to do feature detection. 
+    // However, in case it's needed...  
+    // this function defines a userAgent array that can be used to query for common browsers and OSs 
+    // NOTE: This would be much simpler with jQuery.browser but that was removed from jQuery 1.9
+    // http://api.jquery.com/jQuery.browser/
+    this.userAgent = {}; 
+    this.userAgent.browser = {}; 
+    this.userAgent.os = {}; 
+    
+    // Test for common browsers  
+    if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){ //test for Firefox/x.x or Firefox x.x (ignoring remaining digits);
+      this.userAgent.browser.name = 'Firefox';
+      this.userAgent.browser.version = RegExp.$1; // capture x.x portion  
+    }
+    else if (/MSIE (\d+\.\d+);/.test(navigator.userAgent)) { //test for MSIE x.x (IE10 or lower)
+      this.userAgent.browser.name = 'Internet Explorer';
+      this.userAgent.browser.version = RegExp.$1; 
+    }
+    else if (/Trident.*rv[ :]*(\d+\.\d+)/.test(navigator.userAgent)) { // test for IE11 or higher 
+      this.userAgent.browser.name = 'Internet Explorer';
+      this.userAgent.browser.version = RegExp.$1; 
+    }
+    else if (/Edge[\/\s](\d+\.\d+)/.test(navigator.userAgent)) { // test for MS Edge 
+      this.userAgent.browser.name = 'Edge';
+      this.userAgent.browser.version = RegExp.$1; 
+    }
+    else if (/OPR\/(\d+\.\d+)/i.test(navigator.userAgent)) { // Opera 15 or over 
+      this.userAgent.browser.name = 'Opera';
+      this.userAgent.browser.version = RegExp.$1;         
+    }
+    else if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) { 
+      this.userAgent.browser.name = 'Chrome';
+      if (/Chrome[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {
+        this.userAgent.browser.version = RegExp.$1;
+      }               
+    }
+    else if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) { 
+      this.userAgent.browser.name = 'Safari';
+      if (/Version[\/\s](\d+\.\d+)/.test(navigator.userAgent)) {
+        this.userAgent.browser.version = RegExp.$1;
+      }               
+    }
+    else { 
+      this.userAgent.browser.name = 'Unknown';
+      this.userAgent.browser.version = 'Unknown';       
+    }
+    if (this.debug) { 
+      console.log('User agent:' + navigator.userAgent);
+      console.log('Vendor: ' + navigator.vendor);
+      console.log('Browser: ' + this.userAgent.browser.name);
+      console.log('Version: ' + this.userAgent.browser.version);
+>>>>>>> 41cb70aa64e9496a390074b155768ae0a2e20302
     }
   };
 
   AblePlayer.prototype.isUserAgent = function(which) {
-    var userAgent;
-    userAgentGlobal.fox = /Firefox/i.test(navigator.userAgent);
-    //you can add other variable instances to userAgentGlobal as required. For example for IE and so on.
-    userAgent = navigator.userAgent.toLowerCase();
+    var userAgent = navigator.userAgent.toLowerCase();
     if (this.debug) { 
       console.log('User agent: ' + userAgent);
     }  
@@ -4715,6 +4768,30 @@ var userAgentGlobal = {};
     else { 
       // this is not IOS
       return false;
+    }
+  };
+
+  AblePlayer.prototype.browserSupportsVolume = function() {
+    // ideally we could test for volume support
+    // However, that doesn't seem to be reliable
+    // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
+
+    var userAgent, noVolume;
+
+    userAgent = navigator.userAgent.toLowerCase();
+    noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
+    if (noVolume) {
+      if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
+        // Firefox on android DOES support changing the volume:
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      // as far as we know, this userAgent supports volume control
+      return true;
     }
   };
 
@@ -6605,31 +6682,33 @@ var userAgentGlobal = {};
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
-        if (document.fullscreenElement ||
-                document.webkitFullscreenElement ||
-                document.mozFullScreenElement ||
-                document.msFullscreenElement ||
-                this.modalFullscreenActive ) {
-            var isFirefox = (this.isUserAgent(userAgentGlobal.fox));
-            //making use of isUserAgent function instantiating global variable userAgentGlobal
-            // this can be extended if other browser specific glitches appear in the future
-                if (isFirefox) {
-                var newHeight = window.innerHeight - this.$playerDiv.height();}
-            else {
-                newHeight = window.innerHeight - (this.$playerDiv.height()+(this.$playerDiv.height()/4.4));
-                  //turns out that 4.4 is the relative ratio the $playerDiv is off in all browsers except firefox.
-                  // This should scale with screen size.
+    if (document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement ||
+        this.modalFullscreenActive ) {
 
-              }
-           if (!this.$descDiv.is(':hidden')) {
-                newHeight -= this.$descDiv.height();
-              }
-            this.resizePlayer($(window).width(), newHeight);
-         }
-        else {
-            this.resizePlayer(this.playerWidth, this.playerHeight);
-          }
-      };
+      var newHeight; 
+    
+      if (window.outerHeight >= window.innerHeight) { 
+        newHeight = window.outerHeight - this.$playerDiv.outerHeight();
+      }
+      else { 
+        // not sure why innerHeight > outerHeight, but observed this in Safari 9.0.1
+        // Maybe window is already adjusted for controller height? 
+        // Anyway, no need to subtract player height if window.outerHeight is already reduced
+        newHeight = window.outerHeight;         
+      }
+    
+      if (!this.$descDiv.is(':hidden')) {
+        newHeight -= this.$descDiv.height();
+      }
+      this.resizePlayer($(window).width(), newHeight);
+    }
+    else {
+      this.resizePlayer(this.playerWidth, this.playerHeight);
+    }
+  };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
     var thisObj = this;
