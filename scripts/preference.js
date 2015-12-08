@@ -1,26 +1,26 @@
 (function ($) {
-  AblePlayer.prototype.setCookie = function(cookieValue) { 
-    $.cookie.json = true;
-    if ($.isFunction($.cookie)) { 
-      // set cookie that expires in 90 days 
-      $.cookie('Able-Player', cookieValue, 90);  
+  AblePlayer.prototype.setCookie = function(cookieValue) {
+    if (Cookies.enabled) {
+      Cookies.set('Able-Player', cookieValue, {expires: 90});
     }
   };
 
   AblePlayer.prototype.getCookie = function() {
+   // var cookie;
+    // cookie = Cookies.getJSON('Able-Player');
+   //  return cookie;
+
     var defaultCookie = {
       preferences: {}
     };
 
-    $.cookie.json = true;
-    if ($.isFunction($.cookie)) { 
       var cookie;
       try {
-        cookie = $.cookie('Able-Player');
+        cookie = Cookies.getJSON('Able-Player');
       }
       catch (err) {
-        // Original cookie can't be parsed; update to default.
-        this.setCookie(defaultCookie);
+        // Original cookie can't be parsed; update to defau
+        Cookies.getJSON(defaultCookie);
         cookie = defaultCookie;
       }
       if (cookie) {
@@ -29,7 +29,6 @@
       else {
         return defaultCookie;
       }
-    }
   };
 
   AblePlayer.prototype.getAvailablePreferences = function() { 

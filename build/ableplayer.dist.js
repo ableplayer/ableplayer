@@ -1264,28 +1264,28 @@
 })(jQuery);
 
 (function ($) {
-  AblePlayer.prototype.setCookie = function(cookieValue) { 
-    $.cookie.json = true;
-    if ($.isFunction($.cookie)) { 
-      // set cookie that expires in 90 days 
-      $.cookie('Able-Player', cookieValue, 90);  
+  AblePlayer.prototype.setCookie = function(cookieValue) {
+    if (Cookies.enabled) {
+      Cookies.set('Able-Player', cookieValue, {expires: 90});
     }
   };
 
   AblePlayer.prototype.getCookie = function() {
+   // var cookie;
+    // cookie = Cookies.getJSON('Able-Player');
+   //  return cookie;
+
     var defaultCookie = {
       preferences: {}
     };
 
-    $.cookie.json = true;
-    if ($.isFunction($.cookie)) { 
       var cookie;
       try {
-        cookie = $.cookie('Able-Player');
+        cookie = Cookies.getJSON('Able-Player');
       }
       catch (err) {
-        // Original cookie can't be parsed; update to default.
-        this.setCookie(defaultCookie);
+        // Original cookie can't be parsed; update to defau
+        Cookies.getJSON(defaultCookie);
         cookie = defaultCookie;
       }
       if (cookie) {
@@ -1294,7 +1294,6 @@
       else {
         return defaultCookie;
       }
-    }
   };
 
   AblePlayer.prototype.getAvailablePreferences = function() { 
@@ -4650,13 +4649,13 @@
 var userAgentGlobal = {};
 (function ($) {
 
-  AblePlayer.prototype.browserSupportsVolume = function() { 
-    // ideally we could test for volume support 
-    // However, that doesn't seem to be reliable 
+  AblePlayer.prototype.browserSupportsVolume = function() {
+    // ideally we could test for volume support
+    // However, that doesn't seem to be reliable
     // http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
 
-    var userAgent, noVolume; 
-  
+    var userAgent, noVolume;
+
     userAgent = navigator.userAgent.toLowerCase();
     noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
     if (noVolume) {
@@ -4668,9 +4667,9 @@ var userAgentGlobal = {};
         return false;
       }
     }
-    else { 
-      // as far as we know, this userAgent supports volume control 
-      return true; 
+    else {
+      // as far as we know, this userAgent supports volume control
+      return true;
     }
   };
 
@@ -5776,9 +5775,17 @@ var userAgentGlobal = {};
     }
     this.refreshControls();
   };
-  
+
+
   AblePlayer.prototype.handleFullscreenToggle = function () {
+    var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function
     this.setFullscreen(!this.isFullscreen());
+    if (stillPaused) {
+      this.pauseMedia(); // when toggling fullscreen and media is just paused, keep media paused.
+    }
+    else if (!stillPaused) {
+      this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
+    }
   };
   
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
