@@ -1266,12 +1266,12 @@
 
 (function ($) {
   AblePlayer.prototype.setCookie = function(cookieValue) {
-    if (Cookies.enabled) {
-      Cookies.set('Able-Player', cookieValue, {expires: 90});
-    }
+    Cookies.set('Able-Player', cookieValue, { expires:90 });
+    // set the cookie lifetime for 90 days
   };
 
   AblePlayer.prototype.getCookie = function() {
+
     var defaultCookie = {
       preferences: {}
     };
@@ -1281,7 +1281,7 @@
         cookie = Cookies.getJSON('Able-Player');
       }
       catch (err) {
-        // Original cookie can't be parsed; update to defau
+        // Original cookie can't be parsed; update to default
         Cookies.getJSON(defaultCookie);
         cookie = defaultCookie;
       }
