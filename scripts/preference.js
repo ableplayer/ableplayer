@@ -1,11 +1,11 @@
 (function ($) {
   AblePlayer.prototype.setCookie = function(cookieValue) {
-    if (Cookies.enabled) {
-      Cookies.set('Able-Player', cookieValue, {expires: 90});
-    }
+    Cookies.set('Able-Player', cookieValue, { expires:90 });
+    // set the cookie lifetime for 90 days
   };
 
   AblePlayer.prototype.getCookie = function() {
+
     var defaultCookie = {
       preferences: {}
     };
@@ -15,7 +15,7 @@
         cookie = Cookies.getJSON('Able-Player');
       }
       catch (err) {
-        // Original cookie can't be parsed; update to defau
+        // Original cookie can't be parsed; update to default
         Cookies.getJSON(defaultCookie);
         cookie = defaultCookie;
       }
@@ -230,13 +230,49 @@
     });
     cancelButton.click(function () {
       dialog.hide();
+      thisObj.resetPrefsForm(); 
     });
 
     prefsDiv.append(saveButton);
     prefsDiv.append(cancelButton);
     this.prefsDialog = dialog;
+    
+    // Add click handler for dialog close button 
+    // (button is added in dialog.js) 
+    $('div.able-prefs-form button.modalCloseButton').click(function() { 
+      thisObj.resetPrefsForm(); 
+    }) 
+    // Add handler for escape key 
+    $('div.able-prefs-form').keydown(function(event) { 
+      if (event.which === 27) { // escape
+        thisObj.resetPrefsForm();
+      }      
+    });
   };
 
+   // Reset preferences form with default values from cookie
+   // Called when user clicks cancel or close button in Prefs Dialog
+   // also called when user presses Escape
+    
+   AblePlayer.prototype.resetPrefsForm = function () {
+ 
+     var thisObj, cookie, available, i, prefName, thisDiv, thisId;  
+
+     thisObj = this;
+     cookie = this.getCookie();
+     available = this.getAvailablePreferences();
+     for (i=0; i<available.length; i++) { 
+       prefName = available[i]['name'];
+       if (this[prefName] === 1) { 
+         $('input[name="' + prefName + '"]').prop('checked',true); 
+       } 
+       else { 
+         $('input[name="' + prefName + '"]').prop('checked',false); 
+       }
+     } 
+   };
+   
+   
   // Return a prefs object constructed from the form.
   AblePlayer.prototype.savePrefsFromForm = function () {
     // called when user saves the Preferences form
