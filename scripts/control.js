@@ -1057,7 +1057,9 @@
   
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
     this.autoScrollTranscript = val;
+    this.getCookie(autoScrollTranscript);
     this.refreshControls();
+    this.setCookie(autoScrollTranscript);
   };
 
   AblePlayer.prototype.showTooltip = function($tooltip) { 
