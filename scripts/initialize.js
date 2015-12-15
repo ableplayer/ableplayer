@@ -149,7 +149,6 @@
     this.startedPlaying = false;
     // TODO: Move this setting to cookie.
     this.autoScrollTranscript = true;
-    //this.autoScrollTranscript = this.getCookie(autoScrollTranscript); // (doesn't work)
 
     // Bootstrap from this.media possibly being an ID or other selector.
     this.$media = $(this.media).first();
