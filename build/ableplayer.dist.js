@@ -1364,7 +1364,11 @@
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
       });
-
+      prefs.push({
+        'name': 'autoScrollTranscript',
+        'label': this.tt.autoScrollTranscript,
+        'default': true
+      });
       prefs.push({
         'name': 'prefTabbable', // tab-enable transcript
         'label': this.tt.prefTabbable,
@@ -1377,6 +1381,12 @@
         'name': 'prefTranscript', // transcript default state
         'label': this.tt.prefTranscript,
         'default': 0 // off because turning it on has a certain WOW factor
+      });
+
+      prefs.push({
+        'name': 'autoScrollTranscript',
+        'label': this.tt.autoScrollTranscript,
+        'default': false
       });
 
       prefs.push({
@@ -1423,7 +1433,7 @@
     featuresFieldset, featuresLegend,
     keysFieldset, keysLegend,
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
-    thisObj, available;
+    thisObj, available, autoScrollTranscriptFlag;
 
     thisObj = this;
     available = this.getAvailablePreferences();
@@ -1446,6 +1456,7 @@
     keysFieldset = $('<fieldset>');
     keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');
     keysFieldset.append(keysLegend);
+
 
     for (i=0; i<available.length; i++) {
       thisPref = available[i]['name'];
@@ -5839,7 +5850,9 @@
   
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
     this.autoScrollTranscript = val;
+    this.getCookie(autoScrollTranscript);
     this.refreshControls();
+    this.setCookie(autoScrollTranscript);
   };
 
   AblePlayer.prototype.showTooltip = function($tooltip) { 
