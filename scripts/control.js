@@ -1054,13 +1054,15 @@
       this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
     }
   };
-  
+
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
-    this.autoScrollTranscript = val;
-    this.getCookie(autoScrollTranscript);
+
+    // the + operator converts boolean val to numeric 1 or 0, so it's consistent with other preferences
+    this.autoScrollTranscript = +val;
+    this.updateCookie('autoScrollTranscript');
     this.refreshControls();
-    this.setCookie(autoScrollTranscript);
   };
+
 
   AblePlayer.prototype.showTooltip = function($tooltip) { 
 

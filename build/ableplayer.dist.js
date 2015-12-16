@@ -392,6 +392,7 @@
     this.startedPlaying = false;
     // TODO: Move this setting to cookie.
     this.autoScrollTranscript = true;
+    //this.autoScrollTranscript = this.getCookie(autoScrollTranscript); // (doesn't work)
 
     // Bootstrap from this.media possibly being an ID or other selector.
     this.$media = $(this.media).first();
@@ -1291,6 +1292,28 @@
       else {
         return defaultCookie;
       }
+  };
+  AblePlayer.prototype.updateCookie = function( setting ) {
+
+    // called when a particular setting had been updated
+    // useful for settings updated indpedently of Preferences dialog
+    // e.g., autoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
+
+    var cookie, available, i, prefName;
+    cookie = this.getCookie();
+    available = this.getAvailablePreferences();
+
+    // Rebuild cookie with current cookie values,
+    // replacing the one value that's been changed
+    for (i = 0; i < available.length; i++) {
+      prefName = available[i]['name'];
+      if (prefName == setting) {
+        // this is the one that requires an update
+        cookie.preferences[prefName] = this[prefName];
+      }
+    }
+    // Save updated cookie
+    this.setCookie(cookie);
   };
 
   AblePlayer.prototype.getAvailablePreferences = function() {
@@ -5883,13 +5906,15 @@
       this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
     }
   };
-  
+
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
-    this.autoScrollTranscript = val;
-    this.getCookie(autoScrollTranscript);
+
+    // the + operator converts boolean val to numeric 1 or 0, so it's consistent with other preferences
+    this.autoScrollTranscript = +val;
+    this.updateCookie('autoScrollTranscript');
     this.refreshControls();
-    this.setCookie(autoScrollTranscript);
   };
+
 
   AblePlayer.prototype.showTooltip = function($tooltip) { 
 
