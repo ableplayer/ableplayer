@@ -26,6 +26,28 @@
         return defaultCookie;
       }
   };
+  AblePlayer.prototype.updateCookie = function( setting ) {
+
+    // called when a particular setting had been updated
+    // useful for settings updated indpedently of Preferences dialog
+    // e.g., autoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
+
+    var cookie, available, i, prefName;
+    cookie = this.getCookie();
+    available = this.getAvailablePreferences();
+
+    // Rebuild cookie with current cookie values,
+    // replacing the one value that's been changed
+    for (i = 0; i < available.length; i++) {
+      prefName = available[i]['name'];
+      if (prefName == setting) {
+        // this is the one that requires an update
+        cookie.preferences[prefName] = this[prefName];
+      }
+    }
+    // Save updated cookie
+    this.setCookie(cookie);
+  };
 
   AblePlayer.prototype.getAvailablePreferences = function() {
     // Return the list of currently available preferences.
@@ -98,7 +120,11 @@
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
       });
-
+      prefs.push({
+        'name': 'autoScrollTranscript',
+        'label': this.tt.autoScrollTranscript,
+        'default': true
+      });
       prefs.push({
         'name': 'prefTabbable', // tab-enable transcript
         'label': this.tt.prefTabbable,
@@ -111,6 +137,12 @@
         'name': 'prefTranscript', // transcript default state
         'label': this.tt.prefTranscript,
         'default': 0 // off because turning it on has a certain WOW factor
+      });
+
+      prefs.push({
+        'name': 'autoScrollTranscript',
+        'label': this.tt.autoScrollTranscript,
+        'default': false
       });
 
       prefs.push({
@@ -157,7 +189,7 @@
     featuresFieldset, featuresLegend,
     keysFieldset, keysLegend,
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
-    thisObj, available;
+    thisObj, available, autoScrollTranscriptFlag;
 
     thisObj = this;
     available = this.getAvailablePreferences();
@@ -180,6 +212,7 @@
     keysFieldset = $('<fieldset>');
     keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');
     keysFieldset.append(keysLegend);
+
 
     for (i=0; i<available.length; i++) {
       thisPref = available[i]['name'];

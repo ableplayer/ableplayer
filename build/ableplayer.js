@@ -392,6 +392,7 @@
     this.startedPlaying = false;
     // TODO: Move this setting to cookie.
     this.autoScrollTranscript = true;
+    //this.autoScrollTranscript = this.getCookie(autoScrollTranscript); // (doesn't work)
 
     // Bootstrap from this.media possibly being an ID or other selector.
     this.$media = $(this.media).first();
@@ -1292,6 +1293,28 @@
         return defaultCookie;
       }
   };
+  AblePlayer.prototype.updateCookie = function( setting ) {
+
+    // called when a particular setting had been updated
+    // useful for settings updated indpedently of Preferences dialog
+    // e.g., autoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
+
+    var cookie, available, i, prefName;
+    cookie = this.getCookie();
+    available = this.getAvailablePreferences();
+
+    // Rebuild cookie with current cookie values,
+    // replacing the one value that's been changed
+    for (i = 0; i < available.length; i++) {
+      prefName = available[i]['name'];
+      if (prefName == setting) {
+        // this is the one that requires an update
+        cookie.preferences[prefName] = this[prefName];
+      }
+    }
+    // Save updated cookie
+    this.setCookie(cookie);
+  };
 
   AblePlayer.prototype.getAvailablePreferences = function() {
     // Return the list of currently available preferences.
@@ -1364,7 +1387,11 @@
         'label': this.tt.prefHighlight,
         'default': 1 // on because many users can benefit
       });
-
+      prefs.push({
+        'name': 'autoScrollTranscript',
+        'label': this.tt.autoScrollTranscript,
+        'default': true
+      });
       prefs.push({
         'name': 'prefTabbable', // tab-enable transcript
         'label': this.tt.prefTabbable,
@@ -1377,6 +1404,12 @@
         'name': 'prefTranscript', // transcript default state
         'label': this.tt.prefTranscript,
         'default': 0 // off because turning it on has a certain WOW factor
+      });
+
+      prefs.push({
+        'name': 'autoScrollTranscript',
+        'label': this.tt.autoScrollTranscript,
+        'default': false
       });
 
       prefs.push({
@@ -1423,7 +1456,7 @@
     featuresFieldset, featuresLegend,
     keysFieldset, keysLegend,
     i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
-    thisObj, available;
+    thisObj, available, autoScrollTranscriptFlag;
 
     thisObj = this;
     available = this.getAvailablePreferences();
@@ -1446,6 +1479,7 @@
     keysFieldset = $('<fieldset>');
     keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');
     keysFieldset.append(keysLegend);
+
 
     for (i=0; i<available.length; i++) {
       thisPref = available[i]['name'];
@@ -5872,11 +5906,15 @@
       this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
     }
   };
-  
+
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
-    this.autoScrollTranscript = val;
+
+    // the + operator converts boolean val to numeric 1 or 0, so it's consistent with other preferences
+    this.autoScrollTranscript = +val;
+    this.updateCookie('autoScrollTranscript');
     this.refreshControls();
   };
+
 
   AblePlayer.prototype.showTooltip = function($tooltip) { 
 
