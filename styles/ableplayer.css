@@ -74,7 +74,7 @@
     background-color: transparent;
     border: none;
     outline: none;
-    z-index: 2000;
+    z-index: 1900;
     left: 0;
     top: 0;
     padding: 0;
@@ -109,6 +109,7 @@
   color: #fdfdfd;
   min-width: 20px;
   overflow: hidden !important;
+  z-index: 1950;
 }
 .able-controller button > span { 
   /* icomoon font icon */
@@ -116,18 +117,22 @@
   width: 24px;
   margin: 0 5px;
   padding: 0;
+  z-index: 1955;
 }
 .able-controller button > img { 
   /* image icon */
   margin: 0 2px;
   padding: 0;
+  z-index: 1960;
 }
 .able-controller .buttonOff { 
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
+    z-index: 1965;
 }
 .able-controller .able-seekbar {
-  margin: 0 5px
+  margin: 0 5px;
+  z-index: 1970;
 }
 .able-controller button:hover, 
 .able-controller button:focus { 
@@ -146,7 +151,7 @@
 */
 .able-seekbar-wrapper { 
   display: inline-block;
-  vertical-align: middle; 
+  vertical-align: middle;
 }
 .able-seekbar {
   position: relative;
