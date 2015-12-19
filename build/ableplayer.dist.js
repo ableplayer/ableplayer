@@ -3043,14 +3043,13 @@
     
     // inner container for all text, will be assigned to modal div's aria-describedby 
     $helpTextWrapper = $('<div></div>');
-    
     $helpIntro = $('<p></p>').text(this.tt.helpKeys);    
     $helpDisclaimer = $('<p></p>').text(this.tt.helpKeysDisclaimer);
     helpText = '<ul>\n';
     for (i=0; i<this.controls.length; i++) { 
       if (this.controls[i] === 'play') { 
         label = this.tt.play + '/' + this.tt.pause;
-        key = 'p </span><em>' + this.tt.or + '</em><span class="able-help-modifiers"> ' + this.tt.spacebar;
+        key = 'p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar;
       }
       else if (this.controls[i] === 'stop') { 
         label = this.tt.stop;
@@ -3068,13 +3067,13 @@
         label = this.tt.mute;
         key = 'm';
       }
-      else if (this.controls[i] === 'volumeUp') { 
+      else if (this.controls[i] === 'volume-up') { 
         label = this.tt.volumeUp;
-        key = 'u </b><em>' + this.tt.or + '</em><b> 1-5';
+        key = 'u</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers">1-5';
       }
-      else if (this.controls[i] === 'volumeDown') { 
+      else if (this.controls[i] === 'volume-down') { 
         label = this.tt.volumeDown;
-        key = 'd </b><em>' + this.tt.or + '</em><b> 1-5';
+        key = 'd</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers">1-5';
       }
       else if (this.controls[i] === 'captions') { 
         if (this.captions.length > 1) { 
