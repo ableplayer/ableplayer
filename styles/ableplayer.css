@@ -355,6 +355,10 @@ div.modalDialog button:focus {
   display: table-cell;
 	padding-left: 0.5em;
 }
+#able-prefs-fieldset-keys div { 
+  float: left;
+  margin-right: 1em; 
+}
 
 /* 
   Help Dialog 

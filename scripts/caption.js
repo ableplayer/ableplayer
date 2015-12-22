@@ -7,11 +7,13 @@
       }
       else if (this.$captionDiv) {
         this.$captionDiv.hide();
+        this.prefCaptions = 0; 
       }
     }
   };
 
   // Returns the function used when a caption is clicked in the captions menu.
+  // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction() 
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
@@ -53,6 +55,11 @@
         thisObj.hidingPopup = false;
       }, 100);
       thisObj.$ccButton.focus();
+
+      // save preference to cookie 
+      thisObj.prefCaptions = 1; 
+      thisObj.updateCookie('prefCaptions');
+      
       thisObj.refreshControls();
     }
   };
@@ -76,6 +83,11 @@
         thisObj.hidingPopup = false;
       }, 100);
       thisObj.$ccButton.focus();
+      
+      // save preference to cookie 
+      thisObj.prefCaptions = 0; 
+      thisObj.updateCookie('prefCaptions');
+
       thisObj.refreshControls();
       thisObj.updateCaption();
     }

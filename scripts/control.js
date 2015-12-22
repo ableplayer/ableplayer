@@ -595,9 +595,14 @@
     }
 
     if (this.includeTranscript) {
-      // Sync checkbox with autoScrollTranscript variable.
-      if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
-        this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
+      // Sync checkbox and autoScrollTranscript with user preference 
+      if (this.prefAutoScrollTranscript === 1) { 
+        this.autoScrollTranscript = true; 
+        this.$autoScrollTranscriptCheckbox.attr('checked','checked'); 
+      }
+      else {
+        this.autoScrollTranscript = false; 
+        this.$autoScrollTranscriptCheckbox.removeAttr('checked');
       }
 
       // If transcript locked, scroll transcript to current highlight location.
@@ -887,6 +892,8 @@
 
   AblePlayer.prototype.handleDescriptionToggle = function() { 
     this.descOn = !this.descOn;
+    this.prefDesc = + this.descOn; // convert boolean to integer 
+    this.updateCookie('prefDesc');
     this.updateDescription();
     this.refreshControls();
   };
@@ -906,12 +913,15 @@
       this.$transcriptArea.hide();
       this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
+      this.prefTranscript = 0; 
     }
     else {
       this.$transcriptArea.show();
       this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
+      this.prefTranscript = 1; 
     }
+    this.updateCookie('prefTranscript');    
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -1057,9 +1067,9 @@
 
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
 
-    // the + operator converts boolean val to numeric 1 or 0, so it's consistent with other preferences
-    this.autoScrollTranscript = +val;
-    this.updateCookie('autoScrollTranscript');
+    this.autoScrollTranscript = val; // val is boolean 
+    this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
+    this.updateCookie('prefAutoScrollTranscript');
     this.refreshControls();
   };
 

@@ -108,11 +108,15 @@ var nl = {
 
 "prefTitle": "Voorkeuren",
 
-"prefIntro": "Om je voorkeuren op te slaan moet je cookies toestaan",
+"prefIntro": "Klik op de knop Help op de mediaspeler voor meer informatie over elke voorkeur. Om je voorkeuren op te slaan moet je cookies toestaan",
 
-"prefFeatures": "Kenmerken",
+"prefHeadingKeys": "Aangepaste toetsen",
 
-"prefKeys": "Aangepaste toetsen",
+"prefHeadingDescription": "Tekst-gebaseerde audiobeschrijving",
+
+"prefHeadingCaptions": "Ondertiteling",
+
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -120,19 +124,11 @@ var nl = {
 
 "prefShiftKey": "Shift",
 
-"prefCaptions": "Ondertiteling standaard aan",
-
-"prefSignLanguage": "Toon gebarentaal als deze beschikbaar is",
-
-"prefDesc": "Beschrijving standaard aan",
-
 "prefClosedDesc": "Gebruik tekst-gebaseerde beschrijving als deze beschikbaar is",
 
-"prefDescPause": "Pauzeer video automatisch als tekst-gebaseerde beschrijving aan wordt gezet",
+"prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
 
 "prefVisibleDesc": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
-
-"prefTranscript": "Transcript standaard aan",
 
 "prefHighlight": "Transcript highlighten terwijl media speelt",
 

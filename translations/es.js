@@ -104,11 +104,15 @@ var es = {
 
 "prefTitle": "Preferencias",
 
-"prefIntro": "Guardar sus preferencias requiere el uso de cookies.",
+"prefIntro": "Haga clic en el botón de ayuda en el reproductor de medios para obtener detalles sobre cada preferencia. Guardar sus preferencias requiere el uso de cookies.",
 
-"prefFeatures": "Características",
+"prefHeadingKeys": "Teclas modificadoras",
 
-"prefKeys": "Teclas modificadoras",
+"prefHeadingDescription": "Audiodescrita en texto",
+
+"prefHeadingCaptions": "Subtítulos",
+
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -116,19 +120,11 @@ var es = {
 
 "prefShiftKey": "Mayúscula",
 
-"prefCaptions": "Subtítulos habilitados por defecto",
-
-"prefSignLanguage": "Mostrar lengua de señas si está disponible",
-
-"prefDesc": "Habilitar descripción por defecto",
-
 "prefClosedDesc": "Utilizar descripciones en texto si están disponibles",
 
-"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción en texto",
+"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
 "prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
-
-"prefTranscript": "Habilitar transcripción por defecto",
 
 "prefHighlight": "Resaltar la transcripción según avanza el contenido",
 

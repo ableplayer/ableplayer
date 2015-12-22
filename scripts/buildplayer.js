@@ -495,6 +495,9 @@
             'for': radioId
           });
           trackLabel.text(this.tt.captionsOff);    
+          if (this.prefCaptions === 0) { 
+            trackButton.attr('checked','checked');
+          }
           trackButton.click(this.getCaptionOffFunction());
           trackItem.append(trackButton,trackLabel);
           trackList.append(trackItem);          

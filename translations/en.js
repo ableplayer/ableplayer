@@ -104,11 +104,15 @@ var en = {
 
 "prefTitle": "Preferences",
 
-"prefIntro": "Saving your preferences requires cookies.",
+"prefIntro": "Click the help button on the media player for details about each preference. Saving your preferences requires cookies.",
 
-"prefFeatures": "Features",
+"prefHeadingKeys": "Modifier keys used for shortcuts",
 
-"prefKeys": "Modifier keys used for shortcuts (see help)",
+"prefHeadingDescription": "Text-based audio description",
+
+"prefHeadingCaptions": "Captions",
+
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -116,19 +120,11 @@ var en = {
 
 "prefShiftKey": "Shift",
 
-"prefCaptions": "Closed captions on by default",
-
-"prefSignLanguage": "Show sign language if available",
-
-"prefDesc": "Description on by default",
-
 "prefClosedDesc": "Use text-based description if available",
 
-"prefDescPause": "Automatically pause video when text-based description starts",
+"prefDescPause": "Automatically pause video when description starts",
 
-"prefVisibleDesc": "If using text-based description,make it visible",
-
-"prefTranscript": "Transcript on by default",
+"prefVisibleDesc": "Make description visible",
 
 "prefHighlight": "Highlight transcript as media plays",
 

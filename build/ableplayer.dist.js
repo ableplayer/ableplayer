@@ -1272,7 +1272,7 @@
   };
 
   AblePlayer.prototype.getCookie = function() {
-
+    
     var defaultCookie = {
       preferences: {}
     };
@@ -1297,7 +1297,7 @@
 
     // called when a particular setting had been updated
     // useful for settings updated indpedently of Preferences dialog
-    // e.g., autoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
+    // e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
 
     var cookie, available, i, prefName;
     cookie = this.getCookie();
@@ -1317,114 +1317,101 @@
   };
 
   AblePlayer.prototype.getAvailablePreferences = function() {
-    // Return the list of currently available preferences.
 
+    // Return the list of currently available preferences.
+    // Preferences with no 'label' are set within player, not shown in Prefs dialog
     var prefs = [];
 
-    // modifier keys preferences apply to both audio and video
+    // Modifier keys preferences
     prefs.push({
       'name': 'prefAltKey', // use alt key with shortcuts
       'label': this.tt.prefAltKey,
+      'group': 'keys',
       'default': 1
     });
-
     prefs.push({
       'name': 'prefCtrlKey', // use ctrl key with shortcuts
       'label': this.tt.prefCtrlKey,
+      'group': 'keys',
       'default': 1
     });
-
     prefs.push({
       'name': 'prefShiftKey',
       'label': this.tt.prefShiftKey,
+      'group': 'keys',
       'default': 0
     });
-    if (this.mediaType === 'video') { // features prefs apply only to video
+    
+    // Transcript preferences 
+    prefs.push({
+      'name': 'prefTranscript', // transcript default state
+      'label': null,
+      'group': 'transcript',
+      'default': 0 // off because turning it on has a certain WOW factor
+    });
+    prefs.push({
+      'name': 'prefHighlight', // highlight transcript as media plays
+      'label': this.tt.prefHighlight,
+      'group': 'transcript',
+      'default': 1 // on because many users can benefit
+    });
+    prefs.push({
+      'name': 'prefAutoScrollTranscript',
+      'label': null,
+      'group': 'transcript',
+      'default': 1
+    });
+    prefs.push({
+      'name': 'prefTabbable', // tab-enable transcript
+      'label': this.tt.prefTabbable,
+      'group': 'transcript',
+      'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
+    });
+    
+    if (this.mediaType === 'video') { 
+
+      // Caption preferences       
       prefs.push({
         'name': 'prefCaptions', // closed captions default state
-        'label': this.tt.prefCaptions,
-        'default': 1 // on because many users can benefit
+        'label': null,
+        'group': 'captions',
+        'default': 1
       });
 
+      // Sign lanuage preferences 
       prefs.push({
         'name': 'prefSignLanguage', // use sign language if available
-        'label': this.tt.prefSignLanguage,
+        'label': null,
+        'group': 'sign',
         'default': 1 // on because in rare cases that it's actually available, users should be exposed to it
       });
 
+      // Description preferences 
       prefs.push({
         'name': 'prefDesc', // audio description default state
-        'label': this.tt.prefDesc,
+        'label': null,
+        'group': 'description',
         'default': 0 // off because users who don't need it might find it distracting
       });
-
       prefs.push({
         'name': 'prefClosedDesc', // use closed description if available
         'label': this.tt.prefClosedDesc,
+        'group': 'description',
         'default': 0 // off because experimental
       });
-
       prefs.push({
         'name': 'prefDescPause', // automatically pause when closed description starts
         'label': this.tt.prefDescPause,
+        'group': 'description',
         'default': 0 // off because it burdens user with restarting after every pause
       });
-
       prefs.push({
         'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
         'label': this.tt.prefVisibleDesc,
+        'group': 'description',
         'default': 1 // on because sighted users probably want to see this cool feature in action
       });
-
-      prefs.push({
-        'name': 'prefTranscript', // transcript default state
-        'label': this.tt.prefTranscript,
-        'default': 0 // off because turning it on has a certain WOW factor
-      });
-
-      prefs.push({
-        'name': 'prefHighlight', // highlight transcript as media plays
-        'label': this.tt.prefHighlight,
-        'default': 1 // on because many users can benefit
-      });
-      prefs.push({
-        'name': 'autoScrollTranscript',
-        'label': this.tt.autoScrollTranscript,
-        'default': true
-      });
-      prefs.push({
-        'name': 'prefTabbable', // tab-enable transcript
-        'label': this.tt.prefTabbable,
-        'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
-      });
     }
-    else {
-
-      prefs.push({
-        'name': 'prefTranscript', // transcript default state
-        'label': this.tt.prefTranscript,
-        'default': 0 // off because turning it on has a certain WOW factor
-      });
-
-      prefs.push({
-        'name': 'autoScrollTranscript',
-        'label': this.tt.autoScrollTranscript,
-        'default': false
-      });
-
-      prefs.push({
-        'name': 'prefHighlight', // highlight transcript as media plays
-        'label': this.tt.prefHighlight,
-        'default': 1 // on because many users can benefit
-      });
-
-      prefs.push({
-        'name': 'prefTabbable', // tab-enable transcript
-        'label': this.tt.prefTabbable,
-        'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
-      });
-    }
-
     return prefs;
   };
 
@@ -1452,11 +1439,11 @@
 
   // Creates the preferences form and injects it.
   AblePlayer.prototype.injectPrefsForm = function () {
+
     var prefsDiv, introText, prefsIntro,
-    featuresFieldset, featuresLegend,
-    keysFieldset, keysLegend,
-    i, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
-    thisObj, available, autoScrollTranscriptFlag;
+      groups, fieldset, fieldsetId, legend, heading, 
+      i, j, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
+      thisObj, available;
 
     thisObj = this;
     available = this.getAvailablePreferences();
@@ -1466,56 +1453,68 @@
       'class': 'able-prefs-form'
     });
 
+    // add intro
     introText = '<p>' + this.tt.prefIntro + '</p>\n';
-
     prefsIntro = $('<p>',{
       html: introText
     });
+    prefsDiv.append(prefsIntro)
 
-    featuresFieldset = $('<fieldset>');
-    featuresLegend = $('<legend>' + this.tt.prefFeatures + '</legend>');
-    featuresFieldset.append(featuresLegend);
-
-    keysFieldset = $('<fieldset>');
-    keysLegend = $('<legend>' + this.tt.prefKeys + '</legend>');
-    keysFieldset.append(keysLegend);
-
-
-    for (i=0; i<available.length; i++) {
-      thisPref = available[i]['name'];
-      thisDiv = $('<div>');
-      thisId = this.mediaId + '_' + thisPref;
-      thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-      thisCheckbox = $('<input>',{
-        type: 'checkbox',
-        name: thisPref,
-        id: thisId,
-        value: 'true'
-      });
-      thisDiv.append(thisCheckbox).append(thisLabel);
-      // check current active value for this preference
-      if (this[thisPref] === 1) {
-        thisCheckbox.prop('checked',true);
-      }
-      // TODO: We need to indicate this in the prefs structure itself.
-      if (i === 0 || i === 1 || i === 2) { // this is a key preference
-        keysFieldset.append(thisDiv);
-      }
-      else { // this is a feature preference
-        featuresFieldset.append(thisDiv);
-      }
+    // add preference fields in groups
+    if (this.mediaType === 'video') { 
+      groups = ['keys','description','transcript']; // TODO: Add captions (font & colors)
     }
-    // Now assemble all the parts
-    prefsDiv
-      .append(prefsIntro)
-      .append(keysFieldset)
-      .append(featuresFieldset);
+    else { 
+      groups = ['keys','transcript']; 
+    }
+    for (i=0; i < groups.length; i++) { 
+      fieldset = $('<fieldset>');
+      fieldsetId = 'able-prefs-fieldset-' + groups[i];
+      fieldset.attr('id',fieldsetId);
+      switch (groups[i]) { 
+        case 'keys': 
+          heading = this.tt.prefHeadingKeys;
+          break; 
+        case 'description': 
+          heading = this.tt.prefHeadingDescription;
+          break; 
+        case 'transcript': 
+          heading = this.tt.prefHeadingTranscript;
+          break; 
+        case 'captions': 
+          heading = this.tt.prefHeadingCaptions;
+          break;           
+      }
+      legend = $('<legend>' + heading + '</legend>');
+      fieldset.append(legend);
 
-    // must be appended to the BODY!
+      for (j=0; j<available.length; j++) {
+        // only include prefs in the current group if they have a label
+        if ((available[j]['group'] == groups[i]) && available[j]['label']) { 
+          thisPref = available[j]['name'];
+          thisDiv = $('<div>');
+          thisId = this.mediaId + '_' + thisPref;
+          thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
+          thisCheckbox = $('<input>',{
+            type: 'checkbox',
+            name: thisPref,
+            id: thisId,
+            value: 'true'
+          });
+          thisDiv.append(thisCheckbox).append(thisLabel);
+          // check current active value for this preference
+          if (this[thisPref] === 1) {
+            thisCheckbox.prop('checked',true);
+          }
+          fieldset.append(thisDiv);
+        }
+      }
+      prefsDiv.append(fieldset);
+    }
+    // prefsDiv (dialog) must be appended to the BODY!
     // otherwise when aria-hidden="true" is applied to all background content
     // that will include an ancestor of the dialog,
     // which will render the dialog unreadable by screen readers
-    // this.$ableDiv.append(prefsDiv);
     $('body').append(prefsDiv);
 
     var dialog = new AccessibleDialog(prefsDiv, 'dialog', thisObj.tt.prefTitle, prefsIntro, thisObj.tt.closeButtonLabel, '32em');
@@ -2917,6 +2916,9 @@
             'for': radioId
           });
           trackLabel.text(this.tt.captionsOff);    
+          if (this.prefCaptions === 0) { 
+            trackButton.attr('checked','checked');
+          }
           trackButton.click(this.getCaptionOffFunction());
           trackItem.append(trackButton,trackLabel);
           trackList.append(trackItem);          
@@ -5446,9 +5448,14 @@
     }
 
     if (this.includeTranscript) {
-      // Sync checkbox with autoScrollTranscript variable.
-      if (this.autoScrollTranscript !== this.$autoScrollTranscriptCheckbox.prop('checked')) {
-        this.$autoScrollTranscriptCheckbox.prop('checked', this.autoScrollTranscript);
+      // Sync checkbox and autoScrollTranscript with user preference 
+      if (this.prefAutoScrollTranscript === 1) { 
+        this.autoScrollTranscript = true; 
+        this.$autoScrollTranscriptCheckbox.attr('checked','checked'); 
+      }
+      else {
+        this.autoScrollTranscript = false; 
+        this.$autoScrollTranscriptCheckbox.removeAttr('checked');
       }
 
       // If transcript locked, scroll transcript to current highlight location.
@@ -5738,6 +5745,8 @@
 
   AblePlayer.prototype.handleDescriptionToggle = function() { 
     this.descOn = !this.descOn;
+    this.prefDesc = + this.descOn; // convert boolean to integer 
+    this.updateCookie('prefDesc');
     this.updateDescription();
     this.refreshControls();
   };
@@ -5757,12 +5766,15 @@
       this.$transcriptArea.hide();
       this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
+      this.prefTranscript = 0; 
     }
     else {
       this.$transcriptArea.show();
       this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
+      this.prefTranscript = 1; 
     }
+    this.updateCookie('prefTranscript');    
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -5908,9 +5920,9 @@
 
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
 
-    // the + operator converts boolean val to numeric 1 or 0, so it's consistent with other preferences
-    this.autoScrollTranscript = +val;
-    this.updateCookie('autoScrollTranscript');
+    this.autoScrollTranscript = val; // val is boolean 
+    this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
+    this.updateCookie('prefAutoScrollTranscript');
     this.refreshControls();
   };
 
@@ -6012,11 +6024,13 @@
       }
       else if (this.$captionDiv) {
         this.$captionDiv.hide();
+        this.prefCaptions = 0; 
       }
     }
   };
 
   // Returns the function used when a caption is clicked in the captions menu.
+  // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction() 
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
     var thisObj = this;
     return function () {
@@ -6058,6 +6072,11 @@
         thisObj.hidingPopup = false;
       }, 100);
       thisObj.$ccButton.focus();
+
+      // save preference to cookie 
+      thisObj.prefCaptions = 1; 
+      thisObj.updateCookie('prefCaptions');
+      
       thisObj.refreshControls();
     }
   };
@@ -6081,6 +6100,11 @@
         thisObj.hidingPopup = false;
       }, 100);
       thisObj.$ccButton.focus();
+      
+      // save preference to cookie 
+      thisObj.prefCaptions = 0; 
+      thisObj.updateCookie('prefCaptions');
+
       thisObj.refreshControls();
       thisObj.updateCaption();
     }
@@ -8482,7 +8506,7 @@
     // translation2.js is then contanenated onto the end to finish this function
         
 
-var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefFeatures": "Funktionen","prefKeys": "Tastenkombination für Kurzwahl (siehe Hilfe)","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefCaptions": "Untertitel automatisch einschalten","prefSignLanguage": "Gebärdensprache automatisch einschalten","prefDesc": "Audiodeskription automatisch einschalten","prefClosedDesc": "Textbasierte Szenenbeschreibungen verwenden, wenn vorhanden","prefDescPause": "Video automatisch anhalten, wenn textbasierte Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefTranscript": "Transkription standardmäßig einschalten","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
+var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Klicken Sie auf den Hilfe-Button auf dem Media-Player für Details zu den einzelnen Präferenz. Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefHeadingKeys": "Tastenkombination für Kurzwahl","prefHeadingDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefClosedDesc": "Textbasierte Szenenbeschreibungen verwenden, wenn vorhanden","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
 var en = {
   
 "playerHeading": "Media player",
@@ -8589,11 +8613,15 @@ var en = {
 
 "prefTitle": "Preferences",
 
-"prefIntro": "Saving your preferences requires cookies.",
+"prefIntro": "Click the help button on the media player for details about each preference. Saving your preferences requires cookies.",
 
-"prefFeatures": "Features",
+"prefHeadingKeys": "Modifier keys used for shortcuts",
 
-"prefKeys": "Modifier keys used for shortcuts (see help)",
+"prefHeadingDescription": "Text-based audio description",
+
+"prefHeadingCaptions": "Captions",
+
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -8601,19 +8629,11 @@ var en = {
 
 "prefShiftKey": "Shift",
 
-"prefCaptions": "Closed captions on by default",
-
-"prefSignLanguage": "Show sign language if available",
-
-"prefDesc": "Description on by default",
-
 "prefClosedDesc": "Use text-based description if available",
 
-"prefDescPause": "Automatically pause video when text-based description starts",
+"prefDescPause": "Automatically pause video when description starts",
 
-"prefVisibleDesc": "If using text-based description,make it visible",
-
-"prefTranscript": "Transcript on by default",
+"prefVisibleDesc": "Make description visible",
 
 "prefHighlight": "Highlight transcript as media plays",
 
@@ -8773,11 +8793,15 @@ var es = {
 
 "prefTitle": "Preferencias",
 
-"prefIntro": "Guardar sus preferencias requiere el uso de cookies.",
+"prefIntro": "Haga clic en el botón de ayuda en el reproductor de medios para obtener detalles sobre cada preferencia. Guardar sus preferencias requiere el uso de cookies.",
 
-"prefFeatures": "Características",
+"prefHeadingKeys": "Teclas modificadoras",
 
-"prefKeys": "Teclas modificadoras",
+"prefHeadingDescription": "Audiodescrita en texto",
+
+"prefHeadingCaptions": "Subtítulos",
+
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -8785,19 +8809,11 @@ var es = {
 
 "prefShiftKey": "Mayúscula",
 
-"prefCaptions": "Subtítulos habilitados por defecto",
-
-"prefSignLanguage": "Mostrar lengua de señas si está disponible",
-
-"prefDesc": "Habilitar descripción por defecto",
-
 "prefClosedDesc": "Utilizar descripciones en texto si están disponibles",
 
-"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción en texto",
+"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
 "prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
-
-"prefTranscript": "Habilitar transcripción por defecto",
 
 "prefHighlight": "Resaltar la transcripción según avanza el contenido",
 
@@ -8961,11 +8977,15 @@ var nl = {
 
 "prefTitle": "Voorkeuren",
 
-"prefIntro": "Om je voorkeuren op te slaan moet je cookies toestaan",
+"prefIntro": "Klik op de knop Help op de mediaspeler voor meer informatie over elke voorkeur. Om je voorkeuren op te slaan moet je cookies toestaan",
 
-"prefFeatures": "Kenmerken",
+"prefHeadingKeys": "Aangepaste toetsen",
 
-"prefKeys": "Aangepaste toetsen",
+"prefHeadingDescription": "Tekst-gebaseerde audiobeschrijving",
+
+"prefHeadingCaptions": "Ondertiteling",
+
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -8973,19 +8993,11 @@ var nl = {
 
 "prefShiftKey": "Shift",
 
-"prefCaptions": "Ondertiteling standaard aan",
-
-"prefSignLanguage": "Toon gebarentaal als deze beschikbaar is",
-
-"prefDesc": "Beschrijving standaard aan",
-
 "prefClosedDesc": "Gebruik tekst-gebaseerde beschrijving als deze beschikbaar is",
 
-"prefDescPause": "Pauzeer video automatisch als tekst-gebaseerde beschrijving aan wordt gezet",
+"prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
 
 "prefVisibleDesc": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
-
-"prefTranscript": "Transcript standaard aan",
 
 "prefHighlight": "Transcript highlighten terwijl media speelt",
 
