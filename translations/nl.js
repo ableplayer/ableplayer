@@ -112,7 +112,9 @@ var nl = {
 
 "prefHeadingKeys": "Aangepaste toetsen",
 
-"prefHeadingDescription": "Tekst-gebaseerde audiobeschrijving",
+"prefHeadingDescription": "Audiobeschrijving",
+
+"prefHeadingTextDescription": "Tekst-gebaseerde audiobeschrijving",
 
 "prefHeadingCaptions": "Ondertiteling",
 
@@ -124,7 +126,11 @@ var nl = {
 
 "prefShiftKey": "Shift",
 
-"prefClosedDesc": "Gebruik tekst-gebaseerde beschrijving als deze beschikbaar is",
+"prefDescFormat": "Preferred format",
+
+"prefDescFormatOption1": "Alternative described version of video",
+
+"prefDescFormatOption2": "Text-based description, announced by screen reader",
 
 "prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
 

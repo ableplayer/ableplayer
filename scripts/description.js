@@ -1,66 +1,108 @@
 (function ($) {
   AblePlayer.prototype.initDescription = function() { 
+
     // set default mode for delivering description (open vs closed) 
-    // based on availability and user preference        
+    // based on availability and user preference       
+    
+    // called when player is being built, or when a user  
+    // toggles the Description button or changes a description-related preference 
+    // In the latter two scendarios, this.refreshingDesc == true via control.js > handleDescriptionToggle()
+    
+    // The following variables are applicable to delivery of description: 
+    // prefDesc == 1 if user wants description (i.e., Description button is on); else 0 
+    // prefDescFormat == either 'video' or 'text'
+    // prefDescPause == 1 to pause video when description starts; else 0 
+    // prefVisibleDesc == 1 to visibly show text-based description area; else 0 
+    // hasOpenDesc == true if a described version of video is available via data-desc-src attribute
+    // hasClosedDesc == true if a description text track is available 
+    // this.useDescFormat == either 'video' or 'text'; the format ultimately delivered 
+    // descOn == true if description of either type is on
 
-    // first, check to see if there's an open-described version of this video  
-    // checks only the first source 
-    // Therefore, if a described version is provided, 
-    // it must be provided for all sources  
-    this.descFile = this.$sources.first().attr('data-desc-src');
-    if (this.descFile) { 
-      if (this.debug) {
-        console.log('This video has a described version: ' + this.descFile);      
+    if (!this.refreshingDesc) { 
+      // this is the initial build 
+      // first, check to see if there's an open-described version of this video  
+      // checks only the first source since if a described version is provided, 
+      // it must be provided for all sources  
+      this.descFile = this.$sources.first().attr('data-desc-src');
+      if (typeof this.descFile !== 'undefined') { 
+        this.hasOpenDesc = true;
       }
-      this.hasOpenDesc = true;
-      if (this.prefDesc) {
-        this.descOn = true;
+      else { 
+        this.hasOpenDesc = false;              
       }
     }
-    else { 
-      if (this.debug) {
-        console.log('This video does not have a described version');      
+    
+    // update this.useDescFormat based on media availability & user preferences   
+    if (this.prefDesc) {
+      if (this.hasOpenDesc && this.hasClosedDesc) { 
+        // both formats are available. Use whichever one user prefers 
+        this.useDescFormat = this.prefDescFormat; 
+        this.descOn = true; 
       }
-      this.hasOpenDesc = false;              
+      else if (this.hasOpenDesc) { 
+        this.useDescFormat = 'video'; 
+        this.descOn = true; 
+      }
+      else if (this.hasClosedDesc) { 
+        this.useDescFormat = 'text'; 
+        this.descOn = true; 
+      }
     }
-    
-    this.updateDescription();
-  };
+    else { // description button is off 
+      if (this.refreshingDesc) { // user just now toggled it off 
+        this.prevDescFormat = this.useDescFormat;
+        this.useDescFormat = false; 
+        this.descOn = false; 
+      }
+      else { // desc has always been off
+        this.useDescFormat = false;        
+      }
+    }
 
-  AblePlayer.prototype.updateDescription = function (time) {
-    var useAudioDesc;
-    
     if (this.descOn) {
-      if (this.prefClosedDesc) {
-        useAudioDesc = false;
-        if (this.hasClosedDesc) {
-          if (this.prefVisibleDesc) {
-            this.$descDiv.show();
-            this.$descDiv.removeClass('able-clipped');
-          }
-          else {
-            this.$descDiv.hide();
-            this.$descDiv.addClass('able-clipped');
-          }
-          this.showDescription(time || this.getElapsed());
+
+      if (this.useDescFormat === 'video') { 
+        if (!this.usingAudioDescription()) {
+          this.swapDescription();   
+        }
+        // hide description div 
+        this.$descDiv.hide();
+        this.$descDiv.removeClass('able-clipped');     
+        this.showAlert(this.tt.alertDescribedVersion);                   
+      }
+      else if (this.useDescFormat === 'text') {
+        if (this.usingAudioDescription()) {
+        // switch from described version to non-described version 
+          this.swapDescription();   
+        }        
+        this.$descDiv.show();
+        if (this.prefVisibleDesc) { // make it visible to everyone
+          this.$descDiv.removeClass('able-clipped');
+        }
+        else { // keep it visible to screen readers, but hide from everyone else
+          this.$descDiv.addClass('able-clipped'); 
+        }
+        this.showDescription(this.getElapsed());
+      }
+    }
+    else { // description is off. 
+      if (this.prevDescFormat === 'video') { // user was previously using description via video 
+        if (this.usingAudioDescription()) {
+          this.swapDescription();   
         }
       }
-      else {
-        useAudioDesc = true;
+      else if (this.prevDescFormat === 'text') { // user was previously using text description 
+        // hide description div from everyone, including screen reader users
+        this.$descDiv.hide();
+        this.$descDiv.removeClass('able-clipped');        
       }
     }
-    else {
-      this.$descDiv.hide();
-      useAudioDesc = false;
-    }
-    
-    if (this.hasOpenDesc && this.usingAudioDescription() !== useAudioDesc) {
-      this.swapDescription();   
-    }
+    this.refreshingDesc = false; 
   };
 
   // Returns true if currently using audio description, false otherwise.
   AblePlayer.prototype.usingAudioDescription = function () {
+    
     return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
   };
 
@@ -73,6 +115,7 @@
     var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
 
     if (!this.usingAudioDescription()) {
+      
       for (i=0; i < this.$sources.length; i++) { 
         // for all <source> elements, replace src with data-desc-src (if one exists)
         // then store original source in a new data-orig-src attribute 
@@ -170,9 +213,6 @@
           this.pauseMedia();
         }
         this.currentDescription = thisDescription;
-        if (this.$descDiv.is(':hidden')) { 
-          this.$descDiv.show();
-        }
       } 
     }
     else {     

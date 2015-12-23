@@ -31,7 +31,7 @@
     }
 
     this.updateCaption();
-    this.updateDescription();
+    this.showDescription(this.getElapsed());
     this.updateMeta();
     this.refreshControls();
   };
@@ -63,20 +63,23 @@
   };
 
   AblePlayer.prototype.onMediaNewSourceLoad = function () {
+
     if (this.swappingSrc === true) { 
       // new source file has just been loaded 
-      // should be able to play 
+      if (this.playing) { 
+        // should be able to resume playback  
       
-      if (this.player === 'jw') {
-        var player = this.jwPlayer;
-        // Seems to be a bug in JW player, where this doesn't work when fired immediately.
-        // Thus have to use a setTimeout
-        setTimeout(function () {
-          player.play(true);
-        }, 500);
-      }
-      else {
-        this.playMedia();
+        if (this.player === 'jw') {
+          var player = this.jwPlayer;
+          // Seems to be a bug in JW player, where this doesn't work when fired immediately.
+          // Thus have to use a setTimeout
+          setTimeout(function () {
+            player.play(true);
+          }, 500);
+        }
+        else {
+          this.playMedia();
+        }
       }
       this.swappingSrc = false; // swapping is finished
       this.refreshControls();
@@ -125,7 +128,7 @@
       // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
-      thisObj.updateDescription(position);
+      thisObj.showDescription(position);
       thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {
@@ -343,6 +346,7 @@
         }
       })
       .on('playing',function() { 
+        thisObj.playing = true; 
         thisObj.refreshControls();
       })
       .on('ended',function() {

@@ -242,12 +242,13 @@ div.able-captions {
 }
 div.able-descriptions { 
   position: relative;
-  color: #FF0; /* yellow, to differentiate it from captions */
+  color: #FF6; /* yellow, to differentiate it from captions */
   background-color: #262626;
   min-height: 3em; 
-  border-top: 1px solid white;
-  margin-top: -10px;
-  padding: 1em 0;
+  border-top: 1px solid #666;
+  margin: 0;
+  padding: 3%;
+  width: 94%;
   text-align: center;
 }
 
@@ -355,9 +356,17 @@ div.modalDialog button:focus {
   display: table-cell;
 	padding-left: 0.5em;
 }
-#able-prefs-fieldset-keys div { 
+fieldset.able-prefs-keys div { 
   float: left;
   margin-right: 1em; 
+}
+div.able-desc-pref-prompt { 
+  font-weight: bold;
+  font-style: italic;
+  margin-left: 1em !important;
+}
+div.able-prefDescFormat > div { 
+  margin-left: 1.5em;
 }
 
 /* 

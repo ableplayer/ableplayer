@@ -93,6 +93,8 @@
     // it might be desirable for the transcript to always be ON, with no toggle 
     // This can be overridden with data-transcript-button="false" 
     this.useTranscriptButton = true; 
+    
+    this.playing = false; // will change to true after 'playing' event is triggered
 
     this.getUserAgent();
     this.setButtonImages();
@@ -322,7 +324,6 @@
     this.setupTracks().then(function () {
       thisObj.setupPopups();
       thisObj.initDescription();
-      thisObj.updateDescription();      
       thisObj.initializing = false;
       thisObj.initPlayer();
       thisObj.initDefaultCaption(); 
@@ -361,15 +362,7 @@
       thisObj.setFullscreen(false);
       thisObj.setVolume(thisObj.defaultVolume);
       thisObj.initializing = true;
-      // Moved this block to recreatePlayer() 
-      // Preserved here to ensure there are no problems
-/*
-      thisObj.updateDescription();
-      thisObj.updateCaption();
-      thisObj.updateTranscript();
-      thisObj.showSearchResults();
-*/      
-      thisObj.initializing = false;
+      thisObj.initializing = false; // well, which is it??? 
       thisObj.refreshControls();
 
       // After done messing with the player, this is necessary to fix playback on iOS

@@ -168,6 +168,7 @@
   };
 
   AblePlayer.prototype.injectTextDescriptionArea = function () {
+
     // create a div for exposing description
     // description will be exposed via role="alert" & announced by screen readers  
     this.$descDiv = $('<div>',{
@@ -175,12 +176,8 @@
       'role': 'alert'
     });
     // Start off with description hidden.
+    // It will be exposed conditionally within description.js > initDescription()
     this.$descDiv.hide();
-    // TODO: Does this need to be changed when preference is changed?
-    if (this.prefClosedDesc === 0 || this.prefVisibleDesc === 0) { 
-      this.$descDiv.addClass('able-clipped');                
-    }
-
     this.$ableDiv.append(this.$descDiv);
   };
 
@@ -1021,10 +1018,7 @@
           }
           else if (control === 'descriptions') {        
             this.$descButton = newButton; 
-            // gray out description button if description is not active 
-            if (!this.descOn) {  
-              this.$descButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);
-            }
+            // button will be enabled or disabled in description.js > initDescription() 
           }
           else if (control === 'mute') { 
             this.$muteButton = newButton;
@@ -1062,11 +1056,7 @@
       if (this.$captionDiv) { 
         this.$captionDiv.css('width',this.playerWidth+'px');
       }
-      if (this.$descDiv) {
-        this.$descDiv.css('width',this.playerWidth+'px');
-      }
     }
-    
     
     // combine left and right controls arrays for future reference 
     this.controls = [];

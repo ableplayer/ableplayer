@@ -108,7 +108,9 @@ var en = {
 
 "prefHeadingKeys": "Modifier keys used for shortcuts",
 
-"prefHeadingDescription": "Text-based audio description",
+"prefHeadingDescription": "Audio description",
+
+"prefHeadingTextDescription": "Text-based audio description",
 
 "prefHeadingCaptions": "Captions",
 
@@ -120,7 +122,11 @@ var en = {
 
 "prefShiftKey": "Shift",
 
-"prefClosedDesc": "Use text-based description if available",
+"prefDescFormat": "Preferred format",
+
+"prefDescFormatOption1": "Alternative described version of video",
+
+"prefDescFormatOption2": "Text-based description, announced by screen reader",
 
 "prefDescPause": "Automatically pause video when description starts",
 

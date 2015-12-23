@@ -127,21 +127,21 @@
         'default': 0 // off because users who don't need it might find it distracting
       });
       prefs.push({
-        'name': 'prefClosedDesc', // use closed description if available
-        'label': this.tt.prefClosedDesc,
+        'name': 'prefDescFormat', // audio description default state
+        'label': this.tt.prefDescFormat,
         'group': 'description',
-        'default': 0 // off because experimental
+        'default': 'video'
       });
       prefs.push({
         'name': 'prefDescPause', // automatically pause when closed description starts
         'label': this.tt.prefDescPause,
-        'group': 'description',
+        'group': 'text-description',
         'default': 0 // off because it burdens user with restarting after every pause
       });
       prefs.push({
         'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
         'label': this.tt.prefVisibleDesc,
-        'group': 'description',
+        'group': 'text-description',
         'default': 1 // on because sighted users probably want to see this cool feature in action
       });
     }
@@ -174,8 +174,11 @@
   AblePlayer.prototype.injectPrefsForm = function () {
 
     var prefsDiv, introText, prefsIntro,
-      groups, fieldset, fieldsetId, legend, heading, 
-      i, j, thisPref, thisDiv, thisId, thisLabel, thisCheckbox,
+      groups, fieldset, fieldsetClass, fieldsetId, legend, heading, 
+      i, j, thisPref, thisDiv, thisClass, thisId, thisLabel, thisField,
+      radioPromptId,radioPrompt,hiddenSpanText,
+      div1,id1,radio1,label1,hiddenSpan1, 
+      div2,id2,radio2,label2,hiddenSpan2, 
       thisObj, available;
 
     thisObj = this;
@@ -195,21 +198,25 @@
 
     // add preference fields in groups
     if (this.mediaType === 'video') { 
-      groups = ['keys','description','transcript']; // TODO: Add captions (font & colors)
+      groups = ['keys','description','text-description','transcript']; // TODO: Add captions (font & colors)
     }
     else { 
       groups = ['keys','transcript']; 
     }
     for (i=0; i < groups.length; i++) { 
       fieldset = $('<fieldset>');
-      fieldsetId = 'able-prefs-fieldset-' + groups[i];
-      fieldset.attr('id',fieldsetId);
+      fieldsetClass = 'able-prefs-' + groups[i];
+      fieldsetId = this.mediaId + '-prefs-' + groups[i];
+      fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
       switch (groups[i]) { 
         case 'keys': 
           heading = this.tt.prefHeadingKeys;
           break; 
         case 'description': 
           heading = this.tt.prefHeadingDescription;
+          break; 
+        case 'text-description': 
+          heading = this.tt.prefHeadingTextDescription;
           break; 
         case 'transcript': 
           heading = this.tt.prefHeadingTranscript;
@@ -225,19 +232,75 @@
         // only include prefs in the current group if they have a label
         if ((available[j]['group'] == groups[i]) && available[j]['label']) { 
           thisPref = available[j]['name'];
-          thisDiv = $('<div>');
-          thisId = this.mediaId + '_' + thisPref;
-          thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
-          thisCheckbox = $('<input>',{
-            type: 'checkbox',
-            name: thisPref,
-            id: thisId,
-            value: 'true'
-          });
-          thisDiv.append(thisCheckbox).append(thisLabel);
-          // check current active value for this preference
-          if (this[thisPref] === 1) {
-            thisCheckbox.prop('checked',true);
+          thisClass = 'able-' + thisPref;
+          thisId = this.mediaId + '_' + thisPref;          
+          thisDiv = $('<div>').addClass(thisClass);
+          if (thisPref == 'prefDescFormat') { 
+            radioPromptId = thisId + '_prompt';
+            radioPrompt = $('<div>')
+              .attr('id',radioPromptId)
+              .addClass('able-desc-pref-prompt')
+              .text(available[j]['label'] + ':'); 
+
+            // screen-reader-only text, as prefix to label 
+            hiddenSpanText = 'I prefer audio description as ';
+            
+            // option 1 radio button
+            div1 = $('<div>');
+            id1 = thisId + '_1';
+            hiddenSpan1 = $('<span>')
+              .addClass('able-clipped')
+              .text(hiddenSpanText);
+            label1 = $('<label>')
+              .attr('for',id1)
+              .text(this.tt.prefDescFormatOption1)
+              .prepend(hiddenSpan1); 
+            radio1 = $('<input>',{
+              type: 'radio',
+              name: thisPref,
+              id: id1,
+              value: 'video'
+            });
+            if (this.prefDescFormat === 'video') { 
+              radio1.attr('checked','checked');
+            };
+            div1.append(radio1,label1);
+
+            // option 2 radio button
+            div2 = $('<div>');
+            id2 = thisId + '_2';
+            hiddenSpan2 = $('<span>')
+              .addClass('able-clipped')
+              .text(hiddenSpanText);
+            label2 = $('<label>')
+              .attr('for',id2)
+              .text(this.tt.prefDescFormatOption2) 
+              .prepend(hiddenSpan2); 
+            radio2 = $('<input>',{
+              type: 'radio',
+              name: thisPref,
+              id: id2,
+              value: 'text'
+            });
+            if (this.prefDescFormat === 'text') { 
+              radio2.attr('checked','checked');
+            };
+            div2.append(radio2,label2);
+            thisDiv.append(radioPrompt,div1,div2);
+          }
+          else { // all other fields are checkboxes
+            thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
+            thisField = $('<input>',{
+              type: 'checkbox',
+              name: thisPref,
+              id: thisId,
+              value: 'true'
+            });
+            // check current active value for this preference
+            if (this[thisPref] === 1) {
+              thisField.attr('checked','checked');
+            }
+            thisDiv.append(thisField).append(thisLabel);
           }
           fieldset.append(thisDiv);
         }
@@ -295,15 +358,24 @@
      available = this.getAvailablePreferences();
      for (i=0; i<available.length; i++) { 
        prefName = available[i]['name'];
-       if (this[prefName] === 1) { 
-         $('input[name="' + prefName + '"]').prop('checked',true); 
-       } 
-       else { 
-         $('input[name="' + prefName + '"]').prop('checked',false); 
+       if (prefName === 'prefDescFormat') { 
+         if (this[prefName] === 'text') { 
+           $('input[value="text"]').prop('checked',true);   
+         }
+         else { 
+           $('input[value="video"]').prop('checked',true);              
+         } 
        }
-     } 
+       else { // all others are checkboxes 
+         if (this[prefName] === 1) { 
+           $('input[name="' + prefName + '"]').prop('checked',true); 
+          } 
+          else { 
+            $('input[name="' + prefName + '"]').prop('checked',false); 
+          }
+        }
+      } 
    };
-   
    
   // Return a prefs object constructed from the form.
   AblePlayer.prototype.savePrefsFromForm = function () {
@@ -315,28 +387,40 @@
     numChanges = 0;
     var cookie = this.getCookie();
     var available = this.getAvailablePreferences();
-    for (var ii = 0; ii < available.length; ii++) {
-      var prefName = available[ii]['name'];
-      if ($('input[name="' + prefName + '"]').is(':checked')) {
-        cookie.preferences[prefName] = 1;
-        if (this[prefName] === 1) {
-          // nothing has changed
+    for (var i=0; i < available.length; i++) {
+      // only prefs with labels are used in the Prefs form 
+      if (available[i]['label']) { 
+        var prefName = available[i]['name'];
+        if (prefName == 'prefDescFormat') { 
+          this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
+          if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting           
+            cookie.preferences['prefDescFormat'] = this.prefDescFormat;
+            numChanges++; 
+          }
         }
-        else {
-          // user has just turned this pref on
-          this[prefName] = 1;
-          numChanges++;
-        }
-      }
-      else { // thisPref is not checked
-        cookie.preferences[prefName] = 0;
-        if (this[prefName] === 1) {
-          // user has just turned this pref off
-          this[prefName] = 0;
-          numChanges++;
-        }
-        else {
-          // nothing has chaged
+        else { // all other fields are checkboxes
+          if ($('input[name="' + prefName + '"]').is(':checked')) { 
+            cookie.preferences[prefName] = 1;
+            if (this[prefName] === 1) {
+              // nothing has changed
+            }
+            else {
+              // user has just turned this pref on
+              this[prefName] = 1;
+              numChanges++;
+            }
+          }
+          else { // thisPref is not checked
+            cookie.preferences[prefName] = 0;
+            if (this[prefName] === 1) {
+              // user has just turned this pref off
+              this[prefName] = 0;
+              numChanges++;
+            }
+            else {
+              // nothing has chaged
+            }
+          }
         }
       }
     }
@@ -347,7 +431,6 @@
     else {
       this.showAlert(this.tt.prefNoChange);
     }
-
     this.updatePrefs();
   }
 
@@ -378,7 +461,9 @@
       $('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
     }
     this.updateCaption();
-    this.updateDescription();
+    // In case description-related settings have changed, re-initialize description 
+    this.refreshingDesc = true; 
+    this.initDescription();
   };
 
   AblePlayer.prototype.usingModifierKeys = function(e) { 

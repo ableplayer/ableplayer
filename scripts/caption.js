@@ -42,7 +42,7 @@
           }
         }
         thisObj.updateCaption();
-        thisObj.updateDescription();
+        thisObj.showDescription(this.getElapsed());
       }
       thisObj.captionsOn = true;
       // stopgap to prevent spacebar in Firefox from reopening popup

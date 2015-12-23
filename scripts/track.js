@@ -177,21 +177,13 @@
   };
 
   AblePlayer.prototype.setupDescriptions = function (track, cues) {
+
+    // called via setupTracks() only if there is track with kind="descriptions"
+    // prepares for delivery of text description , in case it's needed
+    // whether and how it's delivered is controlled within description.js > initDescription()  
     var trackLang = track.getAttribute('srclang');
-
-    // descriptions are off unless determined to be available & preferred 
-    this.descOn = false;
-    
-    // prepare closed description, even if user doesn't prefer it 
-    // this way it's available if needed 
     this.hasClosedDesc = true;
-    // Display the description div.
-    //this.$descDiv.show();
     this.currentDescription = -1;
-    if ((this.prefDesc === 1) && (this.prefClosedDesc === 1)) { 
-      this.descOn = true;
-    }
-
     this.descriptions.push({
       cues: cues,
       language: trackLang

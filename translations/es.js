@@ -108,7 +108,9 @@ var es = {
 
 "prefHeadingKeys": "Teclas modificadoras",
 
-"prefHeadingDescription": "Audiodescrita en texto",
+"prefHeadingDescription": "Audiodescrita",
+
+"prefHeadingTextDescription": "Audiodescrita en texto",
 
 "prefHeadingCaptions": "Subtítulos",
 
@@ -120,7 +122,11 @@ var es = {
 
 "prefShiftKey": "Mayúscula",
 
-"prefClosedDesc": "Utilizar descripciones en texto si están disponibles",
+"prefDescFormat": "Preferred format",
+
+"prefDescFormatOption1": "Alternative described version of video",
+
+"prefDescFormatOption2": "Text-based description, announced by screen reader",
 
 "prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 

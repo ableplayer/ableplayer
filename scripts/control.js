@@ -475,7 +475,6 @@
       }
     }
 
-    // Update buttons on/off display.
     if (this.$descButton) { 
       if (this.descOn) { 
         this.$descButton.removeClass('buttonOff').attr('aria-label',this.tt.turnOffDescriptions);
@@ -894,7 +893,8 @@
     this.descOn = !this.descOn;
     this.prefDesc = + this.descOn; // convert boolean to integer 
     this.updateCookie('prefDesc');
-    this.updateDescription();
+    this.refreshingDesc = true; 
+    this.initDescription();
     this.refreshControls();
   };
 
@@ -1139,11 +1139,6 @@
         this.$captionDiv.css('font-size', '');
       }
     }
-
-    if (this.$descDiv) {
-      this.$descDiv.width(width);
-    }
-
     if (this.$vidcapContainer) {
       this.$vidcapContainer.height(height);
       this.$vidcapContainer.width(width); 
