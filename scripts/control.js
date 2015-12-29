@@ -1145,7 +1145,7 @@
       // left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
       alertBox.css({
         left: (this.$playerDiv.width() / 2) - (alertBox.width() / 2)        
-      });      
+      });
     }
     setTimeout(function () {
       alertBox.fadeOut(300);

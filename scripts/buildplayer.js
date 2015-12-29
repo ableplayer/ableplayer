@@ -265,13 +265,21 @@
   }
   
   AblePlayer.prototype.injectAlert = function () {
+
+    var top; 
+    
     this.alertBox = $('<div role="alert"></div>');
     this.alertBox.addClass('able-alert');
     this.alertBox.appendTo(this.$ableDiv);
+    if (this.mediaType == 'audio') { 
+      top = -10;
+    }
+    else { 
+      top = Math.round(this.$mediaContainer.offset().top * 10) / 10; 
+    }
     this.alertBox.css({
-      top: this.$mediaContainer.offset().top
+      top: top + 'px'
     });
-
   };
 
   AblePlayer.prototype.injectPlaylist = function () {
