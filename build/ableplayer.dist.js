@@ -2654,7 +2654,6 @@
     this.injectPlaylist();
     // create the hidden form that will be triggered by a click on the Preferences button
     this.injectPrefsForm();        
-
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
@@ -6207,6 +6206,25 @@
         
     this.refreshControls();
   };
+  
+  AblePlayer.prototype.getHighestZIndex = function() { 
+  
+    // this function might be useful later, when moveable & draggable components are implemented
+    // not currently used 
+    // it's very inefficient though, looping through every DOM element - Is there a better way??? 
+    var z, max, $zIndexes; 
+    max = 0;
+    $('*').each(function(){       
+      z = $(this).css('z-index');
+      if (Number.isInteger(+z)) { // work only with integer values, not 'auto'
+        if (z > max) { 
+          max = z; 
+        }
+      }
+    });
+    return max;        
+  } ; 
+  
 })(jQuery);
 
 (function ($) {

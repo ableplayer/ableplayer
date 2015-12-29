@@ -6,15 +6,22 @@
 	div.modalOverlay = 5000
 	.able-sign-window .able-button-handler-preferences = 4500
 	.able-sign-window = 4000
-	.able-popup, .able-tooltip, .able-alert = 3000 (NO GOOD)
-	.able-big-play-button = 2000
+	.able-alert = 3500
+  .able-popup = 3200 
+  .able-tooltip = 3000
+  .able-controller .able-seekbar = 1970
+  .able-controller .buttonOff = 1965
+  .able-controller button > img = 1960
+  .able-controller button > span = 1955
+	.able-controller button = 1950 
+	.able-big-play-button = 1900
 	div.able-captions = 1000
   .able-seekhead = 300
   .able-seekbar-played = 200 
 	.able-seekbar-loaded = 100 
 	.able = 100 
 	.able-sign-window (if sent to back) = 0 
-	
+
 */
 .able { 
   position: relative;
@@ -625,10 +632,16 @@ fieldset.able-prefs-captions select {
   -moz-border-radius: 5px;
   border-radius: 5px;
   display: none;
-  z-index: 3000;
 }
 .able-alert { 
   background-color: #FFFFCC;
+  z-index: 3500; 
+}
+.able-popup { 
+  z-index: 3200; 
+}
+.able-tooltip { 
+  z-index: 3000; 
 }
 
 /* 

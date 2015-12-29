@@ -59,7 +59,6 @@
     this.injectPlaylist();
     // create the hidden form that will be triggered by a click on the Preferences button
     this.injectPrefsForm();        
-
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
