@@ -6545,7 +6545,7 @@ console.log('inside resizePlayer...');
     // TODO: consider applying the same user prefs to visible text-based description 
     var property, newValue, opacity; 
     
-    if ($element.length) { // if $element exists
+    if (typeof $element !== 'undefined') {
       if (typeof pref !== 'undefined') { 
         // just change the one property that user just changed 
         if (pref === 'prefCaptionsFont') { 
