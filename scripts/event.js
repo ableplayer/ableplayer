@@ -89,11 +89,8 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        this.modalFullscreenActive ) {
+
+    if (this.isFullscreen()) {
 
       var newHeight; 
     
@@ -490,7 +487,7 @@
   
     // Save the current object context in thisObj for use with inner functions.
     thisObj = this;
-    
+
     // Appropriately resize media player for full screen.
     $(window).resize(function () {
       thisObj.onWindowResize();

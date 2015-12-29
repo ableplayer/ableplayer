@@ -316,6 +316,7 @@
   // Right now, update the seekBar values based on current duration and time.
   // Later, move all non-destructive control updates based on state into this function?
   AblePlayer.prototype.refreshControls = function() {
+
     var thisObj = this;
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
@@ -966,7 +967,7 @@
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
         // If not in full screen, initialize it.
-        if (el.requestFullscreen) {          
+        if (el.requestFullscreen) {
           el.requestFullscreen();
         }
         else if (el.webkitRequestFullscreen) {
@@ -997,6 +998,19 @@
           document.msExitFullscreen();
         }
       }
+      // add event handlers for changes in full screen mode
+      // currently most changes are made in response to windowResize event 
+      // However, that alone is not resulting in a properly restored player size in Opera Mac  
+      // More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
+      // this fullscreen event handler added specifically for Opera Mac, 
+      // but includes event listeners for all browsers in case its functionality could be expanded
+      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() { 
+        if (!thisObj.isFullscreen()) { 
+          // user has just exited full screen 
+          // force call to resizePlayer with default player dimensions 
+          thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
+        } 
+      });
     }
     else {
       // Non-native fullscreen support through modal dialog.
@@ -1052,7 +1066,6 @@
     }
     this.refreshControls();
   };
-
 
   AblePlayer.prototype.handleFullscreenToggle = function () {
     var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function

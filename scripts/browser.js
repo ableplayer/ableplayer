@@ -9,7 +9,6 @@
     // http://api.jquery.com/jQuery.browser/
     this.userAgent = {}; 
     this.userAgent.browser = {}; 
-    this.userAgent.os = {}; 
     
     // Test for common browsers  
     if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){ //test for Firefox/x.x or Firefox x.x (ignoring remaining digits);
@@ -48,11 +47,38 @@
       this.userAgent.browser.name = 'Unknown';
       this.userAgent.browser.version = 'Unknown';       
     }
+    
+    // Now test for common operating systems 
+    if (window.navigator.userAgent.indexOf("Windows NT 6.2") != -1) { 
+      this.userAgent.os = "Windows 8";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 6.1") != -1) { 
+      this.userAgent.os = "Windows 7";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 6.0") != -1) { 
+      this.userAgent.os = "Windows Vista";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 5.1") != -1) { 
+      this.userAgent.os = "Windows XP";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 5.0") != -1) { 
+      this.userAgent.os = "Windows 2000";
+    }
+    else if (window.navigator.userAgent.indexOf("Mac")!=-1) { 
+      this.userAgent.os = "Mac/iOS";
+    }
+    else if (window.navigator.userAgent.indexOf("X11")!=-1) { 
+      this.userAgent.os = "UNIX";
+    }
+    else if (window.navigator.userAgent.indexOf("Linux")!=-1) { 
+      this.userAgent.os = "Linux";
+    }
     if (this.debug) { 
       console.log('User agent:' + navigator.userAgent);
       console.log('Vendor: ' + navigator.vendor);
       console.log('Browser: ' + this.userAgent.browser.name);
       console.log('Version: ' + this.userAgent.browser.version);
+      console.log('OS: ' + this.userAgent.os);
     }
   };
 

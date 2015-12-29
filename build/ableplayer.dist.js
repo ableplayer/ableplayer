@@ -4922,7 +4922,6 @@
     // http://api.jquery.com/jQuery.browser/
     this.userAgent = {}; 
     this.userAgent.browser = {}; 
-    this.userAgent.os = {}; 
     
     // Test for common browsers  
     if (/Firefox[\/\s](\d+\.\d+)/.test(navigator.userAgent)){ //test for Firefox/x.x or Firefox x.x (ignoring remaining digits);
@@ -4961,7 +4960,34 @@
       this.userAgent.browser.name = 'Unknown';
       this.userAgent.browser.version = 'Unknown';       
     }
+    
+    // Now test for common operating systems 
+    if (window.navigator.userAgent.indexOf("Windows NT 6.2") != -1) { 
+      this.userAgent.os = "Windows 8";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 6.1") != -1) { 
+      this.userAgent.os = "Windows 7";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 6.0") != -1) { 
+      this.userAgent.os = "Windows Vista";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 5.1") != -1) { 
+      this.userAgent.os = "Windows XP";
+    }
+    else if (window.navigator.userAgent.indexOf("Windows NT 5.0") != -1) { 
+      this.userAgent.os = "Windows 2000";
+    }
+    else if (window.navigator.userAgent.indexOf("Mac")!=-1) { 
+      this.userAgent.os = "Mac/iOS";
+    }
+    else if (window.navigator.userAgent.indexOf("X11")!=-1) { 
+      this.userAgent.os = "UNIX";
+    }
+    else if (window.navigator.userAgent.indexOf("Linux")!=-1) { 
+      this.userAgent.os = "Linux";
+    }
     if (this.debug) { 
+      
       
       
       
@@ -5366,6 +5392,7 @@
   // Right now, update the seekBar values based on current duration and time.
   // Later, move all non-destructive control updates based on state into this function?
   AblePlayer.prototype.refreshControls = function() {
+
     var thisObj = this;
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
@@ -6016,7 +6043,7 @@
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
         // If not in full screen, initialize it.
-        if (el.requestFullscreen) {          
+        if (el.requestFullscreen) {
           el.requestFullscreen();
         }
         else if (el.webkitRequestFullscreen) {
@@ -6047,6 +6074,19 @@
           document.msExitFullscreen();
         }
       }
+      // add event handlers for changes in full screen mode
+      // currently most changes are made in response to windowResize event 
+      // However, that alone is not resulting in a properly restored player size in Opera Mac  
+      // More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
+      // this fullscreen event handler added specifically for Opera Mac, 
+      // but includes event listeners for all browsers in case its functionality could be expanded
+      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() { 
+        if (!thisObj.isFullscreen()) { 
+          // user has just exited full screen 
+          // force call to resizePlayer with default player dimensions 
+          thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
+        } 
+      });
     }
     else {
       // Non-native fullscreen support through modal dialog.
@@ -6102,7 +6142,6 @@
     }
     this.refreshControls();
   };
-
 
   AblePlayer.prototype.handleFullscreenToggle = function () {
     var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function
@@ -7078,11 +7117,8 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
-    if (document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement ||
-        this.modalFullscreenActive ) {
+
+    if (this.isFullscreen()) {
 
       var newHeight; 
     
@@ -7479,7 +7515,7 @@
   
     // Save the current object context in thisObj for use with inner functions.
     thisObj = this;
-    
+
     // Appropriately resize media player for full screen.
     $(window).resize(function () {
       thisObj.onWindowResize();
