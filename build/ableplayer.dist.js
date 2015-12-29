@@ -6162,9 +6162,12 @@
       });
     }
     else { 
-      // Center at top of vidcap container; use vidcap container instead of media container due to an IE8 sizing bug.
+      // The original formula incorporated offset() into the calculation 
+      // but at some point this began resulting in an alert that's off-centered 
+      // Changed in v2.2.17, but here's the original for reference in case needed: 
+      // left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
       alertBox.css({
-        left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
+        left: (this.$playerDiv.width() / 2) - (alertBox.width() / 2)        
       });      
     }
     setTimeout(function () {
@@ -7568,7 +7571,6 @@
     this.$windowAlert.css({
       top: this.$activeWindow.offset().top
     });
-    
     // add button to draggable window which triggers a popup menu 
     // for now, re-use preferences icon for this purpose
     var $newButton = $('<button>',{ 

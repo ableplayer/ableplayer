@@ -30,7 +30,6 @@
     this.$windowAlert.css({
       top: this.$activeWindow.offset().top
     });
-    
     // add button to draggable window which triggers a popup menu 
     // for now, re-use preferences icon for this purpose
     var $newButton = $('<button>',{ 
