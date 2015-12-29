@@ -764,6 +764,7 @@
   };
 
   AblePlayer.prototype.initYouTubePlayer = function () {
+
     var thisObj = this;
     
     var resettingYouTubeCaptions = false;
@@ -825,12 +826,19 @@
             deferred.fail();
           },
           onStateChange: function (x) { 
+            // need to do this onStateChange because onApiChange event is never triggered 
+            // if a video has no captions 
+            // this shouldn't be a problem though because playing for any duration 
+            // seems to trigger onApiChange if captions are available  
             if (thisObj.ytPlayingJustEnough) { 
-              thisObj.handleStop();
+              setTimeout(function() { 
+                thisObj.handleStop();
+              },1000);
               thisObj.ytPlayingJustEnough = false; 
+              // not sure why, but setting this to true results in poster image being restored after stopVideo()
+              // TODO: Trace the cause of this bug; otherwise I'm just addressing the symptom 
+              thisObj.startedPlaying = true;
             } 
-
-            // do something
           },
           onPlaybackQualityChange: function () { 
             // do something
@@ -889,7 +897,7 @@
   };
 
   AblePlayer.prototype.initYouTubeCaptions = function () {
-
+    
     // called when YouTube onApiChange event is fired 
     // fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
     // it isn't fired until the video starts playing 
@@ -914,6 +922,7 @@
     thisObj = this;
     this.ytCaptions = [];     
     options = this.youTubePlayer.getOptions(); 
+    
     if (options.length) {
       for (var i=0; i<options.length; i++) { 
         if (options[i] == 'cc') { // this is the AS3 (Flash) player 
@@ -925,7 +934,6 @@
           break;
         } 
       }
-   
       if (this.ytCaptionModule == 'cc' || this.ytCaptionModule == 'captions') { 
         // captions are available 
 
@@ -1146,7 +1154,6 @@
                 this.$descDiv.css('width',this.playerWidth+'px');
               }
               */
-
               this.refreshControls();      
       
             } // end if there is no cc button 
@@ -5104,6 +5111,8 @@
       this.youTubePlayer.seekTo(newTime,true);
     }
 
+    // one Boolean var is probably enough(?)   
+    this.seeking = true; 
     this.liveUpdatePending = true;
 
     this.refreshControls();
@@ -5437,11 +5446,12 @@
       'buffering': this.tt.statusBuffering,
       'ended': this.tt.statusEnd
     };
-
+    
     if (this.stoppingYouTube) { 
-      // YouTube reports 'paused' but we're trying to emulate 'stopped' 
+      // YouTube video must play briefly in order to get caption data 
+      // stoppingYouTube is true temporarily while video is paused and seeking to 0
       // See notes in handleStop() 
-      // this.stoppingYouTube will be reset when playback resumes in play() 
+      // this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
       if (this.$status.text() !== this.tt.statusStopped) {
         this.$status.text(this.tt.statusStopped);
       }
@@ -5739,6 +5749,7 @@
   };
 
   AblePlayer.prototype.handleStop = function() { 
+
     if (this.player == 'html5') {
       this.pauseMedia();
       this.seekTo(0);
@@ -5748,14 +5759,13 @@
     }
     else if (this.player === 'youtube') { 
       // YouTube API function stopVideo() does not reset video to 0
-      // However, the stopped video is not seekable 
-      // so we can't call seekTo(0) after calling stopVideo() 
-      // Workaround is to use pauseVideo() instead, then seek to 0
-      this.youTubePlayer.pauseVideo();
+      // Also, the stopped video is not seekable so seekTo(0) after stopping doesn't work 
+      // Workaround is to use pauseVideo(), followed by seekTo(0) to emulate stopping 
+      // However, the tradeoff is that YouTube doesn't restore the poster image when video is paused 
+      // Added 12/29/15: After seekTo(0) is finished, stopVideo() to reset video and restore poster image 
+      // This final step is handled in event.js > onMediaUpdate()
+      this.youTubePlayer.pauseVideo(); 
       this.seekTo(0);
-      // Unfortunately, pausing the video doesn't change playerState to 'Stopped' 
-      // which has an effect on the player UI. 
-      // the following Boolean is used  in refreshControls() to emulate a 'stopped' state
       this.stoppingYouTube = true; 
     }
     this.refreshControls();
@@ -5910,6 +5920,8 @@
           this.selectedDescriptions = this.descriptions[0];
         }
       }
+console.log('refreshing controls pos E');
+
       this.refreshControls();
     }
     else {   
@@ -6084,6 +6096,7 @@
         if (!thisObj.isFullscreen()) { 
           // user has just exited full screen 
           // force call to resizePlayer with default player dimensions 
+console.log('resizePlayer pos A');
           thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
         } 
       });
@@ -6140,6 +6153,8 @@
         this.playMedia();
       }
     }
+console.log('refreshing controls pos F');
+
     this.refreshControls();
   };
 
@@ -6216,7 +6231,8 @@
 
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
-    
+
+console.log('inside resizePlayer...');    
     this.$media.height(height);
     this.$media.width(width);
 
@@ -6246,6 +6262,8 @@
       this.youTubePlayer.setSize(width, height);
     }
         
+console.log('refreshing controls pos G');
+
     this.refreshControls();
   };
   
@@ -7029,19 +7047,29 @@
 (function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-    
+
     if (!this.startedPlaying) {
-      if (this.startTime) { 
+      if (typeof this.startTime !== 'undefined') { 
         if (this.startTime === this.media.currentTime) { 
           // media has already scrubbed to start time
-          if (this.autoplay || this.seeking) { 
+          if (this.autoplay || (this.seeking && this.playing)) { 
             this.playMedia();
-            this.seeking = false;            
           }   
+          if (this.seeking) { 
+            this.seeking = false; 
+          }
+          if (this.stoppingYouTube) { 
+            // until now video has just been paused (stop emulation mode) 
+            // now that it's been scrubbed back to 0 it can be formally stopped 
+            // to restore poster image and prevent continued calls to onMediaUpdateTime()
+            this.youTubePlayer.stopVideo();
+            this.stoppingYouTube = false; 
+          }
         }
         else { 
           // continue seeking ahead until currentTime == startTime 
-          this.seekTo(this.startTime);
+          // Commented this out in v2.2.19. Seems unnecessary to call seekTo() again 
+          // this.seekTo(this.startTime);
         }
       }
       else { 
@@ -7053,14 +7081,15 @@
       }       
     }
     
-    // show highlight in transcript 
-    if (this.prefHighlight === 1) {
-      this.highlightTranscript(this.getElapsed()); 
+    if (this.playing) { // added this condition in v2.2.19; seems unnecessary to update this content if not playing
+      // show highlight in transcript 
+      if (this.prefHighlight === 1) {
+        this.highlightTranscript(this.getElapsed()); 
+      }
+      this.updateCaption();
+      this.showDescription(this.getElapsed());
+      this.updateMeta();
     }
-
-    this.updateCaption();
-    this.showDescription(this.getElapsed());
-    this.updateMeta();
     this.refreshControls();
   };
 
@@ -7086,7 +7115,6 @@
         this.swapSource(this.playlistIndex)
       }
     }
-
     this.refreshControls();
   };
 
@@ -7450,7 +7478,6 @@
           thisObj.seekTo(thisObj.startTime);
           thisObj.startedPlaying = true;
         }
-
         thisObj.refreshControls();
       })
       .onSeek(function(event) { 
@@ -7492,7 +7519,6 @@
         if (thisObj.debug) { 
           console.log('JW Player onIdle event fired');
         }
-
         thisObj.refreshControls();
       })
       .onMeta(function() { 

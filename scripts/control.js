@@ -28,6 +28,8 @@
       this.youTubePlayer.seekTo(newTime,true);
     }
 
+    // one Boolean var is probably enough(?)   
+    this.seeking = true; 
     this.liveUpdatePending = true;
 
     this.refreshControls();
@@ -361,11 +363,12 @@
       'buffering': this.tt.statusBuffering,
       'ended': this.tt.statusEnd
     };
-
+    
     if (this.stoppingYouTube) { 
-      // YouTube reports 'paused' but we're trying to emulate 'stopped' 
+      // YouTube video must play briefly in order to get caption data 
+      // stoppingYouTube is true temporarily while video is paused and seeking to 0
       // See notes in handleStop() 
-      // this.stoppingYouTube will be reset when playback resumes in play() 
+      // this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
       if (this.$status.text() !== this.tt.statusStopped) {
         this.$status.text(this.tt.statusStopped);
       }
@@ -663,6 +666,7 @@
   };
 
   AblePlayer.prototype.handleStop = function() { 
+
     if (this.player == 'html5') {
       this.pauseMedia();
       this.seekTo(0);
@@ -672,14 +676,13 @@
     }
     else if (this.player === 'youtube') { 
       // YouTube API function stopVideo() does not reset video to 0
-      // However, the stopped video is not seekable 
-      // so we can't call seekTo(0) after calling stopVideo() 
-      // Workaround is to use pauseVideo() instead, then seek to 0
-      this.youTubePlayer.pauseVideo();
+      // Also, the stopped video is not seekable so seekTo(0) after stopping doesn't work 
+      // Workaround is to use pauseVideo(), followed by seekTo(0) to emulate stopping 
+      // However, the tradeoff is that YouTube doesn't restore the poster image when video is paused 
+      // Added 12/29/15: After seekTo(0) is finished, stopVideo() to reset video and restore poster image 
+      // This final step is handled in event.js > onMediaUpdate()
+      this.youTubePlayer.pauseVideo(); 
       this.seekTo(0);
-      // Unfortunately, pausing the video doesn't change playerState to 'Stopped' 
-      // which has an effect on the player UI. 
-      // the following Boolean is used  in refreshControls() to emulate a 'stopped' state
       this.stoppingYouTube = true; 
     }
     this.refreshControls();
@@ -834,6 +837,8 @@
           this.selectedDescriptions = this.descriptions[0];
         }
       }
+console.log('refreshing controls pos E');
+
       this.refreshControls();
     }
     else {   
@@ -1008,6 +1013,7 @@
         if (!thisObj.isFullscreen()) { 
           // user has just exited full screen 
           // force call to resizePlayer with default player dimensions 
+console.log('resizePlayer pos A');
           thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
         } 
       });
@@ -1064,6 +1070,8 @@
         this.playMedia();
       }
     }
+console.log('refreshing controls pos F');
+
     this.refreshControls();
   };
 
@@ -1140,7 +1148,8 @@
 
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
-    
+
+console.log('inside resizePlayer...');    
     this.$media.height(height);
     this.$media.width(width);
 
@@ -1170,6 +1179,8 @@
       this.youTubePlayer.setSize(width, height);
     }
         
+console.log('refreshing controls pos G');
+
     this.refreshControls();
   };
   

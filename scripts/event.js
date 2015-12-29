@@ -1,19 +1,29 @@
 (function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-    
+
     if (!this.startedPlaying) {
-      if (this.startTime) { 
+      if (typeof this.startTime !== 'undefined') { 
         if (this.startTime === this.media.currentTime) { 
           // media has already scrubbed to start time
-          if (this.autoplay || this.seeking) { 
+          if (this.autoplay || (this.seeking && this.playing)) { 
             this.playMedia();
-            this.seeking = false;            
           }   
+          if (this.seeking) { 
+            this.seeking = false; 
+          }
+          if (this.stoppingYouTube) { 
+            // until now video has just been paused (stop emulation mode) 
+            // now that it's been scrubbed back to 0 it can be formally stopped 
+            // to restore poster image and prevent continued calls to onMediaUpdateTime()
+            this.youTubePlayer.stopVideo();
+            this.stoppingYouTube = false; 
+          }
         }
         else { 
           // continue seeking ahead until currentTime == startTime 
-          this.seekTo(this.startTime);
+          // Commented this out in v2.2.19. Seems unnecessary to call seekTo() again 
+          // this.seekTo(this.startTime);
         }
       }
       else { 
@@ -25,14 +35,15 @@
       }       
     }
     
-    // show highlight in transcript 
-    if (this.prefHighlight === 1) {
-      this.highlightTranscript(this.getElapsed()); 
+    if (this.playing) { // added this condition in v2.2.19; seems unnecessary to update this content if not playing
+      // show highlight in transcript 
+      if (this.prefHighlight === 1) {
+        this.highlightTranscript(this.getElapsed()); 
+      }
+      this.updateCaption();
+      this.showDescription(this.getElapsed());
+      this.updateMeta();
     }
-
-    this.updateCaption();
-    this.showDescription(this.getElapsed());
-    this.updateMeta();
     this.refreshControls();
   };
 
@@ -58,7 +69,6 @@
         this.swapSource(this.playlistIndex)
       }
     }
-
     this.refreshControls();
   };
 
@@ -422,7 +432,6 @@
           thisObj.seekTo(thisObj.startTime);
           thisObj.startedPlaying = true;
         }
-
         thisObj.refreshControls();
       })
       .onSeek(function(event) { 
@@ -464,7 +473,6 @@
         if (thisObj.debug) { 
           console.log('JW Player onIdle event fired');
         }
-
         thisObj.refreshControls();
       })
       .onMeta(function() { 

@@ -521,6 +521,7 @@
   };
 
   AblePlayer.prototype.initYouTubePlayer = function () {
+
     var thisObj = this;
     
     var resettingYouTubeCaptions = false;
@@ -582,12 +583,19 @@
             deferred.fail();
           },
           onStateChange: function (x) { 
+            // need to do this onStateChange because onApiChange event is never triggered 
+            // if a video has no captions 
+            // this shouldn't be a problem though because playing for any duration 
+            // seems to trigger onApiChange if captions are available  
             if (thisObj.ytPlayingJustEnough) { 
-              thisObj.handleStop();
+              setTimeout(function() { 
+                thisObj.handleStop();
+              },1000);
               thisObj.ytPlayingJustEnough = false; 
+              // not sure why, but setting this to true results in poster image being restored after stopVideo()
+              // TODO: Trace the cause of this bug; otherwise I'm just addressing the symptom 
+              thisObj.startedPlaying = true;
             } 
-
-            // do something
           },
           onPlaybackQualityChange: function () { 
             // do something
@@ -646,7 +654,7 @@
   };
 
   AblePlayer.prototype.initYouTubeCaptions = function () {
-
+    
     // called when YouTube onApiChange event is fired 
     // fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
     // it isn't fired until the video starts playing 
@@ -671,6 +679,7 @@
     thisObj = this;
     this.ytCaptions = [];     
     options = this.youTubePlayer.getOptions(); 
+    
     if (options.length) {
       for (var i=0; i<options.length; i++) { 
         if (options[i] == 'cc') { // this is the AS3 (Flash) player 
@@ -682,7 +691,6 @@
           break;
         } 
       }
-   
       if (this.ytCaptionModule == 'cc' || this.ytCaptionModule == 'captions') { 
         // captions are available 
 
@@ -903,7 +911,6 @@
                 this.$descDiv.css('width',this.playerWidth+'px');
               }
               */
-
               this.refreshControls();      
       
             } // end if there is no cc button 
