@@ -15,6 +15,7 @@
   // Returns the function used when a caption is clicked in the captions menu.
   // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction() 
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
+    
     var thisObj = this;
     return function () {
       thisObj.selectedCaptions = track;
@@ -35,14 +36,14 @@
       }
       else { 
         // Try and find a matching description track for rebuilding transcript
-        for (var ii in thisObj.descriptions) {
-          if (thisObj.descriptions[ii].language === track.language) {
-            thisObj.selectedDescriptions = thisObj.descriptions[ii];
+        for (var i in thisObj.descriptions) {
+          if (thisObj.descriptions[i].language === track.language) {
+            thisObj.selectedDescriptions = thisObj.descriptions[i];
             thisObj.currentDescription = -1;
           }
         }
         thisObj.updateCaption();
-        thisObj.showDescription(this.getElapsed());
+        thisObj.showDescription(thisObj.getElapsed());
       }
       thisObj.captionsOn = true;
       // stopgap to prevent spacebar in Firefox from reopening popup
@@ -153,5 +154,113 @@
     
     return result.join('');
   };
+  
+  AblePlayer.prototype.getCaptionsOptions = function(pref) { 
+    
+    var options = []; 
+    
+    switch (pref) { 
+      
+      case 'prefCaptionsFont':
+        options[0] = this.tt.serif;
+        options[1] = this.tt.sans;
+        options[3] = this.tt.cursive;
+        options[4] = this.tt.fantasy;
+        options[2] = this.tt.monospace;
+        break; 
+
+      case 'prefCaptionsColor':
+        options[0] = this.tt.white;
+        options[1] = this.tt.yellow;
+        options[2] = this.tt.green;
+        options[3] = this.tt.cyan;
+        options[4] = this.tt.blue;
+        options[5] = this.tt.magenta;
+        options[6] = this.tt.red;
+        options[7] = this.tt.black;
+        break; 
+        
+      case 'prefCaptionsColor':
+      case 'prefCaptionsBGColor':
+        options[0] = this.tt.white;
+        options[1] = this.tt.yellow;
+        options[2] = this.tt.green;
+        options[3] = this.tt.cyan;
+        options[4] = this.tt.blue;
+        options[5] = this.tt.magenta;
+        options[6] = this.tt.red;
+        options[7] = this.tt.black;
+        break; 
+
+      case 'prefCaptionsSize':
+        options[0] = '50%';
+        options[1] = '75%';
+        options[2] = '100%';
+        options[3] = '150%';
+        options[4] = '200%';
+        break; 
+
+      case 'prefCaptionsOpacity':
+        options[0] = '0% (' + this.tt.transparent + ')';
+        options[1] = '25%';
+        options[2] = '50%';
+        options[3] = '75%';
+        options[4] = '100% (' + this.tt.solid + ')';
+        break; 
+
+      case 'prefCaptionsStyle':
+        options[0] = this.tt.captionsStylePopOn;
+        options[1] = this.tt.captionsStyleRollUp;
+        break;
+    }
+    return options;
+  };
+  
+  AblePlayer.prototype.stylizeCaptions = function($element, pref) { 
+
+    // $element is the jQuery element containing the captions 
+    // this function handles stylizing of the sample caption text in the Prefs dialog  
+    // plus the actual production captions 
+    // TODO: consider applying the same user prefs to visible text-based description 
+    var property, newValue, opacity; 
+    
+    if ($element.length) { // if $element exists
+      if (typeof pref !== 'undefined') { 
+        // just change the one property that user just changed 
+        if (pref === 'prefCaptionsFont') { 
+          property = 'font-family'; 
+        }
+        else if (pref === 'prefCaptionsSize') { 
+          property = 'font-size'; 
+        }
+        else if (pref === 'prefCaptionsColor') { 
+          property = 'color'; 
+        }
+        else if (pref === 'prefCaptionsBGColor') { 
+          property = 'background-color'; 
+        }
+        else if (pref === 'prefCaptionsOpacity') { 
+          property = 'opacity'; 
+        }
+        if (pref === 'prefCaptionsOpacity') { 
+          newValue = parseFloat($('#' + this.mediaId + '_' + pref).val()) / 100.0;
+        }
+        else { 
+          newValue = $('#' + this.mediaId + '_' + pref).val();
+        }
+        $element.css(property, newValue);
+      }
+      else { // no property was specified, update all styles with current saved prefs 
+        var opacity = parseFloat(this.prefCaptionsOpacity) / 100.0;
+        $element.css({ 
+          'font-family': this.prefCaptionsFont,
+          'font-size': this.prefCaptionsSize,
+          'color': this.prefCaptionsColor,
+          'background-color': this.prefCaptionsBGColor, 
+          'opacity': opacity
+        });
+      }
+    }
+  };  
 
 })(jQuery);

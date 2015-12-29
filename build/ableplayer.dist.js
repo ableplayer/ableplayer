@@ -1270,21 +1270,21 @@
       preferences: {}
     };
 
-      var cookie;
-      try {
-        cookie = Cookies.getJSON('Able-Player');
-      }
-      catch (err) {
-        // Original cookie can't be parsed; update to default
-        Cookies.getJSON(defaultCookie);
-        cookie = defaultCookie;
-      }
-      if (cookie) {
-        return cookie;
-      }
-      else {
-        return defaultCookie;
-      }
+    var cookie;
+    try {
+      cookie = Cookies.getJSON('Able-Player');
+    }
+    catch (err) {
+      // Original cookie can't be parsed; update to default
+      Cookies.getJSON(defaultCookie);
+      cookie = defaultCookie;
+    }
+    if (cookie) {
+      return cookie;
+    }
+    else {
+      return defaultCookie;
+    }
   };
   AblePlayer.prototype.updateCookie = function( setting ) {
 
@@ -1370,6 +1370,44 @@
         'group': 'captions',
         'default': 1
       });
+/* // not supported yet       
+      prefs.push({
+        'name': 'prefCaptionsStyle', 
+        'label': this.tt.prefCaptionsStyle,
+        'group': 'captions',
+        'default': this.tt.captionsStylePopOn
+      });
+*/      
+      prefs.push({
+        'name': 'prefCaptionsFont', 
+        'label': this.tt.prefCaptionsFont,
+        'group': 'captions',
+        'default': this.tt.sans
+      });
+      prefs.push({
+        'name': 'prefCaptionsSize', 
+        'label': this.tt.prefCaptionsSize,
+        'group': 'captions',
+        'default': '100%'
+      });
+      prefs.push({
+        'name': 'prefCaptionsColor', 
+        'label': this.tt.prefCaptionsColor,
+        'group': 'captions',
+        'default': this.tt.white
+      });
+      prefs.push({
+        'name': 'prefCaptionsBGColor', 
+        'label': this.tt.prefCaptionsBGColor,
+        'group': 'captions',
+        'default': this.tt.black
+      });
+      prefs.push({
+        'name': 'prefCaptionsOpacity', 
+        'label': this.tt.prefCaptionsOpacity,
+        'group': 'captions',
+        'default': '75%'
+      });      
 
       // Sign lanuage preferences 
       prefs.push({
@@ -1435,10 +1473,11 @@
 
     var prefsDiv, introText, prefsIntro,
       groups, fieldset, fieldsetClass, fieldsetId, legend, heading, 
-      i, j, thisPref, thisDiv, thisClass, thisId, thisLabel, thisField,
-      radioPromptId,radioPrompt,hiddenSpanText,
+      i, j, k, thisPref, thisDiv, thisClass, thisId, thisLabel, thisField,      
+      radioPromptId,radioPrompt,hiddenSpanText,      
       div1,id1,radio1,label1,hiddenSpan1, 
       div2,id2,radio2,label2,hiddenSpan2, 
+      options,thisOption,sampleCapsDiv,changedPref,
       thisObj, available;
 
     thisObj = this;
@@ -1458,7 +1497,7 @@
 
     // add preference fields in groups
     if (this.mediaType === 'video') { 
-      groups = ['keys','description','text-description','transcript']; // TODO: Add captions (font & colors)
+      groups = ['keys','description','text-description','transcript','captions']; 
     }
     else { 
       groups = ['keys','transcript']; 
@@ -1548,6 +1587,32 @@
             div2.append(radio2,label2);
             thisDiv.append(radioPrompt,div1,div2);
           }
+          else if (groups[i] == 'captions') { 
+            thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
+            thisField = $('<select>',{
+              name: thisPref,
+              id: thisId, 
+            });
+            if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') { 
+              // add a change handler that updates the style of the sample caption text
+              thisField.change(function() { 
+                changedPref = $(this).attr('name');
+                thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
+              }); 
+            }
+            options = this.getCaptionsOptions(thisPref);
+            for (k=0; k < options.length; k++) { 
+              thisOption = $('<option>',{
+                value: options[k],
+                text: options[k]
+              });
+              if (this[thisPref] === options[k]) {
+                thisOption.attr('selected','selected');
+              }
+              thisField.append(thisOption);              
+            }
+            thisDiv.append(thisLabel,thisField);            
+          }
           else { // all other fields are checkboxes
             thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
             thisField = $('<input>',{
@@ -1560,13 +1625,23 @@
             if (this[thisPref] === 1) {
               thisField.attr('checked','checked');
             }
-            thisDiv.append(thisField).append(thisLabel);
+            thisDiv.append(thisField,thisLabel);
           }
           fieldset.append(thisDiv);
         }
       }
       prefsDiv.append(fieldset);
     }
+    
+    // add a sample closed caption div to prefs dialog 
+    if (this.mediaType === 'video') { 
+      this.$sampleCapsDiv = $('<div>',{ 
+        'class': 'able-captions-sample'
+      }).text(this.tt.sampleCaptionText);
+      prefsDiv.append(this.$sampleCapsDiv);
+      this.stylizeCaptions(this.$sampleCapsDiv);
+    }
+    
     // prefsDiv (dialog) must be appended to the BODY!
     // otherwise when aria-hidden="true" is applied to all background content
     // that will include an ancestor of the dialog,
@@ -1626,6 +1701,10 @@
            $('input[value="video"]').prop('checked',true);              
          } 
        }
+       else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) { 
+         // this is a caption-related select box 
+         $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
+       }
        else { // all others are checkboxes 
          if (this[prefName] === 1) { 
            $('input[name="' + prefName + '"]').prop('checked',true); 
@@ -1634,7 +1713,9 @@
             $('input[name="' + prefName + '"]').prop('checked',false); 
           }
         }
-      } 
+      }
+      // also restore style of sample caption div 
+      this.stylizeCaptions(this.$sampleCapsDiv); 
    };
    
   // Return a prefs object constructed from the form.
@@ -1642,9 +1723,10 @@
     // called when user saves the Preferences form
     // update cookie with new value
 
-    var numChanges;
+    var numChanges, numCapChanges, newValue;
 
     numChanges = 0;
+    numCapChanges = 0; // changes to caption-style-related preferences
     var cookie = this.getCookie();
     var available = this.getAvailablePreferences();
     for (var i=0; i < available.length; i++) {
@@ -1656,6 +1738,17 @@
           if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting           
             cookie.preferences['prefDescFormat'] = this.prefDescFormat;
             numChanges++; 
+          }
+        }
+        else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) { 
+          // this is one of the caption-related select fields 
+          newValue = $('select[name="' + prefName + '"]').val(); 
+          if (cookie.preferences[prefName] !== newValue) { // user changed setting
+            cookie.preferences[prefName] = newValue;
+            // also update global var for this pref (for caption fields, not done elsewhere) 
+            this[prefName] = newValue;
+            numChanges++; 
+            numCapChanges++; 
           }
         }
         else { // all other fields are checkboxes
@@ -1692,6 +1785,9 @@
       this.showAlert(this.tt.prefNoChange);
     }
     this.updatePrefs();
+    if (numCapChanges > 0) { 
+      this.stylizeCaptions(this.$captionDiv);
+    }
   }
 
   // Updates player based on current prefs.  Safe to call multiple times.
@@ -3543,7 +3639,7 @@
     }
   
     if (this.mediaType === 'video') { 
-      // also set width and height of div.able-vidcap-container
+      // set width and height of div.able-vidcap-container
       vidcapStyles = {
         'width': this.playerWidth+'px',
         'height': this.playerHeight+'px'
@@ -3551,9 +3647,11 @@
       if (this.$vidcapContainer) { 
         this.$vidcapContainer.css(vidcapStyles); 
       }   
-      // also set width of the captions and descriptions containers 
       if (this.$captionDiv) { 
+        // set width of the captions container 
         this.$captionDiv.css('width',this.playerWidth+'px');
+        // stylize captions based on user prefs
+        this.stylizeCaptions(this.$captionDiv); 
       }
     }
     
@@ -4421,7 +4519,7 @@
     this.modal = modal;    
     modal.css({
       'width': width || '50%',
-      'top': (fullscreen ? '0' : '25%')
+      'top': (fullscreen ? '0' : '5%')
     });
     modal.addClass('modalDialog');
 
@@ -6077,18 +6175,19 @@
 
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
+    
     this.$media.height(height);
     this.$media.width(width);
 
     if (this.$captionDiv) {
       this.$captionDiv.width(width);
-      // TODO: Font-size is currently stored in CSS and is not calculable cross-browser.
-      // Instead, store it just here and update appropriately.
-      // For now, just clear font-size when player is reset to default height, so at least it'll be consistent in that case.
+      // Font-size for embedded player is too small in full screen view 
       if (height !== this.playerHeight) {
+        // this calculation results in a reasonably large font across all browsers 
         this.$captionDiv.css('font-size', (height / this.playerHeight) * 18);
       }
       else {
+        // clear full screen font size and return to normal
         this.$captionDiv.css('font-size', '');
       }
     }
@@ -6127,6 +6226,7 @@
   // Returns the function used when a caption is clicked in the captions menu.
   // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction() 
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
+    
     var thisObj = this;
     return function () {
       thisObj.selectedCaptions = track;
@@ -6147,14 +6247,14 @@
       }
       else { 
         // Try and find a matching description track for rebuilding transcript
-        for (var ii in thisObj.descriptions) {
-          if (thisObj.descriptions[ii].language === track.language) {
-            thisObj.selectedDescriptions = thisObj.descriptions[ii];
+        for (var i in thisObj.descriptions) {
+          if (thisObj.descriptions[i].language === track.language) {
+            thisObj.selectedDescriptions = thisObj.descriptions[i];
             thisObj.currentDescription = -1;
           }
         }
         thisObj.updateCaption();
-        thisObj.showDescription(this.getElapsed());
+        thisObj.showDescription(thisObj.getElapsed());
       }
       thisObj.captionsOn = true;
       // stopgap to prevent spacebar in Firefox from reopening popup
@@ -6265,6 +6365,114 @@
     
     return result.join('');
   };
+  
+  AblePlayer.prototype.getCaptionsOptions = function(pref) { 
+    
+    var options = []; 
+    
+    switch (pref) { 
+      
+      case 'prefCaptionsFont':
+        options[0] = this.tt.serif;
+        options[1] = this.tt.sans;
+        options[3] = this.tt.cursive;
+        options[4] = this.tt.fantasy;
+        options[2] = this.tt.monospace;
+        break; 
+
+      case 'prefCaptionsColor':
+        options[0] = this.tt.white;
+        options[1] = this.tt.yellow;
+        options[2] = this.tt.green;
+        options[3] = this.tt.cyan;
+        options[4] = this.tt.blue;
+        options[5] = this.tt.magenta;
+        options[6] = this.tt.red;
+        options[7] = this.tt.black;
+        break; 
+        
+      case 'prefCaptionsColor':
+      case 'prefCaptionsBGColor':
+        options[0] = this.tt.white;
+        options[1] = this.tt.yellow;
+        options[2] = this.tt.green;
+        options[3] = this.tt.cyan;
+        options[4] = this.tt.blue;
+        options[5] = this.tt.magenta;
+        options[6] = this.tt.red;
+        options[7] = this.tt.black;
+        break; 
+
+      case 'prefCaptionsSize':
+        options[0] = '50%';
+        options[1] = '75%';
+        options[2] = '100%';
+        options[3] = '150%';
+        options[4] = '200%';
+        break; 
+
+      case 'prefCaptionsOpacity':
+        options[0] = '0% (' + this.tt.transparent + ')';
+        options[1] = '25%';
+        options[2] = '50%';
+        options[3] = '75%';
+        options[4] = '100% (' + this.tt.solid + ')';
+        break; 
+
+      case 'prefCaptionsStyle':
+        options[0] = this.tt.captionsStylePopOn;
+        options[1] = this.tt.captionsStyleRollUp;
+        break;
+    }
+    return options;
+  };
+  
+  AblePlayer.prototype.stylizeCaptions = function($element, pref) { 
+
+    // $element is the jQuery element containing the captions 
+    // this function handles stylizing of the sample caption text in the Prefs dialog  
+    // plus the actual production captions 
+    // TODO: consider applying the same user prefs to visible text-based description 
+    var property, newValue, opacity; 
+    
+    if ($element.length) { // if $element exists
+      if (typeof pref !== 'undefined') { 
+        // just change the one property that user just changed 
+        if (pref === 'prefCaptionsFont') { 
+          property = 'font-family'; 
+        }
+        else if (pref === 'prefCaptionsSize') { 
+          property = 'font-size'; 
+        }
+        else if (pref === 'prefCaptionsColor') { 
+          property = 'color'; 
+        }
+        else if (pref === 'prefCaptionsBGColor') { 
+          property = 'background-color'; 
+        }
+        else if (pref === 'prefCaptionsOpacity') { 
+          property = 'opacity'; 
+        }
+        if (pref === 'prefCaptionsOpacity') { 
+          newValue = parseFloat($('#' + this.mediaId + '_' + pref).val()) / 100.0;
+        }
+        else { 
+          newValue = $('#' + this.mediaId + '_' + pref).val();
+        }
+        $element.css(property, newValue);
+      }
+      else { // no property was specified, update all styles with current saved prefs 
+        var opacity = parseFloat(this.prefCaptionsOpacity) / 100.0;
+        $element.css({ 
+          'font-family': this.prefCaptionsFont,
+          'font-size': this.prefCaptionsSize,
+          'color': this.prefCaptionsColor,
+          'background-color': this.prefCaptionsBGColor, 
+          'opacity': opacity
+        });
+      }
+    }
+  };  
 
 })(jQuery);
 
@@ -8605,7 +8813,7 @@
     // translation2.js is then contanenated onto the end to finish this function
         
 
-var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Klicken Sie auf den Hilfe-Button auf dem Media-Player für Details zu den einzelnen Präferenz. Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefHeadingKeys": "Tastenkombination für Kurzwahl","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefDescFormat": "Preferred format","prefDescFormatOption1": "Alternative described version of video","prefDescFormatOption2": "Text-based description, announced by screen reader","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
+var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Klicken Sie auf den Hilfe-Button auf dem Media-Player für Details zu den einzelnen Präferenz. Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefHeadingKeys": "Tastenkombination für Kurzwahl","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefDescFormat": "Preferred format","prefDescFormatOption1": "Alternative described version of video","prefDescFormatOption2": "Text-based description, announced by screen reader","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Font","prefCaptionsColor": "Text Color","prefCaptionsBGColor": "Background","prefCaptionsSize": "Font Size","prefCaptionsOpacity": "Opacity","prefCaptionsStyle": "Style","serif": "Serif","sans": "Sans-Serif","cursive": "Cursive","fantasy": "Fantasy","monospace": "Monospace","white": "White","yellow": "Yellow","green": "Green", "cyan": "Cyan","blue": "Blue", "magenta": "Magenta", "red": "Red", "black": "Black", "transparent": "transparent", "solid": "solid", "captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up", "sampleCaptionText": "Sample caption text","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
 var en = {
   
 "playerHeading": "Media player",
@@ -8743,6 +8951,54 @@ var en = {
 "prefHighlight": "Highlight transcript as media plays",
 
 "prefTabbable": "Keyboard-enable transcript",
+
+"prefCaptionsFont": "Font",
+
+"prefCaptionsColor": "Text Color",
+
+"prefCaptionsBGColor": "Background",
+
+"prefCaptionsSize": "Font Size",
+
+"prefCaptionsOpacity": "Opacity",
+
+"prefCaptionsStyle": "Style",
+
+"serif": "Serif",
+
+"sans": "Sans-Serif",
+
+"cursive": "Cursive",
+
+"fantasy": "Fantasy",
+
+"monospace": "Monospace",
+
+"white": "White",
+
+"yellow": "Yellow",
+
+"green": "Green", 
+
+"cyan": "Cyan",
+
+"blue": "Blue", 
+
+"magenta": "Magenta", 
+
+"red": "Red", 
+
+"black": "Black", 
+
+"transparent": "transparent", 
+
+"solid": "solid", 
+
+"captionsStylePopOn": "Pop-on",
+
+"captionsStyleRollUp": "Roll-up", 
+
+"sampleCaptionText": "Sample caption text",
 
 "prefSuccess": "Your changes have been saved.",
 
@@ -8929,6 +9185,54 @@ var es = {
 "prefHighlight": "Resaltar la transcripción según avanza el contenido",
 
 "prefTabbable": "Transcripción manejable por teclado",
+
+"prefCaptionsFont": "Font",
+
+"prefCaptionsColor": "Text Color",
+
+"prefCaptionsBGColor": "Background",
+
+"prefCaptionsSize": "Font Size",
+
+"prefCaptionsOpacity": "Opacity",
+
+"prefCaptionsStyle": "Style",
+
+"serif": "Serif",
+
+"sans": "Sans-Serif",
+
+"cursive": "Cursive",
+
+"fantasy": "Fantasy",
+
+"monospace": "Monospace",
+
+"white": "White",
+
+"yellow": "Yellow",
+
+"green": "Green", 
+
+"cyan": "Cyan",
+
+"blue": "Blue", 
+
+"magenta": "Magenta", 
+
+"red": "Red", 
+
+"black": "Black", 
+
+"transparent": "transparent", 
+
+"solid": "solid", 
+
+"captionsStylePopOn": "Pop-on",
+
+"captionsStyleRollUp": "Roll-up", 
+
+"sampleCaptionText": "Sample caption text",
 
 "prefSuccess": "Los cambios han sido guardados.",
 
@@ -9119,6 +9423,54 @@ var nl = {
 "prefHighlight": "Transcript highlighten terwijl media speelt",
 
 "prefTabbable": "Maak transcript bedienbaar met toetsenbord",
+
+"prefCaptionsFont": "Font",
+
+"prefCaptionsColor": "Text Color",
+
+"prefCaptionsBGColor": "Background",
+
+"prefCaptionsSize": "Font Size",
+
+"prefCaptionsOpacity": "Opacity",
+
+"prefCaptionsStyle": "Style",
+
+"serif": "Serif",
+
+"sans": "Sans-Serif",
+
+"cursive": "Cursive",
+
+"fantasy": "Fantasy",
+
+"monospace": "Monospace",
+
+"white": "White",
+
+"yellow": "Yellow",
+
+"green": "Green", 
+
+"cyan": "Cyan",
+
+"blue": "Blue", 
+
+"magenta": "Magenta", 
+
+"red": "Red", 
+
+"black": "Black", 
+
+"transparent": "transparent", 
+
+"solid": "solid", 
+
+"captionsStylePopOn": "Pop-on",
+
+"captionsStyleRollUp": "Roll-up", 
+
+"sampleCaptionText": "Sample caption text",
 
 "prefSuccess": "Je wijzigingen zijn opgeslagen.",
 

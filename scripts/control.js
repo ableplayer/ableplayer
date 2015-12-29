@@ -1124,18 +1124,19 @@
 
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
+    
     this.$media.height(height);
     this.$media.width(width);
 
     if (this.$captionDiv) {
       this.$captionDiv.width(width);
-      // TODO: Font-size is currently stored in CSS and is not calculable cross-browser.
-      // Instead, store it just here and update appropriately.
-      // For now, just clear font-size when player is reset to default height, so at least it'll be consistent in that case.
+      // Font-size for embedded player is too small in full screen view 
       if (height !== this.playerHeight) {
+        // this calculation results in a reasonably large font across all browsers 
         this.$captionDiv.css('font-size', (height / this.playerHeight) * 18);
       }
       else {
+        // clear full screen font size and return to normal
         this.$captionDiv.css('font-size', '');
       }
     }

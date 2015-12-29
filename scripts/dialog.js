@@ -13,7 +13,7 @@
     this.modal = modal;    
     modal.css({
       'width': width || '50%',
-      'top': (fullscreen ? '0' : '25%')
+      'top': (fullscreen ? '0' : '5%')
     });
     modal.addClass('modalDialog');
 

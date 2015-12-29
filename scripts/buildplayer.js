@@ -1044,7 +1044,7 @@
     }
   
     if (this.mediaType === 'video') { 
-      // also set width and height of div.able-vidcap-container
+      // set width and height of div.able-vidcap-container
       vidcapStyles = {
         'width': this.playerWidth+'px',
         'height': this.playerHeight+'px'
@@ -1052,9 +1052,11 @@
       if (this.$vidcapContainer) { 
         this.$vidcapContainer.css(vidcapStyles); 
       }   
-      // also set width of the captions and descriptions containers 
       if (this.$captionDiv) { 
+        // set width of the captions container 
         this.$captionDiv.css('width',this.playerWidth+'px');
+        // stylize captions based on user prefs
+        this.stylizeCaptions(this.$captionDiv); 
       }
     }
     

@@ -140,6 +140,54 @@ var nl = {
 
 "prefTabbable": "Maak transcript bedienbaar met toetsenbord",
 
+"prefCaptionsFont": "Font",
+
+"prefCaptionsColor": "Text Color",
+
+"prefCaptionsBGColor": "Background",
+
+"prefCaptionsSize": "Font Size",
+
+"prefCaptionsOpacity": "Opacity",
+
+"prefCaptionsStyle": "Style",
+
+"serif": "Serif",
+
+"sans": "Sans-Serif",
+
+"cursive": "Cursive",
+
+"fantasy": "Fantasy",
+
+"monospace": "Monospace",
+
+"white": "White",
+
+"yellow": "Yellow",
+
+"green": "Green", 
+
+"cyan": "Cyan",
+
+"blue": "Blue", 
+
+"magenta": "Magenta", 
+
+"red": "Red", 
+
+"black": "Black", 
+
+"transparent": "transparent", 
+
+"solid": "solid", 
+
+"captionsStylePopOn": "Pop-on",
+
+"captionsStyleRollUp": "Roll-up", 
+
+"sampleCaptionText": "Sample caption text",
+
 "prefSuccess": "Je wijzigingen zijn opgeslagen.",
 
 "prefNoChange": "Je hebt geen wijzigingen gemaakt.",

@@ -227,18 +227,20 @@
 */
 
 div.able-captions {
-  background-color: black;
-  font-size: 1.1em;
   bottom: 0;
-  color: white;
   margin: 0;
-  opacity: 0.7;
   padding: 0.5em 0;
   position: absolute;
   text-align: center;
   display: none;
   z-index: 1000;
   line-height: 1.15em;
+  /* settings that are overridden by user prefs */
+  background-color: black;
+  font-size: 1.1em;
+  color: white;
+  opacity: 0.75;
+  
 }
 div.able-descriptions { 
   position: relative;
@@ -367,6 +369,26 @@ div.able-desc-pref-prompt {
 }
 div.able-prefDescFormat > div { 
   margin-left: 1.5em;
+}
+.able-prefs-captions label, 
+.able-prefs-captions select { 
+  display: block; 
+  float: left;  
+  margin-bottom: 0.25em;
+}
+fieldset.able-prefs-captions label { 
+  width: 6em; 
+  text-align: right; 
+  padding-right: 1em;  
+}
+fieldset.able-prefs-captions select { 
+  width: 10em;
+  font-size: 0.9em;
+  border-radius: none; 
+}
+.able-prefs-form div.able-captions-sample { 
+  padding: 0.5em;
+  text-align: center;
 }
 
 /* 

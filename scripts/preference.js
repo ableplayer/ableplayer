@@ -10,21 +10,21 @@
       preferences: {}
     };
 
-      var cookie;
-      try {
-        cookie = Cookies.getJSON('Able-Player');
-      }
-      catch (err) {
-        // Original cookie can't be parsed; update to default
-        Cookies.getJSON(defaultCookie);
-        cookie = defaultCookie;
-      }
-      if (cookie) {
-        return cookie;
-      }
-      else {
-        return defaultCookie;
-      }
+    var cookie;
+    try {
+      cookie = Cookies.getJSON('Able-Player');
+    }
+    catch (err) {
+      // Original cookie can't be parsed; update to default
+      Cookies.getJSON(defaultCookie);
+      cookie = defaultCookie;
+    }
+    if (cookie) {
+      return cookie;
+    }
+    else {
+      return defaultCookie;
+    }
   };
   AblePlayer.prototype.updateCookie = function( setting ) {
 
@@ -110,6 +110,44 @@
         'group': 'captions',
         'default': 1
       });
+/* // not supported yet       
+      prefs.push({
+        'name': 'prefCaptionsStyle', 
+        'label': this.tt.prefCaptionsStyle,
+        'group': 'captions',
+        'default': this.tt.captionsStylePopOn
+      });
+*/      
+      prefs.push({
+        'name': 'prefCaptionsFont', 
+        'label': this.tt.prefCaptionsFont,
+        'group': 'captions',
+        'default': this.tt.sans
+      });
+      prefs.push({
+        'name': 'prefCaptionsSize', 
+        'label': this.tt.prefCaptionsSize,
+        'group': 'captions',
+        'default': '100%'
+      });
+      prefs.push({
+        'name': 'prefCaptionsColor', 
+        'label': this.tt.prefCaptionsColor,
+        'group': 'captions',
+        'default': this.tt.white
+      });
+      prefs.push({
+        'name': 'prefCaptionsBGColor', 
+        'label': this.tt.prefCaptionsBGColor,
+        'group': 'captions',
+        'default': this.tt.black
+      });
+      prefs.push({
+        'name': 'prefCaptionsOpacity', 
+        'label': this.tt.prefCaptionsOpacity,
+        'group': 'captions',
+        'default': '75%'
+      });      
 
       // Sign lanuage preferences 
       prefs.push({
@@ -175,10 +213,11 @@
 
     var prefsDiv, introText, prefsIntro,
       groups, fieldset, fieldsetClass, fieldsetId, legend, heading, 
-      i, j, thisPref, thisDiv, thisClass, thisId, thisLabel, thisField,
-      radioPromptId,radioPrompt,hiddenSpanText,
+      i, j, k, thisPref, thisDiv, thisClass, thisId, thisLabel, thisField,      
+      radioPromptId,radioPrompt,hiddenSpanText,      
       div1,id1,radio1,label1,hiddenSpan1, 
       div2,id2,radio2,label2,hiddenSpan2, 
+      options,thisOption,sampleCapsDiv,changedPref,
       thisObj, available;
 
     thisObj = this;
@@ -198,7 +237,7 @@
 
     // add preference fields in groups
     if (this.mediaType === 'video') { 
-      groups = ['keys','description','text-description','transcript']; // TODO: Add captions (font & colors)
+      groups = ['keys','description','text-description','transcript','captions']; 
     }
     else { 
       groups = ['keys','transcript']; 
@@ -288,6 +327,32 @@
             div2.append(radio2,label2);
             thisDiv.append(radioPrompt,div1,div2);
           }
+          else if (groups[i] == 'captions') { 
+            thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
+            thisField = $('<select>',{
+              name: thisPref,
+              id: thisId, 
+            });
+            if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') { 
+              // add a change handler that updates the style of the sample caption text
+              thisField.change(function() { 
+                changedPref = $(this).attr('name');
+                thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
+              }); 
+            }
+            options = this.getCaptionsOptions(thisPref);
+            for (k=0; k < options.length; k++) { 
+              thisOption = $('<option>',{
+                value: options[k],
+                text: options[k]
+              });
+              if (this[thisPref] === options[k]) {
+                thisOption.attr('selected','selected');
+              }
+              thisField.append(thisOption);              
+            }
+            thisDiv.append(thisLabel,thisField);            
+          }
           else { // all other fields are checkboxes
             thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
             thisField = $('<input>',{
@@ -300,13 +365,23 @@
             if (this[thisPref] === 1) {
               thisField.attr('checked','checked');
             }
-            thisDiv.append(thisField).append(thisLabel);
+            thisDiv.append(thisField,thisLabel);
           }
           fieldset.append(thisDiv);
         }
       }
       prefsDiv.append(fieldset);
     }
+    
+    // add a sample closed caption div to prefs dialog 
+    if (this.mediaType === 'video') { 
+      this.$sampleCapsDiv = $('<div>',{ 
+        'class': 'able-captions-sample'
+      }).text(this.tt.sampleCaptionText);
+      prefsDiv.append(this.$sampleCapsDiv);
+      this.stylizeCaptions(this.$sampleCapsDiv);
+    }
+    
     // prefsDiv (dialog) must be appended to the BODY!
     // otherwise when aria-hidden="true" is applied to all background content
     // that will include an ancestor of the dialog,
@@ -366,6 +441,10 @@
            $('input[value="video"]').prop('checked',true);              
          } 
        }
+       else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) { 
+         // this is a caption-related select box 
+         $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
+       }
        else { // all others are checkboxes 
          if (this[prefName] === 1) { 
            $('input[name="' + prefName + '"]').prop('checked',true); 
@@ -374,7 +453,9 @@
             $('input[name="' + prefName + '"]').prop('checked',false); 
           }
         }
-      } 
+      }
+      // also restore style of sample caption div 
+      this.stylizeCaptions(this.$sampleCapsDiv); 
    };
    
   // Return a prefs object constructed from the form.
@@ -382,9 +463,10 @@
     // called when user saves the Preferences form
     // update cookie with new value
 
-    var numChanges;
+    var numChanges, numCapChanges, newValue;
 
     numChanges = 0;
+    numCapChanges = 0; // changes to caption-style-related preferences
     var cookie = this.getCookie();
     var available = this.getAvailablePreferences();
     for (var i=0; i < available.length; i++) {
@@ -396,6 +478,17 @@
           if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting           
             cookie.preferences['prefDescFormat'] = this.prefDescFormat;
             numChanges++; 
+          }
+        }
+        else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) { 
+          // this is one of the caption-related select fields 
+          newValue = $('select[name="' + prefName + '"]').val(); 
+          if (cookie.preferences[prefName] !== newValue) { // user changed setting
+            cookie.preferences[prefName] = newValue;
+            // also update global var for this pref (for caption fields, not done elsewhere) 
+            this[prefName] = newValue;
+            numChanges++; 
+            numCapChanges++; 
           }
         }
         else { // all other fields are checkboxes
@@ -432,6 +525,9 @@
       this.showAlert(this.tt.prefNoChange);
     }
     this.updatePrefs();
+    if (numCapChanges > 0) { 
+      this.stylizeCaptions(this.$captionDiv);
+    }
   }
 
   // Updates player based on current prefs.  Safe to call multiple times.
