@@ -587,7 +587,16 @@
             // if a video has no captions 
             // this shouldn't be a problem though because playing for any duration 
             // seems to trigger onApiChange if captions are available  
-            if (thisObj.ytPlayingJustEnough) { 
+            if (thisObj.stoppingYouTube && x.data == 2) { // video has paused  
+              // thisObj.youTubePlayer.stopVideo();
+              if (typeof thisObj.$posterImg !== 'undefined') { 
+                thisObj.$posterImg.show();
+              }
+              thisObj.stoppingYouTube = false;
+              thisObj.seeking = false;
+              thisObj.playing = false;
+            }            
+            else if (thisObj.ytPlayingJustEnough) { 
               setTimeout(function() { 
                 thisObj.handleStop();
               },1000);
@@ -626,6 +635,7 @@
           }          
         }
       });
+      thisObj.injectPoster(thisObj.$mediaContainer);
       thisObj.$media.remove();
     };
 

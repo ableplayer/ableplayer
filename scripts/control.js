@@ -1,5 +1,6 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) { 
+    
     if (this.player === 'html5') {
       var seekable;
   
@@ -26,6 +27,11 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.seekTo(newTime,true);
+      if (newTime > 0) { 
+        if (typeof this.$posterImg !== 'undefined') { 
+          this.$posterImg.hide();
+        }
+      }
     }
 
     // one Boolean var is probably enough(?)   
@@ -310,6 +316,9 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.playVideo();
+      if (typeof this.$posterImg !== 'undefined') { 
+        this.$posterImg.hide();
+      }
       this.stoppingYouTube = false;
     }
     this.startedPlaying = true;    
@@ -667,6 +676,8 @@
 
   AblePlayer.prototype.handleStop = function() { 
 
+    var thisObj = this; 
+    
     if (this.player == 'html5') {
       this.pauseMedia();
       this.seekTo(0);
@@ -837,8 +848,6 @@
           this.selectedDescriptions = this.descriptions[0];
         }
       }
-console.log('refreshing controls pos E');
-
       this.refreshControls();
     }
     else {   
@@ -1013,7 +1022,6 @@ console.log('refreshing controls pos E');
         if (!thisObj.isFullscreen()) { 
           // user has just exited full screen 
           // force call to resizePlayer with default player dimensions 
-console.log('resizePlayer pos A');
           thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
         } 
       });
@@ -1070,8 +1078,6 @@ console.log('resizePlayer pos A');
         this.playMedia();
       }
     }
-console.log('refreshing controls pos F');
-
     this.refreshControls();
   };
 
@@ -1178,9 +1184,6 @@ console.log('inside resizePlayer...');
     else if (this.youTubePlayer) {
       this.youTubePlayer.setSize(width, height);
     }
-        
-console.log('refreshing controls pos G');
-
     this.refreshControls();
   };
   

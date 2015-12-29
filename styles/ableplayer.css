@@ -70,8 +70,15 @@
 	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
 	padding: 0; 
 }
+.able-poster { 
+  position: absolute; 
+  top: 0;
+  left: 0;
+}
 
-/* Controller Buttons & Controls */
+/* 
+  Controller Buttons & Controls 
+*/
 .able-big-play-button {
     position: absolute;
     font-size: 8em;

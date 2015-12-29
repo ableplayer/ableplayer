@@ -243,6 +243,26 @@
     }
     this.$ableColumnRight.width(this.playerWidth);
   };
+
+  AblePlayer.prototype.injectPoster = function ($element) {
+
+    // get poster attribute from media element and append that as an img to $element    
+    // currently only applies to YouTube and fallback 
+    var poster;
+    
+    if (this.$media.attr('poster')) { 
+      poster = this.$media.attr('poster'); 
+      this.$posterImg = $('<img>',{
+        'class': 'able-poster',
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation",
+        'width': this.playerWidth,
+        'height': this.playerHeight
+      });
+      $element.append(this.$posterImg);      
+    }
+  }
   
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
@@ -516,7 +536,7 @@
     // provide ultimate fallback for users who are unable to play the media
     // reason is either 'No Support' or a specific error message     
 
-    var fallback, fallbackText, fallbackContainer, showBrowserList, browsers, i, b, browserList, poster, posterImg;
+    var fallback, fallbackText, $fallbackContainer, showBrowserList, browsers, i, b, browserList;
     
     // use fallback content that's nested inside the HTML5 media element, if there is any
     // any content other than div, p, and ul is rejected 
@@ -535,13 +555,13 @@
         showBrowserList = true;         
       }  
     }
-    fallbackContainer = $('<div>',{
+    $fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
       'role' : 'alert',
       'width' : this.playerWidth
     });
-    this.$media.before(fallbackContainer);     
-    fallbackContainer.html(fallback);  
+    this.$media.before($fallbackContainer);     
+    $fallbackContainer.html(fallback);  
     if (showBrowserList) { 
       browserList = $('<ul>');
       browsers = this.getSupportingBrowsers();
@@ -550,22 +570,13 @@
         b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
         browserList.append(b);
       }
-      fallbackContainer.append(browserList);      
+      $fallbackContainer.append(browserList);      
     }
     
     // if there's a poster, show that as well 
-    if (this.$media.attr('poster')) { 
-      poster = this.$media.attr('poster'); 
-      var posterImg = $('<img>',{
-        'src' : poster,
-        'alt' : "",
-        'role': "presentation"
-      });
-      fallbackContainer.append(posterImg);      
-    }
+    this.injectPoster($fallbackContainer);
     
-    // now remove the media element. 
-    // It doesn't work anyway 
+    // now remove the media element.
     this.$media.remove();     
   };
   

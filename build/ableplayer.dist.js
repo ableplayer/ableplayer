@@ -830,7 +830,16 @@
             // if a video has no captions 
             // this shouldn't be a problem though because playing for any duration 
             // seems to trigger onApiChange if captions are available  
-            if (thisObj.ytPlayingJustEnough) { 
+            if (thisObj.stoppingYouTube && x.data == 2) { // video has paused  
+              // thisObj.youTubePlayer.stopVideo();
+              if (typeof thisObj.$posterImg !== 'undefined') { 
+                thisObj.$posterImg.show();
+              }
+              thisObj.stoppingYouTube = false;
+              thisObj.seeking = false;
+              thisObj.playing = false;
+            }            
+            else if (thisObj.ytPlayingJustEnough) { 
               setTimeout(function() { 
                 thisObj.handleStop();
               },1000);
@@ -869,6 +878,7 @@
           }          
         }
       });
+      thisObj.injectPoster(thisObj.$mediaContainer);
       thisObj.$media.remove();
     };
 
@@ -2845,6 +2855,26 @@
     }
     this.$ableColumnRight.width(this.playerWidth);
   };
+
+  AblePlayer.prototype.injectPoster = function ($element) {
+
+    // get poster attribute from media element and append that as an img to $element    
+    // currently only applies to YouTube and fallback 
+    var poster;
+    
+    if (this.$media.attr('poster')) { 
+      poster = this.$media.attr('poster'); 
+      this.$posterImg = $('<img>',{
+        'class': 'able-poster',
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation",
+        'width': this.playerWidth,
+        'height': this.playerHeight
+      });
+      $element.append(this.$posterImg);      
+    }
+  }
   
   AblePlayer.prototype.injectAlert = function () {
     this.alertBox = $('<div role="alert"></div>');
@@ -3118,7 +3148,7 @@
     // provide ultimate fallback for users who are unable to play the media
     // reason is either 'No Support' or a specific error message     
 
-    var fallback, fallbackText, fallbackContainer, showBrowserList, browsers, i, b, browserList, poster, posterImg;
+    var fallback, fallbackText, $fallbackContainer, showBrowserList, browsers, i, b, browserList;
     
     // use fallback content that's nested inside the HTML5 media element, if there is any
     // any content other than div, p, and ul is rejected 
@@ -3137,13 +3167,13 @@
         showBrowserList = true;         
       }  
     }
-    fallbackContainer = $('<div>',{
+    $fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
       'role' : 'alert',
       'width' : this.playerWidth
     });
-    this.$media.before(fallbackContainer);     
-    fallbackContainer.html(fallback);  
+    this.$media.before($fallbackContainer);     
+    $fallbackContainer.html(fallback);  
     if (showBrowserList) { 
       browserList = $('<ul>');
       browsers = this.getSupportingBrowsers();
@@ -3152,22 +3182,13 @@
         b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
         browserList.append(b);
       }
-      fallbackContainer.append(browserList);      
+      $fallbackContainer.append(browserList);      
     }
     
     // if there's a poster, show that as well 
-    if (this.$media.attr('poster')) { 
-      poster = this.$media.attr('poster'); 
-      var posterImg = $('<img>',{
-        'src' : poster,
-        'alt' : "",
-        'role': "presentation"
-      });
-      fallbackContainer.append(posterImg);      
-    }
+    this.injectPoster($fallbackContainer);
     
-    // now remove the media element. 
-    // It doesn't work anyway 
+    // now remove the media element.
     this.$media.remove();     
   };
   
@@ -5083,6 +5104,7 @@
 
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) { 
+    
     if (this.player === 'html5') {
       var seekable;
   
@@ -5109,6 +5131,11 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.seekTo(newTime,true);
+      if (newTime > 0) { 
+        if (typeof this.$posterImg !== 'undefined') { 
+          this.$posterImg.hide();
+        }
+      }
     }
 
     // one Boolean var is probably enough(?)   
@@ -5393,6 +5420,9 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.playVideo();
+      if (typeof this.$posterImg !== 'undefined') { 
+        this.$posterImg.hide();
+      }
       this.stoppingYouTube = false;
     }
     this.startedPlaying = true;    
@@ -5750,6 +5780,8 @@
 
   AblePlayer.prototype.handleStop = function() { 
 
+    var thisObj = this; 
+    
     if (this.player == 'html5') {
       this.pauseMedia();
       this.seekTo(0);
@@ -5920,8 +5952,6 @@
           this.selectedDescriptions = this.descriptions[0];
         }
       }
-
-
       this.refreshControls();
     }
     else {   
@@ -6096,7 +6126,6 @@
         if (!thisObj.isFullscreen()) { 
           // user has just exited full screen 
           // force call to resizePlayer with default player dimensions 
-
           thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
         } 
       });
@@ -6153,8 +6182,6 @@
         this.playMedia();
       }
     }
-
-
     this.refreshControls();
   };
 
@@ -6261,9 +6288,6 @@
     else if (this.youTubePlayer) {
       this.youTubePlayer.setSize(width, height);
     }
-        
-
-
     this.refreshControls();
   };
   
@@ -7048,7 +7072,7 @@
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
 
-    if (!this.startedPlaying) {
+    if (this.player == 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') { 
         if (this.startTime === this.media.currentTime) { 
           // media has already scrubbed to start time
@@ -7057,13 +7081,6 @@
           }   
           if (this.seeking) { 
             this.seeking = false; 
-          }
-          if (this.stoppingYouTube) { 
-            // until now video has just been paused (stop emulation mode) 
-            // now that it's been scrubbed back to 0 it can be formally stopped 
-            // to restore poster image and prevent continued calls to onMediaUpdateTime()
-            this.youTubePlayer.stopVideo();
-            this.stoppingYouTube = false; 
           }
         }
         else { 
@@ -7080,16 +7097,13 @@
         } 
       }       
     }
-    
-    if (this.playing) { // added this condition in v2.2.19; seems unnecessary to update this content if not playing
-      // show highlight in transcript 
-      if (this.prefHighlight === 1) {
-        this.highlightTranscript(this.getElapsed()); 
-      }
-      this.updateCaption();
-      this.showDescription(this.getElapsed());
-      this.updateMeta();
+    // show highlight in transcript 
+    if (this.prefHighlight === 1) {
+      this.highlightTranscript(this.getElapsed()); 
     }
+    this.updateCaption();
+    this.showDescription(this.getElapsed());
+    this.updateMeta();
     this.refreshControls();
   };
 
