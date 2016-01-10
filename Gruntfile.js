@@ -22,6 +22,7 @@ module.exports = function(grunt) {
                     'scripts/webvtt.js',
                     'scripts/buildplayer.js',
                     'scripts/track.js',
+                    'scripts/youtube.js',
                     'scripts/seekbar.js',
                     'scripts/dialog.js',
                     'scripts/misc.js',
@@ -41,7 +42,8 @@ module.exports = function(grunt) {
                     'translations/en.js',
                     'translations/es.js',
                     'translations/nl.js',
-                    'scripts/translation2.js'
+                    'scripts/translation2.js',
+                    'scripts/JQuery.doWhen.js'
                 ],
                 dest: 'build/<%= pkg.name %>.js'
             },

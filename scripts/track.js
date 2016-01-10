@@ -2,7 +2,10 @@
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
+  // Added in v2.2.23: Also handles YouTube caption tracks  
   AblePlayer.prototype.setupTracks = function() {
+
+    var thisObj = this;
     
     var deferred = new $.Deferred();
     var promise = deferred.promise();
@@ -14,7 +17,6 @@
     this.chapters = [];
     this.meta = []; 
     
-  
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {      
       var track = this.$tracks[ii];
@@ -29,7 +31,6 @@
       }
 
       var loadingPromise = this.loadTextObject(trackSrc);
-      var thisObj = this;
       loadingPromises.push(loadingPromise);
       loadingPromise.then((function (track, kind) {
         return function (trackSrc, trackText) { 
@@ -53,7 +54,6 @@
     $.when.apply($, loadingPromises).then(function () {
       deferred.resolve();
     });
-
     return promise;
   };
 
@@ -98,6 +98,7 @@
     else { 
       this.captionsOn = false;
     }
+    
     if (this.includeTranscript) {
       // Remove the "Unknown" option from the select box.
       if (this.$unknownTranscriptOption) {
@@ -176,6 +177,7 @@
     }
   };
 
+
   AblePlayer.prototype.setupDescriptions = function (track, cues) {
 
     // called via setupTracks() only if there is track with kind="descriptions"
@@ -211,6 +213,7 @@
   }
       
   AblePlayer.prototype.loadTextObject = function(src) {
+    
     var deferred = new $.Deferred();
     var promise = deferred.promise();
     var thisObj = this; 
@@ -232,7 +235,31 @@
       }
       $tempDiv.remove();
     });
-
     return promise;
   };
+  
+  AblePlayer.prototype.setupAltCaptions = function() { 
+    // setup captions from an alternative source (not <track> elements) 
+    // only do this if no <track> captions are provided  
+    // currently supports: YouTube 
+
+    var deferred = new $.Deferred();
+    var promise = deferred.promise();
+
+    if (this.captions.length === 0) { 
+      if (this.player === 'youtube' && typeof youTubeDataAPIKey !== 'undefined') { 
+        this.setupYouTubeCaptions().done(function() { 
+          deferred.resolve(); 
+        });
+      }
+      else { 
+        // repeat for other alt sources once supported (e.g., Vimeo, DailyMotion) 
+      }
+    }
+    else { // there are <track> captions, so no need for alt source captions
+      deferred.resolve();      
+    }
+    return promise;   
+  };
+  
 })(jQuery);

@@ -42,8 +42,10 @@
             thisObj.currentDescription = -1;
           }
         }
-        thisObj.updateCaption();
-        thisObj.showDescription(thisObj.getElapsed());
+        if (!this.swappingSrc) {
+          thisObj.updateCaption();
+          thisObj.showDescription(thisObj.getElapsed());
+        }
       }
       thisObj.captionsOn = true;
       // stopgap to prevent spacebar in Firefox from reopening popup
@@ -88,9 +90,10 @@
       // save preference to cookie 
       thisObj.prefCaptions = 0; 
       thisObj.updateCookie('prefCaptions');
-
-      thisObj.refreshControls();
-      thisObj.updateCaption();
+      if (!this.swappingSrc) {
+        thisObj.refreshControls();
+        thisObj.updateCaption();
+      }
     }
   };
 
@@ -170,17 +173,6 @@
         break; 
 
       case 'prefCaptionsColor':
-        options[0] = this.tt.white;
-        options[1] = this.tt.yellow;
-        options[2] = this.tt.green;
-        options[3] = this.tt.cyan;
-        options[4] = this.tt.blue;
-        options[5] = this.tt.magenta;
-        options[6] = this.tt.red;
-        options[7] = this.tt.black;
-        break; 
-        
-      case 'prefCaptionsColor':
       case 'prefCaptionsBGColor':
         options[0] = this.tt.white;
         options[1] = this.tt.yellow;
@@ -215,6 +207,28 @@
     }
     return options;
   };
+  
+  AblePlayer.prototype.translatePrefs = function(pref, value, outputFormat) { 
+  
+    // translate current value of pref to a value supported by outputformat   
+    if (outputFormat == 'youtube') { 
+      if (pref === 'size') { 
+        switch (value) { 
+          case '50%': 
+            return -1; // YouTube has one size small than default 
+          case '75%': 
+            return 0; // this is actually default, so maybe larger on YouTube than Able Player 
+          case '100%': 
+            return 1; // slightly larger than default 
+          case '150%': 
+            return 2; 
+          case '200%': 
+            return 3; // largest 
+        }
+      }
+    }
+    return false; 
+  }
   
   AblePlayer.prototype.stylizeCaptions = function($element, pref) { 
 

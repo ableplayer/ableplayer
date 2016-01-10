@@ -19,6 +19,15 @@
   https://developers.google.com/youtube/iframe_api_reference  
   // YouTube Player Parameters 
   https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
+  
+  // YouTube Data API 
+  https://developers.google.com/youtube/v3
+  
+  // Google API Client Library for JavaScript 
+  https://developers.google.com/api-client-library/javascript/dev/dev_jscript 
+  
+  // Google API Explorer: YouTube services and methods
+  https://developers.google.com/apis-explorer/#s/youtube/v3/
 */
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
@@ -52,6 +61,7 @@
   // Parameters are: 
   // media - jQuery selector or element identifying the media.
   window.AblePlayer = function(media) {
+    
     // Keep track of the last player created for use with global events.
     AblePlayer.lastCreated = this;
 
@@ -115,9 +125,9 @@
     }
 
     if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") { 
-      this.youtubeDescId = $(media).data('youtube-desc-id'); 
+      this.youTubeDescId = $(media).data('youtube-desc-id'); 
     }
-
+    
     if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") { 
       this.debug = true; 
     }
@@ -220,6 +230,7 @@
   AblePlayer.nextIndex = 0;
 
   AblePlayer.prototype.setup = function() {
+    
     var thisObj = this;
     if (this.debug && this.startTime > 0) {
       console.log('Will start media at ' + this.startTime + ' seconds');

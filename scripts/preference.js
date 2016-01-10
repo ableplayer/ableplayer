@@ -463,10 +463,11 @@
     // called when user saves the Preferences form
     // update cookie with new value
 
-    var numChanges, numCapChanges, newValue;
+    var numChanges, numCapChanges, capSizeChanged, capSizeValue, newValue;
 
     numChanges = 0;
     numCapChanges = 0; // changes to caption-style-related preferences
+    capSizeChanged = false; 
     var cookie = this.getCookie();
     var available = this.getAvailablePreferences();
     for (var i=0; i < available.length; i++) {
@@ -489,6 +490,10 @@
             this[prefName] = newValue;
             numChanges++; 
             numCapChanges++; 
+          }
+          if (prefName === 'prefCaptionsSize') { 
+            capSizeChanged = true;             
+            capSizeValue = newValue;
           }
         }
         else { // all other fields are checkboxes
@@ -523,6 +528,12 @@
     }
     else {
       this.showAlert(this.tt.prefNoChange);
+    }
+    if (this.player === 'youtube' && 
+      (typeof this.usingYouTubeCaptions !== 'undefined' && this.usingYouTubeCaptions) && 
+      capSizeChanged) { 
+        // update font size of YouTube captions 
+        this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
     }
     this.updatePrefs();
     if (numCapChanges > 0) { 

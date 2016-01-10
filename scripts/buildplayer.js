@@ -418,7 +418,7 @@
 
   // Create and fill in the popup menu forms for various controls.
   AblePlayer.prototype.setupPopups = function () {
-    
+
     var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
         radioName, radioId, trackButton, trackLabel; 
     
@@ -753,6 +753,7 @@
   // Each associated value is array of control names to put at that location.
   AblePlayer.prototype.calculateControlLayout = function () {
     // Removed rewind/forward in favor of seek bar.
+    
     var controlLayout = {
       'ul': ['play','stop'],
       'ur': [],
@@ -774,7 +775,6 @@
       bll.push('volume-up');
       bll.push('volume-down');
     }
-
     var blr = [];
     if (this.mediaType === 'video') { 
       if (this.hasCaptions) {
@@ -824,7 +824,6 @@
   };
 
   AblePlayer.prototype.addControls = function() {   
-    
     // determine which controls to show based on several factors: 
     // mediaType (audio vs video) 
     // availability of tracks (e.g., for closed captions & audio description) 

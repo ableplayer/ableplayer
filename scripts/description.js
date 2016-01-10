@@ -28,7 +28,13 @@
         this.hasOpenDesc = true;
       }
       else { 
-        this.hasOpenDesc = false;              
+        // there's no open-described version via data-desc-src, but what about data-youtube-desc-src? 
+        if (this.youTubeDescId) { 
+          this.hasOpenDesc = true; 
+        }
+        else { // there are no open-described versions from any source
+          this.hasOpenDesc = false;              
+        }
       }
     }
     
@@ -62,8 +68,9 @@
     if (this.descOn) {
 
       if (this.useDescFormat === 'video') { 
-        if (!this.usingAudioDescription()) {
-          this.swapDescription();   
+
+        if (!this.usingAudioDescription()) {  
+          this.swapDescription(); 
         }
         // hide description div 
         this.$descDiv.hide();
@@ -82,7 +89,9 @@
         else { // keep it visible to screen readers, but hide from everyone else
           this.$descDiv.addClass('able-clipped'); 
         }
-        this.showDescription(this.getElapsed());
+        if (!this.swappingSrc) {
+          this.showDescription(this.getElapsed());
+        }
       }
     }
     else { // description is off. 
@@ -103,70 +112,79 @@
   // Returns true if currently using audio description, false otherwise.
   AblePlayer.prototype.usingAudioDescription = function () {
     
-    return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+    if (this.player === 'youtube') { 
+      return (this.activeYouTubeId === this.youTubeDescId); 
+    }
+    else { 
+      return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+    }
   };
 
   AblePlayer.prototype.swapDescription = function() { 
+
     // swap described and non-described source media, depending on which is playing
     // this function is only called in two circumstances: 
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
     // 2. User is toggling description 
-
     var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
 
-    if (!this.usingAudioDescription()) {
+    if (this.player === 'youtube') { 
+      // re-initializing with new value of this.prefDesc 
+      // will load the opposite YouTube ID 
+      this.swappingSrc = true; 
+      this.initYouTubePlayer(); 
+    }
+    else {      
+      if (!this.usingAudioDescription()) {
       
-      for (i=0; i < this.$sources.length; i++) { 
-        // for all <source> elements, replace src with data-desc-src (if one exists)
-        // then store original source in a new data-orig-src attribute 
-        origSrc = this.$sources[i].getAttribute('src');
-        descSrc = this.$sources[i].getAttribute('data-desc-src'); 
-        srcType = this.$sources[i].getAttribute('type');
-        if (descSrc) {
-          this.$sources[i].setAttribute('src',descSrc);
-          this.$sources[i].setAttribute('data-orig-src',origSrc);
-        }       
-        if (srcType === 'video/mp4') { 
-          jwSourceIndex = i;
-        }       
-      }
-      if (this.initializing) { // user hasn't pressed play yet 
-        this.swappingSrc = false; 
-      }
+        for (i=0; i < this.$sources.length; i++) { 
+          // for all <source> elements, replace src with data-desc-src (if one exists)
+          // then store original source in a new data-orig-src attribute 
+          origSrc = this.$sources[i].getAttribute('src');
+          descSrc = this.$sources[i].getAttribute('data-desc-src'); 
+          srcType = this.$sources[i].getAttribute('type');
+          if (descSrc) {
+            this.$sources[i].setAttribute('src',descSrc);
+            this.$sources[i].setAttribute('data-orig-src',origSrc);
+          }       
+          if (srcType === 'video/mp4') { 
+            jwSourceIndex = i;
+          }       
+        }
+        if (this.initializing) { // user hasn't pressed play yet 
+          this.swappingSrc = false; 
+        }
+        else { 
+          this.swappingSrc = true; 
+        }
+      }   
       else { 
+        // the described version is currently playing
+        // swap back to the original 
+        for (i=0; i < this.$sources.length; i++) { 
+          // for all <source> elements, replace src with data-orig-src
+          origSrc = this.$sources[i].getAttribute('data-orig-src');
+          srcType = this.$sources[i].getAttribute('type');        
+          if (origSrc) {
+            this.$sources[i].setAttribute('src',origSrc);
+          }       
+          if (srcType === 'video/mp4') { 
+            jwSourceIndex = i;
+          }
+        }
+        // No need to check for this.initializing 
+        // This function is only called during initialization 
+        // if swapping from non-described to described
         this.swappingSrc = true; 
       }
-    }   
-    else { 
-      // the described version is currently playing
-      // swap back to the original 
-      for (i=0; i < this.$sources.length; i++) { 
-        // for all <source> elements, replace src with data-orig-src
-        origSrc = this.$sources[i].getAttribute('data-orig-src');
-        srcType = this.$sources[i].getAttribute('type');        
-        if (origSrc) {
-          this.$sources[i].setAttribute('src',origSrc);
-        }       
-        if (srcType === 'video/mp4') { 
-          jwSourceIndex = i;
-        }
+      // now reload the source file.
+      if (this.player === 'html5') {
+        this.media.load();
       }
-      // No need to check for this.initializing 
-      // This function is only called during initialization 
-      // if swapping from non-described to described
-      this.swappingSrc = true; 
-    }
-    // now reload the source file.
-    if (this.player === 'html5') {
-      this.media.load();
-    }
-    else if (this.player === 'jw' && this.jwPlayer) { 
-      newSource = this.$sources[jwSourceIndex].getAttribute('src');
-      this.jwPlayer.load({file: newSource}); 
-    }
-    else if (this.player === 'youtube') {
-      // Can't switch youtube tracks, so do nothing.
-      // TODO: Disable open descriptions button with Youtube.
+      else if (this.player === 'jw' && this.jwPlayer) { 
+        newSource = this.$sources[jwSourceIndex].getAttribute('src');
+        this.jwPlayer.load({file: newSource}); 
+      }
     }
   };
 
@@ -175,6 +193,10 @@
     // there's a lot of redundancy between this function and showCaptions 
     // Trying to combine them ended up in a mess though. Keeping as is for now. 
 
+    if (this.swappingSrc) { 
+      return; 
+    }
+        
     var d, thisDescription;
     var flattenComponentForDescription = function (component) {
       var result = [];

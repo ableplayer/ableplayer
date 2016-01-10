@@ -52,7 +52,6 @@
     else if (this.player === 'youtube') {
       duration = this.youTubePlayer.getDuration();
     }
-    
     if (duration === undefined || isNaN(duration) || duration === -1) {
       return 0;
     }
@@ -89,6 +88,9 @@
   //  'buffering' - Momentarily paused to load, but will resume once data is loaded.
   //  'playing' - Currently playing.
   AblePlayer.prototype.getPlayerState = function () {
+    if (this.swappingSrc) { 
+      return; 
+    }
     if (this.player === 'html5') {
       if (this.media.paused) {
         if (this.getElapsed() === 0) {
@@ -110,6 +112,7 @@
     }
     else if (this.player === 'jw' && this.jwPlayer) {
       if (this.jwPlayer.getState() === 'PAUSED' || this.jwPlayer.getState() === 'IDLE' || this.jwPlayer.getState() === undefined) {
+
         if (this.getElapsed() === 0) {
           return 'stopped';
         }
@@ -329,6 +332,10 @@
   AblePlayer.prototype.refreshControls = function() {
 
     var thisObj = this;
+    if (this.swappingSrc) { 
+      // wait until new source has loaded before refreshing controls
+      return;
+    } 
     var duration = this.getDuration();
     var elapsed = this.getElapsed();
 
@@ -364,7 +371,7 @@
 
     this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(duration));
     this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
-
+    
     var textByState = {
       'stopped': this.tt.statusStopped,
       'paused': this.tt.statusPaused,
@@ -372,9 +379,8 @@
       'buffering': this.tt.statusBuffering,
       'ended': this.tt.statusEnd
     };
-    
+
     if (this.stoppingYouTube) { 
-      // YouTube video must play briefly in order to get caption data 
       // stoppingYouTube is true temporarily while video is paused and seeking to 0
       // See notes in handleStop() 
       // this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
@@ -586,8 +592,6 @@
       }
     }
     
-    // TODO: Move all button updates here.
-
     if (typeof this.$bigPlayButton !== 'undefined') { 
       // Choose show/hide for big play button and adjust position.
       if (this.isPaused() && !this.seekBar.tracking) {
@@ -636,6 +640,7 @@
     // TODO: Currently only using the first HTML5 buffered interval, but this fails sometimes when buffering is split into two or more intervals.
     if (this.player === 'html5') {
       if (this.media.buffered.length > 0) {
+
         this.seekBar.setBuffered(this.media.buffered.end(0) / this.getDuration())
       }
     }
@@ -796,7 +801,6 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() { 
-
     var captions; 
 
     if (this.hidingPopup) { 
@@ -1155,7 +1159,6 @@
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
 
-console.log('inside resizePlayer...');    
     this.$media.height(height);
     this.$media.width(width);
 

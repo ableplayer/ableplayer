@@ -1,8 +1,7 @@
 (function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
-
-    if (this.player == 'html5' && !this.startedPlaying) {
+    if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') { 
         if (this.startTime === this.media.currentTime) { 
           // media has already scrubbed to start time
@@ -27,14 +26,21 @@
         } 
       }       
     }
-    // show highlight in transcript 
-    if (this.prefHighlight === 1) {
-      this.highlightTranscript(this.getElapsed()); 
+    else if (this.player === 'youtube' && !this.startedPlaying) { 
+      if (this.autoplay) {
+        this.playMedia(); 
+      }
     }
-    this.updateCaption();
-    this.showDescription(this.getElapsed());
-    this.updateMeta();
-    this.refreshControls();
+    if (!this.swappingSrc) {
+      // show highlight in transcript 
+      if (this.prefHighlight === 1) {
+        this.highlightTranscript(this.getElapsed()); 
+      }
+      this.updateCaption();
+      this.showDescription(this.getElapsed());
+      this.updateMeta();
+      this.refreshControls();
+    }
   };
 
   AblePlayer.prototype.onMediaPause = function () {

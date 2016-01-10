@@ -1,10 +1,7 @@
 (function ($) {
   AblePlayer.prototype.initSignLanguage = function() { 
-    
     // Sign language is only currently supported in HTML5 player, not fallback or YouTube
-    // only initialize sign language if user wants it 
-    // since it requires downloading a second video & consumes bandwidth
-    if (this.player === 'html5' && this.prefSignLanguage) {     
+    if (this.player === 'html5') {     
       // check to see if there's a sign language video accompanying this video
       // check only the first source 
       // If sign language is provided, it must be provided for all sources  
