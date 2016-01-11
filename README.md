@@ -26,6 +26,14 @@ Features
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
     
+Contributing
+-------------
+
+There are many ways to contribute to Able Player, and we welcome and appreciate your help! Here are some options: 
+
+- If you spot bugs are have feature requests, please submit them to the [Issues][issues] queue. 
+- If you have code to contribute, please note that all development occurs on the [develop branch][develop]. This is often many commits ahead of the master branch, so please do all development from *develop*, and submit pull requests there. 
+- If you are multilingual, please consider translating Able Player into another language! All labels, prompts, messages, and help text for each language are contained within a single file, contained within the */translations* directory.        
 
 Compatibility
 -------------
@@ -57,9 +65,10 @@ details.
 -   *Able Player* uses [Modernizr][] to enable styling of HTML5 elements
     in Internet Explorer 6 through 8. A Modernizr 2.6.2 Custom Build is
     distributed with *Able Player*, and is all that *Able Player* needs.
--   *Able Player* uses [jquery.cookie][] to store and retrieve user
+-   *Able Player* uses [js-cookie][] to store and retrieve user
     preferences in cookies. This script is distributed with *Able
-    Player*.
+    Player*. Prior to version 2.3, Able Player used [jquery.cookie][]
+    for this same purpose. 
 
 Fallback
 --------
@@ -378,15 +387,25 @@ YouTube Support
 ---------------
 
 To play a YouTube video in *Able Player*, simply include a **data-youtube-id** attribute 
-on the \<video\> element. The value of this attribute must be the video's 11-character YouTube ID. 
+on the `<video>` element. The value of this attribute must be the video's 11-character YouTube ID. 
 
-If captions are available on the YouTube video, they will be displayed automatically for users 
-who have captions turned on when watching other YouTube videos. 
+If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute 
+on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
+of the described version. If users turn on the Description button on their player control bar, 
+the described version of the video will be loaded instead of the non-described version. 
 
-If a described version is available of the video, include a **data-youtube-desc-id** attribute 
-on the \<video\> element as well. The value of this attribute must be the 11-character YouTube ID
-of the described version. If users have "Description on by Default" checked within their *Able Player* 
-preferences, the described version of the video will automatically play by default. 
+If captions or subtitles are available on the YouTube video, these will be displayed for all users,  
+and can be controlled using Able Player's CC button. Alternatively, if you include your own 
+`<track kind="captions">` elements, these will be used *instead of* the captions on YouTube. 
+
+The advantage of managing captions entirely on YouTube is that you only have to manage them in 
+one place, and they're available everywhere your YouTube video is played.
+
+The advantages of including captions locally in `<track>` elements include: 
+
+- Able Player can repurpose the captions into an interactive transcript   
+- The captions are searchable using the **data-search** attribute 
+- Users can control how the captions are displayed (e.g., color, background color, opacity) 
 
 Adjustable playback rate is available for some videos, but only if the user has opted in on using 
 the HTML5 player in YouTube. 
@@ -501,12 +520,17 @@ Files created by the build process are put into the */build* directory:
  
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
   [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
+  [develop]: https://github.com/ableplayer/ableplayer/tree/develop
   [examples]: http://ableplayer.github.io/ableplayer/tests/
   [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
+  [Google Developer Console]: https://console.developers.google.com/
+  [Google's Getting Started page]: https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication
   [Grunt]: http://gruntjs.com/
   [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
+  [issues]: https://github.com/ableplayer/ableplayer/issues
   [jQuery]: http://jquery.com/
   [jquery.cookie]: https://github.com/carhartl/jquery-cookie
+  [js-cookie]: https://github.com/js-cookie/js-cookie
   [JW Player]: http://www.jwplayer.com/
   [Modernizr]: http://modernizr.com/
   [npm]: https://www.npmjs.com/
