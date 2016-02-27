@@ -129,7 +129,7 @@ to all use cases, both audio and video.
 <!-- Dependencies -->
 <script src="thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-<script src="thirdparty/jquery.cookie.js"></script>
+<script src="thirdparty/js.cookie.js"></script>
  
 <!-- CSS --> 
 <link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
