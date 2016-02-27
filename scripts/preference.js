@@ -119,6 +119,12 @@
       });
 */      
       prefs.push({
+        'name': 'prefCaptionsPosition', 
+        'label': this.tt.prefCaptionsPosition,
+        'group': 'captions',
+        'default': 'overlay'
+      });
+      prefs.push({
         'name': 'prefCaptionsFont', 
         'label': this.tt.prefCaptionsFont,
         'group': 'captions',
@@ -217,7 +223,7 @@
       radioPromptId,radioPrompt,hiddenSpanText,      
       div1,id1,radio1,label1,hiddenSpan1, 
       div2,id2,radio2,label2,hiddenSpan2, 
-      options,thisOption,sampleCapsDiv,changedPref,
+      options,thisOption,optionText,sampleCapsDiv,changedPref,
       thisObj, available;
 
     thisObj = this;
@@ -342,9 +348,20 @@
             }
             options = this.getCaptionsOptions(thisPref);
             for (k=0; k < options.length; k++) { 
+              if (thisPref === 'prefCaptionsPosition') { 
+                if (options[k] === 'overlay') { 
+                  optionText = this.tt.captionsPositionOverlay; 
+                }
+                else if (options[k] === 'below') { 
+                  optionText = this.tt.captionsPositionBelow; 
+                }
+              }
+              else { 
+                optionText = options[k];
+              }
               thisOption = $('<option>',{
                 value: options[k],
-                text: options[k]
+                text: optionText
               });
               if (this[thisPref] === options[k]) {
                 thisOption.attr('selected','selected');
@@ -462,7 +479,6 @@
   AblePlayer.prototype.savePrefsFromForm = function () {
     // called when user saves the Preferences form
     // update cookie with new value
-
     var numChanges, numCapChanges, capSizeChanged, capSizeValue, newValue;
 
     numChanges = 0;
@@ -543,6 +559,7 @@
 
   // Updates player based on current prefs.  Safe to call multiple times.
   AblePlayer.prototype.updatePrefs = function () {
+
     var modHelp;
 
     // modifier keys (update help text) 

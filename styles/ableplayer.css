@@ -38,7 +38,7 @@
 }
 .able .able-vidcap-container {
   background-color: black;
-  height: 360px;
+  /* height: 360px; */
   left: 0;
   margin: 0;
   position: relative;
@@ -241,10 +241,7 @@
 */
 
 div.able-captions {
-  bottom: 0;
-  margin: 0;
   padding: 0.5em 0;
-  position: absolute;
   text-align: center;
   display: none;
   z-index: 1000;
@@ -253,8 +250,15 @@ div.able-captions {
   background-color: black;
   font-size: 1.1em;
   color: white;
-  opacity: 0.75;
-  
+  opacity: 0.75;  
+}
+div.able-captions-overlay { 
+  position: absolute; 
+  margin: 0;
+  bottom: 0;
+}
+div.able-captions-below { 
+  position: relative;
 }
 div.able-descriptions { 
   position: relative;

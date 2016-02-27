@@ -62,10 +62,6 @@ var nl = {
 
 "speed": "Snelheid",
 
-"audio": "audio",
-
-"video": "video",
-
 "or": "of", 
 
 "spacebar": "spatietoets",
@@ -152,31 +148,31 @@ var nl = {
 
 "prefCaptionsStyle": "Style",
 
-"serif": "Serif",
+"serif": "serif",
 
-"sans": "Sans-Serif",
+"sans": "sans-serif",
 
-"cursive": "Cursive",
+"cursive": "cursive",
 
-"fantasy": "Fantasy",
+"fantasy": "fantasy",
 
-"monospace": "Monospace",
+"monospace": "monospace",
 
-"white": "White",
+"white": "white",
 
-"yellow": "Yellow",
+"yellow": "yellow",
 
-"green": "Green", 
+"green": "green", 
 
-"cyan": "Cyan",
+"cyan": "cyan",
 
-"blue": "Blue", 
+"blue": "blue", 
 
-"magenta": "Magenta", 
+"magenta": "magenta", 
 
-"red": "Red", 
+"red": "red", 
 
-"black": "Black", 
+"black": "black", 
 
 "transparent": "transparent", 
 
@@ -185,6 +181,12 @@ var nl = {
 "captionsStylePopOn": "Pop-on",
 
 "captionsStyleRollUp": "Roll-up", 
+
+"prefCaptionsPosition": "Position",
+
+"captionsPositionOverlay": "Overlay", 
+
+"captionsPositionBelow": "Below video", 
 
 "sampleCaptionText": "Sample caption text",
 

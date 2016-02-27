@@ -23,6 +23,7 @@ Features
 -   An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. 
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. 
 -   Support for playing YouTube videos within the Able Player chrome.  
+-   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).    
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
     

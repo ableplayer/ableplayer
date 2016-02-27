@@ -204,6 +204,12 @@
         options[0] = this.tt.captionsStylePopOn;
         options[1] = this.tt.captionsStyleRollUp;
         break;
+        
+      case 'prefCaptionsPosition': 
+        options[0] = 'overlay';
+        options[1] = 'below';
+        break;
+      
     }
     return options;
   };
@@ -239,7 +245,10 @@
     var property, newValue, opacity; 
     
     if (typeof $element !== 'undefined') {
-      if (typeof pref !== 'undefined') { 
+      if (pref == 'prefCaptionsPosition') { 
+        this.positionCaptions();
+      }
+      else if (typeof pref !== 'undefined') { 
         // just change the one property that user just changed 
         if (pref === 'prefCaptionsFont') { 
           property = 'font-family'; 
@@ -273,8 +282,24 @@
           'background-color': this.prefCaptionsBGColor, 
           'opacity': opacity
         });
+        this.positionCaptions();        
       }
     }
   };  
+  AblePlayer.prototype.positionCaptions = function() {   
+   
+    if (typeof this.$captionDiv !== 'undefined') { 
+      if (this.prefCaptionsPosition == 'below') { 
+        this.$captionDiv.removeClass('able-captions-overlay').addClass('able-captions-below');
+        // add a min-height property to minimize the amount of 
+        // expanding and contracting that $captionDiv does based on caption content
+        this.$captionDiv.css('min-height','3em');
+      } 
+      else { 
+        this.$captionDiv.removeClass('able-captions-below').addClass('able-captions-overlay'); 
+        this.$captionDiv.css('min-height','');     
+      }
+    }
+  }
 
 })(jQuery);

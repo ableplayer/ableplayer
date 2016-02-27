@@ -1061,14 +1061,20 @@
     }
   
     if (this.mediaType === 'video') { 
+      // As of v 2.3.4, no longer adding width and height on this.$vidCapContainer 
+      // CAN'T constrain the height if this.prefCaptionsPosition === 'below' 
+      // because the caption div below the video needs to be able to expand as needed 
+      // Checked the new setting in Firefox, Chrome, & IE and it seems to work w/o width & height
+      /*
       // set width and height of div.able-vidcap-container
       vidcapStyles = {
         'width': this.playerWidth+'px',
         'height': this.playerHeight+'px'
       }     
       if (this.$vidcapContainer) { 
-        this.$vidcapContainer.css(vidcapStyles); 
+        this.$vidcapContainer.css(vidcapStyles);
       }   
+      */
       if (this.$captionDiv) { 
         // set width of the captions container 
         this.$captionDiv.css('width',this.playerWidth+'px');

@@ -86,6 +86,12 @@
           'class': 'able-captions',
           'aria-hidden': 'true' 
         });
+        if (this.prefCaptionsPosition === 'below') { 
+          this.$captionDiv.addClass('able-captions-below');
+        }
+        else { 
+          this.$captionDiv.addClass('able-captions-overlay');
+        }
         this.$vidcapContainer.append(this.$captionDiv);
       }
     }
