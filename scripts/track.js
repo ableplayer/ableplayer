@@ -254,6 +254,7 @@
       }
       else { 
         // repeat for other alt sources once supported (e.g., Vimeo, DailyMotion) 
+        deferred.resolve();
       }
     }
     else { // there are <track> captions, so no need for alt source captions

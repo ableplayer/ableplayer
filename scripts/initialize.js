@@ -324,7 +324,7 @@
     this.injectPlayerCode();
     this.initSignLanguage();
     this.setupTracks().then(function() {
-
+      
       thisObj.setupAltCaptions().then(function() {  
         thisObj.setupPopups();
         thisObj.initDescription();
@@ -339,7 +339,6 @@
   };
 
   AblePlayer.prototype.initPlayer = function () {
-
     var thisObj = this;
     var playerPromise;
 
