@@ -132,10 +132,10 @@ to all use cases, both audio and video.
 <script src="thirdparty/js.cookie.js"></script>
  
 <!-- CSS --> 
-<link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
+<link rel="stylesheet" href="build/ableplayer.min.css" type="text/css"/>
  
 <!-- JavaScript -->
-<script src="build/ableplayer.js"></script>
+<script src="build/ableplayer.min.js"></script>
 ```
 
 Setup Step 3: Add HTML
@@ -510,7 +510,8 @@ Building the Able Player source
 -------------------------------
 
 The source JavaScript files for Able Player are in the */scripts* directory, 
-and are combined into several different files (in the */build* directory) using 
+and the source CSS files are in the */styles* directory. These source files 
+are ultimately combined into several different files (in the */build* directory) using 
 [npm][] and [Grunt][]:
 
 ```sh
@@ -531,7 +532,7 @@ Files created by the build process are put into the */build* directory:
 - **build/ableplayer.min.js** - 
   a minified version of the *dist* file
 - **build/ableplayer.min.css** - 
-  a minified version of the *styles/ableplayer.css* file
+  a minified combined version of all Able Player CSS files
  
  
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
