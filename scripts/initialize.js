@@ -309,8 +309,10 @@
 
   // Creates the appropriate player for the current source.
   AblePlayer.prototype.recreatePlayer = function () {
-    
-    var thisObj = this;
+
+    var thisObj, prefsGroups, i; 
+    thisObj = this;
+
     // TODO: Ensure when recreating player that we carry over the mediaId
     if (!this.player) {
       console.log("Can't create player; no appropriate player type detected.");
@@ -331,6 +333,13 @@
         thisObj.initializing = false;
         thisObj.initPlayer();
         thisObj.initDefaultCaption(); 
+
+        // inject each of the hidden forms that will be accessed from the Preferences popup menu
+        prefsGroups = thisObj.getPreferencesGroups(); 
+        for (i in prefsGroups) { 
+          thisObj.injectPrefsForm(prefsGroups[i]);        
+        }
+        
         thisObj.updateCaption();
         thisObj.updateTranscript(); 
         thisObj.showSearchResults();      

@@ -410,19 +410,21 @@ fieldset.able-prefs-captions select {
 }
 
 /* 
-  Help Dialog 
+  Keyboard Preferences Dialog 
 */ 
-
-.able-help-div { 
-	background-color: #F5F5F5; 
-	border: medium solid #ccc;
-	width: 25em;
-}
-.able-help-div ul { 
+able-prefs-form-keyboard ul {
 	list-style-type: none;
 }
-.able-help-modifiers { 
-  font-weight: bold;
+span.able-modkey-alt, 
+span.able-modkey-ctrl, 
+span.able-modkey-shift { 
+  color: #666;
+  font-style: italic;
+}
+span.able-modkey { 
+  font-weight: bold; 
+  color: #000; 
+  font-size: 1.1em;
 }
 
 /* 
@@ -690,6 +692,16 @@ fieldset.able-prefs-captions select {
 }
 .able-popup li.able-focus label { 
   color: #000;
+}
+
+/* 
+  Popup Menus with hidden radio buttons 
+  e.g., chapters and preferences 
+*/
+.able-popup-no-radio > ul > li > input { 
+  position: absolute !important;
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);	    
 }
 
 /* 

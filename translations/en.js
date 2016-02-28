@@ -62,6 +62,8 @@ var en = {
 
 "speed": "Speed",
 
+"and": "and",
+
 "or": "or", 
 
 "spacebar": "spacebar",
@@ -102,11 +104,47 @@ var en = {
 
 "orHigher": "or higher",
 
-"prefTitle": "Preferences",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Click the help button on the media player for details about each preference. Saving your preferences requires cookies.",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Modifier keys used for shortcuts",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audio description",
 
@@ -122,11 +160,21 @@ var en = {
 
 "prefShiftKey": "Shift",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Automatically pause video when description starts",
 
@@ -197,10 +245,6 @@ var en = {
 "help": "Help",
 
 "helpTitle": "Help",
-
-"helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
-
-"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
 
 "save": "Save",
 

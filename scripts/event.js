@@ -231,7 +231,7 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-    if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
+    if (which === 27) { 
       this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause     

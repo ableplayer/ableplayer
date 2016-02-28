@@ -563,8 +563,10 @@
 
   // Creates the appropriate player for the current source.
   AblePlayer.prototype.recreatePlayer = function () {
-    
-    var thisObj = this;
+
+    var thisObj, prefsGroups, i; 
+    thisObj = this;
+
     // TODO: Ensure when recreating player that we carry over the mediaId
     if (!this.player) {
       console.log("Can't create player; no appropriate player type detected.");
@@ -585,6 +587,13 @@
         thisObj.initializing = false;
         thisObj.initPlayer();
         thisObj.initDefaultCaption(); 
+
+        // inject each of the hidden forms that will be accessed from the Preferences popup menu
+        prefsGroups = thisObj.getPreferencesGroups(); 
+        for (i in prefsGroups) { 
+          thisObj.injectPrefsForm(prefsGroups[i]);        
+        }
+        
         thisObj.updateCaption();
         thisObj.updateTranscript(); 
         thisObj.showSearchResults();      
@@ -927,6 +936,14 @@
     this.setCookie(cookie);
   };
 
+  AblePlayer.prototype.getPreferencesGroups = function() { 
+    
+    // return array of groups in the order in which they will appear 
+    // in the Preferences popup menu 
+    // Human-readable label for each group is defined in translation table 
+    return ['captions','descriptions','keyboard','transcript'];
+  }
+
   AblePlayer.prototype.getAvailablePreferences = function() {
 
     // Return the list of currently available preferences.
@@ -937,19 +954,19 @@
     prefs.push({
       'name': 'prefAltKey', // use alt key with shortcuts
       'label': this.tt.prefAltKey,
-      'group': 'keys',
+      'group': 'keyboard',
       'default': 1
     });
     prefs.push({
       'name': 'prefCtrlKey', // use ctrl key with shortcuts
       'label': this.tt.prefCtrlKey,
-      'group': 'keys',
+      'group': 'keyboard',
       'default': 1
     });
     prefs.push({
       'name': 'prefShiftKey',
       'label': this.tt.prefShiftKey,
-      'group': 'keys',
+      'group': 'keyboard',
       'default': 0
     });
     
@@ -1033,37 +1050,39 @@
         'default': '75%'
       });      
 
-      // Sign lanuage preferences 
+/*    // Sign lanuage preferences  
+      // no longer an option as of v 2.3.4; always on in rare cases that it's actually avaialable 
+      // as all users should be exposed to it 
       prefs.push({
         'name': 'prefSignLanguage', // use sign language if available
         'label': null,
         'group': 'sign',
-        'default': 1 // on because in rare cases that it's actually available, users should be exposed to it
+        'default': 1 
       });
-
+*/      
       // Description preferences 
       prefs.push({
         'name': 'prefDesc', // audio description default state
         'label': null,
-        'group': 'description',
+        'group': 'descriptions',
         'default': 0 // off because users who don't need it might find it distracting
       });
       prefs.push({
         'name': 'prefDescFormat', // audio description default state
         'label': this.tt.prefDescFormat,
-        'group': 'description',
+        'group': 'descriptions',
         'default': 'video'
       });
       prefs.push({
         'name': 'prefDescPause', // automatically pause when closed description starts
         'label': this.tt.prefDescPause,
-        'group': 'text-description',
+        'group': 'descriptions',
         'default': 0 // off because it burdens user with restarting after every pause
       });
       prefs.push({
         'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
         'label': this.tt.prefVisibleDesc,
-        'group': 'text-description',
+        'group': 'descriptions',
         'default': 1 // on because sighted users probably want to see this cool feature in action
       });
     }
@@ -1092,203 +1111,417 @@
     this.setCookie(cookie);
   };
 
-  // Creates the preferences form and injects it.
-  AblePlayer.prototype.injectPrefsForm = function () {
+  AblePlayer.prototype.injectPrefsForm = function (form) {
 
-    var prefsDiv, introText, prefsIntro,
-      groups, fieldset, fieldsetClass, fieldsetId, legend, heading, 
-      i, j, k, thisPref, thisDiv, thisClass, thisId, thisLabel, thisField,      
-      radioPromptId,radioPrompt,hiddenSpanText,      
-      div1,id1,radio1,label1,hiddenSpan1, 
-      div2,id2,radio2,label2,hiddenSpan2, 
-      options,thisOption,optionText,sampleCapsDiv,changedPref,
-      thisObj, available;
+    // Creates a preferences form and injects it.    
+    // form is one of the supported forms (groups) defined in getPreferencesGroups()
+
+    var available, thisObj, $prefsDiv, formTitle, introText, 
+      $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j, 
+      $fieldset, fieldsetClass, fieldsetId,   
+      $descFieldset1, $descLegend1, $descFieldset2, $descLegend2, $legend,
+      thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,      
+      $div1,id1,$radio1,$label1, 
+      $div2,id2,$radio2,$label2,
+      options,$thisOption,optionText,sampleCapsDiv,
+      changedPref,changedSpan,changedText,
+      currentDescState,
+      $kbHeading,$kbList,kbLabel,key,kbListText,$kbListItem,
+      dialog,saveButton,cancelButton;
 
     thisObj = this;
     available = this.getAvailablePreferences();
-
+    
     // outer container, will be assigned role="dialog"
-    prefsDiv = $('<div>',{
-      'class': 'able-prefs-form'
+    $prefsDiv = $('<div>',{
+      'class': 'able-prefs-form '
     });
+    var customClass = 'able-prefs-form-' + form;
+    $prefsDiv.addClass(customClass);
 
-    // add intro
-    introText = '<p>' + this.tt.prefIntro + '</p>\n';
-    prefsIntro = $('<p>',{
-      html: introText
-    });
-    prefsDiv.append(prefsIntro)
+    // add intro 
+    if (form == 'captions') {       
+      formTitle = this.tt.prefTitleCaptions;
+      introText = this.tt.prefIntroCaptions; 
+      // Uncomment the following line to include a cookie warning 
+      // Not included for now in order to cut down on unnecessary verbiage      
+      // introText += ' ' + this.tt.prefCookieWarning;
+      $prefsIntro = $('<p>',{
+        text: introText
+      });
+      $prefsDiv.append($prefsIntro);
+    }
+    else if (form == 'descriptions') { 
+      formTitle = this.tt.prefTitleDescriptions;
+      var $prefsIntro = $('<p>',{
+        text: this.tt.prefIntroDescription1
+      });
+      var $prefsIntroUL = $('<ul>'); 
+      var $prefsIntroLI1 = $('<li>',{
+        text: this.tt.prefDescFormatOption1
+      });
+      var $prefsIntroLI2 = $('<li>',{
+        text: this.tt.prefDescFormatOption2
+      });
+      
+      $prefsIntroUL.append($prefsIntroLI1,$prefsIntroLI2);
+      if (this.hasOpenDesc && this.hasClosedDesc) { 
+        currentDescState = this.tt.prefIntroDescription2 + ' ';
+        currentDescState += '<strong>' + this.tt.prefDescFormatOption1b + '</strong>'; 
+        currentDescState += ' <em>' + this.tt.and + '</em> <strong>' + this.tt.prefDescFormatOption2b + '</strong>.';
+      }
+      else if (this.hasOpenDesc) { 
+        currentDescState = this.tt.prefIntroDescription2;
+        currentDescState += ' <strong>' + this.tt.prefDescFormatOption1b + '</strong>.';
+      }
+      else if (this.hasClosedDesc) { 
+        currentDescState = this.tt.prefIntroDescription2;
+        currentDescState += ' <strong>' + this.tt.prefDescFormatOption2b + '</strong>.';
+      }
+      else { 
+        currentDescState = this.tt.prefIntroDescriptionNone;
+      }
+      $prefsIntroP2 = $('<p>',{
+        html: currentDescState
+      });
+      
+      p3Text = this.tt.prefIntroDescription3; 
+      if (this.hasOpenDesc || this.hasClosedDesc) { 
+        p3Text += ' ' + this.tt.prefIntroDescription4;
+      }
+      $prefsIntroP3 = $('<p>',{
+        text: p3Text
+      });
+      
+      $prefsDiv.append($prefsIntro,$prefsIntroUL,$prefsIntroP2,$prefsIntroP3);        
+    }
+    else if (form == 'keyboard') { 
+      formTitle = this.tt.prefTitleKeyboard;
+      introText = this.tt.prefIntroKeyboard1; 
+      introText += ' ' + this.tt.prefIntroKeyboard2; 
+      introText += ' ' + this.tt.prefIntroKeyboard3; 
+      $prefsIntro = $('<p>',{
+        text: introText
+      });      
+      $prefsDiv.append($prefsIntro);
+    }
+    else if (form == 'transcript') { 
+      formTitle = this.tt.prefTitleTranscript;    
+      introText = this.tt.prefIntroTranscript;
+      // Uncomment the following line to include a cookie warning 
+      // Not included for now in order to cut down on unnecessary verbiage
+      // introText += ' ' + this.tt.prefCookieWarning;    
+      $prefsIntro = $('<p>',{
+        text: introText
+      });
+      $prefsDiv.append($prefsIntro);
+    }
 
-    // add preference fields in groups
-    if (this.mediaType === 'video') { 
-      groups = ['keys','description','text-description','transcript','captions']; 
+    if (form === 'descriptions') { 
+      // descriptions form has two field sets  
+      
+      // Fieldset 1     
+      $descFieldset1 = $('<fieldset>');
+      fieldsetClass = 'able-prefs-' + form + '1';
+      fieldsetId = this.mediaId + '-prefs-' + form + '1';
+      $descFieldset1.addClass(fieldsetClass).attr('id',fieldsetId);
+      $descLegend1 = $('<legend>' + this.tt.prefDescFormat + '</legend>');
+      $descFieldset1.append($descLegend1);          
+
+      // Fieldset 2     
+      $descFieldset2 = $('<fieldset>');
+      fieldsetClass = 'able-prefs-' + form + '2';
+      fieldsetId = this.mediaId + '-prefs-' + form + '2';
+      $descFieldset2.addClass(fieldsetClass).attr('id',fieldsetId);
+      $descLegend2 = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+      $descFieldset2.append($descLegend2);   
     }
     else { 
-      groups = ['keys','transcript']; 
+      // all other forms just have one fieldset 
+      $fieldset = $('<fieldset>');
+      fieldsetClass = 'able-prefs-' + form;
+      fieldsetId = this.mediaId + '-prefs-' + form;
+      $fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+      if (form === 'keyboard') { 
+        $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+        $fieldset.append($legend);
+      }      
     }
-    for (i=0; i < groups.length; i++) { 
-      fieldset = $('<fieldset>');
-      fieldsetClass = 'able-prefs-' + groups[i];
-      fieldsetId = this.mediaId + '-prefs-' + groups[i];
-      fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
-      switch (groups[i]) { 
-        case 'keys': 
-          heading = this.tt.prefHeadingKeys;
-          break; 
-        case 'description': 
-          heading = this.tt.prefHeadingDescription;
-          break; 
-        case 'text-description': 
-          heading = this.tt.prefHeadingTextDescription;
-          break; 
-        case 'transcript': 
-          heading = this.tt.prefHeadingTranscript;
-          break; 
-        case 'captions': 
-          heading = this.tt.prefHeadingCaptions;
-          break;           
-      }
-      legend = $('<legend>' + heading + '</legend>');
-      fieldset.append(legend);
+    for (i=0; i<available.length; i++) {
 
-      for (j=0; j<available.length; j++) {
-        // only include prefs in the current group if they have a label
-        if ((available[j]['group'] == groups[i]) && available[j]['label']) { 
-          thisPref = available[j]['name'];
-          thisClass = 'able-' + thisPref;
-          thisId = this.mediaId + '_' + thisPref;          
-          thisDiv = $('<div>').addClass(thisClass);
-          if (thisPref == 'prefDescFormat') { 
-            radioPromptId = thisId + '_prompt';
-            radioPrompt = $('<div>')
-              .attr('id',radioPromptId)
-              .addClass('able-desc-pref-prompt')
-              .text(available[j]['label'] + ':'); 
+      // only include prefs on the current form if they have a label
+      if ((available[i]['group'] == form) && available[i]['label']) { 
 
-            // screen-reader-only text, as prefix to label 
-            hiddenSpanText = 'I prefer audio description as ';
-            
-            // option 1 radio button
-            div1 = $('<div>');
-            id1 = thisId + '_1';
-            hiddenSpan1 = $('<span>')
-              .addClass('able-clipped')
-              .text(hiddenSpanText);
-            label1 = $('<label>')
-              .attr('for',id1)
-              .text(this.tt.prefDescFormatOption1)
-              .prepend(hiddenSpan1); 
-            radio1 = $('<input>',{
-              type: 'radio',
-              name: thisPref,
-              id: id1,
-              value: 'video'
-            });
-            if (this.prefDescFormat === 'video') { 
-              radio1.attr('checked','checked');
-            };
-            div1.append(radio1,label1);
+        thisPref = available[i]['name'];
+        thisClass = 'able-' + thisPref;
+        thisId = this.mediaId + '_' + thisPref;    
+        if (thisPref !== 'prefDescFormat') {       
+          $thisDiv = $('<div>').addClass(thisClass);
+        }
+        
+        // Audio Description preferred format radio buttons 
+        if (thisPref == 'prefDescFormat') { 
 
-            // option 2 radio button
-            div2 = $('<div>');
-            id2 = thisId + '_2';
-            hiddenSpan2 = $('<span>')
-              .addClass('able-clipped')
-              .text(hiddenSpanText);
-            label2 = $('<label>')
-              .attr('for',id2)
-              .text(this.tt.prefDescFormatOption2) 
-              .prepend(hiddenSpan2); 
-            radio2 = $('<input>',{
-              type: 'radio',
-              name: thisPref,
-              id: id2,
-              value: 'text'
-            });
-            if (this.prefDescFormat === 'text') { 
-              radio2.attr('checked','checked');
-            };
-            div2.append(radio2,label2);
-            thisDiv.append(radioPrompt,div1,div2);
+          // option 1 radio button
+          $div1 = $('<div>');
+          id1 = thisId + '_1';
+          $label1 = $('<label>')
+            .attr('for',id1)
+            .text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption1))
+          $radio1 = $('<input>',{
+            type: 'radio',
+            name: thisPref,
+            id: id1,
+            value: 'video'
+          });
+          if (this.prefDescFormat === 'video') { 
+            radio1.attr('checked','checked');
+          };
+          $div1.append($radio1,$label1);
+
+          // option 2 radio button
+          $div2 = $('<div>');
+          id2 = thisId + '_2';
+          $label2 = $('<label>')
+            .attr('for',id2)
+            .text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption2)); 
+          $radio2 = $('<input>',{
+            type: 'radio',
+            name: thisPref,
+            id: id2,
+            value: 'text'
+          });
+          if (this.prefDescFormat === 'text') { 
+            $radio2.attr('checked','checked');
+          };
+          $div2.append($radio2,$label2);
+        }
+        else if (form === 'captions') { 
+          $thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
+          $thisField = $('<select>',{
+            name: thisPref,
+            id: thisId, 
+          });
+          if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') { 
+            // add a change handler that updates the style of the sample caption text
+            $thisField.change(function() { 
+              changedPref = $(this).attr('name');
+              thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
+            }); 
           }
-          else if (groups[i] == 'captions') { 
-            thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
-            thisField = $('<select>',{
-              name: thisPref,
-              id: thisId, 
-            });
-            if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') { 
-              // add a change handler that updates the style of the sample caption text
-              thisField.change(function() { 
-                changedPref = $(this).attr('name');
-                thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
-              }); 
+          options = this.getCaptionsOptions(thisPref);
+          for (j=0; j < options.length; j++) { 
+            if (thisPref === 'prefCaptionsPosition') { 
+              if (options[j] === 'overlay') { 
+                optionText = this.tt.captionsPositionOverlay; 
+              }
+              else if (options[j] === 'below') { 
+                optionText = this.tt.captionsPositionBelow; 
+              }
             }
-            options = this.getCaptionsOptions(thisPref);
-            for (k=0; k < options.length; k++) { 
-              if (thisPref === 'prefCaptionsPosition') { 
-                if (options[k] === 'overlay') { 
-                  optionText = this.tt.captionsPositionOverlay; 
-                }
-                else if (options[k] === 'below') { 
-                  optionText = this.tt.captionsPositionBelow; 
-                }
+            else { 
+              optionText = options[j];
+            }
+            $thisOption = $('<option>',{
+              value: options[j],
+              text: optionText
+            });
+            if (this[thisPref] === options[j]) {
+              $thisOption.attr('selected','selected');
+            }
+            $thisField.append($thisOption);              
+          }
+          $thisDiv.append($thisLabel,$thisField);            
+        }
+        else { // all other fields are checkboxes
+          $thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
+          $thisField = $('<input>',{
+            type: 'checkbox',
+            name: thisPref,
+            id: thisId,
+            value: 'true'
+          });
+          // check current active value for this preference
+          if (this[thisPref] === 1) {
+            $thisField.attr('checked','checked');
+          }
+          if (form === 'keyboard') {
+            // add a change handler that updates the list of current keyboard shortcuts 
+            $thisField.change(function() { 
+              changedPref = $(this).attr('name');
+              if (changedPref === 'prefAltKey') { 
+                changedSpan = '.able-modkey-alt'; 
+                changedText = 'Alt + ';
+              }
+              else if (changedPref === 'prefCtrlKey') { 
+                changedSpan = '.able-modkey-ctrl'; 
+                changedText = 'Ctrl + ';
+              }
+              else if (changedPref === 'prefShiftKey') { 
+                changedSpan = '.able-modkey-shift'; 
+                changedText = 'Shift + ';
+              }
+              if ($(this).is(':checked')) { 
+                $(changedSpan).text(changedText);
               }
               else { 
-                optionText = options[k];
+                $(changedSpan).text('');
               }
-              thisOption = $('<option>',{
-                value: options[k],
-                text: optionText
-              });
-              if (this[thisPref] === options[k]) {
-                thisOption.attr('selected','selected');
-              }
-              thisField.append(thisOption);              
-            }
-            thisDiv.append(thisLabel,thisField);            
+            }); 
           }
-          else { // all other fields are checkboxes
-            thisLabel = $('<label for="' + thisId + '"> ' + available[j]['label'] + '</label>');
-            thisField = $('<input>',{
-              type: 'checkbox',
-              name: thisPref,
-              id: thisId,
-              value: 'true'
-            });
-            // check current active value for this preference
-            if (this[thisPref] === 1) {
-              thisField.attr('checked','checked');
-            }
-            thisDiv.append(thisField,thisLabel);
+          $thisDiv.append($thisField,$thisLabel);
+        }
+        if (form === 'descriptions') { 
+          if (thisPref === 'prefDescFormat') { 
+            $descFieldset1.append($div1,$div2);
           }
-          fieldset.append(thisDiv);
+          else { 
+            $descFieldset2.append($thisDiv);
+          }
+        }
+        else { 
+          $fieldset.append($thisDiv);
         }
       }
-      prefsDiv.append(fieldset);
+    }
+    if (form === 'descriptions') { 
+      $prefsDiv.append($descFieldset1,$descFieldset2);
+    }
+    else {
+      $prefsDiv.append($fieldset);
+    }
+    if (form === 'captions') {
+      // add a sample closed caption div to prefs dialog 
+      if (this.mediaType === 'video') { 
+        this.$sampleCapsDiv = $('<div>',{ 
+          'class': 'able-captions-sample'
+        }).text(this.tt.sampleCaptionText);
+        $prefsDiv.append(this.$sampleCapsDiv);
+        this.stylizeCaptions(this.$sampleCapsDiv);
+      }
+    }
+    else if (form === 'keyboard') { 
+      // add a current list of keyboard shortcuts 
+      $kbHeading = $('<h2>',{ 
+        text: this.tt.prefHeadingKeyboard2 
+      });
+      $kbList = $('<ul>'); 
+      for (i=0; i<this.controls.length; i++) { 
+        if (this.controls[i] === 'play') { 
+          kbLabel = this.tt.play + '/' + this.tt.pause;
+          key = 'p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar;
+        }
+        else if (this.controls[i] === 'stop') { 
+          kbLabel = this.tt.stop;
+          key = 's';
+        }
+        else if (this.controls[i] === 'rewind') { 
+          kbLabel = this.tt.rewind;
+          key = 'r';
+        }
+        else if (this.controls[i] === 'forward') { 
+          kbLabel = this.tt.forward;
+          key = 'f';
+        }
+        else if (this.controls[i] === 'mute') { 
+          kbLabel = this.tt.mute;
+          key = 'm';
+        }
+        else if (this.controls[i] === 'volume-up') { 
+          kbLabel = this.tt.volumeUp;
+          key = 'u</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-5';
+        }
+        else if (this.controls[i] === 'volume-down') { 
+          kbLabel = this.tt.volumeDown;
+          key = 'd</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-5';
+        }
+        else if (this.controls[i] === 'captions') { 
+          if (this.captions.length > 1) { 
+            // caption button launches a Captions popup menu
+            kbLabel = this.tt.captions;
+          }        
+          else { 
+            // there is only one caption track
+            // therefore caption button is a toggle
+            if (this.captionsOn) { 
+              kbLabel = this.tt.hideCaptions;
+            }
+            else { 
+              kbLabel = this.tt.showCaptions;
+            }
+          }
+          key = 'c';
+        }
+        else if (this.controls[i] === 'descriptions') { 
+          if (this.descOn) {     
+            kbLabel = this.tt.turnOffDescriptions;
+          }
+          else { 
+            kbLabel = this.tt.turnOnDescriptions;
+          }
+          key = 'n';
+        }
+        else if (this.controls[i] === 'prefs') { 
+          kbLabel = this.tt.preferences;
+          key = 't';
+        }
+        else if (this.controls[i] === 'help') { 
+          kbLabel = this.tt.help;
+          key = 'h';
+        }
+        else { 
+          kbLabel = null;
+          key = null;
+        }        
+        if (kbLabel) { 
+          // alt
+          kbListText = '<span class="able-modkey-alt">';  
+          if (this.prefAltKey === 1) { 
+            kbListText += this.tt.prefAltKey + ' + ';
+          }
+          kbListText += '</span>'; 
+          // ctrl 
+          kbListText += '<span class="able-modkey-ctrl">';  
+          if (this.prefCtrlKey === 1) { 
+            kbListText += this.tt.prefCtrlKey + ' + ';
+          }
+          kbListText += '</span>'; 
+          // shift
+          kbListText += '<span class="able-modkey-shift">';  
+          if (this.prefShiftKey === 1) { 
+            kbListText += this.tt.prefShiftKey + ' + ';
+          }
+          kbListText += '</span>'; 
+          kbListText += '<span class="able-modkey">' + key + '</span>';
+          kbListText += ' = ' + kbLabel;
+          $kbListItem = $('<li>',{ 
+            html: kbListText
+          });
+          $kbList.append($kbListItem);
+        }
+      }
+      // add Escape key 
+      kbListText = '<span class="able-modkey">' + this.tt.escapeKey + '</span>'; 
+      kbListText += ' = ' + this.tt.escapeKeyFunction; 
+      $kbListItem = $('<li>',{ 
+        html: kbListText
+      });
+      $kbList.append($kbListItem);
+      // put it all together            
+      $prefsDiv.append($kbHeading,$kbList);
     }
     
-    // add a sample closed caption div to prefs dialog 
-    if (this.mediaType === 'video') { 
-      this.$sampleCapsDiv = $('<div>',{ 
-        'class': 'able-captions-sample'
-      }).text(this.tt.sampleCaptionText);
-      prefsDiv.append(this.$sampleCapsDiv);
-      this.stylizeCaptions(this.$sampleCapsDiv);
-    }
-    
-    // prefsDiv (dialog) must be appended to the BODY!
+    // $prefsDiv (dialog) must be appended to the BODY!
     // otherwise when aria-hidden="true" is applied to all background content
     // that will include an ancestor of the dialog,
     // which will render the dialog unreadable by screen readers
-    $('body').append(prefsDiv);
-
-    var dialog = new AccessibleDialog(prefsDiv, 'dialog', thisObj.tt.prefTitle, prefsIntro, thisObj.tt.closeButtonLabel, '32em');
+    $('body').append($prefsDiv);
+    dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, '32em');
 
     // Add save and cancel buttons.
-    prefsDiv.append('<hr>');
-    var saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
-    var cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+    $prefsDiv.append('<hr>');
+    saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();
@@ -1298,9 +1531,22 @@
       thisObj.resetPrefsForm(); 
     });
 
-    prefsDiv.append(saveButton);
-    prefsDiv.append(cancelButton);
-    this.prefsDialog = dialog;
+    $prefsDiv.append(saveButton);
+    $prefsDiv.append(cancelButton);
+    
+    // add global reference for future control 
+    if (form === 'captions') { 
+      this.captionPrefsDialog = dialog;
+    }
+    else if (form === 'descriptions') { 
+      this.descPrefsDialog = dialog;
+    }
+    else if (form === 'keyboard') { 
+      this.keyboardPrefsDialog = dialog;
+    }
+    else if (form === 'transcript') { 
+      this.transcriptPrefsDialog = dialog;
+    }
     
     // Add click handler for dialog close button 
     // (button is added in dialog.js) 
@@ -2255,7 +2501,8 @@
     //   This is only a problem in IOS 6 and earlier, 
     //   & is a known bug, fixed in IOS 7      
     
-    var thisObj = this;
+    var thisObj, vidcapContainer, prefsGroups, i;
+    thisObj = this;
 
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
@@ -2282,7 +2529,7 @@
 
       // add container that captions or description will be appended to
       // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-      var vidcapContainer = $('<div>',{ 
+      vidcapContainer = $('<div>',{ 
         'class' : 'able-vidcap-container'
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
@@ -2298,8 +2545,6 @@
 
     this.injectAlert();
     this.injectPlaylist();
-    // create the hidden form that will be triggered by a click on the Preferences button
-    this.injectPrefsForm();        
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
@@ -2579,9 +2824,9 @@
   };
 
   // Create popup div and append to player 
-  // 'which' parameter is either 'captions', 'chapters', or 'X-window' (e.g., "sign-window")
+  // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
-    
+
     var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
         selectedTrackIndex, selectedTrack;
     thisObj = this;
@@ -2589,7 +2834,9 @@
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup' 
     });
-
+    if (which == 'chapters' || which == 'prefs') { 
+      $popup.addClass('able-popup-no-radio');
+    }
     $popup.on('keydown',function (e) {
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
@@ -2651,6 +2898,10 @@
       this.captionsPopup.hide();
       this.$ccButton.focus();
     }
+    if (this.prefsPopup && this.prefsPopup.is(':visible')) {
+      this.prefsPopup.hide();
+      this.$prefsButton.focus();
+    }
     if (this.$windowPopup && this.$windowPopup.is(':visible')) {
       this.$windowPopup.hide();
       this.$windowButton.show().focus();
@@ -2660,10 +2911,13 @@
   // Create and fill in the popup menu forms for various controls.
   AblePlayer.prototype.setupPopups = function () {
 
-    var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
-        radioName, radioId, trackButton, trackLabel; 
+    var popups, thisObj, hasDefault, i, j, 
+        tracks, trackList, trackItem, track,  
+        radioName, radioId, trackButton, trackLabel, 
+        prefCats, prefCat;
     
     popups = [];     
+    popups.push('prefs');
     
     if (typeof this.ytCaptions !== 'undefined') { 
       // special call to this function for setting up a YouTube caption popup
@@ -2687,7 +2941,10 @@
       for (var i=0; i<popups.length; i++) {         
         var popup = popups[i];              
         hasDefault = false;
-        if (popup == 'captions') {
+        if (popup == 'prefs') {
+          this.prefsPopup = this.createPopup('prefs');
+        }
+        else if (popup == 'captions') {
           this.captionsPopup = this.createPopup('captions');
           tracks = this.captions;           
         }
@@ -2701,81 +2958,137 @@
         }
         var trackList = $('<ul></ul>');
         radioName = this.mediaId + '-' + popup + '-choice';
-        for (j in tracks) {
-          trackItem = $('<li></li>');
-          track = tracks[j];          
-          radioId = this.mediaId + '-' + popup + '-' + j;
-          trackButton = $('<input>',{ 
-            'type': 'radio',
-            'val': j,
-            'name': radioName,
-            'id': radioId
+        if (popup === 'prefs') { // LEFT OFF HERE 
+          prefCats = []; 
+          prefCats.push({ 
+            'value': 'captions', 
+            'label': this.tt.prefMenuCaptions
           });
-          if (track.def) { 
-            trackButton.attr('checked','checked');            
-            hasDefault = true;
-          }          
-          trackLabel = $('<label>',{ 
-            'for': radioId
+          prefCats.push({ 
+            'value': 'descriptions', 
+            'label': this.tt.prefMenuDescriptions
           });
-          if (track.language !== 'undefined') { 
-            trackButton.attr('lang',track.language);
+          prefCats.push({ 
+            'value': 'keyboard', 
+            'label': this.tt.prefMenuKeyboard
+          });
+          prefCats.push({ 
+            'value': 'transcript', 
+            'label': this.tt.prefMenuTranscript
+          });
+          for (j in prefCats) { 
+            trackItem = $('<li></li>');
+            prefCat = prefCats[j];          
+            radioId = this.mediaId + '-' + popup + '-' + j;
+            trackButton = $('<input>',{ 
+              'type': 'radio',
+              'val': prefCat.value,
+              'name': radioName,
+              'id': radioId
+            });
+            trackLabel = $('<label>',{ 
+              'for': radioId
+            });
+            trackLabel.text(prefCat.label); 
+            trackButton.click(function(event) { 
+              var whichPref = $(this).attr('value');
+              thisObj.setFullscreen(false);
+              if (whichPref === 'captions') { 
+                thisObj.captionPrefsDialog.show();
+              }
+              else if (whichPref === 'descriptions') { 
+                thisObj.descPrefsDialog.show();
+              }
+              else if (whichPref === 'keyboard') { 
+                thisObj.keyboardPrefsDialog.show();
+              }
+              else if (whichPref === 'transcript') { 
+                thisObj.transcriptPrefsDialog.show();
+              }
+              thisObj.closePopups();
+            });
+            trackItem.append(trackButton,trackLabel);
+            trackList.append(trackItem);                
+          }
+          this.prefsPopup.append(trackList);          
+        }
+        else { 
+          for (j in tracks) {
+            trackItem = $('<li></li>');
+            track = tracks[j];          
+            radioId = this.mediaId + '-' + popup + '-' + j;
+            trackButton = $('<input>',{ 
+              'type': 'radio',
+              'val': j,
+              'name': radioName,
+              'id': radioId
+            });
+            if (track.def) { 
+              trackButton.attr('checked','checked');            
+              hasDefault = true;
+            }          
+            trackLabel = $('<label>',{ 
+              'for': radioId
+            });
+            if (track.language !== 'undefined') { 
+              trackButton.attr('lang',track.language);
+            }
+            if (popup == 'captions' || popup == 'ytCaptions') { 
+              trackLabel.text(track.label || track.language);          
+              trackButton.click(this.getCaptionClickFunction(track));
+            }
+            else if (popup == 'chapters') { 
+              trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+              var getClickFunction = function (time) {
+                return function () {
+                  thisObj.seekTo(time);
+                  // stopgap to prevent spacebar in Firefox from reopening popup
+                  // immediately after closing it (used in handleChapters())
+                  thisObj.hidingPopup = true; 
+                  thisObj.chaptersPopup.hide();
+                  // Ensure stopgap gets cancelled if handleChapters() isn't called 
+                  // e.g., if user triggered button with Enter or mouse click, not spacebar 
+                  setTimeout(function() { 
+                    thisObj.hidingPopup = false;
+                  }, 100);
+                  thisObj.$chaptersButton.focus();
+                }
+              }
+              trackButton.on('click keypress',getClickFunction(track.start));
+            }
+            trackItem.append(trackButton,trackLabel);
+            trackList.append(trackItem);      
           }
           if (popup == 'captions' || popup == 'ytCaptions') { 
-            trackLabel.text(track.label || track.language);          
-            trackButton.click(this.getCaptionClickFunction(track));
-          }
-          else if (popup == 'chapters') { 
-            trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
-            var getClickFunction = function (time) {
-              return function () {
-                thisObj.seekTo(time);
-                // stopgap to prevent spacebar in Firefox from reopening popup
-                // immediately after closing it (used in handleChapters())
-                thisObj.hidingPopup = true; 
-                thisObj.chaptersPopup.hide();
-                // Ensure stopgap gets cancelled if handleChapters() isn't called 
-                // e.g., if user triggered button with Enter or mouse click, not spacebar 
-                setTimeout(function() { 
-                  thisObj.hidingPopup = false;
-                }, 100);
-                thisObj.$chaptersButton.focus();
-              }
+            // add a captions off button 
+            radioId = this.mediaId + '-captions-off'; 
+            trackItem = $('<li></li>');
+            trackButton = $('<input>',{ 
+              'type': 'radio',
+              'name': radioName,
+              'id': radioId
+            });
+            trackLabel = $('<label>',{ 
+              'for': radioId
+            });
+            trackLabel.text(this.tt.captionsOff);    
+            if (this.prefCaptions === 0) { 
+              trackButton.attr('checked','checked');
             }
-            trackButton.on('click keypress',getClickFunction(track.start));
+            trackButton.click(this.getCaptionOffFunction());
+            trackItem.append(trackButton,trackLabel);
+            trackList.append(trackItem);          
           }
-          trackItem.append(trackButton,trackLabel);
-          trackList.append(trackItem);      
-        }
-        if (popup == 'captions' || popup == 'ytCaptions') { 
-          // add a captions off button 
-          radioId = this.mediaId + '-captions-off'; 
-          trackItem = $('<li></li>');
-          trackButton = $('<input>',{ 
-            'type': 'radio',
-            'name': radioName,
-            'id': radioId
-          });
-          trackLabel = $('<label>',{ 
-            'for': radioId
-          });
-          trackLabel.text(this.tt.captionsOff);    
-          if (this.prefCaptions === 0) { 
-            trackButton.attr('checked','checked');
+          if (!hasDefault) { 
+            // check the first button 
+            trackList.find('input').first().attr('checked','checked');          
           }
-          trackButton.click(this.getCaptionOffFunction());
-          trackItem.append(trackButton,trackLabel);
-          trackList.append(trackItem);          
-        }
-        if (!hasDefault) { 
-          // check the first button 
-          trackList.find('input').first().attr('checked','checked');          
-        }
-        if (popup == 'captions' || popup == 'ytCaptions') {
-          this.captionsPopup.append(trackList);
-        }
-        else if (popup == 'chapters') { 
-          this.chaptersPopup.append(trackList);
+          if (popup === 'captions' || popup === 'ytCaptions') {
+            this.captionsPopup.append(trackList);
+          }
+          else if (popup === 'chapters') { 
+            this.chaptersPopup.append(trackList);
+          }
         }
       }
     }    
@@ -2867,128 +3180,6 @@
     return browsers;
   }
 
-  AblePlayer.prototype.addHelp = function() {   
-    // create help text that will be displayed in a modal dialog 
-    // if user clicks the Help button   
-  
-    var $helpDiv, $helpTextWrapper, $helpIntro, $helpDisclaimer, helpText, i, label, key, $okButton; 
-  
-    // outer container, will be assigned role="dialog"  
-    $helpDiv = $('<div></div>',{ 
-      'class': 'able-help-div'
-    });
-    
-    // inner container for all text, will be assigned to modal div's aria-describedby 
-    $helpTextWrapper = $('<div></div>');
-    $helpIntro = $('<p></p>').text(this.tt.helpKeys);    
-    $helpDisclaimer = $('<p></p>').text(this.tt.helpKeysDisclaimer);
-    helpText = '<ul>\n';
-    for (i=0; i<this.controls.length; i++) { 
-      if (this.controls[i] === 'play') { 
-        label = this.tt.play + '/' + this.tt.pause;
-        key = 'p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar;
-      }
-      else if (this.controls[i] === 'stop') { 
-        label = this.tt.stop;
-        key = 's';
-      }
-      else if (this.controls[i] === 'rewind') { 
-        label = this.tt.rewind;
-        key = 'r';
-      }
-      else if (this.controls[i] === 'forward') { 
-        label = this.tt.forward;
-        key = 'f';
-      }
-      else if (this.controls[i] === 'mute') { 
-        label = this.tt.mute;
-        key = 'm';
-      }
-      else if (this.controls[i] === 'volume-up') { 
-        label = this.tt.volumeUp;
-        key = 'u</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers">1-5';
-      }
-      else if (this.controls[i] === 'volume-down') { 
-        label = this.tt.volumeDown;
-        key = 'd</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers">1-5';
-      }
-      else if (this.controls[i] === 'captions') { 
-        if (this.captions.length > 1) { 
-          // caption button launches a Captions popup menu
-          label = this.tt.captions;
-        }        
-        else { 
-          // there is only one caption track
-          // therefore caption button is a toggle
-          if (this.captionsOn) { 
-            label = this.tt.hideCaptions;
-          }
-          else { 
-            label = this.tt.showCaptions;
-          }
-        }
-        key = 'c';
-      }
-      else if (this.controls[i] === 'descriptions') { 
-        if (this.descOn) {     
-          label = this.tt.turnOffDescriptions;
-        }
-        else { 
-          label = this.tt.turnOnDescriptions;
-        }
-        key = 'n';
-      }
-      else if (this.controls[i] === 'prefs') { 
-        label = this.tt.preferences;
-        key = 't';
-      }
-      else if (this.controls[i] === 'help') { 
-        label = this.tt.help;
-        key = 'h';
-      }
-      else { 
-        label = false;
-      }
-      if (label) { 
-        helpText += '<li><span class="able-help-modifiers">'; 
-        if (this.prefAltKey === 1) { 
-          helpText += this.tt.prefAltKey + ' + ';
-        }
-        if (this.prefCtrlKey === 1) { 
-          helpText += this.tt.prefCtrlKey + ' + ';
-        }
-        if (this.prefShiftKey === 1) {
-          helpText += this.tt.prefShiftKey + ' + ';
-        }
-        helpText += key + '</span> = ' + label + '</li>\n';
-      }
-    }
-    helpText += '</ul>\n';
-    
-    // Now assemble all the parts   
-    $helpTextWrapper.append($helpIntro, helpText, $helpDisclaimer);
-    $helpDiv.append($helpTextWrapper);
-    
-    // must be appended to the BODY! 
-    // otherwise when aria-hidden="true" is applied to all background content
-    // that will include an ancestor of the dialog, 
-    // which will render the dialog unreadable by screen readers 
-    $('body').append($helpDiv);
-
-    // Tip from Billy Gregory at AHG2014: 
-    // If dialog does not collect information, use role="alertdialog" 
-    var dialog = new AccessibleDialog($helpDiv, 'alertdialog', this.tt.helpTitle, $helpTextWrapper, this.tt.closeButtonLabel, '40em');
-
-    $helpDiv.append('<hr>');
-    $okButton = $('<button>' + this.tt.ok + '</button>');
-    $okButton.click(function () {
-      dialog.hide();
-    });
-
-    $helpDiv.append($okButton);
-    this.helpDialog = dialog;
-  };
-
   // Calculates the layout for controls based on media and options.
   // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
   // Each associated value is array of control names to put at that location.
@@ -3054,7 +3245,8 @@
     }
         
     controlLayout['br'].push('preferences');
-    controlLayout['br'].push('help');
+    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
+    // controlLayout['br'].push('help');
 
     // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
     if (this.mediaType === 'video' && this.player !== 'jw') {
@@ -3109,7 +3301,6 @@
         });
       }
       this.$controllerDiv.append(controllerSpan);
-      
       for (j=0; j<controls.length; j++) { 
         control = controls[j];
         if (control === 'seek') { 
@@ -3264,7 +3455,7 @@
           }
           
           controllerSpan.append(newButton);
-          // create variables of buttons that are referenced throughout the class 
+          // create variables of buttons that are referenced throughout the AblePlayer object 
           if (control === 'play') { 
             this.$playpauseButton = newButton;
           }
@@ -3293,6 +3484,9 @@
           }
           else if (control === 'chapters') {
             this.$chaptersButton = newButton;
+          }
+          else if (control === 'preferences') {
+            this.$prefsButton = newButton;
           }
         }
       }
@@ -3330,8 +3524,6 @@
       this.controls = this.controls.concat(controlLayout[sec]);
     }
     
-    // construct help dialog that includes keystrokes for operating the included controls 
-    this.addHelp();     
     // Update state-based display of controls.
     this.refreshControls();
   };
@@ -3531,7 +3723,7 @@
       return this.tt.preferences; 
     }
     else if (control === 'help') { 
-      return this.tt.help; 
+      // return this.tt.help; 
     }
     else { 
       // there should be no other controls, but just in case: 
@@ -4566,10 +4758,11 @@
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, dialogRole, title, descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+  window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
 
     this.title = title;
     this.closeButtonLabel = closeButtonLabel;
+    this.focusedElementBeforeModal = $returnElement;
     this.escapeHook = escapeHook;
     this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
     var thisObj = this;
@@ -4601,7 +4794,7 @@
       titleH1.css('text-align', 'center');
       titleH1.text(title);
       
-      descDiv.attr('id', 'modalDesc-' + this.baseId);
+      $descDiv.attr('id', 'modalDesc-' + this.baseId);
       
       modal.attr({
         'aria-labelledby': 'modalTitle-' + this.baseId, 
@@ -4684,7 +4877,6 @@
       'tabindex': '-1'
     });
     
-    this.focusedElementBeforeModal = $(':focus');
     var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
     if (focusable.length === 0) {
       this.focusedElementBeforeModal.blur();
@@ -4742,12 +4934,15 @@
       return dMinutes + ':' + dSeconds;
     }
   };
+  
+  AblePlayer.prototype.capitalizeFirstLetter = function (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 
 })(jQuery);
 
 (function ($) {
   AblePlayer.prototype.initDescription = function() { 
-
     // set default mode for delivering description (open vs closed) 
     // based on availability and user preference       
     
@@ -4784,7 +4979,6 @@
         }
       }
     }
-    
     // update this.useDescFormat based on media availability & user preferences   
     if (this.prefDesc) {
       if (this.hasOpenDesc && this.hasClosedDesc) { 
@@ -6074,9 +6268,28 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.handlePrefsClick = function() { 
-    this.setFullscreen(false);
-    this.prefsDialog.show();
+  AblePlayer.prototype.handlePrefsClick = function(pref) { 
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    if (this.prefsPopup.is(':visible')) {
+      this.prefsPopup.hide();
+      this.hidingPopup = false;
+      this.$prefsButton.focus();
+    }
+    else {
+      this.closePopups();
+      this.prefsPopup.show();
+      this.prefsPopup.css('top', this.$prefsButton.position().top - this.prefsPopup.outerHeight());
+      this.prefsPopup.css('left', this.$prefsButton.position().left)
+      // remove prior focus and set focus on first item
+      this.prefsPopup.find('li').removeClass('able-focus');
+      this.prefsPopup.find('input').first().focus().parent().addClass('able-focus');
+    }
   };
 
   AblePlayer.prototype.handleHelpClick = function() { 
@@ -6193,7 +6406,7 @@
       // Create dialog on first run through.
       if (!this.fullscreenDialog) {
         var dialogDiv = $('<div>');
-        this.fullscreenDialog = new AccessibleDialog(dialogDiv, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
+        this.fullscreenDialog = new AccessibleDialog(dialogDiv, this.$fullscreenButton, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
         $('body').append(dialogDiv);
       }
       
@@ -7396,7 +7609,7 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-    if (which === 27) { // Escape - TODO: Not listed in help file, should it be?
+    if (which === 27) { 
       this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause     
@@ -7937,7 +8150,7 @@
     // that will include an ancestor of the dialog, 
     // which will render the dialog unreadable by screen readers 
     $('body').append($resizeForm);
-    this.resizeDialog = new AccessibleDialog($resizeForm, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+    this.resizeDialog = new AccessibleDialog($resizeForm, this.$windowButton, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
   };
   
   AblePlayer.prototype.handleWindowButtonClick = function (e) { 
@@ -9007,7 +9220,7 @@
     // translation2.js is then contanenated onto the end to finish this function
         
 
-var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefTitle": "Einstellungen","prefIntro": "Klicken Sie auf den Hilfe-Button auf dem Media-Player für Details zu den einzelnen Präferenz. Beachten: es werden Cookies verwendet, um Ihre persönliche Einstellungen zu speichern.","prefHeadingKeys": "Tastenkombination für Kurzwahl","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "prefDescFormat": "Preferred format","prefDescFormatOption1": "Alternative described version of video","prefDescFormatOption2": "Text-based description, announced by screen reader","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Font","prefCaptionsColor": "Text Color","prefCaptionsBGColor": "Background","prefCaptionsSize": "Font Size","prefCaptionsOpacity": "Opacity","prefCaptionsStyle": "Style","serif": "serif","sans": "sans-serif","cursive": "cursive","fantasy": "fantasy","monospace": "monospace","white": "white","yellow": "yellow","green": "green", "cyan": "cyan","blue": "blue", "magenta": "magenta", "red": "red", "black": "black", "transparent": "transparent", "solid": "solid", "captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up", "prefCaptionsPosition": "Position","captionsPositionOverlay": "Overlay", "captionsPositionBelow": "Below video", "sampleCaptionText": "Sample caption text","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","helpKeys": "Der Media-Player in dieser Webseite kann mit Hilfe der folgenden Tasten direkt bedient werden:","helpKeysDisclaimer": "Beachten Sie, dass die Tastenkürzel (Umschalt-, Alt- und Strg-Tastenkombinationen) in den Einstellungen zugewiesen werden können. Falls gewisse Tastenkürzel nicht funktionieren (weil sie bereits vom Browser oder anderen Applikationen verwendet werden), empfehlen wir, andere Tastenkombinationen auszuprobieren.","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
+var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Captions","prefMenuDescriptions": "Descriptions","prefMenuKeyboard": "Keyboard","prefMenuTranscript": "Transcript","prefTitleCaptions": "Captions Preferences","prefTitleDescriptions": "Audio Description Preferences","prefTitleKeyboard": "Keyboard Preferences","prefTitleTranscript": "Transcript Preferences","prefIntroCaptions": "The following preferences control how captions are displayed.","prefIntroDescription1": "This media player supports audio description in two ways: ","prefIntroDescription2": "The current video has ","prefIntroDescriptionNone": "The current video has no audio description in either format.", "prefIntroDescription3": "Use the following form to set your preferences related to audio description.","prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", "prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).","prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.","prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.","prefIntroTranscript": "The following preferences affect the interactive transcript.","prefCookieWarning": "Saving your preferences requires cookies.","prefHeadingKeyboard1": "Modifier keys used for shortcuts","prefHeadingKeyboard2": "Current keyboard shortcuts","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "escapeKey": "Escape","escapeKeyFunction": "Close current dialog or popup menu","prefDescFormat": "Preferred format","prefDescFormatHelp": "If both formats are avaialable, only one will be used.","prefDescFormatOption1": "alternative described version of video","prefDescFormatOption1b": "an alternative described version","prefDescFormatOption2": "text-based description, announced by screen reader","prefDescFormatOption2b": "text-based description","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Font","prefCaptionsColor": "Text Color","prefCaptionsBGColor": "Background","prefCaptionsSize": "Font Size","prefCaptionsOpacity": "Opacity","prefCaptionsStyle": "Style","serif": "serif","sans": "sans-serif","cursive": "cursive","fantasy": "fantasy","monospace": "monospace","white": "white","yellow": "yellow","green": "green", "cyan": "cyan","blue": "blue", "magenta": "magenta", "red": "red", "black": "black", "transparent": "transparent", "solid": "solid", "captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up", "prefCaptionsPosition": "Position","captionsPositionOverlay": "Overlay", "captionsPositionBelow": "Below video", "sampleCaptionText": "Sample caption text","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
 var en = {
   
 "playerHeading": "Media player",
@@ -9072,6 +9285,8 @@ var en = {
 
 "speed": "Speed",
 
+"and": "and",
+
 "or": "or", 
 
 "spacebar": "spacebar",
@@ -9112,11 +9327,47 @@ var en = {
 
 "orHigher": "or higher",
 
-"prefTitle": "Preferences",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Click the help button on the media player for details about each preference. Saving your preferences requires cookies.",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Modifier keys used for shortcuts",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audio description",
 
@@ -9132,11 +9383,21 @@ var en = {
 
 "prefShiftKey": "Shift",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Automatically pause video when description starts",
 
@@ -9207,10 +9468,6 @@ var en = {
 "help": "Help",
 
 "helpTitle": "Help",
-
-"helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
-
-"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
 
 "save": "Save",
 
@@ -9312,6 +9569,8 @@ var es = {
 
 "speed": "Velocidad",
 
+"and": "y",
+
 "or": "o", 
 
 "spacebar": "Barra espaciadora",
@@ -9352,11 +9611,47 @@ var es = {
 
 "orHigher": "o superior",
 
-"prefTitle": "Preferencias",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Haga clic en el botón de ayuda en el reproductor de medios para obtener detalles sobre cada preferencia. Guardar sus preferencias requiere el uso de cookies.",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Teclas modificadoras",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audiodescrita",
 
@@ -9372,11 +9667,21 @@ var es = {
 
 "prefShiftKey": "Mayúscula",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
@@ -9447,10 +9752,6 @@ var es = {
 "help": "Ayuda",
 
 "helpTitle": "Ayuda",
-
-"helpKeys": "El reproductor en esta página pude ser manejado desde cualquier parte de la pa´gina utilizando los siguientes atajos de teclado:",
-
-"helpKeysDisclaimer": "Tengan en cuenta que las teclas modificadoras (Mayúsculas, Alt, y Control) pueden ser asignadas en las preferencias. Algunas combinaaciones de atajos de teclado pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Pruebe varias combinaciones de teclas modificadoras hasta encontrar la que funcione en su caso.",
 
 "save": "Guardar",
 
@@ -9552,6 +9853,8 @@ var nl = {
 
 "speed": "Snelheid",
 
+"and": "en",
+
 "or": "of", 
 
 "spacebar": "spatietoets",
@@ -9592,11 +9895,47 @@ var nl = {
 
 "orHigher": "of hoger",
 
-"prefTitle": "Voorkeuren",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Klik op de knop Help op de mediaspeler voor meer informatie over elke voorkeur. Om je voorkeuren op te slaan moet je cookies toestaan",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Aangepaste toetsen",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audiobeschrijving",
 
@@ -9612,11 +9951,21 @@ var nl = {
 
 "prefShiftKey": "Shift",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
 
@@ -9687,10 +10036,6 @@ var nl = {
 "help": "Help",
 
 "helpTitle": "Help",
-
-"helpKeys": "De mediaspeler op deze pagina kan van elke locatie op de pagina bediend worden met de volgende toetsenbordaanslagen:",
-
-"helpKeysDisclaimer": "De toetsen om te bewerken (Shift, Alt, and Control) kunnen bij Voorkeuren ingesteld worden. Sommige combinaties conflicteren misschien met andere instellingen van uw computer of browser. Probeer een aantal combinaties tot je iets hebt gevonden dat werkt.",
 
 "save": "Opslaan",
 

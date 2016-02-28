@@ -62,6 +62,8 @@ var es = {
 
 "speed": "Velocidad",
 
+"and": "y",
+
 "or": "o", 
 
 "spacebar": "Barra espaciadora",
@@ -102,11 +104,47 @@ var es = {
 
 "orHigher": "o superior",
 
-"prefTitle": "Preferencias",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Haga clic en el botón de ayuda en el reproductor de medios para obtener detalles sobre cada preferencia. Guardar sus preferencias requiere el uso de cookies.",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Teclas modificadoras",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audiodescrita",
 
@@ -122,11 +160,21 @@ var es = {
 
 "prefShiftKey": "Mayúscula",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
@@ -197,10 +245,6 @@ var es = {
 "help": "Ayuda",
 
 "helpTitle": "Ayuda",
-
-"helpKeys": "El reproductor en esta página pude ser manejado desde cualquier parte de la pa´gina utilizando los siguientes atajos de teclado:",
-
-"helpKeysDisclaimer": "Tengan en cuenta que las teclas modificadoras (Mayúsculas, Alt, y Control) pueden ser asignadas en las preferencias. Algunas combinaaciones de atajos de teclado pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Pruebe varias combinaciones de teclas modificadoras hasta encontrar la que funcione en su caso.",
 
 "save": "Guardar",
 

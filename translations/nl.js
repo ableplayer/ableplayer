@@ -62,6 +62,8 @@ var nl = {
 
 "speed": "Snelheid",
 
+"and": "en",
+
 "or": "of", 
 
 "spacebar": "spatietoets",
@@ -102,11 +104,47 @@ var nl = {
 
 "orHigher": "of hoger",
 
-"prefTitle": "Voorkeuren",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Klik op de knop Help op de mediaspeler voor meer informatie over elke voorkeur. Om je voorkeuren op te slaan moet je cookies toestaan",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Aangepaste toetsen",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audiobeschrijving",
 
@@ -122,11 +160,21 @@ var nl = {
 
 "prefShiftKey": "Shift",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
 
@@ -197,10 +245,6 @@ var nl = {
 "help": "Help",
 
 "helpTitle": "Help",
-
-"helpKeys": "De mediaspeler op deze pagina kan van elke locatie op de pagina bediend worden met de volgende toetsenbordaanslagen:",
-
-"helpKeysDisclaimer": "De toetsen om te bewerken (Shift, Alt, and Control) kunnen bij Voorkeuren ingesteld worden. Sommige combinaties conflicteren misschien met andere instellingen van uw computer of browser. Probeer een aantal combinaties tot je iets hebt gevonden dat werkt.",
 
 "save": "Opslaan",
 

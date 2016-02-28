@@ -14,7 +14,8 @@
     //   This is only a problem in IOS 6 and earlier, 
     //   & is a known bug, fixed in IOS 7      
     
-    var thisObj = this;
+    var thisObj, vidcapContainer, prefsGroups, i;
+    thisObj = this;
 
     // create $mediaContainer and $ableDiv and wrap them around the media element
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();        
@@ -41,7 +42,7 @@
 
       // add container that captions or description will be appended to
       // Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable  
-      var vidcapContainer = $('<div>',{ 
+      vidcapContainer = $('<div>',{ 
         'class' : 'able-vidcap-container'
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
@@ -57,8 +58,6 @@
 
     this.injectAlert();
     this.injectPlaylist();
-    // create the hidden form that will be triggered by a click on the Preferences button
-    this.injectPrefsForm();        
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
@@ -338,9 +337,9 @@
   };
 
   // Create popup div and append to player 
-  // 'which' parameter is either 'captions', 'chapters', or 'X-window' (e.g., "sign-window")
+  // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
-    
+
     var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton, 
         selectedTrackIndex, selectedTrack;
     thisObj = this;
@@ -348,7 +347,9 @@
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup' 
     });
-
+    if (which == 'chapters' || which == 'prefs') { 
+      $popup.addClass('able-popup-no-radio');
+    }
     $popup.on('keydown',function (e) {
       $thisButton = $(this).find('input:focus');
       $thisListItem = $thisButton.parent();
@@ -410,6 +411,10 @@
       this.captionsPopup.hide();
       this.$ccButton.focus();
     }
+    if (this.prefsPopup && this.prefsPopup.is(':visible')) {
+      this.prefsPopup.hide();
+      this.$prefsButton.focus();
+    }
     if (this.$windowPopup && this.$windowPopup.is(':visible')) {
       this.$windowPopup.hide();
       this.$windowButton.show().focus();
@@ -419,10 +424,13 @@
   // Create and fill in the popup menu forms for various controls.
   AblePlayer.prototype.setupPopups = function () {
 
-    var popups, thisObj, hasDefault, i, j, tracks, trackList, trackItem, track,  
-        radioName, radioId, trackButton, trackLabel; 
+    var popups, thisObj, hasDefault, i, j, 
+        tracks, trackList, trackItem, track,  
+        radioName, radioId, trackButton, trackLabel, 
+        prefCats, prefCat;
     
     popups = [];     
+    popups.push('prefs');
     
     if (typeof this.ytCaptions !== 'undefined') { 
       // special call to this function for setting up a YouTube caption popup
@@ -446,7 +454,10 @@
       for (var i=0; i<popups.length; i++) {         
         var popup = popups[i];              
         hasDefault = false;
-        if (popup == 'captions') {
+        if (popup == 'prefs') {
+          this.prefsPopup = this.createPopup('prefs');
+        }
+        else if (popup == 'captions') {
           this.captionsPopup = this.createPopup('captions');
           tracks = this.captions;           
         }
@@ -460,81 +471,137 @@
         }
         var trackList = $('<ul></ul>');
         radioName = this.mediaId + '-' + popup + '-choice';
-        for (j in tracks) {
-          trackItem = $('<li></li>');
-          track = tracks[j];          
-          radioId = this.mediaId + '-' + popup + '-' + j;
-          trackButton = $('<input>',{ 
-            'type': 'radio',
-            'val': j,
-            'name': radioName,
-            'id': radioId
+        if (popup === 'prefs') { // LEFT OFF HERE 
+          prefCats = []; 
+          prefCats.push({ 
+            'value': 'captions', 
+            'label': this.tt.prefMenuCaptions
           });
-          if (track.def) { 
-            trackButton.attr('checked','checked');            
-            hasDefault = true;
-          }          
-          trackLabel = $('<label>',{ 
-            'for': radioId
+          prefCats.push({ 
+            'value': 'descriptions', 
+            'label': this.tt.prefMenuDescriptions
           });
-          if (track.language !== 'undefined') { 
-            trackButton.attr('lang',track.language);
+          prefCats.push({ 
+            'value': 'keyboard', 
+            'label': this.tt.prefMenuKeyboard
+          });
+          prefCats.push({ 
+            'value': 'transcript', 
+            'label': this.tt.prefMenuTranscript
+          });
+          for (j in prefCats) { 
+            trackItem = $('<li></li>');
+            prefCat = prefCats[j];          
+            radioId = this.mediaId + '-' + popup + '-' + j;
+            trackButton = $('<input>',{ 
+              'type': 'radio',
+              'val': prefCat.value,
+              'name': radioName,
+              'id': radioId
+            });
+            trackLabel = $('<label>',{ 
+              'for': radioId
+            });
+            trackLabel.text(prefCat.label); 
+            trackButton.click(function(event) { 
+              var whichPref = $(this).attr('value');
+              thisObj.setFullscreen(false);
+              if (whichPref === 'captions') { 
+                thisObj.captionPrefsDialog.show();
+              }
+              else if (whichPref === 'descriptions') { 
+                thisObj.descPrefsDialog.show();
+              }
+              else if (whichPref === 'keyboard') { 
+                thisObj.keyboardPrefsDialog.show();
+              }
+              else if (whichPref === 'transcript') { 
+                thisObj.transcriptPrefsDialog.show();
+              }
+              thisObj.closePopups();
+            });
+            trackItem.append(trackButton,trackLabel);
+            trackList.append(trackItem);                
+          }
+          this.prefsPopup.append(trackList);          
+        }
+        else { 
+          for (j in tracks) {
+            trackItem = $('<li></li>');
+            track = tracks[j];          
+            radioId = this.mediaId + '-' + popup + '-' + j;
+            trackButton = $('<input>',{ 
+              'type': 'radio',
+              'val': j,
+              'name': radioName,
+              'id': radioId
+            });
+            if (track.def) { 
+              trackButton.attr('checked','checked');            
+              hasDefault = true;
+            }          
+            trackLabel = $('<label>',{ 
+              'for': radioId
+            });
+            if (track.language !== 'undefined') { 
+              trackButton.attr('lang',track.language);
+            }
+            if (popup == 'captions' || popup == 'ytCaptions') { 
+              trackLabel.text(track.label || track.language);          
+              trackButton.click(this.getCaptionClickFunction(track));
+            }
+            else if (popup == 'chapters') { 
+              trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+              var getClickFunction = function (time) {
+                return function () {
+                  thisObj.seekTo(time);
+                  // stopgap to prevent spacebar in Firefox from reopening popup
+                  // immediately after closing it (used in handleChapters())
+                  thisObj.hidingPopup = true; 
+                  thisObj.chaptersPopup.hide();
+                  // Ensure stopgap gets cancelled if handleChapters() isn't called 
+                  // e.g., if user triggered button with Enter or mouse click, not spacebar 
+                  setTimeout(function() { 
+                    thisObj.hidingPopup = false;
+                  }, 100);
+                  thisObj.$chaptersButton.focus();
+                }
+              }
+              trackButton.on('click keypress',getClickFunction(track.start));
+            }
+            trackItem.append(trackButton,trackLabel);
+            trackList.append(trackItem);      
           }
           if (popup == 'captions' || popup == 'ytCaptions') { 
-            trackLabel.text(track.label || track.language);          
-            trackButton.click(this.getCaptionClickFunction(track));
-          }
-          else if (popup == 'chapters') { 
-            trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
-            var getClickFunction = function (time) {
-              return function () {
-                thisObj.seekTo(time);
-                // stopgap to prevent spacebar in Firefox from reopening popup
-                // immediately after closing it (used in handleChapters())
-                thisObj.hidingPopup = true; 
-                thisObj.chaptersPopup.hide();
-                // Ensure stopgap gets cancelled if handleChapters() isn't called 
-                // e.g., if user triggered button with Enter or mouse click, not spacebar 
-                setTimeout(function() { 
-                  thisObj.hidingPopup = false;
-                }, 100);
-                thisObj.$chaptersButton.focus();
-              }
+            // add a captions off button 
+            radioId = this.mediaId + '-captions-off'; 
+            trackItem = $('<li></li>');
+            trackButton = $('<input>',{ 
+              'type': 'radio',
+              'name': radioName,
+              'id': radioId
+            });
+            trackLabel = $('<label>',{ 
+              'for': radioId
+            });
+            trackLabel.text(this.tt.captionsOff);    
+            if (this.prefCaptions === 0) { 
+              trackButton.attr('checked','checked');
             }
-            trackButton.on('click keypress',getClickFunction(track.start));
+            trackButton.click(this.getCaptionOffFunction());
+            trackItem.append(trackButton,trackLabel);
+            trackList.append(trackItem);          
           }
-          trackItem.append(trackButton,trackLabel);
-          trackList.append(trackItem);      
-        }
-        if (popup == 'captions' || popup == 'ytCaptions') { 
-          // add a captions off button 
-          radioId = this.mediaId + '-captions-off'; 
-          trackItem = $('<li></li>');
-          trackButton = $('<input>',{ 
-            'type': 'radio',
-            'name': radioName,
-            'id': radioId
-          });
-          trackLabel = $('<label>',{ 
-            'for': radioId
-          });
-          trackLabel.text(this.tt.captionsOff);    
-          if (this.prefCaptions === 0) { 
-            trackButton.attr('checked','checked');
+          if (!hasDefault) { 
+            // check the first button 
+            trackList.find('input').first().attr('checked','checked');          
           }
-          trackButton.click(this.getCaptionOffFunction());
-          trackItem.append(trackButton,trackLabel);
-          trackList.append(trackItem);          
-        }
-        if (!hasDefault) { 
-          // check the first button 
-          trackList.find('input').first().attr('checked','checked');          
-        }
-        if (popup == 'captions' || popup == 'ytCaptions') {
-          this.captionsPopup.append(trackList);
-        }
-        else if (popup == 'chapters') { 
-          this.chaptersPopup.append(trackList);
+          if (popup === 'captions' || popup === 'ytCaptions') {
+            this.captionsPopup.append(trackList);
+          }
+          else if (popup === 'chapters') { 
+            this.chaptersPopup.append(trackList);
+          }
         }
       }
     }    
@@ -626,128 +693,6 @@
     return browsers;
   }
 
-  AblePlayer.prototype.addHelp = function() {   
-    // create help text that will be displayed in a modal dialog 
-    // if user clicks the Help button   
-  
-    var $helpDiv, $helpTextWrapper, $helpIntro, $helpDisclaimer, helpText, i, label, key, $okButton; 
-  
-    // outer container, will be assigned role="dialog"  
-    $helpDiv = $('<div></div>',{ 
-      'class': 'able-help-div'
-    });
-    
-    // inner container for all text, will be assigned to modal div's aria-describedby 
-    $helpTextWrapper = $('<div></div>');
-    $helpIntro = $('<p></p>').text(this.tt.helpKeys);    
-    $helpDisclaimer = $('<p></p>').text(this.tt.helpKeysDisclaimer);
-    helpText = '<ul>\n';
-    for (i=0; i<this.controls.length; i++) { 
-      if (this.controls[i] === 'play') { 
-        label = this.tt.play + '/' + this.tt.pause;
-        key = 'p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar;
-      }
-      else if (this.controls[i] === 'stop') { 
-        label = this.tt.stop;
-        key = 's';
-      }
-      else if (this.controls[i] === 'rewind') { 
-        label = this.tt.rewind;
-        key = 'r';
-      }
-      else if (this.controls[i] === 'forward') { 
-        label = this.tt.forward;
-        key = 'f';
-      }
-      else if (this.controls[i] === 'mute') { 
-        label = this.tt.mute;
-        key = 'm';
-      }
-      else if (this.controls[i] === 'volume-up') { 
-        label = this.tt.volumeUp;
-        key = 'u</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers">1-5';
-      }
-      else if (this.controls[i] === 'volume-down') { 
-        label = this.tt.volumeDown;
-        key = 'd</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers">1-5';
-      }
-      else if (this.controls[i] === 'captions') { 
-        if (this.captions.length > 1) { 
-          // caption button launches a Captions popup menu
-          label = this.tt.captions;
-        }        
-        else { 
-          // there is only one caption track
-          // therefore caption button is a toggle
-          if (this.captionsOn) { 
-            label = this.tt.hideCaptions;
-          }
-          else { 
-            label = this.tt.showCaptions;
-          }
-        }
-        key = 'c';
-      }
-      else if (this.controls[i] === 'descriptions') { 
-        if (this.descOn) {     
-          label = this.tt.turnOffDescriptions;
-        }
-        else { 
-          label = this.tt.turnOnDescriptions;
-        }
-        key = 'n';
-      }
-      else if (this.controls[i] === 'prefs') { 
-        label = this.tt.preferences;
-        key = 't';
-      }
-      else if (this.controls[i] === 'help') { 
-        label = this.tt.help;
-        key = 'h';
-      }
-      else { 
-        label = false;
-      }
-      if (label) { 
-        helpText += '<li><span class="able-help-modifiers">'; 
-        if (this.prefAltKey === 1) { 
-          helpText += this.tt.prefAltKey + ' + ';
-        }
-        if (this.prefCtrlKey === 1) { 
-          helpText += this.tt.prefCtrlKey + ' + ';
-        }
-        if (this.prefShiftKey === 1) {
-          helpText += this.tt.prefShiftKey + ' + ';
-        }
-        helpText += key + '</span> = ' + label + '</li>\n';
-      }
-    }
-    helpText += '</ul>\n';
-    
-    // Now assemble all the parts   
-    $helpTextWrapper.append($helpIntro, helpText, $helpDisclaimer);
-    $helpDiv.append($helpTextWrapper);
-    
-    // must be appended to the BODY! 
-    // otherwise when aria-hidden="true" is applied to all background content
-    // that will include an ancestor of the dialog, 
-    // which will render the dialog unreadable by screen readers 
-    $('body').append($helpDiv);
-
-    // Tip from Billy Gregory at AHG2014: 
-    // If dialog does not collect information, use role="alertdialog" 
-    var dialog = new AccessibleDialog($helpDiv, 'alertdialog', this.tt.helpTitle, $helpTextWrapper, this.tt.closeButtonLabel, '40em');
-
-    $helpDiv.append('<hr>');
-    $okButton = $('<button>' + this.tt.ok + '</button>');
-    $okButton.click(function () {
-      dialog.hide();
-    });
-
-    $helpDiv.append($okButton);
-    this.helpDialog = dialog;
-  };
-
   // Calculates the layout for controls based on media and options.
   // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
   // Each associated value is array of control names to put at that location.
@@ -813,7 +758,8 @@
     }
         
     controlLayout['br'].push('preferences');
-    controlLayout['br'].push('help');
+    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
+    // controlLayout['br'].push('help');
 
     // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
     if (this.mediaType === 'video' && this.player !== 'jw') {
@@ -868,7 +814,6 @@
         });
       }
       this.$controllerDiv.append(controllerSpan);
-      
       for (j=0; j<controls.length; j++) { 
         control = controls[j];
         if (control === 'seek') { 
@@ -1023,7 +968,7 @@
           }
           
           controllerSpan.append(newButton);
-          // create variables of buttons that are referenced throughout the class 
+          // create variables of buttons that are referenced throughout the AblePlayer object 
           if (control === 'play') { 
             this.$playpauseButton = newButton;
           }
@@ -1052,6 +997,9 @@
           }
           else if (control === 'chapters') {
             this.$chaptersButton = newButton;
+          }
+          else if (control === 'preferences') {
+            this.$prefsButton = newButton;
           }
         }
       }
@@ -1089,8 +1037,6 @@
       this.controls = this.controls.concat(controlLayout[sec]);
     }
     
-    // construct help dialog that includes keystrokes for operating the included controls 
-    this.addHelp();     
     // Update state-based display of controls.
     this.refreshControls();
   };
@@ -1290,7 +1236,7 @@
       return this.tt.preferences; 
     }
     else if (control === 'help') { 
-      return this.tt.help; 
+      // return this.tt.help; 
     }
     else { 
       // there should be no other controls, but just in case: 

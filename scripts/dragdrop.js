@@ -219,7 +219,7 @@
     // that will include an ancestor of the dialog, 
     // which will render the dialog unreadable by screen readers 
     $('body').append($resizeForm);
-    this.resizeDialog = new AccessibleDialog($resizeForm, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+    this.resizeDialog = new AccessibleDialog($resizeForm, this.$windowButton, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
   };
   
   AblePlayer.prototype.handleWindowButtonClick = function (e) { 

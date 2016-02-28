@@ -2,10 +2,11 @@
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, dialogRole, title, descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+  window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
 
     this.title = title;
     this.closeButtonLabel = closeButtonLabel;
+    this.focusedElementBeforeModal = $returnElement;
     this.escapeHook = escapeHook;
     this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
     var thisObj = this;
@@ -37,7 +38,7 @@
       titleH1.css('text-align', 'center');
       titleH1.text(title);
       
-      descDiv.attr('id', 'modalDesc-' + this.baseId);
+      $descDiv.attr('id', 'modalDesc-' + this.baseId);
       
       modal.attr({
         'aria-labelledby': 'modalTitle-' + this.baseId, 
@@ -120,7 +121,6 @@
       'tabindex': '-1'
     });
     
-    this.focusedElementBeforeModal = $(':focus');
     var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
     if (focusable.length === 0) {
       this.focusedElementBeforeModal.blur();

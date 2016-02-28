@@ -917,9 +917,28 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.handlePrefsClick = function() { 
-    this.setFullscreen(false);
-    this.prefsDialog.show();
+  AblePlayer.prototype.handlePrefsClick = function(pref) { 
+
+    if (this.hidingPopup) { 
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it 
+      this.hidingPopup = false;      
+      return false; 
+    }
+    if (this.prefsPopup.is(':visible')) {
+      this.prefsPopup.hide();
+      this.hidingPopup = false;
+      this.$prefsButton.focus();
+    }
+    else {
+      this.closePopups();
+      this.prefsPopup.show();
+      this.prefsPopup.css('top', this.$prefsButton.position().top - this.prefsPopup.outerHeight());
+      this.prefsPopup.css('left', this.$prefsButton.position().left)
+      // remove prior focus and set focus on first item
+      this.prefsPopup.find('li').removeClass('able-focus');
+      this.prefsPopup.find('input').first().focus().parent().addClass('able-focus');
+    }
   };
 
   AblePlayer.prototype.handleHelpClick = function() { 
@@ -1036,7 +1055,7 @@
       // Create dialog on first run through.
       if (!this.fullscreenDialog) {
         var dialogDiv = $('<div>');
-        this.fullscreenDialog = new AccessibleDialog(dialogDiv, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
+        this.fullscreenDialog = new AccessibleDialog(dialogDiv, this.$fullscreenButton, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
         $('body').append(dialogDiv);
       }
       

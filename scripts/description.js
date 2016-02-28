@@ -1,6 +1,5 @@
 (function ($) {
   AblePlayer.prototype.initDescription = function() { 
-
     // set default mode for delivering description (open vs closed) 
     // based on availability and user preference       
     
@@ -37,7 +36,6 @@
         }
       }
     }
-    
     // update this.useDescFormat based on media availability & user preferences   
     if (this.prefDesc) {
       if (this.hasOpenDesc && this.hasClosedDesc) { 
