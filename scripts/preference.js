@@ -54,7 +54,17 @@
     // return array of groups in the order in which they will appear 
     // in the Preferences popup menu 
     // Human-readable label for each group is defined in translation table 
-    return ['captions','descriptions','keyboard','transcript'];
+    if (this.mediaType === 'video') { 
+      return ['captions','descriptions','keyboard','transcript'];
+    }
+    else if (this.mediaType === 'audio') { 
+      var groups = []; 
+      groups.push('keyboard');
+      if (this.lyricsMode) { 
+        groups.push('transcript');
+      }
+      return groups;
+    }
   }
 
   AblePlayer.prototype.getAvailablePreferences = function() {

@@ -941,7 +941,17 @@
     // return array of groups in the order in which they will appear 
     // in the Preferences popup menu 
     // Human-readable label for each group is defined in translation table 
-    return ['captions','descriptions','keyboard','transcript'];
+    if (this.mediaType === 'video') { 
+      return ['captions','descriptions','keyboard','transcript'];
+    }
+    else if (this.mediaType === 'audio') { 
+      var groups = []; 
+      groups.push('keyboard');
+      if (this.lyricsMode) { 
+        groups.push('transcript');
+      }
+      return groups;
+    }
   }
 
   AblePlayer.prototype.getAvailablePreferences = function() {
@@ -2914,7 +2924,7 @@
     var popups, thisObj, hasDefault, i, j, 
         tracks, trackList, trackItem, track,  
         radioName, radioId, trackButton, trackLabel, 
-        prefCats, prefCat;
+        prefCats, prefCat, prefLabel;
     
     popups = [];     
     popups.push('prefs');
@@ -2958,38 +2968,34 @@
         }
         var trackList = $('<ul></ul>');
         radioName = this.mediaId + '-' + popup + '-choice';
-        if (popup === 'prefs') { // LEFT OFF HERE 
-          prefCats = []; 
-          prefCats.push({ 
-            'value': 'captions', 
-            'label': this.tt.prefMenuCaptions
-          });
-          prefCats.push({ 
-            'value': 'descriptions', 
-            'label': this.tt.prefMenuDescriptions
-          });
-          prefCats.push({ 
-            'value': 'keyboard', 
-            'label': this.tt.prefMenuKeyboard
-          });
-          prefCats.push({ 
-            'value': 'transcript', 
-            'label': this.tt.prefMenuTranscript
-          });
+        if (popup === 'prefs') { 
+          prefCats = this.getPreferencesGroups();
           for (j in prefCats) { 
             trackItem = $('<li></li>');
-            prefCat = prefCats[j];          
+            prefCat = prefCats[j];
+            if (prefCat === 'captions') { 
+              prefLabel = this.tt.prefMenuCaptions; 
+            }
+            else if (prefCat === 'descriptions') { 
+              prefLabel = this.tt.prefMenuDescriptions; 
+            }
+            else if (prefCat === 'keyboard') { 
+              prefLabel = this.tt.prefMenuKeyboard; 
+            }
+            else if (prefCat === 'transcript') { 
+              prefLabel = this.tt.prefMenuTranscript; 
+            }
             radioId = this.mediaId + '-' + popup + '-' + j;
             trackButton = $('<input>',{ 
               'type': 'radio',
-              'val': prefCat.value,
+              'val': prefCat,
               'name': radioName,
               'id': radioId
             });
             trackLabel = $('<label>',{ 
               'for': radioId
             });
-            trackLabel.text(prefCat.label); 
+            trackLabel.text(prefLabel); 
             trackButton.click(function(event) { 
               var whichPref = $(this).attr('value');
               thisObj.setFullscreen(false);
