@@ -356,45 +356,24 @@
         }
       }
     }
-    
     // Update seekbar width. 
-    // To do this, we need to calculate the width of all elements surrounding it.
+    // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
       var widthUsed = 0;
-      // Elements on the left side of the control panel.
-      var leftControls = this.seekBar.wrapperDiv.parent().prev();
+      var leftControls = this.seekBar.wrapperDiv.parent().prev('span.able-left-controls');
+      var rightControls = leftControls.next('span.able-right-controls');
       leftControls.children().each(function () {
-        if ($(this).is(':hidden')) {
-          // jQuery width() returns 0 for hidden elements 
-          // thisObj.getHiddenWidth() is a workaround 
-          widthUsed += thisObj.getHiddenWidth($(this)); 
-        }
-        else { 
+        if ($(this).prop('tagName')=='BUTTON') { 
           widthUsed += $(this).width(); 
         }
       });
-      // Elements to the left and right of the seekbar on the right side.
-      var prev = this.seekBar.wrapperDiv.prev();
-      while (prev.length > 0) {
-        if (prev.is(':hidden')) { 
-          widthUsed += thisObj.getHiddenWidth(prev); 
+      rightControls.children().each(function () {
+        if ($(this).prop('tagName')=='BUTTON') { 
+          widthUsed += $(this).width(); 
         }
-        else { 
-          widthUsed += prev.width();
-        }
-        prev = prev.prev();
-      }
-      var next = this.seekBar.wrapperDiv.next();
-      while (next.length > 0) {
-        if (next.is(':hidden')) { 
-          widthUsed += thisObj.getHiddenWidth(next); 
-        }
-        else { 
-          widthUsed += next.width();
-        }
-        next = next.next();
-      }
-      var seekbarWidth = this.playerWidth - widthUsed - 20;
+      });
+      
+      var seekbarWidth = this.playerWidth - widthUsed - 20;      
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
         this.seekBar.setWidth(seekbarWidth);
