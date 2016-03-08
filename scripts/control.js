@@ -373,7 +373,12 @@
         }
       });
       
-      var seekbarWidth = this.playerWidth - widthUsed - 20;      
+      if (this.isFullscreen()) {
+        var seekbarWidth = $(window).width() - widthUsed - 20; 
+      }
+      else { 
+        var seekbarWidth = this.playerWidth - widthUsed - 20;
+      }
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
         this.seekBar.setWidth(seekbarWidth);
@@ -998,7 +1003,7 @@
 
     this.$media.height(height);
     this.$media.width(width);
-
+    
     if (this.$captionDiv) {
       this.$captionDiv.width(width);
       // Font-size for embedded player is too small in full screen view 
