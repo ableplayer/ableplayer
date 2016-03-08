@@ -282,7 +282,7 @@
     // By default, AblePlayer uses scalable icomoon fonts for the player controls 
     // and falls back to images if the user has a custom style sheet that overrides font-family 
     // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
-    this.iconType = 'image';   
+    this.iconType = 'font';   
   
     // seekInterval = Number of seconds to seek forward or back with these buttons    
     // NOTE: Unless user overrides this default with data-seek-interval attribute, 
