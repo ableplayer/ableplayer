@@ -1284,7 +1284,7 @@
             value: 'video'
           });
           if (this.prefDescFormat === 'video') { 
-            radio1.attr('checked','checked');
+            $radio1.attr('checked','checked');
           };
           $div1.append($radio1,$label1);
 
