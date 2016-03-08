@@ -7,6 +7,7 @@
 	.able-sign-window .able-button-handler-preferences = 4500
 	.able-sign-window = 4000
 	.able-alert = 3500
+	.able-slider = 3400
   .able-popup = 3200 
   .able-tooltip = 3000
   .able-controller .able-seekbar = 1970
@@ -17,6 +18,7 @@
 	.able-big-play-button = 1900
 	div.able-captions = 1000
   .able-seekhead = 300
+  .able-volume-head = 300
   .able-seekbar-played = 200 
 	.able-seekbar-loaded = 100 
 	.able = 100 
@@ -206,6 +208,137 @@
 }
 
 /* 
+  Volume Slider 
+*/
+.able-volume-slider {
+  width: 34px; 
+  height: 50px; 
+  background-color: #464646; /* same as .able-controller */
+  padding: 10px 0;
+  position: absolute;
+  right: 0px;
+  top: -74px; 
+  z-index: 3400;  
+  display: none; 
+}
+.able-volume-track { 
+  display: block; 
+  position: relative;
+  height: 100%; /* = 50px after padding */ 
+  width: 5px;
+  margin: 0 auto;
+  background-color: #999; 
+}
+.able-volume-track.able-volume-track-on { 
+  background-color: #dadada; 
+  position: absolute;
+  height: 20px; /* change dynamically; 5px per volume tick */
+  top: 30px;  /* change dynamically; 50px - height */
+}
+.able-volume-head { 
+  display: inline-block;
+  background-color: #fdfdfd;
+  outline: 1px solid #333;
+  position: absolute;
+  height: 7px;
+  width: 15px;
+  left: -5px;
+  top: 23px; /* change dynamically; .able-volume-track-on top - 7 */ 
+  z-index: 300;
+}
+.able-volume-head:hover, 
+.able-volume-head:focus { 
+	background-color: #ffbb37 !important; /* yellow */
+}
+
+
+/*
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -14px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #367ebd;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  border-width: 16px 0;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #2a6495;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+input[type=range]::-ms-fill-upper {
+  background: #3071a9;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #3071a9;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #367ebd;
+}
+*/
+
+/* 
   Status Bar 
 */
 
@@ -358,14 +491,18 @@ div.modalDialog button:focus {
 */ 
 
 .able-prefs-form fieldset { 
+  margin-left: 0;
+  padding-left: 0;
 	border: none;
 }
 .able-prefs-form legend { 
 	color: black;
 	font-weight: bold;	
+	font-size: 1.1em;
 }
 .able-prefs-form fieldset div { 
   display: table; 
+  margin-left: 1em;
 }
 .able-prefs-form fieldset div input { 
   display: table-cell;
@@ -407,6 +544,14 @@ fieldset.able-prefs-captions select {
 .able-prefs-form div.able-captions-sample { 
   padding: 0.5em;
   text-align: center;
+}
+.able-prefs-form h2 { 
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-size: 1.1em;
+}
+.able-prefs-form ul { 
+  margin-top: 0;
 }
 
 /* 

@@ -163,11 +163,8 @@
     else if (whichButton === 'mute') { 
       this.handleMute();
     }
-    else if (whichButton === 'volume-up') { 
-      this.handleVolume('up');
-    }
-    else if (whichButton === 'volume-down') { 
-      this.handleVolume('down');
+    else if (whichButton === 'volume') { 
+      this.handleVolume();
     }
     else if (whichButton === 'faster') {
       this.handleRateIncrease();
@@ -256,17 +253,12 @@
         this.handleMute();
       }
     }
-    else if (which === 117) { // u = volume up 
+    else if (which === 118) { // v = volume 
       if (this.usingModifierKeys(e)) { 
-        this.handleVolume('up');
+        this.handleVolume();
       }
     }
-    else if (which === 100) { // d = volume down 
-      if (this.usingModifierKeys(e)) { 
-        this.handleVolume('down');
-      }
-    }
-    else if (which >= 49 && which <= 53) { // set volume 1-5
+    else if (which >= 49 && which <= 57) { // set volume 1-9
       if (this.usingModifierKeys(e)) { 
         this.handleVolume(which);
       }
@@ -276,27 +268,22 @@
         this.handleCaptionToggle();      
       }
     }
+    else if (which === 100) { // d = description
+      if (this.usingModifierKeys(e)) { 
+        this.handleDescriptionToggle();
+      }
+    }     
     else if (which === 102) { // f = forward 
       if (this.usingModifierKeys(e)) { 
         this.handleFastForward();
       }
     }
-    else if (which === 114) { // r = rewind (could use B for back???) 
+    else if (which === 114) { // r = rewind  
       if (this.usingModifierKeys(e)) { 
         this.handleRewind();
       }
     }
-    else if (which === 110) { // n = narration (description)
-      if (this.usingModifierKeys(e)) { 
-        this.handleDescriptionToggle();
-      }
-    }     
-    else if (which === 104) { // h = help
-      if (this.usingModifierKeys(e)) { 
-        this.handleHelpClick();
-      }
-    }     
-    else if (which === 116) { // t = preferences
+    else if (which === 101) { // e = preferences 
       if (this.usingModifierKeys(e)) { 
         this.handlePrefsClick();
       }
@@ -382,8 +369,9 @@
         }
       })
       .on('volumechange',function() { 
+        thisObj.volume = thisObj.getVolume();
         if (thisObj.debug) { 
-          console.log('media volume change');       
+          console.log('media volume change to ' + thisObj.volume + ' (' + thisObj.volumeButton + ')');       
         }
       })
       .on('error',function() { 

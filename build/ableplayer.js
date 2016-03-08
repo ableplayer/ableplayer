@@ -262,8 +262,9 @@
     // Path to root directory of referring website 
     this.rootPath = this.getRootWebSitePath();
 
-    // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
-    this.defaultVolume = 0.5;
+    // Volume range is 0 to 10. Don't crank it to avoid overpowering screen readers
+    this.defaultVolume = 7;
+    this.volume = this.defaultVolume;
 
     // Default video height and width 
     // Can be overwritten with height and width attributes on HTML <video> element
@@ -281,7 +282,7 @@
     // By default, AblePlayer uses scalable icomoon fonts for the player controls 
     // and falls back to images if the user has a custom style sheet that overrides font-family 
     // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
-    this.iconType = 'font';   
+    this.iconType = 'image';   
   
     // seekInterval = Number of seconds to seek forward or back with these buttons    
     // NOTE: Unless user overrides this default with data-seek-interval attribute, 
@@ -365,28 +366,26 @@
   };
   
   AblePlayer.prototype.setButtonImages = function() { 
-  
-    var imgPath = '../images/' + this.iconColor + '/';
     
-    this.playButtonImg = imgPath + 'play.png';
-    this.pauseButtonImg = imgPath + 'pause.png';
-    this.rewindButtonImg = imgPath + 'rewind.png';
-    this.forwardButtonImg = imgPath + 'forward.png';
-    this.fasterButtonImg = imgPath + 'slower.png';
-    this.slowerButtonImg = imgPath + 'faster.png';
-    this.volumeMuteButtonImg = imgPath + 'volume-mute.png';
-    this.volumeLoudButtonImg = imgPath + 'volume-loud.png';
-    this.volumeIncreaseButtonImg = imgPath + 'volume-up.png';
-    this.volumeDecreaseButtonImg = imgPath + 'volume-down.png';
-    this.captionsButtonImg = imgPath + 'captions.png';
-    this.chaptersButtonImg = imgPath + 'chapters.png';
-    this.signButtonImg = imgPath + 'sign.png';
-    this.transcriptButtonImg = imgPath + 'transcript.png';
-    this.descriptionsButtonImg = imgPath + 'descriptions.png';
-    this.fullscreenExpandButtonImg = imgPath + 'fullscreen-expand.png';
-    this.fullscreenCollapseButtonImg = imgPath + 'fullscreen-collapse.png';
-    this.prefsButtonImg = imgPath + 'preferences.png';
-    this.helpButtonImg = imgPath + 'help.png';
+    // NOTE: volume button images are now set dynamically within volume.js 
+  
+    this.imgPath = '../images/' + this.iconColor + '/';
+    
+    this.playButtonImg = this.imgPath + 'play.png';
+    this.pauseButtonImg = this.imgPath + 'pause.png';
+    this.rewindButtonImg = this.imgPath + 'rewind.png';
+    this.forwardButtonImg = this.imgPath + 'forward.png';
+    this.fasterButtonImg = this.imgPath + 'slower.png';
+    this.slowerButtonImg = this.imgPath + 'faster.png';
+    this.captionsButtonImg = this.imgPath + 'captions.png';
+    this.chaptersButtonImg = this.imgPath + 'chapters.png';
+    this.signButtonImg = this.imgPath + 'sign.png';
+    this.transcriptButtonImg = this.imgPath + 'transcript.png';
+    this.descriptionsButtonImg = this.imgPath + 'descriptions.png';
+    this.fullscreenExpandButtonImg = this.imgPath + 'fullscreen-expand.png';
+    this.fullscreenCollapseButtonImg = this.imgPath + 'fullscreen-collapse.png';
+    this.prefsButtonImg = this.imgPath + 'preferences.png';
+    this.helpButtonImg = this.imgPath + 'help.png';
   };
   
   // Initialize player based on data on page.
@@ -1136,7 +1135,7 @@
       options,$thisOption,optionText,sampleCapsDiv,
       changedPref,changedSpan,changedText,
       currentDescState,
-      $kbHeading,$kbList,kbLabel,key,kbListText,$kbListItem,
+      $kbHeading,$kbList,kbLabels,keys,kbListText,$kbListItem,
       dialog,saveButton,cancelButton;
 
     thisObj = this;
@@ -1416,99 +1415,93 @@
         text: this.tt.prefHeadingKeyboard2 
       });
       $kbList = $('<ul>'); 
+      // create arrays of kbLabels and keys 
+      kbLabels = []; 
+      keys = []; 
       for (i=0; i<this.controls.length; i++) { 
         if (this.controls[i] === 'play') { 
-          kbLabel = this.tt.play + '/' + this.tt.pause;
-          key = 'p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar;
+          kbLabels.push(this.tt.play + '/' + this.tt.pause);
+          keys.push('p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar);
         }
         else if (this.controls[i] === 'stop') { 
-          kbLabel = this.tt.stop;
-          key = 's';
+          kbLabels.push(this.tt.stop);
+          keys.push('s');
         }
         else if (this.controls[i] === 'rewind') { 
-          kbLabel = this.tt.rewind;
-          key = 'r';
+          kbLabels.push(this.tt.rewind);
+          keys.push('r');
         }
         else if (this.controls[i] === 'forward') { 
-          kbLabel = this.tt.forward;
-          key = 'f';
+          kbLabels.push(this.tt.forward);
+          keys.push('f');
         }
-        else if (this.controls[i] === 'mute') { 
-          kbLabel = this.tt.mute;
-          key = 'm';
-        }
-        else if (this.controls[i] === 'volume-up') { 
-          kbLabel = this.tt.volumeUp;
-          key = 'u</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-5';
-        }
-        else if (this.controls[i] === 'volume-down') { 
-          kbLabel = this.tt.volumeDown;
-          key = 'd</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-5';
+        else if (this.controls[i] === 'volume') { 
+          kbLabels.push(this.tt.volume);
+          keys.push('v</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-9'); 
+          // mute toggle 
+          kbLabels.push(this.tt.mute + '/' + this.tt.unmute);
+          keys.push('m');
         }
         else if (this.controls[i] === 'captions') { 
           if (this.captions.length > 1) { 
             // caption button launches a Captions popup menu
-            kbLabel = this.tt.captions;
+            kbLabels.push(this.tt.captions);
           }        
           else { 
             // there is only one caption track
             // therefore caption button is a toggle
             if (this.captionsOn) { 
-              kbLabel = this.tt.hideCaptions;
+              kbLabels.push(this.tt.hideCaptions);
             }
             else { 
-              kbLabel = this.tt.showCaptions;
+              kbLabels.push(this.tt.showCaptions);
             }
           }
-          key = 'c';
+          keys.push('c');
         }
         else if (this.controls[i] === 'descriptions') { 
           if (this.descOn) {     
-            kbLabel = this.tt.turnOffDescriptions;
+            kbLabels.push(this.tt.turnOffDescriptions);
           }
           else { 
-            kbLabel = this.tt.turnOnDescriptions;
+            kbLabels.push(this.tt.turnOnDescriptions);
           }
-          key = 'n';
+          keys.push('d');
         }
         else if (this.controls[i] === 'prefs') { 
-          kbLabel = this.tt.preferences;
-          key = 't';
+          kbLabels.push(this.tt.preferences);
+          keys.push('e');
         }
         else if (this.controls[i] === 'help') { 
-          kbLabel = this.tt.help;
-          key = 'h';
+          kbLabels.push(this.tt.help);
+          keys.push('h');
         }
-        else { 
-          kbLabel = null;
-          key = null;
-        }        
-        if (kbLabel) { 
-          // alt
-          kbListText = '<span class="able-modkey-alt">';  
-          if (this.prefAltKey === 1) { 
-            kbListText += this.tt.prefAltKey + ' + ';
-          }
-          kbListText += '</span>'; 
-          // ctrl 
-          kbListText += '<span class="able-modkey-ctrl">';  
-          if (this.prefCtrlKey === 1) { 
-            kbListText += this.tt.prefCtrlKey + ' + ';
-          }
-          kbListText += '</span>'; 
-          // shift
-          kbListText += '<span class="able-modkey-shift">';  
-          if (this.prefShiftKey === 1) { 
-            kbListText += this.tt.prefShiftKey + ' + ';
-          }
-          kbListText += '</span>'; 
-          kbListText += '<span class="able-modkey">' + key + '</span>';
-          kbListText += ' = ' + kbLabel;
-          $kbListItem = $('<li>',{ 
-            html: kbListText
-          });
-          $kbList.append($kbListItem);
+      }
+      for (i=0; i<keys.length; i++) { 
+        // alt
+        kbListText = '<span class="able-modkey-alt">';  
+        if (this.prefAltKey === 1) { 
+          kbListText += this.tt.prefAltKey + ' + ';
         }
+        kbListText += '</span>'; 
+        // ctrl 
+        kbListText += '<span class="able-modkey-ctrl">';  
+        if (this.prefCtrlKey === 1) { 
+          kbListText += this.tt.prefCtrlKey + ' + ';
+        }
+        kbListText += '</span>'; 
+        // shift
+        kbListText += '<span class="able-modkey-shift">';  
+        if (this.prefShiftKey === 1) { 
+          kbListText += this.tt.prefShiftKey + ' + ';
+        }
+        kbListText += '</span>'; 
+        kbListText += '<span class="able-modkey">' + keys[i] + '</span>';
+        kbListText += ' = ' + kbLabels[i];
+        $kbListItem = $('<li>',{ 
+          html: kbListText
+        });
+        $kbList.append($kbListItem);
       }
       // add Escape key 
       kbListText = '<span class="able-modkey">' + this.tt.escapeKey + '</span>'; 
@@ -1543,7 +1536,7 @@
 
     $prefsDiv.append(saveButton);
     $prefsDiv.append(cancelButton);
-    
+
     // add global reference for future control 
     if (form === 'captions') { 
       this.captionPrefsDialog = dialog;
@@ -2915,7 +2908,12 @@
     if (this.$windowPopup && this.$windowPopup.is(':visible')) {
       this.$windowPopup.hide();
       this.$windowButton.show().focus();
-    }    
+    }   
+    if (this.$volumeSlider && this.$volumeSlider.is(':visible')) { 
+      this.$volumeSlider.hide().attr('aria-hidden','true');
+      this.$volumeAlert.text(this.tt.volumeSliderClosed);
+      this.$volumeButton.focus();
+    } 
   };
 
   // Create and fill in the popup menu forms for various controls.
@@ -3204,41 +3202,55 @@
       controlLayout['ur'].push('seek');
       controlLayout['ur'].push('forward');
     }
+
+    if (this.isPlaybackRateSupported()) {
+      controlLayout['ur'].push('slower'); 
+      controlLayout['ur'].push('faster');
+    }    
+
+    // test for browser support for volume before displaying volume button
+    if (this.browserSupportsVolume()) { 
+      // volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
+      // previously supported button were: 'volume-up','volume-down'
+      this.volumeButton = 'volume-' + this.getVolumeName(this.volume);  
+      controlLayout['ur'].push('volume');
+    }
+    else { 
+      this.volume = false; 
+    }
     
     // Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
     var bll = [];
-    // test for browser support for volume before displaying volume-related buttons 
-    if (this.browserSupportsVolume()) { 
-      bll.push('mute');
-      bll.push('volume-up');
-      bll.push('volume-down');
-    }
     var blr = [];
+
     if (this.mediaType === 'video') { 
       if (this.hasCaptions) {
-        blr.push('captions'); //closed captions
+        bll.push('captions'); //closed captions
       }
       if (this.hasSignLanguage) { 
-        blr.push('sign'); // sign language
+        bll.push('sign'); // sign language
       }
       if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('descriptions'); //audio description 
+        bll.push('descriptions'); //audio description 
       }
     }
 
     if (this.includeTranscript && this.useTranscriptButton) {
-      blr.push('transcript');
-    }
-
-    if (this.isPlaybackRateSupported()) {
-      blr.push('slower'); 
-      blr.push('faster');
+      bll.push('transcript');
     }
 
     if (this.mediaType === 'video' && this.hasChapters) {
-      blr.push('chapters');
+      bll.push('chapters');
     }
 
+    controlLayout['br'].push('preferences');
+    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
+    // controlLayout['br'].push('help');
+
+    // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
+    if (this.mediaType === 'video' && this.player !== 'jw') {
+      controlLayout['br'].push('fullscreen');
+    }
 
     // Include the pipe only if we need to.
     if (bll.length > 0 && blr.length > 0) {
@@ -3250,15 +3262,6 @@
       controlLayout['bl'] = bll.concat(blr);
     }
         
-    controlLayout['br'].push('preferences');
-    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
-    // controlLayout['br'].push('help');
-
-    // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
-    if (this.mediaType === 'video' && this.player !== 'jw') {
-      controlLayout['br'].push('fullscreen');
-    }
-
     return controlLayout;
   };
 
@@ -3271,10 +3274,10 @@
     // some controls are aligned on the left, and others on the right 
   
     var useSpeedButtons, useFullScreen, 
-    i, j, controls, controllerSpan, tooltipId, tooltipDiv, tooltipX, tooltipY, control, 
+    i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
-    controllerStyles, vidcapStyles, captionLabel;  
+    controllerStyles, vidcapStyles, captionLabel, popupMenuId;  
     
     var thisObj = this;
     
@@ -3287,11 +3290,11 @@
 
     // add an empty div to serve as a tooltip
     tooltipId = this.mediaId + '-tooltip';
-    tooltipDiv = $('<div>',{
+    this.$tooltipDiv = $('<div>',{
       'id': tooltipId,
       'class': 'able-tooltip' 
     });
-    this.$controllerDiv.append(tooltipDiv);
+    this.$controllerDiv.append(this.$tooltipDiv);
     
     // step separately through left and right controls
     for (i = 0; i <= 3; i++) {
@@ -3336,8 +3339,8 @@
         }
         else {        
           // this control is a button 
-          if (control === 'mute') { 
-            buttonImgSrc = '../images/' + this.iconColor + '/volume-mute.png';
+          if (control === 'volume') {             
+            buttonImgSrc = '../images/' + this.iconColor + '/' + this.volumeButton + '.png';
           }
           else if (control === 'fullscreen') { 
             buttonImgSrc = '../images/' + this.iconColor + '/fullscreen-expand.png';            
@@ -3361,9 +3364,27 @@
             'tabindex': '0',
             'aria-label': buttonTitle,
             'class': 'able-button-handler-' + control
-          });        
+          });
+          if (control === 'volume' || control === 'preferences') { 
+            // This same ARIA for captions and chapters are added elsewhere 
+            if (control == 'preferences') {
+              popupMenuId = this.mediaId + '-prefs-menu';
+            }
+            else if (control === 'volume') { 
+              popupMenuId = this.mediaId + '-volume-slider';
+            }
+            newButton.attr({
+//              'aria-haspopup': 'true', 
+              'aria-controls': popupMenuId              
+            });            
+          }      
           if (this.iconType === 'font') {
-            iconClass = 'icon-' + control; 
+            if (control === 'volume') {
+              iconClass = 'icon-' + this.volumeButton;
+            }
+            else { 
+              iconClass = 'icon-' + control;             
+            }
             buttonIcon = $('<span>',{ 
               'class': iconClass,
               'aria-hidden': 'true'
@@ -3461,6 +3482,7 @@
           }
           
           controllerSpan.append(newButton);
+          
           // create variables of buttons that are referenced throughout the AblePlayer object 
           if (control === 'play') { 
             this.$playpauseButton = newButton;
@@ -3494,13 +3516,20 @@
           else if (control === 'preferences') {
             this.$prefsButton = newButton;
           }
+          else if (control === 'volume') { 
+            this.$volumeButton = newButton; 
+          }
         }
-      }
+        if (control === 'volume') { 
+          // in addition to the volume button, add a hidden slider
+          this.addVolumeSlider(controllerSpan);
+        }
+      }      
       if ((i % 2) == 1) {
         this.$controllerDiv.append('<div style="clear:both;"></div>');
       }
     }
-  
+    
     if (this.mediaType === 'video') { 
       // As of v 2.3.4, no longer adding width and height on this.$vidCapContainer 
       // CAN'T constrain the height if this.prefCaptionsPosition === 'below' 
@@ -3533,7 +3562,7 @@
     // Update state-based display of controls.
     this.refreshControls();
   };
-
+  
   // Change media player source file, for instance when moving to the next element in a playlist.
   // TODO: Add some sort of playlist support for tracks?
   AblePlayer.prototype.swapSource = function(sourceIndex) { 
@@ -3705,19 +3734,8 @@
     else if (control === 'sign') { 
       return this.tt.sign;
     }
-    else if (control === 'mute') { 
-      if (this.getVolume() > 0) { 
-        return this.tt.mute;
-      }
-      else { 
-        return this.tt.unmute;
-      }
-    }
-    else if (control === 'volume-up') { 
-      return this.tt.volumeUp;
-    }   
-    else if (control === 'volume-down') { 
-      return this.tt.volumeDown;
+    else if (control === 'volume') { 
+      return this.tt.volume;
     }
     else if (control === 'faster') {
       return this.tt.faster;
@@ -4761,6 +4779,356 @@
 })(jQuery);
 
 (function ($) {
+
+  AblePlayer.prototype.addVolumeSlider = function($div) {   
+
+    // input type="range" requires IE10 and later 
+    // and still isn't supported by Opera Mini as of v8
+    // Also, vertical orientation of slider requires CSS hacks   
+    // and causes problems in some screen readers 
+    // Therefore, building a custom vertical volume slider 
+    
+    var thisObj, volumeSliderId, volumeHelpId, x, y;
+    
+    thisObj = this; 
+
+    // define a few variables     
+    volumeSliderId = this.mediaId + '-volume-slider';
+    volumeHelpId = this.mediaId + '-volume-help';
+    this.volumeTrackHeight = 50; // must match CSS height for .able-volume-slider
+    this.volumeHeadHeight = 7; // must match CSS height for .able-volume-head 
+    this.volumeTickHeight = this.volumeTrackHeight / 10;     
+
+    this.$volumeSlider = $('<div>',{ 
+      'id': volumeSliderId,
+      'class': 'able-volume-slider',
+      'aria-hidden': 'true'
+    });
+    this.$volumeSliderTooltip = $('<div>',{ 
+      'class': 'able-tooltip',
+      'role': 'tooltip'
+    });    
+    this.$volumeSliderTrack = $('<div>',{ 
+      'class': 'able-volume-track'
+    });
+    this.$volumeSliderTrackOn = $('<div>',{ 
+      'class': 'able-volume-track able-volume-track-on'
+    });
+    this.$volumeSliderHead = $('<div>',{ 
+      'class': 'able-volume-head',
+      'role': 'slider',
+      'aria-label': this.tt.volumeUpDown,
+      'aria-value-min': 0,
+      'aria-value-max': 10,
+      'tabindex': 0 /* should be -1, then change to 0 dynamically & place focus when visible */
+    });
+    this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
+    this.$volumeAlert = $('<div>',{
+      'class': 'able-offscreen',
+      'aria-live': 'polite'
+    });
+    this.$volumeHelp = $('<div>',{ 
+      'id': volumeHelpId,
+      'class': 'able-offscreen' 
+    }).text(this.tt.volumeHelp); 
+    this.$volumeButton.attr({ 
+      'aria-describedby': volumeHelpId
+    });
+    this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)     
+    $div.append(this.$volumeSlider);
+        
+    this.refreshVolumeSlider(this.volume);
+            
+    // add event listeners     
+    this.$volumeSliderHead.on('mousedown',function (event) {
+      thisObj.draggingVolume = true; 
+      thisObj.volumeHeadPositionTop = $(this).offset().top;
+    });
+
+    $(document).on('mouseup',function (event) {
+      thisObj.draggingVolume = false;       
+    });
+
+    $(document).on('mousemove',function (event) {
+      if (thisObj.draggingVolume) { 
+        x = event.pageX;
+        y = event.pageY;
+        thisObj.moveVolumeHead(y);
+      }
+    });
+    
+    this.$volumeSliderHead.on('keydown',function (event) { 
+      // Left arrow or down arrow
+      if (event.which === 37 || event.which === 40) {
+        thisObj.handleVolume('down');
+      }
+      // Right arrow or up arrow
+      else if (event.which === 39 || event.which === 38) {
+        thisObj.handleVolume('up');
+      }
+      // Escape key or Enter key 
+      else if (event.which === 27 || event.which === 13) { 
+        // close popup
+        thisObj.showVolumePopup();
+      }
+      else {
+        return;
+      }
+      event.preventDefault();
+    });
+  };
+  
+  AblePlayer.prototype.refreshVolumeSlider = function(volume) {
+
+    // adjust slider position based on current volume 
+
+    var volumePct; 
+    volumePct = (volume/10) * 100;
+    
+    var trackOnHeight, trackOnTop, headTop; 
+    trackOnHeight = volume * this.volumeTickHeight; 
+    trackOnTop = this.volumeTrackHeight - trackOnHeight; 
+    headTop = trackOnTop - this.volumeHeadHeight; 
+        
+    this.$volumeSliderTrackOn.css({
+      'height': trackOnHeight + 'px',
+      'top': trackOnTop + 'px'
+    });
+    this.$volumeSliderHead.css({
+      'top': headTop + 'px'
+    });    
+    this.$volumeAlert.text(volumePct + '%');
+
+  };
+  
+  AblePlayer.prototype.refreshVolumeButton = function(volume) { 
+
+    var volumeName, volumePct, volumeLabel, volumeIconClass, volumeImg; 
+    
+    volumeName = this.getVolumeName(volume);
+    volumePct = (volume/10) * 100;
+    volumeLabel = this.tt.volume + ' ' + volumePct + '%';
+    
+    if (this.iconType === 'font') {
+      volumeIconClass = 'icon-volume-' + volumeName;
+      this.$volumeButton.find('span').first().removeClass().addClass(volumeIconClass); 
+      this.$volumeButton.find('span.able-clipped').text(volumeLabel);
+    }
+    else { 
+      volumeImg = this.imgPath + 'volume-' + volumeName + '.png';
+      this.$volumeButton.find('img').attr('src',volumeImg); 
+    }
+  };
+  
+  AblePlayer.prototype.moveVolumeHead = function(y) {
+
+    // y is current position after mousemove       
+    var diff, direction, ticksDiff, newVolume, maxedOut; 
+
+    var diff = this.volumeHeadPositionTop - y;    
+    
+    // only move the volume head if user had dragged at least one tick 
+    // this is more efficient, plus creates a "snapping' effect
+    if (Math.abs(diff) > this.volumeTickHeight) { 
+      if (diff > 0) { 
+        direction = 'up'; 
+      }
+      else { 
+        direction = 'down'; 
+      }
+      if (direction == 'up' && this.volume == 10) { 
+        // can't go any higher 
+        return; 
+      }  
+      else if (direction == 'down' && this.volume == 0) { 
+        // can't go any lower 
+        return; 
+      }
+      else { 
+        ticksDiff = Math.round(Math.abs(diff) / this.volumeTickHeight);        
+        if (direction == 'up') { 
+          newVolume = this.volume + ticksDiff;           
+          if (newVolume > 10) { 
+            newVolume = 10; 
+          }
+        }
+        else { // direction is down 
+          newVolume = this.volume - ticksDiff; 
+          if (newVolume < 0) { 
+            newVolume = 0; 
+          }
+        }
+        this.setVolume(newVolume); // this.volume will be updated after volumechange event fires (event.js) 
+        this.refreshVolumeSlider(newVolume);
+        this.refreshVolumeButton(newVolume);
+        this.volumeHeadPositionTop = y;
+      }
+    }  
+  };
+  
+  AblePlayer.prototype.handleVolume = function(direction) {
+    // 'direction is either 'up','down', or an ASCII key code 49-57 (numeric keys 1-9)
+    // Action: calculate and change the volume
+    // Don't change this.volume and this.volumeButton yet - wait for 'volumechange' event to fire (event.js)
+
+    // If NO direction is provided, user has just clicked on the Volume button 
+    // Action: show slider 
+    var volume;
+    
+    if (typeof direction === 'undefined') { 
+      this.showVolumePopup();
+      return; 
+    }
+
+    if (direction >= 49 && direction <= 57) { 
+      volume = direction - 48; 
+    }
+    else {     
+      
+      volume = this.getVolume();
+    
+      if (direction === 'up' && volume < 10) {
+        volume += 1;
+      }
+      else if (direction === 'down' && volume > 0) {
+        volume -= 1;
+      }
+    }    
+
+    if (this.isMuted() && volume > 0) { 
+      this.setMute(false); 
+    }
+    else if (volume === 0) {
+      this.setMute(true);
+    }
+    else { 
+      this.setVolume(volume); // this.volume will be updated after volumechange event fires (event.js) 
+      this.refreshVolumeSlider(volume);
+      this.refreshVolumeButton(volume);
+    }    
+  };
+
+  AblePlayer.prototype.handleMute = function() { 
+    if (this.isMuted()) {
+      this.setMute(false);
+    }
+    else {
+      this.setMute(true);
+    }
+  };
+  
+  AblePlayer.prototype.showVolumePopup = function() {
+  
+    this.closePopups(); 
+    this.$tooltipDiv.hide();
+    this.$volumeSlider.show().attr('aria-hidden','false');
+    this.$volumeSliderHead.focus();
+  };
+  
+  AblePlayer.prototype.isMuted = function () {
+
+    if (this.player === 'html5') {
+      return this.media.muted;
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      return this.jwPlayer.getMute();
+    }
+    else if (this.player === 'youtube') {
+      return this.youTubePlayer.isMuted();
+    }
+  };
+
+  AblePlayer.prototype.setMute = function(mute) {
+
+    // mute is either true (muting) or false (unmuting) 
+    if (mute) { 
+      // save current volume so it can be restored after unmute 
+      this.lastVolume = this.volume; 
+      this.volume = 0; 
+    }
+    else { // restore to previous volume
+      if (typeof this.lastVolume !== 'undefined') {
+        this.volume = this.lastVolume;
+      }
+    }
+    
+    if (this.player === 'html5') {
+      this.media.muted = mute;
+    }
+    else if (this.player === 'jw' && this.jwPlayer) { 
+      this.jwPlayer.setMute(mute);
+    }
+    else if (this.player === 'youtube') {
+      if (mute) {
+        this.youTubePlayer.mute();
+      }
+      else {
+        this.youTubePlayer.unMute();
+      }
+    }    
+    this.refreshVolumeSlider(this.volume);
+    this.refreshVolumeButton(this.volume);
+  };
+  
+  AblePlayer.prototype.setVolume = function (volume) {
+
+    // volume is 1 to 10 
+    // convert as needed depending on player 
+        
+    if (this.player === 'html5') {
+      this.media.volume = volume / 10;
+      if (this.hasSignLanguage && this.signVideo) { 
+        this.signVideo.volume = 0; // always mute
+      }
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      this.jwPlayer.setVolume(volume * 10);
+    }
+    else if (this.player === 'youtube') {
+      this.youTubePlayer.setVolume(volume * 10);
+    }
+    
+    this.lastVolume = volume;
+  };
+
+  AblePlayer.prototype.getVolume = function (volume) {
+
+    // return volume using common audio control scale 1 to 10 
+
+    if (this.player === 'html5') {
+      // uses 0 to 1 scale 
+      return this.media.volume * 10;
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      // uses 0 to 100 scale 
+      return this.jwPlayer.getVolume() / 10;
+    }
+    else if (this.player === 'youtube') {
+      // uses 0 to 100 scale 
+      return this.youTubePlayer.getVolume() / 10;
+    }
+  };
+
+  AblePlayer.prototype.getVolumeName = function (volume) {
+
+    // returns 'mute','soft','medium', or 'loud' depending on volume level 
+    if (volume == 0) { 
+      return 'mute';
+    }
+    else if (volume == 10) { 
+      return 'loud';
+    }
+    else if (volume < 5) { 
+      return 'soft'; 
+    }
+    else { 
+      return 'medium';
+    }
+  };
+    
+})(jQuery);
+
+(function ($) {
   var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
   // Based on the incredible accessible modal dialog.
@@ -5507,99 +5875,6 @@
     }
   };
 
-  AblePlayer.prototype.isMuted = function () {
-
-    if (!this.browserSupportsVolume()) {
-      return false;
-    }
-
-    if (this.player === 'html5') {
-      return this.media.muted;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      return this.jwPlayer.getMute();
-    }
-    else if (this.player === 'youtube') {
-      return this.youTubePlayer.isMuted();
-    }
-  };
-
-  AblePlayer.prototype.setMute = function(mute) {
-    if (!this.browserSupportsVolume()) {
-      return;
-    }
-    if (!mute) {
-      this.$muteButton.attr('aria-label',this.tt.mute); 
-      this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud');       
-      this.$muteButton.find('span.able-clipped').text(this.tt.mute); 
-    }
-    else {
-      this.$muteButton.attr('aria-label',this.tt.unmute); 
-      this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute');       
-      this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
-    }
-    
-    if (this.player === 'html5') {
-      this.media.muted = mute;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) { 
-      this.jwPlayer.setMute(mute);
-    }
-    else if (this.player === 'youtube') {
-      if (mute) {
-        this.youTubePlayer.mute();
-      }
-      else {
-        this.youTubePlayer.unMute();
-      }
-    }
-    
-    if (!mute) {
-      // TODO: Is this necessary?
-      // Restore volume to last value.
-      if (this.lastVolume) {
-        this.setVolume(this.lastVolume);
-      }
-    }
-  };
-  
-  AblePlayer.prototype.setVolume = function (volume) {
-    if (!this.browserSupportsVolume()) {
-      return;
-    }
-
-    if (this.player === 'html5') {
-      this.media.volume = volume;
-      if (this.hasSignLanguage && this.signVideo) { 
-        this.signVideo.volume = 0; // always mute
-      }
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      this.jwPlayer.setVolume(volume * 100);
-    }
-    else if (this.player === 'youtube') {
-      this.youTubePlayer.setVolume(volume * 100);
-    }
-    
-    this.lastVolume = volume;
-  };
-
-  AblePlayer.prototype.getVolume = function (volume) {
-    if (!this.browserSupportsVolume()) {
-      return 1;
-    }
-
-    if (this.player === 'html5') {
-      return this.media.volume;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      return this.jwPlayer.getVolume() / 100;
-    }
-    else if (this.player === 'youtube') {
-      return this.youTubePlayer.getVolume() / 100;
-    }
-  };
-
   AblePlayer.prototype.isPlaybackRateSupported = function () {
     if (this.player === 'html5') {
       return this.media.playbackRate ? true : false;
@@ -5904,28 +6179,6 @@
         'aria-controls': this.mediaId + '-chapters-menu'
       });
     }
-
-    if (this.$muteButton) {
-      if (!this.isMuted()) {
-        if (this.iconType === 'font') {
-          this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
-          this.$muteButton.find('span.able-clipped').text(this.tt.mute);
-        }
-        else { 
-          this.$muteButton.find('img').attr('src',this.volumeLoudButtonImg); 
-        }
-      }
-      else {
-        if (this.iconType === 'font') {
-          this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
-          this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
-        }
-        else { 
-          this.$muteButton.find('img').attr('src',this.volumeMuteButtonImg); 
-        }
-      }
-    }
-
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
         this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
@@ -6078,52 +6331,6 @@
     }
     else {
       this.seekTo(targetTime);
-    }
-  };
-
-  AblePlayer.prototype.handleMute = function() { 
-    if (this.isMuted()) {
-      this.setMute(false);
-    }
-    else {
-      this.setMute(true);
-    }
-  };
-
-  AblePlayer.prototype.handleVolume = function(direction) {
-    var volume;
-    
-    if (this.isMuted()) {
-      this.setMute(false);
-    }
-    
-    volume = this.getVolume();
-    
-    if (direction === 'up') {
-      if (volume < 0.9) {        
-        volume = Math.round((volume + 0.1) * 10) / 10;
-      }
-      else {
-        volume = 1;
-      }
-    }
-    else if (direction === 'down') {
-      if (volume > 0.1) {        
-        volume = Math.round((volume - 0.1) * 10) / 10;
-      }
-      else {
-        volume = 0;
-      }
-    }
-    else if (direction >= 49 || direction <= 53) { 
-      // TODO: What is this for?
-      volume = (direction-48) * 0.2;
-    }
-    
-    this.setVolume(volume);
-    
-    if (volume === 0) {
-      this.setMute(true);
     }
   };
 
@@ -7547,11 +7754,8 @@
     else if (whichButton === 'mute') { 
       this.handleMute();
     }
-    else if (whichButton === 'volume-up') { 
-      this.handleVolume('up');
-    }
-    else if (whichButton === 'volume-down') { 
-      this.handleVolume('down');
+    else if (whichButton === 'volume') { 
+      this.handleVolume();
     }
     else if (whichButton === 'faster') {
       this.handleRateIncrease();
@@ -7640,17 +7844,12 @@
         this.handleMute();
       }
     }
-    else if (which === 117) { // u = volume up 
+    else if (which === 118) { // v = volume 
       if (this.usingModifierKeys(e)) { 
-        this.handleVolume('up');
+        this.handleVolume();
       }
     }
-    else if (which === 100) { // d = volume down 
-      if (this.usingModifierKeys(e)) { 
-        this.handleVolume('down');
-      }
-    }
-    else if (which >= 49 && which <= 53) { // set volume 1-5
+    else if (which >= 49 && which <= 57) { // set volume 1-9
       if (this.usingModifierKeys(e)) { 
         this.handleVolume(which);
       }
@@ -7660,27 +7859,22 @@
         this.handleCaptionToggle();      
       }
     }
+    else if (which === 100) { // d = description
+      if (this.usingModifierKeys(e)) { 
+        this.handleDescriptionToggle();
+      }
+    }     
     else if (which === 102) { // f = forward 
       if (this.usingModifierKeys(e)) { 
         this.handleFastForward();
       }
     }
-    else if (which === 114) { // r = rewind (could use B for back???) 
+    else if (which === 114) { // r = rewind  
       if (this.usingModifierKeys(e)) { 
         this.handleRewind();
       }
     }
-    else if (which === 110) { // n = narration (description)
-      if (this.usingModifierKeys(e)) { 
-        this.handleDescriptionToggle();
-      }
-    }     
-    else if (which === 104) { // h = help
-      if (this.usingModifierKeys(e)) { 
-        this.handleHelpClick();
-      }
-    }     
-    else if (which === 116) { // t = preferences
+    else if (which === 101) { // e = preferences 
       if (this.usingModifierKeys(e)) { 
         this.handlePrefsClick();
       }
@@ -7766,8 +7960,9 @@
         }
       })
       .on('volumechange',function() { 
+        thisObj.volume = thisObj.getVolume();
         if (thisObj.debug) { 
-          console.log('media volume change');       
+          console.log('media volume change to ' + thisObj.volume + ' (' + thisObj.volumeButton + ')');       
         }
       })
       .on('error',function() { 
@@ -9226,7 +9421,7 @@
     // translation2.js is then contanenated onto the end to finish this function
         
 
-var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeUp": "Lauter","volumeDown": "Leiser","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Captions","prefMenuDescriptions": "Descriptions","prefMenuKeyboard": "Keyboard","prefMenuTranscript": "Transcript","prefTitleCaptions": "Captions Preferences","prefTitleDescriptions": "Audio Description Preferences","prefTitleKeyboard": "Keyboard Preferences","prefTitleTranscript": "Transcript Preferences","prefIntroCaptions": "The following preferences control how captions are displayed.","prefIntroDescription1": "This media player supports audio description in two ways: ","prefIntroDescription2": "The current video has ","prefIntroDescriptionNone": "The current video has no audio description in either format.", "prefIntroDescription3": "Use the following form to set your preferences related to audio description.","prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", "prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).","prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.","prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.","prefIntroTranscript": "The following preferences affect the interactive transcript.","prefCookieWarning": "Saving your preferences requires cookies.","prefHeadingKeyboard1": "Modifier keys used for shortcuts","prefHeadingKeyboard2": "Current keyboard shortcuts","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "escapeKey": "Escape","escapeKeyFunction": "Close current dialog or popup menu","prefDescFormat": "Preferred format","prefDescFormatHelp": "If both formats are avaialable, only one will be used.","prefDescFormatOption1": "alternative described version of video","prefDescFormatOption1b": "an alternative described version","prefDescFormatOption2": "text-based description, announced by screen reader","prefDescFormatOption2b": "text-based description","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Font","prefCaptionsColor": "Text Color","prefCaptionsBGColor": "Background","prefCaptionsSize": "Font Size","prefCaptionsOpacity": "Opacity","prefCaptionsStyle": "Style","serif": "serif","sans": "sans-serif","cursive": "cursive","fantasy": "fantasy","monospace": "monospace","white": "white","yellow": "yellow","green": "green", "cyan": "cyan","blue": "blue", "magenta": "magenta", "red": "red", "black": "black", "transparent": "transparent", "solid": "solid", "captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up", "prefCaptionsPosition": "Position","captionsPositionOverlay": "Overlay", "captionsPositionBelow": "Below video", "sampleCaptionText": "Sample caption text","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
+var de = {  "playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","play": "Abspielen", "pause": "Pause","stop": "Anhalten","rewind": "Zurück springen", "forward": "Vorwärts springen", "captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten", "showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke", "volumeHelp": "Click to access volume slider","volumeUpDown": "Volume up down","volumeSliderClosed": "Volume slider closed","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder", "spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt", "statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Version mit Audiodeskription wird verwendet","statusLoadingDesc": "Version mit Audiodeskription wird geladen","statusUsingNoDesc": "Version ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Version ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Audiodeskription wird verwendet für dieses Video","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Captions","prefMenuDescriptions": "Descriptions","prefMenuKeyboard": "Keyboard","prefMenuTranscript": "Transcript","prefTitleCaptions": "Captions Preferences","prefTitleDescriptions": "Audio Description Preferences","prefTitleKeyboard": "Keyboard Preferences","prefTitleTranscript": "Transcript Preferences","prefIntroCaptions": "The following preferences control how captions are displayed.","prefIntroDescription1": "This media player supports audio description in two ways: ","prefIntroDescription2": "The current video has ","prefIntroDescriptionNone": "The current video has no audio description in either format.", "prefIntroDescription3": "Use the following form to set your preferences related to audio description.","prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", "prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).","prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.","prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.","prefIntroTranscript": "The following preferences affect the interactive transcript.","prefCookieWarning": "Saving your preferences requires cookies.","prefHeadingKeyboard1": "Modifier keys used for shortcuts","prefHeadingKeyboard2": "Current keyboard shortcuts","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interactive Transcript","prefAltKey": "Alt-Taste","prefCtrlKey": "Strg-Taste","prefShiftKey": "Umschalttaste", "escapeKey": "Escape","escapeKeyFunction": "Close current dialog or popup menu","prefDescFormat": "Preferred format","prefDescFormatHelp": "If both formats are avaialable, only one will be used.","prefDescFormatOption1": "alternative described version of video","prefDescFormatOption1b": "an alternative described version","prefDescFormatOption2": "text-based description, announced by screen reader","prefDescFormatOption2b": "text-based description","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden", "prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Font","prefCaptionsColor": "Text Color","prefCaptionsBGColor": "Background","prefCaptionsSize": "Font Size","prefCaptionsOpacity": "Opacity","prefCaptionsStyle": "Style","serif": "serif","sans": "sans-serif","cursive": "cursive","fantasy": "fantasy","monospace": "monospace","white": "white","yellow": "yellow","green": "green", "cyan": "cyan","blue": "blue", "magenta": "magenta", "red": "red", "black": "black", "transparent": "transparent", "solid": "solid", "captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up", "prefCaptionsPosition": "Position","captionsPositionOverlay": "Overlay", "captionsPositionBelow": "Below video", "sampleCaptionText": "Sample caption text","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe", "helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok", "done": "Fertig", "closeButtonLabel": "Schließen", "windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben", "windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern", "windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben", "windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."}; 
 var en = {
   
 "playerHeading": "Media player",
@@ -9277,9 +9472,11 @@ var en = {
 
 "volume": "Volume", 
 
-"volumeUp": "Volume up",
+"volumeHelp": "Click to access volume slider",
 
-"volumeDown": "Volume down",
+"volumeUpDown": "Volume up down",
+
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Preferences",
 
@@ -9561,9 +9758,11 @@ var es = {
 
 "volume": "Volumen", 
 
-"volumeUp": "Subir volumen",
+"volumeHelp": "Click to access volume slider",
 
-"volumeDown": "Bajar volumen",
+"volumeUpDown": "Volume up down",
+
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Preferencias",
 
@@ -9845,9 +10044,11 @@ var nl = {
 
 "volume": "Volume", 
 
-"volumeUp": "Volume hoger",
+"volumeHelp": "Click to access volume slider",
 
-"volumeDown": "Volume lager",
+"volumeUpDown": "Volume hoger lager",
+
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Voorkeuren",
 

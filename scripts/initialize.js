@@ -8,8 +8,9 @@
     // Path to root directory of referring website 
     this.rootPath = this.getRootWebSitePath();
 
-    // Volume range is 0 to 1. Don't crank it to avoid overpowering screen readers
-    this.defaultVolume = 0.5;
+    // Volume range is 0 to 10. Don't crank it to avoid overpowering screen readers
+    this.defaultVolume = 7;
+    this.volume = this.defaultVolume;
 
     // Default video height and width 
     // Can be overwritten with height and width attributes on HTML <video> element
@@ -27,7 +28,7 @@
     // By default, AblePlayer uses scalable icomoon fonts for the player controls 
     // and falls back to images if the user has a custom style sheet that overrides font-family 
     // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
-    this.iconType = 'font';   
+    this.iconType = 'image';   
   
     // seekInterval = Number of seconds to seek forward or back with these buttons    
     // NOTE: Unless user overrides this default with data-seek-interval attribute, 
@@ -111,28 +112,26 @@
   };
   
   AblePlayer.prototype.setButtonImages = function() { 
-  
-    var imgPath = '../images/' + this.iconColor + '/';
     
-    this.playButtonImg = imgPath + 'play.png';
-    this.pauseButtonImg = imgPath + 'pause.png';
-    this.rewindButtonImg = imgPath + 'rewind.png';
-    this.forwardButtonImg = imgPath + 'forward.png';
-    this.fasterButtonImg = imgPath + 'slower.png';
-    this.slowerButtonImg = imgPath + 'faster.png';
-    this.volumeMuteButtonImg = imgPath + 'volume-mute.png';
-    this.volumeLoudButtonImg = imgPath + 'volume-loud.png';
-    this.volumeIncreaseButtonImg = imgPath + 'volume-up.png';
-    this.volumeDecreaseButtonImg = imgPath + 'volume-down.png';
-    this.captionsButtonImg = imgPath + 'captions.png';
-    this.chaptersButtonImg = imgPath + 'chapters.png';
-    this.signButtonImg = imgPath + 'sign.png';
-    this.transcriptButtonImg = imgPath + 'transcript.png';
-    this.descriptionsButtonImg = imgPath + 'descriptions.png';
-    this.fullscreenExpandButtonImg = imgPath + 'fullscreen-expand.png';
-    this.fullscreenCollapseButtonImg = imgPath + 'fullscreen-collapse.png';
-    this.prefsButtonImg = imgPath + 'preferences.png';
-    this.helpButtonImg = imgPath + 'help.png';
+    // NOTE: volume button images are now set dynamically within volume.js 
+  
+    this.imgPath = '../images/' + this.iconColor + '/';
+    
+    this.playButtonImg = this.imgPath + 'play.png';
+    this.pauseButtonImg = this.imgPath + 'pause.png';
+    this.rewindButtonImg = this.imgPath + 'rewind.png';
+    this.forwardButtonImg = this.imgPath + 'forward.png';
+    this.fasterButtonImg = this.imgPath + 'slower.png';
+    this.slowerButtonImg = this.imgPath + 'faster.png';
+    this.captionsButtonImg = this.imgPath + 'captions.png';
+    this.chaptersButtonImg = this.imgPath + 'chapters.png';
+    this.signButtonImg = this.imgPath + 'sign.png';
+    this.transcriptButtonImg = this.imgPath + 'transcript.png';
+    this.descriptionsButtonImg = this.imgPath + 'descriptions.png';
+    this.fullscreenExpandButtonImg = this.imgPath + 'fullscreen-expand.png';
+    this.fullscreenCollapseButtonImg = this.imgPath + 'fullscreen-collapse.png';
+    this.prefsButtonImg = this.imgPath + 'preferences.png';
+    this.helpButtonImg = this.imgPath + 'help.png';
   };
   
   // Initialize player based on data on page.

@@ -24,6 +24,7 @@ module.exports = function(grunt) {
                     'scripts/track.js',
                     'scripts/youtube.js',
                     'scripts/seekbar.js',
+                    'scripts/volume.js',
                     'scripts/dialog.js',
                     'scripts/misc.js',
                     'scripts/description.js',

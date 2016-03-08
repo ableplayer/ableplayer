@@ -249,7 +249,7 @@
       options,$thisOption,optionText,sampleCapsDiv,
       changedPref,changedSpan,changedText,
       currentDescState,
-      $kbHeading,$kbList,kbLabel,key,kbListText,$kbListItem,
+      $kbHeading,$kbList,kbLabels,keys,kbListText,$kbListItem,
       dialog,saveButton,cancelButton;
 
     thisObj = this;
@@ -529,99 +529,93 @@
         text: this.tt.prefHeadingKeyboard2 
       });
       $kbList = $('<ul>'); 
+      // create arrays of kbLabels and keys 
+      kbLabels = []; 
+      keys = []; 
       for (i=0; i<this.controls.length; i++) { 
         if (this.controls[i] === 'play') { 
-          kbLabel = this.tt.play + '/' + this.tt.pause;
-          key = 'p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar;
+          kbLabels.push(this.tt.play + '/' + this.tt.pause);
+          keys.push('p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar);
         }
         else if (this.controls[i] === 'stop') { 
-          kbLabel = this.tt.stop;
-          key = 's';
+          kbLabels.push(this.tt.stop);
+          keys.push('s');
         }
         else if (this.controls[i] === 'rewind') { 
-          kbLabel = this.tt.rewind;
-          key = 'r';
+          kbLabels.push(this.tt.rewind);
+          keys.push('r');
         }
         else if (this.controls[i] === 'forward') { 
-          kbLabel = this.tt.forward;
-          key = 'f';
+          kbLabels.push(this.tt.forward);
+          keys.push('f');
         }
-        else if (this.controls[i] === 'mute') { 
-          kbLabel = this.tt.mute;
-          key = 'm';
-        }
-        else if (this.controls[i] === 'volume-up') { 
-          kbLabel = this.tt.volumeUp;
-          key = 'u</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-5';
-        }
-        else if (this.controls[i] === 'volume-down') { 
-          kbLabel = this.tt.volumeDown;
-          key = 'd</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-5';
+        else if (this.controls[i] === 'volume') { 
+          kbLabels.push(this.tt.volume);
+          keys.push('v</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-9'); 
+          // mute toggle 
+          kbLabels.push(this.tt.mute + '/' + this.tt.unmute);
+          keys.push('m');
         }
         else if (this.controls[i] === 'captions') { 
           if (this.captions.length > 1) { 
             // caption button launches a Captions popup menu
-            kbLabel = this.tt.captions;
+            kbLabels.push(this.tt.captions);
           }        
           else { 
             // there is only one caption track
             // therefore caption button is a toggle
             if (this.captionsOn) { 
-              kbLabel = this.tt.hideCaptions;
+              kbLabels.push(this.tt.hideCaptions);
             }
             else { 
-              kbLabel = this.tt.showCaptions;
+              kbLabels.push(this.tt.showCaptions);
             }
           }
-          key = 'c';
+          keys.push('c');
         }
         else if (this.controls[i] === 'descriptions') { 
           if (this.descOn) {     
-            kbLabel = this.tt.turnOffDescriptions;
+            kbLabels.push(this.tt.turnOffDescriptions);
           }
           else { 
-            kbLabel = this.tt.turnOnDescriptions;
+            kbLabels.push(this.tt.turnOnDescriptions);
           }
-          key = 'n';
+          keys.push('d');
         }
         else if (this.controls[i] === 'prefs') { 
-          kbLabel = this.tt.preferences;
-          key = 't';
+          kbLabels.push(this.tt.preferences);
+          keys.push('e');
         }
         else if (this.controls[i] === 'help') { 
-          kbLabel = this.tt.help;
-          key = 'h';
+          kbLabels.push(this.tt.help);
+          keys.push('h');
         }
-        else { 
-          kbLabel = null;
-          key = null;
-        }        
-        if (kbLabel) { 
-          // alt
-          kbListText = '<span class="able-modkey-alt">';  
-          if (this.prefAltKey === 1) { 
-            kbListText += this.tt.prefAltKey + ' + ';
-          }
-          kbListText += '</span>'; 
-          // ctrl 
-          kbListText += '<span class="able-modkey-ctrl">';  
-          if (this.prefCtrlKey === 1) { 
-            kbListText += this.tt.prefCtrlKey + ' + ';
-          }
-          kbListText += '</span>'; 
-          // shift
-          kbListText += '<span class="able-modkey-shift">';  
-          if (this.prefShiftKey === 1) { 
-            kbListText += this.tt.prefShiftKey + ' + ';
-          }
-          kbListText += '</span>'; 
-          kbListText += '<span class="able-modkey">' + key + '</span>';
-          kbListText += ' = ' + kbLabel;
-          $kbListItem = $('<li>',{ 
-            html: kbListText
-          });
-          $kbList.append($kbListItem);
+      }
+      for (i=0; i<keys.length; i++) { 
+        // alt
+        kbListText = '<span class="able-modkey-alt">';  
+        if (this.prefAltKey === 1) { 
+          kbListText += this.tt.prefAltKey + ' + ';
         }
+        kbListText += '</span>'; 
+        // ctrl 
+        kbListText += '<span class="able-modkey-ctrl">';  
+        if (this.prefCtrlKey === 1) { 
+          kbListText += this.tt.prefCtrlKey + ' + ';
+        }
+        kbListText += '</span>'; 
+        // shift
+        kbListText += '<span class="able-modkey-shift">';  
+        if (this.prefShiftKey === 1) { 
+          kbListText += this.tt.prefShiftKey + ' + ';
+        }
+        kbListText += '</span>'; 
+        kbListText += '<span class="able-modkey">' + keys[i] + '</span>';
+        kbListText += ' = ' + kbLabels[i];
+        $kbListItem = $('<li>',{ 
+          html: kbListText
+        });
+        $kbList.append($kbListItem);
       }
       // add Escape key 
       kbListText = '<span class="able-modkey">' + this.tt.escapeKey + '</span>'; 
@@ -656,7 +650,7 @@
 
     $prefsDiv.append(saveButton);
     $prefsDiv.append(cancelButton);
-    
+
     // add global reference for future control 
     if (form === 'captions') { 
       this.captionPrefsDialog = dialog;

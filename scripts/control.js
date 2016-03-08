@@ -150,99 +150,6 @@
     }
   };
 
-  AblePlayer.prototype.isMuted = function () {
-
-    if (!this.browserSupportsVolume()) {
-      return false;
-    }
-
-    if (this.player === 'html5') {
-      return this.media.muted;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      return this.jwPlayer.getMute();
-    }
-    else if (this.player === 'youtube') {
-      return this.youTubePlayer.isMuted();
-    }
-  };
-
-  AblePlayer.prototype.setMute = function(mute) {
-    if (!this.browserSupportsVolume()) {
-      return;
-    }
-    if (!mute) {
-      this.$muteButton.attr('aria-label',this.tt.mute); 
-      this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud');       
-      this.$muteButton.find('span.able-clipped').text(this.tt.mute); 
-    }
-    else {
-      this.$muteButton.attr('aria-label',this.tt.unmute); 
-      this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute');       
-      this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
-    }
-    
-    if (this.player === 'html5') {
-      this.media.muted = mute;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) { 
-      this.jwPlayer.setMute(mute);
-    }
-    else if (this.player === 'youtube') {
-      if (mute) {
-        this.youTubePlayer.mute();
-      }
-      else {
-        this.youTubePlayer.unMute();
-      }
-    }
-    
-    if (!mute) {
-      // TODO: Is this necessary?
-      // Restore volume to last value.
-      if (this.lastVolume) {
-        this.setVolume(this.lastVolume);
-      }
-    }
-  };
-  
-  AblePlayer.prototype.setVolume = function (volume) {
-    if (!this.browserSupportsVolume()) {
-      return;
-    }
-
-    if (this.player === 'html5') {
-      this.media.volume = volume;
-      if (this.hasSignLanguage && this.signVideo) { 
-        this.signVideo.volume = 0; // always mute
-      }
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      this.jwPlayer.setVolume(volume * 100);
-    }
-    else if (this.player === 'youtube') {
-      this.youTubePlayer.setVolume(volume * 100);
-    }
-    
-    this.lastVolume = volume;
-  };
-
-  AblePlayer.prototype.getVolume = function (volume) {
-    if (!this.browserSupportsVolume()) {
-      return 1;
-    }
-
-    if (this.player === 'html5') {
-      return this.media.volume;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      return this.jwPlayer.getVolume() / 100;
-    }
-    else if (this.player === 'youtube') {
-      return this.youTubePlayer.getVolume() / 100;
-    }
-  };
-
   AblePlayer.prototype.isPlaybackRateSupported = function () {
     if (this.player === 'html5') {
       return this.media.playbackRate ? true : false;
@@ -547,28 +454,6 @@
         'aria-controls': this.mediaId + '-chapters-menu'
       });
     }
-
-    if (this.$muteButton) {
-      if (!this.isMuted()) {
-        if (this.iconType === 'font') {
-          this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
-          this.$muteButton.find('span.able-clipped').text(this.tt.mute);
-        }
-        else { 
-          this.$muteButton.find('img').attr('src',this.volumeLoudButtonImg); 
-        }
-      }
-      else {
-        if (this.iconType === 'font') {
-          this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
-          this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
-        }
-        else { 
-          this.$muteButton.find('img').attr('src',this.volumeMuteButtonImg); 
-        }
-      }
-    }
-
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
         this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
@@ -721,52 +606,6 @@
     }
     else {
       this.seekTo(targetTime);
-    }
-  };
-
-  AblePlayer.prototype.handleMute = function() { 
-    if (this.isMuted()) {
-      this.setMute(false);
-    }
-    else {
-      this.setMute(true);
-    }
-  };
-
-  AblePlayer.prototype.handleVolume = function(direction) {
-    var volume;
-    
-    if (this.isMuted()) {
-      this.setMute(false);
-    }
-    
-    volume = this.getVolume();
-    
-    if (direction === 'up') {
-      if (volume < 0.9) {        
-        volume = Math.round((volume + 0.1) * 10) / 10;
-      }
-      else {
-        volume = 1;
-      }
-    }
-    else if (direction === 'down') {
-      if (volume > 0.1) {        
-        volume = Math.round((volume - 0.1) * 10) / 10;
-      }
-      else {
-        volume = 0;
-      }
-    }
-    else if (direction >= 49 || direction <= 53) { 
-      // TODO: What is this for?
-      volume = (direction-48) * 0.2;
-    }
-    
-    this.setVolume(volume);
-    
-    if (volume === 0) {
-      this.setMute(true);
     }
   };
 

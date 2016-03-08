@@ -418,7 +418,12 @@
     if (this.$windowPopup && this.$windowPopup.is(':visible')) {
       this.$windowPopup.hide();
       this.$windowButton.show().focus();
-    }    
+    }   
+    if (this.$volumeSlider && this.$volumeSlider.is(':visible')) { 
+      this.$volumeSlider.hide().attr('aria-hidden','true');
+      this.$volumeAlert.text(this.tt.volumeSliderClosed);
+      this.$volumeButton.focus();
+    } 
   };
 
   // Create and fill in the popup menu forms for various controls.
@@ -707,41 +712,55 @@
       controlLayout['ur'].push('seek');
       controlLayout['ur'].push('forward');
     }
+
+    if (this.isPlaybackRateSupported()) {
+      controlLayout['ur'].push('slower'); 
+      controlLayout['ur'].push('faster');
+    }    
+
+    // test for browser support for volume before displaying volume button
+    if (this.browserSupportsVolume()) { 
+      // volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
+      // previously supported button were: 'volume-up','volume-down'
+      this.volumeButton = 'volume-' + this.getVolumeName(this.volume);  
+      controlLayout['ur'].push('volume');
+    }
+    else { 
+      this.volume = false; 
+    }
     
     // Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
     var bll = [];
-    // test for browser support for volume before displaying volume-related buttons 
-    if (this.browserSupportsVolume()) { 
-      bll.push('mute');
-      bll.push('volume-up');
-      bll.push('volume-down');
-    }
     var blr = [];
+
     if (this.mediaType === 'video') { 
       if (this.hasCaptions) {
-        blr.push('captions'); //closed captions
+        bll.push('captions'); //closed captions
       }
       if (this.hasSignLanguage) { 
-        blr.push('sign'); // sign language
+        bll.push('sign'); // sign language
       }
       if (this.hasOpenDesc || this.hasClosedDesc) { 
-        blr.push('descriptions'); //audio description 
+        bll.push('descriptions'); //audio description 
       }
     }
 
     if (this.includeTranscript && this.useTranscriptButton) {
-      blr.push('transcript');
-    }
-
-    if (this.isPlaybackRateSupported()) {
-      blr.push('slower'); 
-      blr.push('faster');
+      bll.push('transcript');
     }
 
     if (this.mediaType === 'video' && this.hasChapters) {
-      blr.push('chapters');
+      bll.push('chapters');
     }
 
+    controlLayout['br'].push('preferences');
+    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
+    // controlLayout['br'].push('help');
+
+    // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
+    if (this.mediaType === 'video' && this.player !== 'jw') {
+      controlLayout['br'].push('fullscreen');
+    }
 
     // Include the pipe only if we need to.
     if (bll.length > 0 && blr.length > 0) {
@@ -753,15 +772,6 @@
       controlLayout['bl'] = bll.concat(blr);
     }
         
-    controlLayout['br'].push('preferences');
-    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
-    // controlLayout['br'].push('help');
-
-    // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
-    if (this.mediaType === 'video' && this.player !== 'jw') {
-      controlLayout['br'].push('fullscreen');
-    }
-
     return controlLayout;
   };
 
@@ -774,10 +784,10 @@
     // some controls are aligned on the left, and others on the right 
   
     var useSpeedButtons, useFullScreen, 
-    i, j, controls, controllerSpan, tooltipId, tooltipDiv, tooltipX, tooltipY, control, 
+    i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control, 
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle, 
-    controllerStyles, vidcapStyles, captionLabel;  
+    controllerStyles, vidcapStyles, captionLabel, popupMenuId;  
     
     var thisObj = this;
     
@@ -790,11 +800,11 @@
 
     // add an empty div to serve as a tooltip
     tooltipId = this.mediaId + '-tooltip';
-    tooltipDiv = $('<div>',{
+    this.$tooltipDiv = $('<div>',{
       'id': tooltipId,
       'class': 'able-tooltip' 
     });
-    this.$controllerDiv.append(tooltipDiv);
+    this.$controllerDiv.append(this.$tooltipDiv);
     
     // step separately through left and right controls
     for (i = 0; i <= 3; i++) {
@@ -839,8 +849,8 @@
         }
         else {        
           // this control is a button 
-          if (control === 'mute') { 
-            buttonImgSrc = '../images/' + this.iconColor + '/volume-mute.png';
+          if (control === 'volume') {             
+            buttonImgSrc = '../images/' + this.iconColor + '/' + this.volumeButton + '.png';
           }
           else if (control === 'fullscreen') { 
             buttonImgSrc = '../images/' + this.iconColor + '/fullscreen-expand.png';            
@@ -864,9 +874,27 @@
             'tabindex': '0',
             'aria-label': buttonTitle,
             'class': 'able-button-handler-' + control
-          });        
+          });
+          if (control === 'volume' || control === 'preferences') { 
+            // This same ARIA for captions and chapters are added elsewhere 
+            if (control == 'preferences') {
+              popupMenuId = this.mediaId + '-prefs-menu';
+            }
+            else if (control === 'volume') { 
+              popupMenuId = this.mediaId + '-volume-slider';
+            }
+            newButton.attr({
+//              'aria-haspopup': 'true', 
+              'aria-controls': popupMenuId              
+            });            
+          }      
           if (this.iconType === 'font') {
-            iconClass = 'icon-' + control; 
+            if (control === 'volume') {
+              iconClass = 'icon-' + this.volumeButton;
+            }
+            else { 
+              iconClass = 'icon-' + control;             
+            }
             buttonIcon = $('<span>',{ 
               'class': iconClass,
               'aria-hidden': 'true'
@@ -964,6 +992,7 @@
           }
           
           controllerSpan.append(newButton);
+          
           // create variables of buttons that are referenced throughout the AblePlayer object 
           if (control === 'play') { 
             this.$playpauseButton = newButton;
@@ -997,13 +1026,20 @@
           else if (control === 'preferences') {
             this.$prefsButton = newButton;
           }
+          else if (control === 'volume') { 
+            this.$volumeButton = newButton; 
+          }
         }
-      }
+        if (control === 'volume') { 
+          // in addition to the volume button, add a hidden slider
+          this.addVolumeSlider(controllerSpan);
+        }
+      }      
       if ((i % 2) == 1) {
         this.$controllerDiv.append('<div style="clear:both;"></div>');
       }
     }
-  
+    
     if (this.mediaType === 'video') { 
       // As of v 2.3.4, no longer adding width and height on this.$vidCapContainer 
       // CAN'T constrain the height if this.prefCaptionsPosition === 'below' 
@@ -1036,7 +1072,7 @@
     // Update state-based display of controls.
     this.refreshControls();
   };
-
+  
   // Change media player source file, for instance when moving to the next element in a playlist.
   // TODO: Add some sort of playlist support for tracks?
   AblePlayer.prototype.swapSource = function(sourceIndex) { 
@@ -1208,19 +1244,8 @@
     else if (control === 'sign') { 
       return this.tt.sign;
     }
-    else if (control === 'mute') { 
-      if (this.getVolume() > 0) { 
-        return this.tt.mute;
-      }
-      else { 
-        return this.tt.unmute;
-      }
-    }
-    else if (control === 'volume-up') { 
-      return this.tt.volumeUp;
-    }   
-    else if (control === 'volume-down') { 
-      return this.tt.volumeDown;
+    else if (control === 'volume') { 
+      return this.tt.volume;
     }
     else if (control === 'faster') {
       return this.tt.faster;

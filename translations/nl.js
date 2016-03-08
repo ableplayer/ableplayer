@@ -48,9 +48,11 @@ var nl = {
 
 "volume": "Volume", 
 
-"volumeUp": "Volume hoger",
+"volumeHelp": "Click to access volume slider",
 
-"volumeDown": "Volume lager",
+"volumeUpDown": "Volume hoger lager",
+
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Voorkeuren",
 

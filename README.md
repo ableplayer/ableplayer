@@ -193,7 +193,7 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 -   **data-debug** - optional; if present will write messages to the developer console   
--   **data-volume** - optional; set the default volume (0 to 1; default is 0.5 to avoid overpowering screen reader audio)
+-   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
 -   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
 -   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
@@ -469,14 +469,13 @@ player from anywhere on the web page, as follows:
 
 -   **p or spacebar** = Play/Pause
 -   **s** = Stop
--   **r** = Rewind 10 seconds
--   **f** = Forward10 seconds
--   **c** = Toggle captions
--   **m** = Mute
--   **u or 1-5** = Volume Up
--   **d or 1-5** = Volume Down
--   **t** = Settings
--   **h** = Help
+-   **r** = Rewind 
+-   **f** = Forward 
+-   **c** = Captions 
+-   **d** = Description
+-   **m** = Mute on/off
+-   **v or 1-9** = Volume
+-   **e** = Preferences
 
 Note that modifier keys (Alt, Control, and Shift) can be assigned by clicking
 the Preferences button on the player. If users find that shortcut keys

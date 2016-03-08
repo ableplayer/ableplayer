@@ -48,9 +48,11 @@ var es = {
 
 "volume": "Volumen", 
 
-"volumeUp": "Subir volumen",
+"volumeHelp": "Click to access volume slider",
 
-"volumeDown": "Bajar volumen",
+"volumeUpDown": "Volume up down",
+
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Preferencias",
 
