@@ -2,7 +2,7 @@ Able Player
 ==========
 
 *Able Player* is a fully accessible cross-browser media player. It uses
-the HTML5 \<audio\> or \<video\> element for browsers that support them,
+the HTML5 `<audio>` or `<video>` element for browsers that support them,
 and (optionally) the JW Player as a fallback for those that don’t.
 
 To see the player in action check our [Able Player Examples][examples] page.
@@ -33,7 +33,7 @@ Contributing
 There are many ways to contribute to Able Player, and we welcome and appreciate your help! Here are some options: 
 
 - If you spot bugs are have feature requests, please submit them to the [Issues][issues] queue. 
-- If you have code to contribute, please note that all development occurs on the [develop branch][develop]. This is often many commits ahead of the master branch, so please do all development from *develop*, and submit pull requests there. 
+- If you have code to contribute, please note that all development occurs on the [develop branch][develop]. This is often many commits ahead of the master branch, so please do all development from *develop*, and submit pull requests there. We particularly appreciate help with any issues in the Issues queue that have been flagged with "help wanted".
 - If you are multilingual, please consider translating Able Player into another language! All labels, prompts, messages, and help text for each language are contained within a single file, contained within the */translations* directory.        
 
 Compatibility
@@ -142,7 +142,7 @@ to all use cases, both audio and video.
 Setup Step 3: Add HTML
 ----------------------
 
-Add an HTML5 \<audio\> or \<video\> element to your web page, as
+Add an HTML5 `<audio>` or `<video>` element to your web page, as
 follows.
 
 ### Audio
@@ -178,53 +178,90 @@ MP4.
 
 ### Supported Attributes 
 
-The following attributes are supported on both the \<audio\> and \<video\> elements:
+The following attributes are supported on both the `<audio>` and `<video>` elements:
+
+#### Required Attributes 
 
 -   **id** - required; any unique ID
--   **data-able-player** - required 
--   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
--   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **data-able-player** - required
+
+#### Optional; General-Purpose
+  
+-   **data-debug** - optional; if present will write messages to the developer console   
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
+-   **preload** - optional; tells the browser how much media to download
+    when the page loads. If the media is the central focus of the web
+    page, use **preload="auto"**, which instructs the browser to
+    download as much of the media as possible. If the media is not a
+    central focus, downloading the entire media resource can consume
+    valuable bandwidth, so preload="metadata" would be a better option.
+-   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
+-   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
+-   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
+-   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
+-   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
+
+#### Language 
+
+-   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
+-   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
+
+#### Transcript
+
 -   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
     The transcript is generated automatically if captions and/or descriptions are available. 
     If this attribute is not provided the transcript will be displayed in its default container  
     adjacent to the player.  
 -   **data-use-transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container (e.g., on a dedicated transcript page), you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
+-   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
+
+#### Chapters
+
 -   **data-chapters-div** - optional; id of an external div in which to display a list of chapters. 
     The list of chapters is generated automatically if a chapters track is available in a WebVTT file.
     If this attribute is not provided and chapter are available, chapters will be displayed in a popup menu triggered by the Chapters button. 
 -   **data-use-chapters-button** - optional; set to "false" to exclude chapters button from controller. If using the data-chapters-div attribute to write the chapters to an external container, you might not want users to be able to toggle the chapters off. 
 -   **data-chapters-title** - optional; override default chapters title (default is "Chapters"). A null value (data-chapters-title="") eliminates the title altogether.  
 -   **data-chapters-default** - optional; identify ID of default chapter (must correspond with the text or value immediately above the timestamp in your chapter's WebVTT file. If this attribute is present, the media will be advanced to this start time. Otherwise it will start at the beginning. (See also **data-start-time**).
--   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
--   **data-debug** - optional; if present will write messages to the developer console   
--   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
--   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
--   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
--   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
--   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
--   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
--   **data-fallback-path** - optional; override default path to directory in which the fallback player files or stored   
--   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
--   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
--   **preload** - optional; tells the browser how much media to download
-    when the page loads. If the media is the central focus of the web
-    page, use **preload=“auto”**, which instructs the browser to
-    download as much of the media as possible. If the media is not a
-    central focus, downloading the entire media resource can consume
-    valuable bandwidth, so preload=“metadata” would be a better option.
+
+#### Metadata
+
+Metadata is added using the `<track>` element with kind="metadata".
+It must be in Web Video Text Tracks format ([WebVTT][]). 
+Able Player supports two types of metadata: 
+
+1. "text" - The WebVTT file contains text, intended to be written to an external container at the designated times. You must provide the external container; Able Player does not generate that automatically. 
+
+2. "selector" - The WebVTT file contains jQuery selectors which target hidden content that is already present on the web page. At the designated times, the hidden content referenced by the jQuery selectors is made visible. 
+
+The following attributes make all this possible: 
+
+-   **data-meta-type** - required for metadata; indicates the type of metadata contained within a metadata track. Supported values as described above are "text" and "selector".
+-   **data-meta-div** - required for "text" metadata; id of an external div in which to display the text. 
+ 
+#### Search 
+
 -   **data-search** - optional; search terms to search for within the caption tracks, separated by a space  
 -   **data-search-div** - optional; id of external container in which to display search results
 
-The following attributes are supported on the \<video\> element only:
+
+#### Fallback Player
+
+-   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
+-   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
+-   **data-fallback-path** - optional; override default path to directory in which the fallback player files or stored   
+
+
+The following attributes are supported on the `<video>` element only:
     
+-   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
+-   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information. 
 -   **height** - height of the video in pixels. If not provided will
     default to 360.
 -   **poster** - path to an image file. Will be displayed in the player
     until the video is played.
--   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
--   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information. 
 
 The following additional features are supported by *Able Player*:
 
@@ -236,9 +273,9 @@ MP4. Browsers will play the first media source that they support.
 
 #### Closed Captions
 
-Captions are added using the \<track\> element with kind=“captions”.
-Captions must be in Web Video Text Tracks format ([WebVTT][]). WebVTT
-tags within captions are currently ignored. 
+Captions are added using the `<track>` element with kind="captions".
+Captions must be in Web Video Text Tracks format ([WebVTT][]). 
+WebVTT tags within captions are currently ignored. 
 
 **NOTE:** Able Player only supports valid WebVTT files. Be sure to 
 validate your WebVTT using a [WebVTT Validator][]. 
@@ -251,11 +288,11 @@ If captions are provided, a CC button will be added to the
 Supplemental description of key visual content for blind users can be
 added using one of two methods.
 
-The first method is the same as closed captions, a \<track\> element, with
-kind=“descriptions”. This points to a WebVTT file, which is essentially
+The first method is the same as closed captions, a `<track>` element, with
+kind="descriptions". This points to a WebVTT file, which is essentially
 the same as a closed caption file, but its contents are description text
 rather than captions. With this method, description text is written to a
-container that has ARIA role=“alert”. Supporting screen readers
+container that has ARIA role="alert". Supporting screen readers
 automatically announce the new text as soon as it is written to the
 page.
 
@@ -263,16 +300,16 @@ The second method is to produce a separate video with description mixed
 in. If multiple video sources are already provided (e.g., an MP4 and
 WebM file), then the described version must be available in both of
 these formats. For each video source that has a described version
-available, add a **data-desc-src** attribute to the \<source\> element for
+available, add a **data-desc-src** attribute to the `<source>` element for
 that video. The value of this attribute is a path pointing to the
 described version of the video. With this method, the described version
 of the video can be played instead of the non-described version, and the
-two versions can be swapped with clicking the “D” button on the
+two versions can be swapped with clicking the "D" button on the
 controller.
 
 If descriptions are available using either of the above methods, a
 Description toggle button appears on the controller (represented by the
-universal Description symbol, the letter “D”). How descriptions are
+universal Description symbol, the letter "D"). How descriptions are
 ultimately delivered depends on which of the above methods is used, and
 on user preference. If a user prefers text-based description announced
 by their screen reader, that’s what they’ll get. If they prefer an
@@ -292,7 +329,7 @@ interpreter are available from [Signing Books for the Deaf][]:
 If multiple video sources are already provided (e.g., an MP4 and
 WebM file), then the sign language video must be available in both of
 these formats. For each video source that has a sign language version
-available, add a **data-sign-src** attribute to the \<source\> element for
+available, add a **data-sign-src** attribute to the `<source>` element for
 that video. The value of this attribute is a path pointing to the
 sign language version of the video. If a sign language version is available, 
 a sign language button will be added to the media controller. 
@@ -320,7 +357,7 @@ Playlists
 ---------
 
 An *Able Player* playlist is an HTML list of tracks. The list can be
-either ordered (\<ol\>) or unordered (\<ul\>). The following attributes
+either ordered (`<ol>`) or unordered (`<ul>`). The following attributes
 are supported on the list element:
 
 -   **class** - required; must be **able-playlist**
@@ -357,8 +394,8 @@ and OGG:
 -   webm or webmv
 -   ogg or ogv
 
-When a playlist is included on a page, the \<source\> elements within
-the \<audio\> or \<video\> tags are optional. If they are provided, they
+When a playlist is included on a page, the `<source>` elements within
+the `<audio>` or `<video>` tags are optional. If they are provided, they
 should match the first item in the playlist.
 
 If your web page includes a playlist, you should also link to the
