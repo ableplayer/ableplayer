@@ -597,5 +597,5 @@ Files created by the build process are put into the */build* directory:
   [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
   [WebVTT validator]: https://quuz.org/webvtt/
   [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
-  [WebVTT]: http://dev.w3.org/html5/webvtt/
+  [WebVTT]: https://w3c.github.io/webvtt/
 
