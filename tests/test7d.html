@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Test #7c</title>
+<title>Able Player Test #7d</title>
 <link rel="stylesheet" href="tests.css" type="text/css">
 
 <!-- Dependencies --> 
@@ -33,16 +33,19 @@
 
 <body>
 
-<h1>Able Player Test #7d:<br/>Audio player with Metadata Track</h1>
+<h1>Able Player Test #7d:<br/>Audio player with Metadata Track (type = text)</h1>
 
-<p>The meta data is provided in a WebVTT file with kind="metadata". 
-  A <strong>data-meta-div</strong> attribute provides the ID of an external container in which to write the metadata content.
+<p>Time-synced metadata is provided in a WebVTT file with kind="metadata". 
+  A <strong>data-meta-type</strong> attribute has value "text", which is one of two types of supported metadata tracks 
+  (the other is "selector"). With "text" as the metadata type, the text contained in the WebVTT file is displayed in an 
+  external container at the designated times during playback. The ID of the external container is provided in a 
+  <strong>data-meta-div</strong> attribute.
 </p>
 
 <p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
-<audio id="audio1" class="ump-media" preload="auto" data-able-player data-lyrics-mode data-transcript-title="Sing along!" data-meta-div="meta">
+<audio id="audio1" class="ump-media" preload="auto" data-able-player data-meta-type="text" data-meta-div="meta">
   <source type="audio/ogg" src="../media/paulallen.ogg"/>
   <source type="audio/mpeg" src="../media/paulallen.mp3"/>
   <track kind="metadata" src="../media/paulallen_meta.vtt"/>

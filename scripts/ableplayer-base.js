@@ -197,6 +197,10 @@
       this.forceLang = true; 
     }    
     
+    if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") { 
+      this.metaType = $(media).data('meta-type'); 
+    }    
+
     if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") { 
       this.metaDiv = $(media).data('meta-div'); 
     }

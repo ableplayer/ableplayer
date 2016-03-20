@@ -223,17 +223,24 @@
   };    
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
-    // NOTE: Metadata is currently only supported if data-meta-div is provided 
-    // The player does not display metadata internally 
-    if (this.metaDiv) {
-      if ($('#' + this.metaDiv)) { 
-        // container exists 
-        this.$metaDiv = $('#' + this.metaDiv); 
-        this.hasMeta = true;
+    if (this.metaType === 'text') {
+      // Metadata is only supported if data-meta-div is provided 
+      // The player does not display metadata internally 
+      if (this.metaDiv) {
+        if ($('#' + this.metaDiv)) { 
+          // container exists 
+          this.$metaDiv = $('#' + this.metaDiv); 
+          this.hasMeta = true;
+          this.meta = cues;
+        }
       }
     }
-    this.meta = cues;
-  }
+    else if (this.metaType === 'selector') { 
+      this.hasMeta = true;  
+      this.visibleSelectors = []; 
+      this.meta = cues;
+    }
+  };
       
   AblePlayer.prototype.loadTextObject = function(src) {
     
