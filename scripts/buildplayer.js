@@ -776,11 +776,6 @@
       controlLayout['ur'].push('forward');
     }
 
-    if (this.isPlaybackRateSupported()) {
-      controlLayout['ur'].push('slower'); 
-      controlLayout['ur'].push('faster');
-    }    
-
     // test for browser support for volume before displaying volume button
     if (this.browserSupportsVolume()) { 
       // volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
@@ -795,6 +790,11 @@
     // Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
     var bll = [];
     var blr = [];
+
+    if (this.isPlaybackRateSupported()) {
+      bll.push('slower'); 
+      bll.push('faster');
+    }    
 
     if (this.mediaType === 'video') { 
       if (this.hasCaptions) {
