@@ -634,6 +634,53 @@ span.able-modkey {
 }
 
 /* 
+  External chapters div  
+*/
+div.able-chapters-div { 
+  padding: 0;   
+}
+div.able-chapters-div .able-chapters-heading { 
+  margin: 1em 0.75em;
+  font-size: 1.1em;
+  font-weight: bold;   
+}
+div.able-chapters-div ul { 
+  list-style-type: none; 
+  padding-left: 0; 
+}
+div.able-chapters-div ul li { 
+  max-width: 100%;
+  padding: 0; 
+  height: 2em;
+}
+div.able-chapters-div button { 
+  width: 100%; 
+  height: 100%;
+  border: none;
+  background-color: transparent;
+  color: #000; 
+  font-size: 1em;
+  text-align: left;
+  padding: 0.15em 1em;
+}
+div.able-chapters-div li.able-current-chapter { 
+  background-color: #000 !important; 
+}
+div.able-chapters-div li.able-current-chapter button { 
+  color: #FFF !important;
+}
+div.able-chapters-div li.able-focus { 
+  background-color: #4C4C4C;
+}
+div.able-chapters-div button:focus, 
+div.able-chapters-div button:hover, 
+div.able-chapters-div button::-moz-focus-inner {
+  border: 0;
+  outline: none;
+  color: #FFF !important; 
+}
+
+/* 
   icomoon.io font styling 
 */
 

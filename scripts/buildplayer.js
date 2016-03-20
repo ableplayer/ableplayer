@@ -54,48 +54,22 @@
     if (this.includeTranscript) {
       this.injectTranscriptArea();
       this.addTranscriptAreaEvents();
-    }    
-
+    }
     this.injectAlert();
     this.injectPlaylist();
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
     // Add offscreen heading to the media container.
-    // To fine the nearest heading in the ancestor tree, 
-    // loop over each parent of $ableDiv until a heading is found 
-    // If multiple headings are found beneath a given parent, get the closest
-    // The heading injected in $ableDiv is one level deeper than the closest heading 
-    var headingType; 
-    
-    var $parents = this.$ableDiv.parents();
-    $parents.each(function(){
-      var $this = $(this); 
-      var $thisHeadings = $this.find('h1, h2, h3, h4, h5, h6'); 
-      var numHeadings = $thisHeadings.length;
-      if(numHeadings){
-        headingType = $thisHeadings.eq(numHeadings-1).prop('tagName');
-        return false;
-      }
-    });
-    if (typeof headingType === 'undefined') { 
-      var headingType = 'h1';
-    }
-    else { 
-      // Increment closest heading by one if less than 6.
-      var headingNumber = parseInt(headingType[1]);
-      headingNumber += 1;
-      if (headingNumber > 6) {
-        headingNumber = 6;
-      }
-      headingType = 'h' + headingNumber.toString();
-    }
-    this.playerHeadingLevel = headingNumber;
+    // The heading injected in $ableDiv is one level deeper than the closest parent heading 
+    // as determined by getNextHeadingLevel()
+    var headingType;     
+    this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
+    headingType = 'h' + this.playerHeadingLevel.toString();
     this.$headingDiv = $('<' + headingType + '>'); 
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
-    this.$headingDiv.text(this.tt.playerHeading); 
-    
+    this.$headingDiv.text(this.tt.playerHeading);     
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
@@ -227,6 +201,96 @@
     }
   };
 
+  AblePlayer.prototype.populateChaptersDiv = function() { 
+  
+    var thisObj, headingLevel, headingType, headingId, $chaptersHeading, 
+      $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
+      i, itemId, chapter, buttonId, hasDefault, 
+      getFocusFunction, getHoverFunction, getBlurFunction, getClickFunction, 
+      $thisButton, $thisListItem, $prevButton, $nextButton, blurListener; 
+    
+    thisObj = this; 
+    
+    if ($('#' + this.chaptersDivLocation)) { 
+      this.$chaptersDiv = $('#' + this.chaptersDivLocation); 
+      this.$chaptersDiv.addClass('able-chapters-div');
+      
+      // add optional header 
+      if (this.chaptersTitle) { 
+        headingLevel = this.getNextHeadingLevel(this.$chaptersDiv);
+        headingType = 'h' + headingLevel.toString();
+        headingId = this.mediaId + '-chapters-heading';
+        $chaptersHeading = $('<' + headingType + '>', { 
+          'class': 'able-chapters-heading',
+          'id': headingId
+        }).text(this.chaptersTitle);
+        this.$chaptersDiv.append($chaptersHeading);
+      }
+
+      $chaptersNav = $('<nav>');
+      if (this.chaptersTitle) { 
+        $chaptersNav.attr('aria-labeledby',headingId); 
+      }
+      else { 
+        $chaptersNav.attr('aria-label',this.tt.chapters); 
+      }
+
+      $chaptersList = $('<ul>');
+      for (i in this.chapters) {
+        chapter = this.chapters[i]; 
+        itemId = this.mediaId + '-chapters-' + i; // TODO: Maybe not needed??? 
+        $chapterItem = $('<li></li>');
+        $chapterButton = $('<button>',{ 
+          'type': 'button',
+          'val': i
+        }).text(this.flattenCueForCaption(chapter)); 
+        
+        // add event listeners
+        getClickFunction = function (time) {
+          return function () {
+            $(this).closest('ul').find('li')
+              .removeClass('able-current-chapter')
+              .attr('aria-selected','');
+            $(this).closest('li')
+              .addClass('able-current-chapter')
+              .attr('aria-selected','true');
+            thisObj.seekTo(time);
+          }
+        };
+        $chapterButton.on('click',getClickFunction(chapter.start)); // works with Enter too
+        $chapterButton.on('focus',function() { 
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).closest('li').addClass('able-focus');
+        }); 
+        $chapterItem.on('hover',function() { 
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).addClass('able-focus');
+        });         
+        $chapterItem.on('mouseleave',function() { 
+          $(this).removeClass('able-focus');           
+        }); 
+        $chapterButton.on('blur',function() { 
+          $(this).closest('li').removeClass('able-focus');           
+        }); 
+
+        // put it all together 
+        $chapterItem.append($chapterButton);
+        $chaptersList.append($chapterItem);        
+        if (this.defaultChapter == chapter.id) {    
+          $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');        
+          hasDefault = true;
+        }          
+      }
+    }
+    if (!hasDefault) { 
+      // select the first button 
+      $chaptersList.find('button').first().attr('aria-selected','true')
+        .parent('li').addClass('able-current-chapter');
+    }
+    $chaptersNav.append($chaptersList);
+    this.$chaptersDiv.append($chaptersNav);
+  }; 
+  
   AblePlayer.prototype.splitPlayerIntoColumns = function (feature) { 
     // feature is either 'transcript' or 'sign' 
     // if present, player is split into two column, with this feature in the right column
@@ -428,7 +492,6 @@
 
   // Create and fill in the popup menu forms for various controls.
   AblePlayer.prototype.setupPopups = function () {
-
     var popups, thisObj, hasDefault, i, j, 
         tracks, trackList, trackItem, track,  
         radioName, radioId, trackButton, trackLabel, 
@@ -450,7 +513,7 @@
       if (this.captions.length > 0) { 
         popups.push('captions');
       }            
-      if (this.chapters.length > 0) { 
+      if (this.chapters.length > 0 && this.useChaptersButton) { 
         popups.push('chapters');
       }
     }
@@ -749,7 +812,7 @@
       bll.push('transcript');
     }
 
-    if (this.mediaType === 'video' && this.hasChapters) {
+    if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
       bll.push('chapters');
     }
 

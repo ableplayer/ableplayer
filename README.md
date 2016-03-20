@@ -191,6 +191,12 @@ The following attributes are supported on both the \<audio\> and \<video\> eleme
     adjacent to the player.  
 -   **data-use-transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container (e.g., on a dedicated transcript page), you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
+-   **data-chapters-div** - optional; id of an external div in which to display a list of chapters. 
+    The list of chapters is generated automatically if a chapters track is available in a WebVTT file.
+    If this attribute is not provided and chapter are available, chapters will be displayed in a popup menu triggered by the Chapters button. 
+-   **data-use-chapters-button** - optional; set to "false" to exclude chapters button from controller. If using the data-chapters-div attribute to write the chapters to an external container, you might not want users to be able to toggle the chapters off. 
+-   **data-chapters-title** - optional; override default chapters title (default is "Chapters"). A null value (data-chapters-title="") eliminates the title altogether.  
+-   **data-chapters-default** - optional; identify ID of default chapter (must correspond with the text or value immediately above the timestamp in your chapter's WebVTT file. If this attribute is present, the media will be advanced to this start time. Otherwise it will start at the beginning. (See also **data-start-time**).
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 -   **data-debug** - optional; if present will write messages to the developer console   
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)

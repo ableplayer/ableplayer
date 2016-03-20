@@ -94,6 +94,12 @@
     // it might be desirable for the transcript to always be ON, with no toggle 
     // This can be overridden with data-transcript-button="false" 
     this.useTranscriptButton = true; 
+
+    // useChaptersButton - on by default if there's a track with kind="chapters"
+    // However, if chapters is written to an external div via data-chapters-div 
+    // it might be desirable for the chapters to always be ON, with no toggle 
+    // This can be overridden with data-chapters-button="false" 
+    this.useChaptersButton = true; 
     
     this.playing = false; // will change to true after 'playing' event is triggered
 
@@ -342,6 +348,9 @@
         thisObj.updateCaption();
         thisObj.updateTranscript(); 
         thisObj.showSearchResults();      
+        if (thisObj.defaultChapter) { 
+          thisObj.seekToDefaultChapter(); 
+        }        
       });
     });
   };

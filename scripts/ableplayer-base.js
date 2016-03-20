@@ -115,9 +115,22 @@
       this.lyricsMode = true; 
     }
 
-    if ($(media).data('transcript-title') !== undefined) { 
+    if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") { 
+      this.chaptersDivLocation = $(media).data('chapters-div'); 
+    }
+
+    if ($(media).data('chapters-title') !== undefined) { 
       // NOTE: empty string is valid; results in no title being displayed  
-      this.transcriptTitle = $(media).data('transcript-title'); 
+      this.chaptersTitle = $(media).data('chapters-title'); 
+    }
+
+    if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") { 
+      this.defaultChapter = $(media).data('chapters-default'); 
+      this.chapter = this.defaultChapter; // this.chapter is the id of the default chapter (as defined within WebVTT file)
+    }
+
+    if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) { 
+      this.useChaptersButton = false; 
     }
 
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 

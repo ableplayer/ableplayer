@@ -1,4 +1,38 @@
 (function ($) {
+
+  AblePlayer.prototype.getNextHeadingLevel = function($element) { 
+  
+    // Finds the nearest heading in the ancestor tree 
+    // Loops over each parent of the current element until a heading is found 
+    // If multiple headings are found beneath a given parent, get the closest
+    // Returns an integer (1-6) representing the next available heading level 
+
+    var $parents, $foundHeadings, numHeadings, headingType, headingNumber; 
+    
+    $parents = $element.parents();
+    $parents.each(function(){
+      $foundHeadings = $(this).find('h1, h2, h3, h4, h5, h6'); 
+      numHeadings = $foundHeadings.length;
+      if (numHeadings) {
+        headingType = $foundHeadings.eq(numHeadings-1).prop('tagName');
+        return false;
+      }
+    });
+    if (typeof headingType === 'undefined') { 
+      // page has no headings 
+      headingNumber = 1;
+    }
+    else { 
+      // Increment closest heading by one if less than 6.
+      headingNumber = parseInt(headingType[1]);
+      headingNumber += 1;
+      if (headingNumber > 6) {
+        headingNumber = 6;
+      }
+    }
+    return headingNumber; 
+  }; 
+
   AblePlayer.prototype.countProperties = function(obj) { 
     // returns the number of properties in an object 
     var count, prop; 

@@ -115,9 +115,22 @@
       this.lyricsMode = true; 
     }
 
-    if ($(media).data('transcript-title') !== undefined) { 
+    if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") { 
+      this.chaptersDivLocation = $(media).data('chapters-div'); 
+    }
+
+    if ($(media).data('chapters-title') !== undefined) { 
       // NOTE: empty string is valid; results in no title being displayed  
-      this.transcriptTitle = $(media).data('transcript-title'); 
+      this.chaptersTitle = $(media).data('chapters-title'); 
+    }
+
+    if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") { 
+      this.defaultChapter = $(media).data('chapters-default'); 
+      this.chapter = this.defaultChapter; // this.chapter is the id of the default chapter (as defined within WebVTT file)
+    }
+
+    if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) { 
+      this.useChaptersButton = false; 
     }
 
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") { 
@@ -348,6 +361,12 @@
     // it might be desirable for the transcript to always be ON, with no toggle 
     // This can be overridden with data-transcript-button="false" 
     this.useTranscriptButton = true; 
+
+    // useChaptersButton - on by default if there's a track with kind="chapters"
+    // However, if chapters is written to an external div via data-chapters-div 
+    // it might be desirable for the chapters to always be ON, with no toggle 
+    // This can be overridden with data-chapters-button="false" 
+    this.useChaptersButton = true; 
     
     this.playing = false; // will change to true after 'playing' event is triggered
 
@@ -596,6 +615,9 @@
         thisObj.updateCaption();
         thisObj.updateTranscript(); 
         thisObj.showSearchResults();      
+        if (thisObj.defaultChapter) { 
+          thisObj.seekToDefaultChapter(); 
+        }        
       });
     });
   };
@@ -1736,6 +1758,7 @@
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(srcFile,text) { 
+    
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
 
@@ -1933,6 +1956,7 @@
   }
 
   function parseCue(state) {
+    
     var nextLine = peekLine(state);
     var cueId;
     var errString;
@@ -1981,8 +2005,8 @@
       settings: cueSettings,
       components: components
     });
-}
-
+  }
+  
   function getCueSettings(state) {
     var cueSettings = {};
     while (state.text.length > 0 && state.text[0] !== '\n') {
@@ -1992,7 +2016,6 @@
     }
     return cueSettings;
   }
-
 
   function getCuePayload(state) {
     // Parser based on instructions in draft.
@@ -2544,48 +2567,22 @@
     if (this.includeTranscript) {
       this.injectTranscriptArea();
       this.addTranscriptAreaEvents();
-    }    
-
+    }
     this.injectAlert();
     this.injectPlaylist();
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
     // Add offscreen heading to the media container.
-    // To fine the nearest heading in the ancestor tree, 
-    // loop over each parent of $ableDiv until a heading is found 
-    // If multiple headings are found beneath a given parent, get the closest
-    // The heading injected in $ableDiv is one level deeper than the closest heading 
-    var headingType; 
-    
-    var $parents = this.$ableDiv.parents();
-    $parents.each(function(){
-      var $this = $(this); 
-      var $thisHeadings = $this.find('h1, h2, h3, h4, h5, h6'); 
-      var numHeadings = $thisHeadings.length;
-      if(numHeadings){
-        headingType = $thisHeadings.eq(numHeadings-1).prop('tagName');
-        return false;
-      }
-    });
-    if (typeof headingType === 'undefined') { 
-      var headingType = 'h1';
-    }
-    else { 
-      // Increment closest heading by one if less than 6.
-      var headingNumber = parseInt(headingType[1]);
-      headingNumber += 1;
-      if (headingNumber > 6) {
-        headingNumber = 6;
-      }
-      headingType = 'h' + headingNumber.toString();
-    }
-    this.playerHeadingLevel = headingNumber;
+    // The heading injected in $ableDiv is one level deeper than the closest parent heading 
+    // as determined by getNextHeadingLevel()
+    var headingType;     
+    this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
+    headingType = 'h' + this.playerHeadingLevel.toString();
     this.$headingDiv = $('<' + headingType + '>'); 
     this.$ableDiv.prepend(this.$headingDiv);
     this.$headingDiv.addClass('able-offscreen');
-    this.$headingDiv.text(this.tt.playerHeading); 
-    
+    this.$headingDiv.text(this.tt.playerHeading);     
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
@@ -2717,6 +2714,96 @@
     }
   };
 
+  AblePlayer.prototype.populateChaptersDiv = function() { 
+  
+    var thisObj, headingLevel, headingType, headingId, $chaptersHeading, 
+      $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
+      i, itemId, chapter, buttonId, hasDefault, 
+      getFocusFunction, getHoverFunction, getBlurFunction, getClickFunction, 
+      $thisButton, $thisListItem, $prevButton, $nextButton, blurListener; 
+    
+    thisObj = this; 
+    
+    if ($('#' + this.chaptersDivLocation)) { 
+      this.$chaptersDiv = $('#' + this.chaptersDivLocation); 
+      this.$chaptersDiv.addClass('able-chapters-div');
+      
+      // add optional header 
+      if (this.chaptersTitle) { 
+        headingLevel = this.getNextHeadingLevel(this.$chaptersDiv);
+        headingType = 'h' + headingLevel.toString();
+        headingId = this.mediaId + '-chapters-heading';
+        $chaptersHeading = $('<' + headingType + '>', { 
+          'class': 'able-chapters-heading',
+          'id': headingId
+        }).text(this.chaptersTitle);
+        this.$chaptersDiv.append($chaptersHeading);
+      }
+
+      $chaptersNav = $('<nav>');
+      if (this.chaptersTitle) { 
+        $chaptersNav.attr('aria-labeledby',headingId); 
+      }
+      else { 
+        $chaptersNav.attr('aria-label',this.tt.chapters); 
+      }
+
+      $chaptersList = $('<ul>');
+      for (i in this.chapters) {
+        chapter = this.chapters[i]; 
+        itemId = this.mediaId + '-chapters-' + i; // TODO: Maybe not needed??? 
+        $chapterItem = $('<li></li>');
+        $chapterButton = $('<button>',{ 
+          'type': 'button',
+          'val': i
+        }).text(this.flattenCueForCaption(chapter)); 
+        
+        // add event listeners
+        getClickFunction = function (time) {
+          return function () {
+            $(this).closest('ul').find('li')
+              .removeClass('able-current-chapter')
+              .attr('aria-selected','');
+            $(this).closest('li')
+              .addClass('able-current-chapter')
+              .attr('aria-selected','true');
+            thisObj.seekTo(time);
+          }
+        };
+        $chapterButton.on('click',getClickFunction(chapter.start)); // works with Enter too
+        $chapterButton.on('focus',function() { 
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).closest('li').addClass('able-focus');
+        }); 
+        $chapterItem.on('hover',function() { 
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).addClass('able-focus');
+        });         
+        $chapterItem.on('mouseleave',function() { 
+          $(this).removeClass('able-focus');           
+        }); 
+        $chapterButton.on('blur',function() { 
+          $(this).closest('li').removeClass('able-focus');           
+        }); 
+
+        // put it all together 
+        $chapterItem.append($chapterButton);
+        $chaptersList.append($chapterItem);        
+        if (this.defaultChapter == chapter.id) {    
+          $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');        
+          hasDefault = true;
+        }          
+      }
+    }
+    if (!hasDefault) { 
+      // select the first button 
+      $chaptersList.find('button').first().attr('aria-selected','true')
+        .parent('li').addClass('able-current-chapter');
+    }
+    $chaptersNav.append($chaptersList);
+    this.$chaptersDiv.append($chaptersNav);
+  }; 
+  
   AblePlayer.prototype.splitPlayerIntoColumns = function (feature) { 
     // feature is either 'transcript' or 'sign' 
     // if present, player is split into two column, with this feature in the right column
@@ -2918,7 +3005,6 @@
 
   // Create and fill in the popup menu forms for various controls.
   AblePlayer.prototype.setupPopups = function () {
-
     var popups, thisObj, hasDefault, i, j, 
         tracks, trackList, trackItem, track,  
         radioName, radioId, trackButton, trackLabel, 
@@ -2940,7 +3026,7 @@
       if (this.captions.length > 0) { 
         popups.push('captions');
       }            
-      if (this.chapters.length > 0) { 
+      if (this.chapters.length > 0 && this.useChaptersButton) { 
         popups.push('chapters');
       }
     }
@@ -3239,7 +3325,7 @@
       bll.push('transcript');
     }
 
-    if (this.mediaType === 'video' && this.hasChapters) {
+    if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
       bll.push('chapters');
     }
 
@@ -3966,9 +4052,26 @@
   AblePlayer.prototype.setupChapters = function (track, cues) {
     // NOTE: WebVTT supports nested timestamps (to form an outline) 
     // This is not currently supported.
+    var i=0; 
     this.hasChapters = true;
-    this.chapters = cues;
+    this.chapters = cues;    
+    if (this.chaptersDivLocation) { 
+      this.populateChaptersDiv();
+    }
   };
+
+  AblePlayer.prototype.seekToDefaultChapter = function() {
+    // this function is only called if this.defaultChapter is not null 
+    // step through chapters looking for default 
+    var i=0; 
+    while (i < this.chapters.length) { 
+      if (this.chapters[i].id === this.defaultChapter) { 
+        // found the default chapter! Seek to it 
+        this.seekTo(this.chapters[i].start); 
+      } 
+      i++; 
+    }
+  };    
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
     // NOTE: Metadata is currently only supported if data-meta-div is provided 
@@ -5277,6 +5380,40 @@
 })(jQuery);
 
 (function ($) {
+
+  AblePlayer.prototype.getNextHeadingLevel = function($element) { 
+  
+    // Finds the nearest heading in the ancestor tree 
+    // Loops over each parent of the current element until a heading is found 
+    // If multiple headings are found beneath a given parent, get the closest
+    // Returns an integer (1-6) representing the next available heading level 
+
+    var $parents, $foundHeadings, numHeadings, headingType, headingNumber; 
+    
+    $parents = $element.parents();
+    $parents.each(function(){
+      $foundHeadings = $(this).find('h1, h2, h3, h4, h5, h6'); 
+      numHeadings = $foundHeadings.length;
+      if (numHeadings) {
+        headingType = $foundHeadings.eq(numHeadings-1).prop('tagName');
+        return false;
+      }
+    });
+    if (typeof headingType === 'undefined') { 
+      // page has no headings 
+      headingNumber = 1;
+    }
+    else { 
+      // Increment closest heading by one if less than 6.
+      headingNumber = parseInt(headingType[1]);
+      headingNumber += 1;
+      if (headingNumber > 6) {
+        headingNumber = 6;
+      }
+    }
+    return headingNumber; 
+  }; 
+
   AblePlayer.prototype.countProperties = function(obj) { 
     // returns the number of properties in an object 
     var count, prop; 

@@ -1,6 +1,7 @@
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(srcFile,text) { 
+    
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
 
@@ -198,6 +199,7 @@
   }
 
   function parseCue(state) {
+    
     var nextLine = peekLine(state);
     var cueId;
     var errString;
@@ -246,8 +248,8 @@
       settings: cueSettings,
       components: components
     });
-}
-
+  }
+  
   function getCueSettings(state) {
     var cueSettings = {};
     while (state.text.length > 0 && state.text[0] !== '\n') {
@@ -257,7 +259,6 @@
     }
     return cueSettings;
   }
-
 
   function getCuePayload(state) {
     // Parser based on instructions in draft.
