@@ -2746,7 +2746,7 @@
 
       $chaptersNav = $('<nav>');
       if (this.chaptersTitle) { 
-        $chaptersNav.attr('aria-labeledby',headingId); 
+        $chaptersNav.attr('aria-labelledby',headingId); 
       }
       else { 
         $chaptersNav.attr('aria-label',this.tt.chapters); 
