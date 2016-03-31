@@ -1,36 +1,36 @@
-/* 
+/*
 	Able Player core styles
-	
-	z-index Map: 
+
+	z-index Map:
 	div.modalDialog = 6000
 	div.modalOverlay = 5000
 	.able-sign-window .able-button-handler-preferences = 4500
 	.able-sign-window = 4000
 	.able-alert = 3500
 	.able-slider = 3400
-  .able-popup = 3200 
+  .able-popup = 3200
   .able-tooltip = 3000
   .able-controller .able-seekbar = 1970
   .able-controller .buttonOff = 1965
   .able-controller button > img = 1960
   .able-controller button > span = 1955
-	.able-controller button = 1950 
+	.able-controller button = 1950
 	.able-big-play-button = 1900
 	div.able-captions = 1000
   .able-seekhead = 300
   .able-volume-head = 300
-  .able-seekbar-played = 200 
-	.able-seekbar-loaded = 100 
-	.able = 100 
-	.able-sign-window (if sent to back) = 0 
+  .able-seekbar-played = 200
+	.able-seekbar-loaded = 100
+	.able = 100
+	.able-sign-window (if sent to back) = 0
 
 */
-.able { 
+.able {
   position: relative;
   margin: 1em 0;
   width: 100%; /* will be changed dynamically as player is contructed */
   box-shadow: 0px 0px 16px #262626;
-  z-index: 100; 
+  z-index: 100;
 }
 .able-column-left {
     float: left;
@@ -46,11 +46,11 @@
   position: relative;
   top: 0;
 }
-.able-player { 
+.able-player {
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #262626; /* background color of player (appears on top & bottom) */
 }
-.able-offscreen { 
+.able-offscreen {
 	position:absolute;
 	left:-10000px;
 	top:auto;
@@ -58,28 +58,28 @@
 	height:1px;
 	overflow:hidden;
 }
-.able-video { 
+.able-video {
 /*	margin-top: -0.75em;*/
 }
-.able-video .able-now-playing { 
+.able-video .able-now-playing {
 	display: none; /* not currently used for video */
 }
-.able-controller { 
+.able-controller {
 	position: relative;
-	border-top: 2px solid #4c4c4c; 
-	border-bottom: 2px solid #4c4c4c; 
+	border-top: 2px solid #4c4c4c;
+	border-bottom: 2px solid #4c4c4c;
 	background-color: #464646; /* background color of controller bar */
 	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
-	padding: 0; 
+	padding: 0;
 }
-.able-poster { 
-  position: absolute; 
+.able-poster {
+  position: absolute;
   top: 0;
   left: 0;
 }
 
-/* 
-  Controller Buttons & Controls 
+/*
+  Controller Buttons & Controls
 */
 .able-big-play-button {
     position: absolute;
@@ -99,16 +99,16 @@
     opacity: 100;
     filter:alpha(opacity=100); /* for IE */
 }
-.able-left-controls, .able-right-controls { 
+.able-left-controls, .able-right-controls {
     overflow: visible;
 }
 .able-left-controls button, .able-right-controls button {
     vertical-align: middle;
 }
-.able-left-controls { 
+.able-left-controls {
   float: left;
 }
-.able-right-controls { 
+.able-right-controls {
   float: right;
 }
 .able-left-controls span,
@@ -127,21 +127,21 @@
   overflow: hidden !important;
   z-index: 1950;
 }
-.able-controller button > span { 
+.able-controller button > span {
   /* icomoon font icon */
-  font-size: 20px; 
+  font-size: 20px;
   width: 24px;
   margin: 0 5px;
   padding: 0;
   z-index: 1955;
 }
-.able-controller button > img { 
+.able-controller button > img {
   /* image icon */
   margin: 0 2px;
   padding: 0;
   z-index: 1960;
 }
-.able-controller .buttonOff { 
+.able-controller .buttonOff {
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
     z-index: 1965;
@@ -150,22 +150,22 @@
   margin: 0 5px;
   z-index: 1970;
 }
-.able-controller button:hover, 
-.able-controller button:focus { 
+.able-controller button:hover,
+.able-controller button:focus {
   outline-style: solid;
   outline-width: medium;
-}  
-.able-controller button:hover {  
+}
+.able-controller button:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-controller button:focus { 
+.able-controller button:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
 
-/* 
-  Seekbar 
+/*
+  Seekbar
 */
-.able-seekbar-wrapper { 
+.able-seekbar-wrapper {
   display: inline-block;
   vertical-align: middle;
 }
@@ -179,7 +179,7 @@
   border-width: 2px;
   border-color: #ffffff;
 }
-.able-seekbar-loaded { 
+.able-seekbar-loaded {
   display: inline-block;
   position: absolute;
   left: 0;
@@ -188,7 +188,7 @@
   background-color: #464646;
   z-index: 100;
 }
-.able-seekbar-played { 
+.able-seekbar-played {
   display: inline-block;
   position: absolute;
   left: 0;
@@ -197,7 +197,7 @@
   background-color: #DADADA;
   z-index: 200;
 }
-.able-seekhead { 
+.able-seekhead {
   display: inline-block;
   position: relative;
   left: 0;
@@ -207,35 +207,35 @@
   z-index: 300;
 }
 
-/* 
-  Volume Slider 
+/*
+  Volume Slider
 */
 .able-volume-slider {
-  width: 34px; 
-  height: 50px; 
+  width: 34px;
+  height: 50px;
   background-color: #464646; /* same as .able-controller */
   padding: 10px 0;
   position: absolute;
   right: 0px;
-  top: -74px; 
-  z-index: 3400;  
-  display: none; 
+  top: -74px;
+  z-index: 3400;
+  display: none;
 }
-.able-volume-track { 
-  display: block; 
+.able-volume-track {
+  display: block;
   position: relative;
-  height: 100%; /* = 50px after padding */ 
+  height: 100%; /* = 50px after padding */
   width: 5px;
   margin: 0 auto;
-  background-color: #999; 
+  background-color: #999;
 }
-.able-volume-track.able-volume-track-on { 
-  background-color: #dadada; 
+.able-volume-track.able-volume-track-on {
+  background-color: #dadada;
   position: absolute;
   height: 20px; /* change dynamically; 5px per volume tick */
   top: 30px;  /* change dynamically; 50px - height */
 }
-.able-volume-head { 
+.able-volume-head {
   display: inline-block;
   background-color: #fdfdfd;
   outline: 1px solid #333;
@@ -243,11 +243,11 @@
   height: 7px;
   width: 15px;
   left: -5px;
-  top: 23px; /* change dynamically; .able-volume-track-on top - 7 */ 
+  top: 23px; /* change dynamically; .able-volume-track-on top - 7 */
   z-index: 300;
 }
-.able-volume-head:hover, 
-.able-volume-head:focus { 
+.able-volume-head:hover,
+.able-volume-head:focus {
 	background-color: #ffbb37 !important; /* yellow */
 }
 
@@ -338,39 +338,39 @@ input[type=range]:focus::-ms-fill-upper {
 }
 */
 
-/* 
-  Status Bar 
+/*
+  Status Bar
 */
 
-.able-status-bar { 
+.able-status-bar {
 	height: 1.5em;
 	min-height: 1.5em;
 	color: #FFFFFF;
 	font-size: 1.0em;
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
-}	
-.able-status-bar span.able-timer { 
-	/* contains both span.elapsedTime and span.duration */	
+}
+.able-status-bar span.able-timer {
+	/* contains both span.elapsedTime and span.duration */
 	color: #ffffff;
 	text-align: left;
 	float: left;
 	width: 32%;
 }
-.able-status-bar span.able-speed { 
+.able-status-bar span.able-speed {
   float: left;
   width: 32%;
   text-align: center;
 }
-.able-status { 
+.able-status {
 	font-style: italic;
 	float: right;
 	width: 32%;
 	text-align :right;
 }
 
-/* 
-  Captions and Descriptions 
+/*
+  Captions and Descriptions
 */
 
 div.able-captions {
@@ -383,21 +383,21 @@ div.able-captions {
   background-color: black;
   font-size: 1.1em;
   color: white;
-  opacity: 0.75;  
+  opacity: 0.75;
 }
-div.able-captions-overlay { 
-  position: absolute; 
+div.able-captions-overlay {
+  position: absolute;
   margin: 0;
   bottom: 0;
 }
-div.able-captions-below { 
+div.able-captions-below {
   position: relative;
 }
-div.able-descriptions { 
+div.able-descriptions {
   position: relative;
   color: #FF6; /* yellow, to differentiate it from captions */
   background-color: #262626;
-  min-height: 3em; 
+  min-height: 3em;
   border-top: 1px solid #666;
   margin: 0;
   padding: 3%;
@@ -405,8 +405,8 @@ div.able-descriptions {
   text-align: center;
 }
 
-/* 
-  Now Playing 
+/*
+  Now Playing
 */
 
 div.able-now-playing {
@@ -414,21 +414,21 @@ div.able-now-playing {
 	font-weight: bold;
 	font-size: 1.1em;
 	color: #FFFFFF;
-	background-color: transparent; 
+	background-color: transparent;
 	padding: 0.5em 0.5em 1em;
 }
-div.able-now-playing span { 
+div.able-now-playing span {
 	font-size: 0.9em;
 }
-div.able-now-playing span span { 
+div.able-now-playing span span {
 	display: block;
 }
 
-/* 
-  Modal Dialogs 
-*/ 
+/*
+  Modal Dialogs
+*/
 
-div.modalDialog { 
+div.modalDialog {
   position: absolute;
   z-index: 6000;
   height: auto;
@@ -439,7 +439,7 @@ div.modalDialog {
   outline: 0px none;
   display: none;
 }
-div.modalOverlay { 
+div.modalOverlay {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -452,154 +452,154 @@ div.modalOverlay {
   left: 0;
   display: none;
 }
-button.modalCloseButton { 
+button.modalCloseButton {
   position: absolute;
   top: 5px;
   right: 5px;
 }
-button.modal-button { 
+button.modal-button {
   margin-right: 5px;
 }
-div.modalDialog input:hover, 
-div.modalDialog input:focus,   
+div.modalDialog input:hover,
+div.modalDialog input:focus,
 div.modalDialog button:hover,
-div.modalDialog button:focus {  
+div.modalDialog button:focus {
   outline-style: solid;
   outline-width: 2px;
 }
-div.modalDialog input:hover, 
-div.modalDialog button:hover { 
+div.modalDialog input:hover,
+div.modalDialog button:hover {
 	outline-color: #8AB839; /* green */
 }
-div.modalDialog input:focus, 
-div.modalDialog button:focus { 
+div.modalDialog input:focus,
+div.modalDialog button:focus {
 	outline-color: #ffbb37; /* yellow */
 }
-.able-prefs-form, 
-.able-help-div, 
-.able-resize-form { 
-	background-color: #F5F5F5; 
+.able-prefs-form,
+.able-help-div,
+.able-resize-form {
+	background-color: #F5F5F5;
 	border: medium solid #ccc;
 	padding: 0.5em 1em;
-	margin: 0 0 0 1em; 
+	margin: 0 0 0 1em;
 	width: 25em;
 	display: none;
 }
 
-/* 
-  Preferences Form 
-*/ 
+/*
+  Preferences Form
+*/
 
-.able-prefs-form fieldset { 
+.able-prefs-form fieldset {
   margin-left: 0;
   padding-left: 0;
 	border: none;
 }
-.able-prefs-form legend { 
+.able-prefs-form legend {
 	color: black;
-	font-weight: bold;	
+	font-weight: bold;
 	font-size: 1.1em;
 }
-.able-prefs-form fieldset div { 
-  display: table; 
+.able-prefs-form fieldset div {
+  display: table;
   margin-left: 1em;
 }
-.able-prefs-form fieldset div input { 
+.able-prefs-form fieldset div input {
   display: table-cell;
 	width: 1em;
 	vertical-align: middle;
 }
-.able-prefs-form fieldset div label { 
+.able-prefs-form fieldset div label {
   display: table-cell;
 	padding-left: 0.5em;
 }
-fieldset.able-prefs-keys div { 
+fieldset.able-prefs-keys div {
   float: left;
-  margin-right: 1em; 
+  margin-right: 1em;
 }
-div.able-desc-pref-prompt { 
+div.able-desc-pref-prompt {
   font-weight: bold;
   font-style: italic;
   margin-left: 1em !important;
 }
-div.able-prefDescFormat > div { 
+div.able-prefDescFormat > div {
   margin-left: 1.5em;
 }
-.able-prefs-captions label, 
-.able-prefs-captions select { 
-  display: block; 
-  float: left;  
+.able-prefs-captions label,
+.able-prefs-captions select {
+  display: block;
+  float: left;
   margin-bottom: 0.25em;
 }
-fieldset.able-prefs-captions label { 
-  width: 6em; 
-  text-align: right; 
-  padding-right: 1em;  
+fieldset.able-prefs-captions label {
+  width: 6em;
+  text-align: right;
+  padding-right: 1em;
 }
-fieldset.able-prefs-captions select { 
+fieldset.able-prefs-captions select {
   width: 10em;
   font-size: 0.9em;
-  border-radius: none; 
+  border-radius: none;
 }
-.able-prefs-form div.able-captions-sample { 
+.able-prefs-form div.able-captions-sample {
   padding: 0.5em;
   text-align: center;
 }
-.able-prefs-form h2 { 
+.able-prefs-form h2 {
   margin-top: 0;
   margin-bottom: 0.5em;
   font-size: 1.1em;
 }
-.able-prefs-form ul { 
+.able-prefs-form ul {
   margin-top: 0;
 }
 
-/* 
-  Keyboard Preferences Dialog 
-*/ 
+/*
+  Keyboard Preferences Dialog
+*/
 able-prefs-form-keyboard ul {
 	list-style-type: none;
 }
-span.able-modkey-alt, 
-span.able-modkey-ctrl, 
-span.able-modkey-shift { 
+span.able-modkey-alt,
+span.able-modkey-ctrl,
+span.able-modkey-shift {
   color: #666;
   font-style: italic;
 }
-span.able-modkey { 
-  font-weight: bold; 
-  color: #000; 
+span.able-modkey {
+  font-weight: bold;
+  color: #000;
   font-size: 1.1em;
 }
 
-/* 
+/*
   Resize Window Dialog
-*/ 
+*/
 
-.able-resize-form h1 { 
+.able-resize-form h1 {
   font-size: 1.15em;
 }
-.able-resize-form div div { 
+.able-resize-form div div {
   margin: 1em;
 }
-.able-resize-form label { 
+.able-resize-form label {
   padding-right: 0.5em;
   font-weight: bold;
 }
-.able-resize-form input[type="text"] { 
+.able-resize-form input[type="text"] {
   font-size: 1em;
 }
 
-/* 
-  Sign Language Window 
+/*
+  Sign Language Window
 */
-.able-sign-window { 
+.able-sign-window {
   position: relative;
   margin: 1em;
   width: 480px;
   z-index: 4000;
 }
-.able-sign-window .able-button-handler-preferences { 
+.able-sign-window .able-button-handler-preferences {
   position: absolute;
   top: 0;
   right: 0;
@@ -613,75 +613,75 @@ span.able-modkey {
   z-index: 4500;
   padding: 0;
 }
-.able-sign-window .able-popup { 
-  position: absolute; 
+.able-sign-window .able-popup {
+  position: absolute;
   right: 0;
   top: 0;
 }
-.able-sign-window:focus { 
+.able-sign-window:focus {
   outline: none;
 }
-.able-sign-window button:hover, 
-.able-sign-window button:focus { 
+.able-sign-window button:hover,
+.able-sign-window button:focus {
   outline-style: solid;
   outline-width: medium;
-}  
-.able-sign-window button:hover {  
+}
+.able-sign-window button:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-sign-window button:focus { 
+.able-sign-window button:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
 
-/* 
-  External chapters div  
+/*
+  External chapters div
 */
-div.able-chapters-div { 
-  padding: 0;   
+div.able-chapters-div {
+  padding: 0;
 }
-div.able-chapters-div .able-chapters-heading { 
+div.able-chapters-div .able-chapters-heading {
   margin: 1em 0.75em;
   font-size: 1.1em;
-  font-weight: bold;   
+  font-weight: bold;
 }
-div.able-chapters-div ul { 
-  list-style-type: none; 
-  padding-left: 0; 
+div.able-chapters-div ul {
+  list-style-type: none;
+  padding-left: 0;
 }
-div.able-chapters-div ul li { 
+div.able-chapters-div ul li {
   max-width: 100%;
-  padding: 0; 
+  padding: 0;
   height: 2em;
 }
-div.able-chapters-div button { 
-  width: 100%; 
+div.able-chapters-div button {
+  width: 100%;
   height: 100%;
   border: none;
   background-color: transparent;
-  color: #000; 
+  color: #000;
   font-size: 1em;
   text-align: left;
   padding: 0.15em 1em;
 }
-div.able-chapters-div li.able-current-chapter { 
-  background-color: #000 !important; 
+div.able-chapters-div li.able-current-chapter {
+  background-color: #000 !important;
 }
-div.able-chapters-div li.able-current-chapter button { 
+div.able-chapters-div li.able-current-chapter button {
   color: #FFF !important;
 }
-div.able-chapters-div li.able-focus { 
+div.able-chapters-div li.able-focus {
   background-color: #4C4C4C;
 }
-div.able-chapters-div button:focus, 
-div.able-chapters-div button:hover, 
+div.able-chapters-div button:focus,
+div.able-chapters-div button:hover,
 div.able-chapters-div button::-moz-focus-inner {
   border: 0;
   outline: none;
-  color: #FFF !important; 
+  color: #FFF !important;
 }
 
-/* 
-  icomoon.io font styling 
+/*
+  icomoon.io font styling
 */
 
 @font-face {
@@ -782,13 +782,13 @@ div.able-chapters-div button::-moz-focus-inner {
 	content: "\e60a";
 }
 
-/* 
-  Fullscreen settings 
-  In v2.2.4b commented out :-webkit-full-screen style 
-  This was causing the toolbar in fullscreen mode to be positioned slightly offscreen in webkit browsers 
-  Safari had an additional problem in window height was being calculated (see event.js > onWindowResize()) 
+/*
+  Fullscreen settings
+  In v2.2.4b commented out :-webkit-full-screen style
+  This was causing the toolbar in fullscreen mode to be positioned slightly offscreen in webkit browsers
+  Safari had an additional problem in window height was being calculated (see event.js > onWindowResize())
   Commenting out this style appears have no adverse effect in any browser
-  All other fullscreen styles were already commented out, and left here solely for reference 
+  All other fullscreen styles were already commented out, and left here solely for reference
 */
 /*
 :-webkit-full-screen {
@@ -824,7 +824,7 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 */
 
-/* 
+/*
   Tooltips & Alerts
 */
 .able-tooltip, .able-alert {
@@ -838,18 +838,18 @@ div.able-chapters-div button::-moz-focus-inner {
   border-radius: 5px;
   display: none;
 }
-.able-alert { 
+.able-alert {
   background-color: #FFFFCC;
-  z-index: 3500; 
+  z-index: 3500;
 }
-.able-popup { 
-  z-index: 3200; 
+.able-popup {
+  z-index: 3200;
 }
-.able-tooltip { 
-  z-index: 3000; 
+.able-tooltip {
+  z-index: 3000;
 }
 
-/* 
+/*
   Popup Menus
 */
 .able-popup {
@@ -866,55 +866,55 @@ div.able-chapters-div button::-moz-focus-inner {
   display: none;
   z-index: 3000;
 }
-.able-popup ul { 
+.able-popup ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
-.able-popup li { 
+.able-popup li {
   padding: 0.25em 1em 0.25em 0.25em;
   margin: 1px;
 }
-.able-popup label { 
+.able-popup label {
   padding-left: 0.25em;
   color: #FFF;
 }
-.able-popup li.able-focus { 
+.able-popup li.able-focus {
   background-color: #CCC;
 }
-.able-popup li.able-focus label { 
+.able-popup li.able-focus label {
   color: #000;
 }
 
-/* 
-  Popup Menus with hidden radio buttons 
-  e.g., chapters and preferences 
+/*
+  Popup Menus with hidden radio buttons
+  e.g., chapters and preferences
 */
-.able-popup-no-radio > ul > li > input { 
+.able-popup-no-radio > ul > li > input {
   position: absolute !important;
   clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
-  clip: rect(1px, 1px, 1px, 1px);	    
+  clip: rect(1px, 1px, 1px, 1px);
 }
 
-/* 
-  Drag & Drop 
+/*
+  Drag & Drop
 */
-.able-drag { 
-  border: 2px dashed #F90; 
+.able-drag {
+  border: 2px dashed #F90;
   cursor: move;
 }
 
-/* 
-  Misc 
+/*
+  Misc
 */
 
-.able-clipped { 
+.able-clipped {
 	/* hide from sighted users, but not screen reader users */
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
-	clip: rect(1px, 1px, 1px, 1px);	
+	clip: rect(1px, 1px, 1px, 1px);
 }
-.able-error { 
+.able-error {
 	display: block;
 	background: #ffc;
 	border: 2px solid #000;
@@ -922,7 +922,7 @@ div.able-chapters-div button::-moz-focus-inner {
 	margin: 0.75em;
 	padding: 0.5em;
 }
-.able-fallback { 
+.able-fallback {
   display: block;
   text-align: center;
   border: 2px solid #333355;
@@ -930,19 +930,19 @@ div.able-chapters-div button::-moz-focus-inner {
   color: #000;
   font-weight: bold;
   font-size: 1.1em;
-  padding: 1em;  
+  padding: 1em;
   margin-bottom: 1em;
 }
-.able-fallback div, 
-.able-fallback ul, 
-.able-fallback p { 
+.able-fallback div,
+.able-fallback ul,
+.able-fallback p {
   text-align: left;
-} 
-.able-fallback li  { 
+}
+.able-fallback li  {
   font-weight: normal;
 }
-.able-fallback img { 
-  width: 90%; 
+.able-fallback img {
+  width: 90%;
   margin: 1em auto;
   opacity: 0.3;
 }

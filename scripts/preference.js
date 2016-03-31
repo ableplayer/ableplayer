@@ -5,7 +5,7 @@
   };
 
   AblePlayer.prototype.getCookie = function() {
-    
+
     var defaultCookie = {
       preferences: {}
     };
@@ -49,18 +49,18 @@
     this.setCookie(cookie);
   };
 
-  AblePlayer.prototype.getPreferencesGroups = function() { 
-    
-    // return array of groups in the order in which they will appear 
-    // in the Preferences popup menu 
-    // Human-readable label for each group is defined in translation table 
-    if (this.mediaType === 'video') { 
+  AblePlayer.prototype.getPreferencesGroups = function() {
+
+    // return array of groups in the order in which they will appear
+    // in the Preferences popup menu
+    // Human-readable label for each group is defined in translation table
+    if (this.mediaType === 'video') {
       return ['captions','descriptions','keyboard','transcript'];
     }
-    else if (this.mediaType === 'audio') { 
-      var groups = []; 
+    else if (this.mediaType === 'audio') {
+      var groups = [];
       groups.push('keyboard');
-      if (this.lyricsMode) { 
+      if (this.lyricsMode) {
         groups.push('transcript');
       }
       return groups;
@@ -92,8 +92,8 @@
       'group': 'keyboard',
       'default': 0
     });
-    
-    // Transcript preferences 
+
+    // Transcript preferences
     prefs.push({
       'name': 'prefTranscript', // transcript default state
       'label': null,
@@ -118,72 +118,72 @@
       'group': 'transcript',
       'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
     });
-    
-    if (this.mediaType === 'video') { 
 
-      // Caption preferences       
+    if (this.mediaType === 'video') {
+
+      // Caption preferences
       prefs.push({
         'name': 'prefCaptions', // closed captions default state
         'label': null,
         'group': 'captions',
         'default': 1
       });
-/* // not supported yet       
+/* // not supported yet
       prefs.push({
-        'name': 'prefCaptionsStyle', 
+        'name': 'prefCaptionsStyle',
         'label': this.tt.prefCaptionsStyle,
         'group': 'captions',
         'default': this.tt.captionsStylePopOn
       });
-*/      
+*/
       prefs.push({
-        'name': 'prefCaptionsPosition', 
+        'name': 'prefCaptionsPosition',
         'label': this.tt.prefCaptionsPosition,
         'group': 'captions',
         'default': 'overlay'
       });
       prefs.push({
-        'name': 'prefCaptionsFont', 
+        'name': 'prefCaptionsFont',
         'label': this.tt.prefCaptionsFont,
         'group': 'captions',
         'default': this.tt.sans
       });
       prefs.push({
-        'name': 'prefCaptionsSize', 
+        'name': 'prefCaptionsSize',
         'label': this.tt.prefCaptionsSize,
         'group': 'captions',
         'default': '100%'
       });
       prefs.push({
-        'name': 'prefCaptionsColor', 
+        'name': 'prefCaptionsColor',
         'label': this.tt.prefCaptionsColor,
         'group': 'captions',
         'default': this.tt.white
       });
       prefs.push({
-        'name': 'prefCaptionsBGColor', 
+        'name': 'prefCaptionsBGColor',
         'label': this.tt.prefCaptionsBGColor,
         'group': 'captions',
         'default': this.tt.black
       });
       prefs.push({
-        'name': 'prefCaptionsOpacity', 
+        'name': 'prefCaptionsOpacity',
         'label': this.tt.prefCaptionsOpacity,
         'group': 'captions',
         'default': '75%'
-      });      
+      });
 
-/*    // Sign lanuage preferences  
-      // no longer an option as of v 2.3.4; always on in rare cases that it's actually avaialable 
-      // as all users should be exposed to it 
+/*    // Sign lanuage preferences
+      // no longer an option as of v 2.3.4; always on in rare cases that it's actually avaialable
+      // as all users should be exposed to it
       prefs.push({
         'name': 'prefSignLanguage', // use sign language if available
         'label': null,
         'group': 'sign',
-        'default': 1 
+        'default': 1
       });
-*/      
-      // Description preferences 
+*/
+      // Description preferences
       prefs.push({
         'name': 'prefDesc', // audio description default state
         'label': null,
@@ -236,15 +236,15 @@
 
   AblePlayer.prototype.injectPrefsForm = function (form) {
 
-    // Creates a preferences form and injects it.    
+    // Creates a preferences form and injects it.
     // form is one of the supported forms (groups) defined in getPreferencesGroups()
 
-    var available, thisObj, $prefsDiv, formTitle, introText, 
-      $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j, 
-      $fieldset, fieldsetClass, fieldsetId,   
+    var available, thisObj, $prefsDiv, formTitle, introText,
+      $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
+      $fieldset, fieldsetClass, fieldsetId,
       $descFieldset1, $descLegend1, $descFieldset2, $descLegend2, $legend,
-      thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,      
-      $div1,id1,$radio1,$label1, 
+      thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
+      $div1,id1,$radio1,$label1,
       $div2,id2,$radio2,$label2,
       options,$thisOption,optionText,sampleCapsDiv,
       changedPref,changedSpan,changedText,
@@ -254,7 +254,7 @@
 
     thisObj = this;
     available = this.getAvailablePreferences();
-    
+
     // outer container, will be assigned role="dialog"
     $prefsDiv = $('<div>',{
       'class': 'able-prefs-form '
@@ -262,128 +262,128 @@
     var customClass = 'able-prefs-form-' + form;
     $prefsDiv.addClass(customClass);
 
-    // add intro 
-    if (form == 'captions') {       
+    // add intro
+    if (form == 'captions') {
       formTitle = this.tt.prefTitleCaptions;
-      introText = this.tt.prefIntroCaptions; 
-      // Uncomment the following line to include a cookie warning 
-      // Not included for now in order to cut down on unnecessary verbiage      
+      introText = this.tt.prefIntroCaptions;
+      // Uncomment the following line to include a cookie warning
+      // Not included for now in order to cut down on unnecessary verbiage
       // introText += ' ' + this.tt.prefCookieWarning;
       $prefsIntro = $('<p>',{
         text: introText
       });
       $prefsDiv.append($prefsIntro);
     }
-    else if (form == 'descriptions') { 
+    else if (form == 'descriptions') {
       formTitle = this.tt.prefTitleDescriptions;
       var $prefsIntro = $('<p>',{
         text: this.tt.prefIntroDescription1
       });
-      var $prefsIntroUL = $('<ul>'); 
+      var $prefsIntroUL = $('<ul>');
       var $prefsIntroLI1 = $('<li>',{
         text: this.tt.prefDescFormatOption1
       });
       var $prefsIntroLI2 = $('<li>',{
         text: this.tt.prefDescFormatOption2
       });
-      
+
       $prefsIntroUL.append($prefsIntroLI1,$prefsIntroLI2);
-      if (this.hasOpenDesc && this.hasClosedDesc) { 
+      if (this.hasOpenDesc && this.hasClosedDesc) {
         currentDescState = this.tt.prefIntroDescription2 + ' ';
-        currentDescState += '<strong>' + this.tt.prefDescFormatOption1b + '</strong>'; 
+        currentDescState += '<strong>' + this.tt.prefDescFormatOption1b + '</strong>';
         currentDescState += ' <em>' + this.tt.and + '</em> <strong>' + this.tt.prefDescFormatOption2b + '</strong>.';
       }
-      else if (this.hasOpenDesc) { 
+      else if (this.hasOpenDesc) {
         currentDescState = this.tt.prefIntroDescription2;
         currentDescState += ' <strong>' + this.tt.prefDescFormatOption1b + '</strong>.';
       }
-      else if (this.hasClosedDesc) { 
+      else if (this.hasClosedDesc) {
         currentDescState = this.tt.prefIntroDescription2;
         currentDescState += ' <strong>' + this.tt.prefDescFormatOption2b + '</strong>.';
       }
-      else { 
+      else {
         currentDescState = this.tt.prefIntroDescriptionNone;
       }
       $prefsIntroP2 = $('<p>',{
         html: currentDescState
       });
-      
-      p3Text = this.tt.prefIntroDescription3; 
-      if (this.hasOpenDesc || this.hasClosedDesc) { 
+
+      p3Text = this.tt.prefIntroDescription3;
+      if (this.hasOpenDesc || this.hasClosedDesc) {
         p3Text += ' ' + this.tt.prefIntroDescription4;
       }
       $prefsIntroP3 = $('<p>',{
         text: p3Text
       });
-      
-      $prefsDiv.append($prefsIntro,$prefsIntroUL,$prefsIntroP2,$prefsIntroP3);        
+
+      $prefsDiv.append($prefsIntro,$prefsIntroUL,$prefsIntroP2,$prefsIntroP3);
     }
-    else if (form == 'keyboard') { 
+    else if (form == 'keyboard') {
       formTitle = this.tt.prefTitleKeyboard;
-      introText = this.tt.prefIntroKeyboard1; 
-      introText += ' ' + this.tt.prefIntroKeyboard2; 
-      introText += ' ' + this.tt.prefIntroKeyboard3; 
+      introText = this.tt.prefIntroKeyboard1;
+      introText += ' ' + this.tt.prefIntroKeyboard2;
+      introText += ' ' + this.tt.prefIntroKeyboard3;
       $prefsIntro = $('<p>',{
         text: introText
-      });      
+      });
       $prefsDiv.append($prefsIntro);
     }
-    else if (form == 'transcript') { 
-      formTitle = this.tt.prefTitleTranscript;    
+    else if (form == 'transcript') {
+      formTitle = this.tt.prefTitleTranscript;
       introText = this.tt.prefIntroTranscript;
-      // Uncomment the following line to include a cookie warning 
+      // Uncomment the following line to include a cookie warning
       // Not included for now in order to cut down on unnecessary verbiage
-      // introText += ' ' + this.tt.prefCookieWarning;    
+      // introText += ' ' + this.tt.prefCookieWarning;
       $prefsIntro = $('<p>',{
         text: introText
       });
       $prefsDiv.append($prefsIntro);
     }
 
-    if (form === 'descriptions') { 
-      // descriptions form has two field sets  
-      
-      // Fieldset 1     
+    if (form === 'descriptions') {
+      // descriptions form has two field sets
+
+      // Fieldset 1
       $descFieldset1 = $('<fieldset>');
       fieldsetClass = 'able-prefs-' + form + '1';
       fieldsetId = this.mediaId + '-prefs-' + form + '1';
       $descFieldset1.addClass(fieldsetClass).attr('id',fieldsetId);
       $descLegend1 = $('<legend>' + this.tt.prefDescFormat + '</legend>');
-      $descFieldset1.append($descLegend1);          
+      $descFieldset1.append($descLegend1);
 
-      // Fieldset 2     
+      // Fieldset 2
       $descFieldset2 = $('<fieldset>');
       fieldsetClass = 'able-prefs-' + form + '2';
       fieldsetId = this.mediaId + '-prefs-' + form + '2';
       $descFieldset2.addClass(fieldsetClass).attr('id',fieldsetId);
       $descLegend2 = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
-      $descFieldset2.append($descLegend2);   
+      $descFieldset2.append($descLegend2);
     }
-    else { 
-      // all other forms just have one fieldset 
+    else {
+      // all other forms just have one fieldset
       $fieldset = $('<fieldset>');
       fieldsetClass = 'able-prefs-' + form;
       fieldsetId = this.mediaId + '-prefs-' + form;
       $fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
-      if (form === 'keyboard') { 
+      if (form === 'keyboard') {
         $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
         $fieldset.append($legend);
-      }      
+      }
     }
     for (i=0; i<available.length; i++) {
 
       // only include prefs on the current form if they have a label
-      if ((available[i]['group'] == form) && available[i]['label']) { 
+      if ((available[i]['group'] == form) && available[i]['label']) {
 
         thisPref = available[i]['name'];
         thisClass = 'able-' + thisPref;
-        thisId = this.mediaId + '_' + thisPref;    
-        if (thisPref !== 'prefDescFormat') {       
+        thisId = this.mediaId + '_' + thisPref;
+        if (thisPref !== 'prefDescFormat') {
           $thisDiv = $('<div>').addClass(thisClass);
         }
-        
-        // Audio Description preferred format radio buttons 
-        if (thisPref == 'prefDescFormat') { 
+
+        // Audio Description preferred format radio buttons
+        if (thisPref == 'prefDescFormat') {
 
           // option 1 radio button
           $div1 = $('<div>');
@@ -397,7 +397,7 @@
             id: id1,
             value: 'video'
           });
-          if (this.prefDescFormat === 'video') { 
+          if (this.prefDescFormat === 'video') {
             $radio1.attr('checked','checked');
           };
           $div1.append($radio1,$label1);
@@ -407,42 +407,42 @@
           id2 = thisId + '_2';
           $label2 = $('<label>')
             .attr('for',id2)
-            .text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption2)); 
+            .text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption2));
           $radio2 = $('<input>',{
             type: 'radio',
             name: thisPref,
             id: id2,
             value: 'text'
           });
-          if (this.prefDescFormat === 'text') { 
+          if (this.prefDescFormat === 'text') {
             $radio2.attr('checked','checked');
           };
           $div2.append($radio2,$label2);
         }
-        else if (form === 'captions') { 
+        else if (form === 'captions') {
           $thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
           $thisField = $('<select>',{
             name: thisPref,
-            id: thisId, 
+            id: thisId,
           });
-          if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') { 
+          if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') {
             // add a change handler that updates the style of the sample caption text
-            $thisField.change(function() { 
+            $thisField.change(function() {
               changedPref = $(this).attr('name');
               thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
-            }); 
+            });
           }
           options = this.getCaptionsOptions(thisPref);
-          for (j=0; j < options.length; j++) { 
-            if (thisPref === 'prefCaptionsPosition') { 
-              if (options[j] === 'overlay') { 
-                optionText = this.tt.captionsPositionOverlay; 
+          for (j=0; j < options.length; j++) {
+            if (thisPref === 'prefCaptionsPosition') {
+              if (options[j] === 'overlay') {
+                optionText = this.tt.captionsPositionOverlay;
               }
-              else if (options[j] === 'below') { 
-                optionText = this.tt.captionsPositionBelow; 
+              else if (options[j] === 'below') {
+                optionText = this.tt.captionsPositionBelow;
               }
             }
-            else { 
+            else {
               optionText = options[j];
             }
             $thisOption = $('<option>',{
@@ -452,9 +452,9 @@
             if (this[thisPref] === options[j]) {
               $thisOption.attr('selected','selected');
             }
-            $thisField.append($thisOption);              
+            $thisField.append($thisOption);
           }
-          $thisDiv.append($thisLabel,$thisField);            
+          $thisDiv.append($thisLabel,$thisField);
         }
         else { // all other fields are checkboxes
           $thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
@@ -469,165 +469,165 @@
             $thisField.attr('checked','checked');
           }
           if (form === 'keyboard') {
-            // add a change handler that updates the list of current keyboard shortcuts 
-            $thisField.change(function() { 
+            // add a change handler that updates the list of current keyboard shortcuts
+            $thisField.change(function() {
               changedPref = $(this).attr('name');
-              if (changedPref === 'prefAltKey') { 
-                changedSpan = '.able-modkey-alt'; 
+              if (changedPref === 'prefAltKey') {
+                changedSpan = '.able-modkey-alt';
                 changedText = 'Alt + ';
               }
-              else if (changedPref === 'prefCtrlKey') { 
-                changedSpan = '.able-modkey-ctrl'; 
+              else if (changedPref === 'prefCtrlKey') {
+                changedSpan = '.able-modkey-ctrl';
                 changedText = 'Ctrl + ';
               }
-              else if (changedPref === 'prefShiftKey') { 
-                changedSpan = '.able-modkey-shift'; 
+              else if (changedPref === 'prefShiftKey') {
+                changedSpan = '.able-modkey-shift';
                 changedText = 'Shift + ';
               }
-              if ($(this).is(':checked')) { 
+              if ($(this).is(':checked')) {
                 $(changedSpan).text(changedText);
               }
-              else { 
+              else {
                 $(changedSpan).text('');
               }
-            }); 
+            });
           }
           $thisDiv.append($thisField,$thisLabel);
         }
-        if (form === 'descriptions') { 
-          if (thisPref === 'prefDescFormat') { 
+        if (form === 'descriptions') {
+          if (thisPref === 'prefDescFormat') {
             $descFieldset1.append($div1,$div2);
           }
-          else { 
+          else {
             $descFieldset2.append($thisDiv);
           }
         }
-        else { 
+        else {
           $fieldset.append($thisDiv);
         }
       }
     }
-    if (form === 'descriptions') { 
+    if (form === 'descriptions') {
       $prefsDiv.append($descFieldset1,$descFieldset2);
     }
     else {
       $prefsDiv.append($fieldset);
     }
     if (form === 'captions') {
-      // add a sample closed caption div to prefs dialog 
-      if (this.mediaType === 'video') { 
-        this.$sampleCapsDiv = $('<div>',{ 
+      // add a sample closed caption div to prefs dialog
+      if (this.mediaType === 'video') {
+        this.$sampleCapsDiv = $('<div>',{
           'class': 'able-captions-sample'
         }).text(this.tt.sampleCaptionText);
         $prefsDiv.append(this.$sampleCapsDiv);
         this.stylizeCaptions(this.$sampleCapsDiv);
       }
     }
-    else if (form === 'keyboard') { 
-      // add a current list of keyboard shortcuts 
-      $kbHeading = $('<h2>',{ 
-        text: this.tt.prefHeadingKeyboard2 
+    else if (form === 'keyboard') {
+      // add a current list of keyboard shortcuts
+      $kbHeading = $('<h2>',{
+        text: this.tt.prefHeadingKeyboard2
       });
-      $kbList = $('<ul>'); 
-      // create arrays of kbLabels and keys 
-      kbLabels = []; 
-      keys = []; 
-      for (i=0; i<this.controls.length; i++) { 
-        if (this.controls[i] === 'play') { 
+      $kbList = $('<ul>');
+      // create arrays of kbLabels and keys
+      kbLabels = [];
+      keys = [];
+      for (i=0; i<this.controls.length; i++) {
+        if (this.controls[i] === 'play') {
           kbLabels.push(this.tt.play + '/' + this.tt.pause);
           keys.push('p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar);
         }
-        else if (this.controls[i] === 'stop') { 
+        else if (this.controls[i] === 'stop') {
           kbLabels.push(this.tt.stop);
           keys.push('s');
         }
-        else if (this.controls[i] === 'rewind') { 
+        else if (this.controls[i] === 'rewind') {
           kbLabels.push(this.tt.rewind);
           keys.push('r');
         }
-        else if (this.controls[i] === 'forward') { 
+        else if (this.controls[i] === 'forward') {
           kbLabels.push(this.tt.forward);
           keys.push('f');
         }
-        else if (this.controls[i] === 'volume') { 
+        else if (this.controls[i] === 'volume') {
           kbLabels.push(this.tt.volume);
-          keys.push('v</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-9'); 
-          // mute toggle 
+          keys.push('v</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-9');
+          // mute toggle
           kbLabels.push(this.tt.mute + '/' + this.tt.unmute);
           keys.push('m');
         }
-        else if (this.controls[i] === 'captions') { 
-          if (this.captions.length > 1) { 
+        else if (this.controls[i] === 'captions') {
+          if (this.captions.length > 1) {
             // caption button launches a Captions popup menu
             kbLabels.push(this.tt.captions);
-          }        
-          else { 
+          }
+          else {
             // there is only one caption track
             // therefore caption button is a toggle
-            if (this.captionsOn) { 
+            if (this.captionsOn) {
               kbLabels.push(this.tt.hideCaptions);
             }
-            else { 
+            else {
               kbLabels.push(this.tt.showCaptions);
             }
           }
           keys.push('c');
         }
-        else if (this.controls[i] === 'descriptions') { 
-          if (this.descOn) {     
+        else if (this.controls[i] === 'descriptions') {
+          if (this.descOn) {
             kbLabels.push(this.tt.turnOffDescriptions);
           }
-          else { 
+          else {
             kbLabels.push(this.tt.turnOnDescriptions);
           }
           keys.push('d');
         }
-        else if (this.controls[i] === 'prefs') { 
+        else if (this.controls[i] === 'prefs') {
           kbLabels.push(this.tt.preferences);
           keys.push('e');
         }
-        else if (this.controls[i] === 'help') { 
+        else if (this.controls[i] === 'help') {
           kbLabels.push(this.tt.help);
           keys.push('h');
         }
       }
-      for (i=0; i<keys.length; i++) { 
+      for (i=0; i<keys.length; i++) {
         // alt
-        kbListText = '<span class="able-modkey-alt">';  
-        if (this.prefAltKey === 1) { 
+        kbListText = '<span class="able-modkey-alt">';
+        if (this.prefAltKey === 1) {
           kbListText += this.tt.prefAltKey + ' + ';
         }
-        kbListText += '</span>'; 
-        // ctrl 
-        kbListText += '<span class="able-modkey-ctrl">';  
-        if (this.prefCtrlKey === 1) { 
+        kbListText += '</span>';
+        // ctrl
+        kbListText += '<span class="able-modkey-ctrl">';
+        if (this.prefCtrlKey === 1) {
           kbListText += this.tt.prefCtrlKey + ' + ';
         }
-        kbListText += '</span>'; 
+        kbListText += '</span>';
         // shift
-        kbListText += '<span class="able-modkey-shift">';  
-        if (this.prefShiftKey === 1) { 
+        kbListText += '<span class="able-modkey-shift">';
+        if (this.prefShiftKey === 1) {
           kbListText += this.tt.prefShiftKey + ' + ';
         }
-        kbListText += '</span>'; 
+        kbListText += '</span>';
         kbListText += '<span class="able-modkey">' + keys[i] + '</span>';
         kbListText += ' = ' + kbLabels[i];
-        $kbListItem = $('<li>',{ 
+        $kbListItem = $('<li>',{
           html: kbListText
         });
         $kbList.append($kbListItem);
       }
-      // add Escape key 
-      kbListText = '<span class="able-modkey">' + this.tt.escapeKey + '</span>'; 
-      kbListText += ' = ' + this.tt.escapeKeyFunction; 
-      $kbListItem = $('<li>',{ 
+      // add Escape key
+      kbListText = '<span class="able-modkey">' + this.tt.escapeKey + '</span>';
+      kbListText += ' = ' + this.tt.escapeKeyFunction;
+      $kbListItem = $('<li>',{
         html: kbListText
       });
       $kbList.append($kbListItem);
-      // put it all together            
+      // put it all together
       $prefsDiv.append($kbHeading,$kbList);
     }
-    
+
     // $prefsDiv (dialog) must be appended to the BODY!
     // otherwise when aria-hidden="true" is applied to all background content
     // that will include an ancestor of the dialog,
@@ -645,77 +645,77 @@
     });
     cancelButton.click(function () {
       dialog.hide();
-      thisObj.resetPrefsForm(); 
+      thisObj.resetPrefsForm();
     });
 
     $prefsDiv.append(saveButton);
     $prefsDiv.append(cancelButton);
 
-    // add global reference for future control 
-    if (form === 'captions') { 
+    // add global reference for future control
+    if (form === 'captions') {
       this.captionPrefsDialog = dialog;
     }
-    else if (form === 'descriptions') { 
+    else if (form === 'descriptions') {
       this.descPrefsDialog = dialog;
     }
-    else if (form === 'keyboard') { 
+    else if (form === 'keyboard') {
       this.keyboardPrefsDialog = dialog;
     }
-    else if (form === 'transcript') { 
+    else if (form === 'transcript') {
       this.transcriptPrefsDialog = dialog;
     }
-    
-    // Add click handler for dialog close button 
-    // (button is added in dialog.js) 
-    $('div.able-prefs-form button.modalCloseButton').click(function() { 
-      thisObj.resetPrefsForm(); 
-    }) 
-    // Add handler for escape key 
-    $('div.able-prefs-form').keydown(function(event) { 
+
+    // Add click handler for dialog close button
+    // (button is added in dialog.js)
+    $('div.able-prefs-form button.modalCloseButton').click(function() {
+      thisObj.resetPrefsForm();
+    })
+    // Add handler for escape key
+    $('div.able-prefs-form').keydown(function(event) {
       if (event.which === 27) { // escape
         thisObj.resetPrefsForm();
-      }      
+      }
     });
   };
 
    // Reset preferences form with default values from cookie
    // Called when user clicks cancel or close button in Prefs Dialog
    // also called when user presses Escape
-    
+
    AblePlayer.prototype.resetPrefsForm = function () {
- 
-     var thisObj, cookie, available, i, prefName, thisDiv, thisId;  
+
+     var thisObj, cookie, available, i, prefName, thisDiv, thisId;
 
      thisObj = this;
      cookie = this.getCookie();
      available = this.getAvailablePreferences();
-     for (i=0; i<available.length; i++) { 
+     for (i=0; i<available.length; i++) {
        prefName = available[i]['name'];
-       if (prefName === 'prefDescFormat') { 
-         if (this[prefName] === 'text') { 
-           $('input[value="text"]').prop('checked',true);   
+       if (prefName === 'prefDescFormat') {
+         if (this[prefName] === 'text') {
+           $('input[value="text"]').prop('checked',true);
          }
-         else { 
-           $('input[value="video"]').prop('checked',true);              
-         } 
+         else {
+           $('input[value="video"]').prop('checked',true);
+         }
        }
-       else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) { 
-         // this is a caption-related select box 
+       else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+         // this is a caption-related select box
          $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
        }
-       else { // all others are checkboxes 
-         if (this[prefName] === 1) { 
-           $('input[name="' + prefName + '"]').prop('checked',true); 
-          } 
-          else { 
-            $('input[name="' + prefName + '"]').prop('checked',false); 
+       else { // all others are checkboxes
+         if (this[prefName] === 1) {
+           $('input[name="' + prefName + '"]').prop('checked',true);
+          }
+          else {
+            $('input[name="' + prefName + '"]').prop('checked',false);
           }
         }
       }
-      // also restore style of sample caption div 
-      this.stylizeCaptions(this.$sampleCapsDiv); 
+      // also restore style of sample caption div
+      this.stylizeCaptions(this.$sampleCapsDiv);
    };
-   
+
   // Return a prefs object constructed from the form.
   AblePlayer.prototype.savePrefsFromForm = function () {
     // called when user saves the Preferences form
@@ -724,37 +724,37 @@
 
     numChanges = 0;
     numCapChanges = 0; // changes to caption-style-related preferences
-    capSizeChanged = false; 
+    capSizeChanged = false;
     var cookie = this.getCookie();
     var available = this.getAvailablePreferences();
     for (var i=0; i < available.length; i++) {
-      // only prefs with labels are used in the Prefs form 
-      if (available[i]['label']) { 
+      // only prefs with labels are used in the Prefs form
+      if (available[i]['label']) {
         var prefName = available[i]['name'];
-        if (prefName == 'prefDescFormat') { 
+        if (prefName == 'prefDescFormat') {
           this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-          if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting           
+          if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting
             cookie.preferences['prefDescFormat'] = this.prefDescFormat;
-            numChanges++; 
+            numChanges++;
           }
         }
-        else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) { 
-          // this is one of the caption-related select fields 
-          newValue = $('select[name="' + prefName + '"]').val(); 
+        else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+          // this is one of the caption-related select fields
+          newValue = $('select[name="' + prefName + '"]').val();
           if (cookie.preferences[prefName] !== newValue) { // user changed setting
             cookie.preferences[prefName] = newValue;
-            // also update global var for this pref (for caption fields, not done elsewhere) 
+            // also update global var for this pref (for caption fields, not done elsewhere)
             this[prefName] = newValue;
-            numChanges++; 
-            numCapChanges++; 
+            numChanges++;
+            numCapChanges++;
           }
-          if (prefName === 'prefCaptionsSize') { 
-            capSizeChanged = true;             
+          if (prefName === 'prefCaptionsSize') {
+            capSizeChanged = true;
             capSizeValue = newValue;
           }
         }
         else { // all other fields are checkboxes
-          if ($('input[name="' + prefName + '"]').is(':checked')) { 
+          if ($('input[name="' + prefName + '"]').is(':checked')) {
             cookie.preferences[prefName] = 1;
             if (this[prefName] === 1) {
               // nothing has changed
@@ -786,14 +786,14 @@
     else {
       this.showAlert(this.tt.prefNoChange);
     }
-    if (this.player === 'youtube' && 
-      (typeof this.usingYouTubeCaptions !== 'undefined' && this.usingYouTubeCaptions) && 
-      capSizeChanged) { 
-        // update font size of YouTube captions 
+    if (this.player === 'youtube' &&
+      (typeof this.usingYouTubeCaptions !== 'undefined' && this.usingYouTubeCaptions) &&
+      capSizeChanged) {
+        // update font size of YouTube captions
         this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
     }
     this.updatePrefs();
-    if (numCapChanges > 0) { 
+    if (numCapChanges > 0) {
       this.stylizeCaptions(this.$captionDiv);
     }
   }
@@ -803,46 +803,46 @@
 
     var modHelp;
 
-    // modifier keys (update help text) 
-    if (this.prefAltKey === 1) { 
+    // modifier keys (update help text)
+    if (this.prefAltKey === 1) {
       modHelp = 'Alt + ';
     }
-    else { 
+    else {
       modHelp = '';
     }
-    if (this.prefCtrlKey === 1) { 
+    if (this.prefCtrlKey === 1) {
       modHelp += 'Control + ';
     }
     if (this.prefShiftKey === 1) {
       modHelp += 'Shift + ';
     }
-    $('.able-help-modifiers').text(modHelp);     
+    $('.able-help-modifiers').text(modHelp);
 
-    // tabbable transcript 
-    if (this.prefTabbable === 1) { 
-      $('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');     
-    } 
-    else { 
+    // tabbable transcript
+    if (this.prefTabbable === 1) {
+      $('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
+    }
+    else {
       $('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
     }
     this.updateCaption();
-    // In case description-related settings have changed, re-initialize description 
-    this.refreshingDesc = true; 
+    // In case description-related settings have changed, re-initialize description
+    this.refreshingDesc = true;
     this.initDescription();
   };
 
-  AblePlayer.prototype.usingModifierKeys = function(e) { 
-    // return true if user is holding down required modifier keys 
-    if ((this.prefAltKey === 1) && !e.altKey) { 
+  AblePlayer.prototype.usingModifierKeys = function(e) {
+    // return true if user is holding down required modifier keys
+    if ((this.prefAltKey === 1) && !e.altKey) {
       return false;
-    } 
-    if ((this.prefCtrlKey === 1) && !e.ctrlKey) { 
+    }
+    if ((this.prefCtrlKey === 1) && !e.ctrlKey) {
       return false;
     }
     if ((this.prefShiftKey === 1) && !e.shiftKey) {
       return false;
     }
-    return true; 
+    return true;
   };
 
 })(jQuery);

@@ -1,12 +1,12 @@
 var en = {
-  
+
 "playerHeading": "Media player",
 
 "faster": "Faster",
 
 "slower": "Slower",
 
-"play": "Play", 
+"play": "Play",
 
 "pause": "Pause",
 
@@ -26,11 +26,11 @@ var en = {
 
 "showTranscript": "Show transcript",
 
-"hideTranscript": "Hide transcript", 
+"hideTranscript": "Hide transcript",
 
-"turnOnDescriptions": "Turn on descriptions", 
+"turnOnDescriptions": "Turn on descriptions",
 
-"turnOffDescriptions": "Turn off descriptions", 
+"turnOffDescriptions": "Turn off descriptions",
 
 "chapters": "Chapters",
 
@@ -46,7 +46,7 @@ var en = {
 
 "unmute": "Unmute",
 
-"volume": "Volume", 
+"volume": "Volume",
 
 "volumeHelp": "Click to access volume slider",
 
@@ -66,13 +66,13 @@ var en = {
 
 "and": "and",
 
-"or": "or", 
+"or": "or",
 
 "spacebar": "spacebar",
 
 "autoScroll": "Auto scroll",
 
-"unknown": "Unknown", 
+"unknown": "Unknown",
 
 "statusPlaying": "Playing",
 
@@ -128,11 +128,11 @@ var en = {
 
 "prefIntroDescription2": "The current video has ",
 
-"prefIntroDescriptionNone": "The current video has no audio description in either format.", 
+"prefIntroDescriptionNone": "The current video has no audio description in either format.",
 
 "prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
 
-"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.", 
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
 
 "prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
 
@@ -212,31 +212,31 @@ var en = {
 
 "yellow": "yellow",
 
-"green": "green", 
+"green": "green",
 
 "cyan": "cyan",
 
-"blue": "blue", 
+"blue": "blue",
 
-"magenta": "magenta", 
+"magenta": "magenta",
 
-"red": "red", 
+"red": "red",
 
-"black": "black", 
+"black": "black",
 
-"transparent": "transparent", 
+"transparent": "transparent",
 
-"solid": "solid", 
+"solid": "solid",
 
 "captionsStylePopOn": "Pop-on",
 
-"captionsStyleRollUp": "Roll-up", 
+"captionsStyleRollUp": "Roll-up",
 
 "prefCaptionsPosition": "Position",
 
-"captionsPositionOverlay": "Overlay", 
+"captionsPositionOverlay": "Overlay",
 
-"captionsPositionBelow": "Below video", 
+"captionsPositionBelow": "Below video",
 
 "sampleCaptionText": "Sample caption text",
 
@@ -252,7 +252,7 @@ var en = {
 
 "cancel": "Cancel",
 
-"ok": "ok", 
+"ok": "ok",
 
 "done": "Done",
 
@@ -260,11 +260,11 @@ var en = {
 
 "windowButtonLabel": "Window options",
 
-"windowMove": "Move", 
+"windowMove": "Move",
 
 "windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
 
-"windowResize": "Resize", 
+"windowResize": "Resize",
 
 "windowResizeHeading": "Resize Interpreter Window",
 
@@ -274,7 +274,7 @@ var en = {
 
 "height": "Height",
 
-"windowSendBack": "Send to back", 
+"windowSendBack": "Send to back",
 
 "windowSendBackAlert": "This window is now behind other objects on the page.",
 

@@ -1,40 +1,40 @@
 (function ($) {
 
-  AblePlayer.prototype.addVolumeSlider = function($div) {   
+  AblePlayer.prototype.addVolumeSlider = function($div) {
 
-    // input type="range" requires IE10 and later 
+    // input type="range" requires IE10 and later
     // and still isn't supported by Opera Mini as of v8
-    // Also, vertical orientation of slider requires CSS hacks   
-    // and causes problems in some screen readers 
-    // Therefore, building a custom vertical volume slider 
-    
-    var thisObj, volumeSliderId, volumeHelpId, x, y;
-    
-    thisObj = this; 
+    // Also, vertical orientation of slider requires CSS hacks
+    // and causes problems in some screen readers
+    // Therefore, building a custom vertical volume slider
 
-    // define a few variables     
+    var thisObj, volumeSliderId, volumeHelpId, x, y;
+
+    thisObj = this;
+
+    // define a few variables
     volumeSliderId = this.mediaId + '-volume-slider';
     volumeHelpId = this.mediaId + '-volume-help';
     this.volumeTrackHeight = 50; // must match CSS height for .able-volume-slider
-    this.volumeHeadHeight = 7; // must match CSS height for .able-volume-head 
-    this.volumeTickHeight = this.volumeTrackHeight / 10;     
+    this.volumeHeadHeight = 7; // must match CSS height for .able-volume-head
+    this.volumeTickHeight = this.volumeTrackHeight / 10;
 
-    this.$volumeSlider = $('<div>',{ 
+    this.$volumeSlider = $('<div>',{
       'id': volumeSliderId,
       'class': 'able-volume-slider',
       'aria-hidden': 'true'
     });
-    this.$volumeSliderTooltip = $('<div>',{ 
+    this.$volumeSliderTooltip = $('<div>',{
       'class': 'able-tooltip',
       'role': 'tooltip'
-    });    
-    this.$volumeSliderTrack = $('<div>',{ 
+    });
+    this.$volumeSliderTrack = $('<div>',{
       'class': 'able-volume-track'
     });
-    this.$volumeSliderTrackOn = $('<div>',{ 
+    this.$volumeSliderTrackOn = $('<div>',{
       'class': 'able-volume-track able-volume-track-on'
     });
-    this.$volumeSliderHead = $('<div>',{ 
+    this.$volumeSliderHead = $('<div>',{
       'class': 'able-volume-head',
       'role': 'slider',
       'aria-label': this.tt.volumeUpDown,
@@ -47,37 +47,37 @@
       'class': 'able-offscreen',
       'aria-live': 'polite'
     });
-    this.$volumeHelp = $('<div>',{ 
+    this.$volumeHelp = $('<div>',{
       'id': volumeHelpId,
-      'class': 'able-offscreen' 
-    }).text(this.tt.volumeHelp); 
-    this.$volumeButton.attr({ 
+      'class': 'able-offscreen'
+    }).text(this.tt.volumeHelp);
+    this.$volumeButton.attr({
       'aria-describedby': volumeHelpId
     });
-    this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)     
+    this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)
     $div.append(this.$volumeSlider);
-        
+
     this.refreshVolumeSlider(this.volume);
-            
-    // add event listeners     
+
+    // add event listeners
     this.$volumeSliderHead.on('mousedown',function (event) {
-      thisObj.draggingVolume = true; 
+      thisObj.draggingVolume = true;
       thisObj.volumeHeadPositionTop = $(this).offset().top;
     });
 
     $(document).on('mouseup',function (event) {
-      thisObj.draggingVolume = false;       
+      thisObj.draggingVolume = false;
     });
 
     $(document).on('mousemove',function (event) {
-      if (thisObj.draggingVolume) { 
+      if (thisObj.draggingVolume) {
         x = event.pageX;
         y = event.pageY;
         thisObj.moveVolumeHead(y);
       }
     });
-    
-    this.$volumeSliderHead.on('keydown',function (event) { 
+
+    this.$volumeSliderHead.on('keydown',function (event) {
       // Left arrow or down arrow
       if (event.which === 37 || event.which === 40) {
         thisObj.handleVolume('down');
@@ -86,8 +86,8 @@
       else if (event.which === 39 || event.which === 38) {
         thisObj.handleVolume('up');
       }
-      // Escape key or Enter key 
-      else if (event.which === 27 || event.which === 13) { 
+      // Escape key or Enter key
+      else if (event.which === 27 || event.which === 13) {
         // close popup
         thisObj.showVolumePopup();
       }
@@ -97,138 +97,138 @@
       event.preventDefault();
     });
   };
-  
+
   AblePlayer.prototype.refreshVolumeSlider = function(volume) {
 
-    // adjust slider position based on current volume 
+    // adjust slider position based on current volume
 
-    var volumePct; 
+    var volumePct;
     volumePct = (volume/10) * 100;
-    
-    var trackOnHeight, trackOnTop, headTop; 
-    trackOnHeight = volume * this.volumeTickHeight; 
-    trackOnTop = this.volumeTrackHeight - trackOnHeight; 
-    headTop = trackOnTop - this.volumeHeadHeight; 
-        
+
+    var trackOnHeight, trackOnTop, headTop;
+    trackOnHeight = volume * this.volumeTickHeight;
+    trackOnTop = this.volumeTrackHeight - trackOnHeight;
+    headTop = trackOnTop - this.volumeHeadHeight;
+
     this.$volumeSliderTrackOn.css({
       'height': trackOnHeight + 'px',
       'top': trackOnTop + 'px'
     });
     this.$volumeSliderHead.css({
       'top': headTop + 'px'
-    });    
+    });
     this.$volumeAlert.text(volumePct + '%');
 
   };
-  
-  AblePlayer.prototype.refreshVolumeButton = function(volume) { 
 
-    var volumeName, volumePct, volumeLabel, volumeIconClass, volumeImg; 
-    
+  AblePlayer.prototype.refreshVolumeButton = function(volume) {
+
+    var volumeName, volumePct, volumeLabel, volumeIconClass, volumeImg;
+
     volumeName = this.getVolumeName(volume);
     volumePct = (volume/10) * 100;
     volumeLabel = this.tt.volume + ' ' + volumePct + '%';
-    
+
     if (this.iconType === 'font') {
       volumeIconClass = 'icon-volume-' + volumeName;
-      this.$volumeButton.find('span').first().removeClass().addClass(volumeIconClass); 
+      this.$volumeButton.find('span').first().removeClass().addClass(volumeIconClass);
       this.$volumeButton.find('span.able-clipped').text(volumeLabel);
     }
-    else { 
+    else {
       volumeImg = this.imgPath + 'volume-' + volumeName + '.png';
-      this.$volumeButton.find('img').attr('src',volumeImg); 
+      this.$volumeButton.find('img').attr('src',volumeImg);
     }
   };
-  
+
   AblePlayer.prototype.moveVolumeHead = function(y) {
 
-    // y is current position after mousemove       
-    var diff, direction, ticksDiff, newVolume, maxedOut; 
+    // y is current position after mousemove
+    var diff, direction, ticksDiff, newVolume, maxedOut;
 
-    var diff = this.volumeHeadPositionTop - y;    
-    
-    // only move the volume head if user had dragged at least one tick 
+    var diff = this.volumeHeadPositionTop - y;
+
+    // only move the volume head if user had dragged at least one tick
     // this is more efficient, plus creates a "snapping' effect
-    if (Math.abs(diff) > this.volumeTickHeight) { 
-      if (diff > 0) { 
-        direction = 'up'; 
+    if (Math.abs(diff) > this.volumeTickHeight) {
+      if (diff > 0) {
+        direction = 'up';
       }
-      else { 
-        direction = 'down'; 
+      else {
+        direction = 'down';
       }
-      if (direction == 'up' && this.volume == 10) { 
-        // can't go any higher 
-        return; 
-      }  
-      else if (direction == 'down' && this.volume == 0) { 
-        // can't go any lower 
-        return; 
+      if (direction == 'up' && this.volume == 10) {
+        // can't go any higher
+        return;
       }
-      else { 
-        ticksDiff = Math.round(Math.abs(diff) / this.volumeTickHeight);        
-        if (direction == 'up') { 
-          newVolume = this.volume + ticksDiff;           
-          if (newVolume > 10) { 
-            newVolume = 10; 
+      else if (direction == 'down' && this.volume == 0) {
+        // can't go any lower
+        return;
+      }
+      else {
+        ticksDiff = Math.round(Math.abs(diff) / this.volumeTickHeight);
+        if (direction == 'up') {
+          newVolume = this.volume + ticksDiff;
+          if (newVolume > 10) {
+            newVolume = 10;
           }
         }
-        else { // direction is down 
-          newVolume = this.volume - ticksDiff; 
-          if (newVolume < 0) { 
-            newVolume = 0; 
+        else { // direction is down
+          newVolume = this.volume - ticksDiff;
+          if (newVolume < 0) {
+            newVolume = 0;
           }
         }
-        this.setVolume(newVolume); // this.volume will be updated after volumechange event fires (event.js) 
+        this.setVolume(newVolume); // this.volume will be updated after volumechange event fires (event.js)
         this.refreshVolumeSlider(newVolume);
         this.refreshVolumeButton(newVolume);
         this.volumeHeadPositionTop = y;
       }
-    }  
+    }
   };
-  
+
   AblePlayer.prototype.handleVolume = function(direction) {
     // 'direction is either 'up','down', or an ASCII key code 49-57 (numeric keys 1-9)
     // Action: calculate and change the volume
     // Don't change this.volume and this.volumeButton yet - wait for 'volumechange' event to fire (event.js)
 
-    // If NO direction is provided, user has just clicked on the Volume button 
-    // Action: show slider 
+    // If NO direction is provided, user has just clicked on the Volume button
+    // Action: show slider
     var volume;
-    
-    if (typeof direction === 'undefined') { 
+
+    if (typeof direction === 'undefined') {
       this.showVolumePopup();
-      return; 
+      return;
     }
 
-    if (direction >= 49 && direction <= 57) { 
-      volume = direction - 48; 
+    if (direction >= 49 && direction <= 57) {
+      volume = direction - 48;
     }
-    else {     
-      
+    else {
+
       volume = this.getVolume();
-    
+
       if (direction === 'up' && volume < 10) {
         volume += 1;
       }
       else if (direction === 'down' && volume > 0) {
         volume -= 1;
       }
-    }    
+    }
 
-    if (this.isMuted() && volume > 0) { 
-      this.setMute(false); 
+    if (this.isMuted() && volume > 0) {
+      this.setMute(false);
     }
     else if (volume === 0) {
       this.setMute(true);
     }
-    else { 
-      this.setVolume(volume); // this.volume will be updated after volumechange event fires (event.js) 
+    else {
+      this.setVolume(volume); // this.volume will be updated after volumechange event fires (event.js)
       this.refreshVolumeSlider(volume);
       this.refreshVolumeButton(volume);
-    }    
+    }
   };
 
-  AblePlayer.prototype.handleMute = function() { 
+  AblePlayer.prototype.handleMute = function() {
     if (this.isMuted()) {
       this.setMute(false);
     }
@@ -236,15 +236,15 @@
       this.setMute(true);
     }
   };
-  
+
   AblePlayer.prototype.showVolumePopup = function() {
-  
-    this.closePopups(); 
+
+    this.closePopups();
     this.$tooltipDiv.hide();
     this.$volumeSlider.show().attr('aria-hidden','false');
     this.$volumeSliderHead.focus();
   };
-  
+
   AblePlayer.prototype.isMuted = function () {
 
     if (this.player === 'html5') {
@@ -260,22 +260,22 @@
 
   AblePlayer.prototype.setMute = function(mute) {
 
-    // mute is either true (muting) or false (unmuting) 
-    if (mute) { 
-      // save current volume so it can be restored after unmute 
-      this.lastVolume = this.volume; 
-      this.volume = 0; 
+    // mute is either true (muting) or false (unmuting)
+    if (mute) {
+      // save current volume so it can be restored after unmute
+      this.lastVolume = this.volume;
+      this.volume = 0;
     }
     else { // restore to previous volume
       if (typeof this.lastVolume !== 'undefined') {
         this.volume = this.lastVolume;
       }
     }
-    
+
     if (this.player === 'html5') {
       this.media.muted = mute;
     }
-    else if (this.player === 'jw' && this.jwPlayer) { 
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.setMute(mute);
     }
     else if (this.player === 'youtube') {
@@ -285,19 +285,19 @@
       else {
         this.youTubePlayer.unMute();
       }
-    }    
+    }
     this.refreshVolumeSlider(this.volume);
     this.refreshVolumeButton(this.volume);
   };
-  
+
   AblePlayer.prototype.setVolume = function (volume) {
 
-    // volume is 1 to 10 
-    // convert as needed depending on player 
-        
+    // volume is 1 to 10
+    // convert as needed depending on player
+
     if (this.player === 'html5') {
       this.media.volume = volume / 10;
-      if (this.hasSignLanguage && this.signVideo) { 
+      if (this.hasSignLanguage && this.signVideo) {
         this.signVideo.volume = 0; // always mute
       }
     }
@@ -307,43 +307,43 @@
     else if (this.player === 'youtube') {
       this.youTubePlayer.setVolume(volume * 10);
     }
-    
+
     this.lastVolume = volume;
   };
 
   AblePlayer.prototype.getVolume = function (volume) {
 
-    // return volume using common audio control scale 1 to 10 
+    // return volume using common audio control scale 1 to 10
 
     if (this.player === 'html5') {
-      // uses 0 to 1 scale 
+      // uses 0 to 1 scale
       return this.media.volume * 10;
     }
     else if (this.player === 'jw' && this.jwPlayer) {
-      // uses 0 to 100 scale 
+      // uses 0 to 100 scale
       return this.jwPlayer.getVolume() / 10;
     }
     else if (this.player === 'youtube') {
-      // uses 0 to 100 scale 
+      // uses 0 to 100 scale
       return this.youTubePlayer.getVolume() / 10;
     }
   };
 
   AblePlayer.prototype.getVolumeName = function (volume) {
 
-    // returns 'mute','soft','medium', or 'loud' depending on volume level 
-    if (volume == 0) { 
+    // returns 'mute','soft','medium', or 'loud' depending on volume level
+    if (volume == 0) {
       return 'mute';
     }
-    else if (volume == 10) { 
+    else if (volume == 10) {
       return 'loud';
     }
-    else if (volume < 5) { 
-      return 'soft'; 
+    else if (volume < 5) {
+      return 'soft';
     }
-    else { 
+    else {
       return 'medium';
     }
   };
-    
+
 })(jQuery);

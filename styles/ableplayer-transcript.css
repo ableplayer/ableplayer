@@ -1,7 +1,7 @@
-/* 
+/*
 	Able Player interactive transcript styles
 */
-.able-transcript { 
+.able-transcript {
 	position: relative; /* must be positioned for scrolling */
   overflow-y: scroll;
   padding-left: 5%;
@@ -9,37 +9,37 @@
   width: 90%;
   height: 400px;
 }
-.able-transcript div { 
+.able-transcript div {
 	margin: 1em 0;
 }
-.able-transcript-heading { 
+.able-transcript-heading {
   font-size: 1.4em;
   font-weight: bold;
 }
-.able-transcript div.able-desc { 
+.able-transcript div.able-desc {
 	background-color: #FEE;
 	border: thin solid #336;
 	font-style: italic;
 	padding: 1em;
 }
-.able-transcript span.able-unspoken { 
+.able-transcript span.able-unspoken {
 	font-weight: bold;
 }
-.able-transcript span.hidden { 
+.able-transcript span.hidden {
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
 }
-.able-highlight { 
+.able-highlight {
 	background: #FF6; /* light yellow */
 }
-.able-previous { 
+.able-previous {
 	background: black !important;
 	font-style: italic;
 }
-.able-transcript span:hover, 
-.able-transcript span:focus, 
-.able-transcript span:active { 
+.able-transcript span:hover,
+.able-transcript span:focus,
+.able-transcript span:active {
 	background: #CF6; /* light green */
 	cursor: pointer;
 }
@@ -65,10 +65,10 @@
 .able-transcript-toolbar input:hover,
 .able-controller input:focus,
 .able-controller input:hover,
-.able-controller button:focus, 
+.able-controller button:focus,
 .able-controller button:hover,
 .able-seek-head:focus,
-.able-seek-head:hover { 
+.able-seek-head:hover {
   outline-style: solid;
   outline-width: 2px;
 }
@@ -76,7 +76,7 @@
 .able-transcript-toolbar input:focus,
 .able-controller input:focus,
 .able-controller button:focus,
-.able-seek-head:focus {  
+.able-seek-head:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 

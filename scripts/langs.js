@@ -2,7 +2,7 @@
   // Look up ISO 639-1 language codes to be used as subtitle labels
   // @author Phil Teare
   // using wikipedia data
-  // In some instances "name" has been trunctation for readability 
+  // In some instances "name" has been trunctation for readability
   // http://stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json/4900304#4900304
 
   var isoLangs = {
@@ -735,7 +735,7 @@
         "nativeName":"Saɯ cueŋƅ, Saw cuengh"
     }
   }
-  
+
   AblePlayer.prototype.getLanguageName = function (key) {
 		key = key.slice(0,2);
 		var lang = isoLangs[key];
@@ -746,5 +746,5 @@
 		var lang = isoLangs[key];
 		return lang ? lang.nativeName : undefined;
 	}
-	
-})(jQuery);	
+
+})(jQuery);
