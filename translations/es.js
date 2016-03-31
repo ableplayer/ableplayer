@@ -100,6 +100,8 @@ var es = {
 
 "alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
 
+"alertNonDescribedVersion": "Using the non-described version of this video",
+
 "fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
 
 "fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",

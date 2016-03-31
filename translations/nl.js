@@ -100,6 +100,8 @@ var nl = {
 
 "alertDescribedVersion": "Versie met audiobeschrijving wordt gebruikt",
 
+"alertNonDescribedVersion": "Using the non-described version of this video",
+
 "fallbackError1": "Sorry, je browser kan dit mediabestand niet afspelen",
 
 "fallbackError2": "De volgende browsers kunnen met deze mediaspeler overweg:",

@@ -16,7 +16,6 @@
     // hasClosedDesc == true if a description text track is available
     // this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
     // descOn == true if description of either type is on
-
     if (!this.refreshingDesc) {
       // this is the initial build
       // first, check to see if there's an open-described version of this video
@@ -68,18 +67,14 @@
       if (this.useDescFormat === 'video') {
 
         if (!this.usingAudioDescription()) {
+          // switched from non-described to described version
           this.swapDescription();
         }
         // hide description div
         this.$descDiv.hide();
         this.$descDiv.removeClass('able-clipped');
-        this.showAlert(this.tt.alertDescribedVersion);
       }
       else if (this.useDescFormat === 'text') {
-        if (this.usingAudioDescription()) {
-        // switch from described version to non-described version
-          this.swapDescription();
-        }
         this.$descDiv.show();
         if (this.prefVisibleDesc) { // make it visible to everyone
           this.$descDiv.removeClass('able-clipped');
@@ -93,6 +88,7 @@
       }
     }
     else { // description is off.
+
       if (this.prevDescFormat === 'video') { // user was previously using description via video
         if (this.usingAudioDescription()) {
           this.swapDescription();
@@ -125,6 +121,15 @@
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
     // 2. User is toggling description
     var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+
+    if (this.descOn) {
+      // user has requested the described version
+      this.showAlert(this.tt.alertDescribedVersion);
+    }
+    else {
+      // user has requested the non-described version
+      this.showAlert(this.tt.alertNonDescribedVersion);
+    }
 
     if (this.player === 'youtube') {
       // re-initializing with new value of this.prefDesc
