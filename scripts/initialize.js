@@ -333,29 +333,35 @@
     this.setupTracks().then(function() {
 
       thisObj.setupAltCaptions().then(function() {
-        thisObj.setupPopups();
+
         thisObj.initDescription();
-        thisObj.initializing = false;
-        thisObj.initPlayer();
         thisObj.initDefaultCaption();
 
-        // inject each of the hidden forms that will be accessed from the Preferences popup menu
-        prefsGroups = thisObj.getPreferencesGroups();
-        for (i in prefsGroups) {
-          thisObj.injectPrefsForm(prefsGroups[i]);
-        }
+        thisObj.initPlayer().then(function() {
 
-        thisObj.updateCaption();
-        thisObj.updateTranscript();
-        thisObj.showSearchResults();
-        if (thisObj.defaultChapter) {
-          thisObj.seekToDefaultChapter();
-        }
+          thisObj.initializing = false;
+
+          // inject each of the hidden forms that will be accessed from the Preferences popup menu
+          prefsGroups = thisObj.getPreferencesGroups();
+          for (i in prefsGroups) {
+            thisObj.injectPrefsForm(prefsGroups[i]);
+          }
+
+          thisObj.setupPopups();
+          thisObj.updateCaption();
+          thisObj.updateTranscript();
+          thisObj.showSearchResults();
+
+          if (thisObj.defaultChapter) {
+            thisObj.seekToDefaultChapter();
+          }
+        });
       });
     });
   };
 
   AblePlayer.prototype.initPlayer = function () {
+
     var thisObj = this;
     var playerPromise;
 
@@ -383,8 +389,6 @@
       thisObj.setMute(false);
       thisObj.setFullscreen(false);
       thisObj.setVolume(thisObj.defaultVolume);
-      thisObj.initializing = true;
-      thisObj.initializing = false; // well, which is it???
       thisObj.refreshControls();
 
       // After done messing with the player, this is necessary to fix playback on iOS
