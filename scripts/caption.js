@@ -1,6 +1,6 @@
 (function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
-    if (!this.usingYouTubeCaptions) {
+    if (!this.usingYouTubeCaptions && (typeof this.$captionDiv !== 'undefined')) {
       if (this.captionsOn) {
         this.$captionDiv.show();
         this.showCaptions(time || this.getElapsed());

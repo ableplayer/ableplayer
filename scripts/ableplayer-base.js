@@ -134,7 +134,7 @@
     }
 
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
-      this.youtubeId = $(media).data('youtube-id');
+      this.youTubeId = $(media).data('youtube-id');
     }
 
     if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {

@@ -573,7 +573,7 @@
     // Determine which player to use, if any
     // return 'html5', 'jw' or null
     var i, sourceType, $newItem;
-    if (this.youtubeId) {
+    if (this.youTubeId) {
       if (this.mediaType !== 'video') {
         return null;
       }

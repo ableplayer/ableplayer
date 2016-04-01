@@ -1,5 +1,6 @@
 (function ($) {
   AblePlayer.prototype.initDescription = function() {
+
     // set default mode for delivering description (open vs closed)
     // based on availability and user preference
 
@@ -115,7 +116,6 @@
   };
 
   AblePlayer.prototype.swapDescription = function() {
-
     // swap described and non-described source media, depending on which is playing
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -141,7 +141,6 @@
     if (this.player === 'html5') {
 
       if (this.usingAudioDescription()) {
-
         // the described version is currently playing. Swap to non-described
         for (i=0; i < this.$sources.length; i++) {
           // for all <source> elements, replace src with data-orig-src
@@ -160,7 +159,6 @@
         this.swappingSrc = true;
       }
       else {
-
         // the non-described version is currently playing. Swap to described.
         for (i=0; i < this.$sources.length; i++) {
           // for all <source> elements, replace src with data-desc-src (if one exists)
@@ -189,6 +187,29 @@
       else if (this.player === 'jw' && this.jwPlayer) {
         newSource = this.$sources[jwSourceIndex].getAttribute('src');
         this.jwPlayer.load({file: newSource});
+      }
+    }
+    else if (this.player === 'youtube') {
+
+      if (this.usingAudioDescription()) {
+        // the described version is currently playing. Swap to non-described
+        this.activeYouTubeId = this.youTubeId;
+        this.showAlert(this.tt.alertNonDescribedVersion);
+      }
+      else {
+        // the non-described version is currently playing. Swap to described.
+        this.activeYouTubeId = this.youTubeDescId;
+        this.showAlert(this.tt.alertDescribedVersion);
+      }
+      if (typeof this.youTubePlayer !== 'undefined') {
+        if (this.playing) {
+          // loadVideoById() loads and immediately plays the new video at swapTime
+          this.youTubePlayer.loadVideoById(this.activeYouTubeId,this.swapTime);
+        }
+        else {
+          // cueVideoById() loads the new video and seeks to swapTime, but does not play
+          this.youTubePlayer.cueVideoById(this.activeYouTubeId,this.swapTime);
+        }
       }
     }
   };

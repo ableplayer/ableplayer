@@ -13,7 +13,7 @@
       youTubeId = this.youTubeDescId;
     }
     else {
-      youTubeId = this.youtubeId;
+      youTubeId = this.youTubeId;
     }
     this.activeYouTubeId = youTubeId;
 
@@ -183,7 +183,7 @@
       youTubeId = this.youTubeDescId;
     }
     else {
-      youTubeId = this.youtubeId;
+      youTubeId = this.youTubeId;
     }
 
     // Wait until Google Client API is loaded
@@ -211,7 +211,6 @@
   };
 
   AblePlayer.prototype.getYouTubeCaptionData = function (youTubeId) {
-
     // get data via YouTube Data API, and push data to this.ytCaptions
 
     var deferred = new $.Deferred();
@@ -292,7 +291,6 @@
   };
 
   AblePlayer.prototype.initYouTubeCaptionModule = function () {
-
     // This function is called when YouTube onApiChange event fires
     // to indicate that the player has loaded (or unloaded) a module with exposed API methods
     // it isn't fired until the video starts playing

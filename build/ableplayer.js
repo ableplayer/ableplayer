@@ -134,7 +134,7 @@
     }
 
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
-      this.youtubeId = $(media).data('youtube-id');
+      this.youTubeId = $(media).data('youtube-id');
     }
 
     if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {
@@ -844,7 +844,7 @@
     // Determine which player to use, if any
     // return 'html5', 'jw' or null
     var i, sourceType, $newItem;
-    if (this.youtubeId) {
+    if (this.youTubeId) {
       if (this.mediaType !== 'video') {
         return null;
       }
@@ -4171,7 +4171,7 @@
       youTubeId = this.youTubeDescId;
     }
     else {
-      youTubeId = this.youtubeId;
+      youTubeId = this.youTubeId;
     }
     this.activeYouTubeId = youTubeId;
 
@@ -4341,7 +4341,7 @@
       youTubeId = this.youTubeDescId;
     }
     else {
-      youTubeId = this.youtubeId;
+      youTubeId = this.youTubeId;
     }
 
     // Wait until Google Client API is loaded
@@ -4369,7 +4369,6 @@
   };
 
   AblePlayer.prototype.getYouTubeCaptionData = function (youTubeId) {
-
     // get data via YouTube Data API, and push data to this.ytCaptions
 
     var deferred = new $.Deferred();
@@ -4450,7 +4449,6 @@
   };
 
   AblePlayer.prototype.initYouTubeCaptionModule = function () {
-
     // This function is called when YouTube onApiChange event fires
     // to indicate that the player has loaded (or unloaded) a module with exposed API methods
     // it isn't fired until the video starts playing
@@ -5587,7 +5585,6 @@
   };
 
   AblePlayer.prototype.swapDescription = function() {
-
     // swap described and non-described source media, depending on which is playing
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -5613,7 +5610,6 @@
     if (this.player === 'html5') {
 
       if (this.usingAudioDescription()) {
-
         // the described version is currently playing. Swap to non-described
         for (i=0; i < this.$sources.length; i++) {
           // for all <source> elements, replace src with data-orig-src
@@ -5632,7 +5628,6 @@
         this.swappingSrc = true;
       }
       else {
-
         // the non-described version is currently playing. Swap to described.
         for (i=0; i < this.$sources.length; i++) {
           // for all <source> elements, replace src with data-desc-src (if one exists)
@@ -5661,6 +5656,29 @@
       else if (this.player === 'jw' && this.jwPlayer) {
         newSource = this.$sources[jwSourceIndex].getAttribute('src');
         this.jwPlayer.load({file: newSource});
+      }
+    }
+    else if (this.player === 'youtube') {
+
+      if (this.usingAudioDescription()) {
+        // the described version is currently playing. Swap to non-described
+        this.activeYouTubeId = this.youTubeId;
+        this.showAlert(this.tt.alertNonDescribedVersion);
+      }
+      else {
+        // the non-described version is currently playing. Swap to described.
+        this.activeYouTubeId = this.youTubeDescId;
+        this.showAlert(this.tt.alertDescribedVersion);
+      }
+      if (typeof this.youTubePlayer !== 'undefined') {
+        if (this.playing) {
+          // loadVideoById() loads and immediately plays the new video at swapTime
+          this.youTubePlayer.loadVideoById(this.activeYouTubeId,this.swapTime);
+        }
+        else {
+          // cueVideoById() loads the new video and seeks to swapTime, but does not play
+          this.youTubePlayer.cueVideoById(this.activeYouTubeId,this.swapTime);
+        }
       }
     }
   };
@@ -6939,7 +6957,7 @@
 
 (function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
-    if (!this.usingYouTubeCaptions) {
+    if (!this.usingYouTubeCaptions && (typeof this.$captionDiv !== 'undefined')) {
       if (this.captionsOn) {
         this.$captionDiv.show();
         this.showCaptions(time || this.getElapsed());
