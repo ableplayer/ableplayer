@@ -1136,11 +1136,12 @@
     this.refreshControls();
   };
 
-  // Change media player source file, for instance when moving to the next element in a playlist.
-  // TODO: Add some sort of playlist support for tracks?
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
-    // replace default media source elements with those from playlist
+    // Change media player source file, for instance when moving to the next element in a playlist.
+    // NOTE: Swapping source for audio description is handled elsewhere;
+    // see description.js > swapDescription()
+
     var $newItem, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
 
     this.$media.find('source').remove();

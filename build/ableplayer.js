@@ -3653,11 +3653,12 @@
     this.refreshControls();
   };
 
-  // Change media player source file, for instance when moving to the next element in a playlist.
-  // TODO: Add some sort of playlist support for tracks?
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
-    // replace default media source elements with those from playlist
+    // Change media player source file, for instance when moving to the next element in a playlist.
+    // NOTE: Swapping source for audio description is handled elsewhere;
+    // see description.js > swapDescription()
+
     var $newItem, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
 
     this.$media.find('source').remove();
@@ -5481,7 +5482,6 @@
     // hasClosedDesc == true if a description text track is available
     // this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
     // descOn == true if description of either type is on
-console.log('initDescription');
     if (!this.refreshingDesc) {
       // this is the initial build
       // first, check to see if there's an open-described version of this video
@@ -5541,12 +5541,6 @@ console.log('initDescription');
         this.$descDiv.removeClass('able-clipped');
       }
       else if (this.useDescFormat === 'text') {
-/*
-        if (this.usingAudioDescription()) {
-        // switch from described version to non-described version
-          this.swapDescription(); // fuck - why do we need to swap??? Why not just change a variable or two to enable the description track???
-        }
-*/
         this.$descDiv.show();
         if (this.prefVisibleDesc) { // make it visible to everyone
           this.$descDiv.removeClass('able-clipped');
@@ -5588,12 +5582,18 @@ console.log('initDescription');
 
   AblePlayer.prototype.swapDescription = function() {
 
-console.log('swapDescription');
     // swap described and non-described source media, depending on which is playing
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
     // 2. User is toggling description
     var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+
+    // get current time, and start new video at the same time
+    // NOTE: There is some risk in resuming playback at the same start time
+    // since the described version might include extended audio description (with pauses)
+    // and might therefore be longer than the non-described version
+    // The benefits though would seem to outweigh this risk
+    this.swapTime = this.getElapsed(); // video will scrub to this time after loaded (see event.js)
 
     if (this.descOn) {
       // user has requested the described version
@@ -5604,39 +5604,11 @@ console.log('swapDescription');
       this.showAlert(this.tt.alertNonDescribedVersion);
     }
 
-    if (this.player === 'youtube') {
-      // re-initializing with new value of this.prefDesc
-      // will load the opposite YouTube ID
-      this.swappingSrc = true;
-      this.initYouTubePlayer();
-    }
-    else {
-      if (!this.usingAudioDescription()) {
+    if (this.player === 'html5') {
 
-        for (i=0; i < this.$sources.length; i++) {
-          // for all <source> elements, replace src with data-desc-src (if one exists)
-          // then store original source in a new data-orig-src attribute
-          origSrc = this.$sources[i].getAttribute('src');
-          descSrc = this.$sources[i].getAttribute('data-desc-src');
-          srcType = this.$sources[i].getAttribute('type');
-          if (descSrc) {
-            this.$sources[i].setAttribute('src',descSrc);
-            this.$sources[i].setAttribute('data-orig-src',origSrc);
-          }
-          if (srcType === 'video/mp4') {
-            jwSourceIndex = i;
-          }
-        }
-        if (this.initializing) { // user hasn't pressed play yet
-          this.swappingSrc = false;
-        }
-        else {
-          this.swappingSrc = true;
-        }
-      }
-      else {
-        // the described version is currently playing
-        // swap back to the original
+      if (this.usingAudioDescription()) {
+
+        // the described version is currently playing. Swap to non-described
         for (i=0; i < this.$sources.length; i++) {
           // for all <source> elements, replace src with data-orig-src
           origSrc = this.$sources[i].getAttribute('data-orig-src');
@@ -5653,9 +5625,32 @@ console.log('swapDescription');
         // if swapping from non-described to described
         this.swappingSrc = true;
       }
+      else {
+
+        // the non-described version is currently playing. Swap to described.
+        for (i=0; i < this.$sources.length; i++) {
+          // for all <source> elements, replace src with data-desc-src (if one exists)
+          // then store original source in a new data-orig-src attribute
+          origSrc = this.$sources[i].getAttribute('src');
+          descSrc = this.$sources[i].getAttribute('data-desc-src');
+          srcType = this.$sources[i].getAttribute('type');
+          if (descSrc) {
+            this.$sources[i].setAttribute('src',descSrc);
+            this.$sources[i].setAttribute('data-orig-src',origSrc);
+          }
+          if (srcType === 'video/mp4') {
+            jwSourceIndex = i;
+          }
+        }
+        this.swappingSrc = true;
+      }
+
       // now reload the source file.
       if (this.player === 'html5') {
         this.media.load();
+      }
+      else if (this.player === 'youtube') {
+        // TODO: Load new youTubeId
       }
       else if (this.player === 'jw' && this.jwPlayer) {
         newSource = this.$sources[jwSourceIndex].getAttribute('src');
@@ -5893,10 +5888,8 @@ console.log('swapDescription');
       this.startTime = newTime;
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
-
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
         this.media.currentTime = this.startTime;
-
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
@@ -7772,6 +7765,7 @@ console.log('swapDescription');
 (function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
+
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
         if (this.startTime === this.media.currentTime) {
@@ -7797,13 +7791,24 @@ console.log('swapDescription');
         }
       }
     }
+    else if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
+      if (this.swapTime === this.media.currentTime) {
+        // described version been swapped and media has scrubbed to time of previous version
+        if (this.playing) {
+          // resume playback
+          this.playMedia();
+          // reset vars
+          this.swappingSrc = false;
+          this.swapTime = null;
+        }
+      }
+    }
     else if (this.player === 'youtube' && !this.startedPlaying) {
       if (this.autoplay) {
         this.playMedia();
       }
     }
     if (!this.swappingSrc) {
-      // show highlight in transcript
       if (this.prefHighlight === 1) {
         this.highlightTranscript(this.getElapsed());
       }
@@ -7843,23 +7848,29 @@ console.log('swapDescription');
 
     if (this.swappingSrc === true) {
       // new source file has just been loaded
-      if (this.playing) {
-        // should be able to resume playback
-
-        if (this.player === 'jw') {
-          var player = this.jwPlayer;
-          // Seems to be a bug in JW player, where this doesn't work when fired immediately.
-          // Thus have to use a setTimeout
-          setTimeout(function () {
-            player.play(true);
-          }, 500);
-        }
-        else {
-          this.playMedia();
-        }
+      if (this.swapTime > 0) {
+        // this.swappingSrc will be set to false after seek is complete
+        // see onMediaUpdateTime()
+        this.seekTo(this.swapTime);
       }
-      this.swappingSrc = false; // swapping is finished
-      this.refreshControls();
+      else {
+        if (this.playing) {
+          // should be able to resume playback
+          if (this.player === 'jw') {
+            var player = this.jwPlayer;
+            // Seems to be a bug in JW player, where this doesn't work when fired immediately.
+            // Thus have to use a setTimeout
+            setTimeout(function () {
+              player.play(true);
+            }, 500);
+          }
+          else {
+            this.playMedia();
+          }
+        }
+        this.swappingSrc = false; // swapping is finished
+        this.refreshControls();
+      }
     }
   };
 

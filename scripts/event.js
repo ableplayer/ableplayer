@@ -1,6 +1,7 @@
 (function ($) {
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
+
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
         if (this.startTime === this.media.currentTime) {
@@ -26,13 +27,24 @@
         }
       }
     }
+    else if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
+      if (this.swapTime === this.media.currentTime) {
+        // described version been swapped and media has scrubbed to time of previous version
+        if (this.playing) {
+          // resume playback
+          this.playMedia();
+          // reset vars
+          this.swappingSrc = false;
+          this.swapTime = null;
+        }
+      }
+    }
     else if (this.player === 'youtube' && !this.startedPlaying) {
       if (this.autoplay) {
         this.playMedia();
       }
     }
     if (!this.swappingSrc) {
-      // show highlight in transcript
       if (this.prefHighlight === 1) {
         this.highlightTranscript(this.getElapsed());
       }
@@ -72,23 +84,29 @@
 
     if (this.swappingSrc === true) {
       // new source file has just been loaded
-      if (this.playing) {
-        // should be able to resume playback
-
-        if (this.player === 'jw') {
-          var player = this.jwPlayer;
-          // Seems to be a bug in JW player, where this doesn't work when fired immediately.
-          // Thus have to use a setTimeout
-          setTimeout(function () {
-            player.play(true);
-          }, 500);
-        }
-        else {
-          this.playMedia();
-        }
+      if (this.swapTime > 0) {
+        // this.swappingSrc will be set to false after seek is complete
+        // see onMediaUpdateTime()
+        this.seekTo(this.swapTime);
       }
-      this.swappingSrc = false; // swapping is finished
-      this.refreshControls();
+      else {
+        if (this.playing) {
+          // should be able to resume playback
+          if (this.player === 'jw') {
+            var player = this.jwPlayer;
+            // Seems to be a bug in JW player, where this doesn't work when fired immediately.
+            // Thus have to use a setTimeout
+            setTimeout(function () {
+              player.play(true);
+            }, 500);
+          }
+          else {
+            this.playMedia();
+          }
+        }
+        this.swappingSrc = false; // swapping is finished
+        this.refreshControls();
+      }
     }
   };
 

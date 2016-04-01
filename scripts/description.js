@@ -122,6 +122,13 @@
     // 2. User is toggling description
     var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
 
+    // get current time, and start new video at the same time
+    // NOTE: There is some risk in resuming playback at the same start time
+    // since the described version might include extended audio description (with pauses)
+    // and might therefore be longer than the non-described version
+    // The benefits though would seem to outweigh this risk
+    this.swapTime = this.getElapsed(); // video will scrub to this time after loaded (see event.js)
+
     if (this.descOn) {
       // user has requested the described version
       this.showAlert(this.tt.alertDescribedVersion);
@@ -131,39 +138,11 @@
       this.showAlert(this.tt.alertNonDescribedVersion);
     }
 
-    if (this.player === 'youtube') {
-      // re-initializing with new value of this.prefDesc
-      // will load the opposite YouTube ID
-      this.swappingSrc = true;
-      this.initYouTubePlayer();
-    }
-    else {
-      if (!this.usingAudioDescription()) {
+    if (this.player === 'html5') {
 
-        for (i=0; i < this.$sources.length; i++) {
-          // for all <source> elements, replace src with data-desc-src (if one exists)
-          // then store original source in a new data-orig-src attribute
-          origSrc = this.$sources[i].getAttribute('src');
-          descSrc = this.$sources[i].getAttribute('data-desc-src');
-          srcType = this.$sources[i].getAttribute('type');
-          if (descSrc) {
-            this.$sources[i].setAttribute('src',descSrc);
-            this.$sources[i].setAttribute('data-orig-src',origSrc);
-          }
-          if (srcType === 'video/mp4') {
-            jwSourceIndex = i;
-          }
-        }
-        if (this.initializing) { // user hasn't pressed play yet
-          this.swappingSrc = false;
-        }
-        else {
-          this.swappingSrc = true;
-        }
-      }
-      else {
-        // the described version is currently playing
-        // swap back to the original
+      if (this.usingAudioDescription()) {
+
+        // the described version is currently playing. Swap to non-described
         for (i=0; i < this.$sources.length; i++) {
           // for all <source> elements, replace src with data-orig-src
           origSrc = this.$sources[i].getAttribute('data-orig-src');
@@ -180,9 +159,32 @@
         // if swapping from non-described to described
         this.swappingSrc = true;
       }
+      else {
+
+        // the non-described version is currently playing. Swap to described.
+        for (i=0; i < this.$sources.length; i++) {
+          // for all <source> elements, replace src with data-desc-src (if one exists)
+          // then store original source in a new data-orig-src attribute
+          origSrc = this.$sources[i].getAttribute('src');
+          descSrc = this.$sources[i].getAttribute('data-desc-src');
+          srcType = this.$sources[i].getAttribute('type');
+          if (descSrc) {
+            this.$sources[i].setAttribute('src',descSrc);
+            this.$sources[i].setAttribute('data-orig-src',origSrc);
+          }
+          if (srcType === 'video/mp4') {
+            jwSourceIndex = i;
+          }
+        }
+        this.swappingSrc = true;
+      }
+
       // now reload the source file.
       if (this.player === 'html5') {
         this.media.load();
+      }
+      else if (this.player === 'youtube') {
+        // TODO: Load new youTubeId
       }
       else if (this.player === 'jw' && this.jwPlayer) {
         newSource = this.$sources[jwSourceIndex].getAttribute('src');
