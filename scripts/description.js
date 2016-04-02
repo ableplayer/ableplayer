@@ -120,7 +120,9 @@
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
     // 2. User is toggling description
-    var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+    var thisObj, i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+
+    thisObj = this;
 
     // get current time, and start new video at the same time
     // NOTE: There is some risk in resuming playback at the same start time
@@ -202,14 +204,19 @@
         this.showAlert(this.tt.alertDescribedVersion);
       }
       if (typeof this.youTubePlayer !== 'undefined') {
-        if (this.playing) {
-          // loadVideoById() loads and immediately plays the new video at swapTime
-          this.youTubePlayer.loadVideoById(this.activeYouTubeId,this.swapTime);
-        }
-        else {
-          // cueVideoById() loads the new video and seeks to swapTime, but does not play
-          this.youTubePlayer.cueVideoById(this.activeYouTubeId,this.swapTime);
-        }
+
+        // retrieve/setup captions for the new video from YouTube
+        this.setupAltCaptions().then(function() {
+
+          if (thisObj.playing) {
+            // loadVideoById() loads and immediately plays the new video at swapTime
+            thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+          }
+          else {
+            // cueVideoById() loads the new video and seeks to swapTime, but does not play
+            thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+          }
+        });
       }
     }
   };

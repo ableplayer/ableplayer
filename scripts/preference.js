@@ -173,16 +173,6 @@
         'default': '75%'
       });
 
-/*    // Sign lanuage preferences
-      // no longer an option as of v 2.3.4; always on in rare cases that it's actually avaialable
-      // as all users should be exposed to it
-      prefs.push({
-        'name': 'prefSignLanguage', // use sign language if available
-        'label': null,
-        'group': 'sign',
-        'default': 1
-      });
-*/
       // Description preferences
       prefs.push({
         'name': 'prefDesc', // audio description default state

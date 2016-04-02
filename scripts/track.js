@@ -59,7 +59,6 @@
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
     this.hasCaptions = true;
-
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it
     // if not provided, assume track is the same language as the default player language
     var trackLang = track.getAttribute('srclang') || this.lang;
@@ -272,7 +271,6 @@
     // setup captions from an alternative source (not <track> elements)
     // only do this if no <track> captions are provided
     // currently supports: YouTube
-
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 

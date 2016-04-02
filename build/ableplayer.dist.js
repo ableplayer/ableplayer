@@ -686,29 +686,37 @@
 
   AblePlayer.prototype.initDefaultCaption = function () {
 
-    var i;
-    if (this.captions.length > 0) {
-      for (i=0; i<this.captions.length; i++) {
-        if (this.captions[i].def === true) {
-          this.captionLang = this.captions[i].language;
-          this.selectedCaptions = this.captions[i];
+    var captions, i;
+
+    if (this.usingYouTubeCaptions) {
+      captions = this.ytCaptions;
+    }
+    else {
+      captions = this.captions;
+    }
+
+    if (captions.length > 0) {
+      for (i=0; i<captions.length; i++) {
+        if (captions[i].def === true) {
+          this.captionLang = captions[i].language;
+          this.selectedCaptions = captions[i];
         }
       }
       if (typeof this.captionLang === 'undefined') {
         // No caption track was flagged as default
         // find and use a caption language that matches the player language
-        for (i=0; i<this.captions.length; i++) {
-          if (this.captions[i].language === this.lang) {
-            this.captionLang = this.captions[i].language;
-            this.selectedCaptions = this.captions[i];
+        for (i=0; i<captions.length; i++) {
+          if (captions[i].language === this.lang) {
+            this.captionLang = captions[i].language;
+            this.selectedCaptions = captions[i];
           }
         }
       }
       if (typeof this.captionLang === 'undefined') {
         // Still no matching caption track
         // just use the first track
-        this.captionLang = this.captions[0].language;
-        this.selectedCaptions = this.captions[0];
+        this.captionLang = captions[0].language;
+        this.selectedCaptions = captions[0];
       }
       if (typeof this.captionLang !== 'undefined') {
         // reset transcript selected <option> to this.captionLang
@@ -1089,16 +1097,6 @@
         'default': '75%'
       });
 
-/*    // Sign lanuage preferences
-      // no longer an option as of v 2.3.4; always on in rare cases that it's actually avaialable
-      // as all users should be exposed to it
-      prefs.push({
-        'name': 'prefSignLanguage', // use sign language if available
-        'label': null,
-        'group': 'sign',
-        'default': 1
-      });
-*/
       // Description preferences
       prefs.push({
         'name': 'prefDesc', // audio description default state
@@ -2924,7 +2922,6 @@
   // Create popup div and append to player
   // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
-
     var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton,
         selectedTrackIndex, selectedTrack;
     thisObj = this;
@@ -3011,29 +3008,33 @@
     }
   };
 
-  // Create and fill in the popup menu forms for various controls.
-  AblePlayer.prototype.setupPopups = function () {
+  AblePlayer.prototype.setupPopups = function (which) {
+    // Create and fill in the popup menu forms for various controls.
+    // parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
+
     var popups, thisObj, hasDefault, i, j,
         tracks, trackList, trackItem, track,
         radioName, radioId, trackButton, trackLabel,
         prefCats, prefCat, prefLabel;
 
     popups = [];
-    popups.push('prefs');
+    if (typeof which === 'undefined') {
+      popups.push('prefs');
+    }
 
-    if (typeof this.ytCaptions !== 'undefined') {
-      // special call to this function for setting up a YouTube caption popup
-      if (this.ytCaptions.length) {
-        popups.push('ytCaptions');
+    if (which === 'captions' || (typeof which === 'undefined')) {
+      if (typeof this.ytCaptions !== 'undefined') { // setup popup for YouTube captions
+        if (this.ytCaptions.length) {
+          popups.push('ytCaptions');
+        }
       }
-      else {
-        return false;
+      else { // setup popup for local captions
+        if (this.captions.length > 0) {
+          popups.push('captions');
+        }
       }
     }
-    else {
-      if (this.captions.length > 0) {
-        popups.push('captions');
-      }
+    if (which === 'chapters' || (typeof which === 'undefined')) {
       if (this.chapters.length > 0 && this.useChaptersButton) {
         popups.push('chapters');
       }
@@ -3047,15 +3048,21 @@
           this.prefsPopup = this.createPopup('prefs');
         }
         else if (popup == 'captions') {
-          this.captionsPopup = this.createPopup('captions');
+          if (typeof this.captionsPopup === 'undefined') {
+            this.captionsPopup = this.createPopup('captions');
+          }
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          this.chaptersPopup = this.createPopup('chapters');
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters');
+          }
           tracks = this.chapters;
         }
         else if (popup == 'ytCaptions') {
-          this.captionsPopup = this.createPopup('captions');
+          if (typeof this.captionsPopup === 'undefined') {
+            this.captionsPopup = this.createPopup('captions');
+          }
           tracks = this.ytCaptions;
         }
         var trackList = $('<ul></ul>');
@@ -3182,10 +3189,10 @@
             trackList.find('input').first().attr('checked','checked');
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
-            this.captionsPopup.append(trackList);
+            this.captionsPopup.html(trackList);
           }
           else if (popup === 'chapters') {
-            this.chaptersPopup.append(trackList);
+            this.chaptersPopup.html(trackList);
           }
         }
       }
@@ -3920,7 +3927,6 @@
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
     this.hasCaptions = true;
-
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it
     // if not provided, assume track is the same language as the default player language
     var trackLang = track.getAttribute('srclang') || this.lang;
@@ -4133,7 +4139,6 @@
     // setup captions from an alternative source (not <track> elements)
     // only do this if no <track> captions are provided
     // currently supports: YouTube
-
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
@@ -4370,7 +4375,6 @@
 
   AblePlayer.prototype.getYouTubeCaptionData = function (youTubeId) {
     // get data via YouTube Data API, and push data to this.ytCaptions
-
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
@@ -4387,6 +4391,7 @@
           'videoId': youTubeId
         });
         request.then(function(json) {
+
           if (json.result.items.length) { // video has captions!
             thisObj.hasCaptions = true;
             thisObj.usingYouTubeCaptions = true;
@@ -4404,7 +4409,6 @@
               trackLang = json.result.items[i].snippet.language;
               trackKind = json.result.items[i].snippet.trackKind; // ASR, standard, forced
               isDraft = json.result.items[i].snippet.isDraft; // Boolean
-
               // Other variables that could potentially be collected from snippet:
               // isCC - Boolean, always seems to be false
               // isLarge - Boolean
@@ -4434,6 +4438,8 @@
                 });
               }
             }
+            // setupPopups again with new ytCaptions array, replacing original
+            thisObj.setupPopups('captions');
             deferred.resolve();
           }
           else {
@@ -4464,7 +4470,6 @@
     // There are differences in the data and methods available through these modules
     // This function therefore is used to determine which captions module is being used
     // If it's a known module, this.ytCaptionModule will be used elsewhere to control captions
-
     var options, fontSize, displaySettings;
 
     options = this.youTubePlayer.getOptions();
@@ -4472,10 +4477,14 @@
       for (var i=0; i<options.length; i++) {
         if (options[i] == 'cc') { // this is the AS3 (Flash) player
           this.ytCaptionModule = 'cc';
+          this.hasCaptions = true;
+          this.usingYouTubeCaptions = true;
           break;
         }
         else if (options[i] == 'captions') { // this is the HTML5 player
           this.ytCaptionModule = 'captions';
+          this.hasCaptions = true;
+          this.usingYouTubeCaptions = true;
           break;
         }
         else {
@@ -4487,6 +4496,8 @@
       }
       if (typeof this.ytCaptionModule !== 'undefined') {
         if (this.usingYouTubeCaptions) {
+          // set default languaage
+          this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
           // set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
           this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
           // ideally could set other display options too, but no others seem to be supported by setOption()
@@ -5589,7 +5600,9 @@
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
     // 2. User is toggling description
-    var i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+    var thisObj, i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+
+    thisObj = this;
 
     // get current time, and start new video at the same time
     // NOTE: There is some risk in resuming playback at the same start time
@@ -5671,14 +5684,19 @@
         this.showAlert(this.tt.alertDescribedVersion);
       }
       if (typeof this.youTubePlayer !== 'undefined') {
-        if (this.playing) {
-          // loadVideoById() loads and immediately plays the new video at swapTime
-          this.youTubePlayer.loadVideoById(this.activeYouTubeId,this.swapTime);
-        }
-        else {
-          // cueVideoById() loads the new video and seeks to swapTime, but does not play
-          this.youTubePlayer.cueVideoById(this.activeYouTubeId,this.swapTime);
-        }
+
+        // retrieve/setup captions for the new video from YouTube
+        this.setupAltCaptions().then(function() {
+
+          if (thisObj.playing) {
+            // loadVideoById() loads and immediately plays the new video at swapTime
+            thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+          }
+          else {
+            // cueVideoById() loads the new video and seeks to swapTime, but does not play
+            thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+          }
+        });
       }
     }
   };
@@ -6527,6 +6545,7 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() {
+
     var captions;
 
     if (this.hidingPopup) {
@@ -6534,9 +6553,6 @@
       // immediately after closing it
       this.hidingPopup = false;
       return false;
-    }
-    if (this.usingYouTubeCaptions) {
-
     }
     if (this.captions.length) {
       captions = this.captions;
@@ -6563,7 +6579,9 @@
         // captions are off. Turn them on.
         this.captionsOn = true;
         if (this.usingYouTubeCaptions) {
-          this.youTubePlayer.loadModule(this.ytCaptionModule);
+          if (typeof this.ytCaptionModule !== 'undefined') {
+            this.youTubePlayer.loadModule(this.ytCaptionModule);
+          }
         }
         else {
           this.$captionDiv.show();
@@ -6581,6 +6599,8 @@
       this.refreshControls();
     }
     else {
+      // there is more than one caption track.
+      // clicking on a track is handled via caption.js > getCaptionClickFunction()
       if (this.captionsPopup.is(':visible')) {
         this.captionsPopup.hide();
         this.hidingPopup = false;
@@ -6972,16 +6992,23 @@
   // Returns the function used when a caption is clicked in the captions menu.
   // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
-
     var thisObj = this;
     return function () {
       thisObj.selectedCaptions = track;
       thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
+
       if (thisObj.usingYouTubeCaptions) {
         if (thisObj.captionsOn) {
-          // captions are already on. Just need to change the language
-          thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang});
+          if (typeof thisObj.ytCaptionModule !== 'undefined') {
+            // captions are already on. Just need to change the language
+            thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang});
+          }
+          else {
+            // need to wait for caption module to be loaded to change the language
+            // caption module will be loaded after video starts playing, triggered by onApiChange event
+            // at that point, thosObj.captionLang will be passed to the module as the default language
+          }
         }
         else {
           // captions are off (i.e., captions module has been unloaded; need to reload it)
@@ -7142,9 +7169,9 @@
         break;
 
       case 'prefCaptionsSize':
-        options[0] = '50%';
-        options[1] = '75%';
-        options[2] = '100%';
+        options[0] = '75%';
+        options[1] = '100%';
+        options[2] = '125%';
         options[3] = '150%';
         options[4] = '200%';
         break;
@@ -7176,17 +7203,18 @@
     // translate current value of pref to a value supported by outputformat
     if (outputFormat == 'youtube') {
       if (pref === 'size') {
+        // YouTube font sizes are a range from -1 to 3 (0 = default)
         switch (value) {
-          case '50%':
-            return -1; // YouTube has one size small than default
           case '75%':
-            return 0; // this is actually default, so maybe larger on YouTube than Able Player
+            return -1;
           case '100%':
-            return 1; // slightly larger than default
+            return 0;
+          case '125%':
+            return 1;
           case '150%':
             return 2;
           case '200%':
-            return 3; // largest
+            return 3;
         }
       }
     }

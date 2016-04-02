@@ -622,6 +622,7 @@
   };
 
   AblePlayer.prototype.handleCaptionToggle = function() {
+
     var captions;
 
     if (this.hidingPopup) {
@@ -629,9 +630,6 @@
       // immediately after closing it
       this.hidingPopup = false;
       return false;
-    }
-    if (this.usingYouTubeCaptions) {
-
     }
     if (this.captions.length) {
       captions = this.captions;
@@ -658,7 +656,9 @@
         // captions are off. Turn them on.
         this.captionsOn = true;
         if (this.usingYouTubeCaptions) {
-          this.youTubePlayer.loadModule(this.ytCaptionModule);
+          if (typeof this.ytCaptionModule !== 'undefined') {
+            this.youTubePlayer.loadModule(this.ytCaptionModule);
+          }
         }
         else {
           this.$captionDiv.show();
@@ -676,6 +676,8 @@
       this.refreshControls();
     }
     else {
+      // there is more than one caption track.
+      // clicking on a track is handled via caption.js > getCaptionClickFunction()
       if (this.captionsPopup.is(':visible')) {
         this.captionsPopup.hide();
         this.hidingPopup = false;

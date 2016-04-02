@@ -15,16 +15,23 @@
   // Returns the function used when a caption is clicked in the captions menu.
   // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
-
     var thisObj = this;
     return function () {
       thisObj.selectedCaptions = track;
       thisObj.captionLang = track.language;
       thisObj.currentCaption = -1;
+
       if (thisObj.usingYouTubeCaptions) {
         if (thisObj.captionsOn) {
-          // captions are already on. Just need to change the language
-          thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang});
+          if (typeof thisObj.ytCaptionModule !== 'undefined') {
+            // captions are already on. Just need to change the language
+            thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang});
+          }
+          else {
+            // need to wait for caption module to be loaded to change the language
+            // caption module will be loaded after video starts playing, triggered by onApiChange event
+            // at that point, thosObj.captionLang will be passed to the module as the default language
+          }
         }
         else {
           // captions are off (i.e., captions module has been unloaded; need to reload it)
@@ -185,9 +192,9 @@
         break;
 
       case 'prefCaptionsSize':
-        options[0] = '50%';
-        options[1] = '75%';
-        options[2] = '100%';
+        options[0] = '75%';
+        options[1] = '100%';
+        options[2] = '125%';
         options[3] = '150%';
         options[4] = '200%';
         break;
@@ -219,17 +226,18 @@
     // translate current value of pref to a value supported by outputformat
     if (outputFormat == 'youtube') {
       if (pref === 'size') {
+        // YouTube font sizes are a range from -1 to 3 (0 = default)
         switch (value) {
-          case '50%':
-            return -1; // YouTube has one size small than default
           case '75%':
-            return 0; // this is actually default, so maybe larger on YouTube than Able Player
+            return -1;
           case '100%':
-            return 1; // slightly larger than default
+            return 0;
+          case '125%':
+            return 1;
           case '150%':
             return 2;
           case '200%':
-            return 3; // largest
+            return 3;
         }
       }
     }

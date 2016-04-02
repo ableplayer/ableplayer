@@ -415,29 +415,37 @@
 
   AblePlayer.prototype.initDefaultCaption = function () {
 
-    var i;
-    if (this.captions.length > 0) {
-      for (i=0; i<this.captions.length; i++) {
-        if (this.captions[i].def === true) {
-          this.captionLang = this.captions[i].language;
-          this.selectedCaptions = this.captions[i];
+    var captions, i;
+
+    if (this.usingYouTubeCaptions) {
+      captions = this.ytCaptions;
+    }
+    else {
+      captions = this.captions;
+    }
+
+    if (captions.length > 0) {
+      for (i=0; i<captions.length; i++) {
+        if (captions[i].def === true) {
+          this.captionLang = captions[i].language;
+          this.selectedCaptions = captions[i];
         }
       }
       if (typeof this.captionLang === 'undefined') {
         // No caption track was flagged as default
         // find and use a caption language that matches the player language
-        for (i=0; i<this.captions.length; i++) {
-          if (this.captions[i].language === this.lang) {
-            this.captionLang = this.captions[i].language;
-            this.selectedCaptions = this.captions[i];
+        for (i=0; i<captions.length; i++) {
+          if (captions[i].language === this.lang) {
+            this.captionLang = captions[i].language;
+            this.selectedCaptions = captions[i];
           }
         }
       }
       if (typeof this.captionLang === 'undefined') {
         // Still no matching caption track
         // just use the first track
-        this.captionLang = this.captions[0].language;
-        this.selectedCaptions = this.captions[0];
+        this.captionLang = captions[0].language;
+        this.selectedCaptions = captions[0];
       }
       if (typeof this.captionLang !== 'undefined') {
         // reset transcript selected <option> to this.captionLang

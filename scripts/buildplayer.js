@@ -403,7 +403,6 @@
   // Create popup div and append to player
   // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
-
     var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton,
         selectedTrackIndex, selectedTrack;
     thisObj = this;
@@ -490,29 +489,33 @@
     }
   };
 
-  // Create and fill in the popup menu forms for various controls.
-  AblePlayer.prototype.setupPopups = function () {
+  AblePlayer.prototype.setupPopups = function (which) {
+    // Create and fill in the popup menu forms for various controls.
+    // parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
+
     var popups, thisObj, hasDefault, i, j,
         tracks, trackList, trackItem, track,
         radioName, radioId, trackButton, trackLabel,
         prefCats, prefCat, prefLabel;
 
     popups = [];
-    popups.push('prefs');
+    if (typeof which === 'undefined') {
+      popups.push('prefs');
+    }
 
-    if (typeof this.ytCaptions !== 'undefined') {
-      // special call to this function for setting up a YouTube caption popup
-      if (this.ytCaptions.length) {
-        popups.push('ytCaptions');
+    if (which === 'captions' || (typeof which === 'undefined')) {
+      if (typeof this.ytCaptions !== 'undefined') { // setup popup for YouTube captions
+        if (this.ytCaptions.length) {
+          popups.push('ytCaptions');
+        }
       }
-      else {
-        return false;
+      else { // setup popup for local captions
+        if (this.captions.length > 0) {
+          popups.push('captions');
+        }
       }
     }
-    else {
-      if (this.captions.length > 0) {
-        popups.push('captions');
-      }
+    if (which === 'chapters' || (typeof which === 'undefined')) {
       if (this.chapters.length > 0 && this.useChaptersButton) {
         popups.push('chapters');
       }
@@ -526,15 +529,21 @@
           this.prefsPopup = this.createPopup('prefs');
         }
         else if (popup == 'captions') {
-          this.captionsPopup = this.createPopup('captions');
+          if (typeof this.captionsPopup === 'undefined') {
+            this.captionsPopup = this.createPopup('captions');
+          }
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          this.chaptersPopup = this.createPopup('chapters');
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters');
+          }
           tracks = this.chapters;
         }
         else if (popup == 'ytCaptions') {
-          this.captionsPopup = this.createPopup('captions');
+          if (typeof this.captionsPopup === 'undefined') {
+            this.captionsPopup = this.createPopup('captions');
+          }
           tracks = this.ytCaptions;
         }
         var trackList = $('<ul></ul>');
@@ -661,10 +670,10 @@
             trackList.find('input').first().attr('checked','checked');
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
-            this.captionsPopup.append(trackList);
+            this.captionsPopup.html(trackList);
           }
           else if (popup === 'chapters') {
-            this.chaptersPopup.append(trackList);
+            this.chaptersPopup.html(trackList);
           }
         }
       }

@@ -212,7 +212,6 @@
 
   AblePlayer.prototype.getYouTubeCaptionData = function (youTubeId) {
     // get data via YouTube Data API, and push data to this.ytCaptions
-
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
@@ -229,6 +228,7 @@
           'videoId': youTubeId
         });
         request.then(function(json) {
+
           if (json.result.items.length) { // video has captions!
             thisObj.hasCaptions = true;
             thisObj.usingYouTubeCaptions = true;
@@ -246,7 +246,6 @@
               trackLang = json.result.items[i].snippet.language;
               trackKind = json.result.items[i].snippet.trackKind; // ASR, standard, forced
               isDraft = json.result.items[i].snippet.isDraft; // Boolean
-
               // Other variables that could potentially be collected from snippet:
               // isCC - Boolean, always seems to be false
               // isLarge - Boolean
@@ -276,6 +275,8 @@
                 });
               }
             }
+            // setupPopups again with new ytCaptions array, replacing original
+            thisObj.setupPopups('captions');
             deferred.resolve();
           }
           else {
@@ -306,7 +307,6 @@
     // There are differences in the data and methods available through these modules
     // This function therefore is used to determine which captions module is being used
     // If it's a known module, this.ytCaptionModule will be used elsewhere to control captions
-
     var options, fontSize, displaySettings;
 
     options = this.youTubePlayer.getOptions();
@@ -314,10 +314,14 @@
       for (var i=0; i<options.length; i++) {
         if (options[i] == 'cc') { // this is the AS3 (Flash) player
           this.ytCaptionModule = 'cc';
+          this.hasCaptions = true;
+          this.usingYouTubeCaptions = true;
           break;
         }
         else if (options[i] == 'captions') { // this is the HTML5 player
           this.ytCaptionModule = 'captions';
+          this.hasCaptions = true;
+          this.usingYouTubeCaptions = true;
           break;
         }
         else {
@@ -329,6 +333,8 @@
       }
       if (typeof this.ytCaptionModule !== 'undefined') {
         if (this.usingYouTubeCaptions) {
+          // set default languaage
+          this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
           // set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
           this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
           // ideally could set other display options too, but no others seem to be supported by setOption()
