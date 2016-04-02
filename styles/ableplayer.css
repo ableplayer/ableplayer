@@ -913,6 +913,10 @@ div.able-chapters-div button::-moz-focus-inner {
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
+	/* additional rules are needed to ensure clipped buttons are truly invisible in Safari on Mac OS X */
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
 }
 .able-error {
 	display: block;
