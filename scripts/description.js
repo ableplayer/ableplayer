@@ -262,6 +262,8 @@
     }
     if (typeof thisDescription !== 'undefined') {
       if (this.currentDescription !== thisDescription) {
+        // temporarily remove aria-live from $status in order to prevent description from being interrupted
+        this.$status.removeAttr('aria-live');
         // load the new description into the container div
         this.$descDiv.html(flattenComponentForDescription(cues[thisDescription].components));
         if (this.prefDescPause) {
@@ -273,6 +275,8 @@
     else {
       this.$descDiv.html('');
       this.currentDescription = -1;
+      // restore aria-live to $status
+      this.$status.attr('aria-live','polite');
     }
   };
 

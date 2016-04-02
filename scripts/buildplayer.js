@@ -130,7 +130,7 @@
 
     this.$status = $('<span>',{
       'class' : 'able-status',
-      'role' : 'alert'
+      'aria-live' : 'polite'
     });
 
     // Put everything together.
