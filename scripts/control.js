@@ -1,6 +1,10 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
 
+    // set Booleans; these will be reset when finished seeking
+    this.seeking = true;
+    this.liveUpdatePending = true;
+
     if (this.player === 'html5') {
       var seekable;
 
@@ -8,7 +12,9 @@
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
+        // successfully scrubbed to this.startTime
         this.media.currentTime = this.startTime;
+        this.seeking = false;
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
@@ -31,11 +37,6 @@
         }
       }
     }
-
-    // one Boolean var is probably enough(?)
-    this.seeking = true;
-    this.liveUpdatePending = true;
-
     this.refreshControls();
   };
 

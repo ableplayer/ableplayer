@@ -4,19 +4,16 @@
 
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
+
         if (this.startTime === this.media.currentTime) {
           // media has already scrubbed to start time
           if (this.autoplay || (this.seeking && this.playing)) {
             this.playMedia();
           }
-          if (this.seeking) {
-            this.seeking = false;
-          }
         }
         else {
-          // continue seeking ahead until currentTime == startTime
-          // Commented this out in v2.2.19. Seems unnecessary to call seekTo() again
-          // this.seekTo(this.startTime);
+          // seek ahead until currentTime == startTime
+          this.seekTo(this.startTime);
         }
       }
       else {
@@ -340,7 +337,7 @@
         if (thisObj.debug) {
           console.log('canplay event');
         }
-        if (thisObj.startTime && !thisObj.startedPlaying) {
+        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
         }
       })
@@ -348,7 +345,7 @@
         if (thisObj.debug) {
           console.log('canplaythrough event');
         }
-        if (thisObj.startTime && !thisObj.startedPlaying) {
+        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
         }

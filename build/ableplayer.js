@@ -5928,6 +5928,10 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
 
+    // set Booleans; these will be reset when finished seeking
+    this.seeking = true;
+    this.liveUpdatePending = true;
+
     if (this.player === 'html5') {
       var seekable;
 
@@ -5935,7 +5939,9 @@
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
+        // successfully scrubbed to this.startTime
         this.media.currentTime = this.startTime;
+        this.seeking = false;
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
@@ -5958,11 +5964,6 @@
         }
       }
     }
-
-    // one Boolean var is probably enough(?)
-    this.seeking = true;
-    this.liveUpdatePending = true;
-
     this.refreshControls();
   };
 
@@ -7824,19 +7825,16 @@
 
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
+
         if (this.startTime === this.media.currentTime) {
           // media has already scrubbed to start time
           if (this.autoplay || (this.seeking && this.playing)) {
             this.playMedia();
           }
-          if (this.seeking) {
-            this.seeking = false;
-          }
         }
         else {
-          // continue seeking ahead until currentTime == startTime
-          // Commented this out in v2.2.19. Seems unnecessary to call seekTo() again
-          // this.seekTo(this.startTime);
+          // seek ahead until currentTime == startTime
+          this.seekTo(this.startTime);
         }
       }
       else {
@@ -8160,7 +8158,7 @@
         if (thisObj.debug) {
           console.log('canplay event');
         }
-        if (thisObj.startTime && !thisObj.startedPlaying) {
+        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
         }
       })
@@ -8168,7 +8166,7 @@
         if (thisObj.debug) {
           console.log('canplaythrough event');
         }
-        if (thisObj.startTime && !thisObj.startedPlaying) {
+        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
         }
