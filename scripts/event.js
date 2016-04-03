@@ -2,10 +2,12 @@
   // Media events
   AblePlayer.prototype.onMediaUpdateTime = function () {
 
+    var currentTime = this.getElapsed();
+
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
 
-        if (this.startTime === this.media.currentTime) {
+        if (this.startTime === currentTime) {
           // media has already scrubbed to start time
           if (this.autoplay || (this.seeking && this.playing)) {
             this.playMedia();
@@ -25,7 +27,7 @@
       }
     }
     else if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
-      if (this.swapTime === this.media.currentTime) {
+      if (this.swapTime === currentTime) {
         // described version been swapped and media has scrubbed to time of previous version
         if (this.playing) {
           // resume playback
@@ -43,10 +45,11 @@
     }
     if (!this.swappingSrc) {
       if (this.prefHighlight === 1) {
-        this.highlightTranscript(this.getElapsed());
+        this.highlightTranscript(currentTime);
       }
       this.updateCaption();
-      this.showDescription(this.getElapsed());
+      this.showDescription(currentTime);
+      this.updateChapter(currentTime);
       this.updateMeta();
       this.refreshControls();
     }
@@ -147,6 +150,7 @@
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
       thisObj.showDescription(position);
+      thisObj.updateChapter(position);
       thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {

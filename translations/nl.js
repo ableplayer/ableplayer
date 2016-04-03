@@ -34,6 +34,8 @@ var nl = {
 
 "chapters": "Hoofdstukken",
 
+"newChapter": "Nieuw hoofdstuk",
+
 "language": "Taal",
 
 "sign": "Gebarentaal",

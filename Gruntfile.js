@@ -31,6 +31,7 @@ module.exports = function(grunt) {
                     'scripts/browser.js',
                     'scripts/control.js',
                     'scripts/caption.js',
+                    'scripts/chapters.js',
                     'scripts/metadata.js',
                     'scripts/transcript.js',
                     'scripts/search.js',

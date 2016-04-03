@@ -908,7 +908,7 @@ div.able-chapters-div button::-moz-focus-inner {
   Misc
 */
 
-.able-clipped {
+.able-clipped, .able-screenreader-alert {
 	/* hide from sighted users, but not screen reader users */
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */

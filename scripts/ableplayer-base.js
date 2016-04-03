@@ -126,7 +126,7 @@
 
     if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
       this.defaultChapter = $(media).data('chapters-default');
-      this.chapter = this.defaultChapter; // this.chapter is the id of the default chapter (as defined within WebVTT file)
+      this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
     }
 
     if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {

@@ -960,14 +960,21 @@
 
   AblePlayer.prototype.showAlert = function( msg, location ) {
 
-    // location is either 'main' (default) or 'sign' (i.e., sign language window)
+    // location is either of the following:
+    // 'main' (default)
+    // 'screenreader
+    // 'sign' (i.e., sign language window)
+
     var thisObj = this;
     var alertBox, alertLeft;
     if (location === 'sign') {
       alertBox = this.$windowAlert;
     }
+    else if (location === 'screenreader') {
+      alertBox = this.$srAlertBox;
+    }
     else {
-      alertBox = this.alertBox;
+      alertBox = this.$alertBox;
     }
     alertBox.show();
     alertBox.text(msg);
@@ -985,7 +992,7 @@
         left: alertLeft
       });
     }
-    else {
+    else if (location !== 'screenreader') {
       // The original formula incorporated offset() into the calculation
       // but at some point this began resulting in an alert that's off-centered
       // Changed in v2.2.17, but here's the original for reference in case needed:
@@ -994,9 +1001,11 @@
         left: (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
       });
     }
-    setTimeout(function () {
-      alertBox.fadeOut(300);
-    }, 3000);
+    if (location !== 'screenreader') {
+      setTimeout(function () {
+        alertBox.fadeOut(300);
+      }, 3000);
+    }
   };
 
   // Resizes all relevant player attributes.

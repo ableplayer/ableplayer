@@ -208,19 +208,6 @@
     }
   };
 
-  AblePlayer.prototype.seekToDefaultChapter = function() {
-    // this function is only called if this.defaultChapter is not null
-    // step through chapters looking for default
-    var i=0;
-    while (i < this.chapters.length) {
-      if (this.chapters[i].id === this.defaultChapter) {
-        // found the default chapter! Seek to it
-        this.seekTo(this.chapters[i].start);
-      }
-      i++;
-    }
-  };
-
   AblePlayer.prototype.setupMetadata = function(track, cues) {
     if (this.metaType === 'text') {
       // Metadata is only supported if data-meta-div is provided

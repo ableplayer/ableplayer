@@ -34,6 +34,8 @@ var es = {
 
 "chapters": "Capítulos",
 
+"newChapter": "Nuevo capítulo",
+
 "language": "Idioma",
 
 "sign": "Lengua de señas",

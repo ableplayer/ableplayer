@@ -206,8 +206,7 @@
     var thisObj, headingLevel, headingType, headingId, $chaptersHeading,
       $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
       i, itemId, chapter, buttonId, hasDefault,
-      getFocusFunction, getHoverFunction, getBlurFunction, getClickFunction,
-      $thisButton, $thisListItem, $prevButton, $nextButton, blurListener;
+      getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
 
     thisObj = this;
 
@@ -248,12 +247,12 @@
         // add event listeners
         getClickFunction = function (time) {
           return function () {
-            $(this).closest('ul').find('li')
-              .removeClass('able-current-chapter')
-              .attr('aria-selected','');
-            $(this).closest('li')
-              .addClass('able-current-chapter')
-              .attr('aria-selected','true');
+            $clickedItem = $(this).closest('li');
+            $chaptersList = $(this).closest('ul').find('li');
+            thisChapterIndex = $chaptersList.index($clickedItem);
+            $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
+            $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
+            thisObj.currentChapter = thisObj.chapters[thisChapterIndex];
             thisObj.seekTo(time);
           }
         };
@@ -329,20 +328,26 @@
 
   AblePlayer.prototype.injectAlert = function () {
 
+    // inject two alerts, one visible for all users and one for screen reader users only
+
     var top;
 
-    this.alertBox = $('<div role="alert"></div>');
-    this.alertBox.addClass('able-alert');
-    this.alertBox.appendTo(this.$ableDiv);
+    this.$alertBox = $('<div role="alert"></div>');
+    this.$alertBox.addClass('able-alert');
+    this.$alertBox.appendTo(this.$ableDiv);
     if (this.mediaType == 'audio') {
       top = -10;
     }
     else {
       top = Math.round(this.$mediaContainer.offset().top * 10) / 10;
     }
-    this.alertBox.css({
+    this.$alertBox.css({
       top: top + 'px'
     });
+
+    this.$srAlertBox = $('<div role="alert"></div>');
+    this.$srAlertBox.addClass('able-screenreader-alert');
+    this.$srAlertBox.appendTo(this.$ableDiv);
   };
 
   AblePlayer.prototype.injectPlaylist = function () {
