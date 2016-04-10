@@ -225,6 +225,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-use-chapters-button** - optional; set to "false" to exclude chapters button from controller. If using the data-chapters-div attribute to write the chapters to an external container, you might not want users to be able to toggle the chapters off. 
 -   **data-chapters-title** - optional; override default chapters title (default is "Chapters"). A null value (data-chapters-title="") eliminates the title altogether.  
 -   **data-chapters-default** - optional; identify ID of default chapter (must correspond with the text or value immediately above the timestamp in your chapter's WebVTT file. If this attribute is present, the media will be advanced to this start time. Otherwise it will start at the beginning. (See also **data-start-time**).
+-   **data-seekbar-scope** - optional; default is "video" (seekbar represents full duration of video); if set to "chapter" seekbar represents the duration of the current chapter only  
 
 #### Metadata
 
