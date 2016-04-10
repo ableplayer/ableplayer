@@ -3,7 +3,6 @@
   AblePlayer.prototype.onMediaUpdateTime = function () {
 
     var currentTime = this.getElapsed();
-
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
 
@@ -150,12 +149,16 @@
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
       thisObj.showDescription(position);
-      thisObj.updateChapter(position);
+      thisObj.updateChapter(thisObj.convertChapterTimeToVideoTime(position));
       thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {
-      thisObj.seekTo(position);
-
+      if (thisObj.useChapterTimes) {
+        thisObj.seekTo(thisObj.convertChapterTimeToVideoTime(position));
+      }
+      else {
+        thisObj.seekTo(position);
+      }
       if (!thisObj.pausedBeforeTracking) {
         setTimeout(function () {
           thisObj.playMedia();

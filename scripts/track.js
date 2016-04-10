@@ -206,6 +206,7 @@
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
     }
+    this.updateChapter(this.getElapsed());
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {

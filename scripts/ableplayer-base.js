@@ -133,6 +133,25 @@
       this.useChaptersButton = false;
     }
 
+    // valid values are 'playlist' and 'chapter'; will also accept 'chapters'
+    if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
+      this.prevNextUnit = 'chapter';
+    }
+    else if ($(media).data('prevnext-unit') === 'playlist') {
+      this.prevNextUnit = 'playlist';
+    }
+    else {
+      this.prevNextUnit = false;
+    }
+
+    // valid values are 'chapter' and 'video'; will also accept 'chapters'
+    if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
+      this.seekbarScope = 'chapter';
+    }
+    else {
+      this.seekbarScope = 'video';
+    }
+
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
       this.youTubeId = $(media).data('youtube-id');
     }

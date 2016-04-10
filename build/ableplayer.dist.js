@@ -133,6 +133,25 @@
       this.useChaptersButton = false;
     }
 
+    // valid values are 'playlist' and 'chapter'; will also accept 'chapters'
+    if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
+      this.prevNextUnit = 'chapter';
+    }
+    else if ($(media).data('prevnext-unit') === 'playlist') {
+      this.prevNextUnit = 'playlist';
+    }
+    else {
+      this.prevNextUnit = false;
+    }
+
+    // valid values are 'chapter' and 'video'; will also accept 'chapters'
+    if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
+      this.seekbarScope = 'chapter';
+    }
+    else {
+      this.seekbarScope = 'video';
+    }
+
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
       this.youTubeId = $(media).data('youtube-id');
     }
@@ -302,12 +321,11 @@
     this.iconType = 'font';
 
     // seekInterval = Number of seconds to seek forward or back with these buttons
-    // NOTE: Unless user overrides this default with data-seek-interval attribute,
-    // this value is replaced by 1/10 the duration of the media file, once the duration is known
-    this.seekInterval = 10;
+    // NOTE: This can be overridden with the data-seek-interval attribute,
+    // or re-calculated in initialize.js > setSeekInterval();
+    this.defaultSeekInterval = 10;
 
     // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval
-    // rather than override it with 1/10 the duration of the media file
     this.useFixedSeekInterval = false;
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers
@@ -667,21 +685,50 @@
         thisObj.$media[0].load();
       }
       if (thisObj.useFixedSeekInterval === false) {
-        // 10 steps in seek interval; waited until now to set this so we can fetch a duration
-        // If duration is still unavailable (JW Player), try again in refreshControls()
-        var duration = thisObj.getDuration();
-        if (duration > 0) {
-          thisObj.seekInterval = Math.max(thisObj.seekInterval, duration / 10);
-          thisObj.seekIntervalCalculated = true;
-        }
-        else {
-          thisObj.seekIntervalCalculated = false;
-        }
+        thisObj.setSeekInterval();
       }
-
       deferred.resolve();
     });
     return promise;
+  };
+
+  AblePlayer.prototype.setSeekInterval = function () {
+
+    // this function is only called if this.useFixedSeekInterval is false
+    // if this.useChapterTimes, this is called as each new chapter is loaded
+    // otherwise, it's called once, as the player is initialized
+    var duration;
+    this.seekInterval = this.defaultSeekInterval;
+    if (this.useChapterTimes) {
+      duration = this.chapterDuration;
+    }
+    else {
+      duration = this.getDuration();
+    }
+    if (typeof duration === 'undefined' || duration < 1) {
+      // no duration; just use default for now but keep trying until duration is available
+      this.seekIntervalCalculated = false;
+      return;
+    }
+    else {
+      if (duration <= 20) {
+         this.seekInterval = 5;  // 4 steps max
+      }
+      else if (duration <= 30) {
+         this.seekInterval = 6; // 5 steps max
+      }
+      else if (duration <= 40) {
+         this.seekInterval = 8; // 5 steps max
+      }
+      else if (duration <= 100) {
+         this.seekInterval = 10; // 10 steps max
+      }
+      else {
+        // never more than 10 steps from start to end
+         this.seekInterval = (duration / 10);
+      }
+      this.seekIntervalCalculated = true;
+    }
   };
 
   AblePlayer.prototype.initDefaultCaption = function () {
@@ -2771,7 +2818,9 @@
             thisChapterIndex = $chaptersList.index($clickedItem);
             $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
             $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            thisObj.currentChapter = thisObj.chapters[thisChapterIndex];
+
+// Don't update this.currentChapter here; just seekTo chapter's start time; chapter will be updated via chapters.js > updateChapter()
+//            thisObj.currentChapter = thisObj.chapters[thisChapterIndex];
             thisObj.seekTo(time);
           }
         };
@@ -3422,7 +3471,6 @@
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
           controllerSpan.append(sliderDiv);
-
           this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {
@@ -4079,6 +4127,7 @@
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
     }
+    this.updateChapter(this.getElapsed());
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
@@ -4844,6 +4893,10 @@
   };
 
   AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {
+
+//
+//
+
     this.startTracking('keyboard', position);
     this.trackHeadAtPosition(position);
     this.keyTrackPosition = position;
@@ -5920,7 +5973,6 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
 
-    // set Booleans; these will be reset when finished seeking
     this.seeking = true;
     this.liveUpdatePending = true;
 
@@ -6152,52 +6204,97 @@
     this.startedPlaying = true;
   };
 
-  // Right now, update the seekBar values based on current duration and time.
-  // Later, move all non-destructive control updates based on state into this function?
   AblePlayer.prototype.refreshControls = function() {
 
-    var thisObj = this;
+    var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
+      updateLive, textByState, timestamp, widthUsed,
+      leftControls, rightControls, seekbarWidth, captionsCount,
+      buffered, newTop;
+
+    thisObj = this;
     if (this.swappingSrc) {
       // wait until new source has loaded before refreshing controls
       return;
     }
-    var duration = this.getDuration();
-    var elapsed = this.getElapsed();
+
+    duration = this.getDuration();
+    elapsed = this.getElapsed();
+
+    if (this.seekbarScope === 'chapter' && this.chapters.length) {
+      this.useChapterTimes = true;
+      this.chapterDuration = this.getChapterDuration();
+      this.chapterElapsed = this.getChapterElapsed();
+    }
+    else {
+      this.useChapterTimes = false;
+    }
 
     if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
       // couldn't calculate seekInterval previously; try again.
-      if (duration > 0) {
-        this.seekInterval = Math.max(this.seekInterval, duration / 10);
-        this.seekIntervalCalculated = true;
-      }
+      this.setSeekInterval();
     }
 
     if (this.seekBar) {
-      this.seekBar.setDuration(duration);
-      if (!this.seekBar.tracking) {
+
+      if (this.useChapterTimes) {
+        lastChapterIndex = this.chapters.length-1;
+        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+          // this is the last chapter
+          if (this.currentChapter.end !== duration) {
+            // chapter ends before or after video ends
+            // need to adjust seekbar duration to match video end
+            this.seekBar.setDuration(duration - this.currentChapter.start);
+          }
+          else {
+            this.seekBar.setDuration(this.chapterDuration);
+          }
+        }
+        else {
+          // this is not the last chapter
+          this.seekBar.setDuration(this.chapterDuration);
+        }
+      }
+      else {
+        this.seekBar.setDuration(duration);
+      }
+      if (!(this.seekBar.tracking)) {
         // Only update the aria live region if we have an update pending (from a
         // seek button control) or if the seekBar has focus.
         // We use document.activeElement instead of $(':focus') due to a strange bug:
         //  When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-        var updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+        updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
         this.liveUpdatePending = false;
-        this.seekBar.setPosition(elapsed, updateLive);
+        if (this.useChapterTimes) {
+          this.seekBar.setPosition(this.chapterElapsed, updateLive);
+        }
+        else {
+          this.seekBar.setPosition(elapsed, updateLive);
+        }
       }
     }
 
-    var displayElapsed;
     // When seeking, display the seek bar time instead of the actual elapsed time.
     if (this.seekBar.tracking) {
       displayElapsed = this.seekBar.lastTrackPosition;
     }
     else {
-      displayElapsed = elapsed;
+      if (this.useChapterTimes) {
+        displayElapsed = this.chapterElapsed;
+      }
+      else {
+        displayElapsed = elapsed;
+      }
     }
 
-    this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(duration));
+    if (this.useChapterTimes) {
+      this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.chapterDuration));
+    }
+    else {
+      this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(duration));
+    }
     this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 
-    var textByState = {
+    textByState = {
       'stopped': this.tt.statusStopped,
       'paused': this.tt.statusPaused,
       'playing': this.tt.statusPlaying,
@@ -6227,7 +6324,7 @@
       // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
       if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
         // Debounce updates; only update after status has stayed steadily different for 250ms.
-        var timestamp = (new Date()).getTime();
+        timestamp = (new Date()).getTime();
         if (!this.statusDebounceStart) {
           this.statusDebounceStart = timestamp;
           // Make sure refreshControls gets called again at the appropriate time to check.
@@ -6277,9 +6374,9 @@
     // Update seekbar width.
     // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
-      var widthUsed = 0;
-      var leftControls = this.seekBar.wrapperDiv.parent().prev('span.able-left-controls');
-      var rightControls = leftControls.next('span.able-right-controls');
+      widthUsed = 0;
+      leftControls = this.seekBar.wrapperDiv.parent().prev('span.able-left-controls');
+      rightControls = leftControls.next('span.able-right-controls');
       leftControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();
@@ -6292,10 +6389,10 @@
       });
 
       if (this.isFullscreen()) {
-        var seekbarWidth = $(window).width() - widthUsed - 20;
+        seekbarWidth = $(window).width() - widthUsed - 20;
       }
       else {
-        var seekbarWidth = this.playerWidth - widthUsed - 20;
+        seekbarWidth = this.playerWidth - widthUsed - 20;
       }
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
@@ -6316,10 +6413,10 @@
 
     if (this.$ccButton) {
       if (this.usingYouTubeCaptions) {
-        var captionsCount = this.ytCaptions.length;
+        captionsCount = this.ytCaptions.length;
       }
       else {
-        var captionsCount = this.captions.length;
+        captionsCount = this.captions.length;
       }
       // Button has a different title depending on the number of captions.
       // If only one caption track, this is "Show captions" and "Hide captions"
@@ -6410,7 +6507,7 @@
 
       // If transcript locked, scroll transcript to current highlight location.
       if (this.autoScrollTranscript && this.currentHighlight) {
-        var newTop = Math.floor($('.able-transcript').scrollTop() +
+        newTop = Math.floor($('.able-transcript').scrollTop() +
                                 $(this.currentHighlight).position().top -
                                 ($('.able-transcript').height() / 2) +
                                 ($(this.currentHighlight).height() / 2));
@@ -6427,8 +6524,16 @@
     // TODO: Currently only using the first HTML5 buffered interval, but this fails sometimes when buffering is split into two or more intervals.
     if (this.player === 'html5') {
       if (this.media.buffered.length > 0) {
-
-        this.seekBar.setBuffered(this.media.buffered.end(0) / this.getDuration())
+        buffered = this.media.buffered.end(0)
+        if (this.useChapterTimes) {
+          if (buffered > this.chapterDuration) {
+            buffered = this.chapterDuration;
+          }
+          this.seekBar.setBuffered(buffered / this.chapterDuration);
+        }
+        else {
+          this.seekBar.setBuffered(buffered / duration);
+        }
       }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
@@ -6492,23 +6597,63 @@
   };
 
   AblePlayer.prototype.handleRewind = function() {
-    var targetTime = this.getElapsed() - this.seekInterval;
-    if (targetTime < 0) {
-      this.seekTo(0);
+
+    var elapsed, targetTime;
+
+    elapsed = this.getElapsed();
+    targetTime = elapsed - this.seekInterval;
+    if (this.useChapterTimes) {
+      if (targetTime < this.currentChapter.start) {
+        targetTime = this.currentChapter.start;
+      }
     }
     else {
-      this.seekTo(targetTime);
+      if (targetTime < 0) {
+        targetTime = 0;
+      }
     }
+    this.seekTo(targetTime);
   };
 
   AblePlayer.prototype.handleFastForward = function() {
-    var targetTime = this.getElapsed() + this.seekInterval;
-    if (targetTime > this.getDuration()) {
-      this.seekTo(this.getDuration());
+
+    var elapsed, duration, targetTime, lastChapterIndex;
+
+    elapsed = this.getElapsed();
+    duration = this.getDuration();
+    lastChapterIndex = this.chapters.length-1;
+    targetTime = elapsed + this.seekInterval;
+
+    if (this.useChapterTimes) {
+      if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        // this is the last chapter
+        if (targetTime > duration || targetTime > this.currentChapter.end) {
+          // targetTime would exceed the end of the video (or chapter)
+          // scrub to end of whichever is earliest
+          targetTime = Math.min(duration, this.currentChapter.end);
+        }
+        else if (duration % targetTime < this.seekInterval) {
+          // nothing left but pocket change after seeking to targetTime
+          // go ahead and seek to end of video (or chapter), whichever is earliest
+          targetTime = Math.min(duration, this.currentChapter.end);
+        }
+      }
+      else {
+        // this is not the last chapter
+        if (targetTime > this.currentChapter.end) {
+          // targetTime would exceed the end of the chapter
+          // scrub exactly to end of chapter
+          targetTime = this.currentChapter.end;
+        }
+      }
     }
     else {
-      this.seekTo(targetTime);
+      // not using chapter times
+      if (targetTime > duration) {
+        targetTime = duration;
+      }
     }
+    this.seekTo(targetTime);
   };
 
   AblePlayer.prototype.handleRateIncrease = function() {
@@ -7309,14 +7454,16 @@
     }
   };
 
-  AblePlayer.prototype.updateChapter = function(now) {
+  AblePlayer.prototype.updateChapter = function (now) {
 
-    // as time-synced chapters change during playback, update external container
+    // as time-synced chapters change during playback, track changes in current chapter
 
-    if (typeof this.$chaptersDiv === 'undefined') {
+    if (typeof this.chapters === 'undefined') {
       return;
     }
+
     var chapters, i, thisChapterIndex, chapterLabel;
+
     chapters = this.chapters;
     for (i in chapters) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
@@ -7327,13 +7474,80 @@
     if (typeof thisChapterIndex !== 'undefined') {
       if (this.currentChapter !== chapters[thisChapterIndex]) {
         // this is a new chapter
-        this.$chaptersDiv.find('ul').find('li').removeClass('able-current-chapter').attr('aria-selected','');
-        this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
-          .addClass('able-current-chapter').attr('aria-selected','true');
         this.currentChapter = chapters[thisChapterIndex];
+        if (this.useChapterTimes) {
+          this.chapterDuration = this.getChapterDuration();
+          this.seekIntervalCalculated = false; // will be recalculated in setSeekInterval()
+        }
+        if (typeof this.$chaptersDiv !== 'undefined') {
+          // chapters are listed in an external container
+          this.$chaptersDiv.find('ul').find('li').removeClass('able-current-chapter').attr('aria-selected','');
+          this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
+            .addClass('able-current-chapter').attr('aria-selected','true');
+        }
+        // announce new chapter via ARIA alert
         chapterLabel = this.tt.newChapter + ': ' + this.flattenCueForCaption(this.currentChapter);
         this.showAlert(chapterLabel,'screenreader');
       }
+    }
+  };
+
+  AblePlayer.prototype.getChapterDuration = function () {
+
+    // called if this.seekbarScope === 'chapter'
+    // get duration of the current chapter
+
+    var videoDuration, lastChapterIndex, chapterEnd;
+
+    if (typeof this.currentChapter === 'undefined') {
+      return duration;
+    }
+    videoDuration = this.getDuration();
+    lastChapterIndex = this.chapters.length-1;
+    if (this.chapters[lastChapterIndex] == this.currentChapter) {
+      // this is the last chapter
+      if (this.currentChapter.end !== videoDuration) {
+        // chapter ends before or after video ends, adjust chapter end to match video end
+        chapterEnd = videoDuration;
+        this.currentChapter.end = videoDuration;
+      }
+      else {
+        chapterEnd = this.currentChapter.end;
+      }
+    }
+    else { // this is not the last chapter
+      chapterEnd = this.currentChapter.end;
+    }
+    return chapterEnd - this.currentChapter.start;
+  };
+
+  AblePlayer.prototype.getChapterElapsed = function () {
+
+    // called if this.seekbarScope === 'chapter'
+    // get current elapsed time, relative to the current chapter duration
+    if (typeof this.currentChapter === 'undefined') {
+      return elapsed;
+    }
+    var videoDuration = this.getDuration();
+    var videoElapsed = this.getElapsed();
+    if (videoElapsed > this.currentChapter.start) {
+      return videoElapsed - this.currentChapter.start;
+    }
+    else {
+      return 0;
+    }
+  };
+
+  AblePlayer.prototype.convertChapterTimeToVideoTime = function (chapterTime) {
+
+    // chapterTime is the time within the current chapter
+    // return the same time, relative to the entire video
+    var newTime = this.currentChapter.start + chapterTime;
+    if (newTime > this.currentChapter.end) {
+      return this.currentChapter.end;
+    }
+    else {
+      return newTime;
     }
   };
 
@@ -7869,7 +8083,6 @@
   AblePlayer.prototype.onMediaUpdateTime = function () {
 
     var currentTime = this.getElapsed();
-
     if (this.player === 'html5' && !this.startedPlaying) {
       if (typeof this.startTime !== 'undefined') {
 
@@ -8016,12 +8229,16 @@
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
       thisObj.showDescription(position);
-      thisObj.updateChapter(position);
+      thisObj.updateChapter(thisObj.convertChapterTimeToVideoTime(position));
       thisObj.updateMeta(position);
       thisObj.refreshControls();
     }).on('stopTracking', function (event, position) {
-      thisObj.seekTo(position);
-
+      if (thisObj.useChapterTimes) {
+        thisObj.seekTo(thisObj.convertChapterTimeToVideoTime(position));
+      }
+      else {
+        thisObj.seekTo(position);
+      }
       if (!thisObj.pausedBeforeTracking) {
         setTimeout(function () {
           thisObj.playMedia();

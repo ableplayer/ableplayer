@@ -252,7 +252,9 @@
             thisChapterIndex = $chaptersList.index($clickedItem);
             $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
             $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            thisObj.currentChapter = thisObj.chapters[thisChapterIndex];
+console.log('onClick, updating chapter!');
+// Don't update this.currentChapter here; just seekTo chapter's start time; chapter will be updated via chapters.js > updateChapter()
+//            thisObj.currentChapter = thisObj.chapters[thisChapterIndex];
             thisObj.seekTo(time);
           }
         };
@@ -903,7 +905,6 @@
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
           controllerSpan.append(sliderDiv);
-
           this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {

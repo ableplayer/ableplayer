@@ -330,6 +330,10 @@
   };
 
   AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {
+
+//console.log('trackImmediatelyTo');
+//console.log('Position: ' + this.position);
+
     this.startTracking('keyboard', position);
     this.trackHeadAtPosition(position);
     this.keyTrackPosition = position;

@@ -31,12 +31,11 @@
     this.iconType = 'font';
 
     // seekInterval = Number of seconds to seek forward or back with these buttons
-    // NOTE: Unless user overrides this default with data-seek-interval attribute,
-    // this value is replaced by 1/10 the duration of the media file, once the duration is known
-    this.seekInterval = 10;
+    // NOTE: This can be overridden with the data-seek-interval attribute,
+    // or re-calculated in initialize.js > setSeekInterval();
+    this.defaultSeekInterval = 10;
 
     // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval
-    // rather than override it with 1/10 the duration of the media file
     this.useFixedSeekInterval = false;
 
     // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers
@@ -396,21 +395,50 @@
         thisObj.$media[0].load();
       }
       if (thisObj.useFixedSeekInterval === false) {
-        // 10 steps in seek interval; waited until now to set this so we can fetch a duration
-        // If duration is still unavailable (JW Player), try again in refreshControls()
-        var duration = thisObj.getDuration();
-        if (duration > 0) {
-          thisObj.seekInterval = Math.max(thisObj.seekInterval, duration / 10);
-          thisObj.seekIntervalCalculated = true;
-        }
-        else {
-          thisObj.seekIntervalCalculated = false;
-        }
+        thisObj.setSeekInterval();
       }
-
       deferred.resolve();
     });
     return promise;
+  };
+
+  AblePlayer.prototype.setSeekInterval = function () {
+
+    // this function is only called if this.useFixedSeekInterval is false
+    // if this.useChapterTimes, this is called as each new chapter is loaded
+    // otherwise, it's called once, as the player is initialized
+    var duration;
+    this.seekInterval = this.defaultSeekInterval;
+    if (this.useChapterTimes) {
+      duration = this.chapterDuration;
+    }
+    else {
+      duration = this.getDuration();
+    }
+    if (typeof duration === 'undefined' || duration < 1) {
+      // no duration; just use default for now but keep trying until duration is available
+      this.seekIntervalCalculated = false;
+      return;
+    }
+    else {
+      if (duration <= 20) {
+         this.seekInterval = 5;  // 4 steps max
+      }
+      else if (duration <= 30) {
+         this.seekInterval = 6; // 5 steps max
+      }
+      else if (duration <= 40) {
+         this.seekInterval = 8; // 5 steps max
+      }
+      else if (duration <= 100) {
+         this.seekInterval = 10; // 10 steps max
+      }
+      else {
+        // never more than 10 steps from start to end
+         this.seekInterval = (duration / 10);
+      }
+      this.seekIntervalCalculated = true;
+    }
   };
 
   AblePlayer.prototype.initDefaultCaption = function () {

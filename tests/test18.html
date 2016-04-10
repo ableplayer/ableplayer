@@ -5,33 +5,33 @@
 <title>Able Player Test 18</title>
 <link rel="stylesheet" href="tests.css" type="text/css">
 
-<!-- Dependencies --> 
+<!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
-<!-- Able Player CSS -->  
+<!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
 
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
-<!-- Style for this example only --> 
-<style> 
-  main { 
+<!-- Style for this example only -->
+<style>
+  main {
     position: relative;
     width: 100%;
     margin: 0;
   }
-  #chapters { 
+  #chapters {
     float: left;
-    width: 200px; 
+    width: 200px;
     height: 400px;
     background-color: #DEDEDE;
     margin: 1em 1em 0 0;
     border: 2px solid #340449;
   }
-  #player { 
+  #player {
     float: left;
     width: 480px;
     margin: 0;
@@ -52,7 +52,7 @@
 <main role="main">
   <div id="chapters"></div>
   <div id="player">
-    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-chapters-div="chapters" data-use-chapters-button="false" data-chapters-title="Table of Contents" data-chapters-default="Chapter 2">
+    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-chapters-div="chapters" data-use-chapters-button="false" data-chapters-title="Table of Contents" data-chapters-default="Chapter 2" data-seekbar-scope="chapter" data-prevnext-unit="chapter">
       <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
       <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
       <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
