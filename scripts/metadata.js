@@ -38,6 +38,8 @@
           for (i=0; i<cueLines.length; i++) {
             line = $.trim(cueLines[i]);
             if (line.toLowerCase() === 'pause') {
+              // don't show big play button when pausing via metadata
+              this.hideBigPlayButton = true;
               this.pauseMedia();
             }
             else {

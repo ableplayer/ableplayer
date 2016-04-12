@@ -6478,7 +6478,9 @@
     if (typeof this.$bigPlayButton !== 'undefined') {
       // Choose show/hide for big play button and adjust position.
       if (this.isPaused() && !this.seekBar.tracking) {
-        this.$bigPlayButton.show();
+        if (!this.hideBigPlayButton) {
+          this.$bigPlayButton.show();
+        }
         if (this.isFullscreen()) {
           this.$bigPlayButton.width($(window).width());
           this.$bigPlayButton.height($(window).height());
@@ -7597,6 +7599,8 @@
           for (i=0; i<cueLines.length; i++) {
             line = $.trim(cueLines[i]);
             if (line.toLowerCase() === 'pause') {
+              // don't show big play button when pausing via metadata
+              this.hideBigPlayButton = true;
               this.pauseMedia();
             }
             else {
