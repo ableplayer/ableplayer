@@ -438,6 +438,8 @@ div.modalDialog {
   right: 0px;
   outline: 0px none;
   display: none;
+  color: #000;
+  background-color: #FAFAFA;
 }
 div.modalOverlay {
   position: fixed;
@@ -474,6 +476,13 @@ div.modalDialog button:hover {
 div.modalDialog input:focus,
 div.modalDialog button:focus {
 	outline-color: #ffbb37; /* yellow */
+}
+div.modalDialog h1 {
+  font-size: 1.8em;
+  line-height: 1.2em;
+  margin: 0.75em 0;
+  color: #000;
+  text-align: center;
 }
 .able-prefs-form,
 .able-help-div,

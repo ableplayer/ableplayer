@@ -2818,9 +2818,8 @@
             thisChapterIndex = $chaptersList.index($clickedItem);
             $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
             $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-
-// Don't update this.currentChapter here; just seekTo chapter's start time; chapter will be updated via chapters.js > updateChapter()
-//            thisObj.currentChapter = thisObj.chapters[thisChapterIndex];
+            // Don't update this.currentChapter here; just seekTo chapter's start time;
+            // chapter will be updated via chapters.js > updateChapter()
             thisObj.seekTo(time);
           }
         };
