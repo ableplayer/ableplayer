@@ -478,6 +478,7 @@ div.modalDialog button:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 div.modalDialog h1 {
+  font-weight: bold;
   font-size: 1.8em;
   line-height: 1.2em;
   margin: 0.75em 0;
