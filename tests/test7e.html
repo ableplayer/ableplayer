@@ -51,6 +51,11 @@
     width: 200px;
     height: auto;
   }
+  div#instructions:focus,
+  div#terrill:focus,
+  div#terrill:hover {
+    border: 3px solid #C00;
+  }
   div#terrill {
     top: 40px;
     left: 136px;
@@ -81,6 +86,9 @@
 <!-- Example script: handle user's click on Terrill button -->
 <script>
   $(document).ready(function() {
+    $('#instructions').on('focus',function() {
+      $('#terrill').attr('tabindex','0');
+    })
     $('#terrill').on('click',function() {
       toggleResponse();
     });
@@ -127,8 +135,8 @@
   </video>
   <!-- metadata content -->
   <div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
-  <div class="meta" id="instructions" role="alert">What happens if you click Terrill's face?</div>
-  <div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="0"></div>
+  <div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
+  <div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
   <div class="meta" id="response" role="alert">Ouch!</div>
 </div>
 

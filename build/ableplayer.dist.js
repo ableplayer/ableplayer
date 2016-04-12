@@ -7573,7 +7573,7 @@
   };
 
   AblePlayer.prototype.showMeta = function(now) {
-    var m, thisMeta, cues, cueText, cueLines, i, line;
+    var m, thisMeta, cues, cueText, cueLines, i, line, focusTarget;
     if (this.meta.length >= 1) {
       cues = this.meta;
     }
@@ -7598,10 +7598,16 @@
           cueLines = cueText.split('\n');
           for (i=0; i<cueLines.length; i++) {
             line = $.trim(cueLines[i]);
-            if (line.toLowerCase() === 'pause') {
+            if (line.toLowerCase().trim() === 'pause') {
               // don't show big play button when pausing via metadata
               this.hideBigPlayButton = true;
               this.pauseMedia();
+            }
+            else if (line.toLowerCase().substring(0,6) == 'focus:') {
+              focusTarget = line.substring(6).trim();
+              if ($(focusTarget).length) {
+                $(focusTarget).focus();
+              }
             }
             else {
               if ($(line).length) {

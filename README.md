@@ -235,7 +235,12 @@ Able Player supports two types of metadata:
 
 1. "text" - The WebVTT file contains text, intended to be written to an external container at the designated times. You must provide the external container; Able Player does not generate that automatically. 
 
-2. "selector" - The WebVTT file contains jQuery selectors which target hidden content that is already present on the web page. At the designated times, the hidden content referenced by the jQuery selectors is made visible. In addition to selectors, the WebVTT file can contain the single word **PAUSE** on a line by itself, which instructs Able Player to pause the video at that point. This combination of exposing new content and pausing the video can be used to provide supplemental content including clickable "hot spots" overlaid on the video. 
+2. "selector" - The WebVTT file contains jQuery selectors which target hidden content that is already present on the web page. At the designated times, the hidden content referenced by the jQuery selectors is made visible. In addition to selectors, the WebVTT file can contain either of the following keywords, each on a line by itself: 
+
+- **PAUSE** instructs Able Player to pause the video at that point. 
+- **FOCUS:** followed by a jQuery selector, places keyboard focus on the designated element, which should have a *tabindex* attribute with a value of either "0" (element is part of the regular tab order) or "-1" (element is not part of the regular tab order, but can receive focus in this context via JavasScript).
+
+This combination of exposing new content, pausing the video, and placing keyboard focus on a newly exposed element, can be used to provide supplemental content including clickable "hot spots" overlaid on the video.  
 
 The following attributes make all this possible: 
 
