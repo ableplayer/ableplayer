@@ -100,12 +100,17 @@
 
     // chapterTime is the time within the current chapter
     // return the same time, relative to the entire video
-    var newTime = this.currentChapter.start + chapterTime;
-    if (newTime > this.currentChapter.end) {
-      return this.currentChapter.end;
+    if (typeof this.currentChapter !== 'undefined') {
+      var newTime = this.currentChapter.start + chapterTime;
+      if (newTime > this.currentChapter.end) {
+        return this.currentChapter.end;
+      }
+      else {
+        return newTime;
+      }
     }
     else {
-      return newTime;
+      return chapterTime;
     }
   };
 
