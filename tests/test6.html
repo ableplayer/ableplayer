@@ -5,13 +5,13 @@
 <title>Able Player Test #6</title>
 <link rel="stylesheet" href="tests.css" type="text/css">
 
-<!-- Dependencies --> 
+<!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
-<!-- Able Player CSS -->  
-<!-- Source file for playlist styles: ../styles/ableplayer-playlist.css --> 
+<!-- Able Player CSS -->
+<!-- Source file for playlist styles: ../styles/ableplayer-playlist.css -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
 
 <!-- Able Player JavaScript -->
@@ -27,29 +27,29 @@
 
 <!-- use the following markup for each media element -->
 <audio id="audio1" preload="auto" data-able-player>
-  <!-- source elements are optional when there's a playlist. --> 
+  <!-- source elements are optional when there's a playlist. -->
 	<!-- If ommitted, they will be constructed from the first playlist item -->
 </audio>
 
-<!-- use the following markup for each playlist --> 
+<!-- use the following markup for each playlist -->
 <!-- an AblePlayer playlist is any <ul> with class="able-playlist" -->
-<!-- The value of data-player must match the id of the media element --> 
-<!-- Add data-embedded to embed the playlist into the media player -->  
-<!-- see documentation for additional details about markup --> 
+<!-- The value of data-player must match the id of the media element -->
+<!-- Add data-embedded to embed the playlist into the media player -->
+<!-- see documentation for additional details about markup -->
 <ul class="able-playlist" data-player="audio1" data-embedded>
-  <li 
+  <li
 	  data-mp3="../media/paulallen.mp3"
 		data-ogg="../media/paulallen.ogg">The Paul Allen Song</li>
-  <li 
+  <li
 	  data-mp3="../media/php70alpha.mp3"
 		data-ogg="../media/php70alpha.ogg">PHP 7.0 Alpha</li>
-  <li 
+  <li
 	  data-mp3="../media/frenchsong.mp3"
 		data-ogg="../media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
-  <li 
+  <li
 	  data-mp3="../media/smallf.mp3"
 		data-ogg="../media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
-  <li 
+  <li
 	  data-mp3="../media/everyday.mp3"
 		data-ogg="../media/everyday.ogg">Every Day</li>
 </ul>
