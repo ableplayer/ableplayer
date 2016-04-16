@@ -639,6 +639,14 @@
 
       thisObj.setupAltCaptions().then(function() {
 
+        if (thisObj.includeTranscript) {
+          if (thisObj.captions.length <= 1) {
+            // without captions/subtitles in multiple languages,
+            // there is no need for a transcript language selector
+            thisObj.$transcriptLanguageSelect.parent().remove();
+          }
+        }
+
         thisObj.initDescription();
         thisObj.initDefaultCaption();
 
@@ -2751,6 +2759,9 @@
     // Transcript toolbar content:
     this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
     this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
+
+    // Add field for selecting a transcript language
+    // This will be deleted in FUCK if there are no languages
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
     // Add a default "Unknown" option; this will be deleted later if there are any
     // elements with a language.
@@ -4113,6 +4124,8 @@
       if (this.$transcriptLanguageSelect.find('option').length > 1) {
         // More than one option now, so enable the select.
         this.$transcriptLanguageSelect.prop('disabled', false);
+      }
+      else {
       }
     }
   };

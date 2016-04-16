@@ -179,6 +179,8 @@
         // More than one option now, so enable the select.
         this.$transcriptLanguageSelect.prop('disabled', false);
       }
+      else {
+      }
     }
   };
 

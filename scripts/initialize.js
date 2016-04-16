@@ -342,6 +342,14 @@
 
       thisObj.setupAltCaptions().then(function() {
 
+        if (thisObj.includeTranscript) {
+          if (thisObj.captions.length <= 1) {
+            // without captions/subtitles in multiple languages,
+            // there is no need for a transcript language selector
+            thisObj.$transcriptLanguageSelect.parent().remove();
+          }
+        }
+
         thisObj.initDescription();
         thisObj.initDefaultCaption();
 
