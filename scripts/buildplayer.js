@@ -36,7 +36,7 @@
     // youtube adds its own big play button
     // if (this.mediaType === 'video' && this.player !== 'youtube') {
     if (this.mediaType === 'video') {
-      if (this.player !== 'youtube') {
+      if (this.iconType == 'font' && this.player !== 'youtube') {
         this.injectBigPlayButton();
       }
 
@@ -861,7 +861,6 @@
     // browser support (e.g., for sliders and speedButtons)
     // user preferences (???)
     // some controls are aligned on the left, and others on the right
-
     var useSpeedButtons, useFullScreen,
     i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control,
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,

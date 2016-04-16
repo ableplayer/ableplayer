@@ -12,7 +12,7 @@
   .able-tooltip = 3000
   .able-controller .able-seekbar = 1970
   .able-controller .buttonOff = 1965
-  .able-controller button > img = 1960
+  .able-controller button > img = 1955
   .able-controller button > span = 1955
 	.able-controller button = 1950
 	.able-big-play-button = 1900
@@ -137,9 +137,9 @@
 }
 .able-controller button > img {
   /* image icon */
-  margin: 0 2px;
+  margin: 0 5px;
   padding: 0;
-  z-index: 1960;
+  z-index: 1955;
 }
 .able-controller .buttonOff {
 	opacity: 0.5;

@@ -510,7 +510,7 @@
     this.addSeekbarListeners();
 
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').click(function(){
+    this.$controllerDiv.find('button').on('click',function(){
       thisObj.onClickPlayerButton(this);
     });
 
