@@ -52,6 +52,7 @@ input#skipTo {
 }
 #control-panel li span {
   font-weight: bold;
+  color: #C00;
 }
 #control-panel #error {
   margin: 1em 0;
@@ -67,6 +68,8 @@ input#skipTo {
 <script>
 $(document).ready(function() {
   var player = new AblePlayer($('#video1'));
+
+  // handle button clicks by calling Able Player functions
   $('button').on('click',function() {
     var button = $(this).attr('id');
     if (button === 'play') {
@@ -107,6 +110,15 @@ $(document).ready(function() {
       }
     }
   });
+
+  // Able Player is not required for listending for HTML5 media events
+  var $video = $('#video1');
+  $video.on('playing',function() {
+    $('#status-play').text('true');
+  });
+  $video.on('ended',function() {
+    $('#status-end').text('true');
+  });
 })
 </script>
 </head>
@@ -144,6 +156,11 @@ $(document).ready(function() {
     <button id="go">Go</button>
   </div>
   <div id="error" role="alert"></div>
+  <h3>Playback Status</h3>
+  <ul>
+    <li>User played video: <span id="status-play">false</span></li>
+    <li>User played to end: <span id="status-end">false</span></li>
+  </ul>
 </div>
 
 </body>
