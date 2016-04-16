@@ -178,6 +178,13 @@
       }
     }
 
+    if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
+      this.allowFullScreen = false;
+    }
+    else {
+      this.allowFullScreen = true;
+    }
+
     if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
       var seekInterval = $(media).data('seek-interval');
       if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0

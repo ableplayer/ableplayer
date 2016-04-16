@@ -836,7 +836,7 @@
     // controlLayout['br'].push('help');
 
     // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
-    if (this.mediaType === 'video' && this.player !== 'jw') {
+    if (this.mediaType === 'video' && this.allowFullScreen && this.player !== 'jw') {
       controlLayout['br'].push('fullscreen');
     }
 

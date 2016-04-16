@@ -178,6 +178,13 @@
       }
     }
 
+    if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
+      this.allowFullScreen = false;
+    }
+    else {
+      this.allowFullScreen = true;
+    }
+
     if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
       var seekInterval = $(media).data('seek-interval');
       if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
@@ -3411,7 +3418,7 @@
     // controlLayout['br'].push('help');
 
     // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
-    if (this.mediaType === 'video' && this.player !== 'jw') {
+    if (this.mediaType === 'video' && this.allowFullScreen && this.player !== 'jw') {
       controlLayout['br'].push('fullscreen');
     }
 
