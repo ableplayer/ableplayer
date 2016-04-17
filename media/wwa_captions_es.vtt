@@ -1,27 +1,27 @@
-WEBVTT 
+WEBVTT
 kind: captions
 lang: es
 
 NOTE Este fichero VTT incluye algunos extras:
 - Meta data en la parte superior (líneas 2 y 3)
-- Este bloque de comentarios, Idenrificado como NOTA y rodeado de espacios 
-- Indicaciones de configuración al final de la primera marca de tiempo 
-- Una indicación de span en el segundo entrada 
+- Este bloque de comentarios, Idenrificado como NOTA y rodeado de espacios
+- Indicaciones de configuración al final de la primera marca de tiempo
+- Una indicación de span en el segundo entrada
 - (en este caso, una "voice span" <v> identificando al narrador)
-- Una lista de indicaciones de configuración WebTT tras la marca de tiempo en 39.132 
-- Actualmente AblePlayer no soporta estas características extra 
-- pero el intérprete (parser) necesita filtrarlas 
+- Una lista de indicaciones de configuración WebTT tras la marca de tiempo en 39.132
+- Actualmente AblePlayer no soporta estas características extra
+- pero el intérprete (parser) necesita filtrarlas
 - Más información en la especificación de WebVTT (sigue en desarrollo):
 - http://dev.w3.org/html5/webvtt
 - Traducción hecha por Emmanuelle Gutiérrez y Restrepo.
 
-00:00:00.429 --> 00:00:09.165  
+00:00:00.429 --> 00:00:09.165
 [ música ]
 
-00:00:09.165 --> 00:00:10.792 
+00:00:09.165 --> 00:00:10.792
 <v Narrador> Usted quiere a esas personas.
 
-00:00:10.792 --> 00:00:13.759 
+00:00:10.792 --> 00:00:13.759
 Compran sus productos, solicitan sus servicios,
 
 00:00:13.759 --> 00:00:16.627
@@ -38,20 +38,20 @@ a través de su sitio web.
 O quizás no.
 
 00:00:25.891 --> 00:00:30.396
-Los visitantes de su web no son 
+Los visitantes de su web no son
 una masa informe de clicladores idénticos
 
 00:00:30.396 --> 00:00:32.363
-sino una comunidad vibrante de indivíduos 
+sino una comunidad vibrante de indivíduos
 
 00:00:32.363 --> 00:00:35.297
 con distintos gustos, estilos, y habilidades.
 
-00:00:35.297 --> 00:00:39.132
+00:00:35.297 --> 00:00:36.900
 Esto incluye personas con discapacidad.
 
 00:00:39.132 --> 00:00:41.000 position:10%,start align:start size:35%
-[Terrill] Es importante tanto para diseñadores 
+[Terrill] Es importante tanto para diseñadores
 como para desarrolladores
 
 00:00:41.000 --> 00:00:45.500
@@ -62,6 +62,6 @@ con su resolución, con su navegador
 y su sistema operativo
 
 00:00:49.264 --> 00:00:52.000
-no es necesariamente lo que todos 
+no es necesariamente lo que todos
 los demás ven.
 

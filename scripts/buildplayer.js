@@ -171,7 +171,7 @@
     this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
 
     // Add field for selecting a transcript language
-    // This will be deleted in FUCK if there are no languages
+    // This will be deleted in initialize.js > recreatePlayer() if there are no languages
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
     // Add a default "Unknown" option; this will be deleted later if there are any
     // elements with a language.
@@ -394,7 +394,16 @@
     });
 
     this.$transcriptLanguageSelect.change(function () {
+
       var language = thisObj.$transcriptLanguageSelect.val();
+
+      // set language of all content (chapters, captions & descriptions)
+      // to match selection (if languages are avaialable)
+      for (var ii in thisObj.chapters) {
+        if (thisObj.chapters[ii].language === language) {
+          thisObj.transcriptChapters = thisObj.chapters[ii];
+        }
+      }
       for (var ii in thisObj.captions) {
         if (thisObj.captions[ii].language === language) {
           thisObj.transcriptCaptions = thisObj.captions[ii];

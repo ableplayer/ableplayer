@@ -16,6 +16,10 @@
   font-size: 1.4em;
   font-weight: bold;
 }
+.able-transcript-chapter-heading {
+  font-size: 1.2em;
+  font-weight: bold;
+}
 .able-transcript div.able-desc {
 	background-color: #FEE;
 	border: thin solid #336;

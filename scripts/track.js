@@ -190,7 +190,11 @@
     // called via setupTracks() only if there is track with kind="descriptions"
     // prepares for delivery of text description , in case it's needed
     // whether and how it's delivered is controlled within description.js > initDescription()
-    var trackLang = track.getAttribute('srclang');
+
+    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
+    // if not provided, assume track is the same language as the default player language
+    var trackLang = track.getAttribute('srclang') || this.lang;
+
     this.hasClosedDesc = true;
     this.currentDescription = -1;
     this.descriptions.push({
@@ -200,11 +204,29 @@
   };
 
   AblePlayer.prototype.setupChapters = function (track, cues) {
+
     // NOTE: WebVTT supports nested timestamps (to form an outline)
     // This is not currently supported.
-    var i=0;
+
+    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
+    // if not provided, assume track is the same language as the default player language
+    var trackLang = track.getAttribute('srclang') || this.lang;
+
     this.hasChapters = true;
+
+    // TODO: Add support for multiple languages of chapters
+    // Replace the following line with the commented block that follows
+    // Haven't done this because it will have a big effect downstream
+    // on all chapter processing
     this.chapters = cues;
+
+    /* // new
+    this.chapters.push({
+      cues: cues,
+      language: trackLang
+    });
+    */
+
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
     }

@@ -137,6 +137,7 @@
 
   // Takes a cue and returns the caption text to display for it.
   AblePlayer.prototype.flattenCueForCaption = function (cue) {
+
     var result = [];
 
     var flattenComponent = function (component) {
@@ -161,7 +162,6 @@
     for (var ii in cue.components.children) {
       result.push(flattenComponent(cue.components.children[ii]));
     }
-
     return result.join('');
   };
 

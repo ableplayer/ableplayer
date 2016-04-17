@@ -2761,7 +2761,7 @@
     this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
 
     // Add field for selecting a transcript language
-    // This will be deleted in FUCK if there are no languages
+    // This will be deleted in initialize.js > recreatePlayer() if there are no languages
     this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
     // Add a default "Unknown" option; this will be deleted later if there are any
     // elements with a language.
@@ -2984,7 +2984,16 @@
     });
 
     this.$transcriptLanguageSelect.change(function () {
+
       var language = thisObj.$transcriptLanguageSelect.val();
+
+      // set language of all content (chapters, captions & descriptions)
+      // to match selection (if languages are avaialable)
+      for (var ii in thisObj.chapters) {
+        if (thisObj.chapters[ii].language === language) {
+          thisObj.transcriptChapters = thisObj.chapters[ii];
+        }
+      }
       for (var ii in thisObj.captions) {
         if (thisObj.captions[ii].language === language) {
           thisObj.transcriptCaptions = thisObj.captions[ii];
@@ -4136,7 +4145,11 @@
     // called via setupTracks() only if there is track with kind="descriptions"
     // prepares for delivery of text description , in case it's needed
     // whether and how it's delivered is controlled within description.js > initDescription()
-    var trackLang = track.getAttribute('srclang');
+
+    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
+    // if not provided, assume track is the same language as the default player language
+    var trackLang = track.getAttribute('srclang') || this.lang;
+
     this.hasClosedDesc = true;
     this.currentDescription = -1;
     this.descriptions.push({
@@ -4146,11 +4159,29 @@
   };
 
   AblePlayer.prototype.setupChapters = function (track, cues) {
+
     // NOTE: WebVTT supports nested timestamps (to form an outline)
     // This is not currently supported.
-    var i=0;
+
+    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
+    // if not provided, assume track is the same language as the default player language
+    var trackLang = track.getAttribute('srclang') || this.lang;
+
     this.hasChapters = true;
+
+    // TODO: Add support for multiple languages of chapters
+    // Replace the following line with the commented block that follows
+    // Haven't done this because it will have a big effect downstream
+    // on all chapter processing
     this.chapters = cues;
+
+    /* // new
+    this.chapters.push({
+      cues: cues,
+      language: trackLang
+    });
+    */
+
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
     }
@@ -7294,6 +7325,7 @@
 
   // Takes a cue and returns the caption text to display for it.
   AblePlayer.prototype.flattenCueForCaption = function (cue) {
+
     var result = [];
 
     var flattenComponent = function (component) {
@@ -7318,7 +7350,6 @@
     for (var ii in cue.components.children) {
       result.push(flattenComponent(cue.components.children[ii]));
     }
-
     return result.join('');
   };
 
@@ -7704,9 +7735,12 @@
       return;
     }
     // Update transcript.
+    var chapters;
     var captions;
     var descriptions;
     var captionLang;
+
+    // setup captions
     if (this.transcriptCaptions) {
       // use this independently of this.selectedCaptions
       // user might want captions in one language, transcript in another
@@ -7717,6 +7751,26 @@
       captionLang = this.captionLang;
       captions = this.selectedCaptions.cues;
     }
+
+    // setup chapters
+    if (this.transcriptChapters) {
+      chapters = this.transcriptChapters;
+    }
+    else if (this.chapters.length > 0) {
+      // Try and match the caption language.
+      if (captionLang) {
+        for (var ii in this.chapters) {
+          if (this.chapters[ii].language === captionLang) {
+            chapters = this.chapters[ii];
+          }
+        }
+      }
+      if (typeof chapters === 'undefined') {
+        chapters = this.chapters;
+      }
+    }
+
+    // setup descriptions
     if (this.transcriptDescriptions) {
       descriptions = this.transcriptDescriptions.cues;
     }
@@ -7733,7 +7787,8 @@
         descriptions = this.descriptions[0].cues;
       }
     }
-    var div = this.generateTranscript(captions || [], descriptions || []);
+
+    var div = this.generateTranscript(chapters || [], captions || [], descriptions || []);
     this.$transcriptDiv.html(div);
 
     var thisObj = this;
@@ -7786,19 +7841,18 @@
     }
   };
 
-  AblePlayer.prototype.generateTranscript = function(captions, descriptions) {
+  AblePlayer.prototype.generateTranscript = function(chapters, captions, descriptions) {
+
     var thisObj = this;
 
-    var main = $('<div class="able-transcript-container"></div>');
+    var $main = $('<div class="able-transcript-container"></div>');
 
-    // TODO: Make scrolling optional?
-
-    var transcriptTitle = 'Transcript';
+    var transcriptTitle = this.tt.prefMenuTranscript;
     if (typeof this.transcriptTitle !== 'undefined') {
       transcriptTitle = this.transcriptTitle;
     }
     else if (this.lyricsMode) {
-      transcriptTitle = 'Lyrics';
+      transcriptTitle = 'Lyrics'; // TODO: Localize this
     }
 
     if (typeof this.transcriptDivLocation === 'undefined' && transcriptTitle != '') {
@@ -7806,18 +7860,79 @@
       // external transcript is expected to have its own heading
       var headingNumber = this.playerHeadingLevel;
       headingNumber += 1;
-      if (headingNumber > 6) {
-        headingNumber = 6;
+      var chapterHeadingNumber = headingNumber + 1;
+
+      if (headingNumber <= 6) {
+        var transcriptHeading = 'h' + headingNumber.toString();
       }
-      var transcriptHeading = 'h' + headingNumber.toString();
-      var transcriptHeadingTag = '<' + transcriptHeading + ' class="able-transcript-heading">';
-      transcriptHeadingTag += transcriptTitle;
-      transcriptHeadingTag += '</' + transcriptHeading + '>';
-       main.append(transcriptHeadingTag);
+      else {
+        var transcriptHeading = 'div';
+      }
+      // var transcriptHeadingTag = '<' + transcriptHeading + ' class="able-transcript-heading">';
+      var $transcriptHeadingTag = $('<' + transcriptHeading + '>');
+      $transcriptHeadingTag.addClass('able-transcript-heading');
+      if (headingNumber > 6) {
+        $transcriptHeadingTag.attr({
+          'role': 'heading',
+          'aria-level': headingNumber
+        });
+      }
+      $transcriptHeadingTag.text(transcriptTitle);
+
+      $main.append($transcriptHeadingTag);
     }
 
+    var nextChapter = 0;
     var nextCap = 0;
     var nextDesc = 0;
+
+    var addChapter = function(div, chap) {
+
+      if (chapterHeadingNumber <= 6) {
+        var chapterHeading = 'h' + chapterHeadingNumber.toString();
+      }
+      else {
+        var chapterHeading = 'div';
+      }
+
+      var $chapterHeadingTag = $('<' + chapterHeading + '>',{
+        'class': 'able-transcript-chapter-heading'
+      });
+      if (chapterHeadingNumber > 6) {
+        $chapterHeadingTag.attr({
+          'role': 'heading',
+          'aria-level': chapterHeadingNumber
+        });
+      }
+
+      var flattenComponentForChapter = function(comp) {
+        var result = [];
+        if (comp.type === 'string') {
+          result.push(comp.value);
+        }
+        else {
+          for (var ii in comp.children) {
+            result = result.concat(flattenComponentForChapter(comp.children[ii]));
+          }
+        }
+        return result;
+      }
+
+      var $chapSpan = $('<span>',{
+        'class': 'able-transcript-seekpoint'
+      });
+      for (var ii in chap.components.children) {
+        var results = flattenComponentForChapter(chap.components.children[ii]);
+        for (var jj in results) {
+          $chapSpan.append(results[jj]);
+        }
+      }
+      $chapSpan.attr('data-start', chap.start.toString());
+      $chapSpan.attr('data-end', chap.end.toString());
+      $chapterHeadingTag.append($chapSpan);
+
+      div.append($chapterHeadingTag);
+    };
 
     var addDescription = function(div, desc) {
       var descDiv = $('<div class="able-desc"><span class="hidden">Description: </span></div>');
@@ -7922,28 +8037,59 @@
       div.append('\n');
     };
 
-    while ((nextCap < captions.length) || (nextDesc < descriptions.length)) {
-      if ((nextCap < captions.length) && (nextDesc < descriptions.length)) {
-        if (descriptions[nextDesc].start <= captions[nextCap].start) {
-          addDescription(main, descriptions[nextDesc]);
+    // keep looping as long as any one of the three arrays has content
+    while ((nextChapter < chapters.length) || (nextDesc < descriptions.length) || (nextCap < captions.length)) {
+
+      if ((nextChapter < chapters.length) && (nextDesc < descriptions.length) && (nextCap < captions.length)) {
+        // they all three have content
+        var firstStart = Math.min(chapters[nextChapter].start,descriptions[nextDesc].start,captions[nextCap].start);
+      }
+      else if ((nextChapter < chapters.length) && (nextDesc < descriptions.length)) {
+        // chapters & descriptions have content
+        var firstStart = Math.min(chapters[nextChapter].start,descriptions[nextDesc].start);
+      }
+      else if ((nextChapter < chapters.length) && (nextCap < captions.length)) {
+        // chapters & captions have content
+        var firstStart = Math.min(chapters[nextChapter].start,captions[nextCap].start);
+      }
+      else if ((nextDesc < descriptions.length) && (nextCap < captions.length)) {
+        // descriptions & captions have content
+        var firstStart = Math.min(descriptions[nextDesc].start,captions[nextCap].start);
+      }
+      else {
+        var firstStart = null;
+      }
+      if (firstStart !== null) {
+        if (typeof chapters[nextChapter] !== 'undefined' && chapters[nextChapter].start === firstStart) {
+          addChapter($main, chapters[nextChapter]);
+          nextChapter += 1;
+        }
+        else if (typeof descriptions[nextDesc] !== 'undefined' && descriptions[nextDesc].start === firstStart) {
+          addDescription($main, descriptions[nextDesc]);
           nextDesc += 1;
         }
         else {
-          addCaption(main, captions[nextCap]);
+          addCaption($main, captions[nextCap]);
           nextCap += 1;
         }
       }
-      else if (nextCap < captions.length) {
-        addCaption(main, captions[nextCap]);
-        nextCap += 1;
-      }
-      else if (nextDesc < descriptions.length) {
-        addDescription(main, descriptions[nextDesc]);
-        nextDesc += 1;
+      else {
+        if (nextChapter < chapters.length) {
+          addCaption($main, chapters[nextChapter]);
+          nextChapter += 1;
+        }
+        else if (nextDesc < descriptions.length) {
+          addDescription($main, descriptions[nextDesc]);
+          nextDesc += 1;
+        }
+        else if (nextCap < captions.length) {
+          addCaption($main, captions[nextCap]);
+          nextCap += 1;
+        }
       }
     }
 
-    return main;
+    return $main;
   };
 })(jQuery);
 
