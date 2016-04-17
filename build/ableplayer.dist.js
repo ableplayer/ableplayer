@@ -5521,7 +5521,7 @@
 
     $parents = $element.parents();
     $parents.each(function(){
-      $foundHeadings = $(this).find('h1, h2, h3, h4, h5, h6');
+      $foundHeadings = $(this).children(':header');
       numHeadings = $foundHeadings.length;
       if (numHeadings) {
         headingType = $foundHeadings.eq(numHeadings-1).prop('tagName');
