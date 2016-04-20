@@ -5108,7 +5108,12 @@
       // Escape key or Enter key
       else if (event.which === 27 || event.which === 13) {
         // close popup
-        thisObj.showVolumePopup();
+        if (thisObj.$volumeSlider.is(':visible')) {
+          thisObj.hideVolumePopup();
+        }
+        else {
+          thisObj.showVolumePopup();
+        }
       }
       else {
         return;
@@ -5215,7 +5220,12 @@
     var volume;
 
     if (typeof direction === 'undefined') {
-      this.showVolumePopup();
+      if (this.$volumeSlider.is(':visible')) {
+        this.hideVolumePopup();
+      }
+      else {
+        this.showVolumePopup();
+      }
       return;
     }
 
@@ -5262,6 +5272,13 @@
     this.$tooltipDiv.hide();
     this.$volumeSlider.show().attr('aria-hidden','false');
     this.$volumeSliderHead.focus();
+  };
+
+  AblePlayer.prototype.hideVolumePopup = function() {
+
+//    this.$tooltipDiv.hide();
+    this.$volumeSlider.hide().attr('aria-hidden','true');
+    this.$volumeButton.focus();
   };
 
   AblePlayer.prototype.isMuted = function () {
