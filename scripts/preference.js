@@ -471,15 +471,15 @@
               changedPref = $(this).attr('name');
               if (changedPref === 'prefAltKey') {
                 changedSpan = '.able-modkey-alt';
-                changedText = 'Alt + ';
+                changedText = thisObj.tt.prefAltKey + ' + ';
               }
               else if (changedPref === 'prefCtrlKey') {
                 changedSpan = '.able-modkey-ctrl';
-                changedText = 'Ctrl + ';
+                changedText = thisObj.tt.prefCtrlKey + ' + ';
               }
               else if (changedPref === 'prefShiftKey') {
                 changedSpan = '.able-modkey-shift';
-                changedText = 'Shift + ';
+                changedText = thisObj.tt.prefShiftKey + ' + ';
               }
               if ($(this).is(':checked')) {
                 $(changedSpan).text(changedText);
