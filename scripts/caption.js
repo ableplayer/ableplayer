@@ -181,14 +181,15 @@
 
       case 'prefCaptionsColor':
       case 'prefCaptionsBGColor':
-        options[0] = this.tt.white;
-        options[1] = this.tt.yellow;
-        options[2] = this.tt.green;
-        options[3] = this.tt.cyan;
-        options[4] = this.tt.blue;
-        options[5] = this.tt.magenta;
-        options[6] = this.tt.red;
-        options[7] = this.tt.black;
+        // HTML color values must be in English
+        options[0] = ['white',this.tt.white];
+        options[1] = ['yellow',this.tt.yellow];
+        options[2] = ['green',this.tt.green];
+        options[3] = ['cyan',this.tt.cyan];
+        options[4] = ['blue',this.tt.blue];
+        options[5] = ['magenta',this.tt.magenta];
+        options[6] = ['red',this.tt.red];
+        options[7] = ['black',this.tt.black];
         break;
 
       case 'prefCaptionsSize':

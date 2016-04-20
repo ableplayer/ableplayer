@@ -158,13 +158,13 @@
         'name': 'prefCaptionsColor',
         'label': this.tt.prefCaptionsColor,
         'group': 'captions',
-        'default': this.tt.white
+        'default': 'white'
       });
       prefs.push({
         'name': 'prefCaptionsBGColor',
         'label': this.tt.prefCaptionsBGColor,
         'group': 'captions',
-        'default': this.tt.black
+        'default': 'black'
       });
       prefs.push({
         'name': 'prefCaptionsOpacity',
@@ -236,7 +236,7 @@
       thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
       $div1,id1,$radio1,$label1,
       $div2,id2,$radio2,$label2,
-      options,$thisOption,optionText,sampleCapsDiv,
+      options,$thisOption,optionValue,optionText,sampleCapsDiv,
       changedPref,changedSpan,changedText,
       currentDescState,
       $kbHeading,$kbList,kbLabels,keys,kbListText,$kbListItem,
@@ -425,21 +425,28 @@
           options = this.getCaptionsOptions(thisPref);
           for (j=0; j < options.length; j++) {
             if (thisPref === 'prefCaptionsPosition') {
-              if (options[j] === 'overlay') {
+              optionValue = options[j];
+              if (optionValue === 'overlay') {
                 optionText = this.tt.captionsPositionOverlay;
               }
-              else if (options[j] === 'below') {
+              else if (optionValue === 'below') {
+                optionValue = options[j];
                 optionText = this.tt.captionsPositionBelow;
               }
             }
+            else if (thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
+              optionValue = options[j][0];
+              optionText = options[j][1];
+            }
             else {
+              optionValue = options[j];
               optionText = options[j];
             }
             $thisOption = $('<option>',{
-              value: options[j],
+              value: optionValue,
               text: optionText
             });
-            if (this[thisPref] === options[j]) {
+            if (this[thisPref] === optionValue) {
               $thisOption.attr('selected','selected');
             }
             $thisField.append($thisOption);
