@@ -736,6 +736,7 @@
       captions = [];
     }
     if (captions.length === 1) {
+
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) {
         // turn them off
@@ -771,6 +772,7 @@
       this.refreshControls();
     }
     else {
+
       // there is more than one caption track.
       // clicking on a track is handled via caption.js > getCaptionClickFunction()
       if (this.captionsPopup.is(':visible')) {

@@ -699,7 +699,9 @@
       thisObj.addControls();
       thisObj.addEventListeners();
       // Calling these set functions also initializes some icons.
-      thisObj.setMute(false);
+      if (thisObj.Volume) {
+        thisObj.setMute(false);
+      }
       thisObj.setFullscreen(false);
       thisObj.setVolume(thisObj.defaultVolume);
       thisObj.refreshControls();
@@ -5026,7 +5028,6 @@
     // Also, vertical orientation of slider requires CSS hacks
     // and causes problems in some screen readers
     // Therefore, building a custom vertical volume slider
-
     var thisObj, volumeSliderId, volumeHelpId, x, y;
 
     thisObj = this;
@@ -5211,6 +5212,7 @@
   };
 
   AblePlayer.prototype.handleVolume = function(direction) {
+
     // 'direction is either 'up','down', or an ASCII key code 49-57 (numeric keys 1-9)
     // Action: calculate and change the volume
     // Don't change this.volume and this.volumeButton yet - wait for 'volumechange' event to fire (event.js)
@@ -5276,7 +5278,6 @@
 
   AblePlayer.prototype.hideVolumePopup = function() {
 
-//    this.$tooltipDiv.hide();
     this.$volumeSlider.hide().attr('aria-hidden','true');
     this.$volumeButton.focus();
   };
@@ -6790,6 +6791,7 @@
       captions = [];
     }
     if (captions.length === 1) {
+
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) {
         // turn them off
@@ -6825,6 +6827,7 @@
       this.refreshControls();
     }
     else {
+
       // there is more than one caption track.
       // clicking on a track is handled via caption.js > getCaptionClickFunction()
       if (this.captionsPopup.is(':visible')) {

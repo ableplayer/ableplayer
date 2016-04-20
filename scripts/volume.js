@@ -7,7 +7,6 @@
     // Also, vertical orientation of slider requires CSS hacks
     // and causes problems in some screen readers
     // Therefore, building a custom vertical volume slider
-
     var thisObj, volumeSliderId, volumeHelpId, x, y;
 
     thisObj = this;
@@ -192,6 +191,7 @@
   };
 
   AblePlayer.prototype.handleVolume = function(direction) {
+
     // 'direction is either 'up','down', or an ASCII key code 49-57 (numeric keys 1-9)
     // Action: calculate and change the volume
     // Don't change this.volume and this.volumeButton yet - wait for 'volumechange' event to fire (event.js)
@@ -257,7 +257,6 @@
 
   AblePlayer.prototype.hideVolumePopup = function() {
 
-//    this.$tooltipDiv.hide();
     this.$volumeSlider.hide().attr('aria-hidden','true');
     this.$volumeButton.focus();
   };

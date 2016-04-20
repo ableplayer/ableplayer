@@ -402,7 +402,9 @@
       thisObj.addControls();
       thisObj.addEventListeners();
       // Calling these set functions also initializes some icons.
-      thisObj.setMute(false);
+      if (thisObj.Volume) {
+        thisObj.setMute(false);
+      }
       thisObj.setFullscreen(false);
       thisObj.setVolume(thisObj.defaultVolume);
       thisObj.refreshControls();
