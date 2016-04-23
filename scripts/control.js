@@ -971,12 +971,17 @@
     }
     else {
       // Non-native fullscreen support through modal dialog.
-
       // Create dialog on first run through.
       if (!this.fullscreenDialog) {
-        var dialogDiv = $('<div>');
-        this.fullscreenDialog = new AccessibleDialog(dialogDiv, this.$fullscreenButton, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
-        $('body').append(dialogDiv);
+        var $dialogDiv = $('<div>');
+        // create a hidden alert, communicated to screen readers via aria-describedby
+        var $fsDialogAlert = $('<p>',{
+          'class': 'able-screenreader-alert'
+        }).text(this.tt.fullscreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
+        $dialogDiv.append($fsDialogAlert);
+        // now render this as a dialog
+        this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullScreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
+        $('body').append($dialogDiv);
       }
 
       // Track whether paused/playing before moving element; moving the element can stop playback.
