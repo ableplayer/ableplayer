@@ -78,9 +78,6 @@ module.exports = function(grunt) {
             min: {
                 src  : [
                     'styles/ableplayer.css',
-                    'styles/ableplayer-playlist.css',
-                    'styles/ableplayer-search.css',
-                    'styles/ableplayer-transcript.css'
                 ],
                 dest : 'build/<%= pkg.name %>.min.css',
             },

@@ -25,6 +25,7 @@
 	.able-sign-window (if sent to back) = 0
 
 */
+
 .able {
   position: relative;
   margin: 1em 0;
@@ -59,7 +60,6 @@
 	overflow:hidden;
 }
 .able-video {
-/*	margin-top: -0.75em;*/
 }
 .able-video .able-now-playing {
 	display: none; /* not currently used for video */
@@ -603,6 +603,7 @@ span.able-modkey {
 /*
   Sign Language Window
 */
+
 .able-sign-window {
   position: relative;
   margin: 1em;
@@ -641,6 +642,15 @@ span.able-modkey {
 }
 .able-sign-window button:focus {
 	outline-color: #ffbb37 !important; /* yellow */
+}
+
+/*
+  Drag & Drop
+*/
+
+.able-drag {
+  border: 2px dashed #F90;
+  cursor: move;
 }
 
 /*
@@ -688,108 +698,6 @@ div.able-chapters-div button::-moz-focus-inner {
   border: 0;
   outline: none;
   color: #FFF !important;
-}
-
-/*
-  icomoon.io font styling
-*/
-
-@font-face {
-	font-family: able;
-	src:url('../fonts/able.eot?sn5rkg');
-	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
-		url('../fonts/able.woff?sn5rkg') format('woff'),
-		url('../fonts/able.ttf?sn5rkg') format('truetype'),
-		url('../fonts/able.svg?sn5rkg#able') format('svg');
-	font-weight: normal;
-	font-style: normal;
-}
-
-[class^="icon-"], [class*=" icon-"] {
-	font-family: able;
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
-
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
-.icon-play:before {
-	content: "\f04b";
-}
-.icon-pause:before {
-	content: "\f04c";
-}
-.icon-stop:before {
-	content: "\f04d";
-}
-.icon-fullscreen-expand:before {
-	content: "\f065";
-}
-.icon-fullscreen-collapse:before {
-	content: "\f066";
-}
-.icon-pipe:before {
-	content: "\e600";
-}
-.icon-captions:before {
-	content: "\e601";
-}
-.icon-descriptions:before {
-	content: "\e602";
-}
-.icon-transcript:before {
-	content: "\f15c";
-}
-.icon-slower:before {
-	content: "\f0dd";
-}
-.icon-faster:before {
-	content: "\f0de";
-}
-.icon-help:before {
-	content: "\f128";
-}
-.icon-close:before {
-	content: "\f00d";
-}
-.icon-rewind:before {
-	content: "\e603";
-}
-.icon-forward:before {
-	content: "\e604";
-}
-.icon-volume-loud:before {
-	content: "\e60b";
-}
-.icon-volume-medium:before {
-	content: "\e605";
-}
-.icon-volume-soft:before {
-	content: "\e60c";
-}
-.icon-volume-mute:before {
-	content: "\e606";
-}
-.icon-volume-up:before {
-	content: "\e607";
-}
-.icon-volume-down:before {
-	content: "\e608";
-}
-.icon-chapters:before {
-	content: "\e609";
-}
-.icon-preferences:before {
-	content: "\e60d";
-}
-.icon-sign:before {
-	content: "\e60a";
 }
 
 /*
@@ -907,11 +815,178 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 
 /*
-  Drag & Drop
+  Transcript
 */
-.able-drag {
-  border: 2px dashed #F90;
-  cursor: move;
+
+.able-transcript {
+	position: relative; /* must be positioned for scrolling */
+  overflow-y: scroll;
+  padding-left: 5%;
+  padding-right: 5%;
+  width: 90%;
+  height: 400px;
+}
+.able-transcript div {
+	margin: 1em 0;
+}
+.able-transcript-heading {
+  font-size: 1.4em;
+  font-weight: bold;
+}
+.able-transcript-chapter-heading {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.able-transcript div.able-desc {
+	background-color: #FEE;
+	border: thin solid #336;
+	font-style: italic;
+	padding: 1em;
+}
+.able-transcript span.able-unspoken {
+	font-weight: bold;
+}
+.able-transcript span.hidden {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);
+}
+.able-highlight {
+	background: #FF6; /* light yellow */
+}
+.able-previous {
+	background: black !important;
+	font-style: italic;
+}
+.able-transcript span:hover,
+.able-transcript span:focus,
+.able-transcript span:active {
+	background: #CF6; /* light green */
+	cursor: pointer;
+}
+.able-transcript-toolbar {
+  padding: 10px;
+  background-color: #DDDDDD;
+  border-style: solid;
+  border-width: 0 0 1px 0;
+}
+.able-transcript-toolbar label {
+  margin-right: 10px;
+}
+.able-transcript-area {
+  margin: 1em;
+  border-width: 1px;
+  border-style: solid;
+}
+.able-transcript-toolbar input:focus,
+.able-transcript-toolbar input:hover,
+.able-controller input:focus,
+.able-controller input:hover,
+.able-controller button:focus,
+.able-controller button:hover,
+.able-seek-head:focus,
+.able-seek-head:hover {
+  outline-style: solid;
+  outline-width: 2px;
+}
+.able-transcript-toolbar input:focus,
+.able-controller input:focus,
+.able-controller button:focus,
+.able-seek-head:focus {
+	outline-color: #ffbb37; /* yellow */
+}
+.able-transcript-toolbar input:hover,
+.able-controller input:hover,
+.able-controller button:hover,
+.able-seek-head:hover {
+	outline-color: #8AB839; /* green */
+}
+
+/*
+  Playlist - Embedded
+*/
+
+.able .able-playlist {
+	font-size: 0.9em;
+	list-style-type: none;
+	margin: 0;
+	background-color: #FFFFFF;
+	padding: 5px 0;
+}
+.able .able-playlist li {
+	background-color: #DDDDDD; /* default background color of each item in playlist */
+	margin: 5px;
+	padding: 5px 10px;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+}
+.able .able-playlist li:hover,
+.able .able-playlist li:focus,
+.able .able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+	color: #FFFFFF;
+	background-color: #340449;
+	text-decoration: none;
+}
+.able .able-playlist li.able-current { /* currently selected playlist item */
+	color: #000000;
+	background-color: #FFEEB3;
+	font-weight: bold;
+	outline: none;
+	text-decoration: none;
+}
+.able .able-playlist li.able-current:after {
+	content: ' *';
+}
+
+/*
+  Playlist - External
+*/
+
+.able-playlist {
+}
+.able-playlist li {
+}
+.able-playlist li:hover,
+.able-playlist li:focus,
+.able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+	text-decoration: none;
+	color: white;
+	background-color: black;
+}
+.able-playlist li.able-current { /* currently selected playlist item */
+	font-weight: bold;
+  text-decoration: underline;
+}
+.able-playlist li.able-current:after {
+	content: ' *';
+}
+
+/*
+  Search
+*/
+
+.able-search-results ul li {
+  font-size: 1.1em;
+  margin-bottom: 1em;
+}
+.able-search-results-time {
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.able-search-results-time:hover,
+.able-search-results-time:focus,
+.able-search-results-time:active {
+  color: #FFF;
+  background-color: #000;
+  text-decoration: none;
+}
+.able-search-results-text {
+  padding-left: 1em;
+}
+.able-search-term {
+	background-color: #FFC;
+	font-weight: bold;
 }
 
 /*
@@ -960,3 +1035,106 @@ div.able-chapters-div button::-moz-focus-inner {
   margin: 1em auto;
   opacity: 0.3;
 }
+
+/*
+  icomoon.io font styling
+*/
+
+@font-face {
+	font-family: able;
+	src:url('../fonts/able.eot?sn5rkg');
+	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
+		url('../fonts/able.woff?sn5rkg') format('woff'),
+		url('../fonts/able.ttf?sn5rkg') format('truetype'),
+		url('../fonts/able.svg?sn5rkg#able') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+	font-family: able;
+	speak: none;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* Better Font Rendering =========== */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-play:before {
+	content: "\f04b";
+}
+.icon-pause:before {
+	content: "\f04c";
+}
+.icon-stop:before {
+	content: "\f04d";
+}
+.icon-fullscreen-expand:before {
+	content: "\f065";
+}
+.icon-fullscreen-collapse:before {
+	content: "\f066";
+}
+.icon-pipe:before {
+	content: "\e600";
+}
+.icon-captions:before {
+	content: "\e601";
+}
+.icon-descriptions:before {
+	content: "\e602";
+}
+.icon-transcript:before {
+	content: "\f15c";
+}
+.icon-slower:before {
+	content: "\f0dd";
+}
+.icon-faster:before {
+	content: "\f0de";
+}
+.icon-help:before {
+	content: "\f128";
+}
+.icon-close:before {
+	content: "\f00d";
+}
+.icon-rewind:before {
+	content: "\e603";
+}
+.icon-forward:before {
+	content: "\e604";
+}
+.icon-volume-loud:before {
+	content: "\e60b";
+}
+.icon-volume-medium:before {
+	content: "\e605";
+}
+.icon-volume-soft:before {
+	content: "\e60c";
+}
+.icon-volume-mute:before {
+	content: "\e606";
+}
+.icon-volume-up:before {
+	content: "\e607";
+}
+.icon-volume-down:before {
+	content: "\e608";
+}
+.icon-chapters:before {
+	content: "\e609";
+}
+.icon-preferences:before {
+	content: "\e60d";
+}
+.icon-sign:before {
+	content: "\e60a";
+}
+

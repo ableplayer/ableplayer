@@ -405,13 +405,6 @@ When a playlist is included on a page, the `<source>` elements within
 the `<audio>` or `<video>` tags are optional. If they are provided, they
 should match the first item in the playlist.
 
-If your web page includes a playlist, you should also link to the
-*ableplayer-playlist.css* file, as follows:
-
-```HTML
-<link rel="stylesheet" href="styles/ableplayer-playlist.css" type="text/css"/>
-```
-
 Interactive Transcript
 ----------------------
 
