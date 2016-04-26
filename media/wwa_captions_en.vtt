@@ -1,31 +1,31 @@
-WEBVTT 
+WEBVTT
 kind: captions
 lang: en
 
-NOTE This VTT file includes a few extras: 
+NOTE This VTT file includes a few extras:
 - Meta data at the top (lines 2 and 3)
-- The current comment block, identified with NOTE and surrounded by spaces 
-- cue settings at the end of the first timestamp 
-- A cue span at the start of the second cue payload 
+- The current comment block, identified with NOTE and surrounded by spaces
+- cue settings at the end of the first timestamp
+- A cue span at the start of the second cue payload
 - (in this case, a "voice span" <v> identifying the speaker)
-- A WebVTT cue settings list after the timestamp at 39.132 
-- Currently AblePlayer does not support these extra features 
-- but the parser needs to be able to filter them out 
+- A WebVTT cue settings list after the timestamp at 39.132
+- Currently AblePlayer does not support these extra features
+- but the parser needs to be able to filter them out
 -
-- Added on April 1, 2015 for testing purposes (these are both valid): 
-- A cue block with no content 
-- Multiple line breaks between some cue blocks 
+- Added on April 1, 2015 for testing purposes (these are both valid):
+- A cue block with no content
+- Multiple line breaks between some cue blocks
 -
 - More info in the WebVTT spec (still evolving):
 - http://dev.w3.org/html5/webvtt
 
-00:00:00.429 --> 00:00:09.165  
+00:00:00.429 --> 00:00:09.165
 [ music ]
 
-00:00:09.165 --> 00:00:10.792 
-<v Narrator> You want these people.
+00:00:09.165 --> 00:00:10.792
+<v Narrator> You <i>want</i> these people.
 
-00:00:10.792 --> 00:00:13.759 
+00:00:10.792 --> 00:00:13.759
 They order your products, sign up for your services,
 
 00:00:13.759 --> 00:00:16.627
@@ -42,16 +42,16 @@ through your website.
 Or maybe not.
 
 00:00:25.891 --> 00:00:30.396
-Your website's visitors aren't a 
-faceless mass of identical mouse-clickers
+Your website's visitors aren't a
+<b>faceless mass of identical mouse-clickers</b>
 
 00:00:30.396 --> 00:00:32.363
-but a vibrant community of individuals 
+but a vibrant community of individuals
 
 00:00:32.363 --> 00:00:35.297
 with varying tastes, styles, and abilities.
 
-00:00:35.297 --> 00:00:39.132
+00:00:35.297 --> 00:00:36.900
 This includes people with disabilities.
 
 00:00:39.132 --> 00:00:41.000 position:10%,start align:start size:35%
@@ -65,7 +65,7 @@ at their resolution, with their browser
 and their operating system
 
 00:00:49.264 --> 00:00:52.000
-is not going to be necessarily 
+is not going to be necessarily
 the same thing that everybody else sees.
 
 
