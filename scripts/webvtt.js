@@ -1,6 +1,7 @@
 (function ($) {
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
-  AblePlayer.prototype.parseWebVTT = function(srcFile,text) { 
+  AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
+
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
 
@@ -18,14 +19,14 @@
       act(parserState, parseFileBody);
     }
     catch (err) {
-      var errString = 'Invalid WebVTT file: ' + parserState.src + '\n'; 
-      errString += 'Line: ' + parserState.line + ', '; 
+      var errString = 'Invalid WebVTT file: ' + parserState.src + '\n';
+      errString += 'Line: ' + parserState.line + ', ';
       errString += 'Column: ' + parserState.column + '\n';
-      errString += err; 
-      if (console.warn) {          
+      errString += err;
+      if (console.warn) {
         console.warn(errString);
       }
-      else if (console.log) { 
+      else if (console.log) {
         console.log(errString);
       }
     }
@@ -198,28 +199,29 @@
   }
 
   function parseCue(state) {
+
     var nextLine = peekLine(state);
     var cueId;
     var errString;
-    
+
     if(nextLine.indexOf('-->') === -1) {
     	cueId = cutLine(state);
     	nextLine = peekLine(state);
     	if(nextLine.indexOf('-->') === -1) {
-        errString = 'Invalid WebVTT file: ' + state.src + '\n'; 
-        errString += 'Line: ' + state.line + ', '; 
+        errString = 'Invalid WebVTT file: ' + state.src + '\n';
+        errString += 'Line: ' + state.line + ', ';
         errString += 'Column: ' + state.column + '\n';
         errString += 'Expected cue timing for cueId \''+cueId+'\' but found: ' + nextLine + '\n';
-        if (console.warn) { 
+        if (console.warn) {
           console.warn(errString);
         }
-        else if (console.log) { 
+        else if (console.log) {
           console.log(errString);
         }
         return; // Return leaving line for parseCuesAndComments to handle
     	}
     }
-    
+
     var cueTimings = actList(state, [getTiming,
                                      eatAtLeast1SpacesOrTabs,
                                      eatArrow,
@@ -246,7 +248,7 @@
       settings: cueSettings,
       components: components
     });
-}
+  }
 
   function getCueSettings(state) {
     var cueSettings = {};
@@ -257,7 +259,6 @@
     }
     return cueSettings;
   }
-
 
   function getCuePayload(state) {
     // Parser based on instructions in draft.
