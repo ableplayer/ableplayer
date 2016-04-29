@@ -572,6 +572,11 @@
     else if (this.player === 'youtube') {
       this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
     }
+
+    // This will adjust the text in the chapter pop-ups.
+    // This is to respond to changes in the caption language and transcript language when appropriate.
+    // See "updateChaptersLanguage" in chapters.js to see how this is handled.
+    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.getHiddenWidth = function($el) {
@@ -880,6 +885,7 @@
       this.prefTranscript = 1;
     }
     this.updateCookie('prefTranscript');
+    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.handleSignToggle = function () {

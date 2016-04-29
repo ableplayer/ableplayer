@@ -114,4 +114,35 @@
     }
   };
 
+  AblePlayer.prototype.updateChaptersLanguage = function () {
+      var thisObj = this;
+      var matchChapLang = function (languageToMatch){
+          for (var i = 0; i < thisObj.chapters.length; i++) {
+              if(languageToMatch == thisObj.chapters[i].language){
+                  thisObj.selectedChapters = thisObj.chapters[i];
+                  return true;
+              }
+          }
+          return false;
+      };
+
+      var isSelectedChaptersUpdated = false;
+      // if captions are on, use the language of the captions
+      if(this.captionsOn || this.prefCaptions){
+          isSelectedChaptersUpdated = matchChapLang(this.captionLang);
+      }
+      // if captions are off, and the transcript is on, use the transcript language
+      if(this.prefTranscript && !(isSelectedChaptersUpdated)){
+          isSelectedChaptersUpdated = matchChapLang(this.$transcriptLanguageSelect.val());
+      }
+      // if none of the above, use the language of the player
+      if(!(isSelectedChaptersUpdated)){
+          isSelectedChaptersUpdated = matchChapLang(this.lang);
+      }
+      // if can't match any of that, use the first track in the Chapters array
+      if(!(isSelectedChaptersUpdated) && (this.chapters.length >= 1)) {
+          this.selectedChapters = (this.chapters[0]);
+      }
+  };
+
 })(jQuery);

@@ -3014,6 +3014,8 @@
         }
       }
       thisObj.updateTranscript();
+
+      thisObj.setupPopups('chapters');
     });
   };
 
@@ -3152,10 +3154,21 @@
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
+          // sets the appropriate language for chapters if there are multiple chapter tracks available.
+          thisObj.updateChaptersLanguage();
+
           if (typeof this.chaptersPopup === 'undefined') {
             this.chaptersPopup = this.createPopup('chapters');
           }
-          tracks = this.chapters;
+          if (this.selectedChapters) {
+            tracks = this.selectedChapters.cues;
+          }
+          else if (this.chapters.length >= 1) {
+            tracks = this.chapters[0].cues;
+          }
+          else {
+            tracks = [];
+          }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {
@@ -4182,14 +4195,13 @@
     // Replace the following line with the commented block that follows
     // Haven't done this because it will have a big effect downstream
     // on all chapter processing
-    this.chapters = cues;
+    //this.chapters = cues;
 
-    /* // new
+    // new
     this.chapters.push({
       cues: cues,
       language: trackLang
     });
-    */
 
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
@@ -6627,6 +6639,11 @@
     else if (this.player === 'youtube') {
       this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
     }
+
+    // This will adjust the text in the chapter pop-ups.
+    // This is to respond to changes in the caption language and transcript language when appropriate.
+    // See "updateChaptersLanguage" in chapters.js to see how this is handled.
+    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.getHiddenWidth = function($el) {
@@ -6935,6 +6952,7 @@
       this.prefTranscript = 1;
     }
     this.updateCookie('prefTranscript');
+    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -7649,6 +7667,37 @@
     }
   };
 
+  AblePlayer.prototype.updateChaptersLanguage = function () {
+      var thisObj = this;
+      var matchChapLang = function (languageToMatch){
+          for (var i = 0; i < thisObj.chapters.length; i++) {
+              if(languageToMatch == thisObj.chapters[i].language){
+                  thisObj.selectedChapters = thisObj.chapters[i];
+                  return true;
+              }
+          }
+          return false;
+      };
+
+      var isSelectedChaptersUpdated = false;
+      // if captions are on, use the language of the captions
+      if(this.captionsOn || this.prefCaptions){
+          isSelectedChaptersUpdated = matchChapLang(this.captionLang);
+      }
+      // if captions are off, and the transcript is on, use the transcript language
+      if(this.prefTranscript && !(isSelectedChaptersUpdated)){
+          isSelectedChaptersUpdated = matchChapLang(this.$transcriptLanguageSelect.val());
+      }
+      // if none of the above, use the language of the player
+      if(!(isSelectedChaptersUpdated)){
+          isSelectedChaptersUpdated = matchChapLang(this.lang);
+      }
+      // if can't match any of that, use the first track in the Chapters array
+      if(!(isSelectedChaptersUpdated) && (this.chapters.length >= 1)) {
+          this.selectedChapters = (this.chapters[0]);
+      }
+  };
+
 })(jQuery);
 
 (function ($) {
@@ -7799,7 +7848,7 @@
         }
       }
       if (typeof chapters === 'undefined') {
-        chapters = this.chapters;
+        chapters = this.chapters[0] || [];
       }
     }
 
