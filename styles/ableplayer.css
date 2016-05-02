@@ -1,37 +1,48 @@
 /*
 	Able Player core styles
 
-	z-index Map:
-	div.modalDialog = 6000
-	div.modalOverlay = 5000
-	.able-sign-window .able-button-handler-preferences = 4500
-	.able-sign-window = 4000
-	.able-alert = 3500
-	.able-slider = 3400
-  .able-popup = 3200
-  .able-tooltip = 3000
-  .able-controller .able-seekbar = 1970
-  .able-controller .buttonOff = 1965
-  .able-controller button > img = 1955
-  .able-controller button > span = 1955
-	.able-controller button = 1950
-	.able-big-play-button = 1900
-	div.able-captions = 1000
-  .able-seekhead = 300
-  .able-volume-head = 300
-  .able-seekbar-played = 200
-	.able-seekbar-loaded = 100
-	.able = 100
-	.able-sign-window (if sent to back) = 0
+	Default z-index map:
 
+	* Modal dialog
+	div.modalDialog = 10000
+	div.modalOverlay = 9500
+
+	* Items that should always be on top (9000):
+	.able-alert = 9300
+	.able-window-toolbar .able-button-handler-preferences = 9200
+  .able-popup = 9100
+  .able-tooltip = 9000
+
+  * Pop-ups with critical content:  (7000 - 8000):
+	.able-sign-window = 8000
+	.able-transcript-area = 7000
+
+  * Player controls: (5000 - 6000)
+  .able-controller .able-seekbar = 6900
+  .able-controller .buttonOff = 6800
+  .able-controller button > img = 6700
+  .able-controller button > span = 6700
+	.able-controller button = 6600
+	.able-big-play-button = 6500
+	div.able-captions = 6000
+  .able-seekhead = 5500
+  .able-volume-head = 5500
+	.able-volume-slider = 5300
+  .able-seekbar-played = 5200
+	.able-seekbar-loaded = 5100
+	.able = 5000
 */
-
+.able-wrapper {
+  position: relative;
+  margin: 0;
+  padding: 0;
+}
 .able {
   position: relative;
   margin: 1em 0;
   width: 100%; /* will be changed dynamically as player is contructed */
   box-shadow: 0px 0px 16px #262626;
-  z-index: 100;
+  z-index: 5000;
 }
 .able-column-left {
     float: left;
@@ -90,10 +101,10 @@
     background-color: transparent;
     border: none;
     outline: none;
-    z-index: 1900;
     left: 0;
     top: 0;
     padding: 0;
+    z-index: 6500;
 }
 .able-big-play-button:hover {
     opacity: 100;
@@ -125,7 +136,7 @@
   color: #fdfdfd;
   min-width: 20px;
   overflow: hidden !important;
-  z-index: 1950;
+  z-index: 6600;
 }
 .able-controller button > span {
   /* icomoon font icon */
@@ -133,22 +144,22 @@
   width: 24px;
   margin: 0 5px;
   padding: 0;
-  z-index: 1955;
+  z-index: 6700;
 }
 .able-controller button > img {
   /* image icon */
   margin: 0 5px;
   padding: 0;
-  z-index: 1955;
+  z-index: 6700;
 }
 .able-controller .buttonOff {
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
-    z-index: 1965;
+  z-index: 6800;
 }
 .able-controller .able-seekbar {
   margin: 0 5px;
-  z-index: 1970;
+  z-index: 6900;
 }
 .able-controller button:hover,
 .able-controller button:focus {
@@ -186,7 +197,7 @@
   top: 0;
   height: 0.5em;
   background-color: #464646;
-  z-index: 100;
+  z-index: 5100;
 }
 .able-seekbar-played {
   display: inline-block;
@@ -195,7 +206,7 @@
   top: 0;
   height: 0.5em;
   background-color: #DADADA;
-  z-index: 200;
+  z-index: 5200;
 }
 .able-seekhead {
   display: inline-block;
@@ -204,7 +215,7 @@
   top: -0.45em;
   border: 1px solid;
   background-color: #FDFDFD;
-  z-index: 300;
+  z-index: 5500;
 }
 
 /*
@@ -218,8 +229,8 @@
   position: absolute;
   right: 0px;
   top: -74px;
-  z-index: 3400;
   display: none;
+  z-index: 5300;
 }
 .able-volume-track {
   display: block;
@@ -244,7 +255,7 @@
   width: 15px;
   left: -5px;
   top: 23px; /* change dynamically; .able-volume-track-on top - 7 */
-  z-index: 300;
+  z-index: 5500;
 }
 .able-volume-head:hover,
 .able-volume-head:focus {
@@ -377,13 +388,13 @@ div.able-captions {
   padding: 0.5em 0;
   text-align: center;
   display: none;
-  z-index: 1000;
   line-height: 1.15em;
   /* settings that are overridden by user prefs */
   background-color: black;
   font-size: 1.1em;
   color: white;
   opacity: 0.75;
+  z-index: 6000;
 }
 div.able-captions-overlay {
   position: absolute;
@@ -430,7 +441,6 @@ div.able-now-playing span span {
 
 div.modalDialog {
   position: absolute;
-  z-index: 6000;
   height: auto;
   margin-left: auto;
   margin-right: auto;
@@ -440,12 +450,12 @@ div.modalDialog {
   display: none;
   color: #000;
   background-color: #FAFAFA;
+  z-index: 10000;
 }
 div.modalOverlay {
   position: fixed;
   width: 100%;
   height: 100%;
-  z-index: 5000;
   background-color: #000;
   opacity: 0.5;
   margin: 0;
@@ -453,6 +463,7 @@ div.modalOverlay {
   top: 0;
   left: 0;
   display: none;
+  z-index: 9500;
 }
 button.modalCloseButton {
   position: absolute;
@@ -599,18 +610,25 @@ span.able-modkey {
 .able-resize-form input[type="text"] {
   font-size: 1em;
 }
+.able-resize-form input[readonly] {
+  color: #AAA;
+}
 
 /*
-  Sign Language Window
+  Drag & Drop
 */
 
-.able-sign-window {
-  position: relative;
-  margin: 1em;
-  width: 480px;
-  z-index: 4000;
+.able-window-toolbar {
+  background-color: #464646;
+  min-height: 15px;
+  padding: 10px;
+  border-style: solid;
+  border-width: 0 0 1px 0;
 }
-.able-sign-window .able-button-handler-preferences {
+.able-window-toolbar:hover {
+  cursor: move;
+}
+.able-window-toolbar .able-button-handler-preferences {
   position: absolute;
   top: 0;
   right: 0;
@@ -621,37 +639,58 @@ span.able-modkey {
   background-color: transparent;
   border: none;
   outline: none;
-  z-index: 4500;
   padding: 0;
+  z-index: 9200;
 }
-.able-sign-window .able-popup {
-  position: absolute;
-  right: 0;
-  top: 0;
-}
-.able-sign-window:focus {
-  outline: none;
-}
-.able-sign-window button:hover,
-.able-sign-window button:focus {
+.able-window-toolbar .able-button-handler-preferences:hover,
+.able-window-toolbar .able-button-handler-preferences:focus {
   outline-style: solid;
   outline-width: medium;
 }
-.able-sign-window button:hover {
+.able-window-toolbar .able-button-handler-preferences:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-sign-window button:focus {
+.able-window-toolbar .able-button-handler-preferences:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
-
-/*
-  Drag & Drop
-*/
-
+.able-window-toolbar .able-popup {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: none;
+}
 .able-drag {
   border: 2px dashed #F90;
   cursor: move;
 }
+.able-resizable {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  padding: 5px 2px;
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+  background: transparent url('../images/wingrip.png') no-repeat;
+}
+
+/*
+  Sign Language Window
+*/
+
+.able-sign-window {
+  position: relative;
+  margin: 1em;
+  /* max-width: 100%; */
+  z-index: 8000;
+}
+.able-sign-window video {
+  width: 100%;
+}
+.able-sign-window:focus {
+  outline: none;
+}
+
 
 /*
   External chapters div
@@ -745,6 +784,7 @@ div.able-chapters-div button::-moz-focus-inner {
 /*
   Tooltips & Alerts
 */
+
 .able-tooltip, .able-alert {
   position: absolute;
   padding: 5px 10px;
@@ -758,13 +798,13 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 .able-alert {
   background-color: #FFFFCC;
-  z-index: 3500;
+  z-index: 9300;
 }
 .able-popup {
-  z-index: 3200;
+  z-index: 9100;
 }
 .able-tooltip {
-  z-index: 3000;
+  z-index: 9000;
 }
 
 /*
@@ -782,7 +822,6 @@ div.able-chapters-div button::-moz-focus-inner {
   -moz-border-radius: 5px;
   border-radius: 5px;
   display: none;
-  z-index: 3000;
 }
 .able-popup ul {
   list-style-type: none;
@@ -818,13 +857,21 @@ div.able-chapters-div button::-moz-focus-inner {
   Transcript
 */
 
+.able-transcript-area {
+  border-width: 1px;
+  border-style: solid;
+  height: 400px;
+  z-index: 7000;
+  outline: none;
+}
 .able-transcript {
 	position: relative; /* must be positioned for scrolling */
   overflow-y: scroll;
   padding-left: 5%;
   padding-right: 5%;
-  width: 90%;
-  height: 400px;
+  /* width: 90%; */
+  background-color: #FFF;
+  height: 350px;
 }
 .able-transcript div {
 	margin: 1em 0;
@@ -864,22 +911,12 @@ div.able-chapters-div button::-moz-focus-inner {
 	background: #CF6; /* light green */
 	cursor: pointer;
 }
-.able-transcript-toolbar {
-  padding: 10px;
-  background-color: #DDDDDD;
-  border-style: solid;
-  border-width: 0 0 1px 0;
-}
-.able-transcript-toolbar label {
+.able-window-toolbar label {
   margin-right: 10px;
+  color: #FFF;
 }
-.able-transcript-area {
-  margin: 1em;
-  border-width: 1px;
-  border-style: solid;
-}
-.able-transcript-toolbar input:focus,
-.able-transcript-toolbar input:hover,
+.able-window-toolbar input:focus,
+.able-window-toolbar input:hover,
 .able-controller input:focus,
 .able-controller input:hover,
 .able-controller button:focus,
@@ -889,52 +926,56 @@ div.able-chapters-div button::-moz-focus-inner {
   outline-style: solid;
   outline-width: 2px;
 }
-.able-transcript-toolbar input:focus,
+.able-window-toolbar input:focus,
 .able-controller input:focus,
 .able-controller button:focus,
 .able-seek-head:focus {
 	outline-color: #ffbb37; /* yellow */
 }
-.able-transcript-toolbar input:hover,
+.able-window-toolbar input:hover,
 .able-controller input:hover,
 .able-controller button:hover,
 .able-seek-head:hover {
 	outline-color: #8AB839; /* green */
+}
+.able-window-toolbar .transcript-language-select-wrapper {
+  float: right;
+  padding-right: 30px;
 }
 
 /*
   Playlist - Embedded
 */
 
-.able .able-playlist {
+.able-player .able-playlist {
 	font-size: 0.9em;
 	list-style-type: none;
 	margin: 0;
 	background-color: #FFFFFF;
 	padding: 5px 0;
 }
-.able .able-playlist li {
+.able-player .able-playlist li {
 	background-color: #DDDDDD; /* default background color of each item in playlist */
 	margin: 5px;
 	padding: 5px 10px;
 	border-radius: 15px;
 	-moz-border-radius: 15px;
 }
-.able .able-playlist li:hover,
-.able .able-playlist li:focus,
-.able .able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+.able-player .able-playlist li:hover,
+.able-player .able-playlist li:focus,
+.able-player .able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
 	color: #FFFFFF;
 	background-color: #340449;
 	text-decoration: none;
 }
-.able .able-playlist li.able-current { /* currently selected playlist item */
+.able-player .able-playlist li.able-current { /* currently selected playlist item */
 	color: #000000;
 	background-color: #FFEEB3;
 	font-weight: bold;
 	outline: none;
 	text-decoration: none;
 }
-.able .able-playlist li.able-current:after {
+.able-player .able-playlist li.able-current:after {
 	content: ' *';
 }
 

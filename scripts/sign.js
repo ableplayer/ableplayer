@@ -34,15 +34,16 @@
     //   This is only a problem in IOS 6 and earlier,
     //   & is a known bug, fixed in IOS 7
 
-    var thisObj, signVideoId, i, signSrc, srcType, $signSource;
+    var thisObj, signVideoId, signVideoWidth, i, signSrc, srcType, $signSource;
 
     thisObj = this;
+
+    signVideoWidth = this.getDefaultWidth('sign');
 
     signVideoId = this.mediaId + '-sign';
     this.$signVideo = $('<video>',{
       'id' : signVideoId,
-      'width' : this.playerWidth,
-      'tabindex' : '-1' // remove from tab order
+      'tabindex' : '-1'
     });
     this.signVideo = this.$signVideo[0];
     // for each original <source>, add a <source> to the sign <video>
@@ -66,21 +67,26 @@
 
     this.$signWindow = $('<div>',{
       'class' : 'able-sign-window',
-      'draggable': 'true',
       'tabindex': '-1'
     });
-    this.$signWindow.append(this.$signVideo).hide();
+    this.$signToolbar = $('<div>',{
+      'class': 'able-window-toolbar'
+    });
 
-    // Place sign window in div.able-column-right
-    // If div doesn't exist yet, create it
-    if (this.$ableColumnRight) {
-      this.$ableColumnRight.append(this.$signWindow);
+    this.$signWindow.append(this.$signToolbar, this.$signVideo);
+
+    this.$ableWrapper.append(this.$signWindow);
+
+    // make it draggable
+    this.initDragDrop('sign');
+
+    if (this.prefSign === 1) {
+      // sign window is on. Go ahead and position it and show it
+      this.positionDraggableWindow('sign',this.getDefaultWidth('sign'));
     }
     else {
-      this.splitPlayerIntoColumns('sign');
+      this.$signWindow.hide();
     }
-
-    this.initDragDrop(this.$signWindow);
   };
 
 })(jQuery);

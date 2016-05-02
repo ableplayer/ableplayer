@@ -7,7 +7,9 @@
   AblePlayer.prototype.getCookie = function() {
 
     var defaultCookie = {
-      preferences: {}
+      preferences: {},
+      sign: {},
+      transcript: {}
     };
 
     var cookie;
@@ -26,23 +28,55 @@
       return defaultCookie;
     }
   };
+
   AblePlayer.prototype.updateCookie = function( setting ) {
 
     // called when a particular setting had been updated
     // useful for settings updated indpedently of Preferences dialog
     // e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
-
-    var cookie, available, i, prefName;
+    // setting is any supported preference name (e.g., "prefCaptions")
+    // OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
+    var cookie, $window, windowPos, available, i, prefName;
     cookie = this.getCookie();
-    available = this.getAvailablePreferences();
 
-    // Rebuild cookie with current cookie values,
-    // replacing the one value that's been changed
-    for (i = 0; i < available.length; i++) {
-      prefName = available[i]['name'];
-      if (prefName == setting) {
-        // this is the one that requires an update
-        cookie.preferences[prefName] = this[prefName];
+    if (setting === 'transcript' || setting === 'sign') {
+      if (setting === 'transcript') {
+        $window = this.$transcriptArea;
+        windowPos = $window.position();
+        if (typeof cookie.transcript === 'undefined') {
+          cookie.transcript = {};
+        }
+        cookie.transcript['position'] = $window.css('position'); // either 'relative' or 'absolute'
+        cookie.transcript['zindex'] = $window.css('z-index');
+        cookie.transcript['top'] = windowPos.top;
+        cookie.transcript['left'] = windowPos.left;
+        cookie.transcript['width'] = $window.width();
+        cookie.transcript['height'] = $window.height();
+      }
+      else if (setting === 'sign') {
+        $window = this.$signWindow;
+        windowPos = $window.position();
+        if (typeof cookie.sign === 'undefined') {
+          cookie.sign = {};
+        }
+        cookie.sign['position'] = $window.css('position'); // either 'relative' or 'absolute'
+        cookie.sign['zindex'] = $window.css('z-index');
+        cookie.sign['top'] = windowPos.top;
+        cookie.sign['left'] = windowPos.left;
+        cookie.sign['width'] = $window.width();
+        cookie.sign['height'] = $window.height();
+      }
+    }
+    else {
+      available = this.getAvailablePreferences();
+      // Rebuild cookie with current cookie values,
+      // replacing the one value that's been changed
+      for (i = 0; i < available.length; i++) {
+        prefName = available[i]['name'];
+        if (prefName == setting) {
+          // this is the one that requires an update
+          cookie.preferences[prefName] = this[prefName];
+        }
       }
     }
     // Save updated cookie
@@ -198,6 +232,15 @@
         'group': 'descriptions',
         'default': 1 // on because sighted users probably want to see this cool feature in action
       });
+
+      // Video preferences without a category (not shown in Preferences dialogs)
+      prefs.push({
+        'name': 'prefSign', // open sign language window by default if avilable
+        'label': null,
+        'group': null,
+        'default': 0 // off because clicking an icon to see the sign window has a powerful impact
+      });
+
     }
     return prefs;
   };

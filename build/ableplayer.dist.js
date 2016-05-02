@@ -1004,7 +1004,9 @@
   AblePlayer.prototype.getCookie = function() {
 
     var defaultCookie = {
-      preferences: {}
+      preferences: {},
+      sign: {},
+      transcript: {}
     };
 
     var cookie;
@@ -1023,23 +1025,55 @@
       return defaultCookie;
     }
   };
+
   AblePlayer.prototype.updateCookie = function( setting ) {
 
     // called when a particular setting had been updated
     // useful for settings updated indpedently of Preferences dialog
     // e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
-
-    var cookie, available, i, prefName;
+    // setting is any supported preference name (e.g., "prefCaptions")
+    // OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
+    var cookie, $window, windowPos, available, i, prefName;
     cookie = this.getCookie();
-    available = this.getAvailablePreferences();
 
-    // Rebuild cookie with current cookie values,
-    // replacing the one value that's been changed
-    for (i = 0; i < available.length; i++) {
-      prefName = available[i]['name'];
-      if (prefName == setting) {
-        // this is the one that requires an update
-        cookie.preferences[prefName] = this[prefName];
+    if (setting === 'transcript' || setting === 'sign') {
+      if (setting === 'transcript') {
+        $window = this.$transcriptArea;
+        windowPos = $window.position();
+        if (typeof cookie.transcript === 'undefined') {
+          cookie.transcript = {};
+        }
+        cookie.transcript['position'] = $window.css('position'); // either 'relative' or 'absolute'
+        cookie.transcript['zindex'] = $window.css('z-index');
+        cookie.transcript['top'] = windowPos.top;
+        cookie.transcript['left'] = windowPos.left;
+        cookie.transcript['width'] = $window.width();
+        cookie.transcript['height'] = $window.height();
+      }
+      else if (setting === 'sign') {
+        $window = this.$signWindow;
+        windowPos = $window.position();
+        if (typeof cookie.sign === 'undefined') {
+          cookie.sign = {};
+        }
+        cookie.sign['position'] = $window.css('position'); // either 'relative' or 'absolute'
+        cookie.sign['zindex'] = $window.css('z-index');
+        cookie.sign['top'] = windowPos.top;
+        cookie.sign['left'] = windowPos.left;
+        cookie.sign['width'] = $window.width();
+        cookie.sign['height'] = $window.height();
+      }
+    }
+    else {
+      available = this.getAvailablePreferences();
+      // Rebuild cookie with current cookie values,
+      // replacing the one value that's been changed
+      for (i = 0; i < available.length; i++) {
+        prefName = available[i]['name'];
+        if (prefName == setting) {
+          // this is the one that requires an update
+          cookie.preferences[prefName] = this[prefName];
+        }
       }
     }
     // Save updated cookie
@@ -1195,6 +1229,15 @@
         'group': 'descriptions',
         'default': 1 // on because sighted users probably want to see this cool feature in action
       });
+
+      // Video preferences without a category (not shown in Preferences dialogs)
+      prefs.push({
+        'name': 'prefSign', // open sign language window by default if avilable
+        'label': null,
+        'group': null,
+        'default': 0 // off because clicking an icon to see the sign window has a powerful impact
+      });
+
     }
     return prefs;
   };
@@ -2616,9 +2659,13 @@
     var thisObj, vidcapContainer, prefsGroups, i;
     thisObj = this;
 
-    // create $mediaContainer and $ableDiv and wrap them around the media element
+    // create three wrappers and wrap them around the media element. From inner to outer:
+    // $mediaContainer - contains the original media element
+    // $ableDiv - contains the media player and all its objects (e.g., captions, controls, descriptions)
+    // $ableWrapper - contains additional widgets (e.g., transcript window, sign window)
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
     // width and height of this.$mediaContainer are not updated when switching to full screen
     // However, I don't think they're needed at all. Commented out on 4/12/15, but
     // preserved here just in case there are unanticipated problems...
@@ -2753,12 +2800,16 @@
   };
 
   AblePlayer.prototype.injectTranscriptArea = function() {
+
+    var thisObj = this;
+
     this.$transcriptArea = $('<div>', {
-      'class': 'able-transcript-area'
+      'class': 'able-transcript-area',
+      'tabindex': '-1'
     });
 
     this.$transcriptToolbar = $('<div>', {
-      'class': 'able-transcript-toolbar'
+      'class': 'able-window-toolbar'
     });
 
     this.$transcriptDiv = $('<div>', {
@@ -2778,28 +2829,48 @@
     this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
-    var floatRight = $('<div style="float: right;">');
-    this.$transcriptLanguageSelectContainer = floatRight;
+    var languageSelectWrapper = $('<div class="transcript-language-select-wrapper">');
+    this.$transcriptLanguageSelectContainer = languageSelectWrapper;
 
-    floatRight.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
-    this.$transcriptToolbar.append(floatRight);
+    languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
+    this.$transcriptToolbar.append(languageSelectWrapper);
 
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
-    // If client has provided separate transcript location, put it there instead.
+    // If client has provided separate transcript location, put it there.
+    // Otherwise append it to the body
     if (this.transcriptDivLocation) {
       $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
-    else if (this.$ableColumnRight) {
-      this.$ableColumnRight.prepend(this.$transcriptArea);
-    }
     else {
-      this.splitPlayerIntoColumns('transcript');
+      this.$ableWrapper.append(this.$transcriptArea);
+    }
+
+    // make it draggable (popup only; NOT external transcript)
+    if (!this.transcriptDivLocation) {
+      this.initDragDrop('transcript');
+      if (this.prefTranscript === 1) {
+        // transcript is on. Go ahead and position it
+        this.positionDraggableWindow('transcript',this.getDefaultWidth('transcript'));
+      }
     }
 
     // If client has provided separate transcript location, override user's preference for hiding transcript
     if (!this.prefTranscript && !this.transcriptDivLocation) {
       this.$transcriptArea.hide();
+    }
+  };
+
+  AblePlayer.prototype.getDefaultWidth = function(which) {
+
+    // return default width of resizable elements
+    // these values are somewhat arbitrary, but seem to result in good usability
+    // if users disagree, they can resize (and resposition) them
+    if (which === 'transcript') {
+      return 450;
+    }
+    else if (which === 'sign') {
+      return 400;
     }
   };
 
@@ -2893,41 +2964,129 @@
     this.$chaptersDiv.append($chaptersNav);
   };
 
-  AblePlayer.prototype.splitPlayerIntoColumns = function (feature) {
-    // feature is either 'transcript' or 'sign'
-    // if present, player is split into two column, with this feature in the right column
-    this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
-    this.$ableColumnLeft.width(this.playerWidth);
-    if (feature === 'transcript') {
-      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
+  AblePlayer.prototype.positionDraggableWindow = function (which, width) {
+
+    // which is either 'transcript' or 'sign'
+
+    var cookie, cookiePos, $window, dragged, windowPos, currentWindowPos, firstTime;
+    cookie = this.getCookie();
+    if (which === 'transcript') {
+      $window = this.$transcriptArea;
+      if (typeof cookie.transcript !== 'undefined') {
+        cookiePos = cookie.transcript;
+      }
     }
-    else if (feature == 'sign') {
-      this.$signArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$signArea.wrap('<div class="able-column-right">').parent();
+    else if (which === 'sign') {
+      $window = this.$signWindow;
+      if (typeof cookie.transcript !== 'undefined') {
+        cookiePos = cookie.sign;
+      }
     }
-    this.$ableColumnRight.width(this.playerWidth);
+    if (typeof cookiePos !== 'undefined' && !($.isEmptyObject(cookiePos))) {
+      // position window using stored values from cookie
+      $window.css({
+        'position': cookiePos['position'],
+        'width': cookiePos['width'],
+        'z-index': cookiePos['zindex']
+      });
+      if (cookiePos['position'] === 'absolute') {
+        $window.css({
+          'top': cookiePos['top'],
+          'left': cookiePos['left']
+        });
+      }
+      // since cookie is not page-specific, z-index needs may vary across different pages
+      this.updateZIndex(which);
+    }
+    else {
+      // position window using default values
+      windowPos = this.getOptimumPosition(which, width);
+      if (typeof width === 'undefined') {
+        width = this.getDefaultWidth(which);
+      }
+      $window.css({
+        'position': windowPos[0],
+        'width': width,
+        'z-index': windowPos[1]
+      });
+      if (windowPos[0] === 'absolute') {
+        $window.css({
+          'top': windowPos[2] + 'px',
+          'left': windowPos[3] + 'px',
+        });
+      }
+    }
   };
 
-  AblePlayer.prototype.injectPoster = function ($element) {
+  AblePlayer.prototype.getOptimumPosition = function (targetWindow, targetWidth) {
 
-    // get poster attribute from media element and append that as an img to $element
-    // currently only applies to YouTube and fallback
-    var poster;
+    // returns optimum position for targetWindow, as an array with the following structure:
+    // 0 - CSS position ('absolute' or 'relative')
+    // 1 - zindex
+    // 2 - top
+    // 3 - left
+    // targetWindow is either 'transcript' or 'sign'
+    // if there is room to the right of the player, position element there
+    // else if there is room the left of the player, position element there
+    // else position element beneath player
 
-    if (this.$media.attr('poster')) {
-      poster = this.$media.attr('poster');
-      this.$posterImg = $('<img>',{
-        'class': 'able-poster',
-        'src' : poster,
-        'alt' : "",
-        'role': "presentation",
-        'width': this.playerWidth,
-        'height': this.playerHeight
-      });
-      $element.append(this.$posterImg);
+    var gap, position, ableWidth, ableHeight, ableOffset, ableTop, ableLeft,
+       windowWidth, otherWindowWidth, zIndex;
+
+    if (typeof targetWidth === 'undefined') {
+      targetWidth = this.getDefaultWidth(targetWindow);
     }
-  }
+
+    gap = 5; // number of pixels to preserve between Able Player objects
+
+    position = []; // position, top, left
+
+    ableWidth = this.$ableDiv.width();
+    ableHeight = this.$ableDiv.height();
+    ableOffset = this.$ableDiv.offset();
+    ableTop = ableOffset.top;
+    ableLeft = ableOffset.left;
+    windowWidth = $(window).width();
+    otherWindowWidth = 0; // width of other visiable draggable windows will be added to this
+
+    // get optimum zIndex for this window
+    zIndex = this.getHighestZIndex(targetWindow);
+
+    if (targetWindow === 'transcript') {
+      if (typeof this.$signWindow !== 'undefined') {
+        if (this.$signWindow.is(':visible')) {
+          otherWindowWidth = this.$signWindow.width() + gap;
+        }
+      }
+    }
+    else if (targetWindow === 'sign') {
+      if (typeof this.$transcriptArea !== 'undefined') {
+        if (this.$transcriptArea.is(':visible')) {
+          otherWindowWidth = this.$transcriptArea.width() + gap;
+        }
+      }
+    }
+    if (targetWidth < (windowWidth - (ableLeft + ableWidth + gap + otherWindowWidth))) {
+      // there's room to the left of $ableDiv
+      position[0] = 'absolute';
+      position[1] = zIndex;
+      position[2] = 0;
+      position[3] = ableWidth + otherWindowWidth + gap;
+    }
+    else if (targetWidth + gap < ableLeft) {
+      // there's room to the right of $ableDiv
+      position[0] = 'absolute';
+      position[1] = zIndex;
+      position[2] = 0;
+      position[3] = ableLeft - targetWidth - gap;
+    }
+    else {
+      // position element below $ableDiv
+      position[0] = 'relative';
+      // no need to define z-index, top, or left
+    }
+    return position;
+  };
 
   AblePlayer.prototype.injectAlert = function () {
 
@@ -3020,6 +3179,7 @@
   // Create popup div and append to player
   // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
+
     var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton,
         selectedTrackIndex, selectedTrack;
     thisObj = this;
@@ -3027,7 +3187,7 @@
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup'
     });
-    if (which == 'chapters' || which == 'prefs') {
+    if (which === 'chapters' || which === 'prefs' || which === 'sign-window' || which === 'transcript-window') {
       $popup.addClass('able-popup-no-radio');
     }
     $popup.on('keydown',function (e) {
@@ -3443,8 +3603,6 @@
     }
 
     controlLayout['br'].push('preferences');
-    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
-    // controlLayout['br'].push('help');
 
     // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
     if (this.mediaType === 'video' && this.allowFullScreen && this.player !== 'jw') {
@@ -3690,6 +3848,10 @@
           }
           else if (control === 'sign') {
             this.$signButton = newButton;
+            // gray out sign button if sign language window is not active
+            if (!(this.$signWindow.is(':visible'))) {
+              this.$signButton.addClass('buttonOff');
+            }
           }
           else if (control === 'descriptions') {
             this.$descButton = newButton;
@@ -3729,20 +3891,7 @@
     }
 
     if (this.mediaType === 'video') {
-      // As of v 2.3.4, no longer adding width and height on this.$vidCapContainer
-      // CAN'T constrain the height if this.prefCaptionsPosition === 'below'
-      // because the caption div below the video needs to be able to expand as needed
-      // Checked the new setting in Firefox, Chrome, & IE and it seems to work w/o width & height
-      /*
-      // set width and height of div.able-vidcap-container
-      vidcapStyles = {
-        'width': this.playerWidth+'px',
-        'height': this.playerHeight+'px'
-      }
-      if (this.$vidcapContainer) {
-        this.$vidcapContainer.css(vidcapStyles);
-      }
-      */
+
       if (this.$captionDiv) {
         // set width of the captions container
         this.$captionDiv.css('width',this.playerWidth+'px');
@@ -6929,6 +7078,7 @@
       this.prefTranscript = 0;
     }
     else {
+      this.positionDraggableWindow('transcript');
       this.$transcriptArea.show();
       this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
@@ -6942,16 +7092,16 @@
       this.$signWindow.hide();
       this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
       this.$signButton.find('span.able-clipped').text(this.tt.showSign);
+      this.prefSign = 0;
     }
     else {
+      this.positionDraggableWindow('sign');
       this.$signWindow.show();
-      // get starting position of element; used for drag & drop
-      var signWinPos = this.$signWindow.offset();
-      this.dragStartX = signWinPos.left;
-      this.dragStartY = signWinPos.top;
       this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
       this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
+      this.prefSign = 1;
     }
+    this.updateCookie('prefSign');
   };
 
   AblePlayer.prototype.isFullscreen = function () {
@@ -7119,50 +7269,89 @@
     // location is either of the following:
     // 'main' (default)
     // 'screenreader
-    // 'sign' (i.e., sign language window)
+    // 'sign' (sign language window)
+    // 'transcript' (trasncript window)
+    var thisObj, $alertBox, $parentWindow, alertLeft, alertTop;
 
-    var thisObj = this;
-    var alertBox, alertLeft;
-    if (location === 'sign') {
-      alertBox = this.$windowAlert;
+    thisObj = this;
+
+    if (location === 'transcript') {
+      $alertBox = this.$transcriptAlert;
+      $parentWindow = this.$transcriptArea;
+    }
+    else if (location === 'sign') {
+      $alertBox = this.$signAlert;
+      $parentWindow = this.$signWindow;
     }
     else if (location === 'screenreader') {
-      alertBox = this.$srAlertBox;
+      $alertBox = this.$srAlertBox;
     }
     else {
-      alertBox = this.$alertBox;
+      $alertBox = this.$alertBox;
     }
-    alertBox.show();
-    alertBox.text(msg);
-    if (location === 'sign') {
-      if (this.$signWindow.width() > alertBox.width()) {
-        alertLeft = this.$signWindow.width() / 2 - alertBox.width() / 2;
+    $alertBox.show();
+    $alertBox.text(msg);
+    if (location == 'transcript' || location === 'sign') {
+      if ($parentWindow.width() > $alertBox.width()) {
+        alertLeft = $parentWindow.width() / 2 - $alertBox.width() / 2;
       }
       else {
         // alert box is wider than its container. Position it far left and let it wrap
         alertLeft = 10;
       }
-      // position alert in the lower third of the sign window (to avoid covering the signer)
-      alertBox.css({
-        top: (this.$signWindow.height() / 3) * 2,
-        left: alertLeft
+      if (location === 'sign') {
+        // position alert in the lower third of the sign window (to avoid covering the signer)
+        alertTop = ($parentWindow.height() / 3) * 2;
+      }
+      else if (location === 'transcript') {
+        // position alert just beneath the toolbar to avoid getting lost among transcript text
+        alertTop = this.$transcriptToolbar.height() + 20;
+      }
+      $alertBox.css({
+        top: alertTop + 'px',
+        left: alertLeft + 'px'
       });
     }
     else if (location !== 'screenreader') {
       // The original formula incorporated offset() into the calculation
       // but at some point this began resulting in an alert that's off-centered
       // Changed in v2.2.17, but here's the original for reference in case needed:
-      // left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
-      alertBox.css({
-        left: (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
+      // left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - ($alertBox.width() / 2)
+      $alertBox.css({
+        left: (this.$playerDiv.width() / 2) - ($alertBox.width() / 2)
       });
     }
     if (location !== 'screenreader') {
       setTimeout(function () {
-        alertBox.fadeOut(300);
+        $alertBox.fadeOut(300);
       }, 3000);
     }
   };
+
+  AblePlayer.prototype.showedAlert = function (which) {
+
+    // returns true if the target alert has already been shown
+    // useful for throttling alerts that only need to be shown once
+    // e.g., move alerts with instructions for dragging a window
+
+    if (which === 'transcript') {
+      if (this.showedTranscriptAlert) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else if (which === 'sign') {
+      if (this.showedSignAlert) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    return false;
+  }
 
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
@@ -7198,23 +7387,236 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.getHighestZIndex = function() {
+  AblePlayer.prototype.getHighestZIndex = function(window) {
 
-    // this function might be useful later, when moveable & draggable components are implemented
-    // not currently used
-    // it's very inefficient though, looping through every DOM element - Is there a better way???
-    var z, max, $zIndexes;
+    // window is either 'transcript', 'sign', or 'dialog' (all dialogs have the same z-index)
+    // window can also be 'all' (to find the highest overall (non-AblePlayer) zIndex
+    // 'transcript' and 'sign' must be positioned on top of the elements beneath
+    // get highest z-index on page
+    // if that's higher than the default for this window,
+    // assign one greater (rounded to the nearest 1000 for transcript, 2000 for sign)
+    // if window is 'transcript' or 'sign',
+    //
+    var max, $elements, z, defaultZ, highestZ;
     max = 0;
-    $('*').each(function(){
+    if (window === 'all' || window === 'transcript' || window === 'sign') {
+      // exclude all Able Player -related elements since default z-index values satisfy the desired internal relationships
+      $elements = $('body *').not('.able-wrapper,.able-wrapper *,.modalDialog,.modalDialog *,.modalOverlay,.modalOverlay *');
+    }
+    else if (window === 'dialog') {
+      // just exclude themselves
+      $elements = $('body *').not('.modalDialog,.modalDialog *,.modalOverlay,.modalOverlay *');
+    }
+    $elements.each(function(){
       z = $(this).css('z-index');
       if (Number.isInteger(+z)) { // work only with integer values, not 'auto'
-        if (z > max) {
-          max = z;
+        if (parseInt(z) > max) {
+          max = parseInt(z);
         }
       }
     });
-    return max;
-  } ;
+    if (window === 'all') {
+      return parseInt(max);
+    }
+    defaultZ = parseInt(this.getDefaultZIndex(window));
+    if (max > defaultZ) {
+      if (window === 'transcript') {
+        highestZ = Math.ceil(max/1000)*1000;
+        if (highestZ % 1000 === 0) {
+          highestZ += 1000;
+        }
+      }
+      else if (window === 'sign') {
+        highestZ = Math.ceil(max/2000)*2000;
+        if (highestZ % 2000 === 0) {
+          highestZ += 2000;
+        }
+      }
+      else if (window === 'dialog') {
+        // go 2000 over max for dialog
+        // since .modalOverlay will be 500 less than that
+        highestZ = Math.ceil(max/2000)*2000;
+      }
+    }
+    else {
+      highestZ = defaultZ;
+    }
+    return highestZ;
+  };
+
+  AblePlayer.prototype.getDefaultZIndex = function(which) {
+
+    // returns default z-index (as defined in ableplayer.css)
+    // for any of the main windows
+    if (which === 'player') {
+      return 5000;
+    }
+    else if (which === 'transcript') {
+      return 7000;
+    }
+    else if (which === 'sign') {
+      return 8000;
+    }
+    else if (which === 'dialog') {
+      return 10000;
+    }
+  };
+
+  AblePlayer.prototype.updateZIndex = function(which) {
+
+    // update z-index of 'transcript' or 'sign', relative to each other
+    // direction is always 'up' (i.e., move window to top)
+    // windows come to the top when the user clicks on them
+    // when windows were created initially, they were assigned the highest z-index on the page
+    // so there should be no need to recalculate that
+
+    var swapZs, swapHighest, thresholdOverMax,
+    hasTranscript, hasSign, transcriptZ, signZ,
+    highestTranscriptZ, highestSignZ, highestZ, highestNewZ;
+    swapZs = false;
+    swapHighest = false;
+    thresholdOverMax = 10000;
+
+    // get current values (if windows exist)
+    if (typeof this.$transcriptArea !== 'undefined') {
+      hasTranscript = true;
+      transcriptZ = this.$transcriptArea.css('z-index');
+      highestTranscriptZ = this.getHighestZIndex('transcript');
+    }
+    else {
+      hasTranscript = false;
+    }
+    if (typeof this.$signWindow !== 'undefined') {
+      hasSign = true;
+      signZ = this.$signWindow.css('z-index');
+      highestSignZ = this.getHighestZIndex('sign');
+    }
+    else {
+      hasSign = false;
+    }
+
+    highestZ = this.getHighestZIndex('all');
+    if (this.debug) {
+      
+      
+      
+      
+      
+      
+    }
+    if (hasTranscript && hasSign) {
+      if (which === 'transcript' && (signZ >= transcriptZ)) {
+        swapZs = true;
+      }
+      else if (which === 'sign' && (transcriptZ >= signZ)) {
+        swapZs = true;
+      }
+      if (this.debug) {
+        
+      }
+      if (swapZs) {
+        // the current window is NOT on top. Therefore swapping is needed
+        // if either is below the highest non-AblePlayer Z, need to adjust both
+        if (transcriptZ < highestZ || signZ < highestZ) {
+          swapHighest = true;
+        }
+        // else if either is unreasonably large compared to highestZ, reset to highestZ for each window
+        // (sometimes this happens if a non-AblePlayer temp element with an extremely high z-index is added to a page)
+        else if (transcriptZ - highestZ > thresholdOverMax || signZ - highestZ > thresholdOverMax) {
+          swapHighest = true;
+        }
+        if (this.debug) {
+          
+        }
+        if (swapHighest) {
+          if (highestSignZ === highestTranscriptZ) {
+            // the two high values are equal (need to increase the one on top)
+            if (which === 'transcript') {
+              highestNewZ = parseInt(highestSignZ) + 1000;
+              this.$transcriptArea.css('z-index',highestNewZ);
+              this.$signWindow.css('z-index',highestTranscriptZ);
+            }
+            else if (which === 'sign') {
+              highestNewZ = parseInt(highestTranscriptZ) + 1000;
+              this.$transcriptArea.css('z-index',highestSignZ);
+              this.$signWindow.css('z-index',highestNewZ);
+            }
+          }
+          else {
+            if (which === 'transcript') {
+              highestNewZ = Math.max(highestTranscriptZ,highestSignZ);
+              this.$transcriptArea.css('z-index',highestNewZ);
+              this.$signWindow.css('z-index',Math.min(highestTranscriptZ,highestSignZ));
+
+            }
+            else if (which === 'sign') {
+              highestNewZ = Math.max(highestTranscriptZ,highestSignZ);
+              this.$transcriptArea.css('z-index',Math.min(highestTranscriptZ,highestSignZ));
+              this.$signWindow.css('z-index',highestNewZ);
+            }
+          }
+        }
+        else {
+          if (signZ === transcriptZ) {
+            if (which === 'transcript') {
+              highestNewZ = parseInt(signZ) + 1000;
+              this.$transcriptArea.css('z-index', highestNewZ);
+              this.$signWindow.css('z-index',transcriptZ);
+            }
+            else if (which === 'sign') {
+              highestNewZ = parseInt(transcriptZ) + 1000;
+              this.$transcriptArea.css('z-index',signZ);
+              this.$signWindow.css('z-index', highestNewZ);
+            }
+          }
+          else {
+            if (which === 'transcript') {
+              highestNewZ = Math.max(transcriptZ,signZ);
+              this.$transcriptArea.css('z-index', highestNewZ);
+              this.$signWindow.css('z-index',Math.min(transcriptZ,signZ));
+            }
+            else if (which === 'sign') {
+              highestNewZ = Math.max(transcriptZ,signZ)
+              this.$transcriptArea.css('z-index',Math.min(transcriptZ,signZ));
+              this.$signWindow.css('z-index', highestNewZ);
+            }
+          }
+        }
+        if (this.debug) {
+          
+        }
+        if (typeof highestNewZ !== 'undefined') {
+          // reset z-index for specific components
+          $('.able-alert').css('z-index',parseInt(highestNewZ) + 1300);
+          $('.able-window-toolbar .able-button-handler-preferences').css('z-index',parseInt(highestNewZ) + 1200);
+          $('.able-popup').css('z-index',parseInt(highestNewZ) + 1100);
+          $('.able-tooltip').css('z-index',parseInt(highestNewZ) + 1000);
+        }
+      }
+    }
+    else if (which === 'transcript' && hasTranscript) {
+      if (transcriptZ <= highestZ) {
+        this.$transcriptArea.css('z-index',highestTranscriptZ);
+      }
+    }
+    else if (which === 'sign' && hasSign) {
+      if (signZ <= highestZ) {
+        this.$signWindow.css('z-index',highestSignZ);
+      }
+    }
+    return false;
+  };
+
+  AblePlayer.prototype.updateDialogZIndex = function() {
+
+    // since only one dialog is visible at a time, they all share a z-index
+    var modalZ, overlayZ;
+
+    modalZ = this.getHighestZIndex('dialog');
+    overlayZ = modalZ - 500;
+    $('body > .modalDialog').css('z-index',modalZ);
+    $('body > .modalOverlay').css('z-index',overlayZ);
+  };
 
 })(jQuery);
 
@@ -8864,46 +9266,132 @@
 
 (function ($) {
 
-  AblePlayer.prototype.initDragDrop = function ( $element ) {
+  AblePlayer.prototype.initDragDrop = function ( which ) {
 
-    // Accessible Drag & Drop based on these resources:
-    // Accessible Drag and Drop Using WAI-ARIA
+    // supported values of which: 'sign', 'transcript'
+
+    // NOTE: "Drag and Drop" for Able Player is a metaphor only!!!
+    // HTML5 Drag & Drop API enables moving elements to new locations in the DOM
+    // Thats not our purpose; we're simply changing the visible position on-screen
+    // Therefore, the drag & drop interface was overhauled in v2.3.41 to simple
+    // use mouse (and keyboard) events to change CSS positioning properties
+
+    // There are nevertheless lessons to be learned from Drag & Drop about accessibility:
     // http://dev.opera.com/articles/accessible-drag-and-drop/
-    // Accessible Drag and Drop script on quirksmode
-    // http://www.quirksmode.org/js/this.html
-    var thisObj = this;
 
-    this.$activeWindow = $element;
+    var thisObj, $window, $toolbar, windowName, $resizeHandle, resizeZIndex, clickZIndex;
 
-    // able-sign-window is currently the only draggable window,
-    // but this functionality could ultimately be extended to other windows
-    if ($element.is('.able-sign-window')) {
-      this.windowName = 'sign-window';
+    thisObj = this;
+
+    if (which === 'transcript') {
+      $window = this.$transcriptArea;
+      windowName = 'transcript-window';
+      $toolbar = this.$transcriptToolbar;
     }
-    this.addWindowMenu();
+    else if (which === 'sign') {
+      $window = this.$signWindow;
+      windowName = 'sign-window';
+      $toolbar = this.$signToolbar;
+    }
+
+    // add resize handle selector to bottom right corner
+    $resizeHandle = $('<div>',{
+      'class': 'able-resizable'
+    });
+    // assign z-index that's slightly higher than parent window
+    resizeZIndex = parseInt($window.css('z-index')) + 100;
+    $resizeHandle.css('z-index',resizeZIndex);
+    $window.append($resizeHandle);
+
+    // add event listener to toolbar to start and end drag
+    // other event listeners will be added when drag starts
+    $toolbar.on('mousedown', function(event) {
+      event.stopPropagation();
+      if (!thisObj.windowMenuClickRegistered) {
+        thisObj.windowMenuClickRegistered = true;
+        thisObj.startMouseX = event.pageX;
+        thisObj.startMouseY = event.pageY;
+        thisObj.dragDevice = 'mouse';
+        thisObj.startDrag(which, $window);
+      }
+      return false;
+    });
+    $toolbar.on('mouseup', function(event) {
+      event.stopPropagation();
+      if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
+        thisObj.endDrag(which);
+      }
+      return false;
+    });
+
+    // add event listeners for resizing
+    $resizeHandle.on('mousedown', function(event) {
+      event.stopPropagation();
+      if (!thisObj.windowMenuClickRegistered) {
+        thisObj.windowMenuClickRegistered = true;
+        thisObj.startMouseX = event.pageX;
+        thisObj.startMouseY = event.pageY;
+        thisObj.startResize(which, $window);
+        return false;
+      }
+    });
+    $resizeHandle.on('mouseup', function(event) {
+      event.stopPropagation();
+      if (thisObj.resizing) {
+        thisObj.endResize(which);
+      }
+      return false;
+    });
+
+    // whenever a window is clicked, bring it to the foreground
+    $window.on('click', function() {
+      if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+        thisObj.updateZIndex(which);
+      }
+      thisObj.finishingDrag = false;
+    });
+
+    this.addWindowMenu(which,$window,windowName);
   };
 
-  AblePlayer.prototype.addWindowMenu = function() {
+  AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
-    var thisObj = this;
 
-    // add alert div to window
-    this.$windowAlert = $('<div role="alert"></div>');
-    this.$windowAlert.addClass('able-alert');
-    this.$windowAlert.appendTo(this.$activeWindow);
-    this.$windowAlert.css({
-      top: this.$activeWindow.offset().top
+    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttomImg,
+      $buttonLabel, tooltipId, $tooltip, $popup,
+      label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
+      $optionList, radioName, options, i, $optionItem, option,
+      radioId, $radioButton, $radioLabel;
+
+    thisObj = this;
+
+    // Add a Boolean that will be set to true temporarily if window button or a menu item is clicked
+    // This will prevent the click event from also triggering a mousedown event on the toolbar
+    // (which would unexpectedly send the window into drag mode)
+    this.windowMenuClickRegistered = false;
+
+    // Add another Boolean that will be set to true temporarily when mouseup fires at the end of a drag
+    // this will prevent the click event from being triggered
+    this.finishingDrag = false;
+
+    // create an alert div and add it to window
+    $windowAlert = $('<div role="alert"></div>');
+    $windowAlert.addClass('able-alert');
+    $windowAlert.appendTo(this.$activeWindow);
+    $windowAlert.css({
+      top: $window.offset().top
     });
+
     // add button to draggable window which triggers a popup menu
     // for now, re-use preferences icon for this purpose
-    var $newButton = $('<button>',{
+    $newButton = $('<button>',{
       'type': 'button',
       'tabindex': '0',
       'aria-label': this.tt.windowButtonLabel,
       'class': 'able-button-handler-preferences'
     });
     if (this.iconType === 'font') {
-      var $buttonIcon = $('<span>',{
+      $buttonIcon = $('<span>',{
         'class': 'icon-preferences',
         'aria-hidden': 'true'
       });
@@ -8911,8 +9399,8 @@
     }
     else {
       // use image
-      var buttonImgSrc = '../images/' + this.iconColor + '/preferences.png';
-      var $buttonImg = $('<img>',{
+      buttonImgSrc = '../images/' + this.iconColor + '/preferences.png';
+      $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',
         'role': 'presentation'
@@ -8921,14 +9409,14 @@
     }
 
     // add the visibly-hidden label for screen readers that don't support aria-label on the button
-    var $buttonLabel = $('<span>',{
+    $buttonLabel = $('<span>',{
       'class': 'able-clipped'
     }).text(this.tt.windowButtonLabel);
     $newButton.append($buttonLabel);
 
-    // add an event listener that displays a tooltip on mouseenter or focus
-    var tooltipId = this.mediaId + '-' + this.windowName + '-tooltip';
-    var $tooltip = $('<div>',{
+    // add a tooltip that displays aria-label on mouseenter or focus
+    tooltipId = this.mediaId + '-' + windowName + '-tooltip';
+    $tooltip = $('<div>',{
       'class' : 'able-tooltip',
       'id' : tooltipId
     });
@@ -8952,130 +9440,178 @@
       });
     });
 
-    this.addResizeDialog();
-
     // add a popup menu
-    var $popup = this.createPopup(this.windowName);
+    var $popup = this.createPopup(windowName);
     var $optionList = $('<ul></ul>');
-    var radioName = this.mediaId + '-' + this.windowName + '-choice';
-    if (this.windowName == 'sign-window') {
-      var options = [];
-      options.push({
-        'name': 'move',
-        'label': this.tt.windowMove
+    var radioName = this.mediaId + '-' + windowName + '-choice';
+
+    var options = [];
+    options.push({
+      'name': 'move',
+      'label': this.tt.windowMove
+    });
+    options.push({
+      'name': 'resize',
+      'label': this.tt.windowResize
+    });
+    for (var i in options) {
+      var $optionItem = $('<li></li>');
+      var option = options[i];
+      var radioId = radioName + '-' + i;
+      var $radioButton = $('<input>',{
+        'type': 'radio',
+        'val': option.name,
+        'name': radioName,
+        'id': radioId
       });
-      options.push({
-        'name': 'resize',
-        'label': this.tt.windowResize
+      var $radioLabel = $('<label>',{
+        'for': radioId
       });
-      if (this.$activeWindow.css('z-index') > 0) {
-        options.push({
-          'name': 'sendBack',
-          'label': this.tt.windowSendBack
-        });
-      }
-      else {
-        options.push({
-          'name': 'bringTop',
-          'label': this.tt.windowBringTop
-        });
-      }
-      for (var i in options) {
-        var $optionItem = $('<li></li>');
-        var option = options[i];
-        var radioId = radioName + '-' + i;
-        var $radioButton = $('<input>',{
-          'type': 'radio',
-          'val': option.name,
-          'name': radioName,
-          'id': radioId
-        });
-        var $radioLabel = $('<label>',{
-          'for': radioId
-        });
-        $radioLabel.text(option.label);
-        $radioButton.on('click keypress',function(e) {
-          e.preventDefault();
-          thisObj.handleMenuChoice($(this).val());
-        });
-        $optionItem.append($radioButton,$radioLabel);
-        $optionList.append($optionItem);
-      }
+      $radioLabel.text(option.label);
+      $radioButton.on('focus',function(e) {
+        $(this).parents('ul').children('li').removeClass('able-focus');
+        $(this).parent('li').addClass('able-focus');
+      });
+      $radioButton.on('click',function(e) {
+        e.stopPropagation();
+        if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+          thisObj.windowMenuClickRegistered = true;
+          thisObj.handleMenuChoice( which, $(this).val(), e.type);
+        }
+      });
+      // due to an apparent bug (in jquery?) clicking the label
+      // does not result in a click event on the associated radio button
+      // Observed this in Firefox 45.0.2 and Chrome 50
+      // It works fine on a simple test page so this could be an Able Player bug
+      // Added the following as a workaround rather than mess with isolating the bug
+      $radioLabel.on('click mousedown', function() {
+        var clickedId = $(this).attr('for');
+        $('#' + clickedId).click();
+      })
+      $optionItem.append($radioButton,$radioLabel);
+      $optionList.append($optionItem);
     }
     $popup.append($optionList);
-    $newButton.on('click keydown',function(e) {
-      thisObj.handleWindowButtonClick(e);
+    $newButton.on('click mousedown keydown',function(e) {
+      e.stopPropagation();
+      if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+        // don't set windowMenuClickRegistered yet; that happens in handler function
+        thisObj.handleWindowButtonClick(which, e);
+      }
+      thisObj.finishingDrag = false;
     });
-    this.$activeWindow.append($newButton,$tooltip,$popup);
-    this.$windowButton = $newButton;
-    this.$windowPopup = $popup;
+
+    // define vars and assemble all the parts
+    if (which === 'transcript') {
+      this.$transcriptAlert = $windowAlert;
+      this.$transcriptPopupButton = $newButton;
+      this.$transcriptPopup = $popup;
+      this.$transcriptToolbar.append($windowAlert,$newButton,$tooltip,$popup);
+    }
+    else if (which === 'sign') {
+      this.$signAlert = $windowAlert;
+      this.$signPopupButton = $newButton;
+      this.$signPopup = $popup;
+      this.$signToolbar.append($windowAlert,$newButton,$tooltip,$popup);
+    }
+
+    this.addResizeDialog(which, $window);
   };
 
-  AblePlayer.prototype.addResizeDialog = function () {
+  AblePlayer.prototype.addResizeDialog = function (which, $window) {
 
-    var thisObj = this;
-    var widthId = this.mediaId + '-resize-width';
-    var heightId = this.mediaId + '-resize-height';
-    var startingWidth = this.$activeWindow.width();
-    var startingHeight = this.$activeWindow.height();
+    var thisObj, $windowPopup, $windowButton,
+      widthId, heightId, startingWidth, startingHeight, aspectRatio,
+      $resizeForm, $resizeWrapper,
+      $resizeWidthDiv, $resizeWidthInput, $resizeWidthLabel,
+      $resizeHeightDiv, $resizeHeightInput, $resizeHeightLabel,
+      tempWidth, tempHeight,
+      $saveButton, $cancelButton, newWidth, newHeight, resizeDialog;
 
-    var $resizeForm = $('<div></div>',{
+    thisObj = this;
+
+    if (which === 'transcript') {
+      $windowPopup = this.$transcriptPopup;
+      $windowButton = this.$transcriptPopupButton;
+    }
+    else if (which === 'sign') {
+      $windowPopup = this.$signPopup;
+      $windowButton = this.$signPopupButton;
+    }
+
+    widthId = this.mediaId + '-resize-' + which + '-width';
+    heightId = this.mediaId + '-resize-' + which + '-height';
+    startingWidth = $window.width();
+    startingHeight = $window.height();
+    aspectRatio = startingWidth / startingHeight;
+
+    $resizeForm = $('<div></div>',{
       'class' : 'able-resize-form'
     });
 
     // inner container for all content, will be assigned to modal div's aria-describedby
-    var $resizeWrapper = $('<div></div>');
+    $resizeWrapper = $('<div></div>');
 
     // width field
-    var $resizeWidthDiv = $('<div></div>');
-    var $resizeWidthInput = $('<input>',{
+    $resizeWidthDiv = $('<div></div>');
+    $resizeWidthInput = $('<input>',{
       'type': 'text',
       'id': widthId,
       'value': startingWidth
     });
-    var $resizeWidthLabel = $('<label>',{
+    $resizeWidthLabel = $('<label>',{
       'for': widthId
     }).text(this.tt.width);
 
-    /* // Don't prompt for height
-
     // height field
-    var $resizeHeightDiv = $('<div></div>');
-    var $resizeHeightInput = $('<input>',{
+    $resizeHeightDiv = $('<div></div>');
+    $resizeHeightInput = $('<input>',{
       'type': 'text',
       'id': heightId,
-      'value': this.$activeWindow.height()
+      'value': startingHeight
     });
-    var $resizeHeightLabel = $('<label>',{
+    $resizeHeightLabel = $('<label>',{
       'for': heightId
     }).text(this.tt.height);
-    */
+
+    if (which === 'sign') {
+      // make height a read-only field
+      // and calculate its value based on width to preserve aspect ratio
+      $resizeHeightInput.prop('readonly',true);
+      $resizeWidthInput.on('input',function() {
+        tempWidth = $(this).val();
+        tempHeight = Math.round(tempWidth/aspectRatio, 0);
+        $resizeHeightInput.val(tempHeight);
+      })
+    }
 
     // Add save and cancel buttons.
-    var $saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
-    var $cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
-    $saveButton.click(function () {
-      var newWidth = $('#' + widthId).val();
-      if (newWidth !== startingWidth) {
-        // var newHeight = Math.round(newWidth * (startingHeight/startingWidth),0);
-        thisObj.$activeWindow.css('width',newWidth);
-        thisObj.$activeWindow.find('video').css({
-          'width' : newWidth + 'px'
-          //'height' : newHeight + 'px'
+    $saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    $cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+    $saveButton.on('click',function () {
+      newWidth = $('#' + widthId).val();
+      newHeight = $('#' + heightId).val();
+      if (newWidth !== startingWidth || newHeight !== startingHeight) {
+        $window.css({
+          'width': newWidth + 'px',
+          'height': newHeight + 'px'
         });
+        thisObj.updateCookie(which);
       }
-      thisObj.resizeDialog.hide();
-      thisObj.$windowPopup.hide();
-      thisObj.$windowButton.show().focus();
+      resizeDialog.hide();
+      $windowPopup.hide();
+      $windowButton.focus();
     });
-    $cancelButton.click(function () {
-      dialog.hide();
+    $cancelButton.on('click',function () {
+      resizeDialog.hide();
+      $windowPopup.hide();
+      $windowButton.focus();
     });
 
     // Now assemble all the parts
     $resizeWidthDiv.append($resizeWidthLabel,$resizeWidthInput);
-    // $resizeHeightDiv.append($resizeHeightLabel,$resizeHeightInput);
-    $resizeWrapper.append($resizeWidthDiv);
+    $resizeHeightDiv.append($resizeHeightLabel,$resizeHeightInput);
+    $resizeWrapper.append($resizeWidthDiv,$resizeHeightDiv);
     $resizeForm.append($resizeWrapper,'<hr>',$saveButton,$cancelButton);
 
     // must be appended to the BODY!
@@ -9083,133 +9619,202 @@
     // that will include an ancestor of the dialog,
     // which will render the dialog unreadable by screen readers
     $('body').append($resizeForm);
-    this.resizeDialog = new AccessibleDialog($resizeForm, this.$windowButton, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+    resizeDialog = new AccessibleDialog($resizeForm, $windowButton, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+    if (which === 'transcript') {
+      this.transcriptResizeDialog = resizeDialog;
+    }
+    else if (which === 'sign') {
+      this.signResizeDialog = resizeDialog;
+    }
   };
 
-  AblePlayer.prototype.handleWindowButtonClick = function (e) {
+  AblePlayer.prototype.handleWindowButtonClick = function (which, e) {
 
-    if (e.which > 1) {
+    var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
+
+    thisObj = this;
+
+    if (e.type === 'keydown') {
       // user pressed a key
-      if (!(e.which === 32 || e.which === 13)) {
-        // this was not Enter or space. Ignore it
+      if (e.which === 32 || e.which === 13 || e.which === 27) {
+        // this was Enter, space, or escape
+        this.windowMenuClickRegistered = true;
+      }
+      else {
         return false;
       }
     }
-
-    if (this.hidingPopup) {
-      // stopgap to prevent keydown from reopening popup
-      // immediately after closing it
-      this.hidingPopup = false;
-      return false;
+    else {
+      // this was a mouse event
+      this.windowMenuClickRegistered = true;
+    }
+    if (which === 'transcript') {
+      $windowPopup = this.$transcriptPopup;
+      $windowButton = this.$transcriptPopupButton;
+      $toolbar = this.$transcriptToolbar;
+    }
+    else if (which === 'sign') {
+      $windowPopup = this.$signPopup;
+      $windowButton = this.$signPopupButton;
+      $toolbar = this.$signToolbar;
     }
 
-    this.$windowButton.hide();
-    this.$windowPopup.show();
-    // Focus on the checked button, if any buttons are checked
-    // Otherwise, focus on the first button
-    this.$windowPopup.find('li').removeClass('able-focus');
-    if (this.$windowPopup.find('input:checked').val()) {
-      this.$windowPopup.find('input:checked').focus().parent().addClass('able-focus');
+    if ($windowPopup.is(':visible')) {
+      $windowPopup.hide(200,'',function() {
+        thisObj.windowMenuClickRegistered = false; // reset
+      });
+      $windowPopup.find('li').removeClass('able-focus');
+      $windowButton.focus();
     }
     else {
-      this.$windowPopup.find('input').first().focus().parent().addClass('able-focus');
+      // first, be sure window is on top
+      this.updateZIndex(which);
+      popupTop = $windowButton.position().top + $windowButton.outerHeight();
+      $windowPopup.css('top', popupTop);
+      $windowPopup.show(200,'',function() {
+        $(this).find('input').first().focus().parent().addClass('able-focus');
+        thisObj.windowMenuClickRegistered = false; // reset
+      });
     }
-    e.preventDefault();
   };
 
-  AblePlayer.prototype.handleMenuChoice = function ( choice ) {
+  AblePlayer.prototype.handleMenuChoice = function (which, choice, eventType) {
 
-    var thisObj = this;
-    if (choice == 'move') {
-      this.showAlert(this.tt.windowMoveAlert,'sign');
-      thisObj.startDrag();
-      this.$windowPopup.hide().parent().focus();
+    var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
+
+    thisObj = this;
+
+    if (which === 'transcript') {
+      $window = this.$transcriptArea;
+      $windowPopup = this.$transcriptPopup;
+      $windowButton = this.$transcriptPopupButton;
+      resizeDialog = this.transcriptResizeDialog;
+    }
+    else if (which === 'sign') {
+      $window = this.$signWindow;
+      $windowPopup = this.$signPopup;
+      $windowButton = this.$signPopupButton;
+      resizeDialog = this.signResizeDialog;
+    }
+
+    // hide the popup menu, and reset the Boolean
+    $windowPopup.hide('fast', function() {
+       thisObj.windowMenuClickRegistered = false; // reset
+    });
+    $windowButton.focus();
+
+    if (choice === 'move') {
+      if (!this.showedAlert(which)) {
+        this.showAlert(this.tt.windowMoveAlert,which);
+        if (which === 'transcript') {
+          this.showedTranscriptAlert = true;
+        }
+        else if (which === 'sign') {
+          this.showedSignAlert = true;
+        }
+      }
+      if (eventType === 'keydown') {
+        this.dragDevice = 'keyboard';
+      }
+      else {
+        this.dragDevice = 'mouse';
+      }
+      this.startDrag(which, $window);
+      $windowPopup.hide().parent().focus();
     }
     else if (choice == 'resize') {
-      this.resizeDialog.show();
-      this.showAlert(this.tt.windowResizeAlert,'sign');
-    }
-    else if (choice == 'sendBack') {
-      this.$activeWindow.css('z-index','0');
-      // this has the side-effect of making the popup unclickable
-      this.$windowPopup.css('z-index','4000').hide();
-      this.$windowButton.show().focus();
-      this.showAlert(this.tt.windowSendBackAlert,'sign');
-      // change content of radio button
-      var $thisRadio = this.$windowPopup.find('input:last');
-      $thisRadio.val('bringTop');
-      $thisRadio.next('label').text(this.tt.windowBringTop);
-    }
-    else if (choice == 'bringTop') {
-      this.$activeWindow.css({
-        'z-index':'4000'
-      });
-      this.$windowPopup.hide();
-      this.$windowButton.show().focus();
-      this.showAlert(this.tt.windowBringTopAlert,'sign');
-      // change content of radio button
-      var $thisRadio = this.$windowPopup.find('input:last');
-      $thisRadio.val('sendBack');
-      $thisRadio.next('label').text(this.tt.windowSendBack);
+      // resize through the menu uses a form, not drag
+      this.updateDialogZIndex();
+      resizeDialog.show();
     }
   };
 
-  AblePlayer.prototype.startDrag = function() {
+  AblePlayer.prototype.startDrag = function(which, $element) {
 
-    var thisObj, startPos, newX, newY;
+    var thisObj, $windowPopup, zIndex, startPos, newX, newY;
     thisObj = this;
+
+    this.$activeWindow = $element;
+    this.dragging = true;
+
+    if (which === 'transcript') {
+      $windowPopup = this.$transcriptPopup;
+    }
+    else if (which === 'sign') {
+      $windowPopup = this.$signPopup;
+    }
+
+    if (!this.showedAlert(which)) {
+      this.showAlert(this.tt.windowMoveAlert,which);
+      if (which === 'transcript') {
+        this.showedTranscriptAlert = true;
+      }
+      else if (which === 'sign') {
+        this.showedSignAlert = true;
+      }
+    }
+
+    // if window's popup menu is open, close it
+    if ($windowPopup.is(':visible')) {
+      $windowPopup.hide();
+    }
+
+    // be sure this window is on top
+    this.updateZIndex(which);
+
+    // get starting position of element
+    startPos = this.$activeWindow.position();
+    this.dragStartX = startPos.left;
+    this.dragStartY = startPos.top;
+
+    if (typeof this.startMouseX === 'undefined') {
+      this.dragDevice = 'keyboard';
+      this.dragKeyX = this.dragStartX;
+      this.dragKeyY = this.dragStartY;
+      // add stopgap to prevent the Enter that triggered startDrag() from also triggering dragEnd()
+      this.startingDrag = true;
+    }
+    else {
+      this.dragDevice = 'mouse';
+      // get offset between mouse position and top left corner of draggable element
+      this.dragOffsetX = this.startMouseX - this.dragStartX;
+      this.dragOffsetY = this.startMouseY - this.dragStartY;
+    }
 
     // prepare element for dragging
     this.$activeWindow.addClass('able-drag').css({
       'position': 'absolute',
       'top': this.dragStartY + 'px',
       'left': this.dragStartX + 'px'
-    });
+    }).focus();
 
-    // get starting position of element
-    startPos = this.$activeWindow.offset();
-    this.dragStartX = this.dXKeys = startPos.left;
-    this.dragStartY = this.dYKeys = startPos.top;
-
-    // add listeners
-    $(document).on('mousedown',function(e) {
-      thisObj.dragging = true;
-
-    // get starting position of mouse
-      thisObj.startMouseX = e.pageX;
-      thisObj.startMouseY = e.pageY;
-      // get offset between mouse position and top left corner of draggable element
-      thisObj.dragOffsetX = thisObj.startMouseX - thisObj.dragStartX;
-      thisObj.dragOffsetY = thisObj.startMouseY - thisObj.dragStartY;
-    });
-
-    $(document).on('mousemove',function(e) {
-      if (thisObj.dragging) {
-        // calculate new top left based on current mouse position - offset
-        newX = e.pageX - thisObj.dragOffsetX;
-        newY = e.pageY - thisObj.dragOffsetY;
-        thisObj.resetDraggedObject( newX, newY );
-      }
-    });
-
-    $(document).on('mouseup',function() {
-      if (thisObj.dragging) {
-        // finalize the drop
-        thisObj.dragEnd();
-      }
-    });
-
-    this.startingDrag = true;
-    this.$activeWindow.on('keydown',function(e) {
-      thisObj.dragKeys(e);
-    });
-
+    // add device-specific event listeners
+    if (this.dragDevice === 'mouse') {
+      $(document).on('mousemove',function(e) {
+        if (thisObj.dragging) {
+          // calculate new top left based on current mouse position - offset
+          newX = e.pageX - thisObj.dragOffsetX;
+          newY = e.pageY - thisObj.dragOffsetY;
+          thisObj.resetDraggedObject( newX, newY );
+        }
+      });
+    }
+    else if (this.dragDevice === 'keyboard') {
+      this.$activeWindow.on('keydown',function(e) {
+        if (thisObj.dragging) {
+          thisObj.dragKeys(which, e);
+        }
+      });
+    }
     return false;
   };
 
-  AblePlayer.prototype.dragKeys = function(e) {
+  AblePlayer.prototype.dragKeys = function(which, e) {
 
     var key, keySpeed;
+
+    var thisObj = this;
+
     // stopgap to prevent firing on initial Enter or space
     // that selected "Move" from menu
     if (this.startingDrag) {
@@ -9222,53 +9827,198 @@
     switch (key) {
 		  case 37:	// left
       case 63234:
-			  this.dXKeys -= keySpeed;
+			  this.dragKeyX -= keySpeed;
         break;
       case 38:	// up
       case 63232:
-				this.dYKeys -= keySpeed;
+				this.dragKeyY -= keySpeed;
         break;
       case 39:	// right
       case 63235:
-				this.dXKeys += keySpeed;
+				this.dragKeyX += keySpeed;
         break;
       case 40:	// down
       case 63233:
-				this.dYKeys += keySpeed;
+				this.dragKeyY += keySpeed;
         break;
       case 13: 	// enter
       case 27: 	// escape
-				this.dragEnd();
+				this.endDrag(which);
         return false;
       default:
 				return false;
 		}
-    this.resetDraggedObject(this.dXKeys,this.dYKeys);
+    this.resetDraggedObject(this.dragKeyX,this.dragKeyY);
     if (e.preventDefault) {
   		e.preventDefault();
     }
     return false;
   };
+
   AblePlayer.prototype.resetDraggedObject = function ( x, y) {
     this.$activeWindow.css({
       'left': x + 'px',
       'top': y + 'px'
     });
   },
-  AblePlayer.prototype.dragEnd = function() {
+
+  AblePlayer.prototype.resizeObject = function ( which, width, height ) {
+
+    var innerHeight;
+
+    // which is either 'transcript' or 'sign'
+    this.$activeWindow.css({
+      'width': width + 'px',
+      'height': height + 'px'
+    });
+
+    if (which === 'transcript') {
+      // $activeWindow is the outer $transcriptArea
+      // but the inner able-transcript also needs to be resized proporitionally
+      // (it's 50px less than its outer container)
+      innerHeight = height - 50;
+      this.$transcriptDiv.css('height', innerHeight + 'px');
+    }
+  };
+
+  AblePlayer.prototype.endDrag = function(which) {
+
+    var $window, $windowPopup, $windowButton;
+
+    if (which === 'transcript') {
+      $windowPopup = this.$transcriptPopup;
+      $windowButton = this.$transcriptPopupButton;
+    }
+    else if (which === 'sign') {
+      $windowPopup = this.$signPopup;
+      $windowButton = this.$signPopupButton;
+    }
+
     $(document).off('mousemove mouseup');
     this.$activeWindow.off('keydown').removeClass('able-drag');
-    // stopgap to prevent spacebar in Firefox from reopening popup
-    // immediately after closing it (used in handleWindowButtonClick())
-    this.hidingPopup = true;
-    this.$windowPopup.hide();
-    // Ensure stopgap gets cancelled if handleWindowButtonClick() isn't called
-    // e.g., if user triggered button with Enter or mouse click, not spacebar
-    setTimeout(function() {
-      this.hidingPopup = false;
-    }, 100);
-    this.$windowButton.show().focus();
+
+    if (this.dragDevice === 'keyboard') {
+      $windowButton.focus();
+    }
     this.dragging = false;
+
+    // save final position of dragged element
+    this.updateCookie(which);
+
+    // reset starting mouse positions
+    this.startMouseX = undefined;
+    this.startMouseY = undefined;
+
+    // Boolean to stop stray events from firing
+    this.windowMenuClickRegistered = false;
+    this.finishingDrag = true; // will be reset after window click event
+
+    // finishingDrag should e reset after window click event,
+    // which is triggered automatically after mouseup
+    // However, in case that's not reliable in some browsers
+    // need to ensure this gets cancelled
+    setTimeout(function() {
+      this.finishingDrag = false;
+    }, 100);
+  };
+
+  AblePlayer.prototype.isCloseToCorner = function($window, mouseX, mouseY) {
+
+    // return true if mouse is close to bottom right corner (resize target)
+    var tolerance, position, top, left, width, height, bottom, right;
+
+    tolerance = 10; // number of pixels in both directions considered "close enough"
+
+    // first, get position of element
+    position = $window.offset();
+    top = position.top;
+    left = position.left;
+    width = $window.width();
+    height = $window.height();
+    bottom = top + height;
+    right = left + width;
+    if ((Math.abs(bottom-mouseY) <= tolerance) && (Math.abs(right-mouseX) <= tolerance)) {
+      return true;
+    }
+    return false;
+  };
+
+  AblePlayer.prototype.startResize = function(which, $element) {
+
+    var thisObj, $windowPopup, zIndex, startPos, newWidth, newHeight;
+    thisObj = this;
+
+    this.$activeWindow = $element;
+    this.resizing = true;
+
+    if (which === 'transcript') {
+      $windowPopup = this.$transcriptPopup;
+    }
+    else if (which === 'sign') {
+      $windowPopup = this.$signPopup;
+    }
+
+    // if window's popup menu is open, close it & place focus on button (???)
+    if ($windowPopup.is(':visible')) {
+      $windowPopup.hide().parent().focus();
+    }
+
+    // get optimum zIndex for this window
+    zIndex = parseInt(this.getHighestZIndex(which));
+
+    // get starting width and height
+    startPos = this.$activeWindow.position();
+    this.dragKeyX = this.dragStartX;
+    this.dragKeyY = this.dragStartY;
+    this.dragStartWidth = this.$activeWindow.width();
+    this.dragStartHeight = this.$activeWindow.height();
+
+    // add event listeners
+    $(document).on('mousemove',function(e) {
+      if (thisObj.resizing) {
+        // calculate new width and height based on changes to mouse position
+        newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
+        newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
+        thisObj.resizeObject( which, newWidth, newHeight );
+      }
+    });
+    return false;
+  };
+
+  AblePlayer.prototype.endResize = function(which) {
+
+    var $window, $windowPopup, $windowButton;
+
+    if (which === 'transcript') {
+      $windowPopup = this.$transcriptPopup;
+      $windowButton = this.$transcriptPopupButton;
+    }
+    else if (which === 'sign') {
+      $windowPopup = this.$signPopup;
+      $windowButton = this.$signPopupButton;
+    }
+
+    $(document).off('mousemove mouseup');
+    this.$activeWindow.off('keydown');
+
+    $windowButton.show().focus();
+    this.resizing = false;
+    this.$activeWindow.removeClass('able-resize');
+
+    // save final width and height of dragged element
+    this.updateCookie(which);
+
+    // Booleans for preventing stray events
+    this.windowMenuClickRegistered = false;
+    this.finishingDrag = true;
+
+    // finishingDrag should e reset after window click event,
+    // which is triggered automatically after mouseup
+    // However, in case that's not reliable in some browsers
+    // need to ensure this gets cancelled
+    setTimeout(function() {
+      this.finishingDrag = false;
+    }, 100);
   };
 
 })(jQuery);
@@ -9309,15 +10059,16 @@
     //   This is only a problem in IOS 6 and earlier,
     //   & is a known bug, fixed in IOS 7
 
-    var thisObj, signVideoId, i, signSrc, srcType, $signSource;
+    var thisObj, signVideoId, signVideoWidth, i, signSrc, srcType, $signSource;
 
     thisObj = this;
+
+    signVideoWidth = this.getDefaultWidth('sign');
 
     signVideoId = this.mediaId + '-sign';
     this.$signVideo = $('<video>',{
       'id' : signVideoId,
-      'width' : this.playerWidth,
-      'tabindex' : '-1' // remove from tab order
+      'tabindex' : '-1'
     });
     this.signVideo = this.$signVideo[0];
     // for each original <source>, add a <source> to the sign <video>
@@ -9341,21 +10092,26 @@
 
     this.$signWindow = $('<div>',{
       'class' : 'able-sign-window',
-      'draggable': 'true',
       'tabindex': '-1'
     });
-    this.$signWindow.append(this.$signVideo).hide();
+    this.$signToolbar = $('<div>',{
+      'class': 'able-window-toolbar'
+    });
 
-    // Place sign window in div.able-column-right
-    // If div doesn't exist yet, create it
-    if (this.$ableColumnRight) {
-      this.$ableColumnRight.append(this.$signWindow);
+    this.$signWindow.append(this.$signToolbar, this.$signVideo);
+
+    this.$ableWrapper.append(this.$signWindow);
+
+    // make it draggable
+    this.initDragDrop('sign');
+
+    if (this.prefSign === 1) {
+      // sign window is on. Go ahead and position it and show it
+      this.positionDraggableWindow('sign',this.getDefaultWidth('sign'));
     }
     else {
-      this.splitPlayerIntoColumns('sign');
+      this.$signWindow.hide();
     }
-
-    this.initDragDrop(this.$signWindow);
   };
 
 })(jQuery);
@@ -10426,7 +11182,7 @@ var en = {
 
 "windowResize": "Resize",
 
-"windowResizeHeading": "Resize Interpreter Window",
+"windowResizeHeading": "Resize Window",
 
 "windowResizeAlert": "The window has been resized.",
 

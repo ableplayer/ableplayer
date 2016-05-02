@@ -16,6 +16,20 @@
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
+<!-- CSS for this example -->
+<style>
+  #video-wrapper {
+    float: left;
+    width: 500px;
+  }
+  #other-stuff {
+    position: relative;
+    font-size: 2em;
+    line-height: 2em;
+    color: #666;
+    z-index: 10000;
+  }
+</style>
 </head>
 
 <body>
@@ -28,15 +42,19 @@
 
 <p>For additional test see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
-  <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-sign-src="../media/wwa_sign.mp4"/>
-  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm" data-sign-src="../media/wwa_sign.webm"/>
-  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
-  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-  <track kind="chapters" src="../media/wwa_chapters_en.vtt"/>
-</video>
+<div id="video-wrapper">
+  <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
+    <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-sign-src="../media/wwa_sign.mp4"/>
+    <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm" data-sign-src="../media/wwa_sign.webm"/>
+    <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+    <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+    <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+    <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+    <track kind="chapters" src="../media/wwa_chapters_en.vtt"/>
+  </video>
+</div>
 
+<div id="other-stuff">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+</div>
 </body>
 </html>

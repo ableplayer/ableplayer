@@ -270,7 +270,7 @@ var en = {
 
 "windowResize": "Resize",
 
-"windowResizeHeading": "Resize Interpreter Window",
+"windowResizeHeading": "Resize Window",
 
 "windowResizeAlert": "The window has been resized.",
 

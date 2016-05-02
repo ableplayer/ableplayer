@@ -17,9 +17,13 @@
     var thisObj, vidcapContainer, prefsGroups, i;
     thisObj = this;
 
-    // create $mediaContainer and $ableDiv and wrap them around the media element
+    // create three wrappers and wrap them around the media element. From inner to outer:
+    // $mediaContainer - contains the original media element
+    // $ableDiv - contains the media player and all its objects (e.g., captions, controls, descriptions)
+    // $ableWrapper - contains additional widgets (e.g., transcript window, sign window)
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
+    this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
     // width and height of this.$mediaContainer are not updated when switching to full screen
     // However, I don't think they're needed at all. Commented out on 4/12/15, but
     // preserved here just in case there are unanticipated problems...
@@ -154,12 +158,16 @@
   };
 
   AblePlayer.prototype.injectTranscriptArea = function() {
+
+    var thisObj = this;
+
     this.$transcriptArea = $('<div>', {
-      'class': 'able-transcript-area'
+      'class': 'able-transcript-area',
+      'tabindex': '-1'
     });
 
     this.$transcriptToolbar = $('<div>', {
-      'class': 'able-transcript-toolbar'
+      'class': 'able-window-toolbar'
     });
 
     this.$transcriptDiv = $('<div>', {
@@ -179,28 +187,48 @@
     this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
     this.$transcriptLanguageSelect.prop('disabled', true);
 
-    var floatRight = $('<div style="float: right;">');
-    this.$transcriptLanguageSelectContainer = floatRight;
+    var languageSelectWrapper = $('<div class="transcript-language-select-wrapper">');
+    this.$transcriptLanguageSelectContainer = languageSelectWrapper;
 
-    floatRight.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
-    this.$transcriptToolbar.append(floatRight);
+    languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
+    this.$transcriptToolbar.append(languageSelectWrapper);
 
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
-    // If client has provided separate transcript location, put it there instead.
+    // If client has provided separate transcript location, put it there.
+    // Otherwise append it to the body
     if (this.transcriptDivLocation) {
       $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
-    else if (this.$ableColumnRight) {
-      this.$ableColumnRight.prepend(this.$transcriptArea);
-    }
     else {
-      this.splitPlayerIntoColumns('transcript');
+      this.$ableWrapper.append(this.$transcriptArea);
+    }
+
+    // make it draggable (popup only; NOT external transcript)
+    if (!this.transcriptDivLocation) {
+      this.initDragDrop('transcript');
+      if (this.prefTranscript === 1) {
+        // transcript is on. Go ahead and position it
+        this.positionDraggableWindow('transcript',this.getDefaultWidth('transcript'));
+      }
     }
 
     // If client has provided separate transcript location, override user's preference for hiding transcript
     if (!this.prefTranscript && !this.transcriptDivLocation) {
       this.$transcriptArea.hide();
+    }
+  };
+
+  AblePlayer.prototype.getDefaultWidth = function(which) {
+
+    // return default width of resizable elements
+    // these values are somewhat arbitrary, but seem to result in good usability
+    // if users disagree, they can resize (and resposition) them
+    if (which === 'transcript') {
+      return 450;
+    }
+    else if (which === 'sign') {
+      return 400;
     }
   };
 
@@ -294,41 +322,129 @@
     this.$chaptersDiv.append($chaptersNav);
   };
 
-  AblePlayer.prototype.splitPlayerIntoColumns = function (feature) {
-    // feature is either 'transcript' or 'sign'
-    // if present, player is split into two column, with this feature in the right column
-    this.$ableColumnLeft = this.$ableDiv.wrap('<div class="able-column-left">').parent();
-    this.$ableColumnLeft.width(this.playerWidth);
-    if (feature === 'transcript') {
-      this.$transcriptArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$transcriptArea.wrap('<div class="able-column-right">').parent();
+  AblePlayer.prototype.positionDraggableWindow = function (which, width) {
+
+    // which is either 'transcript' or 'sign'
+
+    var cookie, cookiePos, $window, dragged, windowPos, currentWindowPos, firstTime;
+    cookie = this.getCookie();
+    if (which === 'transcript') {
+      $window = this.$transcriptArea;
+      if (typeof cookie.transcript !== 'undefined') {
+        cookiePos = cookie.transcript;
+      }
     }
-    else if (feature == 'sign') {
-      this.$signArea.insertAfter(this.$ableColumnLeft);
-      this.$ableColumnRight = this.$signArea.wrap('<div class="able-column-right">').parent();
+    else if (which === 'sign') {
+      $window = this.$signWindow;
+      if (typeof cookie.transcript !== 'undefined') {
+        cookiePos = cookie.sign;
+      }
     }
-    this.$ableColumnRight.width(this.playerWidth);
+    if (typeof cookiePos !== 'undefined' && !($.isEmptyObject(cookiePos))) {
+      // position window using stored values from cookie
+      $window.css({
+        'position': cookiePos['position'],
+        'width': cookiePos['width'],
+        'z-index': cookiePos['zindex']
+      });
+      if (cookiePos['position'] === 'absolute') {
+        $window.css({
+          'top': cookiePos['top'],
+          'left': cookiePos['left']
+        });
+      }
+      // since cookie is not page-specific, z-index needs may vary across different pages
+      this.updateZIndex(which);
+    }
+    else {
+      // position window using default values
+      windowPos = this.getOptimumPosition(which, width);
+      if (typeof width === 'undefined') {
+        width = this.getDefaultWidth(which);
+      }
+      $window.css({
+        'position': windowPos[0],
+        'width': width,
+        'z-index': windowPos[1]
+      });
+      if (windowPos[0] === 'absolute') {
+        $window.css({
+          'top': windowPos[2] + 'px',
+          'left': windowPos[3] + 'px',
+        });
+      }
+    }
   };
 
-  AblePlayer.prototype.injectPoster = function ($element) {
+  AblePlayer.prototype.getOptimumPosition = function (targetWindow, targetWidth) {
 
-    // get poster attribute from media element and append that as an img to $element
-    // currently only applies to YouTube and fallback
-    var poster;
+    // returns optimum position for targetWindow, as an array with the following structure:
+    // 0 - CSS position ('absolute' or 'relative')
+    // 1 - zindex
+    // 2 - top
+    // 3 - left
+    // targetWindow is either 'transcript' or 'sign'
+    // if there is room to the right of the player, position element there
+    // else if there is room the left of the player, position element there
+    // else position element beneath player
 
-    if (this.$media.attr('poster')) {
-      poster = this.$media.attr('poster');
-      this.$posterImg = $('<img>',{
-        'class': 'able-poster',
-        'src' : poster,
-        'alt' : "",
-        'role': "presentation",
-        'width': this.playerWidth,
-        'height': this.playerHeight
-      });
-      $element.append(this.$posterImg);
+    var gap, position, ableWidth, ableHeight, ableOffset, ableTop, ableLeft,
+       windowWidth, otherWindowWidth, zIndex;
+
+    if (typeof targetWidth === 'undefined') {
+      targetWidth = this.getDefaultWidth(targetWindow);
     }
-  }
+
+    gap = 5; // number of pixels to preserve between Able Player objects
+
+    position = []; // position, top, left
+
+    ableWidth = this.$ableDiv.width();
+    ableHeight = this.$ableDiv.height();
+    ableOffset = this.$ableDiv.offset();
+    ableTop = ableOffset.top;
+    ableLeft = ableOffset.left;
+    windowWidth = $(window).width();
+    otherWindowWidth = 0; // width of other visiable draggable windows will be added to this
+
+    // get optimum zIndex for this window
+    zIndex = this.getHighestZIndex(targetWindow);
+
+    if (targetWindow === 'transcript') {
+      if (typeof this.$signWindow !== 'undefined') {
+        if (this.$signWindow.is(':visible')) {
+          otherWindowWidth = this.$signWindow.width() + gap;
+        }
+      }
+    }
+    else if (targetWindow === 'sign') {
+      if (typeof this.$transcriptArea !== 'undefined') {
+        if (this.$transcriptArea.is(':visible')) {
+          otherWindowWidth = this.$transcriptArea.width() + gap;
+        }
+      }
+    }
+    if (targetWidth < (windowWidth - (ableLeft + ableWidth + gap + otherWindowWidth))) {
+      // there's room to the left of $ableDiv
+      position[0] = 'absolute';
+      position[1] = zIndex;
+      position[2] = 0;
+      position[3] = ableWidth + otherWindowWidth + gap;
+    }
+    else if (targetWidth + gap < ableLeft) {
+      // there's room to the right of $ableDiv
+      position[0] = 'absolute';
+      position[1] = zIndex;
+      position[2] = 0;
+      position[3] = ableLeft - targetWidth - gap;
+    }
+    else {
+      // position element below $ableDiv
+      position[0] = 'relative';
+      // no need to define z-index, top, or left
+    }
+    return position;
+  };
 
   AblePlayer.prototype.injectAlert = function () {
 
@@ -421,6 +537,7 @@
   // Create popup div and append to player
   // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
   AblePlayer.prototype.createPopup = function (which) {
+
     var thisObj, $popup, $thisButton, $thisListItem, $prevButton, $nextButton,
         selectedTrackIndex, selectedTrack;
     thisObj = this;
@@ -428,7 +545,7 @@
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup'
     });
-    if (which == 'chapters' || which == 'prefs') {
+    if (which === 'chapters' || which === 'prefs' || which === 'sign-window' || which === 'transcript-window') {
       $popup.addClass('able-popup-no-radio');
     }
     $popup.on('keydown',function (e) {
@@ -844,8 +961,6 @@
     }
 
     controlLayout['br'].push('preferences');
-    // Help button eliminated in v2.3.4 - help text combined into Preferences dialog
-    // controlLayout['br'].push('help');
 
     // TODO: JW currently has a bug with fullscreen, anything that can be done about this?
     if (this.mediaType === 'video' && this.allowFullScreen && this.player !== 'jw') {
@@ -1091,6 +1206,10 @@
           }
           else if (control === 'sign') {
             this.$signButton = newButton;
+            // gray out sign button if sign language window is not active
+            if (!(this.$signWindow.is(':visible'))) {
+              this.$signButton.addClass('buttonOff');
+            }
           }
           else if (control === 'descriptions') {
             this.$descButton = newButton;
@@ -1130,20 +1249,7 @@
     }
 
     if (this.mediaType === 'video') {
-      // As of v 2.3.4, no longer adding width and height on this.$vidCapContainer
-      // CAN'T constrain the height if this.prefCaptionsPosition === 'below'
-      // because the caption div below the video needs to be able to expand as needed
-      // Checked the new setting in Firefox, Chrome, & IE and it seems to work w/o width & height
-      /*
-      // set width and height of div.able-vidcap-container
-      vidcapStyles = {
-        'width': this.playerWidth+'px',
-        'height': this.playerHeight+'px'
-      }
-      if (this.$vidcapContainer) {
-        this.$vidcapContainer.css(vidcapStyles);
-      }
-      */
+
       if (this.$captionDiv) {
         // set width of the captions container
         this.$captionDiv.css('width',this.playerWidth+'px');
