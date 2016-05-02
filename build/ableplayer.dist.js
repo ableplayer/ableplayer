@@ -3357,15 +3357,19 @@
               var whichPref = $(this).attr('value');
               thisObj.setFullscreen(false);
               if (whichPref === 'captions') {
+                thisObj.updateDialogZIndex();
                 thisObj.captionPrefsDialog.show();
               }
               else if (whichPref === 'descriptions') {
+                thisObj.updateDialogZIndex();
                 thisObj.descPrefsDialog.show();
               }
               else if (whichPref === 'keyboard') {
+                thisObj.updateDialogZIndex();
                 thisObj.keyboardPrefsDialog.show();
               }
               else if (whichPref === 'transcript') {
+                thisObj.updateDialogZIndex();
                 thisObj.transcriptPrefsDialog.show();
               }
               thisObj.closePopups();
@@ -10869,7 +10873,7 @@
 (function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
-    var langs = ['en','de','es','nl'];
+    var langs = ['en','de','es','fr','nl'];
     return langs;
   };
 

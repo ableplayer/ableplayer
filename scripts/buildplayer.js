@@ -715,15 +715,19 @@
               var whichPref = $(this).attr('value');
               thisObj.setFullscreen(false);
               if (whichPref === 'captions') {
+                thisObj.updateDialogZIndex();
                 thisObj.captionPrefsDialog.show();
               }
               else if (whichPref === 'descriptions') {
+                thisObj.updateDialogZIndex();
                 thisObj.descPrefsDialog.show();
               }
               else if (whichPref === 'keyboard') {
+                thisObj.updateDialogZIndex();
                 thisObj.keyboardPrefsDialog.show();
               }
               else if (whichPref === 'transcript') {
+                thisObj.updateDialogZIndex();
                 thisObj.transcriptPrefsDialog.show();
               }
               thisObj.closePopups();
