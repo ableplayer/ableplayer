@@ -218,14 +218,13 @@
     // Replace the following line with the commented block that follows
     // Haven't done this because it will have a big effect downstream
     // on all chapter processing
-    this.chapters = cues;
+    //this.chapters = cues;
 
-    /* // new
+    // new
     this.chapters.push({
       cues: cues,
       language: trackLang
     });
-    */
 
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
