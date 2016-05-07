@@ -309,11 +309,6 @@
     this.defaultVolume = 7;
     this.volume = this.defaultVolume;
 
-    // Default video height and width
-    // Can be overwritten with height and width attributes on HTML <video> element
-    this.playerWidth = 480;
-    this.playerHeight = 360;
-
     // Button color
     // Media controller background color can be customized in able.css
     // Choose 'white' if your controller has a dark background, 'black' if a light background
@@ -348,15 +343,13 @@
     // This is only used when there is a playlist
     this.showNowPlaying = true;
 
-    // fallback - set to 'jw' if implementation includes JW Player as fallback
-    // JW Player is licensed separately
-    // JW Player files must be included in thirdparty folder
+    // fallback path - specify path to fallback player files
+    // Only supported fallback is JW Player, licensed separately
+    // JW Player files must be included in folder specified in this.fallbackPath
     // JW Player will be loaded as needed in browsers that don't support HTML5 media
     // No other fallback solution is supported at this time
-    // If NOT using JW Player, set to false. An error message will be displayed if browser can't play the media.
-    this.fallback = 'jw';
-
-    // fallback path - specify path to fallback player files
+    // NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
+    // Can override the following path with data-fallback-path
     this.fallbackPath = this.rootPath + '/thirdparty/';
 
     // testFallback - set to true to force browser to use the fallback player (for testing)
@@ -492,13 +485,19 @@
 
   AblePlayer.prototype.setDimensions = function() {
 
-    // override default dimensions with width and height attributes of media element, if present
+    // if <video> element includes width and height attributes,
+    // use these to set the max-width and max-height of the player
     if (this.$media.attr('width')) {
-      this.playerWidth = parseInt(this.$media.attr('width'), 10);
+      this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
     }
     if (this.$media.attr('height')) {
-      this.playerHeight = parseInt(this.$media.attr('height'), 10);
+      this.playerMaxHeight = parseInt(this.$media.attr('height'), 10);
     }
+    // override width and height attributes with in-line CSS to make video responsive
+    this.$media.css({
+      'width': '100%',
+      'height': 'auto'
+    });
   };
 
   AblePlayer.prototype.setIconType = function() {
@@ -659,12 +658,10 @@
           for (i in prefsGroups) {
             thisObj.injectPrefsForm(prefsGroups[i]);
           }
-
           thisObj.setupPopups();
           thisObj.updateCaption();
           thisObj.updateTranscript();
           thisObj.showSearchResults();
-
           if (thisObj.defaultChapter) {
             thisObj.seekToDefaultChapter();
           }
@@ -846,6 +843,7 @@
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
         // var html5player = '../thirdparty/jwplayer.html5.js';
 
+        // TODO: Try JW Player without width (playerMaxWidth) and height
         if (thisObj.mediaType === 'video') {
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
@@ -857,7 +855,7 @@
             controls: false,
             volume: thisObj.defaultVolume * 100,
             height: jwHeight,
-            width: thisObj.playerWidth,
+            width: thisObj.playerMaxWidth,
             fallback: false,
             primary: 'flash',
             wmode: 'transparent' // necessary to get HTML captions to appear as overlay
@@ -1201,7 +1199,7 @@
         'name': 'prefCaptionsOpacity',
         'label': this.tt.prefCaptionsOpacity,
         'group': 'captions',
-        'default': '75%'
+        'default': '100%'
       });
 
       // Description preferences
@@ -2666,16 +2664,10 @@
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-    // width and height of this.$mediaContainer are not updated when switching to full screen
-    // However, I don't think they're needed at all. Commented out on 4/12/15, but
-    // preserved here just in case there are unanticipated problems...
-    /*
-    this.$mediaContainer.width(this.playerWidth);
-    if (this.mediaType == 'video') {
-      this.$mediaContainer.height(this.playerHeight);
-    }
-    */
-    this.$ableDiv.width(this.playerWidth);
+
+    this.$ableWrapper.css({
+      'max-width': this.playerMaxWidth + 'px'
+    });
 
     this.injectOffscreenHeading();
 
@@ -2968,7 +2960,8 @@
 
     // which is either 'transcript' or 'sign'
 
-    var cookie, cookiePos, $window, dragged, windowPos, currentWindowPos, firstTime;
+    var cookie, cookiePos, $window, dragged, windowPos, currentWindowPos, firstTime, zIndex;
+
     cookie = this.getCookie();
     if (which === 'transcript') {
       $window = this.$transcriptArea;
@@ -3007,12 +3000,12 @@
       $window.css({
         'position': windowPos[0],
         'width': width,
-        'z-index': windowPos[1]
+        'z-index': windowPos[3]
       });
       if (windowPos[0] === 'absolute') {
         $window.css({
-          'top': windowPos[2] + 'px',
-          'left': windowPos[3] + 'px',
+          'top': windowPos[1] + 'px',
+          'left': windowPos[2] + 'px',
         });
       }
     }
@@ -3022,9 +3015,9 @@
 
     // returns optimum position for targetWindow, as an array with the following structure:
     // 0 - CSS position ('absolute' or 'relative')
-    // 1 - zindex
-    // 2 - top
-    // 3 - left
+    // 1 - top
+    // 2 - left
+    // 3 - zindex (if not default)
     // targetWindow is either 'transcript' or 'sign'
     // if there is room to the right of the player, position element there
     // else if there is room the left of the player, position element there
@@ -3049,9 +3042,6 @@
     windowWidth = $(window).width();
     otherWindowWidth = 0; // width of other visiable draggable windows will be added to this
 
-    // get optimum zIndex for this window
-    zIndex = this.getHighestZIndex(targetWindow);
-
     if (targetWindow === 'transcript') {
       if (typeof this.$signWindow !== 'undefined') {
         if (this.$signWindow.is(':visible')) {
@@ -3069,23 +3059,41 @@
     if (targetWidth < (windowWidth - (ableLeft + ableWidth + gap + otherWindowWidth))) {
       // there's room to the left of $ableDiv
       position[0] = 'absolute';
-      position[1] = zIndex;
-      position[2] = 0;
-      position[3] = ableWidth + otherWindowWidth + gap;
+      position[1] = 0;
+      position[2] = ableWidth + otherWindowWidth + gap;
     }
     else if (targetWidth + gap < ableLeft) {
       // there's room to the right of $ableDiv
       position[0] = 'absolute';
-      position[1] = zIndex;
-      position[2] = 0;
-      position[3] = ableLeft - targetWidth - gap;
+      position[1] = 0;
+      position[2] = ableLeft - targetWidth - gap;
     }
     else {
       // position element below $ableDiv
       position[0] = 'relative';
-      // no need to define z-index, top, or left
+      // no need to define top, left, or z-index
     }
     return position;
+  };
+
+  AblePlayer.prototype.injectPoster = function ($element) {
+
+    // get poster attribute from media element and append that as an img to $element
+    // currently only applies to YouTube and fallback
+    var poster;
+
+    if (this.$media.attr('poster')) {
+      poster = this.$media.attr('poster');
+      this.$posterImg = $('<img>',{
+        'class': 'able-poster',
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation",
+        'width': this.playerWidth,
+        'height': this.playerHeight
+      });
+      $element.append(this.$posterImg);
+    }
   };
 
   AblePlayer.prototype.injectAlert = function () {
@@ -3357,19 +3365,15 @@
               var whichPref = $(this).attr('value');
               thisObj.setFullscreen(false);
               if (whichPref === 'captions') {
-                thisObj.updateDialogZIndex();
                 thisObj.captionPrefsDialog.show();
               }
               else if (whichPref === 'descriptions') {
-                thisObj.updateDialogZIndex();
                 thisObj.descPrefsDialog.show();
               }
               else if (whichPref === 'keyboard') {
-                thisObj.updateDialogZIndex();
                 thisObj.keyboardPrefsDialog.show();
               }
               else if (whichPref === 'transcript') {
-                thisObj.updateDialogZIndex();
                 thisObj.transcriptPrefsDialog.show();
               }
               thisObj.closePopups();
@@ -3462,6 +3466,7 @@
   };
 
   AblePlayer.prototype.provideFallback = function(reason) {
+
     // provide ultimate fallback for users who are unable to play the media
     // reason is either 'No Support' or a specific error message
 
@@ -3487,7 +3492,6 @@
     $fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
       'role' : 'alert',
-      'width' : this.playerWidth
     });
     this.$media.before($fallbackContainer);
     $fallbackContainer.html(fallback);
@@ -3561,9 +3565,9 @@
     }
 
     if (this.useSlider) {
-      controlLayout['ur'].push('rewind');
+      controlLayout['ul'].push('rewind');
+      controlLayout['ul'].push('forward');
       controlLayout['ur'].push('seek');
-      controlLayout['ur'].push('forward');
     }
 
     // test for browser support for volume before displaying volume button
@@ -3780,7 +3784,6 @@
                 // this is the last control on the right
                 // position tooltip using the "right" property
                 centerTooltip = false;
-                // var tooltipX = thisObj.playerWidth - position.left - buttonWidth;
                 var tooltipX = 0;
                 var tooltipStyle = {
                   left: '',
@@ -3896,9 +3899,7 @@
 
     if (this.mediaType === 'video') {
 
-      if (this.$captionDiv) {
-        // set width of the captions container
-        this.$captionDiv.css('width',this.playerWidth+'px');
+      if (typeof this.$captionDiv !== 'undefined') {
         // stylize captions based on user prefs
         this.stylizeCaptions(this.$captionDiv);
       }
@@ -4193,22 +4194,26 @@
     // but captions are currently only supported for video
     if (this.mediaType === 'video') {
 
-      // create a div for displaying captions
+      // create a pair of nested divs for displaying captions
       // includes aria-hidden="true" because otherwise
       // captions being added and removed causes sporadic changes to focus in JAWS
       // (not a problem in NVDA or VoiceOver)
       if (!this.$captionDiv) {
         this.$captionDiv = $('<div>',{
           'class': 'able-captions',
+        });
+        this.$captionWrapper = $('<div>',{
+          'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
         });
         if (this.prefCaptionsPosition === 'below') {
-          this.$captionDiv.addClass('able-captions-below');
+          this.$captionWrapper.addClass('able-captions-below');
         }
         else {
-          this.$captionDiv.addClass('able-captions-overlay');
+          this.$captionWrapper.addClass('able-captions-overlay');
         }
-        this.$vidcapContainer.append(this.$captionDiv);
+        this.$captionWrapper.append(this.$captionDiv);
+        this.$vidcapContainer.append(this.$captionWrapper);
       }
     }
 
@@ -4444,7 +4449,7 @@
     // This is called once we're sure the Youtube iFrame API is loaded -- see below.
     var finalizeYoutubeInitialization = function () {
 
-      var containerId, ccLoadPolicy;
+      var containerId, ccLoadPolicy, videoDimensions;
 
       containerId = thisObj.mediaId + '_youtube';
 
@@ -4479,11 +4484,23 @@
           ccLoadPolicy = 0;
         }
       }
-
+      videoDimensions = thisObj.getYouTubeDimensions(thisObj.activeYouTubeId, thisObj.containerId);
+      if (videoDimensions) {
+        thisObj.ytWidth = videoDimensions[0];
+        thisObj.ytHeight = videoDimensions[1];
+        thisObj.ytAspectRatio = thisObj.ytWidth / thisObj.ytHeight;
+      }
+      else {
+        // dimensions are initially unknown
+        // sending null values to YouTube results in a video that uses the default YouTube dimensions
+        // these can then be scraped from the iframe and applied to this.$ableWrapper
+        thisObj.ytWidth = null;
+        thisObj.ytHeight = null;
+      }
       thisObj.youTubePlayer = new YT.Player(containerId, {
         videoId: youTubeId,
-        height: thisObj.playerHeight.toString(),
-        width: thisObj.playerWidth.toString(),
+        width: thisObj.ytWidth,
+        height: thisObj.ytHeight,
         playerVars: {
           enablejsapi: 1,
           start: thisObj.startTime,
@@ -4504,6 +4521,9 @@
                 // resume playing
                 thisObj.playMedia();
               }
+            }
+            if (typeof thisObj.ytAspectRatio === 'undefined') {
+              thisObj.resizeYouTubePlayer(youTubeId, containerId);
             }
             deferred.resolve();
           },
@@ -4573,6 +4593,76 @@
       });
     }
     return promise;
+  };
+
+  AblePlayer.prototype.getYouTubeDimensions = function (youTubeId, youTubeContainerId) {
+
+    // get dimensions of YouTube video, return array with width & height
+    // Sources, in order of priority:
+    // 1. The width and height attributes on <video>
+    // 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
+
+    var d, url, $iframe, width, height;
+
+    d = [];
+
+    if (typeof this.playerMaxWidth !== 'undefined' && typeof this.playerMaxHeight !== 'undefined') {
+      d[0] = this.playerMaxWidth;
+      d[1] = this.playerMaxHeight;
+      return d;
+    }
+    else {
+      if (typeof $('#' + youTubeContainerId) !== 'undefined') {
+        $iframe = $('#' + youTubeContainerId);
+        width = $iframe.attr('width');
+        height = $iframe.attr('height');
+        if (width > 0 && height > 0) {
+          d[0] = width;
+          d[1] = height;
+          return d;
+        }
+      }
+    }
+    return false;
+  };
+
+  AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
+
+    // called after player is ready, if youTube dimensions were previously unknown
+    // Now need to get them from the iframe element that YouTube injected
+    // and resize Able Player to match
+
+    var d, width, height;
+
+    if (typeof this.ytAspectRatio !== 'undefined') {
+      // video dimensions have already been collected
+      // just recalculate with new wrapper size and re-assign CSS
+      width = this.$ableWrapper.width();
+      height = Math.round(width / this.ytAspectRatio);
+      if (this.youTubePlayer) {
+        this.youTubePlayer.setSize(width, height);
+      }
+    }
+    else {
+      d = this.getYouTubeDimensions(youTubeId, youTubeContainerId);
+      if (d) {
+        width = d[0];
+        height = d[1];
+        if (width > 0 && height > 0) {
+          this.$ableWrapper.css('max-width',width + 'px');
+          this.ytAspectRatio = width / height;
+          if (width !== this.$ableWrapper.width()) {
+            // now that we've retrieved YouTube's default width,
+            // need to adjust to fit the current player wrapper
+            width = this.$ableWrapper.width();
+            height = Math.round(width / this.ytAspectRatio);
+            if (this.youTubePlayer) {
+              this.youTubePlayer.setSize(width, height);
+            }
+          }
+        }
+      }
+    }
   };
 
   AblePlayer.prototype.setupYouTubeCaptions = function () {
@@ -4652,7 +4742,6 @@
           'videoId': youTubeId
         });
         request.then(function(json) {
-
           if (json.result.items.length) { // video has captions!
             thisObj.hasCaptions = true;
             thisObj.usingYouTubeCaptions = true;
@@ -5556,7 +5645,7 @@
       'width': width || '50%',
       'top': (fullscreen ? '0' : '5%')
     });
-    modal.addClass('modalDialog');
+    modal.addClass('able-modal-dialog');
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
@@ -5633,14 +5722,14 @@
       event.stopPropagation();
     });
 
-    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
   };
 
   AccessibleDialog.prototype.show = function () {
     if (!this.overlay) {
       // Generate overlay.
       var overlay = $('<div></div>').attr({
-         'class': 'modalOverlay',
+         'class': 'able-modal-overlay',
          'tabindex': '-1'
       });
       this.overlay = overlay;
@@ -5652,7 +5741,7 @@
       });
     }
 
-    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'true');
+    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'true');
 
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
@@ -5680,7 +5769,7 @@
     }
     this.modal.css('display', 'none');
     this.modal.attr('aria-hidden', 'true');
-    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
 
     this.focusedElementBeforeModal.focus();
   };
@@ -6132,7 +6221,7 @@
     if (this.debug) {
       console.log('User agent: ' + userAgent);
     }
-    if (userAgent.indexOf(which) !== -1) {
+    if (userAgent.indexOf(which.toLowerCase()) !== -1) {
       return true;
     }
     else {
@@ -6607,6 +6696,7 @@
         }
       }
     }
+
     // Update seekbar width.
     // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
@@ -6618,17 +6708,18 @@
           widthUsed += $(this).width();
         }
       });
+//console.log('width used by left controls: ' + widthUsed);
       rightControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();
         }
       });
-
+//console.log('total width used: ' + widthUsed);
       if (this.isFullscreen()) {
         seekbarWidth = $(window).width() - widthUsed - 20;
       }
       else {
-        seekbarWidth = this.playerWidth - widthUsed - 20;
+        seekbarWidth = this.$ableWrapper.width() - widthUsed - 20;
       }
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
@@ -6953,7 +7044,7 @@
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
         else {
-          this.$captionDiv.hide();
+          this.$captionWrapper.hide();
         }
       }
       else {
@@ -6965,7 +7056,7 @@
           }
         }
         else {
-          this.$captionDiv.show();
+          this.$captionWrapper.show();
         }
         for (var i=0; i<captions.length; i++) {
           if (captions[i].def === true) { // this is the default language
@@ -7122,11 +7213,12 @@
   }
 
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
+
     if (this.isFullscreen() == fullscreen) {
       return;
     }
     var thisObj = this;
-    var $el = this.$ableDiv;
+    var $el = this.$ableWrapper;
     var el = $el[0];
 
     if (this.nativeFullscreenSupported()) {
@@ -7173,8 +7265,8 @@
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          // force call to resizePlayer with default player dimensions
-          thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);
+          // restore player with default player dimensions
+          thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
         }
       });
     }
@@ -7212,7 +7304,7 @@
         }
         var newHeight = $(window).height() - this.$playerDiv.height();
         if (!this.$descDiv.is(':hidden')) {
-          newHeight -= thisObj.$descDiv.height();
+          newHeight -= this.$descDiv.height();
         }
         this.resizePlayer($(window).width(), newHeight);
       }
@@ -7224,7 +7316,7 @@
         $el.insertAfter(this.$modalFullscreenPlaceholder);
         this.$modalFullscreenPlaceholder.remove();
         this.fullscreenDialog.hide();
-        this.resizePlayer(this.playerWidth, this.playerHeight);
+        this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
       }
 
       // TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
@@ -7360,57 +7452,128 @@
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
 
-    this.$media.height(height);
-    this.$media.width(width);
+    var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize;
+    if (this.isFullscreen()) {
+      if (typeof this.$vidcapContainer !== 'undefined') {
+        this.$ableWrapper.css({
+          'width': width + 'px',
+          'max-width': ''
+        })
+        this.$vidcapContainer.css({
+          'height': height + 'px',
+          'width': width
+        });
+        this.$media.css({
+          'height': height + 'px',
+          'width': width
+        })
+      }
+      if (typeof this.$transcriptArea !== 'undefined') {
+        this.retrieveOffscreenWindow('transcript',width,height);
+      }
+      if (typeof this.$signWindow !== 'undefined') {
+        this.retrieveOffscreenWindow('sign',width,height);
+      }
+    }
+    else {
+      // player resized, but not fullscreen
+      // in case restoring from fullscreen, reset CSS to responsive
+      this.$ableWrapper.css({
+        'max-width': this.playerMaxWidth,
+        'width': ''
+      });
+      this.$vidcapContainer.css({
+        'height': '',
+        'width': ''
+      });
+      this.$media.css({
+        'width': '100%',
+        'height': 'auto'
+      });
+    }
 
-    if (this.$captionDiv) {
-      this.$captionDiv.width(width);
-      // Font-size for embedded player is too small in full screen view
-      if (height !== this.playerHeight) {
-        // this calculation results in a reasonably large font across all browsers
-        this.$captionDiv.css('font-size', (height / this.playerHeight) * 18);
+    if (typeof this.$captionDiv !== 'undefined') {
+
+      // Font-size is too small in full screen view & too large in small-width view
+      // The following vars define a somewhat arbitary zone outside of which
+      // caption size requires adjustment
+      captionSizeOkMin = 400;
+      captionSizeOkMax = 1000;
+      captionSize = parseInt(this.prefCaptionsSize,10);
+
+      // TODO: Need a better formula so that it scales proportionally to viewport
+      if (width > captionSizeOkMax) {
+        newCaptionSize = captionSize * 1.5;
+      }
+      else if (width < captionSizeOkMin) {
+        newCaptionSize = captionSize / 1.5;
       }
       else {
-        // clear full screen font size and return to normal
-        this.$captionDiv.css('font-size', '');
+        newCaptionSize = captionSize;
       }
-    }
-    if (this.$vidcapContainer) {
-      this.$vidcapContainer.height(height);
-      this.$vidcapContainer.width(width);
+      this.$captionDiv.css('font-size',newCaptionSize + '%');
     }
 
-    this.$ableDiv.width(width);
-
-    if (this.jwPlayer) {
+    if (this.player === 'youtube' && this.youTubePlayer) {
+      this.resizeYouTubePlayer();
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.resize(width, height);
-    }
-    else if (this.youTubePlayer) {
-      this.youTubePlayer.setSize(width, height);
     }
     this.refreshControls();
   };
 
-  AblePlayer.prototype.getHighestZIndex = function(window) {
+  AblePlayer.prototype.retrieveOffscreenWindow = function( which, width, height ) {
 
-    // window is either 'transcript', 'sign', or 'dialog' (all dialogs have the same z-index)
-    // window can also be 'all' (to find the highest overall (non-AblePlayer) zIndex
-    // 'transcript' and 'sign' must be positioned on top of the elements beneath
-    // get highest z-index on page
-    // if that's higher than the default for this window,
-    // assign one greater (rounded to the nearest 1000 for transcript, 2000 for sign)
-    // if window is 'transcript' or 'sign',
-    //
-    var max, $elements, z, defaultZ, highestZ;
+    // check to be sure popup windows ('transcript' or 'sign') are positioned on-screen
+    // (they sometimes disappear off-screen when entering fullscreen mode)
+    // if off-screen, recalculate so they are back on screen
+
+    var window, windowPos, windowTop, windowLeft, windowRight, windowWidth, windowBottom, windowHeight;
+
+    if (which == 'transcript') {
+      window = this.$transcriptArea;
+    }
+    else if (which == 'sign') {
+      window = this.$signWindow;
+    }
+    windowWidth = window.width();
+    windowHeight = window.height();
+    windowPos = window.position();
+    windowTop = windowPos.top;
+    windowLeft = windowPos.left;
+    windowRight = windowLeft + windowWidth;
+    windowBottom = windowTop + windowHeight;
+
+    if (windowTop < 0) { // off-screen to the top
+      windowTop = 10;
+      window.css('top',windowTop);
+    }
+    if (windowLeft < 0) { // off-screen to the left
+      windowLeft = 10;
+      window.css('left',windowLeft);
+    }
+    if (windowRight > width) { // off-screen to the right
+      windowLeft = (width - 20) - windowWidth;
+      window.css('left',windowLeft);
+    }
+    if (windowBottom > height) { // off-screen to the bottom
+      windowTop = (height - 10) - windowHeight;
+      window.css('top',windowTop);
+    }
+  };
+
+  AblePlayer.prototype.getHighestZIndex = function() {
+
+    // returns the highest z-index on page
+    // used to ensure dialogs (or potentially other windows) are on top
+
+    var max, $elements, z;
     max = 0;
-    if (window === 'all' || window === 'transcript' || window === 'sign') {
-      // exclude all Able Player -related elements since default z-index values satisfy the desired internal relationships
-      $elements = $('body *').not('.able-wrapper,.able-wrapper *,.modalDialog,.modalDialog *,.modalOverlay,.modalOverlay *');
-    }
-    else if (window === 'dialog') {
-      // just exclude themselves
-      $elements = $('body *').not('.modalDialog,.modalDialog *,.modalOverlay,.modalOverlay *');
-    }
+
+    // exclude the Able Player dialogs
+    $elements = $('body *').not('.able-modal-dialog,.able-modal-dialog *,.able-modal-overlay,.able-modal-overlay *');
+
     $elements.each(function(){
       z = $(this).css('z-index');
       if (Number.isInteger(+z)) { // work only with integer values, not 'auto'
@@ -7419,51 +7582,7 @@
         }
       }
     });
-    if (window === 'all') {
-      return parseInt(max);
-    }
-    defaultZ = parseInt(this.getDefaultZIndex(window));
-    if (max > defaultZ) {
-      if (window === 'transcript') {
-        highestZ = Math.ceil(max/1000)*1000;
-        if (highestZ % 1000 === 0) {
-          highestZ += 1000;
-        }
-      }
-      else if (window === 'sign') {
-        highestZ = Math.ceil(max/2000)*2000;
-        if (highestZ % 2000 === 0) {
-          highestZ += 2000;
-        }
-      }
-      else if (window === 'dialog') {
-        // go 2000 over max for dialog
-        // since .modalOverlay will be 500 less than that
-        highestZ = Math.ceil(max/2000)*2000;
-      }
-    }
-    else {
-      highestZ = defaultZ;
-    }
-    return highestZ;
-  };
-
-  AblePlayer.prototype.getDefaultZIndex = function(which) {
-
-    // returns default z-index (as defined in ableplayer.css)
-    // for any of the main windows
-    if (which === 'player') {
-      return 5000;
-    }
-    else if (which === 'transcript') {
-      return 7000;
-    }
-    else if (which === 'sign') {
-      return 8000;
-    }
-    else if (which === 'dialog') {
-      return 10000;
-    }
+    return max;
   };
 
   AblePlayer.prototype.updateZIndex = function(which) {
@@ -7471,168 +7590,66 @@
     // update z-index of 'transcript' or 'sign', relative to each other
     // direction is always 'up' (i.e., move window to top)
     // windows come to the top when the user clicks on them
-    // when windows were created initially, they were assigned the highest z-index on the page
-    // so there should be no need to recalculate that
 
-    var swapZs, swapHighest, thresholdOverMax,
-    hasTranscript, hasSign, transcriptZ, signZ,
-    highestTranscriptZ, highestSignZ, highestZ, highestNewZ;
-    swapZs = false;
-    swapHighest = false;
-    thresholdOverMax = 10000;
+    var transcriptZ, signZ, newHighZ, newLowZ;
 
-    // get current values (if windows exist)
-    if (typeof this.$transcriptArea !== 'undefined') {
-      hasTranscript = true;
-      transcriptZ = this.$transcriptArea.css('z-index');
-      highestTranscriptZ = this.getHighestZIndex('transcript');
-    }
-    else {
-      hasTranscript = false;
-    }
-    if (typeof this.$signWindow !== 'undefined') {
-      hasSign = true;
-      signZ = this.$signWindow.css('z-index');
-      highestSignZ = this.getHighestZIndex('sign');
-    }
-    else {
-      hasSign = false;
+    if (typeof this.$transcriptArea === 'undefined' || typeof this.$signWindow === 'undefined' ) {
+      // at least one of the windows doesn't exist, so there's no conflict
+      return false;
     }
 
-    highestZ = this.getHighestZIndex('all');
-    if (this.debug) {
-      console.log('Data from updateZIndex (' + which + ' window)');
-      console.log('hasTranscript: ' + hasTranscript);
-      console.log('hasSign: ' + hasSign);
-      console.log('highestZ: ' + highestZ);
-      console.log('transcriptZ: ' + transcriptZ);
-      console.log('signZ: ' + signZ);
+    // get current values
+    transcriptZ = parseInt(this.$transcriptArea.css('z-index'));
+    signZ = parseInt(this.$signWindow.css('z-index'));
+
+    if (transcriptZ === signZ) {
+      // the two windows are equal; move the target window the top
+      newHighZ = transcriptZ + 1000;
+      newLowZ = transcriptZ;
     }
-    if (hasTranscript && hasSign) {
-      if (which === 'transcript' && (signZ >= transcriptZ)) {
-        swapZs = true;
+    else if (transcriptZ > signZ) {
+      if (which === 'transcript') {
+        // transcript is already on top; nothing to do
+        return false;
       }
-      else if (which === 'sign' && (transcriptZ >= signZ)) {
-        swapZs = true;
-      }
-      if (this.debug) {
-        console.log('swapZs: ' + swapZs);
-      }
-      if (swapZs) {
-        // the current window is NOT on top. Therefore swapping is needed
-        // if either is below the highest non-AblePlayer Z, need to adjust both
-        if (transcriptZ < highestZ || signZ < highestZ) {
-          swapHighest = true;
-        }
-        // else if either is unreasonably large compared to highestZ, reset to highestZ for each window
-        // (sometimes this happens if a non-AblePlayer temp element with an extremely high z-index is added to a page)
-        else if (transcriptZ - highestZ > thresholdOverMax || signZ - highestZ > thresholdOverMax) {
-          swapHighest = true;
-        }
-        if (this.debug) {
-          console.log('swapHighest: ' + swapHighest);
-        }
-        if (swapHighest) {
-          if (highestSignZ === highestTranscriptZ) {
-            // the two high values are equal (need to increase the one on top)
-            if (which === 'transcript') {
-              highestNewZ = parseInt(highestSignZ) + 1000;
-              this.$transcriptArea.css('z-index',highestNewZ);
-              this.$signWindow.css('z-index',highestTranscriptZ);
-            }
-            else if (which === 'sign') {
-              highestNewZ = parseInt(highestTranscriptZ) + 1000;
-              this.$transcriptArea.css('z-index',highestSignZ);
-              this.$signWindow.css('z-index',highestNewZ);
-            }
-          }
-          else {
-            if (which === 'transcript') {
-              highestNewZ = Math.max(highestTranscriptZ,highestSignZ);
-              this.$transcriptArea.css('z-index',highestNewZ);
-              this.$signWindow.css('z-index',Math.min(highestTranscriptZ,highestSignZ));
-
-            }
-            else if (which === 'sign') {
-              highestNewZ = Math.max(highestTranscriptZ,highestSignZ);
-              this.$transcriptArea.css('z-index',Math.min(highestTranscriptZ,highestSignZ));
-              this.$signWindow.css('z-index',highestNewZ);
-            }
-          }
-        }
-        else {
-          if (signZ === transcriptZ) {
-            if (which === 'transcript') {
-              highestNewZ = parseInt(signZ) + 1000;
-              this.$transcriptArea.css('z-index', highestNewZ);
-              this.$signWindow.css('z-index',transcriptZ);
-            }
-            else if (which === 'sign') {
-              highestNewZ = parseInt(transcriptZ) + 1000;
-              this.$transcriptArea.css('z-index',signZ);
-              this.$signWindow.css('z-index', highestNewZ);
-            }
-          }
-          else {
-            if (which === 'transcript') {
-              highestNewZ = Math.max(transcriptZ,signZ);
-              this.$transcriptArea.css('z-index', highestNewZ);
-              this.$signWindow.css('z-index',Math.min(transcriptZ,signZ));
-            }
-            else if (which === 'sign') {
-              highestNewZ = Math.max(transcriptZ,signZ)
-              this.$transcriptArea.css('z-index',Math.min(transcriptZ,signZ));
-              this.$signWindow.css('z-index', highestNewZ);
-            }
-          }
-        }
-        if (this.debug) {
-          console.log('highestNewZ: ' + highestNewZ);
-        }
-        if (typeof highestNewZ !== 'undefined') {
-          // reset z-index for specific components
-          $('.able-alert').css('z-index',parseInt(highestNewZ) + 1300);
-          $('.able-window-toolbar .able-button-handler-preferences').css('z-index',parseInt(highestNewZ) + 1200);
-          $('.able-popup').css('z-index',parseInt(highestNewZ) + 1100);
-          $('.able-tooltip').css('z-index',parseInt(highestNewZ) + 1000);
-        }
+      else {
+        // swap z's
+        newHighZ = transcriptZ;
+        newLowZ = signZ;
       }
     }
-    else if (which === 'transcript' && hasTranscript) {
-      if (transcriptZ <= highestZ) {
-        this.$transcriptArea.css('z-index',highestTranscriptZ);
+    else { // signZ is greater
+      if (which === 'sign') {
+        return false;
+      }
+      else {
+        newHighZ = signZ;
+        newLowZ = transcriptZ;
       }
     }
-    else if (which === 'sign' && hasSign) {
-      if (signZ <= highestZ) {
-        this.$signWindow.css('z-index',highestSignZ);
-      }
+
+    // now assign the new values
+    if (which === 'transcript') {
+      this.$transcriptArea.css('z-index',newHighZ);
+      this.$signWindow.css('z-index',newLowZ);
     }
-    return false;
-  };
-
-  AblePlayer.prototype.updateDialogZIndex = function() {
-
-    // since only one dialog is visible at a time, they all share a z-index
-    var modalZ, overlayZ;
-
-    modalZ = this.getHighestZIndex('dialog');
-    overlayZ = modalZ - 500;
-    $('body > .modalDialog').css('z-index',modalZ);
-    $('body > .modalOverlay').css('z-index',overlayZ);
+    else if (which === 'sign') {
+      this.$signWindow.css('z-index',newHighZ);
+      this.$transcriptArea.css('z-index',newLowZ);
+    }
   };
 
 })(jQuery);
 
 (function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
-    if (!this.usingYouTubeCaptions && (typeof this.$captionDiv !== 'undefined')) {
+    if (!this.usingYouTubeCaptions && (typeof this.$captionWrapper !== 'undefined')) {
       if (this.captionsOn) {
-        this.$captionDiv.show();
+        this.$captionWrapper.show();
         this.showCaptions(time || this.getElapsed());
       }
-      else if (this.$captionDiv) {
-        this.$captionDiv.hide();
+      else if (this.$captionWrapper) {
+        this.$captionWrapper.hide();
         this.prefCaptions = 0;
       }
     }
@@ -7731,7 +7748,7 @@
   };
 
   AblePlayer.prototype.showCaptions = function(now) {
-    var c, thisCaption;
+    var c, thisCaption, captionText;
     var cues;
     if (this.selectedCaptions) {
       cues = this.selectedCaptions.cues;
@@ -7751,8 +7768,16 @@
     if (typeof thisCaption !== 'undefined') {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
-        this.$captionDiv.html(this.flattenCueForCaption(cues[thisCaption]).replace('\n', '<br>'));
+        captionText = this.flattenCueForCaption(cues[thisCaption]).replace('\n', '<br>');
+        this.$captionDiv.html(captionText);
         this.currentCaption = thisCaption;
+        if (captionText.length === 0) {
+          // hide captionDiv; otherwise background-color is visible due to padding
+          this.$captionDiv.css('display','none');
+        }
+        else {
+          this.$captionDiv.css('display','inline-block');
+        }
       }
     }
     else {
@@ -7917,25 +7942,29 @@
           'background-color': this.prefCaptionsBGColor,
           'opacity': opacity
         });
+        if (this.prefCaptionsPosition === 'below') {
+          // also need to add the background color to the wrapper div
+          this.$captionWrapper.css({
+            'background-color': this.prefCaptionsBGColor,
+            'opacity': '1'
+          });
+        }
         this.positionCaptions();
       }
     }
   };
   AblePlayer.prototype.positionCaptions = function() {
 
-    if (typeof this.$captionDiv !== 'undefined') {
+    if (typeof this.$captionWrapper !== 'undefined') {
+
       if (this.prefCaptionsPosition == 'below') {
-        this.$captionDiv.removeClass('able-captions-overlay').addClass('able-captions-below');
-        // add a min-height property to minimize the amount of
-        // expanding and contracting that $captionDiv does based on caption content
-        this.$captionDiv.css('min-height','3em');
+        this.$captionWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
       }
       else {
-        this.$captionDiv.removeClass('able-captions-below').addClass('able-captions-overlay');
-        this.$captionDiv.css('min-height','');
+        this.$captionWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
       }
     }
-  }
+  };
 
 })(jQuery);
 
@@ -8669,8 +8698,8 @@
     // first, round down to nearest second
     var totalSeconds = Math.floor(totalSeconds);
 
-    var hours = parseInt( totalSeconds / 3600 ) % 24;
-    var minutes = parseInt( totalSeconds / 60 ) % 60;
+    var hours = parseInt( totalSeconds / 3600 , 10) % 24;
+    var minutes = parseInt( totalSeconds / 60 , 10) % 60;
     var seconds = totalSeconds % 60;
     var value = '';
     var title = '';
@@ -8822,26 +8851,38 @@
 
     if (this.isFullscreen()) {
 
-      var newHeight;
+      var newWidth, newHeight;
 
-      if (window.outerHeight >= window.innerHeight) {
-        newHeight = window.outerHeight - this.$playerDiv.outerHeight();
+      newWidth = $(window).width();
+
+      // haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
+      // Test results:
+      // Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
+      if (this.isUserAgent('Firefox') || this.isUserAgent('Trident') || this.isUserAgent('Edge')) {
+        newHeight = window.innerHeight - this.$playerDiv.outerHeight() - 20;
+      }
+      else if (window.outerHeight >= window.innerHeight) {
+        // Browsers that do NOT require adjustment: Chrome, Safari, Opera, MSIE 10
+        newHeight = window.innerHeight - this.$playerDiv.outerHeight();
       }
       else {
-        // not sure why innerHeight > outerHeight, but observed this in Safari 9.0.1
-        // Maybe window is already adjusted for controller height?
-        // Anyway, no need to subtract player height if window.outerHeight is already reduced
+        // Observed in Safari 9.0.1 on Mac OS X: outerHeight is actually less than innerHeight
+        // Maybe a bug, or maybe window.outerHeight is already adjusted for controller height(?)
+        // No longer observed in Safari 9.0.2
         newHeight = window.outerHeight;
       }
-
       if (!this.$descDiv.is(':hidden')) {
         newHeight -= this.$descDiv.height();
       }
-      this.resizePlayer($(window).width(), newHeight);
     }
-    else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
+    else { // not fullscreen
+      newWidth = this.$ableWrapper.width();
+      newHeight = this.$ableWrapper.height();
     }
+    this.resizePlayer(newWidth, newHeight);
+
+    // TODO: insert code to check for off-screen transcript & sign windows & reposition them
+    // Need to also do that when first showing these windows (separate function, called twice)
   };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
@@ -9283,7 +9324,7 @@
     // There are nevertheless lessons to be learned from Drag & Drop about accessibility:
     // http://dev.opera.com/articles/accessible-drag-and-drop/
 
-    var thisObj, $window, $toolbar, windowName, $resizeHandle, resizeZIndex, clickZIndex;
+    var thisObj, $window, $toolbar, windowName, $resizeHandle, resizeZIndex;
 
     thisObj = this;
 
@@ -9728,7 +9769,6 @@
     }
     else if (choice == 'resize') {
       // resize through the menu uses a form, not drag
-      this.updateDialogZIndex();
       resizeDialog.show();
     }
   };
@@ -9966,9 +10006,6 @@
     if ($windowPopup.is(':visible')) {
       $windowPopup.hide().parent().focus();
     }
-
-    // get optimum zIndex for this window
-    zIndex = parseInt(this.getHighestZIndex(which));
 
     // get starting width and height
     startPos = this.$activeWindow.position();

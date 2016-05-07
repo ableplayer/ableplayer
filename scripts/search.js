@@ -135,8 +135,8 @@
     // first, round down to nearest second
     var totalSeconds = Math.floor(totalSeconds);
 
-    var hours = parseInt( totalSeconds / 3600 ) % 24;
-    var minutes = parseInt( totalSeconds / 60 ) % 60;
+    var hours = parseInt( totalSeconds / 3600 , 10) % 24;
+    var minutes = parseInt( totalSeconds / 60 , 10) % 60;
     var seconds = totalSeconds % 60;
     var value = '';
     var title = '';

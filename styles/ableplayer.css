@@ -4,8 +4,8 @@
 	Default z-index map:
 
 	* Modal dialog
-	div.modalDialog = 10000
-	div.modalOverlay = 9500
+	div.able-modal-dialog = 10000
+	div.able-modal-overlay = 9500
 
 	* Items that should always be on top (9000):
 	.able-alert = 9300
@@ -24,7 +24,7 @@
   .able-controller button > span = 6700
 	.able-controller button = 6600
 	.able-big-play-button = 6500
-	div.able-captions = 6000
+	div.able-captions-wrapper = 6000
   .able-seekhead = 5500
   .able-volume-head = 5500
 	.able-volume-slider = 5300
@@ -36,6 +36,8 @@
   position: relative;
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: auto;
 }
 .able {
   position: relative;
@@ -384,17 +386,23 @@ input[type=range]:focus::-ms-fill-upper {
   Captions and Descriptions
 */
 
-div.able-captions {
-  padding: 0.5em 0;
+div.able-captions-wrapper {
+  width: 100%;
+  margin: 0;
+  padding: 0;
   text-align: center;
+  line-height: 1.35em;
   display: none;
-  line-height: 1.15em;
+  z-index: 6000;
+}
+div.able-captions {
+  display: none;
+  padding: 0.15em 0.25em;
   /* settings that are overridden by user prefs */
   background-color: black;
   font-size: 1.1em;
   color: white;
   opacity: 0.75;
-  z-index: 6000;
 }
 div.able-captions-overlay {
   position: absolute;
@@ -403,12 +411,13 @@ div.able-captions-overlay {
 }
 div.able-captions-below {
   position: relative;
+  min-height: 2.8em;
 }
 div.able-descriptions {
   position: relative;
   color: #FF6; /* yellow, to differentiate it from captions */
   background-color: #262626;
-  min-height: 3em;
+  min-height: 2.8em;
   border-top: 1px solid #666;
   margin: 0;
   padding: 3%;
@@ -439,9 +448,10 @@ div.able-now-playing span span {
   Modal Dialogs
 */
 
-div.modalDialog {
+div.able-modal-dialog {
   position: absolute;
   height: auto;
+  max-width: 90%;
   margin-left: auto;
   margin-right: auto;
   left: 0px;
@@ -452,7 +462,7 @@ div.modalDialog {
   background-color: #FAFAFA;
   z-index: 10000;
 }
-div.modalOverlay {
+div.able-modal-overlay {
   position: fixed;
   width: 100%;
   height: 100%;
@@ -473,22 +483,22 @@ button.modalCloseButton {
 button.modal-button {
   margin-right: 5px;
 }
-div.modalDialog input:hover,
-div.modalDialog input:focus,
-div.modalDialog button:hover,
-div.modalDialog button:focus {
+div.able-modal-dialog input:hover,
+div.able-modal-dialog input:focus,
+div.able-modal-dialog button:hover,
+div.able-modal-dialog button:focus {
   outline-style: solid;
   outline-width: 2px;
 }
-div.modalDialog input:hover,
-div.modalDialog button:hover {
+div.able-modal-dialog input:hover,
+div.able-modal-dialog button:hover {
 	outline-color: #8AB839; /* green */
 }
-div.modalDialog input:focus,
-div.modalDialog button:focus {
+div.able-modal-dialog input:focus,
+div.able-modal-dialog button:focus {
 	outline-color: #ffbb37; /* yellow */
 }
-div.modalDialog h1 {
+div.able-modal-dialog h1 {
   font-weight: bold;
   font-size: 1.8em;
   line-height: 1.2em;

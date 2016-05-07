@@ -16,7 +16,7 @@
       'width': width || '50%',
       'top': (fullscreen ? '0' : '5%')
     });
-    modal.addClass('modalDialog');
+    modal.addClass('able-modal-dialog');
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
@@ -93,14 +93,14 @@
       event.stopPropagation();
     });
 
-    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
   };
 
   AccessibleDialog.prototype.show = function () {
     if (!this.overlay) {
       // Generate overlay.
       var overlay = $('<div></div>').attr({
-         'class': 'modalOverlay',
+         'class': 'able-modal-overlay',
          'tabindex': '-1'
       });
       this.overlay = overlay;
@@ -112,7 +112,7 @@
       });
     }
 
-    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'true');
+    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'true');
 
     this.overlay.css('display', 'block');
     this.modal.css('display', 'block');
@@ -140,7 +140,7 @@
     }
     this.modal.css('display', 'none');
     this.modal.attr('aria-hidden', 'true');
-    $('body > *').not('.modalOverlay').not('.modalDialog').attr('aria-hidden', 'false');
+    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
 
     this.focusedElementBeforeModal.focus();
   };

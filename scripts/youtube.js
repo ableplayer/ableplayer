@@ -20,7 +20,7 @@
     // This is called once we're sure the Youtube iFrame API is loaded -- see below.
     var finalizeYoutubeInitialization = function () {
 
-      var containerId, ccLoadPolicy;
+      var containerId, ccLoadPolicy, videoDimensions;
 
       containerId = thisObj.mediaId + '_youtube';
 
@@ -55,11 +55,23 @@
           ccLoadPolicy = 0;
         }
       }
-
+      videoDimensions = thisObj.getYouTubeDimensions(thisObj.activeYouTubeId, thisObj.containerId);
+      if (videoDimensions) {
+        thisObj.ytWidth = videoDimensions[0];
+        thisObj.ytHeight = videoDimensions[1];
+        thisObj.ytAspectRatio = thisObj.ytWidth / thisObj.ytHeight;
+      }
+      else {
+        // dimensions are initially unknown
+        // sending null values to YouTube results in a video that uses the default YouTube dimensions
+        // these can then be scraped from the iframe and applied to this.$ableWrapper
+        thisObj.ytWidth = null;
+        thisObj.ytHeight = null;
+      }
       thisObj.youTubePlayer = new YT.Player(containerId, {
         videoId: youTubeId,
-        height: thisObj.playerHeight.toString(),
-        width: thisObj.playerWidth.toString(),
+        width: thisObj.ytWidth,
+        height: thisObj.ytHeight,
         playerVars: {
           enablejsapi: 1,
           start: thisObj.startTime,
@@ -80,6 +92,9 @@
                 // resume playing
                 thisObj.playMedia();
               }
+            }
+            if (typeof thisObj.ytAspectRatio === 'undefined') {
+              thisObj.resizeYouTubePlayer(youTubeId, containerId);
             }
             deferred.resolve();
           },
@@ -149,6 +164,76 @@
       });
     }
     return promise;
+  };
+
+  AblePlayer.prototype.getYouTubeDimensions = function (youTubeId, youTubeContainerId) {
+
+    // get dimensions of YouTube video, return array with width & height
+    // Sources, in order of priority:
+    // 1. The width and height attributes on <video>
+    // 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
+
+    var d, url, $iframe, width, height;
+
+    d = [];
+
+    if (typeof this.playerMaxWidth !== 'undefined' && typeof this.playerMaxHeight !== 'undefined') {
+      d[0] = this.playerMaxWidth;
+      d[1] = this.playerMaxHeight;
+      return d;
+    }
+    else {
+      if (typeof $('#' + youTubeContainerId) !== 'undefined') {
+        $iframe = $('#' + youTubeContainerId);
+        width = $iframe.attr('width');
+        height = $iframe.attr('height');
+        if (width > 0 && height > 0) {
+          d[0] = width;
+          d[1] = height;
+          return d;
+        }
+      }
+    }
+    return false;
+  };
+
+  AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
+
+    // called after player is ready, if youTube dimensions were previously unknown
+    // Now need to get them from the iframe element that YouTube injected
+    // and resize Able Player to match
+
+    var d, width, height;
+
+    if (typeof this.ytAspectRatio !== 'undefined') {
+      // video dimensions have already been collected
+      // just recalculate with new wrapper size and re-assign CSS
+      width = this.$ableWrapper.width();
+      height = Math.round(width / this.ytAspectRatio);
+      if (this.youTubePlayer) {
+        this.youTubePlayer.setSize(width, height);
+      }
+    }
+    else {
+      d = this.getYouTubeDimensions(youTubeId, youTubeContainerId);
+      if (d) {
+        width = d[0];
+        height = d[1];
+        if (width > 0 && height > 0) {
+          this.$ableWrapper.css('max-width',width + 'px');
+          this.ytAspectRatio = width / height;
+          if (width !== this.$ableWrapper.width()) {
+            // now that we've retrieved YouTube's default width,
+            // need to adjust to fit the current player wrapper
+            width = this.$ableWrapper.width();
+            height = Math.round(width / this.ytAspectRatio);
+            if (this.youTubePlayer) {
+              this.youTubePlayer.setSize(width, height);
+            }
+          }
+        }
+      }
+    }
   };
 
   AblePlayer.prototype.setupYouTubeCaptions = function () {
@@ -228,7 +313,6 @@
           'videoId': youTubeId
         });
         request.then(function(json) {
-
           if (json.result.items.length) { // video has captions!
             thisObj.hasCaptions = true;
             thisObj.usingYouTubeCaptions = true;

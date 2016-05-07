@@ -76,22 +76,26 @@
     // but captions are currently only supported for video
     if (this.mediaType === 'video') {
 
-      // create a div for displaying captions
+      // create a pair of nested divs for displaying captions
       // includes aria-hidden="true" because otherwise
       // captions being added and removed causes sporadic changes to focus in JAWS
       // (not a problem in NVDA or VoiceOver)
       if (!this.$captionDiv) {
         this.$captionDiv = $('<div>',{
           'class': 'able-captions',
+        });
+        this.$captionWrapper = $('<div>',{
+          'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
         });
         if (this.prefCaptionsPosition === 'below') {
-          this.$captionDiv.addClass('able-captions-below');
+          this.$captionWrapper.addClass('able-captions-below');
         }
         else {
-          this.$captionDiv.addClass('able-captions-overlay');
+          this.$captionWrapper.addClass('able-captions-overlay');
         }
-        this.$vidcapContainer.append(this.$captionDiv);
+        this.$captionWrapper.append(this.$captionDiv);
+        this.$vidcapContainer.append(this.$captionWrapper);
       }
     }
 

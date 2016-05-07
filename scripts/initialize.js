@@ -12,11 +12,6 @@
     this.defaultVolume = 7;
     this.volume = this.defaultVolume;
 
-    // Default video height and width
-    // Can be overwritten with height and width attributes on HTML <video> element
-    this.playerWidth = 480;
-    this.playerHeight = 360;
-
     // Button color
     // Media controller background color can be customized in able.css
     // Choose 'white' if your controller has a dark background, 'black' if a light background
@@ -51,15 +46,13 @@
     // This is only used when there is a playlist
     this.showNowPlaying = true;
 
-    // fallback - set to 'jw' if implementation includes JW Player as fallback
-    // JW Player is licensed separately
-    // JW Player files must be included in thirdparty folder
+    // fallback path - specify path to fallback player files
+    // Only supported fallback is JW Player, licensed separately
+    // JW Player files must be included in folder specified in this.fallbackPath
     // JW Player will be loaded as needed in browsers that don't support HTML5 media
     // No other fallback solution is supported at this time
-    // If NOT using JW Player, set to false. An error message will be displayed if browser can't play the media.
-    this.fallback = 'jw';
-
-    // fallback path - specify path to fallback player files
+    // NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
+    // Can override the following path with data-fallback-path
     this.fallbackPath = this.rootPath + '/thirdparty/';
 
     // testFallback - set to true to force browser to use the fallback player (for testing)
@@ -195,13 +188,19 @@
 
   AblePlayer.prototype.setDimensions = function() {
 
-    // override default dimensions with width and height attributes of media element, if present
+    // if <video> element includes width and height attributes,
+    // use these to set the max-width and max-height of the player
     if (this.$media.attr('width')) {
-      this.playerWidth = parseInt(this.$media.attr('width'), 10);
+      this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
     }
     if (this.$media.attr('height')) {
-      this.playerHeight = parseInt(this.$media.attr('height'), 10);
+      this.playerMaxHeight = parseInt(this.$media.attr('height'), 10);
     }
+    // override width and height attributes with in-line CSS to make video responsive
+    this.$media.css({
+      'width': '100%',
+      'height': 'auto'
+    });
   };
 
   AblePlayer.prototype.setIconType = function() {
@@ -362,12 +361,10 @@
           for (i in prefsGroups) {
             thisObj.injectPrefsForm(prefsGroups[i]);
           }
-
           thisObj.setupPopups();
           thisObj.updateCaption();
           thisObj.updateTranscript();
           thisObj.showSearchResults();
-
           if (thisObj.defaultChapter) {
             thisObj.seekToDefaultChapter();
           }
@@ -549,6 +546,7 @@
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
         // var html5player = '../thirdparty/jwplayer.html5.js';
 
+        // TODO: Try JW Player without width (playerMaxWidth) and height
         if (thisObj.mediaType === 'video') {
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
@@ -560,7 +558,7 @@
             controls: false,
             volume: thisObj.defaultVolume * 100,
             height: jwHeight,
-            width: thisObj.playerWidth,
+            width: thisObj.playerMaxWidth,
             fallback: false,
             primary: 'flash',
             wmode: 'transparent' // necessary to get HTML captions to appear as overlay

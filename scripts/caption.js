@@ -1,12 +1,12 @@
 (function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
-    if (!this.usingYouTubeCaptions && (typeof this.$captionDiv !== 'undefined')) {
+    if (!this.usingYouTubeCaptions && (typeof this.$captionWrapper !== 'undefined')) {
       if (this.captionsOn) {
-        this.$captionDiv.show();
+        this.$captionWrapper.show();
         this.showCaptions(time || this.getElapsed());
       }
-      else if (this.$captionDiv) {
-        this.$captionDiv.hide();
+      else if (this.$captionWrapper) {
+        this.$captionWrapper.hide();
         this.prefCaptions = 0;
       }
     }
@@ -105,7 +105,7 @@
   };
 
   AblePlayer.prototype.showCaptions = function(now) {
-    var c, thisCaption;
+    var c, thisCaption, captionText;
     var cues;
     if (this.selectedCaptions) {
       cues = this.selectedCaptions.cues;
@@ -125,8 +125,16 @@
     if (typeof thisCaption !== 'undefined') {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
-        this.$captionDiv.html(this.flattenCueForCaption(cues[thisCaption]).replace('\n', '<br>'));
+        captionText = this.flattenCueForCaption(cues[thisCaption]).replace('\n', '<br>');
+        this.$captionDiv.html(captionText);
         this.currentCaption = thisCaption;
+        if (captionText.length === 0) {
+          // hide captionDiv; otherwise background-color is visible due to padding
+          this.$captionDiv.css('display','none');
+        }
+        else {
+          this.$captionDiv.css('display','inline-block');
+        }
       }
     }
     else {
@@ -291,24 +299,28 @@
           'background-color': this.prefCaptionsBGColor,
           'opacity': opacity
         });
+        if (this.prefCaptionsPosition === 'below') {
+          // also need to add the background color to the wrapper div
+          this.$captionWrapper.css({
+            'background-color': this.prefCaptionsBGColor,
+            'opacity': '1'
+          });
+        }
         this.positionCaptions();
       }
     }
   };
   AblePlayer.prototype.positionCaptions = function() {
 
-    if (typeof this.$captionDiv !== 'undefined') {
+    if (typeof this.$captionWrapper !== 'undefined') {
+
       if (this.prefCaptionsPosition == 'below') {
-        this.$captionDiv.removeClass('able-captions-overlay').addClass('able-captions-below');
-        // add a min-height property to minimize the amount of
-        // expanding and contracting that $captionDiv does based on caption content
-        this.$captionDiv.css('min-height','3em');
+        this.$captionWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
       }
       else {
-        this.$captionDiv.removeClass('able-captions-below').addClass('able-captions-overlay');
-        this.$captionDiv.css('min-height','');
+        this.$captionWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
       }
     }
-  }
+  };
 
 })(jQuery);

@@ -115,26 +115,38 @@
 
     if (this.isFullscreen()) {
 
-      var newHeight;
+      var newWidth, newHeight;
 
-      if (window.outerHeight >= window.innerHeight) {
-        newHeight = window.outerHeight - this.$playerDiv.outerHeight();
+      newWidth = $(window).width();
+
+      // haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
+      // Test results:
+      // Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
+      if (this.isUserAgent('Firefox') || this.isUserAgent('Trident') || this.isUserAgent('Edge')) {
+        newHeight = window.innerHeight - this.$playerDiv.outerHeight() - 20;
+      }
+      else if (window.outerHeight >= window.innerHeight) {
+        // Browsers that do NOT require adjustment: Chrome, Safari, Opera, MSIE 10
+        newHeight = window.innerHeight - this.$playerDiv.outerHeight();
       }
       else {
-        // not sure why innerHeight > outerHeight, but observed this in Safari 9.0.1
-        // Maybe window is already adjusted for controller height?
-        // Anyway, no need to subtract player height if window.outerHeight is already reduced
+        // Observed in Safari 9.0.1 on Mac OS X: outerHeight is actually less than innerHeight
+        // Maybe a bug, or maybe window.outerHeight is already adjusted for controller height(?)
+        // No longer observed in Safari 9.0.2
         newHeight = window.outerHeight;
       }
-
       if (!this.$descDiv.is(':hidden')) {
         newHeight -= this.$descDiv.height();
       }
-      this.resizePlayer($(window).width(), newHeight);
     }
-    else {
-      this.resizePlayer(this.playerWidth, this.playerHeight);
+    else { // not fullscreen
+      newWidth = this.$ableWrapper.width();
+      newHeight = this.$ableWrapper.height();
     }
+    this.resizePlayer(newWidth, newHeight);
+
+    // TODO: insert code to check for off-screen transcript & sign windows & reposition them
+    // Need to also do that when first showing these windows (separate function, called twice)
   };
 
   AblePlayer.prototype.addSeekbarListeners = function () {

@@ -399,6 +399,7 @@
         }
       }
     }
+
     // Update seekbar width.
     // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
@@ -410,17 +411,18 @@
           widthUsed += $(this).width();
         }
       });
+//console.log('width used by left controls: ' + widthUsed);
       rightControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();
         }
       });
-
+//console.log('total width used: ' + widthUsed);
       if (this.isFullscreen()) {
         seekbarWidth = $(window).width() - widthUsed - 20;
       }
       else {
-        seekbarWidth = this.playerWidth - widthUsed - 20;
+        seekbarWidth = this.$ableWrapper.width() - widthUsed - 20;
       }
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
@@ -745,7 +747,7 @@
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
         else {
-          this.$captionDiv.hide();
+          this.$captionWrapper.hide();
         }
       }
       else {
@@ -757,7 +759,7 @@
           }
         }
         else {
-          this.$captionDiv.show();
+          this.$captionWrapper.show();
         }
         for (var i=0; i<captions.length; i++) {
           if (captions[i].def === true) { // this is the default language
@@ -914,11 +916,12 @@
   }
 
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
+
     if (this.isFullscreen() == fullscreen) {
       return;
     }
     var thisObj = this;
-    var $el = this.$ableDiv;
+    var $el = this.$ableWrapper;
     var el = $el[0];
 
     if (this.nativeFullscreenSupported()) {
@@ -965,8 +968,8 @@
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          // force call to resizePlayer with default player dimensions
-          thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);
+          // restore player with default player dimensions
+          thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
         }
       });
     }
@@ -1004,7 +1007,7 @@
         }
         var newHeight = $(window).height() - this.$playerDiv.height();
         if (!this.$descDiv.is(':hidden')) {
-          newHeight -= thisObj.$descDiv.height();
+          newHeight -= this.$descDiv.height();
         }
         this.resizePlayer($(window).width(), newHeight);
       }
@@ -1016,7 +1019,7 @@
         $el.insertAfter(this.$modalFullscreenPlaceholder);
         this.$modalFullscreenPlaceholder.remove();
         this.fullscreenDialog.hide();
-        this.resizePlayer(this.playerWidth, this.playerHeight);
+        this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
       }
 
       // TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
@@ -1152,57 +1155,128 @@
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
 
-    this.$media.height(height);
-    this.$media.width(width);
+    var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize;
+    if (this.isFullscreen()) {
+      if (typeof this.$vidcapContainer !== 'undefined') {
+        this.$ableWrapper.css({
+          'width': width + 'px',
+          'max-width': ''
+        })
+        this.$vidcapContainer.css({
+          'height': height + 'px',
+          'width': width
+        });
+        this.$media.css({
+          'height': height + 'px',
+          'width': width
+        })
+      }
+      if (typeof this.$transcriptArea !== 'undefined') {
+        this.retrieveOffscreenWindow('transcript',width,height);
+      }
+      if (typeof this.$signWindow !== 'undefined') {
+        this.retrieveOffscreenWindow('sign',width,height);
+      }
+    }
+    else {
+      // player resized, but not fullscreen
+      // in case restoring from fullscreen, reset CSS to responsive
+      this.$ableWrapper.css({
+        'max-width': this.playerMaxWidth,
+        'width': ''
+      });
+      this.$vidcapContainer.css({
+        'height': '',
+        'width': ''
+      });
+      this.$media.css({
+        'width': '100%',
+        'height': 'auto'
+      });
+    }
 
-    if (this.$captionDiv) {
-      this.$captionDiv.width(width);
-      // Font-size for embedded player is too small in full screen view
-      if (height !== this.playerHeight) {
-        // this calculation results in a reasonably large font across all browsers
-        this.$captionDiv.css('font-size', (height / this.playerHeight) * 18);
+    if (typeof this.$captionDiv !== 'undefined') {
+
+      // Font-size is too small in full screen view & too large in small-width view
+      // The following vars define a somewhat arbitary zone outside of which
+      // caption size requires adjustment
+      captionSizeOkMin = 400;
+      captionSizeOkMax = 1000;
+      captionSize = parseInt(this.prefCaptionsSize,10);
+
+      // TODO: Need a better formula so that it scales proportionally to viewport
+      if (width > captionSizeOkMax) {
+        newCaptionSize = captionSize * 1.5;
+      }
+      else if (width < captionSizeOkMin) {
+        newCaptionSize = captionSize / 1.5;
       }
       else {
-        // clear full screen font size and return to normal
-        this.$captionDiv.css('font-size', '');
+        newCaptionSize = captionSize;
       }
-    }
-    if (this.$vidcapContainer) {
-      this.$vidcapContainer.height(height);
-      this.$vidcapContainer.width(width);
+      this.$captionDiv.css('font-size',newCaptionSize + '%');
     }
 
-    this.$ableDiv.width(width);
-
-    if (this.jwPlayer) {
+    if (this.player === 'youtube' && this.youTubePlayer) {
+      this.resizeYouTubePlayer();
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.resize(width, height);
-    }
-    else if (this.youTubePlayer) {
-      this.youTubePlayer.setSize(width, height);
     }
     this.refreshControls();
   };
 
-  AblePlayer.prototype.getHighestZIndex = function(window) {
+  AblePlayer.prototype.retrieveOffscreenWindow = function( which, width, height ) {
 
-    // window is either 'transcript', 'sign', or 'dialog' (all dialogs have the same z-index)
-    // window can also be 'all' (to find the highest overall (non-AblePlayer) zIndex
-    // 'transcript' and 'sign' must be positioned on top of the elements beneath
-    // get highest z-index on page
-    // if that's higher than the default for this window,
-    // assign one greater (rounded to the nearest 1000 for transcript, 2000 for sign)
-    // if window is 'transcript' or 'sign',
-    //
-    var max, $elements, z, defaultZ, highestZ;
+    // check to be sure popup windows ('transcript' or 'sign') are positioned on-screen
+    // (they sometimes disappear off-screen when entering fullscreen mode)
+    // if off-screen, recalculate so they are back on screen
+
+    var window, windowPos, windowTop, windowLeft, windowRight, windowWidth, windowBottom, windowHeight;
+
+    if (which == 'transcript') {
+      window = this.$transcriptArea;
+    }
+    else if (which == 'sign') {
+      window = this.$signWindow;
+    }
+    windowWidth = window.width();
+    windowHeight = window.height();
+    windowPos = window.position();
+    windowTop = windowPos.top;
+    windowLeft = windowPos.left;
+    windowRight = windowLeft + windowWidth;
+    windowBottom = windowTop + windowHeight;
+
+    if (windowTop < 0) { // off-screen to the top
+      windowTop = 10;
+      window.css('top',windowTop);
+    }
+    if (windowLeft < 0) { // off-screen to the left
+      windowLeft = 10;
+      window.css('left',windowLeft);
+    }
+    if (windowRight > width) { // off-screen to the right
+      windowLeft = (width - 20) - windowWidth;
+      window.css('left',windowLeft);
+    }
+    if (windowBottom > height) { // off-screen to the bottom
+      windowTop = (height - 10) - windowHeight;
+      window.css('top',windowTop);
+    }
+  };
+
+  AblePlayer.prototype.getHighestZIndex = function() {
+
+    // returns the highest z-index on page
+    // used to ensure dialogs (or potentially other windows) are on top
+
+    var max, $elements, z;
     max = 0;
-    if (window === 'all' || window === 'transcript' || window === 'sign') {
-      // exclude all Able Player -related elements since default z-index values satisfy the desired internal relationships
-      $elements = $('body *').not('.able-wrapper,.able-wrapper *,.modalDialog,.modalDialog *,.modalOverlay,.modalOverlay *');
-    }
-    else if (window === 'dialog') {
-      // just exclude themselves
-      $elements = $('body *').not('.modalDialog,.modalDialog *,.modalOverlay,.modalOverlay *');
-    }
+
+    // exclude the Able Player dialogs
+    $elements = $('body *').not('.able-modal-dialog,.able-modal-dialog *,.able-modal-overlay,.able-modal-overlay *');
+
     $elements.each(function(){
       z = $(this).css('z-index');
       if (Number.isInteger(+z)) { // work only with integer values, not 'auto'
@@ -1211,51 +1285,7 @@
         }
       }
     });
-    if (window === 'all') {
-      return parseInt(max);
-    }
-    defaultZ = parseInt(this.getDefaultZIndex(window));
-    if (max > defaultZ) {
-      if (window === 'transcript') {
-        highestZ = Math.ceil(max/1000)*1000;
-        if (highestZ % 1000 === 0) {
-          highestZ += 1000;
-        }
-      }
-      else if (window === 'sign') {
-        highestZ = Math.ceil(max/2000)*2000;
-        if (highestZ % 2000 === 0) {
-          highestZ += 2000;
-        }
-      }
-      else if (window === 'dialog') {
-        // go 2000 over max for dialog
-        // since .modalOverlay will be 500 less than that
-        highestZ = Math.ceil(max/2000)*2000;
-      }
-    }
-    else {
-      highestZ = defaultZ;
-    }
-    return highestZ;
-  };
-
-  AblePlayer.prototype.getDefaultZIndex = function(which) {
-
-    // returns default z-index (as defined in ableplayer.css)
-    // for any of the main windows
-    if (which === 'player') {
-      return 5000;
-    }
-    else if (which === 'transcript') {
-      return 7000;
-    }
-    else if (which === 'sign') {
-      return 8000;
-    }
-    else if (which === 'dialog') {
-      return 10000;
-    }
+    return max;
   };
 
   AblePlayer.prototype.updateZIndex = function(which) {
@@ -1263,155 +1293,53 @@
     // update z-index of 'transcript' or 'sign', relative to each other
     // direction is always 'up' (i.e., move window to top)
     // windows come to the top when the user clicks on them
-    // when windows were created initially, they were assigned the highest z-index on the page
-    // so there should be no need to recalculate that
 
-    var swapZs, swapHighest, thresholdOverMax,
-    hasTranscript, hasSign, transcriptZ, signZ,
-    highestTranscriptZ, highestSignZ, highestZ, highestNewZ;
-    swapZs = false;
-    swapHighest = false;
-    thresholdOverMax = 10000;
+    var transcriptZ, signZ, newHighZ, newLowZ;
 
-    // get current values (if windows exist)
-    if (typeof this.$transcriptArea !== 'undefined') {
-      hasTranscript = true;
-      transcriptZ = this.$transcriptArea.css('z-index');
-      highestTranscriptZ = this.getHighestZIndex('transcript');
-    }
-    else {
-      hasTranscript = false;
-    }
-    if (typeof this.$signWindow !== 'undefined') {
-      hasSign = true;
-      signZ = this.$signWindow.css('z-index');
-      highestSignZ = this.getHighestZIndex('sign');
-    }
-    else {
-      hasSign = false;
+    if (typeof this.$transcriptArea === 'undefined' || typeof this.$signWindow === 'undefined' ) {
+      // at least one of the windows doesn't exist, so there's no conflict
+      return false;
     }
 
-    highestZ = this.getHighestZIndex('all');
-    if (this.debug) {
-      console.log('Data from updateZIndex (' + which + ' window)');
-      console.log('hasTranscript: ' + hasTranscript);
-      console.log('hasSign: ' + hasSign);
-      console.log('highestZ: ' + highestZ);
-      console.log('transcriptZ: ' + transcriptZ);
-      console.log('signZ: ' + signZ);
+    // get current values
+    transcriptZ = parseInt(this.$transcriptArea.css('z-index'));
+    signZ = parseInt(this.$signWindow.css('z-index'));
+
+    if (transcriptZ === signZ) {
+      // the two windows are equal; move the target window the top
+      newHighZ = transcriptZ + 1000;
+      newLowZ = transcriptZ;
     }
-    if (hasTranscript && hasSign) {
-      if (which === 'transcript' && (signZ >= transcriptZ)) {
-        swapZs = true;
+    else if (transcriptZ > signZ) {
+      if (which === 'transcript') {
+        // transcript is already on top; nothing to do
+        return false;
       }
-      else if (which === 'sign' && (transcriptZ >= signZ)) {
-        swapZs = true;
-      }
-      if (this.debug) {
-        console.log('swapZs: ' + swapZs);
-      }
-      if (swapZs) {
-        // the current window is NOT on top. Therefore swapping is needed
-        // if either is below the highest non-AblePlayer Z, need to adjust both
-        if (transcriptZ < highestZ || signZ < highestZ) {
-          swapHighest = true;
-        }
-        // else if either is unreasonably large compared to highestZ, reset to highestZ for each window
-        // (sometimes this happens if a non-AblePlayer temp element with an extremely high z-index is added to a page)
-        else if (transcriptZ - highestZ > thresholdOverMax || signZ - highestZ > thresholdOverMax) {
-          swapHighest = true;
-        }
-        if (this.debug) {
-          console.log('swapHighest: ' + swapHighest);
-        }
-        if (swapHighest) {
-          if (highestSignZ === highestTranscriptZ) {
-            // the two high values are equal (need to increase the one on top)
-            if (which === 'transcript') {
-              highestNewZ = parseInt(highestSignZ) + 1000;
-              this.$transcriptArea.css('z-index',highestNewZ);
-              this.$signWindow.css('z-index',highestTranscriptZ);
-            }
-            else if (which === 'sign') {
-              highestNewZ = parseInt(highestTranscriptZ) + 1000;
-              this.$transcriptArea.css('z-index',highestSignZ);
-              this.$signWindow.css('z-index',highestNewZ);
-            }
-          }
-          else {
-            if (which === 'transcript') {
-              highestNewZ = Math.max(highestTranscriptZ,highestSignZ);
-              this.$transcriptArea.css('z-index',highestNewZ);
-              this.$signWindow.css('z-index',Math.min(highestTranscriptZ,highestSignZ));
-
-            }
-            else if (which === 'sign') {
-              highestNewZ = Math.max(highestTranscriptZ,highestSignZ);
-              this.$transcriptArea.css('z-index',Math.min(highestTranscriptZ,highestSignZ));
-              this.$signWindow.css('z-index',highestNewZ);
-            }
-          }
-        }
-        else {
-          if (signZ === transcriptZ) {
-            if (which === 'transcript') {
-              highestNewZ = parseInt(signZ) + 1000;
-              this.$transcriptArea.css('z-index', highestNewZ);
-              this.$signWindow.css('z-index',transcriptZ);
-            }
-            else if (which === 'sign') {
-              highestNewZ = parseInt(transcriptZ) + 1000;
-              this.$transcriptArea.css('z-index',signZ);
-              this.$signWindow.css('z-index', highestNewZ);
-            }
-          }
-          else {
-            if (which === 'transcript') {
-              highestNewZ = Math.max(transcriptZ,signZ);
-              this.$transcriptArea.css('z-index', highestNewZ);
-              this.$signWindow.css('z-index',Math.min(transcriptZ,signZ));
-            }
-            else if (which === 'sign') {
-              highestNewZ = Math.max(transcriptZ,signZ)
-              this.$transcriptArea.css('z-index',Math.min(transcriptZ,signZ));
-              this.$signWindow.css('z-index', highestNewZ);
-            }
-          }
-        }
-        if (this.debug) {
-          console.log('highestNewZ: ' + highestNewZ);
-        }
-        if (typeof highestNewZ !== 'undefined') {
-          // reset z-index for specific components
-          $('.able-alert').css('z-index',parseInt(highestNewZ) + 1300);
-          $('.able-window-toolbar .able-button-handler-preferences').css('z-index',parseInt(highestNewZ) + 1200);
-          $('.able-popup').css('z-index',parseInt(highestNewZ) + 1100);
-          $('.able-tooltip').css('z-index',parseInt(highestNewZ) + 1000);
-        }
+      else {
+        // swap z's
+        newHighZ = transcriptZ;
+        newLowZ = signZ;
       }
     }
-    else if (which === 'transcript' && hasTranscript) {
-      if (transcriptZ <= highestZ) {
-        this.$transcriptArea.css('z-index',highestTranscriptZ);
+    else { // signZ is greater
+      if (which === 'sign') {
+        return false;
+      }
+      else {
+        newHighZ = signZ;
+        newLowZ = transcriptZ;
       }
     }
-    else if (which === 'sign' && hasSign) {
-      if (signZ <= highestZ) {
-        this.$signWindow.css('z-index',highestSignZ);
-      }
+
+    // now assign the new values
+    if (which === 'transcript') {
+      this.$transcriptArea.css('z-index',newHighZ);
+      this.$signWindow.css('z-index',newLowZ);
     }
-    return false;
-  };
-
-  AblePlayer.prototype.updateDialogZIndex = function() {
-
-    // since only one dialog is visible at a time, they all share a z-index
-    var modalZ, overlayZ;
-
-    modalZ = this.getHighestZIndex('dialog');
-    overlayZ = modalZ - 500;
-    $('body > .modalDialog').css('z-index',modalZ);
-    $('body > .modalOverlay').css('z-index',overlayZ);
+    else if (which === 'sign') {
+      this.$signWindow.css('z-index',newHighZ);
+      this.$transcriptArea.css('z-index',newLowZ);
+    }
   };
 
 })(jQuery);

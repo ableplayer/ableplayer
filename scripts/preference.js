@@ -204,7 +204,7 @@
         'name': 'prefCaptionsOpacity',
         'label': this.tt.prefCaptionsOpacity,
         'group': 'captions',
-        'default': '75%'
+        'default': '100%'
       });
 
       // Description preferences

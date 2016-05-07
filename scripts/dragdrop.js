@@ -13,7 +13,7 @@
     // There are nevertheless lessons to be learned from Drag & Drop about accessibility:
     // http://dev.opera.com/articles/accessible-drag-and-drop/
 
-    var thisObj, $window, $toolbar, windowName, $resizeHandle, resizeZIndex, clickZIndex;
+    var thisObj, $window, $toolbar, windowName, $resizeHandle, resizeZIndex;
 
     thisObj = this;
 
@@ -458,7 +458,6 @@
     }
     else if (choice == 'resize') {
       // resize through the menu uses a form, not drag
-      this.updateDialogZIndex();
       resizeDialog.show();
     }
   };
@@ -696,9 +695,6 @@
     if ($windowPopup.is(':visible')) {
       $windowPopup.hide().parent().focus();
     }
-
-    // get optimum zIndex for this window
-    zIndex = parseInt(this.getHighestZIndex(which));
 
     // get starting width and height
     startPos = this.$activeWindow.position();

@@ -24,16 +24,10 @@
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-    // width and height of this.$mediaContainer are not updated when switching to full screen
-    // However, I don't think they're needed at all. Commented out on 4/12/15, but
-    // preserved here just in case there are unanticipated problems...
-    /*
-    this.$mediaContainer.width(this.playerWidth);
-    if (this.mediaType == 'video') {
-      this.$mediaContainer.height(this.playerHeight);
-    }
-    */
-    this.$ableDiv.width(this.playerWidth);
+
+    this.$ableWrapper.css({
+      'max-width': this.playerMaxWidth + 'px'
+    });
 
     this.injectOffscreenHeading();
 
@@ -326,7 +320,8 @@
 
     // which is either 'transcript' or 'sign'
 
-    var cookie, cookiePos, $window, dragged, windowPos, currentWindowPos, firstTime;
+    var cookie, cookiePos, $window, dragged, windowPos, currentWindowPos, firstTime, zIndex;
+
     cookie = this.getCookie();
     if (which === 'transcript') {
       $window = this.$transcriptArea;
@@ -365,12 +360,12 @@
       $window.css({
         'position': windowPos[0],
         'width': width,
-        'z-index': windowPos[1]
+        'z-index': windowPos[3]
       });
       if (windowPos[0] === 'absolute') {
         $window.css({
-          'top': windowPos[2] + 'px',
-          'left': windowPos[3] + 'px',
+          'top': windowPos[1] + 'px',
+          'left': windowPos[2] + 'px',
         });
       }
     }
@@ -380,9 +375,9 @@
 
     // returns optimum position for targetWindow, as an array with the following structure:
     // 0 - CSS position ('absolute' or 'relative')
-    // 1 - zindex
-    // 2 - top
-    // 3 - left
+    // 1 - top
+    // 2 - left
+    // 3 - zindex (if not default)
     // targetWindow is either 'transcript' or 'sign'
     // if there is room to the right of the player, position element there
     // else if there is room the left of the player, position element there
@@ -407,9 +402,6 @@
     windowWidth = $(window).width();
     otherWindowWidth = 0; // width of other visiable draggable windows will be added to this
 
-    // get optimum zIndex for this window
-    zIndex = this.getHighestZIndex(targetWindow);
-
     if (targetWindow === 'transcript') {
       if (typeof this.$signWindow !== 'undefined') {
         if (this.$signWindow.is(':visible')) {
@@ -427,23 +419,41 @@
     if (targetWidth < (windowWidth - (ableLeft + ableWidth + gap + otherWindowWidth))) {
       // there's room to the left of $ableDiv
       position[0] = 'absolute';
-      position[1] = zIndex;
-      position[2] = 0;
-      position[3] = ableWidth + otherWindowWidth + gap;
+      position[1] = 0;
+      position[2] = ableWidth + otherWindowWidth + gap;
     }
     else if (targetWidth + gap < ableLeft) {
       // there's room to the right of $ableDiv
       position[0] = 'absolute';
-      position[1] = zIndex;
-      position[2] = 0;
-      position[3] = ableLeft - targetWidth - gap;
+      position[1] = 0;
+      position[2] = ableLeft - targetWidth - gap;
     }
     else {
       // position element below $ableDiv
       position[0] = 'relative';
-      // no need to define z-index, top, or left
+      // no need to define top, left, or z-index
     }
     return position;
+  };
+
+  AblePlayer.prototype.injectPoster = function ($element) {
+
+    // get poster attribute from media element and append that as an img to $element
+    // currently only applies to YouTube and fallback
+    var poster;
+
+    if (this.$media.attr('poster')) {
+      poster = this.$media.attr('poster');
+      this.$posterImg = $('<img>',{
+        'class': 'able-poster',
+        'src' : poster,
+        'alt' : "",
+        'role': "presentation",
+        'width': this.playerWidth,
+        'height': this.playerHeight
+      });
+      $element.append(this.$posterImg);
+    }
   };
 
   AblePlayer.prototype.injectAlert = function () {
@@ -715,19 +725,15 @@
               var whichPref = $(this).attr('value');
               thisObj.setFullscreen(false);
               if (whichPref === 'captions') {
-                thisObj.updateDialogZIndex();
                 thisObj.captionPrefsDialog.show();
               }
               else if (whichPref === 'descriptions') {
-                thisObj.updateDialogZIndex();
                 thisObj.descPrefsDialog.show();
               }
               else if (whichPref === 'keyboard') {
-                thisObj.updateDialogZIndex();
                 thisObj.keyboardPrefsDialog.show();
               }
               else if (whichPref === 'transcript') {
-                thisObj.updateDialogZIndex();
                 thisObj.transcriptPrefsDialog.show();
               }
               thisObj.closePopups();
@@ -820,6 +826,7 @@
   };
 
   AblePlayer.prototype.provideFallback = function(reason) {
+
     // provide ultimate fallback for users who are unable to play the media
     // reason is either 'No Support' or a specific error message
 
@@ -845,7 +852,6 @@
     $fallbackContainer = $('<div>',{
       'class' : 'able-fallback',
       'role' : 'alert',
-      'width' : this.playerWidth
     });
     this.$media.before($fallbackContainer);
     $fallbackContainer.html(fallback);
@@ -919,9 +925,9 @@
     }
 
     if (this.useSlider) {
-      controlLayout['ur'].push('rewind');
+      controlLayout['ul'].push('rewind');
+      controlLayout['ul'].push('forward');
       controlLayout['ur'].push('seek');
-      controlLayout['ur'].push('forward');
     }
 
     // test for browser support for volume before displaying volume button
@@ -1138,7 +1144,6 @@
                 // this is the last control on the right
                 // position tooltip using the "right" property
                 centerTooltip = false;
-                // var tooltipX = thisObj.playerWidth - position.left - buttonWidth;
                 var tooltipX = 0;
                 var tooltipStyle = {
                   left: '',
@@ -1254,9 +1259,7 @@
 
     if (this.mediaType === 'video') {
 
-      if (this.$captionDiv) {
-        // set width of the captions container
-        this.$captionDiv.css('width',this.playerWidth+'px');
+      if (typeof this.$captionDiv !== 'undefined') {
         // stylize captions based on user prefs
         this.stylizeCaptions(this.$captionDiv);
       }

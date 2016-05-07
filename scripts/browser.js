@@ -87,7 +87,7 @@
     if (this.debug) {
       console.log('User agent: ' + userAgent);
     }
-    if (userAgent.indexOf(which) !== -1) {
+    if (userAgent.indexOf(which.toLowerCase()) !== -1) {
       return true;
     }
     else {
