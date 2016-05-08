@@ -3,29 +3,7 @@
   AblePlayer.prototype.onMediaUpdateTime = function () {
 
     var currentTime = this.getElapsed();
-    if (this.player === 'html5' && !this.startedPlaying) {
-      if (typeof this.startTime !== 'undefined') {
-
-        if (this.startTime === currentTime) {
-          // media has already scrubbed to start time
-          if (this.autoplay || (this.seeking && this.playing)) {
-            this.playMedia();
-          }
-        }
-        else {
-          // seek ahead until currentTime == startTime
-          this.seekTo(this.startTime);
-        }
-      }
-      else {
-        // autoplay should generally be avoided unless a startTime is provided
-        // but we'll trust the developer to be using this feature responsibly
-        if (this.autoplay) {
-          this.playMedia();
-        }
-      }
-    }
-    else if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
+    if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
       if (this.swapTime === currentTime) {
         // described version been swapped and media has scrubbed to time of previous version
         if (this.playing) {
@@ -37,12 +15,8 @@
         }
       }
     }
-    else if (this.player === 'youtube' && !this.startedPlaying) {
-      if (this.autoplay) {
-        this.playMedia();
-      }
-    }
-    if (!this.swappingSrc) {
+    else if (this.startedPlaying) {
+      // do all the usual time-sync stuff during playback
       if (this.prefHighlight === 1) {
         this.highlightTranscript(currentTime);
       }
@@ -51,6 +25,20 @@
       this.updateChapter(currentTime);
       this.updateMeta();
       this.refreshControls();
+    }
+    else if (this.seeking) {
+      if (this.startTime === currentTime) {
+        // media has scrubbed to start time
+        this.seeking = false;
+        if (this.autoplay || this.playing) {
+          this.playMedia();
+        }
+      }
+    }
+    else { // not swapping src, not started playing, not seeking
+      if (this.autoplay) {
+        this.playMedia();
+      }
     }
   };
 
@@ -355,7 +343,7 @@
         if (thisObj.debug) {
           console.log('canplay event');
         }
-        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
+        if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
         }
       })
@@ -363,7 +351,7 @@
         if (thisObj.debug) {
           console.log('canplaythrough event');
         }
-        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
+        if (thisObj.startTime && !thisObj.startedPlaying) {
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
         }

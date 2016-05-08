@@ -102,7 +102,6 @@
     else {
       this.startTime = 0;
     }
-
     if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
       this.transcriptDivLocation = $(media).data('transcript-div');
     }
@@ -263,13 +262,6 @@
         if (thisObj.countProperties(thisObj.tt) > 50) {
           // close enough to ensure that most text variables are populated
           thisObj.setup();
-          if (thisObj.startTime > 0 && !thisObj.autoplay) {
-            // scrub ahead to startTime, but don't start playing
-            // can't do this in media event listener
-            // because in some browsers no media events are fired until media.play is requested
-            // even if preload="auto"
-            thisObj.onMediaUpdateTime();
-          }
         }
         else {
           // can't continue loading player with no text
@@ -6349,7 +6341,6 @@
 
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
-
     this.seeking = true;
     this.liveUpdatePending = true;
 
@@ -6361,8 +6352,8 @@
       seekable = this.media.seekable;
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
         // successfully scrubbed to this.startTime
+        // this.seeking will be set to false in mediaUpdateTime()
         this.media.currentTime = this.startTime;
-        this.seeking = false;
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
@@ -8849,29 +8840,7 @@
   AblePlayer.prototype.onMediaUpdateTime = function () {
 
     var currentTime = this.getElapsed();
-    if (this.player === 'html5' && !this.startedPlaying) {
-      if (typeof this.startTime !== 'undefined') {
-
-        if (this.startTime === currentTime) {
-          // media has already scrubbed to start time
-          if (this.autoplay || (this.seeking && this.playing)) {
-            this.playMedia();
-          }
-        }
-        else {
-          // seek ahead until currentTime == startTime
-          this.seekTo(this.startTime);
-        }
-      }
-      else {
-        // autoplay should generally be avoided unless a startTime is provided
-        // but we'll trust the developer to be using this feature responsibly
-        if (this.autoplay) {
-          this.playMedia();
-        }
-      }
-    }
-    else if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
+    if (this.swappingSrc && (typeof this.swapTime !== 'undefined')) {
       if (this.swapTime === currentTime) {
         // described version been swapped and media has scrubbed to time of previous version
         if (this.playing) {
@@ -8883,12 +8852,8 @@
         }
       }
     }
-    else if (this.player === 'youtube' && !this.startedPlaying) {
-      if (this.autoplay) {
-        this.playMedia();
-      }
-    }
-    if (!this.swappingSrc) {
+    else if (this.startedPlaying) {
+      // do all the usual time-sync stuff during playback
       if (this.prefHighlight === 1) {
         this.highlightTranscript(currentTime);
       }
@@ -8897,6 +8862,20 @@
       this.updateChapter(currentTime);
       this.updateMeta();
       this.refreshControls();
+    }
+    else if (this.seeking) {
+      if (this.startTime === currentTime) {
+        // media has scrubbed to start time
+        this.seeking = false;
+        if (this.autoplay || this.playing) {
+          this.playMedia();
+        }
+      }
+    }
+    else { // not swapping src, not started playing, not seeking
+      if (this.autoplay) {
+        this.playMedia();
+      }
     }
   };
 
@@ -9201,7 +9180,7 @@
         if (thisObj.debug) {
           
         }
-        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
+        if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
         }
       })
@@ -9209,7 +9188,7 @@
         if (thisObj.debug) {
           
         }
-        if (thisObj.startTime && thisObj.seeking && !thisObj.startedPlaying) {
+        if (thisObj.startTime && !thisObj.startedPlaying) {
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
         }

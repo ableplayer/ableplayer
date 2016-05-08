@@ -1,6 +1,5 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
-
     this.seeking = true;
     this.liveUpdatePending = true;
 
@@ -12,8 +11,8 @@
       seekable = this.media.seekable;
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
         // successfully scrubbed to this.startTime
+        // this.seeking will be set to false in mediaUpdateTime()
         this.media.currentTime = this.startTime;
-        this.seeking = false;
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;

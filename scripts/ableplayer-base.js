@@ -102,7 +102,6 @@
     else {
       this.startTime = 0;
     }
-
     if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
       this.transcriptDivLocation = $(media).data('transcript-div');
     }
@@ -263,13 +262,6 @@
         if (thisObj.countProperties(thisObj.tt) > 50) {
           // close enough to ensure that most text variables are populated
           thisObj.setup();
-          if (thisObj.startTime > 0 && !thisObj.autoplay) {
-            // scrub ahead to startTime, but don't start playing
-            // can't do this in media event listener
-            // because in some browsers no media events are fired until media.play is requested
-            // even if preload="auto"
-            thisObj.onMediaUpdateTime();
-          }
         }
         else {
           // can't continue loading player with no text
