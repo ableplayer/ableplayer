@@ -1263,6 +1263,10 @@
         // stylize captions based on user prefs
         this.stylizeCaptions(this.$captionsDiv);
       }
+      if (typeof this.$descDiv !== 'undefined') {
+        // stylize descriptions based on user's caption prefs
+        this.stylizeCaptions(this.$descDiv);
+      }
     }
 
     // combine left and right controls arrays for future reference

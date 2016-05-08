@@ -845,6 +845,10 @@
     this.updatePrefs();
     if (numCapChanges > 0) {
       this.stylizeCaptions(this.$captionsDiv);
+      // also apply same changes to descriptions, if present
+      if (typeof this.$descDiv !== 'undefined') {
+        this.stylizeCaptions(this.$descDiv);
+      }
     }
   }
 

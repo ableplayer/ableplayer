@@ -1850,6 +1850,10 @@
     this.updatePrefs();
     if (numCapChanges > 0) {
       this.stylizeCaptions(this.$captionsDiv);
+      // also apply same changes to descriptions, if present
+      if (typeof this.$descDiv !== 'undefined') {
+        this.stylizeCaptions(this.$descDiv);
+      }
     }
   }
 
@@ -3922,6 +3926,10 @@
       if (typeof this.$captionsDiv !== 'undefined') {
         // stylize captions based on user prefs
         this.stylizeCaptions(this.$captionsDiv);
+      }
+      if (typeof this.$descDiv !== 'undefined') {
+        // stylize descriptions based on user's caption prefs
+        this.stylizeCaptions(this.$descDiv);
       }
     }
 
