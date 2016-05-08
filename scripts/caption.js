@@ -1,12 +1,12 @@
 (function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
-    if (!this.usingYouTubeCaptions && (typeof this.$captionWrapper !== 'undefined')) {
+    if (!this.usingYouTubeCaptions && (typeof this.$captionsWrapper !== 'undefined')) {
       if (this.captionsOn) {
-        this.$captionWrapper.show();
+        this.$captionsWrapper.show();
         this.showCaptions(time || this.getElapsed());
       }
-      else if (this.$captionWrapper) {
-        this.$captionWrapper.hide();
+      else if (this.$captionsWrapper) {
+        this.$captionsWrapper.hide();
         this.prefCaptions = 0;
       }
     }
@@ -126,19 +126,19 @@
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace('\n', '<br>');
-        this.$captionDiv.html(captionText);
+        this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {
-          // hide captionDiv; otherwise background-color is visible due to padding
-          this.$captionDiv.css('display','none');
+          // hide captionsDiv; otherwise background-color is visible due to padding
+          this.$captionsDiv.css('display','none');
         }
         else {
-          this.$captionDiv.css('display','inline-block');
+          this.$captionsDiv.css('display','inline-block');
         }
       }
     }
     else {
-      this.$captionDiv.html('');
+      this.$captionsDiv.html('');
       this.currentCaption = -1;
     }
   };
@@ -299,20 +299,20 @@
           'background-color': this.prefCaptionsBGColor,
           'opacity': opacity
         });
-        if ($element === this.$captionDiv) {
+        if ($element === this.$captionsDiv) {
           lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
-          this.$captionWrapper.css('line-height',lineHeight + '%');
+          this.$captionsWrapper.css('line-height',lineHeight + '%');
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
-          this.$captionWrapper.css({
+          this.$captionsWrapper.css({
             'background-color': this.prefCaptionsBGColor,
             'opacity': '1'
           });
         }
         else if (this.prefCaptionsPosition === 'overlay') {
           // no background color for overlay wrapper, captions are displayed in-line
-          this.$captionWrapper.css({
+          this.$captionsWrapper.css({
             'background-color': 'transparent',
             'opacity': ''
           });
@@ -329,19 +329,19 @@
     if (typeof position === 'undefined') {
       position = this.prefCaptionsPosition;
     }
-    if (typeof this.$captionWrapper !== 'undefined') {
+    if (typeof this.$captionsWrapper !== 'undefined') {
 
       if (position == 'below') {
-        this.$captionWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
+        this.$captionsWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
         // also need to update in-line styles
-        this.$captionWrapper.css({
+        this.$captionsWrapper.css({
           'background-color': this.prefCaptionsBGColor,
           'opacity': '1'
         });
       }
       else {
-        this.$captionWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
-        this.$captionWrapper.css({
+        this.$captionsWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
+        this.$captionsWrapper.css({
           'background-color': 'transparent',
           'opacity': ''
         });

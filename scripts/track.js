@@ -80,22 +80,22 @@
       // includes aria-hidden="true" because otherwise
       // captions being added and removed causes sporadic changes to focus in JAWS
       // (not a problem in NVDA or VoiceOver)
-      if (!this.$captionDiv) {
-        this.$captionDiv = $('<div>',{
+      if (!this.$captionsDiv) {
+        this.$captionsDiv = $('<div>',{
           'class': 'able-captions',
         });
-        this.$captionWrapper = $('<div>',{
+        this.$captionsWrapper = $('<div>',{
           'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
         });
         if (this.prefCaptionsPosition === 'below') {
-          this.$captionWrapper.addClass('able-captions-below');
+          this.$captionsWrapper.addClass('able-captions-below');
         }
         else {
-          this.$captionWrapper.addClass('able-captions-overlay');
+          this.$captionsWrapper.addClass('able-captions-overlay');
         }
-        this.$captionWrapper.append(this.$captionDiv);
-        this.$vidcapContainer.append(this.$captionWrapper);
+        this.$captionsWrapper.append(this.$captionsDiv);
+        this.$vidcapContainer.append(this.$captionsWrapper);
       }
     }
 

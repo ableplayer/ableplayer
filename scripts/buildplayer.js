@@ -1259,9 +1259,9 @@
 
     if (this.mediaType === 'video') {
 
-      if (typeof this.$captionDiv !== 'undefined') {
+      if (typeof this.$captionsDiv !== 'undefined') {
         // stylize captions based on user prefs
-        this.stylizeCaptions(this.$captionDiv);
+        this.stylizeCaptions(this.$captionsDiv);
       }
     }
 

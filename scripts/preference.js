@@ -844,7 +844,7 @@
     }
     this.updatePrefs();
     if (numCapChanges > 0) {
-      this.stylizeCaptions(this.$captionDiv);
+      this.stylizeCaptions(this.$captionsDiv);
     }
   }
 

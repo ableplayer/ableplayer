@@ -1849,7 +1849,7 @@
     }
     this.updatePrefs();
     if (numCapChanges > 0) {
-      this.stylizeCaptions(this.$captionDiv);
+      this.stylizeCaptions(this.$captionsDiv);
     }
   }
 
@@ -3919,9 +3919,9 @@
 
     if (this.mediaType === 'video') {
 
-      if (typeof this.$captionDiv !== 'undefined') {
+      if (typeof this.$captionsDiv !== 'undefined') {
         // stylize captions based on user prefs
-        this.stylizeCaptions(this.$captionDiv);
+        this.stylizeCaptions(this.$captionsDiv);
       }
     }
 
@@ -4218,22 +4218,22 @@
       // includes aria-hidden="true" because otherwise
       // captions being added and removed causes sporadic changes to focus in JAWS
       // (not a problem in NVDA or VoiceOver)
-      if (!this.$captionDiv) {
-        this.$captionDiv = $('<div>',{
+      if (!this.$captionsDiv) {
+        this.$captionsDiv = $('<div>',{
           'class': 'able-captions',
         });
-        this.$captionWrapper = $('<div>',{
+        this.$captionsWrapper = $('<div>',{
           'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
         });
         if (this.prefCaptionsPosition === 'below') {
-          this.$captionWrapper.addClass('able-captions-below');
+          this.$captionsWrapper.addClass('able-captions-below');
         }
         else {
-          this.$captionWrapper.addClass('able-captions-overlay');
+          this.$captionsWrapper.addClass('able-captions-overlay');
         }
-        this.$captionWrapper.append(this.$captionDiv);
-        this.$vidcapContainer.append(this.$captionWrapper);
+        this.$captionsWrapper.append(this.$captionsDiv);
+        this.$vidcapContainer.append(this.$captionsWrapper);
       }
     }
 
@@ -7088,7 +7088,7 @@
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
         else {
-          this.$captionWrapper.hide();
+          this.$captionsWrapper.hide();
         }
       }
       else {
@@ -7100,7 +7100,7 @@
           }
         }
         else {
-          this.$captionWrapper.show();
+          this.$captionsWrapper.show();
         }
         for (var i=0; i<captions.length; i++) {
           if (captions[i].def === true) { // this is the default language
@@ -7551,7 +7551,7 @@
       });
     }
 
-    if (typeof this.$captionDiv !== 'undefined') {
+    if (typeof this.$captionsDiv !== 'undefined') {
 
       // Font-size is too small in full screen view & too large in small-width view
       // The following vars define a somewhat arbitary zone outside of which
@@ -7571,8 +7571,8 @@
         newCaptionSize = captionSize;
       }
       newLineHeight = newCaptionSize + 25;
-      this.$captionDiv.css('font-size',newCaptionSize + '%');
-      this.$captionWrapper.css('line-height',newLineHeight + '%');
+      this.$captionsDiv.css('font-size',newCaptionSize + '%');
+      this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
 
     if (this.player === 'youtube' && this.youTubePlayer) {
@@ -7704,13 +7704,13 @@
 
 (function ($) {
   AblePlayer.prototype.updateCaption = function (time) {
-    if (!this.usingYouTubeCaptions && (typeof this.$captionWrapper !== 'undefined')) {
+    if (!this.usingYouTubeCaptions && (typeof this.$captionsWrapper !== 'undefined')) {
       if (this.captionsOn) {
-        this.$captionWrapper.show();
+        this.$captionsWrapper.show();
         this.showCaptions(time || this.getElapsed());
       }
-      else if (this.$captionWrapper) {
-        this.$captionWrapper.hide();
+      else if (this.$captionsWrapper) {
+        this.$captionsWrapper.hide();
         this.prefCaptions = 0;
       }
     }
@@ -7830,19 +7830,19 @@
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace('\n', '<br>');
-        this.$captionDiv.html(captionText);
+        this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {
-          // hide captionDiv; otherwise background-color is visible due to padding
-          this.$captionDiv.css('display','none');
+          // hide captionsDiv; otherwise background-color is visible due to padding
+          this.$captionsDiv.css('display','none');
         }
         else {
-          this.$captionDiv.css('display','inline-block');
+          this.$captionsDiv.css('display','inline-block');
         }
       }
     }
     else {
-      this.$captionDiv.html('');
+      this.$captionsDiv.html('');
       this.currentCaption = -1;
     }
   };
@@ -8003,20 +8003,20 @@
           'background-color': this.prefCaptionsBGColor,
           'opacity': opacity
         });
-        if ($element === this.$captionDiv) {
+        if ($element === this.$captionsDiv) {
           lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
-          this.$captionWrapper.css('line-height',lineHeight + '%');
+          this.$captionsWrapper.css('line-height',lineHeight + '%');
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
-          this.$captionWrapper.css({
+          this.$captionsWrapper.css({
             'background-color': this.prefCaptionsBGColor,
             'opacity': '1'
           });
         }
         else if (this.prefCaptionsPosition === 'overlay') {
           // no background color for overlay wrapper, captions are displayed in-line
-          this.$captionWrapper.css({
+          this.$captionsWrapper.css({
             'background-color': 'transparent',
             'opacity': ''
           });
@@ -8033,19 +8033,19 @@
     if (typeof position === 'undefined') {
       position = this.prefCaptionsPosition;
     }
-    if (typeof this.$captionWrapper !== 'undefined') {
+    if (typeof this.$captionsWrapper !== 'undefined') {
 
       if (position == 'below') {
-        this.$captionWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
+        this.$captionsWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
         // also need to update in-line styles
-        this.$captionWrapper.css({
+        this.$captionsWrapper.css({
           'background-color': this.prefCaptionsBGColor,
           'opacity': '1'
         });
       }
       else {
-        this.$captionWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
-        this.$captionWrapper.css({
+        this.$captionsWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
+        this.$captionsWrapper.css({
           'background-color': 'transparent',
           'opacity': ''
         });

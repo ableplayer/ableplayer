@@ -747,7 +747,7 @@
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
         else {
-          this.$captionWrapper.hide();
+          this.$captionsWrapper.hide();
         }
       }
       else {
@@ -759,7 +759,7 @@
           }
         }
         else {
-          this.$captionWrapper.show();
+          this.$captionsWrapper.show();
         }
         for (var i=0; i<captions.length; i++) {
           if (captions[i].def === true) { // this is the default language
@@ -1210,7 +1210,7 @@
       });
     }
 
-    if (typeof this.$captionDiv !== 'undefined') {
+    if (typeof this.$captionsDiv !== 'undefined') {
 
       // Font-size is too small in full screen view & too large in small-width view
       // The following vars define a somewhat arbitary zone outside of which
@@ -1230,8 +1230,8 @@
         newCaptionSize = captionSize;
       }
       newLineHeight = newCaptionSize + 25;
-      this.$captionDiv.css('font-size',newCaptionSize + '%');
-      this.$captionWrapper.css('line-height',newLineHeight + '%');
+      this.$captionsDiv.css('font-size',newCaptionSize + '%');
+      this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
 
     if (this.player === 'youtube' && this.youTubePlayer) {
