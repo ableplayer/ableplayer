@@ -965,11 +965,17 @@
       // More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
       // this fullscreen event handler added specifically for Opera Mac,
       // but includes event listeners for all browsers in case its functionality could be expanded
+      // Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          // restore player with default player dimensions
-          thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
+          if (thisObj.player === 'youtube') {
+            thisObj.restoringAfterFullscreen = true;
+            thisObj.resizePlayer(thisObj.ytWidth, thisObj.ytHeight);
+          }
+          else {
+            thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
+          }
         }
       });
     }
@@ -1181,10 +1187,18 @@
     else {
       // player resized, but not fullscreen
       // in case restoring from fullscreen, reset CSS to responsive
-      this.$ableWrapper.css({
-        'max-width': this.playerMaxWidth,
-        'width': ''
-      });
+      if (this.player === 'youtube') {
+        this.$ableWrapper.css({
+          'max-width': width + 'px',
+          'width': ''
+        });
+      }
+      else {
+        this.$ableWrapper.css({
+          'max-width': this.playerMaxWidth + 'px',
+          'width': ''
+        });
+      }
       this.$vidcapContainer.css({
         'height': '',
         'width': ''

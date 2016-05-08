@@ -144,9 +144,6 @@
       newHeight = this.$ableWrapper.height();
     }
     this.resizePlayer(newWidth, newHeight);
-
-    // TODO: insert code to check for off-screen transcript & sign windows & reposition them
-    // Need to also do that when first showing these windows (separate function, called twice)
   };
 
   AblePlayer.prototype.addSeekbarListeners = function () {

@@ -207,11 +207,21 @@
 
     if (typeof this.ytAspectRatio !== 'undefined') {
       // video dimensions have already been collected
-      // just recalculate with new wrapper size and re-assign CSS
-      width = this.$ableWrapper.width();
-      height = Math.round(width / this.ytAspectRatio);
-      if (this.youTubePlayer) {
-        this.youTubePlayer.setSize(width, height);
+      if (this.restoringAfterFullScreen) {
+        // restore using saved values
+        if (this.youTubePlayer) {
+          this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
+        }
+        this.restoringAfterFullScreen = false;
+      }
+      else {
+        // resizing due to a change in window size, but not from fullscreen
+        // just recalculate with new wrapper size and re-assign CSS
+        width = this.$ableWrapper.width();
+        height = Math.round(width / this.ytAspectRatio);
+        if (this.youTubePlayer) {
+          this.youTubePlayer.setSize(width, height);
+        }
       }
     }
     else {
@@ -222,6 +232,8 @@
         if (width > 0 && height > 0) {
           this.$ableWrapper.css('max-width',width + 'px');
           this.ytAspectRatio = width / height;
+          this.ytWidth = width;
+          this.ytHeight = height;
           if (width !== this.$ableWrapper.width()) {
             // now that we've retrieved YouTube's default width,
             // need to adjust to fit the current player wrapper
@@ -235,6 +247,18 @@
       }
     }
   };
+
+  AblePlayer.prototype.restoreYouTubePlayerSize = function() {
+
+    // called after exit from fullscreen mode
+
+    var d, width, height;
+
+    if (this.youTubePlayer && typeof this.ytWidth !== 'undefined' && typeof this.ytHeight !== 'undefined') {
+      this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
+    }
+  };
+
 
   AblePlayer.prototype.setupYouTubeCaptions = function () {
 

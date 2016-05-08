@@ -4636,11 +4636,21 @@
 
     if (typeof this.ytAspectRatio !== 'undefined') {
       // video dimensions have already been collected
-      // just recalculate with new wrapper size and re-assign CSS
-      width = this.$ableWrapper.width();
-      height = Math.round(width / this.ytAspectRatio);
-      if (this.youTubePlayer) {
-        this.youTubePlayer.setSize(width, height);
+      if (this.restoringAfterFullScreen) {
+        // restore using saved values
+        if (this.youTubePlayer) {
+          this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
+        }
+        this.restoringAfterFullScreen = false;
+      }
+      else {
+        // resizing due to a change in window size, but not from fullscreen
+        // just recalculate with new wrapper size and re-assign CSS
+        width = this.$ableWrapper.width();
+        height = Math.round(width / this.ytAspectRatio);
+        if (this.youTubePlayer) {
+          this.youTubePlayer.setSize(width, height);
+        }
       }
     }
     else {
@@ -4651,6 +4661,8 @@
         if (width > 0 && height > 0) {
           this.$ableWrapper.css('max-width',width + 'px');
           this.ytAspectRatio = width / height;
+          this.ytWidth = width;
+          this.ytHeight = height;
           if (width !== this.$ableWrapper.width()) {
             // now that we've retrieved YouTube's default width,
             // need to adjust to fit the current player wrapper
@@ -4664,6 +4676,18 @@
       }
     }
   };
+
+  AblePlayer.prototype.restoreYouTubePlayerSize = function() {
+
+    // called after exit from fullscreen mode
+
+    var d, width, height;
+
+    if (this.youTubePlayer && typeof this.ytWidth !== 'undefined' && typeof this.ytHeight !== 'undefined') {
+      this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
+    }
+  };
+
 
   AblePlayer.prototype.setupYouTubeCaptions = function () {
 
@@ -7262,11 +7286,17 @@
       // More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
       // this fullscreen event handler added specifically for Opera Mac,
       // but includes event listeners for all browsers in case its functionality could be expanded
+      // Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          // restore player with default player dimensions
-          thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
+          if (thisObj.player === 'youtube') {
+            thisObj.restoringAfterFullscreen = true;
+            thisObj.resizePlayer(thisObj.ytWidth, thisObj.ytHeight);
+          }
+          else {
+            thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
+          }
         }
       });
     }
@@ -7478,10 +7508,18 @@
     else {
       // player resized, but not fullscreen
       // in case restoring from fullscreen, reset CSS to responsive
-      this.$ableWrapper.css({
-        'max-width': this.playerMaxWidth,
-        'width': ''
-      });
+      if (this.player === 'youtube') {
+        this.$ableWrapper.css({
+          'max-width': width + 'px',
+          'width': ''
+        });
+      }
+      else {
+        this.$ableWrapper.css({
+          'max-width': this.playerMaxWidth + 'px',
+          'width': ''
+        });
+      }
       this.$vidcapContainer.css({
         'height': '',
         'width': ''
@@ -8880,9 +8918,6 @@
       newHeight = this.$ableWrapper.height();
     }
     this.resizePlayer(newWidth, newHeight);
-
-    // TODO: insert code to check for off-screen transcript & sign windows & reposition them
-    // Need to also do that when first showing these windows (separate function, called twice)
   };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
