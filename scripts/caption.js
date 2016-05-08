@@ -299,6 +299,9 @@
           'background-color': this.prefCaptionsBGColor,
           'opacity': opacity
         });
+        if ($element === this.$captionDiv) {
+          this.$captionWrapper.css('line-height',this.prefCaptionsSize);
+        }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
           this.$captionWrapper.css({

@@ -1222,18 +1222,16 @@
       // TODO: Need a better formula so that it scales proportionally to viewport
       if (width > captionSizeOkMax) {
         newCaptionSize = captionSize * 1.5;
-        newLineHeight = '1.85em';
       }
       else if (width < captionSizeOkMin) {
         newCaptionSize = captionSize / 1.5;
-        newLineHeight = '1em';
       }
       else {
         newCaptionSize = captionSize;
-        newLineHeight = '1.35em'; // default
       }
+      newLineHeight = newCaptionSize; // or captionSize ???
       this.$captionDiv.css('font-size',newCaptionSize + '%');
-      this.$captionWrapper.css('line-height',newLineHeight);
+      this.$captionWrapper.css('line-height',newLineHeight + '%');
     }
 
     if (this.player === 'youtube' && this.youTubePlayer) {
