@@ -138,10 +138,12 @@
       if (!this.$descDiv.is(':hidden')) {
         newHeight -= this.$descDiv.height();
       }
+      this.positionCaptions('overlay');
     }
     else { // not fullscreen
       newWidth = this.$ableWrapper.width();
       newHeight = this.$ableWrapper.height();
+      this.positionCaptions(); // reset with this.prefCaptionsPosition
     }
     this.resizePlayer(newWidth, newHeight);
   };

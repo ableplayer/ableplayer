@@ -291,7 +291,7 @@
         $element.css(property, newValue);
       }
       else { // no property was specified, update all styles with current saved prefs
-        var opacity = parseFloat(this.prefCaptionsOpacity) / 100.0;
+        opacity = parseFloat(this.prefCaptionsOpacity) / 100.0;
         $element.css({
           'font-family': this.prefCaptionsFont,
           'font-size': this.prefCaptionsSize,
@@ -309,19 +309,41 @@
             'opacity': '1'
           });
         }
+        else if (this.prefCaptionsPosition === 'overlay') {
+          // no background color for overlay wrapper, captions are displayed in-line
+          this.$captionWrapper.css({
+            'background-color': 'transparent',
+            'opacity': ''
+          });
+        }
         this.positionCaptions();
       }
     }
   };
-  AblePlayer.prototype.positionCaptions = function() {
+  AblePlayer.prototype.positionCaptions = function(position) {
 
+    // set caption position to either 'overlay' or 'below'
+    // if position parameter was passed to this function, use that
+    // otherwise use user preference
+    if (typeof position === 'undefined') {
+      position = this.prefCaptionsPosition;
+    }
     if (typeof this.$captionWrapper !== 'undefined') {
 
-      if (this.prefCaptionsPosition == 'below') {
+      if (position == 'below') {
         this.$captionWrapper.removeClass('able-captions-overlay').addClass('able-captions-below');
+        // also need to update in-line styles
+        this.$captionWrapper.css({
+          'background-color': this.prefCaptionsBGColor,
+          'opacity': '1'
+        });
       }
       else {
         this.$captionWrapper.removeClass('able-captions-below').addClass('able-captions-overlay');
+        this.$captionWrapper.css({
+          'background-color': 'transparent',
+          'opacity': ''
+        });
       }
     }
   };
