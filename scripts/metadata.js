@@ -65,7 +65,7 @@
       if (typeof this.$metaDiv !== 'undefined') {
         this.$metaDiv.html('');
       }
-      if (this.visibleSelectors.length) {
+      if (this.visibleSelectors && this.visibleSelectors.length) {
         for (i=0; i<this.visibleSelectors.length; i++) {
           $(this.visibleSelectors[i]).hide();
         }

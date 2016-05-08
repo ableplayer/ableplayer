@@ -8012,22 +8012,28 @@
           'opacity': opacity
         });
         if ($element === this.$captionsDiv) {
-          lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
-          this.$captionsWrapper.css('line-height',lineHeight + '%');
+          if (typeof this.$captionWrapper !== 'undefined') {
+            lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
+            this.$captionsWrapper.css('line-height',lineHeight + '%');
+          }
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
-          this.$captionsWrapper.css({
-            'background-color': this.prefCaptionsBGColor,
-            'opacity': '1'
-          });
+          if (typeof this.$captionWrapper !== 'undefined') {
+            this.$captionsWrapper.css({
+              'background-color': this.prefCaptionsBGColor,
+              'opacity': '1'
+            });
+          }
         }
         else if (this.prefCaptionsPosition === 'overlay') {
           // no background color for overlay wrapper, captions are displayed in-line
-          this.$captionsWrapper.css({
-            'background-color': 'transparent',
-            'opacity': ''
-          });
+          if (typeof this.$captionWrapper !== 'undefined') {
+            this.$captionsWrapper.css({
+              'background-color': 'transparent',
+              'opacity': ''
+            });
+          }
         }
         this.positionCaptions();
       }
@@ -8248,7 +8254,7 @@
       if (typeof this.$metaDiv !== 'undefined') {
         this.$metaDiv.html('');
       }
-      if (this.visibleSelectors.length) {
+      if (this.visibleSelectors && this.visibleSelectors.length) {
         for (i=0; i<this.visibleSelectors.length; i++) {
           $(this.visibleSelectors[i]).hide();
         }
