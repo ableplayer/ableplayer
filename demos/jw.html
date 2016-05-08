@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>JW Player Test</title>
-<link rel="stylesheet" href="tests.css" type="text/css">
+<link rel="stylesheet" href="demos.css" type="text/css">
 <script src="../thirdparty/jwplayer.js"></script>
 </head>
 
@@ -19,7 +19,7 @@
 
 <script>
 
-var startedPlaying = false; 
+var startedPlaying = false;
 
 var jw = jwplayer('media1').setup({
   file: "../media/wwa.mp4",
@@ -28,27 +28,27 @@ var jw = jwplayer('media1').setup({
   image: "../media/wwa.jpg",
   controls: true,
   volume: 100,
-  fallback: false, 
+  fallback: false,
   primary: 'flash',
-  wmode: 'transparent' // necessary to get HTML captions to appear as overlay 
+  wmode: 'transparent' // necessary to get HTML captions to appear as overlay
   })
-  .onReady(function() { 
-    if (!startedPlaying) { 
+  .onReady(function() {
+    if (!startedPlaying) {
       console.log('seeking to 30 seconds');
       jwplayer('media1').seek(30);
       startedPlaying = true;
     }
   })
-  .onSeek(function( event ) { 
+  .onSeek(function( event ) {
     // seek() function is called after .onReady(), but does not trigger onSeek()
     // onSeek() is only triggered by the slider
-    console.log('seeking to ' + event.position + '; goal: ' + event.offset);    
+    console.log('seeking to ' + event.position + '; goal: ' + event.offset);
   });
 
 </script>
 
 <div>
-  <button onclick="jw.play()">Toggle playback</button> 
+  <button onclick="jw.play()">Toggle playback</button>
   <button onclick="console.log('Volume: ' + jw.getVolume())">Report volume</button>
 </div>
 

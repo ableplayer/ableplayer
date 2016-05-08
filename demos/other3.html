@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Fallback Test (using JW Player)</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+
+<h1>Able Player Fallback Test (using JW Player)</h1>
+
+<p>The examples on this page (one audio, one video) automatically use JW Player rather than the usual Able Player Chrome. JW Player is not provided with Able Player, and must be licensed separately. If the &lt;audio&gt; or &lt;video&gt; tags include <strong>data-fallback="jw"</strong> and JW Player is properly installed, Able Player will fallback to JW Player if the user's browser doesn't support HTML5 media. The player can be <em>forced</em> to use JW Player by also adding the <strong>data-test-fallback</strong> attribute to the media element.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<h2>Audio Example</h2>
+<audio id="audio1" width="480" preload="auto" data-able-player data-fallback="jw" data-test-fallback>
+  <source type="audio/ogg" src="../media/smallf.ogg"/>
+  <source type="audio/mpeg" src="../media/smallf.mp3"/>
+</audio>
+
+<h2>Video Example</h2>
+<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-fallback="jw" data-test-fallback>
+  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+  <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+  <!-- Able Player will display tracks alphabetically by label -->
+  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+</video>
+
+</body>
+</html>

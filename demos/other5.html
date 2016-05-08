@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Test #13</title>
-<link rel="stylesheet" href="tests.css" type="text/css">
+<title>Able Player for YouTube</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
@@ -36,20 +36,21 @@
 
 <body>
 
-<h1>Able Player Test #13:<br/>YouTube Player with Able Chrome</h1>
+<h1>Able Player for YouTube</h1>
 
 <p>This page uses the YouTube player, but with Able Player controls.</p>
 <p>If &lt;track&gt; elements are used for captions or subtitles, these take precedence over YouTube captions.
   Otherwise, YouTube captions and subtitles are used if available.</p>
 
-<p>Local captions can be used to build an interactive transcript and can be used to search within videos
-  using the <strong>data-search</strong> parameter. Currently YouTube doesn't expose specific caption data
+<p>Local &lt;track&gt; elements can be used to host captions locally rather than use YouTube's captions.
+  The advantage of using local captions is they can be used to build an interactive transcript and
+  <a href="video8.html">search within videos</a>. Currently YouTube doesn't expose specific caption data
   via its API so these functions are not possible using YouTube captions alone.</p>
 
-<p>A <em>poster</em> attribute can be used to replace YouTube's default poster image with an alternative
-  image. However, this may result in a clumsy transition when the video starts playing.</p>
+<p>Also, a <em>poster</em> attribute can be used to replace YouTube's default poster image with an alternative
+  image.</p>
 
-<p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!--
   # A few video id's for testing:

@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Test #3</title>
-<link rel="stylesheet" href="tests.css" type="text/css">
+<title>Able Player with no captions or descriptions</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
@@ -20,15 +20,16 @@
 
 <body>
 
-<h1>Able Player Test #3:<br/>Video player with closed captions</h1>
+<h1>Able Player with no captions or description (don't do this)</h1>
 
-<p>For additional tests see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+<p>Why would you use an accessible media player to deliver inaccessible media? Makes no sense. But if you have a compelling reason (e.g., you have to share the video with a small private audience while waiting for captions and descriptions to be finished) this test shows that Able Player is capable of handling it.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
 <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
   <source type="video/webm" src="../media/wwa.webm"/>
 	<source type="video/mp4" src="../media/wwa.mp4"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt"/>
 </video>
 
 </body>

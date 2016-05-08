@@ -585,7 +585,7 @@ Files created by the build process are put into the */build* directory:
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
   [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
   [develop]: https://github.com/ableplayer/ableplayer/tree/develop
-  [examples]: http://ableplayer.github.io/ableplayer/tests/
+  [examples]: http://ableplayer.github.io/ableplayer/demos/
   [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
   [Google Developer Console]: https://console.developers.google.com/
   [Google's Getting Started page]: https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication
