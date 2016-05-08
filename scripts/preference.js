@@ -174,7 +174,7 @@
         'name': 'prefCaptionsPosition',
         'label': this.tt.prefCaptionsPosition,
         'group': 'captions',
-        'default': 'overlay'
+        'default': this.defaultCaptionsPosition
       });
       prefs.push({
         'name': 'prefCaptionsFont',
@@ -480,6 +480,16 @@
             else if (thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
               optionValue = options[j][0];
               optionText = options[j][1];
+            }
+            else if (thisPref === 'prefCaptionsOpacity') {
+              optionValue = options[j];
+              optionText = options[j];
+              if (optionValue === '0%') {
+                optionText += ' (' + this.tt.transparent + ')';
+              }
+              else if (optionValue === '100%') {
+                optionText += ' (' + this.tt.solid + ')';
+              }
             }
             else {
               optionValue = options[j];

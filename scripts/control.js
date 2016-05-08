@@ -1229,7 +1229,7 @@
       else {
         newCaptionSize = captionSize;
       }
-      newLineHeight = newCaptionSize; // or captionSize ???
+      newLineHeight = newCaptionSize + 25;
       this.$captionDiv.css('font-size',newCaptionSize + '%');
       this.$captionWrapper.css('line-height',newLineHeight + '%');
     }

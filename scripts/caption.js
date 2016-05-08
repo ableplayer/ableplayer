@@ -209,11 +209,11 @@
         break;
 
       case 'prefCaptionsOpacity':
-        options[0] = '0% (' + this.tt.transparent + ')';
+        options[0] = '0%';
         options[1] = '25%';
         options[2] = '50%';
         options[3] = '75%';
-        options[4] = '100% (' + this.tt.solid + ')';
+        options[4] = '100%';
         break;
 
       case 'prefCaptionsStyle':
@@ -259,7 +259,7 @@
     // this function handles stylizing of the sample caption text in the Prefs dialog
     // plus the actual production captions
     // TODO: consider applying the same user prefs to visible text-based description
-    var property, newValue, opacity;
+    var property, newValue, opacity, lineHeight;
 
     if (typeof $element !== 'undefined') {
       if (pref == 'prefCaptionsPosition') {
@@ -300,7 +300,8 @@
           'opacity': opacity
         });
         if ($element === this.$captionDiv) {
-          this.$captionWrapper.css('line-height',this.prefCaptionsSize);
+          lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
+          this.$captionWrapper.css('line-height',lineHeight + '%');
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div

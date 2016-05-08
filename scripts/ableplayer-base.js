@@ -115,6 +115,16 @@
       this.lyricsMode = true;
     }
 
+    // data-captions-position can be used to set the default captions position
+    // this is only the default, and can be overridden by user preferences
+    // valid values of data-captions-position are 'below' and 'overlay'
+    if ($(media).data('captions-position') === 'overlay') {
+      this.defaultCaptionsPosition = 'overlay';
+    }
+    else { // the default, even if not specified
+      this.defaultCaptionsPosition = 'below';
+    }
+
     if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") {
       this.chaptersDivLocation = $(media).data('chapters-div');
     }
@@ -133,7 +143,7 @@
       this.useChaptersButton = false;
     }
 
-    // valid values are 'playlist' and 'chapter'; will also accept 'chapters'
+    // valid values of data-prevnext-unit are 'playlist' and 'chapter'; will also accept 'chapters'
     if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
       this.prevNextUnit = 'chapter';
     }

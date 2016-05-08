@@ -207,6 +207,10 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
 -   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English. 
 
+#### Captions 
+
+-   **data-captions-position** - optional; specify default position of captions relative to the video (either "below" or "overlay"; "below" is the default if not specified). Users can override this setting in Captions Preferences.
+
 #### Transcript
 
 -   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 

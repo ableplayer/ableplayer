@@ -115,6 +115,16 @@
       this.lyricsMode = true;
     }
 
+    // data-captions-position can be used to set the default captions position
+    // this is only the default, and can be overridden by user preferences
+    // valid values of data-captions-position are 'below' and 'overlay'
+    if ($(media).data('captions-position') === 'overlay') {
+      this.defaultCaptionsPosition = 'overlay';
+    }
+    else { // the default, even if not specified
+      this.defaultCaptionsPosition = 'below';
+    }
+
     if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") {
       this.chaptersDivLocation = $(media).data('chapters-div');
     }
@@ -133,7 +143,7 @@
       this.useChaptersButton = false;
     }
 
-    // valid values are 'playlist' and 'chapter'; will also accept 'chapters'
+    // valid values of data-prevnext-unit are 'playlist' and 'chapter'; will also accept 'chapters'
     if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
       this.prevNextUnit = 'chapter';
     }
@@ -1169,7 +1179,7 @@
         'name': 'prefCaptionsPosition',
         'label': this.tt.prefCaptionsPosition,
         'group': 'captions',
-        'default': 'overlay'
+        'default': this.defaultCaptionsPosition
       });
       prefs.push({
         'name': 'prefCaptionsFont',
@@ -1475,6 +1485,16 @@
             else if (thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
               optionValue = options[j][0];
               optionText = options[j][1];
+            }
+            else if (thisPref === 'prefCaptionsOpacity') {
+              optionValue = options[j];
+              optionText = options[j];
+              if (optionValue === '0%') {
+                optionText += ' (' + this.tt.transparent + ')';
+              }
+              else if (optionValue === '100%') {
+                optionText += ' (' + this.tt.solid + ')';
+              }
             }
             else {
               optionValue = options[j];
@@ -7550,7 +7570,7 @@
       else {
         newCaptionSize = captionSize;
       }
-      newLineHeight = newCaptionSize; // or captionSize ???
+      newLineHeight = newCaptionSize + 25;
       this.$captionDiv.css('font-size',newCaptionSize + '%');
       this.$captionWrapper.css('line-height',newLineHeight + '%');
     }
@@ -7893,11 +7913,11 @@
         break;
 
       case 'prefCaptionsOpacity':
-        options[0] = '0% (' + this.tt.transparent + ')';
+        options[0] = '0%';
         options[1] = '25%';
         options[2] = '50%';
         options[3] = '75%';
-        options[4] = '100% (' + this.tt.solid + ')';
+        options[4] = '100%';
         break;
 
       case 'prefCaptionsStyle':
@@ -7943,7 +7963,7 @@
     // this function handles stylizing of the sample caption text in the Prefs dialog
     // plus the actual production captions
     // TODO: consider applying the same user prefs to visible text-based description
-    var property, newValue, opacity;
+    var property, newValue, opacity, lineHeight;
 
     if (typeof $element !== 'undefined') {
       if (pref == 'prefCaptionsPosition') {
@@ -7984,7 +8004,8 @@
           'opacity': opacity
         });
         if ($element === this.$captionDiv) {
-          this.$captionWrapper.css('line-height',this.prefCaptionsSize);
+          lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
+          this.$captionWrapper.css('line-height',lineHeight + '%');
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
