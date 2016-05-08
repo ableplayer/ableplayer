@@ -839,6 +839,12 @@
 
   AblePlayer.prototype.handlePrefsClick = function(pref) {
 
+    // NOTE: the prefs menu is positioned near the right edge of the player
+    // This assumes the Prefs button is also positioned in that vicinity
+    // (last or second-last button the right)
+
+    var prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+
     if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it
@@ -853,8 +859,11 @@
     else {
       this.closePopups();
       this.prefsPopup.show();
-      this.prefsPopup.css('top', this.$prefsButton.position().top - this.prefsPopup.outerHeight());
-      this.prefsPopup.css('left', this.$prefsButton.position().left)
+      prefsButtonPosition = this.$prefsButton.position();
+      prefsMenuRight = this.$ableDiv.width() - 5;
+      prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
+      this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
+      this.prefsPopup.css('left', prefsMenuLeft);
       // remove prior focus and set focus on first item
       this.prefsPopup.find('li').removeClass('able-focus');
       this.prefsPopup.find('input').first().focus().parent().addClass('able-focus');
