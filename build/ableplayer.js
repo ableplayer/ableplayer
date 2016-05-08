@@ -7482,7 +7482,8 @@
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
 
-    var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize;
+    var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
+
     if (this.isFullscreen()) {
       if (typeof this.$vidcapContainer !== 'undefined') {
         this.$ableWrapper.css({
@@ -7542,14 +7543,18 @@
       // TODO: Need a better formula so that it scales proportionally to viewport
       if (width > captionSizeOkMax) {
         newCaptionSize = captionSize * 1.5;
+        newLineHeight = '1.85em';
       }
       else if (width < captionSizeOkMin) {
         newCaptionSize = captionSize / 1.5;
+        newLineHeight = '1em';
       }
       else {
         newCaptionSize = captionSize;
+        newLineHeight = '1.35em'; // default
       }
       this.$captionDiv.css('font-size',newCaptionSize + '%');
+      this.$captionWrapper.css('line-height',newLineHeight);
     }
 
     if (this.player === 'youtube' && this.youTubePlayer) {
