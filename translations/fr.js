@@ -1,5 +1,5 @@
-var ef = {
-  
+var fr = {
+
 "playerHeading": "Lecteur multimédia",
 
 "faster": "Plus rapidement",

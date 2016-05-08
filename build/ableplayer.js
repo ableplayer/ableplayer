@@ -11019,7 +11019,8 @@
 (function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
-    var langs = ['en','de','es','fr','nl'];
+    // Removing 'nl' as of 2.3.54, pending updates
+    var langs = ['de','en','es','fr'];
     return langs;
   };
 
@@ -11640,239 +11641,239 @@ var es = {
 
 };
 
-var nl = {
+var fr = {
 
-"playerHeading": "Mediaspeler",
+"playerHeading": "Lecteur multimédia",
 
-"faster": "Sneller",
+"faster": "Plus rapidement",
 
-"slower": "Langzamer",
+"slower": "Plus lentement",
 
-"play": "Afspelen",
+"play": "Lecture",
 
-"pause": "Pauzeren",
+"pause": "Pause",
 
-"stop": "Stoppen",
+"stop": "Arrêt",
 
-"rewind": "Terug",
+"rewind": "Reculer",
 
-"forward": "Verder",
+"forward": "Avancer",
 
-"captions": "Ondertiteling",
+"captions": "Sous-titres",
 
-"showCaptions": "Toon ondertiteling",
+"showCaptions": "Afficher les sous-titres",
 
-"hideCaptions": "Verberg ondertiteling",
+"hideCaptions": "Masquer les sous-titres",
 
-"captionsOff": "Ondertiteling uit",
+"captionsOff": "Sous-titres désactivés",
 
-"showTranscript": "Toon transcript",
+"showTranscript": "Afficher la transcription",
 
-"hideTranscript": "Vergerg transcript",
+"hideTranscript": "Masquer la transcription",
 
-"turnOnDescriptions": "Beschrijvingen aanzetten",
+"turnOnDescriptions": "Activer les descriptions",
 
-"turnOffDescriptions": "Beschrijvingen uitzetten",
+"turnOffDescriptions": "Désactiver les descriptions",
 
-"chapters": "Hoofdstukken",
+"chapters": "Chapitres",
 
-"newChapter": "Nieuw hoofdstuk",
+"newChapter": "Nouveau chapitre",
 
-"language": "Taal",
+"language": "Langue",
 
-"sign": "Gebarentaal",
+"sign": "Langage gestuel",
 
-"showSign": "Toon gebarentaal",
+"showSign": "Afficher le langage gestuel",
 
-"hideSign": "Verberg gebarentaal",
+"hideSign": "Masque le langage gestuel",
 
-"mute": "Dempen",
+"mute": "Son désactivé",
 
-"unmute": "Dempen uit",
+"unmute": "Son activé",
 
 "volume": "Volume",
 
-"volumeHelp": "Click to access volume slider",
+"volumeHelp": "Cliquer pour accéder au réglage du volume",
 
-"volumeUpDown": "Volume hoger lager",
+"volumeUpDown": "Monter baisser le volume",
 
-"volumeSliderClosed": "Volume slider closed",
+"volumeSliderClosed": "Réglage du volume fermé",
 
-"preferences": "Voorkeuren",
+"preferences": "Préférences",
 
-"enterFullScreen": "Ga naar volledig scherm",
+"enterFullScreen": "Activer le mode plein écran",
 
-"exitFullScreen": "Verlaat volledig scherm",
+"exitFullScreen": "Quitter le mode plein écran",
 
-"fullScreen": "Volledig scherm",
+"fullScreen": "Plein écran",
 
-"speed": "Snelheid",
+"speed": "Vitesse",
 
-"and": "en",
+"and": "et",
 
-"or": "of",
+"or": "ou",
 
-"spacebar": "spatietoets",
+"spacebar": "barre d’espacement",
 
-"autoScroll": "Auto scroll",
+"autoScroll": "Défilement automatique",
 
-"unknown": "Onbekend",
+"unknown": "Inconnu",
 
-"statusPlaying": "Aan het spelen",
+"statusPlaying": "Lecture en cours",
 
-"statusPaused": "Gepauzeerd",
+"statusPaused": "Lecture sur pause",
 
-"statusStopped": "Gestopt",
+"statusStopped": "Lecture interrompue",
 
-"statusWaiting": "Aan het wachten",
+"statusWaiting": "Attente",
 
-"statusBuffering": "Aan het bufferen",
+"statusBuffering": "Tamponnage",
 
-"statusUsingDesc": "Versie met beschrijving wordt gebruikt",
+"statusUsingDesc": "Utilisation de la version décrite",
 
-"statusLoadingDesc": "Versie met beschrijving wordt geladen",
+"statusLoadingDesc": "Chargement de la version décrite",
 
-"statusUsingNoDesc": "Versie zonder beschrijving wordt gebruikt",
+"statusUsingNoDesc": "Utilisation de la version non décrite",
 
-"statusLoadingNoDesc": "Versie zonder beschrijving wordt geladen",
+"statusLoadingNoDesc": "Chargement de la version non décrite",
 
-"statusLoadingNext": "Volgende track wordt geladen",
+"statusLoadingNext": "Chargement de la prochaine piste",
 
-"statusEnd": "Einde van track",
+"statusEnd": "Fin de la piste",
 
-"selectedTrack": "Geselecteerde Track",
+"selectedTrack": "Piste choisie",
 
-"alertDescribedVersion": "Versie met audiobeschrijving wordt gebruikt",
+"alertDescribedVersion": "Utilisation de la version avec description sonore de cette vidéo",
 
-"alertNonDescribedVersion": "Using the non-described version of this video",
+"alertNonDescribedVersion": "Utilisation de la version non décrite de cette vidéo",
 
-"fallbackError1": "Sorry, je browser kan dit mediabestand niet afspelen",
+"fallbackError1": "Désolé, votre navigateur ne peut pas lire cette piste",
 
-"fallbackError2": "De volgende browsers kunnen met deze mediaspeler overweg:",
+"fallbackError2": "Les navigateurs suivants fonctionnent habituellement avec ce lecteur multimédia",
 
-"orHigher": "of hoger",
+"orHigher": "ou des versions plus récentes",
 
-"prefMenuCaptions": "Captions",
+"prefMenuCaptions": "Sous-titres",
 
 "prefMenuDescriptions": "Descriptions",
 
-"prefMenuKeyboard": "Keyboard",
+"prefMenuKeyboard": "Clavier",
 
-"prefMenuTranscript": "Transcript",
+"prefMenuTranscript": "Transcription",
 
-"prefTitleCaptions": "Captions Preferences",
+"prefTitleCaptions": "Préférences liées au sous-titrage",
 
-"prefTitleDescriptions": "Audio Description Preferences",
+"prefTitleDescriptions": "Préférences liées aux descriptions sonores",
 
-"prefTitleKeyboard": "Keyboard Preferences",
+"prefTitleKeyboard": "Préférences liées au clavier",
 
-"prefTitleTranscript": "Transcript Preferences",
+"prefTitleTranscript": "Préférence liées à la transcription",
 
-"prefIntroCaptions": "The following preferences control how captions are displayed.",
+"prefIntroCaptions": "Les préférences contrôlent la façon dont les sous-titres sont affichés.",
 
-"prefIntroDescription1": "This media player supports audio description in two ways: ",
+"prefIntroDescription1": "Ce lecteur multimédia permet d’entendre les descriptions sonores de deux façons:",
 
-"prefIntroDescription2": "The current video has ",
+"prefIntroDescription2": "Il y a une version ",
 
-"prefIntroDescriptionNone": "The current video has no audio description in either format.",
+"prefIntroDescriptionNone": "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.",
 
-"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+"prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores.",
 
-"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
+"prefIntroDescription4": "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.",
 
-"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+"prefIntroKeyboard1": "Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous).",
 
-"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+"prefIntroKeyboard2": "Des rôles peuvent être assignés aux touches de modification (Shift, Alt, Ctrl) ci-dessous.",
 
-"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+"prefIntroKeyboard3": "Certaines combinaisons de touches pourraient entrer en conflit avec les touches utilisées par votre navigateur ou autres applications logicielles. Essayez diverses combinaisons de touches de modification pour en trouver qui fonctionnent pour vous.",
 
-"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+"prefIntroTranscript": "Les préférences suivantes ont un effet sur la transcription interactive.",
 
-"prefCookieWarning": "Saving your preferences requires cookies.",
+"prefCookieWarning": "Il faut que les témoins soient activés pour enregistrer vos préférences.",
 
-"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+"prefHeadingKeyboard1": "Touches de modification utilisées pour des raccourcis",
 
-"prefHeadingKeyboard2": "Current keyboard shortcuts",
+"prefHeadingKeyboard2": "Raccourcis du clavier assignés actuellement",
 
-"prefHeadingDescription": "Audiobeschrijving",
+"prefHeadingDescription": "Description sonore",
 
-"prefHeadingTextDescription": "Tekst-gebaseerde audiobeschrijving",
+"prefHeadingTextDescription": "Description sonore textuelle",
 
-"prefHeadingCaptions": "Ondertiteling",
+"prefHeadingCaptions": "Sous-titres",
 
-"prefHeadingTranscript": "Interactive Transcript",
+"prefHeadingTranscript": "Transcription interactive",
 
 "prefAltKey": "Alt",
 
-"prefCtrlKey": "Control",
+"prefCtrlKey": "Ctrl",
 
 "prefShiftKey": "Shift",
 
-"escapeKey": "Escape",
+"escapeKey": "Esc",
 
-"escapeKeyFunction": "Close current dialog or popup menu",
+"escapeKeyFunction": "Fermer la fenêtre de dialogue ou le menu contextuel",
 
-"prefDescFormat": "Preferred format",
+"prefDescFormat": "Format privilégié",
 
-"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
+"prefDescFormatHelp": "Si les deux formats sont offerts, un seul sera utilisé.",
 
-"prefDescFormatOption1": "alternative described version of video",
+"prefDescFormatOption1": "autre version de la vidéo avec description",
 
-"prefDescFormatOption1b": "an alternative described version",
+"prefDescFormatOption1b": "autre version avec description",
 
-"prefDescFormatOption2": "text-based description, announced by screen reader",
+"prefDescFormatOption2": "description textuelle, lue à l’aide d’un lecteur d’écran",
 
-"prefDescFormatOption2b": "text-based description",
+"prefDescFormatOption2b": "description textuelle",
 
-"prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
+"prefDescPause": "Mettre la vidéo en pause automatiquement quand la description commence",
 
-"prefVisibleDesc": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
+"prefVisibleDesc": "Affichez la description",
 
-"prefHighlight": "Transcript highlighten terwijl media speelt",
+"prefHighlight": "Surligner la transcription pendant la lecture",
 
-"prefTabbable": "Maak transcript bedienbaar met toetsenbord",
+"prefTabbable": "Transcription activée par clavier",
 
-"prefCaptionsFont": "Font",
+"prefCaptionsFont": "Police de caractères",
 
-"prefCaptionsColor": "Text Color",
+"prefCaptionsColor": "Couleur du texte",
 
-"prefCaptionsBGColor": "Background",
+"prefCaptionsBGColor": "Arrière-plan",
 
-"prefCaptionsSize": "Font Size",
+"prefCaptionsSize": "Taille de la police",
 
-"prefCaptionsOpacity": "Opacity",
+"prefCaptionsOpacity": "Opacité",
 
 "prefCaptionsStyle": "Style",
 
-"serif": "serif",
+"serif": "avec empattement",
 
-"sans": "sans-serif",
+"sans": "sans empattement",
 
-"cursive": "cursive",
+"cursive": "écriture cursive",
 
-"fantasy": "fantasy",
+"fantasy": "écriture de fantaisie",
 
-"monospace": "monospace",
+"monospace": "à taille fixe",
 
-"white": "white",
+"white": "blanc",
 
-"yellow": "yellow",
+"yellow": "jaune",
 
-"green": "green",
+"green": "vert",
 
 "cyan": "cyan",
 
-"blue": "blue",
+"blue": "bleu",
 
 "magenta": "magenta",
 
-"red": "red",
+"red": "rouge",
 
-"black": "black",
+"black": "noir",
 
 "transparent": "transparent",
 
-"solid": "solid",
+"solid": "solide",
 
 "captionsStylePopOn": "Pop-on",
 
@@ -11880,53 +11881,53 @@ var nl = {
 
 "prefCaptionsPosition": "Position",
 
-"captionsPositionOverlay": "Overlay",
+"captionsPositionOverlay": "Superposés",
 
-"captionsPositionBelow": "Below video",
+"captionsPositionBelow": "Sous la vidéo",
 
-"sampleCaptionText": "Sample caption text",
+"sampleCaptionText": "Échantillon de sous-titre",
 
-"prefSuccess": "Je wijzigingen zijn opgeslagen.",
+"prefSuccess": "Vos changements ont été enregistrés.",
 
-"prefNoChange": "Je hebt geen wijzigingen gemaakt.",
+"prefNoChange": "Vous n’avez pas fait de changements.",
 
-"help": "Help",
+"help": "Aide",
 
-"helpTitle": "Help",
+"helpTitle": "Aide",
 
-"save": "Opslaan",
+"save": "Enregistrer",
 
-"cancel": "Annuleren",
+"cancel": "Annuler",
 
 "ok": "ok",
 
-"done": "Klaar",
+"done": "Terminé",
 
-"closeButtonLabel": "Sluit venster",
+"closeButtonLabel": "Fermer le dialogue",
 
-"windowButtonLabel": "Venster instellingen",
+"windowButtonLabel": "Options de fenêtre",
 
-"windowMove": "Verplaats",
+"windowMove": "Déplacer",
 
-"windowMoveAlert": "Versleep of gebruik de pijltjestoetsen om te verplaatsen. Druk op Enter om te stoppen.",
+"windowMoveAlert": "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre; appuyez sur « Enter » pour arrêter.",
 
-"windowResize": "Verkleinen of vergroten",
+"windowResize": "Redimensionner",
 
-"windowResizeHeading": "Verander grootte van scherm met gebarentolk",
+"windowResizeHeading": "Redimensionner la fenêtre de l’interprète",
 
-"windowResizeAlert": "Het venster is van grootte veranderd.",
+"windowResizeAlert": "La fenêtre a été redimensionnée.",
 
-"width": "Breedte",
+"width": "Largeur",
 
-"height": "Hoogte",
+"height": "Hauteur",
 
-"windowSendBack": "Verplaats naar achteren",
+"windowSendBack": "Mettre en arrière-plan",
 
-"windowSendBackAlert": "Het scherm staat nu achter andere objecten op deze pagina.",
+"windowSendBackAlert": "Cette fenêtre est maintenant derrière d’autres objets sur la page.",
 
-"windowBringTop": "Verplaats naar voren",
+"windowBringTop": "Mettre au premier plan",
 
-"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
+"windowBringTopAlert": "Cette fenêtre est maintenant devant d’autres objets sur la page.",
 
 };
 
