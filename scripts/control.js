@@ -411,13 +411,11 @@
           widthUsed += $(this).width();
         }
       });
-//console.log('width used by left controls: ' + widthUsed);
       rightControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();
         }
       });
-//console.log('total width used: ' + widthUsed);
       if (this.isFullscreen()) {
         seekbarWidth = $(window).width() - widthUsed - 20;
       }
@@ -1200,10 +1198,12 @@
           'width': ''
         });
       }
-      this.$vidcapContainer.css({
-        'height': '',
-        'width': ''
-      });
+      if (typeof this.$vidcapContainer !== 'undefined') {
+        this.$vidcapContainer.css({
+          'height': '',
+          'width': ''
+        });
+      }
       this.$media.css({
         'width': '100%',
         'height': 'auto'

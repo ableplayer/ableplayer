@@ -6760,13 +6760,11 @@
           widthUsed += $(this).width();
         }
       });
-//
       rightControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();
         }
       });
-//
       if (this.isFullscreen()) {
         seekbarWidth = $(window).width() - widthUsed - 20;
       }
@@ -7549,10 +7547,12 @@
           'width': ''
         });
       }
-      this.$vidcapContainer.css({
-        'height': '',
-        'width': ''
-      });
+      if (typeof this.$vidcapContainer !== 'undefined') {
+        this.$vidcapContainer.css({
+          'height': '',
+          'width': ''
+        });
+      }
       this.$media.css({
         'width': '100%',
         'height': 'auto'
