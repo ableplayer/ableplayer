@@ -298,21 +298,20 @@
           this.seekBar.setPosition(elapsed, updateLive);
         }
       }
-    }
 
-    // When seeking, display the seek bar time instead of the actual elapsed time.
-    if (this.seekBar.tracking) {
-      displayElapsed = this.seekBar.lastTrackPosition;
-    }
-    else {
-      if (this.useChapterTimes) {
-        displayElapsed = this.chapterElapsed;
+      // When seeking, display the seek bar time instead of the actual elapsed time.
+      if (this.seekBar.tracking) {
+        displayElapsed = this.seekBar.lastTrackPosition;
       }
       else {
-        displayElapsed = elapsed;
+        if (this.useChapterTimes) {
+          displayElapsed = this.chapterElapsed;
+        }
+        else {
+          displayElapsed = elapsed;
+        }
       }
     }
-
     if (this.useChapterTimes) {
       this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.chapterDuration));
     }
@@ -523,7 +522,7 @@
       }
     }
 
-    if (this.includeTranscript) {
+    if (this.transcriptType) {
       // Sync checkbox and autoScrollTranscript with user preference
       if (this.prefAutoScrollTranscript === 1) {
         this.autoScrollTranscript = true;
@@ -1060,6 +1059,7 @@
 
     this.autoScrollTranscript = val; // val is boolean
     this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
+console.log('setting autoscroll pref to ' + this.prefAutoScrollTranscript);
     this.updateCookie('prefAutoScrollTranscript');
     this.refreshControls();
   };

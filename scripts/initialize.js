@@ -341,7 +341,7 @@
 
       thisObj.setupAltCaptions().then(function() {
 
-        if (thisObj.includeTranscript) {
+        if (thisObj.transcriptType === 'external' || thisObj.transcriptType === 'popup') {
           if (thisObj.captions.length <= 1) {
             // without captions/subtitles in multiple languages,
             // there is no need for a transcript language selector

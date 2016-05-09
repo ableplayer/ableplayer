@@ -16,70 +16,128 @@
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
-<!-- Style for this example only -->
+<!-- CSS for hidden blocks on content in this example -->
 <style>
-  main {
+  div#video-and-meta-wrapper {
     position: relative;
-    width: 100%;
-    margin: 0;
-  }
-  #player {
-    float: left;
     width: 480px;
-    margin: 0;
+    height: 360px;
   }
-  #results-wrapper {
-    height: 500px;
-    margin: 0;
-    padding-left: 510px;
-    padding-top: 1em;
+  div.meta {
+    display: block;
+    position: absolute;
+    z-index: 10000;
+    display: none;
   }
-  #results-wrapper p {
-    font-size: 1.1em;
-    margin-left: 1em;
+  div#info,
+  div#instructions {
+    background-color: #ffc;
+    border: 3px solid #412C84;
+    color: #000;
+    font-size: 1.2em;
+    line-height: 1.25em;
+    padding: 0.5em;
   }
-  #search-term {
+  div#info {
+    top: 40px;
+    left: 20px;
+    width: 200px;
+    height: auto;
+  }
+  div#instructions {
+    top: 240px;
+    left: 90px;
+    width: 200px;
+    height: auto;
+  }
+  div#instructions:focus,
+  div#terrill:focus,
+  div#terrill:hover {
+    border: 3px solid #C00;
+  }
+  div#terrill {
+    top: 40px;
+    left: 136px;
+    width: 120px;
+    height: 140px;
+    background-color: #FFF;
+    border: 3px solid #412C84;
+    opacity: 0.3;
+  }
+  div#terrill:focus {
+    border: 3px solid yellow;
+  }
+  div#response {
+    top: 40px;
+    right: 80px;
+    width: 150px;
+    height: 90px;
+    background-image: url('cartoon-bubble.png');
+    background-position: top left;
+    background-repeat: no-repeat;
     font-weight: bold;
-    font-style: italic;
+    font-size: 1.2em;
+    padding-top: 20px;
+    text-align: center;
   }
 </style>
 
+<!-- Example script: handle user's click on Terrill button -->
+<script>
+  $(document).ready(function() {
+    $('#instructions').on('focus',function() {
+      $('#terrill').attr('tabindex','0');
+    })
+    $('#terrill').on('click',function() {
+      toggleResponse();
+    });
+    $('#terrill').on('keypress',function(e) {
+      if (e.which === 13 || e.which === 32) {
+        toggleResponse();
+      }
+    });
+  });
+  function toggleResponse() {
+    if ($('#response').is(':visible')) {
+      $('#response').hide();
+    }
+    else {
+      // response is an interactive element not included in metadata file
+      // therefore it doesn't disappear automatically
+      $('#response').show().delay(5000).fadeOut();
+    }
+  }
+</script>
 </head>
 
 <body>
 
-<h1>Able Player Video Demo #8:<br/>Video player with search</h1>
+<h1>Able Player Video Demo #8:<br/>Video player with Metadata Track (type = selector)</h1>
 
-<p>Search terms are provided to the player using the <em>data-search</em> attribute.
-  In this hypothetical example, we have entered the search term "web mouse" into a search field.
-  On the search results page, the <em>data-search</em> attribute of the &lt;video&gt; element
-  is populated "web mouse" on page. Also the <em>data-search-div</em> attribute is populated with
-  the id of an external &lt;div&gt; in which to display the search results.
-  Finally, <em>data-use-transcript-button</em> is set to "false", since there isn't room on this page
-  for both search results <em>and</em> a transcript (although the latter is optional).
-  </p>
+<p>Time-synced metadata is provided in a WebVTT file with kind="metadata".
+  A <strong>data-meta-type</strong> attribute has value "selector", which is one of two types of supported metadata tracks
+  (the other is "text"). With "selector" as the metadata type, the contents of the WebVTT file is used to identify
+  blocks of existing hidden content that are shown at the designated times during playback.
+  The keyword <strong>PAUSE</strong> on a single line within the WebVTT file causes the player to pause
+  at the designated times.
+</p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
-<!-- to write transcript to an external div, pass id of an empty div via data-transcript-div -->
-<main role="main">
-  <div id="player">
-    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-search="you web" data-search-div="results" data-use-transcript-button="false">
-      <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-      <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-      <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-      <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
-      <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-      <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-    </video>
-  </div>
-  <div id="results-wrapper">
-    <h2>Your Search Results</h2>
-    <p>You searched for: <span id="search-term">you web</span></p>
-    <div id="results" class="able-search-results"></div>
-  </div>
-  <div id="transcript"></div>
-</main>
+<div id="video-and-meta-wrapper">
+  <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-meta-type="selector">
+    <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+    <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+    <!-- Able Player will display tracks alphabetically by label -->
+    <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+    <track kind="metadata" src="../media/wwa_meta.vtt"/>
+  </video>
+  <!-- metadata content -->
+  <div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
+  <div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
+  <div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
+  <div class="meta" id="response" role="alert">Ouch!</div>
+</div>
 
 </body>
 </html>

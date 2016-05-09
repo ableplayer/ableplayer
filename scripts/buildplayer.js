@@ -49,10 +49,16 @@
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
 
-    if (this.includeTranscript) {
-      this.injectTranscriptArea();
+    if (this.transcriptType) {
+      if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
+        this.injectTranscriptArea();
+      }
+      else if (this.transcriptType === 'manual') {
+        this.setupManualTranscript();
+      }
       this.addTranscriptAreaEvents();
     }
+
     this.injectAlert();
     this.injectPlaylist();
   };
@@ -149,68 +155,6 @@
     // It will be exposed conditionally within description.js > initDescription()
     this.$descDiv.hide();
     this.$ableDiv.append(this.$descDiv);
-  };
-
-  AblePlayer.prototype.injectTranscriptArea = function() {
-
-    var thisObj = this;
-
-    this.$transcriptArea = $('<div>', {
-      'class': 'able-transcript-area',
-      'tabindex': '-1'
-    });
-
-    this.$transcriptToolbar = $('<div>', {
-      'class': 'able-window-toolbar'
-    });
-
-    this.$transcriptDiv = $('<div>', {
-      'class' : 'able-transcript'
-    });
-
-    // Transcript toolbar content:
-    this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
-
-    // Add field for selecting a transcript language
-    // This will be deleted in initialize.js > recreatePlayer() if there are no languages
-    this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
-    // Add a default "Unknown" option; this will be deleted later if there are any
-    // elements with a language.
-    this.$unknownTranscriptOption = $('<option val="unknown">' + this.tt.unknown + '</option>');
-    this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
-    this.$transcriptLanguageSelect.prop('disabled', true);
-
-    var languageSelectWrapper = $('<div class="transcript-language-select-wrapper">');
-    this.$transcriptLanguageSelectContainer = languageSelectWrapper;
-
-    languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
-    this.$transcriptToolbar.append(languageSelectWrapper);
-
-    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
-
-    // If client has provided separate transcript location, put it there.
-    // Otherwise append it to the body
-    if (this.transcriptDivLocation) {
-      $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
-    }
-    else {
-      this.$ableWrapper.append(this.$transcriptArea);
-    }
-
-    // make it draggable (popup only; NOT external transcript)
-    if (!this.transcriptDivLocation) {
-      this.initDragDrop('transcript');
-      if (this.prefTranscript === 1) {
-        // transcript is on. Go ahead and position it
-        this.positionDraggableWindow('transcript',this.getDefaultWidth('transcript'));
-      }
-    }
-
-    // If client has provided separate transcript location, override user's preference for hiding transcript
-    if (!this.prefTranscript && !this.transcriptDivLocation) {
-      this.$transcriptArea.hide();
-    }
   };
 
   AblePlayer.prototype.getDefaultWidth = function(which) {
@@ -500,48 +444,6 @@
       }
     }
 
-  };
-
-  AblePlayer.prototype.addTranscriptAreaEvents = function() {
-    var thisObj = this;
-
-    this.$autoScrollTranscriptCheckbox.click(function () {
-      thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
-    });
-
-    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
-      // Propagation is stopped in seekpoint click handler, so clicks are on the scrollbar
-      // or outside of a seekpoint.
-      if (!thisObj.scrollingTranscript) {
-        thisObj.autoScrollTranscript = false;
-        thisObj.refreshControls();
-      }
-      thisObj.scrollingTranscript = false;
-    });
-
-    this.$transcriptLanguageSelect.change(function () {
-
-      var language = thisObj.$transcriptLanguageSelect.val();
-
-      // set language of all content (chapters, captions & descriptions)
-      // to match selection (if languages are avaialable)
-      for (var ii in thisObj.chapters) {
-        if (thisObj.chapters[ii].language === language) {
-          thisObj.transcriptChapters = thisObj.chapters[ii];
-        }
-      }
-      for (var ii in thisObj.captions) {
-        if (thisObj.captions[ii].language === language) {
-          thisObj.transcriptCaptions = thisObj.captions[ii];
-        }
-      }
-      for (var ii in thisObj.descriptions) {
-        if (thisObj.descriptions[ii].language === language) {
-          thisObj.transcriptDescriptions = thisObj.descriptions[ii];
-        }
-      }
-      thisObj.updateTranscript();
-    });
   };
 
   // Create popup div and append to player
@@ -962,7 +864,7 @@
       }
     }
 
-    if (this.includeTranscript && this.useTranscriptButton) {
+    if (this.transcriptType === 'popup') {
       bll.push('transcript');
     }
 

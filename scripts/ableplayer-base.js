@@ -82,34 +82,45 @@
 
     // override defaults with values of data-* attributes
 
-    var includeTranscript = media.data('include-transcript');
-    if (includeTranscript === undefined || includeTranscript === "")  {
-      // If there are caption tracks and no default provided, include transcript.
-      if (media.find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
-        includeTranscript = true;
-      }
-    }
-    if (includeTranscript) {
-      this.includeTranscript = true;
-    }
-    else {
-      this.includeTranscript = false;
-    }
-
     if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") {
       this.startTime = $(media).data('start-time');
     }
     else {
       this.startTime = 0;
     }
-    if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-      this.transcriptDivLocation = $(media).data('transcript-div');
-    }
 
-    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
-      this.useTranscriptButton = false;
-    }
+    // There are three types of interactive transcripts.
+    // In descending of order of precedence (in case there are conflicting tags), they are:
+    // 1. "manual" - A manually coded external transcript (requires data-transcript-src)
+    // 2. "external" - Automatically generated, written to an external div (requires data-transcript-div)
+    // 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
+    // If data-include-transcript="false", there is no "popup" transcript
 
+    this.transcriptType = null;
+    if ($(media).data('transcript-src') !== undefined) {
+      this.transcriptSrc = $(media).data('transcript-src');
+      if (this.transcriptSrcHasRequiredParts()) {
+        this.transcriptType = 'manual';
+      }
+      else {
+        this.transcriptType = null;
+      }
+    }
+    else if (media.find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
+      // required tracks are present. COULD automatically generate a transcript
+      if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
+        this.transcriptDivLocation = $(media).data('transcript-div');
+        this.transcriptType = 'external';
+      }
+      else if ($(media).data('include-transcript') !== undefined) {
+        if ($(media).data('include-transcript') !== false) {
+          this.transcriptType = 'popup';
+        }
+      }
+      else {
+        this.transcriptType = 'popup';
+      }
+    }
     if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") {
       this.lyricsMode = true;
     }

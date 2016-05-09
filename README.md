@@ -20,7 +20,7 @@ Features
 -   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by screen readers.  Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio. 
 -   Support for audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions. 
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so. 
--   An interactive transcript feature, built from the WebVTT caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. 
+-   An interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point. 
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting. 
 -   Support for playing YouTube videos within the Able Player chrome.  
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).    
@@ -213,13 +213,33 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 
 #### Transcript
 
--   **data-transcript-div** - optional; id of an external div in which to display the interactive transcript. 
-    The transcript is generated automatically if captions and/or descriptions are available. 
-    If this attribute is not provided the transcript will be displayed in its default container  
-    adjacent to the player.  
--   **data-use-transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container (e.g., on a dedicated transcript page), you might not want users to be able to toggle the transcript off. 
+Able Player can automatically generate an accessible interactive transcript from the chapters, captions, and descriptions tracks. There are three types of interactive transcripts supported: 
+-  "external" - Automatically generated, written to an external div (requires **data-transcript-div**)
+-  "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button on the controller
+-  "manual" - A manually coded external transcript (requires **data-transcript-src**)  
+ 
+The following attributes control which of the above types, if any, are generated: 
+-   **data-transcript-div** - optional; id of an external div in which to display an interactive transcript. 
+-   **data-transcript-src** - optional; id of an external div that contains a pre-existing manually coded transcript. Able Player will parse this transcript and interact with it during playback.  
+-   **data-include-transcript** - optional; set to "false" to exclude transcript button from controller. 
+
+If none of the above attributes are present, the transcript will be displayed in a draggable, resizable popup that can be toggled on/off using a button on the controller. Note that a toggle button is added to the controller *only* if the transcript is a "popup" type; there is no toggle button for either the "external" or "manual" transcript types. 
+
+Additional transcript-related attributes include:   
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
+
+To manually code the transcript, one simple strategy is to first allow Able Player to *automatically* generate a transcript. Then copy and paste its content as a starting point. To manually code a transcript from scratch, use the following markup (see [Video Demo #7] for an example):  
+
+- Wrap the entire transcript in a container with class="able-transcript", and wrap that in another container with class="able-transcript-area". 
+- Add an empty &lt;div&gt; just inside the outer container with class="able-window-toolbar".
+- Wrap all audio description in a &lt;div&gt; element with class="able-desc".
+- Add a &lt;span&gt; element to the start of each audio description block, with class="able-hidden" and text "Description:". This helps screen reader users to distinguish between caption and description text.
+- Wrap each interactive block of content in a &lt;span&gt; element, with class="able-transcript-seekpoint", plus **data-start** and **data-end** attributes. The values of these two data attributes are the video start and end times extpressed in seconds (decimals points are allowed). 
+- Wrap each interactive block of content in a &lt;span&gt; element, with class="able-transcript-seekpoint", plus **data-start** and **data-end** attributes. The values of these two data attributes are the video start and end times extpressed in seconds (decimals points are allowed). 
+- If the clickable span is caption text, also add the "able-transcript-caption" class. 
+- Wrap unspoken content such as names of speakers or descriptions of sound in a &lt;span&gt; element with class="able-unspoken". 
+- Use any other markup desired to add structure and style to your transcript. Able Player will ignore it.
 
 #### Chapters
 
@@ -439,7 +459,7 @@ on the `<video>` element. The value of this attribute must be the video's 11-cha
 
 If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute 
 on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
-of the described version. If users turn on the Description button on their player control bar, 
+of the described version. If users turn on the Description button on their player controller, 
 the described version of the video will be loaded instead of the non-described version. 
 
 Starting with 2.3.1, a YouTube Data API key is required for playing YouTube videos in Able Player.  
@@ -599,6 +619,7 @@ Files created by the build process are put into the */build* directory:
   [Modernizr]: http://modernizr.com/
   [npm]: https://www.npmjs.com/
   [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
+  [Video Demo #7]: demos/video7.html
   [WebVTT validator]: https://quuz.org/webvtt/
   [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
   [WebVTT]: https://w3c.github.io/webvtt/

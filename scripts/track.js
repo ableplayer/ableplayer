@@ -108,7 +108,7 @@
       this.captionsOn = false;
     }
 
-    if (this.includeTranscript) {
+    if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
       // Remove the "Unknown" option from the select box.
       if (this.$unknownTranscriptOption) {
         this.$unknownTranscriptOption.remove();
@@ -120,7 +120,7 @@
       }).text(trackLabel);
     }
     // alphabetize tracks by label
-    if (this.includeTranscript) {
+    if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
       var options = this.$transcriptLanguageSelect.find('option');
     }
     if (this.captions.length === 0) { // this is the first
@@ -130,7 +130,7 @@
         'label': trackLabel,
         'def': isDefaultTrack
       });
-      if (this.includeTranscript) {
+      if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
         if (isDefaultTrack) {
           option.attr('selected', 'selected');
         }
@@ -150,7 +150,7 @@
             'label': trackLabel,
             'def': isDefaultTrack
           });
-          if (this.includeTranscript) {
+          if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
             if (isDefaultTrack) {
               option.attr('selected', 'selected');
             }
@@ -169,7 +169,7 @@
           'label': trackLabel,
           'def': isDefaultTrack
         });
-        if (this.includeTranscript) {
+        if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
           if (isDefaultTrack) {
             option.attr('selected', 'selected');
           }
@@ -178,12 +178,10 @@
         this.captionLabels.push(trackLabel);
       }
     }
-    if (this.includeTranscript) {
+    if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
       if (this.$transcriptLanguageSelect.find('option').length > 1) {
         // More than one option now, so enable the select.
         this.$transcriptLanguageSelect.prop('disabled', false);
-      }
-      else {
       }
     }
   };
