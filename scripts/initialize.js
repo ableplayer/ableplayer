@@ -136,8 +136,12 @@
   // This sets some variables, but does not modify anything.  Safe to call multiple times.
   // Can call again after updating this.media so long as new media element has the same ID.
   AblePlayer.prototype.reinitialize = function () {
-    var deferred = new $.Deferred();
-    var promise = deferred.promise();
+
+    var deferred, promise, thisObj, errorMsg, srcFile;
+
+    deferred = new $.Deferred();
+    promise = deferred.promise();
+    thisObj = this;
 
     // if F12 Developer Tools aren't open in IE (through 9, no longer a problen in IE10)
     // console.log causes an error - can't use debug without a console to log messages to
@@ -163,22 +167,29 @@
     }
     else {
       this.mediaType = this.$media.get(0).tagName;
-      if (this.debug) {
-        console.log('You initialized Able Player with ' + this.mediaId + ', which is a ' + this.mediaType + ' element.');
-        console.log('Able Player only works with HTML audio or video elements.');
-        console.log('The element with id ' + this.mediaId + ' is a ' + this.mediaType + ' element.');
-        console.log('Expecting an audio or video element.');
-      }
+      errorMsg = 'Media player initialized with ' + this.mediaType + '#' + this.mediaId + '. ';
+      errorMsg += 'Expecting an HTML5 audio or video element.';
+      this.fallback(errorMsg);
       deferred.fail();
       return promise;
     }
 
     this.$sources = this.$media.find('source');
-    if (this.debug) {
-      console.log('found ' + this.$sources.length + ' media sources');
-    }
+    this.$sources.each(function() {
+      // might be overkill to choke on one bad URL
+      // browser might be able to recover if other files are ok
+      // Opting to keep as is for now in the interest of informing web owners of errors
+      srcFile = $(this).attr('src');
+      if (!thisObj.fileExists(srcFile)) {
+        thisObj.fallback('ERROR: File not found: ' + srcFile);
+      };
+    });
 
     this.player = this.getPlayer();
+    if (!this.player) {
+      // an error was generated in getPlayer()
+      this.fallback(this.error);
+    }
     this.setIconType();
     this.setDimensions();
 
@@ -408,6 +419,7 @@
 
       // After done messing with the player, this is necessary to fix playback on iOS
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
+console.log('about to load media...');
         thisObj.$media[0].load();
       }
       if (thisObj.useFixedSeekInterval === false) {
@@ -623,11 +635,13 @@
   };
 
   AblePlayer.prototype.getPlayer = function() {
+
     // Determine which player to use, if any
     // return 'html5', 'jw' or null
     var i, sourceType, $newItem;
     if (this.youTubeId) {
       if (this.mediaType !== 'video') {
+        this.error = 'To play a YouTube video, use the &lt;video&gt; tag.';
         return null;
       }
       else {
@@ -645,6 +659,7 @@
         return 'jw';
       }
       else {
+        this.error = 'The fallback player (JW Player) is unable to play the available media file.';
         return null;
       }
     }
@@ -652,6 +667,7 @@
       return 'html5';
     }
     else {
+      this.error = 'This browser does not support the available media file.';
       return null;
     }
   };
@@ -692,6 +708,19 @@
       }
     }
     return false;
+  };
+
+  AblePlayer.prototype.fileExists = function(file) {
+
+    $.ajax({
+      url: file,
+      success: function(data){
+        return true;
+      },
+      error: function(data){
+        return false;
+      },
+    });
   };
 
 })(jQuery);

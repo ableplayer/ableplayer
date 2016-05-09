@@ -43,9 +43,7 @@
   };
 
   AblePlayer.prototype.onMediaPause = function () {
-    if (this.debug) {
-      console.log('media pause event');
-    }
+    // do something
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
@@ -329,28 +327,17 @@
     // and no events are triggered until media begins to play
     this.$media
       .on('emptied',function() {
-        if (thisObj.debug) {
-          console.log('media has been emptied');
-        }
+        // do something
       })
       .on('loadedmetadata',function() {
-        if (thisObj.debug) {
-          console.log('meta data has loaded');
-        }
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() {
-        if (thisObj.debug) {
-          console.log('canplay event');
-        }
         if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
         }
       })
       .on('canplaythrough',function() {
-        if (thisObj.debug) {
-          console.log('canplaythrough event');
-        }
         if (thisObj.startTime && !thisObj.startedPlaying) {
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
@@ -385,9 +372,7 @@
         thisObj.onMediaPause();
       })
       .on('ratechange',function() {
-        if (thisObj.debug) {
-          console.log('media ratechange');
-        }
+        // do something
       })
       .on('volumechange',function() {
         thisObj.volume = thisObj.getVolume();

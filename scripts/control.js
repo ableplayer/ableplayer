@@ -1059,7 +1059,6 @@
 
     this.autoScrollTranscript = val; // val is boolean
     this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
-console.log('setting autoscroll pref to ' + this.prefAutoScrollTranscript);
     this.updateCookie('prefAutoScrollTranscript');
     this.refreshControls();
   };

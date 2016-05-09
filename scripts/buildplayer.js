@@ -380,11 +380,30 @@
     return position;
   };
 
-  AblePlayer.prototype.injectPoster = function ($element) {
+  AblePlayer.prototype.injectPoster = function ($element, context) {
 
     // get poster attribute from media element and append that as an img to $element
-    // currently only applies to YouTube and fallback
-    var poster;
+    // context is either 'youtube' or 'fallback'
+    var poster, width, height;
+
+    if (context === 'youtube') {
+      if (typeof this.ytWidth !== 'undefined') {
+        width = this.ytWidth;
+        height = this.ytHeight;
+      }
+      else if (typeof this.playerMaxWidth !== 'undefined') {
+        width = this.playerMaxWidth;
+        height = this.playerMaxHeight;
+      }
+      else if (typeof this.playerWidth !== 'undefined') {
+        width = this.playerWidth;
+        height = this.playerHeight;
+      }
+    }
+    else if (context === 'fallback') {
+      width = '100%';
+      height = 'auto';
+    }
 
     if (this.$media.attr('poster')) {
       poster = this.$media.attr('poster');
@@ -393,8 +412,8 @@
         'src' : poster,
         'alt' : "",
         'role': "presentation",
-        'width': this.playerWidth,
-        'height': this.playerHeight
+        'width': width,
+        'height': height
       });
       $element.append(this.$posterImg);
     }
@@ -439,11 +458,7 @@
       this.swapSource(0);
       // redefine this.$sources now that media contains one or more <source> elements
       this.$sources = this.$media.find('source');
-      if (this.debug) {
-        console.log('after initializing playlist, there are ' + this.$sources.length + ' media sources');
-      }
     }
-
   };
 
   // Create popup div and append to player
@@ -727,36 +742,53 @@
     }
   };
 
-  AblePlayer.prototype.provideFallback = function(reason) {
+  AblePlayer.prototype.fallback = function(reason) {
 
     // provide ultimate fallback for users who are unable to play the media
-    // reason is either 'No Support' or a specific error message
+    // reason is a specific error message
+    // if reason is 'NO SUPPORT', use standard text from translation file
 
-    var fallback, fallbackText, $fallbackContainer, showBrowserList, browsers, i, b, browserList;
+    var $fallbackDiv, width, mediaClone, fallback, fallbackText,
+    showBrowserList, browsers, i, b, browserList;
 
-    // use fallback content that's nested inside the HTML5 media element, if there is any
-    // any content other than div, p, and ul is rejected
-
-    fallback = this.$media.find('div,p,ul');
     showBrowserList = false;
 
-    if (fallback.length === 0) {
-      if (reason !== 'No Support' && typeof reason !== 'undefined') {
-        fallback = $('<p>').text(reason);
-      }
-      else {
-        fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
-        fallbackText += this.tt.fallbackError2 + ':';
-        fallback = $('<p>').text(fallbackText);
-        showBrowserList = true;
-      }
-    }
-    $fallbackContainer = $('<div>',{
+    $fallbackDiv = $('<div>',{
       'class' : 'able-fallback',
       'role' : 'alert',
     });
-    this.$media.before($fallbackContainer);
-    $fallbackContainer.html(fallback);
+    // override default width of .able-fallback with player width, if known
+    if (typeof this.playerMaxWidth !== 'undefined') {
+      width = this.playerMaxWidth + 'px';
+    }
+    else if (this.$media.attr('width')) {
+      width = parseInt(this.$media.attr('width'), 10) + 'px';
+    }
+    else {
+      width = '100%';
+    }
+    $fallbackDiv.css('width',width);
+
+    // use fallback content that's nested inside the HTML5 media element, if there is any
+    mediaClone = this.$media.clone();
+    $('source, track', mediaClone).remove();
+    fallback = mediaClone.html().trim();
+    if (fallback.length) {
+      $fallbackDiv.html(fallback);
+    }
+    else if (reason == 'NO SUPPORT') {
+      // not using a supporting browser; use standard text from translation file
+      fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
+      fallbackText += this.tt.fallbackError2 + ':';
+      fallback = $('<p>').text(fallbackText);
+      $fallbackDiv.html(fallback);
+      showBrowserList = true;
+    }
+    else {
+      // show the reason
+      $fallbackDiv.text(reason);
+    }
+
     if (showBrowserList) {
       browserList = $('<ul>');
       browsers = this.getSupportingBrowsers();
@@ -765,14 +797,24 @@
         b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
         browserList.append(b);
       }
-      $fallbackContainer.append(browserList);
+      $fallbackDiv.append(browserList);
     }
 
     // if there's a poster, show that as well
-    this.injectPoster($fallbackContainer);
+    this.injectPoster($fallbackDiv, 'fallback');
 
-    // now remove the media element.
-    this.$media.remove();
+    // inject $fallbackDiv into the DOM and remove broken content
+    if (typeof this.$ableWrapper !== 'undefined') {
+      this.$ableWrapper.before($fallbackDiv);
+      this.$ableWrapper.remove();
+    }
+    else if (typeof this.$media !== 'undefined') {
+      this.$media.before($fallbackDiv);
+      this.$media.remove();
+    }
+    else {
+      $('body').prepend($fallbackDiv);
+    }
   };
 
   AblePlayer.prototype.getSupportingBrowsers = function() {

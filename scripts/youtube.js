@@ -139,7 +139,7 @@
           }
         }
       });
-      thisObj.injectPoster(thisObj.$mediaContainer);
+      thisObj.injectPoster(thisObj.$mediaContainer, 'youtube');
       thisObj.$media.remove();
     };
 

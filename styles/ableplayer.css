@@ -1072,6 +1072,8 @@ div.able-chapters-div button::-moz-focus-inner {
   font-size: 1.1em;
   padding: 1em;
   margin-bottom: 1em;
+  width: 500px;
+  max-width: 98%;
 }
 .able-fallback div,
 .able-fallback ul,
@@ -1085,6 +1087,9 @@ div.able-chapters-div button::-moz-focus-inner {
   width: 90%;
   margin: 1em auto;
   opacity: 0.3;
+}
+.able-fallback img.able-poster {
+  position: relative;
 }
 
 /*

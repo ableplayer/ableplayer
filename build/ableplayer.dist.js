@@ -69,7 +69,7 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      
+      this.fallback('ERROR: No media specified.');
       return;
     }
 
@@ -276,7 +276,7 @@
         }
         else {
           // can't continue loading player with no text
-          
+          thisObj.fallback('ERROR: Failed to load translation table');
         }
       }
     );
@@ -288,13 +288,10 @@
   AblePlayer.prototype.setup = function() {
 
     var thisObj = this;
-    if (this.debug && this.startTime > 0) {
-      
-    }
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
-        thisObj.provideFallback();
+        thisObj.fallback('Unable to play media');
       }
       else {
         thisObj.setupInstance().then(function () {
@@ -446,8 +443,12 @@
   // This sets some variables, but does not modify anything.  Safe to call multiple times.
   // Can call again after updating this.media so long as new media element has the same ID.
   AblePlayer.prototype.reinitialize = function () {
-    var deferred = new $.Deferred();
-    var promise = deferred.promise();
+
+    var deferred, promise, thisObj, errorMsg, srcFile;
+
+    deferred = new $.Deferred();
+    promise = deferred.promise();
+    thisObj = this;
 
     // if F12 Developer Tools aren't open in IE (through 9, no longer a problen in IE10)
     // console.log causes an error - can't use debug without a console to log messages to
@@ -473,22 +474,29 @@
     }
     else {
       this.mediaType = this.$media.get(0).tagName;
-      if (this.debug) {
-        
-        
-        
-        
-      }
+      errorMsg = 'Media player initialized with ' + this.mediaType + '#' + this.mediaId + '. ';
+      errorMsg += 'Expecting an HTML5 audio or video element.';
+      this.fallback(errorMsg);
       deferred.fail();
       return promise;
     }
 
     this.$sources = this.$media.find('source');
-    if (this.debug) {
-      
-    }
+    this.$sources.each(function() {
+      // might be overkill to choke on one bad URL
+      // browser might be able to recover if other files are ok
+      // Opting to keep as is for now in the interest of informing web owners of errors
+      srcFile = $(this).attr('src');
+      if (!thisObj.fileExists(srcFile)) {
+        thisObj.fallback('ERROR: File not found: ' + srcFile);
+      };
+    });
 
     this.player = this.getPlayer();
+    if (!this.player) {
+      // an error was generated in getPlayer()
+      this.fallback(this.error);
+    }
     this.setIconType();
     this.setDimensions();
 
@@ -718,6 +726,7 @@
 
       // After done messing with the player, this is necessary to fix playback on iOS
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
+
         thisObj.$media[0].load();
       }
       if (thisObj.useFixedSeekInterval === false) {
@@ -933,11 +942,13 @@
   };
 
   AblePlayer.prototype.getPlayer = function() {
+
     // Determine which player to use, if any
     // return 'html5', 'jw' or null
     var i, sourceType, $newItem;
     if (this.youTubeId) {
       if (this.mediaType !== 'video') {
+        this.error = 'To play a YouTube video, use the &lt;video&gt; tag.';
         return null;
       }
       else {
@@ -955,6 +966,7 @@
         return 'jw';
       }
       else {
+        this.error = 'The fallback player (JW Player) is unable to play the available media file.';
         return null;
       }
     }
@@ -962,6 +974,7 @@
       return 'html5';
     }
     else {
+      this.error = 'This browser does not support the available media file.';
       return null;
     }
   };
@@ -1002,6 +1015,19 @@
       }
     }
     return false;
+  };
+
+  AblePlayer.prototype.fileExists = function(file) {
+
+    $.ajax({
+      url: file,
+      success: function(data){
+        return true;
+      },
+      error: function(data){
+        return false;
+      },
+    });
   };
 
 })(jQuery);
@@ -3047,11 +3073,30 @@
     return position;
   };
 
-  AblePlayer.prototype.injectPoster = function ($element) {
+  AblePlayer.prototype.injectPoster = function ($element, context) {
 
     // get poster attribute from media element and append that as an img to $element
-    // currently only applies to YouTube and fallback
-    var poster;
+    // context is either 'youtube' or 'fallback'
+    var poster, width, height;
+
+    if (context === 'youtube') {
+      if (typeof this.ytWidth !== 'undefined') {
+        width = this.ytWidth;
+        height = this.ytHeight;
+      }
+      else if (typeof this.playerMaxWidth !== 'undefined') {
+        width = this.playerMaxWidth;
+        height = this.playerMaxHeight;
+      }
+      else if (typeof this.playerWidth !== 'undefined') {
+        width = this.playerWidth;
+        height = this.playerHeight;
+      }
+    }
+    else if (context === 'fallback') {
+      width = '100%';
+      height = 'auto';
+    }
 
     if (this.$media.attr('poster')) {
       poster = this.$media.attr('poster');
@@ -3060,8 +3105,8 @@
         'src' : poster,
         'alt' : "",
         'role': "presentation",
-        'width': this.playerWidth,
-        'height': this.playerHeight
+        'width': width,
+        'height': height
       });
       $element.append(this.$posterImg);
     }
@@ -3106,11 +3151,7 @@
       this.swapSource(0);
       // redefine this.$sources now that media contains one or more <source> elements
       this.$sources = this.$media.find('source');
-      if (this.debug) {
-        
-      }
     }
-
   };
 
   // Create popup div and append to player
@@ -3394,36 +3435,53 @@
     }
   };
 
-  AblePlayer.prototype.provideFallback = function(reason) {
+  AblePlayer.prototype.fallback = function(reason) {
 
     // provide ultimate fallback for users who are unable to play the media
-    // reason is either 'No Support' or a specific error message
+    // reason is a specific error message
+    // if reason is 'NO SUPPORT', use standard text from translation file
 
-    var fallback, fallbackText, $fallbackContainer, showBrowserList, browsers, i, b, browserList;
+    var $fallbackDiv, width, mediaClone, fallback, fallbackText,
+    showBrowserList, browsers, i, b, browserList;
 
-    // use fallback content that's nested inside the HTML5 media element, if there is any
-    // any content other than div, p, and ul is rejected
-
-    fallback = this.$media.find('div,p,ul');
     showBrowserList = false;
 
-    if (fallback.length === 0) {
-      if (reason !== 'No Support' && typeof reason !== 'undefined') {
-        fallback = $('<p>').text(reason);
-      }
-      else {
-        fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
-        fallbackText += this.tt.fallbackError2 + ':';
-        fallback = $('<p>').text(fallbackText);
-        showBrowserList = true;
-      }
-    }
-    $fallbackContainer = $('<div>',{
+    $fallbackDiv = $('<div>',{
       'class' : 'able-fallback',
       'role' : 'alert',
     });
-    this.$media.before($fallbackContainer);
-    $fallbackContainer.html(fallback);
+    // override default width of .able-fallback with player width, if known
+    if (typeof this.playerMaxWidth !== 'undefined') {
+      width = this.playerMaxWidth + 'px';
+    }
+    else if (this.$media.attr('width')) {
+      width = parseInt(this.$media.attr('width'), 10) + 'px';
+    }
+    else {
+      width = '100%';
+    }
+    $fallbackDiv.css('width',width);
+
+    // use fallback content that's nested inside the HTML5 media element, if there is any
+    mediaClone = this.$media.clone();
+    $('source, track', mediaClone).remove();
+    fallback = mediaClone.html().trim();
+    if (fallback.length) {
+      $fallbackDiv.html(fallback);
+    }
+    else if (reason == 'NO SUPPORT') {
+      // not using a supporting browser; use standard text from translation file
+      fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
+      fallbackText += this.tt.fallbackError2 + ':';
+      fallback = $('<p>').text(fallbackText);
+      $fallbackDiv.html(fallback);
+      showBrowserList = true;
+    }
+    else {
+      // show the reason
+      $fallbackDiv.text(reason);
+    }
+
     if (showBrowserList) {
       browserList = $('<ul>');
       browsers = this.getSupportingBrowsers();
@@ -3432,14 +3490,24 @@
         b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
         browserList.append(b);
       }
-      $fallbackContainer.append(browserList);
+      $fallbackDiv.append(browserList);
     }
 
     // if there's a poster, show that as well
-    this.injectPoster($fallbackContainer);
+    this.injectPoster($fallbackDiv, 'fallback');
 
-    // now remove the media element.
-    this.$media.remove();
+    // inject $fallbackDiv into the DOM and remove broken content
+    if (typeof this.$ableWrapper !== 'undefined') {
+      this.$ableWrapper.before($fallbackDiv);
+      this.$ableWrapper.remove();
+    }
+    else if (typeof this.$media !== 'undefined') {
+      this.$media.before($fallbackDiv);
+      this.$media.remove();
+    }
+    else {
+      $('body').prepend($fallbackDiv);
+    }
   };
 
   AblePlayer.prototype.getSupportingBrowsers = function() {
@@ -4499,7 +4567,7 @@
           }
         }
       });
-      thisObj.injectPoster(thisObj.$mediaContainer);
+      thisObj.injectPoster(thisObj.$mediaContainer, 'youtube');
       thisObj.$media.remove();
     };
 
@@ -7311,7 +7379,6 @@
 
     this.autoScrollTranscript = val; // val is boolean
     this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
-
     this.updateCookie('prefAutoScrollTranscript');
     this.refreshControls();
   };
@@ -8937,9 +9004,7 @@
   };
 
   AblePlayer.prototype.onMediaPause = function () {
-    if (this.debug) {
-      
-    }
+    // do something
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
@@ -9223,28 +9288,17 @@
     // and no events are triggered until media begins to play
     this.$media
       .on('emptied',function() {
-        if (thisObj.debug) {
-          
-        }
+        // do something
       })
       .on('loadedmetadata',function() {
-        if (thisObj.debug) {
-          
-        }
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() {
-        if (thisObj.debug) {
-          
-        }
         if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
         }
       })
       .on('canplaythrough',function() {
-        if (thisObj.debug) {
-          
-        }
         if (thisObj.startTime && !thisObj.startedPlaying) {
           // try again, if seeking failed on canplay
           thisObj.seekTo(thisObj.startTime);
@@ -9279,9 +9333,7 @@
         thisObj.onMediaPause();
       })
       .on('ratechange',function() {
-        if (thisObj.debug) {
-          
-        }
+        // do something
       })
       .on('volumechange',function() {
         thisObj.volume = thisObj.getVolume();
