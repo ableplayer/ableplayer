@@ -482,15 +482,6 @@
     }
 
     this.$sources = this.$media.find('source');
-    this.$sources.each(function() {
-      // might be overkill to choke on one bad URL
-      // browser might be able to recover if other files are ok
-      // Opting to keep as is for now in the interest of informing web owners of errors
-      srcFile = $(this).attr('src');
-      if (!thisObj.fileExists(srcFile)) {
-        thisObj.fallback('ERROR: File not found: ' + srcFile);
-      };
-    });
 
     this.player = this.getPlayer();
     if (!this.player) {
@@ -726,7 +717,6 @@
 
       // After done messing with the player, this is necessary to fix playback on iOS
       if (thisObj.player === 'html5' && thisObj.isIOS()) {
-console.log('about to load media...');
         thisObj.$media[0].load();
       }
       if (thisObj.useFixedSeekInterval === false) {
