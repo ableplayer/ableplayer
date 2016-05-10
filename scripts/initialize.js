@@ -169,7 +169,7 @@
       this.mediaType = this.$media.get(0).tagName;
       errorMsg = 'Media player initialized with ' + this.mediaType + '#' + this.mediaId + '. ';
       errorMsg += 'Expecting an HTML5 audio or video element.';
-      this.fallback(errorMsg);
+      this.provideFallback(errorMsg);
       deferred.fail();
       return promise;
     }
@@ -179,7 +179,7 @@
     this.player = this.getPlayer();
     if (!this.player) {
       // an error was generated in getPlayer()
-      this.fallback(this.error);
+      this.provideFallback(this.error);
     }
     this.setIconType();
     this.setDimensions();
@@ -354,8 +354,7 @@
         thisObj.initDescription();
         thisObj.initDefaultCaption();
 
-        thisObj.initPlayer().then(function() {
-
+        thisObj.initPlayer().then(function() { // initPlayer success
           thisObj.initializing = false;
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
@@ -370,7 +369,11 @@
           if (thisObj.defaultChapter) {
             thisObj.seekToDefaultChapter();
           }
-        });
+        },
+        function() {  // initPlayer fail
+          thisObj.provideFallback(this.error);
+        }
+        );
       });
     });
   };
@@ -380,9 +383,6 @@
     var thisObj = this;
     var playerPromise;
 
-    if (this.debug && this.player) {
-      console.log ('Using the ' + this.player + ' media player');
-    }
     // First run player specific initialization.
     if (this.player === 'html5') {
       playerPromise = this.initHtml5Player();
@@ -397,26 +397,32 @@
     // After player specific initialization is done, run remaining general initialization.
     var deferred = new $.Deferred();
     var promise = deferred.promise();
-    playerPromise.done(function () {
-      thisObj.addControls();
-      thisObj.addEventListeners();
-      // Calling these set functions also initializes some icons.
-      if (thisObj.Volume) {
-        thisObj.setMute(false);
-      }
-      thisObj.setFullscreen(false);
-      thisObj.setVolume(thisObj.defaultVolume);
-      thisObj.refreshControls();
+    playerPromise.done(
+      function () { // done/resolved
+        thisObj.addControls();
+        thisObj.addEventListeners();
+        // Calling these set functions also initializes some icons.
+        if (thisObj.Volume) {
+          thisObj.setMute(false);
+        }
+        thisObj.setFullscreen(false);
+        thisObj.setVolume(thisObj.defaultVolume);
+        thisObj.refreshControls();
 
-      // After done messing with the player, this is necessary to fix playback on iOS
-      if (thisObj.player === 'html5' && thisObj.isIOS()) {
-        thisObj.$media[0].load();
+        // After done messing with the player, this is necessary to fix playback on iOS
+        if (thisObj.player === 'html5' && thisObj.isIOS()) {
+          thisObj.$media[0].load();
+        }
+        if (thisObj.useFixedSeekInterval === false) {
+          thisObj.setSeekInterval();
+        }
+        deferred.resolve();
       }
-      if (thisObj.useFixedSeekInterval === false) {
-        thisObj.setSeekInterval();
+    ).fail(function () { // failed
+      deferred.reject();
       }
-      deferred.resolve();
-    });
+    );
+
     return promise;
   };
 
@@ -517,13 +523,12 @@
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
-    // attempt to load jwplayer script
-    $.getScript(this.fallbackPath + 'jwplayer.js')
-      .done(function( script, textStatus ) {
-        if (thisObj.debug) {
-          console.log ('Successfully loaded the JW Player');
-        }
-
+    $.ajax({
+      async: false,
+      url: this.fallbackPath + 'jwplayer.js',
+      dataType: 'script',
+      success: function( data, textStatus, jqXHR) {
+        // Successfully loaded the JW Player
         // add an id to div.able-media-container (JW Player needs this)
         thisObj.jwId = thisObj.mediaId + '_fallback';
         thisObj.$mediaContainer.attr('id', thisObj.jwId);
@@ -585,18 +590,15 @@
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
         thisObj.$media.remove();
 
-        // Done with JW Player initialization.
         deferred.resolve();
-      })
-      .fail(function( jqxhr, preferences, exception ) {
-        if (thisObj.debug) {
-          console.log ('Unable to load JW Player.');
-        }
-        thisObj.player = null;
-        deferred.fail();
-      });
-
-
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        // Loading the JW Player failed
+        this.error = 'Failed to load JW Player.';
+        deferred.reject();
+      }
+    });
+    // Done with JW Player initialization.
     return promise;
   };
 
@@ -698,19 +700,6 @@
       }
     }
     return false;
-  };
-
-  AblePlayer.prototype.fileExists = function(file) {
-
-    $.ajax({
-      url: file,
-      success: function(data){
-        return true;
-      },
-      error: function(data){
-        return false;
-      },
-    });
   };
 
 })(jQuery);

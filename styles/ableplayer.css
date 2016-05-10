@@ -1072,8 +1072,8 @@ div.able-chapters-div button::-moz-focus-inner {
   font-size: 1.1em;
   padding: 1em;
   margin-bottom: 1em;
-  width: 500px;
-  max-width: 98%;
+  max-width: 500px;
+  width: 95%;
 }
 .able-fallback div,
 .able-fallback ul,

@@ -69,7 +69,7 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      this.fallback('ERROR: No media specified.');
+      this.provideFallback('ERROR: No media specified.');
       return;
     }
 
@@ -217,19 +217,20 @@
       this.showNowPlaying = true;
     }
 
-    if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
-      var fallback =  $(media).data('fallback');
-      if (fallback === 'jw') {
-        this.fallback = fallback;
-      }
-    }
-
     if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
       this.testFallback = true;
     }
 
     if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
       this.fallbackPath = $(media).data('fallback-path');
+    }
+
+    var jwFound = false;
+    if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
+      var fallback =  $(media).data('fallback');
+      if (fallback === 'jw') {
+        this.fallback = fallback;
+      }
     }
 
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
@@ -276,7 +277,7 @@
         }
         else {
           // can't continue loading player with no text
-          thisObj.fallback('ERROR: Failed to load translation table');
+          thisObj.provideFallback('ERROR: Failed to load translation table');
         }
       }
     );
@@ -291,7 +292,7 @@
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
-        thisObj.fallback('Unable to play media');
+        thisObj.provideFallback('Unable to play media');
       }
       else {
         thisObj.setupInstance().then(function () {
@@ -476,7 +477,7 @@
       this.mediaType = this.$media.get(0).tagName;
       errorMsg = 'Media player initialized with ' + this.mediaType + '#' + this.mediaId + '. ';
       errorMsg += 'Expecting an HTML5 audio or video element.';
-      this.fallback(errorMsg);
+      this.provideFallback(errorMsg);
       deferred.fail();
       return promise;
     }
@@ -486,7 +487,7 @@
     this.player = this.getPlayer();
     if (!this.player) {
       // an error was generated in getPlayer()
-      this.fallback(this.error);
+      this.provideFallback(this.error);
     }
     this.setIconType();
     this.setDimensions();
@@ -661,8 +662,7 @@
         thisObj.initDescription();
         thisObj.initDefaultCaption();
 
-        thisObj.initPlayer().then(function() {
-
+        thisObj.initPlayer().then(function() { // initPlayer success
           thisObj.initializing = false;
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
@@ -677,7 +677,11 @@
           if (thisObj.defaultChapter) {
             thisObj.seekToDefaultChapter();
           }
-        });
+        },
+        function() {  // initPlayer fail
+          thisObj.provideFallback(this.error);
+        }
+        );
       });
     });
   };
@@ -687,9 +691,6 @@
     var thisObj = this;
     var playerPromise;
 
-    if (this.debug && this.player) {
-      console.log ('Using the ' + this.player + ' media player');
-    }
     // First run player specific initialization.
     if (this.player === 'html5') {
       playerPromise = this.initHtml5Player();
@@ -704,26 +705,32 @@
     // After player specific initialization is done, run remaining general initialization.
     var deferred = new $.Deferred();
     var promise = deferred.promise();
-    playerPromise.done(function () {
-      thisObj.addControls();
-      thisObj.addEventListeners();
-      // Calling these set functions also initializes some icons.
-      if (thisObj.Volume) {
-        thisObj.setMute(false);
-      }
-      thisObj.setFullscreen(false);
-      thisObj.setVolume(thisObj.defaultVolume);
-      thisObj.refreshControls();
+    playerPromise.done(
+      function () { // done/resolved
+        thisObj.addControls();
+        thisObj.addEventListeners();
+        // Calling these set functions also initializes some icons.
+        if (thisObj.Volume) {
+          thisObj.setMute(false);
+        }
+        thisObj.setFullscreen(false);
+        thisObj.setVolume(thisObj.defaultVolume);
+        thisObj.refreshControls();
 
-      // After done messing with the player, this is necessary to fix playback on iOS
-      if (thisObj.player === 'html5' && thisObj.isIOS()) {
-        thisObj.$media[0].load();
+        // After done messing with the player, this is necessary to fix playback on iOS
+        if (thisObj.player === 'html5' && thisObj.isIOS()) {
+          thisObj.$media[0].load();
+        }
+        if (thisObj.useFixedSeekInterval === false) {
+          thisObj.setSeekInterval();
+        }
+        deferred.resolve();
       }
-      if (thisObj.useFixedSeekInterval === false) {
-        thisObj.setSeekInterval();
+    ).fail(function () { // failed
+      deferred.reject();
       }
-      deferred.resolve();
-    });
+    );
+
     return promise;
   };
 
@@ -824,13 +831,12 @@
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
-    // attempt to load jwplayer script
-    $.getScript(this.fallbackPath + 'jwplayer.js')
-      .done(function( script, textStatus ) {
-        if (thisObj.debug) {
-          console.log ('Successfully loaded the JW Player');
-        }
-
+    $.ajax({
+      async: false,
+      url: this.fallbackPath + 'jwplayer.js',
+      dataType: 'script',
+      success: function( data, textStatus, jqXHR) {
+        // Successfully loaded the JW Player
         // add an id to div.able-media-container (JW Player needs this)
         thisObj.jwId = thisObj.mediaId + '_fallback';
         thisObj.$mediaContainer.attr('id', thisObj.jwId);
@@ -892,18 +898,15 @@
         // keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
         thisObj.$media.remove();
 
-        // Done with JW Player initialization.
         deferred.resolve();
-      })
-      .fail(function( jqxhr, preferences, exception ) {
-        if (thisObj.debug) {
-          console.log ('Unable to load JW Player.');
-        }
-        thisObj.player = null;
-        deferred.fail();
-      });
-
-
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        // Loading the JW Player failed
+        this.error = 'Failed to load JW Player.';
+        deferred.reject();
+      }
+    });
+    // Done with JW Player initialization.
     return promise;
   };
 
@@ -1005,19 +1008,6 @@
       }
     }
     return false;
-  };
-
-  AblePlayer.prototype.fileExists = function(file) {
-
-    $.ajax({
-      url: file,
-      success: function(data){
-        return true;
-      },
-      error: function(data){
-        return false;
-      },
-    });
   };
 
 })(jQuery);
@@ -3425,7 +3415,7 @@
     }
   };
 
-  AblePlayer.prototype.fallback = function(reason) {
+  AblePlayer.prototype.provideFallback = function(reason) {
 
     // provide ultimate fallback for users who are unable to play the media
     // reason is a specific error message
@@ -3434,6 +3424,8 @@
     var $fallbackDiv, width, mediaClone, fallback, fallbackText,
     showBrowserList, browsers, i, b, browserList;
 
+    // Could show list of supporting browsers if 99.9% confident the error is truly an outdated browser
+    // Too many sites say "You need to update your browser" when in fact I'm using a current version
     showBrowserList = false;
 
     $fallbackDiv = $('<div>',{
@@ -3450,7 +3442,7 @@
     else {
       width = '100%';
     }
-    $fallbackDiv.css('width',width);
+    $fallbackDiv.css('max-width',width);
 
     // use fallback content that's nested inside the HTML5 media element, if there is any
     mediaClone = this.$media.clone();

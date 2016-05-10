@@ -69,7 +69,7 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      this.fallback('ERROR: No media specified.');
+      this.provideFallback('ERROR: No media specified.');
       return;
     }
 
@@ -217,19 +217,20 @@
       this.showNowPlaying = true;
     }
 
-    if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
-      var fallback =  $(media).data('fallback');
-      if (fallback === 'jw') {
-        this.fallback = fallback;
-      }
-    }
-
     if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
       this.testFallback = true;
     }
 
     if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
       this.fallbackPath = $(media).data('fallback-path');
+    }
+
+    var jwFound = false;
+    if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
+      var fallback =  $(media).data('fallback');
+      if (fallback === 'jw') {
+        this.fallback = fallback;
+      }
     }
 
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
@@ -276,7 +277,7 @@
         }
         else {
           // can't continue loading player with no text
-          thisObj.fallback('ERROR: Failed to load translation table');
+          thisObj.provideFallback('ERROR: Failed to load translation table');
         }
       }
     );
@@ -291,7 +292,7 @@
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
-        thisObj.fallback('Unable to play media');
+        thisObj.provideFallback('Unable to play media');
       }
       else {
         thisObj.setupInstance().then(function () {

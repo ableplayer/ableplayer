@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Fallback Test (using nested HTML content)</title>
+<title>Able Player for YouTube</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
@@ -13,6 +13,22 @@
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
 
+<!-- YouTube Data API key is recommended for better YouTube player performance -->
+<!-- Get YouTube Data API key by registering your application at the Google Developer Console:
+<!-- https://console.developers.google.com/ -->
+<!-- For complete instructions, see Google's Getting Started page: -->
+<!-- https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication -->
+<!-- NOTE: All that's needed for Able Player is a simple API key, NOT OAuth 2.0 -->
+<script>
+  // Get your own API key - ours only works on our registered domains
+  var youTubeDataAPIKey = 'AIzaSyB3bpr8ttIoUqFxD3SUpgJ59n6Ylc0soZw';
+  var googleApiReady = false;
+  function initGoogleClientApi() {
+    googleApiReady = true;
+  }
+</script>
+<script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
+
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
@@ -20,35 +36,38 @@
 
 <body>
 
-<h1>Able Player Fallback Test (using nested HTML content)</h1>
+<h1>Able Player for YouTube</h1>
 
-<p>The examples on this page (one audio, one video) demonstrate Able Player's support for fallback content, nested within the &lt;audio&gt; or &lt;video&gt; tags. If a critical error is encountered that prevents the media from loading, the fallback content is presented in its place. Able Player displays the following fallback content, in descending order of precedence:</p>
+<p>This page uses the YouTube player, but with Able Player controls.</p>
+<p>If &lt;track&gt; elements are used for captions or subtitles, these take precedence over YouTube captions.
+  Otherwise, YouTube captions and subtitles are used if available.</p>
 
-<ol>
-  <li>Fallback HTML content nested within the &lt;audio&gt; or &lt;video&gt; tags</li>
-  <li>An error message that explains why the media cannot be played. If a poster attribute is included on the &lt;video&gt; tag, that will be used to display an image in addition to the error message.</li>
-</ol>
+<p>Local &lt;track&gt; elements can be used to host captions locally rather than use YouTube's captions.
+  The advantage of using local captions is they can be used to build an interactive transcript and
+  <a href="video8.html">search within videos</a>. Currently YouTube doesn't expose specific caption data
+  via its API so these functions are not possible using YouTube captions alone.</p>
 
-<p><strong>NOTE: This page is currently under construction and may not be fully functional.</strong></p>
+<p>Also, a <em>poster</em> attribute can be used to replace YouTube's default poster image with an alternative
+  image.</p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
-<h2>Audio Example (with nested HTML content)</h2>
-<audio id="audio1" width="480" preload="auto" data-able-player>
-  <source type="audio/mpeg" src="bad-file-name.mp3"/>
-  <p>Sorry, something went wrong and we are unable to play that audio file.
-    However, you can <a href="../media/smallf.mp3">download the MP3</a>
-    and play it in any software that supports MP3 audio files.</p>
-</audio>
-
-<h2>Video Example (with a poster)</h2>
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
-  <source type="video/mp4" src="bad-file-name.mp4"/>
-  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
-  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+<!--
+  # A few video id's for testing:
+  # YouTube video about captions: QRS8MkLhQmM, has many languages but no described version
+  # Campus Leaders: tnsB6YCHVXA, described: Ck2TdVMhWcU (854 x 480; additional languages forthcoming)
+  # Invisible disabilities: skNAVgPb1Lo described: SH3vt-XrkEs (English & Japanese)
+  # Uncaptioned video: mrudR-kIB1k
+  # To use a local poster image, add poster="../media/itaccess.jpg" to <video>
+  # If width and height are known, add them to width and height attributes on <video>
+  #  Otherwise, Able will attempt to query YouTube for this data but that's less efficient and less reliable
+  # Remove comments from the <track> elements to use local captions instead of YouTube's captions
+-->
+<video id="video1" preload="auto" data-able-player data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU">
+<!-- // uncomment to use local captions rather than YouTube's captions
+  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en"/>
+-->
 </video>
 
 </body>

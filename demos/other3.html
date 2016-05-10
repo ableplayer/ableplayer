@@ -24,24 +24,38 @@
 
 <p>The examples on this page (one audio, one video) automatically use JW Player rather than the usual Able Player Chrome. JW Player is not provided with Able Player, and must be licensed separately. If the &lt;audio&gt; or &lt;video&gt; tags include <strong>data-fallback="jw"</strong> and JW Player is properly installed, Able Player will fallback to JW Player if the user's browser doesn't support HTML5 media. The player can be <em>forced</em> to use JW Player by also adding the <strong>data-test-fallback</strong> attribute to the media element.</p>
 
+<p>If you're viewing this page on GitHub, the JW Player fallback is not included. Therefore the <em>ultimate</em> fallback content should be shown.
+For the <em>ultimate</em> fallback, Able Player displays some combination of the following content:</p>
+
+<ol>
+  <li>Fallback HTML content nested within the &lt;audio&gt; or &lt;video&gt; tags.</li>
+  <li>An error message that explains why the media cannot be played.</li>
+  <li>The image identified in the poster attribute on the &lt;video&gt; tag, if any. The image is slightly transparent in order to communicate that something isn't quite right.</li>
+</ol>
+
+
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <h2>Audio Example</h2>
 <audio id="audio1" width="480" preload="auto" data-able-player data-fallback="jw" data-test-fallback>
-  <source type="audio/ogg" src="../media/smallf.ogg"/>
   <source type="audio/mpeg" src="../media/smallf.mp3"/>
+  <source type="audio/ogg" src="../media/smallf.ogg"/>
+  <p>This audio example was intended to be played using JW Player, but JW Player is not installed.
+    JW Player is available at <a href="https://www.jwplayer.com/">jwplayer.com</a>.</p>
 </audio>
 
 <h2>Video Example</h2>
 <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-fallback="jw" data-test-fallback>
-  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
   <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
   <!-- Able Player will display tracks alphabetically by label -->
   <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
   <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
   <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
   <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
   <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+  <p>This video example was intended to be played using JW Player, but JW Player is not installed.
+    JW Player is available at <a href="https://www.jwplayer.com/">jwplayer.com</a>.</p>
 </video>
 
 </body>

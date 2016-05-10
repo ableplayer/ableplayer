@@ -742,7 +742,7 @@
     }
   };
 
-  AblePlayer.prototype.fallback = function(reason) {
+  AblePlayer.prototype.provideFallback = function(reason) {
 
     // provide ultimate fallback for users who are unable to play the media
     // reason is a specific error message
@@ -751,6 +751,8 @@
     var $fallbackDiv, width, mediaClone, fallback, fallbackText,
     showBrowserList, browsers, i, b, browserList;
 
+    // Could show list of supporting browsers if 99.9% confident the error is truly an outdated browser
+    // Too many sites say "You need to update your browser" when in fact I'm using a current version
     showBrowserList = false;
 
     $fallbackDiv = $('<div>',{
@@ -767,7 +769,7 @@
     else {
       width = '100%';
     }
-    $fallbackDiv.css('width',width);
+    $fallbackDiv.css('max-width',width);
 
     // use fallback content that's nested inside the HTML5 media element, if there is any
     mediaClone = this.$media.clone();

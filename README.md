@@ -76,7 +76,7 @@ Fallback
 
 For older browsers that don’t support HTML5 media elements, you need a
 fallback solution. *Able Player* was developed to work seamlessly with
-[JW Player][], specifically **JW Player 6** (successfully tested with  
+[JW Player][], specifically **JW Player 6** (successfully tested with 
 versions 6.0 and 6.11). JW Player is free for non-commercial use but 
 is licensed separately and is not distributed with *Able Player*. 
 After licensing and downloading JW PLayer, copy *jwplayer.js*, *jwplayer.html5.js*, 
@@ -281,7 +281,7 @@ The following attributes make all this possible:
 
 -   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
 -   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only) 
--   **data-fallback-path** - optional; override default path to directory in which the fallback player files or stored   
+-   **data-fallback-path** - optional; override default path to directory in which the fallback player files are stored   
 
 
 The following attributes are supported on the `<video>` element only:
