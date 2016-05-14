@@ -864,7 +864,7 @@
     // Removed rewind/forward in favor of seek bar.
 
     var controlLayout = {
-      'ul': ['play','stop'],
+      'ul': ['play','restart'],
       'ur': [],
       'bl': [],
       'br': []
@@ -946,7 +946,7 @@
     // some controls are aligned on the left, and others on the right
     var useSpeedButtons, useFullScreen,
     i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control,
-    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
+    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon, buttonUse,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
     controllerStyles, vidcapStyles, captionLabel, popupMenuId;
 
@@ -999,7 +999,7 @@
           }
           else {
             var pipeImg = $('<img>', {
-              src: '../images/' + this.iconColor + '/pipe.png',
+              src: this.rootPath + '/icons/' + this.iconColor + '/pipe.png',
               alt: '',
               role: 'presentation'
             });
@@ -1010,13 +1010,29 @@
         else {
           // this control is a button
           if (control === 'volume') {
-            buttonImgSrc = '../images/' + this.iconColor + '/' + this.volumeButton + '.png';
+            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/' + this.volumeButton + '.png';
           }
           else if (control === 'fullscreen') {
-            buttonImgSrc = '../images/' + this.iconColor + '/fullscreen-expand.png';
+            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/fullscreen-expand.png';
+          }
+          else if (control === 'slower') {
+            if (this.speedIcons === 'animals') {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/turtle.png';
+            }
+            else {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/slower.png';
+            }
+          }
+          else if (control === 'faster') {
+            if (this.speedIcons === 'animals') {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/rabbit.png';
+            }
+            else {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/faster.png';
+            }
           }
           else {
-            buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
+            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control);
 
@@ -1028,7 +1044,6 @@
           // And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
           // This has been thoroughly tested and works well in all screen reader/browser combinations
           // See https://github.com/ableplayer/ableplayer/issues/81
-
           newButton = $('<button>',{
             'type': 'button',
             'tabindex': '0',
@@ -1044,7 +1059,6 @@
               popupMenuId = this.mediaId + '-volume-slider';
             }
             newButton.attr({
-//              'aria-haspopup': 'true',
               'aria-controls': popupMenuId
             });
           }
@@ -1052,14 +1066,68 @@
             if (control === 'volume') {
               iconClass = 'icon-' + this.volumeButton;
             }
+            else if (control === 'slower') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'icon-turtle';
+              }
+              else {
+                iconClass = 'icon-slower';
+              }
+            }
+            else if (control === 'faster') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'icon-rabbit';
+              }
+              else {
+                iconClass = 'icon-faster';
+              }
+            }
             else {
               iconClass = 'icon-' + control;
             }
             buttonIcon = $('<span>',{
               'class': iconClass,
               'aria-hidden': 'true'
-            })
+            });
             newButton.append(buttonIcon);
+          }
+          else if (this.iconType === 'svg') {
+            if (control === 'volume') {
+              iconClass = 'svg-' + this.volumeButton;
+            }
+            else if (control === 'fullscreen') {
+              iconClass = 'svg-fullscreen-expand';
+            }
+            else if (control === 'slower') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'svg-turtle';
+              }
+              else {
+                iconClass = 'svg-slower';
+              }
+            }
+            else if (control === 'faster') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'svg-rabbit';
+              }
+              else {
+                iconClass = 'svg-faster';
+              }
+            }
+            else {
+              iconClass = 'svg-' + control;
+            }
+            buttonIcon = $('<svg>',{
+              'class': iconClass
+            });
+            buttonUse = $('<use>',{
+              'xlink:href': this.rootPath + '/icons/able-icons.svg#' + iconClass
+            });
+            buttonIcon.append(buttonUse);
+            newButton.html(buttonIcon);
+
+            // Final step: Need to refresh the DOM in order for browser to process & display the SVG
+            newButton.html(newButton.html());
           }
           else {
             // use images
@@ -1225,6 +1293,190 @@
     this.refreshControls();
   };
 
+  AblePlayer.prototype.useSvg = function () {
+
+    // Modified from IcoMoon.io svgxuse
+    // @copyright Copyright (c) 2016 IcoMoon.io
+    // @license   Licensed under MIT license
+    // See https://github.com/Keyamoon/svgxuse
+    // @version   1.1.16
+
+    var cache = Object.create(null); // holds xhr objects to prevent multiple requests
+    var checkUseElems,
+        tid; // timeout id
+    var debouncedCheck = function () {
+      clearTimeout(tid);
+      tid = setTimeout(checkUseElems, 100);
+    };
+    var unobserveChanges = function () {
+      return;
+    };
+    var observeChanges = function () {
+      var observer;
+      window.addEventListener('resize', debouncedCheck, false);
+      window.addEventListener('orientationchange', debouncedCheck, false);
+      if (window.MutationObserver) {
+        observer = new MutationObserver(debouncedCheck);
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+          attributes: true
+        });
+        unobserveChanges = function () {
+          try {
+            observer.disconnect();
+            window.removeEventListener('resize', debouncedCheck, false);
+            window.removeEventListener('orientationchange', debouncedCheck, false);
+          } catch (ignore) {}
+        };
+      }
+      else {
+        document.documentElement.addEventListener('DOMSubtreeModified', debouncedCheck, false);
+        unobserveChanges = function () {
+          document.documentElement.removeEventListener('DOMSubtreeModified', debouncedCheck, false);
+          window.removeEventListener('resize', debouncedCheck, false);
+          window.removeEventListener('orientationchange', debouncedCheck, false);
+        };
+      }
+    };
+    var xlinkNS = 'http://www.w3.org/1999/xlink';
+    checkUseElems = function () {
+      var base,
+          bcr,
+          fallback = '', // optional fallback URL in case no base path to SVG file was given and no symbol definition was found.
+          hash,
+          i,
+          Request,
+          inProgressCount = 0,
+          isHidden,
+          url,
+          uses,
+          xhr;
+      if (window.XMLHttpRequest) {
+        Request = new XMLHttpRequest();
+        if (Request.withCredentials !== undefined) {
+          Request = XMLHttpRequest;
+        }
+        else {
+          Request = XDomainRequest || undefined;
+        }
+      }
+      if (Request === undefined) {
+        return;
+      }
+      function observeIfDone() {
+        // If done with making changes, start watching for chagnes in DOM again
+        inProgressCount -= 1;
+        if (inProgressCount === 0) { // if all xhrs were resolved
+          observeChanges(); // watch for changes to DOM
+        }
+      }
+      function attrUpdateFunc(spec) {
+        return function () {
+          if (cache[spec.base] !== true) {
+            spec.useEl.setAttributeNS(xlinkNS, 'xlink:href', '#' + spec.hash);
+          }
+        };
+      }
+      function onloadFunc(xhr) {
+        return function () {
+          var body = document.body;
+          var x = document.createElement('x');
+          var svg;
+          xhr.onload = null;
+          x.innerHTML = xhr.responseText;
+          svg = x.getElementsByTagName('svg')[0];
+          if (svg) {
+            svg.setAttribute('aria-hidden', 'true');
+            svg.style.position = 'absolute';
+            svg.style.width = 0;
+            svg.style.height = 0;
+            svg.style.overflow = 'hidden';
+            body.insertBefore(svg, body.firstChild);
+          }
+          observeIfDone();
+        };
+      }
+      function onErrorTimeout(xhr) {
+        return function () {
+          xhr.onerror = null;
+          xhr.ontimeout = null;
+          observeIfDone();
+        };
+      }
+      unobserveChanges(); // stop watching for changes to DOM
+      // find all use elements
+      uses = document.getElementsByTagName('use');
+      for (i = 0; i < uses.length; i += 1) {
+        try {
+          bcr = uses[i].getBoundingClientRect();
+        } catch (ignore) {
+          // failed to get bounding rectangle of the use element
+          bcr = false;
+        }
+        url = uses[i].getAttributeNS(xlinkNS, 'href').split('#');
+        base = url[0];
+        hash = url[1];
+        isHidden = bcr && bcr.left === 0 && bcr.right === 0 && bcr.top === 0 && bcr.bottom === 0;
+        if (bcr && bcr.width === 0 && bcr.height === 0 && !isHidden) {
+          // the use element is empty
+          // if there is a reference to an external SVG, try to fetch it
+          // use the optional fallback URL if there is no reference to an external SVG
+          if (fallback && !base.length && hash && !document.getElementById(hash)) {
+            base = fallback;
+          }
+          if (base.length) {
+            // schedule updating xlink:href
+            xhr = cache[base];
+            if (xhr !== true) {
+              // true signifies that prepending the SVG was not required
+              setTimeout(attrUpdateFunc({
+                useEl: uses[i],
+                base: base,
+                hash: hash
+              }), 0);
+            }
+            if (xhr === undefined) {
+              xhr = new Request();
+              cache[base] = xhr;
+              xhr.onload = onloadFunc(xhr);
+              xhr.onerror = onErrorTimeout(xhr);
+              xhr.ontimeout = onErrorTimeout(xhr);
+              xhr.open('GET', base);
+              xhr.send();
+              inProgressCount += 1;
+            }
+          }
+        }
+        else {
+          if (!isHidden) {
+            if (cache[base] === undefined) {
+              // remember this URL if the use element was not empty and no request was sent
+              cache[base] = true;
+            }
+            else if (cache[base].onload) {
+              // if it turns out that prepending the SVG is not necessary,
+              // abort the in-progress xhr.
+              cache[base].abort();
+              cache[base].onload = undefined;
+              cache[base] = true;
+            }
+          }
+        }
+      }
+      uses = '';
+      inProgressCount += 1;
+      observeIfDone();
+    };
+/*
+    // The load event fires when all resources have finished loading, which allows detecting whether SVG use elements are empty.
+    window.addEventListener('load', function winLoad() {
+      window.removeEventListener('load', winLoad, false); // to prevent memory leaks
+      tid = setTimeout(checkUseElems, 0);
+    }, false);
+*/
+  };
+
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
     // Change media player source file, for instance when moving to the next element in a playlist.
@@ -1347,8 +1599,8 @@
     else if (control === 'pause') {
       return this.tt.pause;
     }
-    else if (control === 'stop') {
-      return this.tt.stop;
+    else if (control === 'restart') {
+      return this.tt.restart;
     }
     else if (control === 'rewind') {
       return this.tt.rewind;

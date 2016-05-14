@@ -164,7 +164,16 @@
       this.prevNextUnit = false;
     }
 
-    // valid values are 'chapter' and 'video'; will also accept 'chapters'
+    // valid values of data-speed-icons are 'arrows' (default) and 'animals'
+    // use 'animals' to use turtle and rabbit
+    if ($(media).data('speed-icons') === 'animals') {
+      this.speedIcons = 'animals';
+    }
+    else {
+      this.speedIcons = 'arrows';
+    }
+
+    // valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
     if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
       this.seekbarScope = 'chapter';
     }
@@ -191,13 +200,29 @@
       }
     }
 
+    // Icon type
+    // By default, AblePlayer uses scalable icomoon fonts for the player controls
+    // and falls back to images if the user has a custom style sheet that overrides font-family
+    // use data-icon-type to force controls to use either 'font', 'images' or 'svg'
+    this.iconType = 'font';
+    this.forceIconType = false;
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
       var iconType = $(media).data('icon-type');
-      if (iconType === 'font' || iconType == 'image') {
+      if (iconType === 'font' || iconType == 'image' || iconType == 'svg') {
         this.iconType = iconType;
+        this.forceIconType = true;
       }
     }
-
+/*
+    if (this.iconType === 'svg') {
+      // load and execute the required JavaScript
+      var svgScriptPath = this.rootPath + '/icons/svgxuse.js';
+      var $svgScript = $('<script>',{
+        'src': svgScriptPath
+      });
+      $(document).append($svgScript);
+    }
+*/
     if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
       this.allowFullScreen = false;
     }
@@ -317,21 +342,9 @@
     this.rootPath = this.getRootWebSitePath();
 
     // Volume range is 0 to 10. Don't crank it to avoid overpowering screen readers
+    // can be overridden with data-volume
     this.defaultVolume = 7;
     this.volume = this.defaultVolume;
-
-    // Button color
-    // Media controller background color can be customized in able.css
-    // Choose 'white' if your controller has a dark background, 'black' if a light background
-    // Use a contrast checker to ensure your color scheme has sufficient contrast
-    // e.g., http://www.paciellogroup.com/resources/contrastAnalyser
-    this.iconColor = 'white';
-
-    // Icon type
-    // By default, AblePlayer uses scalable icomoon fonts for the player controls
-    // and falls back to images if the user has a custom style sheet that overrides font-family
-    // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
-    this.iconType = 'font';
 
     // seekInterval = Number of seconds to seek forward or back with these buttons
     // NOTE: This can be overridden with the data-seek-interval attribute,
@@ -404,6 +417,7 @@
     this.playing = false; // will change to true after 'playing' event is triggered
 
     this.getUserAgent();
+    this.setIconColor();
     this.setButtonImages();
   };
 
@@ -417,25 +431,93 @@
     return webFolderFullPath;
   };
 
+  AblePlayer.prototype.setIconColor = function() {
+
+    // determine the best color choice (white or black) for icons,
+    // given the background-color of their container elements
+    // Source for relative luminance formula:
+    // https://en.wikipedia.org/wiki/Relative_luminance
+
+    // We need to know the color *before* creating the element
+    // so the element doesn't exist yet when this function is called
+    // therefore, need to create a temporary element then remove it after color is determined
+    // Temp element must be added to the DOM or WebKit can't retrieve its CSS properties
+
+    var $elements, i, $el, bgColor, rgb, red, green, blue, luminance, iconColor;
+
+    $elements = ['controller', 'toolbar'];
+    for (i=0; i<$elements.length; i++) {
+      if ($elements[i] == 'controller') {
+        $el =  $('<div>', {
+          'class': 'able-controller'
+        }).hide();
+      }
+      else if ($elements[i] === 'toolbar') {
+        $el =  $('<div>', {
+          'class': 'able-window-toolbar'
+        }).hide();
+      }
+      $('body').append($el);
+      bgColor = $el.css('background-color');
+      // bgColor is a string in the form 'rgb(R, G, B)', perhaps with a 4th item for alpha;
+      // split the 3 or 4 channels into an array
+      rgb = bgColor.replace(/[^\d,]/g, '').split(',');
+      red = rgb[0];
+      green = rgb[1];
+      blue = rgb[2];
+      luminance = (0.2126 * red) + (0.7152 * green) + (0.0722 * blue);
+      // range is 1 - 255; therefore 125 is the tipping point
+      if (luminance < 125) { // background is dark
+        iconColor = 'white';
+      }
+      else { // background is light
+        iconColor = 'black';
+      }
+      if ($elements[i] === 'controller') {
+        this.iconColor = iconColor;
+      }
+      else if ($elements[i] === 'toolbar') {
+        this.toolbarIconColor = iconColor;
+      }
+      $el.remove();
+    }
+  };
+
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
 
-    this.imgPath = '../images/' + this.iconColor + '/';
+    this.imgPath = this.rootPath + '/icons/' + this.iconColor + '/';
 
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
+
+    this.restartButtonImg = this.imgPath + 'restart.png';
+
     this.rewindButtonImg = this.imgPath + 'rewind.png';
     this.forwardButtonImg = this.imgPath + 'forward.png';
-    this.fasterButtonImg = this.imgPath + 'slower.png';
-    this.slowerButtonImg = this.imgPath + 'faster.png';
+
+    this.previousButtonImg = this.imgPath + 'previous.png';
+    this.nextButtonImg = this.imgPath + 'next.png';
+
+    if (this.speedIcons === 'arrows') {
+      this.fasterButtonImg = this.imgPath + 'slower.png';
+      this.slowerButtonImg = this.imgPath + 'faster.png';
+    }
+    else if (this.speedIcons === 'animals') {
+      this.fasterButtonImg = this.imgPath + 'rabbit.png';
+      this.slowerButtonImg = this.imgPath + 'turtle.png';
+    }
+
     this.captionsButtonImg = this.imgPath + 'captions.png';
     this.chaptersButtonImg = this.imgPath + 'chapters.png';
     this.signButtonImg = this.imgPath + 'sign.png';
     this.transcriptButtonImg = this.imgPath + 'transcript.png';
     this.descriptionsButtonImg = this.imgPath + 'descriptions.png';
+
     this.fullscreenExpandButtonImg = this.imgPath + 'fullscreen-expand.png';
     this.fullscreenCollapseButtonImg = this.imgPath + 'fullscreen-collapse.png';
+
     this.prefsButtonImg = this.imgPath + 'preferences.png';
     this.helpButtonImg = this.imgPath + 'help.png';
   };
@@ -520,6 +602,11 @@
     // use images as fallback
 
     var $tempButton, $testButton, controllerFont;
+
+    if (this.forceIconType) {
+      // use value specified in data-icon-type
+      return false;
+    }
 
     if (window.getComputedStyle) {
 
@@ -857,9 +944,7 @@
         });
 
         var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
-        // var flashplayer = '../thirdparty/jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
-        // var html5player = '../thirdparty/jwplayer.html5.js';
 
         // TODO: Try JW Player without width (playerMaxWidth) and height
         if (thisObj.mediaType === 'video') {
@@ -1601,8 +1686,8 @@
           kbLabels.push(this.tt.play + '/' + this.tt.pause);
           keys.push('p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar);
         }
-        else if (this.controls[i] === 'stop') {
-          kbLabels.push(this.tt.stop);
+        else if (this.controls[i] === 'restart') {
+          kbLabels.push(this.tt.restart);
           keys.push('s');
         }
         else if (this.controls[i] === 'rewind') {
@@ -3537,7 +3622,7 @@
     // Removed rewind/forward in favor of seek bar.
 
     var controlLayout = {
-      'ul': ['play','stop'],
+      'ul': ['play','restart'],
       'ur': [],
       'bl': [],
       'br': []
@@ -3619,7 +3704,7 @@
     // some controls are aligned on the left, and others on the right
     var useSpeedButtons, useFullScreen,
     i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control,
-    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon,
+    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon, buttonUse,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
     controllerStyles, vidcapStyles, captionLabel, popupMenuId;
 
@@ -3672,7 +3757,7 @@
           }
           else {
             var pipeImg = $('<img>', {
-              src: '../images/' + this.iconColor + '/pipe.png',
+              src: this.rootPath + '/icons/' + this.iconColor + '/pipe.png',
               alt: '',
               role: 'presentation'
             });
@@ -3683,13 +3768,29 @@
         else {
           // this control is a button
           if (control === 'volume') {
-            buttonImgSrc = '../images/' + this.iconColor + '/' + this.volumeButton + '.png';
+            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/' + this.volumeButton + '.png';
           }
           else if (control === 'fullscreen') {
-            buttonImgSrc = '../images/' + this.iconColor + '/fullscreen-expand.png';
+            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/fullscreen-expand.png';
+          }
+          else if (control === 'slower') {
+            if (this.speedIcons === 'animals') {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/turtle.png';
+            }
+            else {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/slower.png';
+            }
+          }
+          else if (control === 'faster') {
+            if (this.speedIcons === 'animals') {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/rabbit.png';
+            }
+            else {
+              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/faster.png';
+            }
           }
           else {
-            buttonImgSrc = '../images/' + this.iconColor + '/' + control + '.png';
+            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control);
 
@@ -3701,7 +3802,6 @@
           // And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
           // This has been thoroughly tested and works well in all screen reader/browser combinations
           // See https://github.com/ableplayer/ableplayer/issues/81
-
           newButton = $('<button>',{
             'type': 'button',
             'tabindex': '0',
@@ -3717,7 +3817,6 @@
               popupMenuId = this.mediaId + '-volume-slider';
             }
             newButton.attr({
-//              'aria-haspopup': 'true',
               'aria-controls': popupMenuId
             });
           }
@@ -3725,14 +3824,68 @@
             if (control === 'volume') {
               iconClass = 'icon-' + this.volumeButton;
             }
+            else if (control === 'slower') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'icon-turtle';
+              }
+              else {
+                iconClass = 'icon-slower';
+              }
+            }
+            else if (control === 'faster') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'icon-rabbit';
+              }
+              else {
+                iconClass = 'icon-faster';
+              }
+            }
             else {
               iconClass = 'icon-' + control;
             }
             buttonIcon = $('<span>',{
               'class': iconClass,
               'aria-hidden': 'true'
-            })
+            });
             newButton.append(buttonIcon);
+          }
+          else if (this.iconType === 'svg') {
+            if (control === 'volume') {
+              iconClass = 'svg-' + this.volumeButton;
+            }
+            else if (control === 'fullscreen') {
+              iconClass = 'svg-fullscreen-expand';
+            }
+            else if (control === 'slower') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'svg-turtle';
+              }
+              else {
+                iconClass = 'svg-slower';
+              }
+            }
+            else if (control === 'faster') {
+              if (this.speedIcons === 'animals') {
+                iconClass = 'svg-rabbit';
+              }
+              else {
+                iconClass = 'svg-faster';
+              }
+            }
+            else {
+              iconClass = 'svg-' + control;
+            }
+            buttonIcon = $('<svg>',{
+              'class': iconClass
+            });
+            buttonUse = $('<use>',{
+              'xlink:href': this.rootPath + '/icons/able-icons.svg#' + iconClass
+            });
+            buttonIcon.append(buttonUse);
+            newButton.html(buttonIcon);
+
+            // Final step: Need to refresh the DOM in order for browser to process & display the SVG
+            newButton.html(newButton.html());
           }
           else {
             // use images
@@ -3898,6 +4051,190 @@
     this.refreshControls();
   };
 
+  AblePlayer.prototype.useSvg = function () {
+
+    // Modified from IcoMoon.io svgxuse
+    // @copyright Copyright (c) 2016 IcoMoon.io
+    // @license   Licensed under MIT license
+    // See https://github.com/Keyamoon/svgxuse
+    // @version   1.1.16
+
+    var cache = Object.create(null); // holds xhr objects to prevent multiple requests
+    var checkUseElems,
+        tid; // timeout id
+    var debouncedCheck = function () {
+      clearTimeout(tid);
+      tid = setTimeout(checkUseElems, 100);
+    };
+    var unobserveChanges = function () {
+      return;
+    };
+    var observeChanges = function () {
+      var observer;
+      window.addEventListener('resize', debouncedCheck, false);
+      window.addEventListener('orientationchange', debouncedCheck, false);
+      if (window.MutationObserver) {
+        observer = new MutationObserver(debouncedCheck);
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true,
+          attributes: true
+        });
+        unobserveChanges = function () {
+          try {
+            observer.disconnect();
+            window.removeEventListener('resize', debouncedCheck, false);
+            window.removeEventListener('orientationchange', debouncedCheck, false);
+          } catch (ignore) {}
+        };
+      }
+      else {
+        document.documentElement.addEventListener('DOMSubtreeModified', debouncedCheck, false);
+        unobserveChanges = function () {
+          document.documentElement.removeEventListener('DOMSubtreeModified', debouncedCheck, false);
+          window.removeEventListener('resize', debouncedCheck, false);
+          window.removeEventListener('orientationchange', debouncedCheck, false);
+        };
+      }
+    };
+    var xlinkNS = 'http://www.w3.org/1999/xlink';
+    checkUseElems = function () {
+      var base,
+          bcr,
+          fallback = '', // optional fallback URL in case no base path to SVG file was given and no symbol definition was found.
+          hash,
+          i,
+          Request,
+          inProgressCount = 0,
+          isHidden,
+          url,
+          uses,
+          xhr;
+      if (window.XMLHttpRequest) {
+        Request = new XMLHttpRequest();
+        if (Request.withCredentials !== undefined) {
+          Request = XMLHttpRequest;
+        }
+        else {
+          Request = XDomainRequest || undefined;
+        }
+      }
+      if (Request === undefined) {
+        return;
+      }
+      function observeIfDone() {
+        // If done with making changes, start watching for chagnes in DOM again
+        inProgressCount -= 1;
+        if (inProgressCount === 0) { // if all xhrs were resolved
+          observeChanges(); // watch for changes to DOM
+        }
+      }
+      function attrUpdateFunc(spec) {
+        return function () {
+          if (cache[spec.base] !== true) {
+            spec.useEl.setAttributeNS(xlinkNS, 'xlink:href', '#' + spec.hash);
+          }
+        };
+      }
+      function onloadFunc(xhr) {
+        return function () {
+          var body = document.body;
+          var x = document.createElement('x');
+          var svg;
+          xhr.onload = null;
+          x.innerHTML = xhr.responseText;
+          svg = x.getElementsByTagName('svg')[0];
+          if (svg) {
+            svg.setAttribute('aria-hidden', 'true');
+            svg.style.position = 'absolute';
+            svg.style.width = 0;
+            svg.style.height = 0;
+            svg.style.overflow = 'hidden';
+            body.insertBefore(svg, body.firstChild);
+          }
+          observeIfDone();
+        };
+      }
+      function onErrorTimeout(xhr) {
+        return function () {
+          xhr.onerror = null;
+          xhr.ontimeout = null;
+          observeIfDone();
+        };
+      }
+      unobserveChanges(); // stop watching for changes to DOM
+      // find all use elements
+      uses = document.getElementsByTagName('use');
+      for (i = 0; i < uses.length; i += 1) {
+        try {
+          bcr = uses[i].getBoundingClientRect();
+        } catch (ignore) {
+          // failed to get bounding rectangle of the use element
+          bcr = false;
+        }
+        url = uses[i].getAttributeNS(xlinkNS, 'href').split('#');
+        base = url[0];
+        hash = url[1];
+        isHidden = bcr && bcr.left === 0 && bcr.right === 0 && bcr.top === 0 && bcr.bottom === 0;
+        if (bcr && bcr.width === 0 && bcr.height === 0 && !isHidden) {
+          // the use element is empty
+          // if there is a reference to an external SVG, try to fetch it
+          // use the optional fallback URL if there is no reference to an external SVG
+          if (fallback && !base.length && hash && !document.getElementById(hash)) {
+            base = fallback;
+          }
+          if (base.length) {
+            // schedule updating xlink:href
+            xhr = cache[base];
+            if (xhr !== true) {
+              // true signifies that prepending the SVG was not required
+              setTimeout(attrUpdateFunc({
+                useEl: uses[i],
+                base: base,
+                hash: hash
+              }), 0);
+            }
+            if (xhr === undefined) {
+              xhr = new Request();
+              cache[base] = xhr;
+              xhr.onload = onloadFunc(xhr);
+              xhr.onerror = onErrorTimeout(xhr);
+              xhr.ontimeout = onErrorTimeout(xhr);
+              xhr.open('GET', base);
+              xhr.send();
+              inProgressCount += 1;
+            }
+          }
+        }
+        else {
+          if (!isHidden) {
+            if (cache[base] === undefined) {
+              // remember this URL if the use element was not empty and no request was sent
+              cache[base] = true;
+            }
+            else if (cache[base].onload) {
+              // if it turns out that prepending the SVG is not necessary,
+              // abort the in-progress xhr.
+              cache[base].abort();
+              cache[base].onload = undefined;
+              cache[base] = true;
+            }
+          }
+        }
+      }
+      uses = '';
+      inProgressCount += 1;
+      observeIfDone();
+    };
+/*
+    // The load event fires when all resources have finished loading, which allows detecting whether SVG use elements are empty.
+    window.addEventListener('load', function winLoad() {
+      window.removeEventListener('load', winLoad, false); // to prevent memory leaks
+      tid = setTimeout(checkUseElems, 0);
+    }, false);
+*/
+  };
+
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
     // Change media player source file, for instance when moving to the next element in a playlist.
@@ -4020,8 +4357,8 @@
     else if (control === 'pause') {
       return this.tt.pause;
     }
-    else if (control === 'stop') {
-      return this.tt.stop;
+    else if (control === 'restart') {
+      return this.tt.restart;
     }
     else if (control === 'rewind') {
       return this.tt.rewind;
@@ -6538,7 +6875,7 @@
     var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
       updateLive, textByState, timestamp, widthUsed,
       leftControls, rightControls, seekbarWidth, captionsCount,
-      buffered, newTop;
+      buffered, newTop, svgLink, newSvgLink;
 
     thisObj = this;
     if (this.swappingSrc) {
@@ -6642,6 +6979,9 @@
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
         }
+        else if (this.iconType === 'svg') {
+          // TODO: Add play/pause toggle for SVG
+        }
         else {
           this.$playpauseButton.find('img').attr('src',this.playButtonImg);
         }
@@ -6682,6 +7022,14 @@
             this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
             this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
           }
+          else if (this.iconType === 'svg') {
+            // Not currently working. SVG is a work in progress
+            this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
+            svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+            newSvgLink = svgLink.replace('svg-pause','svg-play');
+            this.$playpauseButton.find('use').attr(newSvgLink);
+            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+          }
           else {
             this.$playpauseButton.find('img').attr('src',this.playButtonImg);
           }
@@ -6691,6 +7039,14 @@
 
           if (this.iconType === 'font') {
             this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+          }
+          else if (this.iconType === 'svg') {
+            // Not currently working. SVG is a work in progress
+            this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
+            svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+            newSvgLink = svgLink.replace('svg-play','svg-pause');
+            this.$playpauseButton.find('use').attr(newSvgLink);
             this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
           }
           else {
@@ -6788,6 +7144,11 @@
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
         }
+        else if (this.iconType === 'svg') {
+          // Not currently working. SVG is a work in progress.
+          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
+          this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+        }
         else {
           this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
         }
@@ -6796,6 +7157,11 @@
         this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen);
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
+          this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+        }
+        else if (this.iconType === 'svg') {
+          // Not currently working. SVG is a work in progress.
+          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
         }
         else {
@@ -8269,7 +8635,7 @@
     });
 
     this.$transcriptToolbar = $('<div>', {
-      'class': 'able-window-toolbar'
+      'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
     });
 
     this.$transcriptDiv = $('<div>', {
@@ -9113,7 +9479,7 @@
     if (whichButton === 'play') {
       this.handlePlay();
     }
-    else if (whichButton === 'stop') {
+    else if (whichButton === 'restart') {
       this.handleStop();
     }
     else if (whichButton === 'rewind') {
@@ -9205,7 +9571,7 @@
         this.handlePlay();
       }
     }
-    else if (which === 115) { // s = stop
+    else if (which === 115) { // s = stop (now restart)
       if (this.usingModifierKeys(e)) {
         this.handleStop();
       }
@@ -9581,7 +9947,7 @@
   AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
 
-    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttomImg,
+    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
       $buttonLabel, tooltipId, $tooltip, $popup,
       label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
       $optionList, radioName, options, i, $optionItem, option,
@@ -9623,7 +9989,7 @@
     }
     else {
       // use image
-      buttonImgSrc = '../images/' + this.iconColor + '/preferences.png';
+      buttonImgSrc = this.rootPath + '/icons/' + this.toolbarIconColor + '/preferences.png';
       $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',
@@ -11130,7 +11496,7 @@
     // translation2.js is then contanenated onto the end to finish this function
 
 
-var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
+var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","restart": "Restart","prevChapter": "Previous chapter","nextChapter": "Next chapter","prevTrack": "Previous track","nextTrack": "Next track","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
 var en = {
 
 "playerHeading": "Media player",
@@ -11144,6 +11510,16 @@ var en = {
 "pause": "Pause",
 
 "stop": "Stop",
+
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
 
 "rewind": "Rewind",
 
@@ -11435,6 +11811,16 @@ var es = {
 
 "stop": "Detener",
 
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
+
 "rewind": "Rebobinar",
 
 "forward": "Adelantar",
@@ -11724,6 +12110,16 @@ var fr = {
 "pause": "Pause",
 
 "stop": "Arrêt",
+
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
 
 "rewind": "Reculer",
 

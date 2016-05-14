@@ -164,7 +164,16 @@
       this.prevNextUnit = false;
     }
 
-    // valid values are 'chapter' and 'video'; will also accept 'chapters'
+    // valid values of data-speed-icons are 'arrows' (default) and 'animals'
+    // use 'animals' to use turtle and rabbit
+    if ($(media).data('speed-icons') === 'animals') {
+      this.speedIcons = 'animals';
+    }
+    else {
+      this.speedIcons = 'arrows';
+    }
+
+    // valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
     if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
       this.seekbarScope = 'chapter';
     }
@@ -191,13 +200,29 @@
       }
     }
 
+    // Icon type
+    // By default, AblePlayer uses scalable icomoon fonts for the player controls
+    // and falls back to images if the user has a custom style sheet that overrides font-family
+    // use data-icon-type to force controls to use either 'font', 'images' or 'svg'
+    this.iconType = 'font';
+    this.forceIconType = false;
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
       var iconType = $(media).data('icon-type');
-      if (iconType === 'font' || iconType == 'image') {
+      if (iconType === 'font' || iconType == 'image' || iconType == 'svg') {
         this.iconType = iconType;
+        this.forceIconType = true;
       }
     }
-
+/*
+    if (this.iconType === 'svg') {
+      // load and execute the required JavaScript
+      var svgScriptPath = this.rootPath + '/icons/svgxuse.js';
+      var $svgScript = $('<script>',{
+        'src': svgScriptPath
+      });
+      $(document).append($svgScript);
+    }
+*/
     if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
       this.allowFullScreen = false;
     }

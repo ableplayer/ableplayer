@@ -587,8 +587,8 @@
           kbLabels.push(this.tt.play + '/' + this.tt.pause);
           keys.push('p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar);
         }
-        else if (this.controls[i] === 'stop') {
-          kbLabels.push(this.tt.stop);
+        else if (this.controls[i] === 'restart') {
+          kbLabels.push(this.tt.restart);
           keys.push('s');
         }
         else if (this.controls[i] === 'rewind') {

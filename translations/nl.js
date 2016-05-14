@@ -12,6 +12,16 @@ var nl = {
 
 "stop": "Stoppen",
 
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
+
 "rewind": "Terug",
 
 "forward": "Verder",

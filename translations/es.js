@@ -12,6 +12,16 @@ var es = {
 
 "stop": "Detener",
 
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
+
 "rewind": "Rebobinar",
 
 "forward": "Adelantar",

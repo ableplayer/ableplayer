@@ -10,7 +10,7 @@
     });
 
     this.$transcriptToolbar = $('<div>', {
-      'class': 'able-window-toolbar'
+      'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
     });
 
     this.$transcriptDiv = $('<div>', {

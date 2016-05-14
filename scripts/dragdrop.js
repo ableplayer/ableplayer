@@ -91,7 +91,7 @@
   AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
 
-    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttomImg,
+    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
       $buttonLabel, tooltipId, $tooltip, $popup,
       label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
       $optionList, radioName, options, i, $optionItem, option,
@@ -133,7 +133,7 @@
     }
     else {
       // use image
-      buttonImgSrc = '../images/' + this.iconColor + '/preferences.png';
+      buttonImgSrc = this.rootPath + '/icons/' + this.toolbarIconColor + '/preferences.png';
       $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',

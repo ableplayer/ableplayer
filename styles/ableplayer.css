@@ -124,9 +124,27 @@
 .able-right-controls {
   float: right;
 }
+/*
 .able-left-controls span,
 .able-right-controls span {
   color: #fdfdfd;
+}
+*/
+.able-black-controls,
+.able-black-controls button,
+.able-black-controls label  {
+  color: #000 !important;
+}
+.able-black-controls .able-seekbar {
+  border: 2px solid #000;
+}
+.able-white-controls,
+.able-white-controls button,
+.able-black-controls label {
+  color: #FFF !important;
+}
+.able-white-controls .able-seekbar {
+  border: 2px solid #FFF;
 }
 .able-controller button {
   background: none;
@@ -135,7 +153,8 @@
   border-style: none;
   margin: 0;
   padding: 0;
-  color: #fdfdfd;
+  font-size: 20px;
+  width: 40px;
   min-width: 20px;
   overflow: hidden !important;
   z-index: 6600;
@@ -643,9 +662,6 @@ span.able-modkey {
   top: 0;
   right: 0;
   font-size: 1.5em;
-  opacity: 0.85;
-  filter:alpha(opacity=85); /* for IE */
-  color: #fdfdfd;
   background-color: transparent;
   border: none;
   outline: none;
@@ -800,6 +816,7 @@ div.able-chapters-div button::-moz-focus-inner {
   padding: 5px 10px;
   border-color: black;
   border-width: 1px;
+  color: #000 !important;
   background-color: #CCCCCC;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
@@ -1093,104 +1110,134 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 
 /*
+  SVG Icons
+*/
+button svg {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+
+/*
   icomoon.io font styling
 */
-
 @font-face {
-	font-family: able;
-	src:url('../fonts/able.eot?sn5rkg');
-	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
-		url('../fonts/able.woff?sn5rkg') format('woff'),
-		url('../fonts/able.ttf?sn5rkg') format('truetype'),
-		url('../fonts/able.svg?sn5rkg#able') format('svg');
-	font-weight: normal;
-	font-style: normal;
+  font-family: 'able';
+    src:    url('../icons/fonts/able.eot?dqripi');
+    src:    url('../icons/fonts/able.eot?dqripi#iefix') format('embedded-opentype'),
+        url('../icons/fonts/able.ttf?dqripi') format('truetype'),
+        url('../icons/fonts/able.woff?dqripi') format('woff'),
+        url('../icons/fonts/able.svg?dqripi#able') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }
 
 [class^="icon-"], [class*=" icon-"] {
-	font-family: able;
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'able' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
 
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .icon-play:before {
-	content: "\f04b";
+    content: "\f04b";
 }
 .icon-pause:before {
-	content: "\f04c";
+    content: "\f04c";
 }
 .icon-stop:before {
-	content: "\f04d";
+    content: "\f04d";
 }
-.icon-fullscreen-expand:before {
-	content: "\f065";
-}
-.icon-fullscreen-collapse:before {
-	content: "\f066";
-}
-.icon-pipe:before {
-	content: "\e600";
-}
-.icon-captions:before {
-	content: "\e601";
-}
-.icon-descriptions:before {
-	content: "\e602";
-}
-.icon-transcript:before {
-	content: "\f15c";
-}
-.icon-slower:before {
-	content: "\f0dd";
-}
-.icon-faster:before {
-	content: "\f0de";
-}
-.icon-help:before {
-	content: "\f128";
-}
-.icon-close:before {
-	content: "\f00d";
+.icon-restart:before {
+    content: "\e900";
 }
 .icon-rewind:before {
-	content: "\e603";
+    content: "\e603";
 }
 .icon-forward:before {
-	content: "\e604";
+    content: "\e604";
 }
-.icon-volume-loud:before {
-	content: "\e60b";
+.icon-previous:before {
+    content: "\e901";
 }
-.icon-volume-medium:before {
-	content: "\e605";
+.icon-next:before {
+    content: "\e902";
 }
-.icon-volume-soft:before {
-	content: "\e60c";
+.icon-slower:before {
+    content: "\f0dd";
 }
-.icon-volume-mute:before {
-	content: "\e606";
+.icon-faster:before {
+    content: "\f0de";
 }
-.icon-volume-up:before {
-	content: "\e607";
+.icon-turtle:before {
+    content: "\e904";
 }
-.icon-volume-down:before {
-	content: "\e608";
+.icon-rabbit:before {
+    content: "\e905";
 }
-.icon-chapters:before {
-	content: "\e609";
+.icon-ellipsis:before {
+    content: "\e903";
 }
-.icon-preferences:before {
-	content: "\e60d";
+.icon-pipe:before {
+    content: "\e600";
+}
+.icon-captions:before {
+    content: "\e601";
+}
+.icon-descriptions:before {
+    content: "\e602";
 }
 .icon-sign:before {
-	content: "\e60a";
+    content: "\e60a";
 }
+.icon-volume-mute:before {
+    content: "\e606";
+}
+.icon-volume-soft:before {
+    content: "\e60c";
+}
+.icon-volume-medium:before {
+    content: "\e605";
+}
+.icon-volume-loud:before {
+    content: "\e60b";
+}
+.icon-volume-up:before {
+    content: "\e607";
+}
+.icon-volume-down:before {
+    content: "\e608";
+}
+.icon-chapters:before {
+    content: "\e609";
+}
+.icon-transcript:before {
+    content: "\f15c";
+}
+.icon-preferences:before {
+    content: "\e60d";
+}
+.icon-close:before {
+    content: "\f00d";
+}
+.icon-fullscreen-expand:before {
+    content: "\f065";
+}
+.icon-fullscreen-collapse:before {
+    content: "\f066";
+}
+.icon-help:before {
+    content: "\f128";
+}
+
 

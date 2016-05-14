@@ -197,6 +197,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
     valuable bandwidth, so preload="metadata" would be a better option.
 -   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
 -   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
+-   **data-speed-icons** - optional; "arrows" (default) or "animals". The latter will substitute a turtle icon for *slower* and a rabbit icon for *faster*. 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
 -   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
@@ -601,16 +602,33 @@ Files created by the build process are put into the */build* directory:
 - **build/ableplayer.min.css** - 
   a minified combined version of all Able Player CSS files
  
- 
+Acknowledgments 
+---------------
+
+- Able Player development is supported in part by the [AccessComputing][] project 
+at the University of Washington, with financial support from the National Science Foundation 
+(grants #CNS-0540615, CNS-0837508, and CNS-1042260). 
+- Additional support has been provided by the  
+[Committee on Institutional Cooperation][] (CIC).
+- Turtle and rabbit icons (available as optional alternatives for the speed buttons) are provided courtesy of [Icons8][]. 
+- Sample video tracks are provided courtesy of [The DO-IT Center][] at the University of Washington. Additional videos are available on the [DO-IT Video][] website, which uses Able Player.
+- Sample audio tracks are provided courtesy of Terrill Thompson from his album [Flavors, by Flow Theory][]. 
+
+
+  [AccessComputing]: http://washington.edu/accesscomputing
+  [Committee on Institutional Cooperation]: https://www.cic.net/home
   [Configuring MIME Types in IIS 7]: http://technet.microsoft.com/en-us/library/17bda1f4-8a0d-440f-986a-5aaa9d40b74c.aspx
   [Editing the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide13.htm
   [develop]: https://github.com/ableplayer/ableplayer/tree/develop
   [examples]: http://ableplayer.github.io/ableplayer/demos/
   [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
+  [Flavors, by Flow Theory]: http://www.terrillthompson.com/music/2012/01/flow-theory-flavors/
+  [DO-IT Video]: http://washington.edu/doit/video
   [Google Developer Console]: https://console.developers.google.com/
   [Google's Getting Started page]: https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication
   [Grunt]: http://gruntjs.com/
   [How to add MIME Types with IIS7 Web.config]: http://blogs.iis.net/bills/archive/2008/03/25/how-to-add-mime-types-with-iis7-web-config.aspx
+  [Icons8]: https://icons8.com
   [issues]: https://github.com/ableplayer/ableplayer/issues
   [jQuery]: http://jquery.com/
   [jquery.cookie]: https://github.com/carhartl/jquery-cookie
@@ -619,6 +637,7 @@ Files created by the build process are put into the */build* directory:
   [Modernizr]: http://modernizr.com/
   [npm]: https://www.npmjs.com/
   [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
+  [The DO-IT Center]: http://washington.edu/doit
   [Video Demo #7]: demos/video7.html
   [WebVTT validator]: https://quuz.org/webvtt/
   [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers

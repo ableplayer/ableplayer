@@ -12,6 +12,16 @@ var fr = {
 
 "stop": "Arrêt",
 
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
+
 "rewind": "Reculer",
 
 "forward": "Avancer",

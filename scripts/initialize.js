@@ -9,21 +9,9 @@
     this.rootPath = this.getRootWebSitePath();
 
     // Volume range is 0 to 10. Don't crank it to avoid overpowering screen readers
+    // can be overridden with data-volume
     this.defaultVolume = 7;
     this.volume = this.defaultVolume;
-
-    // Button color
-    // Media controller background color can be customized in able.css
-    // Choose 'white' if your controller has a dark background, 'black' if a light background
-    // Use a contrast checker to ensure your color scheme has sufficient contrast
-    // e.g., http://www.paciellogroup.com/resources/contrastAnalyser
-    this.iconColor = 'white';
-
-    // Icon type
-    // By default, AblePlayer uses scalable icomoon fonts for the player controls
-    // and falls back to images if the user has a custom style sheet that overrides font-family
-    // set this to 'image' to always use images for player controls; otherwise leave set to 'font'
-    this.iconType = 'font';
 
     // seekInterval = Number of seconds to seek forward or back with these buttons
     // NOTE: This can be overridden with the data-seek-interval attribute,
@@ -96,6 +84,7 @@
     this.playing = false; // will change to true after 'playing' event is triggered
 
     this.getUserAgent();
+    this.setIconColor();
     this.setButtonImages();
   };
 
@@ -109,25 +98,93 @@
     return webFolderFullPath;
   };
 
+  AblePlayer.prototype.setIconColor = function() {
+
+    // determine the best color choice (white or black) for icons,
+    // given the background-color of their container elements
+    // Source for relative luminance formula:
+    // https://en.wikipedia.org/wiki/Relative_luminance
+
+    // We need to know the color *before* creating the element
+    // so the element doesn't exist yet when this function is called
+    // therefore, need to create a temporary element then remove it after color is determined
+    // Temp element must be added to the DOM or WebKit can't retrieve its CSS properties
+
+    var $elements, i, $el, bgColor, rgb, red, green, blue, luminance, iconColor;
+
+    $elements = ['controller', 'toolbar'];
+    for (i=0; i<$elements.length; i++) {
+      if ($elements[i] == 'controller') {
+        $el =  $('<div>', {
+          'class': 'able-controller'
+        }).hide();
+      }
+      else if ($elements[i] === 'toolbar') {
+        $el =  $('<div>', {
+          'class': 'able-window-toolbar'
+        }).hide();
+      }
+      $('body').append($el);
+      bgColor = $el.css('background-color');
+      // bgColor is a string in the form 'rgb(R, G, B)', perhaps with a 4th item for alpha;
+      // split the 3 or 4 channels into an array
+      rgb = bgColor.replace(/[^\d,]/g, '').split(',');
+      red = rgb[0];
+      green = rgb[1];
+      blue = rgb[2];
+      luminance = (0.2126 * red) + (0.7152 * green) + (0.0722 * blue);
+      // range is 1 - 255; therefore 125 is the tipping point
+      if (luminance < 125) { // background is dark
+        iconColor = 'white';
+      }
+      else { // background is light
+        iconColor = 'black';
+      }
+      if ($elements[i] === 'controller') {
+        this.iconColor = iconColor;
+      }
+      else if ($elements[i] === 'toolbar') {
+        this.toolbarIconColor = iconColor;
+      }
+      $el.remove();
+    }
+  };
+
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
 
-    this.imgPath = '../images/' + this.iconColor + '/';
+    this.imgPath = this.rootPath + '/icons/' + this.iconColor + '/';
 
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
+
+    this.restartButtonImg = this.imgPath + 'restart.png';
+
     this.rewindButtonImg = this.imgPath + 'rewind.png';
     this.forwardButtonImg = this.imgPath + 'forward.png';
-    this.fasterButtonImg = this.imgPath + 'slower.png';
-    this.slowerButtonImg = this.imgPath + 'faster.png';
+
+    this.previousButtonImg = this.imgPath + 'previous.png';
+    this.nextButtonImg = this.imgPath + 'next.png';
+
+    if (this.speedIcons === 'arrows') {
+      this.fasterButtonImg = this.imgPath + 'slower.png';
+      this.slowerButtonImg = this.imgPath + 'faster.png';
+    }
+    else if (this.speedIcons === 'animals') {
+      this.fasterButtonImg = this.imgPath + 'rabbit.png';
+      this.slowerButtonImg = this.imgPath + 'turtle.png';
+    }
+
     this.captionsButtonImg = this.imgPath + 'captions.png';
     this.chaptersButtonImg = this.imgPath + 'chapters.png';
     this.signButtonImg = this.imgPath + 'sign.png';
     this.transcriptButtonImg = this.imgPath + 'transcript.png';
     this.descriptionsButtonImg = this.imgPath + 'descriptions.png';
+
     this.fullscreenExpandButtonImg = this.imgPath + 'fullscreen-expand.png';
     this.fullscreenCollapseButtonImg = this.imgPath + 'fullscreen-collapse.png';
+
     this.prefsButtonImg = this.imgPath + 'preferences.png';
     this.helpButtonImg = this.imgPath + 'help.png';
   };
@@ -212,6 +269,11 @@
     // use images as fallback
 
     var $tempButton, $testButton, controllerFont;
+
+    if (this.forceIconType) {
+      // use value specified in data-icon-type
+      return false;
+    }
 
     if (window.getComputedStyle) {
 
@@ -549,9 +611,7 @@
         });
 
         var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
-        // var flashplayer = '../thirdparty/jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
-        // var html5player = '../thirdparty/jwplayer.html5.js';
 
         // TODO: Try JW Player without width (playerMaxWidth) and height
         if (thisObj.mediaType === 'video') {
