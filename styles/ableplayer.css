@@ -654,7 +654,7 @@ span.able-modkey {
   border-style: solid;
   border-width: 0 0 1px 0;
 }
-.able-window-toolbar:hover {
+.able-draggable:hover {
   cursor: move;
 }
 .able-window-toolbar .able-button-handler-preferences {
@@ -825,6 +825,7 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 .able-alert {
   background-color: #FFFFCC;
+  box-shadow: 0px 0px 16px #262626;
   z-index: 9300;
 }
 .able-popup {

@@ -7814,7 +7814,7 @@
       }
       else if (location === 'transcript') {
         // position alert just beneath the toolbar to avoid getting lost among transcript text
-        alertTop = this.$transcriptToolbar.height() + 20;
+        alertTop = this.$transcriptToolbar.height() + 30;
       }
       $alertBox.css({
         top: alertTop + 'px',
@@ -9919,6 +9919,9 @@
       windowName = 'sign-window';
       $toolbar = this.$signToolbar;
     }
+
+    // add class to trigger change in cursor on hover
+    $toolbar.addClass('able-draggable');
 
     // add resize handle selector to bottom right corner
     $resizeHandle = $('<div>',{

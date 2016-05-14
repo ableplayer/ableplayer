@@ -28,6 +28,9 @@
       $toolbar = this.$signToolbar;
     }
 
+    // add class to trigger change in cursor on hover
+    $toolbar.addClass('able-draggable');
+
     // add resize handle selector to bottom right corner
     $resizeHandle = $('<div>',{
       'class': 'able-resizable'

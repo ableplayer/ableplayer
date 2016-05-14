@@ -1143,7 +1143,7 @@
       }
       else if (location === 'transcript') {
         // position alert just beneath the toolbar to avoid getting lost among transcript text
-        alertTop = this.$transcriptToolbar.height() + 20;
+        alertTop = this.$transcriptToolbar.height() + 30;
       }
       $alertBox.css({
         top: alertTop + 'px',
