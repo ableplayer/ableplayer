@@ -897,7 +897,7 @@
       if (this.hasSignLanguage) {
         bll.push('sign'); // sign language
       }
-      if (this.hasOpenDesc || this.hasClosedDesc) {
+      if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
         bll.push('descriptions'); //audio description
       }
     }
