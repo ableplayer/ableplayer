@@ -385,11 +385,15 @@
     };
 
     var addCaption = function(div, cap) {
+
       var capSpan = $('<span class="able-transcript-seekpoint able-transcript-caption"></span>');
 
       var flattenComponentForCaption = function(comp) {
+
         var result = [];
+
         var flattenString = function (str) {
+
           var result = [];
           if (str === '') {
             return result;
@@ -431,6 +435,23 @@
             }
           }
         }
+        else if (comp.type === 'b' || comp.type === 'i') {
+          if (comp.type === 'b') {
+            var $tag = $('<strong>');
+          }
+          else if (comp.type === 'i') {
+            var $tag = $('<em>');
+          }
+          for (var ii in comp.children) {
+            var subResults = flattenComponentForCaption(comp.children[ii]);
+            for (var jj in subResults) {
+              $tag.append(subResults[jj]);
+            }
+          }
+          if (comp.type === 'b' || comp.type == 'i') {
+            result.push($tag);
+          }
+        }
         else {
           for (var ii in comp.children) {
             result = result.concat(flattenComponentForCaption(comp.children[ii]));
@@ -450,7 +471,6 @@
           capSpan.append(result);
         }
       }
-
       capSpan.attr('data-start', cap.start.toString());
       capSpan.attr('data-end', cap.end.toString());
       div.append(capSpan);

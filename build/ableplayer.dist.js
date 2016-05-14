@@ -2278,7 +2278,6 @@
     if (typeof cueId === 'undefined') {
       cueId = state.cues.length + 1;
     }
-
     state.cues.push({
       id: cueId,
       start: startTime,
@@ -2308,7 +2307,6 @@
       if (nextLine.indexOf('-->') !== -1 || /^\s*$/.test(nextLine)) {
         break; // Handle empty cues
       }
-
       // Have to separately detect double-lines ending cue due to our non-standard parsing.
       // TODO: Redo outer algorithm to conform to W3 spec?
       if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
@@ -2323,9 +2321,9 @@
       }
       else if (token.type === 'startTag') {
         token.type = token.tagName;
-        // Define token.parent; added by Terrill to fix bug on Line 296
+        // Define token.parent; added by Terrill to fix bug end 'endTag' loop
         token.parent = current;
-        if ($.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby']) !== -1) {
+        if ($.inArray(token.tagName, ['i', 'b', 'u', 'ruby']) !== -1) {
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
           }
@@ -2333,6 +2331,14 @@
           current = token;
         }
         else if (token.tagName === 'rt' && current.tagName === 'ruby') {
+          if (languageStack.length > 0) {
+            current.language = languageStack[languageStack.length - 1];
+          }
+          current.children.push(token);
+          current = token;
+        }
+        else if (token.tagName === 'c') {
+          token.value = token.annotation;
           if (languageStack.length > 0) {
             current.language = languageStack[languageStack.length - 1];
           }
@@ -2359,7 +2365,7 @@
       else if (token.type === 'endTag') {
         if (token.tagName === current.type && $.inArray(token.tagName, ['c', 'i', 'b', 'u', 'ruby', 'rt', 'v']) !== -1) {
           // NOTE from Terrill: This was resulting in an error because current.parent was undefined
-          // Fixed (I think) by assigning current token to token.parent  on Line 260
+          // Fixed (I think) by assigning current token to token.parent in 'startTag' loop
           current = current.parent;
         }
         else if (token.tagName === 'lang' && current.type === 'lang') {
@@ -8215,6 +8221,22 @@
   // Takes a cue and returns the caption text to display for it.
   AblePlayer.prototype.flattenCueForCaption = function (cue) {
 
+    // Support for 'i' and 'b' tags added in 2.3.66
+    // TODO: Add support for 'c' (class) and 'ruby'
+
+    // c (class): <c.myClass1.myClass2>Some text</c>
+    // Classes can be used to modify other tags too (e.g., <v.loud>)
+    // If <c> tag, should be rendered as a <span>
+
+    // ruby: http://www.w3schools.com/tags/tag_ruby.asp
+
+    // WebVTT also supports 'u' (underline)
+    // I see no reason to support that in Able Player.
+    // If it's available authors are likely to use it incorrectly
+    // where <i> or <b> should be used instead
+    // Here are the rare use cases where an underline is appropriate on the web:
+    // http://html5doctor.com/u-element/
+
     var result = [];
 
     var flattenComponent = function (component) {
@@ -8227,6 +8249,20 @@
         for (var ii in component.children) {
           result.push(flattenComponent(component.children[ii]));
         }
+      }
+      else if (component.type === 'i') {
+        result.push('<em>');
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+        result.push('</em>');
+      }
+      else if (component.type === 'b') {
+        result.push('<strong>');
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+        result.push('</strong>');
       }
       else {
         for (var ii in component.children) {
@@ -9041,11 +9077,15 @@
     };
 
     var addCaption = function(div, cap) {
+
       var capSpan = $('<span class="able-transcript-seekpoint able-transcript-caption"></span>');
 
       var flattenComponentForCaption = function(comp) {
+
         var result = [];
+
         var flattenString = function (str) {
+
           var result = [];
           if (str === '') {
             return result;
@@ -9087,6 +9127,23 @@
             }
           }
         }
+        else if (comp.type === 'b' || comp.type === 'i') {
+          if (comp.type === 'b') {
+            var $tag = $('<strong>');
+          }
+          else if (comp.type === 'i') {
+            var $tag = $('<em>');
+          }
+          for (var ii in comp.children) {
+            var subResults = flattenComponentForCaption(comp.children[ii]);
+            for (var jj in subResults) {
+              $tag.append(subResults[jj]);
+            }
+          }
+          if (comp.type === 'b' || comp.type == 'i') {
+            result.push($tag);
+          }
+        }
         else {
           for (var ii in comp.children) {
             result = result.concat(flattenComponentForCaption(comp.children[ii]));
@@ -9106,7 +9163,6 @@
           capSpan.append(result);
         }
       }
-
       capSpan.attr('data-start', cap.start.toString());
       capSpan.attr('data-end', cap.end.toString());
       div.append(capSpan);

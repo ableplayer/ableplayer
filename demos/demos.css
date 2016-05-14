@@ -54,4 +54,12 @@ a:hover, a:focus, a:active {
   outline-width: thick;
   text-decoration: none;
 }
+/*
+ * Class example from WebVTT caption file
+ *
+ */
+.quotable {
+  font-weight: bold;
+  color: #C00;
+}
 

@@ -146,6 +146,22 @@
   // Takes a cue and returns the caption text to display for it.
   AblePlayer.prototype.flattenCueForCaption = function (cue) {
 
+    // Support for 'i' and 'b' tags added in 2.3.66
+    // TODO: Add support for 'c' (class) and 'ruby'
+
+    // c (class): <c.myClass1.myClass2>Some text</c>
+    // Classes can be used to modify other tags too (e.g., <v.loud>)
+    // If <c> tag, should be rendered as a <span>
+
+    // ruby: http://www.w3schools.com/tags/tag_ruby.asp
+
+    // WebVTT also supports 'u' (underline)
+    // I see no reason to support that in Able Player.
+    // If it's available authors are likely to use it incorrectly
+    // where <i> or <b> should be used instead
+    // Here are the rare use cases where an underline is appropriate on the web:
+    // http://html5doctor.com/u-element/
+
     var result = [];
 
     var flattenComponent = function (component) {
@@ -158,6 +174,20 @@
         for (var ii in component.children) {
           result.push(flattenComponent(component.children[ii]));
         }
+      }
+      else if (component.type === 'i') {
+        result.push('<em>');
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+        result.push('</em>');
+      }
+      else if (component.type === 'b') {
+        result.push('<strong>');
+        for (var ii in component.children) {
+          result.push(flattenComponent(component.children[ii]));
+        }
+        result.push('</strong>');
       }
       else {
         for (var ii in component.children) {

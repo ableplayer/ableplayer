@@ -26,15 +26,15 @@ NOTE This VTT file includes a few extras:
 <v Narrator> You <i>want</i> these people.
 
 00:00:10.792 --> 00:00:13.759
-They order your products,
-sign up for your services,
+They <b>order</b> your products,
+<b>sign up</b> for your services,
 
 00:00:13.759 --> 00:00:16.627
-enroll in your classes,
-read your opinions,
+<b>enroll</b> in your classes,
+<b>read</b> your opinions,
 
 00:00:16.627 --> 00:00:18.561
-and watch your videos.
+and <b>watch</b> your videos.
 
 00:00:18.561 --> 00:00:24.165
 You'll never see them, but they know you-
@@ -44,8 +44,8 @@ through your website.
 Or maybe not.
 
 00:00:25.891 --> 00:00:30.396
-Your website's visitors aren't a
-<b>faceless mass of identical mouse-clickers</b>
+<c.quotable>Your website's visitors aren't a
+faceless mass of identical mouse-clickers</c>
 
 00:00:30.396 --> 00:00:32.363
 but a vibrant
