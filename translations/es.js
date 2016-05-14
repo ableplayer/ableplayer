@@ -12,15 +12,15 @@ var es = {
 
 "stop": "Detener",
 
-"restart": "Restart",
+"restart": "Reiniciar",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "Capítulo Anterior",
 
-"nextChapter": "Next chapter",
+"nextChapter": "Siguiente Capítulo",
 
-"prevTrack": "Previous track",
+"prevTrack": "Pista Anterior",
 
-"nextTrack": "Next track",
+"nextTrack": "Siguiente Pista",
 
 "rewind": "Rebobinar",
 
@@ -81,6 +81,10 @@ var es = {
 "or": "o",
 
 "spacebar": "Barra espaciadora",
+
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Letra",
 
 "autoScroll": "Desplazamiento automático",
 
