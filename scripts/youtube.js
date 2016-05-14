@@ -105,6 +105,7 @@
             var playerState = thisObj.getPlayerState(x.data);
             if (playerState === 'playing') {
               thisObj.playing = true;
+              thisObj.startedPlaying = true;
             }
             else {
               thisObj.playing = false;
@@ -422,21 +423,23 @@
       for (var i=0; i<options.length; i++) {
         if (options[i] == 'cc') { // this is the AS3 (Flash) player
           this.ytCaptionModule = 'cc';
-          this.hasCaptions = true;
-          this.usingYouTubeCaptions = true;
+          if (!this.hasCaptions) {
+            // there are captions available via other sources (e.g., <track>)
+            // so use these
+            this.hasCaptions = true;
+            this.usingYouTubeCaptions = true;
+          }
           break;
         }
         else if (options[i] == 'captions') { // this is the HTML5 player
           this.ytCaptionModule = 'captions';
-          this.hasCaptions = true;
-          this.usingYouTubeCaptions = true;
+          if (!this.hasCaptions) {
+            // there are captions available via other sources (e.g., <track>)
+            // so use these
+            this.hasCaptions = true;
+            this.usingYouTubeCaptions = true;
+          }
           break;
-        }
-        else {
-          // no recognizable caption module was found
-          // sorry, gonna have to disable captions if we can't control them
-          this.hasCaptions = false;
-          this.usingYouTubeCaptions = false;
         }
       }
       if (typeof this.ytCaptionModule !== 'undefined') {

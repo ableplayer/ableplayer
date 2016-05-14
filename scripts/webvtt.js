@@ -241,6 +241,10 @@
     cut(state, 1);
     var components = act(state, getCuePayload);
 
+    if (typeof cueId === 'undefined') {
+      cueId = state.cues.length + 1;
+    }
+
     state.cues.push({
       id: cueId,
       start: startTime,

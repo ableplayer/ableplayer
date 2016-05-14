@@ -228,11 +228,13 @@
   };
 
   AblePlayer.prototype.highlightTranscript = function (currentTime) {
+
+    //show highlight in transcript marking current caption
+
     if (!this.transcriptType) {
       return;
     }
 
-    //show highlight in transcript marking current caption
     var start, end;
     var thisObj = this;
 

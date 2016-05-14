@@ -13,14 +13,14 @@
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
 
-<!-- YouTube Data API key is recommended for better YouTube player performance -->
+<!-- YouTube Data API key is required -->
 <!-- Get YouTube Data API key by registering your application at the Google Developer Console:
 <!-- https://console.developers.google.com/ -->
 <!-- For complete instructions, see Google's Getting Started page: -->
 <!-- https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication -->
 <!-- NOTE: All that's needed for Able Player is a simple API key, NOT OAuth 2.0 -->
 <script>
-  // Get your own API key - ours only works on our registered domains
+  // Get your own API key - ours only works on our registered domains!
   var youTubeDataAPIKey = 'AIzaSyB3bpr8ttIoUqFxD3SUpgJ59n6Ylc0soZw';
   var googleApiReady = false;
   function initGoogleClientApi() {
@@ -32,6 +32,25 @@
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
+<!-- styles for this example page -->
+<style>
+  #wrapper {
+    width: 100%;
+  }
+  #chapters {
+    float: left;
+    min-width: 12em;
+    width: 30%;
+    padding-right: 1em;
+  }
+  #chapters ul {
+    border: 1px solid #AAA;
+  }
+  #player-plus {
+    float: left;
+    width: 65%;
+  }
+</style>
 </head>
 
 <body>
@@ -40,9 +59,7 @@
 
 <p>This page uses the YouTube player, but with Able Player controls.</p>
 <p>If &lt;track&gt; elements are used for captions or subtitles, these take precedence over YouTube captions.
-  Otherwise, YouTube captions and subtitles are used if available.</p>
-
-<p>Local &lt;track&gt; elements can be used to host captions locally rather than use YouTube's captions.
+  Otherwise, YouTube captions and subtitles are used if available.
   The advantage of using local captions is they can be used to build an interactive transcript and
   <a href="video8.html">search within videos</a>. Currently YouTube doesn't expose specific caption data
   via its API so these functions are not possible using YouTube captions alone.</p>
@@ -52,20 +69,28 @@
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
-<!--
-  # A few video id's for testing:
-  # YouTube video about captions: QRS8MkLhQmM, has many languages but no described version
-  # Campus Leaders: tnsB6YCHVXA, described: Ck2TdVMhWcU (854 x 480; additional languages forthcoming)
-  # Invisible disabilities: skNAVgPb1Lo described: SH3vt-XrkEs (English & Japanese)
-  # Uncaptioned video: mrudR-kIB1k
-  # To use a local poster image, add poster="../media/itaccess.jpg" to <video>
-  # If width and height are known, add them to width and height attributes on <video>
-  #  Otherwise, Able will attempt to query YouTube for this data but that's less efficient and less reliable
-  # Remove comments from the <track> elements to use local captions instead of YouTube's captions
--->
-<video id="video1" preload="auto" data-able-player data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU">
-  <track kind="captions" src="../media/itaccess_en.vtt" srclang="en"/>
-</video>
-
+<div id="wrapper">
+  <div id="chapters"></div>
+  <div id="player-plus">
+    <div id="player">
+      <video data-able-player
+        id="video1"
+        preload="auto"
+        data-youtube-id="tnsB6YCHVXA"
+        data-youtube-desc-id="Ck2TdVMhWcU"
+        data-transcript-div="transcript"
+        data-chapters-div="chapters"
+        data-use-transcript-button="false"
+        data-use-chapters-button="false"
+      >
+        <track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
+        <track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Spanish"/>
+        <track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-CN" label="Chinese, simplified"/>
+        <track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
+      </video>
+    </div>
+    <div id="transcript"></div>
+  </div>
+</div>
 </body>
 </html>

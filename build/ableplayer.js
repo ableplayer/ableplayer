@@ -2275,6 +2275,10 @@
     cut(state, 1);
     var components = act(state, getCuePayload);
 
+    if (typeof cueId === 'undefined') {
+      cueId = state.cues.length + 1;
+    }
+
     state.cues.push({
       id: cueId,
       start: startTime,
@@ -2964,7 +2968,7 @@
 
     var thisObj, headingLevel, headingType, headingId, $chaptersHeading,
       $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
-      i, itemId, chapter, buttonId, hasDefault,
+      i, chapter, buttonId, hasDefault,
       getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
 
     thisObj = this;
@@ -2996,7 +3000,6 @@
       $chaptersList = $('<ul>');
       for (i in this.chapters) {
         chapter = this.chapters[i];
-        itemId = this.mediaId + '-chapters-' + i; // TODO: Maybe not needed???
         $chapterItem = $('<li></li>');
         $chapterButton = $('<button>',{
           'type': 'button',
@@ -4878,6 +4881,7 @@
             var playerState = thisObj.getPlayerState(x.data);
             if (playerState === 'playing') {
               thisObj.playing = true;
+              thisObj.startedPlaying = true;
             }
             else {
               thisObj.playing = false;
@@ -5195,21 +5199,23 @@
       for (var i=0; i<options.length; i++) {
         if (options[i] == 'cc') { // this is the AS3 (Flash) player
           this.ytCaptionModule = 'cc';
-          this.hasCaptions = true;
-          this.usingYouTubeCaptions = true;
+          if (!this.hasCaptions) {
+            // there are captions available via other sources (e.g., <track>)
+            // so use these
+            this.hasCaptions = true;
+            this.usingYouTubeCaptions = true;
+          }
           break;
         }
         else if (options[i] == 'captions') { // this is the HTML5 player
           this.ytCaptionModule = 'captions';
-          this.hasCaptions = true;
-          this.usingYouTubeCaptions = true;
+          if (!this.hasCaptions) {
+            // there are captions available via other sources (e.g., <track>)
+            // so use these
+            this.hasCaptions = true;
+            this.usingYouTubeCaptions = true;
+          }
           break;
-        }
-        else {
-          // no recognizable caption module was found
-          // sorry, gonna have to disable captions if we can't control them
-          this.hasCaptions = false;
-          this.usingYouTubeCaptions = false;
         }
       }
       if (typeof this.ytCaptionModule !== 'undefined') {
@@ -7491,7 +7497,6 @@
   };
 
   AblePlayer.prototype.handleChapters = function () {
-
     if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it
@@ -8879,11 +8884,13 @@
   };
 
   AblePlayer.prototype.highlightTranscript = function (currentTime) {
+
+    //show highlight in transcript marking current caption
+
     if (!this.transcriptType) {
       return;
     }
 
-    //show highlight in transcript marking current caption
     var start, end;
     var thisObj = this;
 

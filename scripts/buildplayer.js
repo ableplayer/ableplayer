@@ -174,7 +174,7 @@
 
     var thisObj, headingLevel, headingType, headingId, $chaptersHeading,
       $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
-      i, itemId, chapter, buttonId, hasDefault,
+      i, chapter, buttonId, hasDefault,
       getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
 
     thisObj = this;
@@ -206,7 +206,6 @@
       $chaptersList = $('<ul>');
       for (i in this.chapters) {
         chapter = this.chapters[i];
-        itemId = this.mediaId + '-chapters-' + i; // TODO: Maybe not needed???
         $chapterItem = $('<li></li>');
         $chapterButton = $('<button>',{
           'type': 'button',

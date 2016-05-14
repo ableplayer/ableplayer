@@ -826,7 +826,6 @@
   };
 
   AblePlayer.prototype.handleChapters = function () {
-
     if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it
