@@ -32,7 +32,7 @@ var es = {
 
 "hideCaptions": "Ocultar subtítulos",
 
-"captionsOff": "Quitar subtítulos",
+"captionsOff": "Sin subtítulos",
 
 "showTranscript": "Mostrar transcripción",
 
@@ -56,15 +56,15 @@ var es = {
 
 "mute": "Silenciar",
 
-"unmute": "Reactivar sonido",
+"unmute": "Habilitar sonido",
 
 "volume": "Volumen",
 
-"volumeHelp": "Click to access volume slider",
+"volumeHelp": "Clic para acceder a la barra de volumen",
 
-"volumeUpDown": "Volume up down",
+"volumeUpDown": "Bajar sonido",
 
-"volumeSliderClosed": "Volume slider closed",
+"volumeSliderClosed": "Barra de volumen cerrada",
 
 "preferences": "Preferencias",
 
@@ -112,7 +112,7 @@ var es = {
 
 "alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
 
-"alertNonDescribedVersion": "Using the non-described version of this video",
+"alertNonDescribedVersion": "Utilizando la versión no descrita de este vídeo",
 
 "fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
 
@@ -120,47 +120,47 @@ var es = {
 
 "orHigher": "o superior",
 
-"prefMenuCaptions": "Captions",
+"prefMenuCaptions": "Subtítulos",
 
-"prefMenuDescriptions": "Descriptions",
+"prefMenuDescriptions": "Descripciones",
 
-"prefMenuKeyboard": "Keyboard",
+"prefMenuKeyboard": "Teclado",
 
-"prefMenuTranscript": "Transcript",
+"prefMenuTranscript": "Transcripción",
 
-"prefTitleCaptions": "Captions Preferences",
+"prefTitleCaptions": "Preferencias de subtítulos",
 
-"prefTitleDescriptions": "Audio Description Preferences",
+"prefTitleDescriptions": "Preferencias de audiodescripción",
 
-"prefTitleKeyboard": "Keyboard Preferences",
+"prefTitleKeyboard": "Preferencias de teclado",
 
-"prefTitleTranscript": "Transcript Preferences",
+"prefTitleTranscript": "Preferencias de transcripción",
 
-"prefIntroCaptions": "The following preferences control how captions are displayed.",
+"prefIntroCaptions": "Las siguientes preferencias controlan cómo se presentan los subtítulos.",
 
-"prefIntroDescription1": "This media player supports audio description in two ways: ",
+"prefIntroDescription1": "Este reproductor soporta la audiodescripción de dos maneras: ",
 
-"prefIntroDescription2": "The current video has ",
+"prefIntroDescription2": "El vídeo actual tiene ",
 
-"prefIntroDescriptionNone": "The current video has no audio description in either format.",
+"prefIntroDescriptionNone": "El vídeo actual no tiene audiodescripción de ninguna manera.",
 
-"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+"prefIntroDescription3": "Utilice el siguiente formulario para establecer sus preferencias en cuanto a la audiodescripción.",
 
-"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
+"prefIntroDescription4": "Una vez guardadas sus preferencias, la audiodescripción puede habilitarse o deshabilitarse mediante el botón Descripción.",
 
-"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+"prefIntroKeyboard1": "El reproductor en esta página puede manejarse desde cualquier parte de la página utilizando los atajos de teclado (vea la lista más abajo).",
 
-"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+"prefIntroKeyboard2": "Las teclas modificadoras (Mayúsculas, Alt, Control) pueden definirse más abajo.",
 
-"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+"prefIntroKeyboard3": "NOTA: Algunas combinaciones de teclas pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Intente varias combinaciones de teclas modificadoras para encontrar la que funciona bien en su caso.",
 
-"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+"prefIntroTranscript": "Las siguientes preferencias afectan a la transcripción interactiva.",
 
-"prefCookieWarning": "Saving your preferences requires cookies.",
+"prefCookieWarning": "Gurdar sus preferencias requiere el uso de cookies.",
 
-"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+"prefHeadingKeyboard1": "Teclas modificadoras utilizadas para atajos de teclado",
 
-"prefHeadingKeyboard2": "Current keyboard shortcuts",
+"prefHeadingKeyboard2": "Atajos de teclado definidos actualmente",
 
 "prefHeadingDescription": "Audiodescrita",
 
@@ -168,29 +168,29 @@ var es = {
 
 "prefHeadingCaptions": "Subtítulos",
 
-"prefHeadingTranscript": "Interactive Transcript",
+"prefHeadingTranscript": "Transcripción interactiva",
 
 "prefAltKey": "Alt",
 
 "prefCtrlKey": "Control",
 
-"prefShiftKey": "Mayúscula",
+"prefShiftKey": "Mayúsculas",
 
 "escapeKey": "Escape",
 
-"escapeKeyFunction": "Close current dialog or popup menu",
+"escapeKeyFunction": "Cerrar el cuadro de diálogo o menú contextual",
 
-"prefDescFormat": "Preferred format",
+"prefDescFormat": "Formato preferido",
 
-"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
+"prefDescFormatHelp": "Si ambos formatos están disponibles, se usará sólo uno de ello.",
 
-"prefDescFormatOption1": "alternative described version of video",
+"prefDescFormatOption1": "versión alternativa del vídeo, descrito",
 
-"prefDescFormatOption1b": "an alternative described version",
+"prefDescFormatOption1b": "una versión alternativa con descripción",
 
-"prefDescFormatOption2": "text-based description, announced by screen reader",
+"prefDescFormatOption2": "descripción en texto, leída por el lector de pantalla",
 
-"prefDescFormatOption2b": "text-based description",
+"prefDescFormatOption2b": "descripción en texto",
 
 "prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
@@ -200,59 +200,59 @@ var es = {
 
 "prefTabbable": "Transcripción manejable por teclado",
 
-"prefCaptionsFont": "Font",
+"prefCaptionsFont": "Fuente",
 
-"prefCaptionsColor": "Text Color",
+"prefCaptionsColor": "Color del texto",
 
-"prefCaptionsBGColor": "Background",
+"prefCaptionsBGColor": "Fondo",
 
-"prefCaptionsSize": "Font Size",
+"prefCaptionsSize": "Tamaño de Fuente",
 
-"prefCaptionsOpacity": "Opacity",
+"prefCaptionsOpacity": "Opacidad",
 
-"prefCaptionsStyle": "Style",
+"prefCaptionsStyle": "Estilo",
 
 "serif": "serif",
 
 "sans": "sans-serif",
 
-"cursive": "cursive",
+"cursive": "cursiva",
 
-"fantasy": "fantasy",
+"fantasy": "fantasía",
 
-"monospace": "monospace",
+"monospace": "mono espaciada",
 
-"white": "white",
+"white": "blanco",
 
-"yellow": "yellow",
+"yellow": "amarillo",
 
-"green": "green",
+"green": "verde",
 
 "cyan": "cyan",
 
-"blue": "blue",
+"blue": "azul",
 
 "magenta": "magenta",
 
-"red": "red",
+"red": "rojo",
 
-"black": "black",
+"black": "negro",
 
-"transparent": "transparent",
+"transparent": "transparente",
 
-"solid": "solid",
+"solid": "sólido",
 
 "captionsStylePopOn": "Pop-on",
 
 "captionsStyleRollUp": "Roll-up",
 
-"prefCaptionsPosition": "Position",
+"prefCaptionsPosition": "Posición",
 
-"captionsPositionOverlay": "Overlay",
+"captionsPositionOverlay": "Cubrir",
 
-"captionsPositionBelow": "Below video",
+"captionsPositionBelow": "Debajo del vídeo",
 
-"sampleCaptionText": "Sample caption text",
+"sampleCaptionText": "Texto de ejemplo de subtítulo",
 
 "prefSuccess": "Los cambios han sido guardados.",
 
