@@ -200,7 +200,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-speed-icons** - optional; "arrows" (default) or "animals". The latter will substitute a turtle icon for *slower* and a rabbit icon for *faster*. 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
--   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is calculated to be 1/10 of the duration of media. 
+-   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is intelligently calculated based on  duration of the media. 
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present  
 
 #### Language 
@@ -227,6 +227,7 @@ The following attributes control which of the above types, if any, are generated
 If none of the above attributes are present, the transcript will be displayed in a draggable, resizable popup that can be toggled on/off using a button on the controller. Note that a toggle button is added to the controller *only* if the transcript is a "popup" type; there is no toggle button for either the "external" or "manual" transcript types. 
 
 Additional transcript-related attributes include:   
+-   **data-use-Transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container, you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 
@@ -348,6 +349,12 @@ by their screen reader, that’s what they’ll get. If they prefer an
 alternate video with description mixed in, that’s what they’ll get. See
 the section below on *User Preferences* for additional information about
 preferences.
+
+In some applications, text-based descriptions might be a required 
+part of the interface (e.g., if video pauses so users can interact with 
+HTML overlays; text-based description could be used in this context to provide 
+additional instructions for screen reader users). In such cases the Descriptions 
+button can be eliminated from the controller with **data-use-descriptions-button="false"**. 
 
 #### Sign language
 

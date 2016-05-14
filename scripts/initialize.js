@@ -8,80 +8,8 @@
     // Path to root directory of referring website
     this.rootPath = this.getRootWebSitePath();
 
-    // Volume range is 0 to 10. Don't crank it to avoid overpowering screen readers
-    // can be overridden with data-volume
-    this.defaultVolume = 7;
-    this.volume = this.defaultVolume;
-
-    // seekInterval = Number of seconds to seek forward or back with these buttons
-    // NOTE: This can be overridden with the data-seek-interval attribute,
-    // or re-calculated in initialize.js > setSeekInterval();
-    this.defaultSeekInterval = 10;
-
-    // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval
-    this.useFixedSeekInterval = false;
-
-    // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers
-    // However, this results in an inconsistent interface across browsers
-    // most notably, Firefox as of 16.x still did not support input[type="range"] (i.e., sliders)
-    // The following variable can be used in the future to add conditional slider support if desired
-    // Note that the related code has not been updated for ABLE.
-    // Therefore, this should NOT be set to true at this point.
-    this.useSlider = true;
-
-    // showNowPlaying - set to true to show 'Now Playing:' plus title of current track above player
-    // Otherwise set to false
-    // This is only used when there is a playlist
-    this.showNowPlaying = true;
-
-    // fallback path - specify path to fallback player files
-    // Only supported fallback is JW Player, licensed separately
-    // JW Player files must be included in folder specified in this.fallbackPath
-    // JW Player will be loaded as needed in browsers that don't support HTML5 media
-    // No other fallback solution is supported at this time
-    // NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
-    // Can override the following path with data-fallback-path
-    this.fallbackPath = this.rootPath + '/thirdparty/';
-
-    // testFallback - set to true to force browser to use the fallback player (for testing)
-    // Note: JW Player does not support offline playback (a Flash restriction)
-    // Therefore testing must be performed on a web server
-    this.testFallback = false;
-
-    // lang - default language of the player
-    this.lang = 'en';
-
-    // forceLang - set to true to force player to use default player language
-    // set to false to reset this.lang to language of the web page or user's browser,
-    // if either is detectable and if a matching translation file is available
-    this.forceLang = false;
-
-    // loop - if true, will start again at top after last item in playlist has ended
-    // NOTE: This is not fully supported yet - needs work
-    this.loop = true;
-
-    // lyricsMode - line breaks in WebVTT caption file are always supported in captions
-    // but they're removed by default form transcripts in order to form a more seamless reading experience
-    // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n"
-    this.lyricsMode = false;
-
-    // transcriptTitle - override default transcript title
-    // Note: If lyricsMode is true, default is automatically replaced with "Lyrics"
-    this.transcriptTitle = 'Transcript';
-
-    // useTranscriptButton - on by default if there's a transcript
-    // However, if transcript is written to an external div via data-transcript-div
-    // it might be desirable for the transcript to always be ON, with no toggle
-    // This can be overridden with data-transcript-button="false"
-    this.useTranscriptButton = true;
-
-    // useChaptersButton - on by default if there's a track with kind="chapters"
-    // However, if chapters is written to an external div via data-chapters-div
-    // it might be desirable for the chapters to always be ON, with no toggle
-    // This can be overridden with data-chapters-button="false"
-    this.useChaptersButton = true;
-
-    this.playing = false; // will change to true after 'playing' event is triggered
+    // this.playing will change to true after 'playing' event is triggered
+    this.playing = false;
 
     this.getUserAgent();
     this.setIconColor();

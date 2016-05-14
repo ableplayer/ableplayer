@@ -865,15 +865,9 @@
 
     var controlLayout = {
       'ul': ['play','restart'],
-      'ur': [],
+      'ur': ['rewind','forward','seek'],
       'bl': [],
       'br': []
-    }
-
-    if (this.useSlider) {
-      controlLayout['ul'].push('rewind');
-      controlLayout['ul'].push('forward');
-      controlLayout['ur'].push('seek');
     }
 
     // test for browser support for volume before displaying volume button

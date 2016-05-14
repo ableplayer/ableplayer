@@ -65,14 +65,24 @@
     // Keep track of the last player created for use with global events.
     AblePlayer.lastCreated = this;
 
-    this.setDefaults();
-
     this.media = media;
     if ($(media).length === 0) {
       this.provideFallback('ERROR: No media specified.');
       return;
     }
 
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
+    ///////////////////////////////
+    //
+    // Default variables assignment
+    //
+    ///////////////////////////////
+
+    // The following variables CAN be overridden with HTML attributes
+
+    // autoplay
     if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") {
       this.autoplay = true;
     }
@@ -80,8 +90,15 @@
       this.autoplay = false;
     }
 
-    // override defaults with values of data-* attributes
+    // loop (NOT FULLY SUPPORTED)
+    if ($(media).attr('loop') !== undefined && $(media).attr('loop') !== "false") {
+      this.loop = true;
+    }
+    else {
+      this.loop = false;
+    }
 
+    // start-time
     if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") {
       this.startTime = $(media).data('start-time');
     }
@@ -89,6 +106,53 @@
       this.startTime = 0;
     }
 
+    // debug
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") {
+      this.debug = true;
+    }
+    else {
+      this.debug = false;
+    }
+
+    // Volume
+    // Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
+    this.defaultVolume = 7;
+    if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
+      var volume = $(media).data('volume');
+      if (volume >= 0 && volume <= 10) {
+        this.defaultVolume = volume;
+      }
+    }
+    this.volume = this.defaultVolume;
+
+
+    // Optional Buttons
+    // Buttons are added to the player controller if relevant media is present
+    // However, in some applications it might be undesirable to show buttons
+    // (e.g., if chapters or transcripts are provided in an external container)
+
+    if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
+      this.useChaptersButton = false;
+    }
+    else {
+      this.useChaptersButton = true;
+    }
+
+    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
+      this.useTranscriptButton = false;
+    }
+    else {
+      this.useTranscriptButton = true;
+    }
+
+    if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
+      this.useDescriptionsButton = false;
+    }
+    else {
+      this.useDescriptionsButton = true;
+    }
+
+    // Transcripts
     // There are three types of interactive transcripts.
     // In descending of order of precedence (in case there are conflicting tags), they are:
     // 1. "manual" - A manually coded external transcript (requires data-transcript-src)
@@ -121,10 +185,25 @@
         this.transcriptType = 'popup';
       }
     }
+    // In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
+    // If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
+    // If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
+
     if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") {
       this.lyricsMode = true;
     }
+    else {
+      this.lyricsMode = false;
+    }
+    // Transcript Title
+    if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
+      this.transcriptTitle = $(media).data('transcript-title');
+    }
+    else {
+      // do nothing. The default title will be defined later (see transcript.js)
+    }
 
+    // Captions
     // data-captions-position can be used to set the default captions position
     // this is only the default, and can be overridden by user preferences
     // valid values of data-captions-position are 'below' and 'overlay'
@@ -135,6 +214,7 @@
       this.defaultCaptionsPosition = 'below';
     }
 
+    // Chapters
     if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") {
       this.chaptersDivLocation = $(media).data('chapters-div');
     }
@@ -149,10 +229,7 @@
       this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
     }
 
-    if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
-      this.useChaptersButton = false;
-    }
-
+    // Previous/Next buttons
     // valid values of data-prevnext-unit are 'playlist' and 'chapter'; will also accept 'chapters'
     if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
       this.prevNextUnit = 'chapter';
@@ -164,6 +241,7 @@
       this.prevNextUnit = false;
     }
 
+    // Slower/Faster buttons
     // valid values of data-speed-icons are 'arrows' (default) and 'animals'
     // use 'animals' to use turtle and rabbit
     if ($(media).data('speed-icons') === 'animals') {
@@ -173,6 +251,7 @@
       this.speedIcons = 'arrows';
     }
 
+    // Seekbar
     // valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
     if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
       this.seekbarScope = 'chapter';
@@ -181,23 +260,13 @@
       this.seekbarScope = 'video';
     }
 
+    // YouTube
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
       this.youTubeId = $(media).data('youtube-id');
     }
 
     if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {
       this.youTubeDescId = $(media).data('youtube-desc-id');
-    }
-
-    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") {
-      this.debug = true;
-    }
-
-    if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
-      var volume = $(media).data('volume');
-      if (volume >= 0 && volume <= 1) {
-        this.defaultVolume = volume;
-      }
     }
 
     // Icon type
@@ -213,16 +282,7 @@
         this.forceIconType = true;
       }
     }
-/*
-    if (this.iconType === 'svg') {
-      // load and execute the required JavaScript
-      var svgScriptPath = this.rootPath + '/icons/svgxuse.js';
-      var $svgScript = $('<script>',{
-        'src': svgScriptPath
-      });
-      $(document).append($svgScript);
-    }
-*/
+
     if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
       this.allowFullScreen = false;
     }
@@ -230,27 +290,40 @@
       this.allowFullScreen = true;
     }
 
+    // Seek interval
+    // Number of seconds to seek forward or back with Rewind & Forward buttons
+    // Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
+    // Calculation attempts to intelligently assign a reasonable interval based on media length
+    this.defaultSeekInterval = 10;
+    this.useFixedSeekInterval = false;
     if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
       var seekInterval = $(media).data('seek-interval');
       if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
         this.seekInterval = seekInterval;
-        this.useFixedSeekInterval = true; // do not override with 1/10 of duration
+        this.useFixedSeekInterval = true; // do not override with calculuation
       }
     }
 
-    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") {
+    // Now Playing
+    // Shows "Now Playing:" plus the title of the current track above player
+    // Only used if there is a playlist
+    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === "false") {
+      this.showNowPlaying = false;
+    }
+    else {
       this.showNowPlaying = true;
     }
 
-    if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
-      this.testFallback = true;
-    }
+    // Fallback Player
+    // The only supported fallback is JW Player, licensed separately
+    // JW Player files must be included in folder specified in this.fallbackPath
+    // JW Player will be loaded as needed in browsers that don't support HTML5 media
+    // NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
 
-    if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
-      this.fallbackPath = $(media).data('fallback-path');
-    }
+    this.fallback = null;
+    this.fallbackPath = null;
+    this.testFallback = false;
 
-    var jwFound = false;
     if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
       var fallback =  $(media).data('fallback');
       if (fallback === 'jw') {
@@ -258,17 +331,42 @@
       }
     }
 
+    if (this.fallback === 'jw') {
+
+      if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
+        this.fallbackPath = $(media).data('fallback-path');
+      }
+      else {
+        this.fallbackPath = this.rootPath + '/thirdparty/';
+      }
+
+      if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
+        this.testFallback = true;
+      }
+    }
+
+    // Language
+    this.lang = 'en';
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
       var lang = $(media).data('lang');
       if (lang.length == 2) {
         this.lang = lang;
       }
     }
-
+    // Player language is determined as follows:
+    // 1. Lang attributes on <html> or <body>, if a matching translation file is available
+    // 2. The value of this.lang, if a matching translation file is available
+    // 3. English
+    // To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
     if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") {
       this.forceLang = true;
     }
+    else {
+      this.forceLang = false;
+    }
 
+
+    // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
       this.metaType = $(media).data('meta-type');
     }
@@ -277,6 +375,7 @@
       this.metaDiv = $(media).data('meta-div');
     }
 
+    // Search
     if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
       // conducting a search currently requires an external div in which to write the results
       if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
@@ -284,6 +383,11 @@
         this.searchDiv = $(media).data('search-div');
       }
     }
+    ////////////////////////////////////////
+    //
+    // End assignment of default variables
+    //
+    ////////////////////////////////////////
 
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;

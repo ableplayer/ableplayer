@@ -12,15 +12,15 @@ var nl = {
 
 "stop": "Stoppen",
 
-"restart": "Restart",
+"restart": "Herstarten",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "Vorige Hoofdstuk",
 
-"nextChapter": "Next chapter",
+"nextChapter": "Volgend Hoofdstuk",
 
-"prevTrack": "Previous track",
+"prevTrack": "Vorige Track",
 
-"nextTrack": "Next track",
+"nextTrack": "Volgend track",
 
 "rewind": "Terug",
 
@@ -81,6 +81,10 @@ var nl = {
 "or": "of",
 
 "spacebar": "spatietoets",
+
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Tekst",
 
 "autoScroll": "Auto scroll",
 

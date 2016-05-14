@@ -82,6 +82,10 @@ var en = {
 
 "spacebar": "spacebar",
 
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Lyrics",
+
 "autoScroll": "Auto scroll",
 
 "unknown": "Unknown",

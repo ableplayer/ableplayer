@@ -65,14 +65,24 @@
     // Keep track of the last player created for use with global events.
     AblePlayer.lastCreated = this;
 
-    this.setDefaults();
-
     this.media = media;
     if ($(media).length === 0) {
       this.provideFallback('ERROR: No media specified.');
       return;
     }
 
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
+    ///////////////////////////////
+    //
+    // Default variables assignment
+    //
+    ///////////////////////////////
+
+    // The following variables CAN be overridden with HTML attributes
+
+    // autoplay
     if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") {
       this.autoplay = true;
     }
@@ -80,8 +90,15 @@
       this.autoplay = false;
     }
 
-    // override defaults with values of data-* attributes
+    // loop (NOT FULLY SUPPORTED)
+    if ($(media).attr('loop') !== undefined && $(media).attr('loop') !== "false") {
+      this.loop = true;
+    }
+    else {
+      this.loop = false;
+    }
 
+    // start-time
     if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") {
       this.startTime = $(media).data('start-time');
     }
@@ -89,6 +106,53 @@
       this.startTime = 0;
     }
 
+    // debug
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") {
+      this.debug = true;
+    }
+    else {
+      this.debug = false;
+    }
+
+    // Volume
+    // Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
+    this.defaultVolume = 7;
+    if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
+      var volume = $(media).data('volume');
+      if (volume >= 0 && volume <= 10) {
+        this.defaultVolume = volume;
+      }
+    }
+    this.volume = this.defaultVolume;
+
+
+    // Optional Buttons
+    // Buttons are added to the player controller if relevant media is present
+    // However, in some applications it might be undesirable to show buttons
+    // (e.g., if chapters or transcripts are provided in an external container)
+
+    if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
+      this.useChaptersButton = false;
+    }
+    else {
+      this.useChaptersButton = true;
+    }
+
+    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
+      this.useTranscriptButton = false;
+    }
+    else {
+      this.useTranscriptButton = true;
+    }
+
+    if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
+      this.useDescriptionsButton = false;
+    }
+    else {
+      this.useDescriptionsButton = true;
+    }
+
+    // Transcripts
     // There are three types of interactive transcripts.
     // In descending of order of precedence (in case there are conflicting tags), they are:
     // 1. "manual" - A manually coded external transcript (requires data-transcript-src)
@@ -121,10 +185,25 @@
         this.transcriptType = 'popup';
       }
     }
+    // In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
+    // If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
+    // If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
+
     if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") {
       this.lyricsMode = true;
     }
+    else {
+      this.lyricsMode = false;
+    }
+    // Transcript Title
+    if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
+      this.transcriptTitle = $(media).data('transcript-title');
+    }
+    else {
+      // do nothing. The default title will be defined later (see transcript.js)
+    }
 
+    // Captions
     // data-captions-position can be used to set the default captions position
     // this is only the default, and can be overridden by user preferences
     // valid values of data-captions-position are 'below' and 'overlay'
@@ -135,6 +214,7 @@
       this.defaultCaptionsPosition = 'below';
     }
 
+    // Chapters
     if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") {
       this.chaptersDivLocation = $(media).data('chapters-div');
     }
@@ -149,10 +229,7 @@
       this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
     }
 
-    if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
-      this.useChaptersButton = false;
-    }
-
+    // Previous/Next buttons
     // valid values of data-prevnext-unit are 'playlist' and 'chapter'; will also accept 'chapters'
     if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
       this.prevNextUnit = 'chapter';
@@ -164,6 +241,7 @@
       this.prevNextUnit = false;
     }
 
+    // Slower/Faster buttons
     // valid values of data-speed-icons are 'arrows' (default) and 'animals'
     // use 'animals' to use turtle and rabbit
     if ($(media).data('speed-icons') === 'animals') {
@@ -173,6 +251,7 @@
       this.speedIcons = 'arrows';
     }
 
+    // Seekbar
     // valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
     if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
       this.seekbarScope = 'chapter';
@@ -181,23 +260,13 @@
       this.seekbarScope = 'video';
     }
 
+    // YouTube
     if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
       this.youTubeId = $(media).data('youtube-id');
     }
 
     if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {
       this.youTubeDescId = $(media).data('youtube-desc-id');
-    }
-
-    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") {
-      this.debug = true;
-    }
-
-    if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
-      var volume = $(media).data('volume');
-      if (volume >= 0 && volume <= 1) {
-        this.defaultVolume = volume;
-      }
     }
 
     // Icon type
@@ -213,16 +282,7 @@
         this.forceIconType = true;
       }
     }
-/*
-    if (this.iconType === 'svg') {
-      // load and execute the required JavaScript
-      var svgScriptPath = this.rootPath + '/icons/svgxuse.js';
-      var $svgScript = $('<script>',{
-        'src': svgScriptPath
-      });
-      $(document).append($svgScript);
-    }
-*/
+
     if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
       this.allowFullScreen = false;
     }
@@ -230,27 +290,40 @@
       this.allowFullScreen = true;
     }
 
+    // Seek interval
+    // Number of seconds to seek forward or back with Rewind & Forward buttons
+    // Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
+    // Calculation attempts to intelligently assign a reasonable interval based on media length
+    this.defaultSeekInterval = 10;
+    this.useFixedSeekInterval = false;
     if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
       var seekInterval = $(media).data('seek-interval');
       if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
         this.seekInterval = seekInterval;
-        this.useFixedSeekInterval = true; // do not override with 1/10 of duration
+        this.useFixedSeekInterval = true; // do not override with calculuation
       }
     }
 
-    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') !== "false") {
+    // Now Playing
+    // Shows "Now Playing:" plus the title of the current track above player
+    // Only used if there is a playlist
+    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === "false") {
+      this.showNowPlaying = false;
+    }
+    else {
       this.showNowPlaying = true;
     }
 
-    if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
-      this.testFallback = true;
-    }
+    // Fallback Player
+    // The only supported fallback is JW Player, licensed separately
+    // JW Player files must be included in folder specified in this.fallbackPath
+    // JW Player will be loaded as needed in browsers that don't support HTML5 media
+    // NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
 
-    if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
-      this.fallbackPath = $(media).data('fallback-path');
-    }
+    this.fallback = null;
+    this.fallbackPath = null;
+    this.testFallback = false;
 
-    var jwFound = false;
     if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
       var fallback =  $(media).data('fallback');
       if (fallback === 'jw') {
@@ -258,17 +331,42 @@
       }
     }
 
+    if (this.fallback === 'jw') {
+
+      if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
+        this.fallbackPath = $(media).data('fallback-path');
+      }
+      else {
+        this.fallbackPath = this.rootPath + '/thirdparty/';
+      }
+
+      if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
+        this.testFallback = true;
+      }
+    }
+
+    // Language
+    this.lang = 'en';
     if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
       var lang = $(media).data('lang');
       if (lang.length == 2) {
         this.lang = lang;
       }
     }
-
+    // Player language is determined as follows:
+    // 1. Lang attributes on <html> or <body>, if a matching translation file is available
+    // 2. The value of this.lang, if a matching translation file is available
+    // 3. English
+    // To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
     if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") {
       this.forceLang = true;
     }
+    else {
+      this.forceLang = false;
+    }
 
+
+    // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
       this.metaType = $(media).data('meta-type');
     }
@@ -277,6 +375,7 @@
       this.metaDiv = $(media).data('meta-div');
     }
 
+    // Search
     if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
       // conducting a search currently requires an external div in which to write the results
       if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
@@ -284,6 +383,11 @@
         this.searchDiv = $(media).data('search-div');
       }
     }
+    ////////////////////////////////////////
+    //
+    // End assignment of default variables
+    //
+    ////////////////////////////////////////
 
     this.ableIndex = AblePlayer.nextIndex;
     AblePlayer.nextIndex += 1;
@@ -341,80 +445,8 @@
     // Path to root directory of referring website
     this.rootPath = this.getRootWebSitePath();
 
-    // Volume range is 0 to 10. Don't crank it to avoid overpowering screen readers
-    // can be overridden with data-volume
-    this.defaultVolume = 7;
-    this.volume = this.defaultVolume;
-
-    // seekInterval = Number of seconds to seek forward or back with these buttons
-    // NOTE: This can be overridden with the data-seek-interval attribute,
-    // or re-calculated in initialize.js > setSeekInterval();
-    this.defaultSeekInterval = 10;
-
-    // useFixedSeekInterval = Force player to use the hard-coded value of this.seekInterval
-    this.useFixedSeekInterval = false;
-
-    // In ABLE's predecessor (AAP) progress sliders were included in supporting browsers
-    // However, this results in an inconsistent interface across browsers
-    // most notably, Firefox as of 16.x still did not support input[type="range"] (i.e., sliders)
-    // The following variable can be used in the future to add conditional slider support if desired
-    // Note that the related code has not been updated for ABLE.
-    // Therefore, this should NOT be set to true at this point.
-    this.useSlider = true;
-
-    // showNowPlaying - set to true to show 'Now Playing:' plus title of current track above player
-    // Otherwise set to false
-    // This is only used when there is a playlist
-    this.showNowPlaying = true;
-
-    // fallback path - specify path to fallback player files
-    // Only supported fallback is JW Player, licensed separately
-    // JW Player files must be included in folder specified in this.fallbackPath
-    // JW Player will be loaded as needed in browsers that don't support HTML5 media
-    // No other fallback solution is supported at this time
-    // NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
-    // Can override the following path with data-fallback-path
-    this.fallbackPath = this.rootPath + '/thirdparty/';
-
-    // testFallback - set to true to force browser to use the fallback player (for testing)
-    // Note: JW Player does not support offline playback (a Flash restriction)
-    // Therefore testing must be performed on a web server
-    this.testFallback = false;
-
-    // lang - default language of the player
-    this.lang = 'en';
-
-    // forceLang - set to true to force player to use default player language
-    // set to false to reset this.lang to language of the web page or user's browser,
-    // if either is detectable and if a matching translation file is available
-    this.forceLang = false;
-
-    // loop - if true, will start again at top after last item in playlist has ended
-    // NOTE: This is not fully supported yet - needs work
-    this.loop = true;
-
-    // lyricsMode - line breaks in WebVTT caption file are always supported in captions
-    // but they're removed by default form transcripts in order to form a more seamless reading experience
-    // Set lyricsMode to true to add line breaks between captions, and within captions if there are "\n"
-    this.lyricsMode = false;
-
-    // transcriptTitle - override default transcript title
-    // Note: If lyricsMode is true, default is automatically replaced with "Lyrics"
-    this.transcriptTitle = 'Transcript';
-
-    // useTranscriptButton - on by default if there's a transcript
-    // However, if transcript is written to an external div via data-transcript-div
-    // it might be desirable for the transcript to always be ON, with no toggle
-    // This can be overridden with data-transcript-button="false"
-    this.useTranscriptButton = true;
-
-    // useChaptersButton - on by default if there's a track with kind="chapters"
-    // However, if chapters is written to an external div via data-chapters-div
-    // it might be desirable for the chapters to always be ON, with no toggle
-    // This can be overridden with data-chapters-button="false"
-    this.useChaptersButton = true;
-
-    this.playing = false; // will change to true after 'playing' event is triggered
+    // this.playing will change to true after 'playing' event is triggered
+    this.playing = false;
 
     this.getUserAgent();
     this.setIconColor();
@@ -3623,15 +3655,9 @@
 
     var controlLayout = {
       'ul': ['play','restart'],
-      'ur': [],
+      'ur': ['rewind','forward','seek'],
       'bl': [],
       'br': []
-    }
-
-    if (this.useSlider) {
-      controlLayout['ul'].push('rewind');
-      controlLayout['ul'].push('forward');
-      controlLayout['ur'].push('seek');
     }
 
     // test for browser support for volume before displaying volume button
@@ -8886,16 +8912,19 @@
     var thisObj = this;
 
     var $main = $('<div class="able-transcript-container"></div>');
+    var transcriptTitle;
 
-    var transcriptTitle = this.tt.prefMenuTranscript;
     if (typeof this.transcriptTitle !== 'undefined') {
       transcriptTitle = this.transcriptTitle;
     }
     else if (this.lyricsMode) {
-      transcriptTitle = 'Lyrics'; // TODO: Localize this
+      transcriptTitle = this.tt.lyricsTitle;
+    }
+    else {
+      transcriptTitle = this.tt.transcriptTitle;
     }
 
-    if (typeof this.transcriptDivLocation === 'undefined' && transcriptTitle != '') {
+    if (typeof this.transcriptDivLocation === 'undefined') {
       // only add an HTML heading to internal transcript
       // external transcript is expected to have its own heading
       var headingNumber = this.playerHeadingLevel;
@@ -11496,7 +11525,7 @@
     // translation2.js is then contanenated onto the end to finish this function
 
 
-var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","restart": "Restart","prevChapter": "Previous chapter","nextChapter": "Next chapter","prevTrack": "Previous track","nextTrack": "Next track","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
+var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","restart": "Neustart","prevChapter": "Vorheriges Kapitel","nextChapter": "Nächste Kapitel","prevTrack": "Vorheriges track","nextTrack": "Nächste Titel","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","transcriptTitle": "Transkription","lyricsTitle": "Text","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
 var en = {
 
 "playerHeading": "Media player",
@@ -11580,6 +11609,10 @@ var en = {
 "or": "or",
 
 "spacebar": "spacebar",
+
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Lyrics",
 
 "autoScroll": "Auto scroll",
 
@@ -11811,15 +11844,15 @@ var es = {
 
 "stop": "Detener",
 
-"restart": "Restart",
+"restart": "Reiniciar",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "Capítulo Anterior",
 
-"nextChapter": "Next chapter",
+"nextChapter": "Siguiente Capítulo",
 
-"prevTrack": "Previous track",
+"prevTrack": "Pista Anterior",
 
-"nextTrack": "Next track",
+"nextTrack": "Siguiente Pista",
 
 "rewind": "Rebobinar",
 
@@ -11880,6 +11913,10 @@ var es = {
 "or": "o",
 
 "spacebar": "Barra espaciadora",
+
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Letra",
 
 "autoScroll": "Desplazamiento automático",
 
@@ -12111,15 +12148,15 @@ var fr = {
 
 "stop": "Arrêt",
 
-"restart": "Restart",
+"restart": "Redémarrer",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "Chapitre Précédente",
 
-"nextChapter": "Next chapter",
+"nextChapter": "Chapitre Suivante",
 
-"prevTrack": "Previous track",
+"prevTrack": "Piste Précédente",
 
-"nextTrack": "Next track",
+"nextTrack": "Piste Suivante",
 
 "rewind": "Reculer",
 
@@ -12180,6 +12217,10 @@ var fr = {
 "or": "ou",
 
 "spacebar": "barre d’espacement",
+
+"transcriptTitle": "Transcription",
+
+"lyricsTitle": "Paroles",
 
 "autoScroll": "Défilement automatique",
 

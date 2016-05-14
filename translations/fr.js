@@ -12,15 +12,15 @@ var fr = {
 
 "stop": "Arrêt",
 
-"restart": "Restart",
+"restart": "Redémarrer",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "Chapitre Précédente",
 
-"nextChapter": "Next chapter",
+"nextChapter": "Chapitre Suivante",
 
-"prevTrack": "Previous track",
+"prevTrack": "Piste Précédente",
 
-"nextTrack": "Next track",
+"nextTrack": "Piste Suivante",
 
 "rewind": "Reculer",
 
@@ -81,6 +81,10 @@ var fr = {
 "or": "ou",
 
 "spacebar": "barre d’espacement",
+
+"transcriptTitle": "Transcription",
+
+"lyricsTitle": "Paroles",
 
 "autoScroll": "Défilement automatique",
 

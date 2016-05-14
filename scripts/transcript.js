@@ -261,16 +261,19 @@
     var thisObj = this;
 
     var $main = $('<div class="able-transcript-container"></div>');
+    var transcriptTitle;
 
-    var transcriptTitle = this.tt.prefMenuTranscript;
     if (typeof this.transcriptTitle !== 'undefined') {
       transcriptTitle = this.transcriptTitle;
     }
     else if (this.lyricsMode) {
-      transcriptTitle = 'Lyrics'; // TODO: Localize this
+      transcriptTitle = this.tt.lyricsTitle;
+    }
+    else {
+      transcriptTitle = this.tt.transcriptTitle;
     }
 
-    if (typeof this.transcriptDivLocation === 'undefined' && transcriptTitle != '') {
+    if (typeof this.transcriptDivLocation === 'undefined') {
       // only add an HTML heading to internal transcript
       // external transcript is expected to have its own heading
       var headingNumber = this.playerHeadingLevel;
