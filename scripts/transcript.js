@@ -82,7 +82,13 @@
 
     if (typeof this.$transcriptLanguageSelect !== 'undefined') {
 
-      this.$transcriptLanguageSelect.change(function () {
+      this.$transcriptLanguageSelect.on('click mousedown',function (event) {
+        // execute default behavior
+        // prevent propagation of mouse event to toolbar or window
+        event.stopPropagation();
+      });
+
+      this.$transcriptLanguageSelect.on('change',function () {
 
         var language = thisObj.$transcriptLanguageSelect.val();
 
