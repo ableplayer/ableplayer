@@ -3396,10 +3396,20 @@
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          if (typeof this.chaptersPopup === 'undefined') {
-            this.chaptersPopup = this.createPopup('chapters');
-          }
-          tracks = this.chapters;
+            // sets the appropriate language for chapters if there are multiple chapter tracks available.
+            thisObj.updateChaptersLanguage();
+            if (typeof this.chaptersPopup === 'undefined') {
+              this.chaptersPopup = this.createPopup('chapters');
+            }
+            if (this.selectedChapters) {
+              tracks = this.selectedChapters.cues;
+            }
+            else if (this.chapters.length >= 1) {
+              tracks = this.chapters[0].cues;
+            }
+            else {
+              tracks = [];
+            }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {
@@ -3779,7 +3789,7 @@
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
           $controllerSpan.append(sliderDiv);
-          this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
+          this.seekBar = new AccessibleSeekBar(this.mediaType, sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {
           // TODO: Unify this with buttons somehow to avoid code duplication
@@ -4693,14 +4703,13 @@
     // Replace the following line with the commented block that follows
     // Haven't done this because it will have a big effect downstream
     // on all chapter processing
-    this.chapters = cues;
+    //this.chapters = cues;
 
-    /* // new
+    // new
     this.chapters.push({
       cues: cues,
       language: trackLang
     });
-    */
 
     if (this.chaptersDivLocation) {
       this.populateChaptersDiv();
@@ -5258,7 +5267,7 @@
   //   tracking(event, position)
   //   stopTracking(event, position)
 
-  window. AccessibleSeekBar = function(div, width) {
+  window. AccessibleSeekBar = function(mediaType, div, width) {
     var thisObj = this;
 
     // Initialize some variables.
@@ -5280,6 +5289,9 @@
     this.seekHead.attr('tabindex', '0');
     // Since head is focusable, it gets the aria roles/titles.
     this.seekHead.attr('role', 'slider');
+    // TODO: Translate aria-label; could use: "progress bar", "timeline", "slider"
+    // Because it has role="slider", screen readers may already describe it as "slider"
+    this.seekHead.attr('aria-label', mediaType + ' timeline');
     this.seekHead.attr('aria-valuemin', 0);
 
     this.timeTooltip = $('<div>');
@@ -5304,15 +5316,8 @@
     this.playedDiv.width(0);
     this.playedDiv.addClass('able-seekbar-played');
 
-    var seekHeadSize = '0.8em';
-    this.seekHead.addClass('able-seekhead').css({
-      'height': seekHeadSize,
-      'width': seekHeadSize,
-      'border-radius': seekHeadSize,
-      '-webkit-border-radius': seekHeadSize,
-      '-moz-border-radius': seekHeadSize,
-      '-o-border-radius': seekHeadSize
-    });
+    this.seekHead.addClass('able-seekhead');
+    this.seekHead.attr('aria-orientation','horizontal');
 
     // Set a default duration.  User should call this and change it.
     this.setDuration(100);
@@ -5576,9 +5581,9 @@
       this.liveAriaRegion.text(descriptionText);
     }
 
-    /* Uncomment to use aria values instead of separate live region.
+    // Uncomment the following lines to use aria values instead of separate live region.
     this.seekHead.attr('aria-valuetext', descriptionText);
-    this.seekHead.attr('aria-valuenow', Math.floor(position).toString());*/
+    this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
   };
 
   AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {
@@ -7308,6 +7313,10 @@
     else if (this.player === 'youtube') {
       this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
     }
+    // This will adjust the text in the chapter pop-ups.
+    // This is to respond to changes in the caption language and transcript language when appropriate.
+    // See "updateChaptersLanguage" in chapters.js to see how this is handled.
+    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.getHiddenWidth = function($el) {
@@ -7632,6 +7641,7 @@
       this.prefTranscript = 1;
     }
     this.updateCookie('prefTranscript');
+    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -8617,6 +8627,37 @@
     }
   };
 
+  AblePlayer.prototype.updateChaptersLanguage = function () {
+      var thisObj = this;
+      var matchChapLang = function (languageToMatch){
+          for (var i = 0; i < thisObj.chapters.length; i++) {
+              if(languageToMatch == thisObj.chapters[i].language){
+                  thisObj.selectedChapters = thisObj.chapters[i];
+                  return true;
+              }
+          }
+          return false;
+      };
+
+      var isSelectedChaptersUpdated = false;
+      // if captions are on, use the language of the captions
+      if(this.captionsOn || this.prefCaptions){
+          isSelectedChaptersUpdated = matchChapLang(this.captionLang);
+      }
+      // if captions are off, and the transcript is on, use the transcript language
+      if(this.prefTranscript && !(isSelectedChaptersUpdated)){
+          isSelectedChaptersUpdated = matchChapLang(this.$transcriptLanguageSelect.val());
+      }
+      // if none of the above, use the language of the player
+      if(!(isSelectedChaptersUpdated)){
+          isSelectedChaptersUpdated = matchChapLang(this.lang);
+      }
+      // if can't match any of that, use the first track in the Chapters array
+      if(!(isSelectedChaptersUpdated) && (this.chapters.length >= 1)) {
+          this.selectedChapters = (this.chapters[0]);
+      }
+  };
+
 })(jQuery);
 
 (function ($) {
@@ -8841,6 +8882,7 @@
           }
         }
         thisObj.updateTranscript();
+        thisObj.setupPopups('chapters');
       });
     }
   };
@@ -8916,7 +8958,7 @@
           }
         }
         if (typeof chapters === 'undefined') {
-          chapters = this.chapters;
+          chapters = this.chapters[0] || [];
         }
       }
 

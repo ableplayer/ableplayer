@@ -3789,7 +3789,7 @@
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
           $controllerSpan.append(sliderDiv);
-          this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
+          this.seekBar = new AccessibleSeekBar(this.mediaType, sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {
           // TODO: Unify this with buttons somehow to avoid code duplication
@@ -5267,7 +5267,7 @@
   //   tracking(event, position)
   //   stopTracking(event, position)
 
-  window. AccessibleSeekBar = function(div, width) {
+  window. AccessibleSeekBar = function(mediaType, div, width) {
     var thisObj = this;
 
     // Initialize some variables.
@@ -5289,6 +5289,9 @@
     this.seekHead.attr('tabindex', '0');
     // Since head is focusable, it gets the aria roles/titles.
     this.seekHead.attr('role', 'slider');
+    // TODO: Translate aria-label; could use: "progress bar", "timeline", "slider"
+    // Because it has role="slider", screen readers may already describe it as "slider"
+    this.seekHead.attr('aria-label', mediaType + ' timeline');
     this.seekHead.attr('aria-valuemin', 0);
 
     this.timeTooltip = $('<div>');
@@ -5313,15 +5316,8 @@
     this.playedDiv.width(0);
     this.playedDiv.addClass('able-seekbar-played');
 
-    var seekHeadSize = '0.8em';
-    this.seekHead.addClass('able-seekhead').css({
-      'height': seekHeadSize,
-      'width': seekHeadSize,
-      'border-radius': seekHeadSize,
-      '-webkit-border-radius': seekHeadSize,
-      '-moz-border-radius': seekHeadSize,
-      '-o-border-radius': seekHeadSize
-    });
+    this.seekHead.addClass('able-seekhead');
+    this.seekHead.attr('aria-orientation','horizontal');
 
     // Set a default duration.  User should call this and change it.
     this.setDuration(100);
@@ -5585,9 +5581,9 @@
       this.liveAriaRegion.text(descriptionText);
     }
 
-    /* Uncomment to use aria values instead of separate live region.
+    // Uncomment the following lines to use aria values instead of separate live region.
     this.seekHead.attr('aria-valuetext', descriptionText);
-    this.seekHead.attr('aria-valuenow', Math.floor(position).toString());*/
+    this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
   };
 
   AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {

@@ -989,7 +989,7 @@
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
           $controllerSpan.append(sliderDiv);
-          this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
+          this.seekBar = new AccessibleSeekBar(this.mediaType, sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {
           // TODO: Unify this with buttons somehow to avoid code duplication

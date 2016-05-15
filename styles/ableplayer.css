@@ -222,8 +222,11 @@
   position: relative;
   left: 0;
   top: -0.45em;
-  border: 1px solid;
   background-color: #FDFDFD;
+  width: 0.8em;
+  height: 0.8em;
+  border: 1px solid;
+  border-radius: 0.8em;
   z-index: 5500;
 }
 
