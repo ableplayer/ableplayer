@@ -441,7 +441,10 @@
       else {
         seekbarWidth = this.$ableWrapper.width() - widthUsed - seekbarSpacer;
       }
-      this.seekBar.setWidth(seekbarWidth);
+      // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+      if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+        this.seekBar.setWidth(seekbarWidth);
+      }
     }
 
     if (this.$descButton) {
