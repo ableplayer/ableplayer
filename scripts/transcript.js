@@ -110,6 +110,7 @@
           }
         }
         thisObj.updateTranscript();
+        thisObj.setupPopups('chapters');
       });
     }
   };
@@ -185,7 +186,7 @@
           }
         }
         if (typeof chapters === 'undefined') {
-          chapters = this.chapters;
+          chapters = this.chapters[0] || [];
         }
       }
 
