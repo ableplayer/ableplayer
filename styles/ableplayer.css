@@ -151,25 +151,19 @@
   position: relative;
   display: inline-block;
   border-style: none;
-  margin: 0;
+  margin: 3px;
   padding: 0;
   font-size: 20px;
-  width: 40px;
-  min-width: 20px;
-  overflow: hidden !important;
+  min-width: 24px;
+  outline: 2px solid #464646; /* same color as .able-controller background-color */
+  border: none;
+  overflow: visible !important;
   z-index: 6600;
 }
-.able-controller button > span {
-  /* icomoon font icon */
-  font-size: 20px;
-  width: 24px;
-  margin: 0 5px;
-  padding: 0;
-  z-index: 6700;
-}
+.able-controller button > span,
 .able-controller button > img {
-  /* image icon */
-  margin: 0 5px;
+  width: 20px;
+  margin: 0 auto;
   padding: 0;
   z-index: 6700;
 }

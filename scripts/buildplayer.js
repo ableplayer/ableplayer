@@ -863,8 +863,8 @@
     // Removed rewind/forward in favor of seek bar.
 
     var controlLayout = {
-      'ul': ['play','restart'],
-      'ur': ['rewind','forward','seek'],
+      'ul': ['play','restart','rewind','forward'],
+      'ur': ['seek'],
       'bl': [],
       'br': []
     }

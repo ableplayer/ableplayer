@@ -3663,8 +3663,8 @@
     // Removed rewind/forward in favor of seek bar.
 
     var controlLayout = {
-      'ul': ['play','restart'],
-      'ur': ['rewind','forward','seek'],
+      'ul': ['play','restart','rewind','forward'],
+      'ur': ['seek'],
       'bl': [],
       'br': []
     }
@@ -6912,7 +6912,7 @@
 
     var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
       updateLive, textByState, timestamp, widthUsed,
-      leftControls, rightControls, seekbarWidth, captionsCount,
+      leftControls, rightControls, seekbarWidth, seekbarSpacer, captionsCount,
       buffered, newTop, svgLink, newSvgLink;
 
     thisObj = this;
@@ -7098,6 +7098,8 @@
     // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
       widthUsed = 0;
+      seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
+
       leftControls = this.seekBar.wrapperDiv.parent().prev('span.able-left-controls');
       rightControls = leftControls.next('span.able-right-controls');
       leftControls.children().each(function () {
@@ -7111,15 +7113,12 @@
         }
       });
       if (this.isFullscreen()) {
-        seekbarWidth = $(window).width() - widthUsed - 20;
+        seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
       }
       else {
-        seekbarWidth = this.$ableWrapper.width() - widthUsed - 20;
+        seekbarWidth = this.$ableWrapper.width() - widthUsed - seekbarSpacer;
       }
-      // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-      if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
-        this.seekBar.setWidth(seekbarWidth);
-      }
+      this.seekBar.setWidth(seekbarWidth);
     }
 
     if (this.$descButton) {
