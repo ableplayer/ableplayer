@@ -104,7 +104,8 @@
     // However, it's only populated if this.showNowPlaying = true
     this.$nowPlayingDiv = $('<div>',{
       'class' : 'able-now-playing',
-      'role' : 'alert'
+      'aria-live' : 'assertive',
+      'aria-atomic': 'true'
     });
 
     this.$controllerDiv = $('<div>',{
@@ -129,7 +130,7 @@
 
     this.$speed = $('<span>',{
       'class' : 'able-speed',
-      'role' : 'alert'
+      'aria-live' : 'assertive'
     }).text(this.tt.speed + ': 1x');
 
     this.$status = $('<span>',{
@@ -149,7 +150,8 @@
     // description will be exposed via role="alert" & announced by screen readers
     this.$descDiv = $('<div>',{
       'class': 'able-descriptions',
-      'role': 'alert'
+      'aria-live': 'assertive',
+      'aria-atomic': 'true'
     });
     // Start off with description hidden.
     // It will be exposed conditionally within description.js > initDescription()

@@ -7,7 +7,7 @@
     // Also, vertical orientation of slider requires CSS hacks
     // and causes problems in some screen readers
     // Therefore, building a custom vertical volume slider
-    var thisObj, volumeSliderId, volumeHelpId, x, y;
+    var thisObj, volumeSliderId, volumeHelpId, x, y, volumePct;
 
     thisObj = this;
 
@@ -36,20 +36,23 @@
     this.$volumeSliderHead = $('<div>',{
       'class': 'able-volume-head',
       'role': 'slider',
+      'aria-orientation': 'vertical',
       'aria-label': this.tt.volumeUpDown,
       'aria-valuemin': 0,
       'aria-valuemax': 10,
-      'tabindex': 0 /* should be -1, then change to 0 dynamically & place focus when visible */
+      'tabindex': -1
     });
     this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
     this.$volumeAlert = $('<div>',{
       'class': 'able-offscreen',
-      'aria-live': 'polite'
+      'aria-live': 'assertive',
+      'aria-atomic': 'true'
     });
+    volumePct = parseInt(thisObj.volume) / 10 * 100;
     this.$volumeHelp = $('<div>',{
       'id': volumeHelpId,
       'class': 'able-offscreen'
-    }).text(this.tt.volumeHelp);
+    }).text(volumePct + '%, ' + this.tt.volumeHelp);
     this.$volumeButton.attr({
       'aria-describedby': volumeHelpId
     });
@@ -105,7 +108,7 @@
   AblePlayer.prototype.refreshVolumeSlider = function(volume) {
 
     // adjust slider position based on current volume
-
+console.log('refreshVolumeSlider');
     var volumePct;
     volumePct = (volume/10) * 100;
 
@@ -252,12 +255,13 @@
     this.closePopups();
     this.$tooltipDiv.hide();
     this.$volumeSlider.show().attr('aria-hidden','false');
-    this.$volumeSliderHead.focus();
+    this.$volumeSliderHead.attr('tabindex','0').focus();
   };
 
   AblePlayer.prototype.hideVolumePopup = function() {
 
     this.$volumeSlider.hide().attr('aria-hidden','true');
+    this.$volumeSliderHead.attr('tabindex','-1');
     this.$volumeButton.focus();
   };
 
