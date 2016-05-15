@@ -236,7 +236,8 @@
     var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
       updateLive, textByState, timestamp, widthUsed,
       leftControls, rightControls, seekbarWidth, seekbarSpacer, captionsCount,
-      buffered, newTop, svgLink, newSvgLink;
+      buffered, newTop, svgLink, newSvgLink,
+      statusBarHeight, speedHeight, statusBarWidthBreakpoint;
 
     thisObj = this;
     if (this.swappingSrc) {
@@ -444,6 +445,35 @@
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
         this.seekBar.setWidth(seekbarWidth);
+      }
+    }
+
+    // Show/hide status bar content conditionally
+    if (!this.isFullscreen()) {
+      statusBarWidthBreakpoint = 300;
+      statusBarHeight = this.$statusBarDiv.height();
+      speedHeight = this.$statusBarDiv.find('span.able-speed').height();
+      if (speedHeight > (statusBarHeight + 5)) {
+        // speed bar is wrapping (happens often in German player)
+        this.$statusBarDiv.find('span.able-speed').hide();
+        this.hidingSpeed = true;
+      }
+      else {
+        if (this.hidingSpeed) {
+          this.$statusBarDiv.find('span.able-speed').show();
+          this.hidingSpeed = false;
+        }
+        if (this.$statusBarDiv.width() < statusBarWidthBreakpoint) {
+          // Player is too small for a speed span
+          this.$statusBarDiv.find('span.able-speed').hide();
+          this.hidingSpeed = true;
+        }
+        else {
+          if (this.hidingSpeed) {
+            this.$statusBarDiv.find('span.able-speed').show();
+            this.hidingSpeed = false;
+          }
+        }
       }
     }
 

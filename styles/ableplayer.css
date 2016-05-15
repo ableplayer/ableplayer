@@ -365,21 +365,20 @@ input[type=range]:focus::-ms-fill-upper {
 .able-status-bar {
 	height: 1.5em;
 	min-height: 1.5em;
-	color: #FFFFFF;
-	font-size: 1.0em;
+	color: #CCC;
+	font-size: 0.9em;
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
 }
 .able-status-bar span.able-timer {
 	/* contains both span.elapsedTime and span.duration */
-	color: #ffffff;
 	text-align: left;
 	float: left;
 	width: 32%;
 }
 .able-status-bar span.able-speed {
   float: left;
-  width: 32%;
+  width: 33%;
   text-align: center;
 }
 .able-status {
