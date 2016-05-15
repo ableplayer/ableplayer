@@ -596,10 +596,20 @@
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          if (typeof this.chaptersPopup === 'undefined') {
-            this.chaptersPopup = this.createPopup('chapters');
-          }
-          tracks = this.chapters;
+            // sets the appropriate language for chapters if there are multiple chapter tracks available.
+            thisObj.updateChaptersLanguage();
+            if (typeof this.chaptersPopup === 'undefined') {
+              this.chaptersPopup = this.createPopup('chapters');
+            }
+            if (this.selectedChapters) {
+              tracks = this.selectedChapters.cues;
+            }
+            else if (this.chapters.length >= 1) {
+              tracks = this.chapters[0].cues;
+            }
+            else {
+              tracks = [];
+            }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {
