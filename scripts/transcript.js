@@ -355,7 +355,14 @@
     };
 
     var addDescription = function(div, desc) {
-      var descDiv = $('<div class="able-desc"><span class="able-hidden">Description: </span></div>');
+      var $descDiv = $('<div>', {
+        'class': 'able-desc'
+      });
+      var $descHiddenSpan = $('<span>',{
+        'class': 'able-hidden'
+      });
+      $descHiddenSpan.text('Description: ');
+      $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
         var result = [];
@@ -370,23 +377,27 @@
         return result;
       }
 
-      var descSpan = $('<span class="able-transcript-seekpoint"></span>');
+      var $descSpan = $('<span>',{
+        'class': 'able-transcript-seekpoint'
+      });
       for (var ii in desc.components.children) {
         var results = flattenComponentForDescription(desc.components.children[ii]);
         for (var jj in results) {
-          descSpan.append(results[jj]);
+          $descSpan.append(results[jj]);
         }
       }
-      descSpan.attr('data-start', desc.start.toString());
-      descSpan.attr('data-end', desc.end.toString());
-      descDiv.append(descSpan);
+      $descSpan.attr('data-start', desc.start.toString());
+      $descSpan.attr('data-end', desc.end.toString());
+      $descDiv.append($descSpan);
 
-      div.append(descDiv);
+      div.append($descDiv);
     };
 
     var addCaption = function(div, cap) {
 
-      var capSpan = $('<span class="able-transcript-seekpoint able-transcript-caption"></span>');
+      var $capSpan = $('<span>',{
+        'class': 'able-transcript-seekpoint able-transcript-caption'
+      });
 
       var flattenComponentForCaption = function(comp) {
 
@@ -408,12 +419,20 @@
 
           if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
             result = result.concat(flattenString(str.substring(0, openBracket)));
-            result.push($('<div></div><span class="able-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
-            result = result.concat(flattenString(str.substring(closeBracket + 1)));
+            var $silentSpan = $('<span>',{
+              'class': 'able-unspoken'
+            });
+            $silentSpan.text(str.substring(openBracket, closeBracket + 1));
+            result.push($silentSpan);
+            result = result.concat(flattenString(str.substring(openParen, closeParen + 1)));
           }
           else if (hasParens) {
             result = result.concat(flattenString(str.substring(0, openParen)));
-            result.push($('<div></div><span class="able-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
+            var $silentSpan = $('<span>',{
+              'class': 'able-unspoken'
+            });
+            $silentSpan.text(str.substring(openBracket, closeBracket + 1));
+            result.push($silentSpan);
             result = result.concat(flattenString(str.substring(closeParen + 1)));
           }
           else {
@@ -426,8 +445,11 @@
           result = result.concat(flattenString(comp.value));
         }
         else if (comp.type === 'v') {
-          var vSpan = $('<div></div><span class="able-unspoken">[' + comp.value + ']</span>');
-          result.push(vSpan);
+          var $vSpan = $('<span>',{
+            'class': 'able-unspoken'
+          });
+          $vSpan.text('[ ' + comp.value + ' ]');
+          result.push($vSpan);
           for (var ii in comp.children) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
             for (var jj in subResults) {
@@ -468,12 +490,12 @@
             // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
             result = result.replace('\n','<br>') + '<br>';
           }
-          capSpan.append(result);
+          $capSpan.append(result);
         }
       }
-      capSpan.attr('data-start', cap.start.toString());
-      capSpan.attr('data-end', cap.end.toString());
-      div.append(capSpan);
+      $capSpan.attr('data-start', cap.start.toString());
+      $capSpan.attr('data-end', cap.end.toString());
+      div.append($capSpan);
       div.append('\n');
     };
 

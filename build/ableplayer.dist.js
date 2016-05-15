@@ -3738,7 +3738,7 @@
     // user preferences (???)
     // some controls are aligned on the left, and others on the right
     var useSpeedButtons, useFullScreen,
-    i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control,
+    i, j, k, controls, $controllerSpan, tooltipId, tooltipX, tooltipY, control,
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon, buttonUse,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
     controllerStyles, vidcapStyles, captionLabel, popupMenuId;
@@ -3764,21 +3764,21 @@
     for (i = 0; i <= 3; i++) {
       controls = controlLayout[sectionByOrder[i]];
       if ((i % 2) === 0) {
-        controllerSpan = $('<span>',{
+        $controllerSpan = $('<div>',{
           'class': 'able-left-controls'
         });
       }
       else {
-        controllerSpan = $('<span>',{
+        $controllerSpan = $('<div>',{
           'class': 'able-right-controls'
         });
       }
-      this.$controllerDiv.append(controllerSpan);
+      this.$controllerDiv.append($controllerSpan);
       for (j=0; j<controls.length; j++) {
         control = controls[j];
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
-          controllerSpan.append(sliderDiv);
+          $controllerSpan.append(sliderDiv);
           this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {
@@ -3798,7 +3798,7 @@
             });
             pipe.append(pipeImg);
           }
-          controllerSpan.append(pipe);
+          $controllerSpan.append(pipe);
         }
         else {
           // this control is a button
@@ -4011,7 +4011,7 @@
             }
           }
 
-          controllerSpan.append(newButton);
+          $controllerSpan.append(newButton);
 
           // create variables of buttons that are referenced throughout the AblePlayer object
           if (control === 'play') {
@@ -4056,7 +4056,7 @@
         }
         if (control === 'volume') {
           // in addition to the volume button, add a hidden slider
-          this.addVolumeSlider(controllerSpan);
+          this.addVolumeSlider($controllerSpan);
         }
       }
       if ((i % 2) == 1) {
@@ -5280,7 +5280,7 @@
     this.seekHead.attr('tabindex', '0');
     // Since head is focusable, it gets the aria roles/titles.
     this.seekHead.attr('role', 'slider');
-    this.seekHead.attr('aria-value-min', 0);
+    this.seekHead.attr('aria-valuemin', 0);
 
     this.timeTooltip = $('<div>');
     this.bodyDiv.append(this.timeTooltip);
@@ -5454,7 +5454,7 @@
     if (duration !== this.duration) {
       this.duration = duration;
       this.resetHeadLocation();
-      this.seekHead.attr('aria-value-max', duration);
+      this.seekHead.attr('aria-valuemax', duration);
     }
   };
 
@@ -5577,7 +5577,7 @@
     }
 
     /* Uncomment to use aria values instead of separate live region.
-    this.seekHead.attr('aria-value-text', descriptionText);
+    this.seekHead.attr('aria-valuetext', descriptionText);
     this.seekHead.attr('aria-valuenow', Math.floor(position).toString());*/
   };
 
@@ -5680,8 +5680,8 @@
       'class': 'able-volume-head',
       'role': 'slider',
       'aria-label': this.tt.volumeUpDown,
-      'aria-value-min': 0,
-      'aria-value-max': 10,
+      'aria-valuemin': 0,
+      'aria-valuemax': 10,
       'tabindex': 0 /* should be -1, then change to 0 dynamically & place focus when visible */
     });
     this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
@@ -7100,8 +7100,8 @@
       widthUsed = 0;
       seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
 
-      leftControls = this.seekBar.wrapperDiv.parent().prev('span.able-left-controls');
-      rightControls = leftControls.next('span.able-right-controls');
+      leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+      rightControls = leftControls.next('div.able-right-controls');
       leftControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();
@@ -9053,7 +9053,14 @@
     };
 
     var addDescription = function(div, desc) {
-      var descDiv = $('<div class="able-desc"><span class="able-hidden">Description: </span></div>');
+      var $descDiv = $('<div>', {
+        'class': 'able-desc'
+      });
+      var $descHiddenSpan = $('<span>',{
+        'class': 'able-hidden'
+      });
+      $descHiddenSpan.text('Description: ');
+      $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
         var result = [];
@@ -9068,23 +9075,27 @@
         return result;
       }
 
-      var descSpan = $('<span class="able-transcript-seekpoint"></span>');
+      var $descSpan = $('<span>',{
+        'class': 'able-transcript-seekpoint'
+      });
       for (var ii in desc.components.children) {
         var results = flattenComponentForDescription(desc.components.children[ii]);
         for (var jj in results) {
-          descSpan.append(results[jj]);
+          $descSpan.append(results[jj]);
         }
       }
-      descSpan.attr('data-start', desc.start.toString());
-      descSpan.attr('data-end', desc.end.toString());
-      descDiv.append(descSpan);
+      $descSpan.attr('data-start', desc.start.toString());
+      $descSpan.attr('data-end', desc.end.toString());
+      $descDiv.append($descSpan);
 
-      div.append(descDiv);
+      div.append($descDiv);
     };
 
     var addCaption = function(div, cap) {
 
-      var capSpan = $('<span class="able-transcript-seekpoint able-transcript-caption"></span>');
+      var $capSpan = $('<span>',{
+        'class': 'able-transcript-seekpoint able-transcript-caption'
+      });
 
       var flattenComponentForCaption = function(comp) {
 
@@ -9106,12 +9117,20 @@
 
           if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
             result = result.concat(flattenString(str.substring(0, openBracket)));
-            result.push($('<div></div><span class="able-unspoken">' + str.substring(openBracket, closeBracket + 1) + '</span>'));
-            result = result.concat(flattenString(str.substring(closeBracket + 1)));
+            var $silentSpan = $('<span>',{
+              'class': 'able-unspoken'
+            });
+            $silentSpan.text(str.substring(openBracket, closeBracket + 1));
+            result.push($silentSpan);
+            result = result.concat(flattenString(str.substring(openParen, closeParen + 1)));
           }
           else if (hasParens) {
             result = result.concat(flattenString(str.substring(0, openParen)));
-            result.push($('<div></div><span class="able-unspoken">' + str.substring(openParen, closeParen + 1) + '</span>'));
+            var $silentSpan = $('<span>',{
+              'class': 'able-unspoken'
+            });
+            $silentSpan.text(str.substring(openBracket, closeBracket + 1));
+            result.push($silentSpan);
             result = result.concat(flattenString(str.substring(closeParen + 1)));
           }
           else {
@@ -9124,8 +9143,11 @@
           result = result.concat(flattenString(comp.value));
         }
         else if (comp.type === 'v') {
-          var vSpan = $('<div></div><span class="able-unspoken">[' + comp.value + ']</span>');
-          result.push(vSpan);
+          var $vSpan = $('<span>',{
+            'class': 'able-unspoken'
+          });
+          $vSpan.text('[ ' + comp.value + ' ]');
+          result.push($vSpan);
           for (var ii in comp.children) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
             for (var jj in subResults) {
@@ -9166,12 +9188,12 @@
             // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
             result = result.replace('\n','<br>') + '<br>';
           }
-          capSpan.append(result);
+          $capSpan.append(result);
         }
       }
-      capSpan.attr('data-start', cap.start.toString());
-      capSpan.attr('data-end', cap.end.toString());
-      div.append(capSpan);
+      $capSpan.attr('data-start', cap.start.toString());
+      $capSpan.attr('data-end', cap.end.toString());
+      div.append($capSpan);
       div.append('\n');
     };
 

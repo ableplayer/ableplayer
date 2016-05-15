@@ -938,7 +938,7 @@
     // user preferences (???)
     // some controls are aligned on the left, and others on the right
     var useSpeedButtons, useFullScreen,
-    i, j, k, controls, controllerSpan, tooltipId, tooltipX, tooltipY, control,
+    i, j, k, controls, $controllerSpan, tooltipId, tooltipX, tooltipY, control,
     buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon, buttonUse,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
     controllerStyles, vidcapStyles, captionLabel, popupMenuId;
@@ -964,21 +964,21 @@
     for (i = 0; i <= 3; i++) {
       controls = controlLayout[sectionByOrder[i]];
       if ((i % 2) === 0) {
-        controllerSpan = $('<span>',{
+        $controllerSpan = $('<div>',{
           'class': 'able-left-controls'
         });
       }
       else {
-        controllerSpan = $('<span>',{
+        $controllerSpan = $('<div>',{
           'class': 'able-right-controls'
         });
       }
-      this.$controllerDiv.append(controllerSpan);
+      this.$controllerDiv.append($controllerSpan);
       for (j=0; j<controls.length; j++) {
         control = controls[j];
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
-          controllerSpan.append(sliderDiv);
+          $controllerSpan.append(sliderDiv);
           this.seekBar = new AccessibleSeekBar(sliderDiv, baseSliderWidth);
         }
         else if (control === 'pipe') {
@@ -998,7 +998,7 @@
             });
             pipe.append(pipeImg);
           }
-          controllerSpan.append(pipe);
+          $controllerSpan.append(pipe);
         }
         else {
           // this control is a button
@@ -1211,7 +1211,7 @@
             }
           }
 
-          controllerSpan.append(newButton);
+          $controllerSpan.append(newButton);
 
           // create variables of buttons that are referenced throughout the AblePlayer object
           if (control === 'play') {
@@ -1256,7 +1256,7 @@
         }
         if (control === 'volume') {
           // in addition to the volume button, add a hidden slider
-          this.addVolumeSlider(controllerSpan);
+          this.addVolumeSlider($controllerSpan);
         }
       }
       if ((i % 2) == 1) {

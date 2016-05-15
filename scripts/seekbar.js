@@ -28,7 +28,7 @@
     this.seekHead.attr('tabindex', '0');
     // Since head is focusable, it gets the aria roles/titles.
     this.seekHead.attr('role', 'slider');
-    this.seekHead.attr('aria-value-min', 0);
+    this.seekHead.attr('aria-valuemin', 0);
 
     this.timeTooltip = $('<div>');
     this.bodyDiv.append(this.timeTooltip);
@@ -202,7 +202,7 @@
     if (duration !== this.duration) {
       this.duration = duration;
       this.resetHeadLocation();
-      this.seekHead.attr('aria-value-max', duration);
+      this.seekHead.attr('aria-valuemax', duration);
     }
   };
 
@@ -325,7 +325,7 @@
     }
 
     /* Uncomment to use aria values instead of separate live region.
-    this.seekHead.attr('aria-value-text', descriptionText);
+    this.seekHead.attr('aria-valuetext', descriptionText);
     this.seekHead.attr('aria-valuenow', Math.floor(position).toString());*/
   };
 

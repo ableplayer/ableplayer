@@ -423,8 +423,8 @@
       widthUsed = 0;
       seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
 
-      leftControls = this.seekBar.wrapperDiv.parent().prev('span.able-left-controls');
-      rightControls = leftControls.next('span.able-right-controls');
+      leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+      rightControls = leftControls.next('div.able-right-controls');
       leftControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
           widthUsed += $(this).width();

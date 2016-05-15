@@ -37,8 +37,8 @@
       'class': 'able-volume-head',
       'role': 'slider',
       'aria-label': this.tt.volumeUpDown,
-      'aria-value-min': 0,
-      'aria-value-max': 10,
+      'aria-valuemin': 0,
+      'aria-valuemax': 10,
       'tabindex': 0 /* should be -1, then change to 0 dynamically & place focus when visible */
     });
     this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
