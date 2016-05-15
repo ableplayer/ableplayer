@@ -171,7 +171,7 @@
       this.handlePlay();
     }
     else if (whichButton === 'restart') {
-      this.handleStop();
+      this.handleRestart();
     }
     else if (whichButton === 'rewind') {
       this.handleRewind();
@@ -264,7 +264,7 @@
     }
     else if (which === 115) { // s = stop (now restart)
       if (this.usingModifierKeys(e)) {
-        this.handleStop();
+        this.handleRestart();
       }
     }
     else if (which === 109) { // m = mute

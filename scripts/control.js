@@ -330,7 +330,7 @@
 
     if (this.stoppingYouTube) {
       // stoppingYouTube is true temporarily while video is paused and seeking to 0
-      // See notes in handleStop()
+      // See notes in handleRestart()
       // this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
       if (this.$status.text() !== this.tt.statusStopped) {
         this.$status.text(this.tt.statusStopped);
@@ -627,10 +627,16 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.handleStop = function() {
+  AblePlayer.prototype.handleRestart = function() {
+
+    this.seekTo(0);
+
+  /*
+    // Prior to 2.3.68, this function was handleStop()
+    // which was a bit more challenging to implement
+    // Preserved here in case Stop is ever cool again...
 
     var thisObj = this;
-
     if (this.player == 'html5') {
       this.pauseMedia();
       this.seekTo(0);
@@ -649,6 +655,7 @@
       this.seekTo(0);
       this.stoppingYouTube = true;
     }
+  */
     this.refreshControls();
   };
 
