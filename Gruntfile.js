@@ -44,6 +44,7 @@ module.exports = function(grunt) {
                     'translations/en.js',
                     'translations/es.js',
                     'translations/fr.js',
+                    'translations/ja.js',
                     'scripts/translation2.js',
                     'scripts/JQuery.doWhen.js'
                 ],
