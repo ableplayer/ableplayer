@@ -12,6 +12,16 @@ var ja = {
 
 "stop": "停止",
 
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
+
 "rewind": "巻き戻し",
 
 "forward": "早送り",
@@ -71,6 +81,10 @@ var ja = {
 "or": "または",
 
 "spacebar": "スペースキー",
+
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Lyrics",
 
 "autoScroll": "自動スクロール",
 
