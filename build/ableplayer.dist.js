@@ -792,9 +792,13 @@
           thisObj.setupPopups();
           thisObj.updateCaption();
           thisObj.updateTranscript();
+          if (thisObj.chaptersDivLocation) {
+            thisObj.populateChaptersDiv();
+          }
           thisObj.showSearchResults();
           if (thisObj.defaultChapter) {
             thisObj.seekToDefaultChapter();
+            // thisObj.updateChapter(thisObj.getElapsed());
           }
         },
         function() {  // initPlayer fail
@@ -931,6 +935,8 @@
         if (this.$transcriptLanguageSelect) {
           this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
         }
+        // sync all other tracks to this same languge
+        this.syncTrackLanguages('init',this.captionLang);
       }
     }
   };
@@ -2972,95 +2978,6 @@
     }
   };
 
-  AblePlayer.prototype.populateChaptersDiv = function() {
-
-    var thisObj, headingLevel, headingType, headingId, $chaptersHeading,
-      $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
-      i, chapter, buttonId, hasDefault,
-      getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
-
-    thisObj = this;
-
-    if ($('#' + this.chaptersDivLocation)) {
-      this.$chaptersDiv = $('#' + this.chaptersDivLocation);
-      this.$chaptersDiv.addClass('able-chapters-div');
-
-      // add optional header
-      if (this.chaptersTitle) {
-        headingLevel = this.getNextHeadingLevel(this.$chaptersDiv);
-        headingType = 'h' + headingLevel.toString();
-        headingId = this.mediaId + '-chapters-heading';
-        $chaptersHeading = $('<' + headingType + '>', {
-          'class': 'able-chapters-heading',
-          'id': headingId
-        }).text(this.chaptersTitle);
-        this.$chaptersDiv.append($chaptersHeading);
-      }
-
-      $chaptersNav = $('<nav>');
-      if (this.chaptersTitle) {
-        $chaptersNav.attr('aria-labelledby',headingId);
-      }
-      else {
-        $chaptersNav.attr('aria-label',this.tt.chapters);
-      }
-
-      $chaptersList = $('<ul>');
-      for (i in this.chapters) {
-        chapter = this.chapters[i];
-        $chapterItem = $('<li></li>');
-        $chapterButton = $('<button>',{
-          'type': 'button',
-          'val': i
-        }).text(this.flattenCueForCaption(chapter));
-
-        // add event listeners
-        getClickFunction = function (time) {
-          return function () {
-            $clickedItem = $(this).closest('li');
-            $chaptersList = $(this).closest('ul').find('li');
-            thisChapterIndex = $chaptersList.index($clickedItem);
-            $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
-            $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            // Don't update this.currentChapter here; just seekTo chapter's start time;
-            // chapter will be updated via chapters.js > updateChapter()
-            thisObj.seekTo(time);
-          }
-        };
-        $chapterButton.on('click',getClickFunction(chapter.start)); // works with Enter too
-        $chapterButton.on('focus',function() {
-          $(this).closest('ul').find('li').removeClass('able-focus');
-          $(this).closest('li').addClass('able-focus');
-        });
-        $chapterItem.on('hover',function() {
-          $(this).closest('ul').find('li').removeClass('able-focus');
-          $(this).addClass('able-focus');
-        });
-        $chapterItem.on('mouseleave',function() {
-          $(this).removeClass('able-focus');
-        });
-        $chapterButton.on('blur',function() {
-          $(this).closest('li').removeClass('able-focus');
-        });
-
-        // put it all together
-        $chapterItem.append($chapterButton);
-        $chaptersList.append($chapterItem);
-        if (this.defaultChapter == chapter.id) {
-          $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
-          hasDefault = true;
-        }
-      }
-    }
-    if (!hasDefault) {
-      // select the first button
-      $chaptersList.find('button').first().attr('aria-selected','true')
-        .parent('li').addClass('able-current-chapter');
-    }
-    $chaptersNav.append($chaptersList);
-    this.$chaptersDiv.append($chaptersNav);
-  };
-
   AblePlayer.prototype.positionDraggableWindow = function (which, width) {
 
     // which is either 'transcript' or 'sign'
@@ -3353,6 +3270,7 @@
   };
 
   AblePlayer.prototype.setupPopups = function (which) {
+
     // Create and fill in the popup menu forms for various controls.
     // parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
 
@@ -3398,20 +3316,28 @@
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-            // sets the appropriate language for chapters if there are multiple chapter tracks available.
-            thisObj.updateChaptersLanguage();
-            if (typeof this.chaptersPopup === 'undefined') {
-              this.chaptersPopup = this.createPopup('chapters');
-            }
-            if (this.selectedChapters) {
-              tracks = this.selectedChapters.cues;
-            }
-            else if (this.chapters.length >= 1) {
-              tracks = this.chapters[0].cues;
-            }
-            else {
-              tracks = [];
-            }
+          // restored original content after PR
+/*
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters');
+          }
+          tracks = this.chapters;
+*/
+          // sets the appropriate language for chapters if there are multiple chapter tracks available.
+//          this.updateChaptersLanguage();
+
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters');
+          }
+          if (this.selectedChapters) {
+            tracks = this.selectedChapters.cues;
+          }
+          else if (this.chapters.length >= 1) {
+            tracks = this.chapters[0].cues;
+          }
+          else {
+            tracks = [];
+          }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {
@@ -4701,22 +4627,10 @@
 
     this.hasChapters = true;
 
-    // TODO: Add support for multiple languages of chapters
-    // Replace the following line with the commented block that follows
-    // Haven't done this because it will have a big effect downstream
-    // on all chapter processing
-    //this.chapters = cues;
-
-    // new
     this.chapters.push({
       cues: cues,
       language: trackLang
     });
-
-    if (this.chaptersDivLocation) {
-      this.populateChaptersDiv();
-    }
-    this.updateChapter(this.getElapsed());
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
@@ -4809,154 +4723,160 @@
       youTubeId = this.youTubeId;
     }
     this.activeYouTubeId = youTubeId;
-
-    // This is called once we're sure the Youtube iFrame API is loaded -- see below.
-    var finalizeYoutubeInitialization = function () {
-
-      var containerId, ccLoadPolicy, videoDimensions;
-
-      containerId = thisObj.mediaId + '_youtube';
-
-      thisObj.$mediaContainer.prepend($('<div>').attr('id', containerId));
-      // NOTE: Tried the following in place of the above in January 2016
-      // because in some cases two videos were being added to the DOM
-      // However, once v2.2.23 was fairly stable, unable to reptroduce that problem
-      // so maybe it's not an issue. This is preserved here temporarily, just in case it's needed...
-      // thisObj.$mediaContainer.html($('<div>').attr('id', containerId));
-
-      thisObj.youTubeCaptionsReady = false;
-
-      // if captions are provided locally via <track> elements, use those
-      // and unload the captions provided by YouTube
-      // Advantages of using <track>:
-      // 1. Interactive transcript and searching within video is possible
-      // 2. User has greater control over captions' display
-      if (thisObj.captions.length) {
-        // initialize YouTube player with cc_load_policy = 0
-        // this doesn't disable captions;
-        // it just doesn't show them automatically (depends on user's preference on YouTube)
-        ccLoadPolicy = 0;
-        thisObj.usingYouTubeCaptions = false;
-      }
-      else {
-        // set ccLoadPolicy to 1 only if captions are on;
-        // this forces them on, regardless of user's preference on YouTube
-        if (thisObj.captionsOn) {
-          ccLoadPolicy = 1;
-        }
-        else {
-          ccLoadPolicy = 0;
-        }
-      }
-      videoDimensions = thisObj.getYouTubeDimensions(thisObj.activeYouTubeId, thisObj.containerId);
-      if (videoDimensions) {
-        thisObj.ytWidth = videoDimensions[0];
-        thisObj.ytHeight = videoDimensions[1];
-        thisObj.ytAspectRatio = thisObj.ytWidth / thisObj.ytHeight;
-      }
-      else {
-        // dimensions are initially unknown
-        // sending null values to YouTube results in a video that uses the default YouTube dimensions
-        // these can then be scraped from the iframe and applied to this.$ableWrapper
-        thisObj.ytWidth = null;
-        thisObj.ytHeight = null;
-      }
-      thisObj.youTubePlayer = new YT.Player(containerId, {
-        videoId: youTubeId,
-        width: thisObj.ytWidth,
-        height: thisObj.ytHeight,
-        playerVars: {
-          enablejsapi: 1,
-          start: thisObj.startTime,
-          controls: 0, // no controls, using our own
-          cc_load_policy: ccLoadPolicy,
-          // enablejsapi: 1, // deprecated; but we don't even need it???
-          hl: thisObj.lang, // use the default language UI
-          modestbranding: 1, // no YouTube logo in controller
-          rel: 0, // do not show related videos when video ends
-          html5: 1 // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
-        },
-        events: {
-          onReady: function () {
-            if (thisObj.swappingSrc) {
-              // swap is now complete
-              thisObj.swappingSrc = false;
-              if (thisObj.playing) {
-                // resume playing
-                thisObj.playMedia();
-              }
-            }
-            if (typeof thisObj.ytAspectRatio === 'undefined') {
-              thisObj.resizeYouTubePlayer(youTubeId, containerId);
-            }
-            deferred.resolve();
-          },
-          onError: function (x) {
-            deferred.fail();
-          },
-          onStateChange: function (x) {
-            var playerState = thisObj.getPlayerState(x.data);
-            if (playerState === 'playing') {
-              thisObj.playing = true;
-              thisObj.startedPlaying = true;
-            }
-            else {
-              thisObj.playing = false;
-            }
-            if (thisObj.stoppingYouTube && playerState === 'paused') {
-              if (typeof thisObj.$posterImg !== 'undefined') {
-                thisObj.$posterImg.show();
-              }
-              thisObj.stoppingYouTube = false;
-              thisObj.seeking = false;
-              thisObj.playing = false;
-            }
-          },
-          onPlaybackQualityChange: function () {
-            // do something
-          },
-          onApiChange: function (x) {
-            // As of Able Player v2.2.23, we are now getting caption data via the YouTube Data API
-            // prior to calling initYouTubePlayer()
-            // Previously we got caption data via the YouTube iFrame API, and doing so was an awful mess.
-            // onApiChange fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
-            // it isn't fired until the video starts playing
-            // if captions are available for this video (automated captions don't count)
-            // the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires
-            // So, to trigger this event we had to play the video briefly, then pause, then reset.
-            // During that brief moment of playback, the onApiChange event was fired and we could setup captions
-            // The 'captions' and 'cc' modules are very different, and have different data and methods
-            // NOW, in v2.2.23, we still need to initialize the caption modules in order to control captions
-            // but we don't have to do that on load in order to get caption data
-            // Instead, we can wait until the video starts playing normally, then retrieve the modules
-            thisObj.initYouTubeCaptionModule();
-          }
-        }
-      });
-      thisObj.injectPoster(thisObj.$mediaContainer, 'youtube');
-      thisObj.$media.remove();
-    };
-
     if (AblePlayer.youtubeIframeAPIReady) {
       // Script already loaded and ready.
-      finalizeYoutubeInitialization();
-    }
-    else {
-      if (!AblePlayer.loadingYoutubeIframeAPI) {
-        // Need to load script; skipped if another player has already started loading.
-        $.getScript('https://www.youtube.com/iframe_api')
-          .fail(function () {
-            if (thisObj.debug) {
-              
-            }
-          });
-      }
-
-      // Catch script load event.
-      $('body').on('youtubeIframeAPIReady', function () {
-        finalizeYoutubeInitialization();
+      this.finalizeYoutubeInit().then(function() {
+        deferred.resolve();
       });
     }
+    else {
+      // Has another player already started loading the script? If so, abort...
+      if (!AblePlayer.loadingYoutubeIframeAPI) {
+        $.getScript('https://www.youtube.com/iframe_api').fail(function () {
+          deferred.fail();
+        });
+      }
+
+      // Otherwise, keeping waiting for script load event...
+      $('body').on('youtubeIframeAPIReady', function () {
+        thisObj.finalizeYoutubeInit().then(function() {
+          deferred.resolve();
+        });
+      });
+    }
+    return promise;
+  };
+
+  AblePlayer.prototype.finalizeYoutubeInit = function () {
+
+    // This is called once we're sure the Youtube iFrame API is loaded -- see above
+    var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions;
+
+    deferred = new $.Deferred();
+    promise = deferred.promise();
+
+    thisObj = this;
+
+    containerId = this.mediaId + '_youtube';
+
+    this.$mediaContainer.prepend($('<div>').attr('id', containerId));
+    // NOTE: Tried the following in place of the above in January 2016
+    // because in some cases two videos were being added to the DOM
+    // However, once v2.2.23 was fairly stable, unable to reptroduce that problem
+    // so maybe it's not an issue. This is preserved here temporarily, just in case it's needed...
+    // thisObj.$mediaContainer.html($('<div>').attr('id', containerId));
+
+    this.youTubeCaptionsReady = false;
+
+    // if captions are provided locally via <track> elements, use those
+    // and unload the captions provided by YouTube
+    // Advantages of using <track>:
+    // 1. Interactive transcript and searching within video is possible
+    // 2. User has greater control over captions' display
+    if (thisObj.captions.length) {
+      // initialize YouTube player with cc_load_policy = 0
+      // this doesn't disable captions;
+      // it just doesn't show them automatically (depends on user's preference on YouTube)
+      ccLoadPolicy = 0;
+      this.usingYouTubeCaptions = false;
+    }
+    else {
+      // set ccLoadPolicy to 1 only if captions are on;
+      // this forces them on, regardless of user's preference on YouTube
+      if (this.captionsOn) {
+        ccLoadPolicy = 1;
+      }
+      else {
+        ccLoadPolicy = 0;
+      }
+    }
+    videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, this.containerId);
+    if (videoDimensions) {
+      this.ytWidth = videoDimensions[0];
+      this.ytHeight = videoDimensions[1];
+      this.ytAspectRatio = thisObj.ytWidth / thisObj.ytHeight;
+    }
+    else {
+      // dimensions are initially unknown
+      // sending null values to YouTube results in a video that uses the default YouTube dimensions
+      // these can then be scraped from the iframe and applied to this.$ableWrapper
+      this.ytWidth = null;
+      this.ytHeight = null;
+    }
+    this.youTubePlayer = new YT.Player(containerId, {
+      videoId: this.activeYouTubeId,
+      width: this.ytWidth,
+      height: this.ytHeight,
+      playerVars: {
+        enablejsapi: 1,
+        start: this.startTime,
+        controls: 0, // no controls, using our own
+        cc_load_policy: ccLoadPolicy,
+        // enablejsapi: 1, // deprecated; but we don't even need it???
+        hl: this.lang, // use the default language UI
+        modestbranding: 1, // no YouTube logo in controller
+        rel: 0, // do not show related videos when video ends
+        html5: 1 // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
+      },
+      events: {
+        onReady: function () {
+          if (thisObj.swappingSrc) {
+            // swap is now complete
+            thisObj.swappingSrc = false;
+            if (thisObj.playing) {
+              // resume playing
+              thisObj.playMedia();
+            }
+          }
+          if (typeof thisObj.ytAspectRatio === 'undefined') {
+            thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
+          }
+          deferred.resolve();
+        },
+        onError: function (x) {
+          deferred.fail();
+        },
+        onStateChange: function (x) {
+          var playerState = thisObj.getPlayerState(x.data);
+          if (playerState === 'playing') {
+            thisObj.playing = true;
+            thisObj.startedPlaying = true;
+          }
+          else {
+            thisObj.playing = false;
+          }
+          if (thisObj.stoppingYouTube && playerState === 'paused') {
+            if (typeof thisObj.$posterImg !== 'undefined') {
+              thisObj.$posterImg.show();
+            }
+            thisObj.stoppingYouTube = false;
+            thisObj.seeking = false;
+            thisObj.playing = false;
+          }
+        },
+        onPlaybackQualityChange: function () {
+          // do something
+        },
+        onApiChange: function (x) {
+          // As of Able Player v2.2.23, we are now getting caption data via the YouTube Data API
+          // prior to calling initYouTubePlayer()
+          // Previously we got caption data via the YouTube iFrame API, and doing so was an awful mess.
+          // onApiChange fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
+          // it isn't fired until the video starts playing
+          // if captions are available for this video (automated captions don't count)
+          // the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires
+          // So, to trigger this event we had to play the video briefly, then pause, then reset.
+          // During that brief moment of playback, the onApiChange event was fired and we could setup captions
+          // The 'captions' and 'cc' modules are very different, and have different data and methods
+          // NOW, in v2.2.23, we still need to initialize the caption modules in order to control captions
+          // but we don't have to do that on load in order to get caption data
+          // Instead, we can wait until the video starts playing normally, then retrieve the modules
+          thisObj.initYouTubeCaptionModule();
+        }
+      }
+    });
+    thisObj.injectPoster(thisObj.$mediaContainer, 'youtube');
+    thisObj.$media.remove();
     return promise;
   };
 
@@ -5758,7 +5678,6 @@
   AblePlayer.prototype.refreshVolumeSlider = function(volume) {
 
     // adjust slider position based on current volume
-
     var volumePct;
     volumePct = (volume/10) * 100;
 
@@ -6727,6 +6646,7 @@
   };
 
   AblePlayer.prototype.getDuration = function () {
+
     var duration;
     if (this.player === 'html5') {
       duration = this.media.duration;
@@ -6734,7 +6654,7 @@
     else if (this.player === 'jw' && this.jwPlayer) {
       duration = this.jwPlayer.getDuration();
     }
-    else if (this.player === 'youtube') {
+    else if (this.player === 'youtube' && this.youTubePlayer) {
       duration = this.youTubePlayer.getDuration();
     }
     if (duration === undefined || isNaN(duration) || duration === -1) {
@@ -6815,7 +6735,7 @@
         return 'playing';
       }
     }
-    else if (this.player === 'youtube') {
+    else if (this.player === 'youtube' && this.youTubePlayer) {
       var state = this.youTubePlayer.getPlayerState();
       if (state === -1 || state === 5) {
         return 'stopped';
@@ -7038,69 +6958,71 @@
       }
     }
     else {
-      // Update the text only if it's changed since it has role="alert";
-      // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
-      if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
-        // Debounce updates; only update after status has stayed steadily different for 250ms.
-        timestamp = (new Date()).getTime();
-        if (!this.statusDebounceStart) {
-          this.statusDebounceStart = timestamp;
-          // Make sure refreshControls gets called again at the appropriate time to check.
-          this.statusTimeout = setTimeout(function () {
-            thisObj.refreshControls();
-          }, 300);
+      if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
+        // Update the text only if it's changed since it has role="alert";
+        // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+        if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
+          // Debounce updates; only update after status has stayed steadily different for 250ms.
+          timestamp = (new Date()).getTime();
+          if (!this.statusDebounceStart) {
+            this.statusDebounceStart = timestamp;
+            // Make sure refreshControls gets called again at the appropriate time to check.
+            this.statusTimeout = setTimeout(function () {
+              thisObj.refreshControls();
+            }, 300);
+          }
+          else if ((timestamp - this.statusDebounceStart) > 250) {
+            this.$status.text(textByState[this.getPlayerState()]);
+            this.statusDebounceStart = null;
+            clearTimeout(this.statusTimeout);
+            this.statusTimeout = null;
+          }
         }
-        else if ((timestamp - this.statusDebounceStart) > 250) {
-          this.$status.text(textByState[this.getPlayerState()]);
+        else {
           this.statusDebounceStart = null;
           clearTimeout(this.statusTimeout);
           this.statusTimeout = null;
         }
-      }
-      else {
-        this.statusDebounceStart = null;
-        clearTimeout(this.statusTimeout);
-        this.statusTimeout = null;
-      }
 
-      // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
-      if (!this.seekBar.tracking && !this.stoppingYouTube) {
-        if (this.isPaused()) {
-          this.$playpauseButton.attr('aria-label',this.tt.play);
+        // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
+        if (!this.seekBar.tracking && !this.stoppingYouTube) {
+          if (this.isPaused()) {
+            this.$playpauseButton.attr('aria-label',this.tt.play);
 
-          if (this.iconType === 'font') {
-            this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
-          }
-          else if (this.iconType === 'svg') {
-            // Not currently working. SVG is a work in progress
-            this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
-            svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-            newSvgLink = svgLink.replace('svg-pause','svg-play');
-            this.$playpauseButton.find('use').attr(newSvgLink);
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            if (this.iconType === 'font') {
+              this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            }
+            else if (this.iconType === 'svg') {
+              // Not currently working. SVG is a work in progress
+              this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
+              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+              newSvgLink = svgLink.replace('svg-pause','svg-play');
+              this.$playpauseButton.find('use').attr(newSvgLink);
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            }
+            else {
+              this.$playpauseButton.find('img').attr('src',this.playButtonImg);
+            }
           }
           else {
-            this.$playpauseButton.find('img').attr('src',this.playButtonImg);
-          }
-        }
-        else {
-          this.$playpauseButton.attr('aria-label',this.tt.pause);
+            this.$playpauseButton.attr('aria-label',this.tt.pause);
 
-          if (this.iconType === 'font') {
-            this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
-          }
-          else if (this.iconType === 'svg') {
-            // Not currently working. SVG is a work in progress
-            this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
-            svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-            newSvgLink = svgLink.replace('svg-play','svg-pause');
-            this.$playpauseButton.find('use').attr(newSvgLink);
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
-          }
-          else {
-            this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
+            if (this.iconType === 'font') {
+              this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+            }
+            else if (this.iconType === 'svg') {
+              // Not currently working. SVG is a work in progress
+              this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
+              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+              newSvgLink = svgLink.replace('svg-play','svg-pause');
+              this.$playpauseButton.find('use').attr(newSvgLink);
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+            }
+            else {
+              this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
+            }
           }
         }
       }
@@ -7306,23 +7228,27 @@
           if (buffered > this.chapterDuration) {
             buffered = this.chapterDuration;
           }
-          this.seekBar.setBuffered(buffered / this.chapterDuration);
+          if (this.seekBar) {
+            this.seekBar.setBuffered(buffered / this.chapterDuration);
+          }
         }
         else {
-          this.seekBar.setBuffered(buffered / duration);
+          if (this.seekBar) {
+            this.seekBar.setBuffered(buffered / duration);
+          }
         }
       }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
-      this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
+      if (this.seekBar) {
+        this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
+      }
     }
     else if (this.player === 'youtube') {
-      this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+      if (this.seekBar) {
+        this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+      }
     }
-    // This will adjust the text in the chapter pop-ups.
-    // This is to respond to changes in the caption language and transcript language when appropriate.
-    // See "updateChaptersLanguage" in chapters.js to see how this is handled.
-    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.getHiddenWidth = function($el) {
@@ -7647,7 +7573,6 @@
       this.prefTranscript = 1;
     }
     this.updateCookie('prefTranscript');
-    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -8126,6 +8051,67 @@
     }
   };
 
+  AblePlayer.prototype.syncTrackLanguages = function (source, language) {
+
+    // this function is called when the player is built (source == 'init')
+    // and again when user changes the language of either 'captions' or 'transcript'
+    // It syncs the languages of chapters, descriptions, and metadata tracks
+    // NOTE: Caption and transcript languages are somewhat independent from one another
+    // If a user changes the caption language, the transcript follows
+    // However, if a user changes the transcript language, this only affects the transcript
+    // This was a group decision based on the belief that users may want a transcript
+    // that is in a different language than the captions
+
+    var i, captions, descriptions, chapters, meta;
+
+    // Captions
+    for (i in this.captions) {
+      if (this.captions[i].language === language) {
+        captions = this.captions[i];
+      }
+    }
+    // Chapters
+    for (i in this.chapters) {
+      if (this.chapters[i].language === language) {
+        chapters = this.chapters[i];
+      }
+    }
+    // Descriptions
+    for (var i in this.descriptions) {
+      if (this.descriptions[i].language === language) {
+        descriptions = this.descriptions[i];
+      }
+    }
+    // Metadata
+    for (var i in this.meta) {
+      if (this.meta[i].language === language) {
+        meta = this.meta[i];
+      }
+    }
+
+    // regardless of source...
+    this.transcriptLang = language;
+
+    if (source === 'init' || source === 'captions') {
+      this.captionLang = language;
+      this.selectedCaptions = captions;
+      this.selectedChapters = chapters;
+      this.selectedDescriptions = descriptions;
+      this.selectedMeta = meta;
+      this.transcriptCaptions = captions;
+      this.transcriptChapters = chapters;
+      this.transcriptDescriptions = descriptions;
+      this.updateChaptersList();
+      this.setupPopups('chapters');
+    }
+    else if (source === 'transcript') {
+      this.transcriptCaptions = captions;
+      this.transcriptChapters = chapters;
+      this.transcriptDescriptions = descriptions;
+    }
+    this.updateTranscript();
+  };
+
 })(jQuery);
 
 (function ($) {
@@ -8172,13 +8158,7 @@
         }
       }
       else {
-        // Try and find a matching description track for rebuilding transcript
-        for (var i in thisObj.descriptions) {
-          if (thisObj.descriptions[i].language === track.language) {
-            thisObj.selectedDescriptions = thisObj.descriptions[i];
-            thisObj.currentDescription = -1;
-          }
-        }
+        thisObj.syncTrackLanguages('captions',thisObj.captionLang);
         if (!this.swappingSrc) {
           thisObj.updateCaption();
           thisObj.showDescription(thisObj.getElapsed());
@@ -8273,8 +8253,10 @@
     }
   };
 
-  // Takes a cue and returns the caption text to display for it.
   AblePlayer.prototype.flattenCueForCaption = function (cue) {
+
+    // Takes a cue and returns the caption text to display
+    // Also used for chapters
 
     // Support for 'i' and 'b' tags added in 2.3.66
     // TODO: Add support for 'c' (class) and 'ruby'
@@ -8300,7 +8282,7 @@
         result.push(component.value);
       }
       else if (component.type === 'v') {
-        result.push('[' + component.value + ']');
+        result.push('(' + component.value + ')');
         for (var ii in component.children) {
           result.push(flattenComponent(component.children[ii]));
         }
@@ -8327,8 +8309,10 @@
       return result.join('');
     }
 
-    for (var ii in cue.components.children) {
-      result.push(flattenComponent(cue.components.children[ii]));
+    if (typeof cue.components !== 'undefined') {
+      for (var ii in cue.components.children) {
+        result.push(flattenComponent(cue.components.children[ii]));
+      }
     }
     return result.join('');
   };
@@ -8518,6 +8502,120 @@
 })(jQuery);
 
 (function ($) {
+
+  AblePlayer.prototype.populateChaptersDiv = function() {
+
+    var headingLevel, headingType, headingId, $chaptersHeading,
+      $chaptersList;
+
+    if ($('#' + this.chaptersDivLocation)) {
+      this.$chaptersDiv = $('#' + this.chaptersDivLocation);
+      this.$chaptersDiv.addClass('able-chapters-div');
+
+      // add optional header
+      if (this.chaptersTitle) {
+        headingLevel = this.getNextHeadingLevel(this.$chaptersDiv);
+        headingType = 'h' + headingLevel.toString();
+        headingId = this.mediaId + '-chapters-heading';
+        $chaptersHeading = $('<' + headingType + '>', {
+          'class': 'able-chapters-heading',
+          'id': headingId
+        }).text(this.chaptersTitle);
+        this.$chaptersDiv.append($chaptersHeading);
+      }
+
+      this.$chaptersNav = $('<nav>');
+      if (this.chaptersTitle) {
+        this.$chaptersNav.attr('aria-labelledby',headingId);
+      }
+      else {
+        this.$chaptersNav.attr('aria-label',this.tt.chapters);
+      }
+      this.$chaptersDiv.append(this.$chaptersNav);
+
+      // populate this.$chaptersNav with a list of chapters
+      this.updateChaptersList();
+    }
+  };
+
+  AblePlayer.prototype.updateChaptersList = function() {
+
+    var thisObj, cues, $chaptersList, c, thisChapter,
+      $chapterItem, $chapterButton, buttonId, hasDefault,
+      getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
+
+    thisObj = this;
+
+    if (!this.$chaptersNav) {
+      return false;
+    }
+
+    if (this.selectedChapters) {
+      cues = this.selectedChapters.cues;
+    }
+    else if (this.chapters.length >= 1) {
+      cues = this.chapters[0].cues;
+    }
+    else {
+      cues = [];
+    }
+    if (cues.length > 0) {
+      $chaptersList = $('<ul>');
+      for (c in cues) {
+        thisChapter = c;
+        $chapterItem = $('<li></li>');
+        $chapterButton = $('<button>',{
+          'type': 'button',
+          'val': thisChapter
+        }).text(this.flattenCueForCaption(cues[thisChapter]));
+
+        // add event listeners
+        getClickFunction = function (time) {
+          return function () {
+            $clickedItem = $(this).closest('li');
+            $chaptersList = $(this).closest('ul').find('li');
+            thisChapterIndex = $chaptersList.index($clickedItem);
+            $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
+            $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
+            // Don't update this.currentChapter here; just seekTo chapter's start time;
+            // chapter will be updated via chapters.js > updateChapter()
+            thisObj.seekTo(time);
+          }
+        };
+        $chapterButton.on('click',getClickFunction(cues[thisChapter].start)); // works with Enter too
+        $chapterButton.on('focus',function() {
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).closest('li').addClass('able-focus');
+        });
+        $chapterItem.on('hover',function() {
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).addClass('able-focus');
+        });
+        $chapterItem.on('mouseleave',function() {
+          $(this).removeClass('able-focus');
+        });
+        $chapterButton.on('blur',function() {
+          $(this).closest('li').removeClass('able-focus');
+        });
+
+        // put it all together
+        $chapterItem.append($chapterButton);
+        $chaptersList.append($chapterItem);
+        if (this.defaultChapter == cues[thisChapter].id) {
+          $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+          hasDefault = true;
+        }
+      }
+      if (!hasDefault) {
+        // select the first button
+        $chaptersList.find('button').first().attr('aria-selected','true')
+          .parent('li').addClass('able-current-chapter');
+      }
+      this.$chaptersNav.html($chaptersList);
+    }
+    return false;
+  };
+
   AblePlayer.prototype.seekToDefaultChapter = function() {
     // this function is only called if this.defaultChapter is not null
     // step through chapters looking for default
@@ -8577,7 +8675,7 @@
     var videoDuration, lastChapterIndex, chapterEnd;
 
     if (typeof this.currentChapter === 'undefined') {
-      return duration;
+      return 0;
     }
     videoDuration = this.getDuration();
     lastChapterIndex = this.chapters.length-1;
@@ -8603,7 +8701,7 @@
     // called if this.seekbarScope === 'chapter'
     // get current elapsed time, relative to the current chapter duration
     if (typeof this.currentChapter === 'undefined') {
-      return elapsed;
+      return 0;
     }
     var videoDuration = this.getDuration();
     var videoElapsed = this.getElapsed();
@@ -8631,37 +8729,6 @@
     else {
       return chapterTime;
     }
-  };
-
-  AblePlayer.prototype.updateChaptersLanguage = function () {
-      var thisObj = this;
-      var matchChapLang = function (languageToMatch){
-          for (var i = 0; i < thisObj.chapters.length; i++) {
-              if(languageToMatch == thisObj.chapters[i].language){
-                  thisObj.selectedChapters = thisObj.chapters[i];
-                  return true;
-              }
-          }
-          return false;
-      };
-
-      var isSelectedChaptersUpdated = false;
-      // if captions are on, use the language of the captions
-      if(this.captionsOn || this.prefCaptions){
-          isSelectedChaptersUpdated = matchChapLang(this.captionLang);
-      }
-      // if captions are off, and the transcript is on, use the transcript language
-      if(this.prefTranscript && !(isSelectedChaptersUpdated)){
-          isSelectedChaptersUpdated = matchChapLang(this.$transcriptLanguageSelect.val());
-      }
-      // if none of the above, use the language of the player
-      if(!(isSelectedChaptersUpdated)){
-          isSelectedChaptersUpdated = matchChapLang(this.lang);
-      }
-      // if can't match any of that, use the first track in the Chapters array
-      if(!(isSelectedChaptersUpdated) && (this.chapters.length >= 1)) {
-          this.selectedChapters = (this.chapters[0]);
-      }
   };
 
 })(jQuery);
@@ -8849,8 +8916,8 @@
     });
 
     this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
-      // Propagation is stopped in seekpoint click handler, so clicks are on the scrollbar
-      // or outside of a seekpoint.
+      // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
+      // or outside of a clickable span.
       if (!thisObj.scrollingTranscript) {
         thisObj.autoScrollTranscript = false;
         thisObj.refreshControls();
@@ -8870,25 +8937,7 @@
 
         var language = thisObj.$transcriptLanguageSelect.val();
 
-        // set language of all content (chapters, captions & descriptions)
-        // to match selection (if languages are avaialable)
-        for (var ii in thisObj.chapters) {
-          if (thisObj.chapters[ii].language === language) {
-            thisObj.transcriptChapters = thisObj.chapters[ii];
-          }
-        }
-        for (var ii in thisObj.captions) {
-          if (thisObj.captions[ii].language === language) {
-            thisObj.transcriptCaptions = thisObj.captions[ii];
-          }
-        }
-        for (var ii in thisObj.descriptions) {
-          if (thisObj.descriptions[ii].language === language) {
-            thisObj.transcriptDescriptions = thisObj.descriptions[ii];
-          }
-        }
-        thisObj.updateTranscript();
-        thisObj.setupPopups('chapters');
+        thisObj.syncTrackLanguages('transcript',language);
       });
     }
   };
@@ -8932,39 +8981,39 @@
 
     if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
 
-      // Update transcript.
-      var chapters;
-      var captions;
-      var descriptions;
-      var captionLang;
+      var chapters, captions, descriptions;
 
-      // setup captions
-      if (this.transcriptCaptions) {
-        // use this independently of this.selectedCaptions
-        // user might want captions in one language, transcript in another
-        captionLang = this.transcriptCaptions.language;
+      // Language of transcript might be different than language of captions
+      // But both are in sync by default
+      if (this.transcriptLang) {
         captions = this.transcriptCaptions.cues;
       }
-      else if (this.selectedCaptions) {
-        captionLang = this.captionLang;
-        captions = this.selectedCaptions.cues;
+      else {
+        if (this.transcriptCaptions) {
+          this.transcriptLang = this.transcriptCaptions.language;
+          captions = this.transcriptCaptions.cues;
+        }
+        else if (this.selectedCaptions) {
+          this.transcriptLang = this.captionLang;
+          captions = this.selectedCaptions.cues;
+        }
       }
 
       // setup chapters
       if (this.transcriptChapters) {
-        chapters = this.transcriptChapters;
+        chapters = this.transcriptChapters.cues;
       }
       else if (this.chapters.length > 0) {
         // Try and match the caption language.
-        if (captionLang) {
+        if (this.transcriptLang) {
           for (var ii in this.chapters) {
-            if (this.chapters[ii].language === captionLang) {
-              chapters = this.chapters[ii];
+            if (this.chapters[ii].language === this.transcriptLang) {
+              chapters = this.chapters[ii].cues;
             }
           }
         }
         if (typeof chapters === 'undefined') {
-          chapters = this.chapters[0] || [];
+          chapters = this.chapters[0].cues || [];
         }
       }
 
@@ -8974,21 +9023,26 @@
       }
       else if (this.descriptions.length > 0) {
         // Try and match the caption language.
-        if (captionLang) {
+        if (this.transcriptLang) {
           for (var ii in this.descriptions) {
-            if (this.descriptions[ii].language === captionLang) {
+            if (this.descriptions[ii].language === this.transcriptLang) {
               descriptions = this.descriptions[ii].cues;
             }
           }
         }
         if (!descriptions) {
-          descriptions = this.descriptions[0].cues;
+          descriptions = this.descriptions[0].cues || [];
         }
       }
 
       var div = this.generateTranscript(chapters || [], captions || [], descriptions || []);
 
       this.$transcriptDiv.html(div);
+      // reset transcript selected <option> to this.transcriptLang
+      if (this.$transcriptLanguageSelect) {
+        this.$transcriptLanguageSelect.find('option:selected').attr('selected','');
+        this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').attr('selected','selected');
+      }
     }
 
     var thisObj = this;
@@ -9111,6 +9165,7 @@
       }
 
       var flattenComponentForChapter = function(comp) {
+
         var result = [];
         if (comp.type === 'string') {
           result.push(comp.value);
@@ -9141,7 +9196,7 @@
 
     var addDescription = function(div, desc) {
       var $descDiv = $('<div>', {
-        'class': 'able-desc'
+        'class': 'able-transcript-desc'
       });
       var $descHiddenSpan = $('<span>',{
         'class': 'able-hidden'
@@ -9150,6 +9205,7 @@
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
+
         var result = [];
         if (comp.type === 'string') {
           result.push(comp.value);
@@ -9189,7 +9245,6 @@
         var result = [];
 
         var flattenString = function (str) {
-
           var result = [];
           if (str === '') {
             return result;
@@ -9233,7 +9288,7 @@
           var $vSpan = $('<span>',{
             'class': 'able-unspoken'
           });
-          $vSpan.text('[ ' + comp.value + ' ]');
+          $vSpan.text('(' + comp.value + ')');
           result.push($vSpan);
           for (var ii in comp.children) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
@@ -9271,9 +9326,15 @@
         var results = flattenComponentForCaption(cap.components.children[ii]);
         for (var jj in results) {
           var result = results[jj];
-          if (typeof result === 'string' && thisObj.lyricsMode) {
-            // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
-            result = result.replace('\n','<br>') + '<br>';
+          if (typeof result === 'string') {
+            if (thisObj.lyricsMode) {
+              // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
+              result = result.replace('\n','<br>') + '<br>';
+            }
+            else {
+              // just add a space between captions
+              result += ' ';
+            }
           }
           $capSpan.append(result);
         }
@@ -9281,7 +9342,7 @@
       $capSpan.attr('data-start', cap.start.toString());
       $capSpan.attr('data-end', cap.end.toString());
       div.append($capSpan);
-      div.append('\n');
+      div.append(' \n');
     };
 
     // keep looping as long as any one of the three arrays has content
@@ -9322,7 +9383,7 @@
       }
       else {
         if (nextChapter < chapters.length) {
-          addCaption($main, chapters[nextChapter]);
+          addChapter($main, chapters[nextChapter]);
           nextChapter += 1;
         }
         else if (nextDesc < descriptions.length) {
@@ -9335,7 +9396,31 @@
         }
       }
     }
-
+    // organize transcript into blocks using [] and () as starting points
+    var $components = $main.children();
+    var spanCount = 0;
+    var openBlock = true;
+    $components.each(function() {
+      if ($(this).hasClass('able-transcript-caption')) {
+        if ($(this).text().indexOf('[') !== -1 || $(this).text().indexOf('(') !== -1) {
+          // this caption includes a bracket or parenth. Start a new block
+          // close the previous block first
+          if (spanCount > 0) {
+            $main.find('.able-block-temp').removeClass('able-block-temp').wrapAll('<div class="able-transcript-block"></div>');
+            spanCount = 0;
+          }
+        }
+        $(this).addClass('able-block-temp');
+        spanCount++;
+      }
+      else {
+        // this is not a caption. Close the caption block
+        if (spanCount > 0) {
+          $main.find('.able-block-temp').removeClass('able-block-temp').wrapAll('<div class="able-transcript-block"></div>');
+          spanCount = 0;
+        }
+      }
+    });
     return $main;
   };
 

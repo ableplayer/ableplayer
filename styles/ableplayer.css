@@ -902,7 +902,7 @@ div.able-chapters-div button::-moz-focus-inner {
   font-size: 1.2em;
   font-weight: bold;
 }
-.able-transcript div.able-desc {
+.able-transcript div.able-transcript-desc {
 	background-color: #FEE;
 	border: thin solid #336;
 	font-style: italic;

@@ -71,8 +71,8 @@
     });
 
     this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
-      // Propagation is stopped in seekpoint click handler, so clicks are on the scrollbar
-      // or outside of a seekpoint.
+      // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
+      // or outside of a clickable span.
       if (!thisObj.scrollingTranscript) {
         thisObj.autoScrollTranscript = false;
         thisObj.refreshControls();
@@ -92,25 +92,7 @@
 
         var language = thisObj.$transcriptLanguageSelect.val();
 
-        // set language of all content (chapters, captions & descriptions)
-        // to match selection (if languages are avaialable)
-        for (var ii in thisObj.chapters) {
-          if (thisObj.chapters[ii].language === language) {
-            thisObj.transcriptChapters = thisObj.chapters[ii];
-          }
-        }
-        for (var ii in thisObj.captions) {
-          if (thisObj.captions[ii].language === language) {
-            thisObj.transcriptCaptions = thisObj.captions[ii];
-          }
-        }
-        for (var ii in thisObj.descriptions) {
-          if (thisObj.descriptions[ii].language === language) {
-            thisObj.transcriptDescriptions = thisObj.descriptions[ii];
-          }
-        }
-        thisObj.updateTranscript();
-        thisObj.setupPopups('chapters');
+        thisObj.syncTrackLanguages('transcript',language);
       });
     }
   };
@@ -154,39 +136,39 @@
 
     if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
 
-      // Update transcript.
-      var chapters;
-      var captions;
-      var descriptions;
-      var captionLang;
+      var chapters, captions, descriptions;
 
-      // setup captions
-      if (this.transcriptCaptions) {
-        // use this independently of this.selectedCaptions
-        // user might want captions in one language, transcript in another
-        captionLang = this.transcriptCaptions.language;
+      // Language of transcript might be different than language of captions
+      // But both are in sync by default
+      if (this.transcriptLang) {
         captions = this.transcriptCaptions.cues;
       }
-      else if (this.selectedCaptions) {
-        captionLang = this.captionLang;
-        captions = this.selectedCaptions.cues;
+      else {
+        if (this.transcriptCaptions) {
+          this.transcriptLang = this.transcriptCaptions.language;
+          captions = this.transcriptCaptions.cues;
+        }
+        else if (this.selectedCaptions) {
+          this.transcriptLang = this.captionLang;
+          captions = this.selectedCaptions.cues;
+        }
       }
 
       // setup chapters
       if (this.transcriptChapters) {
-        chapters = this.transcriptChapters;
+        chapters = this.transcriptChapters.cues;
       }
       else if (this.chapters.length > 0) {
         // Try and match the caption language.
-        if (captionLang) {
+        if (this.transcriptLang) {
           for (var ii in this.chapters) {
-            if (this.chapters[ii].language === captionLang) {
-              chapters = this.chapters[ii];
+            if (this.chapters[ii].language === this.transcriptLang) {
+              chapters = this.chapters[ii].cues;
             }
           }
         }
         if (typeof chapters === 'undefined') {
-          chapters = this.chapters[0] || [];
+          chapters = this.chapters[0].cues || [];
         }
       }
 
@@ -196,21 +178,26 @@
       }
       else if (this.descriptions.length > 0) {
         // Try and match the caption language.
-        if (captionLang) {
+        if (this.transcriptLang) {
           for (var ii in this.descriptions) {
-            if (this.descriptions[ii].language === captionLang) {
+            if (this.descriptions[ii].language === this.transcriptLang) {
               descriptions = this.descriptions[ii].cues;
             }
           }
         }
         if (!descriptions) {
-          descriptions = this.descriptions[0].cues;
+          descriptions = this.descriptions[0].cues || [];
         }
       }
 
       var div = this.generateTranscript(chapters || [], captions || [], descriptions || []);
 
       this.$transcriptDiv.html(div);
+      // reset transcript selected <option> to this.transcriptLang
+      if (this.$transcriptLanguageSelect) {
+        this.$transcriptLanguageSelect.find('option:selected').attr('selected','');
+        this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').attr('selected','selected');
+      }
     }
 
     var thisObj = this;
@@ -333,6 +320,7 @@
       }
 
       var flattenComponentForChapter = function(comp) {
+
         var result = [];
         if (comp.type === 'string') {
           result.push(comp.value);
@@ -363,7 +351,7 @@
 
     var addDescription = function(div, desc) {
       var $descDiv = $('<div>', {
-        'class': 'able-desc'
+        'class': 'able-transcript-desc'
       });
       var $descHiddenSpan = $('<span>',{
         'class': 'able-hidden'
@@ -372,6 +360,7 @@
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
+
         var result = [];
         if (comp.type === 'string') {
           result.push(comp.value);
@@ -411,7 +400,6 @@
         var result = [];
 
         var flattenString = function (str) {
-
           var result = [];
           if (str === '') {
             return result;
@@ -455,7 +443,7 @@
           var $vSpan = $('<span>',{
             'class': 'able-unspoken'
           });
-          $vSpan.text('[ ' + comp.value + ' ]');
+          $vSpan.text('(' + comp.value + ')');
           result.push($vSpan);
           for (var ii in comp.children) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
@@ -493,9 +481,15 @@
         var results = flattenComponentForCaption(cap.components.children[ii]);
         for (var jj in results) {
           var result = results[jj];
-          if (typeof result === 'string' && thisObj.lyricsMode) {
-            // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
-            result = result.replace('\n','<br>') + '<br>';
+          if (typeof result === 'string') {
+            if (thisObj.lyricsMode) {
+              // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
+              result = result.replace('\n','<br>') + '<br>';
+            }
+            else {
+              // just add a space between captions
+              result += ' ';
+            }
           }
           $capSpan.append(result);
         }
@@ -503,7 +497,7 @@
       $capSpan.attr('data-start', cap.start.toString());
       $capSpan.attr('data-end', cap.end.toString());
       div.append($capSpan);
-      div.append('\n');
+      div.append(' \n');
     };
 
     // keep looping as long as any one of the three arrays has content
@@ -544,7 +538,7 @@
       }
       else {
         if (nextChapter < chapters.length) {
-          addCaption($main, chapters[nextChapter]);
+          addChapter($main, chapters[nextChapter]);
           nextChapter += 1;
         }
         else if (nextDesc < descriptions.length) {
@@ -557,7 +551,31 @@
         }
       }
     }
-
+    // organize transcript into blocks using [] and () as starting points
+    var $components = $main.children();
+    var spanCount = 0;
+    var openBlock = true;
+    $components.each(function() {
+      if ($(this).hasClass('able-transcript-caption')) {
+        if ($(this).text().indexOf('[') !== -1 || $(this).text().indexOf('(') !== -1) {
+          // this caption includes a bracket or parenth. Start a new block
+          // close the previous block first
+          if (spanCount > 0) {
+            $main.find('.able-block-temp').removeClass('able-block-temp').wrapAll('<div class="able-transcript-block"></div>');
+            spanCount = 0;
+          }
+        }
+        $(this).addClass('able-block-temp');
+        spanCount++;
+      }
+      else {
+        // this is not a caption. Close the caption block
+        if (spanCount > 0) {
+          $main.find('.able-block-temp').removeClass('able-block-temp').wrapAll('<div class="able-transcript-block"></div>');
+          spanCount = 0;
+        }
+      }
+    });
     return $main;
   };
 

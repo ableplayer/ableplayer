@@ -172,95 +172,6 @@
     }
   };
 
-  AblePlayer.prototype.populateChaptersDiv = function() {
-
-    var thisObj, headingLevel, headingType, headingId, $chaptersHeading,
-      $chaptersNav, $chaptersList, $chapterItem, $chapterButton,
-      i, chapter, buttonId, hasDefault,
-      getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
-
-    thisObj = this;
-
-    if ($('#' + this.chaptersDivLocation)) {
-      this.$chaptersDiv = $('#' + this.chaptersDivLocation);
-      this.$chaptersDiv.addClass('able-chapters-div');
-
-      // add optional header
-      if (this.chaptersTitle) {
-        headingLevel = this.getNextHeadingLevel(this.$chaptersDiv);
-        headingType = 'h' + headingLevel.toString();
-        headingId = this.mediaId + '-chapters-heading';
-        $chaptersHeading = $('<' + headingType + '>', {
-          'class': 'able-chapters-heading',
-          'id': headingId
-        }).text(this.chaptersTitle);
-        this.$chaptersDiv.append($chaptersHeading);
-      }
-
-      $chaptersNav = $('<nav>');
-      if (this.chaptersTitle) {
-        $chaptersNav.attr('aria-labelledby',headingId);
-      }
-      else {
-        $chaptersNav.attr('aria-label',this.tt.chapters);
-      }
-
-      $chaptersList = $('<ul>');
-      for (i in this.chapters) {
-        chapter = this.chapters[i];
-        $chapterItem = $('<li></li>');
-        $chapterButton = $('<button>',{
-          'type': 'button',
-          'val': i
-        }).text(this.flattenCueForCaption(chapter));
-
-        // add event listeners
-        getClickFunction = function (time) {
-          return function () {
-            $clickedItem = $(this).closest('li');
-            $chaptersList = $(this).closest('ul').find('li');
-            thisChapterIndex = $chaptersList.index($clickedItem);
-            $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
-            $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            // Don't update this.currentChapter here; just seekTo chapter's start time;
-            // chapter will be updated via chapters.js > updateChapter()
-            thisObj.seekTo(time);
-          }
-        };
-        $chapterButton.on('click',getClickFunction(chapter.start)); // works with Enter too
-        $chapterButton.on('focus',function() {
-          $(this).closest('ul').find('li').removeClass('able-focus');
-          $(this).closest('li').addClass('able-focus');
-        });
-        $chapterItem.on('hover',function() {
-          $(this).closest('ul').find('li').removeClass('able-focus');
-          $(this).addClass('able-focus');
-        });
-        $chapterItem.on('mouseleave',function() {
-          $(this).removeClass('able-focus');
-        });
-        $chapterButton.on('blur',function() {
-          $(this).closest('li').removeClass('able-focus');
-        });
-
-        // put it all together
-        $chapterItem.append($chapterButton);
-        $chaptersList.append($chapterItem);
-        if (this.defaultChapter == chapter.id) {
-          $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
-          hasDefault = true;
-        }
-      }
-    }
-    if (!hasDefault) {
-      // select the first button
-      $chaptersList.find('button').first().attr('aria-selected','true')
-        .parent('li').addClass('able-current-chapter');
-    }
-    $chaptersNav.append($chaptersList);
-    this.$chaptersDiv.append($chaptersNav);
-  };
-
   AblePlayer.prototype.positionDraggableWindow = function (which, width) {
 
     // which is either 'transcript' or 'sign'
@@ -553,6 +464,7 @@
   };
 
   AblePlayer.prototype.setupPopups = function (which) {
+
     // Create and fill in the popup menu forms for various controls.
     // parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
 
@@ -598,20 +510,28 @@
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-            // sets the appropriate language for chapters if there are multiple chapter tracks available.
-            thisObj.updateChaptersLanguage();
-            if (typeof this.chaptersPopup === 'undefined') {
-              this.chaptersPopup = this.createPopup('chapters');
-            }
-            if (this.selectedChapters) {
-              tracks = this.selectedChapters.cues;
-            }
-            else if (this.chapters.length >= 1) {
-              tracks = this.chapters[0].cues;
-            }
-            else {
-              tracks = [];
-            }
+          // restored original content after PR
+/*
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters');
+          }
+          tracks = this.chapters;
+*/
+          // sets the appropriate language for chapters if there are multiple chapter tracks available.
+//          this.updateChaptersLanguage();
+console.log('setting up popups');
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters');
+          }
+          if (this.selectedChapters) {
+            tracks = this.selectedChapters.cues;
+          }
+          else if (this.chapters.length >= 1) {
+            tracks = this.chapters[0].cues;
+          }
+          else {
+            tracks = [];
+          }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {

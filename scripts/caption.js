@@ -42,13 +42,7 @@
         }
       }
       else {
-        // Try and find a matching description track for rebuilding transcript
-        for (var i in thisObj.descriptions) {
-          if (thisObj.descriptions[i].language === track.language) {
-            thisObj.selectedDescriptions = thisObj.descriptions[i];
-            thisObj.currentDescription = -1;
-          }
-        }
+        thisObj.syncTrackLanguages('captions',thisObj.captionLang);
         if (!this.swappingSrc) {
           thisObj.updateCaption();
           thisObj.showDescription(thisObj.getElapsed());
@@ -143,8 +137,10 @@
     }
   };
 
-  // Takes a cue and returns the caption text to display for it.
   AblePlayer.prototype.flattenCueForCaption = function (cue) {
+
+    // Takes a cue and returns the caption text to display
+    // Also used for chapters
 
     // Support for 'i' and 'b' tags added in 2.3.66
     // TODO: Add support for 'c' (class) and 'ruby'
@@ -170,7 +166,7 @@
         result.push(component.value);
       }
       else if (component.type === 'v') {
-        result.push('[' + component.value + ']');
+        result.push('(' + component.value + ')');
         for (var ii in component.children) {
           result.push(flattenComponent(component.children[ii]));
         }
@@ -197,8 +193,10 @@
       return result.join('');
     }
 
-    for (var ii in cue.components.children) {
-      result.push(flattenComponent(cue.components.children[ii]));
+    if (typeof cue.components !== 'undefined') {
+      for (var ii in cue.components.children) {
+        result.push(flattenComponent(cue.components.children[ii]));
+      }
     }
     return result.join('');
   };

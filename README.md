@@ -235,10 +235,10 @@ To manually code the transcript, one simple strategy is to first allow Able Play
 
 - Wrap the entire transcript in a container with class="able-transcript", and wrap that in another container with class="able-transcript-area". 
 - Add an empty &lt;div&gt; just inside the outer container with class="able-window-toolbar".
-- Wrap all audio description in a &lt;div&gt; element with class="able-desc".
+- Wrap all audio description in a &lt;div&gt; element with class="able-transcript-desc".
 - Add a &lt;span&gt; element to the start of each audio description block, with class="able-hidden" and text "Description:". This helps screen reader users to distinguish between caption and description text.
-- Wrap each interactive block of content in a &lt;span&gt; element, with class="able-transcript-seekpoint", plus **data-start** and **data-end** attributes. The values of these two data attributes are the video start and end times extpressed in seconds (decimals points are allowed). 
-- Wrap each interactive block of content in a &lt;span&gt; element, with class="able-transcript-seekpoint", plus **data-start** and **data-end** attributes. The values of these two data attributes are the video start and end times extpressed in seconds (decimals points are allowed). 
+- Wrap each block of caption text in a &lt;div&gt; element with class="able-transcript-block".
+- Wrap each clickable segment of content in a &lt;span&gt; element, with class="able-transcript-seekpoint", plus **data-start** and **data-end** attributes. The values of these two data attributes are the video start and end times expressed in seconds (decimals points are allowed). 
 - If the clickable span is caption text, also add the "able-transcript-caption" class. 
 - Wrap unspoken content such as names of speakers or descriptions of sound in a &lt;span&gt; element with class="able-unspoken". 
 - Use any other markup desired to add structure and style to your transcript. Able Player will ignore it.

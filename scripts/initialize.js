@@ -355,9 +355,13 @@
           thisObj.setupPopups();
           thisObj.updateCaption();
           thisObj.updateTranscript();
+          if (thisObj.chaptersDivLocation) {
+            thisObj.populateChaptersDiv();
+          }
           thisObj.showSearchResults();
           if (thisObj.defaultChapter) {
             thisObj.seekToDefaultChapter();
+            // thisObj.updateChapter(thisObj.getElapsed());
           }
         },
         function() {  // initPlayer fail
@@ -494,6 +498,8 @@
         if (this.$transcriptLanguageSelect) {
           this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
         }
+        // sync all other tracks to this same languge
+        this.syncTrackLanguages('init',this.captionLang);
       }
     }
   };

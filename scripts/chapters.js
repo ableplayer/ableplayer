@@ -1,4 +1,118 @@
 (function ($) {
+
+  AblePlayer.prototype.populateChaptersDiv = function() {
+
+    var headingLevel, headingType, headingId, $chaptersHeading,
+      $chaptersList;
+
+    if ($('#' + this.chaptersDivLocation)) {
+      this.$chaptersDiv = $('#' + this.chaptersDivLocation);
+      this.$chaptersDiv.addClass('able-chapters-div');
+
+      // add optional header
+      if (this.chaptersTitle) {
+        headingLevel = this.getNextHeadingLevel(this.$chaptersDiv);
+        headingType = 'h' + headingLevel.toString();
+        headingId = this.mediaId + '-chapters-heading';
+        $chaptersHeading = $('<' + headingType + '>', {
+          'class': 'able-chapters-heading',
+          'id': headingId
+        }).text(this.chaptersTitle);
+        this.$chaptersDiv.append($chaptersHeading);
+      }
+
+      this.$chaptersNav = $('<nav>');
+      if (this.chaptersTitle) {
+        this.$chaptersNav.attr('aria-labelledby',headingId);
+      }
+      else {
+        this.$chaptersNav.attr('aria-label',this.tt.chapters);
+      }
+      this.$chaptersDiv.append(this.$chaptersNav);
+
+      // populate this.$chaptersNav with a list of chapters
+      this.updateChaptersList();
+    }
+  };
+
+  AblePlayer.prototype.updateChaptersList = function() {
+
+    var thisObj, cues, $chaptersList, c, thisChapter,
+      $chapterItem, $chapterButton, buttonId, hasDefault,
+      getClickFunction, $clickedItem, $chaptersList, thisChapterIndex;
+
+    thisObj = this;
+
+    if (!this.$chaptersNav) {
+      return false;
+    }
+
+    if (this.selectedChapters) {
+      cues = this.selectedChapters.cues;
+    }
+    else if (this.chapters.length >= 1) {
+      cues = this.chapters[0].cues;
+    }
+    else {
+      cues = [];
+    }
+    if (cues.length > 0) {
+      $chaptersList = $('<ul>');
+      for (c in cues) {
+        thisChapter = c;
+        $chapterItem = $('<li></li>');
+        $chapterButton = $('<button>',{
+          'type': 'button',
+          'val': thisChapter
+        }).text(this.flattenCueForCaption(cues[thisChapter]));
+
+        // add event listeners
+        getClickFunction = function (time) {
+          return function () {
+            $clickedItem = $(this).closest('li');
+            $chaptersList = $(this).closest('ul').find('li');
+            thisChapterIndex = $chaptersList.index($clickedItem);
+            $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
+            $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
+            // Don't update this.currentChapter here; just seekTo chapter's start time;
+            // chapter will be updated via chapters.js > updateChapter()
+            thisObj.seekTo(time);
+          }
+        };
+        $chapterButton.on('click',getClickFunction(cues[thisChapter].start)); // works with Enter too
+        $chapterButton.on('focus',function() {
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).closest('li').addClass('able-focus');
+        });
+        $chapterItem.on('hover',function() {
+          $(this).closest('ul').find('li').removeClass('able-focus');
+          $(this).addClass('able-focus');
+        });
+        $chapterItem.on('mouseleave',function() {
+          $(this).removeClass('able-focus');
+        });
+        $chapterButton.on('blur',function() {
+          $(this).closest('li').removeClass('able-focus');
+        });
+
+        // put it all together
+        $chapterItem.append($chapterButton);
+        $chaptersList.append($chapterItem);
+        if (this.defaultChapter == cues[thisChapter].id) {
+          $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+          hasDefault = true;
+        }
+      }
+      if (!hasDefault) {
+        // select the first button
+        $chaptersList.find('button').first().attr('aria-selected','true')
+          .parent('li').addClass('able-current-chapter');
+      }
+      this.$chaptersNav.html($chaptersList);
+    }
+    return false;
+  };
+
   AblePlayer.prototype.seekToDefaultChapter = function() {
     // this function is only called if this.defaultChapter is not null
     // step through chapters looking for default
@@ -58,7 +172,7 @@
     var videoDuration, lastChapterIndex, chapterEnd;
 
     if (typeof this.currentChapter === 'undefined') {
-      return duration;
+      return 0;
     }
     videoDuration = this.getDuration();
     lastChapterIndex = this.chapters.length-1;
@@ -84,7 +198,7 @@
     // called if this.seekbarScope === 'chapter'
     // get current elapsed time, relative to the current chapter duration
     if (typeof this.currentChapter === 'undefined') {
-      return elapsed;
+      return 0;
     }
     var videoDuration = this.getDuration();
     var videoElapsed = this.getElapsed();
@@ -112,37 +226,6 @@
     else {
       return chapterTime;
     }
-  };
-
-  AblePlayer.prototype.updateChaptersLanguage = function () {
-      var thisObj = this;
-      var matchChapLang = function (languageToMatch){
-          for (var i = 0; i < thisObj.chapters.length; i++) {
-              if(languageToMatch == thisObj.chapters[i].language){
-                  thisObj.selectedChapters = thisObj.chapters[i];
-                  return true;
-              }
-          }
-          return false;
-      };
-
-      var isSelectedChaptersUpdated = false;
-      // if captions are on, use the language of the captions
-      if(this.captionsOn || this.prefCaptions){
-          isSelectedChaptersUpdated = matchChapLang(this.captionLang);
-      }
-      // if captions are off, and the transcript is on, use the transcript language
-      if(this.prefTranscript && !(isSelectedChaptersUpdated)){
-          isSelectedChaptersUpdated = matchChapLang(this.$transcriptLanguageSelect.val());
-      }
-      // if none of the above, use the language of the player
-      if(!(isSelectedChaptersUpdated)){
-          isSelectedChaptersUpdated = matchChapLang(this.lang);
-      }
-      // if can't match any of that, use the first track in the Chapters array
-      if(!(isSelectedChaptersUpdated) && (this.chapters.length >= 1)) {
-          this.selectedChapters = (this.chapters[0]);
-      }
   };
 
 })(jQuery);

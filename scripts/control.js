@@ -39,6 +39,7 @@
   };
 
   AblePlayer.prototype.getDuration = function () {
+
     var duration;
     if (this.player === 'html5') {
       duration = this.media.duration;
@@ -46,7 +47,7 @@
     else if (this.player === 'jw' && this.jwPlayer) {
       duration = this.jwPlayer.getDuration();
     }
-    else if (this.player === 'youtube') {
+    else if (this.player === 'youtube' && this.youTubePlayer) {
       duration = this.youTubePlayer.getDuration();
     }
     if (duration === undefined || isNaN(duration) || duration === -1) {
@@ -127,7 +128,7 @@
         return 'playing';
       }
     }
-    else if (this.player === 'youtube') {
+    else if (this.player === 'youtube' && this.youTubePlayer) {
       var state = this.youTubePlayer.getPlayerState();
       if (state === -1 || state === 5) {
         return 'stopped';
@@ -350,69 +351,71 @@
       }
     }
     else {
-      // Update the text only if it's changed since it has role="alert";
-      // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
-      if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
-        // Debounce updates; only update after status has stayed steadily different for 250ms.
-        timestamp = (new Date()).getTime();
-        if (!this.statusDebounceStart) {
-          this.statusDebounceStart = timestamp;
-          // Make sure refreshControls gets called again at the appropriate time to check.
-          this.statusTimeout = setTimeout(function () {
-            thisObj.refreshControls();
-          }, 300);
+      if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
+        // Update the text only if it's changed since it has role="alert";
+        // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+        if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
+          // Debounce updates; only update after status has stayed steadily different for 250ms.
+          timestamp = (new Date()).getTime();
+          if (!this.statusDebounceStart) {
+            this.statusDebounceStart = timestamp;
+            // Make sure refreshControls gets called again at the appropriate time to check.
+            this.statusTimeout = setTimeout(function () {
+              thisObj.refreshControls();
+            }, 300);
+          }
+          else if ((timestamp - this.statusDebounceStart) > 250) {
+            this.$status.text(textByState[this.getPlayerState()]);
+            this.statusDebounceStart = null;
+            clearTimeout(this.statusTimeout);
+            this.statusTimeout = null;
+          }
         }
-        else if ((timestamp - this.statusDebounceStart) > 250) {
-          this.$status.text(textByState[this.getPlayerState()]);
+        else {
           this.statusDebounceStart = null;
           clearTimeout(this.statusTimeout);
           this.statusTimeout = null;
         }
-      }
-      else {
-        this.statusDebounceStart = null;
-        clearTimeout(this.statusTimeout);
-        this.statusTimeout = null;
-      }
 
-      // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
-      if (!this.seekBar.tracking && !this.stoppingYouTube) {
-        if (this.isPaused()) {
-          this.$playpauseButton.attr('aria-label',this.tt.play);
+        // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
+        if (!this.seekBar.tracking && !this.stoppingYouTube) {
+          if (this.isPaused()) {
+            this.$playpauseButton.attr('aria-label',this.tt.play);
 
-          if (this.iconType === 'font') {
-            this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
-          }
-          else if (this.iconType === 'svg') {
-            // Not currently working. SVG is a work in progress
-            this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
-            svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-            newSvgLink = svgLink.replace('svg-pause','svg-play');
-            this.$playpauseButton.find('use').attr(newSvgLink);
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            if (this.iconType === 'font') {
+              this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            }
+            else if (this.iconType === 'svg') {
+              // Not currently working. SVG is a work in progress
+              this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
+              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+              newSvgLink = svgLink.replace('svg-pause','svg-play');
+              this.$playpauseButton.find('use').attr(newSvgLink);
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            }
+            else {
+              this.$playpauseButton.find('img').attr('src',this.playButtonImg);
+            }
           }
           else {
-            this.$playpauseButton.find('img').attr('src',this.playButtonImg);
-          }
-        }
-        else {
-          this.$playpauseButton.attr('aria-label',this.tt.pause);
+            this.$playpauseButton.attr('aria-label',this.tt.pause);
 
-          if (this.iconType === 'font') {
-            this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
-          }
-          else if (this.iconType === 'svg') {
-            // Not currently working. SVG is a work in progress
-            this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
-            svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-            newSvgLink = svgLink.replace('svg-play','svg-pause');
-            this.$playpauseButton.find('use').attr(newSvgLink);
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
-          }
-          else {
-            this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
+            if (this.iconType === 'font') {
+              this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+            }
+            else if (this.iconType === 'svg') {
+              // Not currently working. SVG is a work in progress
+              this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
+              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+              newSvgLink = svgLink.replace('svg-play','svg-pause');
+              this.$playpauseButton.find('use').attr(newSvgLink);
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+            }
+            else {
+              this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
+            }
           }
         }
       }
@@ -618,23 +621,27 @@
           if (buffered > this.chapterDuration) {
             buffered = this.chapterDuration;
           }
-          this.seekBar.setBuffered(buffered / this.chapterDuration);
+          if (this.seekBar) {
+            this.seekBar.setBuffered(buffered / this.chapterDuration);
+          }
         }
         else {
-          this.seekBar.setBuffered(buffered / duration);
+          if (this.seekBar) {
+            this.seekBar.setBuffered(buffered / duration);
+          }
         }
       }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
-      this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
+      if (this.seekBar) {
+        this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
+      }
     }
     else if (this.player === 'youtube') {
-      this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+      if (this.seekBar) {
+        this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+      }
     }
-    // This will adjust the text in the chapter pop-ups.
-    // This is to respond to changes in the caption language and transcript language when appropriate.
-    // See "updateChaptersLanguage" in chapters.js to see how this is handled.
-    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.getHiddenWidth = function($el) {
@@ -959,7 +966,6 @@
       this.prefTranscript = 1;
     }
     this.updateCookie('prefTranscript');
-    this.setupPopups('chapters');
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -1436,6 +1442,67 @@
       this.$signWindow.css('z-index',newHighZ);
       this.$transcriptArea.css('z-index',newLowZ);
     }
+  };
+
+  AblePlayer.prototype.syncTrackLanguages = function (source, language) {
+
+    // this function is called when the player is built (source == 'init')
+    // and again when user changes the language of either 'captions' or 'transcript'
+    // It syncs the languages of chapters, descriptions, and metadata tracks
+    // NOTE: Caption and transcript languages are somewhat independent from one another
+    // If a user changes the caption language, the transcript follows
+    // However, if a user changes the transcript language, this only affects the transcript
+    // This was a group decision based on the belief that users may want a transcript
+    // that is in a different language than the captions
+
+    var i, captions, descriptions, chapters, meta;
+
+    // Captions
+    for (i in this.captions) {
+      if (this.captions[i].language === language) {
+        captions = this.captions[i];
+      }
+    }
+    // Chapters
+    for (i in this.chapters) {
+      if (this.chapters[i].language === language) {
+        chapters = this.chapters[i];
+      }
+    }
+    // Descriptions
+    for (var i in this.descriptions) {
+      if (this.descriptions[i].language === language) {
+        descriptions = this.descriptions[i];
+      }
+    }
+    // Metadata
+    for (var i in this.meta) {
+      if (this.meta[i].language === language) {
+        meta = this.meta[i];
+      }
+    }
+
+    // regardless of source...
+    this.transcriptLang = language;
+
+    if (source === 'init' || source === 'captions') {
+      this.captionLang = language;
+      this.selectedCaptions = captions;
+      this.selectedChapters = chapters;
+      this.selectedDescriptions = descriptions;
+      this.selectedMeta = meta;
+      this.transcriptCaptions = captions;
+      this.transcriptChapters = chapters;
+      this.transcriptDescriptions = descriptions;
+      this.updateChaptersList();
+      this.setupPopups('chapters');
+    }
+    else if (source === 'transcript') {
+      this.transcriptCaptions = captions;
+      this.transcriptChapters = chapters;
+      this.transcriptDescriptions = descriptions;
+    }
+    this.updateTranscript();
   };
 
 })(jQuery);

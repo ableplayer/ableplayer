@@ -216,22 +216,10 @@
 
     this.hasChapters = true;
 
-    // TODO: Add support for multiple languages of chapters
-    // Replace the following line with the commented block that follows
-    // Haven't done this because it will have a big effect downstream
-    // on all chapter processing
-    //this.chapters = cues;
-
-    // new
     this.chapters.push({
       cues: cues,
       language: trackLang
     });
-
-    if (this.chaptersDivLocation) {
-      this.populateChaptersDiv();
-    }
-    this.updateChapter(this.getElapsed());
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {

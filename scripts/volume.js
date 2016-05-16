@@ -108,7 +108,6 @@
   AblePlayer.prototype.refreshVolumeSlider = function(volume) {
 
     // adjust slider position based on current volume
-console.log('refreshVolumeSlider');
     var volumePct;
     volumePct = (volume/10) * 100;
 
