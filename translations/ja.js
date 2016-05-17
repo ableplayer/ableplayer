@@ -12,15 +12,15 @@ var ja = {
 
 "stop": "停止",
 
-"restart": "Restart",
+"restart": "再開",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "前のチャプター",
 
-"nextChapter": "Next chapter",
+"nextChapter": "次のチャプター",
 
-"prevTrack": "Previous track",
+"prevTrack": "前のトラック",
 
-"nextTrack": "Next track",
+"nextTrack": "次のトラック",
 
 "rewind": "巻き戻し",
 
@@ -82,9 +82,9 @@ var ja = {
 
 "spacebar": "スペースキー",
 
-"transcriptTitle": "Transcript",
+"transcriptTitle": "書き起こし",
 
-"lyricsTitle": "Lyrics",
+"lyricsTitle": "歌詞",
 
 "autoScroll": "自動スクロール",
 
