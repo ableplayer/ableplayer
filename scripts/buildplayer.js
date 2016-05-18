@@ -914,7 +914,7 @@
           }
           else {
             var pipeImg = $('<img>', {
-              src: this.rootPath + '/icons/' + this.iconColor + '/pipe.png',
+              src: this.rootPath + '/button-icons/' + this.iconColor + '/pipe.png',
               alt: '',
               role: 'presentation'
             });
@@ -925,29 +925,29 @@
         else {
           // this control is a button
           if (control === 'volume') {
-            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/' + this.volumeButton + '.png';
+            buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/' + this.volumeButton + '.png';
           }
           else if (control === 'fullscreen') {
-            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/fullscreen-expand.png';
+            buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/fullscreen-expand.png';
           }
           else if (control === 'slower') {
             if (this.speedIcons === 'animals') {
-              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/turtle.png';
+              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/turtle.png';
             }
             else {
-              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/slower.png';
+              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/slower.png';
             }
           }
           else if (control === 'faster') {
             if (this.speedIcons === 'animals') {
-              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/rabbit.png';
+              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/rabbit.png';
             }
             else {
-              buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/faster.png';
+              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/faster.png';
             }
           }
           else {
-            buttonImgSrc = this.rootPath + '/icons/' + this.iconColor + '/' + control + '.png';
+            buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control);
 
