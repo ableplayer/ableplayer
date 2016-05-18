@@ -52,6 +52,8 @@ var nl = {
 
 "showSign": "Toon gebarentaal",
 
+"seekbarLabel": "timeline",
+
 "hideSign": "Verberg gebarentaal",
 
 "mute": "Dempen",

@@ -54,6 +54,8 @@ var en = {
 
 "hideSign": "Hide sign language",
 
+"seekbarLabel": "timeline",
+
 "mute": "Mute",
 
 "unmute": "Unmute",

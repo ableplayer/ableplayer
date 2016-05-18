@@ -54,6 +54,8 @@ var fr = {
 
 "hideSign": "Masque le langage gestuel",
 
+"seekbarLabel": "timeline",
+
 "mute": "Son désactivé",
 
 "unmute": "Son activé",

@@ -900,8 +900,14 @@
         control = controls[j];
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
+          var sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
           $controllerSpan.append(sliderDiv);
-          this.seekBar = new AccessibleSeekBar(this.mediaType, sliderDiv, baseSliderWidth);
+          var duration = this.getDuration();
+          if (duration == 0) {
+            // set arbitrary starting duration, and change it when duration is known
+            duration = 100;
+          }
+          this.seekBar = new AccessibleSlider(this.mediaType, sliderDiv, 'horizontal', baseSliderWidth, 0, duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
         }
         else if (control === 'pipe') {
           // TODO: Unify this with buttons somehow to avoid code duplication

@@ -3706,8 +3706,14 @@
         control = controls[j];
         if (control === 'seek') {
           var sliderDiv = $('<div class="able-seekbar"></div>');
+          var sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
           $controllerSpan.append(sliderDiv);
-          this.seekBar = new AccessibleSeekBar(this.mediaType, sliderDiv, baseSliderWidth);
+          var duration = this.getDuration();
+          if (duration == 0) {
+            // set arbitrary starting duration, and change it when duration is known
+            duration = 100;
+          }
+          this.seekBar = new AccessibleSlider(this.mediaType, sliderDiv, 'horizontal', baseSliderWidth, 0, duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
         }
         else if (control === 'pipe') {
           // TODO: Unify this with buttons somehow to avoid code duplication
@@ -5179,8 +5185,24 @@
   //   tracking(event, position)
   //   stopTracking(event, position)
 
-  window. AccessibleSeekBar = function(mediaType, div, width) {
-    var thisObj = this;
+  window. AccessibleSlider = function(mediaType, div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
+
+    // mediaType is either 'audio' or 'video'
+    // div is the host element around which the slider will be built
+    // orientation is either 'horizontal' or 'vertical'
+    // length is the width or height of the slider, depending on orientation
+    // min is the low end of the slider scale
+    // max is the high end of the slider scale
+    // bigInterval is the number of steps supported by page up/page down (set to 0 if not supported)
+    // (smallInterval, defined as nextStep below, is always set to 1) - this is the interval supported by arrow keys
+    // label is used within an aria-label attribute to identify the slider to screen reader users
+    // className is used as the root within class names (e.g., 'able-' + classname + '-head')
+    // trackingMedia is true if this is a media timeline; otherwise false
+    // initialState is either 'visible' or 'hidden'
+
+    var thisObj;
+
+    thisObj = this;
 
     // Initialize some variables.
     this.position = 0; // Note: position does not change while tracking.
@@ -5193,18 +5215,31 @@
 
     this.bodyDiv = $(div);
 
-    // Add a loaded indicator and a seek head.
-    this.loadedDiv = $('<div></div>');
-    this.playedDiv = $('<div></div>');
-    this.seekHead = $('<div class="able-seek-head"></div>');
-    // Make head focusable.
-    this.seekHead.attr('tabindex', '0');
+    // Add divs for tracking amount of media loaded and played
+    if (trackingMedia) {
+      this.loadedDiv = $('<div></div>');
+      this.playedDiv = $('<div></div>');
+    }
+
+    // Add a seekhead
+    this.seekHead = $('<div>',{
+      'orientation': orientation,
+      'class': 'able-' + className + '-head'
+    });
+
+    if (initialState === 'visible') {
+      this.seekHead.attr('tabindex', '0');
+    }
+    else {
+      this.seekHead.attr('tabindex', '-1');
+    }
     // Since head is focusable, it gets the aria roles/titles.
-    this.seekHead.attr('role', 'slider');
-    // TODO: Translate aria-label; could use: "progress bar", "timeline", "slider"
-    // Because it has role="slider", screen readers may already describe it as "slider"
-    this.seekHead.attr('aria-label', mediaType + ' timeline');
-    this.seekHead.attr('aria-valuemin', 0);
+    this.seekHead.attr({
+      'role': 'slider',
+      'aria-label': label,
+      'aria-valuemin': min,
+      'aria-valuemax': max
+    });
 
     this.timeTooltip = $('<div>');
     this.bodyDiv.append(this.timeTooltip);
@@ -5219,20 +5254,25 @@
     this.bodyDiv.wrap('<div></div>');
     this.wrapperDiv = this.bodyDiv.parent();
 
-    this.wrapperDiv.width(width);
-    this.wrapperDiv.addClass('able-seekbar-wrapper');
+    if (orientation === 'horizontal') {
+      this.wrapperDiv.width(length);
+      this.loadedDiv.width(0);
+    }
+    else {
+      this.wrapperDiv.height(length);
+      this.loadedDiv.height(0);
+    }
+    this.wrapperDiv.addClass('able-' + className + '-wrapper');
 
-    this.loadedDiv.width(0);
-    this.loadedDiv.addClass('able-seekbar-loaded');
+    if (trackingMedia) {
+      this.loadedDiv.addClass('able-' + className + '-loaded');
 
-    this.playedDiv.width(0);
-    this.playedDiv.addClass('able-seekbar-played');
+      this.playedDiv.width(0);
+      this.playedDiv.addClass('able-' + className + '-played');
 
-    this.seekHead.addClass('able-seekhead');
-    this.seekHead.attr('aria-orientation','horizontal');
-
-    // Set a default duration.  User should call this and change it.
-    this.setDuration(100);
+      // Set a default duration. User can call this dynamically if duration changes.
+      this.setDuration(max);
+    }
 
     this.seekHead.hover(function (event) {
       thisObj.overHead = true;
@@ -5322,6 +5362,15 @@
       else if (event.which === 39 || event.which === 38) {
         thisObj.arrowKeyDown(1);
       }
+      // Page up
+      else if (event.which === 33 && bigInterval > 0) {
+        thisObj.arrowKeyDown(bigInterval);
+      }
+      // Page down
+      else if (event.which === 34 && bigInterval > 0) {
+        thisObj.arrowKeyDown(-bigInterval);
+      }
+
       else {
         return;
       }
@@ -5329,7 +5378,7 @@
     });
 
     this.bodyDiv.keyup(function (event) {
-      if (event.which === 35 || event.which === 36 || event.which === 37 || event.which === 38 || event.which === 39 || event.which === 40) {
+      if (event.which >= 33 && event.which <= 40) {
         if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
           thisObj.stopTracking(thisObj.keyTrackPosition);
         }
@@ -5338,7 +5387,7 @@
     });
   }
 
-  AccessibleSeekBar.prototype.arrowKeyDown = function (multiplier) {
+  AccessibleSlider.prototype.arrowKeyDown = function (multiplier) {
     if (this.tracking && this.trackDevice === 'keyboard') {
       this.keyTrackPosition = this.boundPos(this.keyTrackPosition + (this.nextStep * multiplier));
       this.inertiaCount += 1;
@@ -5356,18 +5405,37 @@
       this.trackHeadAtPosition(this.keyTrackPosition);
     }
   };
-
-  AccessibleSeekBar.prototype.pageXToPosition = function (pageX) {
+/*
+  AccessibleSlider.prototype.pageUp = function (multiplier) {
+    if (this.tracking && this.trackDevice === 'keyboard') {
+      this.keyTrackPosition = this.boundPos(this.keyTrackPosition + (this.nextStep * multiplier));
+      this.inertiaCount += 1;
+      if (this.inertiaCount === 20) {
+        this.inertiaCount = 0;
+        this.nextStep *= 2;
+      }
+      this.trackHeadAtPosition(this.keyTrackPosition);
+    }
+    else {
+      this.nextStep = 1;
+      this.inertiaCount = 0;
+      this.keyTrackPosition = this.boundPos(this.position + (this.nextStep * multiplier));
+      this.startTracking('keyboard', this.keyTrackPosition);
+      this.trackHeadAtPosition(this.keyTrackPosition);
+    }
+  };
+*/
+  AccessibleSlider.prototype.pageXToPosition = function (pageX) {
     var offset = pageX - this.bodyDiv.offset().left;
     var position = this.duration * (offset / this.bodyDiv.width());
     return this.boundPos(position);
   };
 
-  AccessibleSeekBar.prototype.boundPos = function (position) {
+  AccessibleSlider.prototype.boundPos = function (position) {
     return Math.max(0, Math.min(position, this.duration));
   }
 
-  AccessibleSeekBar.prototype.setDuration = function (duration) {
+  AccessibleSlider.prototype.setDuration = function (duration) {
     if (duration !== this.duration) {
       this.duration = duration;
       this.resetHeadLocation();
@@ -5375,23 +5443,23 @@
     }
   };
 
-  AccessibleSeekBar.prototype.setWidth = function (width) {
+  AccessibleSlider.prototype.setWidth = function (width) {
     this.wrapperDiv.width(width);
     this.resizeDivs();
     this.resetHeadLocation();
   };
 
-  AccessibleSeekBar.prototype.getWidth = function () {
+  AccessibleSlider.prototype.getWidth = function () {
     return this.wrapperDiv.width();
   };
 
-  AccessibleSeekBar.prototype.resizeDivs = function () {
+  AccessibleSlider.prototype.resizeDivs = function () {
     this.playedDiv.width(this.bodyDiv.width() * (this.position / this.duration));
     this.loadedDiv.width(this.bodyDiv.width() * this.buffered);
   };
 
   // Stops tracking, sets the head location to the current position.
-  AccessibleSeekBar.prototype.resetHeadLocation = function () {
+  AccessibleSlider.prototype.resetHeadLocation = function () {
     var ratio = this.position / this.duration;
     var center = this.bodyDiv.width() * ratio;
     this.seekHead.css('left', center - (this.seekHead.width() / 2));
@@ -5401,7 +5469,7 @@
     }
   };
 
-  AccessibleSeekBar.prototype.setPosition = function (position, updateLive) {
+  AccessibleSlider.prototype.setPosition = function (position, updateLive) {
     this.position = position;
     this.resetHeadLocation();
     this.refreshTooltip();
@@ -5410,12 +5478,12 @@
   }
 
   // TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.  Change this to display them all.
-  AccessibleSeekBar.prototype.setBuffered = function (ratio) {
+  AccessibleSlider.prototype.setBuffered = function (ratio) {
     this.buffered = ratio;
     this.redrawDivs;
   }
 
-  AccessibleSeekBar.prototype.startTracking = function (device, position) {
+  AccessibleSlider.prototype.startTracking = function (device, position) {
     if (!this.tracking) {
       this.trackDevice = device;
       this.tracking = true;
@@ -5423,14 +5491,14 @@
     }
   };
 
-  AccessibleSeekBar.prototype.stopTracking = function (position) {
+  AccessibleSlider.prototype.stopTracking = function (position) {
     this.trackDevice = null;
     this.tracking = false;
     this.bodyDiv.trigger('stopTracking', [position]);
     this.setPosition(position, true);
   };
 
-  AccessibleSeekBar.prototype.trackHeadAtPageX = function (pageX) {
+  AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
     var position = this.pageXToPosition(pageX);
     var newLeft = pageX - this.bodyDiv.offset().left - (this.seekHead.width() / 2);
     newLeft = Math.max(0, Math.min(newLeft, this.bodyDiv.width() - this.seekHead.width()));
@@ -5439,7 +5507,7 @@
     this.reportTrackAtPosition(position);
   };
 
-  AccessibleSeekBar.prototype.trackHeadAtPosition = function (position) {
+  AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
     var ratio = position / this.duration;
     var center = this.bodyDiv.width() * ratio;
     this.lastTrackPosition = position;
@@ -5447,12 +5515,12 @@
     this.reportTrackAtPosition(position);
   };
 
-  AccessibleSeekBar.prototype.reportTrackAtPosition = function (position) {
+  AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
     this.bodyDiv.trigger('tracking', [position]);
     this.updateAriaValues(position, true);
   };
 
-  AccessibleSeekBar.prototype.updateAriaValues = function (position, updateLive) {
+  AccessibleSlider.prototype.updateAriaValues = function (position, updateLive) {
     // TODO: Localize, move to another function.
     var pHours = Math.floor(position / 3600);
     var pMinutes = Math.floor((position % 3600) / 60);
@@ -5498,7 +5566,7 @@
     this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
   };
 
-  AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {
+  AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
 
 //console.log('trackImmediatelyTo');
 //console.log('Position: ' + this.position);
@@ -5508,7 +5576,7 @@
     this.keyTrackPosition = position;
   };
 
-  AccessibleSeekBar.prototype.refreshTooltip = function () {
+  AccessibleSlider.prototype.refreshTooltip = function () {
     if (this.overHead) {
       this.timeTooltip.show();
       if (this.tracking) {
@@ -5529,14 +5597,14 @@
     }
   };
 
-  AccessibleSeekBar.prototype.setTooltipPosition = function (x) {
+  AccessibleSlider.prototype.setTooltipPosition = function (x) {
     this.timeTooltip.css({
       left: x - (this.timeTooltip.width() / 2) - 10,
       bottom: this.seekHead.height() + 10
     });
   };
 
-  AccessibleSeekBar.prototype.positionToStr = function (seconds) {
+  AccessibleSlider.prototype.positionToStr = function (seconds) {
 
     // same logic as misc.js > formatSecondsAsColonTime()
     var dHours = Math.floor(seconds / 3600);
@@ -11801,7 +11869,7 @@
     // translation2.js is then contanenated onto the end to finish this function
 
 
-var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","restart": "Neustart","prevChapter": "Vorheriges Kapitel","nextChapter": "Nächste Kapitel","prevTrack": "Vorheriges track","nextTrack": "Nächste Titel","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","transcriptTitle": "Transkription","lyricsTitle": "Text","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
+var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","restart": "Neustart","prevChapter": "Vorheriges Kapitel","nextChapter": "Nächste Kapitel","prevTrack": "Vorheriges track","nextTrack": "Nächste Titel","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","seekbarLabel": "timeline","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","transcriptTitle": "Transkription","lyricsTitle": "Text","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
 var en = {
 
 "playerHeading": "Media player",
@@ -11857,6 +11925,8 @@ var en = {
 "showSign": "Show sign language",
 
 "hideSign": "Hide sign language",
+
+"seekbarLabel": "timeline",
 
 "mute": "Mute",
 
@@ -12162,6 +12232,8 @@ var es = {
 
 "hideSign": "Ocultar lengua de señas",
 
+"seekbarLabel": "timeline",
+
 "mute": "Silenciar",
 
 "unmute": "Habilitar sonido",
@@ -12466,6 +12538,8 @@ var fr = {
 
 "hideSign": "Masque le langage gestuel",
 
+"seekbarLabel": "timeline",
+
 "mute": "Son désactivé",
 
 "unmute": "Son activé",
@@ -12769,6 +12843,8 @@ var ja = {
 "showSign": "手話を表示",
 
 "hideSign": "手話を非表示",
+
+"seekbarLabel": "timeline",
 
 "mute": "消音",
 

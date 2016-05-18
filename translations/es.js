@@ -54,6 +54,8 @@ var es = {
 
 "hideSign": "Ocultar lengua de señas",
 
+"seekbarLabel": "timeline",
+
 "mute": "Silenciar",
 
 "unmute": "Habilitar sonido",

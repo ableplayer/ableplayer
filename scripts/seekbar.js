@@ -6,8 +6,24 @@
   //   tracking(event, position)
   //   stopTracking(event, position)
 
-  window. AccessibleSeekBar = function(mediaType, div, width) {
-    var thisObj = this;
+  window. AccessibleSlider = function(mediaType, div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
+
+    // mediaType is either 'audio' or 'video'
+    // div is the host element around which the slider will be built
+    // orientation is either 'horizontal' or 'vertical'
+    // length is the width or height of the slider, depending on orientation
+    // min is the low end of the slider scale
+    // max is the high end of the slider scale
+    // bigInterval is the number of steps supported by page up/page down (set to 0 if not supported)
+    // (smallInterval, defined as nextStep below, is always set to 1) - this is the interval supported by arrow keys
+    // label is used within an aria-label attribute to identify the slider to screen reader users
+    // className is used as the root within class names (e.g., 'able-' + classname + '-head')
+    // trackingMedia is true if this is a media timeline; otherwise false
+    // initialState is either 'visible' or 'hidden'
+
+    var thisObj;
+
+    thisObj = this;
 
     // Initialize some variables.
     this.position = 0; // Note: position does not change while tracking.
@@ -20,18 +36,31 @@
 
     this.bodyDiv = $(div);
 
-    // Add a loaded indicator and a seek head.
-    this.loadedDiv = $('<div></div>');
-    this.playedDiv = $('<div></div>');
-    this.seekHead = $('<div class="able-seek-head"></div>');
-    // Make head focusable.
-    this.seekHead.attr('tabindex', '0');
+    // Add divs for tracking amount of media loaded and played
+    if (trackingMedia) {
+      this.loadedDiv = $('<div></div>');
+      this.playedDiv = $('<div></div>');
+    }
+
+    // Add a seekhead
+    this.seekHead = $('<div>',{
+      'orientation': orientation,
+      'class': 'able-' + className + '-head'
+    });
+
+    if (initialState === 'visible') {
+      this.seekHead.attr('tabindex', '0');
+    }
+    else {
+      this.seekHead.attr('tabindex', '-1');
+    }
     // Since head is focusable, it gets the aria roles/titles.
-    this.seekHead.attr('role', 'slider');
-    // TODO: Translate aria-label; could use: "progress bar", "timeline", "slider"
-    // Because it has role="slider", screen readers may already describe it as "slider"
-    this.seekHead.attr('aria-label', mediaType + ' timeline');
-    this.seekHead.attr('aria-valuemin', 0);
+    this.seekHead.attr({
+      'role': 'slider',
+      'aria-label': label,
+      'aria-valuemin': min,
+      'aria-valuemax': max
+    });
 
     this.timeTooltip = $('<div>');
     this.bodyDiv.append(this.timeTooltip);
@@ -46,20 +75,25 @@
     this.bodyDiv.wrap('<div></div>');
     this.wrapperDiv = this.bodyDiv.parent();
 
-    this.wrapperDiv.width(width);
-    this.wrapperDiv.addClass('able-seekbar-wrapper');
+    if (orientation === 'horizontal') {
+      this.wrapperDiv.width(length);
+      this.loadedDiv.width(0);
+    }
+    else {
+      this.wrapperDiv.height(length);
+      this.loadedDiv.height(0);
+    }
+    this.wrapperDiv.addClass('able-' + className + '-wrapper');
 
-    this.loadedDiv.width(0);
-    this.loadedDiv.addClass('able-seekbar-loaded');
+    if (trackingMedia) {
+      this.loadedDiv.addClass('able-' + className + '-loaded');
 
-    this.playedDiv.width(0);
-    this.playedDiv.addClass('able-seekbar-played');
+      this.playedDiv.width(0);
+      this.playedDiv.addClass('able-' + className + '-played');
 
-    this.seekHead.addClass('able-seekhead');
-    this.seekHead.attr('aria-orientation','horizontal');
-
-    // Set a default duration.  User should call this and change it.
-    this.setDuration(100);
+      // Set a default duration. User can call this dynamically if duration changes.
+      this.setDuration(max);
+    }
 
     this.seekHead.hover(function (event) {
       thisObj.overHead = true;
@@ -149,6 +183,15 @@
       else if (event.which === 39 || event.which === 38) {
         thisObj.arrowKeyDown(1);
       }
+      // Page up
+      else if (event.which === 33 && bigInterval > 0) {
+        thisObj.arrowKeyDown(bigInterval);
+      }
+      // Page down
+      else if (event.which === 34 && bigInterval > 0) {
+        thisObj.arrowKeyDown(-bigInterval);
+      }
+
       else {
         return;
       }
@@ -156,7 +199,7 @@
     });
 
     this.bodyDiv.keyup(function (event) {
-      if (event.which === 35 || event.which === 36 || event.which === 37 || event.which === 38 || event.which === 39 || event.which === 40) {
+      if (event.which >= 33 && event.which <= 40) {
         if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
           thisObj.stopTracking(thisObj.keyTrackPosition);
         }
@@ -165,7 +208,7 @@
     });
   }
 
-  AccessibleSeekBar.prototype.arrowKeyDown = function (multiplier) {
+  AccessibleSlider.prototype.arrowKeyDown = function (multiplier) {
     if (this.tracking && this.trackDevice === 'keyboard') {
       this.keyTrackPosition = this.boundPos(this.keyTrackPosition + (this.nextStep * multiplier));
       this.inertiaCount += 1;
@@ -183,18 +226,37 @@
       this.trackHeadAtPosition(this.keyTrackPosition);
     }
   };
-
-  AccessibleSeekBar.prototype.pageXToPosition = function (pageX) {
+/*
+  AccessibleSlider.prototype.pageUp = function (multiplier) {
+    if (this.tracking && this.trackDevice === 'keyboard') {
+      this.keyTrackPosition = this.boundPos(this.keyTrackPosition + (this.nextStep * multiplier));
+      this.inertiaCount += 1;
+      if (this.inertiaCount === 20) {
+        this.inertiaCount = 0;
+        this.nextStep *= 2;
+      }
+      this.trackHeadAtPosition(this.keyTrackPosition);
+    }
+    else {
+      this.nextStep = 1;
+      this.inertiaCount = 0;
+      this.keyTrackPosition = this.boundPos(this.position + (this.nextStep * multiplier));
+      this.startTracking('keyboard', this.keyTrackPosition);
+      this.trackHeadAtPosition(this.keyTrackPosition);
+    }
+  };
+*/
+  AccessibleSlider.prototype.pageXToPosition = function (pageX) {
     var offset = pageX - this.bodyDiv.offset().left;
     var position = this.duration * (offset / this.bodyDiv.width());
     return this.boundPos(position);
   };
 
-  AccessibleSeekBar.prototype.boundPos = function (position) {
+  AccessibleSlider.prototype.boundPos = function (position) {
     return Math.max(0, Math.min(position, this.duration));
   }
 
-  AccessibleSeekBar.prototype.setDuration = function (duration) {
+  AccessibleSlider.prototype.setDuration = function (duration) {
     if (duration !== this.duration) {
       this.duration = duration;
       this.resetHeadLocation();
@@ -202,23 +264,23 @@
     }
   };
 
-  AccessibleSeekBar.prototype.setWidth = function (width) {
+  AccessibleSlider.prototype.setWidth = function (width) {
     this.wrapperDiv.width(width);
     this.resizeDivs();
     this.resetHeadLocation();
   };
 
-  AccessibleSeekBar.prototype.getWidth = function () {
+  AccessibleSlider.prototype.getWidth = function () {
     return this.wrapperDiv.width();
   };
 
-  AccessibleSeekBar.prototype.resizeDivs = function () {
+  AccessibleSlider.prototype.resizeDivs = function () {
     this.playedDiv.width(this.bodyDiv.width() * (this.position / this.duration));
     this.loadedDiv.width(this.bodyDiv.width() * this.buffered);
   };
 
   // Stops tracking, sets the head location to the current position.
-  AccessibleSeekBar.prototype.resetHeadLocation = function () {
+  AccessibleSlider.prototype.resetHeadLocation = function () {
     var ratio = this.position / this.duration;
     var center = this.bodyDiv.width() * ratio;
     this.seekHead.css('left', center - (this.seekHead.width() / 2));
@@ -228,7 +290,7 @@
     }
   };
 
-  AccessibleSeekBar.prototype.setPosition = function (position, updateLive) {
+  AccessibleSlider.prototype.setPosition = function (position, updateLive) {
     this.position = position;
     this.resetHeadLocation();
     this.refreshTooltip();
@@ -237,12 +299,12 @@
   }
 
   // TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.  Change this to display them all.
-  AccessibleSeekBar.prototype.setBuffered = function (ratio) {
+  AccessibleSlider.prototype.setBuffered = function (ratio) {
     this.buffered = ratio;
     this.redrawDivs;
   }
 
-  AccessibleSeekBar.prototype.startTracking = function (device, position) {
+  AccessibleSlider.prototype.startTracking = function (device, position) {
     if (!this.tracking) {
       this.trackDevice = device;
       this.tracking = true;
@@ -250,14 +312,14 @@
     }
   };
 
-  AccessibleSeekBar.prototype.stopTracking = function (position) {
+  AccessibleSlider.prototype.stopTracking = function (position) {
     this.trackDevice = null;
     this.tracking = false;
     this.bodyDiv.trigger('stopTracking', [position]);
     this.setPosition(position, true);
   };
 
-  AccessibleSeekBar.prototype.trackHeadAtPageX = function (pageX) {
+  AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
     var position = this.pageXToPosition(pageX);
     var newLeft = pageX - this.bodyDiv.offset().left - (this.seekHead.width() / 2);
     newLeft = Math.max(0, Math.min(newLeft, this.bodyDiv.width() - this.seekHead.width()));
@@ -266,7 +328,7 @@
     this.reportTrackAtPosition(position);
   };
 
-  AccessibleSeekBar.prototype.trackHeadAtPosition = function (position) {
+  AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
     var ratio = position / this.duration;
     var center = this.bodyDiv.width() * ratio;
     this.lastTrackPosition = position;
@@ -274,12 +336,12 @@
     this.reportTrackAtPosition(position);
   };
 
-  AccessibleSeekBar.prototype.reportTrackAtPosition = function (position) {
+  AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
     this.bodyDiv.trigger('tracking', [position]);
     this.updateAriaValues(position, true);
   };
 
-  AccessibleSeekBar.prototype.updateAriaValues = function (position, updateLive) {
+  AccessibleSlider.prototype.updateAriaValues = function (position, updateLive) {
     // TODO: Localize, move to another function.
     var pHours = Math.floor(position / 3600);
     var pMinutes = Math.floor((position % 3600) / 60);
@@ -325,7 +387,7 @@
     this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
   };
 
-  AccessibleSeekBar.prototype.trackImmediatelyTo = function (position) {
+  AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
 
 //console.log('trackImmediatelyTo');
 //console.log('Position: ' + this.position);
@@ -335,7 +397,7 @@
     this.keyTrackPosition = position;
   };
 
-  AccessibleSeekBar.prototype.refreshTooltip = function () {
+  AccessibleSlider.prototype.refreshTooltip = function () {
     if (this.overHead) {
       this.timeTooltip.show();
       if (this.tracking) {
@@ -356,14 +418,14 @@
     }
   };
 
-  AccessibleSeekBar.prototype.setTooltipPosition = function (x) {
+  AccessibleSlider.prototype.setTooltipPosition = function (x) {
     this.timeTooltip.css({
       left: x - (this.timeTooltip.width() / 2) - 10,
       bottom: this.seekHead.height() + 10
     });
   };
 
-  AccessibleSeekBar.prototype.positionToStr = function (seconds) {
+  AccessibleSlider.prototype.positionToStr = function (seconds) {
 
     // same logic as misc.js > formatSecondsAsColonTime()
     var dHours = Math.floor(seconds / 3600);

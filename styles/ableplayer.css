@@ -25,7 +25,7 @@
 	.able-controller button = 6600
 	.able-big-play-button = 6500
 	div.able-captions-wrapper = 6000
-  .able-seekhead = 5500
+  .able-seekbar-head = 5500
   .able-volume-head = 5500
 	.able-volume-slider = 5300
   .able-seekbar-played = 5200
@@ -217,7 +217,7 @@
   background-color: #DADADA;
   z-index: 5200;
 }
-.able-seekhead {
+.able-seekbar-head {
   display: inline-block;
   position: relative;
   left: 0;
@@ -939,21 +939,21 @@ div.able-chapters-div button::-moz-focus-inner {
 .able-controller input:hover,
 .able-controller button:focus,
 .able-controller button:hover,
-.able-seek-head:focus,
-.able-seek-head:hover {
+.able-seekbar-head:focus,
+.able-seekbar-head:hover {
   outline-style: solid;
   outline-width: 2px;
 }
 .able-window-toolbar input:focus,
 .able-controller input:focus,
 .able-controller button:focus,
-.able-seek-head:focus {
+.able-seekbar-head:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 .able-window-toolbar input:hover,
 .able-controller input:hover,
 .able-controller button:hover,
-.able-seek-head:hover {
+.able-seekbar-head:hover {
 	outline-color: #8AB839; /* green */
 }
 .able-window-toolbar .transcript-language-select-wrapper {
@@ -1116,11 +1116,11 @@ button svg {
 */
 @font-face {
   font-family: 'able';
-    src:    url('../icons/fonts/able.eot?dqripi');
-    src:    url('../icons/fonts/able.eot?dqripi#iefix') format('embedded-opentype'),
-        url('../icons/fonts/able.ttf?dqripi') format('truetype'),
-        url('../icons/fonts/able.woff?dqripi') format('woff'),
-        url('../icons/fonts/able.svg?dqripi#able') format('svg');
+    src:    url('../button-icons/fonts/able.eot?dqripi');
+    src:    url('../button-icons/fonts/able.eot?dqripi#iefix') format('embedded-opentype'),
+        url('../button-icons/fonts/able.ttf?dqripi') format('truetype'),
+        url('../button-icons/fonts/able.woff?dqripi') format('woff'),
+        url('../button-icons/fonts/able.svg?dqripi#able') format('svg');
   font-weight: normal;
   font-style: normal;
 }

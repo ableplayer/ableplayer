@@ -54,6 +54,8 @@ var ja = {
 
 "hideSign": "手話を非表示",
 
+"seekbarLabel": "timeline",
+
 "mute": "消音",
 
 "unmute": "消音解除",
