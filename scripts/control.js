@@ -1244,7 +1244,7 @@
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
 
-    var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
+    var jwHeight, captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
     if (this.isFullscreen()) {
       if (typeof this.$vidcapContainer !== 'undefined') {
@@ -1275,6 +1275,15 @@
         this.$ableWrapper.css({
           'max-width': width + 'px',
           'width': ''
+        });
+      }
+      else if (this.player === 'jw') {
+        // JW Player has a funny way of expanding height disproportionately as width changes
+        // couldn't isolate the cause, but forcing height to preserve default aspect ratio works
+        jwHeight = Math.round(width/this.fallbackRatio, 0);
+        this.$fallbackWrapper.css({
+          'width': width,
+          'height': jwHeight
         });
       }
       else {
@@ -1323,7 +1332,13 @@
       this.resizeYouTubePlayer();
     }
     else if (this.player === 'jw' && this.jwPlayer) {
-      this.jwPlayer.resize(width, height);
+      if (this.mediaType === 'audio') {
+        // keep height set to 0 to prevent JW PLayer from showing its own player
+        this.jwPlayer.resize(width,0);
+      }
+      else {
+        this.jwPlayer.resize(width, jwHeight);
+      }
     }
     this.refreshControls();
   };

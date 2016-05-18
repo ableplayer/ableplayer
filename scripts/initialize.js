@@ -528,12 +528,10 @@
         // add an id to div.able-media-container (JW Player needs this)
         thisObj.jwId = thisObj.mediaId + '_fallback';
         thisObj.$mediaContainer.attr('id', thisObj.jwId);
-
+// fuck - remove unused variables
         if (thisObj.mediaType === 'audio') {
           // JW Player always shows its own controls if height <= 40
           // Must set height to 0 to hide them
-          // My bug report:
-          // http://www.longtailvideo.com/support/forums/jw-player/setup-issues-and-embedding/29814
           jwHeight = 0;
         }
         else {
@@ -547,7 +545,10 @@
         var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
         var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
 
-        // TODO: Try JW Player without width (playerMaxWidth) and height
+        // Initializing JW Player with width:100% results in player that is either the size of the video
+        // or scaled down to fit the container if container is smaller
+        // After onReady event fires, actual dimensions will be collected for future use
+        // in preserving the video ratio
         if (thisObj.mediaType === 'video') {
           thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
             playlist: [{
@@ -558,8 +559,7 @@
             html5player: html5player,
             controls: false,
             volume: thisObj.defaultVolume * 100,
-            height: jwHeight,
-            width: thisObj.playerMaxWidth,
+            width: '100%',
             fallback: false,
             primary: 'flash',
             wmode: 'transparent' // necessary to get HTML captions to appear as overlay
@@ -574,8 +574,8 @@
             html5player: html5player,
             controls: false,
             volume: this.defaultVolume * 100,
-            height: jwHeight,
-            width: 0,
+            height: 0,
+            width: '100%',
             fallback: false,
             primary: 'flash'
           });

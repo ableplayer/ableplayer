@@ -510,16 +510,6 @@
           tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          // restored original content after PR
-/*
-          if (typeof this.chaptersPopup === 'undefined') {
-            this.chaptersPopup = this.createPopup('chapters');
-          }
-          tracks = this.chapters;
-*/
-          // sets the appropriate language for chapters if there are multiple chapter tracks available.
-//          this.updateChaptersLanguage();
-console.log('setting up popups');
           if (typeof this.chaptersPopup === 'undefined') {
             this.chaptersPopup = this.createPopup('chapters');
           }

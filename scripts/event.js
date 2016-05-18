@@ -98,7 +98,6 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
-
     if (this.isFullscreen()) {
 
       var newWidth, newHeight;
@@ -417,6 +416,12 @@
         // remove JW Player from tab order.
         // We don't want users tabbing into the Flash object and getting trapped
         $('#' + thisObj.jwId).removeAttr('tabindex');
+
+        // JW Player was initialized with no explicit width or height; get them now
+        thisObj.$fallbackWrapper = $('#' + thisObj.mediaId + '_fallback_wrapper');
+        thisObj.fallbackDefaultWidth = thisObj.$fallbackWrapper.width();
+        thisObj.fallbackDefaultHeight = thisObj.$fallbackWrapper.height();
+        thisObj.fallbackRatio = thisObj.fallbackDefaultWidth / thisObj.fallbackDefaultHeight;
 
         if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
           thisObj.seekTo(thisObj.startTime);
