@@ -23,7 +23,7 @@ module.exports = function(grunt) {
                     'scripts/buildplayer.js',
                     'scripts/track.js',
                     'scripts/youtube.js',
-                    'scripts/seekbar.js',
+                    'scripts/slider.js',
                     'scripts/volume.js',
                     'scripts/dialog.js',
                     'scripts/misc.js',

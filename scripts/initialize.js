@@ -393,6 +393,9 @@
     var promise = deferred.promise();
     playerPromise.done(
       function () { // done/resolved
+        if (thisObj.useFixedSeekInterval === false) {
+          thisObj.setSeekInterval();
+        }
         thisObj.addControls();
         thisObj.addEventListeners();
         // Calling these set functions also initializes some icons.
@@ -407,9 +410,6 @@
         if (thisObj.player === 'html5' && thisObj.isIOS()) {
           thisObj.$media[0].load();
         }
-        if (thisObj.useFixedSeekInterval === false) {
-          thisObj.setSeekInterval();
-        }
         deferred.resolve();
       }
     ).fail(function () { // failed
@@ -421,7 +421,6 @@
   };
 
   AblePlayer.prototype.setSeekInterval = function () {
-
     // this function is only called if this.useFixedSeekInterval is false
     // if this.useChapterTimes, this is called as each new chapter is loaded
     // otherwise, it's called once, as the player is initialized
