@@ -527,7 +527,6 @@
         // add an id to div.able-media-container (JW Player needs this)
         thisObj.jwId = thisObj.mediaId + '_fallback';
         thisObj.$mediaContainer.attr('id', thisObj.jwId);
-// fuck - remove unused variables
         if (thisObj.mediaType === 'audio') {
           // JW Player always shows its own controls if height <= 40
           // Must set height to 0 to hide them

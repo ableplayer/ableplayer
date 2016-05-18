@@ -964,7 +964,6 @@
         // add an id to div.able-media-container (JW Player needs this)
         thisObj.jwId = thisObj.mediaId + '_fallback';
         thisObj.$mediaContainer.attr('id', thisObj.jwId);
-// fuck - remove unused variables
         if (thisObj.mediaType === 'audio') {
           // JW Player always shows its own controls if height <= 40
           // Must set height to 0 to hide them
@@ -3872,13 +3871,14 @@
           // add an event listener that displays a tooltip on mouseenter or focus
           newButton.on('mouseenter focus',function(event) {
             var label = $(this).attr('aria-label');
+
             // get position of this button
             var position = $(this).position();
             var buttonHeight = $(this).height();
             var buttonWidth = $(this).width();
             var tooltipY = position.top - buttonHeight - 15;
             var centerTooltip = true;
-            if ($(this).closest('span').hasClass('able-right-controls')) {
+            if ($(this).closest('div').hasClass('able-right-controls')) {
               // this control is on the right side
               if ($(this).is(':last-child')) {
                 // this is the last control on the right
@@ -5677,6 +5677,7 @@
       'aria-label': this.tt.volumeUpDown,
       'aria-valuemin': 0,
       'aria-valuemax': 10,
+      'aria-valuenow': this.volume,
       'tabindex': -1
     });
     this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
@@ -5688,7 +5689,7 @@
     volumePct = parseInt(thisObj.volume) / 10 * 100;
     this.$volumeHelp = $('<div>',{
       'id': volumeHelpId,
-      'class': 'able-offscreen'
+      'class': 'able-volume-help'
     }).text(volumePct + '%, ' + this.tt.volumeHelp);
     this.$volumeButton.attr({
       'aria-describedby': volumeHelpId
@@ -5745,8 +5746,9 @@
   AblePlayer.prototype.refreshVolumeSlider = function(volume) {
 
     // adjust slider position based on current volume
-    var volumePct;
+    var volumePct, volumePctText;
     volumePct = (volume/10) * 100;
+    volumePctText = volumePct + '%';
 
     var trackOnHeight, trackOnTop, headTop;
     trackOnHeight = volume * this.volumeTickHeight;
@@ -5756,6 +5758,10 @@
     this.$volumeSliderTrackOn.css({
       'height': trackOnHeight + 'px',
       'top': trackOnTop + 'px'
+    });
+    this.$volumeSliderHead.attr({
+      'aria-valuenow': volume,
+      'aria-valuetext': volumePctText
     });
     this.$volumeSliderHead.css({
       'top': headTop + 'px'

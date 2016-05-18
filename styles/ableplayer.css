@@ -8,9 +8,11 @@
 	div.able-modal-overlay = 9500
 
 	* Items that should always be on top (9000):
-	.able-alert = 9300
-	.able-window-toolbar .able-button-handler-preferences = 9200
-  .able-popup = 9100
+	.able-alert = 9400
+	.able-window-toolbar .able-button-handler-preferences = 9300
+  .able-popup = 9200
+  .able-volume-head = 9175
+  .able-volume-slider = 9150
   .able-tooltip = 9000
 
   * Pop-ups with critical content:  (7000 - 8000):
@@ -26,8 +28,6 @@
 	.able-big-play-button = 6500
 	div.able-captions-wrapper = 6000
   .able-seekbar-head = 5500
-  .able-volume-head = 5500
-	.able-volume-slider = 5300
   .able-seekbar-played = 5200
 	.able-seekbar-loaded = 5100
 	.able = 5000
@@ -242,7 +242,7 @@
   right: 0px;
   top: -74px;
   display: none;
-  z-index: 5300;
+  z-index: 9100;
 }
 .able-volume-track {
   display: block;
@@ -267,13 +267,15 @@
   width: 15px;
   left: -5px;
   top: 23px; /* change dynamically; .able-volume-track-on top - 7 */
-  z-index: 5500;
+  z-index: 9175;
 }
 .able-volume-head:hover,
 .able-volume-head:focus {
 	background-color: #ffbb37 !important; /* yellow */
 }
-
+.able-volume-help { /* not visible; used in aria-describedby */
+  display: none;
+}
 
 /*
 input[type=range]:focus {
@@ -656,7 +658,7 @@ span.able-modkey {
   border: none;
   outline: none;
   padding: 0;
-  z-index: 9200;
+  z-index: 9300;
 }
 .able-window-toolbar .able-button-handler-preferences:hover,
 .able-window-toolbar .able-button-handler-preferences:focus {
@@ -816,10 +818,10 @@ div.able-chapters-div button::-moz-focus-inner {
 .able-alert {
   background-color: #FFFFCC;
   box-shadow: 0px 0px 16px #262626;
-  z-index: 9300;
+  z-index: 9400;
 }
 .able-popup {
-  z-index: 9100;
+  z-index: 9200;
 }
 .able-tooltip {
   z-index: 9000;

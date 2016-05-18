@@ -40,6 +40,7 @@
       'aria-label': this.tt.volumeUpDown,
       'aria-valuemin': 0,
       'aria-valuemax': 10,
+      'aria-valuenow': this.volume,
       'tabindex': -1
     });
     this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
@@ -51,7 +52,7 @@
     volumePct = parseInt(thisObj.volume) / 10 * 100;
     this.$volumeHelp = $('<div>',{
       'id': volumeHelpId,
-      'class': 'able-offscreen'
+      'class': 'able-volume-help'
     }).text(volumePct + '%, ' + this.tt.volumeHelp);
     this.$volumeButton.attr({
       'aria-describedby': volumeHelpId
@@ -108,8 +109,9 @@
   AblePlayer.prototype.refreshVolumeSlider = function(volume) {
 
     // adjust slider position based on current volume
-    var volumePct;
+    var volumePct, volumePctText;
     volumePct = (volume/10) * 100;
+    volumePctText = volumePct + '%';
 
     var trackOnHeight, trackOnTop, headTop;
     trackOnHeight = volume * this.volumeTickHeight;
@@ -119,6 +121,10 @@
     this.$volumeSliderTrackOn.css({
       'height': trackOnHeight + 'px',
       'top': trackOnTop + 'px'
+    });
+    this.$volumeSliderHead.attr({
+      'aria-valuenow': volume,
+      'aria-valuetext': volumePctText
     });
     this.$volumeSliderHead.css({
       'top': headTop + 'px'
