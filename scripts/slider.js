@@ -113,6 +113,16 @@
       }
     });
 
+    this.seekHead.focus(function (event) {
+      thisObj.overHead = true;
+      thisObj.refreshTooltip();
+    });
+
+    this.seekHead.blur(function (event) {
+      thisObj.overHead = false;
+      thisObj.refreshTooltip();
+    });
+
     this.bodyDiv.hover(function () {
       thisObj.overBody = true;
       thisObj.refreshTooltip();
