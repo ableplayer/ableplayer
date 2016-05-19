@@ -6680,6 +6680,7 @@
 
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
+
     this.seeking = true;
     this.liveUpdatePending = true;
 
@@ -6690,14 +6691,14 @@
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
-        // successfully scrubbed to this.startTime
-        // this.seeking will be set to false in mediaUpdateTime()
+        // ok to seek to startTime
+        // canplaythrough will be triggered when seeking is complete
+        // this.seeking will be set to false at that point
         this.media.currentTime = this.startTime;
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
         }
-
       }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
@@ -10021,14 +10022,21 @@
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() {
-        if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
-          thisObj.seekTo(thisObj.startTime);
-        }
+        // previously handled seeking to startTime here
+        // but it's probably safer to wait for canplaythrough
+        // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
         if (thisObj.startTime && !thisObj.startedPlaying) {
-          // try again, if seeking failed on canplay
-          thisObj.seekTo(thisObj.startTime);
+          if (thisObj.seeking) {
+            // a seek has already been initiated
+            // since canplaythrough has been triggered, the seek is complete
+            thisObj.seeking = false;
+          }
+          else {
+            // haven't started seeking yet
+            thisObj.seekTo(thisObj.startTime);
+          }
         }
       })
       .on('playing',function() {

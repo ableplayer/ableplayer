@@ -332,14 +332,21 @@
         thisObj.onMediaNewSourceLoad();
       })
       .on('canplay',function() {
-        if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
-          thisObj.seekTo(thisObj.startTime);
-        }
+        // previously handled seeking to startTime here
+        // but it's probably safer to wait for canplaythrough
+        // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
         if (thisObj.startTime && !thisObj.startedPlaying) {
-          // try again, if seeking failed on canplay
-          thisObj.seekTo(thisObj.startTime);
+          if (thisObj.seeking) {
+            // a seek has already been initiated
+            // since canplaythrough has been triggered, the seek is complete
+            thisObj.seeking = false;
+          }
+          else {
+            // haven't started seeking yet
+            thisObj.seekTo(thisObj.startTime);
+          }
         }
       })
       .on('playing',function() {

@@ -1,5 +1,6 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
+
     this.seeking = true;
     this.liveUpdatePending = true;
 
@@ -10,14 +11,14 @@
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
       if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
-        // successfully scrubbed to this.startTime
-        // this.seeking will be set to false in mediaUpdateTime()
+        // ok to seek to startTime
+        // canplaythrough will be triggered when seeking is complete
+        // this.seeking will be set to false at that point
         this.media.currentTime = this.startTime;
         if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
         }
-
       }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
