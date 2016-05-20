@@ -879,8 +879,15 @@
     else {
       $('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
     }
+
+    // transcript highlights
+    if (this.prefHighlight === 0) {
+      // user doesn't want highlights; remove any existing highlights
+      $('.able-transcript span').removeClass('able-highlight');
+    }
+
+    // Re-initialize caption and description in case relevant settings have changed
     this.updateCaption();
-    // In case description-related settings have changed, re-initialize description
     this.refreshingDesc = true;
     this.initDescription();
   };
