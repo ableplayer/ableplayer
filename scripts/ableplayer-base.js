@@ -114,6 +114,15 @@
       this.debug = false;
     }
 
+    // Path to root directory of Able Player code
+    if ($(media).data('root-path') !== undefined) {
+      // remove trailing slashes if there are any
+      this.rootPath = $(media).data('root-path').replace(/\/+$/, "");
+    }
+    else {
+      this.rootPath = this.getRootWebSitePath();
+    }
+
     // Volume
     // Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
     this.defaultVolume = 7;
