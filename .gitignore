@@ -4,3 +4,4 @@ thirdparty/jwplayer.*
 thirdparty/jquery-*.js
 node_modules/
 translations/???.js
+.idea

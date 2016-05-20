@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Audio Demo #8</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+
+<h1>Able Player Audio Demo #8:<br/>Audio player on a page with form fields</h1>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<!-- use the following markup for each media element -->
+<audio id="audio1" width="480" preload="auto" data-able-player>
+  <source type="audio/ogg" src="../media/smallf.ogg"/>
+  <source type="audio/mpeg" src="../media/smallf.mp3"/>
+</audio>
+
+<h2>Form Fields</h2>
+
+<p>When users are interacting with form fields, their keystrokes should not be handled by the player.</p>
+
+<style>
+.form label, .form input {
+  display: block;
+  margin-bottom: 0.5em;
+  font-size: 1em;
+}
+.form label {
+  font-weight: bold;
+}
+.form #feedback {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: black;
+  background-color: #FFC;
+  padding: 0.5em;
+  margin: 1em 0;
+  width: 20em;
+  text-align: center;
+  border: thin solid #340449;
+  display: none;
+  width:
+}
+</style>
+<script>
+(function () {
+  var feedback, answer;
+  $(document).ready(function () {
+    $('#submit').click(function() {
+      answer = $('#favplayer').val().toLowerCase();
+      if (answer.substring(0,4) == 'able') {
+        feedback = 'Correct!';
+      }
+      else {
+        feedback = 'Wrong answer! Please try again.';
+      }
+      $('#feedback').text(feedback).show();
+    })
+  });
+})();
+</script>
+<div class="form">
+  <div id="feedback" role="alert"></div>
+  <label for="favplayer">What's your favorite media player?</label>
+  <input type="text" id="favplayer">
+  <input type="submit" value="Submit" id="submit">
+</div>
+
+
+</body>
+</html>

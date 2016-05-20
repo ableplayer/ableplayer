@@ -1,16 +1,26 @@
-{
-  
+var es = {
+
 "playerHeading": "Media player",
 
 "faster": "Rápido",
 
 "slower": "Lento",
 
-"play": "Play", 
+"play": "Play",
 
 "pause": "Pausa",
 
 "stop": "Detener",
+
+"restart": "Reiniciar",
+
+"prevChapter": "Capítulo Anterior",
+
+"nextChapter": "Siguiente Capítulo",
+
+"prevTrack": "Pista Anterior",
+
+"nextTrack": "Siguiente Pista",
 
 "rewind": "Rebobinar",
 
@@ -22,17 +32,19 @@
 
 "hideCaptions": "Ocultar subtítulos",
 
-"captionsOff": "Quitar subtítulos",
+"captionsOff": "Sin subtítulos",
 
 "showTranscript": "Mostrar transcripción",
 
-"hideTranscript": "Ocultar transcripción", 
+"hideTranscript": "Ocultar transcripción",
 
-"turnOnDescriptions": "Habilitar descripciones", 
+"turnOnDescriptions": "Habilitar descripciones",
 
-"turnOffDescriptions": "Deshabilitar descripciones", 
+"turnOffDescriptions": "Deshabilitar descripciones",
 
 "chapters": "Capítulos",
+
+"newChapter": "Nuevo capítulo",
 
 "language": "Idioma",
 
@@ -42,15 +54,19 @@
 
 "hideSign": "Ocultar lengua de señas",
 
+"seekbarLabel": "timeline",
+
 "mute": "Silenciar",
 
-"unmute": "Reactivar sonido",
+"unmute": "Habilitar sonido",
 
-"volume": "Volumen", 
+"volume": "Volumen",
 
-"volumeUp": "Subir volumen",
+"volumeHelp": "Clic para acceder a la barra de volumen",
 
-"volumeDown": "Bajar volumen",
+"volumeUpDown": "Bajar sonido",
+
+"volumeSliderClosed": "Barra de volumen cerrada",
 
 "preferences": "Preferencias",
 
@@ -62,17 +78,19 @@
 
 "speed": "Velocidad",
 
-"audio": "Audio",
+"and": "y",
 
-"video": "Video",
-
-"or": "o", 
+"or": "o",
 
 "spacebar": "Barra espaciadora",
 
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Letra",
+
 "autoScroll": "Desplazamiento automático",
 
-"unknown": "Desconocido", 
+"unknown": "Desconocido",
 
 "statusPlaying": "Reproduciendo",
 
@@ -100,43 +118,147 @@
 
 "alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
 
+"alertNonDescribedVersion": "Utilizando la versión no descrita de este vídeo",
+
 "fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
 
 "fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",
 
 "orHigher": "o superior",
 
-"prefTitle": "Preferencias",
+"prefMenuCaptions": "Subtítulos",
 
-"prefIntro": "Guardar sus preferencias requiere el uso de cookies.",
+"prefMenuDescriptions": "Descripciones",
 
-"prefFeatures": "Características",
+"prefMenuKeyboard": "Teclado",
 
-"prefKeys": "Teclas modificadoras",
+"prefMenuTranscript": "Transcripción",
+
+"prefTitleCaptions": "Preferencias de subtítulos",
+
+"prefTitleDescriptions": "Preferencias de audiodescripción",
+
+"prefTitleKeyboard": "Preferencias de teclado",
+
+"prefTitleTranscript": "Preferencias de transcripción",
+
+"prefIntroCaptions": "Las siguientes preferencias controlan cómo se presentan los subtítulos.",
+
+"prefIntroDescription1": "Este reproductor soporta la audiodescripción de dos maneras: ",
+
+"prefIntroDescription2": "El vídeo actual tiene ",
+
+"prefIntroDescriptionNone": "El vídeo actual no tiene audiodescripción de ninguna manera.",
+
+"prefIntroDescription3": "Utilice el siguiente formulario para establecer sus preferencias en cuanto a la audiodescripción.",
+
+"prefIntroDescription4": "Una vez guardadas sus preferencias, la audiodescripción puede habilitarse o deshabilitarse mediante el botón Descripción.",
+
+"prefIntroKeyboard1": "El reproductor en esta página puede manejarse desde cualquier parte de la página utilizando los atajos de teclado (vea la lista más abajo).",
+
+"prefIntroKeyboard2": "Las teclas modificadoras (Mayúsculas, Alt, Control) pueden definirse más abajo.",
+
+"prefIntroKeyboard3": "NOTA: Algunas combinaciones de teclas pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Intente varias combinaciones de teclas modificadoras para encontrar la que funciona bien en su caso.",
+
+"prefIntroTranscript": "Las siguientes preferencias afectan a la transcripción interactiva.",
+
+"prefCookieWarning": "Gurdar sus preferencias requiere el uso de cookies.",
+
+"prefHeadingKeyboard1": "Teclas modificadoras utilizadas para atajos de teclado",
+
+"prefHeadingKeyboard2": "Atajos de teclado definidos actualmente",
+
+"prefHeadingDescription": "Audiodescrita",
+
+"prefHeadingTextDescription": "Audiodescrita en texto",
+
+"prefHeadingCaptions": "Subtítulos",
+
+"prefHeadingTranscript": "Transcripción interactiva",
 
 "prefAltKey": "Alt",
 
 "prefCtrlKey": "Control",
 
-"prefShiftKey": "Mayúscula",
+"prefShiftKey": "Mayúsculas",
 
-"prefCaptions": "Subtítulos habilitados por defecto",
+"escapeKey": "Escape",
 
-"prefSignLanguage": "Mostrar lengua de señas si está disponible",
+"escapeKeyFunction": "Cerrar el cuadro de diálogo o menú contextual",
 
-"prefDesc": "Habilitar descripción por defecto",
+"prefDescFormat": "Formato preferido",
 
-"prefClosedDesc": "Utilizar descripciones en texto si están disponibles",
+"prefDescFormatHelp": "Si ambos formatos están disponibles, se usará sólo uno de ello.",
 
-"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción en texto",
+"prefDescFormatOption1": "versión alternativa del vídeo, descrito",
+
+"prefDescFormatOption1b": "una versión alternativa con descripción",
+
+"prefDescFormatOption2": "descripción en texto, leída por el lector de pantalla",
+
+"prefDescFormatOption2b": "descripción en texto",
+
+"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
 "prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
-
-"prefTranscript": "Habilitar transcripción por defecto",
 
 "prefHighlight": "Resaltar la transcripción según avanza el contenido",
 
 "prefTabbable": "Transcripción manejable por teclado",
+
+"prefCaptionsFont": "Fuente",
+
+"prefCaptionsColor": "Color del texto",
+
+"prefCaptionsBGColor": "Fondo",
+
+"prefCaptionsSize": "Tamaño de Fuente",
+
+"prefCaptionsOpacity": "Opacidad",
+
+"prefCaptionsStyle": "Estilo",
+
+"serif": "serif",
+
+"sans": "sans-serif",
+
+"cursive": "cursiva",
+
+"fantasy": "fantasía",
+
+"monospace": "mono espaciada",
+
+"white": "blanco",
+
+"yellow": "amarillo",
+
+"green": "verde",
+
+"cyan": "cyan",
+
+"blue": "azul",
+
+"magenta": "magenta",
+
+"red": "rojo",
+
+"black": "negro",
+
+"transparent": "transparente",
+
+"solid": "sólido",
+
+"captionsStylePopOn": "Pop-on",
+
+"captionsStyleRollUp": "Roll-up",
+
+"prefCaptionsPosition": "Posición",
+
+"captionsPositionOverlay": "Cubrir",
+
+"captionsPositionBelow": "Debajo del vídeo",
+
+"sampleCaptionText": "Texto de ejemplo de subtítulo",
 
 "prefSuccess": "Los cambios han sido guardados.",
 
@@ -146,15 +268,11 @@
 
 "helpTitle": "Ayuda",
 
-"helpKeys": "El reproductor en esta página pude ser manejado desde cualquier parte de la pa´gina utilizando los siguientes atajos de teclado:",
-
-"helpKeysDisclaimer": "Tengan en cuenta que las teclas modificadoras (Mayúsculas, Alt, y Control) pueden ser asignadas en las preferencias. Algunas combinaaciones de atajos de teclado pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Pruebe varias combinaciones de teclas modificadoras hasta encontrar la que funcione en su caso.",
-
 "save": "Guardar",
 
 "cancel": "Cancelar",
 
-"ok": "ok", 
+"ok": "ok",
 
 "done": "Hecho",
 
@@ -162,11 +280,11 @@
 
 "windowButtonLabel": "Opciones en Windows",
 
-"windowMove": "Mover", 
+"windowMove": "Mover",
 
 "windowMoveAlert": "Arrastre o use las teclas de flecha para mover la ventana, pulse Enter para parar.",
 
-"windowResize": "Redimensionar", 
+"windowResize": "Redimensionar",
 
 "windowResizeHeading": "Redimensionar la ventana con el intérprete",
 
@@ -176,7 +294,7 @@
 
 "height": "Alto",
 
-"windowSendBack": "Enviar atrás", 
+"windowSendBack": "Enviar atrás",
 
 "windowSendBackAlert": "Esta ventana no se encuentra tras otros objetos en la página.",
 
@@ -184,4 +302,4 @@
 
 "windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
 
-}
+};

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>日本語のAble Player</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+
+<h1>日本語のAble Player</h1>
+
+<p>他の例については<a href="index.html"><em>Able Player</em> Examplesの目次</a>を確認してください。</p>
+
+<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
+  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+  <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+  <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <track kind="captions" src="../media/wwa_captions_ja.vtt" srclang="ja" label="日本語" default/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+  <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+  <track kind="chapters" src="../media/wwa_chapters_en.vtt"/>
+</video>
+
+</body>
+</html>
