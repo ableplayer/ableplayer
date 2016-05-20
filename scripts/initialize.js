@@ -2,12 +2,6 @@
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
-    // Debug - set to true to write messages to console; otherwise false
-    this.debug = false;
-
-    // Path to root directory of referring website
-    this.rootPath = this.getRootWebSitePath();
-
     // this.playing will change to true after 'playing' event is triggered
     this.playing = false;
 
