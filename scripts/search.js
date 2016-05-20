@@ -69,7 +69,6 @@
 
     // split searchTerms into an array
     var searchTerms = searchString.split(' ');
-
     if (this.captions.length > 0) {
       captionLang = this.captions[0].language; // in case it's needed later
       captions = this.captions[0].cues;
@@ -77,8 +76,8 @@
         var results = [];
         c = 0;
         for (i in captions) {
-          if (captions[i].components.children[0]['type'] === 'string') {
-            caption = captions[i].components.children[0]['value'];
+          if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
+            caption = this.flattenCueForCaption(captions[i]);
             for (j in searchTerms) {
               if (caption.indexOf(searchTerms[j]) !== -1) {
                 results[c] = [];
