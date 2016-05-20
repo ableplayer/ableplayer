@@ -1,16 +1,26 @@
 var en = {
-  
+
 "playerHeading": "Media player",
 
 "faster": "Faster",
 
 "slower": "Slower",
 
-"play": "Play", 
+"play": "Play",
 
 "pause": "Pause",
 
 "stop": "Stop",
+
+"restart": "Restart",
+
+"prevChapter": "Previous chapter",
+
+"nextChapter": "Next chapter",
+
+"prevTrack": "Previous track",
+
+"nextTrack": "Next track",
 
 "rewind": "Rewind",
 
@@ -26,13 +36,15 @@ var en = {
 
 "showTranscript": "Show transcript",
 
-"hideTranscript": "Hide transcript", 
+"hideTranscript": "Hide transcript",
 
-"turnOnDescriptions": "Turn on descriptions", 
+"turnOnDescriptions": "Turn on descriptions",
 
-"turnOffDescriptions": "Turn off descriptions", 
+"turnOffDescriptions": "Turn off descriptions",
 
 "chapters": "Chapters",
+
+"newChapter": "New chapter",
 
 "language": "Language",
 
@@ -42,15 +54,19 @@ var en = {
 
 "hideSign": "Hide sign language",
 
+"seekbarLabel": "timeline",
+
 "mute": "Mute",
 
 "unmute": "Unmute",
 
-"volume": "Volume", 
+"volume": "Volume",
 
-"volumeUp": "Volume up",
+"volumeHelp": "Click to access volume slider",
 
-"volumeDown": "Volume down",
+"volumeUpDown": "Volume up down",
+
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Preferences",
 
@@ -62,13 +78,19 @@ var en = {
 
 "speed": "Speed",
 
-"or": "or", 
+"and": "and",
+
+"or": "or",
 
 "spacebar": "spacebar",
 
+"transcriptTitle": "Transcript",
+
+"lyricsTitle": "Lyrics",
+
 "autoScroll": "Auto scroll",
 
-"unknown": "Unknown", 
+"unknown": "Unknown",
 
 "statusPlaying": "Playing",
 
@@ -96,17 +118,55 @@ var en = {
 
 "alertDescribedVersion": "Using the audio described version of this video",
 
+"alertNonDescribedVersion": "Using the non-described version of this video",
+
 "fallbackError1": "Sorry, your browser is unable to play this",
 
 "fallbackError2": "The following browsers are known to work with this media player",
 
 "orHigher": "or higher",
 
-"prefTitle": "Preferences",
+"prefMenuCaptions": "Captions",
 
-"prefIntro": "Click the help button on the media player for details about each preference. Saving your preferences requires cookies.",
+"prefMenuDescriptions": "Descriptions",
 
-"prefHeadingKeys": "Modifier keys used for shortcuts",
+"prefMenuKeyboard": "Keyboard",
+
+"prefMenuTranscript": "Transcript",
+
+"prefTitleCaptions": "Captions Preferences",
+
+"prefTitleDescriptions": "Audio Description Preferences",
+
+"prefTitleKeyboard": "Keyboard Preferences",
+
+"prefTitleTranscript": "Transcript Preferences",
+
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
+
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
+
+"prefIntroDescription2": "The current video has ",
+
+"prefIntroDescriptionNone": "The current video has no audio description in either format.",
+
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
+
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
+
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+
+"prefCookieWarning": "Saving your preferences requires cookies.",
+
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audio description",
 
@@ -122,11 +182,21 @@ var en = {
 
 "prefShiftKey": "Shift",
 
+"escapeKey": "Escape",
+
+"escapeKeyFunction": "Close current dialog or popup menu",
+
 "prefDescFormat": "Preferred format",
 
-"prefDescFormatOption1": "Alternative described version of video",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption2": "Text-based description, announced by screen reader",
+"prefDescFormatOption1": "alternative described version of video",
+
+"prefDescFormatOption1b": "an alternative described version",
+
+"prefDescFormatOption2": "text-based description, announced by screen reader",
+
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Automatically pause video when description starts",
 
@@ -148,39 +218,45 @@ var en = {
 
 "prefCaptionsStyle": "Style",
 
-"serif": "Serif",
+"serif": "serif",
 
-"sans": "Sans-Serif",
+"sans": "sans-serif",
 
-"cursive": "Cursive",
+"cursive": "cursive",
 
-"fantasy": "Fantasy",
+"fantasy": "fantasy",
 
-"monospace": "Monospace",
+"monospace": "monospace",
 
-"white": "White",
+"white": "white",
 
-"yellow": "Yellow",
+"yellow": "yellow",
 
-"green": "Green", 
+"green": "green",
 
-"cyan": "Cyan",
+"cyan": "cyan",
 
-"blue": "Blue", 
+"blue": "blue",
 
-"magenta": "Magenta", 
+"magenta": "magenta",
 
-"red": "Red", 
+"red": "red",
 
-"black": "Black", 
+"black": "black",
 
-"transparent": "transparent", 
+"transparent": "transparent",
 
-"solid": "solid", 
+"solid": "solid",
 
 "captionsStylePopOn": "Pop-on",
 
-"captionsStyleRollUp": "Roll-up", 
+"captionsStyleRollUp": "Roll-up",
+
+"prefCaptionsPosition": "Position",
+
+"captionsPositionOverlay": "Overlay",
+
+"captionsPositionBelow": "Below video",
 
 "sampleCaptionText": "Sample caption text",
 
@@ -192,15 +268,11 @@ var en = {
 
 "helpTitle": "Help",
 
-"helpKeys": "The media player on this web page can be operated from anywhere on the page using the following keystrokes:",
-
-"helpKeysDisclaimer": "Note that modifier keys (Shift, Alt, and Control) can be assigned within Preferences. Some shortcut key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
-
 "save": "Save",
 
 "cancel": "Cancel",
 
-"ok": "ok", 
+"ok": "ok",
 
 "done": "Done",
 
@@ -208,13 +280,13 @@ var en = {
 
 "windowButtonLabel": "Window options",
 
-"windowMove": "Move", 
+"windowMove": "Move",
 
 "windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
 
-"windowResize": "Resize", 
+"windowResize": "Resize",
 
-"windowResizeHeading": "Resize Interpreter Window",
+"windowResizeHeading": "Resize Window",
 
 "windowResizeAlert": "The window has been resized.",
 
@@ -222,7 +294,7 @@ var en = {
 
 "height": "Height",
 
-"windowSendBack": "Send to back", 
+"windowSendBack": "Send to back",
 
 "windowSendBackAlert": "This window is now behind other objects on the page.",
 

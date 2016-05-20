@@ -1,34 +1,50 @@
-/* 
+/*
 	Able Player core styles
-	
-	z-index Map: 
-	div.modalDialog = 6000
-	div.modalOverlay = 5000
-	.able-sign-window .able-button-handler-preferences = 4500
-	.able-sign-window = 4000
-	.able-alert = 3500
-  .able-popup = 3200 
-  .able-tooltip = 3000
-  .able-controller .able-seekbar = 1970
-  .able-controller .buttonOff = 1965
-  .able-controller button > img = 1960
-  .able-controller button > span = 1955
-	.able-controller button = 1950 
-	.able-big-play-button = 1900
-	div.able-captions = 1000
-  .able-seekhead = 300
-  .able-seekbar-played = 200 
-	.able-seekbar-loaded = 100 
-	.able = 100 
-	.able-sign-window (if sent to back) = 0 
 
+	Default z-index map:
+
+	* Modal dialog
+	div.able-modal-dialog = 10000
+	div.able-modal-overlay = 9500
+
+	* Items that should always be on top (9000):
+	.able-alert = 9400
+	.able-window-toolbar .able-button-handler-preferences = 9300
+  .able-popup = 9200
+  .able-volume-head = 9175
+  .able-volume-slider = 9150
+  .able-tooltip = 9000
+
+  * Pop-ups with critical content:  (7000 - 8000):
+	.able-sign-window = 8000
+	.able-transcript-area = 7000
+
+  * Player controls: (5000 - 6000)
+  .able-controller .able-seekbar = 6900
+  .able-controller .buttonOff = 6800
+  .able-controller button > img = 6700
+  .able-controller button > span = 6700
+	.able-controller button = 6600
+	.able-big-play-button = 6500
+	div.able-captions-wrapper = 6000
+  .able-seekbar-head = 5500
+  .able-seekbar-played = 5200
+	.able-seekbar-loaded = 5100
+	.able = 5000
 */
-.able { 
+.able-wrapper {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: auto;
+}
+.able {
   position: relative;
   margin: 1em 0;
   width: 100%; /* will be changed dynamically as player is contructed */
   box-shadow: 0px 0px 16px #262626;
-  z-index: 100; 
+  z-index: 5000;
 }
 .able-column-left {
     float: left;
@@ -38,17 +54,17 @@
 }
 .able .able-vidcap-container {
   background-color: black;
-  height: 360px;
+  /* height: 360px; */
   left: 0;
   margin: 0;
   position: relative;
   top: 0;
 }
-.able-player { 
+.able-player {
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #262626; /* background color of player (appears on top & bottom) */
 }
-.able-offscreen { 
+.able-offscreen {
 	position:absolute;
 	left:-10000px;
 	top:auto;
@@ -56,28 +72,27 @@
 	height:1px;
 	overflow:hidden;
 }
-.able-video { 
-/*	margin-top: -0.75em;*/
+.able-video {
 }
-.able-video .able-now-playing { 
+.able-video .able-now-playing {
 	display: none; /* not currently used for video */
 }
-.able-controller { 
+.able-controller {
 	position: relative;
-	border-top: 2px solid #4c4c4c; 
-	border-bottom: 2px solid #4c4c4c; 
+	border-top: 2px solid #4c4c4c;
+	border-bottom: 2px solid #4c4c4c;
 	background-color: #464646; /* background color of controller bar */
 	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
-	padding: 0; 
+	padding: 0;
 }
-.able-poster { 
-  position: absolute; 
+.able-poster {
+  position: absolute;
   top: 0;
   left: 0;
 }
 
-/* 
-  Controller Buttons & Controls 
+/*
+  Controller Buttons & Controls
 */
 .able-big-play-button {
     position: absolute;
@@ -88,82 +103,89 @@
     background-color: transparent;
     border: none;
     outline: none;
-    z-index: 1900;
     left: 0;
     top: 0;
     padding: 0;
+    z-index: 6500;
 }
 .able-big-play-button:hover {
     opacity: 100;
     filter:alpha(opacity=100); /* for IE */
 }
-.able-left-controls, .able-right-controls { 
+.able-left-controls, .able-right-controls {
     overflow: visible;
 }
 .able-left-controls button, .able-right-controls button {
     vertical-align: middle;
 }
-.able-left-controls { 
+.able-left-controls {
   float: left;
 }
-.able-right-controls { 
+.able-right-controls {
   float: right;
 }
-.able-left-controls span,
-.able-right-controls span {
-  color: #fdfdfd;
+.able-black-controls,
+.able-black-controls button,
+.able-black-controls label  {
+  color: #000 !important;
+}
+.able-black-controls .able-seekbar {
+  border: 2px solid #000;
+}
+.able-white-controls,
+.able-white-controls button,
+.able-black-controls label {
+  color: #FFF !important;
+}
+.able-white-controls .able-seekbar {
+  border: 2px solid #FFF;
 }
 .able-controller button {
   background: none;
   position: relative;
   display: inline-block;
   border-style: none;
-  margin: 0;
+  margin: 3px;
   padding: 0;
-  color: #fdfdfd;
-  min-width: 20px;
-  overflow: hidden !important;
-  z-index: 1950;
+  font-size: 20px;
+  min-width: 24px;
+  outline: 2px solid #464646; /* same color as .able-controller background-color */
+  border: none;
+  overflow: visible !important;
+  z-index: 6600;
 }
-.able-controller button > span { 
-  /* icomoon font icon */
-  font-size: 20px; 
-  width: 24px;
-  margin: 0 5px;
+.able-controller button > span,
+.able-controller button > img {
+  width: 20px;
+  margin: 0 auto;
   padding: 0;
-  z-index: 1955;
+  z-index: 6700;
 }
-.able-controller button > img { 
-  /* image icon */
-  margin: 0 2px;
-  padding: 0;
-  z-index: 1960;
-}
-.able-controller .buttonOff { 
+.able-controller .buttonOff {
 	opacity: 0.5;
 	filter:alpha(opacity=50); /* for IE */
-    z-index: 1965;
+  z-index: 6800;
 }
 .able-controller .able-seekbar {
   margin: 0 5px;
-  z-index: 1970;
+  z-index: 6900;
 }
-.able-controller button:hover, 
-.able-controller button:focus { 
+.able-controller button:hover,
+.able-controller button:focus {
   outline-style: solid;
   outline-width: medium;
-}  
-.able-controller button:hover {  
+}
+.able-controller button:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-controller button:focus { 
+.able-controller button:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
 
-/* 
-  Seekbar 
+/*
+  Seekbar
 */
-.able-seekbar-wrapper { 
+.able-seekbar-wrapper {
   display: inline-block;
   vertical-align: middle;
 }
@@ -177,90 +199,236 @@
   border-width: 2px;
   border-color: #ffffff;
 }
-.able-seekbar-loaded { 
+.able-seekbar-loaded {
   display: inline-block;
   position: absolute;
   left: 0;
   top: 0;
   height: 0.5em;
   background-color: #464646;
-  z-index: 100;
+  z-index: 5100;
 }
-.able-seekbar-played { 
+.able-seekbar-played {
   display: inline-block;
   position: absolute;
   left: 0;
   top: 0;
   height: 0.5em;
   background-color: #DADADA;
-  z-index: 200;
+  z-index: 5200;
 }
-.able-seekhead { 
+.able-seekbar-head {
   display: inline-block;
   position: relative;
   left: 0;
   top: -0.45em;
-  border: 1px solid;
   background-color: #FDFDFD;
-  z-index: 300;
+  width: 0.8em;
+  height: 0.8em;
+  border: 1px solid;
+  border-radius: 0.8em;
+  z-index: 5500;
 }
 
-/* 
-  Status Bar 
+/*
+  Volume Slider
+*/
+.able-volume-slider {
+  width: 34px;
+  height: 50px;
+  background-color: #464646; /* same as .able-controller */
+  padding: 10px 0;
+  position: absolute;
+  right: 0px;
+  top: -74px;
+  display: none;
+  z-index: 9100;
+}
+.able-volume-track {
+  display: block;
+  position: relative;
+  height: 100%; /* = 50px after padding */
+  width: 5px;
+  margin: 0 auto;
+  background-color: #999;
+}
+.able-volume-track.able-volume-track-on {
+  background-color: #dadada;
+  position: absolute;
+  height: 20px; /* change dynamically; 5px per volume tick */
+  top: 30px;  /* change dynamically; 50px - height */
+}
+.able-volume-head {
+  display: inline-block;
+  background-color: #fdfdfd;
+  outline: 1px solid #333;
+  position: absolute;
+  height: 7px;
+  width: 15px;
+  left: -5px;
+  top: 23px; /* change dynamically; .able-volume-track-on top - 7 */
+  z-index: 9175;
+}
+.able-volume-head:hover,
+.able-volume-head:focus {
+	background-color: #ffbb37 !important; /* yellow */
+}
+.able-volume-help { /* not visible; used in aria-describedby */
+  display: none;
+}
+
+/*
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -14px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #367ebd;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  background: transparent;
+  border-color: transparent;
+  border-width: 16px 0;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #2a6495;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+input[type=range]::-ms-fill-upper {
+  background: #3071a9;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 36px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #3071a9;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #367ebd;
+}
 */
 
-.able-status-bar { 
+/*
+  Status Bar
+*/
+
+.able-status-bar {
 	height: 1.5em;
 	min-height: 1.5em;
-	color: #FFFFFF;
-	font-size: 1.0em;
+	color: #CCC;
+	font-size: 0.9em;
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
-}	
-.able-status-bar span.able-timer { 
-	/* contains both span.elapsedTime and span.duration */	
-	color: #ffffff;
+}
+.able-status-bar span.able-timer {
+	/* contains both span.elapsedTime and span.duration */
 	text-align: left;
 	float: left;
 	width: 32%;
 }
-.able-status-bar span.able-speed { 
+.able-status-bar span.able-speed {
   float: left;
-  width: 32%;
+  width: 33%;
   text-align: center;
 }
-.able-status { 
+.able-status {
 	font-style: italic;
 	float: right;
 	width: 32%;
 	text-align :right;
 }
 
-/* 
-  Captions and Descriptions 
+/*
+  Captions and Descriptions
 */
 
-div.able-captions {
-  bottom: 0;
+div.able-captions-wrapper {
+  width: 100%;
   margin: 0;
-  padding: 0.5em 0;
-  position: absolute;
+  padding: 0;
   text-align: center;
+  line-height: 1.35em;
   display: none;
-  z-index: 1000;
-  line-height: 1.15em;
+  z-index: 6000;
+}
+div.able-captions {
+  display: none;
+  padding: 0.15em 0.25em;
   /* settings that are overridden by user prefs */
   background-color: black;
   font-size: 1.1em;
   color: white;
   opacity: 0.75;
-  
 }
-div.able-descriptions { 
+div.able-captions-overlay {
+  position: absolute;
+  margin: 0;
+  bottom: 0;
+}
+div.able-captions-below {
+  position: relative;
+  min-height: 2.8em;
+}
+div.able-descriptions {
   position: relative;
   color: #FF6; /* yellow, to differentiate it from captions */
   background-color: #262626;
-  min-height: 3em; 
+  min-height: 2.8em;
   border-top: 1px solid #666;
   margin: 0;
   padding: 3%;
@@ -268,8 +436,8 @@ div.able-descriptions {
   text-align: center;
 }
 
-/* 
-  Now Playing 
+/*
+  Now Playing
 */
 
 div.able-now-playing {
@@ -277,36 +445,38 @@ div.able-now-playing {
 	font-weight: bold;
 	font-size: 1.1em;
 	color: #FFFFFF;
-	background-color: transparent; 
+	background-color: transparent;
 	padding: 0.5em 0.5em 1em;
 }
-div.able-now-playing span { 
+div.able-now-playing span {
 	font-size: 0.9em;
 }
-div.able-now-playing span span { 
+div.able-now-playing span span {
 	display: block;
 }
 
-/* 
-  Modal Dialogs 
-*/ 
+/*
+  Modal Dialogs
+*/
 
-div.modalDialog { 
+div.able-modal-dialog {
   position: absolute;
-  z-index: 6000;
   height: auto;
+  max-width: 90%;
   margin-left: auto;
   margin-right: auto;
   left: 0px;
   right: 0px;
   outline: 0px none;
   display: none;
+  color: #000;
+  background-color: #FAFAFA;
+  z-index: 10000;
 }
-div.modalOverlay { 
+div.able-modal-overlay {
   position: fixed;
   width: 100%;
   height: 100%;
-  z-index: 5000;
   background-color: #000;
   opacity: 0.5;
   margin: 0;
@@ -314,283 +484,286 @@ div.modalOverlay {
   top: 0;
   left: 0;
   display: none;
+  z-index: 9500;
 }
-button.modalCloseButton { 
+button.modalCloseButton {
   position: absolute;
   top: 5px;
   right: 5px;
 }
-button.modal-button { 
+button.modal-button {
   margin-right: 5px;
 }
-div.modalDialog input:hover, 
-div.modalDialog input:focus,   
-div.modalDialog button:hover,
-div.modalDialog button:focus {  
+div.able-modal-dialog input:hover,
+div.able-modal-dialog input:focus,
+div.able-modal-dialog button:hover,
+div.able-modal-dialog button:focus {
   outline-style: solid;
   outline-width: 2px;
 }
-div.modalDialog input:hover, 
-div.modalDialog button:hover { 
+div.able-modal-dialog input:hover,
+div.able-modal-dialog button:hover {
 	outline-color: #8AB839; /* green */
 }
-div.modalDialog input:focus, 
-div.modalDialog button:focus { 
+div.able-modal-dialog input:focus,
+div.able-modal-dialog button:focus {
 	outline-color: #ffbb37; /* yellow */
 }
-.able-prefs-form, 
-.able-help-div, 
-.able-resize-form { 
-	background-color: #F5F5F5; 
+div.able-modal-dialog h1 {
+  font-weight: bold;
+  font-size: 1.8em;
+  line-height: 1.2em;
+  margin: 0.75em 0;
+  color: #000;
+  text-align: center;
+}
+.able-prefs-form,
+.able-help-div,
+.able-resize-form {
+	background-color: #F5F5F5;
 	border: medium solid #ccc;
 	padding: 0.5em 1em;
-	margin: 0 0 0 1em; 
+	margin: 0 0 0 1em;
 	width: 25em;
 	display: none;
 }
 
-/* 
-  Preferences Form 
-*/ 
+/*
+  Preferences Form
+*/
 
-.able-prefs-form fieldset { 
+.able-prefs-form fieldset {
+  margin-left: 0;
+  padding-left: 0;
 	border: none;
 }
-.able-prefs-form legend { 
+.able-prefs-form legend {
 	color: black;
-	font-weight: bold;	
+	font-weight: bold;
+	font-size: 1.1em;
 }
-.able-prefs-form fieldset div { 
-  display: table; 
+.able-prefs-form fieldset div {
+  display: table;
+  margin-left: 1em;
 }
-.able-prefs-form fieldset div input { 
+.able-prefs-form fieldset div input {
   display: table-cell;
 	width: 1em;
 	vertical-align: middle;
 }
-.able-prefs-form fieldset div label { 
+.able-prefs-form fieldset div label {
   display: table-cell;
 	padding-left: 0.5em;
 }
-fieldset.able-prefs-keys div { 
+fieldset.able-prefs-keys div {
   float: left;
-  margin-right: 1em; 
+  margin-right: 1em;
 }
-div.able-desc-pref-prompt { 
+div.able-desc-pref-prompt {
   font-weight: bold;
   font-style: italic;
   margin-left: 1em !important;
 }
-div.able-prefDescFormat > div { 
+div.able-prefDescFormat > div {
   margin-left: 1.5em;
 }
-.able-prefs-captions label, 
-.able-prefs-captions select { 
-  display: block; 
-  float: left;  
+.able-prefs-captions label,
+.able-prefs-captions select {
+  display: block;
+  float: left;
   margin-bottom: 0.25em;
 }
-fieldset.able-prefs-captions label { 
-  width: 6em; 
-  text-align: right; 
-  padding-right: 1em;  
+fieldset.able-prefs-captions label {
+  width: 6em;
+  text-align: right;
+  padding-right: 1em;
 }
-fieldset.able-prefs-captions select { 
+fieldset.able-prefs-captions select {
   width: 10em;
   font-size: 0.9em;
-  border-radius: none; 
+  border-radius: none;
 }
-.able-prefs-form div.able-captions-sample { 
+.able-prefs-form div.able-captions-sample {
   padding: 0.5em;
   text-align: center;
 }
-
-/* 
-  Help Dialog 
-*/ 
-
-.able-help-div { 
-	background-color: #F5F5F5; 
-	border: medium solid #ccc;
-	width: 25em;
+.able-prefs-form h2 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+  font-size: 1.1em;
 }
-.able-help-div ul { 
+.able-prefs-form ul {
+  margin-top: 0;
+}
+
+/*
+  Keyboard Preferences Dialog
+*/
+able-prefs-form-keyboard ul {
 	list-style-type: none;
 }
-.able-help-modifiers { 
+span.able-modkey-alt,
+span.able-modkey-ctrl,
+span.able-modkey-shift {
+  color: #666;
+  font-style: italic;
+}
+span.able-modkey {
   font-weight: bold;
+  color: #000;
+  font-size: 1.1em;
 }
 
-/* 
+/*
   Resize Window Dialog
-*/ 
+*/
 
-.able-resize-form h1 { 
+.able-resize-form h1 {
   font-size: 1.15em;
 }
-.able-resize-form div div { 
+.able-resize-form div div {
   margin: 1em;
 }
-.able-resize-form label { 
+.able-resize-form label {
   padding-right: 0.5em;
   font-weight: bold;
 }
-.able-resize-form input[type="text"] { 
+.able-resize-form input[type="text"] {
   font-size: 1em;
 }
-
-/* 
-  Sign Language Window 
-*/
-.able-sign-window { 
-  position: relative;
-  margin: 1em;
-  width: 480px;
-  z-index: 4000;
+.able-resize-form input[readonly] {
+  color: #AAA;
 }
-.able-sign-window .able-button-handler-preferences { 
+
+/*
+  Drag & Drop
+*/
+
+.able-window-toolbar {
+  background-color: #464646;
+  min-height: 15px;
+  padding: 10px;
+  border-style: solid;
+  border-width: 0 0 1px 0;
+}
+.able-draggable:hover {
+  cursor: move;
+}
+.able-window-toolbar .able-button-handler-preferences {
   position: absolute;
   top: 0;
   right: 0;
   font-size: 1.5em;
-  opacity: 0.85;
-  filter:alpha(opacity=85); /* for IE */
-  color: #fdfdfd;
   background-color: transparent;
   border: none;
   outline: none;
-  z-index: 4500;
   padding: 0;
+  z-index: 9300;
 }
-.able-sign-window .able-popup { 
-  position: absolute; 
-  right: 0;
-  top: 0;
-}
-.able-sign-window:focus { 
-  outline: none;
-}
-.able-sign-window button:hover, 
-.able-sign-window button:focus { 
+.able-window-toolbar .able-button-handler-preferences:hover,
+.able-window-toolbar .able-button-handler-preferences:focus {
   outline-style: solid;
   outline-width: medium;
-}  
-.able-sign-window button:hover {  
+}
+.able-window-toolbar .able-button-handler-preferences:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-sign-window button:focus { 
+.able-window-toolbar .able-button-handler-preferences:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
+.able-window-toolbar .able-popup {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: none;
+}
+.able-drag {
+  border: 2px dashed #F90;
+  cursor: move;
+}
+.able-resizable {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  padding: 5px 2px;
+  bottom: 0;
+  right: 0;
+  cursor: nwse-resize;
+  background: transparent url('../images/wingrip.png') no-repeat;
+}
 
-/* 
-  icomoon.io font styling 
+/*
+  Sign Language Window
 */
 
-@font-face {
-	font-family: able;
-	src:url('../fonts/able.eot?sn5rkg');
-	src:url('../fonts/able.eot?#iefixsn5rkg') format('embedded-opentype'),
-		url('../fonts/able.woff?sn5rkg') format('woff'),
-		url('../fonts/able.ttf?sn5rkg') format('truetype'),
-		url('../fonts/able.svg?sn5rkg#able') format('svg');
-	font-weight: normal;
-	font-style: normal;
+.able-sign-window {
+  position: relative;
+  margin: 1em;
+  /* max-width: 100%; */
+  z-index: 8000;
+}
+.able-sign-window video {
+  width: 100%;
+}
+.able-sign-window:focus {
+  outline: none;
 }
 
-[class^="icon-"], [class*=" icon-"] {
-	font-family: able;
-	speak: none;
-	font-style: normal;
-	font-weight: normal;
-	font-variant: normal;
-	text-transform: none;
-	line-height: 1;
 
-	/* Better Font Rendering =========== */
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+/*
+  External chapters div
+*/
+div.able-chapters-div {
+  padding: 0;
 }
-
-.icon-play:before {
-	content: "\f04b";
+div.able-chapters-div .able-chapters-heading {
+  margin: 1em 0.75em;
+  font-size: 1.1em;
+  font-weight: bold;
 }
-.icon-pause:before {
-	content: "\f04c";
+div.able-chapters-div ul {
+  list-style-type: none;
+  padding-left: 0;
 }
-.icon-stop:before {
-	content: "\f04d";
+div.able-chapters-div ul li {
+  max-width: 100%;
+  padding: 0;
+  height: 2em;
 }
-.icon-fullscreen-expand:before {
-	content: "\f065";
+div.able-chapters-div button {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+  color: #000;
+  font-size: 1em;
+  text-align: left;
+  padding: 0.15em 1em;
 }
-.icon-fullscreen-collapse:before {
-	content: "\f066";
+div.able-chapters-div li.able-current-chapter {
+  background-color: #000 !important;
 }
-.icon-pipe:before {
-	content: "\e600";
+div.able-chapters-div li.able-current-chapter button {
+  color: #FFF !important;
 }
-.icon-captions:before {
-	content: "\e601";
+div.able-chapters-div li.able-focus {
+  background-color: #4C4C4C;
 }
-.icon-descriptions:before {
-	content: "\e602";
-}
-.icon-transcript:before {
-	content: "\f15c";
-}
-.icon-slower:before {
-	content: "\f0dd";
-}
-.icon-faster:before {
-	content: "\f0de";
-}
-.icon-help:before {
-	content: "\f128";
-}
-.icon-close:before {
-	content: "\f00d";
-}
-.icon-rewind:before {
-	content: "\e603";
-}
-.icon-forward:before {
-	content: "\e604";
-}
-.icon-volume-loud:before {
-	content: "\e60b";
-}
-.icon-volume-medium:before {
-	content: "\e605";
-}
-.icon-volume-soft:before {
-	content: "\e60c";
-}
-.icon-volume-mute:before {
-	content: "\e606";
-}
-.icon-volume-up:before {
-	content: "\e607";
-}
-.icon-volume-down:before {
-	content: "\e608";
-}
-.icon-chapters:before {
-	content: "\e609";
-}
-.icon-preferences:before {
-	content: "\e60d";
-}
-.icon-sign:before {
-	content: "\e60a";
+div.able-chapters-div button:focus,
+div.able-chapters-div button:hover,
+div.able-chapters-div button::-moz-focus-inner {
+  border: 0;
+  outline: none;
+  color: #FFF !important;
 }
 
-/* 
-  Fullscreen settings 
-  In v2.2.4b commented out :-webkit-full-screen style 
-  This was causing the toolbar in fullscreen mode to be positioned slightly offscreen in webkit browsers 
-  Safari had an additional problem in window height was being calculated (see event.js > onWindowResize()) 
+/*
+  Fullscreen settings
+  In v2.2.4b commented out :-webkit-full-screen style
+  This was causing the toolbar in fullscreen mode to be positioned slightly offscreen in webkit browsers
+  Safari had an additional problem in window height was being calculated (see event.js > onWindowResize())
   Commenting out this style appears have no adverse effect in any browser
-  All other fullscreen styles were already commented out, and left here solely for reference 
+  All other fullscreen styles were already commented out, and left here solely for reference
 */
 /*
 :-webkit-full-screen {
@@ -626,32 +799,35 @@ fieldset.able-prefs-captions select {
 }
 */
 
-/* 
+/*
   Tooltips & Alerts
 */
+
 .able-tooltip, .able-alert {
   position: absolute;
   padding: 5px 10px;
   border-color: black;
   border-width: 1px;
+  color: #000 !important;
   background-color: #CCCCCC;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
   display: none;
 }
-.able-alert { 
+.able-alert {
   background-color: #FFFFCC;
-  z-index: 3500; 
+  box-shadow: 0px 0px 16px #262626;
+  z-index: 9400;
 }
-.able-popup { 
-  z-index: 3200; 
+.able-popup {
+  z-index: 9200;
 }
-.able-tooltip { 
-  z-index: 3000; 
+.able-tooltip {
+  z-index: 9000;
 }
 
-/* 
+/*
   Popup Menus
 */
 .able-popup {
@@ -666,47 +842,229 @@ fieldset.able-prefs-captions select {
   -moz-border-radius: 5px;
   border-radius: 5px;
   display: none;
-  z-index: 3000;
 }
-.able-popup ul { 
+.able-popup ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
-.able-popup li { 
+.able-popup li {
   padding: 0.25em 1em 0.25em 0.25em;
   margin: 1px;
 }
-.able-popup label { 
+.able-popup label {
   padding-left: 0.25em;
   color: #FFF;
 }
-.able-popup li.able-focus { 
+.able-popup li.able-focus {
   background-color: #CCC;
 }
-.able-popup li.able-focus label { 
+.able-popup li.able-focus label {
   color: #000;
 }
 
-/* 
-  Drag & Drop 
+/*
+  Popup Menus with hidden radio buttons
+  e.g., chapters and preferences
 */
-.able-drag { 
-  border: 2px dashed #F90; 
-  cursor: move;
+.able-popup-no-radio > ul > li > input {
+  position: absolute !important;
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px);
 }
 
-/* 
-  Misc 
+/*
+  Transcript
 */
 
-.able-clipped { 
+.able-transcript-area {
+  border-width: 1px;
+  border-style: solid;
+  height: 400px;
+  z-index: 7000;
+  outline: none;
+}
+.able-transcript {
+	position: relative; /* must be positioned for scrolling */
+  overflow-y: scroll;
+  padding-left: 5%;
+  padding-right: 5%;
+  /* width: 90%; */
+  background-color: #FFF;
+  height: 350px;
+}
+.able-transcript div {
+	margin: 1em 0;
+}
+.able-transcript-heading {
+  font-size: 1.4em;
+  font-weight: bold;
+}
+.able-transcript-chapter-heading {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.able-transcript div.able-transcript-desc {
+	background-color: #FEE;
+	border: thin solid #336;
+	font-style: italic;
+	padding: 1em;
+}
+.able-transcript .able-unspoken {
+	font-weight: bold;
+}
+.able-transcript .able-hidden {
+	position: absolute !important;
+	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+	clip: rect(1px, 1px, 1px, 1px);
+}
+.able-highlight {
+	background: #FF6; /* light yellow */
+}
+.able-previous {
+	background: black !important;
+	font-style: italic;
+}
+.able-transcript span:hover,
+.able-transcript span:focus,
+.able-transcript span:active {
+	background: #CF6; /* light green */
+	cursor: pointer;
+}
+.able-window-toolbar label {
+  margin-right: 10px;
+  color: #FFF;
+}
+.able-window-toolbar input:focus,
+.able-window-toolbar input:hover,
+.able-controller input:focus,
+.able-controller input:hover,
+.able-controller button:focus,
+.able-controller button:hover,
+.able-seekbar-head:focus,
+.able-seekbar-head:hover {
+  outline-style: solid;
+  outline-width: 2px;
+}
+.able-window-toolbar input:focus,
+.able-controller input:focus,
+.able-controller button:focus,
+.able-seekbar-head:focus {
+	outline-color: #ffbb37; /* yellow */
+}
+.able-window-toolbar input:hover,
+.able-controller input:hover,
+.able-controller button:hover,
+.able-seekbar-head:hover {
+	outline-color: #8AB839; /* green */
+}
+.able-window-toolbar .transcript-language-select-wrapper {
+  float: right;
+  padding-right: 30px;
+}
+
+/*
+  Playlist - Embedded
+*/
+
+.able-player .able-playlist {
+	font-size: 0.9em;
+	list-style-type: none;
+	margin: 0;
+	background-color: #FFFFFF;
+	padding: 5px 0;
+}
+.able-player .able-playlist li {
+	background-color: #DDDDDD; /* default background color of each item in playlist */
+	margin: 5px;
+	padding: 5px 10px;
+	border-radius: 15px;
+	-moz-border-radius: 15px;
+}
+.able-player .able-playlist li:hover,
+.able-player .able-playlist li:focus,
+.able-player .able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+	color: #FFFFFF;
+	background-color: #340449;
+	text-decoration: none;
+}
+.able-player .able-playlist li.able-current { /* currently selected playlist item */
+	color: #000000;
+	background-color: #FFEEB3;
+	font-weight: bold;
+	outline: none;
+	text-decoration: none;
+}
+.able-player .able-playlist li.able-current:after {
+	content: ' *';
+}
+
+/*
+  Playlist - External
+*/
+
+.able-playlist {
+}
+.able-playlist li {
+}
+.able-playlist li:hover,
+.able-playlist li:focus,
+.able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
+	text-decoration: none;
+	color: white;
+	background-color: black;
+}
+.able-playlist li.able-current { /* currently selected playlist item */
+	font-weight: bold;
+  text-decoration: underline;
+}
+.able-playlist li.able-current:after {
+	content: ' *';
+}
+
+/*
+  Search
+*/
+
+.able-search-results ul li {
+  font-size: 1.1em;
+  margin-bottom: 1em;
+}
+.able-search-results-time {
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.able-search-results-time:hover,
+.able-search-results-time:focus,
+.able-search-results-time:active {
+  color: #FFF;
+  background-color: #000;
+  text-decoration: none;
+}
+.able-search-results-text {
+  padding-left: 1em;
+}
+.able-search-term {
+	background-color: #FFC;
+	font-weight: bold;
+}
+
+/*
+  Misc
+*/
+
+.able-clipped, .able-screenreader-alert {
 	/* hide from sighted users, but not screen reader users */
 	position: absolute !important;
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
-	clip: rect(1px, 1px, 1px, 1px);	
+	clip: rect(1px, 1px, 1px, 1px);
+	/* additional rules are needed to ensure clipped buttons are truly invisible in Safari on Mac OS X */
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
 }
-.able-error { 
+.able-error {
 	display: block;
 	background: #ffc;
 	border: 2px solid #000;
@@ -714,7 +1072,7 @@ fieldset.able-prefs-captions select {
 	margin: 0.75em;
 	padding: 0.5em;
 }
-.able-fallback { 
+.able-fallback {
   display: block;
   text-align: center;
   border: 2px solid #333355;
@@ -722,19 +1080,157 @@ fieldset.able-prefs-captions select {
   color: #000;
   font-weight: bold;
   font-size: 1.1em;
-  padding: 1em;  
+  padding: 1em;
   margin-bottom: 1em;
+  max-width: 500px;
+  width: 95%;
 }
-.able-fallback div, 
-.able-fallback ul, 
-.able-fallback p { 
+.able-fallback div,
+.able-fallback ul,
+.able-fallback p {
   text-align: left;
-} 
-.able-fallback li  { 
+}
+.able-fallback li  {
   font-weight: normal;
 }
-.able-fallback img { 
-  width: 90%; 
+.able-fallback img {
+  width: 90%;
   margin: 1em auto;
   opacity: 0.3;
 }
+.able-fallback img.able-poster {
+  position: relative;
+}
+
+/*
+  SVG Icons
+*/
+button svg {
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	fill: currentColor;
+}
+
+
+/*
+  icomoon.io font styling
+*/
+@font-face {
+  font-family: 'able';
+    src:    url('../button-icons/fonts/able.eot?dqripi');
+    src:    url('../button-icons/fonts/able.eot?dqripi#iefix') format('embedded-opentype'),
+        url('../button-icons/fonts/able.ttf?dqripi') format('truetype'),
+        url('../button-icons/fonts/able.woff?dqripi') format('woff'),
+        url('../button-icons/fonts/able.svg?dqripi#able') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'able' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-play:before {
+    content: "\f04b";
+}
+.icon-pause:before {
+    content: "\f04c";
+}
+.icon-stop:before {
+    content: "\f04d";
+}
+.icon-restart:before {
+    content: "\e900";
+}
+.icon-rewind:before {
+    content: "\e603";
+}
+.icon-forward:before {
+    content: "\e604";
+}
+.icon-previous:before {
+    content: "\e901";
+}
+.icon-next:before {
+    content: "\e902";
+}
+.icon-slower:before {
+    content: "\f0dd";
+}
+.icon-faster:before {
+    content: "\f0de";
+}
+.icon-turtle:before {
+    content: "\e904";
+}
+.icon-rabbit:before {
+    content: "\e905";
+}
+.icon-ellipsis:before {
+    content: "\e903";
+}
+.icon-pipe:before {
+    content: "\e600";
+}
+.icon-captions:before {
+    content: "\e601";
+}
+.icon-descriptions:before {
+    content: "\e602";
+}
+.icon-sign:before {
+    content: "\e60a";
+}
+.icon-volume-mute:before {
+    content: "\e606";
+}
+.icon-volume-soft:before {
+    content: "\e60c";
+}
+.icon-volume-medium:before {
+    content: "\e605";
+}
+.icon-volume-loud:before {
+    content: "\e60b";
+}
+.icon-volume-up:before {
+    content: "\e607";
+}
+.icon-volume-down:before {
+    content: "\e608";
+}
+.icon-chapters:before {
+    content: "\e609";
+}
+.icon-transcript:before {
+    content: "\f15c";
+}
+.icon-preferences:before {
+    content: "\e60d";
+}
+.icon-close:before {
+    content: "\f00d";
+}
+.icon-fullscreen-expand:before {
+    content: "\f065";
+}
+.icon-fullscreen-collapse:before {
+    content: "\f066";
+}
+.icon-help:before {
+    content: "\f128";
+}
+
+

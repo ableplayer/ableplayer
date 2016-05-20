@@ -1,47 +1,46 @@
 (function ($) {
-  AblePlayer.prototype.seekTo = function (newTime) { 
-    
+  AblePlayer.prototype.seekTo = function (newTime) {
+
+    this.seeking = true;
+    this.liveUpdatePending = true;
+
     if (this.player === 'html5') {
       var seekable;
-  
+
       this.startTime = newTime;
       // Check HTML5 media "seekable" property to be sure media is seekable to startTime
       seekable = this.media.seekable;
-      
-      if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) { 
+      if (seekable.length > 0 && this.startTime >= seekable.start(0) && this.startTime <= seekable.end(0)) {
+        // ok to seek to startTime
+        // canplaythrough will be triggered when seeking is complete
+        // this.seeking will be set to false at that point
         this.media.currentTime = this.startTime;
-        
-        if (this.hasSignLanguage && this.signVideo) { 
+        if (this.hasSignLanguage && this.signVideo) {
           // keep sign languge video in sync
           this.signVideo.currentTime = this.startTime;
         }
-        
-      } 
+      }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
-      // pause JW Player temporarily. 
-      // When seek has successfully reached newTime, 
+      // pause JW Player temporarily.
+      // When seek has successfully reached newTime,
       // onSeek event will be called, and playback will be resumed
-      this.jwSeekPause = true;      
+      this.jwSeekPause = true;
       this.jwPlayer.seek(newTime);
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.seekTo(newTime,true);
-      if (newTime > 0) { 
-        if (typeof this.$posterImg !== 'undefined') { 
+      if (newTime > 0) {
+        if (typeof this.$posterImg !== 'undefined') {
           this.$posterImg.hide();
         }
       }
     }
-
-    // one Boolean var is probably enough(?)   
-    this.seeking = true; 
-    this.liveUpdatePending = true;
-
     this.refreshControls();
   };
 
   AblePlayer.prototype.getDuration = function () {
+
     var duration;
     if (this.player === 'html5') {
       duration = this.media.duration;
@@ -49,10 +48,9 @@
     else if (this.player === 'jw' && this.jwPlayer) {
       duration = this.jwPlayer.getDuration();
     }
-    else if (this.player === 'youtube') {
+    else if (this.player === 'youtube' && this.youTubePlayer) {
       duration = this.youTubePlayer.getDuration();
     }
-    
     if (duration === undefined || isNaN(duration) || duration === -1) {
       return 0;
     }
@@ -71,11 +69,11 @@
       position = this.jwPlayer.getPosition();
     }
     else if (this.player === 'youtube') {
-      if (this.youTubePlayer) { 
+      if (this.youTubePlayer) {
         position = this.youTubePlayer.getCurrentTime();
-      }      
+      }
     }
-    
+
     if (position === undefined || isNaN(position) || position === -1) {
       return 0;
     }
@@ -89,6 +87,9 @@
   //  'buffering' - Momentarily paused to load, but will resume once data is loaded.
   //  'playing' - Currently playing.
   AblePlayer.prototype.getPlayerState = function () {
+    if (this.swappingSrc) {
+      return;
+    }
     if (this.player === 'html5') {
       if (this.media.paused) {
         if (this.getElapsed() === 0) {
@@ -110,6 +111,7 @@
     }
     else if (this.player === 'jw' && this.jwPlayer) {
       if (this.jwPlayer.getState() === 'PAUSED' || this.jwPlayer.getState() === 'IDLE' || this.jwPlayer.getState() === undefined) {
+
         if (this.getElapsed() === 0) {
           return 'stopped';
         }
@@ -127,7 +129,7 @@
         return 'playing';
       }
     }
-    else if (this.player === 'youtube') {
+    else if (this.player === 'youtube' && this.youTubePlayer) {
       var state = this.youTubePlayer.getPlayerState();
       if (state === -1 || state === 5) {
         return 'stopped';
@@ -144,99 +146,6 @@
       else if (state === 3) {
         return 'buffering';
       }
-    }
-  };
-
-  AblePlayer.prototype.isMuted = function () {
-
-    if (!this.browserSupportsVolume()) {
-      return false;
-    }
-
-    if (this.player === 'html5') {
-      return this.media.muted;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      return this.jwPlayer.getMute();
-    }
-    else if (this.player === 'youtube') {
-      return this.youTubePlayer.isMuted();
-    }
-  };
-
-  AblePlayer.prototype.setMute = function(mute) {
-    if (!this.browserSupportsVolume()) {
-      return;
-    }
-    if (!mute) {
-      this.$muteButton.attr('aria-label',this.tt.mute); 
-      this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud');       
-      this.$muteButton.find('span.able-clipped').text(this.tt.mute); 
-    }
-    else {
-      this.$muteButton.attr('aria-label',this.tt.unmute); 
-      this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute');       
-      this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
-    }
-    
-    if (this.player === 'html5') {
-      this.media.muted = mute;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) { 
-      this.jwPlayer.setMute(mute);
-    }
-    else if (this.player === 'youtube') {
-      if (mute) {
-        this.youTubePlayer.mute();
-      }
-      else {
-        this.youTubePlayer.unMute();
-      }
-    }
-    
-    if (!mute) {
-      // TODO: Is this necessary?
-      // Restore volume to last value.
-      if (this.lastVolume) {
-        this.setVolume(this.lastVolume);
-      }
-    }
-  };
-  
-  AblePlayer.prototype.setVolume = function (volume) {
-    if (!this.browserSupportsVolume()) {
-      return;
-    }
-
-    if (this.player === 'html5') {
-      this.media.volume = volume;
-      if (this.hasSignLanguage && this.signVideo) { 
-        this.signVideo.volume = 0; // always mute
-      }
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      this.jwPlayer.setVolume(volume * 100);
-    }
-    else if (this.player === 'youtube') {
-      this.youTubePlayer.setVolume(volume * 100);
-    }
-    
-    this.lastVolume = volume;
-  };
-
-  AblePlayer.prototype.getVolume = function (volume) {
-    if (!this.browserSupportsVolume()) {
-      return 1;
-    }
-
-    if (this.player === 'html5') {
-      return this.media.volume;
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      return this.jwPlayer.getVolume() / 100;
-    }
-    else if (this.player === 'youtube') {
-      return this.youTubePlayer.getVolume() / 100;
     }
   };
 
@@ -261,10 +170,10 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.setPlaybackRate(rate);
-    }    
-    if (this.hasSignLanguage && this.signVideo) { 
-      this.signVideo.playbackRate = rate; 
-    }    
+    }
+    if (this.hasSignLanguage && this.signVideo) {
+      this.signVideo.playbackRate = rate;
+    }
     this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
   };
 
@@ -292,9 +201,9 @@
   AblePlayer.prototype.pauseMedia = function () {
     if (this.player === 'html5') {
       this.media.pause(true);
-      if (this.hasSignLanguage && this.signVideo) { 
+      if (this.hasSignLanguage && this.signVideo) {
         this.signVideo.pause(true);
-      }      
+      }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.pause(true);
@@ -307,7 +216,7 @@
   AblePlayer.prototype.playMedia = function () {
     if (this.player === 'html5') {
       this.media.play(true);
-      if (this.hasSignLanguage && this.signVideo) { 
+      if (this.hasSignLanguage && this.signVideo) {
         this.signVideo.play(true);
       }
     }
@@ -316,287 +225,359 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.playVideo();
-      if (typeof this.$posterImg !== 'undefined') { 
+      if (typeof this.$posterImg !== 'undefined') {
         this.$posterImg.hide();
       }
       this.stoppingYouTube = false;
     }
-    this.startedPlaying = true;    
+    this.startedPlaying = true;
   };
 
-  // Right now, update the seekBar values based on current duration and time.
-  // Later, move all non-destructive control updates based on state into this function?
   AblePlayer.prototype.refreshControls = function() {
 
-    var thisObj = this;
-    var duration = this.getDuration();
-    var elapsed = this.getElapsed();
+    var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
+      updateLive, textByState, timestamp, widthUsed,
+      leftControls, rightControls, seekbarWidth, seekbarSpacer, captionsCount,
+      buffered, newTop, svgLink, newSvgLink,
+      statusBarHeight, speedHeight, statusBarWidthBreakpoint;
 
-    if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) { 
-      // couldn't calculate seekInterval previously; try again. 
-      if (duration > 0) {
-        this.seekInterval = Math.max(this.seekInterval, duration / 10);
-        this.seekIntervalCalculated = true;
-      }
+    thisObj = this;
+    if (this.swappingSrc) {
+      // wait until new source has loaded before refreshing controls
+      return;
     }
-        
+
+    duration = this.getDuration();
+    elapsed = this.getElapsed();
+
+    if (this.seekbarScope === 'chapter' && this.chapters.length) {
+      this.useChapterTimes = true;
+      this.chapterDuration = this.getChapterDuration();
+      this.chapterElapsed = this.getChapterElapsed();
+    }
+    else {
+      this.useChapterTimes = false;
+    }
+
+    if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
+      // couldn't calculate seekInterval previously; try again.
+      this.setSeekInterval();
+    }
+
     if (this.seekBar) {
-      this.seekBar.setDuration(duration);
-      if (!this.seekBar.tracking) {
-        // Only update the aria live region if we have an update pending (from a 
+
+      if (this.useChapterTimes) {
+        lastChapterIndex = this.chapters.length-1;
+        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+          // this is the last chapter
+          if (this.currentChapter.end !== duration) {
+            // chapter ends before or after video ends
+            // need to adjust seekbar duration to match video end
+            this.seekBar.setDuration(duration - this.currentChapter.start);
+          }
+          else {
+            this.seekBar.setDuration(this.chapterDuration);
+          }
+        }
+        else {
+          // this is not the last chapter
+          this.seekBar.setDuration(this.chapterDuration);
+        }
+      }
+      else {
+        this.seekBar.setDuration(duration);
+      }
+      if (!(this.seekBar.tracking)) {
+        // Only update the aria live region if we have an update pending (from a
         // seek button control) or if the seekBar has focus.
         // We use document.activeElement instead of $(':focus') due to a strange bug:
         //  When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-        var updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+        updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
         this.liveUpdatePending = false;
-        this.seekBar.setPosition(elapsed, updateLive);
+        if (this.useChapterTimes) {
+          this.seekBar.setPosition(this.chapterElapsed, updateLive);
+        }
+        else {
+          this.seekBar.setPosition(elapsed, updateLive);
+        }
+      }
+
+      // When seeking, display the seek bar time instead of the actual elapsed time.
+      if (this.seekBar.tracking) {
+        displayElapsed = this.seekBar.lastTrackPosition;
+      }
+      else {
+        if (this.useChapterTimes) {
+          displayElapsed = this.chapterElapsed;
+        }
+        else {
+          displayElapsed = elapsed;
+        }
       }
     }
-
-    var displayElapsed;
-    // When seeking, display the seek bar time instead of the actual elapsed time.
-    if (this.seekBar.tracking) {
-      displayElapsed = this.seekBar.lastTrackPosition;
+    if (this.useChapterTimes) {
+      this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.chapterDuration));
     }
     else {
-      displayElapsed = elapsed;
+      this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(duration));
     }
-
-    this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(duration));
     this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 
-    var textByState = {
+    textByState = {
       'stopped': this.tt.statusStopped,
       'paused': this.tt.statusPaused,
       'playing': this.tt.statusPlaying,
       'buffering': this.tt.statusBuffering,
       'ended': this.tt.statusEnd
     };
-    
-    if (this.stoppingYouTube) { 
-      // YouTube video must play briefly in order to get caption data 
+
+    if (this.stoppingYouTube) {
       // stoppingYouTube is true temporarily while video is paused and seeking to 0
-      // See notes in handleStop() 
+      // See notes in handleRestart()
       // this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
       if (this.$status.text() !== this.tt.statusStopped) {
         this.$status.text(this.tt.statusStopped);
       }
-      if (this.$playpauseButton.find('span').first().hasClass('icon-pause')) { 
+      if (this.$playpauseButton.find('span').first().hasClass('icon-pause')) {
         if (this.iconType === 'font') {
           this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
         }
-        else { 
-          this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
+        else if (this.iconType === 'svg') {
+          // TODO: Add play/pause toggle for SVG
+        }
+        else {
+          this.$playpauseButton.find('img').attr('src',this.playButtonImg);
         }
       }
     }
-    else { 
-      // Update the text only if it's changed since it has role="alert"; 
-      // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
-      if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
-        // Debounce updates; only update after status has stayed steadily different for 250ms.
-        var timestamp = (new Date()).getTime();
-        if (!this.statusDebounceStart) {
-          this.statusDebounceStart = timestamp;
-          // Make sure refreshControls gets called again at the appropriate time to check.
-          this.statusTimeout = setTimeout(function () {
-            thisObj.refreshControls();
-          }, 300);
+    else {
+      if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
+        // Update the text only if it's changed since it has role="alert";
+        // also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
+        if (this.$status.text() !== textByState[this.getPlayerState()] && !this.seekBar.tracking) {
+          // Debounce updates; only update after status has stayed steadily different for 250ms.
+          timestamp = (new Date()).getTime();
+          if (!this.statusDebounceStart) {
+            this.statusDebounceStart = timestamp;
+            // Make sure refreshControls gets called again at the appropriate time to check.
+            this.statusTimeout = setTimeout(function () {
+              thisObj.refreshControls();
+            }, 300);
+          }
+          else if ((timestamp - this.statusDebounceStart) > 250) {
+            this.$status.text(textByState[this.getPlayerState()]);
+            this.statusDebounceStart = null;
+            clearTimeout(this.statusTimeout);
+            this.statusTimeout = null;
+          }
         }
-        else if ((timestamp - this.statusDebounceStart) > 250) {
-          this.$status.text(textByState[this.getPlayerState()]);
+        else {
           this.statusDebounceStart = null;
           clearTimeout(this.statusTimeout);
           this.statusTimeout = null;
         }
-      }
-      else {
-        this.statusDebounceStart = null;
-        clearTimeout(this.statusTimeout);
-        this.statusTimeout = null;
-      }
 
-      // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
-      if (!this.seekBar.tracking && !this.stoppingYouTube) {
-        if (this.isPaused()) {    
-          this.$playpauseButton.attr('aria-label',this.tt.play); 
-        
-          if (this.iconType === 'font') {
-            this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+        // Don't change play/pause button display while using the seek bar (or if YouTube stopped)
+        if (!this.seekBar.tracking && !this.stoppingYouTube) {
+          if (this.isPaused()) {
+            this.$playpauseButton.attr('aria-label',this.tt.play);
+
+            if (this.iconType === 'font') {
+              this.$playpauseButton.find('span').first().removeClass('icon-pause').addClass('icon-play');
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            }
+            else if (this.iconType === 'svg') {
+              // Not currently working. SVG is a work in progress
+              this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
+              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+              newSvgLink = svgLink.replace('svg-pause','svg-play');
+              this.$playpauseButton.find('use').attr(newSvgLink);
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+            }
+            else {
+              this.$playpauseButton.find('img').attr('src',this.playButtonImg);
+            }
           }
-          else { 
-            this.$playpauseButton.find('img').attr('src',this.playButtonImg); 
-          }
-        }
-        else {
-          this.$playpauseButton.attr('aria-label',this.tt.pause); 
-        
-          if (this.iconType === 'font') {
-            this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
-            this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
-          }
-          else { 
-            this.$playpauseButton.find('img').attr('src',this.pauseButtonImg); 
+          else {
+            this.$playpauseButton.attr('aria-label',this.tt.pause);
+
+            if (this.iconType === 'font') {
+              this.$playpauseButton.find('span').first().removeClass('icon-play').addClass('icon-pause');
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+            }
+            else if (this.iconType === 'svg') {
+              // Not currently working. SVG is a work in progress
+              this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
+              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
+              newSvgLink = svgLink.replace('svg-play','svg-pause');
+              this.$playpauseButton.find('use').attr(newSvgLink);
+              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+            }
+            else {
+              this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
+            }
           }
         }
       }
     }
-    
-    // Update seekbar width. 
-    // To do this, we need to calculate the width of all elements surrounding it.
+
+    // Update seekbar width.
+    // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
-      var widthUsed = 0;
-      // Elements on the left side of the control panel.
-      var leftControls = this.seekBar.wrapperDiv.parent().prev();
+      widthUsed = 0;
+      seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
+
+      leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+      rightControls = leftControls.next('div.able-right-controls');
       leftControls.children().each(function () {
-        if ($(this).is(':hidden')) {
-          // jQuery width() returns 0 for hidden elements 
-          // thisObj.getHiddenWidth() is a workaround 
-          widthUsed += thisObj.getHiddenWidth($(this)); 
-        }
-        else { 
-          widthUsed += $(this).width(); 
+        if ($(this).prop('tagName')=='BUTTON') {
+          widthUsed += $(this).width();
         }
       });
-      // Elements to the left and right of the seekbar on the right side.
-      var prev = this.seekBar.wrapperDiv.prev();
-      while (prev.length > 0) {
-        if (prev.is(':hidden')) { 
-          widthUsed += thisObj.getHiddenWidth(prev); 
+      rightControls.children().each(function () {
+        if ($(this).prop('tagName')=='BUTTON') {
+          widthUsed += $(this).width();
         }
-        else { 
-          widthUsed += prev.width();
-        }
-        prev = prev.prev();
+      });
+      if (this.isFullscreen()) {
+        seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
       }
-      var next = this.seekBar.wrapperDiv.next();
-      while (next.length > 0) {
-        if (next.is(':hidden')) { 
-          widthUsed += thisObj.getHiddenWidth(next); 
-        }
-        else { 
-          widthUsed += next.width();
-        }
-        next = next.next();
+      else {
+        seekbarWidth = this.$ableWrapper.width() - widthUsed - seekbarSpacer;
       }
-      var seekbarWidth = this.playerWidth - widthUsed - 20;
       // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
       if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
         this.seekBar.setWidth(seekbarWidth);
       }
     }
 
-    if (this.$descButton) { 
-      if (this.descOn) { 
+    // Show/hide status bar content conditionally
+    if (!this.isFullscreen()) {
+      statusBarWidthBreakpoint = 300;
+      statusBarHeight = this.$statusBarDiv.height();
+      speedHeight = this.$statusBarDiv.find('span.able-speed').height();
+      if (speedHeight > (statusBarHeight + 5)) {
+        // speed bar is wrapping (happens often in German player)
+        this.$statusBarDiv.find('span.able-speed').hide();
+        this.hidingSpeed = true;
+      }
+      else {
+        if (this.hidingSpeed) {
+          this.$statusBarDiv.find('span.able-speed').show();
+          this.hidingSpeed = false;
+        }
+        if (this.$statusBarDiv.width() < statusBarWidthBreakpoint) {
+          // Player is too small for a speed span
+          this.$statusBarDiv.find('span.able-speed').hide();
+          this.hidingSpeed = true;
+        }
+        else {
+          if (this.hidingSpeed) {
+            this.$statusBarDiv.find('span.able-speed').show();
+            this.hidingSpeed = false;
+          }
+        }
+      }
+    }
+
+    if (this.$descButton) {
+      if (this.descOn) {
         this.$descButton.removeClass('buttonOff').attr('aria-label',this.tt.turnOffDescriptions);
         this.$descButton.find('span.able-clipped').text(this.tt.turnOffDescriptions);
       }
-      else { 
-        this.$descButton.addClass('buttonOff').attr('aria-label',this.tt.turnOnDescriptions);            
+      else {
+        this.$descButton.addClass('buttonOff').attr('aria-label',this.tt.turnOnDescriptions);
         this.$descButton.find('span.able-clipped').text(this.tt.turnOnDescriptions);
-      }  
-    }
-    
-    if (this.$ccButton) {
-      if (this.usingYouTubeCaptions) { 
-        var captionsCount = this.ytCaptions.length;
       }
-      else { 
-        var captionsCount = this.captions.length; 
+    }
+
+    if (this.$ccButton) {
+      if (this.usingYouTubeCaptions) {
+        captionsCount = this.ytCaptions.length;
+      }
+      else {
+        captionsCount = this.captions.length;
       }
       // Button has a different title depending on the number of captions.
       // If only one caption track, this is "Show captions" and "Hide captions"
       // Otherwise, it is just always "Captions"
       if (!this.captionsOn) {
-        this.$ccButton.addClass('buttonOff');                
-        if (captionsCount === 1) { 
+        this.$ccButton.addClass('buttonOff');
+        if (captionsCount === 1) {
           this.$ccButton.attr('aria-label',this.tt.showCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
         }
       }
       else {
         this.$ccButton.removeClass('buttonOff');
-        if (captionsCount === 1) { 
+        if (captionsCount === 1) {
           this.$ccButton.attr('aria-label',this.tt.hideCaptions);
           this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
         }
       }
 
       if (captionsCount > 1) {
-        this.$ccButton.attr({ 
+        this.$ccButton.attr({
           'aria-label': this.tt.captions,
           'aria-haspopup': 'true',
           'aria-controls': this.mediaId + '-captions-menu'
         });
-        this.$ccButton.find('span.able-clipped').text(this.tt.captions);        
+        this.$ccButton.find('span.able-clipped').text(this.tt.captions);
       }
     }
-    
-    if (this.$chaptersButton) { 
-      this.$chaptersButton.attr({ 
+
+    if (this.$chaptersButton) {
+      this.$chaptersButton.attr({
         'aria-label': this.tt.chapters,
         'aria-haspopup': 'true',
         'aria-controls': this.mediaId + '-chapters-menu'
       });
     }
-
-    if (this.$muteButton) {
-      if (!this.isMuted()) {
-        if (this.iconType === 'font') {
-          this.$muteButton.find('span').first().removeClass('icon-volume-mute').addClass('icon-volume-loud'); 
-          this.$muteButton.find('span.able-clipped').text(this.tt.mute);
-        }
-        else { 
-          this.$muteButton.find('img').attr('src',this.volumeLoudButtonImg); 
-        }
-      }
-      else {
-        if (this.iconType === 'font') {
-          this.$muteButton.find('span').first().removeClass('icon-volume-loud').addClass('icon-volume-mute'); 
-          this.$muteButton.find('span.able-clipped').text(this.tt.unmute);
-        }
-        else { 
-          this.$muteButton.find('img').attr('src',this.volumeMuteButtonImg); 
-        }
-      }
-    }
-
     if (this.$fullscreenButton) {
       if (!this.isFullscreen()) {
-        this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen); 
+        this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
         if (this.iconType === 'font') {
-          this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand'); 
+          this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
         }
-        else { 
-          this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg); 
+        else if (this.iconType === 'svg') {
+          // Not currently working. SVG is a work in progress.
+          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
+          this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+        }
+        else {
+          this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
         }
       }
       else {
-        this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen); 
+        this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen);
         if (this.iconType === 'font') {
-          this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse'); 
+          this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
         }
-        else { 
-          this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg); 
+        else if (this.iconType === 'svg') {
+          // Not currently working. SVG is a work in progress.
+          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
+          this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+        }
+        else {
+          this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
         }
       }
     }
-    
-    // TODO: Move all button updates here.
 
-    if (typeof this.$bigPlayButton !== 'undefined') { 
+    if (typeof this.$bigPlayButton !== 'undefined') {
       // Choose show/hide for big play button and adjust position.
       if (this.isPaused() && !this.seekBar.tracking) {
-        this.$bigPlayButton.show();
-        if (this.isFullscreen()) { 
+        if (!this.hideBigPlayButton) {
+          this.$bigPlayButton.show();
+        }
+        if (this.isFullscreen()) {
           this.$bigPlayButton.width($(window).width());
           this.$bigPlayButton.height($(window).height());
         }
-        else { 
+        else {
           this.$bigPlayButton.width(this.$mediaContainer.width());
           this.$bigPlayButton.height(this.$mediaContainer.height());
         }
@@ -606,52 +587,69 @@
       }
     }
 
-    if (this.includeTranscript) {
-      // Sync checkbox and autoScrollTranscript with user preference 
-      if (this.prefAutoScrollTranscript === 1) { 
-        this.autoScrollTranscript = true; 
-        this.$autoScrollTranscriptCheckbox.attr('checked','checked'); 
+    if (this.transcriptType) {
+      // Sync checkbox and autoScrollTranscript with user preference
+      if (this.prefAutoScrollTranscript === 1) {
+        this.autoScrollTranscript = true;
+        this.$autoScrollTranscriptCheckbox.attr('checked','checked');
       }
       else {
-        this.autoScrollTranscript = false; 
+        this.autoScrollTranscript = false;
         this.$autoScrollTranscriptCheckbox.removeAttr('checked');
       }
 
       // If transcript locked, scroll transcript to current highlight location.
       if (this.autoScrollTranscript && this.currentHighlight) {
-        var newTop = Math.floor($('.able-transcript').scrollTop() +
+        newTop = Math.floor($('.able-transcript').scrollTop() +
                                 $(this.currentHighlight).position().top -
                                 ($('.able-transcript').height() / 2) +
                                 ($(this.currentHighlight).height() / 2));
         if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
-          // Set a flag to ignore the coming scroll event. 
+          // Set a flag to ignore the coming scroll event.
           // there's no other way I know of to differentiate programmatic and user-initiated scroll events.
           this.scrollingTranscript = true;
           $('.able-transcript').scrollTop(newTop);
         }
       }
     }
-    
+
     // Update buffering progress.
     // TODO: Currently only using the first HTML5 buffered interval, but this fails sometimes when buffering is split into two or more intervals.
     if (this.player === 'html5') {
       if (this.media.buffered.length > 0) {
-        this.seekBar.setBuffered(this.media.buffered.end(0) / this.getDuration())
+        buffered = this.media.buffered.end(0)
+        if (this.useChapterTimes) {
+          if (buffered > this.chapterDuration) {
+            buffered = this.chapterDuration;
+          }
+          if (this.seekBar) {
+            this.seekBar.setBuffered(buffered / this.chapterDuration);
+          }
+        }
+        else {
+          if (this.seekBar) {
+            this.seekBar.setBuffered(buffered / duration);
+          }
+        }
       }
     }
     else if (this.player === 'jw' && this.jwPlayer) {
-      this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
+      if (this.seekBar) {
+        this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
+      }
     }
     else if (this.player === 'youtube') {
-      this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+      if (this.seekBar) {
+        this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+      }
     }
   };
-  
-  AblePlayer.prototype.getHiddenWidth = function($el) { 
 
-    // jQuery returns for width() if element is hidden 
-    // this function is a workaround 
-    
+  AblePlayer.prototype.getHiddenWidth = function($el) {
+
+    // jQuery returns for width() if element is hidden
+    // this function is a workaround
+
     // save a reference to a cloned element that can be measured
     var $hiddenElement = $el.clone().appendTo('body');
 
@@ -664,7 +662,7 @@
     return width;
   };
 
-  AblePlayer.prototype.handlePlay = function(e) { 
+  AblePlayer.prototype.handlePlay = function(e) {
     if (this.isPaused()) {
       this.playMedia();
     }
@@ -674,95 +672,96 @@
     this.refreshControls();
   };
 
-  AblePlayer.prototype.handleStop = function() { 
+  AblePlayer.prototype.handleRestart = function() {
 
-    var thisObj = this; 
-    
+    this.seekTo(0);
+
+  /*
+    // Prior to 2.3.68, this function was handleStop()
+    // which was a bit more challenging to implement
+    // Preserved here in case Stop is ever cool again...
+
+    var thisObj = this;
     if (this.player == 'html5') {
       this.pauseMedia();
       this.seekTo(0);
     }
-    else if (this.player === 'jw' && this.jwPlayer) { 
+    else if (this.player === 'jw' && this.jwPlayer) {
       this.jwPlayer.stop();
     }
-    else if (this.player === 'youtube') { 
+    else if (this.player === 'youtube') {
       // YouTube API function stopVideo() does not reset video to 0
-      // Also, the stopped video is not seekable so seekTo(0) after stopping doesn't work 
-      // Workaround is to use pauseVideo(), followed by seekTo(0) to emulate stopping 
-      // However, the tradeoff is that YouTube doesn't restore the poster image when video is paused 
-      // Added 12/29/15: After seekTo(0) is finished, stopVideo() to reset video and restore poster image 
+      // Also, the stopped video is not seekable so seekTo(0) after stopping doesn't work
+      // Workaround is to use pauseVideo(), followed by seekTo(0) to emulate stopping
+      // However, the tradeoff is that YouTube doesn't restore the poster image when video is paused
+      // Added 12/29/15: After seekTo(0) is finished, stopVideo() to reset video and restore poster image
       // This final step is handled in event.js > onMediaUpdate()
-      this.youTubePlayer.pauseVideo(); 
+      this.youTubePlayer.pauseVideo();
       this.seekTo(0);
-      this.stoppingYouTube = true; 
+      this.stoppingYouTube = true;
     }
+  */
     this.refreshControls();
   };
 
-  AblePlayer.prototype.handleRewind = function() { 
-    var targetTime = this.getElapsed() - this.seekInterval;
-    if (targetTime < 0) {
-      this.seekTo(0);
+  AblePlayer.prototype.handleRewind = function() {
+
+    var elapsed, targetTime;
+
+    elapsed = this.getElapsed();
+    targetTime = elapsed - this.seekInterval;
+    if (this.useChapterTimes) {
+      if (targetTime < this.currentChapter.start) {
+        targetTime = this.currentChapter.start;
+      }
     }
     else {
-      this.seekTo(targetTime);
+      if (targetTime < 0) {
+        targetTime = 0;
+      }
     }
+    this.seekTo(targetTime);
   };
 
-  AblePlayer.prototype.handleFastForward = function() { 
-    var targetTime = this.getElapsed() + this.seekInterval;    
-    if (targetTime > this.getDuration()) {
-      this.seekTo(this.getDuration());
-    }
-    else {
-      this.seekTo(targetTime);
-    }
-  };
+  AblePlayer.prototype.handleFastForward = function() {
 
-  AblePlayer.prototype.handleMute = function() { 
-    if (this.isMuted()) {
-      this.setMute(false);
-    }
-    else {
-      this.setMute(true);
-    }
-  };
+    var elapsed, duration, targetTime, lastChapterIndex;
 
-  AblePlayer.prototype.handleVolume = function(direction) {
-    var volume;
-    
-    if (this.isMuted()) {
-      this.setMute(false);
-    }
-    
-    volume = this.getVolume();
-    
-    if (direction === 'up') {
-      if (volume < 0.9) {        
-        volume = Math.round((volume + 0.1) * 10) / 10;
+    elapsed = this.getElapsed();
+    duration = this.getDuration();
+    lastChapterIndex = this.chapters.length-1;
+    targetTime = elapsed + this.seekInterval;
+
+    if (this.useChapterTimes) {
+      if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        // this is the last chapter
+        if (targetTime > duration || targetTime > this.currentChapter.end) {
+          // targetTime would exceed the end of the video (or chapter)
+          // scrub to end of whichever is earliest
+          targetTime = Math.min(duration, this.currentChapter.end);
+        }
+        else if (duration % targetTime < this.seekInterval) {
+          // nothing left but pocket change after seeking to targetTime
+          // go ahead and seek to end of video (or chapter), whichever is earliest
+          targetTime = Math.min(duration, this.currentChapter.end);
+        }
       }
       else {
-        volume = 1;
+        // this is not the last chapter
+        if (targetTime > this.currentChapter.end) {
+          // targetTime would exceed the end of the chapter
+          // scrub exactly to end of chapter
+          targetTime = this.currentChapter.end;
+        }
       }
     }
-    else if (direction === 'down') {
-      if (volume > 0.1) {        
-        volume = Math.round((volume - 0.1) * 10) / 10;
-      }
-      else {
-        volume = 0;
+    else {
+      // not using chapter times
+      if (targetTime > duration) {
+        targetTime = duration;
       }
     }
-    else if (direction >= 49 || direction <= 53) { 
-      // TODO: What is this for?
-      volume = (direction-48) * 0.2;
-    }
-    
-    this.setVolume(volume);
-    
-    if (volume === 0) {
-      this.setMute(true);
-    }
+    this.seekTo(targetTime);
   };
 
   AblePlayer.prototype.handleRateIncrease = function() {
@@ -795,52 +794,52 @@
     }
   };
 
-  AblePlayer.prototype.handleCaptionToggle = function() { 
+  AblePlayer.prototype.handleCaptionToggle = function() {
 
-    var captions; 
+    var captions;
 
-    if (this.hidingPopup) { 
+    if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
-      // immediately after closing it 
-      this.hidingPopup = false;      
-      return false; 
+      // immediately after closing it
+      this.hidingPopup = false;
+      return false;
     }
-    if (this.usingYouTubeCaptions) { 
-      
-    }
-    if (this.captions.length) { 
+    if (this.captions.length) {
       captions = this.captions;
     }
-    else if (this.ytCaptions.length) { 
+    else if (this.ytCaptions.length) {
       captions = this.ytCaptions;
     }
-    else { 
-      captions = []; 
+    else {
+      captions = [];
     }
     if (captions.length === 1) {
+
       // When there's only one set of captions, just do an on/off toggle.
-      if (this.captionsOn === true) { 
+      if (this.captionsOn === true) {
         // turn them off
         this.captionsOn = false;
-        if (this.usingYouTubeCaptions) { 
-          this.youTubePlayer.unloadModule(this.ytCaptionModule);       
+        if (this.usingYouTubeCaptions) {
+          this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
-        else { 
-          this.$captionDiv.hide();
+        else {
+          this.$captionsWrapper.hide();
         }
       }
-      else { 
-        // captions are off. Turn them on. 
+      else {
+        // captions are off. Turn them on.
         this.captionsOn = true;
-        if (this.usingYouTubeCaptions) { 
-          this.youTubePlayer.loadModule(this.ytCaptionModule);
+        if (this.usingYouTubeCaptions) {
+          if (typeof this.ytCaptionModule !== 'undefined') {
+            this.youTubePlayer.loadModule(this.ytCaptionModule);
+          }
         }
-        else {          
-          this.$captionDiv.show();
+        else {
+          this.$captionsWrapper.show();
         }
-        for (var i=0; i<captions.length; i++) { 
+        for (var i=0; i<captions.length; i++) {
           if (captions[i].def === true) { // this is the default language
-            this.selectedCaptions = captions[i];          
+            this.selectedCaptions = captions[i];
           }
         }
         this.selectedCaptions = this.captions[0];
@@ -850,10 +849,13 @@
       }
       this.refreshControls();
     }
-    else {   
+    else {
+
+      // there is more than one caption track.
+      // clicking on a track is handled via caption.js > getCaptionClickFunction()
       if (this.captionsPopup.is(':visible')) {
         this.captionsPopup.hide();
-        this.hidingPopup = false; 
+        this.hidingPopup = false;
         this.$ccButton.focus();
       }
       else {
@@ -861,13 +863,13 @@
         this.captionsPopup.show();
         this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
         this.captionsPopup.css('left', this.$ccButton.position().left)
-        // Focus on the checked button, if any buttons are checked 
-        // Otherwise, focus on the first button 
+        // Focus on the checked button, if any buttons are checked
+        // Otherwise, focus on the first button
         this.captionsPopup.find('li').removeClass('able-focus');
-        if (this.captionsPopup.find('input:checked')) { 
+        if (this.captionsPopup.find('input:checked')) {
           this.captionsPopup.find('input:checked').focus().parent().addClass('able-focus');
         }
-        else { 
+        else {
           this.captionsPopup.find('input').first().focus().parent().addClass('able-focus');
         }
       }
@@ -875,12 +877,11 @@
   };
 
   AblePlayer.prototype.handleChapters = function () {
-
-    if (this.hidingPopup) { 
+    if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
-      // immediately after closing it 
-      this.hidingPopup = false;      
-      return false; 
+      // immediately after closing it
+      this.hidingPopup = false;
+      return false;
     }
     if (this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
@@ -892,33 +893,61 @@
       this.chaptersPopup.show();
       this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
       this.chaptersPopup.css('left', this.$chaptersButton.position().left)
-      // Focus on the checked button, if any buttons are checked 
-      // Otherwise, focus on the first button 
+      // Focus on the checked button, if any buttons are checked
+      // Otherwise, focus on the first button
       this.chaptersPopup.find('li').removeClass('able-focus');
-      if (this.chaptersPopup.find('input:checked')) { 
+      if (this.chaptersPopup.find('input:checked')) {
         this.chaptersPopup.find('input:checked').focus().parent().addClass('able-focus');
       }
-      else { 
+      else {
         this.chaptersPopup.find('input').first().focus().parent().addClass('able-focus');
       }
     }
   };
 
-  AblePlayer.prototype.handleDescriptionToggle = function() { 
+  AblePlayer.prototype.handleDescriptionToggle = function() {
     this.descOn = !this.descOn;
-    this.prefDesc = + this.descOn; // convert boolean to integer 
+    this.prefDesc = + this.descOn; // convert boolean to integer
     this.updateCookie('prefDesc');
-    this.refreshingDesc = true; 
+    this.refreshingDesc = true;
     this.initDescription();
     this.refreshControls();
   };
 
-  AblePlayer.prototype.handlePrefsClick = function() { 
-    this.setFullscreen(false);
-    this.prefsDialog.show();
+  AblePlayer.prototype.handlePrefsClick = function(pref) {
+
+    // NOTE: the prefs menu is positioned near the right edge of the player
+    // This assumes the Prefs button is also positioned in that vicinity
+    // (last or second-last button the right)
+
+    var prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+
+    if (this.hidingPopup) {
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it
+      this.hidingPopup = false;
+      return false;
+    }
+    if (this.prefsPopup.is(':visible')) {
+      this.prefsPopup.hide();
+      this.hidingPopup = false;
+      this.$prefsButton.focus();
+    }
+    else {
+      this.closePopups();
+      this.prefsPopup.show();
+      prefsButtonPosition = this.$prefsButton.position();
+      prefsMenuRight = this.$ableDiv.width() - 5;
+      prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
+      this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
+      this.prefsPopup.css('left', prefsMenuLeft);
+      // remove prior focus and set focus on first item
+      this.prefsPopup.find('li').removeClass('able-focus');
+      this.prefsPopup.find('input').first().focus().parent().addClass('able-focus');
+    }
   };
 
-  AblePlayer.prototype.handleHelpClick = function() { 
+  AblePlayer.prototype.handleHelpClick = function() {
     this.setFullscreen(false);
     this.helpDialog.show();
   };
@@ -928,15 +957,16 @@
       this.$transcriptArea.hide();
       this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
-      this.prefTranscript = 0; 
+      this.prefTranscript = 0;
     }
     else {
+      this.positionDraggableWindow('transcript');
       this.$transcriptArea.show();
       this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
-      this.prefTranscript = 1; 
+      this.prefTranscript = 1;
     }
-    this.updateCookie('prefTranscript');    
+    this.updateCookie('prefTranscript');
   };
 
   AblePlayer.prototype.handleSignToggle = function () {
@@ -944,16 +974,16 @@
       this.$signWindow.hide();
       this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
       this.$signButton.find('span.able-clipped').text(this.tt.showSign);
+      this.prefSign = 0;
     }
     else {
+      this.positionDraggableWindow('sign');
       this.$signWindow.show();
-      // get starting position of element; used for drag & drop
-      var signWinPos = this.$signWindow.offset();
-      this.dragStartX = signWinPos.left;
-      this.dragStartY = signWinPos.top;      
       this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
       this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
+      this.prefSign = 1;
     }
+    this.updateCookie('prefSign');
   };
 
   AblePlayer.prototype.isFullscreen = function () {
@@ -968,15 +998,16 @@
       return this.modalFullscreenActive ? true : false;
     }
   }
-  
+
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
+
     if (this.isFullscreen() == fullscreen) {
       return;
     }
     var thisObj = this;
-    var $el = this.$ableDiv;
+    var $el = this.$ableWrapper;
     var el = $el[0];
-    
+
     if (this.nativeFullscreenSupported()) {
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
@@ -1013,49 +1044,60 @@
         }
       }
       // add event handlers for changes in full screen mode
-      // currently most changes are made in response to windowResize event 
-      // However, that alone is not resulting in a properly restored player size in Opera Mac  
+      // currently most changes are made in response to windowResize event
+      // However, that alone is not resulting in a properly restored player size in Opera Mac
       // More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
-      // this fullscreen event handler added specifically for Opera Mac, 
+      // this fullscreen event handler added specifically for Opera Mac,
       // but includes event listeners for all browsers in case its functionality could be expanded
-      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() { 
-        if (!thisObj.isFullscreen()) { 
-          // user has just exited full screen 
-          // force call to resizePlayer with default player dimensions 
-          thisObj.resizePlayer(thisObj.playerWidth, thisObj.playerHeight);      
-        } 
+      // Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
+      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
+        if (!thisObj.isFullscreen()) {
+          // user has just exited full screen
+          if (thisObj.player === 'youtube') {
+            thisObj.restoringAfterFullscreen = true;
+            thisObj.resizePlayer(thisObj.ytWidth, thisObj.ytHeight);
+          }
+          else {
+            thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
+          }
+        }
       });
     }
     else {
       // Non-native fullscreen support through modal dialog.
-      
       // Create dialog on first run through.
       if (!this.fullscreenDialog) {
-        var dialogDiv = $('<div>');
-        this.fullscreenDialog = new AccessibleDialog(dialogDiv, 'Fullscreen dialog', 'Fullscreen video player', '100%', true, function () { thisObj.handleFullscreenToggle() });
-        $('body').append(dialogDiv);
+        var $dialogDiv = $('<div>');
+        // create a hidden alert, communicated to screen readers via aria-describedby
+        var $fsDialogAlert = $('<p>',{
+          'class': 'able-screenreader-alert'
+        }).text(this.tt.fullscreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
+        $dialogDiv.append($fsDialogAlert);
+        // now render this as a dialog
+        this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullScreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
+        $('body').append($dialogDiv);
       }
-      
+
       // Track whether paused/playing before moving element; moving the element can stop playback.
       var wasPaused = this.isPaused();
-      
+
       if (fullscreen) {
         this.modalFullscreenActive = true;
         this.fullscreenDialog.show();
-        
+
         // Move player element into fullscreen dialog, then show.
         // Put a placeholder element where player was.
         this.$modalFullscreenPlaceholder = $('<div class="placeholder">');
         this.$modalFullscreenPlaceholder.insertAfter($el);
         $el.appendTo(this.fullscreenDialog.modal);
-        
+
         // Column left css is 50% by default; set to 100% for full screen.
         if ($el === this.$ableColumnLeft) {
           $el.width('100%');
         }
         var newHeight = $(window).height() - this.$playerDiv.height();
         if (!this.$descDiv.is(':hidden')) {
-          newHeight -= thisObj.$descDiv.height();
+          newHeight -= this.$descDiv.height();
         }
         this.resizePlayer($(window).width(), newHeight);
       }
@@ -1067,12 +1109,12 @@
         $el.insertAfter(this.$modalFullscreenPlaceholder);
         this.$modalFullscreenPlaceholder.remove();
         this.fullscreenDialog.hide();
-        this.resizePlayer(this.playerWidth, this.playerHeight);
+        this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
       }
-      
+
       // TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
       // Need to call setup again after moving?
-      
+
       // Resume playback if moving stopped it.
       if (!wasPaused && this.isPaused()) {
         this.playMedia();
@@ -1094,115 +1136,389 @@
 
   AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
 
-    this.autoScrollTranscript = val; // val is boolean 
+    this.autoScrollTranscript = val; // val is boolean
     this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
     this.updateCookie('prefAutoScrollTranscript');
     this.refreshControls();
   };
 
 
-  AblePlayer.prototype.showTooltip = function($tooltip) { 
+  AblePlayer.prototype.showTooltip = function($tooltip) {
 
-    if (($tooltip).is(':animated')) { 
+    if (($tooltip).is(':animated')) {
       $tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
     }
-    else { 
+    else {
       $tooltip.stop().show().delay(4000).fadeOut(1000);
     }
   };
-  
-  AblePlayer.prototype.showAlert = function( msg, location ) { 
-    
-    // location is either 'main' (default) or 'sign' (i.e., sign language window) 
-    var thisObj = this;
-    var alertBox, alertLeft; 
-    if (location === 'sign') { 
-      alertBox = this.$windowAlert; 
+
+  AblePlayer.prototype.showAlert = function( msg, location ) {
+
+    // location is either of the following:
+    // 'main' (default)
+    // 'screenreader
+    // 'sign' (sign language window)
+    // 'transcript' (trasncript window)
+    var thisObj, $alertBox, $parentWindow, alertLeft, alertTop;
+
+    thisObj = this;
+
+    if (location === 'transcript') {
+      $alertBox = this.$transcriptAlert;
+      $parentWindow = this.$transcriptArea;
     }
-    else { 
-      alertBox = this.alertBox;
+    else if (location === 'sign') {
+      $alertBox = this.$signAlert;
+      $parentWindow = this.$signWindow;
     }
-    alertBox.show();
-    alertBox.text(msg);
-    if (location === 'sign') { 
-      if (this.$signWindow.width() > alertBox.width()) { 
-        alertLeft = this.$signWindow.width() / 2 - alertBox.width() / 2; 
+    else if (location === 'screenreader') {
+      $alertBox = this.$srAlertBox;
+    }
+    else {
+      $alertBox = this.$alertBox;
+    }
+    $alertBox.show();
+    $alertBox.text(msg);
+    if (location == 'transcript' || location === 'sign') {
+      if ($parentWindow.width() > $alertBox.width()) {
+        alertLeft = $parentWindow.width() / 2 - $alertBox.width() / 2;
       }
-      else { 
+      else {
         // alert box is wider than its container. Position it far left and let it wrap
         alertLeft = 10;
       }
-      // position alert in the lower third of the sign window (to avoid covering the signer) 
-      alertBox.css({
-        top: (this.$signWindow.height() / 3) * 2,
-        left: alertLeft
+      if (location === 'sign') {
+        // position alert in the lower third of the sign window (to avoid covering the signer)
+        alertTop = ($parentWindow.height() / 3) * 2;
+      }
+      else if (location === 'transcript') {
+        // position alert just beneath the toolbar to avoid getting lost among transcript text
+        alertTop = this.$transcriptToolbar.height() + 30;
+      }
+      $alertBox.css({
+        top: alertTop + 'px',
+        left: alertLeft + 'px'
       });
     }
-    else { 
-      // The original formula incorporated offset() into the calculation 
-      // but at some point this began resulting in an alert that's off-centered 
-      // Changed in v2.2.17, but here's the original for reference in case needed: 
-      // left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - (alertBox.width() / 2)
-      alertBox.css({
-        left: (this.$playerDiv.width() / 2) - (alertBox.width() / 2)        
+    else if (location !== 'screenreader') {
+      // The original formula incorporated offset() into the calculation
+      // but at some point this began resulting in an alert that's off-centered
+      // Changed in v2.2.17, but here's the original for reference in case needed:
+      // left: this.$playerDiv.offset().left + (this.$playerDiv.width() / 2) - ($alertBox.width() / 2)
+      $alertBox.css({
+        left: (this.$playerDiv.width() / 2) - ($alertBox.width() / 2)
       });
     }
-    setTimeout(function () {
-      alertBox.fadeOut(300);
-    }, 3000);
+    if (location !== 'screenreader') {
+      setTimeout(function () {
+        $alertBox.fadeOut(300);
+      }, 3000);
+    }
   };
+
+  AblePlayer.prototype.showedAlert = function (which) {
+
+    // returns true if the target alert has already been shown
+    // useful for throttling alerts that only need to be shown once
+    // e.g., move alerts with instructions for dragging a window
+
+    if (which === 'transcript') {
+      if (this.showedTranscriptAlert) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    else if (which === 'sign') {
+      if (this.showedSignAlert) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    return false;
+  }
 
   // Resizes all relevant player attributes.
   AblePlayer.prototype.resizePlayer = function (width, height) {
 
-console.log('inside resizePlayer...');    
-    this.$media.height(height);
-    this.$media.width(width);
+    var jwHeight, captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
-    if (this.$captionDiv) {
-      this.$captionDiv.width(width);
-      // Font-size for embedded player is too small in full screen view 
-      if (height !== this.playerHeight) {
-        // this calculation results in a reasonably large font across all browsers 
-        this.$captionDiv.css('font-size', (height / this.playerHeight) * 18);
+    if (this.isFullscreen()) {
+      if (typeof this.$vidcapContainer !== 'undefined') {
+        this.$ableWrapper.css({
+          'width': width + 'px',
+          'max-width': ''
+        })
+        this.$vidcapContainer.css({
+          'height': height + 'px',
+          'width': width
+        });
+        this.$media.css({
+          'height': height + 'px',
+          'width': width
+        })
+      }
+      if (typeof this.$transcriptArea !== 'undefined') {
+        this.retrieveOffscreenWindow('transcript',width,height);
+      }
+      if (typeof this.$signWindow !== 'undefined') {
+        this.retrieveOffscreenWindow('sign',width,height);
+      }
+    }
+    else {
+      // player resized, but not fullscreen
+      // in case restoring from fullscreen, reset CSS to responsive
+      if (this.player === 'youtube') {
+        this.$ableWrapper.css({
+          'max-width': width + 'px',
+          'width': ''
+        });
+      }
+      else if (this.player === 'jw') {
+        // JW Player has a funny way of expanding height disproportionately as width changes
+        // couldn't isolate the cause, but forcing height to preserve default aspect ratio works
+        jwHeight = Math.round(width/this.fallbackRatio, 0);
+        this.$fallbackWrapper.css({
+          'width': width,
+          'height': jwHeight
+        });
       }
       else {
-        // clear full screen font size and return to normal
-        this.$captionDiv.css('font-size', '');
+        this.$ableWrapper.css({
+          'max-width': this.playerMaxWidth + 'px',
+          'width': ''
+        });
       }
-    }
-    if (this.$vidcapContainer) {
-      this.$vidcapContainer.height(height);
-      this.$vidcapContainer.width(width); 
+      if (typeof this.$vidcapContainer !== 'undefined') {
+        this.$vidcapContainer.css({
+          'height': '',
+          'width': ''
+        });
+      }
+      this.$media.css({
+        'width': '100%',
+        'height': 'auto'
+      });
     }
 
-    this.$ableDiv.width(width);
-    
-    if (this.jwPlayer) {
-      this.jwPlayer.resize(width, height);
+    if (typeof this.$captionsDiv !== 'undefined') {
+
+      // Font-size is too small in full screen view & too large in small-width view
+      // The following vars define a somewhat arbitary zone outside of which
+      // caption size requires adjustment
+      captionSizeOkMin = 400;
+      captionSizeOkMax = 1000;
+      captionSize = parseInt(this.prefCaptionsSize,10);
+
+      // TODO: Need a better formula so that it scales proportionally to viewport
+      if (width > captionSizeOkMax) {
+        newCaptionSize = captionSize * 1.5;
+      }
+      else if (width < captionSizeOkMin) {
+        newCaptionSize = captionSize / 1.5;
+      }
+      else {
+        newCaptionSize = captionSize;
+      }
+      newLineHeight = newCaptionSize + 25;
+      this.$captionsDiv.css('font-size',newCaptionSize + '%');
+      this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
-    else if (this.youTubePlayer) {
-      this.youTubePlayer.setSize(width, height);
+
+    if (this.player === 'youtube' && this.youTubePlayer) {
+      this.resizeYouTubePlayer();
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      if (this.mediaType === 'audio') {
+        // keep height set to 0 to prevent JW PLayer from showing its own player
+        this.jwPlayer.resize(width,0);
+      }
+      else {
+        this.jwPlayer.resize(width, jwHeight);
+      }
     }
     this.refreshControls();
   };
-  
-  AblePlayer.prototype.getHighestZIndex = function() { 
-  
-    // this function might be useful later, when moveable & draggable components are implemented
-    // not currently used 
-    // it's very inefficient though, looping through every DOM element - Is there a better way??? 
-    var z, max, $zIndexes; 
+
+  AblePlayer.prototype.retrieveOffscreenWindow = function( which, width, height ) {
+
+    // check to be sure popup windows ('transcript' or 'sign') are positioned on-screen
+    // (they sometimes disappear off-screen when entering fullscreen mode)
+    // if off-screen, recalculate so they are back on screen
+
+    var window, windowPos, windowTop, windowLeft, windowRight, windowWidth, windowBottom, windowHeight;
+
+    if (which == 'transcript') {
+      window = this.$transcriptArea;
+    }
+    else if (which == 'sign') {
+      window = this.$signWindow;
+    }
+    windowWidth = window.width();
+    windowHeight = window.height();
+    windowPos = window.position();
+    windowTop = windowPos.top;
+    windowLeft = windowPos.left;
+    windowRight = windowLeft + windowWidth;
+    windowBottom = windowTop + windowHeight;
+
+    if (windowTop < 0) { // off-screen to the top
+      windowTop = 10;
+      window.css('top',windowTop);
+    }
+    if (windowLeft < 0) { // off-screen to the left
+      windowLeft = 10;
+      window.css('left',windowLeft);
+    }
+    if (windowRight > width) { // off-screen to the right
+      windowLeft = (width - 20) - windowWidth;
+      window.css('left',windowLeft);
+    }
+    if (windowBottom > height) { // off-screen to the bottom
+      windowTop = (height - 10) - windowHeight;
+      window.css('top',windowTop);
+    }
+  };
+
+  AblePlayer.prototype.getHighestZIndex = function() {
+
+    // returns the highest z-index on page
+    // used to ensure dialogs (or potentially other windows) are on top
+
+    var max, $elements, z;
     max = 0;
-    $('*').each(function(){       
+
+    // exclude the Able Player dialogs
+    $elements = $('body *').not('.able-modal-dialog,.able-modal-dialog *,.able-modal-overlay,.able-modal-overlay *');
+
+    $elements.each(function(){
       z = $(this).css('z-index');
       if (Number.isInteger(+z)) { // work only with integer values, not 'auto'
-        if (z > max) { 
-          max = z; 
+        if (parseInt(z) > max) {
+          max = parseInt(z);
         }
       }
     });
-    return max;        
-  } ; 
-  
+    return max;
+  };
+
+  AblePlayer.prototype.updateZIndex = function(which) {
+
+    // update z-index of 'transcript' or 'sign', relative to each other
+    // direction is always 'up' (i.e., move window to top)
+    // windows come to the top when the user clicks on them
+
+    var transcriptZ, signZ, newHighZ, newLowZ;
+
+    if (typeof this.$transcriptArea === 'undefined' || typeof this.$signWindow === 'undefined' ) {
+      // at least one of the windows doesn't exist, so there's no conflict
+      return false;
+    }
+
+    // get current values
+    transcriptZ = parseInt(this.$transcriptArea.css('z-index'));
+    signZ = parseInt(this.$signWindow.css('z-index'));
+
+    if (transcriptZ === signZ) {
+      // the two windows are equal; move the target window the top
+      newHighZ = transcriptZ + 1000;
+      newLowZ = transcriptZ;
+    }
+    else if (transcriptZ > signZ) {
+      if (which === 'transcript') {
+        // transcript is already on top; nothing to do
+        return false;
+      }
+      else {
+        // swap z's
+        newHighZ = transcriptZ;
+        newLowZ = signZ;
+      }
+    }
+    else { // signZ is greater
+      if (which === 'sign') {
+        return false;
+      }
+      else {
+        newHighZ = signZ;
+        newLowZ = transcriptZ;
+      }
+    }
+
+    // now assign the new values
+    if (which === 'transcript') {
+      this.$transcriptArea.css('z-index',newHighZ);
+      this.$signWindow.css('z-index',newLowZ);
+    }
+    else if (which === 'sign') {
+      this.$signWindow.css('z-index',newHighZ);
+      this.$transcriptArea.css('z-index',newLowZ);
+    }
+  };
+
+  AblePlayer.prototype.syncTrackLanguages = function (source, language) {
+
+    // this function is called when the player is built (source == 'init')
+    // and again when user changes the language of either 'captions' or 'transcript'
+    // It syncs the languages of chapters, descriptions, and metadata tracks
+    // NOTE: Caption and transcript languages are somewhat independent from one another
+    // If a user changes the caption language, the transcript follows
+    // However, if a user changes the transcript language, this only affects the transcript
+    // This was a group decision based on the belief that users may want a transcript
+    // that is in a different language than the captions
+
+    var i, captions, descriptions, chapters, meta;
+
+    // Captions
+    for (i in this.captions) {
+      if (this.captions[i].language === language) {
+        captions = this.captions[i];
+      }
+    }
+    // Chapters
+    for (i in this.chapters) {
+      if (this.chapters[i].language === language) {
+        chapters = this.chapters[i];
+      }
+    }
+    // Descriptions
+    for (var i in this.descriptions) {
+      if (this.descriptions[i].language === language) {
+        descriptions = this.descriptions[i];
+      }
+    }
+    // Metadata
+    for (var i in this.meta) {
+      if (this.meta[i].language === language) {
+        meta = this.meta[i];
+      }
+    }
+
+    // regardless of source...
+    this.transcriptLang = language;
+
+    if (source === 'init' || source === 'captions') {
+      this.captionLang = language;
+      this.selectedCaptions = captions;
+      this.selectedChapters = chapters;
+      this.selectedDescriptions = descriptions;
+      this.selectedMeta = meta;
+      this.transcriptCaptions = captions;
+      this.transcriptChapters = chapters;
+      this.transcriptDescriptions = descriptions;
+      this.updateChaptersList();
+      this.setupPopups('chapters');
+    }
+    else if (source === 'transcript') {
+      this.transcriptCaptions = captions;
+      this.transcriptChapters = chapters;
+      this.transcriptDescriptions = descriptions;
+    }
+    this.updateTranscript();
+  };
+
 })(jQuery);

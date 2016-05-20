@@ -1,0 +1,73 @@
+WEBVTT
+kind: captions
+lang: ja
+
+NOTE This VTT file includes a few extras:
+- Meta data at the top (lines 2 and 3)
+- The current comment block, identified with NOTE and surrounded by spaces
+- cue settings at the end of the first timestamp
+- A cue span at the start of the second cue payload
+- (in this case, a "voice span" <v> identifying the speaker)
+- A WebVTT cue settings list after the timestamp at 39.132
+- Currently AblePlayer does not support these extra features
+- but the parser needs to be able to filter them out
+-
+- Added on April 1, 2015 for testing purposes (these are both valid):
+- A cue block with no content
+- Multiple line breaks between some cue blocks
+-
+- More info in the WebVTT spec (still evolving):
+- http://dev.w3.org/html5/webvtt
+
+00:00:00.429 --> 00:00:09.165
+[ 音楽 ]
+
+00:00:09.165 --> 00:00:10.792
+<v ナレーター> あなたはWebサイトのビジターを<i>必要</i>としています。
+
+00:00:10.792 --> 00:00:13.759
+ビジターはあなたの製品を<b>購入し</b>、
+あなたのサービスに<b>サインアップ</b>し、
+
+00:00:13.759 --> 00:00:16.627
+あなたのクラスに<b>登録</b>し、
+あなたの意見を<b>読み</b>、
+
+00:00:16.627 --> 00:00:18.561
+あなたのビデオを<b>見ます</b>。
+
+
+00:00:18.561 --> 00:00:24.165
+あなたはビジターを見ることはないでしょう、
+しかしビジターはあなたのWebサイトを通じてあなたを知っています。
+
+00:00:24.165 --> 00:00:25.891
+あるいは知らないかもしれません。
+
+00:00:25.891 --> 00:00:30.396
+<c.quotable>あなたのWebサイトのビジターは、均質にマウスをクリックする
+無名の大衆ではありません。</c>
+
+00:00:30.396 --> 00:00:32.363
+多様な経験、スタイル、才能を持った
+
+00:00:32.363 --> 00:00:35.297
+活発な個性の集団なのです。
+
+00:00:35.297 --> 00:00:36.900
+これには障がいを持つ方々も含まれます。
+
+00:00:39.132 --> 00:00:41.000 position:10%,start align:start size:35%
+<v テリル> WebデザイナーやWeb開発者にとって、 
+
+00:00:41.000 --> 00:00:45.500
+今自分が見ているコンピューター、解像度、
+
+00:00:45.500 --> 00:00:49.264
+ブラウザー、オペレーティングシステムは、
+
+00:00:49.264 --> 00:00:52.000
+他のすべての人と必ずしも同じではないと理解することは
+重要なことです。
+
+
