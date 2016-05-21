@@ -300,6 +300,8 @@ var en = {
 
 "windowBringTop": "Bring to front",
 
-"windowBringTopAlert": "This window is now in front of other objects on the page."
+"windowBringTopAlert": "This window is now in front of other objects on the page.",
+
+"description" : "Description"
 
 };

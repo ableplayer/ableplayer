@@ -300,6 +300,8 @@ var es = {
 
 "windowBringTop": "Traer al frente",
 
-"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
+"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página.",
+
+"description" : "Descripción"
 
 };
