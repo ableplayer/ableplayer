@@ -259,6 +259,9 @@
     var $main = $('<div class="able-transcript-container"></div>');
     var transcriptTitle;
 
+    // set language for transcript container
+    $main.attr('lang', this.transcriptLang);
+
     if (typeof this.transcriptTitle !== 'undefined') {
       transcriptTitle = this.transcriptTitle;
     }
@@ -292,6 +295,10 @@
         });
       }
       $transcriptHeadingTag.text(transcriptTitle);
+
+      // set language of transcript heading to language of player
+      // this is independent of language of transcript
+      $transcriptHeadingTag.attr('lang', this.lang);
 
       $main.append($transcriptHeadingTag);
     }
