@@ -1067,7 +1067,6 @@
           // add an event listener that displays a tooltip on mouseenter or focus
           newButton.on('mouseenter focus',function(event) {
             var label = $(this).attr('aria-label');
-
             // get position of this button
             var position = $(this).position();
             var buttonHeight = $(this).height();
@@ -1076,7 +1075,7 @@
             var centerTooltip = true;
             if ($(this).closest('div').hasClass('able-right-controls')) {
               // this control is on the right side
-              if ($(this).is(':last-child')) {
+              if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
                 // this is the last control on the right
                 // position tooltip using the "right" property
                 centerTooltip = false;

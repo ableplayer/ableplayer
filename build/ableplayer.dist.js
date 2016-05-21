@@ -3881,7 +3881,6 @@
           // add an event listener that displays a tooltip on mouseenter or focus
           newButton.on('mouseenter focus',function(event) {
             var label = $(this).attr('aria-label');
-
             // get position of this button
             var position = $(this).position();
             var buttonHeight = $(this).height();
@@ -3890,7 +3889,7 @@
             var centerTooltip = true;
             if ($(this).closest('div').hasClass('able-right-controls')) {
               // this control is on the right side
-              if ($(this).is(':last-child')) {
+              if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
                 // this is the last control on the right
                 // position tooltip using the "right" property
                 centerTooltip = false;
@@ -9203,6 +9202,9 @@
     var $main = $('<div class="able-transcript-container"></div>');
     var transcriptTitle;
 
+    // set language for transcript container
+    $main.attr('lang', this.transcriptLang);
+
     if (typeof this.transcriptTitle !== 'undefined') {
       transcriptTitle = this.transcriptTitle;
     }
@@ -9236,6 +9238,10 @@
         });
       }
       $transcriptHeadingTag.text(transcriptTitle);
+
+      // set language of transcript heading to language of player
+      // this is independent of language of transcript
+      $transcriptHeadingTag.attr('lang', this.lang);
 
       $main.append($transcriptHeadingTag);
     }
