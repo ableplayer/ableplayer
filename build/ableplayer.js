@@ -9306,7 +9306,8 @@
       var $descHiddenSpan = $('<span>',{
         'class': 'able-hidden'
       });
-      $descHiddenSpan.text('Description: ');
+      $descHiddenSpan.attr('lang', thisObj.lang);
+      $descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ': ');
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
