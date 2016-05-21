@@ -38,6 +38,7 @@
   padding: 0;
   width: 100%;
   height: auto;
+  box-sizing: content-box !important;
 }
 .able {
   position: relative;
@@ -71,6 +72,9 @@
 	width:1px;
 	height:1px;
 	overflow:hidden;
+}
+.able-media-container audio {
+  display: none !important;
 }
 .able-video {
 }
@@ -471,6 +475,7 @@ div.able-modal-dialog {
   display: none;
   color: #000;
   background-color: #FAFAFA;
+  box-sizing: content-box !important;
   z-index: 10000;
 }
 div.able-modal-overlay {
