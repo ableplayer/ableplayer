@@ -300,6 +300,8 @@ var ja = {
 
 "windowBringTop": "前面へ移動",
 
-"windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。"
+"windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。",
+
+"description" : "説明"
 
 };

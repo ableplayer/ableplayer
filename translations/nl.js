@@ -300,6 +300,8 @@ var nl = {
 
 "windowBringTop": "Verplaats naar voren",
 
-"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
+"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina.",
+
+"description" : "Beschrijving"
 
 };
