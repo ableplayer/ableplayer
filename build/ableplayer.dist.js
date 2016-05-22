@@ -235,7 +235,9 @@
 
     if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
       this.defaultChapter = $(media).data('chapters-default');
-      this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
+    }
+    else {
+      this.defaultChapter = null;
     }
 
     // Previous/Next buttons
@@ -373,7 +375,6 @@
     else {
       this.forceLang = false;
     }
-
 
     // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
@@ -799,9 +800,9 @@
             thisObj.populateChaptersDiv();
           }
           thisObj.showSearchResults();
-          if (thisObj.defaultChapter) {
+          if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
             thisObj.seekToDefaultChapter();
-            // thisObj.updateChapter(thisObj.getElapsed());
+            thisObj.updateChapter(thisObj.getElapsed());
           }
         },
         function() {  // initPlayer fail
@@ -5585,10 +5586,6 @@
   };
 
   AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
-
-//
-//
-
     this.startTracking('keyboard', position);
     this.trackHeadAtPosition(position);
     this.keyTrackPosition = position;
@@ -6939,13 +6936,9 @@
     duration = this.getDuration();
     elapsed = this.getElapsed();
 
-    if (this.seekbarScope === 'chapter' && this.chapters.length) {
-      this.useChapterTimes = true;
+    if (this.useChapterTimes) {
       this.chapterDuration = this.getChapterDuration();
       this.chapterElapsed = this.getChapterElapsed();
-    }
-    else {
-      this.useChapterTimes = false;
     }
 
     if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
@@ -6956,8 +6949,8 @@
     if (this.seekBar) {
 
       if (this.useChapterTimes) {
-        lastChapterIndex = this.chapters.length-1;
-        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        lastChapterIndex = this.selectedChapters.cues.length-1;
+        if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
           // this is the last chapter
           if (this.currentChapter.end !== duration) {
             // chapter ends before or after video ends
@@ -8648,7 +8641,16 @@
       return false;
     }
 
-    if (this.selectedChapters) {
+    if (typeof this.useChapterTimes === 'undefined') {
+      if (this.seekbarScope === 'chapter' && this.selectedChapters.cues.length) {
+        this.useChapterTimes = true;
+      }
+      else {
+        this.useChapterTimes = false;
+      }
+    }
+
+    if (this.useChapterTimes) {
       cues = this.selectedChapters.cues;
     }
     else if (this.chapters.length >= 1) {
@@ -8699,13 +8701,15 @@
         // put it all together
         $chapterItem.append($chapterButton);
         $chaptersList.append($chapterItem);
-        if (this.defaultChapter == cues[thisChapter].id) {
+        if (this.defaultChapter === cues[thisChapter].id) {
           $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+          this.currentChapter = cues[thisChapter];
           hasDefault = true;
         }
       }
       if (!hasDefault) {
-        // select the first button
+        // select the first chapter
+        this.currentChapter = cues[0];
         $chaptersList.find('button').first().attr('aria-selected','true')
           .parent('li').addClass('able-current-chapter');
       }
@@ -8715,13 +8719,13 @@
   };
 
   AblePlayer.prototype.seekToDefaultChapter = function() {
-    // this function is only called if this.defaultChapter is not null
+
     // step through chapters looking for default
     var i=0;
-    while (i < this.chapters.length) {
-      if (this.chapters[i].id === this.defaultChapter) {
+    while (i < this.selectedChapters.cues.length) {
+      if (this.selectedChapters.cues[i].id === this.defaultChapter) {
         // found the default chapter! Seek to it
-        this.seekTo(this.chapters[i].start);
+        this.seekTo(this.selectedChapters.cues[i].start);
       }
       i++;
     }
@@ -8730,14 +8734,13 @@
   AblePlayer.prototype.updateChapter = function (now) {
 
     // as time-synced chapters change during playback, track changes in current chapter
-
-    if (typeof this.chapters === 'undefined') {
+    if (typeof this.selectedChapters === 'undefined') {
       return;
     }
 
     var chapters, i, thisChapterIndex, chapterLabel;
 
-    chapters = this.chapters;
+    chapters = this.selectedChapters.cues;
     for (i in chapters) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
         thisChapterIndex = i;
@@ -8776,8 +8779,9 @@
       return 0;
     }
     videoDuration = this.getDuration();
-    lastChapterIndex = this.chapters.length-1;
-    if (this.chapters[lastChapterIndex] == this.currentChapter) {
+    lastChapterIndex = this.selectedChapters.cues.length-1;
+
+    if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
       // this is the last chapter
       if (this.currentChapter.end !== videoDuration) {
         // chapter ends before or after video ends, adjust chapter end to match video end
@@ -9306,7 +9310,8 @@
       var $descHiddenSpan = $('<span>',{
         'class': 'able-hidden'
       });
-      $descHiddenSpan.text('Description: ');
+      $descHiddenSpan.attr('lang', thisObj.lang);
+      $descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ': ');
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
@@ -9731,20 +9736,6 @@
       this.updateMeta();
       this.refreshControls();
     }
-    else if (this.seeking) {
-      if (this.startTime === currentTime) {
-        // media has scrubbed to start time
-        this.seeking = false;
-        if (this.autoplay || this.playing) {
-          this.playMedia();
-        }
-      }
-    }
-    else { // not swapping src, not started playing, not seeking
-      if (this.autoplay) {
-        this.playMedia();
-      }
-    }
   };
 
   AblePlayer.prototype.onMediaPause = function () {
@@ -10025,6 +10016,7 @@
   };
 
   AblePlayer.prototype.addHtml5MediaListeners = function () {
+
     var thisObj = this;
 
     // NOTE: iOS does not support autoplay,
@@ -10042,16 +10034,30 @@
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
-        if (thisObj.startTime && !thisObj.startedPlaying) {
-          if (thisObj.seeking) {
-            // a seek has already been initiated
-            // since canplaythrough has been triggered, the seek is complete
-            thisObj.seeking = false;
+        if (!thisObj.startedPlaying) {
+          if (thisObj.startTime) {
+            if (thisObj.seeking) {
+              // a seek has already been initiated
+              // since canplaythrough has been triggered, the seek is complete
+              thisObj.seeking = false;
+              if (thisObj.autoplay) {
+                thisObj.playMedia();
+              }
+            }
+            else {
+              // haven't started seeking yet
+              thisObj.seekTo(thisObj.startTime);
+            }
           }
           else {
-            // haven't started seeking yet
-            thisObj.seekTo(thisObj.startTime);
+            // there is now startTime, therefore no seeking required
+            if (thisObj.autoplay) {
+              thisObj.playMedia();
+            }
           }
+        }
+        else {
+          // already started playing
         }
       })
       .on('playing',function() {

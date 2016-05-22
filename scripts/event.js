@@ -26,20 +26,6 @@
       this.updateMeta();
       this.refreshControls();
     }
-    else if (this.seeking) {
-      if (this.startTime === currentTime) {
-        // media has scrubbed to start time
-        this.seeking = false;
-        if (this.autoplay || this.playing) {
-          this.playMedia();
-        }
-      }
-    }
-    else { // not swapping src, not started playing, not seeking
-      if (this.autoplay) {
-        this.playMedia();
-      }
-    }
   };
 
   AblePlayer.prototype.onMediaPause = function () {
@@ -320,6 +306,7 @@
   };
 
   AblePlayer.prototype.addHtml5MediaListeners = function () {
+
     var thisObj = this;
 
     // NOTE: iOS does not support autoplay,
@@ -337,16 +324,30 @@
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
-        if (thisObj.startTime && !thisObj.startedPlaying) {
-          if (thisObj.seeking) {
-            // a seek has already been initiated
-            // since canplaythrough has been triggered, the seek is complete
-            thisObj.seeking = false;
+        if (!thisObj.startedPlaying) {
+          if (thisObj.startTime) {
+            if (thisObj.seeking) {
+              // a seek has already been initiated
+              // since canplaythrough has been triggered, the seek is complete
+              thisObj.seeking = false;
+              if (thisObj.autoplay) {
+                thisObj.playMedia();
+              }
+            }
+            else {
+              // haven't started seeking yet
+              thisObj.seekTo(thisObj.startTime);
+            }
           }
           else {
-            // haven't started seeking yet
-            thisObj.seekTo(thisObj.startTime);
+            // there is now startTime, therefore no seeking required
+            if (thisObj.autoplay) {
+              thisObj.playMedia();
+            }
           }
+        }
+        else {
+          // already started playing
         }
       })
       .on('playing',function() {

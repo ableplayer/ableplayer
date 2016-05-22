@@ -353,9 +353,9 @@
             thisObj.populateChaptersDiv();
           }
           thisObj.showSearchResults();
-          if (thisObj.defaultChapter) {
+          if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
             thisObj.seekToDefaultChapter();
-            // thisObj.updateChapter(thisObj.getElapsed());
+            thisObj.updateChapter(thisObj.getElapsed());
           }
         },
         function() {  // initPlayer fail

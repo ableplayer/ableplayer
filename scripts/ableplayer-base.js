@@ -235,7 +235,9 @@
 
     if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
       this.defaultChapter = $(media).data('chapters-default');
-      this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
+    }
+    else {
+      this.defaultChapter = null;
     }
 
     // Previous/Next buttons
@@ -373,7 +375,6 @@
     else {
       this.forceLang = false;
     }
-
 
     // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {

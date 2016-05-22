@@ -47,7 +47,16 @@
       return false;
     }
 
-    if (this.selectedChapters) {
+    if (typeof this.useChapterTimes === 'undefined') {
+      if (this.seekbarScope === 'chapter' && this.selectedChapters.cues.length) {
+        this.useChapterTimes = true;
+      }
+      else {
+        this.useChapterTimes = false;
+      }
+    }
+
+    if (this.useChapterTimes) {
       cues = this.selectedChapters.cues;
     }
     else if (this.chapters.length >= 1) {
@@ -98,13 +107,15 @@
         // put it all together
         $chapterItem.append($chapterButton);
         $chaptersList.append($chapterItem);
-        if (this.defaultChapter == cues[thisChapter].id) {
+        if (this.defaultChapter === cues[thisChapter].id) {
           $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+          this.currentChapter = cues[thisChapter];
           hasDefault = true;
         }
       }
       if (!hasDefault) {
-        // select the first button
+        // select the first chapter
+        this.currentChapter = cues[0];
         $chaptersList.find('button').first().attr('aria-selected','true')
           .parent('li').addClass('able-current-chapter');
       }
@@ -114,13 +125,13 @@
   };
 
   AblePlayer.prototype.seekToDefaultChapter = function() {
-    // this function is only called if this.defaultChapter is not null
+
     // step through chapters looking for default
     var i=0;
-    while (i < this.chapters.length) {
-      if (this.chapters[i].id === this.defaultChapter) {
+    while (i < this.selectedChapters.cues.length) {
+      if (this.selectedChapters.cues[i].id === this.defaultChapter) {
         // found the default chapter! Seek to it
-        this.seekTo(this.chapters[i].start);
+        this.seekTo(this.selectedChapters.cues[i].start);
       }
       i++;
     }
@@ -129,14 +140,13 @@
   AblePlayer.prototype.updateChapter = function (now) {
 
     // as time-synced chapters change during playback, track changes in current chapter
-
-    if (typeof this.chapters === 'undefined') {
+    if (typeof this.selectedChapters === 'undefined') {
       return;
     }
 
     var chapters, i, thisChapterIndex, chapterLabel;
 
-    chapters = this.chapters;
+    chapters = this.selectedChapters.cues;
     for (i in chapters) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
         thisChapterIndex = i;
@@ -175,8 +185,9 @@
       return 0;
     }
     videoDuration = this.getDuration();
-    lastChapterIndex = this.chapters.length-1;
-    if (this.chapters[lastChapterIndex] == this.currentChapter) {
+    lastChapterIndex = this.selectedChapters.cues.length-1;
+
+    if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
       // this is the last chapter
       if (this.currentChapter.end !== videoDuration) {
         // chapter ends before or after video ends, adjust chapter end to match video end

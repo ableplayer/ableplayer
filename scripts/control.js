@@ -250,13 +250,9 @@
     duration = this.getDuration();
     elapsed = this.getElapsed();
 
-    if (this.seekbarScope === 'chapter' && this.chapters.length) {
-      this.useChapterTimes = true;
+    if (this.useChapterTimes) {
       this.chapterDuration = this.getChapterDuration();
       this.chapterElapsed = this.getChapterElapsed();
-    }
-    else {
-      this.useChapterTimes = false;
     }
 
     if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
@@ -267,8 +263,8 @@
     if (this.seekBar) {
 
       if (this.useChapterTimes) {
-        lastChapterIndex = this.chapters.length-1;
-        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        lastChapterIndex = this.selectedChapters.cues.length-1;
+        if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
           // this is the last chapter
           if (this.currentChapter.end !== duration) {
             // chapter ends before or after video ends
