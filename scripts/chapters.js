@@ -83,8 +83,9 @@
             thisChapterIndex = $chaptersList.index($clickedItem);
             $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
             $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            // Don't update this.currentChapter here; just seekTo chapter's start time;
-            // chapter will be updated via chapters.js > updateChapter()
+            // Need to updateChapter before seeking to it
+            // Otherwise seekBar is redrawn with wrong chapterDuration and/or chapterTime
+            thisObj.updateChapter(time);
             thisObj.seekTo(time);
           }
         };
