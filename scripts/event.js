@@ -339,6 +339,9 @@
               thisObj.seekTo(thisObj.startTime);
             }
           }
+          else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
+            thisObj.seekToDefaultChapter();
+          }
           else {
             // there is now startTime, therefore no seeking required
             if (thisObj.autoplay) {

@@ -353,10 +353,6 @@
             thisObj.populateChaptersDiv();
           }
           thisObj.showSearchResults();
-          if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
-            thisObj.seekToDefaultChapter();
-            thisObj.updateChapter(thisObj.getElapsed());
-          }
         },
         function() {  // initPlayer fail
           thisObj.provideFallback(this.error);

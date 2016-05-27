@@ -800,10 +800,6 @@
             thisObj.populateChaptersDiv();
           }
           thisObj.showSearchResults();
-          if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
-            thisObj.seekToDefaultChapter();
-            thisObj.updateChapter(thisObj.getElapsed());
-          }
         },
         function() {  // initPlayer fail
           thisObj.provideFallback(this.error);
@@ -8726,6 +8722,7 @@
       if (this.selectedChapters.cues[i].id === this.defaultChapter) {
         // found the default chapter! Seek to it
         this.seekTo(this.selectedChapters.cues[i].start);
+        this.updateChapter(this.selectedChapters.cues[i].start);
       }
       i++;
     }
@@ -10048,6 +10045,9 @@
               // haven't started seeking yet
               thisObj.seekTo(thisObj.startTime);
             }
+          }
+          else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
+            thisObj.seekToDefaultChapter();
           }
           else {
             // there is now startTime, therefore no seeking required

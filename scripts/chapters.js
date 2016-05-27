@@ -132,6 +132,7 @@
       if (this.selectedChapters.cues[i].id === this.defaultChapter) {
         // found the default chapter! Seek to it
         this.seekTo(this.selectedChapters.cues[i].start);
+        this.updateChapter(this.selectedChapters.cues[i].start);
       }
       i++;
     }
