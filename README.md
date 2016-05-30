@@ -228,7 +228,6 @@ The following attributes control which of the above types, if any, are generated
 If none of the above attributes are present, the transcript will be displayed in a draggable, resizable popup that can be toggled on/off using a button on the controller. Note that a toggle button is added to the controller *only* if the transcript is a "popup" type; there is no toggle button for either the "external" or "manual" transcript types. 
 
 Additional transcript-related attributes include:   
--   **data-use-Transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container, you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 

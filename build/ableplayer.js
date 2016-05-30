@@ -147,13 +147,6 @@
       this.useChaptersButton = true;
     }
 
-    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
-      this.useTranscriptButton = false;
-    }
-    else {
-      this.useTranscriptButton = true;
-    }
-
     if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
       this.useDescriptionsButton = false;
     }
@@ -3634,7 +3627,7 @@
       }
     }
 
-    if (this.transcriptType === 'popup') {
+    if (this.transcriptType === 'popup' && this.useTranscriptButton) {
       bll.push('transcript');
     }
 
