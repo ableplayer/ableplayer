@@ -822,7 +822,6 @@
         bll.push('descriptions'); //audio description
       }
     }
-
     if (this.transcriptType === 'popup') {
       bll.push('transcript');
     }

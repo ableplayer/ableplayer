@@ -125,13 +125,13 @@
     return false;
   };
 
-  AblePlayer.prototype.seekToDefaultChapter = function() {
+  AblePlayer.prototype.seekToChapter = function(chapterId) {
 
-    // step through chapters looking for default
+    // step through chapters looking for matching ID
     var i=0;
     while (i < this.selectedChapters.cues.length) {
-      if (this.selectedChapters.cues[i].id === this.defaultChapter) {
-        // found the default chapter! Seek to it
+      if (this.selectedChapters.cues[i].id === chapterId) {
+        // found the target chapter! Seek to it
         this.seekTo(this.selectedChapters.cues[i].start);
         this.updateChapter(this.selectedChapters.cues[i].start);
       }

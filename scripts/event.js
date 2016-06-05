@@ -340,7 +340,7 @@
             }
           }
           else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
-            thisObj.seekToDefaultChapter();
+            thisObj.seekToChapter(thisObj.defaultChapter);
           }
           else {
             // there is now startTime, therefore no seeking required

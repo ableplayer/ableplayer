@@ -3626,8 +3626,7 @@
         bll.push('descriptions'); //audio description
       }
     }
-
-    if (this.transcriptType === 'popup' && this.useTranscriptButton) {
+    if (this.transcriptType === 'popup') {
       bll.push('transcript');
     }
 
@@ -8708,13 +8707,13 @@
     return false;
   };
 
-  AblePlayer.prototype.seekToDefaultChapter = function() {
+  AblePlayer.prototype.seekToChapter = function(chapterId) {
 
-    // step through chapters looking for default
+    // step through chapters looking for matching ID
     var i=0;
     while (i < this.selectedChapters.cues.length) {
-      if (this.selectedChapters.cues[i].id === this.defaultChapter) {
-        // found the default chapter! Seek to it
+      if (this.selectedChapters.cues[i].id === chapterId) {
+        // found the target chapter! Seek to it
         this.seekTo(this.selectedChapters.cues[i].start);
         this.updateChapter(this.selectedChapters.cues[i].start);
       }
@@ -10041,7 +10040,7 @@
             }
           }
           else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
-            thisObj.seekToDefaultChapter();
+            thisObj.seekToChapter(thisObj.defaultChapter);
           }
           else {
             // there is now startTime, therefore no seeking required
