@@ -8840,7 +8840,9 @@
   };
 
   AblePlayer.prototype.showMeta = function(now) {
-    var m, thisMeta, cues, cueText, cueLines, i, line, focusTarget;
+    var tempSelectors, m, thisMeta, cues, cueText, cueLines, i, line, focusTarget;
+
+    tempSelectors = [];
     if (this.meta.length >= 1) {
       cues = this.meta;
     }
@@ -8882,14 +8884,28 @@
                 $(line).show();
                 // add to array of visible selectors so it can be hidden at end time
                 this.visibleSelectors.push(line);
+                tempSelectors.push(line);
               }
             }
           }
+          // now step through this.visibleSelectors and remove anything that's stale
+          if (this.visibleSelectors && this.visibleSelectors.length) {
+            if (this.visibleSelectors.length !== tempSelectors.length) {
+              for (i=this.visibleSelectors.length-1; i>=0; i--) {
+                if ($.inArray(this.visibleSelectors[i],tempSelectors) == -1) {
+                  $(this.visibleSelectors[i]).hide();
+                  this.visibleSelectors.splice(i,1);
+                }
+              }
+            }
+          }
+
         }
         this.currentMeta = thisMeta;
       }
     }
     else {
+      // there is currently no metadata. Empty stale content
       if (typeof this.$metaDiv !== 'undefined') {
         this.$metaDiv.html('');
       }
