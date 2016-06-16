@@ -783,7 +783,7 @@
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
           prefsGroups = thisObj.getPreferencesGroups();
-          for (i in prefsGroups) {
+          for (i = 0; i < prefsGroups.length; i++) {
             thisObj.injectPrefsForm(prefsGroups[i]);
           }
           thisObj.setupPopups();
@@ -2073,7 +2073,7 @@
 
   function actList(state, list) {
     var results = [];
-    for (var ii in list) {
+    for (var ii = 0; ii < list.length; ii++) {
       results.push(act(state, list[ii]));
     }
     return results;
@@ -2089,7 +2089,7 @@
   }
 
   function updatePosition(state, cutText) {
-    for (var ii in cutText) {
+    for (var ii = 0; ii < cutText.length; ii++) {
       if (cutText[ii] === '\n') {
         state.column = 1;
         state.line += 1;
@@ -3337,7 +3337,7 @@
         radioName = this.mediaId + '-' + popup + '-choice';
         if (popup === 'prefs') {
           prefCats = this.getPreferencesGroups();
-          for (j in prefCats) {
+          for (j = 0; j < prefCats.length; j++) {
             trackItem = $('<li></li>');
             prefCat = prefCats[j];
             if (prefCat === 'captions') {
@@ -3386,7 +3386,7 @@
           this.prefsPopup.append(trackList);
         }
         else {
-          for (j in tracks) {
+          for (j = 0; j < tracks.length; j++) {
             trackItem = $('<li></li>');
             track = tracks[j];
             radioId = this.mediaId + '-' + popup + '-' + j;
@@ -4009,7 +4009,7 @@
 
     // combine left and right controls arrays for future reference
     this.controls = [];
-    for (var sec in controlLayout) {
+    for (var sec in controlLayout) if (controlLayout.hasOwnProperty(sec)) {
       this.controls = this.controls.concat(controlLayout[sec]);
     }
 
@@ -6464,12 +6464,12 @@
         result.push(component.value);
       }
       else {
-        for (var ii in component.children) {
+        for (var ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponentForDescription(component.children[ii]));
         }
       }
       return result.join('');
-    }
+    };
 
     var cues;
     if (this.selectedDescriptions) {
@@ -6481,7 +6481,7 @@
     else {
       cues = [];
     }
-    for (d in cues) {
+    for (d = 0; d < cues.length; d++) {
       if ((cues[d].start <= now) && (cues[d].end > now)) {
         thisDescription = d;
         break;
@@ -8144,25 +8144,25 @@
     var i, captions, descriptions, chapters, meta;
 
     // Captions
-    for (i in this.captions) {
+    for (i = 0; i < this.captions.length; i++) {
       if (this.captions[i].language === language) {
         captions = this.captions[i];
       }
     }
     // Chapters
-    for (i in this.chapters) {
+    for (i = 0; i < this.chapters.length; i++) {
       if (this.chapters[i].language === language) {
         chapters = this.chapters[i];
       }
     }
     // Descriptions
-    for (var i in this.descriptions) {
+    for (i = 0; i < this.descriptions.length; i++) {
       if (this.descriptions[i].language === language) {
         descriptions = this.descriptions[i];
       }
     }
     // Metadata
-    for (var i in this.meta) {
+    for (i = 0; i < this.meta.length; i++) {
       if (this.meta[i].language === language) {
         meta = this.meta[i];
       }
@@ -8305,7 +8305,7 @@
     else {
       cues = [];
     }
-    for (c in cues) {
+    for (c = 0; c < cues.length; c++) {
       if ((cues[c].start <= now) && (cues[c].end > now)) {
         thisCaption = c;
         break;
@@ -8356,40 +8356,40 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('(' + component.value + ')');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else if (component.type === 'i') {
         result.push('<em>');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
         result.push('</em>');
       }
       else if (component.type === 'b') {
         result.push('<strong>');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
         result.push('</strong>');
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
-    }
+    };
 
     if (typeof cue.components !== 'undefined') {
-      for (var ii in cue.components.children) {
+      for (var ii = 0; ii < cue.components.children.length; ii++) {
         result.push(flattenComponent(cue.components.children[ii]));
       }
     }
@@ -8649,7 +8649,7 @@
     }
     if (cues.length > 0) {
       $chaptersList = $('<ul>');
-      for (c in cues) {
+      for (c = 0; c < cues.length; c++) {
         thisChapter = c;
         $chapterItem = $('<li></li>');
         $chapterButton = $('<button>',{
@@ -8732,7 +8732,7 @@
     var chapters, i, thisChapterIndex, chapterLabel;
 
     chapters = this.selectedChapters.cues;
-    for (i in chapters) {
+    for (i = 0; i < chapters.length; i++) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
         thisChapterIndex = i;
         break;
@@ -8849,7 +8849,7 @@
     else {
       cues = [];
     }
-    for (m in cues) {
+    for (m = 0; m < cues.length; m++) {
       if ((cues[m].start <= now) && (cues[m].end > now)) {
         thisMeta = m;
         break;
@@ -8925,25 +8925,25 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('[' + component.value + ']');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
     }
 
-    for (var ii in cue.components.children) {
+    for (var ii = 0; ii < cue.components.children.length; ii++) {
       result.push(flattenComponent(cue.components.children[ii]));
     }
 
@@ -9115,7 +9115,7 @@
       else if (this.chapters.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii in this.chapters) {
+          for (var ii = 0; ii < this.chapters.length; ii++) {
             if (this.chapters[ii].language === this.transcriptLang) {
               chapters = this.chapters[ii].cues;
             }
@@ -9133,7 +9133,7 @@
       else if (this.descriptions.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii in this.descriptions) {
+          for (var ii = 0; ii < this.descriptions.length; ii++) {
             if (this.descriptions[ii].language === this.transcriptLang) {
               descriptions = this.descriptions[ii].cues;
             }
@@ -9287,7 +9287,7 @@
           result.push(comp.value);
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForChapter(comp.children[ii]));
           }
         }
@@ -9297,9 +9297,9 @@
       var $chapSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii in chap.components.children) {
+      for (var ii = 0; ii < chap.components.children.length; ii++) {
         var results = flattenComponentForChapter(chap.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           $chapSpan.append(results[jj]);
         }
       }
@@ -9328,7 +9328,7 @@
           result.push(comp.value);
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForDescription(comp.children[ii]));
           }
         }
@@ -9338,9 +9338,9 @@
       var $descSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii in desc.components.children) {
+      for (var ii = 0; ii < desc.components.children.length; ii++) {
         var results = flattenComponentForDescription(desc.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           $descSpan.append(results[jj]);
         }
       }
@@ -9407,9 +9407,9 @@
           });
           $vSpan.text('(' + comp.value + ')');
           result.push($vSpan);
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
-            for (var jj in subResults) {
+            for (var jj = 0; jj < subResults.length; jj++) {
               result.push(subResults[jj]);
             }
           }
@@ -9421,9 +9421,9 @@
           else if (comp.type === 'i') {
             var $tag = $('<em>');
           }
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
-            for (var jj in subResults) {
+            for (var jj = 0; jj < subResults.length; jj++) {
               $tag.append(subResults[jj]);
             }
           }
@@ -9432,16 +9432,16 @@
           }
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForCaption(comp.children[ii]));
           }
         }
         return result;
       };
 
-      for (var ii in cap.components.children) {
+      for (var ii = 0; ii < cap.components.children.length; ii++) {
         var results = flattenComponentForCaption(cap.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           var result = results[jj];
           if (typeof result === 'string') {
             if (thisObj.lyricsMode) {
@@ -9569,7 +9569,7 @@
           resultsSummaryText += 'to play the video from that point.';
           resultsSummary.html(resultsSummaryText);
           var resultsList = $('<ul>');
-          for (var i in resultsArray) {
+          for (var i = 0; i < resultsArray.length; i++) {
             var resultsItem = $('<li>',{
             });
             var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
@@ -9620,10 +9620,10 @@
       if (captions.length > 0) {
         var results = [];
         c = 0;
-        for (i in captions) {
+        for (i = 0; i < captions.length; i++) {
           if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
             caption = this.flattenCueForCaption(captions[i]);
-            for (j in searchTerms) {
+            for (j = 0; j < searchTerms.length; j++) {
               if (caption.indexOf(searchTerms[j]) !== -1) {
                 results[c] = [];
                 results[c]['start'] = captions[i].start;
@@ -10476,11 +10476,11 @@
     });
 
     // add a popup menu
-    var $popup = this.createPopup(windowName);
-    var $optionList = $('<ul></ul>');
-    var radioName = this.mediaId + '-' + windowName + '-choice';
+    $popup = this.createPopup(windowName);
+    $optionList = $('<ul></ul>');
+    radioName = this.mediaId + '-' + windowName + '-choice';
 
-    var options = [];
+    options = [];
     options.push({
       'name': 'move',
       'label': this.tt.windowMove
@@ -10489,17 +10489,17 @@
       'name': 'resize',
       'label': this.tt.windowResize
     });
-    for (var i in options) {
-      var $optionItem = $('<li></li>');
-      var option = options[i];
-      var radioId = radioName + '-' + i;
-      var $radioButton = $('<input>',{
+    for (i = 0; i < options.length; i++) {
+      $optionItem = $('<li></li>');
+      option = options[i];
+      radioId = radioName + '-' + i;
+      $radioButton = $('<input>',{
         'type': 'radio',
         'val': option.name,
         'name': radioName,
         'id': radioId
       });
-      var $radioLabel = $('<label>',{
+      $radioLabel = $('<label>',{
         'for': radioId
       });
       $radioLabel.text(option.label);

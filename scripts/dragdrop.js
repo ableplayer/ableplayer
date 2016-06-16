@@ -178,11 +178,11 @@
     });
 
     // add a popup menu
-    var $popup = this.createPopup(windowName);
-    var $optionList = $('<ul></ul>');
-    var radioName = this.mediaId + '-' + windowName + '-choice';
+    $popup = this.createPopup(windowName);
+    $optionList = $('<ul></ul>');
+    radioName = this.mediaId + '-' + windowName + '-choice';
 
-    var options = [];
+    options = [];
     options.push({
       'name': 'move',
       'label': this.tt.windowMove
@@ -191,17 +191,17 @@
       'name': 'resize',
       'label': this.tt.windowResize
     });
-    for (var i in options) {
-      var $optionItem = $('<li></li>');
-      var option = options[i];
-      var radioId = radioName + '-' + i;
-      var $radioButton = $('<input>',{
+    for (i = 0; i < options.length; i++) {
+      $optionItem = $('<li></li>');
+      option = options[i];
+      radioId = radioName + '-' + i;
+      $radioButton = $('<input>',{
         'type': 'radio',
         'val': option.name,
         'name': radioName,
         'id': radioId
       });
-      var $radioLabel = $('<label>',{
+      $radioLabel = $('<label>',{
         'for': radioId
       });
       $radioLabel.text(option.label);

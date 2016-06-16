@@ -343,7 +343,7 @@
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
           prefsGroups = thisObj.getPreferencesGroups();
-          for (i in prefsGroups) {
+          for (i = 0; i < prefsGroups.length; i++) {
             thisObj.injectPrefsForm(prefsGroups[i]);
           }
           thisObj.setupPopups();

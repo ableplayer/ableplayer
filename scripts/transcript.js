@@ -161,7 +161,7 @@
       else if (this.chapters.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii in this.chapters) {
+          for (var ii = 0; ii < this.chapters.length; ii++) {
             if (this.chapters[ii].language === this.transcriptLang) {
               chapters = this.chapters[ii].cues;
             }
@@ -179,7 +179,7 @@
       else if (this.descriptions.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii in this.descriptions) {
+          for (var ii = 0; ii < this.descriptions.length; ii++) {
             if (this.descriptions[ii].language === this.transcriptLang) {
               descriptions = this.descriptions[ii].cues;
             }
@@ -333,7 +333,7 @@
           result.push(comp.value);
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForChapter(comp.children[ii]));
           }
         }
@@ -343,9 +343,9 @@
       var $chapSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii in chap.components.children) {
+      for (var ii = 0; ii < chap.components.children.length; ii++) {
         var results = flattenComponentForChapter(chap.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           $chapSpan.append(results[jj]);
         }
       }
@@ -374,7 +374,7 @@
           result.push(comp.value);
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForDescription(comp.children[ii]));
           }
         }
@@ -384,9 +384,9 @@
       var $descSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii in desc.components.children) {
+      for (var ii = 0; ii < desc.components.children.length; ii++) {
         var results = flattenComponentForDescription(desc.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           $descSpan.append(results[jj]);
         }
       }
@@ -453,9 +453,9 @@
           });
           $vSpan.text('(' + comp.value + ')');
           result.push($vSpan);
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
-            for (var jj in subResults) {
+            for (var jj = 0; jj < subResults.length; jj++) {
               result.push(subResults[jj]);
             }
           }
@@ -467,9 +467,9 @@
           else if (comp.type === 'i') {
             var $tag = $('<em>');
           }
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
-            for (var jj in subResults) {
+            for (var jj = 0; jj < subResults.length; jj++) {
               $tag.append(subResults[jj]);
             }
           }
@@ -478,16 +478,16 @@
           }
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForCaption(comp.children[ii]));
           }
         }
         return result;
       };
 
-      for (var ii in cap.components.children) {
+      for (var ii = 0; ii < cap.components.children.length; ii++) {
         var results = flattenComponentForCaption(cap.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           var result = results[jj];
           if (typeof result === 'string') {
             if (thisObj.lyricsMode) {

@@ -21,7 +21,7 @@
     else {
       cues = [];
     }
-    for (m in cues) {
+    for (m = 0; m < cues.length; m++) {
       if ((cues[m].start <= now) && (cues[m].end > now)) {
         thisMeta = m;
         break;
@@ -97,25 +97,25 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('[' + component.value + ']');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
     }
 
-    for (var ii in cue.components.children) {
+    for (var ii = 0; ii < cue.components.children.length; ii++) {
       result.push(flattenComponent(cue.components.children[ii]));
     }
 
