@@ -1470,25 +1470,25 @@
     var i, captions, descriptions, chapters, meta;
 
     // Captions
-    for (i in this.captions) {
+    for (i = 0; i < this.captions.length; i++) {
       if (this.captions[i].language === language) {
         captions = this.captions[i];
       }
     }
     // Chapters
-    for (i in this.chapters) {
+    for (i = 0; i < this.chapters.length; i++) {
       if (this.chapters[i].language === language) {
         chapters = this.chapters[i];
       }
     }
     // Descriptions
-    for (var i in this.descriptions) {
+    for (i = 0; i < this.descriptions.length; i++) {
       if (this.descriptions[i].language === language) {
         descriptions = this.descriptions[i];
       }
     }
     // Metadata
-    for (var i in this.meta) {
+    for (i = 0; i < this.meta.length; i++) {
       if (this.meta[i].language === language) {
         meta = this.meta[i];
       }

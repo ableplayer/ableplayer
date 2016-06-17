@@ -24,7 +24,7 @@
           resultsSummaryText += 'to play the video from that point.';
           resultsSummary.html(resultsSummaryText);
           var resultsList = $('<ul>');
-          for (var i in resultsArray) {
+          for (var i = 0; i < resultsArray.length; i++) {
             var resultsItem = $('<li>',{
             });
             var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
@@ -75,10 +75,10 @@
       if (captions.length > 0) {
         var results = [];
         c = 0;
-        for (i in captions) {
+        for (i = 0; i < captions.length; i++) {
           if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
             caption = this.flattenCueForCaption(captions[i]);
-            for (j in searchTerms) {
+            for (j = 0; j < searchTerms.length; j++) {
               if (caption.indexOf(searchTerms[j]) !== -1) {
                 results[c] = [];
                 results[c]['start'] = captions[i].start;

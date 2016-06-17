@@ -533,7 +533,7 @@
         radioName = this.mediaId + '-' + popup + '-choice';
         if (popup === 'prefs') {
           prefCats = this.getPreferencesGroups();
-          for (j in prefCats) {
+          for (j = 0; j < prefCats.length; j++) {
             trackItem = $('<li></li>');
             prefCat = prefCats[j];
             if (prefCat === 'captions') {
@@ -582,7 +582,7 @@
           this.prefsPopup.append(trackList);
         }
         else {
-          for (j in tracks) {
+          for (j = 0; j < tracks.length; j++) {
             trackItem = $('<li></li>');
             track = tracks[j];
             radioId = this.mediaId + '-' + popup + '-' + j;
@@ -1205,7 +1205,7 @@
 
     // combine left and right controls arrays for future reference
     this.controls = [];
-    for (var sec in controlLayout) {
+    for (var sec in controlLayout) if (controlLayout.hasOwnProperty(sec)) {
       this.controls = this.controls.concat(controlLayout[sec]);
     }
 

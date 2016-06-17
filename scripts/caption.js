@@ -110,7 +110,7 @@
     else {
       cues = [];
     }
-    for (c in cues) {
+    for (c = 0; c < cues.length; c++) {
       if ((cues[c].start <= now) && (cues[c].end > now)) {
         thisCaption = c;
         break;
@@ -161,40 +161,40 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('(' + component.value + ')');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else if (component.type === 'i') {
         result.push('<em>');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
         result.push('</em>');
       }
       else if (component.type === 'b') {
         result.push('<strong>');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
         result.push('</strong>');
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
-    }
+    };
 
     if (typeof cue.components !== 'undefined') {
-      for (var ii in cue.components.children) {
+      for (var ii = 0; ii < cue.components.children.length; ii++) {
         result.push(flattenComponent(cue.components.children[ii]));
       }
     }

@@ -67,7 +67,7 @@
     }
     if (cues.length > 0) {
       $chaptersList = $('<ul>');
-      for (c in cues) {
+      for (c = 0; c < cues.length; c++) {
         thisChapter = c;
         $chapterItem = $('<li></li>');
         $chapterButton = $('<button>',{
@@ -150,7 +150,7 @@
     var chapters, i, thisChapterIndex, chapterLabel;
 
     chapters = this.selectedChapters.cues;
-    for (i in chapters) {
+    for (i = 0; i < chapters.length; i++) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
         thisChapterIndex = i;
         break;
