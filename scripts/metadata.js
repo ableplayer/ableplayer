@@ -12,7 +12,9 @@
   };
 
   AblePlayer.prototype.showMeta = function(now) {
-    var tempSelectors, m, thisMeta, cues, cueText, cueLines, i, line, focusTarget;
+    var tempSelectors, m, thisMeta,
+      cues, cueText, cueLines, i, line,
+      showDuration, focusTarget;
 
     tempSelectors = [];
     if (this.meta.length >= 1) {
@@ -53,7 +55,14 @@
             else {
               if ($(line).length) {
                 // selector exists
-                $(line).show();
+                showDuration = parseInt($(line).attr('data-duration'));
+                if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
+                  $(line).show().delay(showDuration).fadeOut();
+                }
+                else {
+                  // no duration specified. Just show the element until end time specified in VTT file
+                  $(line).show();
+                }
                 // add to array of visible selectors so it can be hidden at end time
                 this.visibleSelectors.push(line);
                 tempSelectors.push(line);

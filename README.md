@@ -272,6 +272,7 @@ The following attributes make all this possible:
 
 -   **data-meta-type** - required for metadata; indicates the type of metadata contained within a metadata track. Supported values as described above are "text" and "selector".
 -   **data-meta-div** - required for "text" metadata; id of an external div in which to display the text. 
+-   **data-duration** - optional attribute on the element displayed via a metadata track; value is the number of milliseconds to display the element before it fades out. Elements displayed via metadata tracks automatically fade out at the end time designated within the WebVTT file. However, if the **data-duration** attribute is present, this enables an element to fade out *before* the designated time. This is useful if multiple elements appear simultaneously, but some need to fade out earlier than others. 
  
 #### Search 
 
