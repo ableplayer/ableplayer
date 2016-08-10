@@ -474,7 +474,7 @@
             }
           }
           if (comp.type === 'b' || comp.type == 'i') {
-            result.push($tag);
+            result.push($tag,' ');
           }
         }
         else {
