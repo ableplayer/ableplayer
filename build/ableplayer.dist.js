@@ -7489,6 +7489,8 @@
       if (this.captionsOn === true) {
         // turn them off
         this.captionsOn = false;
+        this.prefCaptions = 0;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
@@ -7499,6 +7501,8 @@
       else {
         // captions are off. Turn them on.
         this.captionsOn = true;
+        this.prefCaptions = 1;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           if (typeof this.ytCaptionModule !== 'undefined') {
             this.youTubePlayer.loadModule(this.ytCaptionModule);
