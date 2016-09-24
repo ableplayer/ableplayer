@@ -71,9 +71,6 @@
       return;
     }
 
-    // Define built-in variables that CANNOT be overridden with HTML attributes
-    this.setDefaults();
-
     ///////////////////////////////
     //
     // Default variables assignment
@@ -386,6 +383,10 @@
         this.searchDiv = $(media).data('search-div');
       }
     }
+
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
     ////////////////////////////////////////
     //
     // End assignment of default variables
