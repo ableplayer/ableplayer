@@ -648,9 +648,16 @@
             trackItem.append(trackButton,trackLabel);
             trackList.append(trackItem);
           }
-          if (!hasDefault) {
-            // check the first button
-            trackList.find('input').first().attr('checked','checked');
+          if (!hasDefault) { // no 'default' attribute was specified on any <track>
+            if ((popup == 'captions' || popup == 'ytCaptions') && (trackList.find('input:radio[lang=' + this.captionLang + ']'))) {
+              // check the button associated with the default caption language
+              // (as determined in control.js > syncTrackLanguages())
+              trackList.find('input:radio[lang=' + this.captionLang + ']').attr('checked','checked');
+            }
+            else {
+              // check the first button
+              trackList.find('input').first().attr('checked','checked');
+            }
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
             this.captionsPopup.html(trackList);

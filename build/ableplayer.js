@@ -3453,9 +3453,16 @@
             trackItem.append(trackButton,trackLabel);
             trackList.append(trackItem);
           }
-          if (!hasDefault) {
-            // check the first button
-            trackList.find('input').first().attr('checked','checked');
+          if (!hasDefault) { // no 'default' attribute was specified on any <track>
+            if ((popup == 'captions' || popup == 'ytCaptions') && (trackList.find('input:radio[lang=' + this.captionLang + ']'))) {
+              // check the button associated with the default caption language
+              // (as determined in control.js > syncTrackLanguages())
+              trackList.find('input:radio[lang=' + this.captionLang + ']').attr('checked','checked');
+            }
+            else {
+              // check the first button
+              trackList.find('input').first().attr('checked','checked');
+            }
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
             this.captionsPopup.html(trackList);
@@ -4463,6 +4470,7 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
+
     this.hasCaptions = true;
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it
     // if not provided, assume track is the same language as the default player language
