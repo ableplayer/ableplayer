@@ -2882,6 +2882,7 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
+
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
@@ -10456,7 +10457,7 @@
     }
     else {
       // use image
-      buttonImgSrc = this.rootPath + '/icons/' + this.toolbarIconColor + '/preferences.png';
+      buttonImgSrc = this.rootPath + '/button-icons/' + this.toolbarIconColor + '/preferences.png';
       $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',

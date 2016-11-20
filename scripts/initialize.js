@@ -75,9 +75,7 @@
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
-
     this.imgPath = this.rootPath + '/button-icons/' + this.iconColor + '/';
-
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
 
