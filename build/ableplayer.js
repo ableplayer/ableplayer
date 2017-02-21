@@ -71,9 +71,6 @@
       return;
     }
 
-    // Define built-in variables that CANNOT be overridden with HTML attributes
-    this.setDefaults();
-
     ///////////////////////////////
     //
     // Default variables assignment
@@ -145,13 +142,6 @@
     }
     else {
       this.useChaptersButton = true;
-    }
-
-    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
-      this.useTranscriptButton = false;
-    }
-    else {
-      this.useTranscriptButton = true;
     }
 
     if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
@@ -235,7 +225,9 @@
 
     if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
       this.defaultChapter = $(media).data('chapters-default');
-      this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
+    }
+    else {
+      this.defaultChapter = null;
     }
 
     // Previous/Next buttons
@@ -374,7 +366,6 @@
       this.forceLang = false;
     }
 
-
     // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
       this.metaType = $(media).data('meta-type');
@@ -392,6 +383,10 @@
         this.searchDiv = $(media).data('search-div');
       }
     }
+
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
     ////////////////////////////////////////
     //
     // End assignment of default variables
@@ -521,9 +516,7 @@
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
-
     this.imgPath = this.rootPath + '/button-icons/' + this.iconColor + '/';
-
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
 
@@ -763,13 +756,18 @@
       return;
     }
 
-    this.setMediaAttributes();
+    // moved this until after setupTracks() is complete
+    // used to work fine in this location but was broken in Safari 10
+    // this.setMediaAttributes();
 
     this.loadCurrentPreferences();
 
     this.injectPlayerCode();
     this.initSignLanguage();
     this.setupTracks().then(function() {
+
+      // moved this here; in its original location was not working in Safari 10
+      thisObj.setMediaAttributes();
 
       thisObj.setupAltCaptions().then(function() {
 
@@ -789,7 +787,7 @@
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
           prefsGroups = thisObj.getPreferencesGroups();
-          for (i in prefsGroups) {
+          for (i = 0; i < prefsGroups.length; i++) {
             thisObj.injectPrefsForm(prefsGroups[i]);
           }
           thisObj.setupPopups();
@@ -799,10 +797,6 @@
             thisObj.populateChaptersDiv();
           }
           thisObj.showSearchResults();
-          if (thisObj.defaultChapter) {
-            thisObj.seekToDefaultChapter();
-            // thisObj.updateChapter(thisObj.getElapsed());
-          }
         },
         function() {  // initPlayer fail
           thisObj.provideFallback(this.error);
@@ -1039,19 +1033,15 @@
     // Firefox puts videos in tab order; remove.
     this.$media.attr('tabindex', -1);
 
-    // Keep native player from displaying captions/subtitles.
-    // This *should* work but isn't supported in all browsers
-    // For example, Safari 8.0.2 always displays captions if default attribute is present
-    // even if textTracks.mode is 'disabled' or 'hidden'
-    // Still using this here in case it someday is reliable
-    // Meanwhile, the only reliable way to suppress browser captions is to remove default attribute
-    // We're doing that in track.js > setupCaptions()
+    // Keep native player from displaying captions/subtitles by setting textTrack.mode='disabled'
+    // https://dev.w3.org/html5/spec-author-view/video.html#text-track-mode
+    // This *should* work but historically hasn't been supported in all browsers
+    // Workaround for non-supporting browsers is to remove default attribute
+    // We're doing that too in track.js > setupCaptions()
     var textTracks = this.$media.get(0).textTracks;
     if (textTracks) {
       var i = 0;
       while (i < textTracks.length) {
-        // mode is either 'disabled', 'hidden', or 'showing'
-        // neither 'disabled' nor 'hidden' hides default captions in Safari 8.0.2
         textTracks[i].mode = 'disabled';
         i += 1;
       }
@@ -2017,8 +2007,15 @@
     else {
       $('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
     }
+
+    // transcript highlights
+    if (this.prefHighlight === 0) {
+      // user doesn't want highlights; remove any existing highlights
+      $('.able-transcript span').removeClass('able-highlight');
+    }
+
+    // Re-initialize caption and description in case relevant settings have changed
     this.updateCaption();
-    // In case description-related settings have changed, re-initialize description
     this.refreshingDesc = true;
     this.initDescription();
   };
@@ -2076,7 +2073,7 @@
 
   function actList(state, list) {
     var results = [];
-    for (var ii in list) {
+    for (var ii = 0; ii < list.length; ii++) {
       results.push(act(state, list[ii]));
     }
     return results;
@@ -2092,7 +2089,7 @@
   }
 
   function updatePosition(state, cutText) {
-    for (var ii in cutText) {
+    for (var ii = 0; ii < cutText.length; ii++) {
       if (cutText[ii] === '\n') {
         state.column = 1;
         state.line += 1;
@@ -2884,6 +2881,7 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
+
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
@@ -2895,7 +2893,7 @@
       thisObj.handlePlay();
     });
 
-    this.$mediaContainer.prepend(this.$bigPlayButton);
+    this.$mediaContainer.append(this.$bigPlayButton);
   };
 
   AblePlayer.prototype.injectPlayerControlArea = function () {
@@ -3340,7 +3338,7 @@
         radioName = this.mediaId + '-' + popup + '-choice';
         if (popup === 'prefs') {
           prefCats = this.getPreferencesGroups();
-          for (j in prefCats) {
+          for (j = 0; j < prefCats.length; j++) {
             trackItem = $('<li></li>');
             prefCat = prefCats[j];
             if (prefCat === 'captions') {
@@ -3389,7 +3387,7 @@
           this.prefsPopup.append(trackList);
         }
         else {
-          for (j in tracks) {
+          for (j = 0; j < tracks.length; j++) {
             trackItem = $('<li></li>');
             track = tracks[j];
             radioId = this.mediaId + '-' + popup + '-' + j;
@@ -3455,9 +3453,16 @@
             trackItem.append(trackButton,trackLabel);
             trackList.append(trackItem);
           }
-          if (!hasDefault) {
-            // check the first button
-            trackList.find('input').first().attr('checked','checked');
+          if (!hasDefault) { // no 'default' attribute was specified on any <track>
+            if ((popup == 'captions' || popup == 'ytCaptions') && (trackList.find('input:radio[lang=' + this.captionLang + ']'))) {
+              // check the button associated with the default caption language
+              // (as determined in control.js > syncTrackLanguages())
+              trackList.find('input:radio[lang=' + this.captionLang + ']').attr('checked','checked');
+            }
+            else {
+              // check the first button
+              trackList.find('input').first().attr('checked','checked');
+            }
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
             this.captionsPopup.html(trackList);
@@ -3629,7 +3634,6 @@
         bll.push('descriptions'); //audio description
       }
     }
-
     if (this.transcriptType === 'popup') {
       bll.push('transcript');
     }
@@ -3874,7 +3878,6 @@
           // add an event listener that displays a tooltip on mouseenter or focus
           newButton.on('mouseenter focus',function(event) {
             var label = $(this).attr('aria-label');
-
             // get position of this button
             var position = $(this).position();
             var buttonHeight = $(this).height();
@@ -3883,7 +3886,7 @@
             var centerTooltip = true;
             if ($(this).closest('div').hasClass('able-right-controls')) {
               // this control is on the right side
-              if ($(this).is(':last-child')) {
+              if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
                 // this is the last control on the right
                 // position tooltip using the "right" property
                 centerTooltip = false;
@@ -4014,7 +4017,7 @@
 
     // combine left and right controls arrays for future reference
     this.controls = [];
-    for (var sec in controlLayout) {
+    for (var sec in controlLayout) if (controlLayout.hasOwnProperty(sec)) {
       this.controls = this.controls.concat(controlLayout[sec]);
     }
 
@@ -4467,6 +4470,7 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
+
     this.hasCaptions = true;
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it
     // if not provided, assume track is the same language as the default player language
@@ -5579,10 +5583,6 @@
   };
 
   AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
-
-//console.log('trackImmediatelyTo');
-//console.log('Position: ' + this.position);
-
     this.startTracking('keyboard', position);
     this.trackHeadAtPosition(position);
     this.keyTrackPosition = position;
@@ -6473,12 +6473,12 @@
         result.push(component.value);
       }
       else {
-        for (var ii in component.children) {
+        for (var ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponentForDescription(component.children[ii]));
         }
       }
       return result.join('');
-    }
+    };
 
     var cues;
     if (this.selectedDescriptions) {
@@ -6490,7 +6490,7 @@
     else {
       cues = [];
     }
-    for (d in cues) {
+    for (d = 0; d < cues.length; d++) {
       if ((cues[d].start <= now) && (cues[d].end > now)) {
         thisDescription = d;
         break;
@@ -6933,13 +6933,9 @@
     duration = this.getDuration();
     elapsed = this.getElapsed();
 
-    if (this.seekbarScope === 'chapter' && this.chapters.length) {
-      this.useChapterTimes = true;
+    if (this.useChapterTimes) {
       this.chapterDuration = this.getChapterDuration();
       this.chapterElapsed = this.getChapterElapsed();
-    }
-    else {
-      this.useChapterTimes = false;
     }
 
     if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
@@ -6950,8 +6946,8 @@
     if (this.seekBar) {
 
       if (this.useChapterTimes) {
-        lastChapterIndex = this.chapters.length-1;
-        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        lastChapterIndex = this.selectedChapters.cues.length-1;
+        if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
           // this is the last chapter
           if (this.currentChapter.end !== duration) {
             // chapter ends before or after video ends
@@ -7502,6 +7498,8 @@
       if (this.captionsOn === true) {
         // turn them off
         this.captionsOn = false;
+        this.prefCaptions = 0;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
@@ -7512,6 +7510,8 @@
       else {
         // captions are off. Turn them on.
         this.captionsOn = true;
+        this.prefCaptions = 1;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           if (typeof this.ytCaptionModule !== 'undefined') {
             this.youTubePlayer.loadModule(this.ytCaptionModule);
@@ -8157,25 +8157,25 @@
     var i, captions, descriptions, chapters, meta;
 
     // Captions
-    for (i in this.captions) {
+    for (i = 0; i < this.captions.length; i++) {
       if (this.captions[i].language === language) {
         captions = this.captions[i];
       }
     }
     // Chapters
-    for (i in this.chapters) {
+    for (i = 0; i < this.chapters.length; i++) {
       if (this.chapters[i].language === language) {
         chapters = this.chapters[i];
       }
     }
     // Descriptions
-    for (var i in this.descriptions) {
+    for (i = 0; i < this.descriptions.length; i++) {
       if (this.descriptions[i].language === language) {
         descriptions = this.descriptions[i];
       }
     }
     // Metadata
-    for (var i in this.meta) {
+    for (i = 0; i < this.meta.length; i++) {
       if (this.meta[i].language === language) {
         meta = this.meta[i];
       }
@@ -8318,7 +8318,7 @@
     else {
       cues = [];
     }
-    for (c in cues) {
+    for (c = 0; c < cues.length; c++) {
       if ((cues[c].start <= now) && (cues[c].end > now)) {
         thisCaption = c;
         break;
@@ -8369,40 +8369,40 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('(' + component.value + ')');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else if (component.type === 'i') {
         result.push('<em>');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
         result.push('</em>');
       }
       else if (component.type === 'b') {
         result.push('<strong>');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
         result.push('</strong>');
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
-    }
+    };
 
     if (typeof cue.components !== 'undefined') {
-      for (var ii in cue.components.children) {
+      for (var ii = 0; ii < cue.components.children.length; ii++) {
         result.push(flattenComponent(cue.components.children[ii]));
       }
     }
@@ -8642,7 +8642,16 @@
       return false;
     }
 
-    if (this.selectedChapters) {
+    if (typeof this.useChapterTimes === 'undefined') {
+      if (this.seekbarScope === 'chapter' && this.selectedChapters.cues.length) {
+        this.useChapterTimes = true;
+      }
+      else {
+        this.useChapterTimes = false;
+      }
+    }
+
+    if (this.useChapterTimes) {
       cues = this.selectedChapters.cues;
     }
     else if (this.chapters.length >= 1) {
@@ -8653,7 +8662,7 @@
     }
     if (cues.length > 0) {
       $chaptersList = $('<ul>');
-      for (c in cues) {
+      for (c = 0; c < cues.length; c++) {
         thisChapter = c;
         $chapterItem = $('<li></li>');
         $chapterButton = $('<button>',{
@@ -8669,8 +8678,9 @@
             thisChapterIndex = $chaptersList.index($clickedItem);
             $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
             $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            // Don't update this.currentChapter here; just seekTo chapter's start time;
-            // chapter will be updated via chapters.js > updateChapter()
+            // Need to updateChapter before seeking to it
+            // Otherwise seekBar is redrawn with wrong chapterDuration and/or chapterTime
+            thisObj.updateChapter(time);
             thisObj.seekTo(time);
           }
         };
@@ -8693,13 +8703,15 @@
         // put it all together
         $chapterItem.append($chapterButton);
         $chaptersList.append($chapterItem);
-        if (this.defaultChapter == cues[thisChapter].id) {
+        if (this.defaultChapter === cues[thisChapter].id) {
           $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+          this.currentChapter = cues[thisChapter];
           hasDefault = true;
         }
       }
       if (!hasDefault) {
-        // select the first button
+        // select the first chapter
+        this.currentChapter = cues[0];
         $chaptersList.find('button').first().attr('aria-selected','true')
           .parent('li').addClass('able-current-chapter');
       }
@@ -8708,14 +8720,16 @@
     return false;
   };
 
-  AblePlayer.prototype.seekToDefaultChapter = function() {
-    // this function is only called if this.defaultChapter is not null
-    // step through chapters looking for default
+  AblePlayer.prototype.seekToChapter = function(chapterId) {
+
+    // step through chapters looking for matching ID
     var i=0;
-    while (i < this.chapters.length) {
-      if (this.chapters[i].id === this.defaultChapter) {
-        // found the default chapter! Seek to it
-        this.seekTo(this.chapters[i].start);
+    while (i < this.selectedChapters.cues.length) {
+      if (this.selectedChapters.cues[i].id == chapterId) {
+        // found the target chapter! Seek to it
+        this.seekTo(this.selectedChapters.cues[i].start);
+        this.updateChapter(this.selectedChapters.cues[i].start);
+        break;
       }
       i++;
     }
@@ -8724,15 +8738,14 @@
   AblePlayer.prototype.updateChapter = function (now) {
 
     // as time-synced chapters change during playback, track changes in current chapter
-
-    if (typeof this.chapters === 'undefined') {
+    if (typeof this.selectedChapters === 'undefined') {
       return;
     }
 
     var chapters, i, thisChapterIndex, chapterLabel;
 
-    chapters = this.chapters;
-    for (i in chapters) {
+    chapters = this.selectedChapters.cues;
+    for (i = 0; i < chapters.length; i++) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
         thisChapterIndex = i;
         break;
@@ -8770,8 +8783,9 @@
       return 0;
     }
     videoDuration = this.getDuration();
-    lastChapterIndex = this.chapters.length-1;
-    if (this.chapters[lastChapterIndex] == this.currentChapter) {
+    lastChapterIndex = this.selectedChapters.cues.length-1;
+
+    if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
       // this is the last chapter
       if (this.currentChapter.end !== videoDuration) {
         // chapter ends before or after video ends, adjust chapter end to match video end
@@ -8839,14 +8853,18 @@
   };
 
   AblePlayer.prototype.showMeta = function(now) {
-    var m, thisMeta, cues, cueText, cueLines, i, line, focusTarget;
+    var tempSelectors, m, thisMeta,
+      cues, cueText, cueLines, i, line,
+      showDuration, focusTarget;
+
+    tempSelectors = [];
     if (this.meta.length >= 1) {
       cues = this.meta;
     }
     else {
       cues = [];
     }
-    for (m in cues) {
+    for (m = 0; m < cues.length; m++) {
       if ((cues[m].start <= now) && (cues[m].end > now)) {
         thisMeta = m;
         break;
@@ -8878,17 +8896,38 @@
             else {
               if ($(line).length) {
                 // selector exists
-                $(line).show();
+                showDuration = parseInt($(line).attr('data-duration'));
+                if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
+                  $(line).show().delay(showDuration).fadeOut();
+                }
+                else {
+                  // no duration specified. Just show the element until end time specified in VTT file
+                  $(line).show();
+                }
                 // add to array of visible selectors so it can be hidden at end time
                 this.visibleSelectors.push(line);
+                tempSelectors.push(line);
               }
             }
           }
+          // now step through this.visibleSelectors and remove anything that's stale
+          if (this.visibleSelectors && this.visibleSelectors.length) {
+            if (this.visibleSelectors.length !== tempSelectors.length) {
+              for (i=this.visibleSelectors.length-1; i>=0; i--) {
+                if ($.inArray(this.visibleSelectors[i],tempSelectors) == -1) {
+                  $(this.visibleSelectors[i]).hide();
+                  this.visibleSelectors.splice(i,1);
+                }
+              }
+            }
+          }
+
         }
         this.currentMeta = thisMeta;
       }
     }
     else {
+      // there is currently no metadata. Empty stale content
       if (typeof this.$metaDiv !== 'undefined') {
         this.$metaDiv.html('');
       }
@@ -8908,25 +8947,25 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('[' + component.value + ']');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
     }
 
-    for (var ii in cue.components.children) {
+    for (var ii = 0; ii < cue.components.children.length; ii++) {
       result.push(flattenComponent(cue.components.children[ii]));
     }
 
@@ -9098,7 +9137,7 @@
       else if (this.chapters.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii in this.chapters) {
+          for (var ii = 0; ii < this.chapters.length; ii++) {
             if (this.chapters[ii].language === this.transcriptLang) {
               chapters = this.chapters[ii].cues;
             }
@@ -9116,7 +9155,7 @@
       else if (this.descriptions.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii in this.descriptions) {
+          for (var ii = 0; ii < this.descriptions.length; ii++) {
             if (this.descriptions[ii].language === this.transcriptLang) {
               descriptions = this.descriptions[ii].cues;
             }
@@ -9196,6 +9235,9 @@
     var $main = $('<div class="able-transcript-container"></div>');
     var transcriptTitle;
 
+    // set language for transcript container
+    $main.attr('lang', this.transcriptLang);
+
     if (typeof this.transcriptTitle !== 'undefined') {
       transcriptTitle = this.transcriptTitle;
     }
@@ -9230,6 +9272,10 @@
       }
       $transcriptHeadingTag.text(transcriptTitle);
 
+      // set language of transcript heading to language of player
+      // this is independent of language of transcript
+      $transcriptHeadingTag.attr('lang', this.lang);
+
       $main.append($transcriptHeadingTag);
     }
 
@@ -9263,7 +9309,7 @@
           result.push(comp.value);
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForChapter(comp.children[ii]));
           }
         }
@@ -9273,9 +9319,9 @@
       var $chapSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii in chap.components.children) {
+      for (var ii = 0; ii < chap.components.children.length; ii++) {
         var results = flattenComponentForChapter(chap.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           $chapSpan.append(results[jj]);
         }
       }
@@ -9293,7 +9339,8 @@
       var $descHiddenSpan = $('<span>',{
         'class': 'able-hidden'
       });
-      $descHiddenSpan.text('Description: ');
+      $descHiddenSpan.attr('lang', thisObj.lang);
+      $descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ': ');
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function(comp) {
@@ -9303,7 +9350,7 @@
           result.push(comp.value);
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForDescription(comp.children[ii]));
           }
         }
@@ -9313,9 +9360,9 @@
       var $descSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii in desc.components.children) {
+      for (var ii = 0; ii < desc.components.children.length; ii++) {
         var results = flattenComponentForDescription(desc.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           $descSpan.append(results[jj]);
         }
       }
@@ -9382,9 +9429,9 @@
           });
           $vSpan.text('(' + comp.value + ')');
           result.push($vSpan);
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
-            for (var jj in subResults) {
+            for (var jj = 0; jj < subResults.length; jj++) {
               result.push(subResults[jj]);
             }
           }
@@ -9396,27 +9443,27 @@
           else if (comp.type === 'i') {
             var $tag = $('<em>');
           }
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             var subResults = flattenComponentForCaption(comp.children[ii]);
-            for (var jj in subResults) {
+            for (var jj = 0; jj < subResults.length; jj++) {
               $tag.append(subResults[jj]);
             }
           }
           if (comp.type === 'b' || comp.type == 'i') {
-            result.push($tag);
+            result.push($tag,' ');
           }
         }
         else {
-          for (var ii in comp.children) {
+          for (var ii = 0; ii < comp.children.length; ii++) {
             result = result.concat(flattenComponentForCaption(comp.children[ii]));
           }
         }
         return result;
       };
 
-      for (var ii in cap.components.children) {
+      for (var ii = 0; ii < cap.components.children.length; ii++) {
         var results = flattenComponentForCaption(cap.components.children[ii]);
-        for (var jj in results) {
+        for (var jj = 0; jj < results.length; jj++) {
           var result = results[jj];
           if (typeof result === 'string') {
             if (thisObj.lyricsMode) {
@@ -9544,7 +9591,7 @@
           resultsSummaryText += 'to play the video from that point.';
           resultsSummary.html(resultsSummaryText);
           var resultsList = $('<ul>');
-          for (var i in resultsArray) {
+          for (var i = 0; i < resultsArray.length; i++) {
             var resultsItem = $('<li>',{
             });
             var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
@@ -9595,10 +9642,10 @@
       if (captions.length > 0) {
         var results = [];
         c = 0;
-        for (i in captions) {
+        for (i = 0; i < captions.length; i++) {
           if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
             caption = this.flattenCueForCaption(captions[i]);
-            for (j in searchTerms) {
+            for (j = 0; j < searchTerms.length; j++) {
               if (caption.indexOf(searchTerms[j]) !== -1) {
                 results[c] = [];
                 results[c]['start'] = captions[i].start;
@@ -9717,20 +9764,6 @@
       this.updateChapter(currentTime);
       this.updateMeta();
       this.refreshControls();
-    }
-    else if (this.seeking) {
-      if (this.startTime === currentTime) {
-        // media has scrubbed to start time
-        this.seeking = false;
-        if (this.autoplay || this.playing) {
-          this.playMedia();
-        }
-      }
-    }
-    else { // not swapping src, not started playing, not seeking
-      if (this.autoplay) {
-        this.playMedia();
-      }
     }
   };
 
@@ -10012,6 +10045,7 @@
   };
 
   AblePlayer.prototype.addHtml5MediaListeners = function () {
+
     var thisObj = this;
 
     // NOTE: iOS does not support autoplay,
@@ -10029,16 +10063,33 @@
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
-        if (thisObj.startTime && !thisObj.startedPlaying) {
-          if (thisObj.seeking) {
-            // a seek has already been initiated
-            // since canplaythrough has been triggered, the seek is complete
-            thisObj.seeking = false;
+        if (!thisObj.startedPlaying) {
+          if (thisObj.startTime) {
+            if (thisObj.seeking) {
+              // a seek has already been initiated
+              // since canplaythrough has been triggered, the seek is complete
+              thisObj.seeking = false;
+              if (thisObj.autoplay) {
+                thisObj.playMedia();
+              }
+            }
+            else {
+              // haven't started seeking yet
+              thisObj.seekTo(thisObj.startTime);
+            }
+          }
+          else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
+            thisObj.seekToChapter(thisObj.defaultChapter);
           }
           else {
-            // haven't started seeking yet
-            thisObj.seekTo(thisObj.startTime);
+            // there is now startTime, therefore no seeking required
+            if (thisObj.autoplay) {
+              thisObj.playMedia();
+            }
           }
+        }
+        else {
+          // already started playing
         }
       })
       .on('playing',function() {
@@ -10405,7 +10456,7 @@
     }
     else {
       // use image
-      buttonImgSrc = this.rootPath + '/icons/' + this.toolbarIconColor + '/preferences.png';
+      buttonImgSrc = this.rootPath + '/button-icons/' + this.toolbarIconColor + '/preferences.png';
       $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',
@@ -10447,11 +10498,11 @@
     });
 
     // add a popup menu
-    var $popup = this.createPopup(windowName);
-    var $optionList = $('<ul></ul>');
-    var radioName = this.mediaId + '-' + windowName + '-choice';
+    $popup = this.createPopup(windowName);
+    $optionList = $('<ul></ul>');
+    radioName = this.mediaId + '-' + windowName + '-choice';
 
-    var options = [];
+    options = [];
     options.push({
       'name': 'move',
       'label': this.tt.windowMove
@@ -10460,17 +10511,17 @@
       'name': 'resize',
       'label': this.tt.windowResize
     });
-    for (var i in options) {
-      var $optionItem = $('<li></li>');
-      var option = options[i];
-      var radioId = radioName + '-' + i;
-      var $radioButton = $('<input>',{
+    for (i = 0; i < options.length; i++) {
+      $optionItem = $('<li></li>');
+      option = options[i];
+      radioId = radioName + '-' + i;
+      $radioButton = $('<input>',{
         'type': 'radio',
         'val': option.name,
         'name': radioName,
         'id': radioId
       });
-      var $radioLabel = $('<label>',{
+      $radioLabel = $('<label>',{
         'for': radioId
       });
       $radioLabel.text(option.label);
@@ -11097,7 +11148,7 @@
       'tabindex': '-1'
     });
     this.$signToolbar = $('<div>',{
-      'class': 'able-window-toolbar'
+      'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
     });
 
     this.$signWindow.append(this.$signToolbar, this.$signVideo);
@@ -11872,7 +11923,7 @@
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
     // Removing 'nl' as of 2.3.54, pending updates
-    var langs = ['de','en','es','fr','ja'];
+    var langs = ['ca','de','en','es','fr','ja'];
     return langs;
   };
 

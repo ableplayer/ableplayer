@@ -75,9 +75,7 @@
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
-
     this.imgPath = this.rootPath + '/button-icons/' + this.iconColor + '/';
-
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
 
@@ -317,13 +315,18 @@
       return;
     }
 
-    this.setMediaAttributes();
+    // moved this until after setupTracks() is complete
+    // used to work fine in this location but was broken in Safari 10
+    // this.setMediaAttributes();
 
     this.loadCurrentPreferences();
 
     this.injectPlayerCode();
     this.initSignLanguage();
     this.setupTracks().then(function() {
+
+      // moved this here; in its original location was not working in Safari 10
+      thisObj.setMediaAttributes();
 
       thisObj.setupAltCaptions().then(function() {
 
@@ -343,7 +346,7 @@
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
           prefsGroups = thisObj.getPreferencesGroups();
-          for (i in prefsGroups) {
+          for (i = 0; i < prefsGroups.length; i++) {
             thisObj.injectPrefsForm(prefsGroups[i]);
           }
           thisObj.setupPopups();
@@ -353,10 +356,6 @@
             thisObj.populateChaptersDiv();
           }
           thisObj.showSearchResults();
-          if (thisObj.defaultChapter) {
-            thisObj.seekToDefaultChapter();
-            // thisObj.updateChapter(thisObj.getElapsed());
-          }
         },
         function() {  // initPlayer fail
           thisObj.provideFallback(this.error);
@@ -593,19 +592,15 @@
     // Firefox puts videos in tab order; remove.
     this.$media.attr('tabindex', -1);
 
-    // Keep native player from displaying captions/subtitles.
-    // This *should* work but isn't supported in all browsers
-    // For example, Safari 8.0.2 always displays captions if default attribute is present
-    // even if textTracks.mode is 'disabled' or 'hidden'
-    // Still using this here in case it someday is reliable
-    // Meanwhile, the only reliable way to suppress browser captions is to remove default attribute
-    // We're doing that in track.js > setupCaptions()
+    // Keep native player from displaying captions/subtitles by setting textTrack.mode='disabled'
+    // https://dev.w3.org/html5/spec-author-view/video.html#text-track-mode
+    // This *should* work but historically hasn't been supported in all browsers
+    // Workaround for non-supporting browsers is to remove default attribute
+    // We're doing that too in track.js > setupCaptions()
     var textTracks = this.$media.get(0).textTracks;
     if (textTracks) {
       var i = 0;
       while (i < textTracks.length) {
-        // mode is either 'disabled', 'hidden', or 'showing'
-        // neither 'disabled' nor 'hidden' hides default captions in Safari 8.0.2
         textTracks[i].mode = 'disabled';
         i += 1;
       }

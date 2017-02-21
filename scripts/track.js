@@ -58,6 +58,7 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
+
     this.hasCaptions = true;
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it
     // if not provided, assume track is the same language as the default player language

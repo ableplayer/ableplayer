@@ -1,0 +1,73 @@
+WEBVTT
+kind: captions
+lang: en
+
+NOTE This VTT file includes a few extras:
+- Meta data at the top (lines 2 and 3)
+- The current comment block, identified with NOTE and surrounded by spaces
+- cue settings at the end of the first timestamp
+- A cue span at the start of the second cue payload
+- (in this case, a "voice span" <v> identifying the speaker)
+- A WebVTT cue settings list after the timestamp at 39.132
+- Currently AblePlayer does not support these extra features
+- but the parser needs to be able to filter them out
+-
+- Added on April 1, 2015 for testing purposes (these are both valid):
+- A cue block with no content
+- Multiple line breaks between some cue blocks
+-
+- More info in the WebVTT spec (still evolving):
+- http://dev.w3.org/html5/webvtt
+
+00:00:00.429 --> 00:00:09.165
+[ Musik ]
+
+00:00:09.165 --> 00:00:10.792
+<v Sprecherin> Sie <i>wollen</i> Menschen erreichen.
+
+00:00:10.792 --> 00:00:13.759
+Menschen, die Ihre Produkte <b>bestellen</b>,
+sich für Ihre Dienstleistungen <b>registrieren</b>,
+
+00:00:13.759 --> 00:00:16.627
+sich zu Ihren Kursen <b>anmelden</b>,
+Ihre Beiträge <b>lesen</b>&nbsp;
+
+00:00:16.627 --> 00:00:18.561
+und sich Ihre Videos <b>ansehen</b>.
+
+00:00:18.561 --> 00:00:24.165
+Sie werden diese Menschen nie zu Gesicht bekommen, aber 
+diese kennen Sie &ndash; durch Ihre Website.
+
+00:00:24.165 --> 00:00:25.891
+Oder vielleicht auch nicht.
+
+00:00:25.891 --> 00:00:30.396
+<c.quotable>Ihre Webseiten-Besucher sind keine gesichtslose Masse
+identischer Maus-Klicker</c>
+
+00:00:30.396 --> 00:00:32.363
+sondern eine lebhafte Gruppe von Individuen
+
+00:00:32.363 --> 00:00:35.297
+mit unterschiedlichen Vorlieben, Ausprägungen 
+und Fähigkeiten.
+
+00:00:35.297 --> 00:00:36.900
+Das schliesst auch Menschen mit Behinderungen ein.
+
+00:00:39.132 --> 00:00:41.000 position:10%,start align:start size:35%
+<v Terrill> Es ist wichtig für Entwickler und Gestalter von Webseiten
+
+00:00:41.000 --> 00:00:45.500
+zu realisieren, dass das, was sie 
+auf ihrem eigenen Bildschirm sehen,
+
+00:00:45.500 --> 00:00:49.264
+je nach Bildschirmgröße, Auflösung, Browser und Betriebssystem
+
+00:00:49.264 --> 00:00:52.000
+nicht notwendigerweise dem entspricht, was alle anderen sehen.
+
+

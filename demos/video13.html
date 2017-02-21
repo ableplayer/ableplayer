@@ -133,15 +133,17 @@ $(document).ready(function() {
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg">
-  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
   <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-  <!-- Able Player will display tracks alphabetically by label -->
-  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
   <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-  <track kind="captions" src="../media/wwa_captions_ja.vtt" srclang="ja" label="日本語"/>
+  <track kind="subtitles" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+  <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
   <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
   <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
   <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+  <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
   <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
   <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
 </video>

@@ -77,6 +77,7 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
+
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
@@ -88,7 +89,7 @@
       thisObj.handlePlay();
     });
 
-    this.$mediaContainer.prepend(this.$bigPlayButton);
+    this.$mediaContainer.append(this.$bigPlayButton);
   };
 
   AblePlayer.prototype.injectPlayerControlArea = function () {
@@ -533,7 +534,7 @@
         radioName = this.mediaId + '-' + popup + '-choice';
         if (popup === 'prefs') {
           prefCats = this.getPreferencesGroups();
-          for (j in prefCats) {
+          for (j = 0; j < prefCats.length; j++) {
             trackItem = $('<li></li>');
             prefCat = prefCats[j];
             if (prefCat === 'captions') {
@@ -582,7 +583,7 @@
           this.prefsPopup.append(trackList);
         }
         else {
-          for (j in tracks) {
+          for (j = 0; j < tracks.length; j++) {
             trackItem = $('<li></li>');
             track = tracks[j];
             radioId = this.mediaId + '-' + popup + '-' + j;
@@ -648,9 +649,16 @@
             trackItem.append(trackButton,trackLabel);
             trackList.append(trackItem);
           }
-          if (!hasDefault) {
-            // check the first button
-            trackList.find('input').first().attr('checked','checked');
+          if (!hasDefault) { // no 'default' attribute was specified on any <track>
+            if ((popup == 'captions' || popup == 'ytCaptions') && (trackList.find('input:radio[lang=' + this.captionLang + ']'))) {
+              // check the button associated with the default caption language
+              // (as determined in control.js > syncTrackLanguages())
+              trackList.find('input:radio[lang=' + this.captionLang + ']').attr('checked','checked');
+            }
+            else {
+              // check the first button
+              trackList.find('input').first().attr('checked','checked');
+            }
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
             this.captionsPopup.html(trackList);
@@ -822,7 +830,6 @@
         bll.push('descriptions'); //audio description
       }
     }
-
     if (this.transcriptType === 'popup') {
       bll.push('transcript');
     }
@@ -1067,7 +1074,6 @@
           // add an event listener that displays a tooltip on mouseenter or focus
           newButton.on('mouseenter focus',function(event) {
             var label = $(this).attr('aria-label');
-
             // get position of this button
             var position = $(this).position();
             var buttonHeight = $(this).height();
@@ -1076,7 +1082,7 @@
             var centerTooltip = true;
             if ($(this).closest('div').hasClass('able-right-controls')) {
               // this control is on the right side
-              if ($(this).is(':last-child')) {
+              if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
                 // this is the last control on the right
                 // position tooltip using the "right" property
                 centerTooltip = false;
@@ -1207,7 +1213,7 @@
 
     // combine left and right controls arrays for future reference
     this.controls = [];
-    for (var sec in controlLayout) {
+    for (var sec in controlLayout) if (controlLayout.hasOwnProperty(sec)) {
       this.controls = this.controls.concat(controlLayout[sec]);
     }
 

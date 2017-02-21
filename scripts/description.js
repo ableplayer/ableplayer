@@ -237,12 +237,12 @@
         result.push(component.value);
       }
       else {
-        for (var ii in component.children) {
+        for (var ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponentForDescription(component.children[ii]));
         }
       }
       return result.join('');
-    }
+    };
 
     var cues;
     if (this.selectedDescriptions) {
@@ -254,7 +254,7 @@
     else {
       cues = [];
     }
-    for (d in cues) {
+    for (d = 0; d < cues.length; d++) {
       if ((cues[d].start <= now) && (cues[d].end > now)) {
         thisDescription = d;
         break;
