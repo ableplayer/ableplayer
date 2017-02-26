@@ -228,7 +228,6 @@ The following attributes control which of the above types, if any, are generated
 If none of the above attributes are present, the transcript will be displayed in a draggable, resizable popup that can be toggled on/off using a button on the controller. Note that a toggle button is added to the controller *only* if the transcript is a "popup" type; there is no toggle button for either the "external" or "manual" transcript types. 
 
 Additional transcript-related attributes include:   
--   **data-use-Transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container, you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 
@@ -273,6 +272,9 @@ The following attributes make all this possible:
 
 -   **data-meta-type** - required for metadata; indicates the type of metadata contained within a metadata track. Supported values as described above are "text" and "selector".
 -   **data-meta-div** - required for "text" metadata; id of an external div in which to display the text. 
+-   **data-duration** - optional attribute on the element displayed via a metadata track; value is the number of milliseconds to display the element before it fades out. Elements displayed via metadata tracks automatically fade out at the end time designated within the WebVTT file. However, if the **data-duration** attribute is present, this enables an element to fade out *before* the designated time. This is useful if multiple elements appear simultaneously, but some need to fade out earlier than others. 
+
+**NOTE:** If you're using metadata to expose content in sync with videos hosted on YouTube, please review [YouTube's Terms of Service] related to Overlays and Frames. As of August 11, 2016: "You must not display overlays, frames, or other visual elements in front of any part of a YouTube embedded player, including player controls. Similarly, you must not use overlays, frames or other visual elements to obscure any part of an embedded player, including player controls."  
  
 #### Search 
 
@@ -650,4 +652,5 @@ at the University of Washington, with financial support from the National Scienc
   [WebVTT validator]: https://quuz.org/webvtt/
   [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
   [WebVTT]: https://w3c.github.io/webvtt/
+  [YouTube's Terms of Service]: https://developers.google.com/youtube/terms/required-minimum-functionality#overlays-and-frames
 

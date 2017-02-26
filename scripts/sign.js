@@ -70,7 +70,7 @@
       'tabindex': '-1'
     });
     this.$signToolbar = $('<div>',{
-      'class': 'able-window-toolbar'
+      'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
     });
 
     this.$signWindow.append(this.$signToolbar, this.$signVideo);

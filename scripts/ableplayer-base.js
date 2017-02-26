@@ -71,9 +71,6 @@
       return;
     }
 
-    // Define built-in variables that CANNOT be overridden with HTML attributes
-    this.setDefaults();
-
     ///////////////////////////////
     //
     // Default variables assignment
@@ -145,13 +142,6 @@
     }
     else {
       this.useChaptersButton = true;
-    }
-
-    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
-      this.useTranscriptButton = false;
-    }
-    else {
-      this.useTranscriptButton = true;
     }
 
     if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
@@ -235,7 +225,9 @@
 
     if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
       this.defaultChapter = $(media).data('chapters-default');
-      this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
+    }
+    else {
+      this.defaultChapter = null;
     }
 
     // Previous/Next buttons
@@ -374,7 +366,6 @@
       this.forceLang = false;
     }
 
-
     // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
       this.metaType = $(media).data('meta-type');
@@ -392,6 +383,10 @@
         this.searchDiv = $(media).data('search-div');
       }
     }
+
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
     ////////////////////////////////////////
     //
     // End assignment of default variables

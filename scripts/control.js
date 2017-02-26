@@ -250,13 +250,9 @@
     duration = this.getDuration();
     elapsed = this.getElapsed();
 
-    if (this.seekbarScope === 'chapter' && this.chapters.length) {
-      this.useChapterTimes = true;
+    if (this.useChapterTimes) {
       this.chapterDuration = this.getChapterDuration();
       this.chapterElapsed = this.getChapterElapsed();
-    }
-    else {
-      this.useChapterTimes = false;
     }
 
     if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
@@ -267,8 +263,8 @@
     if (this.seekBar) {
 
       if (this.useChapterTimes) {
-        lastChapterIndex = this.chapters.length-1;
-        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        lastChapterIndex = this.selectedChapters.cues.length-1;
+        if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
           // this is the last chapter
           if (this.currentChapter.end !== duration) {
             // chapter ends before or after video ends
@@ -819,6 +815,8 @@
       if (this.captionsOn === true) {
         // turn them off
         this.captionsOn = false;
+        this.prefCaptions = 0;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
@@ -829,6 +827,8 @@
       else {
         // captions are off. Turn them on.
         this.captionsOn = true;
+        this.prefCaptions = 1;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           if (typeof this.ytCaptionModule !== 'undefined') {
             this.youTubePlayer.loadModule(this.ytCaptionModule);
@@ -1474,25 +1474,25 @@
     var i, captions, descriptions, chapters, meta;
 
     // Captions
-    for (i in this.captions) {
+    for (i = 0; i < this.captions.length; i++) {
       if (this.captions[i].language === language) {
         captions = this.captions[i];
       }
     }
     // Chapters
-    for (i in this.chapters) {
+    for (i = 0; i < this.chapters.length; i++) {
       if (this.chapters[i].language === language) {
         chapters = this.chapters[i];
       }
     }
     // Descriptions
-    for (var i in this.descriptions) {
+    for (i = 0; i < this.descriptions.length; i++) {
       if (this.descriptions[i].language === language) {
         descriptions = this.descriptions[i];
       }
     }
     // Metadata
-    for (var i in this.meta) {
+    for (i = 0; i < this.meta.length; i++) {
       if (this.meta[i].language === language) {
         meta = this.meta[i];
       }
