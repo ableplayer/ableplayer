@@ -7,7 +7,6 @@
   };
 
   AblePlayer.prototype.getTranslationText = function() {
-
     // determine language, then get labels and prompts from corresponding translation var
     var deferred, thisObj, lang, thisObj, msg, translationFile;
 
@@ -40,7 +39,8 @@
       }
     }
 
-    translationFile = '../translations/' + this.lang + '.js';
+    // this.scriptPath is location of AblePlayer JavaScript file (default: /build)
+    translationFile = this.scriptPath + '../translations/' + this.lang + '.js';
     this.importTranslationFile(translationFile).then(function(result) {
       thisObj.tt = eval(thisObj.lang);
       deferred.resolve();

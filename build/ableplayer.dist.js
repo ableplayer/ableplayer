@@ -115,9 +115,11 @@
     if ($(media).data('root-path') !== undefined) {
       // remove trailing slashes if there are any
       this.rootPath = $(media).data('root-path').replace(/\/+$/, "");
+      this.scriptPath = this.rootPath;
     }
     else {
       this.rootPath = this.getRootWebSitePath();
+      this.scriptPath = this.getScriptPath();
     }
 
     // Volume
@@ -459,6 +461,15 @@
     var webFolderIndex = _location.indexOf('/', _location.indexOf(domainName) + domainName.length);
     var webFolderFullPath = _location.substring(0, webFolderIndex);
     return webFolderFullPath;
+  };
+
+  AblePlayer.prototype.getScriptPath = function() {
+
+    // returns path to Able Player JavaScript file
+    var scripts= document.getElementsByTagName('script');
+    var path= scripts[scripts.length-1].src.split('?')[0]; // remove any ?query
+    var ableDir= path.split('/').slice(0, -1).join('/')+'/'; // remove last filename part of path
+    return ableDir;
   };
 
   AblePlayer.prototype.setIconColor = function() {
@@ -11925,7 +11936,6 @@
   };
 
   AblePlayer.prototype.getTranslationText = function() {
-
     // determine language, then get labels and prompts from corresponding translation var
     var deferred, thisObj, lang, thisObj, msg, translationFile;
 
@@ -11958,7 +11968,8 @@
       }
     }
 
-    translationFile = '../translations/' + this.lang + '.js';
+    // this.scriptPath is location of AblePlayer JavaScript file (default: /build)
+    translationFile = this.scriptPath + '../translations/' + this.lang + '.js';
     this.importTranslationFile(translationFile).then(function(result) {
       thisObj.tt = eval(thisObj.lang);
       deferred.resolve();

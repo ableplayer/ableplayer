@@ -115,9 +115,11 @@
     if ($(media).data('root-path') !== undefined) {
       // remove trailing slashes if there are any
       this.rootPath = $(media).data('root-path').replace(/\/+$/, "");
+      this.scriptPath = this.rootPath;
     }
     else {
       this.rootPath = this.getRootWebSitePath();
+      this.scriptPath = this.getScriptPath();
     }
 
     // Volume

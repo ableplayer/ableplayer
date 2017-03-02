@@ -20,6 +20,15 @@
     return webFolderFullPath;
   };
 
+  AblePlayer.prototype.getScriptPath = function() {
+
+    // returns path to Able Player JavaScript file
+    var scripts= document.getElementsByTagName('script');
+    var path= scripts[scripts.length-1].src.split('?')[0]; // remove any ?query
+    var ableDir= path.split('/').slice(0, -1).join('/')+'/'; // remove last filename part of path
+    return ableDir;
+  };
+
   AblePlayer.prototype.setIconColor = function() {
 
     // determine the best color choice (white or black) for icons,
