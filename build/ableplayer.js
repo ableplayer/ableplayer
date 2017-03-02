@@ -8765,9 +8765,6 @@
           this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
             .addClass('able-current-chapter').attr('aria-selected','true');
         }
-        // announce new chapter via ARIA alert
-        chapterLabel = this.tt.newChapter + ': ' + this.flattenCueForCaption(this.currentChapter);
-        this.showAlert(chapterLabel,'screenreader');
       }
     }
   };
@@ -11930,9 +11927,11 @@
   AblePlayer.prototype.getTranslationText = function() {
 
     // determine language, then get labels and prompts from corresponding translation var
-    var gettingText, lang, thisObj, msg;
+    var deferred, thisObj, lang, thisObj, msg, translationFile;
 
-    gettingText = $.Deferred();
+    deferred = $.Deferred();
+
+    thisObj = this;
 
     // override this.lang to language of the web page, if known and supported
     // otherwise this.lang will continue using default
@@ -11959,1243 +11958,31 @@
       }
     }
 
-    // in final build, all language variables are contatenated into this function below...
-    // translation2.js is then contanenated onto the end to finish this function
-
-
-var de = {"playerHeading": "Media Player","faster": "Schneller","slower": "Langsamer","chapters": "Kapitel","newChapter": "Neues Kapitel","play": "Abspielen","pause": "Pause","stop": "Anhalten","restart": "Neustart","prevChapter": "Vorheriges Kapitel","nextChapter": "Nächste Kapitel","prevTrack": "Vorheriges track","nextTrack": "Nächste Titel","rewind": "Zurück springen","forward": "Vorwärts springen","captions": "Untertitel","showCaptions": "Untertitel anzeigen","hideCaptions": "Untertitel verstecken","captionsOff": "Untertitel ausschalten","showTranscript": "Transkription anzeigen","hideTranscript": "Transkription entfernen","turnOnDescriptions": "Audiodeskription einschalten","turnOffDescriptions": "Audiodeskription ausschalten","language": "Sprache","sign": "Gebärdensprache","showSign": "Gebärdensprache anzeigen","hideSign": "Gebärdensprache verstecken","seekbarLabel": "timeline","mute": "Ton ausschalten","unmute": "Ton einschalten","volume": "Lautstärke","volumeHelp": "Eingabetaste drücken, um den Lautstärkeregler zu bedienen","volumeUpDown": "Lautstärkeregler","volumeSliderClosed": "Lautstärkeregler verlassen","preferences": "Einstellungen","enterFullScreen": "Vollbildmodus einschalten","exitFullScreen": "Vollbildmodus verlassen","fullScreen": "Vollbildmodus","speed": "Geschwindigkeit","and": "und","or": "oder","spacebar": "Leertaste","transcriptTitle": "Transkription","lyricsTitle": "Text","autoScroll": "Automatisch scrollen","unknown": "Unbekannt","statusPlaying": "Gestartet","statusPaused": "Pausiert","statusStopped": "Angehalten","statusWaiting": "Wartend","statusBuffering": "Daten werden empfangen...","statusUsingDesc": "Video mit Audiodeskription wird verwendet","statusLoadingDesc": "Video mit Audiodeskription wird geladen","statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet","statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen","statusLoadingNext": "Der nächste Titel wird geladen","statusEnd": "Ende des Titels","selectedTrack": "Ausgewählter Titel","alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt","alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt","fallbackError1": "Abspielen ist mit diesem Browser nicht möglich","fallbackError2": "Folgende Browser wurden mit AblePlayer getestet","orHigher": "oder höher","prefMenuCaptions": "Untertitel","prefMenuDescriptions": "Audiodeskriptionen","prefMenuKeyboard": "Tastatur","prefMenuTranscript": "Transkription","prefTitleCaptions": "Untertitel Einstellungen","prefTitleDescriptions": "Audiodeskription Einstellungen","prefTitleKeyboard": "Tastatur Einstellungen","prefTitleTranscript": "Transkription Einstellungen","prefIntroCaptions": "Diese Einstellungen beeinflussen die Darstellung von Untertiteln:","prefIntroDescription1": "Dieser Media Player unterstützt zwei Arten von Untertiteln: ","prefIntroDescription2": "Das aktuelle Video hat ","prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.","prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der Audiodeskription.","prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.","prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).","prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.","prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.","prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.","prefCookieWarning": "Cookies werden benötigt, um Ihre Einstellungen abzuspeichern.","prefHeadingKeyboard1": "Modifikatortasten für die Tastenkürzel","prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel","prefHeadingDescription": "Audiodeskription","prefHeadingTextDescription": "Textbasierte Audiodeskription","prefHeadingCaptions": "Untertitel","prefHeadingTranscript": "Interaktive Transkription","prefAltKey": "Alt","prefCtrlKey": "Strg","prefShiftKey": "Umschalttaste","escapeKey": "ESC Taste","escapeKeyFunction": "Dialogfenster schließen","prefDescFormat": "Bevorzugtes Format","prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.","prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält","prefDescFormatOption1b": "eine alternative Version der Audiodeskription","prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird","prefDescFormatOption2b": "eine textbasierte Audiodeskription","prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden","prefVisibleDesc": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind","prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird","prefTabbable": "Transkription per Tastatur ein-/ausschaltbar machen","prefCaptionsFont": "Schriftart","prefCaptionsColor": "Schriftfarbe","prefCaptionsBGColor": "Hintergrund","prefCaptionsSize": "Schriftgrad","prefCaptionsOpacity": "Deckkraft","prefCaptionsStyle": "Stil","serif": "Serifenschrift","sans": "Serifenlose Schrift","cursive": "kursiv","fantasy": "Fantasieschrift","monospace": "nichtproportionale Schrift","white": "weiß","yellow": "gelb","green": "grün","cyan": "cyan","blue": "blau","magenta": "magenta","red": "rot","black": "schwarz","transparent": "transparent","solid": "undurchsichtig","captionsStylePopOn": "Pop-on","captionsStyleRollUp": "Roll-up","prefCaptionsPosition": "Position","captionsPositionOverlay": "Überlagert","captionsPositionBelow": "Unterhalb","sampleCaptionText": "Textbeispiel","prefSuccess": "Ihre Änderungen wurden gespeichert.","prefNoChange": "Es gab keine Änderungen zu speichern.","help": "Hilfe","helpTitle": "Hilfe","save": "Speichern","cancel": "Abbrechen","ok": "Ok","done": "Fertig","closeButtonLabel": "Schließen","windowButtonLabel": "Fenster Manipulationen","windowMove": "Verschieben","windowMoveAlert": "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste","windowResize": "Größe verändern","windowResizeHeading": "Größe des Gebärdensprache-Fenster","windowResizeAlert": "Die Größe wurde angepasst.","width": "Breite","height": "Höhe","windowSendBack": "In den Hintergrund verschieben","windowSendBackAlert": "Dieses Fenster ist jetzt im Hintergrund und wird von anderen Fenstern verdeckt.","windowBringTop": "In den Vordergrund holen","windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."};
-var en = {
-
-"playerHeading": "Media player",
-
-"faster": "Faster",
-
-"slower": "Slower",
-
-"play": "Play",
-
-"pause": "Pause",
-
-"stop": "Stop",
-
-"restart": "Restart",
-
-"prevChapter": "Previous chapter",
-
-"nextChapter": "Next chapter",
-
-"prevTrack": "Previous track",
-
-"nextTrack": "Next track",
-
-"rewind": "Rewind",
-
-"forward": "Forward",
-
-"captions": "Captions",
-
-"showCaptions": "Show captions",
-
-"hideCaptions": "Hide captions",
-
-"captionsOff": "Captions off",
-
-"showTranscript": "Show transcript",
-
-"hideTranscript": "Hide transcript",
-
-"turnOnDescriptions": "Turn on descriptions",
-
-"turnOffDescriptions": "Turn off descriptions",
-
-"chapters": "Chapters",
-
-"newChapter": "New chapter",
-
-"language": "Language",
-
-"sign": "Sign language",
-
-"showSign": "Show sign language",
-
-"hideSign": "Hide sign language",
-
-"seekbarLabel": "timeline",
-
-"mute": "Mute",
-
-"unmute": "Unmute",
-
-"volume": "Volume",
-
-"volumeHelp": "Click to access volume slider",
-
-"volumeUpDown": "Volume up down",
-
-"volumeSliderClosed": "Volume slider closed",
-
-"preferences": "Preferences",
-
-"enterFullScreen": "Enter full screen",
-
-"exitFullScreen": "Exit full screen",
-
-"fullScreen": "Full screen",
-
-"speed": "Speed",
-
-"and": "and",
-
-"or": "or",
-
-"spacebar": "spacebar",
-
-"transcriptTitle": "Transcript",
-
-"lyricsTitle": "Lyrics",
-
-"autoScroll": "Auto scroll",
-
-"unknown": "Unknown",
-
-"statusPlaying": "Playing",
-
-"statusPaused": "Paused",
-
-"statusStopped": "Stopped",
-
-"statusWaiting": "Waiting",
-
-"statusBuffering": "Buffering",
-
-"statusUsingDesc": "Using described version",
-
-"statusLoadingDesc": "Loading described version",
-
-"statusUsingNoDesc": "Using non-described version",
-
-"statusLoadingNoDesc": "Loading non-described version",
-
-"statusLoadingNext": "Loading next track",
-
-"statusEnd": "End of track",
-
-"selectedTrack": "Selected Track",
-
-"alertDescribedVersion": "Using the audio described version of this video",
-
-"alertNonDescribedVersion": "Using the non-described version of this video",
-
-"fallbackError1": "Sorry, your browser is unable to play this",
-
-"fallbackError2": "The following browsers are known to work with this media player",
-
-"orHigher": "or higher",
-
-"prefMenuCaptions": "Captions",
-
-"prefMenuDescriptions": "Descriptions",
-
-"prefMenuKeyboard": "Keyboard",
-
-"prefMenuTranscript": "Transcript",
-
-"prefTitleCaptions": "Captions Preferences",
-
-"prefTitleDescriptions": "Audio Description Preferences",
-
-"prefTitleKeyboard": "Keyboard Preferences",
-
-"prefTitleTranscript": "Transcript Preferences",
-
-"prefIntroCaptions": "The following preferences control how captions are displayed.",
-
-"prefIntroDescription1": "This media player supports audio description in two ways: ",
-
-"prefIntroDescription2": "The current video has ",
-
-"prefIntroDescriptionNone": "The current video has no audio description in either format.",
-
-"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
-
-"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
-
-"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
-
-"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
-
-"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
-
-"prefIntroTranscript": "The following preferences affect the interactive transcript.",
-
-"prefCookieWarning": "Saving your preferences requires cookies.",
-
-"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
-
-"prefHeadingKeyboard2": "Current keyboard shortcuts",
-
-"prefHeadingDescription": "Audio description",
-
-"prefHeadingTextDescription": "Text-based audio description",
-
-"prefHeadingCaptions": "Captions",
-
-"prefHeadingTranscript": "Interactive Transcript",
-
-"prefAltKey": "Alt",
-
-"prefCtrlKey": "Control",
-
-"prefShiftKey": "Shift",
-
-"escapeKey": "Escape",
-
-"escapeKeyFunction": "Close current dialog or popup menu",
-
-"prefDescFormat": "Preferred format",
-
-"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
-
-"prefDescFormatOption1": "alternative described version of video",
-
-"prefDescFormatOption1b": "an alternative described version",
-
-"prefDescFormatOption2": "text-based description, announced by screen reader",
-
-"prefDescFormatOption2b": "text-based description",
-
-"prefDescPause": "Automatically pause video when description starts",
-
-"prefVisibleDesc": "Make description visible",
-
-"prefHighlight": "Highlight transcript as media plays",
-
-"prefTabbable": "Keyboard-enable transcript",
-
-"prefCaptionsFont": "Font",
-
-"prefCaptionsColor": "Text Color",
-
-"prefCaptionsBGColor": "Background",
-
-"prefCaptionsSize": "Font Size",
-
-"prefCaptionsOpacity": "Opacity",
-
-"prefCaptionsStyle": "Style",
-
-"serif": "serif",
-
-"sans": "sans-serif",
-
-"cursive": "cursive",
-
-"fantasy": "fantasy",
-
-"monospace": "monospace",
-
-"white": "white",
-
-"yellow": "yellow",
-
-"green": "green",
-
-"cyan": "cyan",
-
-"blue": "blue",
-
-"magenta": "magenta",
-
-"red": "red",
-
-"black": "black",
-
-"transparent": "transparent",
-
-"solid": "solid",
-
-"captionsStylePopOn": "Pop-on",
-
-"captionsStyleRollUp": "Roll-up",
-
-"prefCaptionsPosition": "Position",
-
-"captionsPositionOverlay": "Overlay",
-
-"captionsPositionBelow": "Below video",
-
-"sampleCaptionText": "Sample caption text",
-
-"prefSuccess": "Your changes have been saved.",
-
-"prefNoChange": "You didn't make any changes.",
-
-"help": "Help",
-
-"helpTitle": "Help",
-
-"save": "Save",
-
-"cancel": "Cancel",
-
-"ok": "ok",
-
-"done": "Done",
-
-"closeButtonLabel": "Close dialog",
-
-"windowButtonLabel": "Window options",
-
-"windowMove": "Move",
-
-"windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
-
-"windowResize": "Resize",
-
-"windowResizeHeading": "Resize Window",
-
-"windowResizeAlert": "The window has been resized.",
-
-"width": "Width",
-
-"height": "Height",
-
-"windowSendBack": "Send to back",
-
-"windowSendBackAlert": "This window is now behind other objects on the page.",
-
-"windowBringTop": "Bring to front",
-
-"windowBringTopAlert": "This window is now in front of other objects on the page."
-
-};
-
-var es = {
-
-"playerHeading": "Media player",
-
-"faster": "Rápido",
-
-"slower": "Lento",
-
-"play": "Play",
-
-"pause": "Pausa",
-
-"stop": "Detener",
-
-"restart": "Reiniciar",
-
-"prevChapter": "Capítulo Anterior",
-
-"nextChapter": "Siguiente Capítulo",
-
-"prevTrack": "Pista Anterior",
-
-"nextTrack": "Siguiente Pista",
-
-"rewind": "Rebobinar",
-
-"forward": "Adelantar",
-
-"captions": "Subtítulos",
-
-"showCaptions": "Mostrar subtítulos",
-
-"hideCaptions": "Ocultar subtítulos",
-
-"captionsOff": "Sin subtítulos",
-
-"showTranscript": "Mostrar transcripción",
-
-"hideTranscript": "Ocultar transcripción",
-
-"turnOnDescriptions": "Habilitar descripciones",
-
-"turnOffDescriptions": "Deshabilitar descripciones",
-
-"chapters": "Capítulos",
-
-"newChapter": "Nuevo capítulo",
-
-"language": "Idioma",
-
-"sign": "Lengua de señas",
-
-"showSign": "Mostrar lengua de señas",
-
-"hideSign": "Ocultar lengua de señas",
-
-"seekbarLabel": "timeline",
-
-"mute": "Silenciar",
-
-"unmute": "Habilitar sonido",
-
-"volume": "Volumen",
-
-"volumeHelp": "Clic para acceder a la barra de volumen",
-
-"volumeUpDown": "Bajar sonido",
-
-"volumeSliderClosed": "Barra de volumen cerrada",
-
-"preferences": "Preferencias",
-
-"enterFullScreen": "Ver a pantalla completa",
-
-"exitFullScreen": "Salir de pantalla completa",
-
-"fullScreen": "Pantalla completa",
-
-"speed": "Velocidad",
-
-"and": "y",
-
-"or": "o",
-
-"spacebar": "Barra espaciadora",
-
-"transcriptTitle": "Transcript",
-
-"lyricsTitle": "Letra",
-
-"autoScroll": "Desplazamiento automático",
-
-"unknown": "Desconocido",
-
-"statusPlaying": "Reproduciendo",
-
-"statusPaused": "Pausado",
-
-"statusStopped": "Detenido",
-
-"statusWaiting": "Esperando",
-
-"statusBuffering": "Almacenando",
-
-"statusUsingDesc": "Utilizando versión descrita",
-
-"statusLoadingDesc": "Cargando versión descrita",
-
-"statusUsingNoDesc": "Utilizando versión no descrita",
-
-"statusLoadingNoDesc": "Cargando versión no descrita",
-
-"statusLoadingNext": "Cargando la siguiente pista",
-
-"statusEnd": "Fin de pista",
-
-"selectedTrack": "Pista seleccionada",
-
-"alertDescribedVersion": "Utilizando la versión audiodescrita del vídeo",
-
-"alertNonDescribedVersion": "Utilizando la versión no descrita de este vídeo",
-
-"fallbackError1": "Lo sentimos, su navegador no puede reproducir esto",
-
-"fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",
-
-"orHigher": "o superior",
-
-"prefMenuCaptions": "Subtítulos",
-
-"prefMenuDescriptions": "Descripciones",
-
-"prefMenuKeyboard": "Teclado",
-
-"prefMenuTranscript": "Transcripción",
-
-"prefTitleCaptions": "Preferencias de subtítulos",
-
-"prefTitleDescriptions": "Preferencias de audiodescripción",
-
-"prefTitleKeyboard": "Preferencias de teclado",
-
-"prefTitleTranscript": "Preferencias de transcripción",
-
-"prefIntroCaptions": "Las siguientes preferencias controlan cómo se presentan los subtítulos.",
-
-"prefIntroDescription1": "Este reproductor soporta la audiodescripción de dos maneras: ",
-
-"prefIntroDescription2": "El vídeo actual tiene ",
-
-"prefIntroDescriptionNone": "El vídeo actual no tiene audiodescripción de ninguna manera.",
-
-"prefIntroDescription3": "Utilice el siguiente formulario para establecer sus preferencias en cuanto a la audiodescripción.",
-
-"prefIntroDescription4": "Una vez guardadas sus preferencias, la audiodescripción puede habilitarse o deshabilitarse mediante el botón Descripción.",
-
-"prefIntroKeyboard1": "El reproductor en esta página puede manejarse desde cualquier parte de la página utilizando los atajos de teclado (vea la lista más abajo).",
-
-"prefIntroKeyboard2": "Las teclas modificadoras (Mayúsculas, Alt, Control) pueden definirse más abajo.",
-
-"prefIntroKeyboard3": "NOTA: Algunas combinaciones de teclas pueden entrar en conflicto con teclas utilizadas por su navegador y/o otras aplicaciones. Intente varias combinaciones de teclas modificadoras para encontrar la que funciona bien en su caso.",
-
-"prefIntroTranscript": "Las siguientes preferencias afectan a la transcripción interactiva.",
-
-"prefCookieWarning": "Gurdar sus preferencias requiere el uso de cookies.",
-
-"prefHeadingKeyboard1": "Teclas modificadoras utilizadas para atajos de teclado",
-
-"prefHeadingKeyboard2": "Atajos de teclado definidos actualmente",
-
-"prefHeadingDescription": "Audiodescrita",
-
-"prefHeadingTextDescription": "Audiodescrita en texto",
-
-"prefHeadingCaptions": "Subtítulos",
-
-"prefHeadingTranscript": "Transcripción interactiva",
-
-"prefAltKey": "Alt",
-
-"prefCtrlKey": "Control",
-
-"prefShiftKey": "Mayúsculas",
-
-"escapeKey": "Escape",
-
-"escapeKeyFunction": "Cerrar el cuadro de diálogo o menú contextual",
-
-"prefDescFormat": "Formato preferido",
-
-"prefDescFormatHelp": "Si ambos formatos están disponibles, se usará sólo uno de ello.",
-
-"prefDescFormatOption1": "versión alternativa del vídeo, descrito",
-
-"prefDescFormatOption1b": "una versión alternativa con descripción",
-
-"prefDescFormatOption2": "descripción en texto, leída por el lector de pantalla",
-
-"prefDescFormatOption2b": "descripción en texto",
-
-"prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
-
-"prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
-
-"prefHighlight": "Resaltar la transcripción según avanza el contenido",
-
-"prefTabbable": "Transcripción manejable por teclado",
-
-"prefCaptionsFont": "Fuente",
-
-"prefCaptionsColor": "Color del texto",
-
-"prefCaptionsBGColor": "Fondo",
-
-"prefCaptionsSize": "Tamaño de Fuente",
-
-"prefCaptionsOpacity": "Opacidad",
-
-"prefCaptionsStyle": "Estilo",
-
-"serif": "serif",
-
-"sans": "sans-serif",
-
-"cursive": "cursiva",
-
-"fantasy": "fantasía",
-
-"monospace": "mono espaciada",
-
-"white": "blanco",
-
-"yellow": "amarillo",
-
-"green": "verde",
-
-"cyan": "cyan",
-
-"blue": "azul",
-
-"magenta": "magenta",
-
-"red": "rojo",
-
-"black": "negro",
-
-"transparent": "transparente",
-
-"solid": "sólido",
-
-"captionsStylePopOn": "Pop-on",
-
-"captionsStyleRollUp": "Roll-up",
-
-"prefCaptionsPosition": "Posición",
-
-"captionsPositionOverlay": "Cubrir",
-
-"captionsPositionBelow": "Debajo del vídeo",
-
-"sampleCaptionText": "Texto de ejemplo de subtítulo",
-
-"prefSuccess": "Los cambios han sido guardados.",
-
-"prefNoChange": "No se ha hecho ningún cambio.",
-
-"help": "Ayuda",
-
-"helpTitle": "Ayuda",
-
-"save": "Guardar",
-
-"cancel": "Cancelar",
-
-"ok": "ok",
-
-"done": "Hecho",
-
-"closeButtonLabel": "Cerrar cuadro de diálogo",
-
-"windowButtonLabel": "Opciones en Windows",
-
-"windowMove": "Mover",
-
-"windowMoveAlert": "Arrastre o use las teclas de flecha para mover la ventana, pulse Enter para parar.",
-
-"windowResize": "Redimensionar",
-
-"windowResizeHeading": "Redimensionar la ventana con el intérprete",
-
-"windowResizeAlert": "La ventana ha sido redimensionada.",
-
-"width": "Ancho",
-
-"height": "Alto",
-
-"windowSendBack": "Enviar atrás",
-
-"windowSendBackAlert": "Esta ventana no se encuentra tras otros objetos en la página.",
-
-"windowBringTop": "Traer al frente",
-
-"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
-
-};
-
-var fr = {
-
-"playerHeading": "Lecteur multimédia",
-
-"faster": "Plus rapidement",
-
-"slower": "Plus lentement",
-
-"play": "Lecture",
-
-"pause": "Pause",
-
-"stop": "Arrêt",
-
-"restart": "Redémarrer",
-
-"prevChapter": "Chapitre Précédente",
-
-"nextChapter": "Chapitre Suivante",
-
-"prevTrack": "Piste Précédente",
-
-"nextTrack": "Piste Suivante",
-
-"rewind": "Reculer",
-
-"forward": "Avancer",
-
-"captions": "Sous-titres",
-
-"showCaptions": "Afficher les sous-titres",
-
-"hideCaptions": "Masquer les sous-titres",
-
-"captionsOff": "Sous-titres désactivés",
-
-"showTranscript": "Afficher la transcription",
-
-"hideTranscript": "Masquer la transcription",
-
-"turnOnDescriptions": "Activer les descriptions",
-
-"turnOffDescriptions": "Désactiver les descriptions",
-
-"chapters": "Chapitres",
-
-"newChapter": "Nouveau chapitre",
-
-"language": "Langue",
-
-"sign": "Langage gestuel",
-
-"showSign": "Afficher le langage gestuel",
-
-"hideSign": "Masque le langage gestuel",
-
-"seekbarLabel": "timeline",
-
-"mute": "Son désactivé",
-
-"unmute": "Son activé",
-
-"volume": "Volume",
-
-"volumeHelp": "Cliquer pour accéder au réglage du volume",
-
-"volumeUpDown": "Monter baisser le volume",
-
-"volumeSliderClosed": "Réglage du volume fermé",
-
-"preferences": "Préférences",
-
-"enterFullScreen": "Activer le mode plein écran",
-
-"exitFullScreen": "Quitter le mode plein écran",
-
-"fullScreen": "Plein écran",
-
-"speed": "Vitesse",
-
-"and": "et",
-
-"or": "ou",
-
-"spacebar": "barre d’espacement",
-
-"transcriptTitle": "Transcription",
-
-"lyricsTitle": "Paroles",
-
-"autoScroll": "Défilement automatique",
-
-"unknown": "Inconnu",
-
-"statusPlaying": "Lecture en cours",
-
-"statusPaused": "Lecture sur pause",
-
-"statusStopped": "Lecture interrompue",
-
-"statusWaiting": "Attente",
-
-"statusBuffering": "Tamponnage",
-
-"statusUsingDesc": "Utilisation de la version décrite",
-
-"statusLoadingDesc": "Chargement de la version décrite",
-
-"statusUsingNoDesc": "Utilisation de la version non décrite",
-
-"statusLoadingNoDesc": "Chargement de la version non décrite",
-
-"statusLoadingNext": "Chargement de la prochaine piste",
-
-"statusEnd": "Fin de la piste",
-
-"selectedTrack": "Piste choisie",
-
-"alertDescribedVersion": "Utilisation de la version avec description sonore de cette vidéo",
-
-"alertNonDescribedVersion": "Utilisation de la version non décrite de cette vidéo",
-
-"fallbackError1": "Désolé, votre navigateur ne peut pas lire cette piste",
-
-"fallbackError2": "Les navigateurs suivants fonctionnent habituellement avec ce lecteur multimédia",
-
-"orHigher": "ou des versions plus récentes",
-
-"prefMenuCaptions": "Sous-titres",
-
-"prefMenuDescriptions": "Descriptions",
-
-"prefMenuKeyboard": "Clavier",
-
-"prefMenuTranscript": "Transcription",
-
-"prefTitleCaptions": "Préférences liées au sous-titrage",
-
-"prefTitleDescriptions": "Préférences liées aux descriptions sonores",
-
-"prefTitleKeyboard": "Préférences liées au clavier",
-
-"prefTitleTranscript": "Préférence liées à la transcription",
-
-"prefIntroCaptions": "Les préférences contrôlent la façon dont les sous-titres sont affichés.",
-
-"prefIntroDescription1": "Ce lecteur multimédia permet d’entendre les descriptions sonores de deux façons:",
-
-"prefIntroDescription2": "Il y a une version ",
-
-"prefIntroDescriptionNone": "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.",
-
-"prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores.",
-
-"prefIntroDescription4": "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.",
-
-"prefIntroKeyboard1": "Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous).",
-
-"prefIntroKeyboard2": "Des rôles peuvent être assignés aux touches de modification (Shift, Alt, Ctrl) ci-dessous.",
-
-"prefIntroKeyboard3": "Certaines combinaisons de touches pourraient entrer en conflit avec les touches utilisées par votre navigateur ou autres applications logicielles. Essayez diverses combinaisons de touches de modification pour en trouver qui fonctionnent pour vous.",
-
-"prefIntroTranscript": "Les préférences suivantes ont un effet sur la transcription interactive.",
-
-"prefCookieWarning": "Il faut que les témoins soient activés pour enregistrer vos préférences.",
-
-"prefHeadingKeyboard1": "Touches de modification utilisées pour des raccourcis",
-
-"prefHeadingKeyboard2": "Raccourcis du clavier assignés actuellement",
-
-"prefHeadingDescription": "Description sonore",
-
-"prefHeadingTextDescription": "Description sonore textuelle",
-
-"prefHeadingCaptions": "Sous-titres",
-
-"prefHeadingTranscript": "Transcription interactive",
-
-"prefAltKey": "Alt",
-
-"prefCtrlKey": "Ctrl",
-
-"prefShiftKey": "Shift",
-
-"escapeKey": "Esc",
-
-"escapeKeyFunction": "Fermer la fenêtre de dialogue ou le menu contextuel",
-
-"prefDescFormat": "Format privilégié",
-
-"prefDescFormatHelp": "Si les deux formats sont offerts, un seul sera utilisé.",
-
-"prefDescFormatOption1": "autre version de la vidéo avec description",
-
-"prefDescFormatOption1b": "autre version avec description",
-
-"prefDescFormatOption2": "description textuelle, lue à l’aide d’un lecteur d’écran",
-
-"prefDescFormatOption2b": "description textuelle",
-
-"prefDescPause": "Mettre la vidéo en pause automatiquement quand la description commence",
-
-"prefVisibleDesc": "Affichez la description",
-
-"prefHighlight": "Surligner la transcription pendant la lecture",
-
-"prefTabbable": "Transcription activée par clavier",
-
-"prefCaptionsFont": "Police de caractères",
-
-"prefCaptionsColor": "Couleur du texte",
-
-"prefCaptionsBGColor": "Arrière-plan",
-
-"prefCaptionsSize": "Taille de la police",
-
-"prefCaptionsOpacity": "Opacité",
-
-"prefCaptionsStyle": "Style",
-
-"serif": "avec empattement",
-
-"sans": "sans empattement",
-
-"cursive": "écriture cursive",
-
-"fantasy": "écriture de fantaisie",
-
-"monospace": "à taille fixe",
-
-"white": "blanc",
-
-"yellow": "jaune",
-
-"green": "vert",
-
-"cyan": "cyan",
-
-"blue": "bleu",
-
-"magenta": "magenta",
-
-"red": "rouge",
-
-"black": "noir",
-
-"transparent": "transparent",
-
-"solid": "solide",
-
-"captionsStylePopOn": "Pop-on",
-
-"captionsStyleRollUp": "Roll-up",
-
-"prefCaptionsPosition": "Position",
-
-"captionsPositionOverlay": "Superposés",
-
-"captionsPositionBelow": "Sous la vidéo",
-
-"sampleCaptionText": "Échantillon de sous-titre",
-
-"prefSuccess": "Vos changements ont été enregistrés.",
-
-"prefNoChange": "Vous n’avez pas fait de changements.",
-
-"help": "Aide",
-
-"helpTitle": "Aide",
-
-"save": "Enregistrer",
-
-"cancel": "Annuler",
-
-"ok": "ok",
-
-"done": "Terminé",
-
-"closeButtonLabel": "Fermer le dialogue",
-
-"windowButtonLabel": "Options de fenêtre",
-
-"windowMove": "Déplacer",
-
-"windowMoveAlert": "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre; appuyez sur « Enter » pour arrêter.",
-
-"windowResize": "Redimensionner",
-
-"windowResizeHeading": "Redimensionner la fenêtre de l’interprète",
-
-"windowResizeAlert": "La fenêtre a été redimensionnée.",
-
-"width": "Largeur",
-
-"height": "Hauteur",
-
-"windowSendBack": "Mettre en arrière-plan",
-
-"windowSendBackAlert": "Cette fenêtre est maintenant derrière d’autres objets sur la page.",
-
-"windowBringTop": "Mettre au premier plan",
-
-"windowBringTopAlert": "Cette fenêtre est maintenant devant d’autres objets sur la page.",
-
-};
-
-var ja = {
-
-"playerHeading": "メディアプレイヤー",
-
-"faster": "はやく",
-
-"slower": "おそく",
-
-"play": "再生",
-
-"pause": "一時停止",
-
-"stop": "停止",
-
-"restart": "再開",
-
-"prevChapter": "前のチャプター",
-
-"nextChapter": "次のチャプター",
-
-"prevTrack": "前のトラック",
-
-"nextTrack": "次のトラック",
-
-"rewind": "巻き戻し",
-
-"forward": "早送り",
-
-"captions": "キャプション",
-
-"showCaptions": "キャプションを表示する",
-
-"hideCaptions": "キャプションを非表示にする",
-
-"captionsOff": "キャプションを消す",
-
-"showTranscript": "書き起こしの表示",
-
-"hideTranscript": "書き起こしを非表示にする",
-
-"turnOnDescriptions": "音声解説を出す",
-
-"turnOffDescriptions": "音声解説を出さない",
-
-"chapters": "チャプター",
-
-"newChapter": "新しいチャプター",
-
-"language": "言語",
-
-"sign": "手話",
-
-"showSign": "手話を表示",
-
-"hideSign": "手話を非表示",
-
-"seekbarLabel": "timeline",
-
-"mute": "消音",
-
-"unmute": "消音解除",
-
-"volume": "音量",
-
-"volumeHelp": "クリックして音量スライダーを操作します",
-
-"volumeUpDown": "音量の上下",
-
-"volumeSliderClosed": "音量スライダー終了",
-
-"preferences": "設定",
-
-"enterFullScreen": "全画面表示",
-
-"exitFullScreen": "全画面表示の終了",
-
-"fullScreen": "全画面表示",
-
-"speed": "再生速度",
-
-"and": "と",
-
-"or": "または",
-
-"spacebar": "スペースキー",
-
-"transcriptTitle": "書き起こし",
-
-"lyricsTitle": "歌詞",
-
-"autoScroll": "自動スクロール",
-
-"unknown": "不明",
-
-"statusPlaying": "再生中",
-
-"statusPaused": "一時停止中",
-
-"statusStopped": "停止",
-
-"statusWaiting": "待機中",
-
-"statusBuffering": "バッファリング中",
-
-"statusUsingDesc": "解説付き動画を使います",
-
-"statusLoadingDesc": "解説付き動画を読み込み中",
-
-"statusUsingNoDesc": "解説なしのバージョンを使います",
-
-"statusLoadingNoDesc": "解説なしのバージョンを読み込んでいます",
-
-"statusLoadingNext": "次のトラックを読み込んでいます",
-
-"statusEnd": "トラックの終わり",
-
-"selectedTrack": "選択されたトラック",
-
-"alertDescribedVersion": "この動画の音声解説付きバージョンを使います",
-
-"alertNonDescribedVersion": "この動画の解説なしバージョンを使います",
-
-"fallbackError1": "申し訳ございません。あなたのブラウザはこれを再生できません",
-
-"fallbackError2": "以下のブラウザではこのプレイヤーが利用可能であることが知られています",
-
-"orHigher": "以降",
-
-"prefMenuCaptions": "キャプション",
-
-"prefMenuDescriptions": "音声解説",
-
-"prefMenuKeyboard": "キーボード",
-
-"prefMenuTranscript": "字幕",
-
-"prefTitleCaptions": "キャプションの設定",
-
-"prefTitleDescriptions": "音声解説の設定",
-
-"prefTitleKeyboard": "キーボードの設定",
-
-"prefTitleTranscript": "字幕の設定",
-
-"prefIntroCaptions": "以下の設定は、キャプションがどう表示されるかをコントロールします。",
-
-"prefIntroDescription1": "このメディアプレイヤーは次の2つの方法で音声解説をサポートします: ",
-
-"prefIntroDescription2": "現在の動画では次の方法が選択可能です: ",
-
-"prefIntroDescriptionNone": "現在の動画にはどちらの形式の音声解説も含まれていません。",
-
-"prefIntroDescription3": "次のフォームを使って、音声解説に関連する設定を保存できます。",
-
-"prefIntroDescription4": "設定が保存されたら、音声解説ボタンによって音声解説の表示・非表示を切り替えることができます。",
-
-"prefIntroKeyboard1": "このページのメディアプレイヤーは、キーボード・ショートカットを使ってこのページのどこからでも操作できます(下の一覧を参照してください)。",
-
-"prefIntroKeyboard2": "修飾キー(Shift、Alt と Control) は以下で割り当てることができます。",
-
-"prefIntroKeyboard3": "注意: いくつかのキーの組み合わせは、ブラウザやアプリケーション・ソフトで使われているものと衝突する可能性があります。ご利用の環境で正しく動作する、様々なキーの組み合わせを試してください。",
-
-"prefIntroTranscript": "以下の設定はインタラクティブな字幕に作用します。",
-
-"prefCookieWarning": "設定を変更するにはCookieが必要です。",
-
-"prefHeadingKeyboard1": "ショートカットの修飾キー",
-
-"prefHeadingKeyboard2": "現在のキーボード・ショートカット",
-
-"prefHeadingDescription": "音声解説",
-
-"prefHeadingTextDescription": "テキストによる音声解説",
-
-"prefHeadingCaptions": "キャプション",
-
-"prefHeadingTranscript": "インタラクティブな字幕",
-
-"prefAltKey": "Alt",
-
-"prefCtrlKey": "Control",
-
-"prefShiftKey": "Shift",
-
-"escapeKey": "Escape",
-
-"escapeKeyFunction": "現在のダイアログやポップアップメニューを閉じる",
-
-"prefDescFormat": "フォーマットの選択",
-
-"prefDescFormatHelp": "両方のフォーマットが利用可能な場合、どちらかのみ利用されます。",
-
-"prefDescFormatOption1": "解説付きの代替バージョンのビデオ",
-
-"prefDescFormatOption1b": "解説付きの代替バージョン",
-
-"prefDescFormatOption2": "テキストによる解説(スクリーンリーダーによって読み上げられる)",
-
-"prefDescFormatOption2b": "テキストによる解説",
-
-"prefDescPause": "解説が表示されたら動画を自動的に停止する",
-
-"prefVisibleDesc": "解説が見えるようにする",
-
-"prefHighlight": "メディアの再生に合わせて字幕をハイライトする",
-
-"prefTabbable": "キーボード操作可能な字幕",
-
-"prefCaptionsFont": "フォント",
-
-"prefCaptionsColor": "文字色",
-
-"prefCaptionsBGColor": "背景色",
-
-"prefCaptionsSize": "フォントサイズ",
-
-"prefCaptionsOpacity": "不透明度",
-
-"prefCaptionsStyle": "書式",
-
-"serif": "serif",
-
-"sans": "sans-serif",
-
-"cursive": "cursive",
-
-"fantasy": "fantasy",
-
-"monospace": "monospace",
-
-"white": "白",
-
-"yellow": "黄色",
-
-"green": "緑",
-
-"cyan": "シアン",
-
-"blue": "青",
-
-"magenta": "マゼンタ",
-
-"red": "赤",
-
-"black": "黒",
-
-"transparent": "透明",
-
-"solid": "不透明",
-
-"captionsStylePopOn": "ポップ・オン",
-
-"captionsStyleRollUp": "ロール・アップ",
-
-"prefCaptionsPosition": "位置",
-
-"captionsPositionOverlay": "オーバーレイ表示",
-
-"captionsPositionBelow": "動画の下部",
-
-"sampleCaptionText": "キャプション表示の例",
-
-"prefSuccess": "変更が保存されました。",
-
-"prefNoChange": "設定が変更されていません。",
-
-"help": "ヘルプ",
-
-"helpTitle": "ヘルプ",
-
-"save": "保存",
-
-"cancel": "キャンセル",
-
-"ok": "ok",
-
-"done": "終了",
-
-"closeButtonLabel": "ダイアログを閉じる",
-
-"windowButtonLabel": "ウィンドウの設定",
-
-"windowMove": "移動",
-
-"windowMoveAlert": "マウスをドラッグするか矢印キーでウィンドウを移動できます; Enterで終了",
-
-"windowResize": "サイズを変える",
-
-"windowResizeHeading": "ウィンドウのサイズ変更",
-
-"windowResizeAlert": "ウィンドウのサイズが変更されました。",
-
-"width": "幅",
-
-"height": "高さ",
-
-"windowSendBack": "背面へ移動",
-
-"windowSendBackAlert": "このウィンドウはこのページの他のオブジェクトより背面になりました。",
-
-"windowBringTop": "前面へ移動",
-
-"windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。"
-
-};
-
-// end getTranslationText function, which began in translation1.js
-
-    this.tt = eval(this.lang);
-
-    // resolve deferred variable
-    gettingText.resolve();
-    return gettingText.promise();
+    translationFile = '../translations/' + this.lang + '.js';
+    this.importTranslationFile(translationFile).then(function(result) {
+      thisObj.tt = eval(thisObj.lang);
+      deferred.resolve();
+    });
+    return deferred.promise();
   };
+
+  AblePlayer.prototype.importTranslationFile = function(translationFile) {
+
+    var deferred = $.Deferred();
+
+    $.getScript(translationFile)
+      .done(function(translationVar,textStatus) {
+        // translation file successfully retrieved
+        deferred.resolve(translationVar);
+      })
+      .fail(function(jqxhr, settings, exception) {
+        deferred.fail();
+        // error retrieving file
+        // TODO: handle this
+      });
+    return deferred.promise();
+  };
+
 })(jQuery);
 
 /*! Copyright (c) 2014 - Paul Tavares - purtuga - @paul_tavares - MIT License */

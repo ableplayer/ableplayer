@@ -170,9 +170,6 @@
           this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
             .addClass('able-current-chapter').attr('aria-selected','true');
         }
-        // announce new chapter via ARIA alert
-        chapterLabel = this.tt.newChapter + ': ' + this.flattenCueForCaption(this.currentChapter);
-        this.showAlert(chapterLabel,'screenreader');
       }
     }
   };
