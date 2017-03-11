@@ -64,8 +64,16 @@
 
     // add event listeners
     this.$volumeSliderHead.on('mousedown',function (event) {
+      event.preventDefault(); // prevent text selection (implications?)
       thisObj.draggingVolume = true;
       thisObj.volumeHeadPositionTop = $(this).offset().top;
+    });
+
+    // prevent dragging after mouseup as mouseup not detected over iframe (YouTube)
+    this.$mediaContainer.on('mouseover',function (event) {
+      if(thisObj.player == 'youtube'){
+        thisObj.draggingVolume = false;
+      }
     });
 
     $(document).on('mouseup',function (event) {
@@ -331,6 +339,7 @@
     }
     else if (this.player === 'youtube') {
       this.youTubePlayer.setVolume(volume * 10);
+      this.volume = volume;
     }
 
     this.lastVolume = volume;
