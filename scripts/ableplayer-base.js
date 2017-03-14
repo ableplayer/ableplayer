@@ -113,13 +113,11 @@
 
     // Path to root directory of Able Player code
     if ($(media).data('root-path') !== undefined) {
-      // remove trailing slashes if there are any
-      this.rootPath = $(media).data('root-path').replace(/\/+$/, "");
-      this.scriptPath = this.rootPath;
+      // add a trailing slash if there is none
+      this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
     }
     else {
-      this.rootPath = this.getRootWebSitePath();
-      this.scriptPath = this.getScriptPath();
+      this.rootPath = this.getRootPath();
     }
 
     // Volume
@@ -340,7 +338,7 @@
         this.fallbackPath = $(media).data('fallback-path');
       }
       else {
-        this.fallbackPath = this.rootPath + '/thirdparty/';
+        this.fallbackPath = this.rootPath + 'thirdparty/';
       }
 
       if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {

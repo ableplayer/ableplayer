@@ -113,13 +113,11 @@
 
     // Path to root directory of Able Player code
     if ($(media).data('root-path') !== undefined) {
-      // remove trailing slashes if there are any
-      this.rootPath = $(media).data('root-path').replace(/\/+$/, "");
-      this.scriptPath = this.rootPath;
+      // add a trailing slash if there is none
+      this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
     }
     else {
-      this.rootPath = this.getRootWebSitePath();
-      this.scriptPath = this.getScriptPath();
+      this.rootPath = this.getRootPath();
     }
 
     // Volume
@@ -340,7 +338,7 @@
         this.fallbackPath = $(media).data('fallback-path');
       }
       else {
-        this.fallbackPath = this.rootPath + '/thirdparty/';
+        this.fallbackPath = this.rootPath + 'thirdparty/';
       }
 
       if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
@@ -453,24 +451,25 @@
     this.setButtonImages();
   };
 
-  AblePlayer.prototype.getRootWebSitePath = function() {
+  AblePlayer.prototype.getRootPath = function() {
 
-    var _location = document.location.toString();
-    var domainNameIndex = _location.indexOf('/', _location.indexOf('://') + 3);
-    var domainName = _location.substring(0, domainNameIndex) + '/';
-    var webFolderIndex = _location.indexOf('/', _location.indexOf(domainName) + domainName.length);
-    var webFolderFullPath = _location.substring(0, webFolderIndex);
-    return webFolderFullPath;
-  };
-
-  AblePlayer.prototype.getScriptPath = function() {
-
-    // returns path to Able Player JavaScript file
-    var scripts= document.getElementsByTagName('script');
-    var path= scripts[scripts.length-1].src.split('?')[0]; // remove any ?query
-    var ableDir= path.split('/').slice(0, -1).join('/')+'/'; // remove last filename part of path
-    return ableDir;
-  };
+    // returns Able Player root path (assumes ableplayer.js is in /build, one directory removed from root)
+    var scripts, i, scriptSrc, scriptFile, fullPath, ablePath, parentFolderIndex, rootPath;
+    scripts= document.getElementsByTagName('script');
+    for (i=0; i < scripts.length; i++) {
+      scriptSrc = scripts[i].src;
+      scriptFile = scriptSrc.substr(scriptSrc.lastIndexOf('/'));
+      if (scriptFile.indexOf('ableplayer') !== -1) {
+        // this is the ableplayerscript
+        fullPath = scriptSrc.split('?')[0]; // remove any ? params
+        break;
+      }
+    }
+    ablePath= fullPath.split('/').slice(0, -1).join('/'); // remove last filename part of path
+    parentFolderIndex = ablePath.lastIndexOf('/');
+    rootPath = ablePath.substring(0, parentFolderIndex) + '/';
+    return rootPath;
+  }
 
   AblePlayer.prototype.setIconColor = function() {
 
@@ -527,7 +526,7 @@
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
-    this.imgPath = this.rootPath + '/button-icons/' + this.iconColor + '/';
+    this.imgPath = this.rootPath + 'button-icons/' + this.iconColor + '/';
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
 
@@ -3742,7 +3741,7 @@
           }
           else {
             var pipeImg = $('<img>', {
-              src: this.rootPath + '/button-icons/' + this.iconColor + '/pipe.png',
+              src: this.rootPath + 'button-icons/' + this.iconColor + '/pipe.png',
               alt: '',
               role: 'presentation'
             });
@@ -3753,29 +3752,29 @@
         else {
           // this control is a button
           if (control === 'volume') {
-            buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/' + this.volumeButton + '.png';
+            buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/' + this.volumeButton + '.png';
           }
           else if (control === 'fullscreen') {
-            buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/fullscreen-expand.png';
+            buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/fullscreen-expand.png';
           }
           else if (control === 'slower') {
             if (this.speedIcons === 'animals') {
-              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/turtle.png';
+              buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/turtle.png';
             }
             else {
-              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/slower.png';
+              buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/slower.png';
             }
           }
           else if (control === 'faster') {
             if (this.speedIcons === 'animals') {
-              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/rabbit.png';
+              buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/rabbit.png';
             }
             else {
-              buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/faster.png';
+              buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/faster.png';
             }
           }
           else {
-            buttonImgSrc = this.rootPath + '/button-icons/' + this.iconColor + '/' + control + '.png';
+            buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/' + control + '.png';
           }
           buttonTitle = this.getButtonTitle(control);
 
@@ -3864,7 +3863,7 @@
               'class': iconClass
             });
             buttonUse = $('<use>',{
-              'xlink:href': this.rootPath + '/icons/able-icons.svg#' + iconClass
+              'xlink:href': this.rootPath + 'icons/able-icons.svg#' + iconClass
             });
             buttonIcon.append(buttonUse);
             newButton.html(buttonIcon);
@@ -10473,7 +10472,7 @@
     }
     else {
       // use image
-      buttonImgSrc = this.rootPath + '/button-icons/' + this.toolbarIconColor + '/preferences.png';
+      buttonImgSrc = this.rootPath + 'button-icons/' + this.toolbarIconColor + '/preferences.png';
       $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',
@@ -11976,9 +11975,7 @@
         }
       }
     }
-
-    // this.scriptPath is location of AblePlayer JavaScript file (default: /build)
-    translationFile = this.scriptPath + '../translations/' + this.lang + '.js';
+    translationFile = this.rootPath + 'translations/' + this.lang + '.js';
     this.importTranslationFile(translationFile).then(function(result) {
       thisObj.tt = eval(thisObj.lang);
       deferred.resolve();

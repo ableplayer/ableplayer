@@ -10,24 +10,25 @@
     this.setButtonImages();
   };
 
-  AblePlayer.prototype.getRootWebSitePath = function() {
+  AblePlayer.prototype.getRootPath = function() {
 
-    var _location = document.location.toString();
-    var domainNameIndex = _location.indexOf('/', _location.indexOf('://') + 3);
-    var domainName = _location.substring(0, domainNameIndex) + '/';
-    var webFolderIndex = _location.indexOf('/', _location.indexOf(domainName) + domainName.length);
-    var webFolderFullPath = _location.substring(0, webFolderIndex);
-    return webFolderFullPath;
-  };
-
-  AblePlayer.prototype.getScriptPath = function() {
-
-    // returns path to Able Player JavaScript file
-    var scripts= document.getElementsByTagName('script');
-    var path= scripts[scripts.length-1].src.split('?')[0]; // remove any ?query
-    var ableDir= path.split('/').slice(0, -1).join('/')+'/'; // remove last filename part of path
-    return ableDir;
-  };
+    // returns Able Player root path (assumes ableplayer.js is in /build, one directory removed from root)
+    var scripts, i, scriptSrc, scriptFile, fullPath, ablePath, parentFolderIndex, rootPath;
+    scripts= document.getElementsByTagName('script');
+    for (i=0; i < scripts.length; i++) {
+      scriptSrc = scripts[i].src;
+      scriptFile = scriptSrc.substr(scriptSrc.lastIndexOf('/'));
+      if (scriptFile.indexOf('ableplayer') !== -1) {
+        // this is the ableplayerscript
+        fullPath = scriptSrc.split('?')[0]; // remove any ? params
+        break;
+      }
+    }
+    ablePath= fullPath.split('/').slice(0, -1).join('/'); // remove last filename part of path
+    parentFolderIndex = ablePath.lastIndexOf('/');
+    rootPath = ablePath.substring(0, parentFolderIndex) + '/';
+    return rootPath;
+  }
 
   AblePlayer.prototype.setIconColor = function() {
 
@@ -84,7 +85,7 @@
   AblePlayer.prototype.setButtonImages = function() {
 
     // NOTE: volume button images are now set dynamically within volume.js
-    this.imgPath = this.rootPath + '/button-icons/' + this.iconColor + '/';
+    this.imgPath = this.rootPath + 'button-icons/' + this.iconColor + '/';
     this.playButtonImg = this.imgPath + 'play.png';
     this.pauseButtonImg = this.imgPath + 'pause.png';
 

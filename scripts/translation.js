@@ -38,9 +38,7 @@
         }
       }
     }
-
-    // this.scriptPath is location of AblePlayer JavaScript file (default: /build)
-    translationFile = this.scriptPath + '../translations/' + this.lang + '.js';
+    translationFile = this.rootPath + 'translations/' + this.lang + '.js';
     this.importTranslationFile(translationFile).then(function(result) {
       thisObj.tt = eval(thisObj.lang);
       deferred.resolve();
