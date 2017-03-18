@@ -35,10 +35,12 @@
 "use strict";
 
 (function ($) {
+  var ablePlayers = [];
+
   $(document).ready(function () {
     $('video, audio').each(function (index, element) {
       if ($(element).data('able-player') !== undefined) {
-        new AblePlayer($(this),$(element));
+        ablePlayers.push(new AblePlayer($(this),$(element)));
       }
     });
   });
@@ -433,6 +435,20 @@
         });
       }
     });
+  };
+
+  window.AblePlayerAPI = {
+    startAblePlayer: function($element) {
+      if (!($element instanceof $)) {
+        $element = $($element);
+      }
+
+      ablePlayers.push(new AblePlayer($element));
+    },
+
+    getAblePlayers: function() {
+      return ablePlayers;
+    }
   };
 
   AblePlayer.youtubeIframeAPIReady = false;
