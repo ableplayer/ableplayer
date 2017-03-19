@@ -662,7 +662,7 @@ span.able-modkey {
   background-color: transparent;
   border: none;
   outline: none;
-  padding: 0;
+  padding: 8px;
   z-index: 9300;
 }
 .able-window-toolbar .able-button-handler-preferences:hover,
