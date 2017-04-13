@@ -498,7 +498,7 @@
       if (typeof this.captionLang !== 'undefined') {
         // reset transcript selected <option> to this.captionLang
         if (this.$transcriptLanguageSelect) {
-          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
+          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').prop('selected',true);
         }
         // sync all other tracks to this same languge
         this.syncTrackLanguages('init',this.captionLang);

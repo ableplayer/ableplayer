@@ -587,11 +587,11 @@
       // Sync checkbox and autoScrollTranscript with user preference
       if (this.prefAutoScrollTranscript === 1) {
         this.autoScrollTranscript = true;
-        this.$autoScrollTranscriptCheckbox.attr('checked','checked');
+        this.$autoScrollTranscriptCheckbox.prop('checked',true);
       }
       else {
         this.autoScrollTranscript = false;
-        this.$autoScrollTranscriptCheckbox.removeAttr('checked');
+        this.$autoScrollTranscriptCheckbox.prop('checked',false);
       }
 
       // If transcript locked, scroll transcript to current highlight location.
