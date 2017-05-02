@@ -238,6 +238,15 @@
       thisObj.finishingDrag = false;
     });
 
+    $popup.on('keydown', function(event) {
+      // Escape key
+      if (event.which === 27) {
+        // Close Window Options Menu
+        $newButton.focus();
+        $popup.hide();
+      }
+    });
+
     // define vars and assemble all the parts
     if (which === 'transcript') {
       this.$transcriptAlert = $windowAlert;
