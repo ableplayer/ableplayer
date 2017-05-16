@@ -594,7 +594,7 @@
               'id': radioId
             });
             if (track.def) {
-              trackButton.attr('checked','checked');
+              trackButton.prop('checked',true);
               hasDefault = true;
             }
             trackLabel = $('<label>',{
@@ -643,7 +643,7 @@
             });
             trackLabel.text(this.tt.captionsOff);
             if (this.prefCaptions === 0) {
-              trackButton.attr('checked','checked');
+              trackButton.prop('checked',true);
             }
             trackButton.click(this.getCaptionOffFunction());
             trackItem.append(trackButton,trackLabel);
@@ -653,11 +653,11 @@
             if ((popup == 'captions' || popup == 'ytCaptions') && (trackList.find('input:radio[lang=' + this.captionLang + ']'))) {
               // check the button associated with the default caption language
               // (as determined in control.js > syncTrackLanguages())
-              trackList.find('input:radio[lang=' + this.captionLang + ']').attr('checked','checked');
+              trackList.find('input:radio[lang=' + this.captionLang + ']').prop('checked',true);
             }
             else {
               // check the first button
-              trackList.find('input').first().attr('checked','checked');
+              trackList.find('input').first().prop('checked',true);
             }
           }
           if (popup === 'captions' || popup === 'ytCaptions') {

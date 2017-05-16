@@ -133,7 +133,7 @@
       });
       if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
         if (isDefaultTrack) {
-          option.attr('selected', 'selected');
+          option.prop('selected', true);
         }
         this.$transcriptLanguageSelect.append(option);
       }
@@ -153,7 +153,7 @@
           });
           if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
             if (isDefaultTrack) {
-              option.attr('selected', 'selected');
+              option.prop('selected', true);
             }
             option.insertBefore(options.eq(i));
           }
@@ -172,7 +172,7 @@
         });
         if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
           if (isDefaultTrack) {
-            option.attr('selected', 'selected');
+            option.prop('selected', true);
           }
           this.$transcriptLanguageSelect.append(option);
         }

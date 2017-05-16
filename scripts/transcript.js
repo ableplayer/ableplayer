@@ -195,8 +195,8 @@
       this.$transcriptDiv.html(div);
       // reset transcript selected <option> to this.transcriptLang
       if (this.$transcriptLanguageSelect) {
-        this.$transcriptLanguageSelect.find('option:selected').attr('selected','');
-        this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').attr('selected','selected');
+        this.$transcriptLanguageSelect.find('option:selected').prop('selected',false);
+        this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').prop('selected',true);
       }
     }
 
