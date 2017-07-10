@@ -7115,14 +7115,22 @@
       rightControls = leftControls.next('div.able-right-controls');
       leftControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
-          widthUsed += $(this).width();
+          widthUsed += $(this).outerWidth();
         }
       });
       rightControls.children().each(function () {
         if ($(this).prop('tagName')=='BUTTON') {
-          widthUsed += $(this).width();
+          widthUsed += $(this).outerWidth();
         }
       });
+
+      // Add padding or margin from controls.
+      var controlStyles = ['paddingLeft', 'paddingRight', 'marginLeft', 'marginRight'];
+      controlStyles.forEach(function(style) {
+        widthUsed += parseInt(leftControls.css(style), 10);
+        widthUsed += parseInt(leftControls.css(style), 10);
+      });
+
       if (this.isFullscreen()) {
         seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
       }
