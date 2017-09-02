@@ -25,9 +25,11 @@
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 
-    this.$ableWrapper.css({
-      'max-width': this.playerMaxWidth + 'px'
-    });
+    if (this.player !== 'youtube') {
+      this.$ableWrapper.css({
+        'max-width': this.playerMaxWidth + 'px'
+      });
+    }
 
     this.injectOffscreenHeading();
 

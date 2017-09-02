@@ -617,20 +617,49 @@
   };
 
   AblePlayer.prototype.setDimensions = function() {
-
     // if <video> element includes width and height attributes,
     // use these to set the max-width and max-height of the player
-    if (this.$media.attr('width')) {
+    if (this.$media.attr('width') && this.$media.attr('height')) {
       this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
-    }
-    if (this.$media.attr('height')) {
       this.playerMaxHeight = parseInt(this.$media.attr('height'), 10);
+    }
+    else {
+      // set width to width of #player
+      // don't set height though; YouTube will automatically set that to match width
+      this.playerMaxWidth = this.$media.parent().width();
+      this.playerMaxHeight = this.getMatchingHeight(this.playerMaxWidth);
     }
     // override width and height attributes with in-line CSS to make video responsive
     this.$media.css({
       'width': '100%',
       'height': 'auto'
     });
+  };
+
+  AblePlayer.prototype.getMatchingHeight = function(width) {
+
+    // returns likely height for a video, given width
+    // These calculations assume 16:9 aspect ratio (the YouTube standard)
+    // Videos recorded in other resolutions will be sized to fit, with black bars on each side
+    // This function is only called if the <video> element does not have width and height attributes
+
+    var widths, heights, closestWidth, closestIndex, closestHeight, height;
+
+    widths = [ 3840, 2560, 1920, 1280, 854, 640, 426 ];
+    heights = [ 2160, 1440, 1080, 720, 480, 360, 240 ];
+    closestWidth = null;
+    closestIndex = null;
+
+    $.each(widths, function(index){
+      if (closestWidth == null || Math.abs(this - width) < Math.abs(closestWidth - width)) {
+        closestWidth = this;
+        closestIndex = index;
+      }
+    });
+    closestHeight = heights[closestIndex];
+    this.aspectRatio = closestWidth / closestHeight;
+    height = Math.round(width / this.aspectRatio);
+    return height;
   };
 
   AblePlayer.prototype.setIconType = function() {
@@ -939,7 +968,7 @@
       if (typeof this.captionLang !== 'undefined') {
         // reset transcript selected <option> to this.captionLang
         if (this.$transcriptLanguageSelect) {
-          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').attr('selected','selected');
+          this.$transcriptLanguageSelect.find('option[lang=' + this.captionLang + ']').prop('selected',true);
         }
         // sync all other tracks to this same languge
         this.syncTrackLanguages('init',this.captionLang);
@@ -1569,7 +1598,7 @@
             value: 'video'
           });
           if (this.prefDescFormat === 'video') {
-            $radio1.attr('checked','checked');
+            $radio1.prop('checked',true);
           };
           $div1.append($radio1,$label1);
 
@@ -1586,7 +1615,7 @@
             value: 'text'
           });
           if (this.prefDescFormat === 'text') {
-            $radio2.attr('checked','checked');
+            $radio2.prop('checked',true);
           };
           $div2.append($radio2,$label2);
         }
@@ -1638,7 +1667,7 @@
               text: optionText
             });
             if (this[thisPref] === optionValue) {
-              $thisOption.attr('selected','selected');
+              $thisOption.prop('selected',true);
             }
             $thisField.append($thisOption);
           }
@@ -1654,7 +1683,7 @@
           });
           // check current active value for this preference
           if (this[thisPref] === 1) {
-            $thisField.attr('checked','checked');
+            $thisField.prop('checked',true);
           }
           if (form === 'keyboard') {
             // add a change handler that updates the list of current keyboard shortcuts
@@ -2839,9 +2868,11 @@
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 
-    this.$ableWrapper.css({
-      'max-width': this.playerMaxWidth + 'px'
-    });
+    if (this.player !== 'youtube') {
+      this.$ableWrapper.css({
+        'max-width': this.playerMaxWidth + 'px'
+      });
+    }
 
     this.injectOffscreenHeading();
 
@@ -3408,7 +3439,7 @@
               'id': radioId
             });
             if (track.def) {
-              trackButton.attr('checked','checked');
+              trackButton.prop('checked',true);
               hasDefault = true;
             }
             trackLabel = $('<label>',{
@@ -3457,7 +3488,7 @@
             });
             trackLabel.text(this.tt.captionsOff);
             if (this.prefCaptions === 0) {
-              trackButton.attr('checked','checked');
+              trackButton.prop('checked',true);
             }
             trackButton.click(this.getCaptionOffFunction());
             trackItem.append(trackButton,trackLabel);
@@ -3467,11 +3498,11 @@
             if ((popup == 'captions' || popup == 'ytCaptions') && (trackList.find('input:radio[lang=' + this.captionLang + ']'))) {
               // check the button associated with the default caption language
               // (as determined in control.js > syncTrackLanguages())
-              trackList.find('input:radio[lang=' + this.captionLang + ']').attr('checked','checked');
+              trackList.find('input:radio[lang=' + this.captionLang + ']').prop('checked',true);
             }
             else {
               // check the first button
-              trackList.find('input').first().attr('checked','checked');
+              trackList.find('input').first().prop('checked',true);
             }
           }
           if (popup === 'captions' || popup === 'ytCaptions') {
@@ -4555,7 +4586,7 @@
       });
       if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
         if (isDefaultTrack) {
-          option.attr('selected', 'selected');
+          option.prop('selected', true);
         }
         this.$transcriptLanguageSelect.append(option);
       }
@@ -4575,7 +4606,7 @@
           });
           if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
             if (isDefaultTrack) {
-              option.attr('selected', 'selected');
+              option.prop('selected', true);
             }
             option.insertBefore(options.eq(i));
           }
@@ -4594,7 +4625,7 @@
         });
         if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
           if (isDefaultTrack) {
-            option.attr('selected', 'selected');
+            option.prop('selected', true);
           }
           this.$transcriptLanguageSelect.append(option);
         }
@@ -4802,11 +4833,11 @@
         ccLoadPolicy = 0;
       }
     }
-    videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, this.containerId);
+    videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
     if (videoDimensions) {
       this.ytWidth = videoDimensions[0];
       this.ytHeight = videoDimensions[1];
-      this.ytAspectRatio = thisObj.ytWidth / thisObj.ytHeight;
+      this.aspectRatio = thisObj.ytWidth / thisObj.ytHeight;
     }
     else {
       // dimensions are initially unknown
@@ -4840,7 +4871,7 @@
               thisObj.playMedia();
             }
           }
-          if (typeof thisObj.ytAspectRatio === 'undefined') {
+          if (typeof thisObj.aspectRatio === 'undefined') {
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
           }
           deferred.resolve();
@@ -4903,16 +4934,19 @@
 
     d = [];
 
-    if (typeof this.playerMaxWidth !== 'undefined' && typeof this.playerMaxHeight !== 'undefined') {
+    if (typeof this.playerMaxWidth !== 'undefined') {
       d[0] = this.playerMaxWidth;
-      d[1] = this.playerMaxHeight;
+      // optional: set height as well; not required though since YouTube will adjust height to match width
+      if (typeof this.playerMaxHeight !== 'undefined') {
+        d[1] = this.playerMaxHeight;
+      }
       return d;
     }
     else {
       if (typeof $('#' + youTubeContainerId) !== 'undefined') {
         $iframe = $('#' + youTubeContainerId);
-        width = $iframe.attr('width');
-        height = $iframe.attr('height');
+        width = $iframe.width();
+        height = $iframe.height();
         if (width > 0 && height > 0) {
           d[0] = width;
           d[1] = height;
@@ -4924,14 +4958,12 @@
   };
 
   AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
-
     // called after player is ready, if youTube dimensions were previously unknown
     // Now need to get them from the iframe element that YouTube injected
     // and resize Able Player to match
-
     var d, width, height;
 
-    if (typeof this.ytAspectRatio !== 'undefined') {
+    if (typeof this.aspectRatio !== 'undefined') {
       // video dimensions have already been collected
       if (this.restoringAfterFullScreen) {
         // restore using saved values
@@ -4943,8 +4975,9 @@
       else {
         // resizing due to a change in window size, but not from fullscreen
         // just recalculate with new wrapper size and re-assign CSS
-        width = this.$ableWrapper.width();
-        height = Math.round(width / this.ytAspectRatio);
+        width = this.$ableWrapper.parent().width();
+        height = Math.round(width / this.aspectRatio);
+
         if (this.youTubePlayer) {
           this.youTubePlayer.setSize(width, height);
         }
@@ -4956,15 +4989,14 @@
         width = d[0];
         height = d[1];
         if (width > 0 && height > 0) {
-          this.$ableWrapper.css('max-width',width + 'px');
-          this.ytAspectRatio = width / height;
+          this.aspectRatio = width / height;
           this.ytWidth = width;
           this.ytHeight = height;
           if (width !== this.$ableWrapper.width()) {
             // now that we've retrieved YouTube's default width,
             // need to adjust to fit the current player wrapper
             width = this.$ableWrapper.width();
-            height = Math.round(width / this.ytAspectRatio);
+            height = Math.round(width / this.aspectRatio);
             if (this.youTubePlayer) {
               this.youTubePlayer.setSize(width, height);
             }
@@ -4977,7 +5009,6 @@
   AblePlayer.prototype.restoreYouTubePlayerSize = function() {
 
     // called after exit from fullscreen mode
-
     var d, width, height;
 
     if (this.youTubePlayer && typeof this.ytWidth !== 'undefined' && typeof this.ytHeight !== 'undefined') {
@@ -7289,11 +7320,11 @@
       // Sync checkbox and autoScrollTranscript with user preference
       if (this.prefAutoScrollTranscript === 1) {
         this.autoScrollTranscript = true;
-        this.$autoScrollTranscriptCheckbox.attr('checked','checked');
+        this.$autoScrollTranscriptCheckbox.prop('checked',true);
       }
       else {
         this.autoScrollTranscript = false;
-        this.$autoScrollTranscriptCheckbox.removeAttr('checked');
+        this.$autoScrollTranscriptCheckbox.prop('checked',false);
       }
 
       // If transcript locked, scroll transcript to current highlight location.
@@ -7975,10 +8006,14 @@
       // player resized, but not fullscreen
       // in case restoring from fullscreen, reset CSS to responsive
       if (this.player === 'youtube') {
+        // disabled as of 3.0.25
+        // something changed at YouTube in early 2017 and this was causing iframe sizing problems
+        /*
         this.$ableWrapper.css({
           'max-width': width + 'px',
           'width': ''
         });
+        */
       }
       else if (this.player === 'jw') {
         // JW Player has a funny way of expanding height disproportionately as width changes
@@ -9187,8 +9222,8 @@
       this.$transcriptDiv.html(div);
       // reset transcript selected <option> to this.transcriptLang
       if (this.$transcriptLanguageSelect) {
-        this.$transcriptLanguageSelect.find('option:selected').attr('selected','');
-        this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').attr('selected','selected');
+        this.$transcriptLanguageSelect.find('option:selected').prop('selected',false);
+        this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').prop('selected',true);
       }
     }
 

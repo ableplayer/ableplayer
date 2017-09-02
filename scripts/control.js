@@ -1273,10 +1273,14 @@
       // player resized, but not fullscreen
       // in case restoring from fullscreen, reset CSS to responsive
       if (this.player === 'youtube') {
+        // disabled as of 3.0.25
+        // something changed at YouTube in early 2017 and this was causing iframe sizing problems
+        /*
         this.$ableWrapper.css({
           'max-width': width + 'px',
           'width': ''
         });
+        */
       }
       else if (this.player === 'jw') {
         // JW Player has a funny way of expanding height disproportionately as width changes
