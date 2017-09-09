@@ -1000,7 +1000,6 @@
   }
 
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
-
     if (this.isFullscreen() == fullscreen) {
       return;
     }
@@ -1011,7 +1010,12 @@
     if (this.nativeFullscreenSupported()) {
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
-        // If not in full screen, initialize it.
+        // Initialize fullscreen
+
+        // But first, capture current settings so they can be restored later
+        this.preFullScreenWidth = this.$ableWrapper.width();
+        this.preFullScreenHeight = this.$ableWrapper.height();
+
         if (el.requestFullscreen) {
           el.requestFullscreen();
         }
@@ -1026,7 +1030,7 @@
         }
       }
       else {
-        // If in fullscreen, exit it.
+        // Exit fullscreen
         if (document.exitFullscreen) {
           document.exitFullscreen();
         }
@@ -1053,13 +1057,8 @@
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          if (thisObj.player === 'youtube') {
-            thisObj.restoringAfterFullscreen = true;
-            thisObj.resizePlayer(thisObj.ytWidth, thisObj.ytHeight);
-          }
-          else {
-            thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
-          }
+          thisObj.restoringAfterFullScreen = true;
+          thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
         }
       });
     }
@@ -1270,45 +1269,44 @@
       }
     }
     else {
-      // player resized, but not fullscreen
-      // in case restoring from fullscreen, reset CSS to responsive
-      if (this.player === 'youtube') {
-        // disabled as of 3.0.25
-        // something changed at YouTube in early 2017 and this was causing iframe sizing problems
-        /*
+      // player resized
+      if (this.restoringAfterFullScreen) {
+        // User has just exited fullscreen mode. Restore to previous settings
+        width = this.preFullScreenWidth;
+        height = this.preFullScreenHeight;
+        this.restoringAfterFullScreen = false;
         this.$ableWrapper.css({
           'max-width': width + 'px',
           'width': ''
         });
-        */
-      }
-      else if (this.player === 'jw') {
-        // JW Player has a funny way of expanding height disproportionately as width changes
-        // couldn't isolate the cause, but forcing height to preserve default aspect ratio works
-        jwHeight = Math.round(width/this.fallbackRatio, 0);
-        this.$fallbackWrapper.css({
-          'width': width,
-          'height': jwHeight
+        if (typeof this.$vidcapContainer !== 'undefined') {
+          this.$vidcapContainer.css({
+            'height': '',
+            'width': ''
+          });
+        }
+        this.$media.css({
+          'width': '100%',
+          'height': 'auto'
         });
       }
-      else {
-        this.$ableWrapper.css({
-          'max-width': this.playerMaxWidth + 'px',
-          'width': ''
-        });
-      }
-      if (typeof this.$vidcapContainer !== 'undefined') {
-        this.$vidcapContainer.css({
-          'height': '',
-          'width': ''
-        });
-      }
-      this.$media.css({
-        'width': '100%',
-        'height': 'auto'
-      });
     }
 
+    // resize YouTube or JW Player
+    if (this.player === 'youtube' && this.youTubePlayer) {
+      this.youTubePlayer.setSize(width, height);
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      if (this.mediaType === 'audio') {
+        // keep height set to 0 to prevent JW PLayer from showing its own player
+        this.jwPlayer.resize(width,0);
+      }
+      else {
+        this.jwPlayer.resize(width, jwHeight);
+      }
+    }
+
+    // Resize captions
     if (typeof this.$captionsDiv !== 'undefined') {
 
       // Font-size is too small in full screen view & too large in small-width view
@@ -1333,18 +1331,6 @@
       this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
 
-    if (this.player === 'youtube' && this.youTubePlayer) {
-      this.resizeYouTubePlayer();
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      if (this.mediaType === 'audio') {
-        // keep height set to 0 to prevent JW PLayer from showing its own player
-        this.jwPlayer.resize(width,0);
-      }
-      else {
-        this.jwPlayer.resize(width, jwHeight);
-      }
-    }
     this.refreshControls();
   };
 

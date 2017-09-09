@@ -84,6 +84,7 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
+
     if (this.isFullscreen()) {
 
       var newWidth, newHeight;
@@ -112,9 +113,23 @@
       this.positionCaptions('overlay');
     }
     else { // not fullscreen
-      newWidth = this.$ableWrapper.width();
-      newHeight = this.$ableWrapper.height();
-      this.positionCaptions(); // reset with this.prefCaptionsPosition
+      if (this.restoringAfterFullScreen) {
+        newWidth = this.preFullScreenWidth;
+        newHeight = this.preFullScreenHeight;
+      }
+      else {
+        // not restoring after full screen
+        newWidth = this.$ableWrapper.width();
+        if (typeof this.aspectRatio !== 'undefined') {
+          newHeight = Math.round(newWidth / this.aspectRatio);
+        }
+        else {
+          // not likely, since this.aspectRatio is defined during intialization
+          // however, this is a fallback scenario just in case
+          newHeight = this.$ableWrapper.height();
+        }
+        this.positionCaptions(); // reset with this.prefCaptionsPosition
+      }
     }
     this.resizePlayer(newWidth, newHeight);
   };

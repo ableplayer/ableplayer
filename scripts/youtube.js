@@ -105,7 +105,6 @@
         start: this.startTime,
         controls: 0, // no controls, using our own
         cc_load_policy: ccLoadPolicy,
-        // enablejsapi: 1, // deprecated; but we don't even need it???
         hl: this.lang, // use the default language UI
         modestbranding: 1, // no YouTube logo in controller
         rel: 0, // do not show related videos when video ends
@@ -122,6 +121,7 @@
             }
           }
           if (typeof thisObj.aspectRatio === 'undefined') {
+console.log('resizeYouTubePlayer at POS Y1');
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
           }
           deferred.resolve();
@@ -223,13 +223,20 @@
         this.restoringAfterFullScreen = false;
       }
       else {
-        // resizing due to a change in window size, but not from fullscreen
-        // just recalculate with new wrapper size and re-assign CSS
+        // recalculate with new wrapper size
         width = this.$ableWrapper.parent().width();
         height = Math.round(width / this.aspectRatio);
-
-        if (this.youTubePlayer) {
+        this.$ableWrapper.css({
+          'max-width': width + 'px',
+          'width': ''
+        });
+        this.youTubePlayer.setSize(width, height);
+        if (this.isFullscreen()) {
           this.youTubePlayer.setSize(width, height);
+        }
+        else {
+          // resizing due to a change in window size, not full screen
+          this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
         }
       }
     }
@@ -255,17 +262,6 @@
       }
     }
   };
-
-  AblePlayer.prototype.restoreYouTubePlayerSize = function() {
-
-    // called after exit from fullscreen mode
-    var d, width, height;
-
-    if (this.youTubePlayer && typeof this.ytWidth !== 'undefined' && typeof this.ytHeight !== 'undefined') {
-      this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-    }
-  };
-
 
   AblePlayer.prototype.setupYouTubeCaptions = function () {
 

@@ -282,7 +282,6 @@
   }
 
   AblePlayer.prototype.stylizeCaptions = function($element, pref) {
-
     // $element is the jQuery element containing the captions
     // this function handles stylizing of the sample caption text in the Prefs dialog
     // plus the actual production captions
@@ -328,14 +327,14 @@
           'opacity': opacity
         });
         if ($element === this.$captionsDiv) {
-          if (typeof this.$captionWrapper !== 'undefined') {
+          if (typeof this.$captionsWrapper !== 'undefined') {
             lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
             this.$captionsWrapper.css('line-height',lineHeight + '%');
           }
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
-          if (typeof this.$captionWrapper !== 'undefined') {
+          if (typeof this.$captionsWrapper !== 'undefined') {
             this.$captionsWrapper.css({
               'background-color': this.prefCaptionsBGColor,
               'opacity': '1'
@@ -344,7 +343,7 @@
         }
         else if (this.prefCaptionsPosition === 'overlay') {
           // no background color for overlay wrapper, captions are displayed in-line
-          if (typeof this.$captionWrapper !== 'undefined') {
+          if (typeof this.$captionsWrapper !== 'undefined') {
             this.$captionsWrapper.css({
               'background-color': 'transparent',
               'opacity': ''

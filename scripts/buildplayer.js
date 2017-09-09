@@ -1,6 +1,7 @@
 (function ($) {
 
   AblePlayer.prototype.injectPlayerCode = function() {
+
     // create and inject surrounding HTML structure
     // If IOS:
     //  If video:
@@ -24,7 +25,6 @@
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-
     if (this.player !== 'youtube') {
       this.$ableWrapper.css({
         'max-width': this.playerMaxWidth + 'px'

@@ -2844,6 +2844,7 @@
 (function ($) {
 
   AblePlayer.prototype.injectPlayerCode = function() {
+
     // create and inject surrounding HTML structure
     // If IOS:
     //  If video:
@@ -2867,7 +2868,6 @@
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-
     if (this.player !== 'youtube') {
       this.$ableWrapper.css({
         'max-width': this.playerMaxWidth + 'px'
@@ -4855,7 +4855,6 @@
         start: this.startTime,
         controls: 0, // no controls, using our own
         cc_load_policy: ccLoadPolicy,
-        // enablejsapi: 1, // deprecated; but we don't even need it???
         hl: this.lang, // use the default language UI
         modestbranding: 1, // no YouTube logo in controller
         rel: 0, // do not show related videos when video ends
@@ -4872,6 +4871,7 @@
             }
           }
           if (typeof thisObj.aspectRatio === 'undefined') {
+
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
           }
           deferred.resolve();
@@ -4973,13 +4973,20 @@
         this.restoringAfterFullScreen = false;
       }
       else {
-        // resizing due to a change in window size, but not from fullscreen
-        // just recalculate with new wrapper size and re-assign CSS
+        // recalculate with new wrapper size
         width = this.$ableWrapper.parent().width();
         height = Math.round(width / this.aspectRatio);
-
-        if (this.youTubePlayer) {
+        this.$ableWrapper.css({
+          'max-width': width + 'px',
+          'width': ''
+        });
+        this.youTubePlayer.setSize(width, height);
+        if (this.isFullscreen()) {
           this.youTubePlayer.setSize(width, height);
+        }
+        else {
+          // resizing due to a change in window size, not full screen
+          this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
         }
       }
     }
@@ -5005,17 +5012,6 @@
       }
     }
   };
-
-  AblePlayer.prototype.restoreYouTubePlayerSize = function() {
-
-    // called after exit from fullscreen mode
-    var d, width, height;
-
-    if (this.youTubePlayer && typeof this.ytWidth !== 'undefined' && typeof this.ytHeight !== 'undefined') {
-      this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-    }
-  };
-
 
   AblePlayer.prototype.setupYouTubeCaptions = function () {
 
@@ -7733,7 +7729,6 @@
   }
 
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
-
     if (this.isFullscreen() == fullscreen) {
       return;
     }
@@ -7744,7 +7739,12 @@
     if (this.nativeFullscreenSupported()) {
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
-        // If not in full screen, initialize it.
+        // Initialize fullscreen
+
+        // But first, capture current settings so they can be restored later
+        this.preFullScreenWidth = this.$ableWrapper.width();
+        this.preFullScreenHeight = this.$ableWrapper.height();
+
         if (el.requestFullscreen) {
           el.requestFullscreen();
         }
@@ -7759,7 +7759,7 @@
         }
       }
       else {
-        // If in fullscreen, exit it.
+        // Exit fullscreen
         if (document.exitFullscreen) {
           document.exitFullscreen();
         }
@@ -7786,13 +7786,8 @@
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          if (thisObj.player === 'youtube') {
-            thisObj.restoringAfterFullscreen = true;
-            thisObj.resizePlayer(thisObj.ytWidth, thisObj.ytHeight);
-          }
-          else {
-            thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
-          }
+          thisObj.restoringAfterFullScreen = true;
+          thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
         }
       });
     }
@@ -8003,45 +7998,44 @@
       }
     }
     else {
-      // player resized, but not fullscreen
-      // in case restoring from fullscreen, reset CSS to responsive
-      if (this.player === 'youtube') {
-        // disabled as of 3.0.25
-        // something changed at YouTube in early 2017 and this was causing iframe sizing problems
-        /*
+      // player resized
+      if (this.restoringAfterFullScreen) {
+        // User has just exited fullscreen mode. Restore to previous settings
+        width = this.preFullScreenWidth;
+        height = this.preFullScreenHeight;
+        this.restoringAfterFullScreen = false;
         this.$ableWrapper.css({
           'max-width': width + 'px',
           'width': ''
         });
-        */
-      }
-      else if (this.player === 'jw') {
-        // JW Player has a funny way of expanding height disproportionately as width changes
-        // couldn't isolate the cause, but forcing height to preserve default aspect ratio works
-        jwHeight = Math.round(width/this.fallbackRatio, 0);
-        this.$fallbackWrapper.css({
-          'width': width,
-          'height': jwHeight
+        if (typeof this.$vidcapContainer !== 'undefined') {
+          this.$vidcapContainer.css({
+            'height': '',
+            'width': ''
+          });
+        }
+        this.$media.css({
+          'width': '100%',
+          'height': 'auto'
         });
       }
-      else {
-        this.$ableWrapper.css({
-          'max-width': this.playerMaxWidth + 'px',
-          'width': ''
-        });
-      }
-      if (typeof this.$vidcapContainer !== 'undefined') {
-        this.$vidcapContainer.css({
-          'height': '',
-          'width': ''
-        });
-      }
-      this.$media.css({
-        'width': '100%',
-        'height': 'auto'
-      });
     }
 
+    // resize YouTube or JW Player
+    if (this.player === 'youtube' && this.youTubePlayer) {
+      this.youTubePlayer.setSize(width, height);
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      if (this.mediaType === 'audio') {
+        // keep height set to 0 to prevent JW PLayer from showing its own player
+        this.jwPlayer.resize(width,0);
+      }
+      else {
+        this.jwPlayer.resize(width, jwHeight);
+      }
+    }
+
+    // Resize captions
     if (typeof this.$captionsDiv !== 'undefined') {
 
       // Font-size is too small in full screen view & too large in small-width view
@@ -8066,18 +8060,6 @@
       this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
 
-    if (this.player === 'youtube' && this.youTubePlayer) {
-      this.resizeYouTubePlayer();
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      if (this.mediaType === 'audio') {
-        // keep height set to 0 to prevent JW PLayer from showing its own player
-        this.jwPlayer.resize(width,0);
-      }
-      else {
-        this.jwPlayer.resize(width, jwHeight);
-      }
-    }
     this.refreshControls();
   };
 
@@ -8544,7 +8526,6 @@
   }
 
   AblePlayer.prototype.stylizeCaptions = function($element, pref) {
-
     // $element is the jQuery element containing the captions
     // this function handles stylizing of the sample caption text in the Prefs dialog
     // plus the actual production captions
@@ -8590,14 +8571,14 @@
           'opacity': opacity
         });
         if ($element === this.$captionsDiv) {
-          if (typeof this.$captionWrapper !== 'undefined') {
+          if (typeof this.$captionsWrapper !== 'undefined') {
             lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
             this.$captionsWrapper.css('line-height',lineHeight + '%');
           }
         }
         if (this.prefCaptionsPosition === 'below') {
           // also need to add the background color to the wrapper div
-          if (typeof this.$captionWrapper !== 'undefined') {
+          if (typeof this.$captionsWrapper !== 'undefined') {
             this.$captionsWrapper.css({
               'background-color': this.prefCaptionsBGColor,
               'opacity': '1'
@@ -8606,7 +8587,7 @@
         }
         else if (this.prefCaptionsPosition === 'overlay') {
           // no background color for overlay wrapper, captions are displayed in-line
-          if (typeof this.$captionWrapper !== 'undefined') {
+          if (typeof this.$captionsWrapper !== 'undefined') {
             this.$captionsWrapper.css({
               'background-color': 'transparent',
               'opacity': ''
@@ -9874,6 +9855,7 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
+
     if (this.isFullscreen()) {
 
       var newWidth, newHeight;
@@ -9902,9 +9884,23 @@
       this.positionCaptions('overlay');
     }
     else { // not fullscreen
-      newWidth = this.$ableWrapper.width();
-      newHeight = this.$ableWrapper.height();
-      this.positionCaptions(); // reset with this.prefCaptionsPosition
+      if (this.restoringAfterFullScreen) {
+        newWidth = this.preFullScreenWidth;
+        newHeight = this.preFullScreenHeight;
+      }
+      else {
+        // not restoring after full screen
+        newWidth = this.$ableWrapper.width();
+        if (typeof this.aspectRatio !== 'undefined') {
+          newHeight = Math.round(newWidth / this.aspectRatio);
+        }
+        else {
+          // not likely, since this.aspectRatio is defined during intialization
+          // however, this is a fallback scenario just in case
+          newHeight = this.$ableWrapper.height();
+        }
+        this.positionCaptions(); // reset with this.prefCaptionsPosition
+      }
     }
     this.resizePlayer(newWidth, newHeight);
   };
