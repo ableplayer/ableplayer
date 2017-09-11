@@ -435,6 +435,32 @@
     });
   };
 
+  AblePlayer.getActiveDOMElement = function () {
+    var activeElement = document.activeElement;
+
+    // For shadow DOMs we need to keep digging down through the DOMs
+    while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+      activeElement = activeElement.shadowRoot.activeElement;
+    }
+
+    return activeElement;
+  };
+
+  AblePlayer.localGetElementById = function(element, id) {
+    if (element.getRootNode)
+    {
+      // Use getRootNode() and querySelector() where supported (for shadow DOM support)
+      return $(element.getRootNode().querySelector('#' + id));
+    }
+    else
+    {
+      // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+      return $(document.getElementById(id));
+    }
+  };
+
+
+
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
@@ -3185,6 +3211,7 @@
 
     this.$alertBox = $('<div role="alert"></div>');
     this.$alertBox.addClass('able-alert');
+    this.$alertBox.hide();
     this.$alertBox.appendTo(this.$ableDiv);
     if (this.mediaType == 'audio') {
       top = -10;
@@ -3229,7 +3256,7 @@
     $popup = $('<div>',{
       'id': this.mediaId + '-' + which + '-menu',
       'class': 'able-popup'
-    });
+    }).hide();
     if (which === 'chapters' || which === 'prefs' || which === 'sign-window' || which === 'transcript-window') {
       $popup.addClass('able-popup-no-radio');
     }
@@ -3273,7 +3300,7 @@
         $prevButton.parent().addClass('able-focus');
       }
       else if (e.which === 32 || e.which === 13) { // space or enter
-        $('input:focus').click();
+        $thisListItem.find('input:focus').click();
       }
       else if (e.which === 27) {  // Escape
         $thisListItem.removeClass('able-focus');
@@ -3731,7 +3758,7 @@
     this.$tooltipDiv = $('<div>',{
       'id': tooltipId,
       'class': 'able-tooltip'
-    });
+    }).hide();
     this.$controllerDiv.append(this.$tooltipDiv);
 
     // step separately through left and right controls
@@ -3954,7 +3981,7 @@
             }
             if (centerTooltip) {
               // populate tooltip, then calculate its width before showing it
-              var tooltipWidth = $('#' + tooltipId).text(label).width();
+              var tooltipWidth = AblePlayer.localGetElementById(newButton[0], tooltipId).text(label).width();
               // center the tooltip horizontally over the button
               var tooltipX = position.left - tooltipWidth/2;
               var tooltipStyle = {
@@ -3963,10 +3990,10 @@
                 top: tooltipY + 'px'
               };
             }
-            var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle);
+            var tooltip = AblePlayer.localGetElementById(newButton[0], tooltipId).text(label).css(tooltipStyle);
             thisObj.showTooltip(tooltip);
             $(this).on('mouseleave blur',function() {
-              $('#' + tooltipId).text('').hide();
+              AblePlayer.localGetElementById(newButton[0], tooltipId).text('').hide();
             })
           });
 
@@ -4541,7 +4568,7 @@
         this.$captionsWrapper = $('<div>',{
           'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
-        });
+        }).hide();
         if (this.prefCaptionsPosition === 'below') {
           this.$captionsWrapper.addClass('able-captions-below');
         }
@@ -5289,6 +5316,7 @@
 
     this.timeTooltip.attr('role', 'tooltip');
     this.timeTooltip.addClass('able-tooltip');
+    this.timeTooltip.hide();
 
     this.bodyDiv.append(this.loadedDiv);
     this.bodyDiv.append(this.playedDiv);
@@ -5699,11 +5727,11 @@
       'id': volumeSliderId,
       'class': 'able-volume-slider',
       'aria-hidden': 'true'
-    });
+    }).hide();
     this.$volumeSliderTooltip = $('<div>',{
       'class': 'able-tooltip',
       'role': 'tooltip'
-    });
+    }).hide();
     this.$volumeSliderTrack = $('<div>',{
       'class': 'able-volume-track'
     });
@@ -9078,7 +9106,7 @@
       thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
     });
 
-    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
+    this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (event) {
       // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
       // or outside of a clickable span.
       if (!thisObj.scrollingTranscript) {
@@ -9992,14 +10020,16 @@
 
     // returns true unless user's focus is on a UI element
     // that is likely to need supported keystrokes, including space
-    var activeElement = $(document.activeElement).prop('tagName');
-    if (activeElement === 'INPUT') {
+
+    var activeElement = AblePlayer.getActiveDOMElement();
+
+    if ($(activeElement).prop('tagName') === 'INPUT') {
       return false;
     }
     else {
       return true;
     }
-  }
+  };
 
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
@@ -10022,7 +10052,7 @@
       this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause
-      if (!($('.able-controller button').is(':focus'))) {
+      if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
         // only toggle play if a button does not have focus
         // if a button has focus, space should activate that button
         this.handlePlay();
@@ -10481,6 +10511,7 @@
     // create an alert div and add it to window
     $windowAlert = $('<div role="alert"></div>');
     $windowAlert.addClass('able-alert');
+    $windowAlert.hide();
     $windowAlert.appendTo(this.$activeWindow);
     $windowAlert.css({
       top: $window.offset().top
@@ -10523,7 +10554,7 @@
     $tooltip = $('<div>',{
       'class' : 'able-tooltip',
       'id' : tooltipId
-    });
+    }).hide();
     $newButton.on('mouseenter focus',function(event) {
       var label = $(this).attr('aria-label');
       // get position of this button
@@ -10537,10 +10568,10 @@
         right: tooltipX + 'px',
         top: tooltipY + 'px'
       };
-      var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle);
+      var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).css(tooltipStyle);
       thisObj.showTooltip(tooltip);
       $(this).on('mouseleave blur',function() {
-        $('#' + tooltipId).text('').hide();
+        AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
       });
     });
 

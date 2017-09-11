@@ -70,7 +70,7 @@
       thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
     });
 
-    this.$transcriptDiv.bind('mousewheel DOMMouseScroll click scroll', function (event) {
+    this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (event) {
       // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
       // or outside of a clickable span.
       if (!thisObj.scrollingTranscript) {

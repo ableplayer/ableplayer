@@ -67,6 +67,7 @@
 
     this.timeTooltip.attr('role', 'tooltip');
     this.timeTooltip.addClass('able-tooltip');
+    this.timeTooltip.hide();
 
     this.bodyDiv.append(this.loadedDiv);
     this.bodyDiv.append(this.playedDiv);

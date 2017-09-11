@@ -114,6 +114,7 @@
     // create an alert div and add it to window
     $windowAlert = $('<div role="alert"></div>');
     $windowAlert.addClass('able-alert');
+    $windowAlert.hide();
     $windowAlert.appendTo(this.$activeWindow);
     $windowAlert.css({
       top: $window.offset().top
@@ -156,7 +157,7 @@
     $tooltip = $('<div>',{
       'class' : 'able-tooltip',
       'id' : tooltipId
-    });
+    }).hide();
     $newButton.on('mouseenter focus',function(event) {
       var label = $(this).attr('aria-label');
       // get position of this button
@@ -170,10 +171,10 @@
         right: tooltipX + 'px',
         top: tooltipY + 'px'
       };
-      var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle);
+      var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).css(tooltipStyle);
       thisObj.showTooltip(tooltip);
       $(this).on('mouseleave blur',function() {
-        $('#' + tooltipId).text('').hide();
+        AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
       });
     });
 

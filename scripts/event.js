@@ -221,14 +221,16 @@
 
     // returns true unless user's focus is on a UI element
     // that is likely to need supported keystrokes, including space
-    var activeElement = $(document.activeElement).prop('tagName');
-    if (activeElement === 'INPUT') {
+
+    var activeElement = AblePlayer.getActiveDOMElement();
+
+    if ($(activeElement).prop('tagName') === 'INPUT') {
       return false;
     }
     else {
       return true;
     }
-  }
+  };
 
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
@@ -251,7 +253,7 @@
       this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause
-      if (!($('.able-controller button').is(':focus'))) {
+      if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
         // only toggle play if a button does not have focus
         // if a button has focus, space should activate that button
         this.handlePlay();
