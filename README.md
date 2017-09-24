@@ -61,8 +61,8 @@ Dependencies
 exception is the fallback player—see the *Fallback* section below for
 details.
 
--   *Able Player* uses [jQuery][]. The example code
-    below uses Google’s hosted libraries; no download required.
+-   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended. 
+    The example code below uses Google’s hosted libraries; no download required.
 -   *Able Player* uses [Modernizr][] to enable styling of HTML5 elements
     in Internet Explorer 6 through 8. A Modernizr 2.6.2 Custom Build is
     distributed with *Able Player*, and is all that *Able Player* needs.
@@ -129,7 +129,7 @@ to all use cases, both audio and video.
 ```HTML
 <!-- Dependencies -->
 <script src="thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="thirdparty/js.cookie.js"></script>
  
 <!-- CSS --> 
