@@ -88,7 +88,7 @@
         this.$captionsWrapper = $('<div>',{
           'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
-        });
+        }).hide();
         if (this.prefCaptionsPosition === 'below') {
           this.$captionsWrapper.addClass('able-captions-below');
         }

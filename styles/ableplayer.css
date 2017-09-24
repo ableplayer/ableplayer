@@ -245,7 +245,7 @@
   position: absolute;
   right: 0px;
   top: -74px;
-  display: none;
+  display: block;
   z-index: 9100;
 }
 .able-volume-track {
@@ -407,7 +407,7 @@ div.able-captions-wrapper {
   padding: 0;
   text-align: center;
   line-height: 1.35em;
-  display: none;
+  display: block;
   z-index: 6000;
 }
 div.able-captions {
@@ -680,7 +680,7 @@ span.able-modkey {
   position: absolute;
   right: 0;
   top: 0;
-  display: none;
+  display: block;
 }
 .able-drag {
   border: 2px dashed #F90;
@@ -818,7 +818,7 @@ div.able-chapters-div button::-moz-focus-inner {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
-  display: none;
+  display: block;
 }
 .able-alert {
   background-color: #FFFFCC;
@@ -846,7 +846,7 @@ div.able-chapters-div button::-moz-focus-inner {
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
-  display: none;
+  display: block;
 }
 .able-popup ul {
   list-style-type: none;

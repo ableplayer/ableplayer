@@ -22,11 +22,11 @@
       'id': volumeSliderId,
       'class': 'able-volume-slider',
       'aria-hidden': 'true'
-    });
+    }).hide();
     this.$volumeSliderTooltip = $('<div>',{
       'class': 'able-tooltip',
       'role': 'tooltip'
-    });
+    }).hide();
     this.$volumeSliderTrack = $('<div>',{
       'class': 'able-volume-track'
     });
