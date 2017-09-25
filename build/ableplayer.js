@@ -6758,6 +6758,11 @@ console.log('resizeYouTubePlayer at POS Y1');
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
 
+    // define variables to be used for analytics
+    // e.g., to measure the extent to which users seek back and forward
+    this.seekFromTime = this.media.currentTime;
+    this.seekToTime = newTime;
+
     this.seeking = true;
     this.liveUpdatePending = true;
 
