@@ -216,7 +216,16 @@
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
-        thisObj.seekTo(spanStart);
+        // Each click within the transcript triggers two click events (not sure why)
+        // this.seekingFromTranscript is a stopgab to prevent two calls to SeekTo()
+        if (!this.seekingFromTranscript) {
+          this.seekingFromTranscript = true;
+          thisObj.seekTo(spanStart);
+        }
+        else {
+          // don't seek a second time, but do reset var
+          thisObj.seekingFromTranscript = false;
+        }
       });
     }
   };
