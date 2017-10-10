@@ -614,6 +614,7 @@
               trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
               var getClickFunction = function (time) {
                 return function () {
+                  thisObj.seekTrigger = 'chapter';
                   thisObj.seekTo(time);
                   // stopgap to prevent spacebar in Firefox from reopening popup
                   // immediately after closing it (used in handleChapters())

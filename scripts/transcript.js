@@ -213,13 +213,14 @@
     // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js)
     if (this.$transcriptArea.length > 0) {
       this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(event) {
+        thisObj.seekTrigger = 'transcript';
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
         // Each click within the transcript triggers two click events (not sure why)
         // this.seekingFromTranscript is a stopgab to prevent two calls to SeekTo()
-        if (!this.seekingFromTranscript) {
-          this.seekingFromTranscript = true;
+        if (!thisObj.seekingFromTranscript) {
+          thisObj.seekingFromTranscript = true;
           thisObj.seekTo(spanStart);
         }
         else {

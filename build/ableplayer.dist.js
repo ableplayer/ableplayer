@@ -3483,6 +3483,7 @@
               trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
               var getClickFunction = function (time) {
                 return function () {
+                  thisObj.seekTrigger = 'chapter';
                   thisObj.seekTo(time);
                   // stopgap to prevent spacebar in Firefox from reopening popup
                   // immediately after closing it (used in handleChapters())
@@ -8741,6 +8742,7 @@
         // add event listeners
         getClickFunction = function (time) {
           return function () {
+            thisObj.seekTrigger = 'chapter';
             $clickedItem = $(this).closest('li');
             $chaptersList = $(this).closest('ul').find('li');
             thisChapterIndex = $chaptersList.index($clickedItem);
@@ -9254,13 +9256,14 @@
     // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js)
     if (this.$transcriptArea.length > 0) {
       this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(event) {
+        thisObj.seekTrigger = 'transcript';
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
         spanStart += .01;
         // Each click within the transcript triggers two click events (not sure why)
         // this.seekingFromTranscript is a stopgab to prevent two calls to SeekTo()
-        if (!this.seekingFromTranscript) {
-          this.seekingFromTranscript = true;
+        if (!thisObj.seekingFromTranscript) {
+          thisObj.seekingFromTranscript = true;
           thisObj.seekTo(spanStart);
         }
         else {
@@ -9984,12 +9987,15 @@
       this.handlePlay();
     }
     else if (whichButton === 'restart') {
+      this.seekTrigger = 'restart';
       this.handleRestart();
     }
     else if (whichButton === 'rewind') {
+      this.seekTrigger = 'rewind';
       this.handleRewind();
     }
     else if (whichButton === 'forward') {
+      this.seekTrigger = 'forward';
       this.handleFastForward();
     }
     else if (whichButton === 'mute') {
@@ -10154,7 +10160,13 @@
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
-        if (!thisObj.startedPlaying) {
+        if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
+          // by clicking on any of these elements, user is likely intending to play
+          // Not included: elements where user might click multiple times in succession
+          // (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
+          thisObj.playMedia();
+        }
+        else if (!thisObj.startedPlaying) {
           if (thisObj.startTime) {
             if (thisObj.seeking) {
               // a seek has already been initiated

@@ -78,6 +78,7 @@
         // add event listeners
         getClickFunction = function (time) {
           return function () {
+            thisObj.seekTrigger = 'chapter';
             $clickedItem = $(this).closest('li');
             $chaptersList = $(this).closest('ul').find('li');
             thisChapterIndex = $chaptersList.index($clickedItem);
