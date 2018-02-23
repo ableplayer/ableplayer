@@ -1053,7 +1053,7 @@
               'class': iconClass
             });
             buttonUse = $('<use>',{
-              'xlink:href': this.rootPath + 'icons/able-icons.svg#' + iconClass
+              'xlink:href': this.rootPath + 'button-icons/able-icons.svg#' + iconClass
             });
             buttonIcon.append(buttonUse);
             newButton.html(buttonIcon);
