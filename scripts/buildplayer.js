@@ -872,7 +872,7 @@
     // some controls are aligned on the left, and others on the right
     var useSpeedButtons, useFullScreen,
     i, j, k, controls, $controllerSpan, tooltipId, tooltipX, tooltipY, control,
-    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon, buttonUse,
+    buttonImg, buttonImgSrc, buttonTitle, newButton, iconClass, buttonIcon, buttonUse, svgPath,
     leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
     controllerStyles, vidcapStyles, captionLabel, popupMenuId;
 
@@ -1024,6 +1024,13 @@
             newButton.append(buttonIcon);
           }
           else if (this.iconType === 'svg') {
+
+          /*
+            // Unused option for adding SVG:
+            // Use <use> element to link to button-icons/able-icons.svg
+            // Advantage: SVG file can be cached
+            // Disadvantage: Not supported by Safari 6, IE 6-11, or Edge 12
+            // Instead, adding <svg> element within each <button>
             if (control === 'volume') {
               iconClass = 'svg-' + this.volumeButton;
             }
@@ -1056,6 +1063,42 @@
               'xlink:href': this.rootPath + 'button-icons/able-icons.svg#' + iconClass
             });
             buttonIcon.append(buttonUse);
+            */
+            var svgData;
+            if (control === 'volume') {
+              svgData = this.getSvgData(this.volumeButton);
+            }
+            else if (control === 'fullscreen') {
+              svgData = this.getSvgData('fullscreen-expand');
+            }
+            else if (control === 'slower') {
+              if (this.speedIcons === 'animals') {
+                svgData = this.getSvgData('turtle');
+              }
+              else {
+                svgData = this.getSvgData('slower');
+              }
+            }
+            else if (control === 'faster') {
+              if (this.speedIcons === 'animals') {
+                svgData = this.getSvgData('rabbit');
+              }
+              else {
+                svgData = this.getSvgData('faster');
+              }
+            }
+            else {
+              svgData = this.getSvgData(control);
+            }
+            buttonIcon = $('<svg>',{
+              'focusable': 'false',
+              'aria-hidden': 'true',
+              'viewBox': svgData[0]
+            });
+            svgPath = $('<path>',{
+              'd': svgData[1]
+            });
+            buttonIcon.append(svgPath);
             newButton.html(buttonIcon);
 
             // Final step: Need to refresh the DOM in order for browser to process & display the SVG

@@ -243,8 +243,8 @@
     var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
       updateLive, textByState, timestamp, widthUsed,
       leftControls, rightControls, seekbarWidth, seekbarSpacer, captionsCount,
-      buffered, newTop, svgLink, newSvgLink,
-      statusBarHeight, speedHeight, statusBarWidthBreakpoint;
+      buffered, newTop, statusBarHeight, speedHeight, statusBarWidthBreakpoint,
+      newSvgData;
 
     thisObj = this;
     if (this.swappingSrc) {
@@ -345,7 +345,9 @@
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
         }
         else if (this.iconType === 'svg') {
-          // TODO: Add play/pause toggle for SVG
+          newSvgData = this.getSvgData('play');
+          this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
+          this.$playpauseButton.find('path').attr('d',newSvgData[1]);
         }
         else {
           this.$playpauseButton.find('img').attr('src',this.playButtonImg);
@@ -389,12 +391,9 @@
               this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
             }
             else if (this.iconType === 'svg') {
-              // Not currently working. SVG is a work in progress
-              this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
-              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-              newSvgLink = svgLink.replace('svg-pause','svg-play');
-              this.$playpauseButton.find('use').attr(newSvgLink);
-              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+              newSvgData = this.getSvgData('play');
+              this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
+              this.$playpauseButton.find('path').attr('d',newSvgData[1]);
             }
             else {
               this.$playpauseButton.find('img').attr('src',this.playButtonImg);
@@ -408,12 +407,9 @@
               this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
             }
             else if (this.iconType === 'svg') {
-              // Not currently working. SVG is a work in progress
-              this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
-              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-              newSvgLink = svgLink.replace('svg-play','svg-pause');
-              this.$playpauseButton.find('use').attr(newSvgLink);
-              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+              newSvgData = this.getSvgData('pause');
+              this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
+              this.$playpauseButton.find('path').attr('d',newSvgData[1]);
             }
             else {
               this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
@@ -543,9 +539,9 @@
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
         }
         else if (this.iconType === 'svg') {
-          // Not currently working. SVG is a work in progress.
-          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
-          this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+          newSvgData = this.getSvgData('fullscreen-expand');
+          this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
+          this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
         }
         else {
           this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
@@ -558,9 +554,9 @@
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
         }
         else if (this.iconType === 'svg') {
-          // Not currently working. SVG is a work in progress.
-          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
-          this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+          newSvgData = this.getSvgData('fullscreen-collapse');
+          this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
+          this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
         }
         else {
           this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
