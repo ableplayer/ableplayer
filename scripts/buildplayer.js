@@ -36,7 +36,7 @@
     // youtube adds its own big play button
     // if (this.mediaType === 'video' && this.player !== 'youtube') {
     if (this.mediaType === 'video') {
-      if (this.iconType == 'font' && this.player !== 'youtube') {
+      if (this.iconType != 'image' && this.player !== 'youtube') {
         this.injectBigPlayButton();
       }
 
@@ -79,7 +79,6 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
-
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
@@ -863,7 +862,7 @@
   };
 
   AblePlayer.prototype.addControls = function() {
-
+console.log('adding controls with iconType ' + this.iconType);
     // determine which controls to show based on several factors:
     // mediaType (audio vs video)
     // availability of tracks (e.g., for closed captions & audio description)

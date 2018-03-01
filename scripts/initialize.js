@@ -375,10 +375,10 @@
   };
 
   AblePlayer.prototype.setIconType = function() {
-    // returns either "font" or "image"
-    // create a temporary play span and check to see if button has font-family == "able" (the default)
-    // if it doesn't, user has a custom style sheet and icon fonts will not display properly
-    // use images as fallback
+
+    // returns either "svg", "font" or "image" (in descending order of preference)
+    // Test for support of each type. If not supported, test the next type.
+    // last resort is image icons
 
     var $tempButton, $testButton, controllerFont;
 
@@ -387,58 +387,71 @@
       return false;
     }
 
-    if (window.getComputedStyle) {
+    // test for SVG support
+    // Test this method widely; failed as expected on IE8 and below
+    // https://stackoverflow.com/a/27568129/744281
+    if (!!(document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGRect)) {
+      // browser supports SVG
+console.log('browser supports svg');
+      this.iconType = 'svg';
+    }
+    else {
+console.log('browser does not support svg');
+      // browser does NOT support SVG
+      // test whether browser can support icon fonts, and whether user has overriding the default style sheet
+      // which could cause problems with proper display of the icon fonts
+      if (window.getComputedStyle) {
 
-      // webkit doesn't return calculated styles unless element has been added to the DOM
-      // and is visible (note: visibly clipped is considered "visible")
-      // use playpauseButton for font-family test if it exists; otherwise must create a new temp button
-      if ($('span.icon-play').length) {
-        $testButton = $('span.icon-play');
-      }
-      else {
-        $tempButton = $('<span>',{
-          'class': 'icon-play able-clipped'
-        });
-        $('body').append($tempButton);
-        $testButton = $tempButton;
-      }
-
-      // the following retrieves the computed value of font-family
-      // tested in Firefox 45.x with "Allow pages to choose their own fonts" unchecked - works!
-      // tested in Chrome 49.x with Font Changer plugin - works!
-      // tested in IE with user-defined style sheet enables - works!
-      // It does NOT account for users who have "ignore font styles on web pages" checked in IE
-      // There is no known way to check for that ???
-      controllerFont = window.getComputedStyle($testButton.get(0), null).getPropertyValue('font-family');
-      if (typeof controllerFont !== 'undefined') {
-        if (controllerFont.indexOf('able') !== -1) {
-          this.iconType = 'font';
+        // webkit doesn't return calculated styles unless element has been added to the DOM
+        // and is visible (note: visibly clipped is considered "visible")
+        // use playpauseButton for font-family test if it exists; otherwise must create a new temp button
+        if ($('span.icon-play').length) {
+          $testButton = $('span.icon-play');
         }
         else {
+          $tempButton = $('<span>',{
+            'class': 'icon-play able-clipped'
+          });
+          $('body').append($tempButton);
+          $testButton = $tempButton;
+        }
+
+        // the following retrieves the computed value of font-family
+        // tested in Firefox 45.x with "Allow pages to choose their own fonts" unchecked - works!
+        // tested in Chrome 49.x with Font Changer plugin - works!
+        // tested in IE with user-defined style sheet enables - works!
+        // It does NOT account for users who have "ignore font styles on web pages" checked in IE
+        // There is no known way to check for that ???
+        controllerFont = window.getComputedStyle($testButton.get(0), null).getPropertyValue('font-family');
+        if (typeof controllerFont !== 'undefined') {
+          if (controllerFont.indexOf('able') !== -1) {
+            this.iconType = 'font';
+          }
+          else {
+            this.iconType = 'image';
+          }
+        }
+        else {
+          // couldn't get computed font-family; use images to be safe
           this.iconType = 'image';
         }
       }
-      else {
-        // couldn't get computed font-family; use images to be safe
+      else { // window.getComputedStyle is not supported (IE 8 and earlier)
+        // No known way to detect computed font
+        // The following retrieves the value from the style sheet, not the computed font
+        // controllerFont = $tempButton.get(0).currentStyle.fontFamily;
+        // It will therefore return "able", even if the user is overriding that with a custom style sheet
+        // To be safe, use images
         this.iconType = 'image';
       }
-    }
-    else { // window.getComputedStyle is not supported (IE 8 and earlier)
-      // No known way to detect computed font
-      // The following retrieves the value from the style sheet, not the computed font
-      // controllerFont = $tempButton.get(0).currentStyle.fontFamily;
-      // It will therefore return "able", even if the user is overriding that with a custom style sheet
-      // To be safe, use images
-      this.iconType = 'image';
-    }
-    if (this.debug) {
-      console.log('Using ' + this.iconType + 's for player controls');
-    }
-    if (typeof $tempButton !== 'undefined') {
-      $tempButton.remove();
+      if (this.debug) {
+        console.log('Using ' + this.iconType + 's for player controls');
+      }
+      if (typeof $tempButton !== 'undefined') {
+        $tempButton.remove();
+      }
     }
   };
-
 
   // Perform one-time setup for this instance of player; called after player is first initialized.
   AblePlayer.prototype.setupInstance = function () {

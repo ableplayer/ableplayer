@@ -271,9 +271,10 @@
     }
 
     // Icon type
-    // By default, AblePlayer uses scalable icomoon fonts for the player controls
-    // and falls back to images if the user has a custom style sheet that overrides font-family
-    // use data-icon-type to force controls to use either 'font', 'images' or 'svg'
+    // By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
+    // Fallback for browsers that don't support SVG is scalable icomoon fonts
+    // Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
+    // Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
     this.iconType = 'font';
     this.forceIconType = false;
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {

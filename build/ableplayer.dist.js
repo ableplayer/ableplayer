@@ -271,9 +271,10 @@
     }
 
     // Icon type
-    // By default, AblePlayer uses scalable icomoon fonts for the player controls
-    // and falls back to images if the user has a custom style sheet that overrides font-family
-    // use data-icon-type to force controls to use either 'font', 'images' or 'svg'
+    // By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
+    // Fallback for browsers that don't support SVG is scalable icomoon fonts
+    // Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
+    // Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
     this.iconType = 'font';
     this.forceIconType = false;
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
@@ -842,10 +843,10 @@
   };
 
   AblePlayer.prototype.setIconType = function() {
-    // returns either "font" or "image"
-    // create a temporary play span and check to see if button has font-family == "able" (the default)
-    // if it doesn't, user has a custom style sheet and icon fonts will not display properly
-    // use images as fallback
+
+    // returns either "svg", "font" or "image" (in descending order of preference)
+    // Test for support of each type. If not supported, test the next type.
+    // last resort is image icons
 
     var $tempButton, $testButton, controllerFont;
 
@@ -854,58 +855,71 @@
       return false;
     }
 
-    if (window.getComputedStyle) {
+    // test for SVG support
+    // Test this method widely; failed as expected on IE8 and below
+    // https://stackoverflow.com/a/27568129/744281
+    if (!!(document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGRect)) {
+      // browser supports SVG
 
-      // webkit doesn't return calculated styles unless element has been added to the DOM
-      // and is visible (note: visibly clipped is considered "visible")
-      // use playpauseButton for font-family test if it exists; otherwise must create a new temp button
-      if ($('span.icon-play').length) {
-        $testButton = $('span.icon-play');
-      }
-      else {
-        $tempButton = $('<span>',{
-          'class': 'icon-play able-clipped'
-        });
-        $('body').append($tempButton);
-        $testButton = $tempButton;
-      }
+      this.iconType = 'svg';
+    }
+    else {
 
-      // the following retrieves the computed value of font-family
-      // tested in Firefox 45.x with "Allow pages to choose their own fonts" unchecked - works!
-      // tested in Chrome 49.x with Font Changer plugin - works!
-      // tested in IE with user-defined style sheet enables - works!
-      // It does NOT account for users who have "ignore font styles on web pages" checked in IE
-      // There is no known way to check for that ???
-      controllerFont = window.getComputedStyle($testButton.get(0), null).getPropertyValue('font-family');
-      if (typeof controllerFont !== 'undefined') {
-        if (controllerFont.indexOf('able') !== -1) {
-          this.iconType = 'font';
+      // browser does NOT support SVG
+      // test whether browser can support icon fonts, and whether user has overriding the default style sheet
+      // which could cause problems with proper display of the icon fonts
+      if (window.getComputedStyle) {
+
+        // webkit doesn't return calculated styles unless element has been added to the DOM
+        // and is visible (note: visibly clipped is considered "visible")
+        // use playpauseButton for font-family test if it exists; otherwise must create a new temp button
+        if ($('span.icon-play').length) {
+          $testButton = $('span.icon-play');
         }
         else {
+          $tempButton = $('<span>',{
+            'class': 'icon-play able-clipped'
+          });
+          $('body').append($tempButton);
+          $testButton = $tempButton;
+        }
+
+        // the following retrieves the computed value of font-family
+        // tested in Firefox 45.x with "Allow pages to choose their own fonts" unchecked - works!
+        // tested in Chrome 49.x with Font Changer plugin - works!
+        // tested in IE with user-defined style sheet enables - works!
+        // It does NOT account for users who have "ignore font styles on web pages" checked in IE
+        // There is no known way to check for that ???
+        controllerFont = window.getComputedStyle($testButton.get(0), null).getPropertyValue('font-family');
+        if (typeof controllerFont !== 'undefined') {
+          if (controllerFont.indexOf('able') !== -1) {
+            this.iconType = 'font';
+          }
+          else {
+            this.iconType = 'image';
+          }
+        }
+        else {
+          // couldn't get computed font-family; use images to be safe
           this.iconType = 'image';
         }
       }
-      else {
-        // couldn't get computed font-family; use images to be safe
+      else { // window.getComputedStyle is not supported (IE 8 and earlier)
+        // No known way to detect computed font
+        // The following retrieves the value from the style sheet, not the computed font
+        // controllerFont = $tempButton.get(0).currentStyle.fontFamily;
+        // It will therefore return "able", even if the user is overriding that with a custom style sheet
+        // To be safe, use images
         this.iconType = 'image';
       }
-    }
-    else { // window.getComputedStyle is not supported (IE 8 and earlier)
-      // No known way to detect computed font
-      // The following retrieves the value from the style sheet, not the computed font
-      // controllerFont = $tempButton.get(0).currentStyle.fontFamily;
-      // It will therefore return "able", even if the user is overriding that with a custom style sheet
-      // To be safe, use images
-      this.iconType = 'image';
-    }
-    if (this.debug) {
-      
-    }
-    if (typeof $tempButton !== 'undefined') {
-      $tempButton.remove();
+      if (this.debug) {
+        
+      }
+      if (typeof $tempButton !== 'undefined') {
+        $tempButton.remove();
+      }
     }
   };
-
 
   // Perform one-time setup for this instance of player; called after player is first initialized.
   AblePlayer.prototype.setupInstance = function () {
@@ -3058,7 +3072,7 @@
     // youtube adds its own big play button
     // if (this.mediaType === 'video' && this.player !== 'youtube') {
     if (this.mediaType === 'video') {
-      if (this.iconType == 'font' && this.player !== 'youtube') {
+      if (this.iconType != 'image' && this.player !== 'youtube') {
         this.injectBigPlayButton();
       }
 
@@ -3101,7 +3115,6 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
-
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,

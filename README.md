@@ -197,7 +197,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
     valuable bandwidth, so preload="metadata" would be a better option.
 -   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
 -   **data-root-path** - define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server   
--   **data-icon-type** - optional; "svg", "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
+-   **data-icon-type** - optional; "svg", "font" or "image"; "svg" is the default with automatic fallback to "font" unless either (a) the browser doesn't support icon fonts or (b) the user has a custom style sheet that may impact the display of icon fonts; in either case falls back to images. Should generally leave as is unless testing the fallback. 
 -   **data-speed-icons** - optional; "arrows" (default) or "animals". The latter will substitute a turtle icon for *slower* and a rabbit icon for *faster*. 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
