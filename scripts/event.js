@@ -554,8 +554,17 @@
     this.addSeekbarListeners();
 
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').on('click',function(){
+    this.$controllerDiv.find('button').on('click',function(event){
+      event.stopPropagation();
       thisObj.onClickPlayerButton(this);
+    });
+
+    // handle clicks anywhere on the page. If any popups are open, close them.
+    $(document).on('click',function() {
+      if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
+        // at least one popup is visible
+        thisObj.closePopups();
+      }
     });
 
     // handle local keydown events if this isn't the only player on the page;

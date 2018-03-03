@@ -443,6 +443,7 @@
   };
 
   AblePlayer.prototype.closePopups = function () {
+
     if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
       this.$chaptersButton.focus();
@@ -862,7 +863,6 @@
   };
 
   AblePlayer.prototype.addControls = function() {
-console.log('adding controls with iconType ' + this.iconType);
     // determine which controls to show based on several factors:
     // mediaType (audio vs video)
     // availability of tracks (e.g., for closed captions & audio description)

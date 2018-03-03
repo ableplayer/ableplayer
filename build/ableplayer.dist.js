@@ -860,11 +860,9 @@
     // https://stackoverflow.com/a/27568129/744281
     if (!!(document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGRect)) {
       // browser supports SVG
-
       this.iconType = 'svg';
     }
     else {
-
       // browser does NOT support SVG
       // test whether browser can support icon fonts, and whether user has overriding the default style sheet
       // which could cause problems with proper display of the icon fonts
@@ -3479,6 +3477,7 @@
   };
 
   AblePlayer.prototype.closePopups = function () {
+
     if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
       this.$chaptersButton.focus();
@@ -3898,7 +3897,6 @@
   };
 
   AblePlayer.prototype.addControls = function() {
-
     // determine which controls to show based on several factors:
     // mediaType (audio vs video)
     // availability of tracks (e.g., for closed captions & audio description)
@@ -10575,8 +10573,17 @@
     this.addSeekbarListeners();
 
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').on('click',function(){
+    this.$controllerDiv.find('button').on('click',function(event){
+      event.stopPropagation();
       thisObj.onClickPlayerButton(this);
+    });
+
+    // handle clicks anywhere on the page. If any popups are open, close them.
+    $(document).on('click',function() {
+      if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
+        // at least one popup is visible
+        thisObj.closePopups();
+      }
     });
 
     // handle local keydown events if this isn't the only player on the page;

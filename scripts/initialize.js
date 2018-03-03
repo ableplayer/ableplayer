@@ -392,11 +392,9 @@
     // https://stackoverflow.com/a/27568129/744281
     if (!!(document.createElementNS && document.createElementNS('http://www.w3.org/2000/svg','svg').createSVGRect)) {
       // browser supports SVG
-console.log('browser supports svg');
       this.iconType = 'svg';
     }
     else {
-console.log('browser does not support svg');
       // browser does NOT support SVG
       // test whether browser can support icon fonts, and whether user has overriding the default style sheet
       // which could cause problems with proper display of the icon fonts
