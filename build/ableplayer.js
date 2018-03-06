@@ -131,7 +131,6 @@
     }
     this.volume = this.defaultVolume;
 
-
     // Optional Buttons
     // Buttons are added to the player controller if relevant media is present
     // However, in some applications it might be undesirable to show buttons
@@ -149,6 +148,19 @@
     }
     else {
       this.useDescriptionsButton = true;
+    }
+
+    // Headings
+    // By default, an off-screen heading is automatically added to the top of the media player
+    // It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
+    // Authors can override this behavior by manually assigning a heading level using data-heading-level
+    // Accepted values are 1-6, or 0 which indicates "no heading"
+    // (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
+    if ($(media).data('heading-level') !== undefined && $(media).data('heading-level') !== "") {
+      var headingLevel = $(media).data('heading-level');
+      if (/^[0-6]*$/.test(headingLevel)) { // must be a valid HTML heading level 1-6; or 0
+        this.playerHeadingLevel = headingLevel;
+      }
     }
 
     // Transcripts
@@ -3100,16 +3112,24 @@
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
-    // Add offscreen heading to the media container.
-    // The heading injected in $ableDiv is one level deeper than the closest parent heading
+    // Inject an offscreen heading to the media container.
+    // If heading hasn't already been manually defined via data-heading-level,
+    // automatically assign a level that is one level deeper than the closest parent heading
     // as determined by getNextHeadingLevel()
     var headingType;
-    this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
-    headingType = 'h' + this.playerHeadingLevel.toString();
-    this.$headingDiv = $('<' + headingType + '>');
-    this.$ableDiv.prepend(this.$headingDiv);
-    this.$headingDiv.addClass('able-offscreen');
-    this.$headingDiv.text(this.tt.playerHeading);
+    if (this.playerHeadingLevel == '0') {
+      // do NOT inject a heading (at author's request)
+    }
+    else {
+      if (typeof this.playerHeadingLevel === 'undefined') {
+        this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
+      }
+      headingType = 'h' + this.playerHeadingLevel.toString();
+      this.$headingDiv = $('<' + headingType + '>');
+      this.$ableDiv.prepend(this.$headingDiv);
+      this.$headingDiv.addClass('able-offscreen');
+      this.$headingDiv.text(this.tt.playerHeading);
+    }
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {

@@ -66,16 +66,24 @@
   };
 
   AblePlayer.prototype.injectOffscreenHeading = function () {
-    // Add offscreen heading to the media container.
-    // The heading injected in $ableDiv is one level deeper than the closest parent heading
+    // Inject an offscreen heading to the media container.
+    // If heading hasn't already been manually defined via data-heading-level,
+    // automatically assign a level that is one level deeper than the closest parent heading
     // as determined by getNextHeadingLevel()
     var headingType;
-    this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
-    headingType = 'h' + this.playerHeadingLevel.toString();
-    this.$headingDiv = $('<' + headingType + '>');
-    this.$ableDiv.prepend(this.$headingDiv);
-    this.$headingDiv.addClass('able-offscreen');
-    this.$headingDiv.text(this.tt.playerHeading);
+    if (this.playerHeadingLevel == '0') {
+      // do NOT inject a heading (at author's request)
+    }
+    else {
+      if (typeof this.playerHeadingLevel === 'undefined') {
+        this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
+      }
+      headingType = 'h' + this.playerHeadingLevel.toString();
+      this.$headingDiv = $('<' + headingType + '>');
+      this.$ableDiv.prepend(this.$headingDiv);
+      this.$headingDiv.addClass('able-offscreen');
+      this.$headingDiv.text(this.tt.playerHeading);
+    }
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
