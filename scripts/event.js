@@ -29,7 +29,14 @@
   };
 
   AblePlayer.prototype.onMediaPause = function () {
-    // do something
+    if (this.controlsHidden) {
+      this.fadeControls('in');
+      this.controlsHidden = false;
+    }
+    if (this.hidingControls) { // a timeout is actively counting
+      window.clearTimeout(this.hideControlsTimeout);
+      this.hidingControls = false;
+    }
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
@@ -384,6 +391,7 @@
         thisObj.refreshControls();
       })
       .on('ended',function() {
+        thisObj.playing = false;
         thisObj.onMediaComplete();
       })
       .on('progress', function() {
@@ -405,6 +413,7 @@
         }
       })
       .on('pause',function() {
+        thisObj.playing = false;
         thisObj.onMediaPause();
       })
       .on('ratechange',function() {
@@ -564,6 +573,31 @@
       if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
         // at least one popup is visible
         thisObj.closePopups();
+      }
+    });
+
+    // handle mouse movement over player; make controls visible again if hidden
+    this.$ableDiv.on('mousemove',function() {
+      if (thisObj.controlsHidden) {
+        thisObj.fadeControls('in');
+        thisObj.controlsHidden = false;
+        // after showing controls, wait another few seconds, then hide them again if video continues to play
+        thisObj.hidingControls = true;
+        thisObj.hideControlsTimeout = window.setTimeout(function() {
+          if (typeof thisObj.playing !== 'undefined' && thisObj.playing === true) {
+            thisObj.fadeControls('out');
+            thisObj.controlsHidden = true;
+            thisObj.hidingControls = false;
+          }
+        },3000);
+      };
+    });
+
+    // if user presses a key from anywhere on the page, show player controls
+    $(document).keydown(function() {
+      if (thisObj.controlsHidden) {
+        thisObj.fadeControls('in');
+        thisObj.controlsHidden = false;
       }
     });
 

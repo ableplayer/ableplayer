@@ -196,16 +196,17 @@
         this.transcriptType = 'popup';
       }
     }
+
     // In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
     // If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
     // If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-
-    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") {
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) {
       this.lyricsMode = true;
     }
     else {
       this.lyricsMode = false;
     }
+
     // Transcript Title
     if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
       this.transcriptTitle = $(media).data('transcript-title');
@@ -395,6 +396,15 @@
         this.searchString = $(media).data('search');
         this.searchDiv = $(media).data('search-div');
       }
+    }
+
+    // Hide controls when video starts playing
+    // They will reappear again when user presses a key or moves the mouse
+    if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
+      this.hideControls = true;
+    }
+    else {
+      this.hideControls = false;
     }
 
     // Define built-in variables that CANNOT be overridden with HTML attributes

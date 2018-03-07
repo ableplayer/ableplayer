@@ -196,16 +196,17 @@
         this.transcriptType = 'popup';
       }
     }
+
     // In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
     // If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
     // If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-
-    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") {
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) {
       this.lyricsMode = true;
     }
     else {
       this.lyricsMode = false;
     }
+
     // Transcript Title
     if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
       this.transcriptTitle = $(media).data('transcript-title');
@@ -395,6 +396,15 @@
         this.searchString = $(media).data('search');
         this.searchDiv = $(media).data('search-div');
       }
+    }
+
+    // Hide controls when video starts playing
+    // They will reappear again when user presses a key or moves the mouse
+    if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
+      this.hideControls = true;
+    }
+    else {
+      this.hideControls = false;
     }
 
     // Define built-in variables that CANNOT be overridden with HTML attributes
@@ -7204,6 +7214,9 @@
   };
 
   AblePlayer.prototype.playMedia = function () {
+
+    var thisObj = this;
+
     if (this.player === 'html5') {
       this.media.play(true);
       if (this.hasSignLanguage && this.signVideo) {
@@ -7221,6 +7234,52 @@
       this.stoppingYouTube = false;
     }
     this.startedPlaying = true;
+    if (this.hideControls) {
+      // wait briefly after playback begins, then hide controls
+      this.hidingControls = true;
+      this.hideControlsTimeout = window.setTimeout(function() {
+        thisObj.fadeControls('out');
+        thisObj.controlsHidden = true;
+        thisObj.hidingControls = false;
+      },2000);
+    }
+  };
+
+  AblePlayer.prototype.fadeControls = function(direction) {
+
+    // NOTE: This is a work in progress, and is not yet fully functional
+    // TODO: Use jQuery fadeIn() and fadeOut() to attain some sort of transition
+    // Currently just adds or removes able-offscreen class to visibly hide content
+    // without hiding it from screen reader users
+
+    // direction is either 'out' or 'in'
+
+    // One challenge:
+    // When controls fade out in other players (e.g., YouTube, Vimeo), the transition works well because
+    // their controls are an overlay on top of the video.
+    // Therefore, disappearing controls don't affect the size of the video container.
+    // Able Player's controls appear below the video, so if this.$playerDiv disappears,
+    // that results in a reduction in the height of the video container, which is a bit jarring
+    // Solution #1: Don't hide this.$playerDiv; instead hide the two containers nested inside it
+    if (direction == 'out') {
+      this.$controllerDiv.addClass('able-offscreen');
+      this.$statusBarDiv.addClass('able-offscreen');
+      // Removing content from $playerDiv leaves an empty controller bar in its place
+      // What to do with the empty space?
+      // For now, changing to a black background; will restore to original background on fade-in
+      this.playerBackground = this.$playerDiv.css('background-color');
+      this.$playerDiv.css('background-color','black');
+    }
+    else if (direction == 'in') {
+      this.$controllerDiv.removeClass('able-offscreen');
+      this.$statusBarDiv.removeClass('able-offscreen');
+      if (typeof this.playerBackground !== 'undefined') {
+        this.$playerDiv.css('background-color',this.playerBackground);
+      }
+      else {
+        this.$playerDiv.css('background-color','');
+      }
+    }
   };
 
   AblePlayer.prototype.refreshControls = function() {
@@ -10068,7 +10127,14 @@
   };
 
   AblePlayer.prototype.onMediaPause = function () {
-    // do something
+    if (this.controlsHidden) {
+      this.fadeControls('in');
+      this.controlsHidden = false;
+    }
+    if (this.hidingControls) { // a timeout is actively counting
+      window.clearTimeout(this.hideControlsTimeout);
+      this.hidingControls = false;
+    }
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
@@ -10423,6 +10489,7 @@
         thisObj.refreshControls();
       })
       .on('ended',function() {
+        thisObj.playing = false;
         thisObj.onMediaComplete();
       })
       .on('progress', function() {
@@ -10444,6 +10511,7 @@
         }
       })
       .on('pause',function() {
+        thisObj.playing = false;
         thisObj.onMediaPause();
       })
       .on('ratechange',function() {
@@ -10603,6 +10671,31 @@
       if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
         // at least one popup is visible
         thisObj.closePopups();
+      }
+    });
+
+    // handle mouse movement over player; make controls visible again if hidden
+    this.$ableDiv.on('mousemove',function() {
+      if (thisObj.controlsHidden) {
+        thisObj.fadeControls('in');
+        thisObj.controlsHidden = false;
+        // after showing controls, wait another few seconds, then hide them again if video continues to play
+        thisObj.hidingControls = true;
+        thisObj.hideControlsTimeout = window.setTimeout(function() {
+          if (typeof thisObj.playing !== 'undefined' && thisObj.playing === true) {
+            thisObj.fadeControls('out');
+            thisObj.controlsHidden = true;
+            thisObj.hidingControls = false;
+          }
+        },3000);
+      };
+    });
+
+    // if user presses a key from anywhere on the page, show player controls
+    $(document).keydown(function() {
+      if (thisObj.controlsHidden) {
+        thisObj.fadeControls('in');
+        thisObj.controlsHidden = false;
       }
     });
 
