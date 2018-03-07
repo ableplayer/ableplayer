@@ -256,13 +256,13 @@
     }
 
     // Slower/Faster buttons
-    // valid values of data-speed-icons are 'arrows' (default) and 'animals'
-    // use 'animals' to use turtle and rabbit
-    if ($(media).data('speed-icons') === 'animals') {
-      this.speedIcons = 'animals';
+    // valid values of data-speed-icons are 'animals' (default) and 'arrows'
+    // 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
+    if ($(media).data('speed-icons') === 'arrows') {
+      this.speedIcons = 'arrows';
     }
     else {
-      this.speedIcons = 'arrows';
+      this.speedIcons = 'animals';
     }
 
     // Seekbar
