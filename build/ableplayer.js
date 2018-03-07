@@ -819,11 +819,15 @@
   };
 
   AblePlayer.prototype.setDimensions = function() {
-    // if <video> element includes width and height attributes,
+    // if media element includes width and height attributes,
     // use these to set the max-width and max-height of the player
     if (this.$media.attr('width') && this.$media.attr('height')) {
       this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
       this.playerMaxHeight = parseInt(this.$media.attr('height'), 10);
+    }
+    else if (this.$media.attr('width')) {
+      // media element includes a width attribute, but not height
+      this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
     }
     else {
       // set width to width of #player
