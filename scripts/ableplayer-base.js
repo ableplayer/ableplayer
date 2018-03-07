@@ -80,7 +80,7 @@
     // The following variables CAN be overridden with HTML attributes
 
     // autoplay
-    if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") {
+    if ($(media).attr('autoplay') !== undefined) {
       this.autoplay = true;
     }
     else {
@@ -88,7 +88,7 @@
     }
 
     // loop (NOT FULLY SUPPORTED)
-    if ($(media).attr('loop') !== undefined && $(media).attr('loop') !== "false") {
+    if ($(media).attr('loop') !== undefined && $(media).attr('loop') !== false) {
       this.loop = true;
     }
     else {
@@ -96,7 +96,7 @@
     }
 
     // start-time
-    if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") {
+    if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
       this.startTime = $(media).data('start-time');
     }
     else {
@@ -104,7 +104,7 @@
     }
 
     // debug
-    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") {
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== false) {
       this.debug = true;
     }
     else {
@@ -322,7 +322,7 @@
     // Now Playing
     // Shows "Now Playing:" plus the title of the current track above player
     // Only used if there is a playlist
-    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === "false") {
+    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === false) {
       this.showNowPlaying = false;
     }
     else {
@@ -348,14 +348,14 @@
 
     if (this.fallback === 'jw') {
 
-      if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
+      if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== false) {
         this.fallbackPath = $(media).data('fallback-path');
       }
       else {
         this.fallbackPath = this.rootPath + 'thirdparty/';
       }
 
-      if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
+      if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
         this.testFallback = true;
       }
     }
@@ -373,7 +373,7 @@
     // 2. The value of this.lang, if a matching translation file is available
     // 3. English
     // To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
-    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") {
+    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== false) {
       this.forceLang = true;
     }
     else {
