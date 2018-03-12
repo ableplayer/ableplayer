@@ -79,7 +79,7 @@
 
     // The following variables CAN be overridden with HTML attributes
 
-    // autoplay
+    // autoplay (Boolean; if present always resolves to true, regardless of value)
     if ($(media).attr('autoplay') !== undefined) {
       this.autoplay = true;
     }
@@ -87,8 +87,8 @@
       this.autoplay = false;
     }
 
-    // loop (NOT FULLY SUPPORTED)
-    if ($(media).attr('loop') !== undefined && $(media).attr('loop') !== false) {
+    // loop (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr('loop') !== undefined) {
       this.loop = true;
     }
     else {
