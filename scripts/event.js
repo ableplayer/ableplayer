@@ -336,8 +336,10 @@
 
     var thisObj = this;
 
-    // NOTE: iOS does not support autoplay,
+    // NOTE: iOS and some browsers do not support autoplay
     // and no events are triggered until media begins to play
+    // Able Player gets around this by automatically loading media in some circumstances
+    // (see initialize.js > initPlayer() for details)
     this.$media
       .on('emptied',function() {
         // do something
@@ -382,6 +384,12 @@
             }
           }
         }
+        else if (thisObj.hasPlaylist) {
+          if ((thisObj.playlistIndex !== (thisObj.$playlist.length - 1)) || thisObj.loop) {
+            // this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
+            thisObj.playMedia();
+          }
+        }
         else {
           // already started playing
         }
@@ -413,7 +421,21 @@
         }
       })
       .on('pause',function() {
-        thisObj.playing = false;
+        if (!thisObj.clickedPlay) {
+          // 'pause' was triggered automatically, not initiated by user
+          // this happens between tracks in a playlist
+          if (thisObj.hasPlaylist) {
+            // do NOT set playing to false.
+            // doing so prevents continual playback after new track is loaded
+          }
+          else {
+            thisObj.playing = false;
+          }
+        }
+        else {
+          thisObj.playing = false;
+        }
+        thisObj.clickedPlay = false; // done with this variable
         thisObj.onMediaPause();
       })
       .on('ratechange',function() {

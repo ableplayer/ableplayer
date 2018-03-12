@@ -2,8 +2,8 @@
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
-    // this.playing will change to true after 'playing' event is triggered
-    this.playing = false;
+    this.playing = false; // will change to true after 'playing' event is triggered
+    this.clickedPlay = false; // will change to true temporarily if user clicks 'play' (or pause)
 
     this.getUserAgent();
     this.setIconColor();
