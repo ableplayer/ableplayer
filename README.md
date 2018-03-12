@@ -189,6 +189,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
   
 -   **data-debug** - optional; if present will write messages to the developer console   
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
+-   **loop** - optional; loops and plays the media file repeatedly. If used in conjunction with a playlist, loops the entire playlist rather than individual tracks.  
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload="auto"**, which instructs the browser to
