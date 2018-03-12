@@ -443,7 +443,6 @@
   AblePlayer.nextIndex = 0;
 
   AblePlayer.prototype.setup = function() {
-
     var thisObj = this;
     this.reinitialize().then(function () {
       if (!thisObj.player) {
