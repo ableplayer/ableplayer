@@ -502,6 +502,13 @@
       }
     });
 
+    if (this.hasPlaylist && this.loop) {
+      // browser will loop the current track in the playlist, rather than the playlist
+      // therefore, need to remove loop attribute from media element
+      // but keep this.loop as true and handle the playlist looping ourselves
+      this.media.removeAttribute('loop');
+    }
+
     if (this.hasPlaylist && this.playlistEmbed) {
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
