@@ -965,7 +965,6 @@
   };
 
   AblePlayer.prototype.handlePrefsClick = function(pref) {
-
     // NOTE: the prefs menu is positioned near the right edge of the player
     // This assumes the Prefs button is also positioned in that vicinity
     // (last or second-last button the right)
@@ -982,6 +981,8 @@
       this.prefsPopup.hide();
       this.hidingPopup = false;
       this.$prefsButton.focus();
+      // restore each menu item to original hidden state
+      this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
     }
     else {
       this.closePopups();
@@ -991,9 +992,9 @@
       prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
       this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
       this.prefsPopup.css('left', prefsMenuLeft);
-      // remove prior focus and set focus on first item
-      this.prefsPopup.find('li').removeClass('able-focus');
-      this.prefsPopup.find('input').first().focus().parent().addClass('able-focus');
+      // remove prior focus and set focus on first item; also change tabindex from -1 to 0
+      this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
+      this.prefsPopup.find('li').first().focus().addClass('able-focus');
     }
   };
 

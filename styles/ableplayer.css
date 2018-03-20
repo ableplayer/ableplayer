@@ -863,6 +863,7 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 .able-popup li.able-focus {
   background-color: #CCC;
+  color: #000;
 }
 .able-popup li.able-focus label {
   color: #000;
