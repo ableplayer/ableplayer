@@ -102,6 +102,7 @@
       height: this.ytHeight,
       playerVars: {
         enablejsapi: 1,
+        playsinline: this.playsInline,
         start: this.startTime,
         controls: 0, // no controls, using our own
         cc_load_policy: ccLoadPolicy,
@@ -121,7 +122,6 @@
             }
           }
           if (typeof thisObj.aspectRatio === 'undefined') {
-console.log('resizeYouTubePlayer at POS Y1');
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
           }
           deferred.resolve();

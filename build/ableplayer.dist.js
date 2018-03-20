@@ -95,6 +95,14 @@
       this.loop = false;
     }
 
+    // playsinline (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr('playsinline') !== undefined) {
+      this.playsInline = '1'; // this value gets passed to YT.Player contructor in youtube.js
+    }
+    else {
+      this.playsInline = '0';
+    }
+
     // start-time
     if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
       this.startTime = $(media).data('start-time');
@@ -1017,19 +1025,11 @@
       return;
     }
 
-    // moved this until after setupTracks() is complete
-    // used to work fine in this location but was broken in Safari 10
-    // this.setMediaAttributes();
-
     this.loadCurrentPreferences();
 
     this.injectPlayerCode();
     this.initSignLanguage();
     this.setupTracks().then(function() {
-
-      // moved this a second time until after initPlayer() is complete
-      // used to work fine in this location but was broken in Safari 11
-      // this.setMediaAttributes();
 
       thisObj.setupAltCaptions().then(function() {
 
@@ -1047,7 +1047,11 @@
         thisObj.initPlayer().then(function() { // initPlayer success
           thisObj.initializing = false;
 
-          // moved this here; in its original location was not working in Safari 10
+          // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+          // This tells browsers to ignore the text tracks so Able Player can handle them
+          // However, timing is critical as browsers - especially Safari - tend to ignore this request
+          // unless it's sent late in the intialization process.
+          // If browsers ignore the request, the result is redundant captions
           thisObj.setMediaAttributes();
 
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
@@ -5177,6 +5181,7 @@
       height: this.ytHeight,
       playerVars: {
         enablejsapi: 1,
+        playsinline: this.playsInline,
         start: this.startTime,
         controls: 0, // no controls, using our own
         cc_load_policy: ccLoadPolicy,
@@ -5196,7 +5201,6 @@
             }
           }
           if (typeof thisObj.aspectRatio === 'undefined') {
-
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
           }
           deferred.resolve();

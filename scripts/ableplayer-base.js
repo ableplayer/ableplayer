@@ -95,6 +95,14 @@
       this.loop = false;
     }
 
+    // playsinline (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr('playsinline') !== undefined) {
+      this.playsInline = '1'; // this value gets passed to YT.Player contructor in youtube.js
+    }
+    else {
+      this.playsInline = '0';
+    }
+
     // start-time
     if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
       this.startTime = $(media).data('start-time');
