@@ -1026,8 +1026,10 @@
     this.injectPlayerCode();
     this.initSignLanguage();
     this.setupTracks().then(function() {
-      // moved this here; in its original location was not working in Safari 10
-      thisObj.setMediaAttributes();
+
+      // moved this a second time until after initPlayer() is complete
+      // used to work fine in this location but was broken in Safari 11
+      // this.setMediaAttributes();
 
       thisObj.setupAltCaptions().then(function() {
 
@@ -1044,6 +1046,10 @@
 
         thisObj.initPlayer().then(function() { // initPlayer success
           thisObj.initializing = false;
+
+          // moved this here; in its original location was not working in Safari 10
+          thisObj.setMediaAttributes();
+
           // inject each of the hidden forms that will be accessed from the Preferences popup menu
           prefsGroups = thisObj.getPreferencesGroups();
           for (i = 0; i < prefsGroups.length; i++) {
