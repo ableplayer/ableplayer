@@ -32,15 +32,17 @@ Supported Languages
 
 Able Player has been translated into the following languages. To add another language, see instructions below under **Contributing**. 
 
-- "Català (Catalan)
-- Deutsch (German) 
-- English 
-- Español (Spanish) 
-- Français (French) 
-- Italiano (Italian) 
-- 日本語 (Japanese)  
-- Norsk Bokmål (Norwegian) 
-- Nederlands, Vlaams (Dutch) 
+<ul>
+  <li><span lang="ca">Català</span> (Catalan)</li>
+  <li><span lang="de">Deutsch</span> (German) 
+  <li>English 
+  <li><span lang="en">Español</span> (Spanish) 
+  <li><span lang="fr">Français</span> (French) 
+  <li><span lang="it">Italiano</span> (Italian) 
+  <li><span lang="ja">日本語</span> (Japanese)  
+  <li><span lang="nb">Norsk Bokmål</span> (Norwegian) 
+  <li><span lang="nl">Nederlands, Vlaams</span> (Dutch) 
+</ul>
     
 Contributing
 -------------
