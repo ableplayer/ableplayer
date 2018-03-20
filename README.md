@@ -35,7 +35,7 @@ Able Player has been translated into the following languages. To add another lan
 <ul>
   <li><strong lang="ca">Català</strong> (Catalan)</li>
   <li><strong lang="de">Deutsch</strong> (German) 
-  <li>English 
+  <li><strong>English</strong> 
   <li><strong lang="en">Español</strong> (Spanish) 
   <li><strong lang="fr">Français</strong> (French) 
   <li><strong lang="it">Italiano</strong> (Italian) 
