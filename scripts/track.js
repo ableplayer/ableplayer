@@ -58,6 +58,7 @@
   };
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
+
     this.hasCaptions = true;
     // srcLang should always be included with <track>, but HTML5 spec doesn't require it
     // if not provided, assume track is the same language as the default player language
@@ -87,7 +88,7 @@
         this.$captionsWrapper = $('<div>',{
           'class': 'able-captions-wrapper',
           'aria-hidden': 'true'
-        });
+        }).hide();
         if (this.prefCaptionsPosition === 'below') {
           this.$captionsWrapper.addClass('able-captions-below');
         }
@@ -132,7 +133,7 @@
       });
       if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
         if (isDefaultTrack) {
-          option.attr('selected', 'selected');
+          option.prop('selected', true);
         }
         this.$transcriptLanguageSelect.append(option);
       }
@@ -152,7 +153,7 @@
           });
           if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
             if (isDefaultTrack) {
-              option.attr('selected', 'selected');
+              option.prop('selected', true);
             }
             option.insertBefore(options.eq(i));
           }
@@ -171,7 +172,7 @@
         });
         if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
           if (isDefaultTrack) {
-            option.attr('selected', 'selected');
+            option.prop('selected', true);
           }
           this.$transcriptLanguageSelect.append(option);
         }

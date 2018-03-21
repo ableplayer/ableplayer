@@ -2,16 +2,17 @@
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
     // Removing 'nl' as of 2.3.54, pending updates
-    var langs = ['de','en','es','fr','ja'];
+    var langs = ['ca','de','en','es','fr','it','ja','nb'];
     return langs;
   };
 
   AblePlayer.prototype.getTranslationText = function() {
-
     // determine language, then get labels and prompts from corresponding translation var
-    var gettingText, lang, thisObj, msg;
+    var deferred, thisObj, lang, thisObj, msg, translationFile;
 
-    gettingText = $.Deferred();
+    deferred = $.Deferred();
+
+    thisObj = this;
 
     // override this.lang to language of the web page, if known and supported
     // otherwise this.lang will continue using default
@@ -37,7 +38,29 @@
         }
       }
     }
+    translationFile = this.rootPath + 'translations/' + this.lang + '.js';
+    this.importTranslationFile(translationFile).then(function(result) {
+      thisObj.tt = eval(thisObj.lang);
+      deferred.resolve();
+    });
+    return deferred.promise();
+  };
 
-    // in final build, all language variables are contatenated into this function below...
-    // translation2.js is then contanenated onto the end to finish this function
+  AblePlayer.prototype.importTranslationFile = function(translationFile) {
 
+    var deferred = $.Deferred();
+
+    $.getScript(translationFile)
+      .done(function(translationVar,textStatus) {
+        // translation file successfully retrieved
+        deferred.resolve(translationVar);
+      })
+      .fail(function(jqxhr, settings, exception) {
+        deferred.fail();
+        // error retrieving file
+        // TODO: handle this
+      });
+    return deferred.promise();
+  };
+
+})(jQuery);

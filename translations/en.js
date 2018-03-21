@@ -1,5 +1,9 @@
 var en = {
 
+"audio": "audio",
+
+"video": "video",
+
 "playerHeading": "Media player",
 
 "faster": "Faster",

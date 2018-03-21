@@ -12,14 +12,18 @@
   };
 
   AblePlayer.prototype.showMeta = function(now) {
-    var m, thisMeta, cues, cueText, cueLines, i, line, focusTarget;
+    var tempSelectors, m, thisMeta,
+      cues, cueText, cueLines, i, line,
+      showDuration, focusTarget;
+
+    tempSelectors = [];
     if (this.meta.length >= 1) {
       cues = this.meta;
     }
     else {
       cues = [];
     }
-    for (m in cues) {
+    for (m = 0; m < cues.length; m++) {
       if ((cues[m].start <= now) && (cues[m].end > now)) {
         thisMeta = m;
         break;
@@ -51,17 +55,38 @@
             else {
               if ($(line).length) {
                 // selector exists
-                $(line).show();
+                showDuration = parseInt($(line).attr('data-duration'));
+                if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
+                  $(line).show().delay(showDuration).fadeOut();
+                }
+                else {
+                  // no duration specified. Just show the element until end time specified in VTT file
+                  $(line).show();
+                }
                 // add to array of visible selectors so it can be hidden at end time
                 this.visibleSelectors.push(line);
+                tempSelectors.push(line);
               }
             }
           }
+          // now step through this.visibleSelectors and remove anything that's stale
+          if (this.visibleSelectors && this.visibleSelectors.length) {
+            if (this.visibleSelectors.length !== tempSelectors.length) {
+              for (i=this.visibleSelectors.length-1; i>=0; i--) {
+                if ($.inArray(this.visibleSelectors[i],tempSelectors) == -1) {
+                  $(this.visibleSelectors[i]).hide();
+                  this.visibleSelectors.splice(i,1);
+                }
+              }
+            }
+          }
+
         }
         this.currentMeta = thisMeta;
       }
     }
     else {
+      // there is currently no metadata. Empty stale content
       if (typeof this.$metaDiv !== 'undefined') {
         this.$metaDiv.html('');
       }
@@ -81,25 +106,25 @@
     var result = [];
 
     var flattenComponent = function (component) {
-      var result = [];
+      var result = [], ii;
       if (component.type === 'string') {
         result.push(component.value);
       }
       else if (component.type === 'v') {
         result.push('[' + component.value + ']');
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       else {
-        for (var ii in component.children) {
+        for (ii = 0; ii < component.children.length; ii++) {
           result.push(flattenComponent(component.children[ii]));
         }
       }
       return result.join('');
     }
 
-    for (var ii in cue.components.children) {
+    for (var ii = 0; ii < cue.components.children.length; ii++) {
       result.push(flattenComponent(cue.components.children[ii]));
     }
 

@@ -67,6 +67,7 @@
 
     this.timeTooltip.attr('role', 'tooltip');
     this.timeTooltip.addClass('able-tooltip');
+    this.timeTooltip.hide();
 
     this.bodyDiv.append(this.loadedDiv);
     this.bodyDiv.append(this.playedDiv);
@@ -398,10 +399,6 @@
   };
 
   AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
-
-//console.log('trackImmediatelyTo');
-//console.log('Position: ' + this.position);
-
     this.startTracking('keyboard', position);
     this.trackHeadAtPosition(position);
     this.keyTrackPosition = position;

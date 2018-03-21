@@ -35,7 +35,7 @@
 
   function actList(state, list) {
     var results = [];
-    for (var ii in list) {
+    for (var ii = 0; ii < list.length; ii++) {
       results.push(act(state, list[ii]));
     }
     return results;
@@ -51,7 +51,7 @@
   }
 
   function updatePosition(state, cutText) {
-    for (var ii in cutText) {
+    for (var ii = 0; ii < cutText.length; ii++) {
       if (cutText[ii] === '\n') {
         state.column = 1;
         state.line += 1;

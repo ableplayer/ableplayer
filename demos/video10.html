@@ -7,7 +7,7 @@
 
 <!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
@@ -43,15 +43,20 @@
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <div id="video-wrapper">
-  <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player>
+  <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player playsinline>
     <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-sign-src="../media/wwa_sign.mp4"/>
     <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm" data-sign-src="../media/wwa_sign.webm"/>
-    <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
     <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+    <track kind="subtitles" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+    <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+    <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+    <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
     <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
     <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-      <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-      <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+    <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+    <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+    <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+    <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
   </video>
 </div>
 

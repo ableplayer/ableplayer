@@ -1,5 +1,9 @@
 var ja = {
 
+"audio": "オーディオ",
+
+"video": "ビデオ",
+
 "playerHeading": "メディアプレイヤー",
 
 "faster": "はやく",

@@ -47,7 +47,16 @@
       return false;
     }
 
-    if (this.selectedChapters) {
+    if (typeof this.useChapterTimes === 'undefined') {
+      if (this.seekbarScope === 'chapter' && this.selectedChapters.cues.length) {
+        this.useChapterTimes = true;
+      }
+      else {
+        this.useChapterTimes = false;
+      }
+    }
+
+    if (this.useChapterTimes) {
       cues = this.selectedChapters.cues;
     }
     else if (this.chapters.length >= 1) {
@@ -58,7 +67,7 @@
     }
     if (cues.length > 0) {
       $chaptersList = $('<ul>');
-      for (c in cues) {
+      for (c = 0; c < cues.length; c++) {
         thisChapter = c;
         $chapterItem = $('<li></li>');
         $chapterButton = $('<button>',{
@@ -69,13 +78,15 @@
         // add event listeners
         getClickFunction = function (time) {
           return function () {
+            thisObj.seekTrigger = 'chapter';
             $clickedItem = $(this).closest('li');
             $chaptersList = $(this).closest('ul').find('li');
             thisChapterIndex = $chaptersList.index($clickedItem);
             $chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
             $clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
-            // Don't update this.currentChapter here; just seekTo chapter's start time;
-            // chapter will be updated via chapters.js > updateChapter()
+            // Need to updateChapter before seeking to it
+            // Otherwise seekBar is redrawn with wrong chapterDuration and/or chapterTime
+            thisObj.updateChapter(time);
             thisObj.seekTo(time);
           }
         };
@@ -98,13 +109,15 @@
         // put it all together
         $chapterItem.append($chapterButton);
         $chaptersList.append($chapterItem);
-        if (this.defaultChapter == cues[thisChapter].id) {
+        if (this.defaultChapter === cues[thisChapter].id) {
           $chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+          this.currentChapter = cues[thisChapter];
           hasDefault = true;
         }
       }
       if (!hasDefault) {
-        // select the first button
+        // select the first chapter
+        this.currentChapter = cues[0];
         $chaptersList.find('button').first().attr('aria-selected','true')
           .parent('li').addClass('able-current-chapter');
       }
@@ -113,14 +126,16 @@
     return false;
   };
 
-  AblePlayer.prototype.seekToDefaultChapter = function() {
-    // this function is only called if this.defaultChapter is not null
-    // step through chapters looking for default
+  AblePlayer.prototype.seekToChapter = function(chapterId) {
+
+    // step through chapters looking for matching ID
     var i=0;
-    while (i < this.chapters.length) {
-      if (this.chapters[i].id === this.defaultChapter) {
-        // found the default chapter! Seek to it
-        this.seekTo(this.chapters[i].start);
+    while (i < this.selectedChapters.cues.length) {
+      if (this.selectedChapters.cues[i].id == chapterId) {
+        // found the target chapter! Seek to it
+        this.seekTo(this.selectedChapters.cues[i].start);
+        this.updateChapter(this.selectedChapters.cues[i].start);
+        break;
       }
       i++;
     }
@@ -129,15 +144,14 @@
   AblePlayer.prototype.updateChapter = function (now) {
 
     // as time-synced chapters change during playback, track changes in current chapter
-
-    if (typeof this.chapters === 'undefined') {
+    if (typeof this.selectedChapters === 'undefined') {
       return;
     }
 
     var chapters, i, thisChapterIndex, chapterLabel;
 
-    chapters = this.chapters;
-    for (i in chapters) {
+    chapters = this.selectedChapters.cues;
+    for (i = 0; i < chapters.length; i++) {
       if ((chapters[i].start <= now) && (chapters[i].end > now)) {
         thisChapterIndex = i;
         break;
@@ -157,9 +171,6 @@
           this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
             .addClass('able-current-chapter').attr('aria-selected','true');
         }
-        // announce new chapter via ARIA alert
-        chapterLabel = this.tt.newChapter + ': ' + this.flattenCueForCaption(this.currentChapter);
-        this.showAlert(chapterLabel,'screenreader');
       }
     }
   };
@@ -175,8 +186,9 @@
       return 0;
     }
     videoDuration = this.getDuration();
-    lastChapterIndex = this.chapters.length-1;
-    if (this.chapters[lastChapterIndex] == this.currentChapter) {
+    lastChapterIndex = this.selectedChapters.cues.length-1;
+
+    if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
       // this is the last chapter
       if (this.currentChapter.end !== videoDuration) {
         // chapter ends before or after video ends, adjust chapter end to match video end

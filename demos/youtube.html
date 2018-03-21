@@ -7,14 +7,14 @@
 
 <!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
 
 <!-- YouTube Data API key is required -->
-<!-- Get YouTube Data API key by registering your application at the Google Developer Console:
+<!-- Get YouTube Data API key by registering your application at the Google Developer Console: -->
 <!-- https://console.developers.google.com/ -->
 <!-- For complete instructions, see Google's Getting Started page: -->
 <!-- https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication -->
@@ -27,7 +27,7 @@
     googleApiReady = true;
   }
 </script>
-<script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
+<script src="//apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
 
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
@@ -49,6 +49,12 @@
   #player-plus {
     float: left;
     width: 65%;
+  }
+  div.able-chapters-div button:focus,
+  div.able-chapters-div button:hover,
+  div.able-chapters-div button::-moz-focus-inner {
+    background-color: #666;
+    color: #FFF;
   }
 </style>
 </head>
@@ -80,8 +86,8 @@
         data-youtube-desc-id="Ck2TdVMhWcU"
         data-transcript-div="transcript"
         data-chapters-div="chapters"
-        data-use-transcript-button="false"
         data-use-chapters-button="false"
+        playsinline
       >
         <track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
         <track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Spanish"/>

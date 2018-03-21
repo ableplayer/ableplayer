@@ -39,13 +39,7 @@ module.exports = function(grunt) {
                     'scripts/dragdrop.js',
                     'scripts/sign.js',
                     'scripts/langs.js',
-                    'scripts/translation1.js',
-                    'translations/de.js',
-                    'translations/en.js',
-                    'translations/es.js',
-                    'translations/fr.js',
-                    'translations/ja.js',
-                    'scripts/translation2.js',
+                    'scripts/translation.js',
                     'scripts/JQuery.doWhen.js'
                 ],
                 dest: 'build/<%= pkg.name %>.js'
