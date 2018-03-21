@@ -118,10 +118,9 @@ Note the following limitations in Internet Explorer (IE):
 - IE8 works fine with JW Player as fallback 
 - IE6 and 7 are not supported   
 
-At some point we may decide that it’s reasonable to stop supporting a
-fallback player. However, according to [WebAIM’s 2014 Screen Reader User
-Survey][] 19.8% of screen reader users are still using Internet Explorer 8, 7, or 6. Until these users catch up, we think we have to provide a
-working fallback.
+At some point we may decide that it’s reasonable to stop supporting a fallback player. 
+However, according to [WebAIM’s 2017 Screen Reader User Survey][] 4.1% of screen reader users are still using IE 6, 7, or 8, 
+and 4.0% are still using IE 9 or 10. Until these users catch up, we think we have to provide a working fallback.
 
 As an alternative fallback, you could link to the media file so users
 can download it and play it on their player of choice, and/or provide a
@@ -671,7 +670,7 @@ at the University of Washington, with financial support from the National Scienc
   [The DO-IT Center]: http://washington.edu/doit
   [Video Demo #7]: demos/video7.html
   [WebVTT validator]: https://quuz.org/webvtt/
-  [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
+  [WebAIM’s 2017 Screen Reader User Survey]: https://webaim.org/projects/screenreadersurvey7/#browsers
   [WebVTT]: https://w3c.github.io/webvtt/
   [YouTube's Terms of Service]: https://developers.google.com/youtube/terms/required-minimum-functionality#overlays-and-frames
 
