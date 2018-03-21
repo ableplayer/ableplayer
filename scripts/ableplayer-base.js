@@ -67,12 +67,9 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      this.provideFallback('ERROR: No media specified.');
+      this.provideFallback();
       return;
     }
-
-    // Define built-in variables that CANNOT be overridden with HTML attributes
-    this.setDefaults();
 
     ///////////////////////////////
     //
@@ -82,24 +79,32 @@
 
     // The following variables CAN be overridden with HTML attributes
 
-    // autoplay
-    if ($(media).attr('autoplay') !== undefined && $(media).attr('autoplay') !== "false") {
+    // autoplay (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr('autoplay') !== undefined) {
       this.autoplay = true;
     }
     else {
       this.autoplay = false;
     }
 
-    // loop (NOT FULLY SUPPORTED)
-    if ($(media).attr('loop') !== undefined && $(media).attr('loop') !== "false") {
+    // loop (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr('loop') !== undefined) {
       this.loop = true;
     }
     else {
       this.loop = false;
     }
 
+    // playsinline (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr('playsinline') !== undefined) {
+      this.playsInline = '1'; // this value gets passed to YT.Player contructor in youtube.js
+    }
+    else {
+      this.playsInline = '0';
+    }
+
     // start-time
-    if ($(media).data('start-time') !== undefined && $(media).data('start-time') !== "") {
+    if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
       this.startTime = $(media).data('start-time');
     }
     else {
@@ -107,7 +112,7 @@
     }
 
     // debug
-    if ($(media).data('debug') !== undefined && $(media).data('debug') !== "false") {
+    if ($(media).data('debug') !== undefined && $(media).data('debug') !== false) {
       this.debug = true;
     }
     else {
@@ -116,11 +121,11 @@
 
     // Path to root directory of Able Player code
     if ($(media).data('root-path') !== undefined) {
-      // remove trailing slashes if there are any
-      this.rootPath = $(media).data('root-path').replace(/\/+$/, "");
+      // add a trailing slash if there is none
+      this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
     }
     else {
-      this.rootPath = this.getRootWebSitePath();
+      this.rootPath = this.getRootPath();
     }
 
     // Volume
@@ -134,7 +139,6 @@
     }
     this.volume = this.defaultVolume;
 
-
     // Optional Buttons
     // Buttons are added to the player controller if relevant media is present
     // However, in some applications it might be undesirable to show buttons
@@ -147,18 +151,24 @@
       this.useChaptersButton = true;
     }
 
-    if ($(media).data('use-transcript-button') !== undefined && $(media).data('use-transcript-button') === false) {
-      this.useTranscriptButton = false;
-    }
-    else {
-      this.useTranscriptButton = true;
-    }
-
     if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
       this.useDescriptionsButton = false;
     }
     else {
       this.useDescriptionsButton = true;
+    }
+
+    // Headings
+    // By default, an off-screen heading is automatically added to the top of the media player
+    // It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
+    // Authors can override this behavior by manually assigning a heading level using data-heading-level
+    // Accepted values are 1-6, or 0 which indicates "no heading"
+    // (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
+    if ($(media).data('heading-level') !== undefined && $(media).data('heading-level') !== "") {
+      var headingLevel = $(media).data('heading-level');
+      if (/^[0-6]*$/.test(headingLevel)) { // must be a valid HTML heading level 1-6; or 0
+        this.playerHeadingLevel = headingLevel;
+      }
     }
 
     // Transcripts
@@ -194,16 +204,17 @@
         this.transcriptType = 'popup';
       }
     }
+
     // In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
     // If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
     // If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-
-    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== "false") {
+    if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) {
       this.lyricsMode = true;
     }
     else {
       this.lyricsMode = false;
     }
+
     // Transcript Title
     if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
       this.transcriptTitle = $(media).data('transcript-title');
@@ -235,7 +246,9 @@
 
     if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
       this.defaultChapter = $(media).data('chapters-default');
-      this.chapterId = this.defaultChapter; // the id of the default chapter (as defined within WebVTT file)
+    }
+    else {
+      this.defaultChapter = null;
     }
 
     // Previous/Next buttons
@@ -251,13 +264,13 @@
     }
 
     // Slower/Faster buttons
-    // valid values of data-speed-icons are 'arrows' (default) and 'animals'
-    // use 'animals' to use turtle and rabbit
-    if ($(media).data('speed-icons') === 'animals') {
-      this.speedIcons = 'animals';
+    // valid values of data-speed-icons are 'animals' (default) and 'arrows'
+    // 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
+    if ($(media).data('speed-icons') === 'arrows') {
+      this.speedIcons = 'arrows';
     }
     else {
-      this.speedIcons = 'arrows';
+      this.speedIcons = 'animals';
     }
 
     // Seekbar
@@ -279,9 +292,10 @@
     }
 
     // Icon type
-    // By default, AblePlayer uses scalable icomoon fonts for the player controls
-    // and falls back to images if the user has a custom style sheet that overrides font-family
-    // use data-icon-type to force controls to use either 'font', 'images' or 'svg'
+    // By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
+    // Fallback for browsers that don't support SVG is scalable icomoon fonts
+    // Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
+    // Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
     this.iconType = 'font';
     this.forceIconType = false;
     if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
@@ -316,7 +330,7 @@
     // Now Playing
     // Shows "Now Playing:" plus the title of the current track above player
     // Only used if there is a playlist
-    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === "false") {
+    if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === false) {
       this.showNowPlaying = false;
     }
     else {
@@ -342,14 +356,14 @@
 
     if (this.fallback === 'jw') {
 
-      if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== "false") {
+      if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== false) {
         this.fallbackPath = $(media).data('fallback-path');
       }
       else {
-        this.fallbackPath = this.rootPath + '/thirdparty/';
+        this.fallbackPath = this.rootPath + 'thirdparty/';
       }
 
-      if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== "false") {
+      if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
         this.testFallback = true;
       }
     }
@@ -367,13 +381,12 @@
     // 2. The value of this.lang, if a matching translation file is available
     // 3. English
     // To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
-    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== "false") {
+    if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== false) {
       this.forceLang = true;
     }
     else {
       this.forceLang = false;
     }
-
 
     // Metadata Tracks
     if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
@@ -392,6 +405,19 @@
         this.searchDiv = $(media).data('search-div');
       }
     }
+
+    // Hide controls when video starts playing
+    // They will reappear again when user presses a key or moves the mouse
+    if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
+      this.hideControls = true;
+    }
+    else {
+      this.hideControls = false;
+    }
+
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
     ////////////////////////////////////////
     //
     // End assignment of default variables
@@ -415,7 +441,7 @@
         }
         else {
           // can't continue loading player with no text
-          thisObj.provideFallback('ERROR: Failed to load translation table');
+          thisObj.provideFallback();
         }
       }
     );
@@ -425,12 +451,11 @@
   AblePlayer.nextIndex = 0;
 
   AblePlayer.prototype.setup = function() {
-
     var thisObj = this;
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
-        thisObj.provideFallback('Unable to play media');
+        thisObj.provideFallback();
       }
       else {
         thisObj.setupInstance().then(function () {
@@ -439,6 +464,32 @@
       }
     });
   };
+
+  AblePlayer.getActiveDOMElement = function () {
+    var activeElement = document.activeElement;
+
+    // For shadow DOMs we need to keep digging down through the DOMs
+    while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+      activeElement = activeElement.shadowRoot.activeElement;
+    }
+
+    return activeElement;
+  };
+
+  AblePlayer.localGetElementById = function(element, id) {
+    if (element.getRootNode)
+    {
+      // Use getRootNode() and querySelector() where supported (for shadow DOM support)
+      return $(element.getRootNode().querySelector('#' + id));
+    }
+    else
+    {
+      // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+      return $(document.getElementById(id));
+    }
+  };
+
+
 
   AblePlayer.youtubeIframeAPIReady = false;
   AblePlayer.loadingYoutubeIframeAPI = false;

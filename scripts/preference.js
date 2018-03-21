@@ -431,7 +431,7 @@
             value: 'video'
           });
           if (this.prefDescFormat === 'video') {
-            $radio1.attr('checked','checked');
+            $radio1.prop('checked',true);
           };
           $div1.append($radio1,$label1);
 
@@ -448,7 +448,7 @@
             value: 'text'
           });
           if (this.prefDescFormat === 'text') {
-            $radio2.attr('checked','checked');
+            $radio2.prop('checked',true);
           };
           $div2.append($radio2,$label2);
         }
@@ -500,7 +500,7 @@
               text: optionText
             });
             if (this[thisPref] === optionValue) {
-              $thisOption.attr('selected','selected');
+              $thisOption.prop('selected',true);
             }
             $thisField.append($thisOption);
           }
@@ -516,7 +516,7 @@
           });
           // check current active value for this preference
           if (this[thisPref] === 1) {
-            $thisField.attr('checked','checked');
+            $thisField.prop('checked',true);
           }
           if (form === 'keyboard') {
             // add a change handler that updates the list of current keyboard shortcuts
@@ -879,8 +879,15 @@
     else {
       $('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
     }
+
+    // transcript highlights
+    if (this.prefHighlight === 0) {
+      // user doesn't want highlights; remove any existing highlights
+      $('.able-transcript span').removeClass('able-highlight');
+    }
+
+    // Re-initialize caption and description in case relevant settings have changed
     this.updateCaption();
-    // In case description-related settings have changed, re-initialize description
     this.refreshingDesc = true;
     this.initDescription();
   };

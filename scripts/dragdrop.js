@@ -114,6 +114,7 @@
     // create an alert div and add it to window
     $windowAlert = $('<div role="alert"></div>');
     $windowAlert.addClass('able-alert');
+    $windowAlert.hide();
     $windowAlert.appendTo(this.$activeWindow);
     $windowAlert.css({
       top: $window.offset().top
@@ -136,7 +137,7 @@
     }
     else {
       // use image
-      buttonImgSrc = this.rootPath + '/icons/' + this.toolbarIconColor + '/preferences.png';
+      buttonImgSrc = this.rootPath + 'button-icons/' + this.toolbarIconColor + '/preferences.png';
       $buttonImg = $('<img>',{
         'src': buttonImgSrc,
         'alt': '',
@@ -156,7 +157,7 @@
     $tooltip = $('<div>',{
       'class' : 'able-tooltip',
       'id' : tooltipId
-    });
+    }).hide();
     $newButton.on('mouseenter focus',function(event) {
       var label = $(this).attr('aria-label');
       // get position of this button
@@ -170,19 +171,19 @@
         right: tooltipX + 'px',
         top: tooltipY + 'px'
       };
-      var tooltip = $('#' + tooltipId).text(label).css(tooltipStyle);
+      var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).css(tooltipStyle);
       thisObj.showTooltip(tooltip);
       $(this).on('mouseleave blur',function() {
-        $('#' + tooltipId).text('').hide();
+        AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
       });
     });
 
     // add a popup menu
-    var $popup = this.createPopup(windowName);
-    var $optionList = $('<ul></ul>');
-    var radioName = this.mediaId + '-' + windowName + '-choice';
+    $popup = this.createPopup(windowName);
+    $optionList = $('<ul></ul>');
+    radioName = this.mediaId + '-' + windowName + '-choice';
 
-    var options = [];
+    options = [];
     options.push({
       'name': 'move',
       'label': this.tt.windowMove
@@ -191,17 +192,17 @@
       'name': 'resize',
       'label': this.tt.windowResize
     });
-    for (var i in options) {
-      var $optionItem = $('<li></li>');
-      var option = options[i];
-      var radioId = radioName + '-' + i;
-      var $radioButton = $('<input>',{
+    for (i = 0; i < options.length; i++) {
+      $optionItem = $('<li></li>');
+      option = options[i];
+      radioId = radioName + '-' + i;
+      $radioButton = $('<input>',{
         'type': 'radio',
         'val': option.name,
         'name': radioName,
         'id': radioId
       });
-      var $radioLabel = $('<label>',{
+      $radioLabel = $('<label>',{
         'for': radioId
       });
       $radioLabel.text(option.label);
@@ -236,6 +237,15 @@
         thisObj.handleWindowButtonClick(which, e);
       }
       thisObj.finishingDrag = false;
+    });
+
+    $popup.on('keydown', function(event) {
+      // Escape key
+      if (event.which === 27) {
+        // Close Window Options Menu
+        $newButton.focus();
+        $popup.hide();
+      }
     });
 
     // define vars and assemble all the parts

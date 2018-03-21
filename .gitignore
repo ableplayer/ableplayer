@@ -5,3 +5,4 @@ thirdparty/jquery-*.js
 node_modules/
 translations/???.js
 .idea
+.htaccess

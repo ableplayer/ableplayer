@@ -26,24 +26,17 @@
       this.updateMeta();
       this.refreshControls();
     }
-    else if (this.seeking) {
-      if (this.startTime === currentTime) {
-        // media has scrubbed to start time
-        this.seeking = false;
-        if (this.autoplay || this.playing) {
-          this.playMedia();
-        }
-      }
-    }
-    else { // not swapping src, not started playing, not seeking
-      if (this.autoplay) {
-        this.playMedia();
-      }
-    }
   };
 
   AblePlayer.prototype.onMediaPause = function () {
-    // do something
+    if (this.controlsHidden) {
+      this.fadeControls('in');
+      this.controlsHidden = false;
+    }
+    if (this.hidingControls) { // a timeout is actively counting
+      window.clearTimeout(this.hideControlsTimeout);
+      this.hidingControls = false;
+    }
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
@@ -98,6 +91,7 @@
   // End Media events
 
   AblePlayer.prototype.onWindowResize = function () {
+
     if (this.isFullscreen()) {
 
       var newWidth, newHeight;
@@ -126,9 +120,23 @@
       this.positionCaptions('overlay');
     }
     else { // not fullscreen
-      newWidth = this.$ableWrapper.width();
-      newHeight = this.$ableWrapper.height();
-      this.positionCaptions(); // reset with this.prefCaptionsPosition
+      if (this.restoringAfterFullScreen) {
+        newWidth = this.preFullScreenWidth;
+        newHeight = this.preFullScreenHeight;
+      }
+      else {
+        // not restoring after full screen
+        newWidth = this.$ableWrapper.width();
+        if (typeof this.aspectRatio !== 'undefined') {
+          newHeight = Math.round(newWidth / this.aspectRatio);
+        }
+        else {
+          // not likely, since this.aspectRatio is defined during intialization
+          // however, this is a fallback scenario just in case
+          newHeight = this.$ableWrapper.height();
+        }
+        this.positionCaptions(); // reset with this.prefCaptionsPosition
+      }
     }
     this.resizePlayer(newWidth, newHeight);
   };
@@ -170,12 +178,15 @@
       this.handlePlay();
     }
     else if (whichButton === 'restart') {
+      this.seekTrigger = 'restart';
       this.handleRestart();
     }
     else if (whichButton === 'rewind') {
+      this.seekTrigger = 'rewind';
       this.handleRewind();
     }
     else if (whichButton === 'forward') {
+      this.seekTrigger = 'forward';
       this.handleFastForward();
     }
     else if (whichButton === 'mute') {
@@ -220,14 +231,16 @@
 
     // returns true unless user's focus is on a UI element
     // that is likely to need supported keystrokes, including space
-    var activeElement = $(document.activeElement).prop('tagName');
-    if (activeElement === 'INPUT') {
+
+    var activeElement = AblePlayer.getActiveDOMElement();
+
+    if ($(activeElement).prop('tagName') === 'INPUT') {
       return false;
     }
     else {
       return true;
     }
-  }
+  };
 
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
@@ -250,7 +263,7 @@
       this.closePopups();
     }
     else if (which === 32) { // spacebar = play/pause
-      if (!($('.able-controller button').is(':focus'))) {
+      if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
         // only toggle play if a button does not have focus
         // if a button has focus, space should activate that button
         this.handlePlay();
@@ -320,10 +333,13 @@
   };
 
   AblePlayer.prototype.addHtml5MediaListeners = function () {
+
     var thisObj = this;
 
-    // NOTE: iOS does not support autoplay,
+    // NOTE: iOS and some browsers do not support autoplay
     // and no events are triggered until media begins to play
+    // Able Player gets around this by automatically loading media in some circumstances
+    // (see initialize.js > initPlayer() for details)
     this.$media
       .on('emptied',function() {
         // do something
@@ -337,16 +353,45 @@
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
-        if (thisObj.startTime && !thisObj.startedPlaying) {
-          if (thisObj.seeking) {
-            // a seek has already been initiated
-            // since canplaythrough has been triggered, the seek is complete
-            thisObj.seeking = false;
+        if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
+          // by clicking on any of these elements, user is likely intending to play
+          // Not included: elements where user might click multiple times in succession
+          // (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
+          thisObj.playMedia();
+        }
+        else if (!thisObj.startedPlaying) {
+          if (thisObj.startTime) {
+            if (thisObj.seeking) {
+              // a seek has already been initiated
+              // since canplaythrough has been triggered, the seek is complete
+              thisObj.seeking = false;
+              if (thisObj.autoplay) {
+                thisObj.playMedia();
+              }
+            }
+            else {
+              // haven't started seeking yet
+              thisObj.seekTo(thisObj.startTime);
+            }
+          }
+          else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
+            thisObj.seekToChapter(thisObj.defaultChapter);
           }
           else {
-            // haven't started seeking yet
-            thisObj.seekTo(thisObj.startTime);
+            // there is now startTime, therefore no seeking required
+            if (thisObj.autoplay) {
+              thisObj.playMedia();
+            }
           }
+        }
+        else if (thisObj.hasPlaylist) {
+          if ((thisObj.playlistIndex !== (thisObj.$playlist.length - 1)) || thisObj.loop) {
+            // this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
+            thisObj.playMedia();
+          }
+        }
+        else {
+          // already started playing
         }
       })
       .on('playing',function() {
@@ -354,6 +399,7 @@
         thisObj.refreshControls();
       })
       .on('ended',function() {
+        thisObj.playing = false;
         thisObj.onMediaComplete();
       })
       .on('progress', function() {
@@ -375,6 +421,21 @@
         }
       })
       .on('pause',function() {
+        if (!thisObj.clickedPlay) {
+          // 'pause' was triggered automatically, not initiated by user
+          // this happens between tracks in a playlist
+          if (thisObj.hasPlaylist) {
+            // do NOT set playing to false.
+            // doing so prevents continual playback after new track is loaded
+          }
+          else {
+            thisObj.playing = false;
+          }
+        }
+        else {
+          thisObj.playing = false;
+        }
+        thisObj.clickedPlay = false; // done with this variable
         thisObj.onMediaPause();
       })
       .on('ratechange',function() {
@@ -505,27 +566,68 @@
 
     // Refresh player if it changes from hidden to visible
     // There is no event triggered by a change in visibility
-    // but MutationObserver works in most browsers:
+    // but MutationObserver works in most browsers (but NOT in IE 10 or earlier)
     // http://caniuse.com/#feat=mutationobserver
-    var target = this.$ableDiv[0];
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          // the player's style attribute has changed. Check to see if it's visible
-          if (thisObj.$ableDiv.is(':visible')) {
-            thisObj.refreshControls();
+    if (window.MutationObserver) {
+      var target = this.$ableDiv[0];
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            // the player's style attribute has changed. Check to see if it's visible
+            if (thisObj.$ableDiv.is(':visible')) {
+              thisObj.refreshControls();
+            }
           }
-        }
+        });
       });
-    });
-    var config = { attributes: true, childList: true, characterData: true };
-    observer.observe(target, config);
+      var config = { attributes: true, childList: true, characterData: true };
+      observer.observe(target, config);
+    }
+    else {
+      // browser doesn't support MutationObserver
+      // TODO: Figure out an alternative solution for this rare use case in older browsers
+      // See example in buildplayer.js > useSvg()
+    }
 
     this.addSeekbarListeners();
 
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').on('click',function(){
+    this.$controllerDiv.find('button').on('click',function(event){
+      event.stopPropagation();
       thisObj.onClickPlayerButton(this);
+    });
+
+    // handle clicks anywhere on the page. If any popups are open, close them.
+    $(document).on('click',function() {
+      if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
+        // at least one popup is visible
+        thisObj.closePopups();
+      }
+    });
+
+    // handle mouse movement over player; make controls visible again if hidden
+    this.$ableDiv.on('mousemove',function() {
+      if (thisObj.controlsHidden) {
+        thisObj.fadeControls('in');
+        thisObj.controlsHidden = false;
+        // after showing controls, wait another few seconds, then hide them again if video continues to play
+        thisObj.hidingControls = true;
+        thisObj.hideControlsTimeout = window.setTimeout(function() {
+          if (typeof thisObj.playing !== 'undefined' && thisObj.playing === true) {
+            thisObj.fadeControls('out');
+            thisObj.controlsHidden = true;
+            thisObj.hidingControls = false;
+          }
+        },3000);
+      };
+    });
+
+    // if user presses a key from anywhere on the page, show player controls
+    $(document).keydown(function() {
+      if (thisObj.controlsHidden) {
+        thisObj.fadeControls('in');
+        thisObj.controlsHidden = false;
+      }
     });
 
     // handle local keydown events if this isn't the only player on the page;

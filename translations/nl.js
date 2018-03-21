@@ -1,5 +1,9 @@
 var nl = {
 
+"audio": "audio",
+
+"video": "video",
+
 "playerHeading": "Mediaspeler",
 
 "faster": "Sneller",

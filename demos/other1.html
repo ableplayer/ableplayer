@@ -3,12 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <title>Native HTML5 Media Player</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <link rel="stylesheet" href="demos.css" type="text/css">
 <style>
 :focus {
   border: 2px solid #CC0000;
 }
 </style>
+
+<script>
+$(document).ready(function () {
+
+  var audioDuration, videoDuration, audioTime, videoTime,
+    audioElapsed, videoElapsed, prevAudioElapsed, prevVideoElapsed,
+    elapsedTargets;
+
+  elapsedTargets = [25,50,75,100];
+
+  $('video,audio').on(
+    {
+      'canplay': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'canplaythrough': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'durationchange': function(event) {
+        if (event.target.localName == 'audio') {
+          audioDuration = event.target.duration;
+          audioElapsed = 0;
+          prevAudioElapsed = 0;
+        }
+        else {
+          videoDuration = event.target.duration;
+          videoElapsed = 0;
+          prevVideoElapsed = 0;
+        }
+        showEvent(event.target.localName,event.type);
+      },
+      'emptied': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'encrypted': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'ended': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'error': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'interruptbegin': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'interruptend': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'loadeddata': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'loadedmetadata': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'loadstart': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'pause': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'play': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'playing': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'progress': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'ratechange': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'seeked': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'seeking': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'stalled': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'suspend': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'timeupdate': function(event) {
+        if (event.target.localName == 'audio') {
+          audioTime = event.target.currentTime;
+          audioElapsed = Math.floor((audioTime/audioDuration)*100);
+          if (audioElapsed !== prevAudioElapsed) {
+            // % elapsed has changed.
+            // If it meets one of the predefined targets, log it to the event list
+            if ($.inArray(audioElapsed,elapsedTargets) !== -1) {
+              showEvent(event.target.localName,event.type,audioElapsed);
+            }
+            prevAudioElapsed = audioElapsed;
+          }
+        }
+        else {
+          videoTime = event.target.currentTime;
+          videoElapsed = Math.floor((videoTime/videoDuration)*100);
+          if (videoElapsed !== prevVideoElapsed) {
+            // % elapsed has changed.
+            // If it meets one of the predefined targets, log it to the event list
+            if ($.inArray(videoElapsed,elapsedTargets) !== -1) {
+              showEvent(event.target.localName,event.type,videoElapsed);
+            }
+            prevVideoElapsed = videoElapsed;
+          }
+        }
+      },
+      'volumechange': function(event) {
+        showEvent(event.target.localName,event.type);
+      },
+      'waiting': function(event) {
+        showEvent(event.target.localName,event.type);
+      }
+    }
+  );
+
+  function showEvent (player, eventName, pctElapsed) {
+    var eventText = player + ': ' + eventName;
+    if (typeof pctElapsed !== 'undefined') {
+      eventText += ' to ' + pctElapsed + '%';
+    }
+    var $eventLi = $('<li>').text(eventText);
+    $('#events').append($eventLi);
+  }
+});
+</script>
+
 </head>
 <body>
 
@@ -19,22 +151,31 @@
 <p>For additional demos see the <a href="index.html#examples">Index of <em>Able Player</em> Examples</a>.</p>
 
 <h2>Audio</h2>
-<audio preload="auto" controls>
+<audio id="audio1" preload="auto" controls>
   <source type="audio/ogg" src="../media/smallf.ogg"/>
 	<source type="audio/mpeg" src="../media/smallf.mp3"/>
 </audio>
 
 <h2>Video (with English captions, Spanish subtitles, description, and chapters tracks)</h2>
 
-<video preload="auto" width="480" height="360" poster="../media/wwa.jpg" controls>
-  <source type="video/webm" src="../media/wwa.webm">
+<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" controls>
   <source type="video/mp4" src="../media/wwa.mp4">
-  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default>
-  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Español">
-  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en">
+  <source type="video/webm" src="../media/wwa.webm">
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+  <track kind="subtitles" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+  <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+  <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+  <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
   <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en">
 </video>
 
+<h2>HTML5 Media Events</h2>
+<ul id="events" aria-live="assertive" aria-atomic="false">
+</ul>
 </body>
 </html>

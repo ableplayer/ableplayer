@@ -1,6 +1,11 @@
 (function ($) {
   AblePlayer.prototype.seekTo = function (newTime) {
 
+    // define variables to be used for analytics
+    // e.g., to measure the extent to which users seek back and forward
+    this.seekFromTime = this.media.currentTime;
+    this.seekToTime = newTime;
+
     this.seeking = true;
     this.liveUpdatePending = true;
 
@@ -214,6 +219,9 @@
   };
 
   AblePlayer.prototype.playMedia = function () {
+
+    var thisObj = this;
+
     if (this.player === 'html5') {
       this.media.play(true);
       if (this.hasSignLanguage && this.signVideo) {
@@ -231,6 +239,52 @@
       this.stoppingYouTube = false;
     }
     this.startedPlaying = true;
+    if (this.hideControls) {
+      // wait briefly after playback begins, then hide controls
+      this.hidingControls = true;
+      this.hideControlsTimeout = window.setTimeout(function() {
+        thisObj.fadeControls('out');
+        thisObj.controlsHidden = true;
+        thisObj.hidingControls = false;
+      },2000);
+    }
+  };
+
+  AblePlayer.prototype.fadeControls = function(direction) {
+
+    // NOTE: This is a work in progress, and is not yet fully functional
+    // TODO: Use jQuery fadeIn() and fadeOut() to attain some sort of transition
+    // Currently just adds or removes able-offscreen class to visibly hide content
+    // without hiding it from screen reader users
+
+    // direction is either 'out' or 'in'
+
+    // One challenge:
+    // When controls fade out in other players (e.g., YouTube, Vimeo), the transition works well because
+    // their controls are an overlay on top of the video.
+    // Therefore, disappearing controls don't affect the size of the video container.
+    // Able Player's controls appear below the video, so if this.$playerDiv disappears,
+    // that results in a reduction in the height of the video container, which is a bit jarring
+    // Solution #1: Don't hide this.$playerDiv; instead hide the two containers nested inside it
+    if (direction == 'out') {
+      this.$controllerDiv.addClass('able-offscreen');
+      this.$statusBarDiv.addClass('able-offscreen');
+      // Removing content from $playerDiv leaves an empty controller bar in its place
+      // What to do with the empty space?
+      // For now, changing to a black background; will restore to original background on fade-in
+      this.playerBackground = this.$playerDiv.css('background-color');
+      this.$playerDiv.css('background-color','black');
+    }
+    else if (direction == 'in') {
+      this.$controllerDiv.removeClass('able-offscreen');
+      this.$statusBarDiv.removeClass('able-offscreen');
+      if (typeof this.playerBackground !== 'undefined') {
+        this.$playerDiv.css('background-color',this.playerBackground);
+      }
+      else {
+        this.$playerDiv.css('background-color','');
+      }
+    }
   };
 
   AblePlayer.prototype.refreshControls = function() {
@@ -238,8 +292,8 @@
     var thisObj, duration, elapsed, lastChapterIndex, displayElapsed,
       updateLive, textByState, timestamp, widthUsed,
       leftControls, rightControls, seekbarWidth, seekbarSpacer, captionsCount,
-      buffered, newTop, svgLink, newSvgLink,
-      statusBarHeight, speedHeight, statusBarWidthBreakpoint;
+      buffered, newTop, statusBarHeight, speedHeight, statusBarWidthBreakpoint,
+      newSvgData;
 
     thisObj = this;
     if (this.swappingSrc) {
@@ -250,13 +304,9 @@
     duration = this.getDuration();
     elapsed = this.getElapsed();
 
-    if (this.seekbarScope === 'chapter' && this.chapters.length) {
-      this.useChapterTimes = true;
+    if (this.useChapterTimes) {
       this.chapterDuration = this.getChapterDuration();
       this.chapterElapsed = this.getChapterElapsed();
-    }
-    else {
-      this.useChapterTimes = false;
     }
 
     if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && duration > 0) {
@@ -267,8 +317,8 @@
     if (this.seekBar) {
 
       if (this.useChapterTimes) {
-        lastChapterIndex = this.chapters.length-1;
-        if (this.chapters[lastChapterIndex] == this.currentChapter) {
+        lastChapterIndex = this.selectedChapters.cues.length-1;
+        if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
           // this is the last chapter
           if (this.currentChapter.end !== duration) {
             // chapter ends before or after video ends
@@ -344,7 +394,9 @@
           this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
         }
         else if (this.iconType === 'svg') {
-          // TODO: Add play/pause toggle for SVG
+          newSvgData = this.getSvgData('play');
+          this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
+          this.$playpauseButton.find('path').attr('d',newSvgData[1]);
         }
         else {
           this.$playpauseButton.find('img').attr('src',this.playButtonImg);
@@ -388,12 +440,9 @@
               this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
             }
             else if (this.iconType === 'svg') {
-              // Not currently working. SVG is a work in progress
-              this.$playpauseButton.find('svg').removeClass('svg-pause').addClass('svg-play');
-              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-              newSvgLink = svgLink.replace('svg-pause','svg-play');
-              this.$playpauseButton.find('use').attr(newSvgLink);
-              this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+              newSvgData = this.getSvgData('play');
+              this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
+              this.$playpauseButton.find('path').attr('d',newSvgData[1]);
             }
             else {
               this.$playpauseButton.find('img').attr('src',this.playButtonImg);
@@ -407,12 +456,9 @@
               this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
             }
             else if (this.iconType === 'svg') {
-              // Not currently working. SVG is a work in progress
-              this.$playpauseButton.find('svg').removeClass('svg-play').addClass('svg-pause');
-              svgLink = this.$playpauseButton.find('use').attr('xlink:href');
-              newSvgLink = svgLink.replace('svg-play','svg-pause');
-              this.$playpauseButton.find('use').attr(newSvgLink);
-              this.$playpauseButton.find('span.able-clipped').text(this.tt.pause);
+              newSvgData = this.getSvgData('pause');
+              this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
+              this.$playpauseButton.find('path').attr('d',newSvgData[1]);
             }
             else {
               this.$playpauseButton.find('img').attr('src',this.pauseButtonImg);
@@ -542,9 +588,9 @@
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
         }
         else if (this.iconType === 'svg') {
-          // Not currently working. SVG is a work in progress.
-          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
-          this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+          newSvgData = this.getSvgData('fullscreen-expand');
+          this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
+          this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
         }
         else {
           this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
@@ -557,9 +603,9 @@
           this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
         }
         else if (this.iconType === 'svg') {
-          // Not currently working. SVG is a work in progress.
-          this.$fullscreenButton.find('svg').removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
-          this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+          newSvgData = this.getSvgData('fullscreen-collapse');
+          this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
+          this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
         }
         else {
           this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
@@ -591,11 +637,11 @@
       // Sync checkbox and autoScrollTranscript with user preference
       if (this.prefAutoScrollTranscript === 1) {
         this.autoScrollTranscript = true;
-        this.$autoScrollTranscriptCheckbox.attr('checked','checked');
+        this.$autoScrollTranscriptCheckbox.prop('checked',true);
       }
       else {
         this.autoScrollTranscript = false;
-        this.$autoScrollTranscriptCheckbox.removeAttr('checked');
+        this.$autoScrollTranscriptCheckbox.prop('checked',false);
       }
 
       // If transcript locked, scroll transcript to current highlight location.
@@ -819,6 +865,8 @@
       if (this.captionsOn === true) {
         // turn them off
         this.captionsOn = false;
+        this.prefCaptions = 0;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           this.youTubePlayer.unloadModule(this.ytCaptionModule);
         }
@@ -829,6 +877,8 @@
       else {
         // captions are off. Turn them on.
         this.captionsOn = true;
+        this.prefCaptions = 1;
+        this.updateCookie('prefCaptions');
         if (this.usingYouTubeCaptions) {
           if (typeof this.ytCaptionModule !== 'undefined') {
             this.youTubePlayer.loadModule(this.ytCaptionModule);
@@ -915,7 +965,6 @@
   };
 
   AblePlayer.prototype.handlePrefsClick = function(pref) {
-
     // NOTE: the prefs menu is positioned near the right edge of the player
     // This assumes the Prefs button is also positioned in that vicinity
     // (last or second-last button the right)
@@ -932,6 +981,8 @@
       this.prefsPopup.hide();
       this.hidingPopup = false;
       this.$prefsButton.focus();
+      // restore each menu item to original hidden state
+      this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
     }
     else {
       this.closePopups();
@@ -941,9 +992,9 @@
       prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
       this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
       this.prefsPopup.css('left', prefsMenuLeft);
-      // remove prior focus and set focus on first item
-      this.prefsPopup.find('li').removeClass('able-focus');
-      this.prefsPopup.find('input').first().focus().parent().addClass('able-focus');
+      // remove prior focus and set focus on first item; also change tabindex from -1 to 0
+      this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
+      this.prefsPopup.find('li').first().focus().addClass('able-focus');
     }
   };
 
@@ -1000,7 +1051,6 @@
   }
 
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
-
     if (this.isFullscreen() == fullscreen) {
       return;
     }
@@ -1011,7 +1061,12 @@
     if (this.nativeFullscreenSupported()) {
       // Note: many varying names for options for browser compatibility.
       if (fullscreen) {
-        // If not in full screen, initialize it.
+        // Initialize fullscreen
+
+        // But first, capture current settings so they can be restored later
+        this.preFullScreenWidth = this.$ableWrapper.width();
+        this.preFullScreenHeight = this.$ableWrapper.height();
+
         if (el.requestFullscreen) {
           el.requestFullscreen();
         }
@@ -1026,7 +1081,7 @@
         }
       }
       else {
-        // If in fullscreen, exit it.
+        // Exit fullscreen
         if (document.exitFullscreen) {
           document.exitFullscreen();
         }
@@ -1053,13 +1108,8 @@
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
         if (!thisObj.isFullscreen()) {
           // user has just exited full screen
-          if (thisObj.player === 'youtube') {
-            thisObj.restoringAfterFullscreen = true;
-            thisObj.resizePlayer(thisObj.ytWidth, thisObj.ytHeight);
-          }
-          else {
-            thisObj.resizePlayer(thisObj.$ableWrapper.width(), thisObj.$ableWrapper.height());
-          }
+          thisObj.restoringAfterFullScreen = true;
+          thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
         }
       });
     }
@@ -1270,41 +1320,44 @@
       }
     }
     else {
-      // player resized, but not fullscreen
-      // in case restoring from fullscreen, reset CSS to responsive
-      if (this.player === 'youtube') {
+      // player resized
+      if (this.restoringAfterFullScreen) {
+        // User has just exited fullscreen mode. Restore to previous settings
+        width = this.preFullScreenWidth;
+        height = this.preFullScreenHeight;
+        this.restoringAfterFullScreen = false;
         this.$ableWrapper.css({
           'max-width': width + 'px',
           'width': ''
         });
-      }
-      else if (this.player === 'jw') {
-        // JW Player has a funny way of expanding height disproportionately as width changes
-        // couldn't isolate the cause, but forcing height to preserve default aspect ratio works
-        jwHeight = Math.round(width/this.fallbackRatio, 0);
-        this.$fallbackWrapper.css({
-          'width': width,
-          'height': jwHeight
+        if (typeof this.$vidcapContainer !== 'undefined') {
+          this.$vidcapContainer.css({
+            'height': '',
+            'width': ''
+          });
+        }
+        this.$media.css({
+          'width': '100%',
+          'height': 'auto'
         });
       }
-      else {
-        this.$ableWrapper.css({
-          'max-width': this.playerMaxWidth + 'px',
-          'width': ''
-        });
-      }
-      if (typeof this.$vidcapContainer !== 'undefined') {
-        this.$vidcapContainer.css({
-          'height': '',
-          'width': ''
-        });
-      }
-      this.$media.css({
-        'width': '100%',
-        'height': 'auto'
-      });
     }
 
+    // resize YouTube or JW Player
+    if (this.player === 'youtube' && this.youTubePlayer) {
+      this.youTubePlayer.setSize(width, height);
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      if (this.mediaType === 'audio') {
+        // keep height set to 0 to prevent JW PLayer from showing its own player
+        this.jwPlayer.resize(width,0);
+      }
+      else {
+        this.jwPlayer.resize(width, jwHeight);
+      }
+    }
+
+    // Resize captions
     if (typeof this.$captionsDiv !== 'undefined') {
 
       // Font-size is too small in full screen view & too large in small-width view
@@ -1329,18 +1382,6 @@
       this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
 
-    if (this.player === 'youtube' && this.youTubePlayer) {
-      this.resizeYouTubePlayer();
-    }
-    else if (this.player === 'jw' && this.jwPlayer) {
-      if (this.mediaType === 'audio') {
-        // keep height set to 0 to prevent JW PLayer from showing its own player
-        this.jwPlayer.resize(width,0);
-      }
-      else {
-        this.jwPlayer.resize(width, jwHeight);
-      }
-    }
     this.refreshControls();
   };
 
@@ -1474,25 +1515,25 @@
     var i, captions, descriptions, chapters, meta;
 
     // Captions
-    for (i in this.captions) {
+    for (i = 0; i < this.captions.length; i++) {
       if (this.captions[i].language === language) {
         captions = this.captions[i];
       }
     }
     // Chapters
-    for (i in this.chapters) {
+    for (i = 0; i < this.chapters.length; i++) {
       if (this.chapters[i].language === language) {
         chapters = this.chapters[i];
       }
     }
     // Descriptions
-    for (var i in this.descriptions) {
+    for (i = 0; i < this.descriptions.length; i++) {
       if (this.descriptions[i].language === language) {
         descriptions = this.descriptions[i];
       }
     }
     // Metadata
-    for (var i in this.meta) {
+    for (i = 0; i < this.meta.length; i++) {
       if (this.meta[i].language === language) {
         meta = this.meta[i];
       }
