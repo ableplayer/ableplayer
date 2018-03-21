@@ -10729,21 +10729,28 @@
 
     // Refresh player if it changes from hidden to visible
     // There is no event triggered by a change in visibility
-    // but MutationObserver works in most browsers:
+    // but MutationObserver works in most browsers (but NOT in IE 10 or earlier)
     // http://caniuse.com/#feat=mutationobserver
-    var target = this.$ableDiv[0];
-    var observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          // the player's style attribute has changed. Check to see if it's visible
-          if (thisObj.$ableDiv.is(':visible')) {
-            thisObj.refreshControls();
+    if (window.MutationObserver) {
+      var target = this.$ableDiv[0];
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+            // the player's style attribute has changed. Check to see if it's visible
+            if (thisObj.$ableDiv.is(':visible')) {
+              thisObj.refreshControls();
+            }
           }
-        }
+        });
       });
-    });
-    var config = { attributes: true, childList: true, characterData: true };
-    observer.observe(target, config);
+      var config = { attributes: true, childList: true, characterData: true };
+      observer.observe(target, config);
+    }
+    else {
+      // browser doesn't support MutationObserver
+      // TODO: Figure out an alternative solution for this rare use case in older browsers
+      // See example in buildplayer.js > useSvg()
+    }
 
     this.addSeekbarListeners();
 
