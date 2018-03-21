@@ -26,23 +26,6 @@ Features
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).    
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
-
-Supported Languages
--------------------
-
-Able Player has been translated into the following languages. To add another language, see instructions below under **Contributing**. 
-
-<ul>
-  <li><strong lang="ca">Català</strong> (Catalan)</li>
-  <li><strong lang="de">Deutsch</strong> (German) 
-  <li><strong>English</strong> 
-  <li><strong lang="en">Español</strong> (Spanish) 
-  <li><strong lang="fr">Français</strong> (French) 
-  <li><strong lang="it">Italiano</strong> (Italian) 
-  <li><strong lang="ja">日本語</strong> (Japanese)  
-  <li><strong lang="nb">Norsk Bokmål</strong> (Norwegian) 
-  <li><strong lang="nl">Nederlands, Vlaams</strong> (Dutch) 
-</ul>
     
 Contributing
 -------------
@@ -78,8 +61,8 @@ Dependencies
 exception is the fallback player—see the *Fallback* section below for
 details.
 
--   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended. 
-    The example code below uses Google’s hosted libraries; no download required.
+-   *Able Player* uses [jQuery][]. The example code
+    below uses Google’s hosted libraries; no download required.
 -   *Able Player* uses [Modernizr][] to enable styling of HTML5 elements
     in Internet Explorer 6 through 8. A Modernizr 2.6.2 Custom Build is
     distributed with *Able Player*, and is all that *Able Player* needs.
@@ -118,9 +101,10 @@ Note the following limitations in Internet Explorer (IE):
 - IE8 works fine with JW Player as fallback 
 - IE6 and 7 are not supported   
 
-At some point we may decide that it’s reasonable to stop supporting a fallback player. 
-However, according to [WebAIM’s 2017 Screen Reader User Survey][] 4.1% of screen reader users are still using IE 6, 7, or 8, 
-and 4.0% are still using IE 9 or 10. Until these users catch up, we think we have to provide a working fallback.
+At some point we may decide that it’s reasonable to stop supporting a
+fallback player. However, according to [WebAIM’s 2014 Screen Reader User
+Survey][] 19.8% of screen reader users are still using Internet Explorer 8, 7, or 6. Until these users catch up, we think we have to provide a
+working fallback.
 
 As an alternative fallback, you could link to the media file so users
 can download it and play it on their player of choice, and/or provide a
@@ -145,7 +129,7 @@ to all use cases, both audio and video.
 ```HTML
 <!-- Dependencies -->
 <script src="thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 <script src="thirdparty/js.cookie.js"></script>
  
 <!-- CSS --> 
@@ -205,8 +189,6 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
   
 -   **data-debug** - optional; if present will write messages to the developer console   
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.   
--   **loop** - optional; loops and plays the media file repeatedly. If used in conjunction with a playlist, loops the entire playlist rather than individual tracks.  
--   **playsinline** - optional but recommended; instructs supporting browsers to play the video "inline" within the web page. This is especially applicable on iPhones, which by default load the video in their own built-in video player, thereby removing it from its surrounding context, which includes Able Player buttons and controls, an interactive transcript, and any other companion features added via Able Player. If this attribute is present, it works for all supported videos, including YouTube videos. 
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload="auto"**, which instructs the browser to
@@ -215,10 +197,8 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
     valuable bandwidth, so preload="metadata" would be a better option.
 -   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
 -   **data-root-path** - define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server   
--   **data-heading-level** - optional; Able Player injects an off-screen HTML heading "Media Player" (or localized equivalent) at the top of the player so screen reader users can easily find the player. It automatically assigns a heading level that is one level deeper than the closest parent heading. This attribute can be used to manually set the heading level, rather than relying on Able Player to assign it automatically. Valid values are 1 through 6. A value of 0 is also supported, and instructs Able Player to not inject a heading at all. The latter should be used only if the web page already includes a heading immediately prior to the media player.  
--   **data-hide-controls** - optional; set to "true" to hide controls during playback. Controls are visibly hidden but still accessible to assistive technologies. Controls reappear if user presses any key or moves the mouse over the video player region. 
--   **data-icon-type** - optional; "svg", "font" or "image"; "svg" is the default with automatic fallback to "font" unless either (a) the browser doesn't support icon fonts or (b) the user has a custom style sheet that may impact the display of icon fonts; in either case falls back to images. Should generally leave as is unless testing the fallback. 
--   **data-speed-icons** - optional; "animals" (default) or "arrows". The default setting uses a turtle icon for *slower* and a rabbit icon for *faster*. Setting this to "arrows" uses the original Able Player icons (prior to version 3.5), arrows pointing up for *faster* and down for *slower*. 
+-   **data-icon-type** - optional; "font" or "image"; "font" is the default with automatic fallback to image if browsers don't support icon fonts. Should generally leave as is unless testing the fallback. 
+-   **data-speed-icons** - optional; "arrows" (default) or "animals". The latter will substitute a turtle icon for *slower* and a rabbit icon for *faster*. 
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
 -   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is intelligently calculated based on  duration of the media. 
@@ -248,6 +228,7 @@ The following attributes control which of the above types, if any, are generated
 If none of the above attributes are present, the transcript will be displayed in a draggable, resizable popup that can be toggled on/off using a button on the controller. Note that a toggle button is added to the controller *only* if the transcript is a "popup" type; there is no toggle button for either the "external" or "manual" transcript types. 
 
 Additional transcript-related attributes include:   
+-   **data-use-Transcript-button** - optional; set to "false" to exclude transcript button from controller. If using the data-transcript-div attribute to write the transcript to an external container, you might not want users to be able to toggle the transcript off. 
 -   **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present) 
 -   **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript 
 
@@ -292,9 +273,6 @@ The following attributes make all this possible:
 
 -   **data-meta-type** - required for metadata; indicates the type of metadata contained within a metadata track. Supported values as described above are "text" and "selector".
 -   **data-meta-div** - required for "text" metadata; id of an external div in which to display the text. 
--   **data-duration** - optional attribute on the element displayed via a metadata track; value is the number of milliseconds to display the element before it fades out. Elements displayed via metadata tracks automatically fade out at the end time designated within the WebVTT file. However, if the **data-duration** attribute is present, this enables an element to fade out *before* the designated time. This is useful if multiple elements appear simultaneously, but some need to fade out earlier than others. 
-
-**NOTE:** If you're using metadata to expose content in sync with videos hosted on YouTube, please review [YouTube's Terms of Service] related to Overlays and Frames. As of August 11, 2016: "You must not display overlays, frames, or other visual elements in front of any part of a YouTube embedded player, including player controls. Similarly, you must not use overlays, frames or other visual elements to obscure any part of an embedded player, including player controls."  
  
 #### Search 
 
@@ -670,7 +648,6 @@ at the University of Washington, with financial support from the National Scienc
   [The DO-IT Center]: http://washington.edu/doit
   [Video Demo #7]: demos/video7.html
   [WebVTT validator]: https://quuz.org/webvtt/
-  [WebAIM’s 2017 Screen Reader User Survey]: https://webaim.org/projects/screenreadersurvey7/#browsers
+  [WebAIM’s 2014 Screen Reader User Survey]: http://webaim.org/projects/screenreadersurvey5/#browsers
   [WebVTT]: https://w3c.github.io/webvtt/
-  [YouTube's Terms of Service]: https://developers.google.com/youtube/terms/required-minimum-functionality#overlays-and-frames
 
