@@ -26,23 +26,6 @@ Features
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).    
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design. 
-
-Supported Languages
--------------------
-
-Able Player has been translated into the following languages. To add another language, see instructions below under **Contributing**. 
-
-<ul>
-  <li><strong lang="ca">Català</strong> (Catalan)</li>
-  <li><strong lang="de">Deutsch</strong> (German) 
-  <li><strong>English</strong> 
-  <li><strong lang="en">Español</strong> (Spanish) 
-  <li><strong lang="fr">Français</strong> (French) 
-  <li><strong lang="it">Italiano</strong> (Italian) 
-  <li><strong lang="ja">日本語</strong> (Japanese)  
-  <li><strong lang="nb">Norsk Bokmål</strong> (Norwegian) 
-  <li><strong lang="nl">Nederlands, Vlaams</strong> (Dutch) 
-</ul>
     
 Contributing
 -------------
