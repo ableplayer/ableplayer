@@ -1,0 +1,8 @@
+title: Able Player
+description: "Fully accessible cross-browser HTML5 media player. "
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-slate
+
+gems:
+  - jekyll-mentions
