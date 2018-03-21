@@ -67,7 +67,7 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      this.provideFallback('ERROR: No media specified.');
+      this.provideFallback();
       return;
     }
 
@@ -441,7 +441,7 @@
         }
         else {
           // can't continue loading player with no text
-          thisObj.provideFallback('ERROR: Failed to load translation table');
+          thisObj.provideFallback();
         }
       }
     );
@@ -455,7 +455,7 @@
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
-        thisObj.provideFallback('Unable to play media');
+        thisObj.provideFallback();
       }
       else {
         thisObj.setupInstance().then(function () {
@@ -803,10 +803,8 @@
       this.mediaType = 'video';
     }
     else {
-      this.mediaType = this.$media.get(0).tagName;
-      errorMsg = 'Media player initialized with ' + this.mediaType + '#' + this.mediaId + '. ';
-      errorMsg += 'Expecting an HTML5 audio or video element.';
-      this.provideFallback(errorMsg);
+      // Able Player was initialized with some element other than <video> or <audio>
+      this.provideFallback();
       deferred.fail();
       return promise;
     }
@@ -816,7 +814,7 @@
     this.player = this.getPlayer();
     if (!this.player) {
       // an error was generated in getPlayer()
-      this.provideFallback(this.error);
+      this.provideFallback();
     }
     this.setIconType();
     this.setDimensions();
@@ -1068,7 +1066,7 @@
           thisObj.showSearchResults();
         },
         function() {  // initPlayer fail
-          thisObj.provideFallback(this.error);
+          thisObj.provideFallback();
         }
         );
       });
@@ -1292,7 +1290,6 @@
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Loading the JW Player failed
-        this.error = 'Failed to load JW Player.';
         deferred.reject();
       }
     });
@@ -1327,7 +1324,7 @@
     var i, sourceType, $newItem;
     if (this.youTubeId) {
       if (this.mediaType !== 'video') {
-        this.error = 'To play a YouTube video, use the &lt;video&gt; tag.';
+        // attempting to play a YouTube video using an element other than <video>
         return null;
       }
       else {
@@ -1341,11 +1338,17 @@
       // the user wants to test the fallback player, or
       // the user is using an older version of IE or IOS,
       // both of which had buggy implementation of HTML5 video
-      if (this.fallback === 'jw' && this.jwCanPlay()) {
-        return 'jw';
+      if (this.fallback === 'jw') {
+        if (this.jwCanPlay()) {
+          return 'jw';
+        }
+        else {
+          // JW Player is available as fallback, but can't play this source file
+          return null;
+        }
       }
       else {
-        this.error = 'The fallback player (JW Player) is unable to play the available media file.';
+        // browser doesn't support HTML5 video and there is no fallback player
         return null;
       }
     }
@@ -1353,7 +1356,7 @@
       return 'html5';
     }
     else {
-      this.error = 'This browser does not support the available media file.';
+      // Browser does not support the available media file
       return null;
     }
   };
@@ -3803,11 +3806,11 @@
     }
   };
 
-  AblePlayer.prototype.provideFallback = function(reason) {
+  AblePlayer.prototype.provideFallback = function() {
 
     // provide ultimate fallback for users who are unable to play the media
-    // reason is a specific error message
-    // if reason is 'NO SUPPORT', use standard text from translation file
+    // If there is HTML content nested within the media element, display that
+    // Otherwise, display standard localized error text
 
     var $fallbackDiv, width, mediaClone, fallback, fallbackText,
     showBrowserList, browsers, i, b, browserList;
@@ -3839,17 +3842,13 @@
     if (fallback.length) {
       $fallbackDiv.html(fallback);
     }
-    else if (reason == 'NO SUPPORT') {
-      // not using a supporting browser; use standard text from translation file
+    else {
+      // use standard localized error message
       fallbackText =  this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
       fallbackText += this.tt.fallbackError2 + ':';
       fallback = $('<p>').text(fallbackText);
       $fallbackDiv.html(fallback);
       showBrowserList = true;
-    }
-    else {
-      // show the reason
-      $fallbackDiv.text(reason);
     }
 
     if (showBrowserList) {

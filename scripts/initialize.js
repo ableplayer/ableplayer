@@ -306,10 +306,8 @@
       this.mediaType = 'video';
     }
     else {
-      this.mediaType = this.$media.get(0).tagName;
-      errorMsg = 'Media player initialized with ' + this.mediaType + '#' + this.mediaId + '. ';
-      errorMsg += 'Expecting an HTML5 audio or video element.';
-      this.provideFallback(errorMsg);
+      // Able Player was initialized with some element other than <video> or <audio>
+      this.provideFallback();
       deferred.fail();
       return promise;
     }
@@ -319,7 +317,7 @@
     this.player = this.getPlayer();
     if (!this.player) {
       // an error was generated in getPlayer()
-      this.provideFallback(this.error);
+      this.provideFallback();
     }
     this.setIconType();
     this.setDimensions();
@@ -571,7 +569,7 @@
           thisObj.showSearchResults();
         },
         function() {  // initPlayer fail
-          thisObj.provideFallback(this.error);
+          thisObj.provideFallback();
         }
         );
       });
@@ -795,7 +793,6 @@
       },
       error: function(jqXHR, textStatus, errorThrown) {
         // Loading the JW Player failed
-        this.error = 'Failed to load JW Player.';
         deferred.reject();
       }
     });
@@ -830,7 +827,7 @@
     var i, sourceType, $newItem;
     if (this.youTubeId) {
       if (this.mediaType !== 'video') {
-        this.error = 'To play a YouTube video, use the &lt;video&gt; tag.';
+        // attempting to play a YouTube video using an element other than <video>
         return null;
       }
       else {
@@ -844,11 +841,17 @@
       // the user wants to test the fallback player, or
       // the user is using an older version of IE or IOS,
       // both of which had buggy implementation of HTML5 video
-      if (this.fallback === 'jw' && this.jwCanPlay()) {
-        return 'jw';
+      if (this.fallback === 'jw') {
+        if (this.jwCanPlay()) {
+          return 'jw';
+        }
+        else {
+          // JW Player is available as fallback, but can't play this source file
+          return null;
+        }
       }
       else {
-        this.error = 'The fallback player (JW Player) is unable to play the available media file.';
+        // browser doesn't support HTML5 video and there is no fallback player
         return null;
       }
     }
@@ -856,7 +859,7 @@
       return 'html5';
     }
     else {
-      this.error = 'This browser does not support the available media file.';
+      // Browser does not support the available media file
       return null;
     }
   };

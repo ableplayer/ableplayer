@@ -1,5 +1,9 @@
 var fr = {
 
+"audio": "audio",
+
+"video": "vidéo",
+
 "playerHeading": "Lecteur multimédia",
 
 "faster": "Plus rapidement",

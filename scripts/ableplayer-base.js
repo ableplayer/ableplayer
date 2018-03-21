@@ -67,7 +67,7 @@
 
     this.media = media;
     if ($(media).length === 0) {
-      this.provideFallback('ERROR: No media specified.');
+      this.provideFallback();
       return;
     }
 
@@ -441,7 +441,7 @@
         }
         else {
           // can't continue loading player with no text
-          thisObj.provideFallback('ERROR: Failed to load translation table');
+          thisObj.provideFallback();
         }
       }
     );
@@ -455,7 +455,7 @@
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
-        thisObj.provideFallback('Unable to play media');
+        thisObj.provideFallback();
       }
       else {
         thisObj.setupInstance().then(function () {

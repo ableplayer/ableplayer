@@ -1,5 +1,9 @@
 var nb = {
 
+"audio": "audio",
+
+"video": "video",
+
 "playerHeading": "Mediespiller",
 
 "faster": "Raskere",

@@ -1,5 +1,9 @@
 var it = {
 
+"audio": "audio",
+
+"video": "video",
+
 "playerHeading": "Lettore multimediale",
 
 "faster": "Piu' veloce",
@@ -196,7 +200,7 @@ var it = {
 
 "prefDescFormatOption2b": "Descrizione testuale",
 
-"prefDescPause": "Mette automaticamente il video in pausa, quando inizia la descrizione", 
+"prefDescPause": "Mette automaticamente il video in pausa, quando inizia la descrizione",
 
 "prefVisibleDesc": "Rende la descrizione visibile",
 
