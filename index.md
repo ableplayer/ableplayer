@@ -1,9 +1,7 @@
 Able Player
 ==========
 
-*Able Player* is a fully accessible cross-browser media player. It uses
-the HTML5 `<audio>` or `<video>` element for browsers that support them,
-and (optionally) the JW Player as a fallback for those that don’t.
+*Able Player* is a fully accessible cross-browser HTML5 media player. 
 
 To see the player in action check our [Able Player Examples][examples] page.
 
