@@ -376,7 +376,7 @@
         this.lang = lang;
       }
     }
-    // Player language is determined as follows:
+    // Player language is determined as follows (in translation.js > getTranslationText() ):
     // 1. Lang attributes on <html> or <body>, if a matching translation file is available
     // 2. The value of this.lang, if a matching translation file is available
     // 3. English
@@ -399,6 +399,20 @@
 
     // Search
     if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
+      // conducting a search currently requires an external div in which to write the results
+      if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+        this.searchString = $(media).data('search');
+        this.searchDiv = $(media).data('search-div');
+      }
+
+      // Search Language
+      if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {
+        this.searchLang = $(media).data('search-lang');
+      }
+      else {
+        this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
+      }
+
       // conducting a search currently requires an external div in which to write the results
       if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
         this.searchString = $(media).data('search');

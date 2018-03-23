@@ -376,7 +376,7 @@
         this.lang = lang;
       }
     }
-    // Player language is determined as follows:
+    // Player language is determined as follows (in translation.js > getTranslationText() ):
     // 1. Lang attributes on <html> or <body>, if a matching translation file is available
     // 2. The value of this.lang, if a matching translation file is available
     // 3. English
@@ -399,6 +399,20 @@
 
     // Search
     if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
+      // conducting a search currently requires an external div in which to write the results
+      if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+        this.searchString = $(media).data('search');
+        this.searchDiv = $(media).data('search-div');
+      }
+
+      // Search Language
+      if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {
+        this.searchLang = $(media).data('search-lang');
+      }
+      else {
+        this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
+      }
+
       // conducting a search currently requires an external div in which to write the results
       if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
         this.searchString = $(media).data('search');
@@ -10054,16 +10068,19 @@
   AblePlayer.prototype.searchFor = function(searchString) {
 
     // return chronological array of caption cues that match searchTerms
-
     var captionLang, captions, results, caption, c, i, j;
-
+    results = [];
     // split searchTerms into an array
     var searchTerms = searchString.split(' ');
     if (this.captions.length > 0) {
-      captionLang = this.captions[0].language; // in case it's needed later
-      captions = this.captions[0].cues;
+      // Get caption track that matches this.searchLang
+      for (i=0; i < this.captions.length; i++) {
+        if (this.captions[i].language === this.searchLang) {
+          captionLang = this.searchLang;
+          captions = this.captions[i].cues;
+        }
+      }
       if (captions.length > 0) {
-        var results = [];
         c = 0;
         for (i = 0; i < captions.length; i++) {
           if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
@@ -10072,6 +10089,7 @@
               if (caption.indexOf(searchTerms[j]) !== -1) {
                 results[c] = [];
                 results[c]['start'] = captions[i].start;
+                results[c]['lang'] = captionLang;
                 results[c]['caption'] = this.highlightSearchTerm(searchTerms,j,caption);
                 c++;
                 break;
@@ -10081,7 +10099,6 @@
         }
       }
     }
-
     return results;
   };
 
@@ -12461,34 +12478,43 @@
   AblePlayer.prototype.getTranslationText = function() {
     // determine language, then get labels and prompts from corresponding translation var
     var deferred, thisObj, lang, thisObj, msg, translationFile;
-
     deferred = $.Deferred();
 
     thisObj = this;
 
+    // get language of the web page, if specified
+    if ($('body').attr('lang')) {
+      lang = $('body').attr('lang');
+    }
+    else if ($('html').attr('lang')) {
+      lang = $('html').attr('lang');
+    }
+    else {
+      lang = null;
+    }
+
     // override this.lang to language of the web page, if known and supported
     // otherwise this.lang will continue using default
     if (!this.forceLang) {
-      if ($('body').attr('lang')) {
-        lang = $('body').attr('lang');
-      }
-      else if ($('html').attr('lang')) {
-        lang = $('html').attr('lang');
-      }
-      if (lang !== this.lang) {
-        msg = 'Language of web page (' + lang +') ';
-        if ($.inArray(lang,this.getSupportedLangs()) !== -1) {
-          // this is a supported lang
-          msg += ' has a translation table available.';
-          this.lang = lang;
-        }
-        else {
-          msg += ' is not currently supported. Using default language (' + this.lang + ')';
-        }
-        if (this.debug) {
-          console.log(msg);
+      if (lang) {
+        if (lang !== this.lang) {
+          msg = 'Language of web page (' + lang +') ';
+          if ($.inArray(lang,this.getSupportedLangs()) !== -1) {
+            // this is a supported lang
+            msg += ' has a translation table available.';
+            this.lang = lang;
+          }
+          else {
+            msg += ' is not currently supported. Using default language (' + this.lang + ')';
+          }
+          if (this.debug) {
+            console.log(msg);
+          }
         }
       }
+    }
+    if (!this.searchLang) {
+      this.searchLang = this.lang;
     }
     translationFile = this.rootPath + 'translations/' + this.lang + '.js';
     this.importTranslationFile(translationFile).then(function(result) {

@@ -299,8 +299,8 @@ The following attributes make all this possible:
 #### Search 
 
 -   **data-search** - optional; search terms to search for within the caption tracks, separated by a space  
+-   **data-search-lang** - optional; specify 2-character language code of caption or subtitle track to search. If unspecified, searches the default language, which is the language of the web page if specified using the *lang* attribute on either the `<html>` or `<body>` tag. 
 -   **data-search-div** - optional; id of external container in which to display search results
-
 
 #### Fallback Player
 
