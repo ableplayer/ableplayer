@@ -12471,7 +12471,7 @@
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
     // Removing 'nl' as of 2.3.54, pending updates
-    var langs = ['ca','de','en','es','fr','it','ja','nb'];
+    var langs = ['ca','de','en','es','fr','he','it','ja','nb'];
     return langs;
   };
 

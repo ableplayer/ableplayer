@@ -34,14 +34,15 @@ Able Player has been translated into the following languages. To add another lan
 
 <ul>
   <li><strong lang="ca">Català</strong> (Catalan)</li>
-  <li><strong lang="de">Deutsch</strong> (German) 
-  <li><strong>English</strong> 
-  <li><strong lang="en">Español</strong> (Spanish) 
-  <li><strong lang="fr">Français</strong> (French) 
-  <li><strong lang="it">Italiano</strong> (Italian) 
-  <li><strong lang="ja">日本語</strong> (Japanese)  
-  <li><strong lang="nb">Norsk Bokmål</strong> (Norwegian) 
-  <li><strong lang="nl">Nederlands, Vlaams</strong> (Dutch) 
+  <li><strong lang="de">Deutsch</strong> (German)</li>
+  <li><strong>English</strong></li> 
+  <li><strong lang="en">Español</strong> (Spanish)</li> 
+  <li><strong lang="fr">Français</strong> (French)</li> 
+  <li><strong lang="he">עִברִית</strong> (Hebrew)</li>
+  <li><strong lang="it">Italiano</strong> (Italian)</li>
+  <li><strong lang="ja">日本語</strong> (Japanese)</li>  
+  <li><strong lang="nb">Norsk Bokmål</strong> (Norwegian)</li> 
+  <li><strong lang="nl">Nederlands, Vlaams</strong> (Dutch)</li> 
 </ul>
     
 Contributing
