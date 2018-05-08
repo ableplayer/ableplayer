@@ -945,7 +945,8 @@
       controls = controlLayout[sectionByOrder[i]];
       if ((i % 2) === 0) {
         $controllerSpan = $('<div>',{
-          'class': 'able-left-controls'
+          'class': 'able-left-controls',
+          'role': 'application' // See https://github.com/ableplayer/ableplayer/issues/318
         });
       }
       else {
@@ -1027,7 +1028,8 @@
             'type': 'button',
             'tabindex': '0',
             'aria-label': buttonTitle,
-            'class': 'able-button-handler-' + control
+            'class': 'able-button-handler-' + control,
+            'role': 'application'  // See https://github.com/ableplayer/ableplayer/issues/318
           });
           if (control === 'volume' || control === 'preferences') {
             // This same ARIA for captions and chapters are added elsewhere
