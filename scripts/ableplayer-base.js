@@ -345,6 +345,7 @@
 
     this.fallback = null;
     this.fallbackPath = null;
+    this.fallbackJwKey = null;
     this.testFallback = false;
 
     if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
@@ -358,9 +359,21 @@
 
       if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== false) {
         this.fallbackPath = $(media).data('fallback-path');
-      }
-      else {
+
+        var path = $(media).data('fallback-path');
+
+        // remove js file is specified.
+        var playerJs = 'jwplayer.js';
+        if (path.endsWith(playerJs)) {
+          path = path.slice(0, path.length - playerJs.length);
+        }
+        this.fallbackPath = path;
+      } else {
         this.fallbackPath = this.rootPath + 'thirdparty/';
+      }
+
+      if ($(media).data('fallback-jwkey') !== undefined) {
+        this.fallbackJwKey = $(media).data('fallback-jwkey');
       }
 
       if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
