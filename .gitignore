@@ -3,6 +3,7 @@ test.html
 thirdparty/jwplayer.*
 thirdparty/jquery-*.js
 node_modules/
+npm-debug.log
 translations/???.js
 .idea
 .htaccess
