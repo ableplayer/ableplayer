@@ -32,39 +32,44 @@
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
-"use strict";
 
-(function ($) {
-  $(document).ready(function () {
-    $('video, audio').each(function (index, element) {
-      if ($(element).data('able-player') !== undefined) {
-        new AblePlayer($(this),$(element));
-      }
-    });
-  });
+import $ from 'jquery';
 
-  // YouTube player support; pass ready event to jQuery so we can catch in player.
-  window.onYouTubeIframeAPIReady = function() {
-    AblePlayer.youtubeIframeAPIReady = true;
-    $('body').trigger('youtubeIframeAPIReady', []);
-  };
+// Static Variables and Methods
+AblePlayer.lastCreated = this; // Keep track of the last player created for use with global events.
+AblePlayer.nextIndex = 0; // Index to increment every time new player is created.
+AblePlayer.youtubeIframeAPIReady = false;
+AblePlayer.loadingYoutubeIframeAPI = false;
 
-  // If there is only one player on the page, dispatch global keydown events to it
-  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-  $(window).keydown(function(e) {
-    if (AblePlayer.nextIndex === 1) {
-      AblePlayer.lastCreated.onPlayerKeyPress(e);
-    }
-  });
+AblePlayer.getActiveDOMElement = function () {
+  var activeElement = document.activeElement;
 
+  // For shadow DOMs we need to keep digging down through the DOMs
+  while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+    activeElement = activeElement.shadowRoot.activeElement;
+  }
+
+  return activeElement;
+};
+
+AblePlayer.localGetElementById = function(element, id) {
+  if (element.getRootNode)
+  {
+    // Use getRootNode() and querySelector() where supported (for shadow DOM support)
+    return $(element.getRootNode().querySelector('#' + id));
+  }
+  else
+  {
+    // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+    return $(document.getElementById(id));
+  }
+};
+
+export default class AblePlayer {
   // Construct an AblePlayer object
   // Parameters are:
   // media - jQuery selector or element identifying the media.
-  window.AblePlayer = function(media) {
-
-    // Keep track of the last player created for use with global events.
-    AblePlayer.lastCreated = this;
-
+  constructor(media){
     this.media = media;
     if ($(media).length === 0) {
       this.provideFallback();
@@ -448,63 +453,31 @@
     this.tt = {};
     var thisObj = this;
     $.when(this.getTranslationText()).then(
-      function () {
-        if (thisObj.countProperties(thisObj.tt) > 50) {
-          // close enough to ensure that most text variables are populated
-          thisObj.setup();
-        }
-        else {
-          // can't continue loading player with no text
-          thisObj.provideFallback();
-        }
-      }
-    );
-  };
-
-  // Index to increment every time new player is created.
-  AblePlayer.nextIndex = 0;
-
-  AblePlayer.prototype.setup = function() {
-    var thisObj = this;
-    this.reinitialize().then(function () {
-      if (!thisObj.player) {
-        // No player for this media, show last-line fallback.
-        thisObj.provideFallback();
+    function () {
+      if (thisObj.countProperties(thisObj.tt) > 50) {
+        // close enough to ensure that most text variables are populated
+        thisObj.setup();
       }
       else {
-        thisObj.setupInstance().then(function () {
-          thisObj.recreatePlayer();
-        });
+        // can't continue loading player with no text
+        thisObj.provideFallback();
       }
-    });
-  };
-
-  AblePlayer.getActiveDOMElement = function () {
-    var activeElement = document.activeElement;
-
-    // For shadow DOMs we need to keep digging down through the DOMs
-    while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
-      activeElement = activeElement.shadowRoot.activeElement;
     }
+    );
+  }
+}
 
-    return activeElement;
-  };
-
-  AblePlayer.localGetElementById = function(element, id) {
-    if (element.getRootNode)
-    {
-      // Use getRootNode() and querySelector() where supported (for shadow DOM support)
-      return $(element.getRootNode().querySelector('#' + id));
+AblePlayer.prototype.setup = function() {
+  var thisObj = this;
+  this.reinitialize().then(function () {
+    if (!thisObj.player) {
+      // No player for this media, show last-line fallback.
+      thisObj.provideFallback();
     }
-    else
-    {
-      // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
-      return $(document.getElementById(id));
+    else {
+      thisObj.setupInstance().then(function () {
+        thisObj.recreatePlayer();
+      });
     }
-  };
-
-
-
-  AblePlayer.youtubeIframeAPIReady = false;
-  AblePlayer.loadingYoutubeIframeAPI = false;
-})(jQuery);
+  });
+};

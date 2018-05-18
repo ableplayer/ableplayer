@@ -9,22 +9,24 @@
     "type": "git",
     "url": "https://github.com/ableplayer/ableplayer.git"
   },
-  "main": "build/ableplayer.min.js",
+  "main": "build/ableplayer.js",
   "scripts": {
-    "build": "grunt"
+    "build": "NODE_ENV='production' grunt webpack:prod",
+    "start": "grunt webpack:dev"
   },
   "dependencies": {
     "jquery": "3.3.1",
     "js-cookie": "2.2.0"
   },
   "devDependencies": {
-    "grunt": ">=0.4.1",
-    "grunt-contrib-clean": ">=0.6.0",
-    "grunt-contrib-concat": ">=0.3.0",
-    "grunt-contrib-copy": ">=0.4.1",
-    "grunt-contrib-cssmin": ">=0.6.1",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": ">=0.2.2",
-    "grunt-remove-logging": ">=0.2.0"
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "grunt": "^1.0.2",
+    "grunt-contrib-clean": "^1.1.0",
+    "grunt-contrib-cssmin": "^2.2.1",
+    "grunt-webpack": "^3.1.2",
+    "webpack": "^4.8.3"
   }
 }
