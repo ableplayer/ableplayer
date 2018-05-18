@@ -35,36 +35,6 @@
 
 import $ from 'jquery';
 
-// Static Variables and Methods
-AblePlayer.lastCreated = this; // Keep track of the last player created for use with global events.
-AblePlayer.nextIndex = 0; // Index to increment every time new player is created.
-AblePlayer.youtubeIframeAPIReady = false;
-AblePlayer.loadingYoutubeIframeAPI = false;
-
-AblePlayer.getActiveDOMElement = function () {
-  var activeElement = document.activeElement;
-
-  // For shadow DOMs we need to keep digging down through the DOMs
-  while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
-    activeElement = activeElement.shadowRoot.activeElement;
-  }
-
-  return activeElement;
-};
-
-AblePlayer.localGetElementById = function(element, id) {
-  if (element.getRootNode)
-  {
-    // Use getRootNode() and querySelector() where supported (for shadow DOM support)
-    return $(element.getRootNode().querySelector('#' + id));
-  }
-  else
-  {
-    // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
-    return $(document.getElementById(id));
-  }
-};
-
 export default class AblePlayer {
   // Construct an AblePlayer object
   // Parameters are:
@@ -467,6 +437,7 @@ export default class AblePlayer {
   }
 }
 
+
 AblePlayer.prototype.setup = function() {
   var thisObj = this;
   this.reinitialize().then(function () {
@@ -480,4 +451,35 @@ AblePlayer.prototype.setup = function() {
       });
     }
   });
+};
+
+
+// Static Variables and Methods
+AblePlayer.lastCreated = this; // Keep track of the last player created for use with global events.
+AblePlayer.nextIndex = 0; // Index to increment every time new player is created.
+AblePlayer.youtubeIframeAPIReady = false;
+AblePlayer.loadingYoutubeIframeAPI = false;
+
+AblePlayer.getActiveDOMElement = function () {
+  var activeElement = document.activeElement;
+
+  // For shadow DOMs we need to keep digging down through the DOMs
+  while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+    activeElement = activeElement.shadowRoot.activeElement;
+  }
+
+  return activeElement;
+};
+
+AblePlayer.localGetElementById = function(element, id) {
+  if (element.getRootNode)
+  {
+    // Use getRootNode() and querySelector() where supported (for shadow DOM support)
+    return $(element.getRootNode().querySelector('#' + id));
+  }
+  else
+  {
+    // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+    return $(document.getElementById(id));
+  }
 };
