@@ -34,7 +34,14 @@
       loadingPromises.push(loadingPromise);
       loadingPromise.then((function (track, kind) {
         return function (trackSrc, trackText) {
-          var cues = thisObj.parseWebVTT(trackSrc, trackText).cues;
+          var trackContents = trackText;
+
+          // convert XMl/TTML captions file
+          if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
+            trackContents = thisObj.ttml2webvtt(trackText);
+          }
+
+          var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
           if (kind === 'captions' || kind === 'subtitles') {
             thisObj.setupCaptions(track, cues);
           }
