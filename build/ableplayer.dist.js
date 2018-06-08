@@ -189,7 +189,7 @@
         this.transcriptType = null;
       }
     }
-    else if (media.find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
+    else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
       // required tracks are present. COULD automatically generate a transcript
       if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
         this.transcriptDivLocation = $(media).data('transcript-div');
