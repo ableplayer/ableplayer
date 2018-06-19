@@ -1,9 +1,10 @@
-(function ($) {
-  var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+import $ from 'jquery';
 
-  // Based on the incredible accessible modal dialog.
-  window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
+// Based on the incredible accessible modal dialog.
+export default class AccessibleDialog{
+  constructor(modalDiv, $returnElement, dialogRole, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook){
     this.title = title;
     this.closeButtonLabel = closeButtonLabel;
     this.focusedElementBeforeModal = $returnElement;
@@ -20,9 +21,9 @@
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
-         'class': 'modalCloseButton',
-         'title': thisObj.closeButtonLabel,
-         'aria-label': thisObj.closeButtonLabel
+        'class': 'modalCloseButton',
+        'title': thisObj.closeButtonLabel,
+        'aria-label': thisObj.closeButtonLabel
       }).text('X');
       closeButton.keydown(function (event) {
         // Space key down
@@ -94,54 +95,56 @@
     });
 
     $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
-  };
+  }
+}
 
-  AccessibleDialog.prototype.show = function () {
-    if (!this.overlay) {
-      // Generate overlay.
-      var overlay = $('<div></div>').attr({
-         'class': 'able-modal-overlay',
-         'tabindex': '-1'
-      });
-      this.overlay = overlay;
-      $('body').append(overlay);
-
-      // Keep from moving focus out of dialog when clicking outside of it.
-      overlay.on('mousedown.accessibleModal', function (event) {
-        event.preventDefault();
-      });
-    }
-
-    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'true');
-
-    this.overlay.css('display', 'block');
-    this.modal.css('display', 'block');
-    this.modal.attr({
-      'aria-hidden': 'false',
+AccessibleDialog.prototype.show = function () {
+  if (!this.overlay) {
+    // Generate overlay.
+    var overlay = $('<div></div>').attr({
+      'class': 'able-modal-overlay',
       'tabindex': '-1'
     });
+    this.overlay = overlay;
+    $('body').append(overlay);
 
-    var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
-    if (focusable.length === 0) {
-      this.focusedElementBeforeModal.blur();
-    }
-    var thisObj = this;
-    setTimeout(function () {
-      // originally set focus on the first focusable element
-      // thisObj.modal.find('button.modalCloseButton').first().focus();
-      // but setting focus on dialog seems to provide more reliable access to ALL content within
-      thisObj.modal.focus();
-    }, 300);
-  };
+    // Keep from moving focus out of dialog when clicking outside of it.
+    overlay.on('mousedown.accessibleModal', function (event) {
+      event.preventDefault();
+    });
+  }
 
-  AccessibleDialog.prototype.hide = function () {
-    if (this.overlay) {
-      this.overlay.css('display', 'none');
-    }
-    this.modal.css('display', 'none');
-    this.modal.attr('aria-hidden', 'true');
-    $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
+  $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'true');
 
-    this.focusedElementBeforeModal.focus();
-  };
-})(jQuery);
+  this.overlay.css('display', 'block');
+  this.modal.css('display', 'block');
+  this.modal.attr({
+    'aria-hidden': 'false',
+    'tabindex': '-1'
+  });
+
+  var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
+  if (focusable.length === 0) {
+    this.focusedElementBeforeModal.blur();
+  }
+  var thisObj = this;
+  setTimeout(function () {
+    // originally set focus on the first focusable element
+    // thisObj.modal.find('button.modalCloseButton').first().focus();
+    // but setting focus on dialog seems to provide more reliable access to ALL content within
+    thisObj.modal.focus();
+  }, 300);
+};
+
+AccessibleDialog.prototype.hide = function () {
+  if (this.overlay) {
+    this.overlay.css('display', 'none');
+  }
+  this.modal.css('display', 'none');
+  this.modal.attr('aria-hidden', 'true');
+  $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
+
+  this.focusedElementBeforeModal.focus();
+};
+
+

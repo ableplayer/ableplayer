@@ -1,4 +1,4 @@
-var ja = {
+export default {
 
 "audio": "オーディオ",
 

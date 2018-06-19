@@ -1,4 +1,4 @@
-var nl = {
+export default {
 
 "audio": "audio",
 

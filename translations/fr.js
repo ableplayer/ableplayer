@@ -1,4 +1,4 @@
-var fr = {
+export default {
 
 "audio": "audio",
 
