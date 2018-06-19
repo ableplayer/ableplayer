@@ -1,4 +1,4 @@
-var nb = {
+export default {
 
 "audio": "audio",
 

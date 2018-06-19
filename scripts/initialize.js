@@ -732,6 +732,15 @@ AblePlayer.prototype.initJwPlayer = function () {
     url: this.fallbackPath + 'jwplayer.js',
     dataType: 'script',
     success: function( data, textStatus, jqXHR) {
+      // add jwplayer key for selfhosted when fallback is activated
+      if (thisObj.fallbackJwKey) {
+        $('head').append(
+        '<script type="text/javascript">jwplayer.key="' +
+        thisObj.fallbackJwKey +
+        '";</script>'
+        );
+      }
+
       // Successfully loaded the JW Player
       // add an id to div.able-media-container (JW Player needs this)
       thisObj.jwId = thisObj.mediaId + '_fallback';

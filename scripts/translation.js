@@ -1,6 +1,40 @@
 import $ from 'jquery';
 import AblePlayer from './ableplayer-base';
 
+function importAndGetTranslation(lang){
+  var deferred = $.Deferred();
+  switch(lang) {
+    case 'ca':
+      deferred.resolve(require('../translations/ca'));
+      break;
+    case 'de':
+      deferred.resolve(require('../translations/de'));
+      break;
+    case 'es':
+      deferred.resolve(require('../translations/es'));
+      break;
+    case 'fr':
+      deferred.resolve(require('../translations/fr'));
+      break;
+    case 'he':
+      deferred.resolve(require('../translations/he'));
+      break;
+    case 'it':
+      deferred.resolve(require('../translations/it'));
+      break;
+    case 'ja':
+      deferred.resolve(require('../translations/js'));
+      break;
+    case 'nb':
+      deferred.resolve(require('../translations/nb'));
+      break;
+    case 'en':
+    default:
+      deferred.resolve(require('../translations/en'));
+  }
+  return deferred.promise();
+}
+
 AblePlayer.prototype.getSupportedLangs = function() {
   // returns an array of languages for which AblePlayer has translation tables
   // Removing 'nl' as of 2.3.54, pending updates
@@ -49,27 +83,10 @@ AblePlayer.prototype.getTranslationText = function() {
   if (!this.searchLang) {
     this.searchLang = this.lang;
   }
-  translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-  this.importTranslationFile(translationFile).then(function(result) {
-    thisObj.tt = eval(thisObj.lang);
-    deferred.resolve();
+  importAndGetTranslation(this.lang).then(function(result) {
+    deferred.resolve(result);
   });
   return deferred.promise();
 };
 
-AblePlayer.prototype.importTranslationFile = function(translationFile) {
 
-  var deferred = $.Deferred();
-
-  $.getScript(translationFile)
-  .done(function(translationVar,textStatus) {
-    // translation file successfully retrieved
-    deferred.resolve(translationVar);
-  })
-  .fail(function(jqxhr, settings, exception) {
-    deferred.fail();
-    // error retrieving file
-    // TODO: handle this
-  });
-  return deferred.promise();
-};
