@@ -11,8 +11,7 @@
   },
   "main": "build/ableplayer.js",
   "scripts": {
-    "build": "NODE_ENV='production' grunt webpack:prod",
-    "start": "grunt webpack:dev"
+    "build": "grunt"
   },
   "dependencies": {
     "jquery": "3.3.1",

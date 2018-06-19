@@ -23,7 +23,7 @@ function importAndGetTranslation(lang){
       deferred.resolve(require('../translations/it'));
       break;
     case 'ja':
-      deferred.resolve(require('../translations/js'));
+      deferred.resolve(require('../translations/ja'));
       break;
     case 'nb':
       deferred.resolve(require('../translations/nb'));
@@ -83,8 +83,8 @@ AblePlayer.prototype.getTranslationText = function() {
   if (!this.searchLang) {
     this.searchLang = this.lang;
   }
-  importAndGetTranslation(this.lang).then(function(result) {
-    deferred.resolve(result);
+  importAndGetTranslation(this.lang).then(function(module) {
+    deferred.resolve(module.default);
   });
   return deferred.promise();
 };

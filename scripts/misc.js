@@ -34,18 +34,6 @@ AblePlayer.prototype.getNextHeadingLevel = function($element) {
   return headingNumber;
 };
 
-AblePlayer.prototype.countProperties = function(obj) {
-  // returns the number of properties in an object
-  var count, prop;
-  count = 0;
-  for (prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
-      ++count;
-    }
-  }
-  return count;
-};
-
 // Takes seconds and converts to string of form hh:mm:ss
 AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
 

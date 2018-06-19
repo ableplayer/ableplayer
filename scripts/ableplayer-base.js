@@ -445,16 +445,9 @@ export default class AblePlayer {
     // use defer method to defer additional processing until text is retrieved
     this.tt = {};
     var thisObj = this;
-    this.getTranslationText().then(function (translatedText) {
-      if (thisObj.countProperties(translatedText) > 50) {
-        thisObj.tt = translatedText;
-        // close enough to ensure that most text variables are populated
-        thisObj.setup();
-      }
-      else {
-        // can't continue loading player with no text
-        thisObj.provideFallback();
-      }
+    this.getTranslationText().then(function (translatedTextObj) {
+      thisObj.tt = translatedTextObj;
+      thisObj.setup();
     })
   };
 }
