@@ -38,8 +38,14 @@
   padding: 0;
   width: 100%;
   height: auto;
+}
+
+.able-wrapper *,
+.able-wrapper ::after,
+.able-wrapper ::before {
   box-sizing: content-box !important;
 }
+
 .able {
   position: relative;
   margin: 1em 0;
@@ -1111,7 +1117,7 @@ div.able-chapters-div button::-moz-focus-inner {
 /*
   SVG Icons
 */
-button svg {
+.able-wrapper button svg {
 	display: inline-block;
 	width: 1em;
 	height: 1em;
@@ -1133,7 +1139,7 @@ button svg {
   font-style: normal;
 }
 
-[class^="icon-"], [class*=" icon-"] {
+.able-wrapper [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'able' !important;
   speak: none;

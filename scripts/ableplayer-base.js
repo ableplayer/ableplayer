@@ -46,6 +46,8 @@ export default class AblePlayer {
       return;
     }
 
+    AblePlayer.lastCreated = this; // Keep track of the last player created for use with global events.
+
     ///////////////////////////////
     //
     // Default variables assignment
@@ -470,7 +472,6 @@ AblePlayer.prototype.setup = function() {
 
 
 // Static Variables and Methods
-AblePlayer.lastCreated = this; // Keep track of the last player created for use with global events.
 AblePlayer.nextIndex = 0; // Index to increment every time new player is created.
 AblePlayer.youtubeIframeAPIReady = false;
 AblePlayer.loadingYoutubeIframeAPI = false;
