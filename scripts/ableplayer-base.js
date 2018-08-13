@@ -497,6 +497,7 @@
       else {
         thisObj.setupInstance().then(function () {
           thisObj.recreatePlayer();
+          // thisObj.injectVTS(); // TEMP - added this here. Does it work? Fuck no.
         });
       }
     });

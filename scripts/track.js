@@ -16,13 +16,20 @@
     this.descriptions = [];
     this.chapters = [];
     this.meta = [];
+    if ($('#able-vts').length) {
+      // Page includes a container for a VTS instance
+      this.vtsTracks = [];
+      this.hasVts = true;
+    }
+    else {
+      this.hasVts = false;
+    }
 
     var loadingPromises = [];
     for (var ii = 0; ii < this.$tracks.length; ii++) {
       var track = this.$tracks[ii];
       var kind = track.getAttribute('kind');
       var trackSrc = track.getAttribute('src');
-
       var isDefaultTrack = track.getAttribute('default');
 
       if (!trackSrc) {
@@ -32,8 +39,15 @@
 
       var loadingPromise = this.loadTextObject(trackSrc);
       loadingPromises.push(loadingPromise);
-      loadingPromise.then((function (track, kind) {
+      loadingPromise.then((function (track, kind, trackLang, trackLabel) {
+
+        // srcLang should always be included with <track>, but HTML5 spec doesn't require it
+        // if not provided, assume track is the same language as the default player language
+        var trackLang = track.getAttribute('srclang') || thisObj.lang;
+        var trackLabel = track.getAttribute('label') || thisObj.getLanguageName(trackLang);
+
         return function (trackSrc, trackText) {
+
           var trackContents = trackText;
 
           // convert XMl/TTML captions file
@@ -41,15 +55,21 @@
             trackContents = thisObj.ttml2webvtt(trackText);
           }
 
+          if (thisObj.hasVts) {
+            // setupVtsTracks() is in vts.js
+            thisObj.setupVtsTracks(kind, trackLang, trackLabel, trackSrc, trackContents);
+          }
+
           var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
+
           if (kind === 'captions' || kind === 'subtitles') {
-            thisObj.setupCaptions(track, cues);
+            thisObj.setupCaptions(track, cues, trackLang, trackLabel);
           }
           else if (kind === 'descriptions') {
-            thisObj.setupDescriptions(track, cues);
+            thisObj.setupDescriptions(track, cues, trackLang);
           }
           else if (kind === 'chapters') {
-            thisObj.setupChapters(track, cues);
+            thisObj.setupChapters(track, cues, trackLang);
           }
           else if (kind === 'metadata') {
             thisObj.setupMetadata(track, cues);
@@ -64,13 +84,9 @@
     return promise;
   };
 
-  AblePlayer.prototype.setupCaptions = function (track, cues) {
+  AblePlayer.prototype.setupCaptions = function (track, cues, trackLang, trackLabel) {
 
     this.hasCaptions = true;
-    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
-    // if not provided, assume track is the same language as the default player language
-    var trackLang = track.getAttribute('srclang') || this.lang;
-    var trackLabel = track.getAttribute('label') || this.getLanguageName(trackLang);
     if (typeof track.getAttribute('default') == 'string') {
       var isDefaultTrack = true;
       // Now remove 'default' attribute from <track>
@@ -195,15 +211,11 @@
   };
 
 
-  AblePlayer.prototype.setupDescriptions = function (track, cues) {
+  AblePlayer.prototype.setupDescriptions = function (track, cues, trackLang) {
 
     // called via setupTracks() only if there is track with kind="descriptions"
     // prepares for delivery of text description , in case it's needed
     // whether and how it's delivered is controlled within description.js > initDescription()
-
-    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
-    // if not provided, assume track is the same language as the default player language
-    var trackLang = track.getAttribute('srclang') || this.lang;
 
     this.hasClosedDesc = true;
     this.currentDescription = -1;
@@ -213,14 +225,10 @@
     });
   };
 
-  AblePlayer.prototype.setupChapters = function (track, cues) {
+  AblePlayer.prototype.setupChapters = function (track, cues, trackLang) {
 
     // NOTE: WebVTT supports nested timestamps (to form an outline)
     // This is not currently supported.
-
-    // srcLang should always be included with <track>, but HTML5 spec doesn't require it
-    // if not provided, assume track is the same language as the default player language
-    var trackLang = track.getAttribute('srclang') || this.lang;
 
     this.hasChapters = true;
 
@@ -231,6 +239,7 @@
   };
 
   AblePlayer.prototype.setupMetadata = function(track, cues) {
+
     if (this.metaType === 'text') {
       // Metadata is only supported if data-meta-div is provided
       // The player does not display metadata internally

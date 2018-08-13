@@ -8,6 +8,7 @@
 	div.able-modal-overlay = 9500
 
 	* Items that should always be on top (9000):
+	#able-vts-alert = 9400
 	.able-alert = 9400
 	.able-window-toolbar .able-button-handler-preferences = 9300
   .able-popup = 9200
@@ -1054,6 +1055,106 @@ div.able-chapters-div button::-moz-focus-inner {
 .able-search-term {
 	background-color: #FFC;
 	font-weight: bold;
+}
+
+/*
+  Video Transcript Sorter (VTS)
+*/
+#able-vts-instructions {
+	margin-bottom: 1.5em;
+	padding: 1em;
+	border: 1px solid #999;
+	width: 720px;
+	max-width: 90%;
+}
+#able-vts fieldset {
+  margin: 1em;
+  border: none;
+}
+#able-vts fieldset legend {
+  color: #000;
+  font-weight: bold;
+}
+#able-vts fieldset div {
+  float: left;
+  padding-right: 1em;
+}
+#able-vts table {
+  clear: left;
+}
+
+#able-vts table,
+#able-vts table th,
+#able-vts table td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 0.5em 0.75em;
+}
+#able-vts table td.buttons {
+  width: 100px;
+}
+#able-vts table td button {
+  width: auto;
+  padding: 0;
+}
+#able-vts table td button svg {
+  width: 16px;
+  height: 16px;
+}
+#able-vts table button:hover,
+#able-vts table button:focus  {
+  /*    border: 3px solid #66c2ff; */
+}
+#able-vts table button:hover svg {
+  fill: #C00;
+}
+tr.kind-chapters,
+tr.kind-subtitles {
+  background-color: #FFF;
+}
+tr.kind-descriptions {
+  background-color: #FEE;
+}
+tr.kind-chapters {
+  background-color: #e6ffe6;
+}
+.able-vts-dragging {
+  background-color: #FFC;
+}
+div#able-vts-icon-credit {
+  margin: 1em;
+}
+div#able-vts-alert {
+  display: none;
+  position: fixed;
+  top: 5px;
+  left: 5px;
+  border: 2px solid #666;
+  background-color: #FFC;
+  padding: 1em;
+  font-weight: bold;
+  z-index: 9400;
+}
+button#able-vts-save {
+	font-size: 1em;
+	padding: 0.25em;
+	border-radius: 5px;
+	margin-bottom: 1em;
+	font-weight: bold;
+}
+button#able-vts-save:hover,
+button#able-vts-save:focus {
+  color: white;
+  background-color: #060;
+}
+.able-vts-output-instructions {
+	width: 720px;
+	max-width: 90%;
+}
+#able-vts textarea {
+	height: 200px;
+	width: 720px;
+	max-width: 90%;
 }
 
 /*

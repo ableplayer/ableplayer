@@ -563,6 +563,7 @@
           thisObj.setupPopups();
           thisObj.updateCaption();
           thisObj.updateTranscript();
+          thisObj.injectVTS();
           if (thisObj.chaptersDivLocation) {
             thisObj.populateChaptersDiv();
           }

@@ -469,8 +469,8 @@ Interactive Transcript
 ----------------------
 
 *Able Player* interactive transcripts are generated automatically from
-WebVTT caption and description files. If a transcript is available, a Transcript
-button will be added to the *Able Player* controller.
+WebVTT chapters, descriptions, and captions/subtitles files. 
+If a transcript is available, a Transcript button will be added to the *Able Player* controller.
 
 Features of the interactive transcript include the following:
 
@@ -486,6 +486,24 @@ Features of the interactive transcript include the following:
     be toggled on/off in the Preferences dialog.
 -   If subtitles are available, the transcript can be displayed in any supported language.
     Available languages can be selected from a dropdown select field.
+    
+If the transcript is assembled from multiple sources, any timing imperfections between sources 
+come sometimes lead to problems in the read order within the transcript. For example, 
+a new chapter should start *before* any captions or descriptions within that chapter. 
+If the chapter starts a millisecond later than its first caption, the chapter name will appear 
+in the transcript as a heading *after* its first caption. To help authors/developers attain 
+perfect synchronization between all timed text files, Able Player (in version 3.1.6) introduced 
+a Video Transcript Sorter (VTS). The VTS displays all timed text content from all sources 
+in a table, and provides several features that enable users to rearrange content and 
+modify start and end times. Users can also insert new content into the table, which can be useful 
+for authoring low frequency content such as chapters and description. Too use VTS, 
+add the following HTML to the desired location within any web page that includes an 
+Able Player instance: 
+
+```HTML
+<div id="able-vts"></div>
+```
+
 
 YouTube Support
 ---------------

@@ -590,7 +590,6 @@
     }
 
     this.addSeekbarListeners();
-
     // handle clicks on player buttons
     this.$controllerDiv.find('button').on('click',function(event){
       event.stopPropagation();
