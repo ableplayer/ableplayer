@@ -2090,8 +2090,8 @@
 
     // Add save and cancel buttons.
     $prefsDiv.append('<hr>');
-    saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
-    cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+    saveButton = $('<button type="button" class="modal-button">' + this.tt.save + '</button>');
+    cancelButton = $('<button type="button" class="modal-button">' + this.tt.cancel + '</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();
@@ -3167,6 +3167,7 @@
 
   AblePlayer.prototype.injectBigPlayButton = function () {
     this.$bigPlayButton = $('<button>', {
+      'type': 'button',
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
       'tabindex': -1
@@ -6410,6 +6411,7 @@
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
+         'type': 'button',
          'class': 'modalCloseButton',
          'title': thisObj.closeButtonLabel,
          'aria-label': thisObj.closeButtonLabel
@@ -11174,8 +11176,8 @@
     }
 
     // Add save and cancel buttons.
-    $saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
-    $cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+    $saveButton = $('<button type="button" class="modal-button">' + this.tt.save + '</button>');
+    $cancelButton = $('<button type="button" class="modal-button">' + this.tt.cancel + '</button>');
     $saveButton.on('click',function () {
       newWidth = $('#' + widthId).val();
       newHeight = $('#' + heightId).val();
