@@ -2138,8 +2138,8 @@
 
     // Add save and cancel buttons.
     $prefsDiv.append('<hr>');
-    saveButton = $('<button type="button" class="modal-button">' + this.tt.save + '</button>');
-    cancelButton = $('<button type="button" class="modal-button">' + this.tt.cancel + '</button>');
+    saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
     saveButton.click(function () {
       dialog.hide();
       thisObj.savePrefsFromForm();
@@ -3215,7 +3215,6 @@
 
   AblePlayer.prototype.injectBigPlayButton = function () {
     this.$bigPlayButton = $('<button>', {
-      'type': 'button',
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
       'tabindex': -1
@@ -6475,7 +6474,6 @@
 
     if (!fullscreen) {
       var closeButton = $('<button>',{
-		 'type': 'button',
          'class': 'modalCloseButton',
          'title': thisObj.closeButtonLabel,
          'aria-label': thisObj.closeButtonLabel
@@ -11242,8 +11240,8 @@
     }
 
     // Add save and cancel buttons.
-    $saveButton = $('<button type="button" class="modal-button">' + this.tt.save + '</button>');
-    $cancelButton = $('<button type="button" class="modal-button">' + this.tt.cancel + '</button>');
+    $saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
+    $cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
     $saveButton.on('click',function () {
       newWidth = $('#' + widthId).val();
       newHeight = $('#' + heightId).val();
@@ -13188,7 +13186,6 @@
         if (rowNum > 1) {
           $button = $('<button>',{
             'id': 'able-vts-button-up-' + rowNum,
-			'type': 'button',
             'title': 'Move up',
             'aria-label': 'Move Row ' + rowNum + ' up'
           }).on('click', function(el) {
@@ -13222,7 +13219,6 @@
         if (rowNum < numRows) {
           $button = $('<button>',{
             'id': 'able-vts-button-down-' + rowNum,
-			'type': 'button',
             'title': 'Move down',
             'aria-label': 'Move Row ' + rowNum + ' down'
           }).on('click', function(el) {
@@ -13256,7 +13252,6 @@
         // Add Insert button to all rows
         $button = $('<button>',{
           'id': 'able-vts-button-insert-' + rowNum,
-		  'type': 'button',
           'title': 'Insert row below',
           'aria-label': 'Insert row before Row ' + rowNum
         }).on('click', function(el) {
@@ -13292,7 +13287,6 @@
         // Add Delete button to all rows
         $button = $('<button>',{
           'id': 'able-vts-button-delete-' + rowNum,
-		  'type': 'button',
           'title': 'Delete row ',
           'aria-label': 'Delete Row ' + rowNum
         }).on('click', function(el) {
