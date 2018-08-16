@@ -12819,6 +12819,13 @@
       if (this.vtsTracks.length) {
         // Yes - there are!
 
+        // Build an array of unique languages
+        this.langs = [];
+        this.getAllLangs(this.vtsTracks);
+
+        // Set the default VTS language
+        this.vtsLang = this.lang;
+
         // Inject a heading
         $heading = $('<h2>').text('Video Transcript Sorter'); // TODO: Localize; intelligently assign proper heading level
         $('#able-vts').append($heading);
@@ -12844,13 +12851,6 @@
         $ul.append($li1,$li2,$li3);
         $instructions.append($p1,$ul,$p2);
         $('#able-vts').append($instructions);
-
-        // Build an array of unique languages
-        this.langs = [];
-        this.getAllLangs(this.vtsTracks);
-
-        // Set the default VTS language
-        this.vtsLang = this.lang;
 
         // Inject a fieldset with radio buttons for each language
         $fieldset = $('<fieldset>');
@@ -13362,7 +13362,7 @@
       return credit;
   };
 
-  AblePlayer.prototype.getAllLangs = function(tracks) { // LEFT OFF HERE. NOT WORKING WITH NEW tracks STRUCTURE **********
+  AblePlayer.prototype.getAllLangs = function(tracks) {
 
     // update this.langs with any unique languages found in tracks
     var i;
