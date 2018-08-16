@@ -1090,12 +1090,13 @@ div.able-chapters-div button::-moz-focus-inner {
   border-collapse: collapse;
   padding: 0.5em 0.75em;
 }
-#able-vts table td.buttons {
-  width: 100px;
+#able-vts table th.actions {
+  min-width: 140px;
 }
 #able-vts table td button {
   width: auto;
   padding: 0;
+  margin: 2px;
 }
 #able-vts table td button svg {
   width: 16px;

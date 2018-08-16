@@ -321,6 +321,9 @@
       $th = $('<th>', {
         'scope': 'col'
       }).text(headers[i]);
+      if (headers[i] === 'Actions') {
+        $th.addClass('actions');
+      }
       $tr.append($th);
     }
     $table.append($tr);
