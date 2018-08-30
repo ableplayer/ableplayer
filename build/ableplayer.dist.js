@@ -13780,8 +13780,29 @@
       }
     }
     else {
-      // current row has a start time (i.e., an existing row has been moved)
-      if (prevStart < start) {
+      // current row has a start time (i.e., an existing row has been moved))
+      if (prevStart) {
+        // this is not the first row.
+        if (prevStart < start) {
+          if (start < nextStart) {
+            // No change is necessary
+          }
+          else {
+            // nextStart needs to be incremented
+            nextStart = (parseFloat(start) + minDuration[kind]).toFixed(3);
+            nextEnd = (parseFloat(nextStart) + minDuration[nextKind]).toFixed(3);
+            // TODO: Ensure nextEnd does not exceed the following start (nextNextStart)
+            // Or... maybe this is getting too complicated and should be left up to the user
+          }
+        }
+        else {
+          // start needs to be incremented
+          start = (parseFloat(prevStart) + minDuration[prevKind]).toFixed(3);
+          end = (parseFloat(start) + minDuration[kind]).toFixed(3);
+        }
+      }
+      else {
+        // this is the first row
         if (start < nextStart) {
           // No change is necessary
         }
@@ -13789,14 +13810,7 @@
           // nextStart needs to be incremented
           nextStart = (parseFloat(start) + minDuration[kind]).toFixed(3);
           nextEnd = (parseFloat(nextStart) + minDuration[nextKind]).toFixed(3);
-          // TODO: Ensure nextEnd does not exceed the following start (nextNextStart)
-          // Or... maybe this is getting too complicated and should be left up to the user
         }
-      }
-      else {
-        // start needs to be incremented
-        start = (parseFloat(prevStart) + minDuration[prevKind]).toFixed(3);
-        end = (parseFloat(start) + minDuration[kind]).toFixed(3);
       }
     }
 
