@@ -6636,6 +6636,7 @@
   };
 
   AblePlayer.prototype.countProperties = function(obj) {
+
     // returns the number of properties in an object
     var count, prop;
     count = 0;
@@ -6647,12 +6648,35 @@
     return count;
   };
 
-  // Takes seconds and converts to string of form hh:mm:ss
-  AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
+  AblePlayer.prototype.formatSecondsAsColonTime = function (seconds, showFullTime) {
 
-    var dHours = Math.floor(seconds / 3600);
-    var dMinutes = Math.floor(seconds / 60) % 60;
-    var dSeconds = Math.floor(seconds % 60);
+    // Takes seconds and converts to string of form hh:mm:ss
+    // If showFullTime is true, shows 00 for hours if time is less than an hour
+    //   and show milliseconds  (e.g., 00:00:04.123 as in Video Track Sorter)
+    // Otherwise, omits empty hours and milliseconds (e.g., 00:04 as in timer on controller)
+
+    var dHours, dMinutes, dSeconds,
+        parts, milliSeconds, numShort, i;
+
+    if (showFullTime) {
+      // preserve milliseconds, if included in seconds
+      parts = seconds.toString().split('.');
+      if (parts.length === 2) {
+        milliSeconds = parts[1];
+        if (milliSeconds.length < 3) {
+          numShort = 3 - milliSeconds.length;
+          for (i=1; i <= numShort; i++) {
+            milliSeconds += '0';
+          }
+        }
+      }
+      else {
+        milliSeconds = '000';
+      }
+    }
+    dHours = Math.floor(seconds / 3600);
+    dMinutes = Math.floor(seconds / 60) % 60;
+    dSeconds = Math.floor(seconds % 60);
     if (dSeconds < 10) {
       dSeconds = '0' + dSeconds;
     }
@@ -6660,10 +6684,55 @@
       if (dMinutes < 10) {
         dMinutes = '0' + dMinutes;
       }
-      return dHours + ':' + dMinutes + ':' + dSeconds;
+      if (showFullTime) {
+        return dHours + ':' + dMinutes + ':' + dSeconds + '.' + milliSeconds;
+      }
+      else {
+        return dHours + ':' + dMinutes + ':' + dSeconds;
+      }
     }
     else {
-      return dMinutes + ':' + dSeconds;
+      if (showFullTime) {
+        if (dHours < 1) {
+          dHours = '00';
+        }
+        else if (dHours < 10) {
+          dHours = '0' + dHours;
+        }
+        if (dMinutes < 1) {
+          dMinutes = '00';
+        }
+        else if (dMinutes < 10) {
+          dMinutes = '0' + dMinutes;
+        }
+        return dHours + ':' + dMinutes + ':' + dSeconds + '.' + milliSeconds;
+      }
+      else {
+        return dMinutes + ':' + dSeconds;
+      }
+    }
+  };
+
+  AblePlayer.prototype.getSecondsFromColonTime = function (timeStr) {
+
+    // Converts string of form hh:mm:ss to seconds
+    var timeParts, hours, minutes, seconds, newTime;
+
+    timeParts = timeStr.split(':');
+    if (timeParts.length === 3) {
+      hours = parseInt(timeParts[0]);
+      minutes = parseInt(timeParts[1]);
+      seconds = parseFloat(timeParts[2]);
+      return ((hours * 3600) + (minutes * 60) + (seconds));
+    }
+    else if (timeParts.length === 2) {
+      minutes = parseInt(timeParts[0]);
+      seconds = parseFloat(timeParts[1]);
+      return ((minutes * 60) + (seconds));
+    }
+    else if (timeParts.length === 1) {
+      seconds = parseFloat(timeParts[0]);
+      return seconds;
     }
   };
 
@@ -13192,7 +13261,7 @@
             'title': 'Move up',
             'aria-label': 'Move Row ' + rowNum + ' up'
           }).on('click', function(el) {
-            thisObj.onClickVtsActionButton(el.target);
+            thisObj.onClickVtsActionButton(el.currentTarget);
           });
           $svg = $('<svg>',{
             'focusable': 'false',
@@ -13225,7 +13294,7 @@
             'title': 'Move down',
             'aria-label': 'Move Row ' + rowNum + ' down'
           }).on('click', function(el) {
-            thisObj.onClickVtsActionButton(el.target);
+            thisObj.onClickVtsActionButton(el.currentTarget);
           });
           $svg = $('<svg>',{
             'focusable': 'false',
@@ -13258,7 +13327,7 @@
           'title': 'Insert row below',
           'aria-label': 'Insert row before Row ' + rowNum
         }).on('click', function(el) {
-          thisObj.onClickVtsActionButton(el.target);
+          thisObj.onClickVtsActionButton(el.currentTarget);
         });
         $svg = $('<svg>',{
           'focusable': 'false',
@@ -13293,7 +13362,7 @@
           'title': 'Delete row ',
           'aria-label': 'Delete Row ' + rowNum
         }).on('click', function(el) {
-          thisObj.onClickVtsActionButton(el.target);
+          thisObj.onClickVtsActionButton(el.currentTarget);
         });
         $svg = $('<svg>',{
           'focusable': 'false',
@@ -13436,7 +13505,7 @@
 
     // Insert empty row below rowNum
     var $table, $rows, numRows, newRowNum, newRowId, newTimes, $tr, $td;
-    var $select, options, i, $option, newKind;
+    var $select, options, i, $option, newKind, newClass, $parentRow;
     var i, nextRowNum, $buttons;
 
     $table = $('#able-vts table');
@@ -13446,9 +13515,6 @@
 
     newRowNum = parseInt(rowNum) + 1;
     newRowId = 'able-vts-row-' + newRowNum;
-
-    // TODO: Work on the following. Not currently supported.
-    newTimes = this.getAdjustedTimes($rows,rowNum,newRowNum);
 
     // Create an empty row
     $tr = $('<tr>',{
@@ -13467,8 +13533,14 @@
       'placeholder': 'Select a kind'
     }).on('change',function() {
       newKind = $(this).val();
+      newClass = 'kind-' + newKind;
+      $parentRow = $(this).closest('tr');
       // replace the select field with the chosen value as text
       $(this).parent().text(newKind);
+      // add a class to the parent row
+      if (newKind === 'chapters' || newKind === 'descriptions') {
+        $parentRow.addClass(newClass);
+      }
     });
     options = ['','captions','chapters','descriptions','subtitles'];
     for (i=0; i<options.length; i++) {
@@ -13514,13 +13586,14 @@
       this.updateVtsActionButtons($buttons,nextRowNum);
     }
 
+    // Auto-adjust times
+    this.adjustTimes(newRowNum);
+
     // Announce the insertion
     this.showVtsAlert('A new row ' + newRowNum + ' has been inserted'); // TODO: Localize this
 
     // Place focus in new select field
     $select.focus();
-
-    // TODO: After a kind has been selected, change select field to text and update row class
 
   };
 
@@ -13550,7 +13623,7 @@
   AblePlayer.prototype.moveRow = function(rowNum,direction) {
 
     // swap two rows
-    var $rows, $thisRow, otherRowNum, $otherRow, msg;
+    var $rows, $thisRow, otherRowNum, $otherRow, newTimes, msg;
 
     $rows = $('#able-vts table').find('tr');
     $thisRow = $('#able-vts table').find('tr').eq(rowNum);
@@ -13572,28 +13645,201 @@
     $otherRow.find('td').eq(0).text(rowNum);
     this.updateVtsActionButtons($otherRow.find('button'),rowNum);
 
+    // auto-adjust times
+    this.adjustTimes(otherRowNum);
+
     // Announce the move (TODO: Localize this)
     msg = 'Row ' + rowNum + ' has been moved ' + direction;
     msg += ' and is now Row ' + otherRowNum;
     this.showVtsAlert(msg);
   };
 
-  AblePlayer.prototype.getAdjustedTimes = function($rows,rowNum1,rowNum2) {
+  AblePlayer.prototype.adjustTimes = function(rowNum) {
 
-    // TODO: Work on this function. It's complicated.
-    // The requirements vary based on track kind
+    // Adjusts start and end times of the current, previous, and next rows in VTS table
+    // after a move or insert
+    // NOTE: Fully automating this process would be extraordinarily complicated
+    // The goal here is simply to make subtle tweaks to ensure rows appear
+    // in the new order within the Able Player transcript
+    // Additional tweaking will likely be required by the user
 
-    // get the start and end times of two adjacent rows
-    // return an array of start and end times, adjusted if needed to avoid overlap
-    var start1, end1, start2, end2;
+    // TODO: Add WebVTT validation on save, since tweaking times is risky
 
-    start1 = $rows.eq(rowNum1).find('td').eq(2).text();
-    end1 = $rows.eq(rowNum1).find('td').eq(3).text();
-    start2 = $rows.eq(rowNum2).find('td').eq(2).text();
-    end2 = $rows.eq(rowNum2).find('td').eq(3).text();
+    var  minDuration, $rows, prevRowNum, nextRowNum, $row, $prevRow, $nextRow,
+        kind, prevKind, nextKind,
+        start, prevStart, nextStart,
+        end, prevEnd, nextEnd;
 
-    // console.log('row1 start: ' + start1 + ', end: ' + end1);
-    // console.log('row2 start: ' + start2 + ', end: ' + end2);
+    // Define minimum duration (in seconds) for each kind of track
+    minDuration = [];
+    minDuration['captions'] = 2; // 2 seconds
+    minDuration['descriptions'] = .500; // arbitary, but need to allow some time for screen readers to read the content
+    minDuration['chapters'] = .001; // functionally irrelevant; only affects placement within transcript
+
+    // refresh rows object
+    $rows = $('#able-vts table').find('tr');
+
+    // Get kind, start, and end from current row
+    $row = $rows.eq(rowNum);
+    if ($row.is('[class^="kind-"]')) {
+      // row has a class that starts with "kind-"
+      // Extract kind from the class name
+      kind = this.getKindFromClass($row.attr('class'));
+    }
+    else {
+      // Kind has not been assigned (e.g., newly inserted row)
+      // Set as captions row by default
+      kind = 'captions';
+    }
+    start = this.getSecondsFromColonTime($row.find('td').eq(2).text());
+    end = this.getSecondsFromColonTime($row.find('td').eq(3).text());
+
+    // Get kind, start, and end from previous row
+    if (rowNum > 1) {
+      // this is not the first row. Include the previous row
+      prevRowNum = rowNum - 1;
+      $prevRow = $rows.eq(prevRowNum);
+      if ($prevRow.is('[class^="kind-"]')) {
+        // row has a class that starts with "kind-"
+        // Extract kind from the class name
+       prevKind = this.getKindFromClass($prevRow.attr('class'));
+      }
+      else {
+        // Kind has not been assigned (e.g., newly inserted row)
+        prevKind = null;
+      }
+      prevStart = this.getSecondsFromColonTime($prevRow.find('td').eq(2).text());
+      prevEnd = this.getSecondsFromColonTime($prevRow.find('td').eq(3).text());
+    }
+    else {
+      // this is the first row
+      prevRowNum = null;
+      $prevRow = null;
+      prevKind = null;
+      prevStart = null;
+      prevEnd = null;
+    }
+
+    // Get kind, start, and end from next row
+    if (rowNum < ($rows.length - 1)) {
+      // this is not the last row. Include the next row
+      nextRowNum = rowNum + 1;
+      $nextRow = $rows.eq(nextRowNum);
+      if ($nextRow.is('[class^="kind-"]')) {
+        // row has a class that starts with "kind-"
+        // Extract kind from the class name
+       nextKind = this.getKindFromClass($nextRow.attr('class'));
+      }
+      else {
+        // Kind has not been assigned (e.g., newly inserted row)
+        nextKind = null;
+      }
+      nextStart = this.getSecondsFromColonTime($nextRow.find('td').eq(2).text());
+      nextEnd = this.getSecondsFromColonTime($nextRow.find('td').eq(3).text());
+    }
+    else {
+      // this is the last row
+      nextRowNum = null;
+      $nextRow = null;
+      nextKind = null;
+      nextStart = null;
+      nextEnd = null;
+    }
+
+    if (isNaN(start)) {
+      // Current row has no start time (i.e., it's an inserted row)
+      if (prevKind === 'captions') {
+        // start the new row immediately after the captions end
+        start = (parseFloat(prevEnd) + .001).toFixed(3);
+        if (nextStart) {
+          // end the new row immediately before the next row starts
+          end = (parseFloat(nextStart) - .001).toFixed(3);
+        }
+        else {
+          // this is the last row. Use minDuration to calculate end time.
+          end = (parseFloat(start) + minDuration[kind]).toFixed(3);
+        }
+      }
+      else if (prevKind === 'chapters') {
+        // start the new row immediately after the chapter start (not end)
+        start = (parseFloat(prevStart) + .001).toFixed(3);
+        if (nextStart) {
+          // end the new row immediately before the next row starts
+          end = (parseFloat(nextStart) - .001).toFixed(3);
+        }
+        else {
+          // this is the last row. Use minDuration to calculate end time.
+          end = (parseFloat(start) + minDurartion[kind]).toFixed(3);
+        }
+      }
+      else if (prevKind === 'descriptions') {
+        // start the new row minDuration['descriptions'] after the description starts
+        // this will theoretically allow at least a small cushion for the description to be read
+        start = (parseFloat(prevStart) + minDuration['descriptions']).toFixed(3);
+        end = (parseFloat(start) + minDuration['descriptions']).toFixed(3);
+      }
+    }
+    else {
+      // current row has a start time (i.e., an existing row has been moved)
+      if (prevStart < start) {
+        if (start < nextStart) {
+          // No change is necessary
+        }
+        else {
+          // nextStart needs to be incremented
+          nextStart = (parseFloat(start) + minDuration[kind]).toFixed(3);
+          nextEnd = (parseFloat(nextStart) + minDuration[nextKind]).toFixed(3);
+          // TODO: Ensure nextEnd does not exceed the following start (nextNextStart)
+          // Or... maybe this is getting too complicated and should be left up to the user
+        }
+      }
+      else {
+        // start needs to be incremented
+        start = (parseFloat(prevStart) + minDuration[prevKind]).toFixed(3);
+        end = (parseFloat(start) + minDuration[kind]).toFixed(3);
+      }
+    }
+
+    // check to be sure there is sufficient duration between new start & end times
+    if (end - start < minDuration[kind]) {
+      // duration is too short. Change end time
+      end = (parseFloat(start) + minDuration[kind]).toFixed(3);
+      if (nextStart) {
+        // this is not the last row
+        // increase start time of next row
+        nextStart = (parseFloat(end) + .001).toFixed(3);
+      }
+    }
+
+    // Update all affected start/end times
+    $row.find('td').eq(2).text(this.formatSecondsAsColonTime(start,true));
+    $row.find('td').eq(3).text(this.formatSecondsAsColonTime(end,true));
+    if ($prevRow) {
+      $prevRow.find('td').eq(2).text(this.formatSecondsAsColonTime(prevStart,true));
+      $prevRow.find('td').eq(3).text(this.formatSecondsAsColonTime(prevEnd,true));
+    }
+    if ($nextRow) {
+      $nextRow.find('td').eq(2).text(this.formatSecondsAsColonTime(nextStart,true));
+      $nextRow.find('td').eq(3).text(this.formatSecondsAsColonTime(nextEnd,true));
+    }
+  };
+
+  AblePlayer.prototype.getKindFromClass = function(myclass) {
+
+    // This function is called when a class with prefix "kind-" is found in the class attribute
+    // TODO: Rewrite this using regular expressions
+    var kindStart, kindEnd, kindLength, kind;
+      kindStart = myclass.indexOf('kind-')+5;
+      kindEnd = myclass.indexOf(' ',kindStart);
+      if (kindEnd == -1) {
+        // no spaces found, "kind-" must be the only myclass
+        kindLength = myclass.length - kindStart;
+      }
+      else {
+        kindLength = kindEnd - kindStart;
+      }
+      kind = myclass.substr(kindStart,kindLength);
+      return kind;
   };
 
   AblePlayer.prototype.showVtsAlert = function(message) {

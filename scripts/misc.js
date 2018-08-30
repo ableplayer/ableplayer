@@ -34,6 +34,7 @@
   };
 
   AblePlayer.prototype.countProperties = function(obj) {
+
     // returns the number of properties in an object
     var count, prop;
     count = 0;
@@ -45,12 +46,35 @@
     return count;
   };
 
-  // Takes seconds and converts to string of form hh:mm:ss
-  AblePlayer.prototype.formatSecondsAsColonTime = function (seconds) {
+  AblePlayer.prototype.formatSecondsAsColonTime = function (seconds, showFullTime) {
 
-    var dHours = Math.floor(seconds / 3600);
-    var dMinutes = Math.floor(seconds / 60) % 60;
-    var dSeconds = Math.floor(seconds % 60);
+    // Takes seconds and converts to string of form hh:mm:ss
+    // If showFullTime is true, shows 00 for hours if time is less than an hour
+    //   and show milliseconds  (e.g., 00:00:04.123 as in Video Track Sorter)
+    // Otherwise, omits empty hours and milliseconds (e.g., 00:04 as in timer on controller)
+
+    var dHours, dMinutes, dSeconds,
+        parts, milliSeconds, numShort, i;
+
+    if (showFullTime) {
+      // preserve milliseconds, if included in seconds
+      parts = seconds.toString().split('.');
+      if (parts.length === 2) {
+        milliSeconds = parts[1];
+        if (milliSeconds.length < 3) {
+          numShort = 3 - milliSeconds.length;
+          for (i=1; i <= numShort; i++) {
+            milliSeconds += '0';
+          }
+        }
+      }
+      else {
+        milliSeconds = '000';
+      }
+    }
+    dHours = Math.floor(seconds / 3600);
+    dMinutes = Math.floor(seconds / 60) % 60;
+    dSeconds = Math.floor(seconds % 60);
     if (dSeconds < 10) {
       dSeconds = '0' + dSeconds;
     }
@@ -58,10 +82,55 @@
       if (dMinutes < 10) {
         dMinutes = '0' + dMinutes;
       }
-      return dHours + ':' + dMinutes + ':' + dSeconds;
+      if (showFullTime) {
+        return dHours + ':' + dMinutes + ':' + dSeconds + '.' + milliSeconds;
+      }
+      else {
+        return dHours + ':' + dMinutes + ':' + dSeconds;
+      }
     }
     else {
-      return dMinutes + ':' + dSeconds;
+      if (showFullTime) {
+        if (dHours < 1) {
+          dHours = '00';
+        }
+        else if (dHours < 10) {
+          dHours = '0' + dHours;
+        }
+        if (dMinutes < 1) {
+          dMinutes = '00';
+        }
+        else if (dMinutes < 10) {
+          dMinutes = '0' + dMinutes;
+        }
+        return dHours + ':' + dMinutes + ':' + dSeconds + '.' + milliSeconds;
+      }
+      else {
+        return dMinutes + ':' + dSeconds;
+      }
+    }
+  };
+
+  AblePlayer.prototype.getSecondsFromColonTime = function (timeStr) {
+
+    // Converts string of form hh:mm:ss to seconds
+    var timeParts, hours, minutes, seconds, newTime;
+
+    timeParts = timeStr.split(':');
+    if (timeParts.length === 3) {
+      hours = parseInt(timeParts[0]);
+      minutes = parseInt(timeParts[1]);
+      seconds = parseFloat(timeParts[2]);
+      return ((hours * 3600) + (minutes * 60) + (seconds));
+    }
+    else if (timeParts.length === 2) {
+      minutes = parseInt(timeParts[0]);
+      seconds = parseFloat(timeParts[1]);
+      return ((minutes * 60) + (seconds));
+    }
+    else if (timeParts.length === 1) {
+      seconds = parseFloat(timeParts[0]);
+      return seconds;
     }
   };
 
