@@ -320,6 +320,7 @@ The following attributes are supported on the `<video>` element only:
 -   **data-allow-fullscreen** - optional; if set to "false" the player will not include a fullscreen button
 -   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
 -   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information.
+-   **data-youtube-nocookie** - optional; if set to "true" the YouTube video will be embedded using the "youtube-nocookie.com" host.
 -   **height** - height of the video in pixels. If not provided will
     default to 360.
 -   **poster** - path to an image file. Will be displayed in the player

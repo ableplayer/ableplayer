@@ -98,6 +98,7 @@
     }
     this.youTubePlayer = new YT.Player(containerId, {
       videoId: this.activeYouTubeId,
+      host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
       width: this.ytWidth,
       height: this.ytHeight,
       playerVars: {
