@@ -259,75 +259,79 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-    if (which === 27) {
-      this.closePopups();
-    }
-    else if (which === 32) { // spacebar = play/pause
-      if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
-        // only toggle play if a button does not have focus
-        // if a button has focus, space should activate that button
-        this.handlePlay();
+
+    // Only use keypress to control player if focus is NOT on an input field or contenteditable element
+    if (!($(':focus').is('[contenteditable]') || ($(':focus').is('input')))) {
+      if (which === 27) { // escape
+        this.closePopups();
       }
-    }
-    else if (which === 112) { // p = play/pause
-      if (this.usingModifierKeys(e)) {
-        this.handlePlay();
+      else if (which === 32) { // spacebar = play/pause
+        if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
+          // only toggle play if a button does not have focus
+          // if a button has focus, space should activate that button
+          this.handlePlay();
+        }
       }
-    }
-    else if (which === 115) { // s = stop (now restart)
-      if (this.usingModifierKeys(e)) {
-        this.handleRestart();
+      else if (which === 112) { // p = play/pause
+        if (this.usingModifierKeys(e)) {
+          this.handlePlay();
+        }
       }
-    }
-    else if (which === 109) { // m = mute
-      if (this.usingModifierKeys(e)) {
-        this.handleMute();
+      else if (which === 115) { // s = stop (now restart)
+        if (this.usingModifierKeys(e)) {
+          this.handleRestart();
+        }
       }
-    }
-    else if (which === 118) { // v = volume
-      if (this.usingModifierKeys(e)) {
-        this.handleVolume();
+      else if (which === 109) { // m = mute
+        if (this.usingModifierKeys(e)) {
+          this.handleMute();
+        }
       }
-    }
-    else if (which >= 49 && which <= 57) { // set volume 1-9
-      if (this.usingModifierKeys(e)) {
-        this.handleVolume(which);
+      else if (which === 118) { // v = volume
+        if (this.usingModifierKeys(e)) {
+          this.handleVolume();
+        }
       }
-    }
-    else if (which === 99) { // c = caption toggle
-      if (this.usingModifierKeys(e)) {
-        this.handleCaptionToggle();
+      else if (which >= 49 && which <= 57) { // set volume 1-9
+        if (this.usingModifierKeys(e)) {
+          this.handleVolume(which);
+        }
       }
-    }
-    else if (which === 100) { // d = description
-      if (this.usingModifierKeys(e)) {
-        this.handleDescriptionToggle();
+      else if (which === 99) { // c = caption toggle
+        if (this.usingModifierKeys(e)) {
+          this.handleCaptionToggle();
+        }
       }
-    }
-    else if (which === 102) { // f = forward
-      if (this.usingModifierKeys(e)) {
-        this.handleFastForward();
+      else if (which === 100) { // d = description
+        if (this.usingModifierKeys(e)) {
+          this.handleDescriptionToggle();
+        }
       }
-    }
-    else if (which === 114) { // r = rewind
-      if (this.usingModifierKeys(e)) {
-        this.handleRewind();
+      else if (which === 102) { // f = forward
+        if (this.usingModifierKeys(e)) {
+          this.handleFastForward();
+        }
       }
-    }
-    else if (which === 101) { // e = preferences
-      if (this.usingModifierKeys(e)) {
-        this.handlePrefsClick();
+      else if (which === 114) { // r = rewind
+        if (this.usingModifierKeys(e)) {
+          this.handleRewind();
+        }
       }
-    }
-    else if (which === 13) { // Enter
-      var thisElement = $(document.activeElement);
-      if (thisElement.prop('tagName') === 'SPAN') {
-        // register a click on this SPAN
-        // if it's a transcript span the transcript span click handler will take over
-        thisElement.click();
+      else if (which === 101) { // e = preferences
+        if (this.usingModifierKeys(e)) {
+          this.handlePrefsClick();
+        }
       }
-      else if (thisElement.prop('tagName') === 'LI') {
-        thisElement.click();
+      else if (which === 13) { // Enter
+        var thisElement = $(document.activeElement);
+        if (thisElement.prop('tagName') === 'SPAN') {
+          // register a click on this SPAN
+          // if it's a transcript span the transcript span click handler will take over
+          thisElement.click();
+        }
+        else if (thisElement.prop('tagName') === 'LI') {
+          thisElement.click();
+        }
       }
     }
   };

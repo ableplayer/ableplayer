@@ -1023,7 +1023,7 @@
           end = $rows.eq(i).find('td').eq(3).text();
           content = $rows.eq(i).find('td').eq(4).text();
           if (start !== undefined && end !== undefined) {
-            vtt[kind] += start + '  --> ' + end + "\n";
+            vtt[kind] += start + ' --> ' + end + "\n";
             if (content !== 'undefined') {
               vtt[kind] += content;
             }
