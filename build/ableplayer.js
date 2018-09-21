@@ -10558,7 +10558,12 @@
     }
 
     // Only use keypress to control player if focus is NOT on an input field or contenteditable element
-    if (!($(':focus').is('[contenteditable]') || ($(':focus').is('input')))) {
+    if (!(
+      $(':focus').is('[contenteditable]') ||
+      $(':focus').is('input') ||
+      e.target.hasAttribute('contenteditable') ||
+      e.target.tagName === 'INPUT'
+    )){
       if (which === 27) { // escape
         this.closePopups();
       }
