@@ -126,6 +126,10 @@
         "name":"Chinese",
         "nativeName":"中文 (Zhōngwén), 汉语, 漢語"
     },
+    "zh-tw":{
+        "name":"Chinese Traditional (Taiwan)",
+        "nativeName":"中文（台灣）"
+    },
     "cv":{
         "name":"Chuvash",
         "nativeName":"чӑваш чӗлхи"

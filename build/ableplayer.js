@@ -11971,6 +11971,10 @@
         "name":"Chinese",
         "nativeName":"中文 (Zhōngwén), 汉语, 漢語"
     },
+    "zh-tw":{
+        "name":"Chinese Traditional (Taiwan)",
+        "nativeName":"中文（台灣）"
+    },
     "cv":{
         "name":"Chuvash",
         "nativeName":"чӑваш чӗлхи"
@@ -12597,7 +12601,7 @@
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
     // Removing 'nl' as of 2.3.54, pending updates
-    var langs = ['ca','de','en','es','fr','he','it','ja','nb'];
+    var langs = ['ca','de','en','es','fr','he','it','ja','nb','zh-tw'];
     return langs;
   };
 
