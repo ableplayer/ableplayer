@@ -291,6 +291,13 @@
       this.youTubeDescId = $(media).data('youtube-desc-id');
     }
 
+    if ($(media).data('youtube-nocookie') !== undefined && $(media).data('youtube-nocookie')) {
+      this.youTubeNoCookie = true;
+    }
+    else {
+      this.youTubeNoCookie = false;
+    }
+
     // Icon type
     // By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
     // Fallback for browsers that don't support SVG is scalable icomoon fonts
@@ -5239,6 +5246,7 @@
     }
     this.youTubePlayer = new YT.Player(containerId, {
       videoId: this.activeYouTubeId,
+      host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
       width: this.ytWidth,
       height: this.ytHeight,
       playerVars: {
