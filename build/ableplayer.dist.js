@@ -13172,11 +13172,27 @@
 
     // timestamp is a string in the form "HH:MM:SS.xxx"
     // Take some simple steps to ensure edited timestamp values still adhere to expected format
-    // Could probably do more here, but currently the only step is to ensure there are 3 decimal places at the end
+
+    var firstPart, lastPart;
+
     var firstPart = timestamp.substr(0,timestamp.lastIndexOf('.')+1);
     var lastPart = timestamp.substr(timestamp.lastIndexOf('.')+1);
-    while (lastPart.length < 3) {
-      lastPart += '0';
+
+    // TODO: Be sure each component within firstPart has only exactly two digits
+    // Probably can't justify doing this automatically
+    // If users enters '5' for minutes, that could be either '05' or '50'
+    // This should trigger an error and prompt the user to correct the value before proceeding
+
+    // Be sure lastPart has exactly three digits
+    if (lastPart.length > 3) {
+      // chop off any extra digits
+      lastPart = lastPart.substr(0,3);
+    }
+    else if (lastPart.length < 3) {
+      // add trailing zeros
+      while (lastPart.length < 3) {
+        lastPart += '0';
+      }
     }
     return firstPart + lastPart;
   };
@@ -13558,9 +13574,7 @@
       // replace the select field with the chosen value as text
       $(this).parent().text(newKind);
       // add a class to the parent row
-      if (newKind === 'chapters' || newKind === 'descriptions') {
-        $parentRow.addClass(newClass);
-      }
+      $parentRow.addClass(newClass);
     });
     options = ['','captions','chapters','descriptions','subtitles'];
     for (i=0; i<options.length; i++) {
@@ -13683,6 +13697,12 @@
     // in the new order within the Able Player transcript
     // Additional tweaking will likely be required by the user
 
+    // HISTORY: Originally set minDuration to 2 seconds for captions and .500 for descriptions
+    // However, this can results in significant changes to existing caption timing,
+    // with not-so-positive results.
+    // As of 3.1.15, setting minDuration to .001 for all track kinds
+    // Users will have to make further adjustments manually if needed
+
     // TODO: Add WebVTT validation on save, since tweaking times is risky
 
     var  minDuration, $rows, prevRowNum, nextRowNum, $row, $prevRow, $nextRow,
@@ -13692,9 +13712,9 @@
 
     // Define minimum duration (in seconds) for each kind of track
     minDuration = [];
-    minDuration['captions'] = 2; // 2 seconds
-    minDuration['descriptions'] = .500; // arbitary, but need to allow some time for screen readers to read the content
-    minDuration['chapters'] = .001; // functionally irrelevant; only affects placement within transcript
+    minDuration['captions'] = .001;
+    minDuration['descriptions'] = .001;
+    minDuration['chapters'] = .001;
 
     // refresh rows object
     $rows = $('#able-vts table').find('tr');
@@ -13767,6 +13787,13 @@
     }
 
     if (isNaN(start)) {
+      if (prevKind == null) {
+        // The previous row was probably inserted, and user has not yet selected a kind
+        // automatically set it to captions
+        prevKind = 'captions';
+        $prevRow.attr('class','kind-captions');
+        $prevRow.find('td').eq(1).html('captions');
+      }
       // Current row has no start time (i.e., it's an inserted row)
       if (prevKind === 'captions') {
         // start the new row immediately after the captions end
@@ -13863,17 +13890,18 @@
     // This function is called when a class with prefix "kind-" is found in the class attribute
     // TODO: Rewrite this using regular expressions
     var kindStart, kindEnd, kindLength, kind;
-      kindStart = myclass.indexOf('kind-')+5;
-      kindEnd = myclass.indexOf(' ',kindStart);
-      if (kindEnd == -1) {
-        // no spaces found, "kind-" must be the only myclass
-        kindLength = myclass.length - kindStart;
-      }
-      else {
-        kindLength = kindEnd - kindStart;
-      }
-      kind = myclass.substr(kindStart,kindLength);
-      return kind;
+
+    kindStart = myclass.indexOf('kind-')+5;
+    kindEnd = myclass.indexOf(' ',kindStart);
+    if (kindEnd == -1) {
+      // no spaces found, "kind-" must be the only myclass
+      kindLength = myclass.length - kindStart;
+    }
+    else {
+      kindLength = kindEnd - kindStart;
+    }
+    kind = myclass.substr(kindStart,kindLength);
+    return kind;
   };
 
   AblePlayer.prototype.showVtsAlert = function(message) {
