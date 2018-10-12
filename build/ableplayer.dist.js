@@ -13009,15 +13009,11 @@
                 else if (editedContent.substr(0,1) === 'd') {
                   $(this).text('descriptions');
                 }
-                // or first three characters
-                else if (editedContent.substr(0,3) === 'cap') {
-                  $(this).text('captions');
-                }
-                else if (editedContent.substr(0,3) === 'cha') {
+                else if (editedContent.substr(0,2) === 'ch') {
                   $(this).text('chapters');
                 }
                 else {
-                  // if they really butchered it, assume 'captions'
+                  // whatever else they types, assume 'captions'
                   $(this).text('captions');
                 }
               }
