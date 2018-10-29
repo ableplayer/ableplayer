@@ -10565,12 +10565,16 @@
       which += 32;
     }
 
-    // Only use keypress to control player if focus is NOT on an input field or contenteditable element
+    // Only use keypress to control player if focus is NOT on a form field or contenteditable element
     if (!(
       $(':focus').is('[contenteditable]') ||
       $(':focus').is('input') ||
+      $(':focus').is('textarea') ||
+      $(':focus').is('select') ||
       e.target.hasAttribute('contenteditable') ||
-      e.target.tagName === 'INPUT'
+      e.target.tagName === 'INPUT' ||
+      e.target.tagName === 'TEXTAREA' ||
+      e.target.tagName === 'SELECT'
     )){
       if (which === 27) { // escape
         this.closePopups();
