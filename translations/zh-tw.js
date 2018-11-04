@@ -294,6 +294,8 @@ var zh-tw = {
 
 "windowResizeAlert": "已變更視窗大小。",
 
+"windowClose": "閉",
+
 "width": "寬度",
 
 "height": "高度",

@@ -294,6 +294,8 @@ var ja = {
 
 "windowResizeAlert": "ウィンドウのサイズが変更されました。",
 
+"windowClose": "閉じる",
+
 "width": "幅",
 
 "height": "高さ",

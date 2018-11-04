@@ -294,6 +294,8 @@ var ca = {
 
 "windowResizeAlert": "S\'ha redimensionat la finestra.",
 
+"windowClose": "Tanca",
+
 "width": "Amplada",
 
 "height": "Alçada",

@@ -294,6 +294,8 @@ var he = {
 
 "windowResizeAlert": "גודל החלון שונה.",
 
+"windowClose": "סגירת",
+
 "width": "רוחב",
 
 "height": "גובה",

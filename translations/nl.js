@@ -294,6 +294,8 @@ var nl = {
 
 "windowResizeAlert": "Het venster is van grootte veranderd.",
 
+"windowClose": "Sluit",
+
 "width": "Breedte",
 
 "height": "Hoogte",

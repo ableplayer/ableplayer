@@ -294,6 +294,8 @@ var en = {
 
 "windowResizeAlert": "The window has been resized.",
 
+"windowClose": "Close",
+
 "width": "Width",
 
 "height": "Height",

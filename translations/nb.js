@@ -294,6 +294,8 @@ var nb = {
 
 "windowResizeAlert": "Vindusstørrelsen er endret",
 
+"windowClose": "Lukk",
+
 "width": "Bredde",
 
 "height": "Høyde",

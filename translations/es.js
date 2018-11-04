@@ -294,6 +294,8 @@ var es = {
 
 "windowResizeAlert": "La ventana ha sido redimensionada.",
 
+"windowClose": "Cerrar",
+
 "width": "Ancho",
 
 "height": "Alto",
