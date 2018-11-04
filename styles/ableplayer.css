@@ -679,6 +679,7 @@ span.able-modkey {
 }
 .able-window-toolbar .able-popup {
   position: absolute;
+  cursor: default;
   right: 0;
   top: 0;
   display: block;
@@ -848,36 +849,28 @@ div.able-chapters-div button::-moz-focus-inner {
   -moz-border-radius: 5px;
   border-radius: 5px;
   display: block;
+  cursor: default;
 }
-.able-popup ul {
+ul.able-popup {
   list-style-type: none;
-  margin: 0;
-  padding: 0;
 }
 .able-popup li {
   padding: 0.25em 1em 0.25em 0.25em;
   margin: 1px;
-}
-.able-popup label {
-  padding-left: 0.25em;
   color: #FFF;
 }
 .able-popup li.able-focus {
   background-color: #CCC;
   color: #000;
 }
-.able-popup li.able-focus label {
-  color: #000;
+.able-popup-captions li {
+  padding-left: 1em;
 }
-
-/*
-  Popup Menus with hidden radio buttons
-  e.g., chapters and preferences
-*/
-.able-popup-no-radio > ul > li > input {
-  position: absolute !important;
-  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
-  clip: rect(1px, 1px, 1px, 1px);
+.able-popup-captions li[aria-checked="true"] {
+  padding-left: 0;
+}
+.able-popup-captions li[aria-checked="true"]::before {
+  content: "\2713  "; /* check mark; for heavier mark us 2714 */
 }
 
 /*
@@ -944,6 +937,8 @@ div.able-chapters-div button::-moz-focus-inner {
 }
 .able-window-toolbar input:focus,
 .able-window-toolbar input:hover,
+.able-window-toolbar select:focus,
+.able-window-toolbar select:hover,
 .able-controller input:focus,
 .able-controller input:hover,
 .able-controller button:focus,
@@ -954,12 +949,14 @@ div.able-chapters-div button::-moz-focus-inner {
   outline-width: 2px;
 }
 .able-window-toolbar input:focus,
+.able-window-toolbar select:focus,
 .able-controller input:focus,
 .able-controller button:focus,
 .able-seekbar-head:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 .able-window-toolbar input:hover,
+.able-window-toolbar select:hover,
 .able-controller input:hover,
 .able-controller button:hover,
 .able-seekbar-head:hover {

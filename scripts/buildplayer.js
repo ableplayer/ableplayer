@@ -384,146 +384,248 @@
     }
   };
 
-  // Create popup div and append to player
-  // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
-  AblePlayer.prototype.createPopup = function (which) {
+  AblePlayer.prototype.createPopup = function (which, tracks) {
 
-    var thisObj, $popup, whichMenu, $thisButton, $thisListItem, $prevButton, $nextButton,
-      $thisItem, $prevItem, $nextItem, selectedTrackIndex, selectedTrack;
+    // Create popup menu and append to player
+    // 'which' parameter is either 'captions', 'chapters', 'prefs', 'transcript-window' or 'sign-window'
+    // TODO: Add 'ytcaptions' to parameter list??? Or do they get handled as 'captions'
+    // 'tracks', if provided, is a list of tracks to be used as menu items
+
+    var thisObj, $menu, prefCats, i, $menuItem, prefCat, whichPref,
+      hasDefault, track, windowOptions, whichPref, whichMenu,
+      $thisItem, $prevItem, $nextItem;
 
     thisObj = this;
-    $popup = $('<div>',{
+
+    $menu = $('<ul>',{
       'id': this.mediaId + '-' + which + '-menu',
-      'class': 'able-popup'
+      'class': 'able-popup',
+      'role': 'menu'
     }).hide();
-    if (which == 'prefs') {
-      $popup.attr('role','menu');
+
+    if (which === 'captions') {
+      $menu.addClass('able-popup-captions');
     }
-    if (which === 'chapters' || which === 'prefs' || which === 'sign-window' || which === 'transcript-window') {
-      $popup.addClass('able-popup-no-radio');
-    }
-    $popup.on('keydown',function (e) {
-      whichMenu = $(this).attr('id').split('-')[1]; // 'prefs','captions' or 'chapters'
-      if (whichMenu === 'prefs') { // pop-up menu is a list of menu items
-        $thisItem = $(this).find('li:focus');
-        if ($thisItem.is(':first-child')) {
-          // this is the first item in the menu
-          $prevItem = $(this).find('li').last(); // wrap to bottom
-          $nextItem = $thisItem.next();
+
+    // Populate menu with menu items
+    if (which === 'prefs') {
+      prefCats = this.getPreferencesGroups();
+      for (i = 0; i < prefCats.length; i++) {
+        $menuItem = $('<li></li>',{
+          'role': 'menuitem',
+          'tabindex': '-1'
+        });
+        prefCat = prefCats[i];
+        if (prefCat === 'captions') {
+          $menuItem.text(this.tt.prefMenuCaptions);
         }
-        else if ($thisItem.is(':last-child')) {
-          // this is the last Item
-          $prevItem = $thisItem.prev();
-          $nextItem = $(this).find('li').first(); // wrap to top
+        else if (prefCat === 'descriptions') {
+          $menuItem.text(this.tt.prefMenuDescriptions);
+        }
+        else if (prefCat === 'keyboard') {
+          $menuItem.text(this.tt.prefMenuKeyboard);
+        }
+        else if (prefCat === 'transcript') {
+          $menuItem.text(this.tt.prefMenuTranscript);
+        }
+        $menuItem.on('click',function() {
+          whichPref = $(this).text();
+          thisObj.setFullscreen(false);
+          if (whichPref === thisObj.tt.prefMenuCaptions) {
+            thisObj.captionPrefsDialog.show();
+          }
+          else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+            thisObj.descPrefsDialog.show();
+          }
+          else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+            thisObj.keyboardPrefsDialog.show();
+          }
+          else if (whichPref === thisObj.tt.prefMenuTranscript) {
+            thisObj.transcriptPrefsDialog.show();
+          }
+          thisObj.closePopups();
+        });
+        $menu.append($menuItem);
+      }
+    }
+    else if (which === 'captions' || which === 'chapters') {
+      hasDefault = false;
+      for (i = 0; i < tracks.length; i++) {
+        track = tracks[i];
+        $menuItem = $('<li></li>',{
+          'role': 'menuitemradio',
+          'tabindex': '-1',
+          'lang': track.language
+        });
+        if (track.def) {
+          $menuItem.attr('aria-checked','true');
+          hasDefault = true;
         }
         else {
-          $prevItem = $thisItem.prev();
-          $nextItem = $thisItem.next();
+          $menuItem.attr('aria-checked','false');
         }
-        if (e.which === 9) { // Tab
-          if (e.shiftKey) {
-            $thisItem.removeClass('able-focus');
-            $prevItem.focus().addClass('able-focus');
+        // Get a label using track data
+        if (which == 'captions' || which == 'ytCaptions') {
+          $menuItem.text(track.label);
+          $menuItem.on('click',this.getCaptionClickFunction(track));
+        }
+        else if (which == 'chapters') {
+          $menuItem.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+          $menuItem.on('click',this.getChapterClickFunction(track.start));
+        }
+        $menu.append($menuItem);
+      }
+      if (which === 'captions' || which === 'ytcaptions') {
+        // add a 'captions off' menu item
+        $menuItem = $('<li></li>',{
+          'role': 'menuitemradio',
+          'tabindex': '-1',
+        }).text(this.tt.captionsOff);
+        if (this.prefCaptions === 0) {
+          $menuItem.attr('aria-checked','true');
+          hasDefault = true;
+        }
+        $menuItem.on('click',this.getCaptionOffFunction());
+        $menu.append($menuItem);
+      }
+    }
+    else if (which === 'transcript-window' || which === 'sign-window') {
+      windowOptions = [];
+      windowOptions.push({
+        'name': 'move',
+        'label': this.tt.windowMove
+      });
+      windowOptions.push({
+        'name': 'resize',
+        'label': this.tt.windowResize
+      });
+      windowOptions.push({
+        'name': 'close',
+        'label': this.tt.windowClose
+      });
+      for (i = 0; i < windowOptions.length; i++) {
+        $menuItem = $('<li></li>',{
+          'role': 'menuitem',
+          'tabindex': '-1',
+          'data-choice': windowOptions[i].name
+        });
+        $menuItem.text(windowOptions[i].label);
+        $menuItem.on('click mousedown',function(e) {
+          e.stopPropagation();
+          if (e.button !== 0) { // not a left click
+            return false;
           }
-          else {
-            $thisItem.removeClass('able-focus');
-            $nextItem.focus().addClass('able-focus');
+          if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+            thisObj.windowMenuClickRegistered = true;
+            thisObj.handleMenuChoice(which.substr(0, which.indexOf('-')), $(this).attr('data-choice'), e);
           }
-        }
-        else if (e.which === 40 || e.which === 39) { // down or right arrow
-          $thisItem.removeClass('able-focus');
-          $nextItem.focus().addClass('able-focus');
-        }
-        else if (e.which == 38 || e.which === 37) { // up or left arrow
+        });
+        $menu.append($menuItem);
+      }
+    }
+    // assign default item, if there isn't one already
+    if ((which === 'captions' || which === 'ytcaptions') && !hasDefault) {
+      // check the menu item associated with the default language
+      // as determined in control.js > syncTrackLanguages()
+      if ($menu.find('li[lang=' + this.captionLang + ']')) {
+        // a track exists for the default language. Check that item in the menu
+        $menu.find('li[lang=' + this.captionLang + ']').attr('aria-checked','true');
+      }
+      else {
+        // check the last item (captions off)
+        $menu.find('li').last().attr('aria-checked','true');
+      }
+    }
+    else if (which === 'chapters') {
+      if ($menu.find('li:contains("' + this.defaultChapter + '")')) {
+        $menu.find('li:contains("' + this.defaultChapter + '")').attr('aria-checked','true').addClass('able-focus');
+      }
+      else {
+        $menu.find('li').first().attr('aria-checked','true').addClass('able-focus');
+      }
+    }
+    // add keyboard handlers for navigating within popups
+    $menu.on('keydown',function (e) {
+      whichMenu = $(this).attr('id').split('-')[1];
+      $thisItem = $(this).find('li:focus');
+      if ($thisItem.is(':first-child')) {
+        // this is the first item in the menu
+        $prevItem = $(this).find('li').last(); // wrap to bottom
+        $nextItem = $thisItem.next();
+      }
+      else if ($thisItem.is(':last-child')) {
+        // this is the last Item
+        $prevItem = $thisItem.prev();
+        $nextItem = $(this).find('li').first(); // wrap to top
+      }
+      else {
+        $prevItem = $thisItem.prev();
+        $nextItem = $thisItem.next();
+      }
+      if (e.which === 9) { // Tab
+        if (e.shiftKey) {
           $thisItem.removeClass('able-focus');
           $prevItem.focus().addClass('able-focus');
         }
-        else if (e.which === 32 || e.which === 13) { // space or enter
-          $thisItem.click();
-        }
-        else if (e.which === 27) {  // Escape
-          $thisItem.removeClass('able-focus');
-          thisObj.closePopups();
-        }
-        e.preventDefault();
-      }
-      else { // other than prefs, each other pop-up menu is a list of radio buttons
-        $thisButton = $(this).find('input:focus');
-        $thisListItem = $thisButton.parent();
-        if ($thisListItem.is(':first-child')) {
-          // this is the first button
-          $prevButton = $(this).find('input').last(); // wrap to bottom
-          $nextButton = $thisListItem.next().find('input');
-        }
-        else if ($thisListItem.is(':last-child')) {
-          // this is the last button
-          $prevButton = $thisListItem.prev().find('input');
-          $nextButton = $(this).find('input').first(); // wrap to top
-        }
         else {
-          $prevButton = $thisListItem.prev().find('input');
-          $nextButton = $thisListItem.next().find('input');
+          $thisItem.removeClass('able-focus');
+          $nextItem.focus().addClass('able-focus');
         }
-        if (e.which === 9) { // Tab
-          if (e.shiftKey) {
-            $thisListItem.removeClass('able-focus');
-            $prevButton.focus();
-            $prevButton.parent().addClass('able-focus');
-          }
-          else {
-            $thisListItem.removeClass('able-focus');
-            $nextButton.focus();
-            $nextButton.parent().addClass('able-focus');
-          }
-        }
-        else if (e.which === 40 || e.which === 39) { // down or right arrow
-          $thisListItem.removeClass('able-focus');
-          $nextButton.focus();
-          $nextButton.parent().addClass('able-focus');
-        }
-        else if (e.which == 38 || e.which === 37) { // up or left arrow
-          $thisListItem.removeClass('able-focus');
-          $prevButton.focus();
-          $prevButton.parent().addClass('able-focus');
-        }
-        else if (e.which === 32 || e.which === 13) { // space or enter
-          $thisListItem.find('input:focus').click();
-        }
-        else if (e.which === 27) {  // Escape
-          $thisListItem.removeClass('able-focus');
-          thisObj.closePopups();
-        }
-        e.preventDefault();
       }
+      else if (e.which === 40 || e.which === 39) { // down or right arrow
+        $thisItem.removeClass('able-focus');
+        $nextItem.focus().addClass('able-focus');
+      }
+      else if (e.which == 38 || e.which === 37) { // up or left arrow
+        $thisItem.removeClass('able-focus');
+        $prevItem.focus().addClass('able-focus');
+      }
+      else if (e.which === 32 || e.which === 13) { // space or enter
+        $thisItem.click();
+      }
+      else if (e.which === 27) {  // Escape
+        $thisItem.removeClass('able-focus');
+        thisObj.closePopups();
+      }
+      e.preventDefault();
     });
-    this.$controllerDiv.append($popup);
-    return $popup;
+
+    this.$controllerDiv.append($menu);
+    return $menu;
   };
 
   AblePlayer.prototype.closePopups = function () {
 
     if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
-      this.$chaptersButton.focus();
+      this.$chaptersButton.attr('aria-expanded','false').focus();
     }
     if (this.captionsPopup && this.captionsPopup.is(':visible')) {
       this.captionsPopup.hide();
-      this.$ccButton.focus();
+      this.$ccButton.attr('aria-expanded','false').focus();
     }
     if (this.prefsPopup && this.prefsPopup.is(':visible')) {
       this.prefsPopup.hide();
       // restore menu items to their original state
       this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-      this.$prefsButton.focus();
-    }
-    if (this.$windowPopup && this.$windowPopup.is(':visible')) {
-      this.$windowPopup.hide();
-      this.$windowButton.show().focus();
+      this.$prefsButton.attr('aria-expanded','false').focus();
     }
     if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
       this.$volumeSlider.hide().attr('aria-hidden','true');
       this.$volumeAlert.text(this.tt.volumeSliderClosed);
-      this.$volumeButton.focus();
+      this.$volumeButton.attr('aria-expanded','false').focus();
+    }
+    if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
+      this.$transcriptPopup.hide();
+      // restore menu items to their original state
+      this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+      this.$transcriptPopupButton.attr('aria-expanded','false').focus();
+    }
+    if (this.$signPopup && this.$signPopup.is(':visible')) {
+      this.$signPopup.hide();
+      // restore menu items to their original state
+      this.$signPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+      this.$signPopupButton.attr('aria-expanded','false').focus();
     }
   };
 
@@ -531,7 +633,8 @@
 
     // Create and fill in the popup menu forms for various controls.
     // parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
-
+    // If which is undefined, automatically setup 'captions', 'chapters', and 'prefs' popups
+    // However, only setup 'transcript-window' and 'sign-window' popups if passed as value of which
     var popups, thisObj, hasDefault, i, j,
         tracks, track, $trackButton, $trackLabel,
         radioName, radioId, $menu, $menuItem,
@@ -559,6 +662,12 @@
         popups.push('chapters');
       }
     }
+    if (which === 'transcript-window' && this.transcriptType === 'popup') {
+      popups.push('transcript-window');
+    }
+    if (which === 'sign-window' && this.hasSignLanguage) {
+      popups.push('sign-window');
+    }
     if (popups.length > 0) {
       thisObj = this;
       for (var i=0; i<popups.length; i++) {
@@ -569,14 +678,10 @@
         }
         else if (popup == 'captions') {
           if (typeof this.captionsPopup === 'undefined') {
-            this.captionsPopup = this.createPopup('captions');
+            this.captionsPopup = this.createPopup('captions',this.captions);
           }
-          tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          if (typeof this.chaptersPopup === 'undefined') {
-            this.chaptersPopup = this.createPopup('chapters');
-          }
           if (this.selectedChapters) {
             tracks = this.selectedChapters.cues;
           }
@@ -586,142 +691,20 @@
           else {
             tracks = [];
           }
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters',tracks);
+          }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {
-            this.captionsPopup = this.createPopup('captions');
+            this.captionsPopup = this.createPopup('captions',this.ytCaptions);
           }
-          tracks = this.ytCaptions;
         }
-        $menu = $('<ul></ul>');
-        radioName = this.mediaId + '-' + popup + '-choice';
-        if (popup === 'prefs') {
-          $menu.attr('role','presentation');
-          prefCats = this.getPreferencesGroups();
-          for (j = 0; j < prefCats.length; j++) {
-            $menuItem = $('<li></li>',{
-              'role': 'menuitem',
-              'tabindex': '-1'
-            });
-            prefCat = prefCats[j];
-            if (prefCat === 'captions') {
-              $menuItem.text(this.tt.prefMenuCaptions);
-            }
-            else if (prefCat === 'descriptions') {
-              $menuItem.text(this.tt.prefMenuDescriptions);
-            }
-            else if (prefCat === 'keyboard') {
-              $menuItem.text(this.tt.prefMenuKeyboard);
-            }
-            else if (prefCat === 'transcript') {
-              $menuItem.text(this.tt.prefMenuTranscript);
-            }
-            $menuItem.click(function(event) {
-              var whichPref = $(this).text();
-              thisObj.setFullscreen(false);
-              if (whichPref === 'Captions') {
-                thisObj.captionPrefsDialog.show();
-              }
-              else if (whichPref === 'Descriptions') {
-                thisObj.descPrefsDialog.show();
-              }
-              else if (whichPref === 'Keyboard') {
-                thisObj.keyboardPrefsDialog.show();
-              }
-              else if (whichPref === 'Transcript') {
-                thisObj.transcriptPrefsDialog.show();
-              }
-              thisObj.closePopups();
-            });
-            $menu.append($menuItem);
-          }
-          this.prefsPopup.append($menu);
+        else if (popup == 'transcript-window') {
+          return this.createPopup('transcript-window');
         }
-        else {
-          for (j = 0; j < tracks.length; j++) {
-            $menuItem = $('<li></li>');
-            track = tracks[j];
-            radioId = this.mediaId + '-' + popup + '-' + j;
-            $trackButton = $('<input>',{
-              'type': 'radio',
-              'val': j,
-              'name': radioName,
-              'id': radioId
-            });
-            if (track.def) {
-              $trackButton.prop('checked',true);
-              hasDefault = true;
-            }
-            $trackLabel = $('<label>',{
-              'for': radioId
-            });
-            if (track.language !== 'undefined') {
-              $trackButton.attr('lang',track.language);
-            }
-            if (popup == 'captions' || popup == 'ytCaptions') {
-              $trackLabel.text(track.label || track.language);
-              $trackButton.click(this.getCaptionClickFunction(track));
-            }
-            else if (popup == 'chapters') {
-              $trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
-              var getClickFunction = function (time) {
-                return function () {
-                  thisObj.seekTrigger = 'chapter';
-                  thisObj.seekTo(time);
-                  // stopgap to prevent spacebar in Firefox from reopening popup
-                  // immediately after closing it (used in handleChapters())
-                  thisObj.hidingPopup = true;
-                  thisObj.chaptersPopup.hide();
-                  // Ensure stopgap gets cancelled if handleChapters() isn't called
-                  // e.g., if user triggered button with Enter or mouse click, not spacebar
-                  setTimeout(function() {
-                    thisObj.hidingPopup = false;
-                  }, 100);
-                  thisObj.$chaptersButton.focus();
-                }
-              }
-              $trackButton.on('click keypress',getClickFunction(track.start));
-            }
-            $menuItem.append($trackButton,$trackLabel);
-            $menu.append($menuItem);
-          }
-          if (popup == 'captions' || popup == 'ytCaptions') {
-            // add a captions off button
-            radioId = this.mediaId + '-captions-off';
-            $menuItem = $('<li></li>');
-            $trackButton = $('<input>',{
-              'type': 'radio',
-              'name': radioName,
-              'id': radioId
-            });
-            $trackLabel = $('<label>',{
-              'for': radioId
-            });
-            $trackLabel.text(this.tt.captionsOff);
-            if (this.prefCaptions === 0) {
-              $trackButton.prop('checked',true);
-            }
-            $trackButton.click(this.getCaptionOffFunction());
-            $menuItem.append($trackButton,$trackLabel);
-            $menu.append($menuItem);
-          }
-          if (!hasDefault) { // no 'default' attribute was specified on any <track>
-            if ((popup == 'captions' || popup == 'ytCaptions') && ($menu.find('input:radio[lang=' + this.captionLang + ']'))) {
-              // check the button associated with the default caption language
-              // (as determined in control.js > syncTrackLanguages())
-              $menu.find('input:radio[lang=' + this.captionLang + ']').prop('checked',true);
-            }
-            else {
-              // check the first button
-              $menu.find('input').first().prop('checked',true);
-            }
-          }
-          if (popup === 'captions' || popup === 'ytCaptions') {
-            this.captionsPopup.html($menu);
-          }
-          else if (popup === 'chapters') {
-            this.chaptersPopup.html($menu);
-          }
+        else if (popup == 'sign-window') {
+          return this.createPopup('sign-window');
         }
       }
     }
@@ -1030,7 +1013,7 @@
             'class': 'able-button-handler-' + control
           });
           if (control === 'volume' || control === 'preferences') {
-            // This same ARIA for captions and chapters are added elsewhere
+            // This same ARIA for captions and chapters are added elsewhere (FUCK where?)
             if (control == 'preferences') {
               popupMenuId = this.mediaId + '-prefs-menu';
             }
@@ -1038,7 +1021,8 @@
               popupMenuId = this.mediaId + '-volume-slider';
             }
             $newButton.attr({
-              'aria-controls': popupMenuId
+              'aria-controls': popupMenuId,
+              'aria-expanded': 'false'
             });
           }
           if (this.iconType === 'font') {

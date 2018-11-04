@@ -268,6 +268,7 @@
     this.closePopups();
     this.$tooltipDiv.hide();
     this.$volumeSlider.show().attr('aria-hidden','false');
+    this.$volumeButton.attr('aria-expanded','true');
     this.$volumeSliderHead.attr('tabindex','0').focus();
   };
 
@@ -275,7 +276,7 @@
 
     this.$volumeSlider.hide().attr('aria-hidden','true');
     this.$volumeSliderHead.attr('tabindex','-1');
-    this.$volumeButton.focus();
+    this.$volumeButton.attr('aria-expanded','false').focus();
   };
 
   AblePlayer.prototype.isMuted = function () {

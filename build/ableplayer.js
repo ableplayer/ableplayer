@@ -3517,146 +3517,248 @@
     }
   };
 
-  // Create popup div and append to player
-  // 'which' parameter is either 'captions', 'chapters', 'prefs', or 'X-window' (e.g., "sign-window")
-  AblePlayer.prototype.createPopup = function (which) {
+  AblePlayer.prototype.createPopup = function (which, tracks) {
 
-    var thisObj, $popup, whichMenu, $thisButton, $thisListItem, $prevButton, $nextButton,
-      $thisItem, $prevItem, $nextItem, selectedTrackIndex, selectedTrack;
+    // Create popup menu and append to player
+    // 'which' parameter is either 'captions', 'chapters', 'prefs', 'transcript-window' or 'sign-window'
+    // TODO: Add 'ytcaptions' to parameter list??? Or do they get handled as 'captions'
+    // 'tracks', if provided, is a list of tracks to be used as menu items
+
+    var thisObj, $menu, prefCats, i, $menuItem, prefCat, whichPref,
+      hasDefault, track, windowOptions, whichPref, whichMenu,
+      $thisItem, $prevItem, $nextItem;
 
     thisObj = this;
-    $popup = $('<div>',{
+
+    $menu = $('<ul>',{
       'id': this.mediaId + '-' + which + '-menu',
-      'class': 'able-popup'
+      'class': 'able-popup',
+      'role': 'menu'
     }).hide();
-    if (which == 'prefs') {
-      $popup.attr('role','menu');
+
+    if (which === 'captions') {
+      $menu.addClass('able-popup-captions');
     }
-    if (which === 'chapters' || which === 'prefs' || which === 'sign-window' || which === 'transcript-window') {
-      $popup.addClass('able-popup-no-radio');
-    }
-    $popup.on('keydown',function (e) {
-      whichMenu = $(this).attr('id').split('-')[1]; // 'prefs','captions' or 'chapters'
-      if (whichMenu === 'prefs') { // pop-up menu is a list of menu items
-        $thisItem = $(this).find('li:focus');
-        if ($thisItem.is(':first-child')) {
-          // this is the first item in the menu
-          $prevItem = $(this).find('li').last(); // wrap to bottom
-          $nextItem = $thisItem.next();
+
+    // Populate menu with menu items
+    if (which === 'prefs') {
+      prefCats = this.getPreferencesGroups();
+      for (i = 0; i < prefCats.length; i++) {
+        $menuItem = $('<li></li>',{
+          'role': 'menuitem',
+          'tabindex': '-1'
+        });
+        prefCat = prefCats[i];
+        if (prefCat === 'captions') {
+          $menuItem.text(this.tt.prefMenuCaptions);
         }
-        else if ($thisItem.is(':last-child')) {
-          // this is the last Item
-          $prevItem = $thisItem.prev();
-          $nextItem = $(this).find('li').first(); // wrap to top
+        else if (prefCat === 'descriptions') {
+          $menuItem.text(this.tt.prefMenuDescriptions);
+        }
+        else if (prefCat === 'keyboard') {
+          $menuItem.text(this.tt.prefMenuKeyboard);
+        }
+        else if (prefCat === 'transcript') {
+          $menuItem.text(this.tt.prefMenuTranscript);
+        }
+        $menuItem.on('click',function() {
+          whichPref = $(this).text();
+          thisObj.setFullscreen(false);
+          if (whichPref === thisObj.tt.prefMenuCaptions) {
+            thisObj.captionPrefsDialog.show();
+          }
+          else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+            thisObj.descPrefsDialog.show();
+          }
+          else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+            thisObj.keyboardPrefsDialog.show();
+          }
+          else if (whichPref === thisObj.tt.prefMenuTranscript) {
+            thisObj.transcriptPrefsDialog.show();
+          }
+          thisObj.closePopups();
+        });
+        $menu.append($menuItem);
+      }
+    }
+    else if (which === 'captions' || which === 'chapters') {
+      hasDefault = false;
+      for (i = 0; i < tracks.length; i++) {
+        track = tracks[i];
+        $menuItem = $('<li></li>',{
+          'role': 'menuitemradio',
+          'tabindex': '-1',
+          'lang': track.language
+        });
+        if (track.def) {
+          $menuItem.attr('aria-checked','true');
+          hasDefault = true;
         }
         else {
-          $prevItem = $thisItem.prev();
-          $nextItem = $thisItem.next();
+          $menuItem.attr('aria-checked','false');
         }
-        if (e.which === 9) { // Tab
-          if (e.shiftKey) {
-            $thisItem.removeClass('able-focus');
-            $prevItem.focus().addClass('able-focus');
+        // Get a label using track data
+        if (which == 'captions' || which == 'ytCaptions') {
+          $menuItem.text(track.label);
+          $menuItem.on('click',this.getCaptionClickFunction(track));
+        }
+        else if (which == 'chapters') {
+          $menuItem.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+          $menuItem.on('click',this.getChapterClickFunction(track.start));
+        }
+        $menu.append($menuItem);
+      }
+      if (which === 'captions' || which === 'ytcaptions') {
+        // add a 'captions off' menu item
+        $menuItem = $('<li></li>',{
+          'role': 'menuitemradio',
+          'tabindex': '-1',
+        }).text(this.tt.captionsOff);
+        if (this.prefCaptions === 0) {
+          $menuItem.attr('aria-checked','true');
+          hasDefault = true;
+        }
+        $menuItem.on('click',this.getCaptionOffFunction());
+        $menu.append($menuItem);
+      }
+    }
+    else if (which === 'transcript-window' || which === 'sign-window') {
+      windowOptions = [];
+      windowOptions.push({
+        'name': 'move',
+        'label': this.tt.windowMove
+      });
+      windowOptions.push({
+        'name': 'resize',
+        'label': this.tt.windowResize
+      });
+      windowOptions.push({
+        'name': 'close',
+        'label': this.tt.windowClose
+      });
+      for (i = 0; i < windowOptions.length; i++) {
+        $menuItem = $('<li></li>',{
+          'role': 'menuitem',
+          'tabindex': '-1',
+          'data-choice': windowOptions[i].name
+        });
+        $menuItem.text(windowOptions[i].label);
+        $menuItem.on('click mousedown',function(e) {
+          e.stopPropagation();
+          if (e.button !== 0) { // not a left click
+            return false;
           }
-          else {
-            $thisItem.removeClass('able-focus');
-            $nextItem.focus().addClass('able-focus');
+          if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+            thisObj.windowMenuClickRegistered = true;
+            thisObj.handleMenuChoice(which.substr(0, which.indexOf('-')), $(this).attr('data-choice'), e);
           }
-        }
-        else if (e.which === 40 || e.which === 39) { // down or right arrow
-          $thisItem.removeClass('able-focus');
-          $nextItem.focus().addClass('able-focus');
-        }
-        else if (e.which == 38 || e.which === 37) { // up or left arrow
+        });
+        $menu.append($menuItem);
+      }
+    }
+    // assign default item, if there isn't one already
+    if ((which === 'captions' || which === 'ytcaptions') && !hasDefault) {
+      // check the menu item associated with the default language
+      // as determined in control.js > syncTrackLanguages()
+      if ($menu.find('li[lang=' + this.captionLang + ']')) {
+        // a track exists for the default language. Check that item in the menu
+        $menu.find('li[lang=' + this.captionLang + ']').attr('aria-checked','true');
+      }
+      else {
+        // check the last item (captions off)
+        $menu.find('li').last().attr('aria-checked','true');
+      }
+    }
+    else if (which === 'chapters') {
+      if ($menu.find('li:contains("' + this.defaultChapter + '")')) {
+        $menu.find('li:contains("' + this.defaultChapter + '")').attr('aria-checked','true').addClass('able-focus');
+      }
+      else {
+        $menu.find('li').first().attr('aria-checked','true').addClass('able-focus');
+      }
+    }
+    // add keyboard handlers for navigating within popups
+    $menu.on('keydown',function (e) {
+      whichMenu = $(this).attr('id').split('-')[1];
+      $thisItem = $(this).find('li:focus');
+      if ($thisItem.is(':first-child')) {
+        // this is the first item in the menu
+        $prevItem = $(this).find('li').last(); // wrap to bottom
+        $nextItem = $thisItem.next();
+      }
+      else if ($thisItem.is(':last-child')) {
+        // this is the last Item
+        $prevItem = $thisItem.prev();
+        $nextItem = $(this).find('li').first(); // wrap to top
+      }
+      else {
+        $prevItem = $thisItem.prev();
+        $nextItem = $thisItem.next();
+      }
+      if (e.which === 9) { // Tab
+        if (e.shiftKey) {
           $thisItem.removeClass('able-focus');
           $prevItem.focus().addClass('able-focus');
         }
-        else if (e.which === 32 || e.which === 13) { // space or enter
-          $thisItem.click();
-        }
-        else if (e.which === 27) {  // Escape
-          $thisItem.removeClass('able-focus');
-          thisObj.closePopups();
-        }
-        e.preventDefault();
-      }
-      else { // other than prefs, each other pop-up menu is a list of radio buttons
-        $thisButton = $(this).find('input:focus');
-        $thisListItem = $thisButton.parent();
-        if ($thisListItem.is(':first-child')) {
-          // this is the first button
-          $prevButton = $(this).find('input').last(); // wrap to bottom
-          $nextButton = $thisListItem.next().find('input');
-        }
-        else if ($thisListItem.is(':last-child')) {
-          // this is the last button
-          $prevButton = $thisListItem.prev().find('input');
-          $nextButton = $(this).find('input').first(); // wrap to top
-        }
         else {
-          $prevButton = $thisListItem.prev().find('input');
-          $nextButton = $thisListItem.next().find('input');
+          $thisItem.removeClass('able-focus');
+          $nextItem.focus().addClass('able-focus');
         }
-        if (e.which === 9) { // Tab
-          if (e.shiftKey) {
-            $thisListItem.removeClass('able-focus');
-            $prevButton.focus();
-            $prevButton.parent().addClass('able-focus');
-          }
-          else {
-            $thisListItem.removeClass('able-focus');
-            $nextButton.focus();
-            $nextButton.parent().addClass('able-focus');
-          }
-        }
-        else if (e.which === 40 || e.which === 39) { // down or right arrow
-          $thisListItem.removeClass('able-focus');
-          $nextButton.focus();
-          $nextButton.parent().addClass('able-focus');
-        }
-        else if (e.which == 38 || e.which === 37) { // up or left arrow
-          $thisListItem.removeClass('able-focus');
-          $prevButton.focus();
-          $prevButton.parent().addClass('able-focus');
-        }
-        else if (e.which === 32 || e.which === 13) { // space or enter
-          $thisListItem.find('input:focus').click();
-        }
-        else if (e.which === 27) {  // Escape
-          $thisListItem.removeClass('able-focus');
-          thisObj.closePopups();
-        }
-        e.preventDefault();
       }
+      else if (e.which === 40 || e.which === 39) { // down or right arrow
+        $thisItem.removeClass('able-focus');
+        $nextItem.focus().addClass('able-focus');
+      }
+      else if (e.which == 38 || e.which === 37) { // up or left arrow
+        $thisItem.removeClass('able-focus');
+        $prevItem.focus().addClass('able-focus');
+      }
+      else if (e.which === 32 || e.which === 13) { // space or enter
+        $thisItem.click();
+      }
+      else if (e.which === 27) {  // Escape
+        $thisItem.removeClass('able-focus');
+        thisObj.closePopups();
+      }
+      e.preventDefault();
     });
-    this.$controllerDiv.append($popup);
-    return $popup;
+
+    this.$controllerDiv.append($menu);
+    return $menu;
   };
 
   AblePlayer.prototype.closePopups = function () {
 
     if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
-      this.$chaptersButton.focus();
+      this.$chaptersButton.attr('aria-expanded','false').focus();
     }
     if (this.captionsPopup && this.captionsPopup.is(':visible')) {
       this.captionsPopup.hide();
-      this.$ccButton.focus();
+      this.$ccButton.attr('aria-expanded','false').focus();
     }
     if (this.prefsPopup && this.prefsPopup.is(':visible')) {
       this.prefsPopup.hide();
       // restore menu items to their original state
       this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-      this.$prefsButton.focus();
-    }
-    if (this.$windowPopup && this.$windowPopup.is(':visible')) {
-      this.$windowPopup.hide();
-      this.$windowButton.show().focus();
+      this.$prefsButton.attr('aria-expanded','false').focus();
     }
     if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
       this.$volumeSlider.hide().attr('aria-hidden','true');
       this.$volumeAlert.text(this.tt.volumeSliderClosed);
-      this.$volumeButton.focus();
+      this.$volumeButton.attr('aria-expanded','false').focus();
+    }
+    if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
+      this.$transcriptPopup.hide();
+      // restore menu items to their original state
+      this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+      this.$transcriptPopupButton.attr('aria-expanded','false').focus();
+    }
+    if (this.$signPopup && this.$signPopup.is(':visible')) {
+      this.$signPopup.hide();
+      // restore menu items to their original state
+      this.$signPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+      this.$signPopupButton.attr('aria-expanded','false').focus();
     }
   };
 
@@ -3664,7 +3766,8 @@
 
     // Create and fill in the popup menu forms for various controls.
     // parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
-
+    // If which is undefined, automatically setup 'captions', 'chapters', and 'prefs' popups
+    // However, only setup 'transcript-window' and 'sign-window' popups if passed as value of which
     var popups, thisObj, hasDefault, i, j,
         tracks, track, $trackButton, $trackLabel,
         radioName, radioId, $menu, $menuItem,
@@ -3692,6 +3795,12 @@
         popups.push('chapters');
       }
     }
+    if (which === 'transcript-window' && this.transcriptType === 'popup') {
+      popups.push('transcript-window');
+    }
+    if (which === 'sign-window' && this.hasSignLanguage) {
+      popups.push('sign-window');
+    }
     if (popups.length > 0) {
       thisObj = this;
       for (var i=0; i<popups.length; i++) {
@@ -3702,14 +3811,10 @@
         }
         else if (popup == 'captions') {
           if (typeof this.captionsPopup === 'undefined') {
-            this.captionsPopup = this.createPopup('captions');
+            this.captionsPopup = this.createPopup('captions',this.captions);
           }
-          tracks = this.captions;
         }
         else if (popup == 'chapters') {
-          if (typeof this.chaptersPopup === 'undefined') {
-            this.chaptersPopup = this.createPopup('chapters');
-          }
           if (this.selectedChapters) {
             tracks = this.selectedChapters.cues;
           }
@@ -3719,142 +3824,20 @@
           else {
             tracks = [];
           }
+          if (typeof this.chaptersPopup === 'undefined') {
+            this.chaptersPopup = this.createPopup('chapters',tracks);
+          }
         }
         else if (popup == 'ytCaptions') {
           if (typeof this.captionsPopup === 'undefined') {
-            this.captionsPopup = this.createPopup('captions');
+            this.captionsPopup = this.createPopup('captions',this.ytCaptions);
           }
-          tracks = this.ytCaptions;
         }
-        $menu = $('<ul></ul>');
-        radioName = this.mediaId + '-' + popup + '-choice';
-        if (popup === 'prefs') {
-          $menu.attr('role','presentation');
-          prefCats = this.getPreferencesGroups();
-          for (j = 0; j < prefCats.length; j++) {
-            $menuItem = $('<li></li>',{
-              'role': 'menuitem',
-              'tabindex': '-1'
-            });
-            prefCat = prefCats[j];
-            if (prefCat === 'captions') {
-              $menuItem.text(this.tt.prefMenuCaptions);
-            }
-            else if (prefCat === 'descriptions') {
-              $menuItem.text(this.tt.prefMenuDescriptions);
-            }
-            else if (prefCat === 'keyboard') {
-              $menuItem.text(this.tt.prefMenuKeyboard);
-            }
-            else if (prefCat === 'transcript') {
-              $menuItem.text(this.tt.prefMenuTranscript);
-            }
-            $menuItem.click(function(event) {
-              var whichPref = $(this).text();
-              thisObj.setFullscreen(false);
-              if (whichPref === 'Captions') {
-                thisObj.captionPrefsDialog.show();
-              }
-              else if (whichPref === 'Descriptions') {
-                thisObj.descPrefsDialog.show();
-              }
-              else if (whichPref === 'Keyboard') {
-                thisObj.keyboardPrefsDialog.show();
-              }
-              else if (whichPref === 'Transcript') {
-                thisObj.transcriptPrefsDialog.show();
-              }
-              thisObj.closePopups();
-            });
-            $menu.append($menuItem);
-          }
-          this.prefsPopup.append($menu);
+        else if (popup == 'transcript-window') {
+          return this.createPopup('transcript-window');
         }
-        else {
-          for (j = 0; j < tracks.length; j++) {
-            $menuItem = $('<li></li>');
-            track = tracks[j];
-            radioId = this.mediaId + '-' + popup + '-' + j;
-            $trackButton = $('<input>',{
-              'type': 'radio',
-              'val': j,
-              'name': radioName,
-              'id': radioId
-            });
-            if (track.def) {
-              $trackButton.prop('checked',true);
-              hasDefault = true;
-            }
-            $trackLabel = $('<label>',{
-              'for': radioId
-            });
-            if (track.language !== 'undefined') {
-              $trackButton.attr('lang',track.language);
-            }
-            if (popup == 'captions' || popup == 'ytCaptions') {
-              $trackLabel.text(track.label || track.language);
-              $trackButton.click(this.getCaptionClickFunction(track));
-            }
-            else if (popup == 'chapters') {
-              $trackLabel.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
-              var getClickFunction = function (time) {
-                return function () {
-                  thisObj.seekTrigger = 'chapter';
-                  thisObj.seekTo(time);
-                  // stopgap to prevent spacebar in Firefox from reopening popup
-                  // immediately after closing it (used in handleChapters())
-                  thisObj.hidingPopup = true;
-                  thisObj.chaptersPopup.hide();
-                  // Ensure stopgap gets cancelled if handleChapters() isn't called
-                  // e.g., if user triggered button with Enter or mouse click, not spacebar
-                  setTimeout(function() {
-                    thisObj.hidingPopup = false;
-                  }, 100);
-                  thisObj.$chaptersButton.focus();
-                }
-              }
-              $trackButton.on('click keypress',getClickFunction(track.start));
-            }
-            $menuItem.append($trackButton,$trackLabel);
-            $menu.append($menuItem);
-          }
-          if (popup == 'captions' || popup == 'ytCaptions') {
-            // add a captions off button
-            radioId = this.mediaId + '-captions-off';
-            $menuItem = $('<li></li>');
-            $trackButton = $('<input>',{
-              'type': 'radio',
-              'name': radioName,
-              'id': radioId
-            });
-            $trackLabel = $('<label>',{
-              'for': radioId
-            });
-            $trackLabel.text(this.tt.captionsOff);
-            if (this.prefCaptions === 0) {
-              $trackButton.prop('checked',true);
-            }
-            $trackButton.click(this.getCaptionOffFunction());
-            $menuItem.append($trackButton,$trackLabel);
-            $menu.append($menuItem);
-          }
-          if (!hasDefault) { // no 'default' attribute was specified on any <track>
-            if ((popup == 'captions' || popup == 'ytCaptions') && ($menu.find('input:radio[lang=' + this.captionLang + ']'))) {
-              // check the button associated with the default caption language
-              // (as determined in control.js > syncTrackLanguages())
-              $menu.find('input:radio[lang=' + this.captionLang + ']').prop('checked',true);
-            }
-            else {
-              // check the first button
-              $menu.find('input').first().prop('checked',true);
-            }
-          }
-          if (popup === 'captions' || popup === 'ytCaptions') {
-            this.captionsPopup.html($menu);
-          }
-          else if (popup === 'chapters') {
-            this.chaptersPopup.html($menu);
-          }
+        else if (popup == 'sign-window') {
+          return this.createPopup('sign-window');
         }
       }
     }
@@ -4163,7 +4146,7 @@
             'class': 'able-button-handler-' + control
           });
           if (control === 'volume' || control === 'preferences') {
-            // This same ARIA for captions and chapters are added elsewhere
+            // This same ARIA for captions and chapters are added elsewhere (FUCK where?)
             if (control == 'preferences') {
               popupMenuId = this.mediaId + '-prefs-menu';
             }
@@ -4171,7 +4154,8 @@
               popupMenuId = this.mediaId + '-volume-slider';
             }
             $newButton.attr({
-              'aria-controls': popupMenuId
+              'aria-controls': popupMenuId,
+              'aria-expanded': 'false'
             });
           }
           if (this.iconType === 'font') {
@@ -6345,6 +6329,7 @@
     this.closePopups();
     this.$tooltipDiv.hide();
     this.$volumeSlider.show().attr('aria-hidden','false');
+    this.$volumeButton.attr('aria-expanded','true');
     this.$volumeSliderHead.attr('tabindex','0').focus();
   };
 
@@ -6352,7 +6337,7 @@
 
     this.$volumeSlider.hide().attr('aria-hidden','true');
     this.$volumeSliderHead.attr('tabindex','-1');
-    this.$volumeButton.focus();
+    this.$volumeButton.attr('aria-expanded','false').focus();
   };
 
   AblePlayer.prototype.isMuted = function () {
@@ -7765,7 +7750,8 @@
         this.$ccButton.attr({
           'aria-label': this.tt.captions,
           'aria-haspopup': 'true',
-          'aria-controls': this.mediaId + '-captions-menu'
+          'aria-controls': this.mediaId + '-captions-menu',
+          'aria-expanded': 'false'
         });
         this.$ccButton.find('span.able-clipped').text(this.tt.captions);
       }
@@ -7775,7 +7761,8 @@
       this.$chaptersButton.attr({
         'aria-label': this.tt.chapters,
         'aria-haspopup': 'true',
-        'aria-controls': this.mediaId + '-chapters-menu'
+        'aria-controls': this.mediaId + '-chapters-menu',
+        'aria-expanded': 'false'
       });
     }
     if (this.$fullscreenButton) {
@@ -8098,27 +8085,23 @@
       this.refreshControls();
     }
     else {
-
       // there is more than one caption track.
       // clicking on a track is handled via caption.js > getCaptionClickFunction()
-      if (this.captionsPopup.is(':visible')) {
+      if (this.captionsPopup && this.captionsPopup.is(':visible')) {
         this.captionsPopup.hide();
         this.hidingPopup = false;
-        this.$ccButton.focus();
+        this.$ccButton.attr('aria-expanded','false').focus();
       }
       else {
         this.closePopups();
-        this.captionsPopup.show();
-        this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
-        this.captionsPopup.css('left', this.$ccButton.position().left)
-        // Focus on the checked button, if any buttons are checked
-        // Otherwise, focus on the first button
-        this.captionsPopup.find('li').removeClass('able-focus');
-        if (this.captionsPopup.find('input:checked')) {
-          this.captionsPopup.find('input:checked').focus().parent().addClass('able-focus');
-        }
-        else {
-          this.captionsPopup.find('input').first().focus().parent().addClass('able-focus');
+        if (this.captionsPopup) {
+          this.captionsPopup.show();
+          this.$ccButton.attr('aria-expanded','true');
+          this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
+          this.captionsPopup.css('left', this.$ccButton.position().left)
+          // Place focus on the first button (even if another button is checked)
+          this.captionsPopup.find('li').removeClass('able-focus');
+          this.captionsPopup.find('li').first().focus().addClass('able-focus');
         }
       }
     }
@@ -8134,21 +8117,23 @@
     if (this.chaptersPopup.is(':visible')) {
       this.chaptersPopup.hide();
       this.hidingPopup = false;
-      this.$chaptersButton.focus();
+      this.$chaptersButton.attr('aria-expanded','false').focus();
     }
     else {
       this.closePopups();
       this.chaptersPopup.show();
+      this.$chaptersButton.attr('aria-expanded','true');
       this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
       this.chaptersPopup.css('left', this.$chaptersButton.position().left)
-      // Focus on the checked button, if any buttons are checked
-      // Otherwise, focus on the first button
+
+      // Highlight the current chapter, if any chapters are checked
+      // Otherwise, place focus on the first chapter
       this.chaptersPopup.find('li').removeClass('able-focus');
-      if (this.chaptersPopup.find('input:checked')) {
-        this.chaptersPopup.find('input:checked').focus().parent().addClass('able-focus');
+      if (this.chaptersPopup.find('li[aria-checked="true"]').length) {
+        this.chaptersPopup.find('li[aria-checked="true"]').focus().addClass('able-focus');
       }
       else {
-        this.chaptersPopup.find('input').first().focus().parent().addClass('able-focus');
+        this.chaptersPopup.find('li').first().addClass('able-focus').attr('aria-checked','true').focus();
       }
     }
   };
@@ -8178,13 +8163,14 @@
     if (this.prefsPopup.is(':visible')) {
       this.prefsPopup.hide();
       this.hidingPopup = false;
-      this.$prefsButton.focus();
+      this.$prefsButton.attr('aria-expanded','false').focus();
       // restore each menu item to original hidden state
       this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
     }
     else {
       this.closePopups();
       this.prefsPopup.show();
+      this.$prefsButton.attr('aria-expanded','true');
       prefsButtonPosition = this.$prefsButton.position();
       prefsMenuRight = this.$ableDiv.width() - 5;
       prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
@@ -8207,6 +8193,7 @@
       this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
       this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
       this.prefTranscript = 0;
+      this.$transcriptButton.focus().addClass('able-focus');
     }
     else {
       this.positionDraggableWindow('transcript');
@@ -8224,6 +8211,7 @@
       this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
       this.$signButton.find('span.able-clipped').text(this.tt.showSign);
       this.prefSign = 0;
+      this.$signButton.focus().addClass('able-focus');
     }
     else {
       this.positionDraggableWindow('sign');
@@ -8631,8 +8619,8 @@
     var max, $elements, z;
     max = 0;
 
-    // exclude the Able Player dialogs
-    $elements = $('body *').not('.able-modal-dialog,.able-modal-dialog *,.able-modal-overlay,.able-modal-overlay *');
+    // exclude the Able Player dialogs and windows
+    $elements = $('body *').not('.able-modal-dialog,.able-modal-dialog *,.able-modal-overlay,.able-modal-overlay *,.able-sign-window,.able-transcript-area');
 
     $elements.each(function(){
       z = $(this).css('z-index');
@@ -8650,22 +8638,48 @@
     // update z-index of 'transcript' or 'sign', relative to each other
     // direction is always 'up' (i.e., move window to top)
     // windows come to the top when the user clicks on them
+    var defHighZ, defLowZ, highestZ, transcriptZ, signZ, newHighZ, newLowZ;
 
-    var transcriptZ, signZ, newHighZ, newLowZ;
+    // set the default z-indexes, as defined in ableplayer.css
+    defHighZ = 8000; // by default, assigned to the sign window
+    defLowZ = 7000; // by default, assigned to the transcript area
+    highestZ = this.getHighestZIndex(); // highest z-index on the page, excluding Able Player windows & modals
+
+    // NOTE: Although highestZ is collected here, it currently isn't used.
+    // If something on the page has a higher z-index than the transcript or sign window, do we care?
+    // Excluding it here assumes "No". Our immediate concern is with the relationship between our own components.
+    // If we elevate our z-indexes so our content is on top, we run the risk of starting a z-index war.
 
     if (typeof this.$transcriptArea === 'undefined' || typeof this.$signWindow === 'undefined' ) {
       // at least one of the windows doesn't exist, so there's no conflict
+      // since z-index may have been stored to a cookie on another page, need to restore default
+      if (typeof this.$transcriptArea !== 'undefined') {
+        transcriptZ = parseInt(this.$transcriptArea.css('z-index'));
+        if (transcriptZ > defLowZ) {
+          // restore to the default
+          this.$transcriptArea.css('z-index',defLowZ);
+        }
+      }
+      else if (typeof this.$signWindow !== 'undefined') {
+        signZ = parseInt(this.$signWindow.css('z-index'));
+        if (signZ > defHighZ) {
+          // restore to the default
+          this.$signWindow.css('z-index',defHighZ);
+        }
+      }
       return false;
     }
+
+    // both windows exist
 
     // get current values
     transcriptZ = parseInt(this.$transcriptArea.css('z-index'));
     signZ = parseInt(this.$signWindow.css('z-index'));
 
     if (transcriptZ === signZ) {
-      // the two windows are equal; move the target window the top
-      newHighZ = transcriptZ + 1000;
-      newLowZ = transcriptZ;
+      // the two windows are equal; restore defaults (the target window will be on top)
+      newHighZ = defHighZ;
+      newLowZ = defLowZ;
     }
     else if (transcriptZ > signZ) {
       if (which === 'transcript') {
@@ -8680,6 +8694,7 @@
     }
     else { // signZ is greater
       if (which === 'sign') {
+        // sign is already on top; nothing to do
         return false;
       }
       else {
@@ -8687,7 +8702,6 @@
         newLowZ = transcriptZ;
       }
     }
-
     // now assign the new values
     if (which === 'transcript') {
       this.$transcriptArea.css('z-index',newHighZ);
@@ -8750,7 +8764,10 @@
       this.transcriptChapters = chapters;
       this.transcriptDescriptions = descriptions;
       this.updateChaptersList();
-      this.setupPopups('chapters');
+      // the following was commented out in Oct/Nov 2018.
+      // chapters popup is setup automatically when setupPopups() is called later with no param
+      // not sure why it was included here.
+      // this.setupPopups('chapters');
     }
     else if (source === 'transcript') {
       this.transcriptCaptions = captions;
@@ -8776,9 +8793,24 @@
     }
   };
 
+  AblePlayer.prototype.updateCaptionsMenu = function (lang) {
+
+    // uncheck all previous menu items
+    this.captionsPopup.find('li').attr('aria-checked','false');
+    if (typeof lang === 'undefined') {
+      // check the last menu item (captions off)
+      this.captionsPopup.find('li').last().attr('aria-checked','true');
+    }
+    else {
+      // check the newly selected lang
+      this.captionsPopup.find('li[lang=' + lang + ']').attr('aria-checked','true');
+    }
+  };
+
   // Returns the function used when a caption is clicked in the captions menu.
   // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
+
     var thisObj = this;
     return function () {
       thisObj.selectedCaptions = track;
@@ -8822,6 +8854,7 @@
       setTimeout(function() {
         thisObj.hidingPopup = false;
       }, 100);
+      thisObj.updateCaptionsMenu(thisObj.captionLang);
       thisObj.$ccButton.focus();
 
       // save preference to cookie
@@ -8834,6 +8867,7 @@
 
   // Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
   AblePlayer.prototype.getCaptionOffFunction = function () {
+
     var thisObj = this;
     return function () {
       if (thisObj.player == 'youtube') {
@@ -8850,6 +8884,7 @@
       setTimeout(function() {
         thisObj.hidingPopup = false;
       }, 100);
+      thisObj.updateCaptionsMenu();
       thisObj.$ccButton.focus();
 
       // save preference to cookie
@@ -8863,6 +8898,7 @@
   };
 
   AblePlayer.prototype.showCaptions = function(now) {
+
     var c, thisCaption, captionText;
     var cues;
     if (this.selectedCaptions) {
@@ -9390,6 +9426,26 @@
     }
   };
 
+  AblePlayer.prototype.getChapterClickFunction = function (time) {
+
+    // Returns the function used when a chapter is clicked in the chapters menu.
+    var thisObj = this;
+    return function () {
+      thisObj.seekTrigger = 'chapter';
+      thisObj.seekTo(time);
+      // stopgap to prevent spacebar in Firefox from reopening popup
+      // immediately after closing it (used in handleChapters())
+      thisObj.hidingPopup = true;
+      thisObj.chaptersPopup.hide();
+      // Ensure stopgap gets cancelled if handleChapters() isn't called
+      // e.g., if user triggered button with Enter or mouse click, not spacebar
+      setTimeout(function() {
+        thisObj.hidingPopup = false;
+      }, 100);
+      thisObj.$chaptersButton.focus();
+    }
+  };
+
 })(jQuery);
 
 (function ($) {
@@ -9564,7 +9620,6 @@
 
     languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(languageSelectWrapper);
-
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
     // If client has provided separate transcript location, put it there.
@@ -10548,6 +10603,7 @@
   };
 
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
+
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
     // http://dev.aol.com/dhtml_style_guide/#mediaplayer
     // Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
@@ -10914,8 +10970,11 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle clicks anywhere on the page. If any popups are open, close them.
-    $(document).on('click',function() {
+    // handle clicks (left only) anywhere on the page. If any popups are open, close them.
+    $(document).on('click',function(e) {
+      if (e.button !== 0) { // not a left click
+        return false;
+      }
       if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
         // at least one popup is visible
         thisObj.closePopups();
@@ -11059,6 +11118,7 @@
 
     // add event listeners for resizing
     $resizeHandle.on('mousedown', function(event) {
+
       event.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
@@ -11068,6 +11128,7 @@
         return false;
       }
     });
+
     $resizeHandle.on('mouseup', function(event) {
       event.stopPropagation();
       if (thisObj.resizing) {
@@ -11078,6 +11139,7 @@
 
     // whenever a window is clicked, bring it to the foreground
     $window.on('click', function() {
+
       if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
         thisObj.updateZIndex(which);
       }
@@ -11090,11 +11152,10 @@
   AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
 
-    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
+    var thisObj, $windowAlert, menuId, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
       $buttonLabel, tooltipId, $tooltip, $popup,
       label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
-      $optionList, radioName, options, i, $optionItem, option,
-      radioId, $radioButton, $radioLabel;
+      $optionList, menuBaseId, options, i, $optionItem, option, menuId;
 
     thisObj = this;
 
@@ -11118,10 +11179,13 @@
 
     // add button to draggable window which triggers a popup menu
     // for now, re-use preferences icon for this purpose
+    menuId = this.mediaId + '-' + windowName + '-menu';
     $newButton = $('<button>',{
       'type': 'button',
       'tabindex': '0',
       'aria-label': this.tt.windowButtonLabel,
+      'aria-haspopup': 'true',
+      'aria-controls': menuId,
       'class': 'able-button-handler-preferences'
     });
     if (this.iconType === 'font') {
@@ -11174,76 +11238,8 @@
       });
     });
 
-    // add a popup menu
-    $popup = this.createPopup(windowName);
-    $optionList = $('<ul></ul>');
-    radioName = this.mediaId + '-' + windowName + '-choice';
-
-    options = [];
-    options.push({
-      'name': 'move',
-      'label': this.tt.windowMove
-    });
-    options.push({
-      'name': 'resize',
-      'label': this.tt.windowResize
-    });
-    for (i = 0; i < options.length; i++) {
-      $optionItem = $('<li></li>');
-      option = options[i];
-      radioId = radioName + '-' + i;
-      $radioButton = $('<input>',{
-        'type': 'radio',
-        'val': option.name,
-        'name': radioName,
-        'id': radioId
-      });
-      $radioLabel = $('<label>',{
-        'for': radioId
-      });
-      $radioLabel.text(option.label);
-      $radioButton.on('focus',function(e) {
-        $(this).parents('ul').children('li').removeClass('able-focus');
-        $(this).parent('li').addClass('able-focus');
-      });
-      $radioButton.on('click',function(e) {
-        e.stopPropagation();
-        if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-          thisObj.windowMenuClickRegistered = true;
-          thisObj.handleMenuChoice( which, $(this).val(), e.type);
-        }
-      });
-      // due to an apparent bug (in jquery?) clicking the label
-      // does not result in a click event on the associated radio button
-      // Observed this in Firefox 45.0.2 and Chrome 50
-      // It works fine on a simple test page so this could be an Able Player bug
-      // Added the following as a workaround rather than mess with isolating the bug
-      $radioLabel.on('click mousedown', function() {
-        var clickedId = $(this).attr('for');
-        $('#' + clickedId).click();
-      })
-      $optionItem.append($radioButton,$radioLabel);
-      $optionList.append($optionItem);
-    }
-    $popup.append($optionList);
-    $newButton.on('click mousedown keydown',function(e) {
-      e.stopPropagation();
-      if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-        // don't set windowMenuClickRegistered yet; that happens in handler function
-        thisObj.handleWindowButtonClick(which, e);
-      }
-      thisObj.finishingDrag = false;
-    });
-
-    $popup.on('keydown', function(event) {
-      // Escape key
-      if (event.which === 27) {
-        // Close Window Options Menu
-        $newButton.focus();
-        $popup.hide();
-      }
-    });
-
+    // setup popup menu
+    $popup = this.setupPopups(windowName); // 'transcript-window' or 'sign-window'
     // define vars and assemble all the parts
     if (which === 'transcript') {
       this.$transcriptAlert = $windowAlert;
@@ -11257,6 +11253,16 @@
       this.$signPopup = $popup;
       this.$signToolbar.append($windowAlert,$newButton,$tooltip,$popup);
     }
+
+    // handle button click
+    $newButton.on('click mousedown keydown',function(e) {
+      e.stopPropagation();
+      if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+        // don't set windowMenuClickRegistered yet; that happens in handler function
+        thisObj.handleWindowButtonClick(which, e);
+      }
+      thisObj.finishingDrag = false;
+    });
 
     this.addResizeDialog(which, $window);
   };
@@ -11377,20 +11383,6 @@
 
     thisObj = this;
 
-    if (e.type === 'keydown') {
-      // user pressed a key
-      if (e.which === 32 || e.which === 13 || e.which === 27) {
-        // this was Enter, space, or escape
-        this.windowMenuClickRegistered = true;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      // this was a mouse event
-      this.windowMenuClickRegistered = true;
-    }
     if (which === 'transcript') {
       $windowPopup = this.$transcriptPopup;
       $windowButton = this.$transcriptPopupButton;
@@ -11402,12 +11394,38 @@
       $toolbar = this.$signToolbar;
     }
 
+    if (e.type === 'keydown') {
+      // user pressed a key
+      if (e.which === 32 || e.which === 13) {
+        // this was Enter or space
+        this.windowMenuClickRegistered = true;
+      }
+      else if (e.which === 27) { // escape
+        // hide the popup menu
+        $windowPopup.hide('fast', function() {
+          // also reset the Boolean
+          thisObj.windowMenuClickRegistered = false;
+          // also restore menu items to their original state
+          $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+          // also return focus to window options button
+          $windowButton.focus();
+        });
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      // this was a mouse event
+      this.windowMenuClickRegistered = true;
+    }
+
     if ($windowPopup.is(':visible')) {
       $windowPopup.hide(200,'',function() {
         thisObj.windowMenuClickRegistered = false; // reset
       });
       $windowPopup.find('li').removeClass('able-focus');
-      $windowButton.focus();
+      $windowButton.attr('aria-expanded','false').focus();
     }
     else {
       // first, be sure window is on top
@@ -11415,13 +11433,14 @@
       popupTop = $windowButton.position().top + $windowButton.outerHeight();
       $windowPopup.css('top', popupTop);
       $windowPopup.show(200,'',function() {
-        $(this).find('input').first().focus().parent().addClass('able-focus');
+        $windowButton.attr('aria-expanded','true');
+        $(this).find('li').first().focus().addClass('able-focus');
         thisObj.windowMenuClickRegistered = false; // reset
       });
     }
   };
 
-  AblePlayer.prototype.handleMenuChoice = function (which, choice, eventType) {
+  AblePlayer.prototype.handleMenuChoice = function (which, choice, event) {
 
     var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
 
@@ -11440,11 +11459,35 @@
       resizeDialog = this.signResizeDialog;
     }
 
-    // hide the popup menu, and reset the Boolean
+    if (event.type === 'keydown') {
+      if (event.which === 27) { // escape
+        // hide the popup menu
+        $windowPopup.hide('fast', function() {
+          // also reset the Boolean
+          thisObj.windowMenuClickRegistered = false;
+          // also restore menu items to their original state
+          $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+          // also return focus to window options button
+          $windowButton.focus();
+        });
+        return false;
+      }
+      else {
+        // all other keys will be handled by upstream functions
+        return false;
+      }
+    }
+
+    // hide the popup menu
     $windowPopup.hide('fast', function() {
-       thisObj.windowMenuClickRegistered = false; // reset
+      // also reset the boolean
+      thisObj.windowMenuClickRegistered = false;
+      // also restore menu items to their original state
+      $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
     });
-    $windowButton.focus();
+    if (choice !== 'close') {
+      $windowButton.focus();
+    }
 
     if (choice === 'move') {
       if (!this.showedAlert(which)) {
@@ -11456,7 +11499,7 @@
           this.showedSignAlert = true;
         }
       }
-      if (eventType === 'keydown') {
+      if (event.type === 'keydown') {
         this.dragDevice = 'keyboard';
       }
       else {
@@ -11469,10 +11512,18 @@
       // resize through the menu uses a form, not drag
       resizeDialog.show();
     }
+    else if (choice == 'close') {
+      // close window, place focus on corresponding button on controller bar
+      if (which === 'transcript') {
+        this.handleTranscriptToggle();
+      }
+      else if (which === 'sign') {
+        this.handleSignToggle();
+      }
+    }
   };
 
   AblePlayer.prototype.startDrag = function(which, $element) {
-
     var thisObj, $windowPopup, zIndex, startPos, newX, newY;
     thisObj = this;
 

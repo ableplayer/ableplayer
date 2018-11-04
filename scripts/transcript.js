@@ -35,7 +35,6 @@
 
     languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(languageSelectWrapper);
-
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
     // If client has provided separate transcript location, put it there.

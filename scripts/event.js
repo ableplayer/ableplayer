@@ -243,6 +243,7 @@
   };
 
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
+
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
     // http://dev.aol.com/dhtml_style_guide/#mediaplayer
     // Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
@@ -609,8 +610,11 @@
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle clicks anywhere on the page. If any popups are open, close them.
-    $(document).on('click',function() {
+    // handle clicks (left only) anywhere on the page. If any popups are open, close them.
+    $(document).on('click',function(e) {
+      if (e.button !== 0) { // not a left click
+        return false;
+      }
       if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
         // at least one popup is visible
         thisObj.closePopups();
