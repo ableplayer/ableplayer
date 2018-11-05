@@ -245,12 +245,16 @@
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
 
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
-    // http://dev.aol.com/dhtml_style_guide/#mediaplayer
+    // https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
     // Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
     // NOTE #1: Style guide only supports Play/Pause, Stop, Mute, Captions, & Volume Up & Down
     // The rest are reasonable best choices
     // NOTE #2: If there are multiple players on a single page, keystroke handlers
     // are only bound to the FIRST player
+    // NOTE #3: The DHTML Style Guide is now the W3C WAI-ARIA Authoring Guide and has undergone many revisions
+    // including removal of the "media player" design pattern. There's an issue about that:
+    // https://github.com/w3c/aria-practices/issues/27
+
     if (!this.okToHandleKeyPress()) {
       return false;
     }
