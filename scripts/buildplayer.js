@@ -1150,7 +1150,7 @@
           }).text(buttonTitle);
           $newButton.append(buttonLabel);
           // add an event listener that displays a tooltip on mouseenter or focus
-          $newButton.on('mouseenter focus',function(event) {
+          $newButton.on('mouseenter focus',function(e) {
             var label = $(this).attr('aria-label');
             // get position of this button
             var position = $(this).position();

@@ -2178,8 +2178,8 @@
       thisObj.resetPrefsForm();
     })
     // Add handler for escape key
-    $('div.able-prefs-form').keydown(function(event) {
-      if (event.which === 27) { // escape
+    $('div.able-prefs-form').keydown(function(e) {
+      if (e.which === 27) { // escape
         thisObj.resetPrefsForm();
       }
     });
@@ -4283,7 +4283,7 @@
           }).text(buttonTitle);
           $newButton.append(buttonLabel);
           // add an event listener that displays a tooltip on mouseenter or focus
-          $newButton.on('mouseenter focus',function(event) {
+          $newButton.on('mouseenter focus',function(e) {
             var label = $(this).attr('aria-label');
             // get position of this button
             var position = $(this).position();
@@ -5701,30 +5701,30 @@
       this.setDuration(max);
     }
 
-    this.seekHead.hover(function (event) {
+    this.seekHead.hover(function (e) {
       thisObj.overHead = true;
       thisObj.refreshTooltip();
-    }, function (event) {
+    }, function (e) {
       thisObj.overHead = false;
 
       if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-        thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+        thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
       }
       thisObj.refreshTooltip();
     });
 
-    this.seekHead.mousemove(function (event) {
+    this.seekHead.mousemove(function (e) {
       if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-        thisObj.trackHeadAtPageX(event.pageX);
+        thisObj.trackHeadAtPageX(e.pageX);
       }
     });
 
-    this.seekHead.focus(function (event) {
+    this.seekHead.focus(function (e) {
       thisObj.overHead = true;
       thisObj.refreshTooltip();
     });
 
-    this.seekHead.blur(function (event) {
+    this.seekHead.blur(function (e) {
       thisObj.overHead = false;
       thisObj.refreshTooltip();
     });
@@ -5732,94 +5732,94 @@
     this.bodyDiv.hover(function () {
       thisObj.overBody = true;
       thisObj.refreshTooltip();
-    }, function (event) {
+    }, function (e) {
       thisObj.overBody = false;
       thisObj.overBodyMousePos = null;
       thisObj.refreshTooltip();
 
       if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-        thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+        thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
       }
     });
 
-    this.bodyDiv.mousemove(function (event) {
+    this.bodyDiv.mousemove(function (e) {
       thisObj.overBodyMousePos = {
-        x: event.pageX,
-        y: event.pageY
+        x: e.pageX,
+        y: e.pageY
       };
       if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-        thisObj.trackHeadAtPageX(event.pageX);
+        thisObj.trackHeadAtPageX(e.pageX);
       }
       thisObj.refreshTooltip();
     });
 
-    this.bodyDiv.mousedown(function (event) {
-      thisObj.startTracking('mouse', thisObj.pageXToPosition(event.pageX));
-      thisObj.trackHeadAtPageX(event.pageX);
+    this.bodyDiv.mousedown(function (e) {
+      thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
+      thisObj.trackHeadAtPageX(e.pageX);
       if (!thisObj.seekHead.is(':focus')) {
         thisObj.seekHead.focus();
       }
-      event.preventDefault();
+      e.preventDefault();
     });
 
-    this.seekHead.mousedown(function (event) {
+    this.seekHead.mousedown(function (e) {
       thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
       if (!thisObj.bodyDiv.is(':focus')) {
         thisObj.bodyDiv.focus();
       }
-      event.preventDefault();
+      e.preventDefault();
     });
 
-    this.bodyDiv.mouseup(function (event) {
+    this.bodyDiv.mouseup(function (e) {
       if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-        thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+        thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
       }
     })
 
-    this.seekHead.mouseup(function (event) {
+    this.seekHead.mouseup(function (e) {
       if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-        thisObj.stopTracking(thisObj.pageXToPosition(event.pageX));
+        thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
       }
     });
 
-    this.bodyDiv.keydown(function (event) {
+    this.bodyDiv.keydown(function (e) {
       // Home
-      if (event.which === 36) {
+      if (e.which === 36) {
         thisObj.trackImmediatelyTo(0);
       }
       // End
-      else if (event.which === 35) {
+      else if (e.which === 35) {
         thisObj.trackImmediatelyTo(thisObj.duration);
       }
       // Left arrow or down arrow
-      else if (event.which === 37 || event.which === 40) {
+      else if (e.which === 37 || e.which === 40) {
         thisObj.arrowKeyDown(-1);
       }
       // Right arrow or up arrow
-      else if (event.which === 39 || event.which === 38) {
+      else if (e.which === 39 || e.which === 38) {
         thisObj.arrowKeyDown(1);
       }
       // Page up
-      else if (event.which === 33 && bigInterval > 0) {
+      else if (e.which === 33 && bigInterval > 0) {
         thisObj.arrowKeyDown(bigInterval);
       }
       // Page down
-      else if (event.which === 34 && bigInterval > 0) {
+      else if (e.which === 34 && bigInterval > 0) {
         thisObj.arrowKeyDown(-bigInterval);
       }
 
       else {
         return;
       }
-      event.preventDefault();
+      e.preventDefault();
     });
 
-    this.bodyDiv.keyup(function (event) {
-      if (event.which >= 33 && event.which <= 40) {
+    this.bodyDiv.keyup(function (e) {
+      if (e.which >= 33 && e.which <= 40) {
         if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
           thisObj.stopTracking(thisObj.keyTrackPosition);
         }
-        event.preventDefault();
+        e.preventDefault();
       }
     });
   }
@@ -6124,42 +6124,42 @@
     this.refreshVolumeSlider(this.volume);
 
     // add event listeners
-    this.$volumeSliderHead.on('mousedown',function (event) {
-      event.preventDefault(); // prevent text selection (implications?)
+    this.$volumeSliderHead.on('mousedown',function (e) {
+      e.preventDefault(); // prevent text selection (implications?)
       thisObj.draggingVolume = true;
       thisObj.volumeHeadPositionTop = $(this).offset().top;
     });
 
     // prevent dragging after mouseup as mouseup not detected over iframe (YouTube)
-    this.$mediaContainer.on('mouseover',function (event) {
+    this.$mediaContainer.on('mouseover',function (e) {
       if(thisObj.player == 'youtube'){
         thisObj.draggingVolume = false;
       }
     });
 
-    $(document).on('mouseup',function (event) {
+    $(document).on('mouseup',function (e) {
       thisObj.draggingVolume = false;
     });
 
-    $(document).on('mousemove',function (event) {
+    $(document).on('mousemove',function (e) {
       if (thisObj.draggingVolume) {
-        x = event.pageX;
-        y = event.pageY;
+        x = e.pageX;
+        y = e.pageY;
         thisObj.moveVolumeHead(y);
       }
     });
 
-    this.$volumeSliderHead.on('keydown',function (event) {
+    this.$volumeSliderHead.on('keydown',function (e) {
       // Left arrow or down arrow
-      if (event.which === 37 || event.which === 40) {
+      if (e.which === 37 || e.which === 40) {
         thisObj.handleVolume('down');
       }
       // Right arrow or up arrow
-      else if (event.which === 39 || event.which === 38) {
+      else if (e.which === 39 || e.which === 38) {
         thisObj.handleVolume('up');
       }
       // Escape key or Enter key
-      else if (event.which === 27 || event.which === 13) {
+      else if (e.which === 27 || e.which === 13) {
         // close popup
         if (thisObj.$volumeSlider.is(':visible')) {
           thisObj.hideVolumePopup();
@@ -6171,7 +6171,7 @@
       else {
         return;
       }
-      event.preventDefault();
+      e.preventDefault();
     });
   };
 
@@ -6470,9 +6470,9 @@
          'title': thisObj.closeButtonLabel,
          'aria-label': thisObj.closeButtonLabel
       }).text('X');
-      closeButton.keydown(function (event) {
+      closeButton.keydown(function (e) {
         // Space key down
-        if (event.which === 32) {
+        if (e.which === 32) {
           thisObj.hide();
         }
       }).click(function () {
@@ -6499,19 +6499,19 @@
       'role': dialogRole
     });
 
-    modal.keydown(function (event) {
+    modal.keydown(function (e) {
       // Escape
-      if (event.which === 27) {
+      if (e.which === 27) {
         if (thisObj.escapeHook) {
-          thisObj.escapeHook(event, this);
+          thisObj.escapeHook(e, this);
         }
         else {
           thisObj.hide();
-          event.preventDefault();
+          e.preventDefault();
         }
       }
       // Tab
-      else if (event.which === 9) {
+      else if (e.which === 9) {
         // Manually loop tab navigation inside the modal.
         var parts = modal.find('*');
         var focusable = parts.filter(focusableElementsSelector).filter(':visible');
@@ -6522,21 +6522,21 @@
 
         var focused = $(':focus');
         var currentIndex = focusable.index(focused);
-        if (event.shiftKey) {
+        if (e.shiftKey) {
           // If backwards from first element, go to last.
           if (currentIndex === 0) {
             focusable.get(focusable.length - 1).focus();
-            event.preventDefault();
+            e.preventDefault();
           }
         }
         else {
           if (currentIndex === focusable.length - 1) {
             focusable.get(0).focus();
-            event.preventDefault();
+            e.preventDefault();
           }
         }
       }
-      event.stopPropagation();
+      e.stopPropagation();
     });
 
     $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
@@ -6553,8 +6553,8 @@
       $('body').append(overlay);
 
       // Keep from moving focus out of dialog when clicking outside of it.
-      overlay.on('mousedown.accessibleModal', function (event) {
-        event.preventDefault();
+      overlay.on('mousedown.accessibleModal', function (e) {
+        e.preventDefault();
       });
     }
 
@@ -9654,7 +9654,7 @@
       thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
     });
 
-    this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (event) {
+    this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (e) {
       // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
       // or outside of a clickable span.
       if (!thisObj.scrollingTranscript) {
@@ -9666,10 +9666,10 @@
 
     if (typeof this.$transcriptLanguageSelect !== 'undefined') {
 
-      this.$transcriptLanguageSelect.on('click mousedown',function (event) {
+      this.$transcriptLanguageSelect.on('click mousedown',function (e) {
         // execute default behavior
         // prevent propagation of mouse event to toolbar or window
-        event.stopPropagation();
+        e.stopPropagation();
       });
 
       this.$transcriptLanguageSelect.on('change',function () {
@@ -9796,7 +9796,7 @@
     // Pressing Enter on an element that is not natively clickable does NOT trigger click()
     // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js)
     if (this.$transcriptArea.length > 0) {
-      this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(event) {
+      this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(e) {
         thisObj.seekTrigger = 'transcript';
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.
@@ -10221,7 +10221,7 @@
             });
             itemStartSpan.text(itemStartTime['value']);
             // add a listener for clisk on itemStart
-            itemStartSpan.click(function(event) {
+            itemStartSpan.click(function(e) {
               var spanStart = parseFloat($(this).attr('data-start'));
               // Add a tiny amount so that we're inside the span.
               spanStart += .01;
@@ -10505,10 +10505,10 @@
     var thisObj = this;
 
     // Handle seek bar events.
-    this.seekBar.bodyDiv.on('startTracking', function (event) {
+    this.seekBar.bodyDiv.on('startTracking', function (e) {
       thisObj.pausedBeforeTracking = thisObj.isPaused();
       thisObj.pauseMedia();
-    }).on('tracking', function (event, position) {
+    }).on('tracking', function (e, position) {
       // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
@@ -10516,7 +10516,7 @@
       thisObj.updateChapter(thisObj.convertChapterTimeToVideoTime(position));
       thisObj.updateMeta(position);
       thisObj.refreshControls();
-    }).on('stopTracking', function (event, position) {
+    }).on('stopTracking', function (e, position) {
       if (thisObj.useChapterTimes) {
         thisObj.seekTo(thisObj.convertChapterTimeToVideoTime(position));
       }
@@ -10605,12 +10605,16 @@
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
 
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
-    // http://dev.aol.com/dhtml_style_guide/#mediaplayer
+    // https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
     // Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
     // NOTE #1: Style guide only supports Play/Pause, Stop, Mute, Captions, & Volume Up & Down
     // The rest are reasonable best choices
     // NOTE #2: If there are multiple players on a single page, keystroke handlers
     // are only bound to the FIRST player
+    // NOTE #3: The DHTML Style Guide is now the W3C WAI-ARIA Authoring Guide and has undergone many revisions
+    // including removal of the "media player" design pattern. There's an issue about that:
+    // https://github.com/w3c/aria-practices/issues/27
+
     if (!this.okToHandleKeyPress()) {
       return false;
     }
@@ -10871,11 +10875,11 @@
         }
         thisObj.refreshControls();
       })
-      .onSeek(function(event) {
+      .onSeek(function(e) {
         // this is called when user scrubs ahead or back,
         // after the target offset is reached
         if (thisObj.debug) {
-          console.log('Seeking to ' + event.position + '; target: ' + event.offset);
+          console.log('Seeking to ' + e.position + '; target: ' + e.offset);
         }
 
         if (thisObj.jwSeekPause) {
@@ -10965,8 +10969,8 @@
 
     this.addSeekbarListeners();
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').on('click',function(event){
-      event.stopPropagation();
+    this.$controllerDiv.find('button').on('click',function(e){
+      e.stopPropagation();
       thisObj.onClickPlayerButton(this);
     });
 
@@ -11097,19 +11101,19 @@
 
     // add event listener to toolbar to start and end drag
     // other event listeners will be added when drag starts
-    $toolbar.on('mousedown', function(event) {
-      event.stopPropagation();
+    $toolbar.on('mousedown', function(e) {
+      e.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
-        thisObj.startMouseX = event.pageX;
-        thisObj.startMouseY = event.pageY;
+        thisObj.startMouseX = e.pageX;
+        thisObj.startMouseY = e.pageY;
         thisObj.dragDevice = 'mouse';
         thisObj.startDrag(which, $window);
       }
       return false;
     });
-    $toolbar.on('mouseup', function(event) {
-      event.stopPropagation();
+    $toolbar.on('mouseup', function(e) {
+      e.stopPropagation();
       if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
         thisObj.endDrag(which);
       }
@@ -11117,20 +11121,20 @@
     });
 
     // add event listeners for resizing
-    $resizeHandle.on('mousedown', function(event) {
+    $resizeHandle.on('mousedown', function(e) {
 
-      event.stopPropagation();
+      e.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
-        thisObj.startMouseX = event.pageX;
-        thisObj.startMouseY = event.pageY;
+        thisObj.startMouseX = e.pageX;
+        thisObj.startMouseY = e.pageY;
         thisObj.startResize(which, $window);
         return false;
       }
     });
 
-    $resizeHandle.on('mouseup', function(event) {
-      event.stopPropagation();
+    $resizeHandle.on('mouseup', function(e) {
+      e.stopPropagation();
       if (thisObj.resizing) {
         thisObj.endResize(which);
       }
@@ -11218,7 +11222,7 @@
       'class' : 'able-tooltip',
       'id' : tooltipId
     }).hide();
-    $newButton.on('mouseenter focus',function(event) {
+    $newButton.on('mouseenter focus',function(e) {
       var label = $(this).attr('aria-label');
       // get position of this button
       var position = $(this).position();
@@ -11440,7 +11444,7 @@
     }
   };
 
-  AblePlayer.prototype.handleMenuChoice = function (which, choice, event) {
+  AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
     var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
 
@@ -11459,8 +11463,8 @@
       resizeDialog = this.signResizeDialog;
     }
 
-    if (event.type === 'keydown') {
-      if (event.which === 27) { // escape
+    if (e.type === 'keydown') {
+      if (e.which === 27) { // escape
         // hide the popup menu
         $windowPopup.hide('fast', function() {
           // also reset the Boolean
@@ -11499,7 +11503,7 @@
           this.showedSignAlert = true;
         }
       }
-      if (event.type === 'keydown') {
+      if (e.type === 'keydown') {
         this.dragDevice = 'keyboard';
       }
       else {
@@ -13079,17 +13083,17 @@
               $(this).text(thisObj.formatTimestamp(editedContent));
             }
           }
-        }).on('keydown',function(event) {
+        }).on('keydown',function(e) {
           // don't allow keystrokes to trigger Able Player (or other) functions
           // while user is editing
-          event.stopPropagation();
+          e.stopPropagation();
         });
 
         // handle click on the Save button
 
         // handle click on the Save button
-        $('#able-vts-save').on('click',function(event) {
-          event.stopPropagation();
+        $('#able-vts-save').on('click',function(e) {
+          e.stopPropagation();
           if ($(this).attr('value') == 'save') {
             // replace table with WebVTT output in textarea fields (for copying/pasting)
             $(this).attr('value','cancel').text('Return to Editor'); // TODO: Localize this

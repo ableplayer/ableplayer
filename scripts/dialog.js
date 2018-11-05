@@ -24,9 +24,9 @@
          'title': thisObj.closeButtonLabel,
          'aria-label': thisObj.closeButtonLabel
       }).text('X');
-      closeButton.keydown(function (event) {
+      closeButton.keydown(function (e) {
         // Space key down
-        if (event.which === 32) {
+        if (e.which === 32) {
           thisObj.hide();
         }
       }).click(function () {
@@ -53,19 +53,19 @@
       'role': dialogRole
     });
 
-    modal.keydown(function (event) {
+    modal.keydown(function (e) {
       // Escape
-      if (event.which === 27) {
+      if (e.which === 27) {
         if (thisObj.escapeHook) {
-          thisObj.escapeHook(event, this);
+          thisObj.escapeHook(e, this);
         }
         else {
           thisObj.hide();
-          event.preventDefault();
+          e.preventDefault();
         }
       }
       // Tab
-      else if (event.which === 9) {
+      else if (e.which === 9) {
         // Manually loop tab navigation inside the modal.
         var parts = modal.find('*');
         var focusable = parts.filter(focusableElementsSelector).filter(':visible');
@@ -76,21 +76,21 @@
 
         var focused = $(':focus');
         var currentIndex = focusable.index(focused);
-        if (event.shiftKey) {
+        if (e.shiftKey) {
           // If backwards from first element, go to last.
           if (currentIndex === 0) {
             focusable.get(focusable.length - 1).focus();
-            event.preventDefault();
+            e.preventDefault();
           }
         }
         else {
           if (currentIndex === focusable.length - 1) {
             focusable.get(0).focus();
-            event.preventDefault();
+            e.preventDefault();
           }
         }
       }
-      event.stopPropagation();
+      e.stopPropagation();
     });
 
     $('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
@@ -107,8 +107,8 @@
       $('body').append(overlay);
 
       // Keep from moving focus out of dialog when clicking outside of it.
-      overlay.on('mousedown.accessibleModal', function (event) {
-        event.preventDefault();
+      overlay.on('mousedown.accessibleModal', function (e) {
+        e.preventDefault();
       });
     }
 

@@ -140,17 +140,17 @@
               $(this).text(thisObj.formatTimestamp(editedContent));
             }
           }
-        }).on('keydown',function(event) {
+        }).on('keydown',function(e) {
           // don't allow keystrokes to trigger Able Player (or other) functions
           // while user is editing
-          event.stopPropagation();
+          e.stopPropagation();
         });
 
         // handle click on the Save button
 
         // handle click on the Save button
-        $('#able-vts-save').on('click',function(event) {
-          event.stopPropagation();
+        $('#able-vts-save').on('click',function(e) {
+          e.stopPropagation();
           if ($(this).attr('value') == 'save') {
             // replace table with WebVTT output in textarea fields (for copying/pasting)
             $(this).attr('value','cancel').text('Return to Editor'); // TODO: Localize this

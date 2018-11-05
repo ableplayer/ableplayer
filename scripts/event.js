@@ -145,10 +145,10 @@
     var thisObj = this;
 
     // Handle seek bar events.
-    this.seekBar.bodyDiv.on('startTracking', function (event) {
+    this.seekBar.bodyDiv.on('startTracking', function (e) {
       thisObj.pausedBeforeTracking = thisObj.isPaused();
       thisObj.pauseMedia();
-    }).on('tracking', function (event, position) {
+    }).on('tracking', function (e, position) {
       // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
@@ -156,7 +156,7 @@
       thisObj.updateChapter(thisObj.convertChapterTimeToVideoTime(position));
       thisObj.updateMeta(position);
       thisObj.refreshControls();
-    }).on('stopTracking', function (event, position) {
+    }).on('stopTracking', function (e, position) {
       if (thisObj.useChapterTimes) {
         thisObj.seekTo(thisObj.convertChapterTimeToVideoTime(position));
       }
@@ -515,11 +515,11 @@
         }
         thisObj.refreshControls();
       })
-      .onSeek(function(event) {
+      .onSeek(function(e) {
         // this is called when user scrubs ahead or back,
         // after the target offset is reached
         if (thisObj.debug) {
-          console.log('Seeking to ' + event.position + '; target: ' + event.offset);
+          console.log('Seeking to ' + e.position + '; target: ' + e.offset);
         }
 
         if (thisObj.jwSeekPause) {
@@ -609,8 +609,8 @@
 
     this.addSeekbarListeners();
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').on('click',function(event){
-      event.stopPropagation();
+    this.$controllerDiv.find('button').on('click',function(e){
+      e.stopPropagation();
       thisObj.onClickPlayerButton(this);
     });
 

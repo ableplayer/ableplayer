@@ -42,19 +42,19 @@
 
     // add event listener to toolbar to start and end drag
     // other event listeners will be added when drag starts
-    $toolbar.on('mousedown', function(event) {
-      event.stopPropagation();
+    $toolbar.on('mousedown', function(e) {
+      e.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
-        thisObj.startMouseX = event.pageX;
-        thisObj.startMouseY = event.pageY;
+        thisObj.startMouseX = e.pageX;
+        thisObj.startMouseY = e.pageY;
         thisObj.dragDevice = 'mouse';
         thisObj.startDrag(which, $window);
       }
       return false;
     });
-    $toolbar.on('mouseup', function(event) {
-      event.stopPropagation();
+    $toolbar.on('mouseup', function(e) {
+      e.stopPropagation();
       if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
         thisObj.endDrag(which);
       }
@@ -62,20 +62,20 @@
     });
 
     // add event listeners for resizing
-    $resizeHandle.on('mousedown', function(event) {
+    $resizeHandle.on('mousedown', function(e) {
 
-      event.stopPropagation();
+      e.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
-        thisObj.startMouseX = event.pageX;
-        thisObj.startMouseY = event.pageY;
+        thisObj.startMouseX = e.pageX;
+        thisObj.startMouseY = e.pageY;
         thisObj.startResize(which, $window);
         return false;
       }
     });
 
-    $resizeHandle.on('mouseup', function(event) {
-      event.stopPropagation();
+    $resizeHandle.on('mouseup', function(e) {
+      e.stopPropagation();
       if (thisObj.resizing) {
         thisObj.endResize(which);
       }
@@ -163,7 +163,7 @@
       'class' : 'able-tooltip',
       'id' : tooltipId
     }).hide();
-    $newButton.on('mouseenter focus',function(event) {
+    $newButton.on('mouseenter focus',function(e) {
       var label = $(this).attr('aria-label');
       // get position of this button
       var position = $(this).position();
@@ -385,7 +385,7 @@
     }
   };
 
-  AblePlayer.prototype.handleMenuChoice = function (which, choice, event) {
+  AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
     var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
 
@@ -404,8 +404,8 @@
       resizeDialog = this.signResizeDialog;
     }
 
-    if (event.type === 'keydown') {
-      if (event.which === 27) { // escape
+    if (e.type === 'keydown') {
+      if (e.which === 27) { // escape
         // hide the popup menu
         $windowPopup.hide('fast', function() {
           // also reset the Boolean
@@ -444,7 +444,7 @@
           this.showedSignAlert = true;
         }
       }
-      if (event.type === 'keydown') {
+      if (e.type === 'keydown') {
         this.dragDevice = 'keyboard';
       }
       else {

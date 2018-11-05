@@ -63,42 +63,42 @@
     this.refreshVolumeSlider(this.volume);
 
     // add event listeners
-    this.$volumeSliderHead.on('mousedown',function (event) {
-      event.preventDefault(); // prevent text selection (implications?)
+    this.$volumeSliderHead.on('mousedown',function (e) {
+      e.preventDefault(); // prevent text selection (implications?)
       thisObj.draggingVolume = true;
       thisObj.volumeHeadPositionTop = $(this).offset().top;
     });
 
     // prevent dragging after mouseup as mouseup not detected over iframe (YouTube)
-    this.$mediaContainer.on('mouseover',function (event) {
+    this.$mediaContainer.on('mouseover',function (e) {
       if(thisObj.player == 'youtube'){
         thisObj.draggingVolume = false;
       }
     });
 
-    $(document).on('mouseup',function (event) {
+    $(document).on('mouseup',function (e) {
       thisObj.draggingVolume = false;
     });
 
-    $(document).on('mousemove',function (event) {
+    $(document).on('mousemove',function (e) {
       if (thisObj.draggingVolume) {
-        x = event.pageX;
-        y = event.pageY;
+        x = e.pageX;
+        y = e.pageY;
         thisObj.moveVolumeHead(y);
       }
     });
 
-    this.$volumeSliderHead.on('keydown',function (event) {
+    this.$volumeSliderHead.on('keydown',function (e) {
       // Left arrow or down arrow
-      if (event.which === 37 || event.which === 40) {
+      if (e.which === 37 || e.which === 40) {
         thisObj.handleVolume('down');
       }
       // Right arrow or up arrow
-      else if (event.which === 39 || event.which === 38) {
+      else if (e.which === 39 || e.which === 38) {
         thisObj.handleVolume('up');
       }
       // Escape key or Enter key
-      else if (event.which === 27 || event.which === 13) {
+      else if (e.which === 27 || e.which === 13) {
         // close popup
         if (thisObj.$volumeSlider.is(':visible')) {
           thisObj.hideVolumePopup();
@@ -110,7 +110,7 @@
       else {
         return;
       }
-      event.preventDefault();
+      e.preventDefault();
     });
   };
 
