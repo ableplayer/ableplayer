@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Deadline: Open Video with Accessibility Enhancements</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+
+<h1>The Deadline: Open Video with Accessibility Enhancements</h1>
+
+<p><a href="https://morevnaproject.org/school/deadline/">The Deadline</a> is a video from the Morevna Project,
+  enhanced here with an audio described version (selectable using the Description button on the media player)
+  and captions/subtitles in multiple languages.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<video id="video1" preload="auto" width="800" height="450" data-able-player playsinline>
+	<source type="video/mp4" src="../media/deadline.mp4" data-desc-src="../media/deadline_desc.mp4"/>
+	<track kind="captions" src="../media/deadline_captions_en.vtt" srclang="en" label="English" default/>
+	<track kind="captions" src="../media/deadline_captions_ar.vtt" srclang="ar" label="Arabic"/>
+	<track kind="captions" src="../media/deadline_captions_es.vtt" srclang="es" label="Spanish"/>
+	<track kind="captions" src="../media/deadline_captions_hi.vtt" srclang="hi" label="Hindi"/>
+	<track kind="captions" src="../media/deadline_captions_it.vtt" srclang="it" label="Italian"/>
+	<track kind="captions" src="../media/deadline_captions_pt-br.vtt" srclang="pt-br" label="Portuguese, Brazilian"/>
+</video>
+
+<p>This work is licensed under the terms of Creative Commons Attribution 4.0 license. You are free to  share (copy and redistribute) and adapt (remix, transform) this work for any purpose, even commercially as long as you comply to licensing terms.</p>
+
+</body>
+</html>
