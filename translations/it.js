@@ -292,6 +292,8 @@ var it = {
 
 "windowResizeAlert": "La finestra e' stata ridimensionata.",
 
+"windowClose": "Chiudi",
+
 "width": "Larghezza",
 
 "height": "Altezza",

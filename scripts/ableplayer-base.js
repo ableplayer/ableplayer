@@ -189,7 +189,7 @@
         this.transcriptType = null;
       }
     }
-    else if (media.find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
+    else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
       // required tracks are present. COULD automatically generate a transcript
       if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
         this.transcriptDivLocation = $(media).data('transcript-div');
@@ -291,6 +291,13 @@
       this.youTubeDescId = $(media).data('youtube-desc-id');
     }
 
+    if ($(media).data('youtube-nocookie') !== undefined && $(media).data('youtube-nocookie')) {
+      this.youTubeNoCookie = true;
+    }
+    else {
+      this.youTubeNoCookie = false;
+    }
+
     // Icon type
     // By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
     // Fallback for browsers that don't support SVG is scalable icomoon fonts
@@ -337,6 +344,16 @@
       this.showNowPlaying = true;
     }
 
+    // TTML support (experimental); enabled for testing with data-use-ttml (Boolean)
+    if ($(media).data('use-ttml') !== undefined) {
+      this.useTtml = true;
+      // The following may result in a console error.
+      this.convert = require('xml-js');
+    }
+    else {
+      this.useTtml = false;
+    }
+
     // Fallback Player
     // The only supported fallback is JW Player, licensed separately
     // JW Player files must be included in folder specified in this.fallbackPath
@@ -345,6 +362,7 @@
 
     this.fallback = null;
     this.fallbackPath = null;
+    this.fallbackJwKey = null;
     this.testFallback = false;
 
     if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
@@ -358,9 +376,21 @@
 
       if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== false) {
         this.fallbackPath = $(media).data('fallback-path');
-      }
-      else {
+
+        var path = $(media).data('fallback-path');
+
+        // remove js file is specified.
+        var playerJs = 'jwplayer.js';
+        if (path.endsWith(playerJs)) {
+          path = path.slice(0, path.length - playerJs.length);
+        }
+        this.fallbackPath = path;
+      } else {
         this.fallbackPath = this.rootPath + 'thirdparty/';
+      }
+
+      if ($(media).data('fallback-jwkey') !== undefined) {
+        this.fallbackJwKey = $(media).data('fallback-jwkey');
       }
 
       if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
@@ -376,7 +406,7 @@
         this.lang = lang;
       }
     }
-    // Player language is determined as follows:
+    // Player language is determined as follows (in translation.js > getTranslationText() ):
     // 1. Lang attributes on <html> or <body>, if a matching translation file is available
     // 2. The value of this.lang, if a matching translation file is available
     // 3. English
@@ -399,6 +429,20 @@
 
     // Search
     if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
+      // conducting a search currently requires an external div in which to write the results
+      if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+        this.searchString = $(media).data('search');
+        this.searchDiv = $(media).data('search-div');
+      }
+
+      // Search Language
+      if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {
+        this.searchLang = $(media).data('search-lang');
+      }
+      else {
+        this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
+      }
+
       // conducting a search currently requires an external div in which to write the results
       if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
         this.searchString = $(media).data('search');

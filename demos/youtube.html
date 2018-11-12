@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player for YouTube</title>
+<title>Simple YouTube Examples</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="../thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
@@ -27,76 +27,46 @@
     googleApiReady = true;
   }
 </script>
-<script src="//apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
+<script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
 
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
 <!-- styles for this example page -->
 <style>
-  #wrapper {
-    width: 100%;
-  }
-  #chapters {
-    float: left;
-    min-width: 12em;
-    width: 30%;
-    padding-right: 1em;
-  }
-  #chapters ul {
-    border: 1px solid #AAA;
-  }
-  #player-plus {
-    float: left;
-    width: 65%;
-  }
-  div.able-chapters-div button:focus,
-  div.able-chapters-div button:hover,
-  div.able-chapters-div button::-moz-focus-inner {
-    background-color: #666;
-    color: #FFF;
+  .wrapper {
+    width: 500px;
   }
 </style>
 </head>
 
 <body>
 
-<h1>Able Player for YouTube</h1>
+<h1>Able Player for YouTube (Simple Examples)</h1>
 
-<p>This page uses the YouTube player, but with Able Player controls.</p>
-<p>If &lt;track&gt; elements are used for captions or subtitles, these take precedence over YouTube captions.
-  Otherwise, YouTube captions and subtitles are used if available.
-  The advantage of using local captions is they can be used to build an interactive transcript and
-  <a href="video8.html">search within videos</a>. Currently YouTube doesn't expose specific caption data
-  via its API so these functions are not possible using YouTube captions alone.</p>
+<p>This page features a few simple examples of Able Player being used to play YouTube videos. In all examples, the video is available with and without audio description;  both versions are stored on YouTube, and can be swapped using the <em>Description</em> button.</p>
 
-<p>Also, a <em>poster</em> attribute can be used to replace YouTube's default poster image with an alternative
-  image.</p>
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>. In particular, check out the <a href="youtube2.html">Complex YouTube Example</a>.</p>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
-<div id="wrapper">
-  <div id="chapters"></div>
-  <div id="player-plus">
-    <div id="player">
-      <video data-able-player
-        id="video1"
-        preload="auto"
-        data-youtube-id="tnsB6YCHVXA"
-        data-youtube-desc-id="Ck2TdVMhWcU"
-        data-transcript-div="transcript"
-        data-chapters-div="chapters"
-        data-use-chapters-button="false"
-        playsinline
-      >
-        <track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
-        <track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Spanish"/>
-        <track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-CN" label="Chinese, simplified"/>
-        <track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
-      </video>
-    </div>
-    <div id="transcript"></div>
-  </div>
+<h2>Video #1</h2>
+<p>All assets, including captions and poster, are on YouTube. Width & height are defined by CSS of a parent element. The video is available with and without audio description (both versions are stored on YouTube, and can be swapped using the Description button.</p>
+<div class="wrapper">
+  <video id="video1" data-able-player preload="auto" data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU">
+  </video>
 </div>
+
+<h2>Video #2</h2>
+<p>This is the same as Video #1, except for how width and height are defined. Both are defined using the <em>width</em> and <em>height</em> attributes on the video element.</p>
+<video id="video2" data-able-player preload="auto"  data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU"
+  width="500" height="281">
+</video>
+
+<h2>Video #3</h2>
+<p>Captions and poster are stored locally, not on YouTube. Using local captions makes the automated transcript possible. Width and height are the same as Video #2.</p>
+<video id="video3" data-able-player preload="auto" data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU"
+  width="500" height="281" poster="../media/itaccess.jpg">
+  <track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
+</video>
+
 </body>
 </html>

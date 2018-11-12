@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 title: Able Player
 description: "Fully accessible cross-browser HTML5 media player. "
 google_analytics: 
@@ -6,3 +7,6 @@ theme: jekyll-theme-slate
 
 gems:
   - jekyll-mentions
+=======
+theme: jekyll-theme-slate
+>>>>>>> master

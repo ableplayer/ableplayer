@@ -145,10 +145,10 @@
     var thisObj = this;
 
     // Handle seek bar events.
-    this.seekBar.bodyDiv.on('startTracking', function (event) {
+    this.seekBar.bodyDiv.on('startTracking', function (e) {
       thisObj.pausedBeforeTracking = thisObj.isPaused();
       thisObj.pauseMedia();
-    }).on('tracking', function (event, position) {
+    }).on('tracking', function (e, position) {
       // Scrub transcript, captions, and metadata.
       thisObj.highlightTranscript(position);
       thisObj.updateCaption(position);
@@ -156,7 +156,7 @@
       thisObj.updateChapter(thisObj.convertChapterTimeToVideoTime(position));
       thisObj.updateMeta(position);
       thisObj.refreshControls();
-    }).on('stopTracking', function (event, position) {
+    }).on('stopTracking', function (e, position) {
       if (thisObj.useChapterTimes) {
         thisObj.seekTo(thisObj.convertChapterTimeToVideoTime(position));
       }
@@ -243,13 +243,18 @@
   };
 
   AblePlayer.prototype.onPlayerKeyPress = function (e) {
+
     // handle keystrokes (using DHTML Style Guide recommended key combinations)
-    // http://dev.aol.com/dhtml_style_guide/#mediaplayer
+    // https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
     // Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
     // NOTE #1: Style guide only supports Play/Pause, Stop, Mute, Captions, & Volume Up & Down
     // The rest are reasonable best choices
     // NOTE #2: If there are multiple players on a single page, keystroke handlers
     // are only bound to the FIRST player
+    // NOTE #3: The DHTML Style Guide is now the W3C WAI-ARIA Authoring Guide and has undergone many revisions
+    // including removal of the "media player" design pattern. There's an issue about that:
+    // https://github.com/w3c/aria-practices/issues/27
+
     if (!this.okToHandleKeyPress()) {
       return false;
     }
@@ -259,75 +264,88 @@
     if (which >= 65 && which <= 90) {
       which += 32;
     }
-    if (which === 27) {
-      this.closePopups();
-    }
-    else if (which === 32) { // spacebar = play/pause
-      if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
-        // only toggle play if a button does not have focus
-        // if a button has focus, space should activate that button
-        this.handlePlay();
+
+    // Only use keypress to control player if focus is NOT on a form field or contenteditable element
+    if (!(
+      $(':focus').is('[contenteditable]') ||
+      $(':focus').is('input') ||
+      $(':focus').is('textarea') ||
+      $(':focus').is('select') ||
+      e.target.hasAttribute('contenteditable') ||
+      e.target.tagName === 'INPUT' ||
+      e.target.tagName === 'TEXTAREA' ||
+      e.target.tagName === 'SELECT'
+    )){
+      if (which === 27) { // escape
+        this.closePopups();
       }
-    }
-    else if (which === 112) { // p = play/pause
-      if (this.usingModifierKeys(e)) {
-        this.handlePlay();
+      else if (which === 32) { // spacebar = play/pause
+        if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
+          // only toggle play if a button does not have focus
+          // if a button has focus, space should activate that button
+          this.handlePlay();
+        }
       }
-    }
-    else if (which === 115) { // s = stop (now restart)
-      if (this.usingModifierKeys(e)) {
-        this.handleRestart();
+      else if (which === 112) { // p = play/pause
+        if (this.usingModifierKeys(e)) {
+          this.handlePlay();
+        }
       }
-    }
-    else if (which === 109) { // m = mute
-      if (this.usingModifierKeys(e)) {
-        this.handleMute();
+      else if (which === 115) { // s = stop (now restart)
+        if (this.usingModifierKeys(e)) {
+          this.handleRestart();
+        }
       }
-    }
-    else if (which === 118) { // v = volume
-      if (this.usingModifierKeys(e)) {
-        this.handleVolume();
+      else if (which === 109) { // m = mute
+        if (this.usingModifierKeys(e)) {
+          this.handleMute();
+        }
       }
-    }
-    else if (which >= 49 && which <= 57) { // set volume 1-9
-      if (this.usingModifierKeys(e)) {
-        this.handleVolume(which);
+      else if (which === 118) { // v = volume
+        if (this.usingModifierKeys(e)) {
+          this.handleVolume();
+        }
       }
-    }
-    else if (which === 99) { // c = caption toggle
-      if (this.usingModifierKeys(e)) {
-        this.handleCaptionToggle();
+      else if (which >= 49 && which <= 57) { // set volume 1-9
+        if (this.usingModifierKeys(e)) {
+          this.handleVolume(which);
+        }
       }
-    }
-    else if (which === 100) { // d = description
-      if (this.usingModifierKeys(e)) {
-        this.handleDescriptionToggle();
+      else if (which === 99) { // c = caption toggle
+        if (this.usingModifierKeys(e)) {
+          this.handleCaptionToggle();
+        }
       }
-    }
-    else if (which === 102) { // f = forward
-      if (this.usingModifierKeys(e)) {
-        this.handleFastForward();
+      else if (which === 100) { // d = description
+        if (this.usingModifierKeys(e)) {
+          this.handleDescriptionToggle();
+        }
       }
-    }
-    else if (which === 114) { // r = rewind
-      if (this.usingModifierKeys(e)) {
-        this.handleRewind();
+      else if (which === 102) { // f = forward
+        if (this.usingModifierKeys(e)) {
+          this.handleFastForward();
+        }
       }
-    }
-    else if (which === 101) { // e = preferences
-      if (this.usingModifierKeys(e)) {
-        this.handlePrefsClick();
+      else if (which === 114) { // r = rewind
+        if (this.usingModifierKeys(e)) {
+          this.handleRewind();
+        }
       }
-    }
-    else if (which === 13) { // Enter
-      var thisElement = $(document.activeElement);
-      if (thisElement.prop('tagName') === 'SPAN') {
-        // register a click on this SPAN
-        // if it's a transcript span the transcript span click handler will take over
-        thisElement.click();
+      else if (which === 101) { // e = preferences
+        if (this.usingModifierKeys(e)) {
+          this.handlePrefsClick();
+        }
       }
-      else if (thisElement.prop('tagName') === 'LI') {
-        thisElement.click();
+      else if (which === 13) { // Enter
+        var thisElement = $(document.activeElement);
+        if (thisElement.prop('tagName') === 'SPAN') {
+          // register a click on this SPAN
+          // if it's a transcript span the transcript span click handler will take over
+          thisElement.click();
+        }
+        else if (thisElement.prop('tagName') === 'LI') {
+          thisElement.click();
+        }
       }
     }
   };
@@ -497,11 +515,11 @@
         }
         thisObj.refreshControls();
       })
-      .onSeek(function(event) {
+      .onSeek(function(e) {
         // this is called when user scrubs ahead or back,
         // after the target offset is reached
         if (thisObj.debug) {
-          console.log('Seeking to ' + event.position + '; target: ' + event.offset);
+          console.log('Seeking to ' + e.position + '; target: ' + e.offset);
         }
 
         if (thisObj.jwSeekPause) {
@@ -590,15 +608,17 @@
     }
 
     this.addSeekbarListeners();
-
     // handle clicks on player buttons
-    this.$controllerDiv.find('button').on('click',function(event){
-      event.stopPropagation();
+    this.$controllerDiv.find('button').on('click',function(e){
+      e.stopPropagation();
       thisObj.onClickPlayerButton(this);
     });
 
-    // handle clicks anywhere on the page. If any popups are open, close them.
-    $(document).on('click',function() {
+    // handle clicks (left only) anywhere on the page. If any popups are open, close them.
+    $(document).on('click',function(e) {
+      if (e.button !== 0) { // not a left click
+        return false;
+      }
       if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
         // at least one popup is visible
         thisObj.closePopups();

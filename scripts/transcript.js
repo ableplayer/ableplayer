@@ -35,7 +35,6 @@
 
     languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
     this.$transcriptToolbar.append(languageSelectWrapper);
-
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
     // If client has provided separate transcript location, put it there.
@@ -70,7 +69,7 @@
       thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
     });
 
-    this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (event) {
+    this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (e) {
       // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
       // or outside of a clickable span.
       if (!thisObj.scrollingTranscript) {
@@ -82,10 +81,10 @@
 
     if (typeof this.$transcriptLanguageSelect !== 'undefined') {
 
-      this.$transcriptLanguageSelect.on('click mousedown',function (event) {
+      this.$transcriptLanguageSelect.on('click mousedown',function (e) {
         // execute default behavior
         // prevent propagation of mouse event to toolbar or window
-        event.stopPropagation();
+        e.stopPropagation();
       });
 
       this.$transcriptLanguageSelect.on('change',function () {
@@ -212,7 +211,7 @@
     // Pressing Enter on an element that is not natively clickable does NOT trigger click()
     // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js)
     if (this.$transcriptArea.length > 0) {
-      this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(event) {
+      this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(e) {
         thisObj.seekTrigger = 'transcript';
         var spanStart = parseFloat($(this).attr('data-start'));
         // Add a tiny amount so that we're inside the span.

@@ -36,7 +36,7 @@
             });
             itemStartSpan.text(itemStartTime['value']);
             // add a listener for clisk on itemStart
-            itemStartSpan.click(function(event) {
+            itemStartSpan.click(function(e) {
               var spanStart = parseFloat($(this).attr('data-start'));
               // Add a tiny amount so that we're inside the span.
               spanStart += .01;
@@ -64,16 +64,19 @@
   AblePlayer.prototype.searchFor = function(searchString) {
 
     // return chronological array of caption cues that match searchTerms
-
     var captionLang, captions, results, caption, c, i, j;
-
+    results = [];
     // split searchTerms into an array
     var searchTerms = searchString.split(' ');
     if (this.captions.length > 0) {
-      captionLang = this.captions[0].language; // in case it's needed later
-      captions = this.captions[0].cues;
+      // Get caption track that matches this.searchLang
+      for (i=0; i < this.captions.length; i++) {
+        if (this.captions[i].language === this.searchLang) {
+          captionLang = this.searchLang;
+          captions = this.captions[i].cues;
+        }
+      }
       if (captions.length > 0) {
-        var results = [];
         c = 0;
         for (i = 0; i < captions.length; i++) {
           if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
@@ -82,6 +85,7 @@
               if (caption.indexOf(searchTerms[j]) !== -1) {
                 results[c] = [];
                 results[c]['start'] = captions[i].start;
+                results[c]['lang'] = captionLang;
                 results[c]['caption'] = this.highlightSearchTerm(searchTerms,j,caption);
                 c++;
                 break;
@@ -91,7 +95,6 @@
         }
       }
     }
-
     return results;
   };
 

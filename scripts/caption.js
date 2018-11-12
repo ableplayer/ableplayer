@@ -12,9 +12,24 @@
     }
   };
 
+  AblePlayer.prototype.updateCaptionsMenu = function (lang) {
+
+    // uncheck all previous menu items
+    this.captionsPopup.find('li').attr('aria-checked','false');
+    if (typeof lang === 'undefined') {
+      // check the last menu item (captions off)
+      this.captionsPopup.find('li').last().attr('aria-checked','true');
+    }
+    else {
+      // check the newly selected lang
+      this.captionsPopup.find('li[lang=' + lang + ']').attr('aria-checked','true');
+    }
+  };
+
   // Returns the function used when a caption is clicked in the captions menu.
   // Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
   AblePlayer.prototype.getCaptionClickFunction = function (track) {
+
     var thisObj = this;
     return function () {
       thisObj.selectedCaptions = track;
@@ -58,6 +73,7 @@
       setTimeout(function() {
         thisObj.hidingPopup = false;
       }, 100);
+      thisObj.updateCaptionsMenu(thisObj.captionLang);
       thisObj.$ccButton.focus();
 
       // save preference to cookie
@@ -70,6 +86,7 @@
 
   // Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
   AblePlayer.prototype.getCaptionOffFunction = function () {
+
     var thisObj = this;
     return function () {
       if (thisObj.player == 'youtube') {
@@ -86,6 +103,7 @@
       setTimeout(function() {
         thisObj.hidingPopup = false;
       }, 100);
+      thisObj.updateCaptionsMenu();
       thisObj.$ccButton.focus();
 
       // save preference to cookie
@@ -99,6 +117,7 @@
   };
 
   AblePlayer.prototype.showCaptions = function(now) {
+
     var c, thisCaption, captionText;
     var cues;
     if (this.selectedCaptions) {

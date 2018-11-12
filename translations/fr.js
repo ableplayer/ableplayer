@@ -294,6 +294,8 @@ var fr = {
 
 "windowResizeAlert": "La fenêtre a été redimensionnée.",
 
+"windowClose": "Fermer",
+
 "width": "Largeur",
 
 "height": "Hauteur",

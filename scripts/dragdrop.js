@@ -42,19 +42,19 @@
 
     // add event listener to toolbar to start and end drag
     // other event listeners will be added when drag starts
-    $toolbar.on('mousedown', function(event) {
-      event.stopPropagation();
+    $toolbar.on('mousedown', function(e) {
+      e.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
-        thisObj.startMouseX = event.pageX;
-        thisObj.startMouseY = event.pageY;
+        thisObj.startMouseX = e.pageX;
+        thisObj.startMouseY = e.pageY;
         thisObj.dragDevice = 'mouse';
         thisObj.startDrag(which, $window);
       }
       return false;
     });
-    $toolbar.on('mouseup', function(event) {
-      event.stopPropagation();
+    $toolbar.on('mouseup', function(e) {
+      e.stopPropagation();
       if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
         thisObj.endDrag(which);
       }
@@ -62,18 +62,20 @@
     });
 
     // add event listeners for resizing
-    $resizeHandle.on('mousedown', function(event) {
-      event.stopPropagation();
+    $resizeHandle.on('mousedown', function(e) {
+
+      e.stopPropagation();
       if (!thisObj.windowMenuClickRegistered) {
         thisObj.windowMenuClickRegistered = true;
-        thisObj.startMouseX = event.pageX;
-        thisObj.startMouseY = event.pageY;
+        thisObj.startMouseX = e.pageX;
+        thisObj.startMouseY = e.pageY;
         thisObj.startResize(which, $window);
         return false;
       }
     });
-    $resizeHandle.on('mouseup', function(event) {
-      event.stopPropagation();
+
+    $resizeHandle.on('mouseup', function(e) {
+      e.stopPropagation();
       if (thisObj.resizing) {
         thisObj.endResize(which);
       }
@@ -82,6 +84,7 @@
 
     // whenever a window is clicked, bring it to the foreground
     $window.on('click', function() {
+
       if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
         thisObj.updateZIndex(which);
       }
@@ -94,11 +97,10 @@
   AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
 
-    var thisObj, $windowAlert, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
+    var thisObj, $windowAlert, menuId, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
       $buttonLabel, tooltipId, $tooltip, $popup,
       label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
-      $optionList, radioName, options, i, $optionItem, option,
-      radioId, $radioButton, $radioLabel;
+      $optionList, menuBaseId, options, i, $optionItem, option, menuId;
 
     thisObj = this;
 
@@ -122,10 +124,13 @@
 
     // add button to draggable window which triggers a popup menu
     // for now, re-use preferences icon for this purpose
+    menuId = this.mediaId + '-' + windowName + '-menu';
     $newButton = $('<button>',{
       'type': 'button',
       'tabindex': '0',
       'aria-label': this.tt.windowButtonLabel,
+      'aria-haspopup': 'true',
+      'aria-controls': menuId,
       'class': 'able-button-handler-preferences'
     });
     if (this.iconType === 'font') {
@@ -158,7 +163,7 @@
       'class' : 'able-tooltip',
       'id' : tooltipId
     }).hide();
-    $newButton.on('mouseenter focus',function(event) {
+    $newButton.on('mouseenter focus',function(e) {
       var label = $(this).attr('aria-label');
       // get position of this button
       var position = $(this).position();
@@ -178,76 +183,8 @@
       });
     });
 
-    // add a popup menu
-    $popup = this.createPopup(windowName);
-    $optionList = $('<ul></ul>');
-    radioName = this.mediaId + '-' + windowName + '-choice';
-
-    options = [];
-    options.push({
-      'name': 'move',
-      'label': this.tt.windowMove
-    });
-    options.push({
-      'name': 'resize',
-      'label': this.tt.windowResize
-    });
-    for (i = 0; i < options.length; i++) {
-      $optionItem = $('<li></li>');
-      option = options[i];
-      radioId = radioName + '-' + i;
-      $radioButton = $('<input>',{
-        'type': 'radio',
-        'val': option.name,
-        'name': radioName,
-        'id': radioId
-      });
-      $radioLabel = $('<label>',{
-        'for': radioId
-      });
-      $radioLabel.text(option.label);
-      $radioButton.on('focus',function(e) {
-        $(this).parents('ul').children('li').removeClass('able-focus');
-        $(this).parent('li').addClass('able-focus');
-      });
-      $radioButton.on('click',function(e) {
-        e.stopPropagation();
-        if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-          thisObj.windowMenuClickRegistered = true;
-          thisObj.handleMenuChoice( which, $(this).val(), e.type);
-        }
-      });
-      // due to an apparent bug (in jquery?) clicking the label
-      // does not result in a click event on the associated radio button
-      // Observed this in Firefox 45.0.2 and Chrome 50
-      // It works fine on a simple test page so this could be an Able Player bug
-      // Added the following as a workaround rather than mess with isolating the bug
-      $radioLabel.on('click mousedown', function() {
-        var clickedId = $(this).attr('for');
-        $('#' + clickedId).click();
-      })
-      $optionItem.append($radioButton,$radioLabel);
-      $optionList.append($optionItem);
-    }
-    $popup.append($optionList);
-    $newButton.on('click mousedown keydown',function(e) {
-      e.stopPropagation();
-      if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-        // don't set windowMenuClickRegistered yet; that happens in handler function
-        thisObj.handleWindowButtonClick(which, e);
-      }
-      thisObj.finishingDrag = false;
-    });
-
-    $popup.on('keydown', function(event) {
-      // Escape key
-      if (event.which === 27) {
-        // Close Window Options Menu
-        $newButton.focus();
-        $popup.hide();
-      }
-    });
-
+    // setup popup menu
+    $popup = this.setupPopups(windowName); // 'transcript-window' or 'sign-window'
     // define vars and assemble all the parts
     if (which === 'transcript') {
       this.$transcriptAlert = $windowAlert;
@@ -261,6 +198,16 @@
       this.$signPopup = $popup;
       this.$signToolbar.append($windowAlert,$newButton,$tooltip,$popup);
     }
+
+    // handle button click
+    $newButton.on('click mousedown keydown',function(e) {
+      e.stopPropagation();
+      if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+        // don't set windowMenuClickRegistered yet; that happens in handler function
+        thisObj.handleWindowButtonClick(which, e);
+      }
+      thisObj.finishingDrag = false;
+    });
 
     this.addResizeDialog(which, $window);
   };
@@ -381,20 +328,6 @@
 
     thisObj = this;
 
-    if (e.type === 'keydown') {
-      // user pressed a key
-      if (e.which === 32 || e.which === 13 || e.which === 27) {
-        // this was Enter, space, or escape
-        this.windowMenuClickRegistered = true;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      // this was a mouse event
-      this.windowMenuClickRegistered = true;
-    }
     if (which === 'transcript') {
       $windowPopup = this.$transcriptPopup;
       $windowButton = this.$transcriptPopupButton;
@@ -406,12 +339,38 @@
       $toolbar = this.$signToolbar;
     }
 
+    if (e.type === 'keydown') {
+      // user pressed a key
+      if (e.which === 32 || e.which === 13) {
+        // this was Enter or space
+        this.windowMenuClickRegistered = true;
+      }
+      else if (e.which === 27) { // escape
+        // hide the popup menu
+        $windowPopup.hide('fast', function() {
+          // also reset the Boolean
+          thisObj.windowMenuClickRegistered = false;
+          // also restore menu items to their original state
+          $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+          // also return focus to window options button
+          $windowButton.focus();
+        });
+      }
+      else {
+        return false;
+      }
+    }
+    else {
+      // this was a mouse event
+      this.windowMenuClickRegistered = true;
+    }
+
     if ($windowPopup.is(':visible')) {
       $windowPopup.hide(200,'',function() {
         thisObj.windowMenuClickRegistered = false; // reset
       });
       $windowPopup.find('li').removeClass('able-focus');
-      $windowButton.focus();
+      $windowButton.attr('aria-expanded','false').focus();
     }
     else {
       // first, be sure window is on top
@@ -419,13 +378,14 @@
       popupTop = $windowButton.position().top + $windowButton.outerHeight();
       $windowPopup.css('top', popupTop);
       $windowPopup.show(200,'',function() {
-        $(this).find('input').first().focus().parent().addClass('able-focus');
+        $windowButton.attr('aria-expanded','true');
+        $(this).find('li').first().focus().addClass('able-focus');
         thisObj.windowMenuClickRegistered = false; // reset
       });
     }
   };
 
-  AblePlayer.prototype.handleMenuChoice = function (which, choice, eventType) {
+  AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
     var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
 
@@ -444,11 +404,35 @@
       resizeDialog = this.signResizeDialog;
     }
 
-    // hide the popup menu, and reset the Boolean
+    if (e.type === 'keydown') {
+      if (e.which === 27) { // escape
+        // hide the popup menu
+        $windowPopup.hide('fast', function() {
+          // also reset the Boolean
+          thisObj.windowMenuClickRegistered = false;
+          // also restore menu items to their original state
+          $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+          // also return focus to window options button
+          $windowButton.focus();
+        });
+        return false;
+      }
+      else {
+        // all other keys will be handled by upstream functions
+        return false;
+      }
+    }
+
+    // hide the popup menu
     $windowPopup.hide('fast', function() {
-       thisObj.windowMenuClickRegistered = false; // reset
+      // also reset the boolean
+      thisObj.windowMenuClickRegistered = false;
+      // also restore menu items to their original state
+      $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
     });
-    $windowButton.focus();
+    if (choice !== 'close') {
+      $windowButton.focus();
+    }
 
     if (choice === 'move') {
       if (!this.showedAlert(which)) {
@@ -460,7 +444,7 @@
           this.showedSignAlert = true;
         }
       }
-      if (eventType === 'keydown') {
+      if (e.type === 'keydown') {
         this.dragDevice = 'keyboard';
       }
       else {
@@ -473,10 +457,18 @@
       // resize through the menu uses a form, not drag
       resizeDialog.show();
     }
+    else if (choice == 'close') {
+      // close window, place focus on corresponding button on controller bar
+      if (which === 'transcript') {
+        this.handleTranscriptToggle();
+      }
+      else if (which === 'sign') {
+        this.handleSignToggle();
+      }
+    }
   };
 
   AblePlayer.prototype.startDrag = function(which, $element) {
-
     var thisObj, $windowPopup, zIndex, startPos, newX, newY;
     thisObj = this;
 
