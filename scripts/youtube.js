@@ -1,3 +1,4 @@
+
 (function ($) {
   AblePlayer.prototype.initYouTubePlayer = function () {
 
@@ -55,7 +56,7 @@
     this.$mediaContainer.prepend($('<div>').attr('id', containerId));
     // NOTE: Tried the following in place of the above in January 2016
     // because in some cases two videos were being added to the DOM
-    // However, once v2.2.23 was fairly stable, unable to reptroduce that problem
+    // However, once v2.2.23 was fairly stable, unable to reproduce that problem
     // so maybe it's not an issue. This is preserved here temporarily, just in case it's needed...
     // thisObj.$mediaContainer.html($('<div>').attr('id', containerId));
 
@@ -96,13 +97,22 @@
       this.ytWidth = null;
       this.ytHeight = null;
     }
+
+    // NOTE: YouTube is changing the following parameters on or after Sep 25, 2018:
+    // rel - No longer able to prevent YouTube from showing related videos
+    //      value of 0 now limits related videos to video's same channel
+    // showinfo - No longer supported (previously, value of 0 hid title, share, & watch later buttons
+    // Documentation https://developers.google.com/youtube/player_parameters
+
     this.youTubePlayer = new YT.Player(containerId, {
       videoId: this.activeYouTubeId,
       host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
       width: this.ytWidth,
       height: this.ytHeight,
       playerVars: {
+        autoplay: 0,
         enablejsapi: 1,
+        disableKb: 1, // disable keyboard shortcuts, using our own
         playsinline: this.playsInline,
         start: this.startTime,
         controls: 0, // no controls, using our own
@@ -110,7 +120,8 @@
         hl: this.lang, // use the default language UI
         modestbranding: 1, // no YouTube logo in controller
         rel: 0, // do not show related videos when video ends
-        html5: 1 // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
+        html5: 1, // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
+        iv_load_policy: 3 // do not show video annotations
       },
       events: {
         onReady: function () {
@@ -209,11 +220,11 @@
   };
 
   AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
+
     // called after player is ready, if youTube dimensions were previously unknown
     // Now need to get them from the iframe element that YouTube injected
     // and resize Able Player to match
     var d, width, height;
-
     if (typeof this.aspectRatio !== 'undefined') {
       // video dimensions have already been collected
       if (this.restoringAfterFullScreen) {
@@ -331,7 +342,6 @@
     var thisObj, i, trackId, trackLang, trackLabel, trackKind, isDraft, isDefaultTrack;
 
     thisObj = this;
-
     gapi.client.setApiKey(youTubeDataAPIKey);
     gapi.client
       .load('youtube', 'v3')

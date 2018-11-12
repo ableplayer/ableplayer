@@ -25,11 +25,15 @@
     this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
     this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
     this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-    if (this.player !== 'youtube') {
+
+    // NOTE: Excluding the following from youtube was resulting in a player
+    // that exceeds the width of the YouTube video
+    // Unclear why it was originally excluded; commented out in 3.1.20
+    // if (this.player !== 'youtube') {
       this.$ableWrapper.css({
         'max-width': this.playerMaxWidth + 'px'
       });
-    }
+    // } // end if not youtube
 
     this.injectOffscreenHeading();
 
