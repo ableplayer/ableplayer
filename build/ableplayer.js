@@ -6754,6 +6754,14 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
     return Number(Math.floor(value+'e'+decimals)+'e-'+decimals);
   };
 
+  Number.isInteger = Number.isInteger || function(value) {
+
+    // polyfill for IE11, which doesn't otherwise support Number.isInteger
+    // https://stackoverflow.com/a/31720368/744281
+console.log('checking whether ' + value + ' is an integer');
+    return typeof value === "number" && isFinite(value) && Math.floor(value) === value;
+  };
+
 })(jQuery);
 
 (function ($) {
