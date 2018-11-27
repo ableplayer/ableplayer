@@ -4622,6 +4622,7 @@
 
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
+console.log('swapSource; sourceIndex: ' + sourceIndex);
     // Change media player source file, for instance when moving to the next element in a playlist.
     // NOTE: Swapping source for audio description is handled elsewhere;
     // see description.js > swapDescription()
@@ -6746,6 +6747,13 @@
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
+  AblePlayer.prototype.roundDown = function (value, decimals) {
+
+    // round value down to the nearest X decimal points
+    // where X is the value of the decimals parameter
+    return Number(Math.floor(value+'e'+decimals)+'e-'+decimals);
+  };
+
 })(jQuery);
 
 (function ($) {
@@ -6866,6 +6874,7 @@
   };
 
   AblePlayer.prototype.swapDescription = function() {
+
     // swap described and non-described source media, depending on which is playing
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -6880,7 +6889,6 @@
     // and might therefore be longer than the non-described version
     // The benefits though would seem to outweigh this risk
     this.swapTime = this.getElapsed(); // video will scrub to this time after loaded (see event.js)
-
     if (this.descOn) {
       // user has requested the described version
       this.showAlert(this.tt.alertDescribedVersion);
@@ -7260,9 +7268,14 @@
   };
 
   AblePlayer.prototype.getElapsed = function () {
+
     var position;
     if (this.player === 'html5') {
-      position = this.media.currentTime;
+      // Values of this.media.currentTime are of inconsistent lengths
+      // in Safari (observed in 12.0.1 in Mac OS) - usually 6 decimals, but sometimes 9
+      // this results in problems when comparing seekTime or swapTime with currentTime
+      // added roundDown() in 3.2.1 to limit length to 6 decimals
+      position = this.roundDown(this.media.currentTime,6);
     }
     else if (this.player === 'jw' && this.jwPlayer) {
       if (this.jwPlayer.getState() === 'IDLE') {
@@ -7275,7 +7288,6 @@
         position = this.youTubePlayer.getCurrentTime();
       }
     }
-
     if (position === undefined || isNaN(position) || position === -1) {
       return 0;
     }
@@ -7289,9 +7301,15 @@
   //  'buffering' - Momentarily paused to load, but will resume once data is loaded.
   //  'playing' - Currently playing.
   AblePlayer.prototype.getPlayerState = function () {
+
+    // Commented out the following in 3.2.1 - not sure of its intended purpose
+    // It can be useful to know player state even when swapping src
+    // and the overhead is seemingly minimal
+    /*
     if (this.swappingSrc) {
       return;
     }
+    */
     if (this.player === 'html5') {
       if (this.media.paused) {
         if (this.getElapsed() === 0) {
@@ -7497,7 +7515,6 @@
       // wait until new source has loaded before refreshing controls
       return;
     }
-
     duration = this.getDuration();
     elapsed = this.getElapsed();
 
@@ -10752,7 +10769,7 @@
           thisObj.playMedia();
         }
         else if (!thisObj.startedPlaying) {
-          if (thisObj.startTime) {
+          if (thisObj.startTime > 0) {
             if (thisObj.seeking) {
               // a seek has already been initiated
               // since canplaythrough has been triggered, the seek is complete
@@ -10770,7 +10787,7 @@
             thisObj.seekToChapter(thisObj.defaultChapter);
           }
           else {
-            // there is now startTime, therefore no seeking required
+            // there is no startTime, therefore no seeking required
             if (thisObj.autoplay) {
               thisObj.playMedia();
             }
@@ -10784,6 +10801,20 @@
         }
         else {
           // already started playing
+          // we're here because a new media source has been loaded and is ready to resume playback
+          if (thisObj.swappingSrc && thisObj.getPlayerState() == 'stopped') {
+            // Safari is the only broewser that returns value of 'stopped' (observed in 12.0.1 on MacOS)
+            // This prevents 'timeupdate' events from triggering, which prevents the new media src
+            // from resuming playback at swapTime
+            // This is a hack to jump start Safari
+            thisObj.startedPlaying = false;
+            if (thisObj.swapTime > 0) {
+              thisObj.seekTo(thisObj.swapTime);
+            }
+            else {
+              thisObj.playMedia();
+            }
+          }
         }
       })
       .on('playing',function() {
@@ -10815,8 +10846,9 @@
       .on('pause',function() {
         if (!thisObj.clickedPlay) {
           // 'pause' was triggered automatically, not initiated by user
-          // this happens between tracks in a playlist
-          if (thisObj.hasPlaylist) {
+          // this happens in some browsers (not Chrome, as of 70.x)
+          // when swapping source (e.g., between tracks in a playlist, or swapping description)
+          if (thisObj.hasPlaylist || thisObj.swappingSrc) {
             // do NOT set playing to false.
             // doing so prevents continual playback after new track is loaded
           }

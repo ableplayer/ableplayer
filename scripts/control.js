@@ -63,9 +63,14 @@
   };
 
   AblePlayer.prototype.getElapsed = function () {
+
     var position;
     if (this.player === 'html5') {
-      position = this.media.currentTime;
+      // Values of this.media.currentTime are of inconsistent lengths
+      // in Safari (observed in 12.0.1 in Mac OS) - usually 6 decimals, but sometimes 9
+      // this results in problems when comparing seekTime or swapTime with currentTime
+      // added roundDown() in 3.2.1 to limit length to 6 decimals
+      position = this.roundDown(this.media.currentTime,6);
     }
     else if (this.player === 'jw' && this.jwPlayer) {
       if (this.jwPlayer.getState() === 'IDLE') {
@@ -78,7 +83,6 @@
         position = this.youTubePlayer.getCurrentTime();
       }
     }
-
     if (position === undefined || isNaN(position) || position === -1) {
       return 0;
     }
@@ -92,9 +96,15 @@
   //  'buffering' - Momentarily paused to load, but will resume once data is loaded.
   //  'playing' - Currently playing.
   AblePlayer.prototype.getPlayerState = function () {
+
+    // Commented out the following in 3.2.1 - not sure of its intended purpose
+    // It can be useful to know player state even when swapping src
+    // and the overhead is seemingly minimal
+    /*
     if (this.swappingSrc) {
       return;
     }
+    */
     if (this.player === 'html5') {
       if (this.media.paused) {
         if (this.getElapsed() === 0) {
@@ -300,7 +310,6 @@
       // wait until new source has loaded before refreshing controls
       return;
     }
-
     duration = this.getDuration();
     elapsed = this.getElapsed();
 

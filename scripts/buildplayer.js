@@ -1489,6 +1489,7 @@
 
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
+console.log('swapSource; sourceIndex: ' + sourceIndex);
     // Change media player source file, for instance when moving to the next element in a playlist.
     // NOTE: Swapping source for audio description is handled elsewhere;
     // see description.js > swapDescription()

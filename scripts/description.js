@@ -116,6 +116,7 @@
   };
 
   AblePlayer.prototype.swapDescription = function() {
+
     // swap described and non-described source media, depending on which is playing
     // this function is only called in two circumstances:
     // 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -130,7 +131,6 @@
     // and might therefore be longer than the non-described version
     // The benefits though would seem to outweigh this risk
     this.swapTime = this.getElapsed(); // video will scrub to this time after loaded (see event.js)
-
     if (this.descOn) {
       // user has requested the described version
       this.showAlert(this.tt.alertDescribedVersion);

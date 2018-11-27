@@ -138,4 +138,11 @@
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
+  AblePlayer.prototype.roundDown = function (value, decimals) {
+
+    // round value down to the nearest X decimal points
+    // where X is the value of the decimals parameter
+    return Number(Math.floor(value+'e'+decimals)+'e-'+decimals);
+  };
+
 })(jQuery);

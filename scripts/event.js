@@ -378,7 +378,7 @@
           thisObj.playMedia();
         }
         else if (!thisObj.startedPlaying) {
-          if (thisObj.startTime) {
+          if (thisObj.startTime > 0) {
             if (thisObj.seeking) {
               // a seek has already been initiated
               // since canplaythrough has been triggered, the seek is complete
@@ -396,7 +396,7 @@
             thisObj.seekToChapter(thisObj.defaultChapter);
           }
           else {
-            // there is now startTime, therefore no seeking required
+            // there is no startTime, therefore no seeking required
             if (thisObj.autoplay) {
               thisObj.playMedia();
             }
@@ -410,6 +410,20 @@
         }
         else {
           // already started playing
+          // we're here because a new media source has been loaded and is ready to resume playback
+          if (thisObj.swappingSrc && thisObj.getPlayerState() == 'stopped') {
+            // Safari is the only broewser that returns value of 'stopped' (observed in 12.0.1 on MacOS)
+            // This prevents 'timeupdate' events from triggering, which prevents the new media src
+            // from resuming playback at swapTime
+            // This is a hack to jump start Safari
+            thisObj.startedPlaying = false;
+            if (thisObj.swapTime > 0) {
+              thisObj.seekTo(thisObj.swapTime);
+            }
+            else {
+              thisObj.playMedia();
+            }
+          }
         }
       })
       .on('playing',function() {
@@ -441,8 +455,9 @@
       .on('pause',function() {
         if (!thisObj.clickedPlay) {
           // 'pause' was triggered automatically, not initiated by user
-          // this happens between tracks in a playlist
-          if (thisObj.hasPlaylist) {
+          // this happens in some browsers (not Chrome, as of 70.x)
+          // when swapping source (e.g., between tracks in a playlist, or swapping description)
+          if (thisObj.hasPlaylist || thisObj.swappingSrc) {
             // do NOT set playing to false.
             // doing so prevents continual playback after new track is loaded
           }
