@@ -286,10 +286,7 @@
       newWidth = $('#' + widthId).val();
       newHeight = $('#' + heightId).val();
       if (newWidth !== startingWidth || newHeight !== startingHeight) {
-        $window.css({
-          'width': newWidth + 'px',
-          'height': newHeight + 'px'
-        });
+        thisObj.resizeObject(which,newWidth,newHeight);
         thisObj.updateCookie(which);
       }
       resizeDialog.hide();

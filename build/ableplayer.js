@@ -6758,7 +6758,6 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
 
     // polyfill for IE11, which doesn't otherwise support Number.isInteger
     // https://stackoverflow.com/a/31720368/744281
-console.log('checking whether ' + value + ' is an integer');
     return typeof value === "number" && isFinite(value) && Math.floor(value) === value;
   };
 
@@ -11399,10 +11398,7 @@ console.log('checking whether ' + value + ' is an integer');
       newWidth = $('#' + widthId).val();
       newHeight = $('#' + heightId).val();
       if (newWidth !== startingWidth || newHeight !== startingHeight) {
-        $window.css({
-          'width': newWidth + 'px',
-          'height': newHeight + 'px'
-        });
+        thisObj.resizeObject(which,newWidth,newHeight);
         thisObj.updateCookie(which);
       }
       resizeDialog.hide();
