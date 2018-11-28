@@ -160,9 +160,9 @@
       else if (this.chapters.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii = 0; ii < this.chapters.length; ii++) {
-            if (this.chapters[ii].language === this.transcriptLang) {
-              chapters = this.chapters[ii].cues;
+          for (var i = 0; i < this.chapters.length; i++) {
+            if (this.chapters[i].language === this.transcriptLang) {
+              chapters = this.chapters[i].cues;
             }
           }
         }
@@ -178,9 +178,9 @@
       else if (this.descriptions.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var ii = 0; ii < this.descriptions.length; ii++) {
-            if (this.descriptions[ii].language === this.transcriptLang) {
-              descriptions = this.descriptions[ii].cues;
+          for (var i = 0; i < this.descriptions.length; i++) {
+            if (this.descriptions[i].language === this.transcriptLang) {
+              descriptions = this.descriptions[i].cues;
             }
           }
         }
@@ -342,8 +342,8 @@
           result.push(comp.value);
         }
         else {
-          for (var ii = 0; ii < comp.children.length; ii++) {
-            result = result.concat(flattenComponentForChapter(comp.children[ii]));
+          for (var i = 0; i < comp.children.length; i++) {
+            result = result.concat(flattenComponentForChapter(comp.children[i]));
           }
         }
         return result;
@@ -352,8 +352,8 @@
       var $chapSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii = 0; ii < chap.components.children.length; ii++) {
-        var results = flattenComponentForChapter(chap.components.children[ii]);
+      for (var i = 0; i < chap.components.children.length; i++) {
+        var results = flattenComponentForChapter(chap.components.children[i]);
         for (var jj = 0; jj < results.length; jj++) {
           $chapSpan.append(results[jj]);
         }
@@ -383,8 +383,8 @@
           result.push(comp.value);
         }
         else {
-          for (var ii = 0; ii < comp.children.length; ii++) {
-            result = result.concat(flattenComponentForDescription(comp.children[ii]));
+          for (var i = 0; i < comp.children.length; i++) {
+            result = result.concat(flattenComponentForDescription(comp.children[i]));
           }
         }
         return result;
@@ -393,8 +393,8 @@
       var $descSpan = $('<span>',{
         'class': 'able-transcript-seekpoint'
       });
-      for (var ii = 0; ii < desc.components.children.length; ii++) {
-        var results = flattenComponentForDescription(desc.components.children[ii]);
+      for (var i = 0; i < desc.components.children.length; i++) {
+        var results = flattenComponentForDescription(desc.components.children[i]);
         for (var jj = 0; jj < results.length; jj++) {
           $descSpan.append(results[jj]);
         }
@@ -416,11 +416,18 @@
 
         var result = [];
 
+        var parts = 0;
+
         var flattenString = function (str) {
+
+          parts++;
+
+          var flatStr;
           var result = [];
           if (str === '') {
             return result;
           }
+
           var openBracket = str.indexOf('[');
           var closeBracket = str.indexOf(']');
           var openParen = str.indexOf('(');
@@ -429,23 +436,43 @@
           var hasBrackets = openBracket !== -1 && closeBracket !== -1;
           var hasParens = openParen !== -1 && closeParen !== -1;
 
-          if ((hasParens && hasBrackets && openBracket < openParen) || hasBrackets) {
-            result = result.concat(flattenString(str.substring(0, openBracket)));
-            var $silentSpan = $('<span>',{
-              'class': 'able-unspoken'
-            });
-            $silentSpan.text(str.substring(openBracket, closeBracket + 1));
-            result.push($silentSpan);
-            result = result.concat(flattenString(str.substring(openParen, closeParen + 1)));
+          if (hasParens || hasBrackets) {
+            if (parts > 1) {
+              // force a line break between sections that contain parens or brackets
+              var silentSpanBreak = '<br/>';
+            }
+            else {
+              var silentSpanBreak = '';
+            }
+            var silentSpanOpen = silentSpanBreak + '<span class="able-unspoken">';
+            var silentSpanClose = '</span>';
+            if (hasParens && hasBrackets) {
+              // string has both!
+              if (openBracket < openParen) {
+                // brackets come first. Parse parens separately
+                hasParens = false;
+              }
+              else {
+                // parens come first. Parse brackets separately
+                hasBrackets = false;
+              }
+            }
           }
-          else if (hasParens) {
-            result = result.concat(flattenString(str.substring(0, openParen)));
-            var $silentSpan = $('<span>',{
-              'class': 'able-unspoken'
-            });
-            $silentSpan.text(str.substring(openBracket, closeBracket + 1));
-            result.push($silentSpan);
-            result = result.concat(flattenString(str.substring(closeParen + 1)));
+          if (hasParens) {
+            flatStr = str.substring(0, openParen);
+            flatStr += silentSpanOpen;
+            flatStr += str.substring(openParen, closeParen + 1);
+            flatStr += silentSpanClose;
+            flatStr += flattenString(str.substring(closeParen + 1));
+            result.push(flatStr);
+          }
+          else if (hasBrackets) {
+            flatStr = str.substring(0, openBracket);
+            flatStr += silentSpanOpen;
+            flatStr += str.substring(openBracket, closeBracket + 1);
+            flatStr += silentSpanClose;
+            flatStr += flattenString(str.substring(closeBracket + 1));
+            result.push(flatStr);
           }
           else {
             result.push(str);
@@ -462,8 +489,8 @@
           });
           $vSpan.text('(' + comp.value + ')');
           result.push($vSpan);
-          for (var ii = 0; ii < comp.children.length; ii++) {
-            var subResults = flattenComponentForCaption(comp.children[ii]);
+          for (var i = 0; i < comp.children.length; i++) {
+            var subResults = flattenComponentForCaption(comp.children[i]);
             for (var jj = 0; jj < subResults.length; jj++) {
               result.push(subResults[jj]);
             }
@@ -476,8 +503,8 @@
           else if (comp.type === 'i') {
             var $tag = $('<em>');
           }
-          for (var ii = 0; ii < comp.children.length; ii++) {
-            var subResults = flattenComponentForCaption(comp.children[ii]);
+          for (var i = 0; i < comp.children.length; i++) {
+            var subResults = flattenComponentForCaption(comp.children[i]);
             for (var jj = 0; jj < subResults.length; jj++) {
               $tag.append(subResults[jj]);
             }
@@ -487,15 +514,15 @@
           }
         }
         else {
-          for (var ii = 0; ii < comp.children.length; ii++) {
-            result = result.concat(flattenComponentForCaption(comp.children[ii]));
+          for (var i = 0; i < comp.children.length; i++) {
+            result = result.concat(flattenComponentForCaption(comp.children[i]));
           }
         }
         return result;
       };
 
-      for (var ii = 0; ii < cap.components.children.length; ii++) {
-        var results = flattenComponentForCaption(cap.components.children[ii]);
+      for (var i = 0; i < cap.components.children.length; i++) {
+        var results = flattenComponentForCaption(cap.components.children[i]);
         for (var jj = 0; jj < results.length; jj++) {
           var result = results[jj];
           if (typeof result === 'string') {
