@@ -545,6 +545,7 @@
 
     this.playing = false; // will change to true after 'playing' event is triggered
     this.clickedPlay = false; // will change to true temporarily if user clicks 'play' (or pause)
+    this.fullscreen = false; // will change to true if player is in full screen mode
 
     this.getUserAgent();
     this.setIconColor();
@@ -5380,7 +5381,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
           'width': ''
         });
         this.youTubePlayer.setSize(width, height);
-        if (this.isFullscreen()) {
+        if (this.fullscreen) {
           this.youTubePlayer.setSize(width, height);
         }
         else {
@@ -7707,7 +7708,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
           widthUsed += $(this).width();
         }
       });
-      if (this.isFullscreen()) {
+      if (this.fullscreen) {
         seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
       }
       else {
@@ -7720,7 +7721,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
     }
 
     // Show/hide status bar content conditionally
-    if (!this.isFullscreen()) {
+    if (!this.fullscreen) {
       statusBarWidthBreakpoint = 300;
       statusBarHeight = this.$statusBarDiv.height();
       speedHeight = this.$statusBarDiv.find('span.able-speed').height();
@@ -7804,7 +7805,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
       });
     }
     if (this.$fullscreenButton) {
-      if (!this.isFullscreen()) {
+      if (!this.fullscreen) {
         this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
         if (this.iconType === 'font') {
           this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
@@ -7842,7 +7843,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
         if (!this.hideBigPlayButton) {
           this.$bigPlayButton.show();
         }
-        if (this.isFullscreen()) {
+        if (this.fullscreen) {
           this.$bigPlayButton.width($(window).width());
           this.$bigPlayButton.height($(window).height());
         }
@@ -8262,6 +8263,14 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
   };
 
   AblePlayer.prototype.isFullscreen = function () {
+
+    // NOTE: This has been largely replaced as of 3.2.5 with a Boolean this.fullscreen,
+    // which is defined in setFullscreen()
+    // This function returns true if *any* element is fullscreen
+    // but doesn't tell us whether a particular element is in fullscreen
+    // (e.g., if there are multiple players on the page)
+    // The Boolean this.fullscreen is defined separately for each player instance
+
     if (this.nativeFullscreenSupported()) {
       return (document.fullscreenElement ||
               document.webkitFullscreenElement ||
@@ -8275,7 +8284,9 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
   }
 
   AblePlayer.prototype.setFullscreen = function (fullscreen) {
-    if (this.isFullscreen() == fullscreen) {
+
+    if (this.fullscreen == fullscreen) {
+      // replace isFullscreen() with a Boolean. see function for explanation
       return;
     }
     var thisObj = this;
@@ -8303,6 +8314,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
         else if (el.msRequestFullscreen) {
           el.msRequestFullscreen();
         }
+        this.fullscreen = true;
       }
       else {
         // Exit fullscreen
@@ -8321,6 +8333,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
         else if (document.msExitFullscreen) {
           document.msExitFullscreen();
         }
+        this.fullscreen = false;
       }
       // add event handlers for changes in full screen mode
       // currently most changes are made in response to windowResize event
@@ -8330,7 +8343,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
       // but includes event listeners for all browsers in case its functionality could be expanded
       // Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
       $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
-        if (!thisObj.isFullscreen()) {
+        if (!thisObj.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
           // user has just exited full screen
           thisObj.restoringAfterFullScreen = true;
           thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
@@ -8399,7 +8412,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
 
   AblePlayer.prototype.handleFullscreenToggle = function () {
     var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function
-    this.setFullscreen(!this.isFullscreen());
+    this.setFullscreen(!this.fullscreen);
     if (stillPaused) {
       this.pauseMedia(); // when toggling fullscreen and media is just paused, keep media paused.
     }
@@ -8521,7 +8534,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
 
     var jwHeight, captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
-    if (this.isFullscreen()) {
+    if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
       if (typeof this.$vidcapContainer !== 'undefined') {
         this.$ableWrapper.css({
           'width': width + 'px',
@@ -10517,7 +10530,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
 
   AblePlayer.prototype.onWindowResize = function () {
 
-    if (this.isFullscreen()) {
+    if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
 
       var newWidth, newHeight;
 

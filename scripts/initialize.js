@@ -4,6 +4,7 @@
 
     this.playing = false; // will change to true after 'playing' event is triggered
     this.clickedPlay = false; // will change to true temporarily if user clicks 'play' (or pause)
+    this.fullscreen = false; // will change to true if player is in full screen mode
 
     this.getUserAgent();
     this.setIconColor();

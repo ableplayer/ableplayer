@@ -92,7 +92,7 @@
 
   AblePlayer.prototype.onWindowResize = function () {
 
-    if (this.isFullscreen()) {
+    if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
 
       var newWidth, newHeight;
 

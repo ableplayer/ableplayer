@@ -243,7 +243,7 @@
           'width': ''
         });
         this.youTubePlayer.setSize(width, height);
-        if (this.isFullscreen()) {
+        if (this.fullscreen) {
           this.youTubePlayer.setSize(width, height);
         }
         else {
