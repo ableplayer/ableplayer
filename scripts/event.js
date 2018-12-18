@@ -223,6 +223,7 @@
       this.handleTranscriptToggle();
     }
     else if (whichButton === 'fullscreen') {
+      this.clickedFullscreenButton = true;
       this.handleFullscreenToggle();
     }
   };

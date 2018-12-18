@@ -1135,6 +1135,14 @@
           thisObj.restoringAfterFullScreen = true;
           thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
         }
+        else if (!thisObj.clickedFullscreenButton) {
+          // user triggered fullscreenchange without clicking (or pressing) fullscreen button
+          // this is only possible if they pressed Escape to exit fullscreen mode
+          thisObj.fullscreen = false;
+          thisObj.restoringAfterFullScreen = true;
+          thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
+        }
+        thisObj.clickedFullscreenButton = false; // reset
       });
     }
     else {
