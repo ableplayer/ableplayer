@@ -1129,8 +1129,9 @@
       // this fullscreen event handler added specifically for Opera Mac,
       // but includes event listeners for all browsers in case its functionality could be expanded
       // Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
-      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function() {
-        if (!thisObj.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
+      $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e) {
+        // NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
+        if (!thisObj.fullscreen) {
           // user has just exited full screen
           thisObj.restoringAfterFullScreen = true;
           thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
@@ -1142,7 +1143,16 @@
           thisObj.restoringAfterFullScreen = true;
           thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
         }
-        thisObj.clickedFullscreenButton = false; // reset
+        // NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
+        // when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
+        // Not sure why, but consequently we need to be sure thisObj.clickedFullScreenButton
+        // continues to be true through both events
+        // Could use a counter variable to control that (reset to false after the 2nd trigger)
+        // However, since I don't know why it's happening, and whether it's 100% reliable
+        // resetting clickedFullScreenButton after a timeout seems to be better approach
+        setTimeout(function() {
+          thisObj.clickedFullscreenButton = false;
+        },3000);
       });
     }
     else {
@@ -1206,6 +1216,7 @@
   };
 
   AblePlayer.prototype.handleFullscreenToggle = function () {
+
     var stillPaused = this.isPaused(); //add boolean variable reading return from isPaused function
     this.setFullscreen(!this.fullscreen);
     if (stillPaused) {
