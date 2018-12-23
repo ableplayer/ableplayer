@@ -5473,6 +5473,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
   };
 
   AblePlayer.prototype.getYouTubeCaptionData = function (youTubeId) {
+
     // get data via YouTube Data API, and push data to this.ytCaptions
     var deferred = new $.Deferred();
     var promise = deferred.promise();
@@ -5545,7 +5546,12 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
             deferred.resolve();
           }
         }, function (reason) {
-          console.log('Error: ' + reason.result.error.message);
+          console.log('Error retrieving captions: ' + reason.result.error.message);
+          // If video has no captions, YouTube returns an error.
+          // Should still proceed, but with captions disabled
+          thisObj.hasCaptions = false;
+          thisObj.usingYouTubeCaptions = false;
+          deferred.resolve();
         });
       });
     return promise;
