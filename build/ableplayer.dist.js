@@ -5546,9 +5546,12 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
             deferred.resolve();
           }
         }, function (reason) {
-          
           // If video has no captions, YouTube returns an error.
           // Should still proceed, but with captions disabled
+          // The specific error, if needed: reason.result.error.message
+          // If no captions, the error is: "The video identified by the <code>videoId</code> parameter could not be found."
+          
+          
           thisObj.hasCaptions = false;
           thisObj.usingYouTubeCaptions = false;
           deferred.resolve();

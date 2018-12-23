@@ -408,9 +408,12 @@
             deferred.resolve();
           }
         }, function (reason) {
-          console.log('Error retrieving captions: ' + reason.result.error.message);
           // If video has no captions, YouTube returns an error.
           // Should still proceed, but with captions disabled
+          // The specific error, if needed: reason.result.error.message
+          // If no captions, the error is: "The video identified by the <code>videoId</code> parameter could not be found."
+          console.log('Error retrieving captions.');
+          console.log('Check your video on YouTube to be sure captions are available and published.');
           thisObj.hasCaptions = false;
           thisObj.usingYouTubeCaptions = false;
           deferred.resolve();
