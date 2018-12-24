@@ -103,6 +103,14 @@
       this.playsInline = '0';
     }
 
+    // poster (Boolean, indicating whether media element has a poster attribute)
+    if ($(media).attr('poster')) {
+      this.hasPoster = true;
+    }
+    else {
+      this.hasPoster = false;
+    }
+
     // start-time
     if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
       this.startTime = $(media).data('start-time');
@@ -3171,10 +3179,11 @@
 
     this.injectOffscreenHeading();
 
-    // youtube adds its own big play button
-    // if (this.mediaType === 'video' && this.player !== 'youtube') {
     if (this.mediaType === 'video') {
-      if (this.iconType != 'image' && this.player !== 'youtube') {
+      // youtube adds its own big play button
+      // don't show ours *unless* video has a poster attribute
+      // (which obstructs the YouTube poster & big play button)
+      if (this.iconType != 'image' && (this.player !== 'youtube' || this.hasPoster)) {
         this.injectBigPlayButton();
       }
 
@@ -3465,7 +3474,7 @@
       height = 'auto';
     }
 
-    if (this.$media.attr('poster')) {
+    if (this.hasPoster) {
       poster = this.$media.attr('poster');
       this.$posterImg = $('<img>',{
         'class': 'able-poster',

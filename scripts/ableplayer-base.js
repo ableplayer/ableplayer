@@ -103,6 +103,14 @@
       this.playsInline = '0';
     }
 
+    // poster (Boolean, indicating whether media element has a poster attribute)
+    if ($(media).attr('poster')) {
+      this.hasPoster = true;
+    }
+    else {
+      this.hasPoster = false;
+    }
+
     // start-time
     if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
       this.startTime = $(media).data('start-time');
