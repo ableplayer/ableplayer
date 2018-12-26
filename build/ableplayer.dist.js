@@ -8333,6 +8333,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
           el.msRequestFullscreen();
         }
         this.fullscreen = true;
+
       }
       else {
         // Exit fullscreen
@@ -8352,6 +8353,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
           document.msExitFullscreen();
         }
         this.fullscreen = false;
+
       }
       // add event handlers for changes in full screen mode
       // currently most changes are made in response to windowResize event
@@ -8383,7 +8385,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
         // resetting clickedFullScreenButton after a timeout seems to be better approach
         setTimeout(function() {
           thisObj.clickedFullscreenButton = false;
-        },3000);
+        },1000);
       });
     }
     else {

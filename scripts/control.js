@@ -1102,6 +1102,7 @@
           el.msRequestFullscreen();
         }
         this.fullscreen = true;
+console.log('setting fullscreen to true');
       }
       else {
         // Exit fullscreen
@@ -1121,6 +1122,7 @@
           document.msExitFullscreen();
         }
         this.fullscreen = false;
+console.log('setting fullscreen to false');
       }
       // add event handlers for changes in full screen mode
       // currently most changes are made in response to windowResize event
@@ -1152,7 +1154,7 @@
         // resetting clickedFullScreenButton after a timeout seems to be better approach
         setTimeout(function() {
           thisObj.clickedFullscreenButton = false;
-        },3000);
+        },1000);
       });
     }
     else {
