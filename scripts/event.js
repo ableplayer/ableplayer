@@ -142,6 +142,7 @@
   };
 
   AblePlayer.prototype.addSeekbarListeners = function () {
+
     var thisObj = this;
 
     // Handle seek bar events.

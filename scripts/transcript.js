@@ -1,8 +1,38 @@
 (function ($) {
 
+  AblePlayer.prototype.setupTranscript = function() {
+
+    var deferred = new $.Deferred();
+    var promise = deferred.promise();
+
+		if (!this.transcriptType) {
+			// previously set transcriptType to null since there are no <track> elements
+			// check again to see if captions have been collected from other sources (e.g., YouTube)
+			if (this.captions.length) {
+				// captions are possible! Use the default type (popup)
+				// if other types ('external' and 'manual') were desired, transcriptType would not be null here
+				this.transcriptType = 'popup';
+			}
+		}
+
+		if (this.transcriptType) {
+			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
+  	    this.injectTranscriptArea();
+	  	    deferred.resolve();
+			}
+			else if (this.transcriptType === 'manual') {
+				this.setupManualTranscript();
+				deferred.resolve();
+			}
+		}
+		return promise;
+	};
+
   AblePlayer.prototype.injectTranscriptArea = function() {
 
-    var thisObj = this;
+		var thisObj, $autoScrollLabel, $languageSelectWrapper, $languageSelectLabel, i, $option;
+
+    thisObj = this;
 
     this.$transcriptArea = $('<div>', {
       'class': 'able-transcript-area',
@@ -17,29 +47,48 @@
       'class' : 'able-transcript'
     });
 
-    // Transcript toolbar content:
-    this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-    this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
+    // Transcript toolbar content
+
+		// Add auto Scroll checkbox
+    this.$autoScrollTranscriptCheckbox = $('<input>', {
+     	'id': 'autoscroll-transcript-checkbox',
+     	'type': 'checkbox'
+     });
+    $autoScrollLabel = $('<label>', {
+	    'for': 'autoscroll-transcript-checkbox'
+	   }).text(this.tt.autoScroll);
+    this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
 
     // Add field for selecting a transcript language
-    // This will be deleted in initialize.js > recreatePlayer() if there are no languages
-    this.$transcriptLanguageSelect = $('<select id="transcript-language-select">');
-    // Add a default "Unknown" option; this will be deleted later if there are any
-    // elements with a language.
-    this.$unknownTranscriptOption = $('<option val="unknown">' + this.tt.unknown + '</option>');
-    this.$transcriptLanguageSelect.append(this.$unknownTranscriptOption);
-    this.$transcriptLanguageSelect.prop('disabled', true);
+    // Only necessary if there is more than one language
+    if (this.captions.length >= 1) {
+			$languageSelectWrapper = $('<div>',{
+				'class': 'transcript-language-select-wrapper'
+			});
+			$languageSelectLabel = $('<label>',{
+				'for': 'transcript-language-select'
+			}).text(this.tt.language);
+			this.$transcriptLanguageSelect = $('<select>',{
+				'id': 'transcript-language-select'
+			});
+			for (i=0; i < this.captions.length; i++) {
+      	$option = $('<option></option>',{
+        	value: this.captions[i]['language'],
+					lang: this.captions[i]['language']
+      	}).text(this.captions[i]['label']);
+      	if (this.captions[i]['def']) {
+	      	$option.prop('selected',true);
+	      }
+				this.$transcriptLanguageSelect.append($option);
+	    }
+    }
+    $languageSelectWrapper.append($languageSelectLabel,this.$transcriptLanguageSelect);
+		this.$transcriptToolbar.append($languageSelectWrapper);
+		this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
-    var languageSelectWrapper = $('<div class="transcript-language-select-wrapper">');
-    this.$transcriptLanguageSelectContainer = languageSelectWrapper;
-
-    languageSelectWrapper.append($('<label for="transcript-language-select">' + this.tt.language + ': </label>'), this.$transcriptLanguageSelect);
-    this.$transcriptToolbar.append(languageSelectWrapper);
-    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
-
-    // If client has provided separate transcript location, put it there.
-    // Otherwise append it to the body
-    if (this.transcriptDivLocation) {
+		// If client has provided separate transcript location, put it there.
+		// Otherwise append it to the body
+		if (this.transcriptDivLocation) {
       $('#' + this.transcriptDivLocation).append(this.$transcriptArea);
     }
     else {

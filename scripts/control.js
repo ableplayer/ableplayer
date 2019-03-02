@@ -548,12 +548,9 @@
     }
 
     if (this.$ccButton) {
-      if (this.usingYouTubeCaptions) {
-        captionsCount = this.ytCaptions.length;
-      }
-      else {
-        captionsCount = this.captions.length;
-      }
+
+      captionsCount = this.captions.length;
+
       // Button has a different title depending on the number of captions.
       // If only one caption track, this is "Show captions" and "Hide captions"
       // Otherwise, it is just always "Captions"
@@ -864,9 +861,6 @@
     if (this.captions.length) {
       captions = this.captions;
     }
-    else if (this.ytCaptions.length) {
-      captions = this.ytCaptions;
-    }
     else {
       captions = [];
     }
@@ -1102,7 +1096,6 @@
           el.msRequestFullscreen();
         }
         this.fullscreen = true;
-console.log('setting fullscreen to true');
       }
       else {
         // Exit fullscreen
@@ -1122,7 +1115,6 @@ console.log('setting fullscreen to true');
           document.msExitFullscreen();
         }
         this.fullscreen = false;
-console.log('setting fullscreen to false');
       }
       // add event handlers for changes in full screen mode
       // currently most changes are made in response to windowResize event

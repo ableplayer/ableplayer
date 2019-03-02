@@ -2,6 +2,9 @@
   // See section 4.1 of dev.w3.org/html5/webvtt for format details.
   AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
 
+//    var deferred = new $.Deferred();
+//    var promise = deferred.promise();
+
     // Normalize line ends to \n.
     text = text.replace(/(\r\n|\n|\r)/g,'\n');
 

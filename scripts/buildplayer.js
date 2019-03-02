@@ -55,17 +55,6 @@
 
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
-
-    if (this.transcriptType) {
-      if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
-        this.injectTranscriptArea();
-      }
-      else if (this.transcriptType === 'manual') {
-        this.setupManualTranscript();
-      }
-      this.addTranscriptAreaEvents();
-    }
-
     this.injectAlert();
     this.injectPlaylist();
   };
@@ -393,7 +382,6 @@
 
     // Create popup menu and append to player
     // 'which' parameter is either 'captions', 'chapters', 'prefs', 'transcript-window' or 'sign-window'
-    // TODO: Add 'ytcaptions' to parameter list??? Or do they get handled as 'captions'
     // 'tracks', if provided, is a list of tracks to be used as menu items
 
     var thisObj, $menu, prefCats, i, $menuItem, prefCat, whichPref,
@@ -470,7 +458,7 @@
           $menuItem.attr('aria-checked','false');
         }
         // Get a label using track data
-        if (which == 'captions' || which == 'ytCaptions') {
+        if (which == 'captions') {
           $menuItem.text(track.label);
           $menuItem.on('click',this.getCaptionClickFunction(track));
         }
@@ -480,7 +468,7 @@
         }
         $menu.append($menuItem);
       }
-      if (which === 'captions' || which === 'ytcaptions') {
+      if (which === 'captions') {
         // add a 'captions off' menu item
         $menuItem = $('<li></li>',{
           'role': 'menuitemradio',
@@ -529,7 +517,7 @@
       }
     }
     // assign default item, if there isn't one already
-    if ((which === 'captions' || which === 'ytcaptions') && !hasDefault) {
+    if (which === 'captions' && !hasDefault) {
       // check the menu item associated with the default language
       // as determined in control.js > syncTrackLanguages()
       if ($menu.find('li[lang=' + this.captionLang + ']')) {
@@ -651,15 +639,8 @@
     }
 
     if (which === 'captions' || (typeof which === 'undefined')) {
-      if (typeof this.ytCaptions !== 'undefined') { // setup popup for YouTube captions
-        if (this.ytCaptions.length) {
-          popups.push('ytCaptions');
-        }
-      }
-      else { // setup popup for local captions
-        if (this.captions.length > 0) {
-          popups.push('captions');
-        }
+      if (this.captions.length > 0) {
+        popups.push('captions');
       }
     }
     if (which === 'chapters' || (typeof which === 'undefined')) {
@@ -698,11 +679,6 @@
           }
           if (typeof this.chaptersPopup === 'undefined') {
             this.chaptersPopup = this.createPopup('chapters',tracks);
-          }
-        }
-        else if (popup == 'ytCaptions') {
-          if (typeof this.captionsPopup === 'undefined') {
-            this.captionsPopup = this.createPopup('captions',this.ytCaptions);
           }
         }
         else if (popup == 'transcript-window') {
@@ -1018,7 +994,6 @@
             'class': 'able-button-handler-' + control
           });
           if (control === 'volume' || control === 'preferences') {
-            // This same ARIA for captions and chapters are added elsewhere (FUCK where?)
             if (control == 'preferences') {
               popupMenuId = this.mediaId + '-prefs-menu';
             }
@@ -1490,7 +1465,6 @@
 
   AblePlayer.prototype.swapSource = function(sourceIndex) {
 
-console.log('swapSource; sourceIndex: ' + sourceIndex);
     // Change media player source file, for instance when moving to the next element in a playlist.
     // NOTE: Swapping source for audio description is handled elsewhere;
     // see description.js > swapDescription()
@@ -1600,8 +1574,6 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
 
   AblePlayer.prototype.getButtonTitle = function(control) {
 
-    var captionsCount;
-
     if (control === 'playpause') {
       return this.tt.play;
     }
@@ -1621,13 +1593,7 @@ console.log('swapSource; sourceIndex: ' + sourceIndex);
       return this.tt.forward;
     }
     else if (control === 'captions') {
-      if (this.usingYouTubeCaptions) {
-        captionsCount = this.ytCaptions.length;
-      }
-      else {
-        captionsCount = this.captions.length;
-      }
-      if (captionsCount > 1) {
+      if (this.captions.length > 1) {
         return this.tt.captions;
       }
       else {

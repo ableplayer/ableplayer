@@ -292,15 +292,6 @@
 
     thisObj = this;
 
-    // this.ytCaptions has the same structure as this.captions
-    // but unfortunately does not contain cues
-    // Google *does* offer a captions.download service for downloading captions in WebVTT
-    // https://developers.google.com/youtube/v3/docs/captions/download
-    // However, this requires OAUTH 2.0 (user must login and give consent)
-    // So, for now the best we can do is create an array of available caption/subtitle tracks
-    // and provide a button & popup menu to allow users to control them
-    this.ytCaptions = [];
-
     // if a described version is available && user prefers desription
     // Use the described version, and get its captions
     if (this.youTubeDescId && this.prefDesc) {
@@ -310,115 +301,298 @@
       youTubeId = this.youTubeId;
     }
 
-    // Wait until Google Client API is loaded
-    // When loaded, it sets global var googleApiReady to true
+    if (typeof youTubeDataAPIKey !== 'undefined') {
+      // Wait until Google Client API is loaded
+      // When loaded, it sets global var googleApiReady to true
 
-    // Thanks to Paul Tavares for $.doWhen()
-    // https://gist.github.com/purtuga/8257269
-    $.doWhen({
-      when: function(){
-        return googleApiReady;
-      },
-      interval: 100, // ms
-      attempts: 1000
-    })
-    .done(function(){
-      thisObj.getYouTubeCaptionData(youTubeId).done(function() {
-        deferred.resolve();
+      // Thanks to Paul Tavares for $.doWhen()
+      // https://gist.github.com/purtuga/8257269
+      $.doWhen({
+        when: function(){
+          return googleApiReady;
+        },
+        interval: 100, // ms
+        attempts: 1000
+      })
+      .done(function(){
+          deferred.resolve();
+      })
+      .fail(function(){
+        console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
       });
-    })
-    .fail(function(){
-      console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
-    });
-
+    }
+    else {
+      deferred.resolve();
+    }
     return promise;
   };
 
-  AblePlayer.prototype.getYouTubeCaptionData = function (youTubeId) {
+  AblePlayer.prototype.waitForGapi = function () {
 
-    // get data via YouTube Data API, and push data to this.ytCaptions
+    // wait for Google API to initialize
+
+    var thisObj, deferred, promise, maxWaitTime, maxTries, tries, timer, interval;
+
+    thisObj = this;
+    deferred = new $.Deferred();
+    promise = deferred.promise();
+    maxWaitTime = 5000; // 5 seconds
+    maxTries = 100; // number of tries during maxWaitTime
+    tries = 0;
+    interval = Math.floor(maxWaitTime/maxTries);
+
+    timer = setInterval(function() {
+      tries++;
+      if (googleApiReady || tries >= maxTries) {
+        clearInterval(timer);
+        if (googleApiReady) { // success!
+          deferred.resolve(true);
+        }
+        else { // tired of waiting
+          deferred.resolve(false);
+        }
+      }
+      else {
+        thisObj.waitForGapi();
+      }
+    }, interval);
+    return promise;
+  };
+
+  AblePlayer.prototype.getYouTubeCaptionTracks = function (youTubeId) {
+
+    // get data via YouTube Data API, and push data to this.captions
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
-    var thisObj, i, trackId, trackLang, trackLabel, trackKind, isDraft, isDefaultTrack;
+    var thisObj, useGoogleApi, i, trackId, trackLang, trackName, trackLabel, trackKind, isDraft, isDefaultTrack;
 
     thisObj = this;
-    gapi.client.setApiKey(youTubeDataAPIKey);
-    gapi.client
-      .load('youtube', 'v3')
-      .then(function() {
-        var request = gapi.client.youtube.captions.list({
-          'part': 'id, snippet',
-          'videoId': youTubeId
-        });
-        request.then(function(json) {
-          if (json.result.items.length) { // video has captions!
-            thisObj.hasCaptions = true;
-            thisObj.usingYouTubeCaptions = true;
-            if (thisObj.prefCaptions === 1) {
-              thisObj.captionsOn = true;
-            }
-            else {
-              thisObj.captionsOn = false;
-            }
-            // Step through results and add them to cues array
-            for (i=0; i < json.result.items.length; i++) {
 
-              trackId = json.result.items[i].id;
-              trackLabel = json.result.items[i].snippet.name; // always seems to be empty
-              trackLang = json.result.items[i].snippet.language;
-              trackKind = json.result.items[i].snippet.trackKind; // ASR, standard, forced
-              isDraft = json.result.items[i].snippet.isDraft; // Boolean
-              // Other variables that could potentially be collected from snippet:
-              // isCC - Boolean, always seems to be false
-              // isLarge - Boolean
-              // isEasyReader - Boolean
-              // isAutoSynced  Boolean
-              // status - string, always seems to be "serving"
+    if (typeof youTubeDataAPIKey !== 'undefined') {
+      this.waitForGapi().then(function(waitResult) {
 
-              if (trackKind !== 'ASR' && !isDraft) {
+        useGoogleApi = waitResult;
 
-                // if track name is empty (it always seems to be), assign a name based on trackLang
-                if (trackLabel === '') {
-                  trackLabel = thisObj.getLanguageName(trackLang);
-                }
+        // useGoogleApi returns false if API failed to initalize after max wait time
+        // Proceed only if true. Otherwise can still use fallback method (see else loop below)
+        if (useGoogleApi === true) {
+          gapi.client.setApiKey(youTubeDataAPIKey);
+          gapi.client
+            .load('youtube', 'v3')
+            .then(function() {
+              var request = gapi.client.youtube.captions.list({
+                'part': 'id, snippet',
+                'videoId': youTubeId
+              });
+              request.then(function(json) {
+                if (json.result.items.length) { // video has captions!
+                  thisObj.hasCaptions = true;
+                  thisObj.usingYouTubeCaptions = true;
+                  if (thisObj.prefCaptions === 1) {
+                    thisObj.captionsOn = true;
+                  }
+                  else {
+                    thisObj.captionsOn = false;
+                  }
+                  // Step through results and add them to cues array
+                  for (i=0; i < json.result.items.length; i++) {
+                    trackName = json.result.items[i].snippet.name; // usually seems to be empty
+                    trackLang = json.result.items[i].snippet.language;
+                    trackKind = json.result.items[i].snippet.trackKind; // ASR, standard, forced
+                    isDraft = json.result.items[i].snippet.isDraft; // Boolean
+                    // Other variables that could potentially be collected from snippet:
+                    // isCC - Boolean, always seems to be false
+                    // isLarge - Boolean
+                    // isEasyReader - Boolean
+                    // isAutoSynced  Boolean
+                    // status - string, always seems to be "serving"
 
-                // assign the default track based on language of the player
-                if (trackLang === thisObj.lang) {
-                  isDefaultTrack = true;
+										var srcUrl = thisObj.getYouTubeTimedTextUrl(youTubeId,trackName,trackLang);
+                    if (trackKind !== 'ASR' && !isDraft) {
+
+                      if (trackName !== '') {
+	                      trackLabel = trackName;
+                      }
+                      else {
+	                      // if track name is empty (it always seems to be), assign a label based on trackLang
+	                      trackLabel = thisObj.getLanguageName(trackLang);
+                      }
+
+                      // assign the default track based on language of the player
+                      if (trackLang === thisObj.lang) {
+                        isDefaultTrack = true;
+                      }
+                      else {
+                        isDefaultTrack = false;
+                      }
+                      thisObj.tracks.push({
+                        'kind': 'captions',
+                        'src': srcUrl,
+                        'language': trackLang,
+                        'label': trackLabel,
+                        'def': isDefaultTrack
+                      });
+                    }
+                  }
+                  // setupPopups again with new captions array, replacing original
+                  thisObj.setupPopups('captions');
+                  deferred.resolve();
                 }
                 else {
-                  isDefaultTrack = false;
+                  thisObj.hasCaptions = false;
+                  thisObj.usingYouTubeCaptions = false;
+                  deferred.resolve();
                 }
+              }, function (reason) {
+                // If video has no captions, YouTube returns an error.
+                // Should still proceed, but with captions disabled
+                // The specific error, if needed: reason.result.error.message
+                // If no captions, the error is: "The video identified by the <code>videoId</code> parameter could not be found."
+                console.log('Error retrieving captions.');
+                console.log('Check your video on YouTube to be sure captions are available and published.');
+                thisObj.hasCaptions = false;
+                thisObj.usingYouTubeCaptions = false;
+                deferred.resolve();
+              });
+            })
+        }
+        else {
+          // googleAPi never loaded.
+					this.getYouTubeCaptionTracks2(youTubeId).then(function() {
+						deferred.resolve();
+					});
+        }
+      });
+    }
+    else {
+      // web owner hasn't provided a Google API key
+      // attempt to get YouTube captions via the backup method
+			this.getYouTubeCaptionTracks2(youTubeId).then(function() {
+				deferred.resolve();
+			});
+    }
+    return promise;
+  };
 
-                thisObj.ytCaptions.push({
-                  'language': trackLang,
-                  'label': trackLabel,
-                  'def': isDefaultTrack
-                });
-              }
-            }
-            // setupPopups again with new ytCaptions array, replacing original
-            thisObj.setupPopups('captions');
-            deferred.resolve();
-          }
-          else {
-            thisObj.hasCaptions = false;
-            thisObj.usingYouTubeCaptions = false;
-            deferred.resolve();
-          }
-        }, function (reason) {
-          // If video has no captions, YouTube returns an error.
-          // Should still proceed, but with captions disabled
-          // The specific error, if needed: reason.result.error.message
-          // If no captions, the error is: "The video identified by the <code>videoId</code> parameter could not be found."
-          console.log('Error retrieving captions.');
-          console.log('Check your video on YouTube to be sure captions are available and published.');
-          thisObj.hasCaptions = false;
+	AblePlayer.prototype.getYouTubeCaptionTracks2 = function (youTubeId) {
+
+   	// Use alternative backup method of getting caption tracks from YouTube
+   	// and pushing them to this.captions
+   	// Called from getYouTubeCaptionTracks if no Google API key is defined
+   	// or if Google API failed to initiatlize
+	 	// This method seems to be undocumented, but is referenced on StackOverflow
+	 	// We'll use that as a fallback but it could break at any moment
+
+    var deferred = new $.Deferred();
+    var promise = deferred.promise();
+
+    var thisObj, useGoogleApi, i, trackId, trackLang, trackName, trackLabel, trackKind, isDraft, isDefaultTrack;
+
+    thisObj = this;
+
+		$.ajax({
+			type: 'get',
+			url: 'https://www.youtube.com/api/timedtext?type=list&v=' + youTubeId,
+			dataType: 'xml',
+			success: function(xml) {
+				var $tracks = $(xml).find('track');
+				if ($tracks.length > 0) {  // video has captions!
+        	thisObj.hasCaptions = true;
+          thisObj.usingYouTubeCaptions = true;
+					if (thisObj.prefCaptions === 1) {
+          	thisObj.captionsOn = true;
+					}
+					else {
+						thisObj.captionsOn = false;
+					}
+					// Step through results and add them to cues array
+					$tracks.each(function() {
+						trackId = $(this).attr('id');
+						trackLang = $(this).attr('lang_code');
+						if ($(this).attr('name') !== '') {
+							trackName = $(this).attr('name');
+							trackLabel = trackName;
+						}
+						else {
+							// @name is typically null except for default track
+							// but lang_translated seems to be reliable
+							trackName = '';
+							trackLabel = $(this).attr('lang_translated');
+						}
+						if (trackLabel === '') {
+							trackLabel = thisObj.getLanguageName(trackLang);
+						}
+						// assign the default track based on language of the player
+						if (trackLang === thisObj.lang) {
+							isDefaultTrack = true;
+						}
+						else {
+							isDefaultTrack = false;
+						}
+
+						// Build URL for retrieving WebVTT source via YouTube's timedtext API
+						var srcUrl = thisObj.getYouTubeTimedTextUrl(youTubeId,trackName,trackLang);
+						thisObj.tracks.push({
+							'kind': 'captions',
+							'src': srcUrl,
+							'language': trackLang,
+							'label': trackLabel,
+							'def': isDefaultTrack
+						});
+
+					});
+					// setupPopups again with new captions array, replacing original
+					thisObj.setupPopups('captions');
+					deferred.resolve();
+				}
+        else {
+        	thisObj.hasCaptions = false;
           thisObj.usingYouTubeCaptions = false;
           deferred.resolve();
-        });
-      });
+				}
+			},
+      error: function(xhr, status) {
+      	console.log('Error retrieving YouTube caption data for video ' + youTubeId);
+				deferred.resolve();
+			}
+		});
+    return promise;
+  };
+
+	AblePlayer.prototype.getYouTubeTimedTextUrl = function (youTubeId, trackName, trackLang) {
+
+		// return URL for retrieving WebVTT source via YouTube's timedtext API
+		// Note: This API seems to be undocumented, and could break anytime
+    var url = 'https://www.youtube.com/api/timedtext?fmt=vtt';
+    url += '&v=' + youTubeId;
+    url += '&lang=' + trackLang;
+    // if track has a value in the name field, it's *required* in the URL
+    if (trackName !== '') {
+    	url += '&name=' + trackName;
+  	}
+  	return url;
+	};
+
+
+  AblePlayer.prototype.getYouTubeCaptionCues = function (youTubeId) {
+
+    var deferred, promise, thisObj;
+
+    var deferred = new $.Deferred();
+    var promise = deferred.promise();
+
+    thisObj = this;
+
+    this.tracks = [];
+    this.tracks.push({
+      'kind': 'captions',
+      'src': 'some_file.vtt',
+      'language': 'en',
+      'label': 'Fake English captions'
+    });
+
+    deferred.resolve();
     return promise;
   };
 

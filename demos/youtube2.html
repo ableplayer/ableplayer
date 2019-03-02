@@ -63,16 +63,17 @@
 
 <h1>Able Player for YouTube (Complex Example)</h1>
 
-<p>This page features a relatively complex example of Able Player being used to play a YouTube video. Its features include:</p>
+<p>This page features a relatively <strong>complex</strong> example of Able Player being used to play a YouTube video. Its features include:</p>
 
 <ul>
-  <li>A described and non-described version of the video, both hosted on YouTube.</li>
-  <li>Captions, subtitles, and chapters; all hosted locally.</li>
-  <li>An interactive transcript, only possible since the above timed text resources are stored locally.</li>
+  <li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
+  <li>Captions and subtitles, both hosted on YouTube.</li>
+  <li>Chapters, hosted in a local WebVTT file, and referenced in a &lt;track&gt; element.</li>
+  <li>An interactive transcript that combines all of the above text tracks.</li>
   <li>An external container to which Able Player adds chapters.</li>
 </ul>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>. In particular, check out the <a href="youtube.html">Simple YouTube Examples</a> page.</p>
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>. In particular, check out the <a href="youtube.html">Simple YouTube Example</a> page.</p>
 
 <div id="wrapper">
   <div id="chapters"></div>
@@ -81,16 +82,13 @@
       <video data-able-player
         id="video1"
         preload="auto"
-        data-youtube-id="tnsB6YCHVXA"
+        data-youtube-id="dhwpLACAls8"
         data-youtube-desc-id="Ck2TdVMhWcU"
         data-transcript-div="transcript"
         data-chapters-div="chapters"
         data-use-chapters-button="false"
         playsinline
       >
-        <track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
-        <track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Spanish"/>
-        <track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-CN" label="Chinese, simplified"/>
         <track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
       </video>
     </div>

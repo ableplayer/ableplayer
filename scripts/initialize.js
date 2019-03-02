@@ -531,50 +531,50 @@
 
     this.injectPlayerCode();
     this.initSignLanguage();
+
     this.setupTracks().then(function() {
 
-      thisObj.setupAltCaptions().then(function() {
+			if (thisObj.captions.length >= 1) {
 
-        if (thisObj.transcriptType === 'external' || thisObj.transcriptType === 'popup') {
-          if (thisObj.captions.length <= 1) {
-            // without captions/subtitles in multiple languages,
-            // there is no need for a transcript language selector
-            thisObj.$transcriptLanguageSelect.parent().remove();
-          }
-        }
+				thisObj.setupAltCaptions().then(function() {
 
-        thisObj.initDescription();
-        thisObj.initDefaultCaption();
+					thisObj.setupTranscript().then(function() {
 
-        thisObj.initPlayer().then(function() { // initPlayer success
-          thisObj.initializing = false;
+						thisObj.addTranscriptAreaEvents();
+						thisObj.updateTranscript();
+						thisObj.initDescription();
+						thisObj.initDefaultCaption();
+        		thisObj.initPlayer().then(function() { // initPlayer success
 
-          // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-          // This tells browsers to ignore the text tracks so Able Player can handle them
-          // However, timing is critical as browsers - especially Safari - tend to ignore this request
-          // unless it's sent late in the intialization process.
-          // If browsers ignore the request, the result is redundant captions
-          thisObj.setMediaAttributes();
+          		thisObj.initializing = false;
 
-          // inject each of the hidden forms that will be accessed from the Preferences popup menu
-          prefsGroups = thisObj.getPreferencesGroups();
-          for (i = 0; i < prefsGroups.length; i++) {
-            thisObj.injectPrefsForm(prefsGroups[i]);
-          }
-          thisObj.setupPopups();
-          thisObj.updateCaption();
-          thisObj.updateTranscript();
-          thisObj.injectVTS();
-          if (thisObj.chaptersDivLocation) {
-            thisObj.populateChaptersDiv();
-          }
-          thisObj.showSearchResults();
-        },
-        function() {  // initPlayer fail
-          thisObj.provideFallback();
-        }
-        );
-      });
+							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+							// This tells browsers to ignore the text tracks so Able Player can handle them
+							// However, timing is critical as browsers - especially Safari - tend to ignore this request
+							// unless it's sent late in the intialization process.
+							// If browsers ignore the request, the result is redundant captions
+							thisObj.setMediaAttributes();
+
+							// inject each of the hidden forms that will be accessed from the Preferences popup menu
+							prefsGroups = thisObj.getPreferencesGroups();
+							for (i = 0; i < prefsGroups.length; i++) {
+								thisObj.injectPrefsForm(prefsGroups[i]);
+          		}
+							thisObj.setupPopups();
+							thisObj.updateCaption();
+							thisObj.injectVTS();
+							if (thisObj.chaptersDivLocation) {
+								thisObj.populateChaptersDiv();
+          		}
+							thisObj.showSearchResults();
+        		},
+        			function() {  // initPlayer fail
+								thisObj.provideFallback();
+        			}
+						);
+					});
+    		});
+			}
     });
   };
 
@@ -671,12 +671,7 @@
 
     var captions, i;
 
-    if (this.usingYouTubeCaptions) {
-      captions = this.ytCaptions;
-    }
-    else {
-      captions = this.captions;
-    }
+    captions = this.captions;
 
     if (captions.length > 0) {
       for (i=0; i<captions.length; i++) {

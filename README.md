@@ -518,10 +518,10 @@ on the `<video>` element. The value of this attribute must be the 11-character Y
 of the described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
-Starting with 2.3.1, a YouTube Data API key is required for playing YouTube videos in Able Player.
+Versions 2.3.1 through 3.2.12 required a YouTube Data API key for retrieving caption data from YouTube.
 Get a YouTube Data API key by registering your application at the [Google Developer Console][].
 For complete instructions, see [Google's Getting Started page]. Note: All that's needed for
-playing YouTube videos in Able Player is a simple API key, **not** OAuth 2.0.
+playing YouTube videos in Able Player is a simple API key, **not** OAuth 2.0. 
 
 After obtaining your YouTube Data API Key, insert the following code into your HTML page:
 
@@ -536,18 +536,16 @@ After obtaining your YouTube Data API Key, insert the following code into your H
 <script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
 ```
 
-If captions or subtitles are available on the YouTube video, these will be displayed for all users,
-and can be controlled using Able Player's CC button. Alternatively, if you include your own
-`<track kind="captions">` elements, these will be used *instead of* the captions on YouTube.
+Starting with version 3.2.13, Able Player no longer requires a YouTube Data API key in order to access caption tracks from YouTube. However, an API key is still encouraged, as it relies on well-documented methods from Google, 
+whereas operating without an API key relies on methods that are not well documented, and therefore 
+may not be reliable.  
 
-The advantage of managing captions entirely on YouTube is that you only have to manage them in
-one place, and they're available everywhere your YouTube video is played.
+Also new in 3.2.13, Able Player now handles YouTube captions in the same way it handles HTML `<track kind="captions">` elements. The display of the caption text can be customized via the Preferences menu, and the caption text is used to automatically create an interactive transcript. 
 
-The advantages of including captions locally in `<track>` elements include:
+YouTube does not currently support chapters, descriptions, and metadata tracks. With Able Player, these features can be added to the video using HTML `<track>` elements, even if the video's captions and subtitles are stored on YouTube. The advantage of managing captions entirely on YouTube is that you only have to manage them in one place, and they're available everywhere your YouTube video is played.  
 
-- Able Player can repurpose the captions into an interactive transcript
-- The captions are searchable using the **data-search** attribute
-- Users can control how the captions are displayed (e.g., color, background color, opacity)
+If your video has HTML `<track>` elements for captions and subtitles, these will be used *instead of* the captions on YouTube.
+
 
 Adjustable playback rate is available for some videos.
 
