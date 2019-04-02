@@ -482,38 +482,38 @@ Able Player supports mixed playlists, with videos hosted locally or on YouTube.
 ```HTML
 <ul class="able-playlist" data-player="my_video_player">
   <li data-poster="video1.jpg" data-width="480" data-height="360">
-		<span class="able-source" 
-		  data-type="video/mp4" 
-		  data-src="video1.mp4">
-		</span>
+    <span class="able-source" 
+      data-type="video/mp4" 
+      data-src="video1.mp4">
+    </span>
     <span class="able-track" 
       data-kind="captions" 
       data-src="video1_captions_en.vtt" 
       data-srclang="en"
-			data-label="English">
-		</span>
+      data-label="English">
+    </span>
     <span class="able-track"
-		  data-kind="descriptions"
-			data-src="video1_description_en.vtt"
+      data-kind="descriptions"
+      data-src="video1_description_en.vtt"
       data-srclang="en"
-			data-label="English">
-		</span>
+      data-label="English">
+    </span>
     <button type="button">
-		  <img src="video1_thumbnail.jpg" alt="">
-			Title of Video 1
-		</button>
+      <img src="video1_thumbnail.jpg" alt="">
+      Title of Video 1
+    </button>
   </li>
   <li data-youtube-id="xxxxxxxxxxx" data-youtube-desc-id="yyyyyyyyyyy">
-		<span class="able-track"
-		  data-kind="chapters"
-			data-src="video2_chapters.vtt"
+    <span class="able-track"
+      data-kind="chapters"
+      data-src="video2_chapters.vtt"
       data-srclang="en"
-			data-label="Chapters">
-		</span>
-		<button type="button">
-		  <!-- thumbnail will be retrieved from YouTube -->
-			Title of Video 2
-		</button>
+      data-label="Chapters">
+    </span>
+    <button type="button">
+      <!-- thumbnail will be retrieved from YouTube -->
+      Title of Video 2
+    </button>
   </li>
 </ul>
 ```
