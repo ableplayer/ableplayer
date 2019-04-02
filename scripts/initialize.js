@@ -2,9 +2,14 @@
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
+    this.playerCreated = false; // will set to true after recreatePlayer() is complete the first time
     this.playing = false; // will change to true after 'playing' event is triggered
     this.clickedPlay = false; // will change to true temporarily if user clicks 'play' (or pause)
     this.fullscreen = false; // will change to true if player is in full screen mode
+    this.swappingSrc = false; // will change to true temporarily while media source is being swapped
+    this.initializing = false; // will change to true temporarily while initPlayer() is processing
+    this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
+    this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
 
     this.getUserAgent();
     this.setIconColor();
@@ -456,6 +461,7 @@
 
   // Perform one-time setup for this instance of player; called after player is first initialized.
   AblePlayer.prototype.setupInstance = function () {
+
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
@@ -467,14 +473,12 @@
       this.mediaId = "ableMediaId_" + this.ableIndex;
       this.$media.attr('id', this.mediaId);
     }
-    // get playlist for this media element
-    this.setupInstancePlaylist();
-
     deferred.resolve();
     return promise;
   };
 
   AblePlayer.prototype.setupInstancePlaylist = function() {
+
     // find a matching playlist and set this.hasPlaylist
     // if there is one, also set this.$playlist, this.playlistIndex, & this.playlistEmbed
     var thisObj = this;
@@ -487,8 +491,22 @@
         thisObj.hasPlaylist = true;
         // If using an embedded player, we'll replace $playlist with the clone later.
         thisObj.$playlist = $(this).find('li');
-        // add tabindex to each list item
-        $(this).find('li').attr('tabindex', '0');
+
+        // check to see if list item has YouTube as its source
+        // if it does, inject a thumbnail from YouTube
+        var $youTubeVideos = $(this).find('li[data-youtube-id]');
+        $youTubeVideos.each(function() {
+          var youTubeId = $(this).attr('data-youtube-id');
+          var youTubePoster = thisObj.getYouTubePosterUrl(youTubeId,'120');
+          var $youTubeImg = $('<img>',{
+            'src': youTubePoster,
+            'alt': ''
+          });
+          $(this).find('button').prepend($youTubeImg);
+        });
+
+        // add accessibility to the list markup
+        $(this).find('li span').attr('aria-hidden','true');
         thisObj.playlistIndex = 0;
         var dataEmbedded = $(this).data('embedded');
         if (typeof dataEmbedded !== 'undefined' && dataEmbedded !== false) {
@@ -507,17 +525,24 @@
       // but keep this.loop as true and handle the playlist looping ourselves
       this.media.removeAttribute('loop');
     }
-
     if (this.hasPlaylist && this.playlistEmbed) {
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
       this.$playlistDom = parent.clone();
       parent.remove();
     }
+    if (this.hasPlaylist && this.$sources.length === 0) {
+      // no source elements were provided. Construct them from the first playlist item
+      this.cuePlaylistItem(0);
+      // redefine this.$sources now that media contains one or more <source> elements
+      this.$sources = this.$media.find('source');
+    }
+
   };
 
-  // Creates the appropriate player for the current source.
   AblePlayer.prototype.recreatePlayer = function () {
+
+    // Creates the appropriate player for the current source.
     var thisObj, prefsGroups, i;
     thisObj = this;
 
@@ -526,55 +551,63 @@
       console.log("Can't create player; no appropriate player type detected.");
       return;
     }
+		if (!this.playerCreated) {
+			// only call these functions once
+	    this.loadCurrentPreferences();
+			this.injectPlayerCode();
+		}
 
-    this.loadCurrentPreferences();
+		// call all remaining functions each time a new media instance is loaded
 
-    this.injectPlayerCode();
     this.initSignLanguage();
 
     this.setupTracks().then(function() {
 
-			if (thisObj.captions.length >= 1) {
+			thisObj.setupAltCaptions().then(function() {
 
-				thisObj.setupAltCaptions().then(function() {
+				thisObj.setupTranscript().then(function() {
 
-					thisObj.setupTranscript().then(function() {
-
+					if (thisObj.transcriptType) {
 						thisObj.addTranscriptAreaEvents();
 						thisObj.updateTranscript();
+					}
+					if (thisObj.mediaType === 'video') {
 						thisObj.initDescription();
+					}
+
+					if (thisObj.captions.length) {
 						thisObj.initDefaultCaption();
-        		thisObj.initPlayer().then(function() { // initPlayer success
+					}
+//          thisObj.initializing = true;
+        	  thisObj.initPlayer().then(function() { // initPlayer success
+//          	  thisObj.initializing = false;
 
-          		thisObj.initializing = false;
+            // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+						// This tells browsers to ignore the text tracks so Able Player can handle them
+						// However, timing is critical as browsers - especially Safari - tend to ignore this request
+						// unless it's sent late in the intialization process.
+						// If browsers ignore the request, the result is redundant captions
+						thisObj.setMediaAttributes();
 
-							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-							// This tells browsers to ignore the text tracks so Able Player can handle them
-							// However, timing is critical as browsers - especially Safari - tend to ignore this request
-							// unless it's sent late in the intialization process.
-							// If browsers ignore the request, the result is redundant captions
-							thisObj.setMediaAttributes();
-
-							// inject each of the hidden forms that will be accessed from the Preferences popup menu
-							prefsGroups = thisObj.getPreferencesGroups();
-							for (i = 0; i < prefsGroups.length; i++) {
-								thisObj.injectPrefsForm(prefsGroups[i]);
-          		}
-							thisObj.setupPopups();
-							thisObj.updateCaption();
-							thisObj.injectVTS();
-							if (thisObj.chaptersDivLocation) {
-								thisObj.populateChaptersDiv();
-          		}
-							thisObj.showSearchResults();
-        		},
-        			function() {  // initPlayer fail
-								thisObj.provideFallback();
-        			}
-						);
-					});
-    		});
-			}
+						// inject each of the hidden forms that will be accessed from the Preferences popup menu
+						prefsGroups = thisObj.getPreferencesGroups();
+						for (i = 0; i < prefsGroups.length; i++) {
+							thisObj.injectPrefsForm(prefsGroups[i]);
+          	  }
+						thisObj.setupPopups();
+						thisObj.updateCaption();
+						thisObj.injectVTS();
+						if (thisObj.chaptersDivLocation) {
+							thisObj.populateChaptersDiv();
+          	  }
+						thisObj.showSearchResults();
+            thisObj.refreshControls();
+          },
+        	  function() {  // initPlayer fail
+						thisObj.provideFallback();
+        	  });
+				});
+      });
     });
   };
 
@@ -616,7 +649,8 @@
         // Normally, we wait until user clicks play, rather than unnecessarily consume their bandwidth
         // Exceptions are if the video is intended to autostart or if running on iOS (a workaround for iOS issues)
         // TODO: Confirm that this is still necessary with iOS (this would added early, & I don't remember what the issues were)
-        if (thisObj.player === 'html5' && (thisObj.isIOS() || thisObj.startTime > 0 || thisObj.autoplay)) {
+        if (thisObj.player === 'html5' &&
+          (thisObj.isIOS() || thisObj.startTime > 0 || thisObj.autoplay || thisObj.okToPlay)) {
           thisObj.$media[0].load();
         }
         deferred.resolve();

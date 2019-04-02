@@ -82,7 +82,6 @@
         	}
       	})(track, kind));
     	}
-
       $.when.apply($, loadingPromises).then(function () {
         deferred.resolve();
       });
@@ -155,17 +154,18 @@
       });
     }
 
-    captionTracks = this.$media.find('track[kind="captions"],track[kind="subtitles"]');
-    if (captionTracks.length === 0) {
-      // no captions (or subtitles) were found in HTML5 track elements
-      if (this.player === 'youtube') {
-        // try to get tracks via YouTube
+		if (this.player === 'youtube') {
+			// check to see if any HTML caption or subitle tracks were found.
+			// If not, check YouTube
+			captionTracks = this.$media.find('track[kind="captions"],track[kind="subtitles"]');
+			if (captionTracks.length) {
+				// HTML captions or subtitles were found. Use those.
+				deferred.resolve();
+			}
+			else {
 				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
           deferred.resolve();
         });
-      }
-      else {
-        // repeat this for other players (e.g., Vimeo, DailyMotion) once supported
       }
     }
     else {
@@ -346,13 +346,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   };
 
   AblePlayer.prototype.setupAltCaptions = function() {
+
     // setup captions from an alternative source (not <track> elements)
     // only do this if no <track> captions are provided
     // currently supports: YouTube
     var deferred = new $.Deferred();
     var promise = deferred.promise();
     if (this.captions.length === 0) {
-      if (this.player === 'youtube' && this.usingYouTubeCaptions()) {
+      if (this.player === 'youtube' && this.usingYouTubeCaptions) {
         this.setupYouTubeCaptions().done(function() {
           deferred.resolve();
         });

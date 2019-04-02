@@ -5,7 +5,7 @@ Able Player
 the HTML5 `<audio>` or `<video>` element for browsers that support them,
 and (optionally) the JW Player as a fallback for those that don’t.
 
-To see the player in action check our [Able Player Examples][examples] page.
+To see the player in action check out the [Able Player Examples][examples] page.
 
 Features
 --------
@@ -218,7 +218,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
     download as much of the media as possible. If the media is not a
     central focus, downloading the entire media resource can consume
     valuable bandwidth, so preload="metadata" would be a better option.
--   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
+-   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided the player will be sized to fit its container.
 -   **data-root-path** - define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server
 -   **data-heading-level** - optional; Able Player injects an off-screen HTML heading "Media Player" (or localized equivalent) at the top of the player so screen reader users can easily find the player. It automatically assigns a heading level that is one level deeper than the closest parent heading. This attribute can be used to manually set the heading level, rather than relying on Able Player to assign it automatically. Valid values are 1 through 6. A value of 0 is also supported, and instructs Able Player to not inject a heading at all. The latter should be used only if the web page already includes a heading immediately prior to the media player.
 -   **data-hide-controls** - optional; set to "true" to hide controls during playback. Controls are visibly hidden but still accessible to assistive technologies. Controls reappear if user presses any key or moves the mouse over the video player region.
@@ -321,10 +321,11 @@ The following attributes are supported on the `<video>` element only:
 -   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
 -   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information.
 -   **data-youtube-nocookie** - optional; if set to "true" the YouTube video will be embedded using the "youtube-nocookie.com" host.
--   **height** - height of the video in pixels. If not provided will
-    default to 360.
+-   **height** - height of the video in pixels. 
 -   **poster** - path to an image file. Will be displayed in the player
     until the video is played.
+    
+If width and height are omitted, the player will be sized to fit its container. 
 
 The following additional features are supported by *Able Player*:
 
@@ -425,9 +426,11 @@ To do so, run the shell script *compile.sh*.
 Playlists
 ---------
 
-An *Able Player* playlist is an HTML list of tracks. The list can be
-either ordered (`<ol>`) or unordered (`<ul>`). The following attributes
-are supported on the list element:
+An *Able Player* playlist is an HTML list of tracks. A playlist can accompany 
+either a video or audio player, but both audio and video cannot be combined 
+within a single playlist. The list can be either ordered (`<ol>`) or unordered (`<ul>`). 
+
+The following attributes are supported on the list element:
 
 -   **class** - required; must be **able-playlist**
 -   **data-player** - required; must reference the ID of the media
@@ -437,19 +440,85 @@ are supported on the list element:
     omitted, the playlist will be external to the player and will appear
     wherever you place it on the web page.
 
-Within the playlist, each list item must include data-\* attributes
-where \* is the media type and the value of the attribute is the URL
-pointing to the media file of that type. For example, the following
-audio playlist includes three songs, each of which is available in MP3
-and OGG:
+Within the playlist, each list item can include the following HTML attributes: 
 
+-   **data-poster** - path to an image file. 
+-   **width** - width of the video in pixels. 
+-   **height** - height of the video in pixels. 
+
+If width and height are omitted, the player will be sized to fit its container. 
+
+The following HTML elements must be nested inside each list item: 
+
+A `<span>` element with **class="able-source"** for each `<source>` element 
+    that is to accompany the media. When the user selects an item from the playlist, 
+    its able-source `<span>` elements will be copied to `<source>` elements and loaded for playback. 
+    For each attribute that will ultimately be on the media's `<source>` elements, 
+    add the same attributes to each `<span>`, prefaced with **data-**. 
+
+
+Within the playlist, each list item must include the following HTML elements: 
+
+-   A `<span>` element with **class="able-source"** for each `<source>` element 
+    that is to accompany the media. When the user selects an item from the playlist, 
+    its able-source `<span>` elements will be copied to `<source>` elements and loaded for playback. 
+    For each attribute that will ultimately be on the media's `<source>` elements, 
+    add the same attributes to each `<span>`, prefaced with **data-**. 
+-   A `<span>` element with **class="able-track"** for each `<track>` element 
+    that is to accompany the media. When the user selects an item from the playlist, 
+    its able-track `<span>` elements will be copied to `<track>` elements and loaded for playback. 
+    For each attribute that will ultimately be on the media's `<track>` elements, 
+    add the same attributes to each `<span>`, prefaced with **data-**. 
+-   A `<button>` element with **type="button"**. Inside the button, include either text, 
+    an image, or both. This content would typically be the title of the item. If using an image 
+    alone, be sure to add a meaningful **alt** attribute. If the image is purely decorative and 
+    is accompanied by text, using **alt=""**. 
+    
+The following example shows a playlist with two videos. The first video has one source (an MP4 file), 
+and two tracks (captions and descriptions). The second video is hosted on YouTube, and has both a 
+non-described and described version. It also has a locally-hosted chapters track.  
+Able Player supports mixed playlists, with videos hosted locally or on YouTube. 
+  
 ```HTML
-<ul class="able-playlist" data-player="audio1" data-embedded>
-  <li data-mp3="song1.mp3" data-ogg="song1.ogg">My First Song</li>
-  <li data-mp3="song2.mp3" data-ogg="song2.ogg">My Second Song</li>
-  <li data-mp3="song3.mp3" data-ogg="song3.ogg">My Third Song</li>
+<ul class="able-playlist" data-player="my_video_player">
+  <li data-poster="video1.jpg" data-width="480" data-height="360">
+		<span class="able-source" 
+		  data-type="video/mp4" 
+		  data-src="video1.mp4">
+		</span>
+    <span class="able-track" 
+      data-kind="captions" 
+      data-src="video1_captions_en.vtt" 
+      data-srclang="en"
+			data-label="English">
+		</span>
+    <span class="able-track"
+		  data-kind="descriptions"
+			data-src="video1_description_en.vtt"
+      data-srclang="en"
+			data-label="English">
+		</span>
+    <button type="button">
+		  <img src="video1_thumbnail.jpg" alt="">
+			Title of Video 1
+		</button>
+  </li>
+  <li data-youtube-id="xxxxxxxxxxx" data-youtube-desc-id="yyyyyyyyyyy">
+		<span class="able-track"
+		  data-kind="chapters"
+			data-src="video2_chapters.vtt"
+      data-srclang="en"
+			data-label="Chapters">
+		</span>
+		<button type="button">
+		  <!-- thumbnail will be retrieved from YouTube -->
+			Title of Video 2
+		</button>
+  </li>
 </ul>
 ```
+
+For additional examples of both audio and video playlists, see the [Able Player Examples][examples] page.
 
 **Supported data-\* audio types:**
 

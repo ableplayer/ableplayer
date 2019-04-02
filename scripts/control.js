@@ -214,6 +214,7 @@
   };
 
   AblePlayer.prototype.pauseMedia = function () {
+
     if (this.player === 'html5') {
       this.media.pause(true);
       if (this.hasSignLanguage && this.signVideo) {
@@ -480,6 +481,7 @@
     // Update seekbar width.
     // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
+
       widthUsed = 0;
       seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
 
@@ -588,6 +590,7 @@
         'aria-expanded': 'false'
       });
     }
+
     if (this.$fullscreenButton) {
       if (!this.fullscreen) {
         this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
@@ -851,7 +854,6 @@
   AblePlayer.prototype.handleCaptionToggle = function() {
 
     var captions;
-
     if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it
@@ -865,7 +867,6 @@
       captions = [];
     }
     if (captions.length === 1) {
-
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) {
         // turn them off
@@ -1206,6 +1207,7 @@
         this.playMedia();
       }
     }
+
     this.refreshControls();
   };
 
@@ -1418,7 +1420,6 @@
       this.$captionsDiv.css('font-size',newCaptionSize + '%');
       this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
-
     this.refreshControls();
   };
 

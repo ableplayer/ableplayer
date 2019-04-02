@@ -79,7 +79,6 @@
       // save preference to cookie
       thisObj.prefCaptions = 1;
       thisObj.updateCookie('prefCaptions');
-
       thisObj.refreshControls();
     }
   };

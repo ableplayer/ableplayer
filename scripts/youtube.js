@@ -44,7 +44,7 @@
   AblePlayer.prototype.finalizeYoutubeInit = function () {
 
     // This is called once we're sure the Youtube iFrame API is loaded -- see above
-    var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions;
+    var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions, autoplay;
 
     deferred = new $.Deferred();
     promise = deferred.promise();
@@ -98,6 +98,13 @@
       this.ytHeight = null;
     }
 
+    if (this.okToPlay) {
+      autoplay = 1;
+    }
+    else {
+      autoplay = 0;
+    }
+
     // NOTE: YouTube is changing the following parameters on or after Sep 25, 2018:
     // rel - No longer able to prevent YouTube from showing related videos
     //      value of 0 now limits related videos to video's same channel
@@ -110,7 +117,7 @@
       width: this.ytWidth,
       height: this.ytHeight,
       playerVars: {
-        autoplay: 0,
+        autoplay: autoplay,
         enablejsapi: 1,
         disableKb: 1, // disable keyboard shortcuts, using our own
         playsinline: this.playsInline,
@@ -128,10 +135,14 @@
           if (thisObj.swappingSrc) {
             // swap is now complete
             thisObj.swappingSrc = false;
+            thisObj.cueingPlaylistItem = false;
             if (thisObj.playing) {
               // resume playing
               thisObj.playMedia();
             }
+          }
+          if (thisObj.userClickedPlaylist) {
+            thisObj.userClickedPlaylist = false; // reset
           }
           if (typeof thisObj.aspectRatio === 'undefined') {
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
@@ -143,9 +154,13 @@
         },
         onStateChange: function (x) {
           var playerState = thisObj.getPlayerState(x.data);
+          // values of playerState: 'playing','paused','buffering','ended'
           if (playerState === 'playing') {
             thisObj.playing = true;
             thisObj.startedPlaying = true;
+          }
+          else if (playerState == 'ended') {
+            thisObj.onMediaComplete();
           }
           else {
             thisObj.playing = false;
@@ -181,7 +196,11 @@
       }
     });
     thisObj.injectPoster(thisObj.$mediaContainer, 'youtube');
-    thisObj.$media.remove();
+    if (!thisObj.hasPlaylist) {
+      // remove the media element, since YouTube replaces that with its own element in an iframe
+      // this is handled differently for playlists. See buildplayer.js > cuePlaylistItem()
+      thisObj.$media.remove();
+    }
     return promise;
   };
 
@@ -660,6 +679,31 @@
       this.usingYouTubeCaptions = false;
     }
     this.refreshControls();
+  };
+
+	AblePlayer.prototype.getYouTubePosterUrl = function (youTubeId, width) {
+
+  	  // return a URL for retrieving a YouTube poster image
+  	  // supported values of width: 120, 320, 480, 640
+
+  	  var url = 'https://img.youtube.com/vi/' + youTubeId;
+  	  if (width == '120') {
+    	  // default (small) thumbnail, 120 x 90
+    	  return url + '/default.jpg';
+  	  }
+  	  else if (width == '320') {
+    	  // medium quality thumbnail, 320 x 180
+    	  return url + '/hqdefault.jpg';
+  	  }
+  	  else if (width == '480') {
+    	  // high quality thumbnail, 480 x 360
+    	  return url + '/hqdefault.jpg';
+  	  }
+  	  else if (width == '640') {
+    	  // standard definition poster image, 640 x 480
+    	  return url + '/sddefault.jpg';
+  	  }
+  	  return false;
   };
 
 })(jQuery);

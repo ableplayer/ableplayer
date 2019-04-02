@@ -81,10 +81,12 @@
 
     // autoplay (Boolean; if present always resolves to true, regardless of value)
     if ($(media).attr('autoplay') !== undefined) {
-      this.autoplay = true;
+      this.autoplay = true; // this value remains constant
+      this.okToPlay = true; // this value can change dynamically
     }
     else {
       this.autoplay = false;
+      this.okToPlay = false;
     }
 
     // loop (Boolean; if present always resolves to true, regardless of value)
@@ -503,7 +505,9 @@
   AblePlayer.nextIndex = 0;
 
   AblePlayer.prototype.setup = function() {
+
     var thisObj = this;
+    this.initializing = true; // will remain true until entire sequence of function calls is complete
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
@@ -511,7 +515,13 @@
       }
       else {
         thisObj.setupInstance().then(function () {
-          thisObj.recreatePlayer();
+          thisObj.setupInstancePlaylist();
+          if (!thisObj.hasPlaylist) {
+            // for playlists, recreatePlayer() is called from within cuePlaylistItem()
+            thisObj.recreatePlayer();
+          }
+          thisObj.initializing = false;
+          thisObj.playerCreated = true; // remains true until browser is refreshed
         });
       }
     });

@@ -40,19 +40,22 @@
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
+
     // if there's a playlist, advance to next item and start playing
-    if (this.hasPlaylist) {
+    if (this.hasPlaylist && !this.cueingPlaylistItem) {
       if (this.playlistIndex === (this.$playlist.length - 1)) {
         // this is the last track in the playlist
         if (this.loop) {
           this.playlistIndex = 0;
-          this.swapSource(0);
+          this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+          this.cuePlaylistItem(0);
         }
       }
       else {
         // this is not the last track. Play the next one.
         this.playlistIndex++;
-        this.swapSource(this.playlistIndex)
+        this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+        this.cuePlaylistItem(this.playlistIndex)
       }
     }
     this.refreshControls();
@@ -60,6 +63,11 @@
 
   AblePlayer.prototype.onMediaNewSourceLoad = function () {
 
+    if (this.cueingPlaylistItem) {
+      // this variable was set in order to address bugs caused by multiple firings of media 'end' event
+      // safe to reset now
+      this.cueingPlaylistItem = false;
+    }
     if (this.swappingSrc === true) {
       // new source file has just been loaded
       if (this.swapTime > 0) {
@@ -173,6 +181,7 @@
   };
 
   AblePlayer.prototype.onClickPlayerButton = function (el) {
+
     // TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
     var whichButton = $(el).attr('class').split(' ')[0].substr(20);
     if (whichButton === 'play') {
@@ -373,6 +382,13 @@
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
+        if (thisObj.userClickedPlaylist) {
+          if (!thisObj.startedPlaying) {
+		        	// start playing; no further user action is required
+            thisObj.playMedia();
+	      	  }
+          thisObj.userClickedPlaylist = false; // reset
+        }
         if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
           // by clicking on any of these elements, user is likely intending to play
           // Not included: elements where user might click multiple times in succession
@@ -385,7 +401,7 @@
               // a seek has already been initiated
               // since canplaythrough has been triggered, the seek is complete
               thisObj.seeking = false;
-              if (thisObj.autoplay) {
+              if (thisObj.autoplay || thisObj.okToPlay) {
                 thisObj.playMedia();
               }
             }
@@ -399,13 +415,13 @@
           }
           else {
             // there is no startTime, therefore no seeking required
-            if (thisObj.autoplay) {
+            if (thisObj.autoplay || thisObj.okToPlay) {
               thisObj.playMedia();
             }
           }
         }
         else if (thisObj.hasPlaylist) {
-          if ((thisObj.playlistIndex !== (thisObj.$playlist.length - 1)) || thisObj.loop) {
+					if ((thisObj.playlistIndex !== thisObj.$playlist.length) || thisObj.loop) {
             // this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
             thisObj.playMedia();
           }
@@ -633,6 +649,7 @@
 
     // handle clicks (left only) anywhere on the page. If any popups are open, close them.
     $(document).on('click',function(e) {
+
       if (e.button !== 0) { // not a left click
         return false;
       }
@@ -687,9 +704,13 @@
 
     // handle clicks on playlist items
     if (this.$playlist) {
-      this.$playlist.click(function() {
-        thisObj.playlistIndex = $(this).index();
-        thisObj.swapSource(thisObj.playlistIndex);
+      this.$playlist.click(function(e) {
+        if (!thisObj.userClickedPlaylist) {
+          // stopgap in case multiple clicks are fired on the same playlist item
+          thisObj.userClickedPlaylist = true; // will be set to false after new src is loaded & canplaythrough is triggered
+          thisObj.playlistIndex = $(this).index();
+          thisObj.cuePlaylistItem(thisObj.playlistIndex);
+        }
       });
     }
 

@@ -136,7 +136,7 @@
 
   AblePlayer.prototype.capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+  };
 
   AblePlayer.prototype.roundDown = function (value, decimals) {
 
@@ -144,6 +144,25 @@
     // where X is the value of the decimals parameter
     return Number(Math.floor(value+'e'+decimals)+'e-'+decimals);
   };
+
+  AblePlayer.prototype.hasAttr = function (object, attribute) {
+
+	  // surprisingly, there is no hasAttr() function in Jquery as of 3.2.1
+	  // return true if object has attribute; otherwise false
+	  // selector is a Jquery object
+	  // attribute is a string
+
+		var attr = object.attr(attribute);
+
+		// For some browsers, `attr` is undefined; for others,
+		// `attr` is false.  Check for both.
+		if (typeof attr !== typeof undefined && attr !== false) {
+    	return true;
+    }
+    else {
+	    return false;
+    }
+	};
 
   Number.isInteger = Number.isInteger || function(value) {
 

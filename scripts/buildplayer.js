@@ -1,7 +1,6 @@
 (function ($) {
 
   AblePlayer.prototype.injectPlayerCode = function() {
-
     // create and inject surrounding HTML structure
     // If IOS:
     //  If video:
@@ -52,7 +51,6 @@
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
-
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
     this.injectAlert();
@@ -81,6 +79,7 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
+
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
@@ -96,6 +95,7 @@
   };
 
   AblePlayer.prototype.injectPlayerControlArea = function () {
+
     this.$playerDiv = $('<div>', {
       'class' : 'able-player',
       'role' : 'region',
@@ -361,20 +361,13 @@
   };
 
   AblePlayer.prototype.injectPlaylist = function () {
+
     if (this.playlistEmbed === true) {
       // move playlist into player, immediately before statusBarDiv
       var playlistClone = this.$playlistDom.clone();
       playlistClone.insertBefore(this.$statusBarDiv);
       // Update to the new playlist copy.
       this.$playlist = playlistClone.find('li');
-    }
-
-    if (this.hasPlaylist && this.$sources.length === 0) {
-      // no source elements were provided. Construct them from the first playlist item
-      this.initializing = true;
-      this.swapSource(0);
-      // redefine this.$sources now that media contains one or more <source> elements
-      this.$sources = this.$media.find('source');
     }
   };
 
@@ -582,7 +575,6 @@
       }
       e.preventDefault();
     });
-
     this.$controllerDiv.append($menu);
     return $menu;
   };
@@ -632,7 +624,6 @@
         tracks, track, $trackButton, $trackLabel,
         radioName, radioId, $menu, $menuItem,
         prefCats, prefCat, prefLabel;
-
     popups = [];
     if (typeof which === 'undefined') {
       popups.push('prefs');
@@ -663,7 +654,7 @@
           this.prefsPopup = this.createPopup('prefs');
         }
         else if (popup == 'captions') {
-          if (typeof this.captionsPopup === 'undefined') {
+          if (typeof this.captionsPopup === 'undefined' || !this.captionsPopup) {
             this.captionsPopup = this.createPopup('captions',this.captions);
           }
         }
@@ -677,7 +668,7 @@
           else {
             tracks = [];
           }
-          if (typeof this.chaptersPopup === 'undefined') {
+          if (typeof this.chaptersPopup === 'undefined' || !this.chaptersPopup) {
             this.chaptersPopup = this.createPopup('chapters',tracks);
           }
         }
@@ -802,11 +793,11 @@
     return browsers;
   }
 
-  // Calculates the layout for controls based on media and options.
-  // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
-  // Each associated value is array of control names to put at that location.
   AblePlayer.prototype.calculateControlLayout = function () {
-    // Removed rewind/forward in favor of seek bar.
+
+    // Calculates the layout for controls based on media and options.
+    // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
+    // Each associated value is array of control names to put at that location.
 
     var controlLayout = {
       'ul': ['play','restart','rewind','forward'],
@@ -834,7 +825,6 @@
       bll.push('slower');
       bll.push('faster');
     }
-
     if (this.mediaType === 'video') {
       if (this.hasCaptions) {
         bll.push('captions'); //closed captions
@@ -875,6 +865,7 @@
   };
 
   AblePlayer.prototype.addControls = function() {
+
     // determine which controls to show based on several factors:
     // mediaType (audio vs video)
     // availability of tracks (e.g., for closed captions & audio description)
@@ -1463,96 +1454,175 @@
 */
   };
 
-  AblePlayer.prototype.swapSource = function(sourceIndex) {
+  AblePlayer.prototype.cuePlaylistItem = function(sourceIndex) {
 
-    // Change media player source file, for instance when moving to the next element in a playlist.
+    // Move to a new item in a playlist.
     // NOTE: Swapping source for audio description is handled elsewhere;
     // see description.js > swapDescription()
 
-    var $newItem, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
+    /*
+      // Decided against preventing a reload of the current item in the playlist.
+      // If it's clickable, users should be able to click on it and expect something to happen.
+      // Leaving here though in case it's determined to be desirable.
+    if (sourceIndex === this.playlistItemIndex) {
+      // user has requested the item that's currently playing
+      // just ignore the request
+      return;
+    }
+    this.playlistItemIndex = sourceIndex;
+    */
 
-    this.$media.find('source').remove();
+    var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
+
+		var thisObj = this;
+
+		prevPlayer = this.player;
+
+    if (this.initializing) { // this is the first track - user hasn't pressed play yet
+			// do nothing.
+		}
+		else {
+  		  if (this.playerCreated) {
+        // remove the old
+        this.deletePlayer();
+      }
+		}
+
+		// Determine appropriate player to play this media
     $newItem = this.$playlist.eq(sourceIndex);
-    itemTitle = $newItem.html();
-    if ($newItem.attr('lang')) {
+		if (this.hasAttr($newItem,'data-youtube-id')) {
+			this.youTubeId = $newItem.attr('data-youtube-id');
+      newPlayer = 'youtube';
+		}
+		else {
+  		  newPlayer = 'html5';
+		}
+
+    if (newPlayer === 'youtube') {
+      if (prevPlayer === 'html5') {
+        // pause and hide the previous media
+        if (this.playing) {
+          this.pauseMedia();
+        }
+        this.$media.hide();
+      }
+    }
+		else {
+  		  // the new player is not youtube
+      this.youTubeId = false;
+      if (prevPlayer === 'youtube') {
+        // unhide the media element
+        this.$media.show();
+		  }
+		}
+		this.player = newPlayer;
+
+		// set swappingSrc; needs to be true within recreatePlayer(), called below
+		this.swappingSrc = true;
+
+		// transfer media attributes from playlist to media element
+		if (this.hasAttr($newItem,'data-poster')) {
+			this.$media.attr('poster',$newItem.attr('data-poster'));
+		}
+		if (this.hasAttr($newItem,'data-width')) {
+			this.$media.attr('width',$newItem.attr('data-width'));
+		}
+		if (this.hasAttr($newItem,'data-height')) {
+			this.$media.attr('height',$newItem.attr('data-height'));
+		}
+		if (this.hasAttr($newItem,'data-youtube-desc-id')) {
+			this.$media.attr('data-youtube-desc-id',$newItem.attr('data-youtube-desc-id'));
+		}
+		if (this.youTubeId) {
+			this.$media.attr('data-youtube-id',$newItem.attr('data-youtube-id'));
+		}
+
+		// add new <source> elements from playlist data
+    var $sourceSpans = $newItem.children('span.able-source');
+		if ($sourceSpans.length) {
+			$sourceSpans.each(function() {
+				if (thisObj.hasAttr($(this),'data-src')) {
+					// this is the only required attribute
+					var $newSource = $('<source>',{
+						'src': $(this).attr('data-src')
+					});
+					if (thisObj.hasAttr($(this),'data-type')) {
+						$newSource.attr('type',$(this).attr('data-type'));
+					}
+					if (thisObj.hasAttr($(this),'data-desc-src')) {
+						$newSource.attr('data-desc-src',$(this).attr('data-desc-src'));
+					}
+					if (thisObj.hasAttr($(this),'data-sign-src')) {
+						$newSource.attr('data-sign-src',$(this).attr('data-sign-src'));
+					}
+					thisObj.$media.append($newSource);
+				}
+			});
+		}
+
+		// add new <track> elements from playlist data
+    var $trackSpans = $newItem.children('span.able-track');
+		if ($trackSpans.length) {
+	    // for each element in $trackSpans, create a new <track> element
+			$trackSpans.each(function() {
+				if (thisObj.hasAttr($(this),'data-src') &&
+					thisObj.hasAttr($(this),'data-kind') &&
+					thisObj.hasAttr($(this),'data-srclang')) {
+					// all required attributes are present
+					var $newTrack = $('<track>',{
+						'src': $(this).attr('data-src'),
+						'kind': $(this).attr('data-kind'),
+						'srclang': $(this).attr('data-srclang')
+					});
+					if (thisObj.hasAttr($(this),'data-label')) {
+						$newTrack.attr('label',$(this).attr('data-label'));
+					}
+					thisObj.$media.append($newTrack);
+				}
+			});
+		}
+
+    itemTitle = $newItem.text();
+    if (this.hasAttr($newItem,'lang')) {
       itemLang = $newItem.attr('lang');
     }
-    sources = [];
-    s = 0; // index
-    if (this.mediaType === 'audio') {
-      if ($newItem.attr('data-mp3')) {
-        jwSource = $newItem.attr('data-mp3'); // JW Player can play this
-        sources[s] =  new Array('audio/mpeg',jwSource);
-        s++;
-      }
-      if ($newItem.attr('data-webm')) {
-        sources[s] = new Array('audio/webm',$newItem.attr('data-webm'));
-        s++;
-      }
-      if ($newItem.attr('data-webma')) {
-        sources[s] = new Array('audio/webm',$newItem.attr('data-webma'));
-        s++;
-      }
-      if ($newItem.attr('data-ogg')) {
-        sources[s] = new Array('audio/ogg',$newItem.attr('data-ogg'));
-        s++;
-      }
-      if ($newItem.attr('data-oga')) {
-        sources[s] = new Array('audio/ogg',$newItem.attr('data-oga'));
-        s++;
-      }
-      if ($newItem.attr('data-wav')) {
-        sources[s] = new Array('audio/wav',$newItem.attr('data-wav'));
-        s++;
-      }
-    }
-    else if (this.mediaType === 'video') {
-      if ($newItem.attr('data-mp4')) {
-        jwSource = $newItem.attr('data-mp4'); // JW Player can play this
-        sources[s] =  new Array('video/mp4',jwSource);
-        s++;
-      }
-      if ($newItem.attr('data-webm')) {
-        sources[s] = new Array('video/webm',$newItem.attr('data-webm'));
-        s++;
-      }
-      if ($newItem.attr('data-webmv')) {
-        sources[s] = new Array('video/webm',$newItem.attr('data-webmv'));
-        s++;
-      }
-      if ($newItem.attr('data-ogg')) {
-        sources[s] = new Array('video/ogg',$newItem.attr('data-ogg'));
-        s++;
-      }
-      if ($newItem.attr('data-ogv')) {
-        sources[s] = new Array('video/ogg',$newItem.attr('data-ogv'));
-        s++;
-      }
-    }
-    for (i=0; i<sources.length; i++) {
-      $newSource = $('<source>',{
-        type: sources[i][0],
-        src: sources[i][1]
-      });
-      this.$media.append($newSource);
-    }
+    // Update relevant arrays
+    this.$sources = this.$media.find('source');
+
+    // recreate player, informed by new attributes and track elements
+    this.recreatePlayer();
 
     // update playlist to indicate which item is playing
     //$('.able-playlist li').removeClass('able-current');
     this.$playlist.removeClass('able-current');
-    $newItem.addClass('able-current');
+    this.$playlist.eq(sourceIndex).addClass('able-current');
 
     // update Now Playing div
     if (this.showNowPlaying === true) {
-      nowPlayingSpan = $('<span>');
-      if (typeof itemLang !== 'undefined') {
-        nowPlayingSpan.attr('lang',itemLang);
+      if (typeof this.$nowPlayingDiv !== 'undefined') {
+        nowPlayingSpan = $('<span>');
+        if (typeof itemLang !== 'undefined') {
+          nowPlayingSpan.attr('lang',itemLang);
+        }
+        nowPlayingSpan.html('<span>' + this.tt.selectedTrack + ':</span>' + itemTitle);
+        this.$nowPlayingDiv.html(nowPlayingSpan);
       }
-      nowPlayingSpan.html('<span>Selected track:</span>' + itemTitle);
-      this.$nowPlayingDiv.html(nowPlayingSpan);
     }
 
-    // reload audio after sources have been updated
+    // finished swapping src, now reload the new source file.
+    this.swappingSrc = false;
+
+    if (this.player === 'html5') {
+      this.media.load();
+    }
+    else if (this.player === 'youtube') {
+      // TODO: Load new youTubeId
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      jwSource = this.$sources[sourceIndex].getAttribute('src');
+      this.jwPlayer.load({file: jwSource});
+    }
+
     // if this.swappingSrc is true, media will autoplay when ready
     if (this.initializing) { // this is the first track - user hasn't pressed play yet
       this.swappingSrc = false;
@@ -1566,11 +1636,47 @@
         this.jwPlayer.load({file: jwSource});
       }
       else if (this.player === 'youtube') {
-        // Does nothing, can't swap source with youtube.
-        // TODO: Anything we need to do to prevent this happening?
+        this.okToPlay = true;
       }
     }
   };
+
+	AblePlayer.prototype.deletePlayer = function() {
+
+		// remove previous video's attributes and child elements from media element
+		if (this.player == 'youtube') {
+  		  var $youTubeIframe = this.$mediaContainer.find('iframe');
+    		$youTubeIframe.remove();
+		}
+		else {
+    		this.$media.removeAttr('poster width height');
+      this.$media.empty();
+      // this.$media.find('source').remove();
+      // this.$media.find('track').remove();
+    }
+
+		// Empty elements that will be rebuilt
+		this.$controllerDiv.empty();
+		// this.$statusBarDiv.empty();
+		// this.$timer.empty();
+		this.$elapsedTimeContainer.empty().text('0:00'); // span.able-elapsedTime
+		this.$durationContainer.empty(); // span.able-duration
+
+		// Remove popup windows and modal dialogs; these too will be rebuilt
+		if (this.$signWindow) {
+    		this.$signWindow.remove();
+    }
+    if (this.$transcriptArea) {
+    		this.$transcriptArea.remove();
+    }
+		$('.able-modal-dialog').remove();
+
+		// reset key variables
+		this.hasCaptions = false;
+		this.hasChapters = false;
+		this.captionsPopup = null;
+		this.chaptersPopup = null;
+	};
 
   AblePlayer.prototype.getButtonTitle = function(control) {
 

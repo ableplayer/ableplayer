@@ -81,10 +81,12 @@
 
     // autoplay (Boolean; if present always resolves to true, regardless of value)
     if ($(media).attr('autoplay') !== undefined) {
-      this.autoplay = true;
+      this.autoplay = true; // this value remains constant
+      this.okToPlay = true; // this value can change dynamically
     }
     else {
       this.autoplay = false;
+      this.okToPlay = false;
     }
 
     // loop (Boolean; if present always resolves to true, regardless of value)
@@ -503,7 +505,9 @@
   AblePlayer.nextIndex = 0;
 
   AblePlayer.prototype.setup = function() {
+
     var thisObj = this;
+    this.initializing = true; // will remain true until entire sequence of function calls is complete
     this.reinitialize().then(function () {
       if (!thisObj.player) {
         // No player for this media, show last-line fallback.
@@ -511,7 +515,13 @@
       }
       else {
         thisObj.setupInstance().then(function () {
-          thisObj.recreatePlayer();
+          thisObj.setupInstancePlaylist();
+          if (!thisObj.hasPlaylist) {
+            // for playlists, recreatePlayer() is called from within cuePlaylistItem()
+            thisObj.recreatePlayer();
+          }
+          thisObj.initializing = false;
+          thisObj.playerCreated = true; // remains true until browser is refreshed
         });
       }
     });
@@ -551,9 +561,14 @@
   // Set default variable values.
   AblePlayer.prototype.setDefaults = function () {
 
+    this.playerCreated = false; // will set to true after recreatePlayer() is complete the first time
     this.playing = false; // will change to true after 'playing' event is triggered
     this.clickedPlay = false; // will change to true temporarily if user clicks 'play' (or pause)
     this.fullscreen = false; // will change to true if player is in full screen mode
+    this.swappingSrc = false; // will change to true temporarily while media source is being swapped
+    this.initializing = false; // will change to true temporarily while initPlayer() is processing
+    this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
+    this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
 
     this.getUserAgent();
     this.setIconColor();
@@ -1005,6 +1020,7 @@
 
   // Perform one-time setup for this instance of player; called after player is first initialized.
   AblePlayer.prototype.setupInstance = function () {
+
     var deferred = new $.Deferred();
     var promise = deferred.promise();
 
@@ -1016,14 +1032,12 @@
       this.mediaId = "ableMediaId_" + this.ableIndex;
       this.$media.attr('id', this.mediaId);
     }
-    // get playlist for this media element
-    this.setupInstancePlaylist();
-
     deferred.resolve();
     return promise;
   };
 
   AblePlayer.prototype.setupInstancePlaylist = function() {
+
     // find a matching playlist and set this.hasPlaylist
     // if there is one, also set this.$playlist, this.playlistIndex, & this.playlistEmbed
     var thisObj = this;
@@ -1036,8 +1050,22 @@
         thisObj.hasPlaylist = true;
         // If using an embedded player, we'll replace $playlist with the clone later.
         thisObj.$playlist = $(this).find('li');
-        // add tabindex to each list item
-        $(this).find('li').attr('tabindex', '0');
+
+        // check to see if list item has YouTube as its source
+        // if it does, inject a thumbnail from YouTube
+        var $youTubeVideos = $(this).find('li[data-youtube-id]');
+        $youTubeVideos.each(function() {
+          var youTubeId = $(this).attr('data-youtube-id');
+          var youTubePoster = thisObj.getYouTubePosterUrl(youTubeId,'120');
+          var $youTubeImg = $('<img>',{
+            'src': youTubePoster,
+            'alt': ''
+          });
+          $(this).find('button').prepend($youTubeImg);
+        });
+
+        // add accessibility to the list markup
+        $(this).find('li span').attr('aria-hidden','true');
         thisObj.playlistIndex = 0;
         var dataEmbedded = $(this).data('embedded');
         if (typeof dataEmbedded !== 'undefined' && dataEmbedded !== false) {
@@ -1056,17 +1084,24 @@
       // but keep this.loop as true and handle the playlist looping ourselves
       this.media.removeAttribute('loop');
     }
-
     if (this.hasPlaylist && this.playlistEmbed) {
       // Copy the playlist out of the dom, so we can reinject when we build the player.
       var parent = this.$playlist.parent();
       this.$playlistDom = parent.clone();
       parent.remove();
     }
+    if (this.hasPlaylist && this.$sources.length === 0) {
+      // no source elements were provided. Construct them from the first playlist item
+      this.cuePlaylistItem(0);
+      // redefine this.$sources now that media contains one or more <source> elements
+      this.$sources = this.$media.find('source');
+    }
+
   };
 
-  // Creates the appropriate player for the current source.
   AblePlayer.prototype.recreatePlayer = function () {
+
+    // Creates the appropriate player for the current source.
     var thisObj, prefsGroups, i;
     thisObj = this;
 
@@ -1075,55 +1110,63 @@
       console.log("Can't create player; no appropriate player type detected.");
       return;
     }
+		if (!this.playerCreated) {
+			// only call these functions once
+	    this.loadCurrentPreferences();
+			this.injectPlayerCode();
+		}
 
-    this.loadCurrentPreferences();
+		// call all remaining functions each time a new media instance is loaded
 
-    this.injectPlayerCode();
     this.initSignLanguage();
 
     this.setupTracks().then(function() {
 
-			if (thisObj.captions.length >= 1) {
+			thisObj.setupAltCaptions().then(function() {
 
-				thisObj.setupAltCaptions().then(function() {
+				thisObj.setupTranscript().then(function() {
 
-					thisObj.setupTranscript().then(function() {
-
+					if (thisObj.transcriptType) {
 						thisObj.addTranscriptAreaEvents();
 						thisObj.updateTranscript();
+					}
+					if (thisObj.mediaType === 'video') {
 						thisObj.initDescription();
+					}
+
+					if (thisObj.captions.length) {
 						thisObj.initDefaultCaption();
-        		thisObj.initPlayer().then(function() { // initPlayer success
+					}
+//          thisObj.initializing = true;
+        	  thisObj.initPlayer().then(function() { // initPlayer success
+//          	  thisObj.initializing = false;
 
-          		thisObj.initializing = false;
+            // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+						// This tells browsers to ignore the text tracks so Able Player can handle them
+						// However, timing is critical as browsers - especially Safari - tend to ignore this request
+						// unless it's sent late in the intialization process.
+						// If browsers ignore the request, the result is redundant captions
+						thisObj.setMediaAttributes();
 
-							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-							// This tells browsers to ignore the text tracks so Able Player can handle them
-							// However, timing is critical as browsers - especially Safari - tend to ignore this request
-							// unless it's sent late in the intialization process.
-							// If browsers ignore the request, the result is redundant captions
-							thisObj.setMediaAttributes();
-
-							// inject each of the hidden forms that will be accessed from the Preferences popup menu
-							prefsGroups = thisObj.getPreferencesGroups();
-							for (i = 0; i < prefsGroups.length; i++) {
-								thisObj.injectPrefsForm(prefsGroups[i]);
-          		}
-							thisObj.setupPopups();
-							thisObj.updateCaption();
-							thisObj.injectVTS();
-							if (thisObj.chaptersDivLocation) {
-								thisObj.populateChaptersDiv();
-          		}
-							thisObj.showSearchResults();
-        		},
-        			function() {  // initPlayer fail
-								thisObj.provideFallback();
-        			}
-						);
-					});
-    		});
-			}
+						// inject each of the hidden forms that will be accessed from the Preferences popup menu
+						prefsGroups = thisObj.getPreferencesGroups();
+						for (i = 0; i < prefsGroups.length; i++) {
+							thisObj.injectPrefsForm(prefsGroups[i]);
+          	  }
+						thisObj.setupPopups();
+						thisObj.updateCaption();
+						thisObj.injectVTS();
+						if (thisObj.chaptersDivLocation) {
+							thisObj.populateChaptersDiv();
+          	  }
+						thisObj.showSearchResults();
+            thisObj.refreshControls();
+          },
+        	  function() {  // initPlayer fail
+						thisObj.provideFallback();
+        	  });
+				});
+      });
     });
   };
 
@@ -1165,7 +1208,8 @@
         // Normally, we wait until user clicks play, rather than unnecessarily consume their bandwidth
         // Exceptions are if the video is intended to autostart or if running on iOS (a workaround for iOS issues)
         // TODO: Confirm that this is still necessary with iOS (this would added early, & I don't remember what the issues were)
-        if (thisObj.player === 'html5' && (thisObj.isIOS() || thisObj.startTime > 0 || thisObj.autoplay)) {
+        if (thisObj.player === 'html5' &&
+          (thisObj.isIOS() || thisObj.startTime > 0 || thisObj.autoplay || thisObj.okToPlay)) {
           thisObj.$media[0].load();
         }
         deferred.resolve();
@@ -3141,7 +3185,6 @@
 (function ($) {
 
   AblePlayer.prototype.injectPlayerCode = function() {
-
     // create and inject surrounding HTML structure
     // If IOS:
     //  If video:
@@ -3192,7 +3235,6 @@
       });
       this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
     }
-
     this.injectPlayerControlArea();
     this.injectTextDescriptionArea();
     this.injectAlert();
@@ -3221,6 +3263,7 @@
   };
 
   AblePlayer.prototype.injectBigPlayButton = function () {
+
     this.$bigPlayButton = $('<button>', {
       'class': 'able-big-play-button icon-play',
       'aria-hidden': true,
@@ -3236,6 +3279,7 @@
   };
 
   AblePlayer.prototype.injectPlayerControlArea = function () {
+
     this.$playerDiv = $('<div>', {
       'class' : 'able-player',
       'role' : 'region',
@@ -3501,20 +3545,13 @@
   };
 
   AblePlayer.prototype.injectPlaylist = function () {
+
     if (this.playlistEmbed === true) {
       // move playlist into player, immediately before statusBarDiv
       var playlistClone = this.$playlistDom.clone();
       playlistClone.insertBefore(this.$statusBarDiv);
       // Update to the new playlist copy.
       this.$playlist = playlistClone.find('li');
-    }
-
-    if (this.hasPlaylist && this.$sources.length === 0) {
-      // no source elements were provided. Construct them from the first playlist item
-      this.initializing = true;
-      this.swapSource(0);
-      // redefine this.$sources now that media contains one or more <source> elements
-      this.$sources = this.$media.find('source');
     }
   };
 
@@ -3722,7 +3759,6 @@
       }
       e.preventDefault();
     });
-
     this.$controllerDiv.append($menu);
     return $menu;
   };
@@ -3772,7 +3808,6 @@
         tracks, track, $trackButton, $trackLabel,
         radioName, radioId, $menu, $menuItem,
         prefCats, prefCat, prefLabel;
-
     popups = [];
     if (typeof which === 'undefined') {
       popups.push('prefs');
@@ -3803,7 +3838,7 @@
           this.prefsPopup = this.createPopup('prefs');
         }
         else if (popup == 'captions') {
-          if (typeof this.captionsPopup === 'undefined') {
+          if (typeof this.captionsPopup === 'undefined' || !this.captionsPopup) {
             this.captionsPopup = this.createPopup('captions',this.captions);
           }
         }
@@ -3817,7 +3852,7 @@
           else {
             tracks = [];
           }
-          if (typeof this.chaptersPopup === 'undefined') {
+          if (typeof this.chaptersPopup === 'undefined' || !this.chaptersPopup) {
             this.chaptersPopup = this.createPopup('chapters',tracks);
           }
         }
@@ -3942,11 +3977,11 @@
     return browsers;
   }
 
-  // Calculates the layout for controls based on media and options.
-  // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
-  // Each associated value is array of control names to put at that location.
   AblePlayer.prototype.calculateControlLayout = function () {
-    // Removed rewind/forward in favor of seek bar.
+
+    // Calculates the layout for controls based on media and options.
+    // Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
+    // Each associated value is array of control names to put at that location.
 
     var controlLayout = {
       'ul': ['play','restart','rewind','forward'],
@@ -3974,7 +4009,6 @@
       bll.push('slower');
       bll.push('faster');
     }
-
     if (this.mediaType === 'video') {
       if (this.hasCaptions) {
         bll.push('captions'); //closed captions
@@ -4015,6 +4049,7 @@
   };
 
   AblePlayer.prototype.addControls = function() {
+
     // determine which controls to show based on several factors:
     // mediaType (audio vs video)
     // availability of tracks (e.g., for closed captions & audio description)
@@ -4603,96 +4638,175 @@
 */
   };
 
-  AblePlayer.prototype.swapSource = function(sourceIndex) {
+  AblePlayer.prototype.cuePlaylistItem = function(sourceIndex) {
 
-    // Change media player source file, for instance when moving to the next element in a playlist.
+    // Move to a new item in a playlist.
     // NOTE: Swapping source for audio description is handled elsewhere;
     // see description.js > swapDescription()
 
-    var $newItem, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
+    /*
+      // Decided against preventing a reload of the current item in the playlist.
+      // If it's clickable, users should be able to click on it and expect something to happen.
+      // Leaving here though in case it's determined to be desirable.
+    if (sourceIndex === this.playlistItemIndex) {
+      // user has requested the item that's currently playing
+      // just ignore the request
+      return;
+    }
+    this.playlistItemIndex = sourceIndex;
+    */
 
-    this.$media.find('source').remove();
+    var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
+
+		var thisObj = this;
+
+		prevPlayer = this.player;
+
+    if (this.initializing) { // this is the first track - user hasn't pressed play yet
+			// do nothing.
+		}
+		else {
+  		  if (this.playerCreated) {
+        // remove the old
+        this.deletePlayer();
+      }
+		}
+
+		// Determine appropriate player to play this media
     $newItem = this.$playlist.eq(sourceIndex);
-    itemTitle = $newItem.html();
-    if ($newItem.attr('lang')) {
+		if (this.hasAttr($newItem,'data-youtube-id')) {
+			this.youTubeId = $newItem.attr('data-youtube-id');
+      newPlayer = 'youtube';
+		}
+		else {
+  		  newPlayer = 'html5';
+		}
+
+    if (newPlayer === 'youtube') {
+      if (prevPlayer === 'html5') {
+        // pause and hide the previous media
+        if (this.playing) {
+          this.pauseMedia();
+        }
+        this.$media.hide();
+      }
+    }
+		else {
+  		  // the new player is not youtube
+      this.youTubeId = false;
+      if (prevPlayer === 'youtube') {
+        // unhide the media element
+        this.$media.show();
+		  }
+		}
+		this.player = newPlayer;
+
+		// set swappingSrc; needs to be true within recreatePlayer(), called below
+		this.swappingSrc = true;
+
+		// transfer media attributes from playlist to media element
+		if (this.hasAttr($newItem,'data-poster')) {
+			this.$media.attr('poster',$newItem.attr('data-poster'));
+		}
+		if (this.hasAttr($newItem,'data-width')) {
+			this.$media.attr('width',$newItem.attr('data-width'));
+		}
+		if (this.hasAttr($newItem,'data-height')) {
+			this.$media.attr('height',$newItem.attr('data-height'));
+		}
+		if (this.hasAttr($newItem,'data-youtube-desc-id')) {
+			this.$media.attr('data-youtube-desc-id',$newItem.attr('data-youtube-desc-id'));
+		}
+		if (this.youTubeId) {
+			this.$media.attr('data-youtube-id',$newItem.attr('data-youtube-id'));
+		}
+
+		// add new <source> elements from playlist data
+    var $sourceSpans = $newItem.children('span.able-source');
+		if ($sourceSpans.length) {
+			$sourceSpans.each(function() {
+				if (thisObj.hasAttr($(this),'data-src')) {
+					// this is the only required attribute
+					var $newSource = $('<source>',{
+						'src': $(this).attr('data-src')
+					});
+					if (thisObj.hasAttr($(this),'data-type')) {
+						$newSource.attr('type',$(this).attr('data-type'));
+					}
+					if (thisObj.hasAttr($(this),'data-desc-src')) {
+						$newSource.attr('data-desc-src',$(this).attr('data-desc-src'));
+					}
+					if (thisObj.hasAttr($(this),'data-sign-src')) {
+						$newSource.attr('data-sign-src',$(this).attr('data-sign-src'));
+					}
+					thisObj.$media.append($newSource);
+				}
+			});
+		}
+
+		// add new <track> elements from playlist data
+    var $trackSpans = $newItem.children('span.able-track');
+		if ($trackSpans.length) {
+	    // for each element in $trackSpans, create a new <track> element
+			$trackSpans.each(function() {
+				if (thisObj.hasAttr($(this),'data-src') &&
+					thisObj.hasAttr($(this),'data-kind') &&
+					thisObj.hasAttr($(this),'data-srclang')) {
+					// all required attributes are present
+					var $newTrack = $('<track>',{
+						'src': $(this).attr('data-src'),
+						'kind': $(this).attr('data-kind'),
+						'srclang': $(this).attr('data-srclang')
+					});
+					if (thisObj.hasAttr($(this),'data-label')) {
+						$newTrack.attr('label',$(this).attr('data-label'));
+					}
+					thisObj.$media.append($newTrack);
+				}
+			});
+		}
+
+    itemTitle = $newItem.text();
+    if (this.hasAttr($newItem,'lang')) {
       itemLang = $newItem.attr('lang');
     }
-    sources = [];
-    s = 0; // index
-    if (this.mediaType === 'audio') {
-      if ($newItem.attr('data-mp3')) {
-        jwSource = $newItem.attr('data-mp3'); // JW Player can play this
-        sources[s] =  new Array('audio/mpeg',jwSource);
-        s++;
-      }
-      if ($newItem.attr('data-webm')) {
-        sources[s] = new Array('audio/webm',$newItem.attr('data-webm'));
-        s++;
-      }
-      if ($newItem.attr('data-webma')) {
-        sources[s] = new Array('audio/webm',$newItem.attr('data-webma'));
-        s++;
-      }
-      if ($newItem.attr('data-ogg')) {
-        sources[s] = new Array('audio/ogg',$newItem.attr('data-ogg'));
-        s++;
-      }
-      if ($newItem.attr('data-oga')) {
-        sources[s] = new Array('audio/ogg',$newItem.attr('data-oga'));
-        s++;
-      }
-      if ($newItem.attr('data-wav')) {
-        sources[s] = new Array('audio/wav',$newItem.attr('data-wav'));
-        s++;
-      }
-    }
-    else if (this.mediaType === 'video') {
-      if ($newItem.attr('data-mp4')) {
-        jwSource = $newItem.attr('data-mp4'); // JW Player can play this
-        sources[s] =  new Array('video/mp4',jwSource);
-        s++;
-      }
-      if ($newItem.attr('data-webm')) {
-        sources[s] = new Array('video/webm',$newItem.attr('data-webm'));
-        s++;
-      }
-      if ($newItem.attr('data-webmv')) {
-        sources[s] = new Array('video/webm',$newItem.attr('data-webmv'));
-        s++;
-      }
-      if ($newItem.attr('data-ogg')) {
-        sources[s] = new Array('video/ogg',$newItem.attr('data-ogg'));
-        s++;
-      }
-      if ($newItem.attr('data-ogv')) {
-        sources[s] = new Array('video/ogg',$newItem.attr('data-ogv'));
-        s++;
-      }
-    }
-    for (i=0; i<sources.length; i++) {
-      $newSource = $('<source>',{
-        type: sources[i][0],
-        src: sources[i][1]
-      });
-      this.$media.append($newSource);
-    }
+    // Update relevant arrays
+    this.$sources = this.$media.find('source');
+
+    // recreate player, informed by new attributes and track elements
+    this.recreatePlayer();
 
     // update playlist to indicate which item is playing
     //$('.able-playlist li').removeClass('able-current');
     this.$playlist.removeClass('able-current');
-    $newItem.addClass('able-current');
+    this.$playlist.eq(sourceIndex).addClass('able-current');
 
     // update Now Playing div
     if (this.showNowPlaying === true) {
-      nowPlayingSpan = $('<span>');
-      if (typeof itemLang !== 'undefined') {
-        nowPlayingSpan.attr('lang',itemLang);
+      if (typeof this.$nowPlayingDiv !== 'undefined') {
+        nowPlayingSpan = $('<span>');
+        if (typeof itemLang !== 'undefined') {
+          nowPlayingSpan.attr('lang',itemLang);
+        }
+        nowPlayingSpan.html('<span>' + this.tt.selectedTrack + ':</span>' + itemTitle);
+        this.$nowPlayingDiv.html(nowPlayingSpan);
       }
-      nowPlayingSpan.html('<span>Selected track:</span>' + itemTitle);
-      this.$nowPlayingDiv.html(nowPlayingSpan);
     }
 
-    // reload audio after sources have been updated
+    // finished swapping src, now reload the new source file.
+    this.swappingSrc = false;
+
+    if (this.player === 'html5') {
+      this.media.load();
+    }
+    else if (this.player === 'youtube') {
+      // TODO: Load new youTubeId
+    }
+    else if (this.player === 'jw' && this.jwPlayer) {
+      jwSource = this.$sources[sourceIndex].getAttribute('src');
+      this.jwPlayer.load({file: jwSource});
+    }
+
     // if this.swappingSrc is true, media will autoplay when ready
     if (this.initializing) { // this is the first track - user hasn't pressed play yet
       this.swappingSrc = false;
@@ -4706,11 +4820,47 @@
         this.jwPlayer.load({file: jwSource});
       }
       else if (this.player === 'youtube') {
-        // Does nothing, can't swap source with youtube.
-        // TODO: Anything we need to do to prevent this happening?
+        this.okToPlay = true;
       }
     }
   };
+
+	AblePlayer.prototype.deletePlayer = function() {
+
+		// remove previous video's attributes and child elements from media element
+		if (this.player == 'youtube') {
+  		  var $youTubeIframe = this.$mediaContainer.find('iframe');
+    		$youTubeIframe.remove();
+		}
+		else {
+    		this.$media.removeAttr('poster width height');
+      this.$media.empty();
+      // this.$media.find('source').remove();
+      // this.$media.find('track').remove();
+    }
+
+		// Empty elements that will be rebuilt
+		this.$controllerDiv.empty();
+		// this.$statusBarDiv.empty();
+		// this.$timer.empty();
+		this.$elapsedTimeContainer.empty().text('0:00'); // span.able-elapsedTime
+		this.$durationContainer.empty(); // span.able-duration
+
+		// Remove popup windows and modal dialogs; these too will be rebuilt
+		if (this.$signWindow) {
+    		this.$signWindow.remove();
+    }
+    if (this.$transcriptArea) {
+    		this.$transcriptArea.remove();
+    }
+		$('.able-modal-dialog').remove();
+
+		// reset key variables
+		this.hasCaptions = false;
+		this.hasChapters = false;
+		this.captionsPopup = null;
+		this.chaptersPopup = null;
+	};
 
   AblePlayer.prototype.getButtonTitle = function(control) {
 
@@ -4880,7 +5030,6 @@
         	}
       	})(track, kind));
     	}
-
       $.when.apply($, loadingPromises).then(function () {
         deferred.resolve();
       });
@@ -4953,17 +5102,18 @@
       });
     }
 
-    captionTracks = this.$media.find('track[kind="captions"],track[kind="subtitles"]');
-    if (captionTracks.length === 0) {
-      // no captions (or subtitles) were found in HTML5 track elements
-      if (this.player === 'youtube') {
-        // try to get tracks via YouTube
+		if (this.player === 'youtube') {
+			// check to see if any HTML caption or subitle tracks were found.
+			// If not, check YouTube
+			captionTracks = this.$media.find('track[kind="captions"],track[kind="subtitles"]');
+			if (captionTracks.length) {
+				// HTML captions or subtitles were found. Use those.
+				deferred.resolve();
+			}
+			else {
 				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
           deferred.resolve();
         });
-      }
-      else {
-        // repeat this for other players (e.g., Vimeo, DailyMotion) once supported
       }
     }
     else {
@@ -5144,13 +5294,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   };
 
   AblePlayer.prototype.setupAltCaptions = function() {
+
     // setup captions from an alternative source (not <track> elements)
     // only do this if no <track> captions are provided
     // currently supports: YouTube
     var deferred = new $.Deferred();
     var promise = deferred.promise();
     if (this.captions.length === 0) {
-      if (this.player === 'youtube' && this.usingYouTubeCaptions()) {
+      if (this.player === 'youtube' && this.usingYouTubeCaptions) {
         this.setupYouTubeCaptions().done(function() {
           deferred.resolve();
         });
@@ -5214,7 +5365,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   AblePlayer.prototype.finalizeYoutubeInit = function () {
 
     // This is called once we're sure the Youtube iFrame API is loaded -- see above
-    var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions;
+    var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions, autoplay;
 
     deferred = new $.Deferred();
     promise = deferred.promise();
@@ -5268,6 +5419,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       this.ytHeight = null;
     }
 
+    if (this.okToPlay) {
+      autoplay = 1;
+    }
+    else {
+      autoplay = 0;
+    }
+
     // NOTE: YouTube is changing the following parameters on or after Sep 25, 2018:
     // rel - No longer able to prevent YouTube from showing related videos
     //      value of 0 now limits related videos to video's same channel
@@ -5280,7 +5438,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       width: this.ytWidth,
       height: this.ytHeight,
       playerVars: {
-        autoplay: 0,
+        autoplay: autoplay,
         enablejsapi: 1,
         disableKb: 1, // disable keyboard shortcuts, using our own
         playsinline: this.playsInline,
@@ -5298,10 +5456,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
           if (thisObj.swappingSrc) {
             // swap is now complete
             thisObj.swappingSrc = false;
+            thisObj.cueingPlaylistItem = false;
             if (thisObj.playing) {
               // resume playing
               thisObj.playMedia();
             }
+          }
+          if (thisObj.userClickedPlaylist) {
+            thisObj.userClickedPlaylist = false; // reset
           }
           if (typeof thisObj.aspectRatio === 'undefined') {
             thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
@@ -5313,9 +5475,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
         },
         onStateChange: function (x) {
           var playerState = thisObj.getPlayerState(x.data);
+          // values of playerState: 'playing','paused','buffering','ended'
           if (playerState === 'playing') {
             thisObj.playing = true;
             thisObj.startedPlaying = true;
+          }
+          else if (playerState == 'ended') {
+            thisObj.onMediaComplete();
           }
           else {
             thisObj.playing = false;
@@ -5351,7 +5517,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       }
     });
     thisObj.injectPoster(thisObj.$mediaContainer, 'youtube');
-    thisObj.$media.remove();
+    if (!thisObj.hasPlaylist) {
+      // remove the media element, since YouTube replaces that with its own element in an iframe
+      // this is handled differently for playlists. See buildplayer.js > cuePlaylistItem()
+      thisObj.$media.remove();
+    }
     return promise;
   };
 
@@ -5830,6 +6000,31 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       this.usingYouTubeCaptions = false;
     }
     this.refreshControls();
+  };
+
+	AblePlayer.prototype.getYouTubePosterUrl = function (youTubeId, width) {
+
+  	  // return a URL for retrieving a YouTube poster image
+  	  // supported values of width: 120, 320, 480, 640
+
+  	  var url = 'https://img.youtube.com/vi/' + youTubeId;
+  	  if (width == '120') {
+    	  // default (small) thumbnail, 120 x 90
+    	  return url + '/default.jpg';
+  	  }
+  	  else if (width == '320') {
+    	  // medium quality thumbnail, 320 x 180
+    	  return url + '/hqdefault.jpg';
+  	  }
+  	  else if (width == '480') {
+    	  // high quality thumbnail, 480 x 360
+    	  return url + '/hqdefault.jpg';
+  	  }
+  	  else if (width == '640') {
+    	  // standard definition poster image, 640 x 480
+    	  return url + '/sddefault.jpg';
+  	  }
+  	  return false;
   };
 
 })(jQuery);
@@ -6961,7 +7156,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
   AblePlayer.prototype.capitalizeFirstLetter = function (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+  };
 
   AblePlayer.prototype.roundDown = function (value, decimals) {
 
@@ -6969,6 +7164,25 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     // where X is the value of the decimals parameter
     return Number(Math.floor(value+'e'+decimals)+'e-'+decimals);
   };
+
+  AblePlayer.prototype.hasAttr = function (object, attribute) {
+
+	  // surprisingly, there is no hasAttr() function in Jquery as of 3.2.1
+	  // return true if object has attribute; otherwise false
+	  // selector is a Jquery object
+	  // attribute is a string
+
+		var attr = object.attr(attribute);
+
+		// For some browsers, `attr` is undefined; for others,
+		// `attr` is false.  Check for both.
+		if (typeof attr !== typeof undefined && attr !== false) {
+    	return true;
+    }
+    else {
+	    return false;
+    }
+	};
 
   Number.isInteger = Number.isInteger || function(value) {
 
@@ -7642,6 +7856,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   };
 
   AblePlayer.prototype.pauseMedia = function () {
+
     if (this.player === 'html5') {
       this.media.pause(true);
       if (this.hasSignLanguage && this.signVideo) {
@@ -7908,6 +8123,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     // Update seekbar width.
     // To do this, we need to calculate the width of all buttons surrounding it.
     if (this.seekBar) {
+
       widthUsed = 0;
       seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
 
@@ -8016,6 +8232,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
         'aria-expanded': 'false'
       });
     }
+
     if (this.$fullscreenButton) {
       if (!this.fullscreen) {
         this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
@@ -8279,7 +8496,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   AblePlayer.prototype.handleCaptionToggle = function() {
 
     var captions;
-
     if (this.hidingPopup) {
       // stopgap to prevent spacebar in Firefox from reopening popup
       // immediately after closing it
@@ -8293,7 +8509,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       captions = [];
     }
     if (captions.length === 1) {
-
       // When there's only one set of captions, just do an on/off toggle.
       if (this.captionsOn === true) {
         // turn them off
@@ -8634,6 +8849,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
         this.playMedia();
       }
     }
+
     this.refreshControls();
   };
 
@@ -8846,7 +9062,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       this.$captionsDiv.css('font-size',newCaptionSize + '%');
       this.$captionsWrapper.css('line-height',newLineHeight + '%');
     }
-
     this.refreshControls();
   };
 
@@ -9139,7 +9354,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       // save preference to cookie
       thisObj.prefCaptions = 1;
       thisObj.updateCookie('prefCaptions');
-
       thisObj.refreshControls();
     }
   };
@@ -9889,6 +10103,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				deferred.resolve();
 			}
 		}
+		else {
+			// there is no transcript
+			deferred.resolve();
+		}
 		return promise;
 	};
 
@@ -9946,8 +10164,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.$transcriptLanguageSelect.append($option);
 	    }
     }
-    $languageSelectWrapper.append($languageSelectLabel,this.$transcriptLanguageSelect);
-		this.$transcriptToolbar.append($languageSelectWrapper);
+    if ($languageSelectWrapper) {
+      $languageSelectWrapper.append($languageSelectLabel,this.$transcriptLanguageSelect);
+      this.$transcriptToolbar.append($languageSelectWrapper);
+    }
 		this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
 		// If client has provided separate transcript location, put it there.
@@ -10755,19 +10975,22 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   };
 
   AblePlayer.prototype.onMediaComplete = function () {
+
     // if there's a playlist, advance to next item and start playing
-    if (this.hasPlaylist) {
+    if (this.hasPlaylist && !this.cueingPlaylistItem) {
       if (this.playlistIndex === (this.$playlist.length - 1)) {
         // this is the last track in the playlist
         if (this.loop) {
           this.playlistIndex = 0;
-          this.swapSource(0);
+          this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+          this.cuePlaylistItem(0);
         }
       }
       else {
         // this is not the last track. Play the next one.
         this.playlistIndex++;
-        this.swapSource(this.playlistIndex)
+        this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+        this.cuePlaylistItem(this.playlistIndex)
       }
     }
     this.refreshControls();
@@ -10775,6 +10998,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
   AblePlayer.prototype.onMediaNewSourceLoad = function () {
 
+    if (this.cueingPlaylistItem) {
+      // this variable was set in order to address bugs caused by multiple firings of media 'end' event
+      // safe to reset now
+      this.cueingPlaylistItem = false;
+    }
     if (this.swappingSrc === true) {
       // new source file has just been loaded
       if (this.swapTime > 0) {
@@ -10888,6 +11116,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   };
 
   AblePlayer.prototype.onClickPlayerButton = function (el) {
+
     // TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
     var whichButton = $(el).attr('class').split(' ')[0].substr(20);
     if (whichButton === 'play') {
@@ -11088,6 +11317,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
         // so we know player can seek ahead to anything
       })
       .on('canplaythrough',function() {
+        if (thisObj.userClickedPlaylist) {
+          if (!thisObj.startedPlaying) {
+		        	// start playing; no further user action is required
+            thisObj.playMedia();
+	      	  }
+          thisObj.userClickedPlaylist = false; // reset
+        }
         if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
           // by clicking on any of these elements, user is likely intending to play
           // Not included: elements where user might click multiple times in succession
@@ -11100,7 +11336,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
               // a seek has already been initiated
               // since canplaythrough has been triggered, the seek is complete
               thisObj.seeking = false;
-              if (thisObj.autoplay) {
+              if (thisObj.autoplay || thisObj.okToPlay) {
                 thisObj.playMedia();
               }
             }
@@ -11114,13 +11350,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
           }
           else {
             // there is no startTime, therefore no seeking required
-            if (thisObj.autoplay) {
+            if (thisObj.autoplay || thisObj.okToPlay) {
               thisObj.playMedia();
             }
           }
         }
         else if (thisObj.hasPlaylist) {
-          if ((thisObj.playlistIndex !== (thisObj.$playlist.length - 1)) || thisObj.loop) {
+					if ((thisObj.playlistIndex !== thisObj.$playlist.length) || thisObj.loop) {
             // this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
             thisObj.playMedia();
           }
@@ -11348,6 +11584,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
     // handle clicks (left only) anywhere on the page. If any popups are open, close them.
     $(document).on('click',function(e) {
+
       if (e.button !== 0) { // not a left click
         return false;
       }
@@ -11402,9 +11639,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
     // handle clicks on playlist items
     if (this.$playlist) {
-      this.$playlist.click(function() {
-        thisObj.playlistIndex = $(this).index();
-        thisObj.swapSource(thisObj.playlistIndex);
+      this.$playlist.click(function(e) {
+        if (!thisObj.userClickedPlaylist) {
+          // stopgap in case multiple clicks are fired on the same playlist item
+          thisObj.userClickedPlaylist = true; // will be set to false after new src is loaded & canplaythrough is triggered
+          thisObj.playlistIndex = $(this).index();
+          thisObj.cuePlaylistItem(thisObj.playlistIndex);
+        }
       });
     }
 
@@ -12188,6 +12429,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 (function ($) {
   AblePlayer.prototype.initSignLanguage = function() {
+
     // Sign language is only currently supported in HTML5 player, not fallback or YouTube
     if (this.player === 'html5') {
       // check to see if there's a sign language video accompanying this video
@@ -12204,6 +12446,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       else {
         this.hasSignLanguage = false;
       }
+    }
+    else {
+      this.hasSignLanguage = false;
     }
   };
 
@@ -13036,8 +13281,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
-    // Removing 'nl' as of 2.3.54, pending updates
-    var langs = ['ca','de','en','es','fr','he','it','ja','nb','zh-tw'];
+    var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','zh-tw'];
     return langs;
   };
 

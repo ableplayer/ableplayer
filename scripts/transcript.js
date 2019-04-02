@@ -25,6 +25,10 @@
 				deferred.resolve();
 			}
 		}
+		else {
+			// there is no transcript
+			deferred.resolve();
+		}
 		return promise;
 	};
 
@@ -82,8 +86,10 @@
 				this.$transcriptLanguageSelect.append($option);
 	    }
     }
-    $languageSelectWrapper.append($languageSelectLabel,this.$transcriptLanguageSelect);
-		this.$transcriptToolbar.append($languageSelectWrapper);
+    if ($languageSelectWrapper) {
+      $languageSelectWrapper.append($languageSelectLabel,this.$transcriptLanguageSelect);
+      this.$transcriptToolbar.append($languageSelectWrapper);
+    }
 		this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
 
 		// If client has provided separate transcript location, put it there.
