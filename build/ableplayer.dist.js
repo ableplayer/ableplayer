@@ -12522,10 +12522,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 (function ($) {
   // Look up ISO 639-1 language codes to be used as subtitle labels
-  // @author Phil Teare
-  // using wikipedia data
   // In some instances "name" has been trunctation for readability
+  // Sources:
   // http://stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json/4900304#4900304
+  // https://www.venea.net/web/culture_code
 
   var isoLangs = {
     "ab":{
@@ -12647,10 +12647,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     "zh":{
         "name":"Chinese",
         "nativeName":"中文 (Zhōngwén), 汉语, 漢語"
-    },
-    "zh-tw":{
-        "name":"Chinese Traditional (Taiwan)",
-        "nativeName":"中文（台灣）"
     },
     "cv":{
         "name":"Chuvash",
@@ -13044,6 +13040,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
         "name":"Portuguese",
         "nativeName":"Português"
     },
+    "pt-br":{
+        "name":"Portuguese (Brazilian)",
+        "nativeName":"Português do Brasil"
+    },
     "qu":{
         "name":"Quechua",
         "nativeName":"Runa Simi, Kichwa"
@@ -13259,16 +13259,256 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     "za":{
         "name":"Zhuang",
         "nativeName":"Saɯ cueŋƅ, Saw cuengh"
+    },
+    "ar-dz":{
+        "name":"Arabic (Algeria)",
+        "nativeName":"العربية (الجزائر)"
+    },
+    "ar-bh":{
+        "name":"Arabic (Bahrain)",
+        "nativeName":"العربية (البحرين)"
+    },
+    "ar-eg":{
+        "name":"Arabic (Egypt)",
+        "nativeName":"العربية (مصر)"
+    },
+    "ar-iq":{
+        "name":"Arabic (Iraq)",
+        "nativeName":"العربية (العراق)"
+    },
+    "ar-jo":{
+        "name":"Arabic (Jordan)",
+        "nativeName":"العربية (الأردن)"
+    },
+    "ar-kw":{
+        "name":"Arabic (Kuwait)",
+        "nativeName":"العربية (الكويت)"
+    },
+    "ar-lb":{
+        "name":"Arabic (Lebanon)",
+        "nativeName":"العربية (لبنان)"
+    },
+    "ar-ly":{
+        "name":"Arabic (Libya)",
+        "nativeName":"العربية (ليبيا)"
+    },
+    "ar-ma":{
+        "name":"Arabic (Morocco)",
+        "nativeName":"العربية (المملكة المغربية)"
+    },
+    "ar-om":{
+        "name":"Arabic (Oman)",
+        "nativeName":"العربية (عمان)"
+    },
+    "ar-qa":{
+        "name":"Arabic (Qatar)",
+        "nativeName":"العربية (قطر)"
+    },
+    "ar-sa":{
+        "name":"Arabic (Saudi Arabia)",
+        "nativeName":"العربية (المملكة العربية السعودية)"
+    },
+    "ar-sy":{
+        "name":"Arabic (Syria)",
+        "nativeName":"العربية (سوريا)"
+    },
+    "ar-tn":{
+        "name":"Arabic (Tunisia)",
+        "nativeName":"العربية (تونس)"
+    },
+    "ar-ae":{
+        "name":"Arabic (U.A.E.)",
+        "nativeName":"العربية (الإمارات العربية المتحدة)"
+    },
+    "ar-ye":{
+        "name":"Arabic (Yemen)",
+        "nativeName":"العربية (اليمن)"
+    },
+    "de-at":{
+        "name":"German (Austria)",
+        "nativeName":"Deutsch (Österreich)"
+    },
+    "de-li":{
+        "name":"German (Liechtenstein)",
+        "nativeName":"Deutsch (Liechtenstein)"
+    },
+    "de-lu":{
+        "name":"German (Luxembourg)",
+        "nativeName":"Deutsch (Luxemburg)"
+    },
+    "de-ch":{
+        "name":"German (Switzerland)",
+        "nativeName":"Deutsch (Schweiz)"
+    },
+    "en-au":{
+        "name":"English (Australia)",
+        "nativeName":"English (Australia)"
+    },
+    "en-bz":{
+        "name":"English (Belize)",
+        "nativeName":"English (Belize)"
+    },
+    "en-ca":{
+        "name":"English (Canada)",
+        "nativeName":"English (Canada)"
+    },
+    "en-ie":{
+        "name":"English (Ireland)",
+        "nativeName":"English (Ireland)"
+    },
+    "en-jm":{
+        "name":"English (Jamaica)",
+        "nativeName":"English (Jamaica)"
+    },
+    "en-nz":{
+        "name":"English (New Zealand)",
+        "nativeName":""
+    },
+    "en-za":{
+        "name":"English (South Africa)",
+        "nativeName":"English (South Africa)"
+    },
+    "en-tt":{
+        "name":"English (Trinidad)",
+        "nativeName":"English (Trinidad y Tobago)"
+    },
+    "en-gb":{
+        "name":"English (United Kingdom)",
+        "nativeName":"English (United Kingdom)"
+    },
+    "en-us":{
+        "name":"English (United States)",
+        "nativeName":"English (United States)"
+    },
+    "es-ar":{
+        "name":"Spanish (Argentina)",
+        "nativeName":"Español (Argentina)"
+    },
+    "es-bo":{
+        "name":"Spanish (Bolivia)",
+        "nativeName":"Español (Bolivia)"
+    },
+    "es-cl":{
+        "name":"Spanish (Chile)",
+        "nativeName":"Español (Chile)"
+    },
+    "es-co":{
+        "name":"Spanish (Colombia)",
+        "nativeName":"Español (Colombia)"
+    },
+    "es-cr":{
+        "name":"Spanish (Costa Rica)",
+        "nativeName":"Español (Costa Rica)"
+    },
+    "es-do":{
+        "name":"Spanish (Dominican Republic)",
+        "nativeName":"Español (República Dominicana)"
+    },
+    "es-ec":{
+        "name":"Spanish (Ecuador)",
+        "nativeName":"Español (Ecuador)"
+    },
+    "es-sv":{
+        "name":"Spanish (El Salvador)",
+        "nativeName":"Español (El Salvador)"
+    },
+    "es-gt":{
+        "name":"Spanish (Guatemala)",
+        "nativeName":"Español (Guatemala)"
+    },
+    "es-hn":{
+        "name":"Spanish (Honduras)",
+        "nativeName":"Español (Honduras)"
+    },
+    "es-mx":{
+        "name":"Spanish (Mexico)",
+        "nativeName":"Español (México)"
+    },
+    "es-ni":{
+        "name":"Spanish (Nicaragua)",
+        "nativeName":"Español (Nicaragua)"
+    },
+    "es-pa":{
+        "name":"Spanish (Panama)",
+        "nativeName":"Español (Panamá)"
+    },
+    "es-py":{
+        "name":"Spanish (Paraguay)",
+        "nativeName":"Español (Paraguay)"
+    },
+    "es-pe":{
+        "name":"Spanish (Peru)",
+        "nativeName":"Español (Perú)"
+    },
+    "es-pr":{
+        "name":"Spanish (Puerto Rico)",
+        "nativeName":"Español (Puerto Rico)"
+    },
+    "es-uy":{
+        "name":"Spanish (Uruguay)",
+        "nativeName":"Español (Uruguay)"
+    },
+    "es-ve":{
+        "name":"Spanish (Venezuela)",
+        "nativeName":"Español (Venezuela)"
+    },
+    "fr-be":{
+        "name":"French (Belgium)",
+        "nativeName":"français (Belgique)"
+    },
+    "fr-ca":{
+        "name":"French (Canada)",
+        "nativeName":"français (Canada)"
+    },
+    "fr-lu":{
+        "name":"French (Luxembourg)",
+        "nativeName":"français (Luxembourg)"
+    },
+    "fr-ch":{
+        "name":"French (Switzerland)",
+        "nativeName":"français (Suisse)"
+    },
+    "it-ch":{
+        "name":"Italian (Switzerland)",
+        "nativeName":"italiano (Svizzera)"
+    },
+    "nl-be":{
+        "name":"Dutch (Belgium)",
+        "nativeName":"Nederlands (België)"
+    },
+    "pt-br":{
+        "name":"Portuguese (Brazil)",
+        "nativeName":"Português (Brasil)"
+    },
+    "sv-fi":{
+        "name":"Swedish (Finland)",
+        "nativeName":"svenska (Finland)"
+    },
+    "zh-hk":{
+        "name":"Chinese (Hong Kong)",
+        "nativeName":"中文(香港特别行政區)"
+    },
+    "zh-cn":{
+        "name":"Chinese (PRC)",
+        "nativeName":"中文(中华人民共和国)"
+    },
+    "zh-sg":{
+        "name":"Chinese (Singapore)",
+        "nativeName":"中文(新加坡)"
+    },
+    "zh-tw":{
+        "name":"Chinese Traditional (Taiwan)",
+        "nativeName":"中文（台灣）"
     }
   }
 
   AblePlayer.prototype.getLanguageName = function (key) {
-		key = key.slice(0,2);
+		// key = key.slice(0,2);
 		var lang = isoLangs[key];
 		return lang ? lang.name : undefined;
 	};
   AblePlayer.prototype.getLanguageNativeName = function (key) {
-		key = key.slice(0,2);
+		// key = key.slice(0,2);
 		var lang = isoLangs[key];
 		return lang ? lang.nativeName : undefined;
 	}
@@ -13277,17 +13517,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
   AblePlayer.prototype.getSupportedLangs = function() {
     // returns an array of languages for which AblePlayer has translation tables
-    var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','zh-tw'];
+    var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','zh-tw'];
     return langs;
   };
 
   AblePlayer.prototype.getTranslationText = function() {
     // determine language, then get labels and prompts from corresponding translation var
-    var deferred, thisObj, lang, thisObj, msg, translationFile;
+    var deferred, thisObj, lang, thisObj, msg, translationFile, collapsedLang;
     deferred = $.Deferred();
 
     thisObj = this;
-
     // get language of the web page, if specified
     if ($('body').attr('lang')) {
       lang = $('body').attr('lang');
@@ -13304,17 +13543,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     if (!this.forceLang) {
       if (lang) {
         if (lang !== this.lang) {
-          msg = 'Language of web page (' + lang +') ';
           if ($.inArray(lang,this.getSupportedLangs()) !== -1) {
             // this is a supported lang
-            msg += ' has a translation table available.';
             this.lang = lang;
           }
           else {
-            msg += ' is not currently supported. Using default language (' + this.lang + ')';
-          }
-          if (this.debug) {
-            
+            msg = lang + ' is not currently supported. Using default language (' + this.lang + ')';
+            if (this.debug) {
+              
+            }
           }
         }
       }
@@ -13324,7 +13561,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     }
     translationFile = this.rootPath + 'translations/' + this.lang + '.js';
     this.importTranslationFile(translationFile).then(function(result) {
-      thisObj.tt = eval(thisObj.lang);
+      collapsedLang = thisObj.lang.replace('-','');
+      thisObj.tt = eval(collapsedLang);
       deferred.resolve();
     });
     return deferred.promise();
@@ -13333,7 +13571,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   AblePlayer.prototype.importTranslationFile = function(translationFile) {
 
     var deferred = $.Deferred();
-
     $.getScript(translationFile)
       .done(function(translationVar,textStatus) {
         // translation file successfully retrieved
