@@ -10143,7 +10143,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
     // Add field for selecting a transcript language
     // Only necessary if there is more than one language
-    if (this.captions.length >= 1) {
+    if (this.captions.length > 1) {
 			$languageSelectWrapper = $('<div>',{
 				'class': 'transcript-language-select-wrapper'
 			});
