@@ -1648,12 +1648,8 @@
   		  var $youTubeIframe = this.$mediaContainer.find('iframe');
     		$youTubeIframe.remove();
 		}
-		else {
-    		this.$media.removeAttr('poster width height');
-      this.$media.empty();
-      // this.$media.find('source').remove();
-      // this.$media.find('track').remove();
-    }
+    this.$media.removeAttr('poster width height');
+    this.$media.empty();
 
 		// Empty elements that will be rebuilt
 		this.$controllerDiv.empty();
