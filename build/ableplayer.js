@@ -10373,7 +10373,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     currentTime = parseFloat(currentTime);
 
     // Highlight the current transcript item.
-    this.$transcriptArea.find('span.able-transcript-caption').each(function() {
+    this.$transcriptArea.find('span.able-transcript-seekpoint').each(function() {
       start = parseFloat($(this).attr('data-start'));
       end = parseFloat($(this).attr('data-end'));
       if (currentTime >= start && currentTime <= end) {

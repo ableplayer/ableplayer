@@ -889,6 +889,7 @@ ul.able-popup {
   z-index: 7000;
   outline: none;
   padding-bottom: 25px; /* keep content above 16x16px drag icon */
+  background-color: #FFF;
 }
 .able-transcript {
 	position: relative; /* must be positioned for scrolling */
