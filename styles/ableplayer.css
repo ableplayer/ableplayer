@@ -40,6 +40,7 @@
   width: 100%;
   height: auto;
   box-sizing: content-box !important;
+  text-align: left;
 }
 .able {
   position: relative;
