@@ -24,7 +24,7 @@ var tr = {
 
 "prevTrack": "Önceki Parça",
 
-"nextTrack": "Gelecek Parça",
+"nextTrack": "Sonraki Parça",
 
 "rewind": "Geri Sar",
 
@@ -40,7 +40,7 @@ var tr = {
 
 "showTranscript": "Belgeyi Göster",
 
-"hideTranscript": "HBelgeyi Gizle",
+"hideTranscript": "Belgeyi Gizle",
 
 "turnOnDescriptions": "Açıklamaları Aç",
 
