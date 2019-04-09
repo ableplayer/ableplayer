@@ -22,7 +22,7 @@ Features
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so.
 -   An interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
--   Support for playing YouTube videos within the Able Player chrome.
+-   Support for playing YouTube and Vimeo videos within the Able Player chrome.
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
 -   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
@@ -211,7 +211,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-debug** - optional; if present will write messages to the developer console
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.
 -   **loop** - optional; loops and plays the media file repeatedly. If used in conjunction with a playlist, loops the entire playlist rather than individual tracks.
--   **playsinline** - optional but recommended; instructs supporting browsers to play the video "inline" within the web page. This is especially applicable on iPhones, which by default load the video in their own built-in video player, thereby removing it from its surrounding context, which includes Able Player buttons and controls, an interactive transcript, and any other companion features added via Able Player. If this attribute is present, it works for all supported videos, including YouTube videos.
+-   **playsinline** - optional but recommended; instructs supporting browsers to play the video "inline" within the web page. This is especially applicable on iPhones, which by default load the video in their own built-in video player, thereby removing it from its surrounding context, which includes Able Player buttons and controls, an interactive transcript, and any other companion features added via Able Player. If this attribute is present, it works for all supported videos, including YouTube and Vimeo videos.
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload="auto"**, which instructs the browser to
@@ -321,6 +321,8 @@ The following attributes are supported on the `<video>` element only:
 -   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
 -   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information.
 -   **data-youtube-nocookie** - optional; if set to "true" the YouTube video will be embedded using the "youtube-nocookie.com" host.
+-   **data-vimeo-id** - optional; ID of a video on Vimeo, to play the Vimeo video using *Able Player*.
+-   **data-vimeo-desc-id** - optional; ID of the described version of a video on Vimeo. See the section below on *Vimeo Support* for additional information.
 -   **height** - height of the video in pixels. 
 -   **poster** - path to an image file. Will be displayed in the player
     until the video is played.
@@ -478,6 +480,7 @@ The following example shows a playlist with two videos. The first video has one 
 and two tracks (captions and descriptions). The second video is hosted on YouTube, and has both a 
 non-described and described version. It also has a locally-hosted chapters track.  
 Able Player supports mixed playlists, with videos hosted locally or on YouTube. 
+Vimeo videos are not yet supported within playlists.  
   
 ```HTML
 <ul class="able-playlist" data-player="my_video_player">
@@ -617,6 +620,24 @@ If your video has HTML `<track>` elements for captions and subtitles, these will
 
 
 Adjustable playback rate is available for some videos.
+
+Vimeo Support
+---------------
+
+To play a Vimeo video in *Able Player*, simply include a **data-vimeo-id** attribute
+on the `<video>` element. The value of this attribute must be the video's Vimeo ID (a string of numbers).
+
+If a described version of the video is available on Vimeo, include a **data-vimeo-desc-id** attribute
+on the `<video>` element. The value of this attribute must be the Vimeo ID
+of the described version. If users turn on the Description button on their player controller,
+the described version of the video will be loaded instead of the non-described version.
+
+Note that Vimeo currently has a few major limitations:  
+
+-   A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is extremely cluttered and confusing
+-   Hiding Vimeo's playback controls (as per the previous item) also hides captions and subtitles. Therefore the only way to include captions and subtitles is to host them locally and reference them with a &lt;track&gt; element. This is necessary anyway in order to have an interactive transcript, since Vimeo does not expose its caption data in a way that would enable Able Player to repurpose captions into a transcript.
+-   A Pro or Business account is required in order to change playback rate (with faster and slower buttons). Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.
+
 
 MIME Types
 ----------

@@ -1,0 +1,165 @@
+WEBVTT
+
+NOTE Paragraph
+
+00:00:00.490 --> 00:00:07.090
+[alegre melodía de piano]
+
+00:00:07.120 --> 00:00:10.559
+<v madre de Boon> Boon está
+muy ilusionado con el mundo.
+
+00:00:10.560 --> 00:00:12.550
+Quiere hacer casi de todo.
+
+00:00:13.760 --> 00:00:19.090
+<v papá de Boon> Es muy pensante
+y... le gusta explorar.
+
+00:00:19.310 --> 00:00:21.030
+No tiene miedo de hacer cosas.
+
+00:00:21.050 --> 00:00:26.000
+<v Boon> Me gusta la programación
+informática. Quizás haga algo de eso.
+
+00:00:26.240 --> 00:00:32.030
+Y también quiero ser, quizás,
+un inventor, un científico y un autor.
+
+00:00:34.770 --> 00:00:38.900
+<v mamá de Boon> Y, si es tan importante
+para él aprender codificacion...
+
+00:00:38.930 --> 00:00:42.990
+Si es así, creo que para él es importante
+que, al menos, aprenda lo básico,
+
+00:00:42.990 --> 00:00:45.960
+y después es su decisión,
+seguir ese camino o no.
+
+00:00:46.150 --> 00:00:47.720
+<v Richard> Soy Richard Ladner.
+
+00:00:47.740 --> 00:00:50.020
+profesor emérito en la
+Universidad de Washington.
+
+00:00:50.540 --> 00:00:53.160
+He venido observando
+este movimiento que intenta
+
+00:00:53.160 --> 00:00:56.300
+acercar la informática a la educación
+primaria y secundaria,
+
+00:00:56.310 --> 00:01:00.120
+y he notado que una gran parte
+de la tecnología
+
+00:01:00.120 --> 00:01:03.480
+que se enseña a los niños pequeños
+no se encuentra accesible,
+
+00:01:03.480 --> 00:01:06.810
+especialmente para niños pequeños
+invidentes o con trastornos visuales.
+
+00:01:06.990 --> 00:01:08.270
+<v Lauren> Soy Lauren Milne,
+
+00:01:08.290 --> 00:01:11.020
+estudiante graduada de
+la Universidad de Washington,
+
+00:01:11.030 --> 00:01:13.100
+y soy la creadora de Blocks4All.
+
+00:01:13.800 --> 00:01:17.160
+Tradicionalmente, se programaba
+mediante la edición basada en textos.
+
+00:01:17.160 --> 00:01:23.060
+Solo había que escribir en el programa,
+lo que era, por supuesto, muy accesible.
+
+00:01:23.730 --> 00:01:28.040
+Pero recientemente, se han creado
+estos entornos para niños,
+
+00:01:28.510 --> 00:01:31.840
+estos entornos con bloques
+que tienen muchos elementos visuales,
+
+00:01:31.840 --> 00:01:35.700
+que realmente no son accesibles
+para los niños con trastornos visuales.
+
+00:01:35.950 --> 00:01:39.530
+Decidimos crear Blocks4All
+en una pantalla táctil
+
+00:01:39.540 --> 00:01:44.600
+porque comprobamos que muchos niños,
+sobre todo niños con trastornos visuales,
+
+00:01:44.600 --> 00:01:46.550
+ya utilizan pantallas táctiles.
+
+00:01:46.770 --> 00:01:51.780
+El lecto de pantalla VoiceOver
+que viene, por ejemplo, con los iPad
+
+00:01:52.020 --> 00:01:53.320
+es muy accesible.
+
+00:01:53.400 --> 00:01:56.540
+<v Richard> Los productos de los programas
+eran típicamente visuales.
+
+00:01:56.580 --> 00:01:59.540
+Además, había animaciones,
+que tampoco eran accesibles.
+
+00:01:59.620 --> 00:02:02.860
+En lugar de brindar un producto visual,
+aquí brindamos uno táctil,
+
+00:02:02.900 --> 00:02:04.670
+que es el uso de un robot.
+
+00:02:05.010 --> 00:02:13.940
+<v Boon> Avanzar. Girar a la izquierda.
+Girar a la izquierda. Girar otra vez.
+
+00:02:15.140 --> 00:02:20.050
+[lector de pantalla dando instrucciones]
+
+00:02:20.070 --> 00:02:22.460
+<v adultos en el fondo> ¡Ahí vamos! Oh... ¡no!
+
+00:02:22.480 --> 00:02:24.130
+[ruido de bloques]
+
+00:02:24.160 --> 00:02:27.549
+<v Lauren> Lo que realmente visualizo
+es que sea un prototipo
+
+00:02:27.900 --> 00:02:29.660
+para probar diferentes técnicas
+
+00:02:29.660 --> 00:02:32.040
+y espero que otros desarrolladores
+
+00:02:32.120 --> 00:02:35.060
+que están creando estos entornos
+basados en bloques
+
+00:02:35.080 --> 00:02:37.100
+puedan usar algunas
+de mis técnicas
+
+00:02:37.100 --> 00:02:39.040
+para que sus entornos
+sean accesibles.

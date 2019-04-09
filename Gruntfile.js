@@ -42,7 +42,8 @@ module.exports = function(grunt) {
                     'scripts/translation.js',
                     'scripts/ttml2webvtt.js',
                     'scripts/JQuery.doWhen.js',
-                    'scripts/vts.js'
+                    'scripts/vts.js',
+                    'scripts/vimeo.js'
                 ],
                 dest: 'build/<%= pkg.name %>.js'
             },
