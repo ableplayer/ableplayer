@@ -346,10 +346,12 @@
 		this.$alertBox.hide();
 		this.$alertBox.appendTo(this.$ableDiv);
 		if (this.mediaType == 'audio') {
-			top = -10;
+			top = '-10';
 		}
 		else {
-			top = Math.round(this.$mediaContainer.offset().top * 10) / 10;
+			// position just below the vertical center of the mediaContainer
+			// hopefully above captions, but not too far from the controller bar
+			top = Math.round(this.$mediaContainer.height() / 3) * 2;
 		}
 		this.$alertBox.css({
 			top: top + 'px'

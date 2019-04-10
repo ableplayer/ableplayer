@@ -3559,10 +3559,12 @@
 		this.$alertBox.hide();
 		this.$alertBox.appendTo(this.$ableDiv);
 		if (this.mediaType == 'audio') {
-			top = -10;
+			top = '-10';
 		}
 		else {
-			top = Math.round(this.$mediaContainer.offset().top * 10) / 10;
+			// position just below the vertical center of the mediaContainer
+			// hopefully above captions, but not too far from the controller bar
+			top = Math.round(this.$mediaContainer.height() / 3) * 2;
 		}
 		this.$alertBox.css({
 			top: top + 'px'
@@ -7290,8 +7292,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.hasOpenDesc = true;
 			}
 			else {
-				// there's no open-described version via data-desc-src, but what about data-youtube-desc-src?
-				if (this.youTubeDescId) {
+				// there's no open-described version via data-desc-src,
+				// but what about data-youtube-desc-src or data-vimeo-desc-src?
+				if (this.youTubeDescId || this.vimeoDescId) {
 					this.hasOpenDesc = true;
 				}
 				else { // there are no open-described versions from any source
@@ -7329,7 +7332,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.descOn) {
 
 			if (this.useDescFormat === 'video') {
-
 				if (!this.usingAudioDescription()) {
 					// switched from non-described to described version
 					this.swapDescription();
@@ -7375,6 +7377,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.player === 'youtube') {
 			return (this.activeYouTubeId === this.youTubeDescId);
 		}
+		else if (this.player === 'vimeo') {
+			return (this.activeVimeoId === this.vimeoDescId);
+		}
 		else {
 			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
 		}
@@ -7406,7 +7411,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// user has requested the non-described version
 				thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
 			}
-
 			if (thisObj.player === 'html5') {
 
 				if (thisObj.usingAudioDescription()) {
@@ -7485,6 +7489,32 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						}
 					});
 				}
+			}
+			else if (thisObj.player === 'vimeo') {
+				if (thisObj.usingAudioDescription()) {
+					// the described version is currently playing. Swap to non-described
+					thisObj.activeVimeoId = thisObj.vimeoId;
+					thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
+				}
+				else {
+					// the non-described version is currently playing. Swap to described.
+					thisObj.activeVimeoId = thisObj.vimeoDescId;
+					thisObj.showAlert(thisObj.tt.alertDescribedVersion);
+				}
+				// load the new video source
+				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
+
+					if (thisObj.playing) {
+						// video was playing when user requested an alternative version
+						// seek to swapTime and continue playback (playback happens automatically)
+						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+					}
+					else {
+						// Vimeo autostarts immediately after video loads
+						// The "Described" button should not trigger playback, so stop this before the user notices.
+						thisObj.vimeoPlayer.pause();
+					}
+				});
 			}
 		});
 	};
@@ -8230,7 +8260,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// wait until new source has loaded before refreshing controls
 			return;
 		}
-context = 'init';
+context = 'init'; // TEMP: Forces all code to be executed
 		if (context === 'timeline' || context === 'init') {
 			// all timeline-related functionality requires both duration and elapsed
 			this.getMediaTimes(duration, elapsed).then(function(mediaTimes) {
@@ -8830,7 +8860,6 @@ context = 'init';
 			// increase/decrease in inrements of 0.5
 			vimeoMin = 0.5;
 			vimeoMax = 2;
-console.log('changeRate; dir is ' + dir + ', currentRate is ' + this.vimeoPlaybackRate);
 			if (dir === 1) {
 				if (this.vimeoPlaybackRate + 0.5 <= vimeoMax) {
 					newRate = this.vimeoPlaybackRate + 0.5;
@@ -8847,7 +8876,6 @@ console.log('changeRate; dir is ' + dir + ', currentRate is ' + this.vimeoPlayba
 					newRate = vimeoMin;
 				}
 			}
-console.log('changing playback rate to ' + newRate);
 			this.setPlaybackRate(newRate);
 		}
 	};
@@ -9246,7 +9274,7 @@ console.log('changing playback rate to ' + newRate);
 
 		// location is either of the following:
 		// 'main' (default)
-		// 'screenreader
+		// 'screenreader (visibly hidden)
 		// 'sign' (sign language window)
 		// 'transcript' (trasncript window)
 		var thisObj, $alertBox, $parentWindow, alertLeft, alertTop;
@@ -9267,8 +9295,7 @@ console.log('changing playback rate to ' + newRate);
 		else {
 			$alertBox = this.$alertBox;
 		}
-		$alertBox.show();
-		$alertBox.text(msg);
+		$alertBox.text(msg).show();
 		if (location == 'transcript' || location === 'sign') {
 			if ($parentWindow.width() > $alertBox.width()) {
 				alertLeft = $parentWindow.width() / 2 - $alertBox.width() / 2;

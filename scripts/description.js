@@ -30,8 +30,9 @@
 				this.hasOpenDesc = true;
 			}
 			else {
-				// there's no open-described version via data-desc-src, but what about data-youtube-desc-src?
-				if (this.youTubeDescId) {
+				// there's no open-described version via data-desc-src,
+				// but what about data-youtube-desc-src or data-vimeo-desc-src?
+				if (this.youTubeDescId || this.vimeoDescId) {
 					this.hasOpenDesc = true;
 				}
 				else { // there are no open-described versions from any source
@@ -69,7 +70,6 @@
 		if (this.descOn) {
 
 			if (this.useDescFormat === 'video') {
-
 				if (!this.usingAudioDescription()) {
 					// switched from non-described to described version
 					this.swapDescription();
@@ -115,6 +115,9 @@
 		if (this.player === 'youtube') {
 			return (this.activeYouTubeId === this.youTubeDescId);
 		}
+		else if (this.player === 'vimeo') {
+			return (this.activeVimeoId === this.vimeoDescId);
+		}
 		else {
 			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
 		}
@@ -146,7 +149,6 @@
 				// user has requested the non-described version
 				thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
 			}
-
 			if (thisObj.player === 'html5') {
 
 				if (thisObj.usingAudioDescription()) {
@@ -225,6 +227,32 @@
 						}
 					});
 				}
+			}
+			else if (thisObj.player === 'vimeo') {
+				if (thisObj.usingAudioDescription()) {
+					// the described version is currently playing. Swap to non-described
+					thisObj.activeVimeoId = thisObj.vimeoId;
+					thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
+				}
+				else {
+					// the non-described version is currently playing. Swap to described.
+					thisObj.activeVimeoId = thisObj.vimeoDescId;
+					thisObj.showAlert(thisObj.tt.alertDescribedVersion);
+				}
+				// load the new video source
+				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
+
+					if (thisObj.playing) {
+						// video was playing when user requested an alternative version
+						// seek to swapTime and continue playback (playback happens automatically)
+						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+					}
+					else {
+						// Vimeo autostarts immediately after video loads
+						// The "Described" button should not trigger playback, so stop this before the user notices.
+						thisObj.vimeoPlayer.pause();
+					}
+				});
 			}
 		});
 	};

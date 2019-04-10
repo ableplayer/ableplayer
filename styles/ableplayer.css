@@ -8,7 +8,7 @@
 	div.able-modal-overlay = 9500
 
 	* Items that should always be on top (9000):
-	#able-vts-alert = 9400
+	#able-vts = 9400
 	.able-alert = 9400
 	.able-window-toolbar .able-button-handler-preferences = 9300
   .able-popup = 9200
@@ -832,6 +832,8 @@ div.able-chapters-div button::-moz-focus-inner {
   background-color: #FFFFCC;
   box-shadow: 0px 0px 16px #262626;
   z-index: 9400;
+  position: absolute;
+  top: 1em;
 }
 .able-popup {
   z-index: 9200;

@@ -515,7 +515,7 @@
 			// wait until new source has loaded before refreshing controls
 			return;
 		}
-context = 'init';
+context = 'init'; // TEMP: Forces all code to be executed
 		if (context === 'timeline' || context === 'init') {
 			// all timeline-related functionality requires both duration and elapsed
 			this.getMediaTimes(duration, elapsed).then(function(mediaTimes) {
@@ -1115,7 +1115,6 @@ context = 'init';
 			// increase/decrease in inrements of 0.5
 			vimeoMin = 0.5;
 			vimeoMax = 2;
-console.log('changeRate; dir is ' + dir + ', currentRate is ' + this.vimeoPlaybackRate);
 			if (dir === 1) {
 				if (this.vimeoPlaybackRate + 0.5 <= vimeoMax) {
 					newRate = this.vimeoPlaybackRate + 0.5;
@@ -1132,7 +1131,6 @@ console.log('changeRate; dir is ' + dir + ', currentRate is ' + this.vimeoPlayba
 					newRate = vimeoMin;
 				}
 			}
-console.log('changing playback rate to ' + newRate);
 			this.setPlaybackRate(newRate);
 		}
 	};
@@ -1531,7 +1529,7 @@ console.log('changing playback rate to ' + newRate);
 
 		// location is either of the following:
 		// 'main' (default)
-		// 'screenreader
+		// 'screenreader (visibly hidden)
 		// 'sign' (sign language window)
 		// 'transcript' (trasncript window)
 		var thisObj, $alertBox, $parentWindow, alertLeft, alertTop;
@@ -1552,8 +1550,7 @@ console.log('changing playback rate to ' + newRate);
 		else {
 			$alertBox = this.$alertBox;
 		}
-		$alertBox.show();
-		$alertBox.text(msg);
+		$alertBox.text(msg).show();
 		if (location == 'transcript' || location === 'sign') {
 			if ($parentWindow.width() > $alertBox.width()) {
 				alertLeft = $parentWindow.width() / 2 - $alertBox.width() / 2;
