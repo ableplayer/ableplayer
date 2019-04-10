@@ -31,6 +31,10 @@
 
 	// Google API Explorer: YouTube services and methods
 	https://developers.google.com/apis-explorer/#s/youtube/v3/
+
+	// Web Speech API (Speech Synthesis)
+	// https://w3c.github.io/speech-api/#tts-section
+	// https://developer.mozilla.org/en-US/docs/Web/API/Window/speechSynthesis
 */
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */

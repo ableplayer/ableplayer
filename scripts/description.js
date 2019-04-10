@@ -67,6 +67,34 @@
 			}
 		}
 
+		if (this.useDescFormat === 'text') {
+			// check whether browser supports the Web Speech API
+			if (window.speechSynthesis) {
+				// It does!
+				this.synth = window.speechSynthesis;
+				this.descVoices = this.synth.getVoices();
+				// select the first voice that matches the track language
+				// available languages are identified with local suffixes (e.g., en-US)
+				// in case no matching voices are found, use the first voice in the voices array
+				this.descVoiceIndex = 0;
+				for (var i=0; i<this.descVoices.length; i++) {
+					if (this.captionLang.length === 2) {
+						// match only the first 2 characters of the lang code
+						if (this.descVoices[i].lang.substr(0,2).toLowerCase() === this.captionLang.toLowerCase()) {
+							this.descVoiceIndex = i;
+							break;
+						}
+					}
+					else {
+						// match the entire lang code
+						if (this.descVoices[i].lang.toLowerCase() === this.captionLang.toLowerCase()) {
+							this.descVoiceIndex = i;
+							break;
+						}
+					}
+				}
+			}
+		}
 		if (this.descOn) {
 
 			if (this.useDescFormat === 'video') {
@@ -300,8 +328,27 @@
 			if (this.currentDescription !== thisDescription) {
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
-				// load the new description into the container div
-				this.$descDiv.html(flattenComponentForDescription(cues[thisDescription].components));
+				if (typeof this.synth !== 'undefined' && typeof this.descVoiceIndex !== 'undefined') {
+					// browser supports speech synthesis and a voice has been selected in initDescription()
+					// use the web speech API
+					var msg = new SpeechSynthesisUtterance();
+					msg.voice = this.descVoices[this.descVoiceIndex]; // Note: some voices don't support altering params
+					msg.voiceURI = 'native';
+					msg.volume = 1; // 0 to 1
+					msg.rate = 1.5; // 0.1 to 10 (1 is normal human speech; 2 is fast but easily decipherable; anything above 2 is blazing fast)
+					msg.pitch = 1; //0 to 2
+					msg.text = flattenComponentForDescription(cues[thisDescription].components);
+					msg.lang = this.captionLang;
+					msg.onend = function(e) {
+						// NOTE: e.elapsedTime might be useful
+      			};
+					this.synth.speak(msg);
+				}
+				else {
+					// browser does not support speech synthesis
+					// load the new description into the container div for screen readers to read
+					this.$descDiv.html(flattenComponentForDescription(cues[thisDescription].components));
+				}
 				if (this.prefDescPause) {
 					this.pauseMedia();
 				}

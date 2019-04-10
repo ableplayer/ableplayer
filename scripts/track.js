@@ -161,6 +161,11 @@
 					isDefault = false;
 				}
 
+				if (isDefault) {
+					// this.captionLang will also be the default language for non-caption tracks
+					thisObj.captionLang = trackLang;
+				}
+
 				thisObj.tracks.push({
 					'kind': $(this).attr('kind'),
 					'src': $(this).attr('src'),
