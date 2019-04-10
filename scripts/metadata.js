@@ -3,10 +3,10 @@
 		if (this.hasMeta) {
 			if (this.metaType === 'text') {
 				this.$metaDiv.show();
-				this.showMeta(time || this.getElapsed());
+				this.showMeta(time || this.elapsed);
 			}
 			else {
-				this.showMeta(time || this.getElapsed());
+				this.showMeta(time || this.elapsed);
 			}
 		}
 	};

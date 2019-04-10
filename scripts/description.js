@@ -287,7 +287,7 @@
 			return;
 		}
 
-		var thisObj, i, cues, d, thisDescription, msg;
+		var thisObj, i, cues, d, thisDescription, descText, msg;
 		thisObj = this;
 
 		var flattenComponentForDescription = function (component) {
@@ -322,6 +322,7 @@
 			if (this.currentDescription !== thisDescription) {
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
+				descText = flattenComponentForDescription(cues[thisDescription].components);
 				if (typeof this.synth !== 'undefined' && typeof this.descVoiceIndex !== 'undefined') {
 					// browser supports speech synthesis and a voice has been selected in initDescription()
 					// use the web speech API
@@ -331,7 +332,7 @@
 					msg.volume = 1; // 0 to 1
 					msg.rate = 1.5; // 0.1 to 10 (1 is normal human speech; 2 is fast but easily decipherable; anything above 2 is blazing fast)
 					msg.pitch = 1; //0 to 2
-					msg.text = flattenComponentForDescription(cues[thisDescription].components);
+					msg.text = descText;
 					msg.lang = this.captionLang;
 					msg.onend = function(e) {
 						// NOTE: e.elapsedTime might be useful
@@ -340,11 +341,16 @@
 						}
       			};
 					this.synth.speak(msg);
+					if (this.prefVisibleDesc) {
+						// write description to the screen for sighted users
+						// but remove ARIA attributes since it isn't intended to be read by screen readers
+						this.$descDiv.html(descText).removeAttr('aria-live aria-atomic');
+					}
 				}
 				else {
 					// browser does not support speech synthesis
 					// load the new description into the container div for screen readers to read
-					this.$descDiv.html(flattenComponentForDescription(cues[thisDescription].components));
+					this.$descDiv.html(descText);
 				}
 				if (this.prefDescPause) {
 					this.pauseMedia();
