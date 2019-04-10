@@ -294,21 +294,22 @@
 			return;
 		}
 
-		var d, thisDescription;
+		var thisObj, i, cues, d, thisDescription, msg;
+		thisObj = this;
+
 		var flattenComponentForDescription = function (component) {
 			var result = [];
 			if (component.type === 'string') {
 				result.push(component.value);
 			}
 			else {
-				for (var ii = 0; ii < component.children.length; ii++) {
-					result.push(flattenComponentForDescription(component.children[ii]));
+				for (var i = 0; i < component.children.length; i++) {
+					result.push(flattenComponentForDescription(component.children[i]));
 				}
 			}
 			return result.join('');
 		};
 
-		var cues;
 		if (this.selectedDescriptions) {
 			cues = this.selectedDescriptions.cues;
 		}
@@ -331,7 +332,7 @@
 				if (typeof this.synth !== 'undefined' && typeof this.descVoiceIndex !== 'undefined') {
 					// browser supports speech synthesis and a voice has been selected in initDescription()
 					// use the web speech API
-					var msg = new SpeechSynthesisUtterance();
+					msg = new SpeechSynthesisUtterance();
 					msg.voice = this.descVoices[this.descVoiceIndex]; // Note: some voices don't support altering params
 					msg.voiceURI = 'native';
 					msg.volume = 1; // 0 to 1
@@ -341,6 +342,9 @@
 					msg.lang = this.captionLang;
 					msg.onend = function(e) {
 						// NOTE: e.elapsedTime might be useful
+						if (thisObj.pausedForDescription) {
+							thisObj.playMedia();
+						}
       			};
 					this.synth.speak(msg);
 				}
@@ -351,6 +355,7 @@
 				}
 				if (this.prefDescPause) {
 					this.pauseMedia();
+					this.pausedForDescription = true;
 				}
 				this.currentDescription = thisDescription;
 			}
