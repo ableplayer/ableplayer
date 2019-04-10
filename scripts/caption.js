@@ -82,11 +82,9 @@
 			}
 			else { // using local track elements for captions/subtitles
 				thisObj.syncTrackLanguages('captions',thisObj.captionLang);
-				if (!this.swappingSrc) {
-					thisObj.getMediaTimes().then(function(mediaTimes) {
-						thisObj.updateCaption(mediaTimes['elapsed']);
-						thisObj.showDescription(mediaTimes['elapsed']);
-					});
+				if (!thisObj.swappingSrc) {
+					thisObj.updateCaption(thisObj.elapsed);
+					thisObj.showDescription(thisObj.elapsed);
 				}
 			}
 			thisObj.captionsOn = true;

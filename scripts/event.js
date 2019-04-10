@@ -9,13 +9,13 @@
 
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 			if (typeof duration === 'undefined') {
-				duration = mediaTimes['duration'];
+				thisObj.duration = mediaTimes['duration'];
 			}
 			if (typeof elapsed === 'undefined') {
-				elapsed = mediaTimes['elapsed'];
+				thisObj.elapsed = mediaTimes['elapsed'];
 			}
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
-				if (thisObj.swapTime === elapsed) {
+				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
 					if (thisObj.playing) {
 						// resume playback
@@ -29,13 +29,13 @@
 			else if (thisObj.startedPlaying) {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
-					thisObj.highlightTranscript(elapsed);
+					thisObj.highlightTranscript(thisObj.elapsed);
 				}
-				thisObj.updateCaption(elapsed);
-				thisObj.showDescription(elapsed);
-				thisObj.updateChapter(elapsed);
-				thisObj.updateMeta(elapsed);
-				thisObj.refreshControls('timeline', duration, elapsed);
+				thisObj.updateCaption(thisObj.elapsed);
+				thisObj.showDescription(thisObj.elapsed);
+				thisObj.updateChapter(thisObj.elapsed);
+				thisObj.updateMeta(thisObj.elapsed);
+				thisObj.refreshControls('timeline', thisObj.duration, thisObj.elapsed);
 			}
 		});
 	};

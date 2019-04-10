@@ -115,9 +115,7 @@
 					this.$descDiv.addClass('able-clipped');
 				}
 				if (!this.swappingSrc) {
-					this.getMediaTimes().then(function(mediaTimes) {
-						thisObj.showDescription(mediaTimes['elapsed']);
-					});
+					this.showDescription(this.elapsed);
 				}
 			}
 		}
@@ -167,122 +165,117 @@
 		// and might therefore be longer than the non-described version
 		// The benefits though would seem to outweigh this risk
 
-		this.getMediaTimes().then(function(mediaTimes) {
-			thisObj.swapTime = mediaTimes['elapsed']; // video will scrub to this time after loaded (see event.js)
-			if (thisObj.descOn) {
-				// user has requested the described version
-				thisObj.showAlert(thisObj.tt.alertDescribedVersion);
+		this.swapTime = this.elapsed; // video will scrub to this time after loaded (see event.js)
+		if (this.descOn) {
+			// user has requested the described version
+			this.showAlert(this.tt.alertDescribedVersion);
+		}
+		else {
+			// user has requested the non-described version
+			this.showAlert(this.tt.alertNonDescribedVersion);
+		}
+		if (this.player === 'html5' || this.player === 'jw') {
+
+			if (this.usingAudioDescription()) {
+				// the described version is currently playing. Swap to non-described
+				for (i=0; i < this.$sources.length; i++) {
+					// for all <source> elements, replace src with data-orig-src
+					origSrc = this.$sources[i].getAttribute('data-orig-src');
+					srcType = this.$sources[i].getAttribute('type');
+					if (origSrc) {
+						this.$sources[i].setAttribute('src',origSrc);
+					}
+					if (srcType === 'video/mp4') {
+						jwSourceIndex = i;
+					}
+				}
+				// No need to check for this.initializing
+				// This function is only called during initialization
+				// if swapping from non-described to described
+				this.swappingSrc = true;
 			}
 			else {
-				// user has requested the non-described version
-				thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
-			}
-			if (thisObj.player === 'html5') {
-
-				if (thisObj.usingAudioDescription()) {
-					// the described version is currently playing. Swap to non-described
-					for (i=0; i < thisObj.$sources.length; i++) {
-						// for all <source> elements, replace src with data-orig-src
-						origSrc = thisObj.$sources[i].getAttribute('data-orig-src');
-						srcType = thisObj.$sources[i].getAttribute('type');
-						if (origSrc) {
-							thisObj.$sources[i].setAttribute('src',origSrc);
-						}
-						if (srcType === 'video/mp4') {
-							jwSourceIndex = i;
-						}
+				// the non-described version is currently playing. Swap to described.
+				for (i=0; i < this.$sources.length; i++) {
+					// for all <source> elements, replace src with data-desc-src (if one exists)
+					// then store original source in a new data-orig-src attribute
+					origSrc = this.$sources[i].getAttribute('src');
+					descSrc = this.$sources[i].getAttribute('data-desc-src');
+					srcType = this.$sources[i].getAttribute('type');
+					if (descSrc) {
+						this.$sources[i].setAttribute('src',descSrc);
+						this.$sources[i].setAttribute('data-orig-src',origSrc);
 					}
-					// No need to check for thisObj.initializing
-					// This function is only called during initialization
-					// if swapping from non-described to described
-					thisObj.swappingSrc = true;
-				}
-				else {
-					// the non-described version is currently playing. Swap to described.
-					for (i=0; i < thisObj.$sources.length; i++) {
-						// for all <source> elements, replace src with data-desc-src (if one exists)
-						// then store original source in a new data-orig-src attribute
-						origSrc = thisObj.$sources[i].getAttribute('src');
-						descSrc = thisObj.$sources[i].getAttribute('data-desc-src');
-						srcType = thisObj.$sources[i].getAttribute('type');
-						if (descSrc) {
-							thisObj.$sources[i].setAttribute('src',descSrc);
-							thisObj.$sources[i].setAttribute('data-orig-src',origSrc);
-						}
-						if (srcType === 'video/mp4') {
-							jwSourceIndex = i;
-						}
+					if (srcType === 'video/mp4') {
+						jwSourceIndex = i;
 					}
-					thisObj.swappingSrc = true;
 				}
-
-				// now reload the source file.
-				if (thisObj.player === 'html5') {
-					thisObj.media.load();
-				}
-				else if (thisObj.player === 'youtube') {
-					// TODO: Load new youTubeId
-				}
-				else if (thisObj.player === 'jw' && thisObj.jwPlayer) {
-					newSource = thisObj.$sources[jwSourceIndex].getAttribute('src');
-					thisObj.jwPlayer.load({file: newSource});
-				}
+				this.swappingSrc = true;
 			}
-			else if (thisObj.player === 'youtube') {
 
-				if (thisObj.usingAudioDescription()) {
-					// the described version is currently playing. Swap to non-described
-					thisObj.activeYouTubeId = thisObj.youTubeId;
-					thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
-				}
-				else {
-					// the non-described version is currently playing. Swap to described.
-					thisObj.activeYouTubeId = thisObj.youTubeDescId;
-					thisObj.showAlert(thisObj.tt.alertDescribedVersion);
-				}
-				if (typeof thisObj.youTubePlayer !== 'undefined') {
-
-					// retrieve/setup captions for the new video from YouTube
-					thisObj.setupAltCaptions().then(function() {
-
-						if (thisObj.playing) {
-							// loadVideoById() loads and immediately plays the new video at swapTime
-							thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-						}
-						else {
-							// cueVideoById() loads the new video and seeks to swapTime, but does not play
-							thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-						}
-					});
-				}
+			// now reload the source file.
+			if (this.player === 'html5') {
+				this.media.load();
 			}
-			else if (thisObj.player === 'vimeo') {
-				if (thisObj.usingAudioDescription()) {
-					// the described version is currently playing. Swap to non-described
-					thisObj.activeVimeoId = thisObj.vimeoId;
-					thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
-				}
-				else {
-					// the non-described version is currently playing. Swap to described.
-					thisObj.activeVimeoId = thisObj.vimeoDescId;
-					thisObj.showAlert(thisObj.tt.alertDescribedVersion);
-				}
-				// load the new video source
-				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
+			else if (this.player === 'jw') {
+				newSource = this.$sources[jwSourceIndex].getAttribute('src');
+				this.jwPlayer.load({file: newSource});
+			}
+		}
+		else if (this.player === 'youtube') {
+
+			if (this.usingAudioDescription()) {
+				// the described version is currently playing. Swap to non-described
+				this.activeYouTubeId = this.youTubeId;
+				this.showAlert(this.tt.alertNonDescribedVersion);
+			}
+			else {
+				// the non-described version is currently playing. Swap to described.
+				this.activeYouTubeId = this.youTubeDescId;
+				this.showAlert(this.tt.alertDescribedVersion);
+			}
+			if (typeof this.youTubePlayer !== 'undefined') {
+
+				// retrieve/setup captions for the new video from YouTube
+				this.setupAltCaptions().then(function() {
 
 					if (thisObj.playing) {
-						// video was playing when user requested an alternative version
-						// seek to swapTime and continue playback (playback happens automatically)
-						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+						// loadVideoById() loads and immediately plays the new video at swapTime
+						thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
 					}
 					else {
-						// Vimeo autostarts immediately after video loads
-						// The "Described" button should not trigger playback, so stop this before the user notices.
-						thisObj.vimeoPlayer.pause();
+						// cueVideoById() loads the new video and seeks to swapTime, but does not play
+						thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
 					}
 				});
 			}
-		});
+		}
+		else if (this.player === 'vimeo') {
+			if (this.usingAudioDescription()) {
+				// the described version is currently playing. Swap to non-described
+				this.activeVimeoId = this.vimeoId;
+				this.showAlert(this.tt.alertNonDescribedVersion);
+			}
+			else {
+				// the non-described version is currently playing. Swap to described.
+				this.activeVimeoId = this.vimeoDescId;
+				this.showAlert(this.tt.alertDescribedVersion);
+			}
+			// load the new video source
+			this.vimeoPlayer.loadVideo(this.activeVimeoId).then(function() {
+
+				if (thisObj.playing) {
+					// video was playing when user requested an alternative version
+					// seek to swapTime and continue playback (playback happens automatically)
+					thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+				}
+				else {
+					// Vimeo autostarts immediately after video loads
+					// The "Described" button should not trigger playback, so stop this before the user notices.
+					thisObj.vimeoPlayer.pause();
+				}
+			});
+		}
 	};
 
 	AblePlayer.prototype.showDescription = function(now) {

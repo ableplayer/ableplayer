@@ -180,55 +180,46 @@
 		// called if this.seekbarScope === 'chapter'
 		// get duration of the current chapter
 
-		var videoDuration, lastChapterIndex, chapterEnd;
+		var lastChapterIndex, chapterEnd;
 
 		if (typeof this.currentChapter === 'undefined') {
 			return 0;
 		}
-		this.getMediaTimes().then(function(mediaTimes) {
-
-			videoDuration = mediaTimes['duration'];
-			lastChapterIndex = this.selectedChapters.cues.length-1;
-
-			if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
-				// this is the last chapter
-				if (this.currentChapter.end !== videoDuration) {
-					// chapter ends before or after video ends, adjust chapter end to match video end
-					chapterEnd = videoDuration;
-					this.currentChapter.end = videoDuration;
-				}
-				else {
-					chapterEnd = this.currentChapter.end;
-				}
+		if (typeof this.duration === 'undefined') {
+			return 0;
+		}
+		lastChapterIndex = this.selectedChapters.cues.length-1;
+		if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
+			// this is the last chapter
+			if (this.currentChapter.end !== this.duration) {
+				// chapter ends before or after video ends, adjust chapter end to match video end
+				chapterEnd = this.duration;
+				this.currentChapter.end = this.duration;
 			}
-			else { // this is not the last chapter
+			else {
 				chapterEnd = this.currentChapter.end;
 			}
-			return chapterEnd - this.currentChapter.start;
-		});
+		}
+		else { // this is not the last chapter
+			chapterEnd = this.currentChapter.end;
+		}
+		return chapterEnd - this.currentChapter.start;
 	};
 
 	AblePlayer.prototype.getChapterElapsed = function () {
-
 		// called if this.seekbarScope === 'chapter'
 		// get current elapsed time, relative to the current chapter duration
-
-		var videoDuration, videoElapsed;
 
 		if (typeof this.currentChapter === 'undefined') {
 			return 0;
 		}
-		this.getMediaTimes().then(function(mediaTimes) {
 
-			videoDuration = mediaTimes['duration'];
-			videoElapsed = mediaTimes['elapsed'];
-			if (videoElapsed > this.currentChapter.start) {
-				return videoElapsed - this.currentChapter.start;
-			}
-			else {
-				return 0;
-			}
-		});
+		if (this.elapsed > this.currentChapter.start) {
+			return this.elapsed - this.currentChapter.start;
+		}
+		else {
+			return 0;
+		}
 	};
 
 	AblePlayer.prototype.convertChapterTimeToVideoTime = function (chapterTime) {

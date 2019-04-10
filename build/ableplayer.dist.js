@@ -1136,6 +1136,7 @@
 // 	thisObj.initializing = true;
 		this.initPlayer().then(function() { // initPlayer success
 //		thisObj.initializing = false;
+
 			 thisObj.setupTracks().then(function() {
 
 				thisObj.setupAltCaptions().then(function() {
@@ -1248,38 +1249,37 @@
 		var thisObj, duration;
 		thisObj = this;
 		this.seekInterval = this.defaultSeekInterval;
-		this.getMediaTimes().then(function(mediaTimes) {
-			if (thisObj.useChapterTimes) {
-				duration = thisObj.chapterDuration;
+
+		if (this.useChapterTimes) {
+			duration = this.chapterDuration;
+		}
+		else {
+			duration = this.duration;
+		}
+		if (typeof duration === 'undefined' || duration < 1) {
+			// no duration; just use default for now but keep trying until duration is available
+			this.seekIntervalCalculated = false;
+			return;
+		}
+		else {
+			if (duration <= 20) {
+				this.seekInterval = 5;	 // 4 steps max
+			}
+			else if (duration <= 30) {
+				this.seekInterval = 6; // 5 steps max
+			}
+			else if (duration <= 40) {
+				this.seekInterval = 8; // 5 steps max
+			}
+			else if (duration <= 100) {
+				this.seekInterval = 10; // 10 steps max
 			}
 			else {
-				duration = mediaTimes['duration'];
+				// never more than 10 steps from start to end
+				this.seekInterval = (duration / 10);
 			}
-			if (typeof duration === 'undefined' || duration < 1) {
-				// no duration; just use default for now but keep trying until duration is available
-				thisObj.seekIntervalCalculated = false;
-				return;
-			}
-			else {
-				if (duration <= 20) {
-					thisObj.seekInterval = 5;	 // 4 steps max
-				}
-				else if (duration <= 30) {
-					thisObj.seekInterval = 6; // 5 steps max
-				}
-				else if (duration <= 40) {
-					thisObj.seekInterval = 8; // 5 steps max
-				}
-				else if (duration <= 100) {
-					thisObj.seekInterval = 10; // 10 steps max
-				}
-				else {
-					// never more than 10 steps from start to end
-					thisObj.seekInterval = (duration / 10);
-				}
-				thisObj.seekIntervalCalculated = true;
-			}
-		});
+			this.seekIntervalCalculated = true;
+		}
 	};
 
 	AblePlayer.prototype.initDefaultCaption = function () {
@@ -4137,14 +4137,13 @@
 					$sliderDiv = $('<div class="able-seekbar"></div>');
 					sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 					$controllerSpan.append($sliderDiv);
-					this.getMediaTimes().then(function(mediaTimes) {
-						duration = mediaTimes['duration'];
-						if (duration === 0) {
-							// set arbitrary starting duration, and change it when duration is known
-							duration = 100;
-						}
-						thisObj.seekBar = new AccessibleSlider(thisObj.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, duration, thisObj.seekInterval, sliderLabel, 'seekbar', true, 'visible');
-					});
+					if (typeof this.duration === 'undefined' || this.duration === 0) {
+						// set arbitrary starting duration, and change it when duration is known
+						this.duration = 100;
+						// also set elapsed to 0
+						this.elapsed = 0;
+					}
+					this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 				}
 				else if (control === 'pipe') {
 					// TODO: Unify this with buttons somehow to avoid code duplication
@@ -5015,6 +5014,7 @@
 		}
 
 		this.getTracks().then(function() {
+
 			tracks = thisObj.tracks;
 
 			if (thisObj.player === 'youtube') {
@@ -5177,6 +5177,11 @@
 				this.getVimeoCaptionTracks().then(function() {
 					deferred.resolve();
 				});
+			}
+			else {
+				// this is neither YouTube nor Vimeo
+				// there just ain't no caption tracks
+				deferred.resolve();
 			}
 		}
 		return promise;
@@ -7386,9 +7391,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					this.$descDiv.addClass('able-clipped');
 				}
 				if (!this.swappingSrc) {
-					this.getMediaTimes().then(function(mediaTimes) {
-						thisObj.showDescription(mediaTimes['elapsed']);
-					});
+					this.showDescription(this.elapsed);
 				}
 			}
 		}
@@ -7438,122 +7441,117 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// and might therefore be longer than the non-described version
 		// The benefits though would seem to outweigh this risk
 
-		this.getMediaTimes().then(function(mediaTimes) {
-			thisObj.swapTime = mediaTimes['elapsed']; // video will scrub to this time after loaded (see event.js)
-			if (thisObj.descOn) {
-				// user has requested the described version
-				thisObj.showAlert(thisObj.tt.alertDescribedVersion);
+		this.swapTime = this.elapsed; // video will scrub to this time after loaded (see event.js)
+		if (this.descOn) {
+			// user has requested the described version
+			this.showAlert(this.tt.alertDescribedVersion);
+		}
+		else {
+			// user has requested the non-described version
+			this.showAlert(this.tt.alertNonDescribedVersion);
+		}
+		if (this.player === 'html5' || this.player === 'jw') {
+
+			if (this.usingAudioDescription()) {
+				// the described version is currently playing. Swap to non-described
+				for (i=0; i < this.$sources.length; i++) {
+					// for all <source> elements, replace src with data-orig-src
+					origSrc = this.$sources[i].getAttribute('data-orig-src');
+					srcType = this.$sources[i].getAttribute('type');
+					if (origSrc) {
+						this.$sources[i].setAttribute('src',origSrc);
+					}
+					if (srcType === 'video/mp4') {
+						jwSourceIndex = i;
+					}
+				}
+				// No need to check for this.initializing
+				// This function is only called during initialization
+				// if swapping from non-described to described
+				this.swappingSrc = true;
 			}
 			else {
-				// user has requested the non-described version
-				thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
-			}
-			if (thisObj.player === 'html5') {
-
-				if (thisObj.usingAudioDescription()) {
-					// the described version is currently playing. Swap to non-described
-					for (i=0; i < thisObj.$sources.length; i++) {
-						// for all <source> elements, replace src with data-orig-src
-						origSrc = thisObj.$sources[i].getAttribute('data-orig-src');
-						srcType = thisObj.$sources[i].getAttribute('type');
-						if (origSrc) {
-							thisObj.$sources[i].setAttribute('src',origSrc);
-						}
-						if (srcType === 'video/mp4') {
-							jwSourceIndex = i;
-						}
+				// the non-described version is currently playing. Swap to described.
+				for (i=0; i < this.$sources.length; i++) {
+					// for all <source> elements, replace src with data-desc-src (if one exists)
+					// then store original source in a new data-orig-src attribute
+					origSrc = this.$sources[i].getAttribute('src');
+					descSrc = this.$sources[i].getAttribute('data-desc-src');
+					srcType = this.$sources[i].getAttribute('type');
+					if (descSrc) {
+						this.$sources[i].setAttribute('src',descSrc);
+						this.$sources[i].setAttribute('data-orig-src',origSrc);
 					}
-					// No need to check for thisObj.initializing
-					// This function is only called during initialization
-					// if swapping from non-described to described
-					thisObj.swappingSrc = true;
-				}
-				else {
-					// the non-described version is currently playing. Swap to described.
-					for (i=0; i < thisObj.$sources.length; i++) {
-						// for all <source> elements, replace src with data-desc-src (if one exists)
-						// then store original source in a new data-orig-src attribute
-						origSrc = thisObj.$sources[i].getAttribute('src');
-						descSrc = thisObj.$sources[i].getAttribute('data-desc-src');
-						srcType = thisObj.$sources[i].getAttribute('type');
-						if (descSrc) {
-							thisObj.$sources[i].setAttribute('src',descSrc);
-							thisObj.$sources[i].setAttribute('data-orig-src',origSrc);
-						}
-						if (srcType === 'video/mp4') {
-							jwSourceIndex = i;
-						}
+					if (srcType === 'video/mp4') {
+						jwSourceIndex = i;
 					}
-					thisObj.swappingSrc = true;
 				}
-
-				// now reload the source file.
-				if (thisObj.player === 'html5') {
-					thisObj.media.load();
-				}
-				else if (thisObj.player === 'youtube') {
-					// TODO: Load new youTubeId
-				}
-				else if (thisObj.player === 'jw' && thisObj.jwPlayer) {
-					newSource = thisObj.$sources[jwSourceIndex].getAttribute('src');
-					thisObj.jwPlayer.load({file: newSource});
-				}
+				this.swappingSrc = true;
 			}
-			else if (thisObj.player === 'youtube') {
 
-				if (thisObj.usingAudioDescription()) {
-					// the described version is currently playing. Swap to non-described
-					thisObj.activeYouTubeId = thisObj.youTubeId;
-					thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
-				}
-				else {
-					// the non-described version is currently playing. Swap to described.
-					thisObj.activeYouTubeId = thisObj.youTubeDescId;
-					thisObj.showAlert(thisObj.tt.alertDescribedVersion);
-				}
-				if (typeof thisObj.youTubePlayer !== 'undefined') {
-
-					// retrieve/setup captions for the new video from YouTube
-					thisObj.setupAltCaptions().then(function() {
-
-						if (thisObj.playing) {
-							// loadVideoById() loads and immediately plays the new video at swapTime
-							thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-						}
-						else {
-							// cueVideoById() loads the new video and seeks to swapTime, but does not play
-							thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-						}
-					});
-				}
+			// now reload the source file.
+			if (this.player === 'html5') {
+				this.media.load();
 			}
-			else if (thisObj.player === 'vimeo') {
-				if (thisObj.usingAudioDescription()) {
-					// the described version is currently playing. Swap to non-described
-					thisObj.activeVimeoId = thisObj.vimeoId;
-					thisObj.showAlert(thisObj.tt.alertNonDescribedVersion);
-				}
-				else {
-					// the non-described version is currently playing. Swap to described.
-					thisObj.activeVimeoId = thisObj.vimeoDescId;
-					thisObj.showAlert(thisObj.tt.alertDescribedVersion);
-				}
-				// load the new video source
-				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
+			else if (this.player === 'jw') {
+				newSource = this.$sources[jwSourceIndex].getAttribute('src');
+				this.jwPlayer.load({file: newSource});
+			}
+		}
+		else if (this.player === 'youtube') {
+
+			if (this.usingAudioDescription()) {
+				// the described version is currently playing. Swap to non-described
+				this.activeYouTubeId = this.youTubeId;
+				this.showAlert(this.tt.alertNonDescribedVersion);
+			}
+			else {
+				// the non-described version is currently playing. Swap to described.
+				this.activeYouTubeId = this.youTubeDescId;
+				this.showAlert(this.tt.alertDescribedVersion);
+			}
+			if (typeof this.youTubePlayer !== 'undefined') {
+
+				// retrieve/setup captions for the new video from YouTube
+				this.setupAltCaptions().then(function() {
 
 					if (thisObj.playing) {
-						// video was playing when user requested an alternative version
-						// seek to swapTime and continue playback (playback happens automatically)
-						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+						// loadVideoById() loads and immediately plays the new video at swapTime
+						thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
 					}
 					else {
-						// Vimeo autostarts immediately after video loads
-						// The "Described" button should not trigger playback, so stop this before the user notices.
-						thisObj.vimeoPlayer.pause();
+						// cueVideoById() loads the new video and seeks to swapTime, but does not play
+						thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
 					}
 				});
 			}
-		});
+		}
+		else if (this.player === 'vimeo') {
+			if (this.usingAudioDescription()) {
+				// the described version is currently playing. Swap to non-described
+				this.activeVimeoId = this.vimeoId;
+				this.showAlert(this.tt.alertNonDescribedVersion);
+			}
+			else {
+				// the non-described version is currently playing. Swap to described.
+				this.activeVimeoId = this.vimeoDescId;
+				this.showAlert(this.tt.alertDescribedVersion);
+			}
+			// load the new video source
+			this.vimeoPlayer.loadVideo(this.activeVimeoId).then(function() {
+
+				if (thisObj.playing) {
+					// video was playing when user requested an alternative version
+					// seek to swapTime and continue playback (playback happens automatically)
+					thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+				}
+				else {
+					// Vimeo autostarts immediately after video loads
+					// The "Described" button should not trigger playback, so stop this before the user notices.
+					thisObj.vimeoPlayer.pause();
+				}
+			});
+		}
 	};
 
 	AblePlayer.prototype.showDescription = function(now) {
@@ -7863,6 +7861,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		 // Vars passed to this function come courtesy of select Vimeo events
 		 // Use those if they're available.
 		 // Otherwise, will need to call the relevant media API
+		 // This function should only be called from onMediaUpdateTime()
+		 // If duration and elapsed are needed other times, use this.duration and this.elapsed
 
 		// both values are expressed in seconds, and all player APIs are similar:
 		// they return a value that is rounded to the nearest second before playback begins,
@@ -8091,19 +8091,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else if (this.player === 'jw' && this.jwPlayer) {
 			jwState = this.jwPlayer.getState();
 			if (jwState === 'PAUSED' || jwState === 'IDLE' || typeof jwState === 'undefined') {
-				this.getMediaTimes().then(function(mediaTimes) {
-					elapsed = mediaTimes['elapsed'];
-					duration = mediaTimes['duration'];
-					if (elapsed === 0) {
-						deferred.resolve('stopped');
-					}
-					else if (elapsed === duration) {
-						deferred.resolve('ended');
-					}
-					else {
-						deferred.resolve('paused');
-					}
-				});
+				if (this.elapsed === 0) {
+					deferred.resolve('stopped');
+				}
+				else if (this.elapsed === this.duration) {
+					deferred.resolve('ended');
+				}
+				else {
+					deferred.resolve('paused');
+				}
 			}
 			else if (jwState === 'BUFFERING') {
 				deferred.resolve('buffering');
@@ -8324,158 +8320,149 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 context = 'init'; // TEMP: Forces all code to be executed
 		if (context === 'timeline' || context === 'init') {
 			// all timeline-related functionality requires both duration and elapsed
-			this.getMediaTimes(duration, elapsed).then(function(mediaTimes) {
-				// use the value passed to this function, if available
-				if (typeof duration === 'undefined') {
-					duration = mediaTimes['duration'];
-				}
-				if (typeof elapsed === 'undefined') {
-					elapsed = mediaTimes['elapsed'];
-				}
-				if (typeof duration === 'undefined') {
-			 		// wait until duration is known before proceeding with refresh
-			 		return;
-				}
-				if (thisObj.useChapterTimes) {
-					thisObj.chapterDuration = thisObj.getChapterDuration();
-					thisObj.chapterElapsed = thisObj.getChapterElapsed();
-				}
+			if (typeof this.duration === 'undefined') {
+			 	// wait until duration is known before proceeding with refresh
+			 	return;
+			}
+			if (this.useChapterTimes) {
+				this.chapterDuration = this.getChapterDuration();
+				this.chapterElapsed = this.getChapterElapsed();
+			}
 
-				if (thisObj.useFixedSeekInterval === false && thisObj.seekIntervalCalculated === false && duration > 0) {
-					// couldn't calculate seekInterval previously; try again.
-					thisObj.setSeekInterval();
-				}
+			if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
+				// couldn't calculate seekInterval previously; try again.
+				this.setSeekInterval();
+			}
 
-				if (thisObj.seekBar) {
-					if (thisObj.useChapterTimes) {
-						lastChapterIndex = thisObj.selectedChapters.cues.length-1;
-						if (thisObj.selectedChapters.cues[lastChapterIndex] == thisObj.currentChapter) {
-							// this is the last chapter
-							if (thisObj.currentChapter.end !== duration) {
-								// chapter ends before or after video ends
-								// need to adjust seekbar duration to match video end
-								thisObj.seekBar.setDuration(duration - thisObj.currentChapter.start);
-							}
-							else {
-								thisObj.seekBar.setDuration(thisObj.chapterDuration);
-							}
+			if (this.seekBar) {
+				if (this.useChapterTimes) {
+					lastChapterIndex = this.selectedChapters.cues.length-1;
+					if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
+						// this is the last chapter
+						if (this.currentChapter.end !== this.duration) {
+							// chapter ends before or after video ends
+							// need to adjust seekbar duration to match video end
+							this.seekBar.setDuration(this.duration - this.currentChapter.start);
 						}
 						else {
-							// this is not the last chapter
-							thisObj.seekBar.setDuration(thisObj.chapterDuration);
+							this.seekBar.setDuration(this.chapterDuration);
 						}
 					}
 					else {
-						if (!(duration === undefined || isNaN(duration) || duration === -1)) {
-							thisObj.seekBar.setDuration(duration);
-				 		}
+						// this is not the last chapter
+						this.seekBar.setDuration(this.chapterDuration);
 					}
-					if (!(thisObj.seekBar.tracking)) {
-						// Only update the aria live region if we have an update pending
-						// (from a seek button control) or if the seekBar has focus.
-						// We use document.activeElement instead of $(':focus') due to a strange bug:
-						// 	When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-						updateLive = thisObj.liveUpdatePending || thisObj.seekBar.seekHead.is($(document.activeElement));
-						thisObj.liveUpdatePending = false;
-						if (thisObj.useChapterTimes) {
-							thisObj.seekBar.setPosition(thisObj.chapterElapsed, updateLive);
-						}
-						else {
-							thisObj.seekBar.setPosition(elapsed, updateLive);
-						}
+				}
+				else {
+					if (!(this.duration === undefined || isNaN(this.duration) || this.duration === -1)) {
+						this.seekBar.setDuration(this.duration);
 					}
-
-					// When seeking, display the seek bar time instead of the actual elapsed time.
-					if (thisObj.seekBar.tracking) {
-						displayElapsed = thisObj.seekBar.lastTrackPosition;
+				}
+				if (!(this.seekBar.tracking)) {
+					// Only update the aria live region if we have an update pending
+					// (from a seek button control) or if the seekBar has focus.
+					// We use document.activeElement instead of $(':focus') due to a strange bug:
+					// 	When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
+					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+					this.liveUpdatePending = false;
+					if (this.useChapterTimes) {
+						this.seekBar.setPosition(this.chapterElapsed, updateLive);
 					}
 					else {
-						if (thisObj.useChapterTimes) {
-							displayElapsed = thisObj.chapterElapsed;
-						}
-						else {
-							displayElapsed = elapsed;
-						}
+						this.seekBar.setPosition(this.elapsed, updateLive);
 					}
 				}
-				// update elapsed & duration
-				if (typeof thisObj.$durationContainer !== 'undefined') {
-					if (thisObj.useChapterTimes) {
-						thisObj.$durationContainer.text(' / ' + thisObj.formatSecondsAsColonTime(thisObj.chapterDuration));
+
+				// When seeking, display the seek bar time instead of the actual elapsed time.
+				if (this.seekBar.tracking) {
+					displayElapsed = this.seekBar.lastTrackPosition;
+				}
+				else {
+					if (this.useChapterTimes) {
+						displayElapsed = this.chapterElapsed;
 					}
 					else {
-						thisObj.$durationContainer.text(' / ' + thisObj.formatSecondsAsColonTime(duration));
+						displayElapsed = this.elapsed;
 					}
 				}
-				if (typeof thisObj.$elapsedTimeContainer !== 'undefined') {
-					thisObj.$elapsedTimeContainer.text(thisObj.formatSecondsAsColonTime(displayElapsed));
+			}
+			// update elapsed & duration
+			if (typeof this.$durationContainer !== 'undefined') {
+				if (this.useChapterTimes) {
+					this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.chapterDuration));
 				}
+				else {
+					this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.duration));
+				}
+			}
+			if (typeof this.$elapsedTimeContainer !== 'undefined') {
+				this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
+			}
 
-				// Update seekbar width.
-				// To do this, we need to calculate the width of all buttons surrounding it.
-				if (thisObj.seekBar) {
-					widthUsed = 0;
-					seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
+			// Update seekbar width.
+			// To do this, we need to calculate the width of all buttons surrounding it.
+			if (this.seekBar) {
+				widthUsed = 0;
+				seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
 
-					leftControls = thisObj.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
-					rightControls = leftControls.next('div.able-right-controls');
-					leftControls.children().each(function () {
-						if ($(this).prop('tagName')=='BUTTON') {
-							widthUsed += $(this).width();
+				leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+				rightControls = leftControls.next('div.able-right-controls');
+				leftControls.children().each(function () {
+					if ($(this).prop('tagName')=='BUTTON') {
+						widthUsed += $(this).width();
+					}
+				});
+				rightControls.children().each(function () {
+					if ($(this).prop('tagName')=='BUTTON') {
+						widthUsed += $(this).width();
+					}
+				});
+				if (this.fullscreen) {
+					seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
+				}
+				else {
+					seekbarWidth = this.$ableWrapper.width() - widthUsed - seekbarSpacer;
+				}
+				// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+				if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+					this.seekBar.setWidth(seekbarWidth);
+				}
+			}
+
+			// Update buffering progress.
+			// TODO: Currently only using the first HTML5 buffered interval,
+			// but this fails sometimes when buffering is split into two or more intervals.
+			if (this.player === 'html5') {
+				if (this.media.buffered.length > 0) {
+					buffered = this.media.buffered.end(0);
+					if (this.useChapterTimes) {
+						if (buffered > this.chapterDuration) {
+							buffered = this.chapterDuration;
 						}
-					});
-					rightControls.children().each(function () {
-						if ($(this).prop('tagName')=='BUTTON') {
-							widthUsed += $(this).width();
+						if (this.seekBar) {
+							this.seekBar.setBuffered(buffered / this.chapterDuration);
 						}
-					});
-					if (thisObj.fullscreen) {
-						seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
 					}
 					else {
-						seekbarWidth = thisObj.$ableWrapper.width() - widthUsed - seekbarSpacer;
-					}
-					// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-					if (Math.abs(seekbarWidth - thisObj.seekBar.getWidth()) > 5) {
-						thisObj.seekBar.setWidth(seekbarWidth);
-					}
-				}
-
-				// Update buffering progress.
-				// TODO: Currently only using the first HTML5 buffered interval,
-				// but this fails sometimes when buffering is split into two or more intervals.
-				if (thisObj.player === 'html5') {
-					if (thisObj.media.buffered.length > 0) {
-						buffered = thisObj.media.buffered.end(0);
-						if (thisObj.useChapterTimes) {
-							if (buffered > thisObj.chapterDuration) {
-								buffered = thisObj.chapterDuration;
-							}
-							if (thisObj.seekBar) {
-								thisObj.seekBar.setBuffered(buffered / thisObj.chapterDuration);
-							}
-						}
-						else {
-							if (thisObj.seekBar) {
-								thisObj.seekBar.setBuffered(buffered / duration);
-							}
+						if (this.seekBar) {
+							this.seekBar.setBuffered(buffered / duration);
 						}
 					}
 				}
-				else if (thisObj.player === 'jw' && thisObj.jwPlayer) {
-					if (thisObj.seekBar) {
-						thisObj.seekBar.setBuffered(thisObj.jwPlayer.getBuffer() / 100);
-					}
+			}
+			else if (this.player === 'jw' && this.jwPlayer) {
+				if (this.seekBar) {
+					this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
 				}
-				else if (thisObj.player === 'youtube') {
-					if (thisObj.seekBar) {
-						thisObj.seekBar.setBuffered(thisObj.youTubePlayer.getVideoLoadedFraction());
-					}
+			}
+			else if (this.player === 'youtube') {
+				if (this.seekBar) {
+					this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
 				}
-				else if (thisObj.player === 'vimeo') {
-					// TODO: Add support for Vimeo buffering update
-				}
-			});
+			}
+			else if (this.player === 'vimeo') {
+				// TODO: Add support for Vimeo buffering update
+			}
 		} // end if context == 'timeline' or 'init'
 
 		if (context === 'descriptions' || context == 'init'){
@@ -8819,70 +8806,59 @@ context = 'init'; // TEMP: Forces all code to be executed
 
 	AblePlayer.prototype.handleRewind = function() {
 
-		var thisObj, elapsed, targetTime;
-		thisObj = this;
+		var targetTime;
 
-		this.getMediaTimes().then(function(mediaTimes) {
-			elapsed = mediaTimes['elapsed'];
-			targetTime = elapsed - thisObj.seekInterval;
-			if (thisObj.useChapterTimes) {
-				if (targetTime < thisObj.currentChapter.start) {
-					targetTime = thisObj.currentChapter.start;
-				}
+		targetTime = this.elapsed - this.seekInterval;
+		if (this.useChapterTimes) {
+			if (targetTime < this.currentChapter.start) {
+				targetTime = this.currentChapter.start;
 			}
-			else {
-				if (targetTime < 0) {
-					targetTime = 0;
-				}
+		}
+		else {
+			if (targetTime < 0) {
+				targetTime = 0;
 			}
-			thisObj.seekTo(targetTime);
-		});
+		}
+		this.seekTo(targetTime);
 	};
 
 	AblePlayer.prototype.handleFastForward = function() {
 
-		var thisObj, elapsed, duration, targetTime, lastChapterIndex;
+		var targetTime, lastChapterIndex;
 
-		thisObj = this;
+		lastChapterIndex = this.chapters.length-1;
+		targetTime = this.elapsed + this.seekInterval;
 
-		this.getMediaTimes().then(function(mediaTimes) {
-
-			elapsed = mediaTimes['elapsed'];
-			duration = mediaTimes['duration'];
-			lastChapterIndex = thisObj.chapters.length-1;
-			targetTime = elapsed + thisObj.seekInterval;
-
-			if (thisObj.useChapterTimes) {
-				if (thisObj.chapters[lastChapterIndex] == thisObj.currentChapter) {
-					// this is the last chapter
-					if (targetTime > duration || targetTime > thisObj.currentChapter.end) {
-						// targetTime would exceed the end of the video (or chapter)
-						// scrub to end of whichever is earliest
-						targetTime = Math.min(duration, thisObj.currentChapter.end);
-					}
-					else if (duration % targetTime < thisObj.seekInterval) {
-						// nothing left but pocket change after seeking to targetTime
-						// go ahead and seek to end of video (or chapter), whichever is earliest
-						targetTime = Math.min(duration, thisObj.currentChapter.end);
-					}
+		if (this.useChapterTimes) {
+			if (this.chapters[lastChapterIndex] == this.currentChapter) {
+				// this is the last chapter
+				if (targetTime > this.duration || targetTime > this.currentChapter.end) {
+					// targetTime would exceed the end of the video (or chapter)
+					// scrub to end of whichever is earliest
+					targetTime = Math.min(this.duration, this.currentChapter.end);
 				}
-				else {
-					// this is not the last chapter
-					if (targetTime > thisObj.currentChapter.end) {
-						// targetTime would exceed the end of the chapter
-						// scrub exactly to end of chapter
-						targetTime = thisObj.currentChapter.end;
-					}
+				else if (this.duration % targetTime < this.seekInterval) {
+					// nothing left but pocket change after seeking to targetTime
+					// go ahead and seek to end of video (or chapter), whichever is earliest
+					targetTime = Math.min(this.duration, this.currentChapter.end);
 				}
 			}
 			else {
-				// not using chapter times
-				if (targetTime > duration) {
-					targetTime = duration;
+				// this is not the last chapter
+				if (targetTime > this.currentChapter.end) {
+					// targetTime would exceed the end of the chapter
+					// scrub exactly to end of chapter
+					targetTime = this.currentChapter.end;
 				}
 			}
-			thisObj.seekTo(targetTime);
-		});
+		}
+		else {
+			// not using chapter times
+			if (targetTime > this.duration) {
+				targetTime = this.duration;
+			}
+		}
+		this.seekTo(targetTime);
 	};
 
 	AblePlayer.prototype.handleRateIncrease = function() {
@@ -9803,11 +9779,9 @@ context = 'init'; // TEMP: Forces all code to be executed
 			}
 			else { // using local track elements for captions/subtitles
 				thisObj.syncTrackLanguages('captions',thisObj.captionLang);
-				if (!this.swappingSrc) {
-					thisObj.getMediaTimes().then(function(mediaTimes) {
-						thisObj.updateCaption(mediaTimes['elapsed']);
-						thisObj.showDescription(mediaTimes['elapsed']);
-					});
+				if (!thisObj.swappingSrc) {
+					thisObj.updateCaption(thisObj.elapsed);
+					thisObj.showDescription(thisObj.elapsed);
 				}
 			}
 			thisObj.captionsOn = true;
@@ -10331,55 +10305,46 @@ context = 'init'; // TEMP: Forces all code to be executed
 		// called if this.seekbarScope === 'chapter'
 		// get duration of the current chapter
 
-		var videoDuration, lastChapterIndex, chapterEnd;
+		var lastChapterIndex, chapterEnd;
 
 		if (typeof this.currentChapter === 'undefined') {
 			return 0;
 		}
-		this.getMediaTimes().then(function(mediaTimes) {
-
-			videoDuration = mediaTimes['duration'];
-			lastChapterIndex = this.selectedChapters.cues.length-1;
-
-			if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
-				// this is the last chapter
-				if (this.currentChapter.end !== videoDuration) {
-					// chapter ends before or after video ends, adjust chapter end to match video end
-					chapterEnd = videoDuration;
-					this.currentChapter.end = videoDuration;
-				}
-				else {
-					chapterEnd = this.currentChapter.end;
-				}
+		if (typeof this.duration === 'undefined') {
+			return 0;
+		}
+		lastChapterIndex = this.selectedChapters.cues.length-1;
+		if (this.selectedChapters.cues[lastChapterIndex] == this.currentChapter) {
+			// this is the last chapter
+			if (this.currentChapter.end !== this.duration) {
+				// chapter ends before or after video ends, adjust chapter end to match video end
+				chapterEnd = this.duration;
+				this.currentChapter.end = this.duration;
 			}
-			else { // this is not the last chapter
+			else {
 				chapterEnd = this.currentChapter.end;
 			}
-			return chapterEnd - this.currentChapter.start;
-		});
+		}
+		else { // this is not the last chapter
+			chapterEnd = this.currentChapter.end;
+		}
+		return chapterEnd - this.currentChapter.start;
 	};
 
 	AblePlayer.prototype.getChapterElapsed = function () {
-
 		// called if this.seekbarScope === 'chapter'
 		// get current elapsed time, relative to the current chapter duration
-
-		var videoDuration, videoElapsed;
 
 		if (typeof this.currentChapter === 'undefined') {
 			return 0;
 		}
-		this.getMediaTimes().then(function(mediaTimes) {
 
-			videoDuration = mediaTimes['duration'];
-			videoElapsed = mediaTimes['elapsed'];
-			if (videoElapsed > this.currentChapter.start) {
-				return videoElapsed - this.currentChapter.start;
-			}
-			else {
-				return 0;
-			}
-		});
+		if (this.elapsed > this.currentChapter.start) {
+			return this.elapsed - this.currentChapter.start;
+		}
+		else {
+			return 0;
+		}
 	};
 
 	AblePlayer.prototype.convertChapterTimeToVideoTime = function (chapterTime) {
@@ -11432,13 +11397,13 @@ context = 'init'; // TEMP: Forces all code to be executed
 
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 			if (typeof duration === 'undefined') {
-				duration = mediaTimes['duration'];
+				thisObj.duration = mediaTimes['duration'];
 			}
 			if (typeof elapsed === 'undefined') {
-				elapsed = mediaTimes['elapsed'];
+				thisObj.elapsed = mediaTimes['elapsed'];
 			}
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
-				if (thisObj.swapTime === elapsed) {
+				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
 					if (thisObj.playing) {
 						// resume playback
@@ -11452,13 +11417,13 @@ context = 'init'; // TEMP: Forces all code to be executed
 			else if (thisObj.startedPlaying) {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
-					thisObj.highlightTranscript(elapsed);
+					thisObj.highlightTranscript(thisObj.elapsed);
 				}
-				thisObj.updateCaption(elapsed);
-				thisObj.showDescription(elapsed);
-				thisObj.updateChapter(elapsed);
-				thisObj.updateMeta(elapsed);
-				thisObj.refreshControls('timeline', duration, elapsed);
+				thisObj.updateCaption(thisObj.elapsed);
+				thisObj.showDescription(thisObj.elapsed);
+				thisObj.updateChapter(thisObj.elapsed);
+				thisObj.updateMeta(thisObj.elapsed);
+				thisObj.refreshControls('timeline', thisObj.duration, thisObj.elapsed);
 			}
 		});
 	};

@@ -31,6 +31,7 @@
 		}
 
 		this.getTracks().then(function() {
+
 			tracks = thisObj.tracks;
 
 			if (thisObj.player === 'youtube') {
@@ -193,6 +194,11 @@
 				this.getVimeoCaptionTracks().then(function() {
 					deferred.resolve();
 				});
+			}
+			else {
+				// this is neither YouTube nor Vimeo
+				// there just ain't no caption tracks
+				deferred.resolve();
 			}
 		}
 		return promise;

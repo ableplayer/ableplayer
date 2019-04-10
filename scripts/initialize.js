@@ -565,6 +565,7 @@
 // 	thisObj.initializing = true;
 		this.initPlayer().then(function() { // initPlayer success
 //		thisObj.initializing = false;
+
 			 thisObj.setupTracks().then(function() {
 
 				thisObj.setupAltCaptions().then(function() {
@@ -677,38 +678,37 @@
 		var thisObj, duration;
 		thisObj = this;
 		this.seekInterval = this.defaultSeekInterval;
-		this.getMediaTimes().then(function(mediaTimes) {
-			if (thisObj.useChapterTimes) {
-				duration = thisObj.chapterDuration;
+
+		if (this.useChapterTimes) {
+			duration = this.chapterDuration;
+		}
+		else {
+			duration = this.duration;
+		}
+		if (typeof duration === 'undefined' || duration < 1) {
+			// no duration; just use default for now but keep trying until duration is available
+			this.seekIntervalCalculated = false;
+			return;
+		}
+		else {
+			if (duration <= 20) {
+				this.seekInterval = 5;	 // 4 steps max
+			}
+			else if (duration <= 30) {
+				this.seekInterval = 6; // 5 steps max
+			}
+			else if (duration <= 40) {
+				this.seekInterval = 8; // 5 steps max
+			}
+			else if (duration <= 100) {
+				this.seekInterval = 10; // 10 steps max
 			}
 			else {
-				duration = mediaTimes['duration'];
+				// never more than 10 steps from start to end
+				this.seekInterval = (duration / 10);
 			}
-			if (typeof duration === 'undefined' || duration < 1) {
-				// no duration; just use default for now but keep trying until duration is available
-				thisObj.seekIntervalCalculated = false;
-				return;
-			}
-			else {
-				if (duration <= 20) {
-					thisObj.seekInterval = 5;	 // 4 steps max
-				}
-				else if (duration <= 30) {
-					thisObj.seekInterval = 6; // 5 steps max
-				}
-				else if (duration <= 40) {
-					thisObj.seekInterval = 8; // 5 steps max
-				}
-				else if (duration <= 100) {
-					thisObj.seekInterval = 10; // 10 steps max
-				}
-				else {
-					// never more than 10 steps from start to end
-					thisObj.seekInterval = (duration / 10);
-				}
-				thisObj.seekIntervalCalculated = true;
-			}
-		});
+			this.seekIntervalCalculated = true;
+		}
 	};
 
 	AblePlayer.prototype.initDefaultCaption = function () {
