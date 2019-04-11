@@ -22,7 +22,7 @@ Features
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
 -   Support for playing YouTube and Vimeo videos within the Able Player chrome.
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
--   Fallback support (see section on *Fallback* for details).
+-   Fallback support (see section on **Fallback** for details).
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
 
 Supported Languages
@@ -73,7 +73,7 @@ Note that mobile browsers have limitations (e.g., volume control and autostart a
 Dependencies
 ------------
 
-*Able Player* has two dependencies: 
+*Able Player* has the following third party dependencies: 
 
 -   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
@@ -81,6 +81,21 @@ Dependencies
     preferences in cookies. This script is distributed with *Able
     Player*. Prior to version 2.3, Able Player used [jquery.cookie][]
     for this same purpose.
+    
+To install Able Player, copy the following files from the Able Player repo into a folder on your web server:
+- 		build/* 
+-		button-icons/*
+- 		images/*
+-		styles/* (optional, see note below)
+-		thirdparty/* (includes js-cookie, as mentioned above)
+-		translations/* 
+-		LICENSE 
+
+The *build* folder includes minified production code (*ableplayer.min.js* and *ableplayer.min.css*). 
+For debugging and/or style customization purposes, human-readable source files are also available: 
+-		build/ableplayer.js 
+-		styles/ableplayer.css 
+ 
 
 Fallback
 --------
