@@ -1,12 +1,7 @@
 Able Player
 ==========
 
-*Able Player* is a fully accessible cross-browser media player. It uses
-the HTML5 `<audio>` or `<video>` element, and supports all five kinds 
-of `<track>` elements defined by the HTML5 spec 
-(captions, subtitles, descriptions, chapters, and metadata). 
-It also supports fully accessible playlists, and 
-can be used to play YouTube and Vimeo videos.  
+*Able Player* is a fully accessible cross-browser HTML5 media player. 
 
 To see the player in action check out the [Able Player Examples][examples] page.
 
