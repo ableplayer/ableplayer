@@ -41,13 +41,15 @@
 	};
 
 	AblePlayer.prototype.onMediaPause = function () {
+
 		if (this.controlsHidden) {
 			this.fadeControls('in');
 			this.controlsHidden = false;
 		}
-		if (this.hidingControls) { // a timeout is actively counting
+		if (this.hideControlsTimeoutStatus === 'active') {
 			window.clearTimeout(this.hideControlsTimeout);
-			this.hidingControls = false;
+			this.hideControlsTimeoutStatus = 'clear';
+
 		}
 		this.refreshControls('playpause');
 	};
@@ -773,16 +775,26 @@
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
-				// after showing controls, wait another few seconds, then hide them again if video continues to play
-				thisObj.hidingControls = true;
-				thisObj.hideControlsTimeout = window.setTimeout(function() {
-					if (typeof thisObj.playing !== 'undefined' && thisObj.playing === true) {
-						thisObj.fadeControls('out');
-						thisObj.controlsHidden = true;
-						thisObj.hidingControls = false;
+				// if there's already an active timeout, clear it and start timer again
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+				}
+				if (thisObj.hideControls) {
+					// after showing controls, hide them again after a brief timeout
+					thisObj.invokeHideControlsTimeout();
+				}
+			}
+			else {
+				// if there's already an active timeout, clear it and start timer again
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+					if (thisObj.hideControls) {
+						thisObj.invokeHideControlsTimeout();
 					}
-				},3000);
-			};
+				}
+			}
 		});
 
 		// if user presses a key from anywhere on the page, show player controls
@@ -790,6 +802,26 @@
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+				}
+				if (thisObj.hideControls) {
+					// after showing controls, hide them again after a brief timeout
+					thisObj.invokeHideControlsTimeout();
+				}
+			}
+			else {
+				// controls are visible
+				// if there's already an active timeout, clear it and start timer again
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+
+					if (thisObj.hideControls) {
+						thisObj.invokeHideControlsTimeout();
+					}
+				}
 			}
 		});
 

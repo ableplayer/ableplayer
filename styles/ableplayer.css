@@ -46,6 +46,7 @@
   position: relative;
   margin: 1em 0;
   width: 100%; /* will be changed dynamically as player is contructed */
+  background-color: #000;
   box-shadow: 0px 0px 16px #262626;
   z-index: 5000;
 }
@@ -68,12 +69,12 @@
 	background-color: #262626; /* background color of player (appears on top & bottom) */
 }
 .able-offscreen {
-	position:absolute;
-	left:-10000px;
-	top:auto;
-	width:1px;
-	height:1px;
-	overflow:hidden;
+	position: absolute;
+	left: -10000px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }
 .able-media-container audio {
   display: none !important;

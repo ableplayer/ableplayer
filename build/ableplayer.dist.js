@@ -432,11 +432,14 @@
 
 		// Hide controls when video starts playing
 		// They will reappear again when user presses a key or moves the mouse
+		// As of v4.0, controls are hidden automatically on playback in fullscreen mode
 		if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
 			this.hideControls = true;
+			this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
 		}
 		else {
 			this.hideControls = false;
+			this.hideControlsOriginal = false;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
@@ -7985,49 +7988,66 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.hideControls) {
 			// wait briefly after playback begins, then hide controls
 			this.hidingControls = true;
-			this.hideControlsTimeout = window.setTimeout(function() {
-				thisObj.fadeControls('out');
-				thisObj.controlsHidden = true;
-				thisObj.hidingControls = false;
-			},2000);
+			this.invokeHideControlsTimeout();
 		}
 	};
 
 	AblePlayer.prototype.fadeControls = function(direction) {
 
-		// NOTE: This is a work in progress, and is not yet fully functional
-		// TODO: Use jQuery fadeIn() and fadeOut() to attain some sort of transition
-		// Currently just adds or removes able-offscreen class to visibly hide content
-		// without hiding it from screen reader users
+		// Visibly fade controls without hiding them from screen reader users
 
 		// direction is either 'out' or 'in'
 
-		// One challenge:
-		// When controls fade out in other players (e.g., YouTube, Vimeo), the transition works well because
-		// their controls are an overlay on top of the video.
-		// Therefore, disappearing controls don't affect the size of the video container.
-		// Able Player's controls appear below the video, so if this.$playerDiv disappears,
-		// that results in a reduction in the height of the video container, which is a bit jarring
-		// Solution #1: Don't hide this.$playerDiv; instead hide the two containers nested inside it
+		// TODO: This still needs work.
+		// After the player fades, it's replaced by an empty space
+		// Would be better if the video and captions expanded to fill the void
+		// Attempted to fade out to 0 opacity, then move the playerDiv offscreen
+		// and expand the mediaContainer to fill the vacated space
+		// However, my attempts to do this have been choppy and buggy
+		// Code is preserved below and commented out
+
+		var thisObj, mediaHeight, playerHeight, newMediaHeight;
+		var thisObj = this;
+
 		if (direction == 'out') {
-			this.$controllerDiv.addClass('able-offscreen');
-			this.$statusBarDiv.addClass('able-offscreen');
-			// Removing content from $playerDiv leaves an empty controller bar in its place
-			// What to do with the empty space?
-			// For now, changing to a black background; will restore to original background on fade-in
-			this.playerBackground = this.$playerDiv.css('background-color');
-			this.$playerDiv.css('background-color','black');
+			// get the original height of two key components:
+			mediaHeight = this.$mediaContainer.height();
+			playerHeight = this.$playerDiv.height();
+			newMediaHeight = mediaHeight + playerHeight;
+
+			// fade slowly to transparency
+			this.$playerDiv.fadeTo(2000,0,function() {
+				/*
+				// when finished, position playerDiv offscreen
+				// thisObj.$playerDiv.addClass('able-offscreen');
+				// Expand the height of mediaContainer to fill the void (needs work)
+				thisObj.$mediaContainer.animate({
+					height: newMediaHeight
+				},500);
+				*/
+			});
 		}
 		else if (direction == 'in') {
-			this.$controllerDiv.removeClass('able-offscreen');
-			this.$statusBarDiv.removeClass('able-offscreen');
-			if (typeof this.playerBackground !== 'undefined') {
-				this.$playerDiv.css('background-color',this.playerBackground);
-			}
-			else {
-				this.$playerDiv.css('background-color','');
-			}
+			// restore vidcapContainer to its original height (needs work)
+			// this.$mediaContainer.removeAttr('style');
+			// fade relatively quickly back to its original position with full opacity
+			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
+			this.$playerDiv.fadeTo(100,1);
 		}
+	};
+
+	AblePlayer.prototype.invokeHideControlsTimeout = function () {
+
+		// invoke timeout for waiting a few seconds after a mouse move or key down
+		// before hiding controls again
+		var thisObj = this;
+		this.hideControlsTimeout = window.setTimeout(function() {
+			if (typeof thisObj.playing !== 'undefined' && thisObj.playing === true && thisObj.hideControls) {
+				thisObj.fadeControls('out');
+				thisObj.controlsHidden = true;
+			}
+		},5000);
+		this.hideControlsTimeoutStatus = 'active';
 	};
 
 	AblePlayer.prototype.refreshControls = function(context, duration, elapsed) {
@@ -8040,6 +8060,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// 'transcript' - a change may effect the transcript window or button
 		// 'fullscreen' - a change has been triggered by full screen toggle
 		// 'playpause' - a change triggered by either a 'play' or 'pause' event
+
+		// NOTE: context is not currently supported.
+		// The steps in this function have too many complex interdependencies
+		// The gains in efficiency are offset by the possibility of introducing bugs
+		// For now, executing everything
+		context = 'init';
 
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
@@ -8056,7 +8082,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// wait until new source has loaded before refreshing controls
 			return;
 		}
-context = 'init'; // TEMP: Forces all code to be executed
+
 		if (context === 'timeline' || context === 'init') {
 			// all timeline-related functionality requires both duration and elapsed
 			if (typeof this.duration === 'undefined') {
@@ -8990,6 +9016,31 @@ context = 'init'; // TEMP: Forces all code to be executed
 		}
 		else if (!stillPaused) {
 			this.playMedia(); // when toggling fullscreen and media is playing, continue playing.
+		}
+		// automatically hide controller in fullscreen mode
+		// then reset back to original setting after exiting fullscreen mode
+		if (this.fullscreen) {
+			this.hideControls = true;
+			if (this.playing) {
+				// go ahead and hide the controls
+				this.fadeControls('out');
+				this.controlsHidden = true;
+			}
+		}
+		else {
+			// exit fullscreen mode
+			this.hideControls = this.hideControlsOriginal;
+			if (!this.hideControls) { // do not hide controls
+				if (this.controlsHidden) {
+					this.fadeControls('in');
+					this.controlsHidden = false;
+				}
+				// if there's an active timeout to fade controls out again, clear it
+				if (this.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(this.hideControlsTimeout);
+					this.hideControlsTimeoutStatus = 'clear';
+				}
+			}
 		}
 	};
 
@@ -11125,13 +11176,15 @@ context = 'init'; // TEMP: Forces all code to be executed
 	};
 
 	AblePlayer.prototype.onMediaPause = function () {
+
 		if (this.controlsHidden) {
 			this.fadeControls('in');
 			this.controlsHidden = false;
 		}
-		if (this.hidingControls) { // a timeout is actively counting
+		if (this.hideControlsTimeoutStatus === 'active') {
 			window.clearTimeout(this.hideControlsTimeout);
-			this.hidingControls = false;
+			this.hideControlsTimeoutStatus = 'clear';
+
 		}
 		this.refreshControls('playpause');
 	};
@@ -11857,16 +11910,26 @@ context = 'init'; // TEMP: Forces all code to be executed
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
-				// after showing controls, wait another few seconds, then hide them again if video continues to play
-				thisObj.hidingControls = true;
-				thisObj.hideControlsTimeout = window.setTimeout(function() {
-					if (typeof thisObj.playing !== 'undefined' && thisObj.playing === true) {
-						thisObj.fadeControls('out');
-						thisObj.controlsHidden = true;
-						thisObj.hidingControls = false;
+				// if there's already an active timeout, clear it and start timer again
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+				}
+				if (thisObj.hideControls) {
+					// after showing controls, hide them again after a brief timeout
+					thisObj.invokeHideControlsTimeout();
+				}
+			}
+			else {
+				// if there's already an active timeout, clear it and start timer again
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+					if (thisObj.hideControls) {
+						thisObj.invokeHideControlsTimeout();
 					}
-				},3000);
-			};
+				}
+			}
 		});
 
 		// if user presses a key from anywhere on the page, show player controls
@@ -11874,6 +11937,26 @@ context = 'init'; // TEMP: Forces all code to be executed
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+				}
+				if (thisObj.hideControls) {
+					// after showing controls, hide them again after a brief timeout
+					thisObj.invokeHideControlsTimeout();
+				}
+			}
+			else {
+				// controls are visible
+				// if there's already an active timeout, clear it and start timer again
+				if (thisObj.hideControlsTimeoutStatus === 'active') {
+					window.clearTimeout(thisObj.hideControlsTimeout);
+					thisObj.hideControlsTimeoutStatus = 'clear';
+
+					if (thisObj.hideControls) {
+						thisObj.invokeHideControlsTimeout();
+					}
+				}
 			}
 		});
 

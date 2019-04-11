@@ -432,11 +432,14 @@
 
 		// Hide controls when video starts playing
 		// They will reappear again when user presses a key or moves the mouse
+		// As of v4.0, controls are hidden automatically on playback in fullscreen mode
 		if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
 			this.hideControls = true;
+			this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
 		}
 		else {
 			this.hideControls = false;
+			this.hideControlsOriginal = false;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
