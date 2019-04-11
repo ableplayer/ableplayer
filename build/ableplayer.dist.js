@@ -13775,7 +13775,7 @@ context = 'init'; // TEMP: Forces all code to be executed
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
-		var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','zh-tw'];
+		var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','tr','zh-tw'];
 		return langs;
 	};
 
