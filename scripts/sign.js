@@ -1,7 +1,7 @@
 (function ($) {
 	AblePlayer.prototype.initSignLanguage = function() {
 
-		// Sign language is only currently supported in HTML5 player, not fallback or YouTube
+		// Sign language is only currently supported in HTML5 player, not YouTube or Vimeo
 		if (this.player === 'html5') {
 			// check to see if there's a sign language video accompanying this video
 			// check only the first source

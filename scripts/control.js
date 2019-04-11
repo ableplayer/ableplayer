@@ -41,13 +41,6 @@
 				// successful completion also fires a 'seeked' event (see event.js)
 			})
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// pause JW Player temporarily.
-			// When seek has successfully reached newTime,
-			// onSeek event will be called, and playback will be resumed
-			this.jwSeekPause = true;
-			this.jwPlayer.seek(newTime);
-		}
 		this.refreshControls('timeline');
 	};
 
@@ -130,14 +123,6 @@
 					duration = 0;
 				}
 			}
-			else if (this.player === 'jw') {
-				if (this.jwPlayer) {
-					duration = this.jwPlayer.getDuration();
-				}
-				else { // JW Player hasn't initialized yet
-					duration = 0;
-				}
-			}
 			if (duration === undefined || isNaN(duration) || duration === -1) {
 				deferred.resolve(0);
 			}
@@ -187,19 +172,6 @@
 					elapsed = 0;
 				}
 			}
-			else if (this.player === 'jw') {
-				if (this.jwPlayer) {
-					if (this.jwPlayer.getState() === 'IDLE') {
-						elapsed = 0;
-					}
-					else {
-						elapsed = this.jwPlayer.getPosition();
-					}
-				}
-				else { // JW Player hasn't initialized yet
-					elapsed = 0;
-				}
-			}
 			if (elapsed === undefined || isNaN(elapsed) || elapsed === -1) {
 				deferred.resolve(0);
 			}
@@ -228,7 +200,7 @@
 		}
 		*/
 
-		var deferred, promise, thisObj, jwState, duration, elapsed;
+		var deferred, promise, thisObj, duration, elapsed;
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 		thisObj = this;
@@ -284,26 +256,6 @@
 				}
 			});
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			jwState = this.jwPlayer.getState();
-			if (jwState === 'PAUSED' || jwState === 'IDLE' || typeof jwState === 'undefined') {
-				if (this.elapsed === 0) {
-					deferred.resolve('stopped');
-				}
-				else if (this.elapsed === this.duration) {
-					deferred.resolve('ended');
-				}
-				else {
-					deferred.resolve('paused');
-				}
-			}
-			else if (jwState === 'BUFFERING') {
-				deferred.resolve('buffering');
-			}
-			else if (jwState === 'PLAYING') {
-				deferred.resolve('playing');
-			}
-		}
 		return promise;
 	};
 
@@ -330,11 +282,6 @@
 			// since this takes longer to determine, it was set previous in initVimeoPlayer()
 			return this.vimeoSupportsPlaybackRateChange;
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// Not directly supported by JW player;
-			// can hack for HTML5 version by finding the dynamically generated video tag, but decided not to do that.
-			return false;
-		}
 	};
 
 	AblePlayer.prototype.setPlaybackRate = function (rate) {
@@ -359,10 +306,6 @@
 
 		if (this.player === 'html5') {
 			return this.media.playbackRate;
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// Unsupported, always the normal rate.
-			return 1;
 		}
 		else if (this.player === 'youtube') {
 			return this.youTubePlayer.getPlaybackRate();
@@ -410,9 +353,6 @@
 		else if (this.player === 'vimeo') {
 			this.vimeoPlayer.pause();
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.pause(true);
-		}
 	};
 
 	AblePlayer.prototype.playMedia = function () {
@@ -434,9 +374,6 @@
 		}
 		else if (this.player === 'vimeo') {
 			 this.vimeoPlayer.play();
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.play(true);
 		}
 		this.startedPlaying = true;
 		if (this.hideControls) {
@@ -644,11 +581,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 							this.seekBar.setBuffered(buffered / duration);
 						}
 					}
-				}
-			}
-			else if (this.player === 'jw' && this.jwPlayer) {
-				if (this.seekBar) {
-					this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
 				}
 			}
 			else if (this.player === 'youtube') {
@@ -972,32 +904,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 	AblePlayer.prototype.handleRestart = function() {
 
 		this.seekTo(0);
-
-	/*
-		// Prior to 2.3.68, this function was handleStop()
-		// which was a bit more challenging to implement
-		// Preserved here in case Stop is ever cool again...
-
-		var thisObj = this;
-		if (this.player == 'html5') {
-			this.pauseMedia();
-			this.seekTo(0);
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.stop();
-		}
-		else if (this.player === 'youtube') {
-			// YouTube API function stopVideo() does not reset video to 0
-			// Also, the stopped video is not seekable so seekTo(0) after stopping doesn't work
-			// Workaround is to use pauseVideo(), followed by seekTo(0) to emulate stopping
-			// However, the tradeoff is that YouTube doesn't restore the poster image when video is paused
-			// Added 12/29/15: After seekTo(0) is finished, stopVideo() to reset video and restore poster image
-			// This final step is handled in event.js > onMediaUpdate()
-			this.youTubePlayer.pauseVideo();
-			this.seekTo(0);
-			this.stoppingYouTube = true;
-		}
-	*/
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
@@ -1461,9 +1367,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 				this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
 			}
 
-			// TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
-			// Need to call setup again after moving?
-
 			// Resume playback if moving stopped it.
 			if (!wasPaused && this.paused) {
 				this.playMedia();
@@ -1594,7 +1497,7 @@ context = 'init'; // TEMP: Forces all code to be executed
 	// Resizes all relevant player attributes.
 	AblePlayer.prototype.resizePlayer = function (width, height) {
 
-		var jwHeight, captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
+		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
 		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
 			if (typeof this.$vidcapContainer !== 'undefined') {
@@ -1642,18 +1545,9 @@ context = 'init'; // TEMP: Forces all code to be executed
 			}
 		}
 
-		// resize YouTube or JW Player
+		// resize YouTube
 		if (this.player === 'youtube' && this.youTubePlayer) {
 			this.youTubePlayer.setSize(width, height);
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			if (this.mediaType === 'audio') {
-				// keep height set to 0 to prevent JW PLayer from showing its own player
-				this.jwPlayer.resize(width,0);
-			}
-			else {
-				this.jwPlayer.resize(width, jwHeight);
-			}
 		}
 
 		// Resize captions

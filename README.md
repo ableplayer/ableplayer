@@ -2,8 +2,11 @@ Able Player
 ==========
 
 *Able Player* is a fully accessible cross-browser media player. It uses
-the HTML5 `<audio>` or `<video>` element for browsers that support them,
-and (optionally) the JW Player as a fallback for those that don’t.
+the HTML5 `<audio>` or `<video>` element, and supports all five kinds 
+of `<track>` elements defined by the HTML5 spec 
+(captions, subtitles, descriptions, chapters, and metadata). 
+It also supports fully accessible playlists, and 
+can be used to play YouTube and Vimeo videos.  
 
 To see the player in action check out the [Able Player Examples][examples] page.
 
@@ -24,7 +27,7 @@ Features
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
 -   Support for playing YouTube and Vimeo videos within the Able Player chrome.
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
--   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
+-   Fallback support (see section on *Fallback* for details).
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
 
 Supported Languages
@@ -62,12 +65,11 @@ Compatibility
 technologies.
 
 -   Firefox 3.x and higher
--   Internet Explorer 10 and higher without fallback
--   Internet Explorer 8 and 9, dependent on JW Player as fallback.
+-   Internet Explorer 10 and higher
 -   Google Chrome 7.0 and higher
 -   Opera 10.63 and higher
 -   Safari 5.0 on Mac OS X
--   Safari on IOS 3.2.2 and higher (audio only, video plays in default IOS player)
+-   Safari on IOS 3.2.2 and higher
 -   Chrome on Android 4.2 and higher
 
 Note that mobile browsers have limitations (e.g., volume control and autostart are not supported)
@@ -75,16 +77,10 @@ Note that mobile browsers have limitations (e.g., volume control and autostart a
 Dependencies
 ------------
 
-*Able Player* has a few dependencies, but most are either provided with
-*Able Player* or available through Google’s hosted libraries. The one
-exception is the fallback player—see the *Fallback* section below for
-details.
+*Able Player* has two dependencies: 
 
 -   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
--   *Able Player* uses [Modernizr][] to enable styling of HTML5 elements
-    in Internet Explorer 6 through 8. A Modernizr 2.6.2 Custom Build is
-    distributed with *Able Player*, and is all that *Able Player* needs.
 -   *Able Player* uses [js-cookie][] to store and retrieve user
     preferences in cookies. This script is distributed with *Able
     Player*. Prior to version 2.3, Able Player used [jquery.cookie][]
@@ -93,43 +89,25 @@ details.
 Fallback
 --------
 
-For older browsers that don’t support HTML5 media elements, you need a
-fallback solution. *Able Player* was developed to work seamlessly with
-[JW Player][], specifically **JW Player 6** (successfully tested with
-versions 6.0 and 6.11). JW Player is free for non-commercial use but
-is licensed separately and is not distributed with *Able Player*.
-After licensing and downloading JW PLayer, copy *jwplayer.js*, *jwplayer.html5.js*,
-and *jwplayer.flash.swf* into the
-*Able Player* */thirdparty* directory.
+All modern browsers have supported HTML5 media elements for many years.
+However, there are still older browsers in use that don’t have this support 
+(e.g., Internet Explorer 9 and earlier). For these, you need to provide fallback content. 
+ 
+Prior to version 4.0, *Able Player* used [JW Player][] as a fallback Flash player 
+for older browsers. However, this solution was built specifically on **JW Player 6** 
+which is now many versions old and difficult to find. 
 
-If you choose to use JW Player as your fallback player,
-users with some older browsers will have a similar experience with
-*Able Player* as users with newer browsers.
+Also, prior to version 4.0, *Able Player* used [Modernizr][] to enable 
+styling of HTML5 elements in Internet Explorer 6 through 8. This too is no longer 
+supported, and Modernizr is no longer needed. 
 
-If using a licensed copy of JWPlayer, the JWPlayer key can be passed with
-the **data-fallback-jwkey** attribute.
+Instead, we recommend providing alternative content as a child of the `<video>` or `<audio>` element. 
+For example, this could be a link to the media file so users can download it 
+and play it on their player of choice. Or it could be a link to a transcript. 
 
-Note that *most* browsers in use today support HTML5 media elements.
-Here’s a breakdown:
--   Chrome since 3.0
--   Firefox since 3.5
--   Safari since 3.1
--   Opera since 10.5
--   Internet Explorer since 9.0 (video was buggy in 9; better in 10)
-
-Note the following limitations in Internet Explorer (IE):
-- IE10 and higher work fine without a fallback player
-- IE9 was the first version of IE to support HTML5 media elements. However, its support for video was buggy so Able Player uses the fallback if it's available
-- IE8 works fine with JW Player as fallback
-- IE6 and 7 are not supported
-
-At some point we may decide that it’s reasonable to stop supporting a fallback player.
-However, according to [WebAIM’s 2017 Screen Reader User Survey][] 4.1% of screen reader users are still using IE 6, 7, or 8,
-and 4.0% are still using IE 9 or 10. Until these users catch up, we think we have to provide a working fallback.
-
-As an alternative fallback, you could link to the media file so users
-can download it and play it on their player of choice, and/or provide a
-transcript.
+If the browser is unable to play the media file, Able Player will show this alternative content. 
+If no alternative content is provided, Able Player will display a standard message that lists 
+the minimum versions of common web browsers required for playing HTML5 media. 
 
 Setup Step 1: Use HTML5 Doctype
 -------------------------------
@@ -309,11 +287,7 @@ The following attributes make all this possible:
 
 #### Fallback Player
 
--   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
--   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only)
--   **data-fallback-path** - optional; override default path to directory in which the fallback player files are stored
--   **data-fallback-jwkey** - optional; set JW Player key for hosted players
-
+-   **data-test-fallback** - optional; force browsers to display the fallback content that will be shown to users with older browsers that don't support HTML5 media.  
 
 The following attributes are supported on the `<video>` element only:
 

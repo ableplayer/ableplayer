@@ -91,17 +91,7 @@
 			else {
 				if (this.playing) {
 					// should be able to resume playback
-					if (this.player === 'jw') {
-						var player = this.jwPlayer;
-						// Seems to be a bug in JW player, where this doesn't work when fired immediately.
-						// Thus have to use a setTimeout
-						setTimeout(function () {
-							player.play(true);
-						}, 500);
-					}
-					else {
-						this.playMedia();
-					}
+					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
 				this.refreshControls('init');
@@ -710,69 +700,6 @@
 		});
 	};
 
-	AblePlayer.prototype.addJwMediaListeners = function () {
-		var thisObj = this;
-		// add listeners for JW Player events
-		this.jwPlayer
-			.onTime(function() {
-				thisObj.onMediaUpdateTime();
-			})
-			.onComplete(function() {
-				thisObj.onMediaComplete();
-			})
-			.onReady(function() {
-				// remove JW Player from tab order.
-				// We don't want users tabbing into the Flash object and getting trapped
-				$('#' + thisObj.jwId).removeAttr('tabindex');
-
-				// JW Player was initialized with no explicit width or height; get them now
-				thisObj.$fallbackWrapper = $('#' + thisObj.mediaId + '_fallback_wrapper');
-				thisObj.fallbackDefaultWidth = thisObj.$fallbackWrapper.width();
-				thisObj.fallbackDefaultHeight = thisObj.$fallbackWrapper.height();
-				thisObj.fallbackRatio = thisObj.fallbackDefaultWidth / thisObj.fallbackDefaultHeight;
-
-				if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
-					thisObj.seekTo(thisObj.startTime);
-					thisObj.startedPlaying = true;
-				}
-				thisObj.refreshControls('init');
-			})
-			.onSeek(function(e) {
-				// this is called when user scrubs ahead or back,
-				// after the target offset is reached
-				if (thisObj.jwSeekPause) {
-					// media was temporarily paused
-					thisObj.jwSeekPause = false;
-					thisObj.playMedia();
-				}
-				setTimeout(function () {
-					thisObj.refreshControls('timeline');
-				}, 300);
-			})
-			.onPlay(function() {
-				thisObj.refreshControls('playpause');
-			})
-			.onPause(function() {
-				thisObj.onMediaPause(); // includes a call to refreshControls()
-			})
-			.onBuffer(function() {
-				thisObj.refreshControls('timeline');
-			})
-			.onBufferChange(function() {
-				thisObj.refreshControls('timeline');
-			})
-			.onIdle(function(e) {
-				thisObj.refreshControls('timeline');
-			})
-			.onMeta(function() {
-				 // do something
-			})
-			.onPlaylist(function() {
-				// Playlist change includes new media source.
-				thisObj.onMediaNewSourceLoad();
-			});
-	};
-
 	AblePlayer.prototype.addEventListeners = function () {
 
 		var thisObj, whichButton, thisElement;
@@ -907,9 +834,6 @@
 		}
 		else if (this.player === 'vimeo') {
 			 this.addVimeoListeners();
-		}
-		else if (this.player === 'jw') {
-			this.addJwMediaListeners();
 		}
 		else if (this.player === 'youtube') {
 			// Youtube doesn't give us time update events, so we just periodically generate them ourselves

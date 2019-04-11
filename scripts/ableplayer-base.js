@@ -8,13 +8,6 @@
 	// W3C API Test Page:
 	// http://www.w3.org/2010/05/video/mediaevents.html
 
-	// Uses JW Player as fallback
-	// JW Player configuration options:
-	// http://support.jwplayer.com/customer/portal/articles/1413113-configuration-options-reference
-	// (NOTE: some options are not documented, e.g., volume)
-	// JW Player 6 API reference:
-	// http://support.jwplayer.com/customer/portal/articles/1413089-javascript-api-reference
-
 	// YouTube Player API for iframe Embeds
 	https://developers.google.com/youtube/iframe_api_reference
 	// YouTube Player Parameters
@@ -376,48 +369,13 @@
 			this.useTtml = false;
 		}
 
-		// Fallback Player
-		// The only supported fallback is JW Player, licensed separately
-		// JW Player files must be included in folder specified in this.fallbackPath
-		// JW Player will be loaded as needed in browsers that don't support HTML5 media
-		// NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
-
-		this.fallback = null;
-		this.fallbackPath = null;
-		this.fallbackJwKey = null;
-		this.testFallback = false;
-
-		if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
-			var fallback =	$(media).data('fallback');
-			if (fallback === 'jw') {
-				this.fallback = fallback;
-			}
-		}
-
-		if (this.fallback === 'jw') {
-
-			if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== false) {
-				this.fallbackPath = $(media).data('fallback-path');
-
-				var path = $(media).data('fallback-path');
-
-				// remove js file is specified.
-				var playerJs = 'jwplayer.js';
-				if (path.endsWith(playerJs)) {
-					path = path.slice(0, path.length - playerJs.length);
-				}
-				this.fallbackPath = path;
-			} else {
-				this.fallbackPath = this.rootPath + 'thirdparty/';
-			}
-
-			if ($(media).data('fallback-jwkey') !== undefined) {
-				this.fallbackJwKey = $(media).data('fallback-jwkey');
-			}
-
-			if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
-				this.testFallback = true;
-			}
+		// Fallback
+		// The only supported fallback content as of version 4.0 is:
+		// 1. Content nested within the <audio> or <video> element.
+		// 2. A standard localized message (see buildplayer.js > provideFallback()
+		// The data-test-fallback attribute can be used to test the fallback solution in any browser
+		if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
+			this.testFallback = true;
 		}
 
 		// Language

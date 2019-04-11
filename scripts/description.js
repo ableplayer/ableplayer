@@ -155,7 +155,7 @@
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
 		// 2. User is toggling description
-		var thisObj, i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+		var thisObj, i, origSrc, descSrc, srcType, newSource;
 
 		thisObj = this;
 
@@ -174,7 +174,7 @@
 			// user has requested the non-described version
 			this.showAlert(this.tt.alertNonDescribedVersion);
 		}
-		if (this.player === 'html5' || this.player === 'jw') {
+		if (this.player === 'html5') {
 
 			if (this.usingAudioDescription()) {
 				// the described version is currently playing. Swap to non-described
@@ -184,9 +184,6 @@
 					srcType = this.$sources[i].getAttribute('type');
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
-					}
-					if (srcType === 'video/mp4') {
-						jwSourceIndex = i;
 					}
 				}
 				// No need to check for this.initializing
@@ -206,9 +203,6 @@
 						this.$sources[i].setAttribute('src',descSrc);
 						this.$sources[i].setAttribute('data-orig-src',origSrc);
 					}
-					if (srcType === 'video/mp4') {
-						jwSourceIndex = i;
-					}
 				}
 				this.swappingSrc = true;
 			}
@@ -216,10 +210,6 @@
 			// now reload the source file.
 			if (this.player === 'html5') {
 				this.media.load();
-			}
-			else if (this.player === 'jw') {
-				newSource = this.$sources[jwSourceIndex].getAttribute('src');
-				this.jwPlayer.load({file: newSource});
 			}
 		}
 		else if (this.player === 'youtube') {

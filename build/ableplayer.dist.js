@@ -8,13 +8,6 @@
 	// W3C API Test Page:
 	// http://www.w3.org/2010/05/video/mediaevents.html
 
-	// Uses JW Player as fallback
-	// JW Player configuration options:
-	// http://support.jwplayer.com/customer/portal/articles/1413113-configuration-options-reference
-	// (NOTE: some options are not documented, e.g., volume)
-	// JW Player 6 API reference:
-	// http://support.jwplayer.com/customer/portal/articles/1413089-javascript-api-reference
-
 	// YouTube Player API for iframe Embeds
 	https://developers.google.com/youtube/iframe_api_reference
 	// YouTube Player Parameters
@@ -376,48 +369,13 @@
 			this.useTtml = false;
 		}
 
-		// Fallback Player
-		// The only supported fallback is JW Player, licensed separately
-		// JW Player files must be included in folder specified in this.fallbackPath
-		// JW Player will be loaded as needed in browsers that don't support HTML5 media
-		// NOTE: As of 2.3.44, NO FALLBACK is used unless data-fallback='jw'
-
-		this.fallback = null;
-		this.fallbackPath = null;
-		this.fallbackJwKey = null;
-		this.testFallback = false;
-
-		if ($(media).data('fallback') !== undefined && $(media).data('fallback') !== "") {
-			var fallback =	$(media).data('fallback');
-			if (fallback === 'jw') {
-				this.fallback = fallback;
-			}
-		}
-
-		if (this.fallback === 'jw') {
-
-			if ($(media).data('fallback-path') !== undefined && $(media).data('fallback-path') !== false) {
-				this.fallbackPath = $(media).data('fallback-path');
-
-				var path = $(media).data('fallback-path');
-
-				// remove js file is specified.
-				var playerJs = 'jwplayer.js';
-				if (path.endsWith(playerJs)) {
-					path = path.slice(0, path.length - playerJs.length);
-				}
-				this.fallbackPath = path;
-			} else {
-				this.fallbackPath = this.rootPath + 'thirdparty/';
-			}
-
-			if ($(media).data('fallback-jwkey') !== undefined) {
-				this.fallbackJwKey = $(media).data('fallback-jwkey');
-			}
-
-			if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
-				this.testFallback = true;
-			}
+		// Fallback
+		// The only supported fallback content as of version 4.0 is:
+		// 1. Content nested within the <audio> or <video> element.
+		// 2. A standard localized message (see buildplayer.js > provideFallback()
+		// The data-test-fallback attribute can be used to test the fallback solution in any browser
+		if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
+			this.testFallback = true;
 		}
 
 		// Language
@@ -1219,9 +1177,6 @@
 		else if (this.player === 'vimeo') {
 			playerPromise = this.initVimeoPlayer();
 		}
-		else if (this.player === 'jw') {
-			playerPromise = this.initJwPlayer();
-		}
 
 		// After player specific initialization is done, run remaining general initialization.
 		var deferred = new $.Deferred();
@@ -1330,97 +1285,6 @@
 		return promise;
 	};
 
-	AblePlayer.prototype.initJwPlayer = function () {
-
-		var jwHeight;
-		var thisObj = this;
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		$.ajax({
-			async: false,
-			url: this.fallbackPath + 'jwplayer.js',
-			dataType: 'script',
-			success: function( data, textStatus, jqXHR) {
-				// add jwplayer key for selfhosted when fallback is activated
-				if (thisObj.fallbackJwKey) {
-					$('head').append(
-						'<script type="text/javascript">jwplayer.key="' +
-							thisObj.fallbackJwKey +
-							'";</script>'
-					);
-				}
-
-				// Successfully loaded the JW Player
-				// add an id to div.able-media-container (JW Player needs this)
-				thisObj.jwId = thisObj.mediaId + '_fallback';
-				thisObj.$mediaContainer.attr('id', thisObj.jwId);
-				if (thisObj.mediaType === 'audio') {
-					// JW Player always shows its own controls if height <= 40
-					// Must set height to 0 to hide them
-					jwHeight = 0;
-				}
-				else {
-					jwHeight = thisObj.playerHeight;
-				}
-				var sources = [];
-				$.each(thisObj.$sources, function (ii, source) {
-					sources.push({file: $(source).attr('src')});
-				});
-
-				var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
-				var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
-
-				// Initializing JW Player with width:100% results in player that is either the size of the video
-				// or scaled down to fit the container if container is smaller
-				// After onReady event fires, actual dimensions will be collected for future use
-				// in preserving the video ratio
-				if (thisObj.mediaType === 'video') {
-					thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
-						playlist: [{
-							image: thisObj.$media.attr('poster'),
-							sources: sources
-						}],
-						flashplayer: flashplayer,
-						html5player: html5player,
-						controls: false,
-						volume: thisObj.defaultVolume * 100,
-						width: '100%',
-						fallback: false,
-						primary: 'flash',
-						wmode: 'transparent' // necessary to get HTML captions to appear as overlay
-					});
-				}
-				else { // if this is an audio player
-					thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
-						playlist: [{
-							sources: sources
-						}],
-						flashplayer: flashplayer,
-						html5player: html5player,
-						controls: false,
-						volume: this.defaultVolume * 100,
-						height: 0,
-						width: '100%',
-						fallback: false,
-						primary: 'flash'
-					});
-				}
-				// remove the media element - we're done with it
-				// keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
-				thisObj.$media.remove();
-
-				deferred.resolve();
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				// Loading the JW Player failed
-				deferred.reject();
-			}
-		});
-		// Done with JW Player initialization.
-		return promise;
-	};
-
 	// Sets media/track/source attributes; is called whenever player is recreated since $media may have changed.
 	AblePlayer.prototype.setMediaAttributes = function () {
 		// Firefox puts videos in tab order; remove.
@@ -1444,7 +1308,7 @@
 	AblePlayer.prototype.getPlayer = function() {
 
 		// Determine which player to use, if any
-		// return 'html5', 'youtube', 'vimeo', 'jw' or null
+		// return 'html5', 'youtube', 'vimeo', or null
 
 		var i, sourceType, $newItem;
 		if (this.youTubeId) {
@@ -1473,19 +1337,7 @@
 			// the user wants to test the fallback player, or
 			// the user is using an older version of IE or IOS,
 			// both of which had buggy implementation of HTML5 video
-			if (this.fallback === 'jw') {
-				if (this.jwCanPlay()) {
-					return 'jw';
-				}
-				else {
-					// JW Player is available as fallback, but can't play this source file
-					return null;
-				}
-			}
-			else {
-				// browser doesn't support HTML5 video and there is no fallback player
-				return null;
-			}
+			return null;
 		}
 		else if (this.media.canPlayType) {
 			return 'html5';
@@ -1494,44 +1346,6 @@
 			// Browser does not support the available media file
 			return null;
 		}
-	};
-
-	AblePlayer.prototype.jwCanPlay = function() {
-		// Determine whether there are media files that JW supports
-		var i, sourceType, $firstItem;
-
-		if (this.$sources.length > 0) { // this media has one or more <source> elements
-			for (i = 0; i < this.$sources.length; i++) {
-				sourceType = this.$sources[i].getAttribute('type');
-				if ((this.mediaType === 'video' && sourceType === 'video/mp4') ||
-						(this.mediaType === 'audio' && sourceType === 'audio/mpeg')) {
-						// JW Player can play this
-						return true;
-				}
-			}
-		}
-		// still here? That means there's no source that JW can play
-		// check for an mp3 or mp4 in a able-playlist
-		// TODO: Implement this more efficiently
-		// Playlist is initialized later in setupInstancePlaylist()
-		// but we can't wait for that...
-		if ($('.able-playlist')) {
-			// there's at least one playlist on this page
-			// get the first item from the first playlist
-			// if JW Player can play that one, assume it can play all items in all playlists
-			$firstItem = $('.able-playlist').eq(0).find('li').eq(0);
-			if (this.mediaType === 'audio') {
-				if ($firstItem.attr('data-mp3')) {
-					return true;
-				}
-				else if (this.mediaType === 'video') {
-					if ($firstItem.attr('data-mp4')) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	};
 
 })(jQuery);
@@ -4067,8 +3881,7 @@
 
 		controlLayout['br'].push('preferences');
 
-		// TODO: JW currently has a bug with fullscreen, anything that can be done about this?
-		if (this.mediaType === 'video' && this.allowFullScreen && this.player !== 'jw') {
+		if (this.mediaType === 'video' && this.allowFullScreen) {
 			controlLayout['br'].push('fullscreen');
 		}
 
@@ -4695,7 +4508,7 @@
 		this.playlistItemIndex = sourceIndex;
 		*/
 
-		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
+		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, sources, s, i, $newSource, nowPlayingSpan;
 
 		var thisObj = this;
 
@@ -4841,10 +4654,6 @@
 		else if (this.player === 'youtube') {
 			// TODO: Load new youTubeId
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			jwSource = this.$sources[sourceIndex].getAttribute('src');
-			this.jwPlayer.load({file: jwSource});
-		}
 
 		// if this.swappingSrc is true, media will autoplay when ready
 		if (this.initializing) { // this is the first track - user hasn't pressed play yet
@@ -4854,9 +4663,6 @@
 			this.swappingSrc = true;
 			if (this.player === 'html5') {
 				this.media.load();
-			}
-			else if (this.player === 'jw') {
-				this.jwPlayer.load({file: jwSource});
 			}
 			else if (this.player === 'youtube') {
 				this.okToPlay = true;
@@ -7431,7 +7237,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
 		// 2. User is toggling description
-		var thisObj, i, origSrc, descSrc, srcType, jwSourceIndex, newSource;
+		var thisObj, i, origSrc, descSrc, srcType, newSource;
 
 		thisObj = this;
 
@@ -7450,7 +7256,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// user has requested the non-described version
 			this.showAlert(this.tt.alertNonDescribedVersion);
 		}
-		if (this.player === 'html5' || this.player === 'jw') {
+		if (this.player === 'html5') {
 
 			if (this.usingAudioDescription()) {
 				// the described version is currently playing. Swap to non-described
@@ -7460,9 +7266,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					srcType = this.$sources[i].getAttribute('type');
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
-					}
-					if (srcType === 'video/mp4') {
-						jwSourceIndex = i;
 					}
 				}
 				// No need to check for this.initializing
@@ -7482,9 +7285,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						this.$sources[i].setAttribute('src',descSrc);
 						this.$sources[i].setAttribute('data-orig-src',origSrc);
 					}
-					if (srcType === 'video/mp4') {
-						jwSourceIndex = i;
-					}
 				}
 				this.swappingSrc = true;
 			}
@@ -7492,10 +7292,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// now reload the source file.
 			if (this.player === 'html5') {
 				this.media.load();
-			}
-			else if (this.player === 'jw') {
-				newSource = this.$sources[jwSourceIndex].getAttribute('src');
-				this.jwPlayer.load({file: newSource});
 			}
 		}
 		else if (this.player === 'youtube') {
@@ -7730,6 +7526,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.isUserAgent = function(which) {
+
 		var userAgent = navigator.userAgent.toLowerCase();
 		if (this.debug) {
 			
@@ -7743,6 +7540,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.isIOS = function(version) {
+
 		// return true if this is IOS
 		// if version is provided check for a particular version
 
@@ -7772,6 +7570,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.browserSupportsVolume = function() {
+
 		// ideally we could test for volume support
 		// However, that doesn't seem to be reliable
 		// http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
@@ -7796,10 +7595,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.nativeFullscreenSupported = function () {
-		if (this.player === 'jw') {
-			// JW player flash has problems with native fullscreen.
-			return false;
-		}
+
 		return document.fullscreenEnabled ||
 			document.webkitFullscreenEnabled ||
 			document.mozFullScreenEnabled ||
@@ -7850,13 +7646,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// could do something here
 				// successful completion also fires a 'seeked' event (see event.js)
 			})
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// pause JW Player temporarily.
-			// When seek has successfully reached newTime,
-			// onSeek event will be called, and playback will be resumed
-			this.jwSeekPause = true;
-			this.jwPlayer.seek(newTime);
 		}
 		this.refreshControls('timeline');
 	};
@@ -7940,14 +7729,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					duration = 0;
 				}
 			}
-			else if (this.player === 'jw') {
-				if (this.jwPlayer) {
-					duration = this.jwPlayer.getDuration();
-				}
-				else { // JW Player hasn't initialized yet
-					duration = 0;
-				}
-			}
 			if (duration === undefined || isNaN(duration) || duration === -1) {
 				deferred.resolve(0);
 			}
@@ -7997,19 +7778,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					elapsed = 0;
 				}
 			}
-			else if (this.player === 'jw') {
-				if (this.jwPlayer) {
-					if (this.jwPlayer.getState() === 'IDLE') {
-						elapsed = 0;
-					}
-					else {
-						elapsed = this.jwPlayer.getPosition();
-					}
-				}
-				else { // JW Player hasn't initialized yet
-					elapsed = 0;
-				}
-			}
 			if (elapsed === undefined || isNaN(elapsed) || elapsed === -1) {
 				deferred.resolve(0);
 			}
@@ -8038,7 +7806,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		*/
 
-		var deferred, promise, thisObj, jwState, duration, elapsed;
+		var deferred, promise, thisObj, duration, elapsed;
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 		thisObj = this;
@@ -8094,26 +7862,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			});
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			jwState = this.jwPlayer.getState();
-			if (jwState === 'PAUSED' || jwState === 'IDLE' || typeof jwState === 'undefined') {
-				if (this.elapsed === 0) {
-					deferred.resolve('stopped');
-				}
-				else if (this.elapsed === this.duration) {
-					deferred.resolve('ended');
-				}
-				else {
-					deferred.resolve('paused');
-				}
-			}
-			else if (jwState === 'BUFFERING') {
-				deferred.resolve('buffering');
-			}
-			else if (jwState === 'PLAYING') {
-				deferred.resolve('playing');
-			}
-		}
 		return promise;
 	};
 
@@ -8140,11 +7888,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// since this takes longer to determine, it was set previous in initVimeoPlayer()
 			return this.vimeoSupportsPlaybackRateChange;
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// Not directly supported by JW player;
-			// can hack for HTML5 version by finding the dynamically generated video tag, but decided not to do that.
-			return false;
-		}
 	};
 
 	AblePlayer.prototype.setPlaybackRate = function (rate) {
@@ -8169,10 +7912,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		if (this.player === 'html5') {
 			return this.media.playbackRate;
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// Unsupported, always the normal rate.
-			return 1;
 		}
 		else if (this.player === 'youtube') {
 			return this.youTubePlayer.getPlaybackRate();
@@ -8220,9 +7959,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else if (this.player === 'vimeo') {
 			this.vimeoPlayer.pause();
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.pause(true);
-		}
 	};
 
 	AblePlayer.prototype.playMedia = function () {
@@ -8244,9 +7980,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else if (this.player === 'vimeo') {
 			 this.vimeoPlayer.play();
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.play(true);
 		}
 		this.startedPlaying = true;
 		if (this.hideControls) {
@@ -8454,11 +8187,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 							this.seekBar.setBuffered(buffered / duration);
 						}
 					}
-				}
-			}
-			else if (this.player === 'jw' && this.jwPlayer) {
-				if (this.seekBar) {
-					this.seekBar.setBuffered(this.jwPlayer.getBuffer() / 100);
 				}
 			}
 			else if (this.player === 'youtube') {
@@ -8782,32 +8510,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 	AblePlayer.prototype.handleRestart = function() {
 
 		this.seekTo(0);
-
-	/*
-		// Prior to 2.3.68, this function was handleStop()
-		// which was a bit more challenging to implement
-		// Preserved here in case Stop is ever cool again...
-
-		var thisObj = this;
-		if (this.player == 'html5') {
-			this.pauseMedia();
-			this.seekTo(0);
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.stop();
-		}
-		else if (this.player === 'youtube') {
-			// YouTube API function stopVideo() does not reset video to 0
-			// Also, the stopped video is not seekable so seekTo(0) after stopping doesn't work
-			// Workaround is to use pauseVideo(), followed by seekTo(0) to emulate stopping
-			// However, the tradeoff is that YouTube doesn't restore the poster image when video is paused
-			// Added 12/29/15: After seekTo(0) is finished, stopVideo() to reset video and restore poster image
-			// This final step is handled in event.js > onMediaUpdate()
-			this.youTubePlayer.pauseVideo();
-			this.seekTo(0);
-			this.stoppingYouTube = true;
-		}
-	*/
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
@@ -9271,9 +8973,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 				this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
 			}
 
-			// TODO: JW Player freezes after being moved on iPads (instead of being reset as in most browsers)
-			// Need to call setup again after moving?
-
 			// Resume playback if moving stopped it.
 			if (!wasPaused && this.paused) {
 				this.playMedia();
@@ -9404,7 +9103,7 @@ context = 'init'; // TEMP: Forces all code to be executed
 	// Resizes all relevant player attributes.
 	AblePlayer.prototype.resizePlayer = function (width, height) {
 
-		var jwHeight, captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
+		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
 		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
 			if (typeof this.$vidcapContainer !== 'undefined') {
@@ -9452,18 +9151,9 @@ context = 'init'; // TEMP: Forces all code to be executed
 			}
 		}
 
-		// resize YouTube or JW Player
+		// resize YouTube
 		if (this.player === 'youtube' && this.youTubePlayer) {
 			this.youTubePlayer.setSize(width, height);
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			if (this.mediaType === 'audio') {
-				// keep height set to 0 to prevent JW PLayer from showing its own player
-				this.jwPlayer.resize(width,0);
-			}
-			else {
-				this.jwPlayer.resize(width, jwHeight);
-			}
 		}
 
 		// Resize captions
@@ -11485,17 +11175,7 @@ context = 'init'; // TEMP: Forces all code to be executed
 			else {
 				if (this.playing) {
 					// should be able to resume playback
-					if (this.player === 'jw') {
-						var player = this.jwPlayer;
-						// Seems to be a bug in JW player, where this doesn't work when fired immediately.
-						// Thus have to use a setTimeout
-						setTimeout(function () {
-							player.play(true);
-						}, 500);
-					}
-					else {
-						this.playMedia();
-					}
+					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
 				this.refreshControls('init');
@@ -12104,69 +11784,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 		});
 	};
 
-	AblePlayer.prototype.addJwMediaListeners = function () {
-		var thisObj = this;
-		// add listeners for JW Player events
-		this.jwPlayer
-			.onTime(function() {
-				thisObj.onMediaUpdateTime();
-			})
-			.onComplete(function() {
-				thisObj.onMediaComplete();
-			})
-			.onReady(function() {
-				// remove JW Player from tab order.
-				// We don't want users tabbing into the Flash object and getting trapped
-				$('#' + thisObj.jwId).removeAttr('tabindex');
-
-				// JW Player was initialized with no explicit width or height; get them now
-				thisObj.$fallbackWrapper = $('#' + thisObj.mediaId + '_fallback_wrapper');
-				thisObj.fallbackDefaultWidth = thisObj.$fallbackWrapper.width();
-				thisObj.fallbackDefaultHeight = thisObj.$fallbackWrapper.height();
-				thisObj.fallbackRatio = thisObj.fallbackDefaultWidth / thisObj.fallbackDefaultHeight;
-
-				if (thisObj.startTime > 0 && !thisObj.startedPlaying) {
-					thisObj.seekTo(thisObj.startTime);
-					thisObj.startedPlaying = true;
-				}
-				thisObj.refreshControls('init');
-			})
-			.onSeek(function(e) {
-				// this is called when user scrubs ahead or back,
-				// after the target offset is reached
-				if (thisObj.jwSeekPause) {
-					// media was temporarily paused
-					thisObj.jwSeekPause = false;
-					thisObj.playMedia();
-				}
-				setTimeout(function () {
-					thisObj.refreshControls('timeline');
-				}, 300);
-			})
-			.onPlay(function() {
-				thisObj.refreshControls('playpause');
-			})
-			.onPause(function() {
-				thisObj.onMediaPause(); // includes a call to refreshControls()
-			})
-			.onBuffer(function() {
-				thisObj.refreshControls('timeline');
-			})
-			.onBufferChange(function() {
-				thisObj.refreshControls('timeline');
-			})
-			.onIdle(function(e) {
-				thisObj.refreshControls('timeline');
-			})
-			.onMeta(function() {
-				 // do something
-			})
-			.onPlaylist(function() {
-				// Playlist change includes new media source.
-				thisObj.onMediaNewSourceLoad();
-			});
-	};
-
 	AblePlayer.prototype.addEventListeners = function () {
 
 		var thisObj, whichButton, thisElement;
@@ -12301,9 +11918,6 @@ context = 'init'; // TEMP: Forces all code to be executed
 		}
 		else if (this.player === 'vimeo') {
 			 this.addVimeoListeners();
-		}
-		else if (this.player === 'jw') {
-			this.addJwMediaListeners();
 		}
 		else if (this.player === 'youtube') {
 			// Youtube doesn't give us time update events, so we just periodically generate them ourselves
@@ -13074,7 +12688,7 @@ context = 'init'; // TEMP: Forces all code to be executed
 (function ($) {
 	AblePlayer.prototype.initSignLanguage = function() {
 
-		// Sign language is only currently supported in HTML5 player, not fallback or YouTube
+		// Sign language is only currently supported in HTML5 player, not YouTube or Vimeo
 		if (this.player === 'html5') {
 			// check to see if there's a sign language video accompanying this video
 			// check only the first source

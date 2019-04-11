@@ -850,8 +850,7 @@
 
 		controlLayout['br'].push('preferences');
 
-		// TODO: JW currently has a bug with fullscreen, anything that can be done about this?
-		if (this.mediaType === 'video' && this.allowFullScreen && this.player !== 'jw') {
+		if (this.mediaType === 'video' && this.allowFullScreen) {
 			controlLayout['br'].push('fullscreen');
 		}
 
@@ -1478,7 +1477,7 @@
 		this.playlistItemIndex = sourceIndex;
 		*/
 
-		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, sources, s, jwSource, i, $newSource, nowPlayingSpan;
+		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, sources, s, i, $newSource, nowPlayingSpan;
 
 		var thisObj = this;
 
@@ -1624,10 +1623,6 @@
 		else if (this.player === 'youtube') {
 			// TODO: Load new youTubeId
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			jwSource = this.$sources[sourceIndex].getAttribute('src');
-			this.jwPlayer.load({file: jwSource});
-		}
 
 		// if this.swappingSrc is true, media will autoplay when ready
 		if (this.initializing) { // this is the first track - user hasn't pressed play yet
@@ -1637,9 +1632,6 @@
 			this.swappingSrc = true;
 			if (this.player === 'html5') {
 				this.media.load();
-			}
-			else if (this.player === 'jw') {
-				this.jwPlayer.load({file: jwSource});
 			}
 			else if (this.player === 'youtube') {
 				this.okToPlay = true;

@@ -83,6 +83,7 @@
 	};
 
 	AblePlayer.prototype.isUserAgent = function(which) {
+
 		var userAgent = navigator.userAgent.toLowerCase();
 		if (this.debug) {
 			console.log('User agent: ' + userAgent);
@@ -96,6 +97,7 @@
 	};
 
 	AblePlayer.prototype.isIOS = function(version) {
+
 		// return true if this is IOS
 		// if version is provided check for a particular version
 
@@ -125,6 +127,7 @@
 	};
 
 	AblePlayer.prototype.browserSupportsVolume = function() {
+
 		// ideally we could test for volume support
 		// However, that doesn't seem to be reliable
 		// http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
@@ -149,10 +152,7 @@
 	};
 
 	AblePlayer.prototype.nativeFullscreenSupported = function () {
-		if (this.player === 'jw') {
-			// JW player flash has problems with native fullscreen.
-			return false;
-		}
+
 		return document.fullscreenEnabled ||
 			document.webkitFullscreenEnabled ||
 			document.mozFullScreenEnabled ||

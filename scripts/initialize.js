@@ -648,9 +648,6 @@
 		else if (this.player === 'vimeo') {
 			playerPromise = this.initVimeoPlayer();
 		}
-		else if (this.player === 'jw') {
-			playerPromise = this.initJwPlayer();
-		}
 
 		// After player specific initialization is done, run remaining general initialization.
 		var deferred = new $.Deferred();
@@ -759,97 +756,6 @@
 		return promise;
 	};
 
-	AblePlayer.prototype.initJwPlayer = function () {
-
-		var jwHeight;
-		var thisObj = this;
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		$.ajax({
-			async: false,
-			url: this.fallbackPath + 'jwplayer.js',
-			dataType: 'script',
-			success: function( data, textStatus, jqXHR) {
-				// add jwplayer key for selfhosted when fallback is activated
-				if (thisObj.fallbackJwKey) {
-					$('head').append(
-						'<script type="text/javascript">jwplayer.key="' +
-							thisObj.fallbackJwKey +
-							'";</script>'
-					);
-				}
-
-				// Successfully loaded the JW Player
-				// add an id to div.able-media-container (JW Player needs this)
-				thisObj.jwId = thisObj.mediaId + '_fallback';
-				thisObj.$mediaContainer.attr('id', thisObj.jwId);
-				if (thisObj.mediaType === 'audio') {
-					// JW Player always shows its own controls if height <= 40
-					// Must set height to 0 to hide them
-					jwHeight = 0;
-				}
-				else {
-					jwHeight = thisObj.playerHeight;
-				}
-				var sources = [];
-				$.each(thisObj.$sources, function (ii, source) {
-					sources.push({file: $(source).attr('src')});
-				});
-
-				var flashplayer = thisObj.fallbackPath + 'jwplayer.flash.swf';
-				var html5player = thisObj.fallbackPath + 'jwplayer.html5.js';
-
-				// Initializing JW Player with width:100% results in player that is either the size of the video
-				// or scaled down to fit the container if container is smaller
-				// After onReady event fires, actual dimensions will be collected for future use
-				// in preserving the video ratio
-				if (thisObj.mediaType === 'video') {
-					thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
-						playlist: [{
-							image: thisObj.$media.attr('poster'),
-							sources: sources
-						}],
-						flashplayer: flashplayer,
-						html5player: html5player,
-						controls: false,
-						volume: thisObj.defaultVolume * 100,
-						width: '100%',
-						fallback: false,
-						primary: 'flash',
-						wmode: 'transparent' // necessary to get HTML captions to appear as overlay
-					});
-				}
-				else { // if this is an audio player
-					thisObj.jwPlayer = jwplayer(thisObj.jwId).setup({
-						playlist: [{
-							sources: sources
-						}],
-						flashplayer: flashplayer,
-						html5player: html5player,
-						controls: false,
-						volume: this.defaultVolume * 100,
-						height: 0,
-						width: '100%',
-						fallback: false,
-						primary: 'flash'
-					});
-				}
-				// remove the media element - we're done with it
-				// keeping it would cause too many potential problems with HTML5 & JW event listeners both firing
-				thisObj.$media.remove();
-
-				deferred.resolve();
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				// Loading the JW Player failed
-				deferred.reject();
-			}
-		});
-		// Done with JW Player initialization.
-		return promise;
-	};
-
 	// Sets media/track/source attributes; is called whenever player is recreated since $media may have changed.
 	AblePlayer.prototype.setMediaAttributes = function () {
 		// Firefox puts videos in tab order; remove.
@@ -873,7 +779,7 @@
 	AblePlayer.prototype.getPlayer = function() {
 
 		// Determine which player to use, if any
-		// return 'html5', 'youtube', 'vimeo', 'jw' or null
+		// return 'html5', 'youtube', 'vimeo', or null
 
 		var i, sourceType, $newItem;
 		if (this.youTubeId) {
@@ -902,19 +808,7 @@
 			// the user wants to test the fallback player, or
 			// the user is using an older version of IE or IOS,
 			// both of which had buggy implementation of HTML5 video
-			if (this.fallback === 'jw') {
-				if (this.jwCanPlay()) {
-					return 'jw';
-				}
-				else {
-					// JW Player is available as fallback, but can't play this source file
-					return null;
-				}
-			}
-			else {
-				// browser doesn't support HTML5 video and there is no fallback player
-				return null;
-			}
+			return null;
 		}
 		else if (this.media.canPlayType) {
 			return 'html5';
@@ -923,44 +817,6 @@
 			// Browser does not support the available media file
 			return null;
 		}
-	};
-
-	AblePlayer.prototype.jwCanPlay = function() {
-		// Determine whether there are media files that JW supports
-		var i, sourceType, $firstItem;
-
-		if (this.$sources.length > 0) { // this media has one or more <source> elements
-			for (i = 0; i < this.$sources.length; i++) {
-				sourceType = this.$sources[i].getAttribute('type');
-				if ((this.mediaType === 'video' && sourceType === 'video/mp4') ||
-						(this.mediaType === 'audio' && sourceType === 'audio/mpeg')) {
-						// JW Player can play this
-						return true;
-				}
-			}
-		}
-		// still here? That means there's no source that JW can play
-		// check for an mp3 or mp4 in a able-playlist
-		// TODO: Implement this more efficiently
-		// Playlist is initialized later in setupInstancePlaylist()
-		// but we can't wait for that...
-		if ($('.able-playlist')) {
-			// there's at least one playlist on this page
-			// get the first item from the first playlist
-			// if JW Player can play that one, assume it can play all items in all playlists
-			$firstItem = $('.able-playlist').eq(0).find('li').eq(0);
-			if (this.mediaType === 'audio') {
-				if ($firstItem.attr('data-mp3')) {
-					return true;
-				}
-				else if (this.mediaType === 'video') {
-					if ($firstItem.attr('data-mp4')) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	};
 
 })(jQuery);
