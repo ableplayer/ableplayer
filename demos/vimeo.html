@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vimeo Example</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- Vimeo JavaScript -->
+<script src="https://player.vimeo.com/api/player.js"></script>
+
+<!-- styles for this example page -->
+<style>
+  .wrapper {
+    width: 500px;
+    max-width: 100%;
+  }
+  p {
+    width: 600px;
+    max-width: 100%;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Able Player for Vimeo</h1>
+
+<p>This page features an example of Able Player being used to play a Vimeo video. </p>
+
+<p>Vimeo currently has some limitations:</p>
+<ul>
+	<li>A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is extremely cluttered and confusing.</li>
+	<li>Hiding Vimeo's playback controls (as per the previous item) also hides captions and subtitles. Therefore the only way to include captions and subtitles is to host them locally and reference them with a &lt;track&gt; element. This is necessary anyway in order to have an interactive transcript, since Vimeo does not expose its caption data in a way that would enable Able Player to repurpose captions into a transcript.</li>
+	<li>A Pro or Business account is required in order to change playback rate (with faster and slower buttons). Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.</li>
+</ul>
+
+<p>The video featured below is hosted in a Vimeo Plus account. Captions have been uploaded to Vimeo but because of the above limitations, they are redundantly referenced in &lt;track&gt; elements within the source code of the current page.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>. In particular, check out the <a href="youtube2.html">Complex YouTube Example</a>.</p>
+
+
+<div class="wrapper">
+  <video id="video2" data-able-player preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
+    <track kind="captions" src="../media/blocks4all_captions_en.vtt" srclang="en-US" label="English">
+    <track kind="captions" src="../media/blocks4all_captions_es.vtt" srclang="es" label="Spanish">
+    <track kind="captions" src="../media/blocks4all_captions_pt-br.vtt" srclang="pt-BR" label="Portuguese (Brazil)">
+    <track kind="captions" src="../media/blocks4all_captions_ko.vtt" srclang="ko" label="Korean">
+    <track kind="chapters" src="../media/blocks4all_chapters.vtt" srclang="en-US" label="Chapters">
+    <track kind="descriptions" src="../media/blocks4all_descriptions_en.vtt" srclang="en-US" label="English descriptions">
+  </video>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Video Demo #5</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- CSS for this example page -->
+<style>
+  main {
+    position: relative;
+    width: 100%;
+    margin: 0;
+  }
+  #player {
+    float: left;
+    width: 480px;
+    margin: 0;
+  }
+  #playlist {
+    float: left;
+    border: 1px solid #DDD;
+    margin: 20px;
+  }
+  #playlist h2 {
+	  text-align: center;
+  }
+</style>
+
+</head>
+
+<body>
+
+<h1>Able Player Video Demo #15:<br/>Video player with a playlist</h1>
+
+<p>This page includes a playlist of three videos, two of which are stored locally and one on YouTube.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<main role="main">
+  <div id="player">
+	  <!-- video source and track elements will be populated from playlist -->
+		<video id="video1" preload="auto" data-able-player playsinline loop></video>
+  </div>
+	<div id="playlist">
+		<h2>Playlist</h2>
+		<!-- an AblePlayer playlist is any <ul> with class="able-playlist" -->
+		<!-- The value of data-player must match the id of the media element -->
+		<!-- see documentation for additional details -->
+		<ul class="able-playlist" data-player="video1">
+			<!-- World Wide Access -->
+			<li data-poster="../media/wwa.jpg" data-width="480" data-height="360">
+				<span class="able-source"
+					data-type="video/mp4"
+					data-src="../media/wwa.mp4"
+					data-desc-src="../media/wwa_described.mp4"
+					data-sign-src="../media/wwa_sign.mp4"></span>
+				<span class="able-source"
+					data-type="video/webm"
+					data-src="../media/wwa.webm"
+					data-desc-src="../media/wwa_described.webm"
+					data-sign-src="../media/wwa_sign.webm"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/wwa_captions_en.vtt"
+					data-srclang="en"
+					data-label="English"></span>
+				<span class="able-track"
+					data-kind="subtitles"
+					data-src="../media/wwa_captions_de.vtt"
+					data-srclang="de"
+					data-label="Deutsche"></span>
+				<span class="able-track"
+					data-kind="subtitles"
+					data-src="../media/wwa_captions_es.vtt"
+					data-srclang="es"
+					data-label="Espanol"></span>
+				<span class="able-track"
+					data-kind="subtitles"
+					data-src="../media/wwa_captions_ja.vtt"
+					data-srclang="ja"
+					data-label="日本語"></span>
+				<span class="able-track"
+					data-kind="descriptions"
+					data-src="../media/wwa_description_en.vtt"
+					data-srclang="en"
+					data-label="English"></span>
+				<span class="able-track"
+					data-kind="descriptions"
+					data-src="../media/wwa_description_de.vtt"
+					data-srclang="de"
+					data-label="Deutsche"></span>
+				<span class="able-track"
+					data-kind="descriptions"
+					data-src="../media/wwa_description_es.vtt"
+					data-srclang="es"
+					data-label="Espanol"></span>
+				<span class="able-track"
+					data-kind="descriptions"
+					data-src="../media/wwa_description_ja.vtt"
+					data-srclang="ja"
+					data-label="日本語"></span>
+				<span class="able-track"
+					data-kind="chapters"
+					data-src="../media/wwa_chapters_en.vtt"
+					data-srclang="en"
+					data-label="English"></span>
+				<span class="able-track"
+					data-kind="chapters"
+					data-src="../media/wwa_chapters_de.vtt"
+					data-srclang="de"
+					data-label="Deutsche"></span>
+				<span class="able-track"
+					data-kind="chapters"
+					data-src="../media/wwa_chapters_es.vtt"
+					data-srclang="es"
+					data-label="Espanol"></span>
+				<button type="button">
+					<img src="../media/wwa_mq_thumbnail.jpg" alt="">
+					World Wide Access
+				</button>
+			</li>
+			<!-- IT Accessibility: Campus Leaders (6-minute version), via YouTube -->
+			<li data-youtube-id="dhwpLACAls8" data-youtube-desc-id="Ck2TdVMhWcU">
+				<span class="able-track"
+					data-kind="chapters"
+					data-src="../media/itaccess_chapters_en.vtt"
+					data-srclang="en"
+					data-label="Speakers"></span>
+				<button type="button"><!-- thumbnail will be retrieved from YouTube -->
+					IT Accessibility: What Campus Leaders Have to Say
+				</button>
+			</li>
+			<!-- The Deadline -->
+			<li data-poster="../media/deadline.jpg" data-width="800" data-height="450">
+				<span class="able-source"
+					data-type="video/mp4"
+					data-src="../media/deadline.mp4"
+					data-desc-src="../media/deadline_desc.mp4"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/deadline_captions_en.vtt"
+					data-srclang="en"
+					data-label="English"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/deadline_captions_ar.vtt"
+					data-srclang="ar"
+					data-label="Arabic"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/deadline_captions_es.vtt"
+					data-srclang="es"
+					data-label="Spanish"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/deadline_captions_hi.vtt"
+					data-srclang="hi"
+					data-label="Hindi"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/deadline_captions_it.vtt"
+					data-srclang="it"
+					data-label="Italian"></span>
+				<span class="able-track"
+					data-kind="captions"
+					data-src="../media/deadline_captions_pt-br.vtt"
+					data-srclang="pt-bre"
+					data-label="Portuguese, Brazilian"></span>
+				<span class="able-track"
+					data-kind="descriptions"
+					data-src="../media/deadline_descriptions_en.vtt"
+					data-srclang="en"
+					data-label="English descriptions"></span>
+				<button type="button">
+					<img src="../media/deadline_mq_thumbnail.jpg" alt="">
+					The Deadline
+				</button>
+			</li>
+		</ul>
+	</section>
+
+</body>
+</html>

@@ -6,28 +6,11 @@
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="../thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
-
-<!-- YouTube Data API key is required -->
-<!-- Get YouTube Data API key by registering your application at the Google Developer Console: -->
-<!-- https://console.developers.google.com/ -->
-<!-- For complete instructions, see Google's Getting Started page: -->
-<!-- https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication -->
-<!-- NOTE: All that's needed for Able Player is a simple API key, NOT OAuth 2.0 -->
-<script>
-  // Get your own API key - ours only works on our registered domains!
-  var youTubeDataAPIKey = 'AIzaSyB3bpr8ttIoUqFxD3SUpgJ59n6Ylc0soZw';
-  var googleApiReady = false;
-  function initGoogleClientApi() {
-    googleApiReady = true;
-  }
-</script>
-<script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
 
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
@@ -36,37 +19,33 @@
 <style>
   .wrapper {
     width: 500px;
+    max-width: 100%;
+  }
+  p {
+    width: 600px;
+    max-width: 100%;
   }
 </style>
 </head>
 
 <body>
 
-<h1>Able Player for YouTube (Simple Examples)</h1>
+<h1>Able Player for YouTube (Simple Example)</h1>
 
-<p>This page features a few simple examples of Able Player being used to play YouTube videos. In all examples, the video is available with and without audio description;  both versions are stored on YouTube, and can be swapped using the <em>Description</em> button.</p>
+<p>This page features a relatively <strong>simple</strong> example of Able Player being used to play a YouTube video. Its features include:</p>
+
+<ul>
+  <li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
+  <li>Captions, subtitles, and a poster image, all hosted on YouTube.</li>
+  <li>An interactive transcript built from the caption and subtitle files.</li>
+</ul>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>. In particular, check out the <a href="youtube2.html">Complex YouTube Example</a>.</p>
 
-<h2>Video #1</h2>
-<p>All assets, including captions and poster, are on YouTube. Width & height are defined by CSS of a parent element. The video is available with and without audio description (both versions are stored on YouTube, and can be swapped using the Description button.</p>
 <div class="wrapper">
-  <video id="video1" data-able-player preload="auto" data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU">
+  <video id="video1" data-able-player preload="auto" data-youtube-id="dhwpLACAls8" data-youtube-desc-id="Ck2TdVMhWcU">
   </video>
 </div>
-
-<h2>Video #2</h2>
-<p>This is the same as Video #1, except for how width and height are defined. Both are defined using the <em>width</em> and <em>height</em> attributes on the video element.</p>
-<video id="video2" data-able-player preload="auto"  data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU"
-  width="500" height="281">
-</video>
-
-<h2>Video #3</h2>
-<p>Captions and poster are stored locally, not on YouTube. Using local captions makes the automated transcript possible. Width and height are the same as Video #2.</p>
-<video id="video3" data-able-player preload="auto" data-youtube-id="tnsB6YCHVXA" data-youtube-desc-id="Ck2TdVMhWcU"
-  width="500" height="281" poster="../media/itaccess.jpg">
-  <track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
-</video>
 
 </body>
 </html>

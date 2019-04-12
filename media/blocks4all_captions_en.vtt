@@ -1,0 +1,168 @@
+WEBVTT
+Kind: captions
+Language: en
+
+00:00:01.340 --> 00:00:03.940
+[jaunty piano tune]
+
+00:00:07.360 --> 00:00:10.559
+<v Boon's Mom> Boon, he's very excited
+about the world.
+
+00:00:10.560 --> 00:00:13.760
+He's up for almost anything.
+
+00:00:13.820 --> 00:00:19.500
+<v Boon's Dad> He's a thinker
+and he likes to explore.
+
+00:00:19.620 --> 00:00:21.680
+He's not afraid to do things.
+
+00:00:21.680 --> 00:00:26.200
+<v Boon> I like computer programming.
+I might do some computer programming.
+
+00:00:26.240 --> 00:00:33.600
+And I also want to be maybe an inventor,
+a scientist, and an author.
+
+00:00:35.020 --> 00:00:38.880
+<v Boon's mom> I don't know I guess if it's
+so important for him to learn coding
+
+00:00:38.880 --> 00:00:42.990
+but it's important I feel like for him
+to be at least introduced to coding
+
+00:00:42.990 --> 00:00:46.220
+and then it's his decision
+to pursue it or not.
+
+00:00:46.220 --> 00:00:47.700
+<v Richard Ladner> I'm Richard Ladner,
+
+00:00:47.740 --> 00:00:50.540
+professor emeritus at the
+University of Washington.
+
+00:00:50.540 --> 00:00:53.160
+I've been observing, you know,
+this movement
+
+00:00:53.160 --> 00:00:56.300
+to bring computer science
+into K-12 education.
+
+00:00:56.380 --> 00:01:00.120
+And I've noticed that a lot
+of the technologies
+
+00:01:00.120 --> 00:01:03.480
+that are being introduced
+to young children are not accessible,
+
+00:01:03.480 --> 00:01:06.840
+especially for young children
+who are blind or visually impaired.
+
+00:01:06.900 --> 00:01:08.300
+<v Lauren Milne> I'm Lauren Milne.
+
+00:01:08.360 --> 00:01:11.020
+I'm a graduate student at
+the University of Washington
+
+00:01:11.060 --> 00:01:13.800
+and I'm the inventor
+of Blocks4All.
+
+00:01:13.800 --> 00:01:17.160
+Traditionally, programming has been
+done with text-based editing
+
+00:01:17.160 --> 00:01:23.880
+so you just type in your program
+which is of course very accessible
+
+00:01:23.880 --> 00:01:28.530
+but more recently people have been
+creating these environments for children,
+
+00:01:28.530 --> 00:01:31.840
+these block-based environments,
+that have a lot of visual elements
+
+00:01:31.840 --> 00:01:35.700
+so they're really not accessible
+for a child with a visual impairment.
+
+00:01:35.800 --> 00:01:39.580
+We decided to design Blocks4All
+on a touchscreen
+
+00:01:39.580 --> 00:01:44.600
+because we found that a lot of children,
+especially children with visual impairments,
+
+00:01:44.600 --> 00:01:46.920
+are already using touch screens.
+
+00:01:46.920 --> 00:01:51.980
+The screen reader VoiceOver that comes
+with, for example, iPads,
+
+00:01:52.080 --> 00:01:53.490
+is very accessible.
+
+00:01:53.490 --> 00:01:56.540
+<v Richard> The outputs for the programs
+were typically visual.
+
+00:01:56.580 --> 00:01:59.840
+There were animations, and
+those weren't accessible either.
+
+00:01:59.840 --> 00:02:03.920
+Instead of having visual outputs
+we have tactile output
+
+00:02:03.980 --> 00:02:05.200
+which is using a robot.
+
+00:02:05.320 --> 00:02:14.160
+<v Boon> Drive forward. Turn left.
+Turn left. And then turn left again.
+
+00:02:15.140 --> 00:02:18.500
+[Screen reader voicing instructions]
+
+00:02:20.240 --> 00:02:22.240
+<v Adults in the background> Here we go, Oh!
+
+00:02:22.280 --> 00:02:24.540
+[blocks clattering]
+
+00:02:24.600 --> 00:02:28.439
+<v Lauren> Really what I'm envisioning is
+I see it as really a prototype
+
+00:02:28.440 --> 00:02:29.660
+where I try out a whole bunch
+of techniques
+
+00:02:29.660 --> 00:02:32.040
+and I'm hoping that other developers
+
+00:02:32.120 --> 00:02:35.280
+who are creating these
+blocks-based environments
+
+00:02:35.380 --> 00:02:37.100
+can use some of the techniques
+that I'm finding
+
+00:02:37.100 --> 00:02:39.040
+and make their own environments
+accessible.
+

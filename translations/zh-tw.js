@@ -1,4 +1,4 @@
-var zh-tw = {
+var zhtw = {
 
 "audio": "音訊",
 

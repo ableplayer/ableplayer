@@ -1,11 +1,9 @@
 Able Player
 ==========
 
-*Able Player* is a fully accessible cross-browser media player. It uses
-the HTML5 `<audio>` or `<video>` element for browsers that support them,
-and (optionally) the JW Player as a fallback for those that don’t.
+*Able Player* is a fully accessible cross-browser HTML5 media player. 
 
-To see the player in action check our [Able Player Examples][examples] page.
+To see the player in action check out the [Able Player Examples][examples] page.
 
 Features
 --------
@@ -22,9 +20,9 @@ Features
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so.
 -   An interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
 -   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
--   Support for playing YouTube videos within the Able Player chrome.
+-   Support for playing YouTube and Vimeo videos within the Able Player chrome.
 -   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
--   Optional seamless integrated support for JW Player as a fallback player for users whose browsers don't support HTML5 media. The fallback player uses the same custom interface and provides a nearly identical experience.
+-   Fallback support (see section on **Fallback** for details).
 -   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
 
 Supported Languages
@@ -43,6 +41,7 @@ Able Player has been translated into the following languages. To add another lan
 -   Japanese
 -   Norwegian
 -   Spanish
+-   Turkish
 
 Contributing
 -------------
@@ -60,12 +59,11 @@ Compatibility
 technologies.
 
 -   Firefox 3.x and higher
--   Internet Explorer 10 and higher without fallback
--   Internet Explorer 8 and 9, dependent on JW Player as fallback.
+-   Internet Explorer 10 and higher
 -   Google Chrome 7.0 and higher
 -   Opera 10.63 and higher
 -   Safari 5.0 on Mac OS X
--   Safari on IOS 3.2.2 and higher (audio only, video plays in default IOS player)
+-   Safari on IOS 3.2.2 and higher
 -   Chrome on Android 4.2 and higher
 
 Note that mobile browsers have limitations (e.g., volume control and autostart are not supported)
@@ -73,61 +71,52 @@ Note that mobile browsers have limitations (e.g., volume control and autostart a
 Dependencies
 ------------
 
-*Able Player* has a few dependencies, but most are either provided with
-*Able Player* or available through Google’s hosted libraries. The one
-exception is the fallback player—see the *Fallback* section below for
-details.
+*Able Player* has the following third party dependencies: 
 
 -   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
--   *Able Player* uses [Modernizr][] to enable styling of HTML5 elements
-    in Internet Explorer 6 through 8. A Modernizr 2.6.2 Custom Build is
-    distributed with *Able Player*, and is all that *Able Player* needs.
 -   *Able Player* uses [js-cookie][] to store and retrieve user
     preferences in cookies. This script is distributed with *Able
     Player*. Prior to version 2.3, Able Player used [jquery.cookie][]
     for this same purpose.
+    
+To install Able Player, copy the following files from the Able Player repo into a folder on your web server:
+- 		build/* 
+-		button-icons/*
+- 		images/*
+-		styles/* (optional, see note below)
+-		thirdparty/* (includes js-cookie, as mentioned above)
+-		translations/* 
+-		LICENSE 
+
+The *build* folder includes minified production code (*ableplayer.min.js* and *ableplayer.min.css*). 
+For debugging and/or style customization purposes, human-readable source files are also available: 
+-		build/ableplayer.js 
+-		styles/ableplayer.css 
+ 
 
 Fallback
 --------
 
-For older browsers that don’t support HTML5 media elements, you need a
-fallback solution. *Able Player* was developed to work seamlessly with
-[JW Player][], specifically **JW Player 6** (successfully tested with
-versions 6.0 and 6.11). JW Player is free for non-commercial use but
-is licensed separately and is not distributed with *Able Player*.
-After licensing and downloading JW PLayer, copy *jwplayer.js*, *jwplayer.html5.js*,
-and *jwplayer.flash.swf* into the
-*Able Player* */thirdparty* directory.
+All modern browsers have supported HTML5 media elements for many years.
+However, there are still older browsers in use that don’t have this support 
+(e.g., Internet Explorer 9 and earlier). For these, you need to provide fallback content. 
+ 
+Prior to version 4.0, *Able Player* used [JW Player][] as a fallback Flash player 
+for older browsers. However, this solution was built specifically on **JW Player 6** 
+which is now many versions old and difficult to find. 
 
-If you choose to use JW Player as your fallback player,
-users with some older browsers will have a similar experience with
-*Able Player* as users with newer browsers.
+Also, prior to version 4.0, *Able Player* used [Modernizr][] to enable 
+styling of HTML5 elements in Internet Explorer 6 through 8. This too is no longer 
+supported, and Modernizr is no longer needed. 
 
-If using a licensed copy of JWPlayer, the JWPlayer key can be passed with
-the **data-fallback-jwkey** attribute.
+Instead, we recommend providing alternative content as a child of the `<video>` or `<audio>` element. 
+For example, this could be a link to the media file so users can download it 
+and play it on their player of choice. Or it could be a link to a transcript. 
 
-Note that *most* browsers in use today support HTML5 media elements.
-Here’s a breakdown:
--   Chrome since 3.0
--   Firefox since 3.5
--   Safari since 3.1
--   Opera since 10.5
--   Internet Explorer since 9.0 (video was buggy in 9; better in 10)
-
-Note the following limitations in Internet Explorer (IE):
-- IE10 and higher work fine without a fallback player
-- IE9 was the first version of IE to support HTML5 media elements. However, its support for video was buggy so Able Player uses the fallback if it's available
-- IE8 works fine with JW Player as fallback
-- IE6 and 7 are not supported
-
-At some point we may decide that it’s reasonable to stop supporting a fallback player.
-However, according to [WebAIM’s 2017 Screen Reader User Survey][] 4.1% of screen reader users are still using IE 6, 7, or 8,
-and 4.0% are still using IE 9 or 10. Until these users catch up, we think we have to provide a working fallback.
-
-As an alternative fallback, you could link to the media file so users
-can download it and play it on their player of choice, and/or provide a
-transcript.
+If the browser is unable to play the media file, Able Player will show this alternative content. 
+If no alternative content is provided, Able Player will display a standard message that lists 
+the minimum versions of common web browsers required for playing HTML5 media. 
 
 Setup Step 1: Use HTML5 Doctype
 -------------------------------
@@ -209,14 +198,14 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-debug** - optional; if present will write messages to the developer console
 -   **autoplay** - optional; play media automatically when page loads. For accessibility reasons, this is *not* recommended unless user is sure to *expect* media to automatically start. For example, autoplay could reasonably be used in conjunction with data-start-time in a media search application.
 -   **loop** - optional; loops and plays the media file repeatedly. If used in conjunction with a playlist, loops the entire playlist rather than individual tracks.
--   **playsinline** - optional but recommended; instructs supporting browsers to play the video "inline" within the web page. This is especially applicable on iPhones, which by default load the video in their own built-in video player, thereby removing it from its surrounding context, which includes Able Player buttons and controls, an interactive transcript, and any other companion features added via Able Player. If this attribute is present, it works for all supported videos, including YouTube videos.
+-   **playsinline** - optional but recommended; instructs supporting browsers to play the video "inline" within the web page. This is especially applicable on iPhones, which by default load the video in their own built-in video player, thereby removing it from its surrounding context, which includes Able Player buttons and controls, an interactive transcript, and any other companion features added via Able Player. If this attribute is present, it works for all supported videos, including YouTube and Vimeo videos.
 -   **preload** - optional; tells the browser how much media to download
     when the page loads. If the media is the central focus of the web
     page, use **preload="auto"**, which instructs the browser to
     download as much of the media as possible. If the media is not a
     central focus, downloading the entire media resource can consume
     valuable bandwidth, so preload="metadata" would be a better option.
--   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided will default to 480.
+-   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided the player will be sized to fit its container.
 -   **data-root-path** - define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server
 -   **data-heading-level** - optional; Able Player injects an off-screen HTML heading "Media Player" (or localized equivalent) at the top of the player so screen reader users can easily find the player. It automatically assigns a heading level that is one level deeper than the closest parent heading. This attribute can be used to manually set the heading level, rather than relying on Able Player to assign it automatically. Valid values are 1 through 6. A value of 0 is also supported, and instructs Able Player to not inject a heading at all. The latter should be used only if the web page already includes a heading immediately prior to the media player.
 -   **data-hide-controls** - optional; set to "true" to hide controls during playback. Controls are visibly hidden but still accessible to assistive technologies. Controls reappear if user presses any key or moves the mouse over the video player region.
@@ -307,11 +296,7 @@ The following attributes make all this possible:
 
 #### Fallback Player
 
--   **data-fallback** - optional; specify a fallback player. Currently the only supported option is "jw" (JW Player)
--   **data-test-fallback** - optional; force browser to user fallback player (recommended for testing only)
--   **data-fallback-path** - optional; override default path to directory in which the fallback player files are stored
--   **data-fallback-jwkey** - optional; set JW Player key for hosted players
-
+-   **data-test-fallback** - optional; force browsers to display the fallback content that will be shown to users with older browsers that don't support HTML5 media.  
 
 The following attributes are supported on the `<video>` element only:
 
@@ -319,10 +304,13 @@ The following attributes are supported on the `<video>` element only:
 -   **data-youtube-id** - optional; 11-character YouTube ID, to play the YouTube video using *Able Player*.
 -   **data-youtube-desc-id** - optional; 11-character YouTube ID of the described version of a video. See the section below on *YouTube Support* for additional information.
 -   **data-youtube-nocookie** - optional; if set to "true" the YouTube video will be embedded using the "youtube-nocookie.com" host.
--   **height** - height of the video in pixels. If not provided will
-    default to 360.
+-   **data-vimeo-id** - optional; ID of a video on Vimeo, to play the Vimeo video using *Able Player*.
+-   **data-vimeo-desc-id** - optional; ID of the described version of a video on Vimeo. See the section below on *Vimeo Support* for additional information.
+-   **height** - height of the video in pixels. 
 -   **poster** - path to an image file. Will be displayed in the player
     until the video is played.
+    
+If width and height are omitted, the player will be sized to fit its container. 
 
 The following additional features are supported by *Able Player*:
 
@@ -423,9 +411,11 @@ To do so, run the shell script *compile.sh*.
 Playlists
 ---------
 
-An *Able Player* playlist is an HTML list of tracks. The list can be
-either ordered (`<ol>`) or unordered (`<ul>`). The following attributes
-are supported on the list element:
+An *Able Player* playlist is an HTML list of tracks. A playlist can accompany 
+either a video or audio player, but both audio and video cannot be combined 
+within a single playlist. The list can be either ordered (`<ol>`) or unordered (`<ul>`). 
+
+The following attributes are supported on the list element:
 
 -   **class** - required; must be **able-playlist**
 -   **data-player** - required; must reference the ID of the media
@@ -435,19 +425,86 @@ are supported on the list element:
     omitted, the playlist will be external to the player and will appear
     wherever you place it on the web page.
 
-Within the playlist, each list item must include data-\* attributes
-where \* is the media type and the value of the attribute is the URL
-pointing to the media file of that type. For example, the following
-audio playlist includes three songs, each of which is available in MP3
-and OGG:
+Within the playlist, each list item can include the following HTML attributes: 
 
+-   **data-poster** - path to an image file. 
+-   **width** - width of the video in pixels. 
+-   **height** - height of the video in pixels. 
+
+If width and height are omitted, the player will be sized to fit its container. 
+
+The following HTML elements must be nested inside each list item: 
+
+A `<span>` element with **class="able-source"** for each `<source>` element 
+    that is to accompany the media. When the user selects an item from the playlist, 
+    its able-source `<span>` elements will be copied to `<source>` elements and loaded for playback. 
+    For each attribute that will ultimately be on the media's `<source>` elements, 
+    add the same attributes to each `<span>`, prefaced with **data-**. 
+
+
+Within the playlist, each list item must include the following HTML elements: 
+
+-   A `<span>` element with **class="able-source"** for each `<source>` element 
+    that is to accompany the media. When the user selects an item from the playlist, 
+    its able-source `<span>` elements will be copied to `<source>` elements and loaded for playback. 
+    For each attribute that will ultimately be on the media's `<source>` elements, 
+    add the same attributes to each `<span>`, prefaced with **data-**. 
+-   A `<span>` element with **class="able-track"** for each `<track>` element 
+    that is to accompany the media. When the user selects an item from the playlist, 
+    its able-track `<span>` elements will be copied to `<track>` elements and loaded for playback. 
+    For each attribute that will ultimately be on the media's `<track>` elements, 
+    add the same attributes to each `<span>`, prefaced with **data-**. 
+-   A `<button>` element with **type="button"**. Inside the button, include either text, 
+    an image, or both. This content would typically be the title of the item. If using an image 
+    alone, be sure to add a meaningful **alt** attribute. If the image is purely decorative and 
+    is accompanied by text, using **alt=""**. 
+    
+The following example shows a playlist with two videos. The first video has one source (an MP4 file), 
+and two tracks (captions and descriptions). The second video is hosted on YouTube, and has both a 
+non-described and described version. It also has a locally-hosted chapters track.  
+Able Player supports mixed playlists, with videos hosted locally or on YouTube. 
+Vimeo videos are not yet supported within playlists.  
+  
 ```HTML
-<ul class="able-playlist" data-player="audio1" data-embedded>
-  <li data-mp3="song1.mp3" data-ogg="song1.ogg">My First Song</li>
-  <li data-mp3="song2.mp3" data-ogg="song2.ogg">My Second Song</li>
-  <li data-mp3="song3.mp3" data-ogg="song3.ogg">My Third Song</li>
+<ul class="able-playlist" data-player="my_video_player">
+  <li data-poster="video1.jpg" data-width="480" data-height="360">
+    <span class="able-source" 
+      data-type="video/mp4" 
+      data-src="video1.mp4">
+    </span>
+    <span class="able-track" 
+      data-kind="captions" 
+      data-src="video1_captions_en.vtt" 
+      data-srclang="en"
+      data-label="English">
+    </span>
+    <span class="able-track"
+      data-kind="descriptions"
+      data-src="video1_description_en.vtt"
+      data-srclang="en"
+      data-label="English">
+    </span>
+    <button type="button">
+      <img src="video1_thumbnail.jpg" alt="">
+      Title of Video 1
+    </button>
+  </li>
+  <li data-youtube-id="xxxxxxxxxxx" data-youtube-desc-id="yyyyyyyyyyy">
+    <span class="able-track"
+      data-kind="chapters"
+      data-src="video2_chapters.vtt"
+      data-srclang="en"
+      data-label="Chapters">
+    </span>
+    <button type="button">
+      <!-- thumbnail will be retrieved from YouTube -->
+      Title of Video 2
+    </button>
+  </li>
 </ul>
 ```
+
+For additional examples of both audio and video playlists, see the [Able Player Examples][examples] page.
 
 **Supported data-\* audio types:**
 
@@ -516,10 +573,10 @@ on the `<video>` element. The value of this attribute must be the 11-character Y
 of the described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
-Starting with 2.3.1, a YouTube Data API key is required for playing YouTube videos in Able Player.
+Versions 2.3.1 through 3.2.12 required a YouTube Data API key for retrieving caption data from YouTube.
 Get a YouTube Data API key by registering your application at the [Google Developer Console][].
 For complete instructions, see [Google's Getting Started page]. Note: All that's needed for
-playing YouTube videos in Able Player is a simple API key, **not** OAuth 2.0.
+playing YouTube videos in Able Player is a simple API key, **not** OAuth 2.0. 
 
 After obtaining your YouTube Data API Key, insert the following code into your HTML page:
 
@@ -534,20 +591,36 @@ After obtaining your YouTube Data API Key, insert the following code into your H
 <script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
 ```
 
-If captions or subtitles are available on the YouTube video, these will be displayed for all users,
-and can be controlled using Able Player's CC button. Alternatively, if you include your own
-`<track kind="captions">` elements, these will be used *instead of* the captions on YouTube.
+Starting with version 3.2.13, Able Player no longer requires a YouTube Data API key in order to access caption tracks from YouTube. However, an API key is still encouraged, as it relies on well-documented methods from Google, 
+whereas operating without an API key relies on methods that are not well documented, and therefore 
+may not be reliable.  
 
-The advantage of managing captions entirely on YouTube is that you only have to manage them in
-one place, and they're available everywhere your YouTube video is played.
+Also new in 3.2.13, Able Player now handles YouTube captions in the same way it handles HTML `<track kind="captions">` elements. The display of the caption text can be customized via the Preferences menu, and the caption text is used to automatically create an interactive transcript. 
 
-The advantages of including captions locally in `<track>` elements include:
+YouTube does not currently support chapters, descriptions, and metadata tracks. With Able Player, these features can be added to the video using HTML `<track>` elements, even if the video's captions and subtitles are stored on YouTube. The advantage of managing captions entirely on YouTube is that you only have to manage them in one place, and they're available everywhere your YouTube video is played.  
 
-- Able Player can repurpose the captions into an interactive transcript
-- The captions are searchable using the **data-search** attribute
-- Users can control how the captions are displayed (e.g., color, background color, opacity)
+If your video has HTML `<track>` elements for captions and subtitles, these will be used *instead of* the captions on YouTube.
+
 
 Adjustable playback rate is available for some videos.
+
+Vimeo Support
+---------------
+
+To play a Vimeo video in *Able Player*, simply include a **data-vimeo-id** attribute
+on the `<video>` element. The value of this attribute must be the video's Vimeo ID (a string of numbers).
+
+If a described version of the video is available on Vimeo, include a **data-vimeo-desc-id** attribute
+on the `<video>` element. The value of this attribute must be the Vimeo ID
+of the described version. If users turn on the Description button on their player controller,
+the described version of the video will be loaded instead of the non-described version.
+
+Note that Vimeo currently has a few major limitations:  
+
+-   A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is extremely cluttered and confusing
+-   Hiding Vimeo's playback controls (as per the previous item) also hides captions and subtitles. Therefore the only way to include captions and subtitles is to host them locally and reference them with a &lt;track&gt; element. This is necessary anyway in order to have an interactive transcript, since Vimeo does not expose its caption data in a way that would enable Able Player to repurpose captions into a transcript.
+-   A Pro or Business account is required in order to change playback rate (with faster and slower buttons). Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.
+
 
 MIME Types
 ----------

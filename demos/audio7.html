@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="../thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
@@ -20,7 +19,16 @@
 <style>
   .column {
     float: left;
-    padding-right: 10px;
+    width: 40%;
+    padding-right: 20px;
+  }
+  .column h2 {
+    font-size: 1.2em;
+    text-align: center;
+  }
+  #playlist {
+    border: medium solid #DDD;
+    padding: 0.25em;
   }
 </style>
 
@@ -30,7 +38,9 @@
 
 <h1>Able Player Audio Demo #7:<br/>Multiple audio players (each with its own playlist)</h1>
 
-<p>The first player has an embedded playlist, the second player has an external playlist.</p>
+<p>The first player has an embedded playlist; the second player has an external playlist.
+  Both can be customized with CSS, but the external player is more flexible in terms of positioning.
+</p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
@@ -44,13 +54,26 @@
 
   <!-- first playlist (embedded) -->
   <ul class="able-playlist" data-player="audio1" data-embedded>
-    <li
-      data-mp3="../media/everyday.mp3"
-      data-ogg="../media/everyday.ogg">Every Day</li>
-    <li
-	    data-mp3="../media/php70alpha.mp3"
-      data-ogg="../media/php70alpha.ogg">PHP 7.0 Alpha</li>
+	  <li>
+  		<span class="able-source"
+  			data-type="audio/mpeg"
+				data-src="../media/everyday.mp3"></span>
+			<span class="able-source"
+  			data-type="audio/ogg"
+				data-src="../media/everyday.ogg"></span>
+			<button>Every Day</button>
+		</li>
+		<li>
+  		<span class="able-source"
+  			data-type="audio/mpeg"
+				data-src="../media/php70alpha.mp3"></span>
+			<span class="able-source"
+  			data-type="audio/ogg"
+				data-src="../media/php70alpha.ogg"></span>
+			<button>PHP 7.0 Alpha</button>
+		</li>
   </ul>
+
 </div>
 
 <div class="column">
@@ -62,17 +85,44 @@
   </audio>
 
   <!-- second playlist (external) -->
-  <ul class="able-playlist" data-player="audio2">
-    <li
-	    data-mp3="../media/frenchsong.mp3"
-      data-ogg="../media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
-    <li
-	    data-mp3="../media/paulallen.mp3"
-      data-ogg="../media/paulallen.ogg">The Paul Allen Song</li>
-    <li
-	    data-mp3="../media/smallf.mp3"
-      data-ogg="../media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
-  </ul>
+  <div id="playlist">
+    <ul class="able-playlist" data-player="audio2">
+      	<li>
+        <span class="able-source"
+      			data-type="audio/mpeg"
+          data-src="../media/frenchsong.mp3">
+        </span>
+        <span class="able-source"
+  			    data-type="audio/ogg"
+          data-src="../media/frenchsong.ogg">
+        </span>
+        <button lang="fr">Une Chanson Française</button>
+      </li>
+      <li>
+  		    <span class="able-source"
+          data-type="audio/mpeg"
+          data-src="../media/paulallen.mp3">
+        </span>
+        <span class="able-source"
+  			    data-type="audio/ogg"
+          data-src="../media/paulallen.ogg">
+        </span>
+        <button>The Paul Allen Song</button>
+      </li>
+      <li>
+  		    <span class="able-source"
+          data-type="audio/mpeg"
+          data-src="../media/smallf.mp3">
+        </span>
+        <span class="able-source"
+  			    data-type="audio/ogg"
+          data-src="../media/smallf.ogg">
+        </span>
+        <button>Man With Small F (The Inaccessible PDF Song)</button>
+      </li>
+    </ul>
+  </div>
+
 </div>
 
 </body>

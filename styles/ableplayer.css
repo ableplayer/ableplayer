@@ -8,7 +8,7 @@
 	div.able-modal-overlay = 9500
 
 	* Items that should always be on top (9000):
-	#able-vts-alert = 9400
+	#able-vts = 9400
 	.able-alert = 9400
 	.able-window-toolbar .able-button-handler-preferences = 9300
   .able-popup = 9200
@@ -40,11 +40,13 @@
   width: 100%;
   height: auto;
   box-sizing: content-box !important;
+  text-align: left;
 }
 .able {
   position: relative;
   margin: 1em 0;
   width: 100%; /* will be changed dynamically as player is contructed */
+  background-color: #000;
   box-shadow: 0px 0px 16px #262626;
   z-index: 5000;
 }
@@ -67,12 +69,12 @@
 	background-color: #262626; /* background color of player (appears on top & bottom) */
 }
 .able-offscreen {
-	position:absolute;
-	left:-10000px;
-	top:auto;
-	width:1px;
-	height:1px;
-	overflow:hidden;
+	position: absolute;
+	left: -10000px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }
 .able-media-container audio {
   display: none !important;
@@ -94,6 +96,11 @@
   position: absolute;
   top: 0;
   left: 0;
+  width: 100% !important;
+  height: auto !important;
+}
+.able .able-vidcap-container {
+  overflow: hidden;
 }
 
 /*
@@ -826,6 +833,8 @@ div.able-chapters-div button::-moz-focus-inner {
   background-color: #FFFFCC;
   box-shadow: 0px 0px 16px #262626;
   z-index: 9400;
+  position: absolute;
+  top: 1em;
 }
 .able-popup {
   z-index: 9200;
@@ -884,6 +893,7 @@ ul.able-popup {
   z-index: 7000;
   outline: none;
   padding-bottom: 25px; /* keep content above 16x16px drag icon */
+  background-color: #FFF;
 }
 .able-transcript {
 	position: relative; /* must be positioned for scrolling */
@@ -969,62 +979,62 @@ ul.able-popup {
 }
 
 /*
-  Playlist - Embedded
+  Playlist (both audio and video)
 */
 
-.able-player .able-playlist {
-	font-size: 0.9em;
+.able-playlist {
 	list-style-type: none;
 	margin: 0;
 	background-color: #FFFFFF;
 	padding: 5px 0;
 }
-.able-player .able-playlist li {
+.able-playlist li {
 	background-color: #DDDDDD; /* default background color of each item in playlist */
 	margin: 5px;
-	padding: 5px 10px;
-	border-radius: 15px;
-	-moz-border-radius: 15px;
+	padding: 0;
+  border: 2px solid #AAA;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
 }
-.able-player .able-playlist li:hover,
-.able-player .able-playlist li:focus,
-.able-player .able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
-	color: #FFFFFF;
-	background-color: #340449;
-	text-decoration: none;
-}
-.able-player .able-playlist li.able-current { /* currently selected playlist item */
+.able-playlist li button {
+	border: none;
 	color: #000000;
+	background-color: transparent;
+	font-size: 1em;
+	width: 100%;
+	padding: 5px 10px;
+	text-align: left;
+}
+.able-playlist li button:hover,
+.able-playlist li button:focus,
+.able-playlist li button:active { /* playlist items when they have mouse or keyboard focus */
 	background-color: #FFEEB3;
-	font-weight: bold;
+	color: #000000;
+	text-decoration: none;
 	outline: none;
-	text-decoration: none;
 }
-.able-player .able-playlist li.able-current:after {
-	content: ' *';
+.able-playlist li button::-moz-focus-inner {
+  border: 0;
 }
-
-/*
-  Playlist - External
-*/
-
-.able-playlist {
-}
-.able-playlist li {
-}
-.able-playlist li:hover,
-.able-playlist li:focus,
-.able-playlist li:active { /* playlist items when they have mouse or keyboard focus */
-	text-decoration: none;
-	color: white;
-	background-color: black;
+.able-playlist li button img {
+ width: 100px;
+ float: left;
+ margin-right: 10px;
 }
 .able-playlist li.able-current { /* currently selected playlist item */
-	font-weight: bold;
-  text-decoration: underline;
+	background-color: #340449;
+	border-color: #230330;
 }
-.able-playlist li.able-current:after {
-	content: ' *';
+.able-playlist li.able-current button {
+	color: #FFFFFF;
+	font-weight: bold;
+	text-decoration: none;
+	outline: none;
+}
+.able-playlist li.able-current button:hover,
+.able-playlist li.able-current button:focus,
+.able-playlist li.able-current button:active   {
+	color: #000000;
 }
 
 /*
