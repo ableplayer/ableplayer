@@ -96,9 +96,9 @@
 					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
-				this.refreshControls('init');
 			}
 		}
+		this.refreshControls('init');
 	};
 
 	// End Media events
@@ -379,6 +379,8 @@
 				// do something
 			})
 			.on('loadedmetadata',function() {
+        // should be able to get duration now
+        thisObj.duration = thisObj.media.duration;
 				thisObj.onMediaNewSourceLoad();
 			})
 			.on('canplay',function() {

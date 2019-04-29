@@ -921,7 +921,7 @@
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
-						this.duration = 100;
+						this.duration = 60;
 						// also set elapsed to 0
 						this.elapsed = 0;
 					}

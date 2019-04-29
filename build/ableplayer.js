@@ -1144,11 +1144,10 @@
 						thisObj.showSearchResults();
 
 						// Go ahead and load media, without user requesting it
-						// Normally, we wait until user clicks play, rather than unnecessarily consume their bandwidth
-						// Exceptions are if the video is intended to autostart or if running on iOS (a workaround for iOS issues)
-						// TODO: Confirm that this is still necessary with iOS (this would added early, & I don't remember what the issues were)
-						if (thisObj.player === 'html5' &&
-								(thisObj.isIOS() || thisObj.startTime > 0 || thisObj.autoplay || thisObj.okToPlay)) {
+						// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+            // However, the media needs to load before the 'loadedmetadata' event is fired
+            // and until that happens we can't get the media's duration
+						if (thisObj.player === 'html5') {
 							thisObj.$media[0].load();
 						}
 						// refreshControls is called twice building/initializing the player
@@ -3955,7 +3954,7 @@
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
-						this.duration = 100;
+						this.duration = 60;
 						// also set elapsed to 0
 						this.elapsed = 0;
 					}
@@ -11231,9 +11230,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
-				this.refreshControls('init');
 			}
 		}
+		this.refreshControls('init');
 	};
 
 	// End Media events
@@ -11514,6 +11513,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// do something
 			})
 			.on('loadedmetadata',function() {
+        // should be able to get duration now
+        thisObj.duration = thisObj.media.duration;
 				thisObj.onMediaNewSourceLoad();
 			})
 			.on('canplay',function() {
