@@ -55,7 +55,6 @@
 	};
 
 	AblePlayer.prototype.onMediaComplete = function () {
-
 		// if there's a playlist, advance to next item and start playing
 		if (this.hasPlaylist && !this.cueingPlaylistItem) {
 			if (this.playlistIndex === (this.$playlist.length - 1)) {
@@ -64,6 +63,10 @@
 					this.playlistIndex = 0;
 					this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
 					this.cuePlaylistItem(0);
+				}
+				else {
+  				this.playing = false;
+  				this.paused = true;
 				}
 			}
 			else {
@@ -190,6 +193,7 @@
 		// TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
 		var whichButton = $(el).attr('class').split(' ')[0].substr(20);
 		if (whichButton === 'play') {
+  		this.clickedPlay = true;
 			this.handlePlay();
 		}
 		else if (whichButton === 'restart') {

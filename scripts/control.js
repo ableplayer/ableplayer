@@ -828,7 +828,7 @@
 
 						// Don't change play/pause button display while using the seek bar (or if YouTube stopped)
 						if (!thisObj.seekBar.tracking && !thisObj.stoppingYouTube) {
-							if (currentState === 'paused' || currentState === 'stopped') {
+							if (currentState === 'paused' || currentState === 'stopped' || currentState === 'ended') {
 								thisObj.$playpauseButton.attr('aria-label',thisObj.tt.play);
 
 								if (thisObj.iconType === 'font') {
