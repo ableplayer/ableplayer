@@ -1,19 +1,14 @@
 (function ($) {
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {
-
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 		var thisObj = this;
 
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
-			if (typeof duration === 'undefined') {
-				thisObj.duration = mediaTimes['duration'];
-			}
-			if (typeof elapsed === 'undefined') {
-				thisObj.elapsed = mediaTimes['elapsed'];
-			}
+		  thisObj.duration = mediaTimes['duration'];
+      thisObj.elapsed = mediaTimes['elapsed'];
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
 				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
