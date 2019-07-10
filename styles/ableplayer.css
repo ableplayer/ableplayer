@@ -1243,7 +1243,7 @@ button svg {
   font-style: normal;
 }
 
-[class^="icon-"], [class*=" icon-"] {
+.able-wrapper [class^="icon-"], .able-wrapper [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'able' !important;
   speak: none;
