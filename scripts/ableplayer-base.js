@@ -189,6 +189,21 @@
 		// 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
 		// If data-include-transcript="false", there is no "popup" transcript
 
+		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
+		  this.transcriptDivLocation = $(media).data('transcript-div');
+		}
+		else {
+  		this.transcriptDivLocation = null;
+    }
+		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
+console.log('YOU WANT TO HIDE TRANSCRIPT BUTTON');
+  		this.hideTranscriptButton = true;
+    }
+    else {
+console.log('YOU DO NOT WANT TO HIDE TRANSCRIPT BUTTON');
+      this.hideTranscriptButton = null;
+    }
+
 		this.transcriptType = null;
 		if ($(media).data('transcript-src') !== undefined) {
 			this.transcriptSrc = $(media).data('transcript-src');
@@ -198,19 +213,17 @@
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
-			if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-				this.transcriptDivLocation = $(media).data('transcript-div');
+      if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
-			}
-			else if ($(media).data('include-transcript') !== undefined) {
-				if ($(media).data('include-transcript') !== false) {
-					this.transcriptType = 'popup';
-				}
 			}
 			else {
 				this.transcriptType = 'popup';
 			}
 		}
+console.log('transcriptType: ' + this.transcriptType);
+console.log('transcriptDivLocation: ' + this.transcriptDivLocation);
+console.log('hideTranscriptButton: ' + this.hideTranscriptButton);
+
 
 		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
 		// If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience

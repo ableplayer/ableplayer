@@ -840,7 +840,7 @@
 				bll.push('descriptions'); //audio description
 			}
 		}
-		if (this.transcriptType === 'popup') {
+		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
 			bll.push('transcript');
 		}
 

@@ -8,7 +8,12 @@
 		if (!this.transcriptType) {
 			// previously set transcriptType to null since there are no <track> elements
 			// check again to see if captions have been collected from other sources (e.g., YouTube)
+console.log("there is no transcriptType yet");
+console.log('captions length: ' + this.captions.length);
+console.log('usingYouTubeCaptions: ' + this.usingYouTubeCaptions);
+
 			if (this.captions.length && (!(this.usingYouTubeCaptions || this.usingVimeoCaptions))) {
+console.log('captions are possible!');
 				// captions are possible! Use the default type (popup)
 				// if other types ('external' and 'manual') were desired, transcriptType would not be null here
 				this.transcriptType = 'popup';
