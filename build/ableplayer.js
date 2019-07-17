@@ -196,11 +196,9 @@
   		this.transcriptDivLocation = null;
     }
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-console.log('YOU WANT TO HIDE TRANSCRIPT BUTTON');
   		this.hideTranscriptButton = true;
     }
     else {
-console.log('YOU DO NOT WANT TO HIDE TRANSCRIPT BUTTON');
       this.hideTranscriptButton = null;
     }
 
@@ -220,10 +218,6 @@ console.log('YOU DO NOT WANT TO HIDE TRANSCRIPT BUTTON');
 				this.transcriptType = 'popup';
 			}
 		}
-console.log('transcriptType: ' + this.transcriptType);
-console.log('transcriptDivLocation: ' + this.transcriptDivLocation);
-console.log('hideTranscriptButton: ' + this.hideTranscriptButton);
-
 
 		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
 		// If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
@@ -10291,12 +10285,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (!this.transcriptType) {
 			// previously set transcriptType to null since there are no <track> elements
 			// check again to see if captions have been collected from other sources (e.g., YouTube)
-console.log("there is no transcriptType yet");
-console.log('captions length: ' + this.captions.length);
-console.log('usingYouTubeCaptions: ' + this.usingYouTubeCaptions);
 
 			if (this.captions.length && (!(this.usingYouTubeCaptions || this.usingVimeoCaptions))) {
-console.log('captions are possible!');
 				// captions are possible! Use the default type (popup)
 				// if other types ('external' and 'manual') were desired, transcriptType would not be null here
 				this.transcriptType = 'popup';

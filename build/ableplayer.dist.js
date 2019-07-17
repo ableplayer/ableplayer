@@ -196,11 +196,9 @@
   		this.transcriptDivLocation = null;
     }
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-
   		this.hideTranscriptButton = true;
     }
     else {
-
       this.hideTranscriptButton = null;
     }
 
@@ -220,10 +218,6 @@
 				this.transcriptType = 'popup';
 			}
 		}
-
-
-
-
 
 		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
 		// If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
@@ -10292,11 +10286,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// previously set transcriptType to null since there are no <track> elements
 			// check again to see if captions have been collected from other sources (e.g., YouTube)
 
-
-
-
 			if (this.captions.length && (!(this.usingYouTubeCaptions || this.usingVimeoCaptions))) {
-
 				// captions are possible! Use the default type (popup)
 				// if other types ('external' and 'manual') were desired, transcriptType would not be null here
 				this.transcriptType = 'popup';

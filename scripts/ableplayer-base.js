@@ -196,11 +196,9 @@
   		this.transcriptDivLocation = null;
     }
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-console.log('YOU WANT TO HIDE TRANSCRIPT BUTTON');
   		this.hideTranscriptButton = true;
     }
     else {
-console.log('YOU DO NOT WANT TO HIDE TRANSCRIPT BUTTON');
       this.hideTranscriptButton = null;
     }
 
@@ -220,10 +218,6 @@ console.log('YOU DO NOT WANT TO HIDE TRANSCRIPT BUTTON');
 				this.transcriptType = 'popup';
 			}
 		}
-console.log('transcriptType: ' + this.transcriptType);
-console.log('transcriptDivLocation: ' + this.transcriptDivLocation);
-console.log('hideTranscriptButton: ' + this.hideTranscriptButton);
-
 
 		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
 		// If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
