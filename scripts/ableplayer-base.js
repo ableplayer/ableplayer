@@ -265,18 +265,6 @@
 			this.defaultChapter = null;
 		}
 
-		// Previous/Next buttons
-		// valid values of data-prevnext-unit are 'playlist' and 'chapter'; will also accept 'chapters'
-		if ($(media).data('prevnext-unit') === 'chapter' || $(media).data('prevnext-unit') === 'chapters') {
-			this.prevNextUnit = 'chapter';
-		}
-		else if ($(media).data('prevnext-unit') === 'playlist') {
-			this.prevNextUnit = 'playlist';
-		}
-		else {
-			this.prevNextUnit = false;
-		}
-
 		// Slower/Faster buttons
 		// valid values of data-speed-icons are 'animals' (default) and 'arrows'
 		// 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
