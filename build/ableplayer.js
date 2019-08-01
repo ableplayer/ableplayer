@@ -1940,6 +1940,14 @@
 					kbLabels.push(this.tt.restart);
 					keys.push('s');
 				}
+				else if (this.controls[i] === 'previous') {
+					kbLabels.push(this.tt.prevTrack);
+					keys.push('b'); // b = back
+				}
+				else if (this.controls[i] === 'next') {
+					kbLabels.push(this.tt.nextTrack);
+					keys.push('n');
+				}
 				else if (this.controls[i] === 'rewind') {
 					kbLabels.push(this.tt.rewind);
 					keys.push('r');
@@ -3837,6 +3845,11 @@
 			'br': []
 		}
 
+		if (this.hasPlaylist) {
+  		controlLayout['ur'].push('previous');
+  		controlLayout['ur'].push('next');
+		}
+
 		// test for browser support for volume before displaying volume button
 		if (this.browserSupportsVolume()) {
 			// volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
@@ -4713,6 +4726,12 @@
 		}
 		else if (control === 'restart') {
 			return this.tt.restart;
+		}
+		else if (control === 'previous') {
+			return this.tt.prevTrack;
+		}
+		else if (control === 'next') {
+			return this.tt.nextTrack;
 		}
 		else if (control === 'rewind') {
 			return this.tt.rewind;
@@ -8166,30 +8185,27 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (typeof this.$elapsedTimeContainer !== 'undefined') {
 				this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 			}
-
 			// Update seekbar width.
 			// To do this, we need to calculate the width of all buttons surrounding it.
 			if (this.seekBar) {
 				widthUsed = 0;
-				seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
-
 				leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
 				rightControls = leftControls.next('div.able-right-controls');
 				leftControls.children().each(function () {
 					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).width();
+						widthUsed += $(this).outerWidth(true); // true = include margin
 					}
 				});
 				rightControls.children().each(function () {
 					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).width();
+						widthUsed += $(this).outerWidth(true);
 					}
 				});
 				if (this.fullscreen) {
-					seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
+					seekbarWidth = $(window).width() - widthUsed;
 				}
 				else {
-					seekbarWidth = this.$ableWrapper.width() - widthUsed - seekbarSpacer;
+					seekbarWidth = this.$ableWrapper.width() - widthUsed;
 				}
 				// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
 				if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
@@ -8539,6 +8555,34 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.handleRestart = function() {
 
 		this.seekTo(0);
+	};
+
+	AblePlayer.prototype.handlePrevTrack = function() {
+
+    if (this.playlistIndex === 0) {
+      // currently on the first track
+      // wrap to bottom and play the last track
+      this.playlistIndex = this.$playlist.length - 1;
+    }
+    else {
+		  this.playlistIndex--;
+    }
+		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+    this.cuePlaylistItem(this.playlistIndex);
+	};
+
+	AblePlayer.prototype.handleNextTrack = function() {
+
+    if (this.playlistIndex === this.$playlist.length - 1) {
+      // currently on the last track
+      // wrap to top and play the forst track
+      this.playlistIndex = 0;
+    }
+    else {
+		  this.playlistIndex++;
+    }
+		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+    this.cuePlaylistItem(this.playlistIndex);
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
@@ -11334,6 +11378,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.seekTrigger = 'restart';
 			this.handleRestart();
 		}
+		else if (whichButton === 'previous') {
+			this.seekTrigger = 'previous';
+			this.handlePrevTrack();
+		}
+		else if (whichButton === 'next') {
+			this.seekTrigger = 'next';
+			this.handleNextTrack();
+		}
 		else if (whichButton === 'rewind') {
 			this.seekTrigger = 'rewind';
 			this.handleRewind();
@@ -11430,6 +11482,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			e.target.tagName === 'TEXTAREA' ||
 			e.target.tagName === 'SELECT'
 		)){
+
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -11483,6 +11536,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			else if (which === 114) { // r = rewind
 				if (this.usingModifierKeys(e)) {
 					this.handleRewind();
+				}
+			}
+			else if (which === 98) { // b = back (previous track)
+				if (this.usingModifierKeys(e)) {
+					this.handlePrevTrack();
+				}
+			}
+			else if (which === 110) { // n = next track
+				if (this.usingModifierKeys(e)) {
+					this.handleNextTrack();
 				}
 			}
 			else if (which === 101) { // e = preferences

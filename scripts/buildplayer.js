@@ -809,6 +809,11 @@
 			'br': []
 		}
 
+		if (this.hasPlaylist) {
+  		controlLayout['ur'].push('previous');
+  		controlLayout['ur'].push('next');
+		}
+
 		// test for browser support for volume before displaying volume button
 		if (this.browserSupportsVolume()) {
 			// volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
@@ -1685,6 +1690,12 @@
 		}
 		else if (control === 'restart') {
 			return this.tt.restart;
+		}
+		else if (control === 'previous') {
+			return this.tt.prevTrack;
+		}
+		else if (control === 'next') {
+			return this.tt.nextTrack;
 		}
 		else if (control === 'rewind') {
 			return this.tt.rewind;

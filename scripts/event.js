@@ -195,6 +195,14 @@
 			this.seekTrigger = 'restart';
 			this.handleRestart();
 		}
+		else if (whichButton === 'previous') {
+			this.seekTrigger = 'previous';
+			this.handlePrevTrack();
+		}
+		else if (whichButton === 'next') {
+			this.seekTrigger = 'next';
+			this.handleNextTrack();
+		}
 		else if (whichButton === 'rewind') {
 			this.seekTrigger = 'rewind';
 			this.handleRewind();
@@ -291,6 +299,7 @@
 			e.target.tagName === 'TEXTAREA' ||
 			e.target.tagName === 'SELECT'
 		)){
+
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -344,6 +353,16 @@
 			else if (which === 114) { // r = rewind
 				if (this.usingModifierKeys(e)) {
 					this.handleRewind();
+				}
+			}
+			else if (which === 98) { // b = back (previous track)
+				if (this.usingModifierKeys(e)) {
+					this.handlePrevTrack();
+				}
+			}
+			else if (which === 110) { // n = next track
+				if (this.usingModifierKeys(e)) {
+					this.handleNextTrack();
 				}
 			}
 			else if (which === 101) { // e = preferences
