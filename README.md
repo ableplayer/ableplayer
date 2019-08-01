@@ -667,6 +667,8 @@ player from anywhere on the web page, as follows:
 -   **s** = Stop
 -   **r** = Rewind
 -   **f** = Forward
+-   **b** = Back (previous track in playlist)
+-   **n** = Next (next track in playlist) 
 -   **c** = Captions
 -   **d** = Description
 -   **m** = Mute on/off
