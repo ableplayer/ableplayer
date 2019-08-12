@@ -360,7 +360,16 @@ controller.
 If descriptions are available using either of the above methods, a
 Description toggle button appears on the controller (represented by the
 universal Description symbol, the letter "D"). How descriptions are
-ultimately delivered depends on which of the above methods is used, and
+ultimately delivered depends on which of the above methods is used. 
+
+If *both* methods are used, description will be delivered using the separate  
+described version of the video. However, the WebVTT file will be used to 
+(a) display the description text visibly (if users have selected this option in their 
+preferences), and (b) incorporate the description text into the 
+auto-generated interactive transcript. Therefore, it is important for the 
+WebVTT description file to be accurately synchronized with the separate 
+described version of the video.  
+
 on user preference. If a user prefers text-based description announced
 by their screen reader, that’s what they’ll get. If they prefer an
 alternate video with description mixed in, that’s what they’ll get. See
@@ -372,6 +381,7 @@ part of the interface (e.g., if video pauses so users can interact with
 HTML overlays; text-based description could be used in this context to provide
 additional instructions for screen reader users). In such cases the Descriptions
 button can be eliminated from the controller with **data-use-descriptions-button="false"**.
+
 
 #### Sign language
 

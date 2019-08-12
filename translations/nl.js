@@ -154,7 +154,7 @@ var nl = {
 
 "prefIntroDescriptionNone": "De huidige video heeft in beide formaten geen audiobeschrijving.",
 
-"prefIntroDescription3": "Gebruik het volgende formulier om je voorkeuren gerelateerd aan audiobeschrijving in te stellen.",
+"prefIntroDescription3": "Gebruik het volgende formulier om je voorkeuren gerelateerd aan tekst-gebaseerde audiobeschrijving in te stellen.",
 
 "prefIntroDescription4": "Na het opslaan van je instellingen, kan audiobeschrijving aan of uit gezet worden met de Beschrijving knop.",
 

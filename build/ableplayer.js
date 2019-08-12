@@ -1565,7 +1565,7 @@
 			});
 			prefs.push({
 				'name': 'prefDescFormat', // audio description default state
-				'label': this.tt.prefDescFormat,
+				'label': null,
 				'group': 'descriptions',
 				'default': 'video'
 			});
@@ -1624,7 +1624,7 @@
 		var available, thisObj, $prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
-			$descFieldset1, $descLegend1, $descFieldset2, $descLegend2, $legend,
+			$descFieldset, $descLegend, $legend,
 			thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
 			$div1,id1,$radio1,$label1,
 			$div2,id2,$radio2,$label2,
@@ -1722,35 +1722,17 @@
 			$prefsDiv.append($prefsIntro);
 		}
 
-		if (form === 'descriptions') {
-			// descriptions form has two field sets
-
-			// Fieldset 1
-			$descFieldset1 = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form + '1';
-			fieldsetId = this.mediaId + '-prefs-' + form + '1';
-			$descFieldset1.addClass(fieldsetClass).attr('id',fieldsetId);
-			$descLegend1 = $('<legend>' + this.tt.prefDescFormat + '</legend>');
-			$descFieldset1.append($descLegend1);
-
-			// Fieldset 2
-			$descFieldset2 = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form + '2';
-			fieldsetId = this.mediaId + '-prefs-' + form + '2';
-			$descFieldset2.addClass(fieldsetClass).attr('id',fieldsetId);
-			$descLegend2 = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
-			$descFieldset2.append($descLegend2);
+		$fieldset = $('<fieldset>');
+		fieldsetClass = 'able-prefs-' + form;
+		fieldsetId = this.mediaId + '-prefs-' + form;
+		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+		if (form === 'keyboard') {
+		  $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$fieldset.append($legend);
 		}
-		else {
-			// all other forms just have one fieldset
-			$fieldset = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form;
-			fieldsetId = this.mediaId + '-prefs-' + form;
-			$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
-			if (form === 'keyboard') {
-				$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
-				$fieldset.append($legend);
-			}
+		else if (form === 'descriptions') {
+  		$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+  		$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
 
@@ -1760,48 +1742,9 @@
 				thisPref = available[i]['name'];
 				thisClass = 'able-' + thisPref;
 				thisId = this.mediaId + '_' + thisPref;
-				if (thisPref !== 'prefDescFormat') {
-					$thisDiv = $('<div>').addClass(thisClass);
-				}
+				$thisDiv = $('<div>').addClass(thisClass);
 
-				// Audio Description preferred format radio buttons
-				if (thisPref == 'prefDescFormat') {
-
-					// option 1 radio button
-					$div1 = $('<div>');
-					id1 = thisId + '_1';
-					$label1 = $('<label>')
-						.attr('for',id1)
-						.text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption1))
-					$radio1 = $('<input>',{
-						type: 'radio',
-						name: thisPref,
-						id: id1,
-						value: 'video'
-					});
-					if (this.prefDescFormat === 'video') {
-						$radio1.prop('checked',true);
-					};
-					$div1.append($radio1,$label1);
-
-					// option 2 radio button
-					$div2 = $('<div>');
-					id2 = thisId + '_2';
-					$label2 = $('<label>')
-						.attr('for',id2)
-						.text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption2));
-					$radio2 = $('<input>',{
-						type: 'radio',
-						name: thisPref,
-						id: id2,
-						value: 'text'
-					});
-					if (this.prefDescFormat === 'text') {
-						$radio2.prop('checked',true);
-					};
-					$div2.append($radio2,$label2);
-				}
-				else if (form === 'captions') {
+				if (form === 'captions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<select>',{
 						name: thisPref,
@@ -1893,25 +1836,11 @@
 					}
 					$thisDiv.append($thisField,$thisLabel);
 				}
-				if (form === 'descriptions') {
-					if (thisPref === 'prefDescFormat') {
-						$descFieldset1.append($div1,$div2);
-					}
-					else {
-						$descFieldset2.append($thisDiv);
-					}
-				}
-				else {
-					$fieldset.append($thisDiv);
-				}
+				$fieldset.append($thisDiv);
 			}
 		}
-		if (form === 'descriptions') {
-			$prefsDiv.append($descFieldset1,$descFieldset2);
-		}
-		else {
-			$prefsDiv.append($fieldset);
-		}
+		$prefsDiv.append($fieldset);
+
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
 			if (this.mediaType === 'video') {
@@ -2098,15 +2027,7 @@
 		 available = this.getAvailablePreferences();
 		 for (i=0; i<available.length; i++) {
 			 prefName = available[i]['name'];
-			 if (prefName === 'prefDescFormat') {
-				 if (this[prefName] === 'text') {
-					 $('input[value="text"]').prop('checked',true);
-				 }
-				 else {
-					 $('input[value="video"]').prop('checked',true);
-				 }
-			 }
-			 else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+			 if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				 // this is a caption-related select box
 				 $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
 			 }
@@ -2139,8 +2060,10 @@
 			if (available[i]['label']) {
 				var prefName = available[i]['name'];
 				if (prefName == 'prefDescFormat') {
-					this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting
+  				// As of v4.0.10, prefDescFormat is no longer a choice
+					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
+					this.prefDescFormat = 'video';
+					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
 						cookie.preferences['prefDescFormat'] = this.prefDescFormat;
 						numChanges++;
 					}
@@ -7117,7 +7040,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
-		// prefDescFormat == either 'video' or 'text'
+		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefVisibleDesc == 1 to visibly show text-based description area; else 0
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
@@ -7126,8 +7049,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// descOn == true if description of either type is on
 
 		var thisObj = this;
-
-		if (!this.refreshingDesc) {
+    if (this.refreshingDesc) {
+		  this.prevDescFormat = this.useDescFormat;
+    }
+		else {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
 			// checks only the first source since if a described version is provided,
@@ -7151,9 +7076,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// update this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. Use whichever one user prefers
+				// both formats are available. Always use 'video'
 				this.useDescFormat = this.prefDescFormat;
 				this.descOn = true;
+				// Do not pause during descriptions when playing described video
+				this.prefDescPause = false;
 			}
 			else if (this.hasOpenDesc) {
 				this.useDescFormat = 'video';
@@ -7167,9 +7094,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else { // description button is off
       this.useDescFormat = false;
 			this.descOn = false;
-			if (this.refreshingDesc) { // user just now toggled it off
-				this.prevDescFormat = this.useDescFormat;
-			}
 		}
 
 		if (this.useDescFormat === 'text') {
@@ -7201,22 +7125,21 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		if (this.descOn) {
-
 			if (this.useDescFormat === 'video') {
 				if (!this.usingAudioDescription()) {
 					// switched from non-described to described version
 					this.swapDescription();
 				}
-				// hide description div
-				this.$descDiv.hide();
-				this.$descDiv.removeClass('able-clipped');
 			}
-			else if (this.useDescFormat === 'text') {
-				this.$descDiv.show();
-				if (this.prefVisibleDesc) { // make it visible to everyone
+			if (this.hasClosedDesc) {
+				if (this.prefVisibleDesc) {
+  				// make description text visible
+  				// New in v4.0.10: Do this regardless of useDescFormat
+  				this.$descDiv.show();
 					this.$descDiv.removeClass('able-clipped');
 				}
-				else { // keep it visible to screen readers, but hide from everyone else
+				else {
+  				// keep it visible to screen readers, but hide it visibly
 					this.$descDiv.addClass('able-clipped');
 				}
 				if (!this.swappingSrc) {
@@ -7225,7 +7148,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else { // description is off.
-
 			if (this.prevDescFormat === 'video') { // user was previously using description via video
 				if (this.usingAudioDescription()) {
 					this.swapDescription();
@@ -7255,7 +7177,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.swapDescription = function() {
-
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)

@@ -10,7 +10,7 @@
 
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
-		// prefDescFormat == either 'video' or 'text'
+		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefVisibleDesc == 1 to visibly show text-based description area; else 0
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
@@ -19,8 +19,10 @@
 		// descOn == true if description of either type is on
 
 		var thisObj = this;
-
-		if (!this.refreshingDesc) {
+    if (this.refreshingDesc) {
+		  this.prevDescFormat = this.useDescFormat;
+    }
+		else {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
 			// checks only the first source since if a described version is provided,
@@ -44,9 +46,11 @@
 		// update this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. Use whichever one user prefers
+				// both formats are available. Always use 'video'
 				this.useDescFormat = this.prefDescFormat;
 				this.descOn = true;
+				// Do not pause during descriptions when playing described video
+				this.prefDescPause = false;
 			}
 			else if (this.hasOpenDesc) {
 				this.useDescFormat = 'video';
@@ -60,9 +64,6 @@
 		else { // description button is off
       this.useDescFormat = false;
 			this.descOn = false;
-			if (this.refreshingDesc) { // user just now toggled it off
-				this.prevDescFormat = this.useDescFormat;
-			}
 		}
 
 		if (this.useDescFormat === 'text') {
@@ -94,22 +95,21 @@
 			}
 		}
 		if (this.descOn) {
-
 			if (this.useDescFormat === 'video') {
 				if (!this.usingAudioDescription()) {
 					// switched from non-described to described version
 					this.swapDescription();
 				}
-				// hide description div
-				this.$descDiv.hide();
-				this.$descDiv.removeClass('able-clipped');
 			}
-			else if (this.useDescFormat === 'text') {
-				this.$descDiv.show();
-				if (this.prefVisibleDesc) { // make it visible to everyone
+			if (this.hasClosedDesc) {
+				if (this.prefVisibleDesc) {
+  				// make description text visible
+  				// New in v4.0.10: Do this regardless of useDescFormat
+  				this.$descDiv.show();
 					this.$descDiv.removeClass('able-clipped');
 				}
-				else { // keep it visible to screen readers, but hide from everyone else
+				else {
+  				// keep it visible to screen readers, but hide it visibly
 					this.$descDiv.addClass('able-clipped');
 				}
 				if (!this.swappingSrc) {
@@ -118,7 +118,6 @@
 			}
 		}
 		else { // description is off.
-
 			if (this.prevDescFormat === 'video') { // user was previously using description via video
 				if (this.usingAudioDescription()) {
 					this.swapDescription();
@@ -148,7 +147,6 @@
 	};
 
 	AblePlayer.prototype.swapDescription = function() {
-
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)

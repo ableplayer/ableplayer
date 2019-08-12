@@ -152,7 +152,7 @@ var it = {
 "prefIntroDescription2": "il video corrente ha ",
 "prefIntroDescriptionNone": "Il video corrente non ha audiodescrizioni.",
 
-"prefIntroDescription3": "Usa il seguente form per impostare le tue preferenze relative all'audiodescrizione.",
+"prefIntroDescription3": "Usa il seguente form per impostare le tue preferenze relative all'audiodescrizione testuale.",
 
 "prefIntroDescription4": "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.",
 

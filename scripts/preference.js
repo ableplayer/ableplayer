@@ -216,7 +216,7 @@
 			});
 			prefs.push({
 				'name': 'prefDescFormat', // audio description default state
-				'label': this.tt.prefDescFormat,
+				'label': null,
 				'group': 'descriptions',
 				'default': 'video'
 			});
@@ -275,7 +275,7 @@
 		var available, thisObj, $prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
-			$descFieldset1, $descLegend1, $descFieldset2, $descLegend2, $legend,
+			$descFieldset, $descLegend, $legend,
 			thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
 			$div1,id1,$radio1,$label1,
 			$div2,id2,$radio2,$label2,
@@ -373,35 +373,17 @@
 			$prefsDiv.append($prefsIntro);
 		}
 
-		if (form === 'descriptions') {
-			// descriptions form has two field sets
-
-			// Fieldset 1
-			$descFieldset1 = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form + '1';
-			fieldsetId = this.mediaId + '-prefs-' + form + '1';
-			$descFieldset1.addClass(fieldsetClass).attr('id',fieldsetId);
-			$descLegend1 = $('<legend>' + this.tt.prefDescFormat + '</legend>');
-			$descFieldset1.append($descLegend1);
-
-			// Fieldset 2
-			$descFieldset2 = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form + '2';
-			fieldsetId = this.mediaId + '-prefs-' + form + '2';
-			$descFieldset2.addClass(fieldsetClass).attr('id',fieldsetId);
-			$descLegend2 = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
-			$descFieldset2.append($descLegend2);
+		$fieldset = $('<fieldset>');
+		fieldsetClass = 'able-prefs-' + form;
+		fieldsetId = this.mediaId + '-prefs-' + form;
+		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+		if (form === 'keyboard') {
+		  $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$fieldset.append($legend);
 		}
-		else {
-			// all other forms just have one fieldset
-			$fieldset = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form;
-			fieldsetId = this.mediaId + '-prefs-' + form;
-			$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
-			if (form === 'keyboard') {
-				$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
-				$fieldset.append($legend);
-			}
+		else if (form === 'descriptions') {
+  		$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+  		$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
 
@@ -411,48 +393,9 @@
 				thisPref = available[i]['name'];
 				thisClass = 'able-' + thisPref;
 				thisId = this.mediaId + '_' + thisPref;
-				if (thisPref !== 'prefDescFormat') {
-					$thisDiv = $('<div>').addClass(thisClass);
-				}
+				$thisDiv = $('<div>').addClass(thisClass);
 
-				// Audio Description preferred format radio buttons
-				if (thisPref == 'prefDescFormat') {
-
-					// option 1 radio button
-					$div1 = $('<div>');
-					id1 = thisId + '_1';
-					$label1 = $('<label>')
-						.attr('for',id1)
-						.text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption1))
-					$radio1 = $('<input>',{
-						type: 'radio',
-						name: thisPref,
-						id: id1,
-						value: 'video'
-					});
-					if (this.prefDescFormat === 'video') {
-						$radio1.prop('checked',true);
-					};
-					$div1.append($radio1,$label1);
-
-					// option 2 radio button
-					$div2 = $('<div>');
-					id2 = thisId + '_2';
-					$label2 = $('<label>')
-						.attr('for',id2)
-						.text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption2));
-					$radio2 = $('<input>',{
-						type: 'radio',
-						name: thisPref,
-						id: id2,
-						value: 'text'
-					});
-					if (this.prefDescFormat === 'text') {
-						$radio2.prop('checked',true);
-					};
-					$div2.append($radio2,$label2);
-				}
-				else if (form === 'captions') {
+				if (form === 'captions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<select>',{
 						name: thisPref,
@@ -544,25 +487,11 @@
 					}
 					$thisDiv.append($thisField,$thisLabel);
 				}
-				if (form === 'descriptions') {
-					if (thisPref === 'prefDescFormat') {
-						$descFieldset1.append($div1,$div2);
-					}
-					else {
-						$descFieldset2.append($thisDiv);
-					}
-				}
-				else {
-					$fieldset.append($thisDiv);
-				}
+				$fieldset.append($thisDiv);
 			}
 		}
-		if (form === 'descriptions') {
-			$prefsDiv.append($descFieldset1,$descFieldset2);
-		}
-		else {
-			$prefsDiv.append($fieldset);
-		}
+		$prefsDiv.append($fieldset);
+
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
 			if (this.mediaType === 'video') {
@@ -749,15 +678,7 @@
 		 available = this.getAvailablePreferences();
 		 for (i=0; i<available.length; i++) {
 			 prefName = available[i]['name'];
-			 if (prefName === 'prefDescFormat') {
-				 if (this[prefName] === 'text') {
-					 $('input[value="text"]').prop('checked',true);
-				 }
-				 else {
-					 $('input[value="video"]').prop('checked',true);
-				 }
-			 }
-			 else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+			 if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				 // this is a caption-related select box
 				 $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
 			 }
@@ -790,8 +711,10 @@
 			if (available[i]['label']) {
 				var prefName = available[i]['name'];
 				if (prefName == 'prefDescFormat') {
-					this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting
+  				// As of v4.0.10, prefDescFormat is no longer a choice
+					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
+					this.prefDescFormat = 'video';
+					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
 						cookie.preferences['prefDescFormat'] = this.prefDescFormat;
 						numChanges++;
 					}
