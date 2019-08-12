@@ -116,7 +116,7 @@ var he = {
 
 "statusLoading Next": "טוען את הרצועה הבאה",
 
-"statusEnd": "סוף המסלול", "
+"statusEnd": "סוף המסלול",
 
 "selectTrack": "מסלול נבחר",
 
@@ -132,9 +132,9 @@ var he = {
 
 "prefMenuCaptions": "כיתובים",
 
-"prefMenuDescriptions": "תיאורים", "
+"prefMenuDescriptions": "תיאורים",
 
-"prefMenuKeyboard": "מקלדת", "
+"prefMenuKeyboard": "מקלדת",
 
 "prefMenuTranscript": "תמליל",
 
@@ -164,21 +164,21 @@ var he = {
 
 "prefIntroKeyboard3": "הערה: ייתכן שחלק מצירופי המקשים מתנגשים עם המקשים המשמשים את הדפדפן ו / או יישומי תוכנה אחרים, נסה שילובים שונים של מפתחות שינוי כדי למצוא אחד המתאים לך.",
 
-"prefIntroTranscript": "ההעדפות הבאות משפיעות על התמליל האינטראקטיבי".,
+"prefIntroTranscript": "ההעדפות הבאות משפיעות על התמליל האינטראקטיבי.",
 
-"prefCookieWarning": "שמירת ההעדפות שלך דורשת קובצי cookie".,
+"prefCookieWarning": "שמירת ההעדפות שלך דורשת קובצי cookie.",
 
 "prefHeadingKeyboard1": "מקשי משנה המשמשים לקיצורי דרך",
 
 "prefHeadingKeyboard2": "קיצורי מקשים נוכחיים",
 
-"prefHeadingDescription": "תיאור שמע", "
+"prefHeadingDescription": "תיאור שמע",
 
 "prefHeadingTextDescription": "תיאור מבוסס טקסט מבוסס טקסט",
 
-"prefHeadingCaptions": "כיתובים", "
+"prefHeadingCaptions": "כיתובים",
 
-"prefHeadingTranscript": "תמליל אינטראקטיבי"
+"prefHeadingTranscript": "תמליל אינטראקטיבי",
 
 "prefAltKey": "Alt",
 
@@ -210,17 +210,17 @@ var he = {
 
 "prefTabbable": "הפעל תמליל",
 
-"prefCaptionsFont": "גופן", "
+"prefCaptionsFont": "גופן",
 
-"prefCaptionsColor": "צבע טקסט", "
+"prefCaptionsColor": "צבע טקסט",
 
-"prefCaptionsBGColor": "רקע", "
+"prefCaptionsBGColor": "רקע",
 
-"prefCaptionsSize": "גודל גופן", "
+"prefCaptionsSize": "גודל גופן",
 
 "prefCaptionsOpacity": "אטימות",
 
-"prefCaptionsStyle": "סגנון", "
+"prefCaptionsStyle": "סגנון",
 
 "serif": "serif",
 
