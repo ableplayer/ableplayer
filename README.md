@@ -138,7 +138,6 @@ to all use cases, both audio and video.
 
 ```HTML
 <!-- Dependencies -->
-<script src="thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="thirdparty/js.cookie.js"></script>
 
