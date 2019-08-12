@@ -1179,6 +1179,9 @@
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
+		if (!this.$descDiv.is(':hidden')) {
+			this.$descDiv.hide();
+		}
 		this.refreshingDesc = true;
 		this.initDescription();
 		this.refreshControls('descriptions');

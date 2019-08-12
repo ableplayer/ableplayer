@@ -7147,6 +7147,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 		}
+
 		// update this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
@@ -7164,13 +7165,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else { // description button is off
+      this.useDescFormat = false;
+			this.descOn = false;
 			if (this.refreshingDesc) { // user just now toggled it off
 				this.prevDescFormat = this.useDescFormat;
-				this.useDescFormat = false;
-				this.descOn = false;
-			}
-			else { // desc has always been off
-				this.useDescFormat = false;
 			}
 		}
 
@@ -7380,7 +7378,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// there's a lot of redundancy between this function and showCaptions
 		// Trying to combine them ended up in a mess though. Keeping as is for now.
 
-		if (this.swappingSrc) {
+		if (this.swappingSrc || !this.descOn) {
 			return;
 		}
 
@@ -7436,7 +7434,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						if (thisObj.pausedForDescription) {
 							thisObj.playMedia();
 						}
-      			};
+      		};
 					this.synth.speak(msg);
 					if (this.prefVisibleDesc) {
 						// write description to the screen for sighted users
@@ -8810,6 +8808,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
+		if (!this.$descDiv.is(':hidden')) {
+			this.$descDiv.hide();
+		}
 		this.refreshingDesc = true;
 		this.initDescription();
 		this.refreshControls('descriptions');

@@ -40,6 +40,7 @@
 				}
 			}
 		}
+
 		// update this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
@@ -57,13 +58,10 @@
 			}
 		}
 		else { // description button is off
+      this.useDescFormat = false;
+			this.descOn = false;
 			if (this.refreshingDesc) { // user just now toggled it off
 				this.prevDescFormat = this.useDescFormat;
-				this.useDescFormat = false;
-				this.descOn = false;
-			}
-			else { // desc has always been off
-				this.useDescFormat = false;
 			}
 		}
 
@@ -273,7 +271,7 @@
 		// there's a lot of redundancy between this function and showCaptions
 		// Trying to combine them ended up in a mess though. Keeping as is for now.
 
-		if (this.swappingSrc) {
+		if (this.swappingSrc || !this.descOn) {
 			return;
 		}
 
@@ -329,7 +327,7 @@
 						if (thisObj.pausedForDescription) {
 							thisObj.playMedia();
 						}
-      			};
+      		};
 					this.synth.speak(msg);
 					if (this.prefVisibleDesc) {
 						// write description to the screen for sighted users
