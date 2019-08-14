@@ -17,6 +17,7 @@
 		// hasClosedDesc == true if a description text track is available
 		// this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
 		// descOn == true if description of either type is on
+		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
 
 		var thisObj = this;
     if (this.refreshingDesc) {
@@ -309,7 +310,10 @@
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (typeof this.synth !== 'undefined' && typeof this.descVoiceIndex !== 'undefined') {
+				if (
+  				this.exposeTextDescriptions &&
+				  typeof this.synth !== 'undefined' &&
+          typeof this.descVoiceIndex !== 'undefined') {
 					// browser supports speech synthesis and a voice has been selected in initDescription()
 					// use the web speech API
 					msg = new SpeechSynthesisUtterance();
@@ -338,7 +342,7 @@
 					// load the new description into the container div for screen readers to read
 					this.$descDiv.html(descText);
 				}
-				if (this.prefDescPause) {
+				if (this.prefDescPause && this.exposeTextDescriptions) {
 					this.pauseMedia();
 					this.pausedForDescription = true;
 				}

@@ -168,6 +168,20 @@
 			this.useDescriptionsButton = true;
 		}
 
+		// Silence audio description
+		// set to "false" if the sole purposes of the WebVTT descriptions file
+		// is to display description text visibly and to integrate it into the transcript
+		if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
+			this.exposeTextDescriptions = false;
+		}
+		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
+  		// support both singular and plural spelling of attribute
+			this.exposeTextDescriptions = false;
+		}
+		else {
+			this.exposeTextDescriptions = true;
+		}
+
 		// Headings
 		// By default, an off-screen heading is automatically added to the top of the media player
 		// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()

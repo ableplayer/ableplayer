@@ -168,6 +168,20 @@
 			this.useDescriptionsButton = true;
 		}
 
+		// Silence audio description
+		// set to "false" if the sole purposes of the WebVTT descriptions file
+		// is to display description text visibly and to integrate it into the transcript
+		if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
+			this.exposeTextDescriptions = false;
+		}
+		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
+  		// support both singular and plural spelling of attribute
+			this.exposeTextDescriptions = false;
+		}
+		else {
+			this.exposeTextDescriptions = true;
+		}
+
 		// Headings
 		// By default, an off-screen heading is automatically added to the top of the media player
 		// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
@@ -3112,10 +3126,14 @@
 		// create a div for exposing description
 		// description will be exposed via role="alert" & announced by screen readers
 		this.$descDiv = $('<div>',{
-			'class': 'able-descriptions',
-			'aria-live': 'assertive',
-			'aria-atomic': 'true'
+			'class': 'able-descriptions'
 		});
+		if (this.exposeTextDescriptions) {
+  		this.$descDiv.attr({
+  			'aria-live': 'assertive',
+        'aria-atomic': 'true'
+		  });
+		}
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
 		this.$descDiv.hide();
@@ -7047,6 +7065,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// hasClosedDesc == true if a description text track is available
 		// this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
 		// descOn == true if description of either type is on
+		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
 
 		var thisObj = this;
     if (this.refreshingDesc) {
@@ -7339,7 +7358,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (typeof this.synth !== 'undefined' && typeof this.descVoiceIndex !== 'undefined') {
+				if (
+  				this.exposeTextDescriptions &&
+				  typeof this.synth !== 'undefined' &&
+          typeof this.descVoiceIndex !== 'undefined') {
 					// browser supports speech synthesis and a voice has been selected in initDescription()
 					// use the web speech API
 					msg = new SpeechSynthesisUtterance();
@@ -7368,7 +7390,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					// load the new description into the container div for screen readers to read
 					this.$descDiv.html(descText);
 				}
-				if (this.prefDescPause) {
+				if (this.prefDescPause && this.exposeTextDescriptions) {
 					this.pauseMedia();
 					this.pausedForDescription = true;
 				}

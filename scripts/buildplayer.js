@@ -153,10 +153,14 @@
 		// create a div for exposing description
 		// description will be exposed via role="alert" & announced by screen readers
 		this.$descDiv = $('<div>',{
-			'class': 'able-descriptions',
-			'aria-live': 'assertive',
-			'aria-atomic': 'true'
+			'class': 'able-descriptions'
 		});
+		if (this.exposeTextDescriptions) {
+  		this.$descDiv.attr({
+  			'aria-live': 'assertive',
+        'aria-atomic': 'true'
+		  });
+		}
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
 		this.$descDiv.hide();

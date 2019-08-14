@@ -370,18 +370,18 @@ auto-generated interactive transcript. Therefore, it is important for the
 WebVTT description file to be accurately synchronized with the separate 
 described version of the video.  
 
-on user preference. If a user prefers text-based description announced
-by their screen reader, that’s what they’ll get. If they prefer an
-alternate video with description mixed in, that’s what they’ll get. See
-the section below on *User Preferences* for additional information about
-preferences.
-
 In some applications, text-based descriptions might be a required
 part of the interface (e.g., if video pauses so users can interact with
 HTML overlays; text-based description could be used in this context to provide
 additional instructions for screen reader users). In such cases the Descriptions
 button can be eliminated from the controller with **data-use-descriptions-button="false"**.
 
+In other applications, a WebVTT descriptions file might be used solely for the purposes 
+of displaying visible description text or incorporating description text into the 
+auto-generated transcript, and the WebVTT description text is not intended to be read aloud 
+by screen readers or browsers  (for example, if the sole video source is a described video).
+In such cases, use **data-descriptions-audible="false"** to prevent browsers and screen readers 
+from announcing changes to the description text. 
 
 #### Sign language
 
