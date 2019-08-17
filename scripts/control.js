@@ -655,8 +655,7 @@
 					this.$ccButton.attr({
 						'aria-label': this.tt.captions,
 						'aria-haspopup': 'true',
-						'aria-controls': this.mediaId + '-captions-menu',
-						'aria-expanded': 'false'
+						'aria-controls': this.mediaId + '-captions-menu'
 					});
 					this.$ccButton.find('span.able-clipped').text(this.tt.captions);
 				}
@@ -756,8 +755,7 @@
 				this.$chaptersButton.attr({
 					'aria-label': this.tt.chapters,
 					'aria-haspopup': 'true',
-					'aria-controls': this.mediaId + '-chapters-menu',
-					'aria-expanded': 'false'
+					'aria-controls': this.mediaId + '-chapters-menu'
 				});
 			}
 		}
@@ -1127,7 +1125,7 @@
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
 				this.hidingPopup = false;
-				this.$ccButton.attr('aria-expanded','false').focus();
+				this.$ccButton.removeAttr('aria-expanded').focus();
 			}
 			else {
 				this.closePopups();
@@ -1154,7 +1152,7 @@
 		if (this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.hidingPopup = false;
-			this.$chaptersButton.attr('aria-expanded','false').focus();
+			this.$chaptersButton.removeAttr('aria-expanded').focus();
 		}
 		else {
 			this.closePopups();
@@ -1204,7 +1202,7 @@
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
 			this.hidingPopup = false;
-			this.$prefsButton.attr('aria-expanded','false').focus();
+			this.$prefsButton.removeAttr('aria-expanded').focus();
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 		}

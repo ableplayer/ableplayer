@@ -596,34 +596,34 @@
 
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
-			this.$chaptersButton.attr('aria-expanded','false').focus();
+			this.$chaptersButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
-			this.$ccButton.attr('aria-expanded','false').focus();
+			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.attr('aria-expanded','false').focus();
+			this.$prefsButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeAlert.text(this.tt.volumeSliderClosed);
-			this.$volumeButton.attr('aria-expanded','false').focus();
+			this.$volumeButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$transcriptPopupButton.attr('aria-expanded','false').focus();
+			this.$transcriptPopupButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.$signPopup && this.$signPopup.is(':visible')) {
 			this.$signPopup.hide();
 			// restore menu items to their original state
 			this.$signPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$signPopupButton.attr('aria-expanded','false').focus();
+			this.$signPopupButton.removeAttr('aria-expanded').focus();
 		}
 	};
 
