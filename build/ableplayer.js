@@ -8394,24 +8394,42 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 					this.getPlayerState().then(function(currentState) {
 						if (thisObj.$status.text() !== textByState[currentState] && !thisObj.seekBar.tracking) {
-							// Debounce updates; only update after status has stayed steadily different for 250ms.
-							timestamp = (new Date()).getTime();
+							// Debounce updates; only update after status has stayed steadily different for a while
+							// "A while" is defined differently depending on context
+							if (thisObj.swappingSrc) {
+                // this is where most of the chatter occurs (e.g., playing, paused, buffering, playing),
+                // so set a longer wait time before writing a status message
+                if (!thisObj.debouncingStatus) {
+                  thisObj.statusMessageThreshold = 2000; // in ms (2 seconds)
+                }
+              }
+              else {
+                // for all other contexts (e.g., users clicks Play/Pause)
+                // user should receive more rapid feedback
+                if (!thisObj.debouncingStatus) {
+                  thisObj.statusMessageThreshold = 250; // in ms
+                }
+              }
+  						timestamp = (new Date()).getTime();
 							if (!thisObj.statusDebounceStart) {
 								thisObj.statusDebounceStart = timestamp;
-								// Make sure refreshControls gets called again at the appropriate time to check.
+								// Call refreshControls() again after allotted time has passed
+								thisObj.debouncingStatus = true;
 								thisObj.statusTimeout = setTimeout(function () {
+                  thisObj.debouncingStatus = false;
 									thisObj.refreshControls(context);
-								}, 300);
+								}, thisObj.statusMessageThreshold);
 							}
-							else if ((timestamp - thisObj.statusDebounceStart) > 250) {
-								thisObj.$status.text(textByState[currentState]);
-								thisObj.statusDebounceStart = null;
-								clearTimeout(thisObj.statusTimeout);
-								thisObj.statusTimeout = null;
-							}
+							else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
+    						thisObj.$status.text(textByState[currentState]);
+                thisObj.statusDebounceStart = null;
+                clearTimeout(thisObj.statusTimeout);
+                thisObj.statusTimeout = null;
+						  }
 						}
 						else {
 							thisObj.statusDebounceStart = null;
+							thisObj.debouncingStatus = false;
 							clearTimeout(thisObj.statusTimeout);
 							thisObj.statusTimeout = null;
 						}
