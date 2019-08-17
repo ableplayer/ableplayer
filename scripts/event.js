@@ -186,7 +186,9 @@
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 
 		// TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
-		var whichButton = $(el).attr('class').split(' ')[0].substr(20);
+
+		var whichButton, prefsPopup;
+		whichButton = $(el).attr('class').split(' ')[0].substr(20);
 		if (whichButton === 'play') {
   		this.clickedPlay = true;
 			this.handlePlay();
@@ -236,7 +238,25 @@
 			this.handleSignToggle();
 		}
 		else if (whichButton === 'preferences') {
-			this.handlePrefsClick();
+      if ($(el).attr('data-prefs-popup') === 'menu') {
+  			this.handlePrefsClick();
+  		}
+  		else {
+        this.closePopups();
+    		prefsPopup = $(el).attr('data-prefs-popup');
+        if (prefsPopup === 'keyboard') {
+				  this.keyboardPrefsDialog.show();
+				}
+        else if (prefsPopup === 'captions') {
+				  this.captionPrefsDialog.show();
+				}
+        else if (prefsPopup === 'descriptions') {
+				  this.descPrefsDialog.show();
+				}
+        else if (prefsPopup === 'transcript') {
+				  this.transcriptPrefsDialog.show();
+				}
+  		}
 		}
 		else if (whichButton === 'help') {
 			this.handleHelpClick();

@@ -401,44 +401,51 @@
 
 		// Populate menu with menu items
 		if (which === 'prefs') {
-			prefCats = this.getPreferencesGroups();
-			for (i = 0; i < prefCats.length; i++) {
-				$menuItem = $('<li></li>',{
-					'role': 'menuitem',
-					'tabindex': '-1'
-				});
-				prefCat = prefCats[i];
-				if (prefCat === 'captions') {
-					$menuItem.text(this.tt.prefMenuCaptions);
-				}
-				else if (prefCat === 'descriptions') {
-					$menuItem.text(this.tt.prefMenuDescriptions);
-				}
-				else if (prefCat === 'keyboard') {
-					$menuItem.text(this.tt.prefMenuKeyboard);
-				}
-				else if (prefCat === 'transcript') {
-					$menuItem.text(this.tt.prefMenuTranscript);
-				}
-				$menuItem.on('click',function() {
-					whichPref = $(this).text();
-					thisObj.setFullscreen(false);
-					if (whichPref === thisObj.tt.prefMenuCaptions) {
-						thisObj.captionPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuDescriptions) {
-						thisObj.descPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuKeyboard) {
-						thisObj.keyboardPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuTranscript) {
-						thisObj.transcriptPrefsDialog.show();
-					}
-					thisObj.closePopups();
-				});
-				$menu.append($menuItem);
-			}
+      if (this.prefCats.length > 1) {
+  			for (i = 0; i < this.prefCats.length; i++) {
+	  			$menuItem = $('<li></li>',{
+		  			'role': 'menuitem',
+            'tabindex': '-1'
+				  });
+          prefCat = this.prefCats[i];
+          if (prefCat === 'captions') {
+					  $menuItem.text(this.tt.prefMenuCaptions);
+				  }
+          else if (prefCat === 'descriptions') {
+					  $menuItem.text(this.tt.prefMenuDescriptions);
+				  }
+          else if (prefCat === 'keyboard') {
+					  $menuItem.text(this.tt.prefMenuKeyboard);
+				  }
+          else if (prefCat === 'transcript') {
+					  $menuItem.text(this.tt.prefMenuTranscript);
+				  }
+          $menuItem.on('click',function() {
+					  whichPref = $(this).text();
+            thisObj.setFullscreen(false);
+            if (whichPref === thisObj.tt.prefMenuCaptions) {
+						  thisObj.captionPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+						  thisObj.descPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+						  thisObj.keyboardPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuTranscript) {
+						  thisObj.transcriptPrefsDialog.show();
+					  }
+            thisObj.closePopups();
+				  });
+          $menu.append($menuItem);
+			  }
+			  this.$prefsButton.attr('data-prefs-popup','menu');
+      }
+      else if (this.prefCats.length == 1) {
+        // only 1 category, so don't create a popup menu.
+        // Instead, open dialog directly when user clicks Prefs button
+        this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
+      }
 		}
 		else if (which === 'captions' || which === 'chapters') {
 			hasDefault = false;
@@ -1000,15 +1007,31 @@
 					});
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
-							popupMenuId = this.mediaId + '-prefs-menu';
+  						this.prefCats = this.getPreferencesGroups();
+              if (this.prefCats.length > 1) {
+  						  // Prefs button will trigger a menu
+                popupMenuId = this.mediaId + '-prefs-menu';
+                $newButton.attr({
+							    'aria-controls': popupMenuId,
+                  'aria-haspopup': 'menu'
+                });
+						  }
+              else if (this.prefCats.length === 1) {
+  						  // Prefs button will trigger a dialog
+                $newButton.attr({
+    						  'aria-haspopup': 'dialog'
+                });
+						  }
 						}
 						else if (control === 'volume') {
 							popupMenuId = this.mediaId + '-volume-slider';
+							// volume slider popup is not a menu or a dialog
+							// therefore, using aria-expanded rather than aria-haspopup to communicate properties/state
+              $newButton.attr({
+                'aria-controls': popupMenuId,
+    						'aria-expanded': 'false'
+              });
 						}
-						$newButton.attr({
-							'aria-controls': popupMenuId,
-							'aria-expanded': 'false'
-						});
 					}
 					if (this.iconType === 'font') {
 						if (control === 'volume') {

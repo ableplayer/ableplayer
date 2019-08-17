@@ -3374,44 +3374,51 @@
 
 		// Populate menu with menu items
 		if (which === 'prefs') {
-			prefCats = this.getPreferencesGroups();
-			for (i = 0; i < prefCats.length; i++) {
-				$menuItem = $('<li></li>',{
-					'role': 'menuitem',
-					'tabindex': '-1'
-				});
-				prefCat = prefCats[i];
-				if (prefCat === 'captions') {
-					$menuItem.text(this.tt.prefMenuCaptions);
-				}
-				else if (prefCat === 'descriptions') {
-					$menuItem.text(this.tt.prefMenuDescriptions);
-				}
-				else if (prefCat === 'keyboard') {
-					$menuItem.text(this.tt.prefMenuKeyboard);
-				}
-				else if (prefCat === 'transcript') {
-					$menuItem.text(this.tt.prefMenuTranscript);
-				}
-				$menuItem.on('click',function() {
-					whichPref = $(this).text();
-					thisObj.setFullscreen(false);
-					if (whichPref === thisObj.tt.prefMenuCaptions) {
-						thisObj.captionPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuDescriptions) {
-						thisObj.descPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuKeyboard) {
-						thisObj.keyboardPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuTranscript) {
-						thisObj.transcriptPrefsDialog.show();
-					}
-					thisObj.closePopups();
-				});
-				$menu.append($menuItem);
-			}
+      if (this.prefCats.length > 1) {
+  			for (i = 0; i < this.prefCats.length; i++) {
+	  			$menuItem = $('<li></li>',{
+		  			'role': 'menuitem',
+            'tabindex': '-1'
+				  });
+          prefCat = this.prefCats[i];
+          if (prefCat === 'captions') {
+					  $menuItem.text(this.tt.prefMenuCaptions);
+				  }
+          else if (prefCat === 'descriptions') {
+					  $menuItem.text(this.tt.prefMenuDescriptions);
+				  }
+          else if (prefCat === 'keyboard') {
+					  $menuItem.text(this.tt.prefMenuKeyboard);
+				  }
+          else if (prefCat === 'transcript') {
+					  $menuItem.text(this.tt.prefMenuTranscript);
+				  }
+          $menuItem.on('click',function() {
+					  whichPref = $(this).text();
+            thisObj.setFullscreen(false);
+            if (whichPref === thisObj.tt.prefMenuCaptions) {
+						  thisObj.captionPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+						  thisObj.descPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+						  thisObj.keyboardPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuTranscript) {
+						  thisObj.transcriptPrefsDialog.show();
+					  }
+            thisObj.closePopups();
+				  });
+          $menu.append($menuItem);
+			  }
+			  this.$prefsButton.attr('data-prefs-popup','menu');
+      }
+      else if (this.prefCats.length == 1) {
+        // only 1 category, so don't create a popup menu.
+        // Instead, open dialog directly when user clicks Prefs button
+        this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
+      }
 		}
 		else if (which === 'captions' || which === 'chapters') {
 			hasDefault = false;
@@ -3973,15 +3980,31 @@
 					});
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
-							popupMenuId = this.mediaId + '-prefs-menu';
+  						this.prefCats = this.getPreferencesGroups();
+              if (this.prefCats.length > 1) {
+  						  // Prefs button will trigger a menu
+                popupMenuId = this.mediaId + '-prefs-menu';
+                $newButton.attr({
+							    'aria-controls': popupMenuId,
+                  'aria-haspopup': 'menu'
+                });
+						  }
+              else if (this.prefCats.length === 1) {
+  						  // Prefs button will trigger a dialog
+                $newButton.attr({
+    						  'aria-haspopup': 'dialog'
+                });
+						  }
 						}
 						else if (control === 'volume') {
 							popupMenuId = this.mediaId + '-volume-slider';
+							// volume slider popup is not a menu or a dialog
+							// therefore, using aria-expanded rather than aria-haspopup to communicate properties/state
+              $newButton.attr({
+                'aria-controls': popupMenuId,
+    						'aria-expanded': 'false'
+              });
 						}
-						$newButton.attr({
-							'aria-controls': popupMenuId,
-							'aria-expanded': 'false'
-						});
 					}
 					if (this.iconType === 'font') {
 						if (control === 'volume') {
@@ -8760,6 +8783,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.handlePrefsClick = function(pref) {
+
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
@@ -11313,7 +11337,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 
 		// TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
-		var whichButton = $(el).attr('class').split(' ')[0].substr(20);
+
+		var whichButton, prefsPopup;
+		whichButton = $(el).attr('class').split(' ')[0].substr(20);
 		if (whichButton === 'play') {
   		this.clickedPlay = true;
 			this.handlePlay();
@@ -11363,7 +11389,25 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.handleSignToggle();
 		}
 		else if (whichButton === 'preferences') {
-			this.handlePrefsClick();
+      if ($(el).attr('data-prefs-popup') === 'menu') {
+  			this.handlePrefsClick();
+  		}
+  		else {
+        this.closePopups();
+    		prefsPopup = $(el).attr('data-prefs-popup');
+        if (prefsPopup === 'keyboard') {
+				  this.keyboardPrefsDialog.show();
+				}
+        else if (prefsPopup === 'captions') {
+				  this.captionPrefsDialog.show();
+				}
+        else if (prefsPopup === 'descriptions') {
+				  this.descPrefsDialog.show();
+				}
+        else if (prefsPopup === 'transcript') {
+				  this.transcriptPrefsDialog.show();
+				}
+  		}
 		}
 		else if (whichButton === 'help') {
 			this.handleHelpClick();
@@ -15389,7 +15433,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.getVimeoDimensions = function (vimeoContainerId) {
 
-		// get dimensions of YouTube video, return array with width & height
+		// get dimensions of Vimeo video, return array with width & height
 		// Sources, in order of priority:
 		// 1. The width and height attributes on <video>
 		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
@@ -15422,6 +15466,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.resizeVimeoPlayer = function(youTubeId, youTubeContainerId) {
+
+    // NOTE: This function is modeled after same function in youtube.js
+    // in case useful for Vimeo, but is not currently used
 
 		// called after player is ready, if youTube dimensions were previously unknown
 		// Now need to get them from the iframe element that YouTube injected
@@ -15478,6 +15525,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.setupVimeoCaptions = function () {
+
 
 		// called from setupAltCaptions if player is YouTube and there are no <track> captions
 
@@ -15591,6 +15639,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.initVimeoCaptionModule = function () {
+
+    // NOTE: This function is modeled after same function in youtube.js
+    // in case useful for Vimeo, but is not currently used
+
+
 		// This function is called when YouTube onApiChange event fires
 		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
 		// it isn't fired until the video starts playing
@@ -15657,6 +15710,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.getVimeoPosterUrl = function (youTubeId, width) {
+
+    // NOTE: This function is modeled after same function in youtube.js
+    // in case useful for Vimeo, but is not currently used
 
 			 // return a URL for retrieving a YouTube poster image
 			 // supported values of width: 120, 320, 480, 640

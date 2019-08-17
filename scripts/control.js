@@ -1188,6 +1188,7 @@
 	};
 
 	AblePlayer.prototype.handlePrefsClick = function(pref) {
+
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
