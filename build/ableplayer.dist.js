@@ -6841,7 +6841,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			e.stopPropagation();
 		});
 
-		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
+		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('aria-hidden');
 	};
 
 	AccessibleDialog.prototype.show = function () {
@@ -6888,7 +6888,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		this.modal.css('display', 'none');
 		this.modal.attr('aria-hidden', 'true');
-		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('aria-hidden', 'false');
+		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('aria-hidden');
 
 		this.focusedElementBeforeModal.focus();
 	};
