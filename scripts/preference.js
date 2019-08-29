@@ -32,7 +32,7 @@
 	AblePlayer.prototype.updateCookie = function( setting ) {
 
 		// called when a particular setting had been updated
-		// useful for settings updated indpedently of Preferences dialog
+		// useful for settings updated indepedently of Preferences dialog
 		// e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
 		// setting is any supported preference name (e.g., "prefCaptions")
 		// OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
@@ -245,8 +245,10 @@
 		return prefs;
 	};
 
-	// Loads current/default preferences from cookie into the AblePlayer object.
 	AblePlayer.prototype.loadCurrentPreferences = function () {
+
+  	// Load current/default preferences from cookie into the AblePlayer object.
+
 		var available = this.getAvailablePreferences();
 		var cookie = this.getCookie();
 
@@ -398,7 +400,7 @@
 				if (form === 'captions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<select>',{
-						name: thisPref,
+						name: thisId,
 						id: thisId,
 					});
 					if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') {
@@ -453,7 +455,7 @@
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<input>',{
 						type: 'checkbox',
-						name: thisPref,
+						name: thisId,
 						id: thisId,
 						value: 'true'
 					});
@@ -628,7 +630,7 @@
 		cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
 		saveButton.click(function () {
 			dialog.hide();
-			thisObj.savePrefsFromForm();
+		  thisObj.savePrefsFromForm();
 		});
 		cancelButton.click(function () {
 			dialog.hide();
@@ -665,29 +667,32 @@
 		});
 	};
 
-	 // Reset preferences form with default values from cookie
-	 // Called when user clicks cancel or close button in Prefs Dialog
-	 // also called when user presses Escape
-
 	 AblePlayer.prototype.resetPrefsForm = function () {
 
-		 var thisObj, cookie, available, i, prefName, thisDiv, thisId;
+  	 // Reset preferences form with default values from cookie
+     // Called when:
+     // User clicks cancel or close button in Prefs Dialog
+     // User presses Escape to close Prefs dialog
+     // User clicks Save in Prefs dialog, & there's more than one player on page
+
+		 var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
 
 		 thisObj = this;
 		 cookie = this.getCookie();
 		 available = this.getAvailablePreferences();
 		 for (i=0; i<available.length; i++) {
 			 prefName = available[i]['name'];
+			 prefId = this.mediaId + '_' + prefName;
 			 if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				 // this is a caption-related select box
-				 $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
+				 $('select[name="' + prefId + '"]').val(cookie.preferences[prefName]);
 			 }
 			 else { // all others are checkboxes
 				 if (this[prefName] === 1) {
-					 $('input[name="' + prefName + '"]').prop('checked',true);
+					 $('input[name="' + prefId + '"]').prop('checked',true);
 					}
 					else {
-						$('input[name="' + prefName + '"]').prop('checked',false);
+						$('input[name="' + prefId + '"]').prop('checked',false);
 					}
 				}
 			}
@@ -695,21 +700,25 @@
 			this.stylizeCaptions(this.$sampleCapsDiv);
 	 };
 
-	// Return a prefs object constructed from the form.
 	AblePlayer.prototype.savePrefsFromForm = function () {
+
+  	// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
 		// update cookie with new value
-		var numChanges, numCapChanges, capSizeChanged, capSizeValue, newValue;
+		var cookie, available, prefName, prefId, numChanges,
+		  numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
 		numCapChanges = 0; // changes to caption-style-related preferences
 		capSizeChanged = false;
-		var cookie = this.getCookie();
-		var available = this.getAvailablePreferences();
+		cookie = this.getCookie();
+		available = this.getAvailablePreferences();
 		for (var i=0; i < available.length; i++) {
 			// only prefs with labels are used in the Prefs form
 			if (available[i]['label']) {
-				var prefName = available[i]['name'];
+				prefName = available[i]['name'];
+				prefId = this.mediaId + '_' + prefName;
+
 				if (prefName == 'prefDescFormat') {
   				// As of v4.0.10, prefDescFormat is no longer a choice
 					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
@@ -721,7 +730,7 @@
 				}
 				else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
-					newValue = $('select[name="' + prefName + '"]').val();
+					newValue = $('select[name="' + prefId + '"]').val();
 					if (cookie.preferences[prefName] !== newValue) { // user changed setting
 						cookie.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -735,7 +744,7 @@
 					}
 				}
 				else { // all other fields are checkboxes
-					if ($('input[name="' + prefName + '"]').is(':checked')) {
+					if ($('input[name="' + prefId + '"]').is(':checked')) {
 						cookie.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed
@@ -773,18 +782,38 @@
 				// update font size of YouTube captions
 				this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
-		this.updatePrefs();
-		if (numCapChanges > 0) {
-			this.stylizeCaptions(this.$captionsDiv);
-			// also apply same changes to descriptions, if present
-			if (typeof this.$descDiv !== 'undefined') {
-				this.stylizeCaptions(this.$descDiv);
-			}
-		}
+    if (AblePlayerInstances.length > 1) {
+      // there are multiple players on this page.
+      // update prefs for ALL of them
+      for (var i=0; i<AblePlayerInstances.length; i++) {
+        AblePlayerInstances[i].updatePrefs();
+        AblePlayerInstances[i].loadCurrentPreferences();
+        AblePlayerInstances[i].resetPrefsForm();
+        if (numCapChanges > 0) {
+          AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
+          // also apply same changes to descriptions, if present
+          if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
+            AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
+			    }
+        }
+      }
+    }
+    else {
+      // there is only one player
+      this.updatePrefs();
+      if (numCapChanges > 0) {
+        this.stylizeCaptions(this.$captionsDiv);
+        // also apply same changes to descriptions, if present
+        if (typeof this.$descDiv !== 'undefined') {
+          this.stylizeCaptions(this.$descDiv);
+			  }
+      }
+    }
 	}
 
-	// Updates player based on current prefs.	 Safe to call multiple times.
 	AblePlayer.prototype.updatePrefs = function () {
+
+  	// Update player based on current prefs. Safe to call multiple times.
 
 		var modHelp;
 
@@ -824,6 +853,7 @@
 	};
 
 	AblePlayer.prototype.usingModifierKeys = function(e) {
+
 		// return true if user is holding down required modifier keys
 		if ((this.prefAltKey === 1) && !e.altKey) {
 			return false;

@@ -34,11 +34,15 @@
 /*global $, jQuery */
 "use strict";
 
+// maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
+var AblePlayerInstances = [];
+
 (function ($) {
 	$(document).ready(function () {
+
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {
-				new AblePlayer($(this),$(element));
+				AblePlayerInstances.push(new AblePlayer($(this),$(element)));
 			}
 		});
 	});
@@ -61,10 +65,8 @@
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
 	window.AblePlayer = function(media) {
-
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
-
 		this.media = media;
 		if ($(media).length === 0) {
 			this.provideFallback();

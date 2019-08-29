@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Video Demo #16</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- CSS for this example page -->
+<style>
+  main {
+    position: relative;
+    width: 100%;
+    margin: 0;
+  }
+</style>
+
+</head>
+
+<body>
+
+<h1>Able Player Video Demo #16:<br/>Multiple video players</h1>
+
+<p>Although it is possible to have multiple players on a single page, this is discouraged
+  as it might be confusing for users ("which player am I on?").
+  Note that only the first player can be operated with keystrokes.
+  Use <a href="video15.html">playlists</a> instead.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<h2>Player #1: World Wide Access</h2>
+<video id="video1" preload="auto" width="800" data-able-player playsinline>
+  <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-sign-src="../media/wwa_sign.mp4"/>
+  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm" data-sign-src="../media/wwa_sign.webm"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+  <track kind="subtitles" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+  <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+  <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+  <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+  <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+  <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+  <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+</video>
+
+<h2>Player #2: The Deadline</h2>
+<video id="video2" preload="auto" width="800" height="450" data-able-player playsinline>
+  <source type="video/mp4" src="../media/deadline.mp4" data-desc-src="../media/deadline_desc.mp4"/>
+  <track kind="captions" src="../media/deadline_captions_en.vtt" srclang="en" label="English" default/>
+  <track kind="captions" src="../media/deadline_captions_ar.vtt" srclang="ar" label="Arabic"/>
+  <track kind="captions" src="../media/deadline_captions_es.vtt" srclang="es" label="Spanish"/>
+  <track kind="captions" src="../media/deadline_captions_hi.vtt" srclang="hi" label="Hindi"/>
+  <track kind="captions" src="../media/deadline_captions_it.vtt" srclang="it" label="Italian"/>
+  <track kind="captions" src="../media/deadline_captions_pt-br.vtt" srclang="pt-br" label="Portuguese, Brazilian"/>
+  <track kind="descriptions" src="../media/deadline_descriptions_en.vtt" srclang="en" label="English descriptions"/>
+</video>
+
+</main>
+</body>
+</html>
