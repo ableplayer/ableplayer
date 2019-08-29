@@ -1765,7 +1765,7 @@ var AblePlayerInstances = [];
 				if (form === 'captions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<select>',{
-						name: thisId,
+						name: thisPref,
 						id: thisId,
 					});
 					if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') {
@@ -1820,7 +1820,7 @@ var AblePlayerInstances = [];
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<input>',{
 						type: 'checkbox',
-						name: thisId,
+						name: thisPref,
 						id: thisId,
 						value: 'true'
 					});
@@ -2050,14 +2050,14 @@ var AblePlayerInstances = [];
 			 prefId = this.mediaId + '_' + prefName;
 			 if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				 // this is a caption-related select box
-				 $('select[name="' + prefId + '"]').val(cookie.preferences[prefName]);
+				 $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
 			 }
 			 else { // all others are checkboxes
 				 if (this[prefName] === 1) {
-					 $('input[name="' + prefId + '"]').prop('checked',true);
+					 $('input[name="' + prefName + '"]').prop('checked',true);
 					}
 					else {
-						$('input[name="' + prefId + '"]').prop('checked',false);
+						$('input[name="' + prefName + '"]').prop('checked',false);
 					}
 				}
 			}
@@ -2095,7 +2095,7 @@ var AblePlayerInstances = [];
 				}
 				else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
-					newValue = $('select[name="' + prefId + '"]').val();
+					newValue = $('select[name="' + prefName + '"]').val();
 					if (cookie.preferences[prefName] !== newValue) { // user changed setting
 						cookie.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -2109,7 +2109,7 @@ var AblePlayerInstances = [];
 					}
 				}
 				else { // all other fields are checkboxes
-					if ($('input[name="' + prefId + '"]').is(':checked')) {
+					if ($('input[name="' + prefName + '"]').is(':checked')) {
 						cookie.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed
@@ -9831,6 +9831,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	}
 
 	AblePlayer.prototype.stylizeCaptions = function($element, pref) {
+
+
 		// $element is the jQuery element containing the captions
 		// this function handles stylizing of the sample caption text in the Prefs dialog
 		// plus the actual production captions
