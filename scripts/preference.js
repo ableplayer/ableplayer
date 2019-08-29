@@ -718,7 +718,6 @@
 			if (available[i]['label']) {
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
-
 				if (prefName == 'prefDescFormat') {
   				// As of v4.0.10, prefDescFormat is no longer a choice
 					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
@@ -730,7 +729,7 @@
 				}
 				else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
-					newValue = $('select[name="' + prefName + '"]').val();
+					newValue = $('select[id="' + prefId + '"]').val();
 					if (cookie.preferences[prefName] !== newValue) { // user changed setting
 						cookie.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -744,7 +743,7 @@
 					}
 				}
 				else { // all other fields are checkboxes
-					if ($('input[name="' + prefName + '"]').is(':checked')) {
+					if ($('input[id="' + prefId + '"]').is(':checked')) {
 						cookie.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed
@@ -814,23 +813,6 @@
 	AblePlayer.prototype.updatePrefs = function () {
 
   	// Update player based on current prefs. Safe to call multiple times.
-
-		var modHelp;
-
-		// modifier keys (update help text)
-		if (this.prefAltKey === 1) {
-			modHelp = 'Alt + ';
-		}
-		else {
-			modHelp = '';
-		}
-		if (this.prefCtrlKey === 1) {
-			modHelp += 'Control + ';
-		}
-		if (this.prefShiftKey === 1) {
-			modHelp += 'Shift + ';
-		}
-		$('.able-help-modifiers').text(modHelp);
 
 		// tabbable transcript
 		if (this.prefTabbable === 1) {

@@ -2083,7 +2083,6 @@ var AblePlayerInstances = [];
 			if (available[i]['label']) {
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
-
 				if (prefName == 'prefDescFormat') {
   				// As of v4.0.10, prefDescFormat is no longer a choice
 					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
@@ -2095,7 +2094,7 @@ var AblePlayerInstances = [];
 				}
 				else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
-					newValue = $('select[name="' + prefName + '"]').val();
+					newValue = $('select[id="' + prefId + '"]').val();
 					if (cookie.preferences[prefName] !== newValue) { // user changed setting
 						cookie.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -2109,7 +2108,7 @@ var AblePlayerInstances = [];
 					}
 				}
 				else { // all other fields are checkboxes
-					if ($('input[name="' + prefName + '"]').is(':checked')) {
+					if ($('input[id="' + prefId + '"]').is(':checked')) {
 						cookie.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed
@@ -2179,23 +2178,6 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.updatePrefs = function () {
 
   	// Update player based on current prefs. Safe to call multiple times.
-
-		var modHelp;
-
-		// modifier keys (update help text)
-		if (this.prefAltKey === 1) {
-			modHelp = 'Alt + ';
-		}
-		else {
-			modHelp = '';
-		}
-		if (this.prefCtrlKey === 1) {
-			modHelp += 'Control + ';
-		}
-		if (this.prefShiftKey === 1) {
-			modHelp += 'Shift + ';
-		}
-		$('.able-help-modifiers').text(modHelp);
 
 		// tabbable transcript
 		if (this.prefTabbable === 1) {
@@ -9832,7 +9814,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.stylizeCaptions = function($element, pref) {
 
-
 		// $element is the jQuery element containing the captions
 		// this function handles stylizing of the sample caption text in the Prefs dialog
 		// plus the actual production captions
@@ -11508,7 +11489,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
-
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		if (!(
 			$(':focus').is('[contenteditable]') ||
@@ -11532,7 +11512,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 			else if (which === 112) { // p = play/pause
-
 				if (this.usingModifierKeys(e)) {
 					this.handlePlay();
 				}
