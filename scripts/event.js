@@ -307,7 +307,6 @@
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
-console.log('You pressed ' + which);
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		if (!(
 			$(':focus').is('[contenteditable]') ||
@@ -331,7 +330,6 @@ console.log('You pressed ' + which);
 				}
 			}
 			else if (which === 112) { // p = play/pause
-console.log('playing...');
 				if (this.usingModifierKeys(e)) {
 					this.handlePlay();
 				}
