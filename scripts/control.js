@@ -743,7 +743,11 @@
 						// Set a flag to ignore the coming scroll event.
 						// there's no other way I know of to differentiate programmatic and user-initiated scroll events.
 						this.scrollingTranscript = true;
-						$('.able-transcript').scrollTop(newTop);
+						// only scroll once after moving a highlight
+						if (this.movingHighlight) {
+  						$('.able-transcript').scrollTop(newTop);
+              this.movingHighlight = false;
+            }
 					}
 				}
 			}

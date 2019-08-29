@@ -311,10 +311,15 @@
 			}
 
 			if (currentTime >= start && currentTime <= end && !isChapterHeading) {
-				// move all previous highlights before adding one to current span
-				thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
-				$(this).addClass('able-highlight');
-				return false;
+
+  		  // If this item isn't already highlighted, it should be
+  		  if (!($(this).hasClass('able-highlight'))) {
+  				// remove all previous highlights before adding one to current span
+          thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
+          $(this).addClass('able-highlight');
+          thisObj.movingHighlight = true;
+        }
+        return false;
 			}
 		});
 		thisObj.currentHighlight = $('.able-highlight');
