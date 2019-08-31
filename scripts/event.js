@@ -5,7 +5,6 @@
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 		var thisObj = this;
-
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 		  thisObj.duration = mediaTimes['duration'];
       thisObj.elapsed = mediaTimes['elapsed'];

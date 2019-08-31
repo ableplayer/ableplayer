@@ -96,6 +96,121 @@
 			this.setDuration(max);
 		}
 
+    // handle seekHead events
+		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
+
+		  if (e.type === 'mouseenter' || e.type === 'focus') {
+  			thisObj.overHead = true;
+      }
+      else if (e.type === 'mouseleave' || e.type === 'blur') {
+  			thisObj.overHead = false;
+        if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+			  }
+      }
+      else if (e.type === 'mousemove' || e.type === 'touchmove') {
+  			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+	  			thisObj.trackHeadAtPageX(e.pageX);
+        }
+      }
+      else if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
+        if (!thisObj.bodyDiv.is(':focus')) {
+				  thisObj.bodyDiv.focus();
+			  }
+        e.preventDefault();
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+  			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+        }
+      }
+      if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+  			thisObj.refreshTooltip();
+  		}
+		});
+
+    // handle bodyDiv events
+		this.bodyDiv.on(
+		  'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
+
+  		if (e.type === 'mouseenter') {
+  			thisObj.overBody = true;
+		  }
+		  else if (e.type === 'mouseleave') {
+  			thisObj.overBody = false;
+        thisObj.overBodyMousePos = null;
+  			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+			  }
+      }
+      else if (e.type === 'mousemove' || e.type === 'touchmove') {
+  			thisObj.overBodyMousePos = {
+	  			x: e.pageX,
+          y: e.pageY
+			  };
+        if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+				  thisObj.trackHeadAtPageX(e.pageX);
+			  }
+      }
+      else if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
+        thisObj.trackHeadAtPageX(e.pageX);
+        if (!thisObj.seekHead.is(':focus')) {
+				  thisObj.seekHead.focus();
+			  }
+        e.preventDefault();
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+        if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+			  }
+      }
+      else if (e.type === 'keydown') {
+	  		// Home
+  			if (e.which === 36) {
+		  		thisObj.trackImmediatelyTo(0);
+			  }
+        // End
+        else if (e.which === 35) {
+				  thisObj.trackImmediatelyTo(thisObj.duration);
+			  }
+        // Left arrow or down arrow
+        else if (e.which === 37 || e.which === 40) {
+				  thisObj.arrowKeyDown(-1);
+			  }
+        // Right arrow or up arrow
+        else if (e.which === 39 || e.which === 38) {
+				  thisObj.arrowKeyDown(1);
+			  }
+        // Page up
+        else if (e.which === 33 && bigInterval > 0) {
+				  thisObj.arrowKeyDown(bigInterval);
+			  }
+        // Page down
+        else if (e.which === 34 && bigInterval > 0) {
+				  thisObj.arrowKeyDown(-bigInterval);
+			  }
+        else {
+				  return;
+			  }
+        e.preventDefault();
+      }
+      else if (e.type === 'keyup') {
+  			if (e.which >= 33 && e.which <= 40) {
+	  			if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
+		  			thisObj.stopTracking(thisObj.keyTrackPosition);
+          }
+          e.preventDefault();
+			  }
+      }
+      if (e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
+  			thisObj.refreshTooltip();
+  		}
+		});
+
+/* Old event listeners on seekHead and bodyDiv...
+
 		this.seekHead.hover(function (e) {
 			thisObj.overHead = true;
 			thisObj.refreshTooltip();
@@ -217,6 +332,7 @@
 				e.preventDefault();
 			}
 		});
+*/
 	}
 
 	AccessibleSlider.prototype.arrowKeyDown = function (multiplier) {

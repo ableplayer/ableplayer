@@ -5992,6 +5992,121 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.setDuration(max);
 		}
 
+    // handle seekHead events
+		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
+
+		  if (e.type === 'mouseenter' || e.type === 'focus') {
+  			thisObj.overHead = true;
+      }
+      else if (e.type === 'mouseleave' || e.type === 'blur') {
+  			thisObj.overHead = false;
+        if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+			  }
+      }
+      else if (e.type === 'mousemove' || e.type === 'touchmove') {
+  			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+	  			thisObj.trackHeadAtPageX(e.pageX);
+        }
+      }
+      else if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
+        if (!thisObj.bodyDiv.is(':focus')) {
+				  thisObj.bodyDiv.focus();
+			  }
+        e.preventDefault();
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+  			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+        }
+      }
+      if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+  			thisObj.refreshTooltip();
+  		}
+		});
+
+    // handle bodyDiv events
+		this.bodyDiv.on(
+		  'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
+
+  		if (e.type === 'mouseenter') {
+  			thisObj.overBody = true;
+		  }
+		  else if (e.type === 'mouseleave') {
+  			thisObj.overBody = false;
+        thisObj.overBodyMousePos = null;
+  			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+			  }
+      }
+      else if (e.type === 'mousemove' || e.type === 'touchmove') {
+  			thisObj.overBodyMousePos = {
+	  			x: e.pageX,
+          y: e.pageY
+			  };
+        if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+				  thisObj.trackHeadAtPageX(e.pageX);
+			  }
+      }
+      else if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
+        thisObj.trackHeadAtPageX(e.pageX);
+        if (!thisObj.seekHead.is(':focus')) {
+				  thisObj.seekHead.focus();
+			  }
+        e.preventDefault();
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+        if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+			  }
+      }
+      else if (e.type === 'keydown') {
+	  		// Home
+  			if (e.which === 36) {
+		  		thisObj.trackImmediatelyTo(0);
+			  }
+        // End
+        else if (e.which === 35) {
+				  thisObj.trackImmediatelyTo(thisObj.duration);
+			  }
+        // Left arrow or down arrow
+        else if (e.which === 37 || e.which === 40) {
+				  thisObj.arrowKeyDown(-1);
+			  }
+        // Right arrow or up arrow
+        else if (e.which === 39 || e.which === 38) {
+				  thisObj.arrowKeyDown(1);
+			  }
+        // Page up
+        else if (e.which === 33 && bigInterval > 0) {
+				  thisObj.arrowKeyDown(bigInterval);
+			  }
+        // Page down
+        else if (e.which === 34 && bigInterval > 0) {
+				  thisObj.arrowKeyDown(-bigInterval);
+			  }
+        else {
+				  return;
+			  }
+        e.preventDefault();
+      }
+      else if (e.type === 'keyup') {
+  			if (e.which >= 33 && e.which <= 40) {
+	  			if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
+		  			thisObj.stopTracking(thisObj.keyTrackPosition);
+          }
+          e.preventDefault();
+			  }
+      }
+      if (e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
+  			thisObj.refreshTooltip();
+  		}
+		});
+
+/* Old event listeners on seekHead and bodyDiv...
+
 		this.seekHead.hover(function (e) {
 			thisObj.overHead = true;
 			thisObj.refreshTooltip();
@@ -6113,6 +6228,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				e.preventDefault();
 			}
 		});
+*/
 	}
 
 	AccessibleSlider.prototype.arrowKeyDown = function (multiplier) {
@@ -11196,7 +11312,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 		var thisObj = this;
-
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 		  thisObj.duration = mediaTimes['duration'];
       thisObj.elapsed = mediaTimes['elapsed'];
@@ -12150,44 +12265,42 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// add event listener to toolbar to start and end drag
 		// other event listeners will be added when drag starts
-		$toolbar.on('mousedown', function(e) {
+		$toolbar.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered) {
-				thisObj.windowMenuClickRegistered = true;
-				thisObj.startMouseX = e.pageX;
-				thisObj.startMouseY = e.pageY;
-				thisObj.dragDevice = 'mouse';
-				thisObj.startDrag(which, $window);
-			}
-			return false;
-		});
-		$toolbar.on('mouseup', function(e) {
-			e.stopPropagation();
-			if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-				thisObj.endDrag(which);
-			}
-			return false;
+			if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			if (!thisObj.windowMenuClickRegistered) {
+	  			thisObj.windowMenuClickRegistered = true;
+          thisObj.startMouseX = e.pageX;
+          thisObj.startMouseY = e.pageY;
+          thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
+          thisObj.startDrag(which, $window);
+			  }
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+        if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
+				  thisObj.endDrag(which);
+			  }
+      }
+      return false;
 		});
 
 		// add event listeners for resizing
-		$resizeHandle.on('mousedown', function(e) {
-
+		$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered) {
-				thisObj.windowMenuClickRegistered = true;
-				thisObj.startMouseX = e.pageX;
-				thisObj.startMouseY = e.pageY;
-				thisObj.startResize(which, $window);
-				return false;
-			}
-		});
-
-		$resizeHandle.on('mouseup', function(e) {
-			e.stopPropagation();
-			if (thisObj.resizing) {
-				thisObj.endResize(which);
-			}
-			return false;
+			if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			if (!thisObj.windowMenuClickRegistered) {
+	  			thisObj.windowMenuClickRegistered = true;
+          thisObj.startMouseX = e.pageX;
+          thisObj.startMouseY = e.pageY;
+          thisObj.startResize(which, $window);
+			  }
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+  			if (thisObj.resizing) {
+	  			thisObj.endResize(which);
+        }
+      }
+      return false;
 		});
 
 		// whenever a window is clicked, bring it to the foreground
@@ -12632,8 +12745,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}).focus();
 
 		// add device-specific event listeners
-		if (this.dragDevice === 'mouse') {
-			$(document).on('mousemove',function(e) {
+		if (this.dragDevice === 'mouse') { // might also be a touchpad
+			$(document).on('mousemove touchmove',function(e) {
 				if (thisObj.dragging) {
 					// calculate new top left based on current mouse position - offset
 					newX = e.pageX - thisObj.dragOffsetX;
@@ -12737,7 +12850,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			$windowButton = this.$signPopupButton;
 		}
 
-		$(document).off('mousemove mouseup');
+		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
 
 		if (this.dragDevice === 'keyboard') {
@@ -12814,7 +12927,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.dragStartHeight = this.$activeWindow.height();
 
 		// add event listeners
-		$(document).on('mousemove',function(e) {
+		$(document).on('mousemove touchmove',function(e) {
 			if (thisObj.resizing) {
 				// calculate new width and height based on changes to mouse position
 				newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
@@ -12838,7 +12951,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			$windowButton = this.$signPopupButton;
 		}
 
-		$(document).off('mousemove mouseup');
+		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown');
 
 		$windowButton.show().focus();
