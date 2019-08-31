@@ -847,7 +847,6 @@ var AblePlayerInstances = [];
 		// Bootstrap from this.media possibly being an ID or other selector.
 		this.$media = $(this.media).first();
 		this.media = this.$media[0];
-
 		// Set media type to 'audio' or 'video'; this determines some of the behavior of player creation.
 		if (this.$media.is('audio')) {
 			this.mediaType = 'audio';
@@ -7791,7 +7790,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 		thisObj = this;
-
 		if (typeof duration !== 'undefined' && typeof elapsed !== 'undefined') {
 			mediaTimes['duration'] = duration;
 			mediaTimes['elapsed'] = elapsed;
@@ -7924,7 +7922,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			return;
 		}
 		*/
-
 		var deferred, promise, thisObj, duration, elapsed;
 		deferred = new $.Deferred();
 		promise = deferred.promise();
@@ -7935,7 +7932,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				deferred.resolve('ended');
 			}
 			else if (this.media.paused) {
-				deferred.resolve('paused');
+  		  deferred.resolve('paused');
 			}
 			else if (this.media.readyState !== 4) {
 				deferred.resolve('buffering');
@@ -8422,7 +8419,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 		}
-
 		if (context === 'playpause' || context == 'init'){
 			if (typeof this.$bigPlayButton !== 'undefined' && typeof this.seekBar !== 'undefined') {
 				// Choose show/hide for big play button and adjust position.
@@ -11307,6 +11303,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {
+
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
@@ -11735,7 +11732,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					if (!thisObj.startedPlaying) {
 							// start playing; no further user action is required
 						thisObj.playMedia();
-				 		}
+				 	}
 					thisObj.userClickedPlaylist = false; // reset
 				}
 				if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
@@ -11810,7 +11807,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				thisObj.refreshControls('timeline');
 			})
 			.on('waiting',function() {
-
 				 // do something
 				 // previously called refreshControls() here but this event probably doesn't warrant a refresh
 			})
@@ -11824,8 +11820,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			.on('pause',function() {
 				if (!thisObj.clickedPlay) {
 					// 'pause' was triggered automatically, not initiated by user
-					// this happens in some browsers (not Chrome, as of 70.x)
-					// when swapping source (e.g., between tracks in a playlist, or swapping description)
+					// this happens in some browsers when swapping source
+					// (e.g., between tracks in a playlist or swapping description)
 					if (thisObj.hasPlaylist || thisObj.swappingSrc) {
 						// do NOT set playing to false.
 						// doing so prevents continual playback after new track is loaded
@@ -11852,7 +11848,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			})
 			.on('error',function() {
-
 				if (thisObj.debug) {
 					switch (thisObj.media.error.code) {
 						case 1:
@@ -12983,11 +12978,21 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// If sign language is provided, it must be provided for all sources
 			this.signFile = this.$sources.first().attr('data-sign-src');
 			if (this.signFile) {
-				if (this.debug) {
-					
-				}
-				this.hasSignLanguage = true;
-				this.injectSignPlayerCode();
+  		  if (this.isIOS()) {
+    		  // IOS does not allow multiple videos to play simultaneously
+    		  // Therefore, sign language as rendered by Able Player unfortunately won't work
+          this.hasSignLanguage = false;
+          if (this.debug) {
+            
+          }
+        }
+        else {
+  				if (this.debug) {
+	  				
+          }
+          this.hasSignLanguage = true;
+          this.injectSignPlayerCode();
+        }
 			}
 			else {
 				this.hasSignLanguage = false;
@@ -13001,17 +13006,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.injectSignPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
-		// If IOS:
-		//	If video:
-		//	 IOS does not support any of the player's functionality
-		//	 - everything plays in its own player
-		//	 Therefore, AblePlayer is not loaded & all functionality is disabled
-		//	 (this all determined. If this is IOS && video, this function is never called)
-		//	If audio:
-		//	 HTML cannot be injected as a *parent* of the <audio> element
-		//	 It is therefore injected *after* the <audio> element
-		//	 This is only a problem in IOS 6 and earlier,
-		//	 & is a known bug, fixed in IOS 7
 
 		var thisObj, signVideoId, signVideoWidth, i, signSrc, srcType, $signSource;
 

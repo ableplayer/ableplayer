@@ -66,7 +66,6 @@
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 		thisObj = this;
-
 		if (typeof duration !== 'undefined' && typeof elapsed !== 'undefined') {
 			mediaTimes['duration'] = duration;
 			mediaTimes['elapsed'] = elapsed;
@@ -199,7 +198,6 @@
 			return;
 		}
 		*/
-
 		var deferred, promise, thisObj, duration, elapsed;
 		deferred = new $.Deferred();
 		promise = deferred.promise();
@@ -210,7 +208,7 @@
 				deferred.resolve('ended');
 			}
 			else if (this.media.paused) {
-				deferred.resolve('paused');
+  		  deferred.resolve('paused');
 			}
 			else if (this.media.readyState !== 4) {
 				deferred.resolve('buffering');
@@ -697,7 +695,6 @@
 				}
 			}
 		}
-
 		if (context === 'playpause' || context == 'init'){
 			if (typeof this.$bigPlayButton !== 'undefined' && typeof this.seekBar !== 'undefined') {
 				// Choose show/hide for big play button and adjust position.

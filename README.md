@@ -399,12 +399,11 @@ available, add a **data-sign-src** attribute to the `<source>` element for
 that video. The value of this attribute is a path pointing to the
 sign language version of the video. If a sign language version is available,
 a sign language button will be added to the media controller.
-This button will toggle the display of a secondary window in which
-the sign language video will appear.
+This button will toggle the display of a pop-up window in which
+the sign language video will appear. Users can move or resize the pop-up window 
+with either mouse or keyboard.   
 
-This is an experimental feature and a work in progress. Ultimately
-the intent is for the user to have full control of the size and position
-of the sign language video.
+Unfortunately this feature is not currently supported on iOS. 
 
 Setup Step 4: Review User-Defined Variables in *ableplayer.js*
 --------------------------------------------------------------

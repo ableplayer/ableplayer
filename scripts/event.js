@@ -1,6 +1,7 @@
 (function ($) {
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {
+
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
@@ -429,7 +430,7 @@
 					if (!thisObj.startedPlaying) {
 							// start playing; no further user action is required
 						thisObj.playMedia();
-				 		}
+				 	}
 					thisObj.userClickedPlaylist = false; // reset
 				}
 				if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
@@ -504,7 +505,6 @@
 				thisObj.refreshControls('timeline');
 			})
 			.on('waiting',function() {
-console.log('waiting');
 				 // do something
 				 // previously called refreshControls() here but this event probably doesn't warrant a refresh
 			})
@@ -518,8 +518,8 @@ console.log('waiting');
 			.on('pause',function() {
 				if (!thisObj.clickedPlay) {
 					// 'pause' was triggered automatically, not initiated by user
-					// this happens in some browsers (not Chrome, as of 70.x)
-					// when swapping source (e.g., between tracks in a playlist, or swapping description)
+					// this happens in some browsers when swapping source
+					// (e.g., between tracks in a playlist or swapping description)
 					if (thisObj.hasPlaylist || thisObj.swappingSrc) {
 						// do NOT set playing to false.
 						// doing so prevents continual playback after new track is loaded
@@ -546,7 +546,6 @@ console.log('waiting');
 				}
 			})
 			.on('error',function() {
-console.log('error: ' + thisObj.media.error.code);
 				if (thisObj.debug) {
 					switch (thisObj.media.error.code) {
 						case 1:

@@ -8,11 +8,21 @@
 			// If sign language is provided, it must be provided for all sources
 			this.signFile = this.$sources.first().attr('data-sign-src');
 			if (this.signFile) {
-				if (this.debug) {
-					console.log('This video has an accompanying sign language video: ' + this.signFile);
-				}
-				this.hasSignLanguage = true;
-				this.injectSignPlayerCode();
+  		  if (this.isIOS()) {
+    		  // IOS does not allow multiple videos to play simultaneously
+    		  // Therefore, sign language as rendered by Able Player unfortunately won't work
+          this.hasSignLanguage = false;
+          if (this.debug) {
+            console.log('Sign language has been disabled due to IOS restrictions');
+          }
+        }
+        else {
+  				if (this.debug) {
+	  				console.log('This video has an accompanying sign language video: ' + this.signFile);
+          }
+          this.hasSignLanguage = true;
+          this.injectSignPlayerCode();
+        }
 			}
 			else {
 				this.hasSignLanguage = false;
@@ -26,17 +36,6 @@
 	AblePlayer.prototype.injectSignPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
-		// If IOS:
-		//	If video:
-		//	 IOS does not support any of the player's functionality
-		//	 - everything plays in its own player
-		//	 Therefore, AblePlayer is not loaded & all functionality is disabled
-		//	 (this all determined. If this is IOS && video, this function is never called)
-		//	If audio:
-		//	 HTML cannot be injected as a *parent* of the <audio> element
-		//	 It is therefore injected *after* the <audio> element
-		//	 This is only a problem in IOS 6 and earlier,
-		//	 & is a known bug, fixed in IOS 7
 
 		var thisObj, signVideoId, signVideoWidth, i, signSrc, srcType, $signSource;
 
