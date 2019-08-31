@@ -15,7 +15,7 @@ Features
 -   High contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus.
 -   Support for closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
 -   Support for chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated.
--   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by screen readers.  Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio.
+-   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by browsers, or by screen readers for browsers that don't support the Web Speech API. Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio.
 -   Support for audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions.
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so.
 -   An interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
@@ -341,10 +341,10 @@ added using one of two methods.
 The first method is the same as closed captions, a `<track>` element, with
 kind="descriptions". This points to a WebVTT file, which is essentially
 the same as a closed caption file, but its contents are description text
-rather than captions. With this method, description text is written to a
-container that has ARIA role="alert". Supporting screen readers
-automatically announce the new text as soon as it is written to the
-page.
+rather than captions. With this method, description text is read aloud by 
+browsers that support the [Web Speech API][]; otherwise it's written to an  
+ARIA live region, so supporting screen readers will automatically announce 
+the new text as soon as it is written to the page.
 
 The second method is to produce a separate video with description mixed
 in. If multiple video sources are already provided (e.g., an MP4 and
@@ -780,4 +780,5 @@ at the University of Washington, with financial support from the National Scienc
   [WebVTT validator]: https://quuz.org/webvtt/
   [WebAIM’s 2017 Screen Reader User Survey]: https://webaim.org/projects/screenreadersurvey7/#browsers
   [WebVTT]: https://w3c.github.io/webvtt/
+  [Web Speech API]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
   [YouTube's Terms of Service]: https://developers.google.com/youtube/terms/required-minimum-functionality#overlays-and-frames
