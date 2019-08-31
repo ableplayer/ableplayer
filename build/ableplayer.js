@@ -8567,7 +8567,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 							clearTimeout(thisObj.statusTimeout);
 							thisObj.statusTimeout = null;
 						}
-
 						// Don't change play/pause button display while using the seek bar (or if YouTube stopped)
 						if (!thisObj.seekBar.tracking && !thisObj.stoppingYouTube) {
 							if (currentState === 'paused' || currentState === 'stopped' || currentState === 'ended') {
@@ -11780,11 +11779,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					// already started playing
 					// we're here because a new media source has been loaded and is ready to resume playback
 					thisObj.getPlayerState().then(function(currentState) {
-						if (thisObj.swappingSrc && currentState === 'stopped') {
-							// Safari is the only browser that returns value of 'stopped' (observed in 12.0.1 on MacOS)
-							// This prevents 'timeupdate' events from triggering, which prevents the new media src
-							// from resuming playback at swapTime
-							// This is a hack to jump start Safari
+						if (thisObj.swappingSrc && (currentState === 'stopped' || currentState === 'paused')) {
 							thisObj.startedPlaying = false;
 							if (thisObj.swapTime > 0) {
 								thisObj.seekTo(thisObj.swapTime);
@@ -11815,6 +11810,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				thisObj.refreshControls('timeline');
 			})
 			.on('waiting',function() {
+console.log('waiting');
 				 // do something
 				 // previously called refreshControls() here but this event probably doesn't warrant a refresh
 			})
@@ -11856,6 +11852,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			})
 			.on('error',function() {
+console.log('error: ' + thisObj.media.error.code);
 				if (thisObj.debug) {
 					switch (thisObj.media.error.code) {
 						case 1:
