@@ -15,7 +15,7 @@ Features
 -   High contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus.
 -   Support for closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
 -   Support for chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated.
--   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by screen readers.  Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio.
+-   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by browsers, or by screen readers for browsers that don't support the Web Speech API. Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio.
 -   Support for audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions.
 -   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so.
 -   An interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
@@ -136,7 +136,6 @@ to all use cases, both audio and video.
 
 ```HTML
 <!-- Dependencies -->
-<script src="thirdparty/modernizr.custom.js"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="thirdparty/js.cookie.js"></script>
 
@@ -340,10 +339,10 @@ added using one of two methods.
 The first method is the same as closed captions, a `<track>` element, with
 kind="descriptions". This points to a WebVTT file, which is essentially
 the same as a closed caption file, but its contents are description text
-rather than captions. With this method, description text is written to a
-container that has ARIA role="alert". Supporting screen readers
-automatically announce the new text as soon as it is written to the
-page.
+rather than captions. With this method, description text is read aloud by 
+browsers that support the [Web Speech API][]; otherwise it's written to an  
+ARIA live region, so supporting screen readers will automatically announce 
+the new text as soon as it is written to the page.
 
 The second method is to produce a separate video with description mixed
 in. If multiple video sources are already provided (e.g., an MP4 and
@@ -359,18 +358,28 @@ controller.
 If descriptions are available using either of the above methods, a
 Description toggle button appears on the controller (represented by the
 universal Description symbol, the letter "D"). How descriptions are
-ultimately delivered depends on which of the above methods is used, and
-on user preference. If a user prefers text-based description announced
-by their screen reader, that’s what they’ll get. If they prefer an
-alternate video with description mixed in, that’s what they’ll get. See
-the section below on *User Preferences* for additional information about
-preferences.
+ultimately delivered depends on which of the above methods is used. 
+
+If *both* methods are used, description will be delivered using the separate  
+described version of the video. However, the WebVTT file will be used to 
+(a) display the description text visibly (if users have selected this option in their 
+preferences), and (b) incorporate the description text into the 
+auto-generated interactive transcript. Therefore, it is important for the 
+WebVTT description file to be accurately synchronized with the separate 
+described version of the video.  
 
 In some applications, text-based descriptions might be a required
 part of the interface (e.g., if video pauses so users can interact with
 HTML overlays; text-based description could be used in this context to provide
 additional instructions for screen reader users). In such cases the Descriptions
 button can be eliminated from the controller with **data-use-descriptions-button="false"**.
+
+In other applications, a WebVTT descriptions file might be used solely for the purposes 
+of displaying visible description text or incorporating description text into the 
+auto-generated transcript, and the WebVTT description text is not intended to be read aloud 
+by screen readers or browsers  (for example, if the sole video source is a described video).
+In such cases, use **data-descriptions-audible="false"** to prevent browsers and screen readers 
+from announcing changes to the description text. 
 
 #### Sign language
 
@@ -388,12 +397,11 @@ available, add a **data-sign-src** attribute to the `<source>` element for
 that video. The value of this attribute is a path pointing to the
 sign language version of the video. If a sign language version is available,
 a sign language button will be added to the media controller.
-This button will toggle the display of a secondary window in which
-the sign language video will appear.
+This button will toggle the display of a pop-up window in which
+the sign language video will appear. Users can move or resize the pop-up window 
+with either mouse or keyboard.   
 
-This is an experimental feature and a work in progress. Ultimately
-the intent is for the user to have full control of the size and position
-of the sign language video.
+Unfortunately this feature is not currently supported on iOS. 
 
 Setup Step 4: Review User-Defined Variables in *ableplayer.js*
 --------------------------------------------------------------
@@ -665,6 +673,8 @@ player from anywhere on the web page, as follows:
 -   **s** = Stop
 -   **r** = Rewind
 -   **f** = Forward
+-   **b** = Back (previous track in playlist)
+-   **n** = Next (next track in playlist) 
 -   **c** = Captions
 -   **d** = Description
 -   **m** = Mute on/off
@@ -768,4 +778,5 @@ at the University of Washington, with financial support from the National Scienc
   [WebVTT validator]: https://quuz.org/webvtt/
   [WebAIM’s 2017 Screen Reader User Survey]: https://webaim.org/projects/screenreadersurvey7/#browsers
   [WebVTT]: https://w3c.github.io/webvtt/
+  [Web Speech API]: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API
   [YouTube's Terms of Service]: https://developers.google.com/youtube/terms/required-minimum-functionality#overlays-and-frames

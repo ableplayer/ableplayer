@@ -154,7 +154,7 @@ var fr = {
 
 "prefIntroDescriptionNone": "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.",
 
-"prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores.",
+"prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelle.",
 
 "prefIntroDescription4": "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.",
 

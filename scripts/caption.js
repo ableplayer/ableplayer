@@ -324,6 +324,7 @@
 	}
 
 	AblePlayer.prototype.stylizeCaptions = function($element, pref) {
+
 		// $element is the jQuery element containing the captions
 		// this function handles stylizing of the sample caption text in the Prefs dialog
 		// plus the actual production captions

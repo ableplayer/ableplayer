@@ -154,7 +154,7 @@ var nb = {
 
 "prefIntroDescriptionNone": "Denne videoen har ikke lydbeskrivelse i noen av formatene.",
 
-"prefIntroDescription3": "Bruk følgende innstillinger for å gjøre dine valg angående lydbeskrivelse.",
+"prefIntroDescription3": "Bruk følgende innstillinger for å gjøre dine valg angående tekstbasert lydbeskrivelse.",
 
 "prefIntroDescription4": "Etter at du har lagret dine valg kan lydbeskrivelse slås av og på i panelet.",
 

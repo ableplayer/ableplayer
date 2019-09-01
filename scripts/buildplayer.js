@@ -153,10 +153,14 @@
 		// create a div for exposing description
 		// description will be exposed via role="alert" & announced by screen readers
 		this.$descDiv = $('<div>',{
-			'class': 'able-descriptions',
-			'aria-live': 'assertive',
-			'aria-atomic': 'true'
+			'class': 'able-descriptions'
 		});
+		if (this.exposeTextDescriptions) {
+  		this.$descDiv.attr({
+  			'aria-live': 'assertive',
+        'aria-atomic': 'true'
+		  });
+		}
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
 		this.$descDiv.hide();
@@ -397,44 +401,51 @@
 
 		// Populate menu with menu items
 		if (which === 'prefs') {
-			prefCats = this.getPreferencesGroups();
-			for (i = 0; i < prefCats.length; i++) {
-				$menuItem = $('<li></li>',{
-					'role': 'menuitem',
-					'tabindex': '-1'
-				});
-				prefCat = prefCats[i];
-				if (prefCat === 'captions') {
-					$menuItem.text(this.tt.prefMenuCaptions);
-				}
-				else if (prefCat === 'descriptions') {
-					$menuItem.text(this.tt.prefMenuDescriptions);
-				}
-				else if (prefCat === 'keyboard') {
-					$menuItem.text(this.tt.prefMenuKeyboard);
-				}
-				else if (prefCat === 'transcript') {
-					$menuItem.text(this.tt.prefMenuTranscript);
-				}
-				$menuItem.on('click',function() {
-					whichPref = $(this).text();
-					thisObj.setFullscreen(false);
-					if (whichPref === thisObj.tt.prefMenuCaptions) {
-						thisObj.captionPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuDescriptions) {
-						thisObj.descPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuKeyboard) {
-						thisObj.keyboardPrefsDialog.show();
-					}
-					else if (whichPref === thisObj.tt.prefMenuTranscript) {
-						thisObj.transcriptPrefsDialog.show();
-					}
-					thisObj.closePopups();
-				});
-				$menu.append($menuItem);
-			}
+      if (this.prefCats.length > 1) {
+  			for (i = 0; i < this.prefCats.length; i++) {
+	  			$menuItem = $('<li></li>',{
+		  			'role': 'menuitem',
+            'tabindex': '-1'
+				  });
+          prefCat = this.prefCats[i];
+          if (prefCat === 'captions') {
+					  $menuItem.text(this.tt.prefMenuCaptions);
+				  }
+          else if (prefCat === 'descriptions') {
+					  $menuItem.text(this.tt.prefMenuDescriptions);
+				  }
+          else if (prefCat === 'keyboard') {
+					  $menuItem.text(this.tt.prefMenuKeyboard);
+				  }
+          else if (prefCat === 'transcript') {
+					  $menuItem.text(this.tt.prefMenuTranscript);
+				  }
+          $menuItem.on('click',function() {
+					  whichPref = $(this).text();
+            thisObj.setFullscreen(false);
+            if (whichPref === thisObj.tt.prefMenuCaptions) {
+						  thisObj.captionPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+						  thisObj.descPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+						  thisObj.keyboardPrefsDialog.show();
+					  }
+            else if (whichPref === thisObj.tt.prefMenuTranscript) {
+						  thisObj.transcriptPrefsDialog.show();
+					  }
+            thisObj.closePopups();
+				  });
+          $menu.append($menuItem);
+			  }
+			  this.$prefsButton.attr('data-prefs-popup','menu');
+      }
+      else if (this.prefCats.length == 1) {
+        // only 1 category, so don't create a popup menu.
+        // Instead, open dialog directly when user clicks Prefs button
+        this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
+      }
 		}
 		else if (which === 'captions' || which === 'chapters') {
 			hasDefault = false;
@@ -585,34 +596,34 @@
 
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
-			this.$chaptersButton.attr('aria-expanded','false').focus();
+			this.$chaptersButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
-			this.$ccButton.attr('aria-expanded','false').focus();
+			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.attr('aria-expanded','false').focus();
+			this.$prefsButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeAlert.text(this.tt.volumeSliderClosed);
-			this.$volumeButton.attr('aria-expanded','false').focus();
+			this.$volumeButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$transcriptPopupButton.attr('aria-expanded','false').focus();
+			this.$transcriptPopupButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.$signPopup && this.$signPopup.is(':visible')) {
 			this.$signPopup.hide();
 			// restore menu items to their original state
 			this.$signPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$signPopupButton.attr('aria-expanded','false').focus();
+			this.$signPopupButton.removeAttr('aria-expanded').focus();
 		}
 	};
 
@@ -809,6 +820,11 @@
 			'br': []
 		}
 
+		if (this.hasPlaylist) {
+  		controlLayout['ur'].push('previous');
+  		controlLayout['ur'].push('next');
+		}
+
 		// test for browser support for volume before displaying volume button
 		if (this.browserSupportsVolume()) {
 			// volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
@@ -840,7 +856,7 @@
 				bll.push('descriptions'); //audio description
 			}
 		}
-		if (this.transcriptType === 'popup') {
+		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
 			bll.push('transcript');
 		}
 
@@ -921,7 +937,7 @@
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
-						this.duration = 100;
+						this.duration = 60;
 						// also set elapsed to 0
 						this.elapsed = 0;
 					}
@@ -991,15 +1007,31 @@
 					});
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
-							popupMenuId = this.mediaId + '-prefs-menu';
+  						this.prefCats = this.getPreferencesGroups();
+              if (this.prefCats.length > 1) {
+  						  // Prefs button will trigger a menu
+                popupMenuId = this.mediaId + '-prefs-menu';
+                $newButton.attr({
+							    'aria-controls': popupMenuId,
+                  'aria-haspopup': 'menu'
+                });
+						  }
+              else if (this.prefCats.length === 1) {
+  						  // Prefs button will trigger a dialog
+                $newButton.attr({
+    						  'aria-haspopup': 'dialog'
+                });
+						  }
 						}
 						else if (control === 'volume') {
 							popupMenuId = this.mediaId + '-volume-slider';
+							// volume slider popup is not a menu or a dialog
+							// therefore, using aria-expanded rather than aria-haspopup to communicate properties/state
+              $newButton.attr({
+                'aria-controls': popupMenuId,
+    						'aria-expanded': 'false'
+              });
 						}
-						$newButton.attr({
-							'aria-controls': popupMenuId,
-							'aria-expanded': 'false'
-						});
 					}
 					if (this.iconType === 'font') {
 						if (control === 'volume') {
@@ -1685,6 +1717,12 @@
 		}
 		else if (control === 'restart') {
 			return this.tt.restart;
+		}
+		else if (control === 'previous') {
+			return this.tt.prevTrack;
+		}
+		else if (control === 'next') {
+			return this.tt.nextTrack;
 		}
 		else if (control === 'rewind') {
 			return this.tt.rewind;

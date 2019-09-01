@@ -32,7 +32,7 @@
 	AblePlayer.prototype.updateCookie = function( setting ) {
 
 		// called when a particular setting had been updated
-		// useful for settings updated indpedently of Preferences dialog
+		// useful for settings updated indepedently of Preferences dialog
 		// e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
 		// setting is any supported preference name (e.g., "prefCaptions")
 		// OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
@@ -216,7 +216,7 @@
 			});
 			prefs.push({
 				'name': 'prefDescFormat', // audio description default state
-				'label': this.tt.prefDescFormat,
+				'label': null,
 				'group': 'descriptions',
 				'default': 'video'
 			});
@@ -245,8 +245,10 @@
 		return prefs;
 	};
 
-	// Loads current/default preferences from cookie into the AblePlayer object.
 	AblePlayer.prototype.loadCurrentPreferences = function () {
+
+  	// Load current/default preferences from cookie into the AblePlayer object.
+
 		var available = this.getAvailablePreferences();
 		var cookie = this.getCookie();
 
@@ -275,7 +277,7 @@
 		var available, thisObj, $prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
-			$descFieldset1, $descLegend1, $descFieldset2, $descLegend2, $legend,
+			$descFieldset, $descLegend, $legend,
 			thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
 			$div1,id1,$radio1,$label1,
 			$div2,id2,$radio2,$label2,
@@ -373,35 +375,17 @@
 			$prefsDiv.append($prefsIntro);
 		}
 
-		if (form === 'descriptions') {
-			// descriptions form has two field sets
-
-			// Fieldset 1
-			$descFieldset1 = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form + '1';
-			fieldsetId = this.mediaId + '-prefs-' + form + '1';
-			$descFieldset1.addClass(fieldsetClass).attr('id',fieldsetId);
-			$descLegend1 = $('<legend>' + this.tt.prefDescFormat + '</legend>');
-			$descFieldset1.append($descLegend1);
-
-			// Fieldset 2
-			$descFieldset2 = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form + '2';
-			fieldsetId = this.mediaId + '-prefs-' + form + '2';
-			$descFieldset2.addClass(fieldsetClass).attr('id',fieldsetId);
-			$descLegend2 = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
-			$descFieldset2.append($descLegend2);
+		$fieldset = $('<fieldset>');
+		fieldsetClass = 'able-prefs-' + form;
+		fieldsetId = this.mediaId + '-prefs-' + form;
+		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+		if (form === 'keyboard') {
+		  $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$fieldset.append($legend);
 		}
-		else {
-			// all other forms just have one fieldset
-			$fieldset = $('<fieldset>');
-			fieldsetClass = 'able-prefs-' + form;
-			fieldsetId = this.mediaId + '-prefs-' + form;
-			$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
-			if (form === 'keyboard') {
-				$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
-				$fieldset.append($legend);
-			}
+		else if (form === 'descriptions') {
+  		$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+  		$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
 
@@ -411,48 +395,9 @@
 				thisPref = available[i]['name'];
 				thisClass = 'able-' + thisPref;
 				thisId = this.mediaId + '_' + thisPref;
-				if (thisPref !== 'prefDescFormat') {
-					$thisDiv = $('<div>').addClass(thisClass);
-				}
+				$thisDiv = $('<div>').addClass(thisClass);
 
-				// Audio Description preferred format radio buttons
-				if (thisPref == 'prefDescFormat') {
-
-					// option 1 radio button
-					$div1 = $('<div>');
-					id1 = thisId + '_1';
-					$label1 = $('<label>')
-						.attr('for',id1)
-						.text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption1))
-					$radio1 = $('<input>',{
-						type: 'radio',
-						name: thisPref,
-						id: id1,
-						value: 'video'
-					});
-					if (this.prefDescFormat === 'video') {
-						$radio1.prop('checked',true);
-					};
-					$div1.append($radio1,$label1);
-
-					// option 2 radio button
-					$div2 = $('<div>');
-					id2 = thisId + '_2';
-					$label2 = $('<label>')
-						.attr('for',id2)
-						.text(this.capitalizeFirstLetter(this.tt.prefDescFormatOption2));
-					$radio2 = $('<input>',{
-						type: 'radio',
-						name: thisPref,
-						id: id2,
-						value: 'text'
-					});
-					if (this.prefDescFormat === 'text') {
-						$radio2.prop('checked',true);
-					};
-					$div2.append($radio2,$label2);
-				}
-				else if (form === 'captions') {
+				if (form === 'captions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<select>',{
 						name: thisPref,
@@ -544,25 +489,11 @@
 					}
 					$thisDiv.append($thisField,$thisLabel);
 				}
-				if (form === 'descriptions') {
-					if (thisPref === 'prefDescFormat') {
-						$descFieldset1.append($div1,$div2);
-					}
-					else {
-						$descFieldset2.append($thisDiv);
-					}
-				}
-				else {
-					$fieldset.append($thisDiv);
-				}
+				$fieldset.append($thisDiv);
 			}
 		}
-		if (form === 'descriptions') {
-			$prefsDiv.append($descFieldset1,$descFieldset2);
-		}
-		else {
-			$prefsDiv.append($fieldset);
-		}
+		$prefsDiv.append($fieldset);
+
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
 			if (this.mediaType === 'video') {
@@ -590,6 +521,14 @@
 				else if (this.controls[i] === 'restart') {
 					kbLabels.push(this.tt.restart);
 					keys.push('s');
+				}
+				else if (this.controls[i] === 'previous') {
+					kbLabels.push(this.tt.prevTrack);
+					keys.push('b'); // b = back
+				}
+				else if (this.controls[i] === 'next') {
+					kbLabels.push(this.tt.nextTrack);
+					keys.push('n');
 				}
 				else if (this.controls[i] === 'rewind') {
 					kbLabels.push(this.tt.rewind);
@@ -691,7 +630,7 @@
 		cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
 		saveButton.click(function () {
 			dialog.hide();
-			thisObj.savePrefsFromForm();
+		  thisObj.savePrefsFromForm();
 		});
 		cancelButton.click(function () {
 			dialog.hide();
@@ -728,28 +667,23 @@
 		});
 	};
 
-	 // Reset preferences form with default values from cookie
-	 // Called when user clicks cancel or close button in Prefs Dialog
-	 // also called when user presses Escape
-
 	 AblePlayer.prototype.resetPrefsForm = function () {
 
-		 var thisObj, cookie, available, i, prefName, thisDiv, thisId;
+  	 // Reset preferences form with default values from cookie
+     // Called when:
+     // User clicks cancel or close button in Prefs Dialog
+     // User presses Escape to close Prefs dialog
+     // User clicks Save in Prefs dialog, & there's more than one player on page
+
+		 var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
 
 		 thisObj = this;
 		 cookie = this.getCookie();
 		 available = this.getAvailablePreferences();
 		 for (i=0; i<available.length; i++) {
 			 prefName = available[i]['name'];
-			 if (prefName === 'prefDescFormat') {
-				 if (this[prefName] === 'text') {
-					 $('input[value="text"]').prop('checked',true);
-				 }
-				 else {
-					 $('input[value="video"]').prop('checked',true);
-				 }
-			 }
-			 else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+			 prefId = this.mediaId + '_' + prefName;
+			 if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				 // this is a caption-related select box
 				 $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
 			 }
@@ -766,31 +700,36 @@
 			this.stylizeCaptions(this.$sampleCapsDiv);
 	 };
 
-	// Return a prefs object constructed from the form.
 	AblePlayer.prototype.savePrefsFromForm = function () {
+
+  	// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
 		// update cookie with new value
-		var numChanges, numCapChanges, capSizeChanged, capSizeValue, newValue;
+		var cookie, available, prefName, prefId, numChanges,
+		  numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
 		numCapChanges = 0; // changes to caption-style-related preferences
 		capSizeChanged = false;
-		var cookie = this.getCookie();
-		var available = this.getAvailablePreferences();
+		cookie = this.getCookie();
+		available = this.getAvailablePreferences();
 		for (var i=0; i < available.length; i++) {
 			// only prefs with labels are used in the Prefs form
 			if (available[i]['label']) {
-				var prefName = available[i]['name'];
+				prefName = available[i]['name'];
+				prefId = this.mediaId + '_' + prefName;
 				if (prefName == 'prefDescFormat') {
-					this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user changed setting
+  				// As of v4.0.10, prefDescFormat is no longer a choice
+					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
+					this.prefDescFormat = 'video';
+					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
 						cookie.preferences['prefDescFormat'] = this.prefDescFormat;
 						numChanges++;
 					}
 				}
 				else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
-					newValue = $('select[name="' + prefName + '"]').val();
+					newValue = $('select[id="' + prefId + '"]').val();
 					if (cookie.preferences[prefName] !== newValue) { // user changed setting
 						cookie.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -804,7 +743,7 @@
 					}
 				}
 				else { // all other fields are checkboxes
-					if ($('input[name="' + prefName + '"]').is(':checked')) {
+					if ($('input[id="' + prefId + '"]').is(':checked')) {
 						cookie.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed
@@ -842,35 +781,38 @@
 				// update font size of YouTube captions
 				this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
-		this.updatePrefs();
-		if (numCapChanges > 0) {
-			this.stylizeCaptions(this.$captionsDiv);
-			// also apply same changes to descriptions, if present
-			if (typeof this.$descDiv !== 'undefined') {
-				this.stylizeCaptions(this.$descDiv);
-			}
-		}
+    if (AblePlayerInstances.length > 1) {
+      // there are multiple players on this page.
+      // update prefs for ALL of them
+      for (var i=0; i<AblePlayerInstances.length; i++) {
+        AblePlayerInstances[i].updatePrefs();
+        AblePlayerInstances[i].loadCurrentPreferences();
+        AblePlayerInstances[i].resetPrefsForm();
+        if (numCapChanges > 0) {
+          AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
+          // also apply same changes to descriptions, if present
+          if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
+            AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
+			    }
+        }
+      }
+    }
+    else {
+      // there is only one player
+      this.updatePrefs();
+      if (numCapChanges > 0) {
+        this.stylizeCaptions(this.$captionsDiv);
+        // also apply same changes to descriptions, if present
+        if (typeof this.$descDiv !== 'undefined') {
+          this.stylizeCaptions(this.$descDiv);
+			  }
+      }
+    }
 	}
 
-	// Updates player based on current prefs.	 Safe to call multiple times.
 	AblePlayer.prototype.updatePrefs = function () {
 
-		var modHelp;
-
-		// modifier keys (update help text)
-		if (this.prefAltKey === 1) {
-			modHelp = 'Alt + ';
-		}
-		else {
-			modHelp = '';
-		}
-		if (this.prefCtrlKey === 1) {
-			modHelp += 'Control + ';
-		}
-		if (this.prefShiftKey === 1) {
-			modHelp += 'Shift + ';
-		}
-		$('.able-help-modifiers').text(modHelp);
+  	// Update player based on current prefs. Safe to call multiple times.
 
 		// tabbable transcript
 		if (this.prefTabbable === 1) {
@@ -893,6 +835,7 @@
 	};
 
 	AblePlayer.prototype.usingModifierKeys = function(e) {
+
 		// return true if user is holding down required modifier keys
 		if ((this.prefAltKey === 1) && !e.altKey) {
 			return false;

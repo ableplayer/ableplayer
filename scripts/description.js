@@ -10,17 +10,20 @@
 
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
-		// prefDescFormat == either 'video' or 'text'
+		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefVisibleDesc == 1 to visibly show text-based description area; else 0
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
 		// hasClosedDesc == true if a description text track is available
 		// this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
 		// descOn == true if description of either type is on
+		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
 
 		var thisObj = this;
-
-		if (!this.refreshingDesc) {
+    if (this.refreshingDesc) {
+		  this.prevDescFormat = this.useDescFormat;
+    }
+		else {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
 			// checks only the first source since if a described version is provided,
@@ -40,12 +43,15 @@
 				}
 			}
 		}
+
 		// update this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. Use whichever one user prefers
+				// both formats are available. Always use 'video'
 				this.useDescFormat = this.prefDescFormat;
 				this.descOn = true;
+				// Do not pause during descriptions when playing described video
+				this.prefDescPause = false;
 			}
 			else if (this.hasOpenDesc) {
 				this.useDescFormat = 'video';
@@ -57,14 +63,8 @@
 			}
 		}
 		else { // description button is off
-			if (this.refreshingDesc) { // user just now toggled it off
-				this.prevDescFormat = this.useDescFormat;
-				this.useDescFormat = false;
-				this.descOn = false;
-			}
-			else { // desc has always been off
-				this.useDescFormat = false;
-			}
+      this.useDescFormat = false;
+			this.descOn = false;
 		}
 
 		if (this.useDescFormat === 'text') {
@@ -96,22 +96,21 @@
 			}
 		}
 		if (this.descOn) {
-
 			if (this.useDescFormat === 'video') {
 				if (!this.usingAudioDescription()) {
 					// switched from non-described to described version
 					this.swapDescription();
 				}
-				// hide description div
-				this.$descDiv.hide();
-				this.$descDiv.removeClass('able-clipped');
 			}
-			else if (this.useDescFormat === 'text') {
-				this.$descDiv.show();
-				if (this.prefVisibleDesc) { // make it visible to everyone
+			if (this.hasClosedDesc) {
+				if (this.prefVisibleDesc) {
+  				// make description text visible
+  				// New in v4.0.10: Do this regardless of useDescFormat
+  				this.$descDiv.show();
 					this.$descDiv.removeClass('able-clipped');
 				}
-				else { // keep it visible to screen readers, but hide from everyone else
+				else {
+  				// keep it visible to screen readers, but hide it visibly
 					this.$descDiv.addClass('able-clipped');
 				}
 				if (!this.swappingSrc) {
@@ -120,7 +119,6 @@
 			}
 		}
 		else { // description is off.
-
 			if (this.prevDescFormat === 'video') { // user was previously using description via video
 				if (this.usingAudioDescription()) {
 					this.swapDescription();
@@ -150,7 +148,6 @@
 	};
 
 	AblePlayer.prototype.swapDescription = function() {
-
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -273,7 +270,7 @@
 		// there's a lot of redundancy between this function and showCaptions
 		// Trying to combine them ended up in a mess though. Keeping as is for now.
 
-		if (this.swappingSrc) {
+		if (this.swappingSrc || !this.descOn) {
 			return;
 		}
 
@@ -313,7 +310,10 @@
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (typeof this.synth !== 'undefined' && typeof this.descVoiceIndex !== 'undefined') {
+				if (
+  				this.exposeTextDescriptions &&
+				  typeof this.synth !== 'undefined' &&
+          typeof this.descVoiceIndex !== 'undefined') {
 					// browser supports speech synthesis and a voice has been selected in initDescription()
 					// use the web speech API
 					msg = new SpeechSynthesisUtterance();
@@ -329,7 +329,7 @@
 						if (thisObj.pausedForDescription) {
 							thisObj.playMedia();
 						}
-      			};
+      		};
 					this.synth.speak(msg);
 					if (this.prefVisibleDesc) {
 						// write description to the screen for sighted users
@@ -342,7 +342,7 @@
 					// load the new description into the container div for screen readers to read
 					this.$descDiv.html(descText);
 				}
-				if (this.prefDescPause) {
+				if (this.prefDescPause && this.exposeTextDescriptions) {
 					this.pauseMedia();
 					this.pausedForDescription = true;
 				}

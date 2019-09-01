@@ -153,7 +153,7 @@
 
 	AblePlayer.prototype.getVimeoDimensions = function (vimeoContainerId) {
 
-		// get dimensions of YouTube video, return array with width & height
+		// get dimensions of Vimeo video, return array with width & height
 		// Sources, in order of priority:
 		// 1. The width and height attributes on <video>
 		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
@@ -186,6 +186,9 @@
 	};
 
 	AblePlayer.prototype.resizeVimeoPlayer = function(youTubeId, youTubeContainerId) {
+
+    // NOTE: This function is modeled after same function in youtube.js
+    // in case useful for Vimeo, but is not currently used
 
 		// called after player is ready, if youTube dimensions were previously unknown
 		// Now need to get them from the iframe element that YouTube injected
@@ -243,6 +246,7 @@
 
 	AblePlayer.prototype.setupVimeoCaptions = function () {
 
+console.log('setupVimeoCaptions');
 		// called from setupAltCaptions if player is YouTube and there are no <track> captions
 
 		// use YouTube Data API to get caption data from YouTube
@@ -355,6 +359,11 @@
 	};
 
 	AblePlayer.prototype.initVimeoCaptionModule = function () {
+
+    // NOTE: This function is modeled after same function in youtube.js
+    // in case useful for Vimeo, but is not currently used
+
+
 		// This function is called when YouTube onApiChange event fires
 		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
 		// it isn't fired until the video starts playing
@@ -421,6 +430,9 @@
 	};
 
 	AblePlayer.prototype.getVimeoPosterUrl = function (youTubeId, width) {
+
+    // NOTE: This function is modeled after same function in youtube.js
+    // in case useful for Vimeo, but is not currently used
 
 			 // return a URL for retrieving a YouTube poster image
 			 // supported values of width: 120, 320, 480, 640

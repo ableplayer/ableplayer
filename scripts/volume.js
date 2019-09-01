@@ -143,7 +143,7 @@
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
 
-		var volumeName, volumePct, volumeLabel, volumeIconClass, volumeImg;
+		var volumeName, volumePct, volumeLabel, volumeIconClass, volumeImg, newSvgData;
 
 		volumeName = this.getVolumeName(volume);
 		volumePct = (volume/10) * 100;
@@ -154,10 +154,18 @@
 			this.$volumeButton.find('span').first().removeClass().addClass(volumeIconClass);
 			this.$volumeButton.find('span.able-clipped').text(volumeLabel);
 		}
-		else {
+		else if (this.iconType === 'image') {
 			volumeImg = this.imgPath + 'volume-' + volumeName + '.png';
 			this.$volumeButton.find('img').attr('src',volumeImg);
 		}
+		else if (this.iconType === 'svg') {
+  		if (volumeName !== 'mute') {
+    		volumeName = 'volume-' + volumeName;
+      }
+		  newSvgData = this.getSvgData(volumeName);
+      this.$volumeButton.find('svg').attr('viewBox',newSvgData[0]);
+      this.$volumeButton.find('path').attr('d',newSvgData[1]);
+    }
 	};
 
 	AblePlayer.prototype.moveVolumeHead = function(y) {
@@ -255,6 +263,7 @@
 	};
 
 	AblePlayer.prototype.handleMute = function() {
+
 		if (this.isMuted()) {
 			this.setMute(false);
 		}

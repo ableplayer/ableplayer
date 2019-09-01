@@ -154,7 +154,7 @@ var ptbr = {
 
 "prefIntroDescriptionNone": "O vídeo atual não possui audiodescrição em nenhum formato.",
 
-"prefIntroDescription3": "Use o formulário a seguir para definir suas preferências relacionadas à audiodescrição.",
+"prefIntroDescription3": "Use o formulário a seguir para definir suas preferências relacionadas à texto baseado em audiodescrição.",
 
 "prefIntroDescription4": "Depois que salvar suas configurações, a audiodescrição poderá ser ligada/desligada usando o botão Descrição.",
 

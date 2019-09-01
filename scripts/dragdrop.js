@@ -42,44 +42,42 @@
 
 		// add event listener to toolbar to start and end drag
 		// other event listeners will be added when drag starts
-		$toolbar.on('mousedown', function(e) {
+		$toolbar.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered) {
-				thisObj.windowMenuClickRegistered = true;
-				thisObj.startMouseX = e.pageX;
-				thisObj.startMouseY = e.pageY;
-				thisObj.dragDevice = 'mouse';
-				thisObj.startDrag(which, $window);
-			}
-			return false;
-		});
-		$toolbar.on('mouseup', function(e) {
-			e.stopPropagation();
-			if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-				thisObj.endDrag(which);
-			}
-			return false;
+			if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			if (!thisObj.windowMenuClickRegistered) {
+	  			thisObj.windowMenuClickRegistered = true;
+          thisObj.startMouseX = e.pageX;
+          thisObj.startMouseY = e.pageY;
+          thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
+          thisObj.startDrag(which, $window);
+			  }
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+        if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
+				  thisObj.endDrag(which);
+			  }
+      }
+      return false;
 		});
 
 		// add event listeners for resizing
-		$resizeHandle.on('mousedown', function(e) {
-
+		$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered) {
-				thisObj.windowMenuClickRegistered = true;
-				thisObj.startMouseX = e.pageX;
-				thisObj.startMouseY = e.pageY;
-				thisObj.startResize(which, $window);
-				return false;
-			}
-		});
-
-		$resizeHandle.on('mouseup', function(e) {
-			e.stopPropagation();
-			if (thisObj.resizing) {
-				thisObj.endResize(which);
-			}
-			return false;
+			if (e.type === 'mousedown' || e.type === 'touchstart') {
+  			if (!thisObj.windowMenuClickRegistered) {
+	  			thisObj.windowMenuClickRegistered = true;
+          thisObj.startMouseX = e.pageX;
+          thisObj.startMouseY = e.pageY;
+          thisObj.startResize(which, $window);
+			  }
+      }
+      else if (e.type === 'mouseup' || e.type === 'touchend') {
+  			if (thisObj.resizing) {
+	  			thisObj.endResize(which);
+        }
+      }
+      return false;
 		});
 
 		// whenever a window is clicked, bring it to the foreground
@@ -524,8 +522,8 @@
 		}).focus();
 
 		// add device-specific event listeners
-		if (this.dragDevice === 'mouse') {
-			$(document).on('mousemove',function(e) {
+		if (this.dragDevice === 'mouse') { // might also be a touchpad
+			$(document).on('mousemove touchmove',function(e) {
 				if (thisObj.dragging) {
 					// calculate new top left based on current mouse position - offset
 					newX = e.pageX - thisObj.dragOffsetX;
@@ -629,7 +627,7 @@
 			$windowButton = this.$signPopupButton;
 		}
 
-		$(document).off('mousemove mouseup');
+		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
 
 		if (this.dragDevice === 'keyboard') {
@@ -706,7 +704,7 @@
 		this.dragStartHeight = this.$activeWindow.height();
 
 		// add event listeners
-		$(document).on('mousemove',function(e) {
+		$(document).on('mousemove touchmove',function(e) {
 			if (thisObj.resizing) {
 				// calculate new width and height based on changes to mouse position
 				newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
@@ -730,7 +728,7 @@
 			$windowButton = this.$signPopupButton;
 		}
 
-		$(document).off('mousemove mouseup');
+		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown');
 
 		$windowButton.show().focus();

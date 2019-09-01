@@ -225,7 +225,7 @@
 				svg[1] = 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z';
 				break;
 
-			case 'volume-mute':
+			case 'volume-soft':
 				svg[0] = '0 0 20 20';
 				svg[1] = 'M10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
 				break;
@@ -304,7 +304,6 @@
 		// Bootstrap from this.media possibly being an ID or other selector.
 		this.$media = $(this.media).first();
 		this.media = this.$media[0];
-
 		// Set media type to 'audio' or 'video'; this determines some of the behavior of player creation.
 		if (this.$media.is('audio')) {
 			this.mediaType = 'audio';
@@ -612,11 +611,10 @@
 						thisObj.showSearchResults();
 
 						// Go ahead and load media, without user requesting it
-						// Normally, we wait until user clicks play, rather than unnecessarily consume their bandwidth
-						// Exceptions are if the video is intended to autostart or if running on iOS (a workaround for iOS issues)
-						// TODO: Confirm that this is still necessary with iOS (this would added early, & I don't remember what the issues were)
-						if (thisObj.player === 'html5' &&
-								(thisObj.isIOS() || thisObj.startTime > 0 || thisObj.autoplay || thisObj.okToPlay)) {
+						// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+            // However, the media needs to load before the 'loadedmetadata' event is fired
+            // and until that happens we can't get the media's duration
+						if (thisObj.player === 'html5') {
 							thisObj.$media[0].load();
 						}
 						// refreshControls is called twice building/initializing the player

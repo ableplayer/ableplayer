@@ -6,14 +6,9 @@
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 		var thisObj = this;
-
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
-			if (typeof duration === 'undefined') {
-				thisObj.duration = mediaTimes['duration'];
-			}
-			if (typeof elapsed === 'undefined') {
-				thisObj.elapsed = mediaTimes['elapsed'];
-			}
+		  thisObj.duration = mediaTimes['duration'];
+      thisObj.elapsed = mediaTimes['elapsed'];
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
 				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
@@ -55,7 +50,6 @@
 	};
 
 	AblePlayer.prototype.onMediaComplete = function () {
-
 		// if there's a playlist, advance to next item and start playing
 		if (this.hasPlaylist && !this.cueingPlaylistItem) {
 			if (this.playlistIndex === (this.$playlist.length - 1)) {
@@ -64,6 +58,10 @@
 					this.playlistIndex = 0;
 					this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
 					this.cuePlaylistItem(0);
+				}
+				else {
+  				this.playing = false;
+  				this.paused = true;
 				}
 			}
 			else {
@@ -96,9 +94,9 @@
 					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
-				this.refreshControls('init');
 			}
 		}
+		this.refreshControls('init');
 	};
 
 	// End Media events
@@ -188,13 +186,24 @@
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 
 		// TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
-		var whichButton = $(el).attr('class').split(' ')[0].substr(20);
+
+		var whichButton, prefsPopup;
+		whichButton = $(el).attr('class').split(' ')[0].substr(20);
 		if (whichButton === 'play') {
+  		this.clickedPlay = true;
 			this.handlePlay();
 		}
 		else if (whichButton === 'restart') {
 			this.seekTrigger = 'restart';
 			this.handleRestart();
+		}
+		else if (whichButton === 'previous') {
+			this.seekTrigger = 'previous';
+			this.handlePrevTrack();
+		}
+		else if (whichButton === 'next') {
+			this.seekTrigger = 'next';
+			this.handleNextTrack();
 		}
 		else if (whichButton === 'rewind') {
 			this.seekTrigger = 'rewind';
@@ -229,7 +238,25 @@
 			this.handleSignToggle();
 		}
 		else if (whichButton === 'preferences') {
-			this.handlePrefsClick();
+      if ($(el).attr('data-prefs-popup') === 'menu') {
+  			this.handlePrefsClick();
+  		}
+  		else {
+        this.closePopups();
+    		prefsPopup = $(el).attr('data-prefs-popup');
+        if (prefsPopup === 'keyboard') {
+				  this.keyboardPrefsDialog.show();
+				}
+        else if (prefsPopup === 'captions') {
+				  this.captionPrefsDialog.show();
+				}
+        else if (prefsPopup === 'descriptions') {
+				  this.descPrefsDialog.show();
+				}
+        else if (prefsPopup === 'transcript') {
+				  this.transcriptPrefsDialog.show();
+				}
+  		}
 		}
 		else if (whichButton === 'help') {
 			this.handleHelpClick();
@@ -280,7 +307,6 @@
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
-
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		if (!(
 			$(':focus').is('[contenteditable]') ||
@@ -292,6 +318,7 @@
 			e.target.tagName === 'TEXTAREA' ||
 			e.target.tagName === 'SELECT'
 		)){
+
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -347,6 +374,16 @@
 					this.handleRewind();
 				}
 			}
+			else if (which === 98) { // b = back (previous track)
+				if (this.usingModifierKeys(e)) {
+					this.handlePrevTrack();
+				}
+			}
+			else if (which === 110) { // n = next track
+				if (this.usingModifierKeys(e)) {
+					this.handleNextTrack();
+				}
+			}
 			else if (which === 101) { // e = preferences
 				if (this.usingModifierKeys(e)) {
 					this.handlePrefsClick();
@@ -379,6 +416,8 @@
 				// do something
 			})
 			.on('loadedmetadata',function() {
+        // should be able to get duration now
+        thisObj.duration = thisObj.media.duration;
 				thisObj.onMediaNewSourceLoad();
 			})
 			.on('canplay',function() {
@@ -391,7 +430,7 @@
 					if (!thisObj.startedPlaying) {
 							// start playing; no further user action is required
 						thisObj.playMedia();
-				 		}
+				 	}
 					thisObj.userClickedPlaylist = false; // reset
 				}
 				if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
@@ -435,11 +474,7 @@
 					// already started playing
 					// we're here because a new media source has been loaded and is ready to resume playback
 					thisObj.getPlayerState().then(function(currentState) {
-						if (thisObj.swappingSrc && currentState === 'stopped') {
-							// Safari is the only browser that returns value of 'stopped' (observed in 12.0.1 on MacOS)
-							// This prevents 'timeupdate' events from triggering, which prevents the new media src
-							// from resuming playback at swapTime
-							// This is a hack to jump start Safari
+						if (thisObj.swappingSrc && (currentState === 'stopped' || currentState === 'paused')) {
 							thisObj.startedPlaying = false;
 							if (thisObj.swapTime > 0) {
 								thisObj.seekTo(thisObj.swapTime);
@@ -483,8 +518,8 @@
 			.on('pause',function() {
 				if (!thisObj.clickedPlay) {
 					// 'pause' was triggered automatically, not initiated by user
-					// this happens in some browsers (not Chrome, as of 70.x)
-					// when swapping source (e.g., between tracks in a playlist, or swapping description)
+					// this happens in some browsers when swapping source
+					// (e.g., between tracks in a playlist or swapping description)
 					if (thisObj.hasPlaylist || thisObj.swappingSrc) {
 						// do NOT set playing to false.
 						// doing so prevents continual playback after new track is loaded

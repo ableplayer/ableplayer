@@ -66,7 +66,6 @@
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 		thisObj = this;
-
 		if (typeof duration !== 'undefined' && typeof elapsed !== 'undefined') {
 			mediaTimes['duration'] = duration;
 			mediaTimes['elapsed'] = elapsed;
@@ -199,7 +198,6 @@
 			return;
 		}
 		*/
-
 		var deferred, promise, thisObj, duration, elapsed;
 		deferred = new $.Deferred();
 		promise = deferred.promise();
@@ -210,7 +208,7 @@
 				deferred.resolve('ended');
 			}
 			else if (this.media.paused) {
-				deferred.resolve('paused');
+  		  deferred.resolve('paused');
 			}
 			else if (this.media.readyState !== 4) {
 				deferred.resolve('buffering');
@@ -554,30 +552,27 @@
 			if (typeof this.$elapsedTimeContainer !== 'undefined') {
 				this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 			}
-
 			// Update seekbar width.
 			// To do this, we need to calculate the width of all buttons surrounding it.
 			if (this.seekBar) {
 				widthUsed = 0;
-				seekbarSpacer = 40; // adjust for discrepancies in browsers' calculated button widths
-
 				leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
 				rightControls = leftControls.next('div.able-right-controls');
 				leftControls.children().each(function () {
 					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).width();
+						widthUsed += $(this).outerWidth(true); // true = include margin
 					}
 				});
 				rightControls.children().each(function () {
 					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).width();
+						widthUsed += $(this).outerWidth(true);
 					}
 				});
 				if (this.fullscreen) {
-					seekbarWidth = $(window).width() - widthUsed - seekbarSpacer;
+					seekbarWidth = $(window).width() - widthUsed;
 				}
 				else {
-					seekbarWidth = this.$ableWrapper.width() - widthUsed - seekbarSpacer;
+					seekbarWidth = this.$ableWrapper.width() - widthUsed;
 				}
 				// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
 				if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
@@ -658,8 +653,7 @@
 					this.$ccButton.attr({
 						'aria-label': this.tt.captions,
 						'aria-haspopup': 'true',
-						'aria-controls': this.mediaId + '-captions-menu',
-						'aria-expanded': 'false'
+						'aria-controls': this.mediaId + '-captions-menu'
 					});
 					this.$ccButton.find('span.able-clipped').text(this.tt.captions);
 				}
@@ -701,7 +695,6 @@
 				}
 			}
 		}
-
 		if (context === 'playpause' || context == 'init'){
 			if (typeof this.$bigPlayButton !== 'undefined' && typeof this.seekBar !== 'undefined') {
 				// Choose show/hide for big play button and adjust position.
@@ -747,7 +740,11 @@
 						// Set a flag to ignore the coming scroll event.
 						// there's no other way I know of to differentiate programmatic and user-initiated scroll events.
 						this.scrollingTranscript = true;
-						$('.able-transcript').scrollTop(newTop);
+						// only scroll once after moving a highlight
+						if (this.movingHighlight) {
+  						$('.able-transcript').scrollTop(newTop);
+              this.movingHighlight = false;
+            }
 					}
 				}
 			}
@@ -759,8 +756,7 @@
 				this.$chaptersButton.attr({
 					'aria-label': this.tt.chapters,
 					'aria-haspopup': 'true',
-					'aria-controls': this.mediaId + '-chapters-menu',
-					'aria-expanded': 'false'
+					'aria-controls': this.mediaId + '-chapters-menu'
 				});
 			}
 		}
@@ -804,31 +800,48 @@
 					// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 					this.getPlayerState().then(function(currentState) {
 						if (thisObj.$status.text() !== textByState[currentState] && !thisObj.seekBar.tracking) {
-							// Debounce updates; only update after status has stayed steadily different for 250ms.
-							timestamp = (new Date()).getTime();
+							// Debounce updates; only update after status has stayed steadily different for a while
+							// "A while" is defined differently depending on context
+							if (thisObj.swappingSrc) {
+                // this is where most of the chatter occurs (e.g., playing, paused, buffering, playing),
+                // so set a longer wait time before writing a status message
+                if (!thisObj.debouncingStatus) {
+                  thisObj.statusMessageThreshold = 2000; // in ms (2 seconds)
+                }
+              }
+              else {
+                // for all other contexts (e.g., users clicks Play/Pause)
+                // user should receive more rapid feedback
+                if (!thisObj.debouncingStatus) {
+                  thisObj.statusMessageThreshold = 250; // in ms
+                }
+              }
+  						timestamp = (new Date()).getTime();
 							if (!thisObj.statusDebounceStart) {
 								thisObj.statusDebounceStart = timestamp;
-								// Make sure refreshControls gets called again at the appropriate time to check.
+								// Call refreshControls() again after allotted time has passed
+								thisObj.debouncingStatus = true;
 								thisObj.statusTimeout = setTimeout(function () {
+                  thisObj.debouncingStatus = false;
 									thisObj.refreshControls(context);
-								}, 300);
+								}, thisObj.statusMessageThreshold);
 							}
-							else if ((timestamp - thisObj.statusDebounceStart) > 250) {
-								thisObj.$status.text(textByState[currentState]);
-								thisObj.statusDebounceStart = null;
-								clearTimeout(thisObj.statusTimeout);
-								thisObj.statusTimeout = null;
-							}
+							else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
+    						thisObj.$status.text(textByState[currentState]);
+                thisObj.statusDebounceStart = null;
+                clearTimeout(thisObj.statusTimeout);
+                thisObj.statusTimeout = null;
+						  }
 						}
 						else {
 							thisObj.statusDebounceStart = null;
+							thisObj.debouncingStatus = false;
 							clearTimeout(thisObj.statusTimeout);
 							thisObj.statusTimeout = null;
 						}
-
 						// Don't change play/pause button display while using the seek bar (or if YouTube stopped)
 						if (!thisObj.seekBar.tracking && !thisObj.stoppingYouTube) {
-							if (currentState === 'paused' || currentState === 'stopped') {
+							if (currentState === 'paused' || currentState === 'stopped' || currentState === 'ended') {
 								thisObj.$playpauseButton.attr('aria-label',thisObj.tt.play);
 
 								if (thisObj.iconType === 'font') {
@@ -927,6 +940,34 @@
 	AblePlayer.prototype.handleRestart = function() {
 
 		this.seekTo(0);
+	};
+
+	AblePlayer.prototype.handlePrevTrack = function() {
+
+    if (this.playlistIndex === 0) {
+      // currently on the first track
+      // wrap to bottom and play the last track
+      this.playlistIndex = this.$playlist.length - 1;
+    }
+    else {
+		  this.playlistIndex--;
+    }
+		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+    this.cuePlaylistItem(this.playlistIndex);
+	};
+
+	AblePlayer.prototype.handleNextTrack = function() {
+
+    if (this.playlistIndex === this.$playlist.length - 1) {
+      // currently on the last track
+      // wrap to top and play the forst track
+      this.playlistIndex = 0;
+    }
+    else {
+		  this.playlistIndex++;
+    }
+		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
+    this.cuePlaylistItem(this.playlistIndex);
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
@@ -1102,7 +1143,7 @@
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
 				this.hidingPopup = false;
-				this.$ccButton.attr('aria-expanded','false').focus();
+				this.$ccButton.removeAttr('aria-expanded').focus();
 			}
 			else {
 				this.closePopups();
@@ -1129,7 +1170,7 @@
 		if (this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.hidingPopup = false;
-			this.$chaptersButton.attr('aria-expanded','false').focus();
+			this.$chaptersButton.removeAttr('aria-expanded').focus();
 		}
 		else {
 			this.closePopups();
@@ -1154,12 +1195,16 @@
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
+		if (!this.$descDiv.is(':hidden')) {
+			this.$descDiv.hide();
+		}
 		this.refreshingDesc = true;
 		this.initDescription();
 		this.refreshControls('descriptions');
 	};
 
 	AblePlayer.prototype.handlePrefsClick = function(pref) {
+
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
@@ -1175,7 +1220,7 @@
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
 			this.hidingPopup = false;
-			this.$prefsButton.attr('aria-expanded','false').focus();
+			this.$prefsButton.removeAttr('aria-expanded').focus();
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 		}

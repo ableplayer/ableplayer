@@ -154,7 +154,7 @@ var ca = {
 
 "prefIntroDescriptionNone": "L\'actual vídeo no disposa d\'audiodescripció en cap format.",
 
-"prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l\'audiodescripció.",
+"prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l\'audiodescripció textual.",
 
 "prefIntroDescription4": "Desprès de desar la configuració, podeu commutar l\'ús de l\'audiodescripció amb el mateix botó.",
 
