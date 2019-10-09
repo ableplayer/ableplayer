@@ -11,6 +11,7 @@
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
 		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
+		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
 		this.getUserAgent();
 		this.setIconColor();

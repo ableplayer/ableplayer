@@ -1238,6 +1238,24 @@
 					if (control === 'play') {
 						this.$playpauseButton = $newButton;
 					}
+					else if (control == 'previous') {
+  					this.$prevButton = $newButton;
+            // if player is being rebuilt because user clicked the Prev button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'previous') {
+              this.$prevButton.focus();
+              this.buttonWithFocus = null;
+            }
+					}
+					else if (control == 'next') {
+  					this.$nextButton = $newButton;
+            // if player is being rebuilt because user clicked the Next button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'next') {
+              this.$nextButton.focus();
+              this.buttonWithFocus = null;
+            }
+					}
 					else if (control === 'captions') {
 						this.$ccButton = $newButton;
 					}

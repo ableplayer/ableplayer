@@ -199,10 +199,12 @@
 		}
 		else if (whichButton === 'previous') {
 			this.seekTrigger = 'previous';
+			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
 			this.seekTrigger = 'next';
+			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
 		}
 		else if (whichButton === 'rewind') {

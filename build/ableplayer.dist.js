@@ -554,6 +554,7 @@ var AblePlayerInstances = [];
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
 		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
+		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
 		this.getUserAgent();
 		this.setIconColor();
@@ -4223,6 +4224,24 @@ var AblePlayerInstances = [];
 					// create variables of buttons that are referenced throughout the AblePlayer object
 					if (control === 'play') {
 						this.$playpauseButton = $newButton;
+					}
+					else if (control == 'previous') {
+  					this.$prevButton = $newButton;
+            // if player is being rebuilt because user clicked the Prev button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'previous') {
+              this.$prevButton.focus();
+              this.buttonWithFocus = null;
+            }
+					}
+					else if (control == 'next') {
+  					this.$nextButton = $newButton;
+            // if player is being rebuilt because user clicked the Next button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'next') {
+              this.$nextButton.focus();
+              this.buttonWithFocus = null;
+            }
 					}
 					else if (control === 'captions') {
 						this.$ccButton = $newButton;
@@ -11491,10 +11510,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else if (whichButton === 'previous') {
 			this.seekTrigger = 'previous';
+			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
 			this.seekTrigger = 'next';
+			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
 		}
 		else if (whichButton === 'rewind') {
