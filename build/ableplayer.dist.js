@@ -4632,16 +4632,6 @@ var AblePlayerInstances = [];
 			}
 		}
 
-		// finished swapping src, now reload the new source file.
-		this.swappingSrc = false;
-
-		if (this.player === 'html5') {
-			this.media.load();
-		}
-		else if (this.player === 'youtube') {
-			// TODO: Load new youTubeId
-		}
-
 		// if this.swappingSrc is true, media will autoplay when ready
 		if (this.initializing) { // this is the first track - user hasn't pressed play yet
 			this.swappingSrc = false;
@@ -15668,7 +15658,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.setupVimeoCaptions = function () {
-
 
 		// called from setupAltCaptions if player is YouTube and there are no <track> captions
 

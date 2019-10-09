@@ -246,7 +246,6 @@
 
 	AblePlayer.prototype.setupVimeoCaptions = function () {
 
-console.log('setupVimeoCaptions');
 		// called from setupAltCaptions if player is YouTube and there are no <track> captions
 
 		// use YouTube Data API to get caption data from YouTube
