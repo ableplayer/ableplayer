@@ -3817,7 +3817,7 @@ var AblePlayerInstances = [];
 		// 3 = Bottom right (legacy skin only)
 		// Each key contains an array of control names to put in that section.
 
-		var controlLayout, volumeSupported, playbackSupported;
+		var controlLayout, volumeSupported, playbackSupported, totalButtonWidth, numA11yButtons;
 
 		controlLayout = [];
 		controlLayout[0] = [];
@@ -3841,7 +3841,7 @@ var AblePlayerInstances = [];
     		controlLayout[0].push('previous');
         controlLayout[0].push('next');
       }
-      else if (this.skin === '2020') {
+      else if (this.skin == '2020') {
     		controlLayout[0].push('previous');
         controlLayout[0].push('next');
       }
@@ -3859,58 +3859,69 @@ var AblePlayerInstances = [];
 		}
 
 		if (this.mediaType === 'video') {
+  		numA11yButtons = 0;
 			if (this.hasCaptions) {
+  			numA11yButtons++;
   			if (this.skin === 'legacy') {
 				  controlLayout[2].push('captions');
 				}
-				else if (this.skin === '2020') {
+				else if (this.skin == '2020') {
   				controlLayout[1].push('captions');
         }
 			}
 			if (this.hasSignLanguage) {
+  			numA11yButtons++;
   			if (this.skin === 'legacy') {
 				  controlLayout[2].push('sign');
 				}
-				else if (this.skin === '2020') {
+				else if (this.skin == '2020') {
   				controlLayout[1].push('sign');
         }
 			}
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
+  			numA11yButtons++;
   			if (this.skin === 'legacy') {
 				  controlLayout[2].push('descriptions');
 				}
-				else if (this.skin === '2020') {
+				else if (this.skin == '2020') {
   				controlLayout[1].push('descriptions');
         }
 			}
 		}
 		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
+  		numA11yButtons++;
   		if (this.skin === 'legacy') {
 				controlLayout[2].push('transcript');
 		  }
-      else if (this.skin === '2020') {
+      else if (this.skin == '2020') {
   		  controlLayout[1].push('transcript');
       }
 		}
 
 		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
+  		numA11yButtons++;
   		if (this.skin === 'legacy') {
 				controlLayout[2].push('chapters');
 		  }
-			else if (this.skin === '2020') {
+			else if (this.skin == '2020') {
   		  controlLayout[1].push('chapters');
       }
+		}
+
+    if (this.skin == '2020' && numA11yButtons > 0) {
+  		controlLayout[1].push('pipe');
 		}
 
     if (playbackSupported && this.skin === '2020') {
       controlLayout[1].push('faster');
     	controlLayout[1].push('slower');
+    	controlLayout[1].push('pipe');
 		}
 
     if (this.skin === 'legacy') {
   		controlLayout[3].push('preferences');
     }
-    else if (this.skin === '2020') {
+    else if (this.skin == '2020') {
       controlLayout[1].push('preferences');
     }
 
@@ -3929,7 +3940,7 @@ var AblePlayerInstances = [];
 			if (this.skin === 'legacy') {
   			controlLayout[1].push('volume');
   		}
-  		else if (this.skin === '2020') {
+  		else if (this.skin == '2020') {
     		controlLayout[1].push('volume');
   		}
 		}
@@ -3953,8 +3964,8 @@ var AblePlayerInstances = [];
 		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, mediaTimes, duration, $pipe, $pipeImg,
 		tooltipId, tooltipX, tooltipY, control,
 		buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon, buttonUse, svgPath,
-		leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
-		controllerStyles, vidcapStyles, captionLabel, popupMenuId;
+		leftWidth, rightWidth, widthUsed, controllerWidth, thresholdForPipe,
+		captionLabel, popupMenuId;
 
 		thisObj = this;
 
@@ -3972,7 +3983,7 @@ var AblePlayerInstances = [];
 		}).hide();
 		this.$controllerDiv.append(this.$tooltipDiv);
 
-		if (this.skin === '2020') {
+		if (this.skin == '2020') {
   		// add a full-width seek bar
       $sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
@@ -4015,7 +4026,6 @@ var AblePlayerInstances = [];
 					this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 				}
 				else if (control === 'pipe') {
-					// TODO: Unify this with buttons somehow to avoid code duplication
 					$pipe = $('<span>', {
 						'tabindex': '-1',
 						'aria-hidden': 'true'
