@@ -1228,6 +1228,13 @@ button svg {
 	fill: currentColor;
 }
 
+/*
+  Styles for 2020 Skin
+*/
+div.able-skin-2020 div.able-seekbar-wrapper {
+  width: 96%;
+  margin: 10px 2%;
+}
 
 /*
   icomoon.io font styling

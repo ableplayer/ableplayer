@@ -324,6 +324,17 @@ var AblePlayerInstances = [];
 			this.vimeoDescId = $(media).data('vimeo-desc-id');
 		}
 
+		// Skin
+		// valid values of data-skin are:
+		// 'legacy' (default), two rows of controls; seekbar positioned in available space within top row
+		// '2020', all buttons in one row beneath a full-width seekbar
+		if ($(media).data('skin') == '2020') {
+			this.skin = '2020';
+		}
+		else {
+			this.skin = 'legacy';
+		}
+
 		// Icon type
 		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
 		// Fallback for browsers that don't support SVG is scalable icomoon fonts
@@ -3012,6 +3023,7 @@ var AblePlayerInstances = [];
 		this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
+    this.$ableWrapper.addClass('able-skin-' + this.skin);
 
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
@@ -3797,76 +3809,134 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.calculateControlLayout = function () {
 
 		// Calculates the layout for controls based on media and options.
-		// Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
-		// Each associated value is array of control names to put at that location.
+		// Returns an array with 4 keys (for legacy skin) or 2 keys (for 2020 skin)
+		// Keys are the following order:
+		// 0 = Top left
+		// 1 = Top right
+		// 2 = Bottom left (legacy skin only)
+		// 3 = Bottom right (legacy skin only)
+		// Each key contains an array of control names to put in that section.
 
-		var controlLayout = {
-			'ul': ['play','restart','rewind','forward'],
-			'ur': ['seek'],
-			'bl': [],
-			'br': []
+		var controlLayout, volumeSupported, playbackSupported;
+
+		controlLayout = [];
+		controlLayout[0] = [];
+		controlLayout[1] = [];
+    if (this.skin === 'legacy') {
+		  controlLayout[2] = [];
+		  controlLayout[3] = [];
 		}
+
+		controlLayout[0].push('play');
+		controlLayout[0].push('restart');
+		controlLayout[0].push('rewind');
+		controlLayout[0].push('forward');
+
+    if (this.skin === 'legacy') {
+      controlLayout[1].push('seek');
+    }
 
 		if (this.hasPlaylist) {
-  		controlLayout['ur'].push('previous');
-  		controlLayout['ur'].push('next');
+  		if (this.skin === 'legacy') {
+    		controlLayout[0].push('previous');
+        controlLayout[0].push('next');
+      }
+      else if (this.skin === '2020') {
+    		controlLayout[0].push('previous');
+        controlLayout[0].push('next');
+      }
 		}
-
-		// test for browser support for volume before displaying volume button
-		if (this.browserSupportsVolume()) {
-			// volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
-			// previously supported button were: 'volume-up','volume-down'
-			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
-			controlLayout['ur'].push('volume');
-		}
-		else {
-			this.volume = false;
-		}
-
-		// Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
-		var bll = [];
-		var blr = [];
 
 		if (this.isPlaybackRateSupported()) {
-			bll.push('slower');
-			bll.push('faster');
+  		playbackSupported = true;
+  		if (this.skin === 'legacy') {
+  			controlLayout[2].push('slower');
+  			controlLayout[2].push('faster');
+  		}
+		}
+		else {
+  		playbackSupported = false;
 		}
 
 		if (this.mediaType === 'video') {
 			if (this.hasCaptions) {
-				bll.push('captions'); //closed captions
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('captions');
+				}
+				else if (this.skin === '2020') {
+  				controlLayout[1].push('captions');
+        }
 			}
 			if (this.hasSignLanguage) {
-				bll.push('sign'); // sign language
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('sign');
+				}
+				else if (this.skin === '2020') {
+  				controlLayout[1].push('sign');
+        }
 			}
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
-				bll.push('descriptions'); //audio description
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('descriptions');
+				}
+				else if (this.skin === '2020') {
+  				controlLayout[1].push('descriptions');
+        }
 			}
 		}
 		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
-			bll.push('transcript');
+  		if (this.skin === 'legacy') {
+				controlLayout[2].push('transcript');
+		  }
+      else if (this.skin === '2020') {
+  		  controlLayout[1].push('transcript');
+      }
 		}
 
 		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
-			bll.push('chapters');
+  		if (this.skin === 'legacy') {
+				controlLayout[2].push('chapters');
+		  }
+			else if (this.skin === '2020') {
+  		  controlLayout[1].push('chapters');
+      }
 		}
 
-		controlLayout['br'].push('preferences');
+    if (playbackSupported && this.skin === '2020') {
+      controlLayout[1].push('faster');
+    	controlLayout[1].push('slower');
+		}
+
+    if (this.skin === 'legacy') {
+  		controlLayout[3].push('preferences');
+    }
+    else if (this.skin === '2020') {
+      controlLayout[1].push('preferences');
+    }
 
 		if (this.mediaType === 'video' && this.allowFullScreen) {
-			controlLayout['br'].push('fullscreen');
+      if (this.skin === 'legacy') {
+    		controlLayout[3].push('fullscreen');
+      }
+      else {
+        controlLayout[1].push('fullscreen');
+      }
 		}
 
-		// Include the pipe only if we need to.
-		if (bll.length > 0 && blr.length > 0) {
-			controlLayout['bl'] = bll;
-			controlLayout['bl'].push('pipe');
-			controlLayout['bl'] = controlLayout['bl'].concat(blr);
+		if (this.browserSupportsVolume()) {
+  		volumeSupported = true; // defined in case we decide to move volume button elsewhere
+			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
+			if (this.skin === 'legacy') {
+  			controlLayout[1].push('volume');
+  		}
+  		else if (this.skin === '2020') {
+    		controlLayout[1].push('volume');
+  		}
 		}
 		else {
-			controlLayout['bl'] = bll.concat(blr);
+  		volumeSupported = false;
+			this.volume = false;
 		}
-
 		return controlLayout;
 	};
 
@@ -3878,7 +3948,8 @@ var AblePlayerInstances = [];
 		// browser support (e.g., for sliders and speedButtons)
 		// user preferences (???)
 		// some controls are aligned on the left, and others on the right
-		var thisObj, baseSliderWidth, controlLayout, sectionByOrder, useSpeedButtons, useFullScreen,
+		var thisObj, baseSliderWidth, controlLayout, numSections,
+		sectionByOrder, useSpeedButtons, useFullScreen,
 		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, mediaTimes, duration, $pipe, $pipeImg,
 		tooltipId, tooltipX, tooltipY, control,
 		buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon, buttonUse, svgPath,
@@ -3891,8 +3962,7 @@ var AblePlayerInstances = [];
 
 		// Initialize the layout into the this.controlLayout variable.
 		controlLayout = this.calculateControlLayout();
-
-		sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
+		numSections = controlLayout.length;
 
 		// add an empty div to serve as a tooltip
 		tooltipId = this.mediaId + '-tooltip';
@@ -3902,15 +3972,29 @@ var AblePlayerInstances = [];
 		}).hide();
 		this.$controllerDiv.append(this.$tooltipDiv);
 
+		if (this.skin === '2020') {
+  		// add a full-width seek bar
+      $sliderDiv = $('<div class="able-seekbar"></div>');
+			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+			this.$controllerDiv.append($sliderDiv);
+			if (typeof this.duration === 'undefined' || this.duration === 0) {
+			  // set arbitrary starting duration, and change it when duration is known
+				this.duration = 60;
+				// also set elapsed to 0
+				this.elapsed = 0;
+		  }
+			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
+		}
+
 		// step separately through left and right controls
-		for (i = 0; i <= 3; i++) {
-			controls = controlLayout[sectionByOrder[i]];
-			if ((i % 2) === 0) {
+		for (i = 0; i < numSections; i++) {
+			controls = controlLayout[i];
+			if ((i % 2) === 0) { // even keys on the left
 				$controllerSpan = $('<div>',{
 					'class': 'able-left-controls'
 				});
 			}
-			else {
+			else { // odd keys on the right
 				$controllerSpan = $('<div>',{
 					'class': 'able-right-controls'
 				});
@@ -5980,13 +6064,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.bodyDiv.wrap('<div></div>');
 		this.wrapperDiv = this.bodyDiv.parent();
 
-		if (orientation === 'horizontal') {
-			this.wrapperDiv.width(length);
-			this.loadedDiv.width(0);
-		}
-		else {
-			this.wrapperDiv.height(length);
-			this.loadedDiv.height(0);
+    if (this.skin === 'legacy') {
+  		if (orientation === 'horizontal') {
+	  		this.wrapperDiv.width(length);
+        this.loadedDiv.width(0);
+		  }
+      else {
+			  this.wrapperDiv.height(length);
+        this.loadedDiv.height(0);
+		  }
 		}
 		this.wrapperDiv.addClass('able-' + className + '-wrapper');
 
@@ -8285,33 +8371,36 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (typeof this.$elapsedTimeContainer !== 'undefined') {
 				this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 			}
-			// Update seekbar width.
-			// To do this, we need to calculate the width of all buttons surrounding it.
-			if (this.seekBar) {
-				widthUsed = 0;
-				leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
-				rightControls = leftControls.next('div.able-right-controls');
-				leftControls.children().each(function () {
-					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).outerWidth(true); // true = include margin
-					}
-				});
-				rightControls.children().each(function () {
-					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).outerWidth(true);
-					}
-				});
-				if (this.fullscreen) {
-					seekbarWidth = $(window).width() - widthUsed;
-				}
-				else {
-					seekbarWidth = this.$ableWrapper.width() - widthUsed;
-				}
-				// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-				if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
-					this.seekBar.setWidth(seekbarWidth);
-				}
-			}
+
+			if (this.skin === 'legacy') {
+  			// Update seekbar width.
+        // To do this, we need to calculate the width of all buttons surrounding it.
+        if (this.seekBar) {
+				  widthUsed = 0;
+          leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+          rightControls = leftControls.next('div.able-right-controls');
+          leftControls.children().each(function () {
+					  if ($(this).prop('tagName')=='BUTTON') {
+						  widthUsed += $(this).outerWidth(true); // true = include margin
+					  }
+				  });
+          rightControls.children().each(function () {
+					  if ($(this).prop('tagName')=='BUTTON') {
+						  widthUsed += $(this).outerWidth(true);
+					  }
+				  });
+          if (this.fullscreen) {
+					  seekbarWidth = $(window).width() - widthUsed;
+				  }
+          else {
+					  seekbarWidth = this.$ableWrapper.width() - widthUsed;
+				  }
+          // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+          if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+					  this.seekBar.setWidth(seekbarWidth);
+				  }
+			  }
+      }
 
 			// Update buffering progress.
 			// TODO: Currently only using the first HTML5 buffered interval,

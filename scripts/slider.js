@@ -76,13 +76,15 @@
 		this.bodyDiv.wrap('<div></div>');
 		this.wrapperDiv = this.bodyDiv.parent();
 
-		if (orientation === 'horizontal') {
-			this.wrapperDiv.width(length);
-			this.loadedDiv.width(0);
-		}
-		else {
-			this.wrapperDiv.height(length);
-			this.loadedDiv.height(0);
+    if (this.skin === 'legacy') {
+  		if (orientation === 'horizontal') {
+	  		this.wrapperDiv.width(length);
+        this.loadedDiv.width(0);
+		  }
+      else {
+			  this.wrapperDiv.height(length);
+        this.loadedDiv.height(0);
+		  }
 		}
 		this.wrapperDiv.addClass('able-' + className + '-wrapper');
 

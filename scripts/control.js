@@ -552,33 +552,36 @@
 			if (typeof this.$elapsedTimeContainer !== 'undefined') {
 				this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 			}
-			// Update seekbar width.
-			// To do this, we need to calculate the width of all buttons surrounding it.
-			if (this.seekBar) {
-				widthUsed = 0;
-				leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
-				rightControls = leftControls.next('div.able-right-controls');
-				leftControls.children().each(function () {
-					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).outerWidth(true); // true = include margin
-					}
-				});
-				rightControls.children().each(function () {
-					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).outerWidth(true);
-					}
-				});
-				if (this.fullscreen) {
-					seekbarWidth = $(window).width() - widthUsed;
-				}
-				else {
-					seekbarWidth = this.$ableWrapper.width() - widthUsed;
-				}
-				// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-				if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
-					this.seekBar.setWidth(seekbarWidth);
-				}
-			}
+
+			if (this.skin === 'legacy') {
+  			// Update seekbar width.
+        // To do this, we need to calculate the width of all buttons surrounding it.
+        if (this.seekBar) {
+				  widthUsed = 0;
+          leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+          rightControls = leftControls.next('div.able-right-controls');
+          leftControls.children().each(function () {
+					  if ($(this).prop('tagName')=='BUTTON') {
+						  widthUsed += $(this).outerWidth(true); // true = include margin
+					  }
+				  });
+          rightControls.children().each(function () {
+					  if ($(this).prop('tagName')=='BUTTON') {
+						  widthUsed += $(this).outerWidth(true);
+					  }
+				  });
+          if (this.fullscreen) {
+					  seekbarWidth = $(window).width() - widthUsed;
+				  }
+          else {
+					  seekbarWidth = this.$ableWrapper.width() - widthUsed;
+				  }
+          // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+          if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+					  this.seekBar.setWidth(seekbarWidth);
+				  }
+			  }
+      }
 
 			// Update buffering progress.
 			// TODO: Currently only using the first HTML5 buffered interval,

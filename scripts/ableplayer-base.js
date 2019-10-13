@@ -324,6 +324,17 @@ var AblePlayerInstances = [];
 			this.vimeoDescId = $(media).data('vimeo-desc-id');
 		}
 
+		// Skin
+		// valid values of data-skin are:
+		// 'legacy' (default), two rows of controls; seekbar positioned in available space within top row
+		// '2020', all buttons in one row beneath a full-width seekbar
+		if ($(media).data('skin') == '2020') {
+			this.skin = '2020';
+		}
+		else {
+			this.skin = 'legacy';
+		}
+
 		// Icon type
 		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
 		// Fallback for browsers that don't support SVG is scalable icomoon fonts
