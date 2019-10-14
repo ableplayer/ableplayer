@@ -10460,6 +10460,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						else {
 							if ($(line).length) {
 								// selector exists
+                this.currentMeta = thisMeta;
 								showDuration = parseInt($(line).attr('data-duration'));
 								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
 									$(line).show().delay(showDuration).fadeOut();
@@ -10471,6 +10472,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 								// add to array of visible selectors so it can be hidden at end time
 								this.visibleSelectors.push(line);
 								tempSelectors.push(line);
+
 							}
 						}
 					}
@@ -10487,7 +10489,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 
 				}
-				this.currentMeta = thisMeta;
 			}
 		}
 		else {
