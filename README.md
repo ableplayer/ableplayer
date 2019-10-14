@@ -10,20 +10,20 @@ Features
 
 -   Supports both audio and video.
 -   Supports either a single audio track or an entire playlist.
--   A full set of player controls that are keyboard-accessible, properly labeled for screen reader users, and controllable by speech recognition users.
--   Customizable keyboard shortcuts that enable the player to be operated from anywhere on the web page (unless there are multiple instances of the player on a given page; then the player must have focus for keyboard shortcuts to work).
--   High contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus.
--   Support for closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
--   Support for chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated.
--   Support for text-based audio description, also using WebVTT. At designated times, the description text is read aloud by browsers, or by screen readers for browsers that don't support the Web Speech API. Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio.
--   Support for audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions.
--   Support for adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so.
--   An interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
--   Automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
--   Support for playing YouTube and Vimeo videos within the Able Player chrome.
--   Customizable caption display. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
--   Fallback support (see section on **Fallback** for details).
--   Extensive customization. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
+-   Includes a full set of player controls that are keyboard-accessible, properly labeled for screen reader users, and controllable by speech recognition users.
+-   Includes customizable keyboard shortcuts that enable the player to be operated from anywhere on the web page (unless there are multiple instances of the player on a given page; then the player must have focus for keyboard shortcuts to work).
+-   Features high contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus.
+-   Supports closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
+-   Supports chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated.
+-   Supports text-based audio description, also using WebVTT. At designated times, the description text is read aloud by browsers, or by screen readers for browsers that don't support the Web Speech API. Users can optionally set their player to pause when audio description starts in order to avoid conflicts between the description and program audio.
+-   Supports audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions.
+-   Supports adjustable playback rate. Users who need to slow down the video in order to better process and understand its content can do so; and users who need to speed up the video in order to maintain better focus can do so.
+-   Includes an interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
+-   Features automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
+-   Supports YouTube and Vimeo videos.
+-   Provides users with the ability to customize the display of captions and subtitles. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
+-   Supports fallback content if the media cannot be played (see section on **Fallback** for details).
+-   Includes extensive customization options. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
 
 Supported Languages
 -------------------
@@ -57,11 +57,11 @@ There are many ways to contribute to Able Player, and we welcome and appreciate 
 Compatibility
 -------------
 
-*Able Player* has been tested with the following browsers and assistive
-technologies.
+*Able Player* has been tested with the following browsers.
 
 -   Firefox 3.x and higher
 -   Internet Explorer 10 and higher
+-   Microsoft Edge all versions 
 -   Google Chrome 7.0 and higher
 -   Opera 10.63 and higher
 -   Safari 5.0 on Mac OS X
