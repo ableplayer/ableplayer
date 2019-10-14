@@ -71,7 +71,7 @@ $(document).ready(function() {
   $('button').on('click',function() {
     var button = $(this).attr('id');
     if (button === 'play') {
-      if (player.getPlayerState() === 'playing') {
+      if (player.playing) {
         player.pauseMedia();
         $(this).text('Play');
       }
