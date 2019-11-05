@@ -11722,7 +11722,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		// Convert to lower case.
 		var which = e.which;
-
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
@@ -11745,6 +11744,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
 					// only toggle play if a button does not have focus
 					// if a button has focus, space should activate that button
+          this.clickedPlay = true; // important to set this var for program control
 					this.handlePlay();
 				}
 			}
