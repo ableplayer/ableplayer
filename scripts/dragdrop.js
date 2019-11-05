@@ -398,7 +398,6 @@
 			$windowButton = this.$signPopupButton;
 			resizeDialog = this.signResizeDialog;
 		}
-
 		if (e.type === 'keydown') {
 			if (e.which === 27) { // escape
 				// hide the popup menu
@@ -414,6 +413,9 @@
 			}
 			else {
 				// all other keys will be handled by upstream functions
+        if (choice !== 'close') {
+          this.$activeWindow = $window;
+		    }
 				return false;
 			}
 		}
@@ -464,11 +466,15 @@
 	};
 
 	AblePlayer.prototype.startDrag = function(which, $element) {
+
 		var thisObj, $windowPopup, zIndex, startPos, newX, newY;
+
 		thisObj = this;
 
-		this.$activeWindow = $element;
-		this.dragging = true;
+    if (!this.$activeWindow) {
+  		this.$activeWindow = $element;
+    }
+    this.dragging = true;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -679,8 +685,8 @@
 	AblePlayer.prototype.startResize = function(which, $element) {
 
 		var thisObj, $windowPopup, zIndex, startPos, newWidth, newHeight;
-		thisObj = this;
 
+		thisObj = this;
 		this.$activeWindow = $element;
 		this.resizing = true;
 

@@ -512,7 +512,10 @@
 				$menuItem.text(windowOptions[i].label);
 				$menuItem.on('click mousedown',function(e) {
 					e.stopPropagation();
-					if (e.button !== 0) { // not a left click
+					if (typeof e.button !== 'undefined' && e.button !== 0) {
+  					// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
+  					// and the button was not a left click (left click = 0)
+  					// therefore, ignore this click
 						return false;
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {

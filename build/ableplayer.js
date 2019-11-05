@@ -3512,7 +3512,10 @@ var AblePlayerInstances = [];
 				$menuItem.text(windowOptions[i].label);
 				$menuItem.on('click mousedown',function(e) {
 					e.stopPropagation();
-					if (e.button !== 0) { // not a left click
+					if (typeof e.button !== 'undefined' && e.button !== 0) {
+  					// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
+  					// and the button was not a left click (left click = 0)
+  					// therefore, ignore this click
 						return false;
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
@@ -12730,7 +12733,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			$windowButton = this.$signPopupButton;
 			resizeDialog = this.signResizeDialog;
 		}
-
 		if (e.type === 'keydown') {
 			if (e.which === 27) { // escape
 				// hide the popup menu
@@ -12746,6 +12748,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			else {
 				// all other keys will be handled by upstream functions
+        if (choice !== 'close') {
+          this.$activeWindow = $window;
+		    }
 				return false;
 			}
 		}
@@ -12796,11 +12801,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.startDrag = function(which, $element) {
+
 		var thisObj, $windowPopup, zIndex, startPos, newX, newY;
+
 		thisObj = this;
 
-		this.$activeWindow = $element;
-		this.dragging = true;
+    if (!this.$activeWindow) {
+  		this.$activeWindow = $element;
+    }
+    this.dragging = true;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -13011,8 +13020,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.startResize = function(which, $element) {
 
 		var thisObj, $windowPopup, zIndex, startPos, newWidth, newHeight;
-		thisObj = this;
 
+		thisObj = this;
 		this.$activeWindow = $element;
 		this.resizing = true;
 
