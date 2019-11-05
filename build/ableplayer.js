@@ -776,6 +776,7 @@ var AblePlayerInstances = [];
 				break;
 
 			case 'mute':
+			case 'volume-mute':
 				svg[0] = '0 0 20 20';
 				svg[1] = 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z';
 				break;
@@ -1126,11 +1127,12 @@ var AblePlayerInstances = [];
 
 					thisObj.setupTranscript().then(function() {
 
-						if (thisObj.Volume) {
-								thisObj.setMute(false);
-							}
 						thisObj.setFullscreen(false);
-						thisObj.setVolume(thisObj.defaultVolume);
+
+						if (typeof thisObj.volume === 'undefined') {
+  						thisObj.volume = thisObj.defaultVolume;
+						}
+						thisObj.setVolume(thisObj.volume);
 
 						if (thisObj.transcriptType) {
 							thisObj.addTranscriptAreaEvents();
@@ -6632,7 +6634,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		});
 		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)
 		$div.append(this.$volumeSlider);
-
 		this.refreshVolumeSlider(this.volume);
 
 		// add event listeners
@@ -6699,19 +6700,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		trackOnTop = this.volumeTrackHeight - trackOnHeight;
 		headTop = trackOnTop - this.volumeHeadHeight;
 
-		this.$volumeSliderTrackOn.css({
-			'height': trackOnHeight + 'px',
-			'top': trackOnTop + 'px'
-		});
-		this.$volumeSliderHead.attr({
-			'aria-valuenow': volume,
-			'aria-valuetext': volumePctText
-		});
-		this.$volumeSliderHead.css({
-			'top': headTop + 'px'
-		});
-		this.$volumeAlert.text(volumePct + '%');
-
+    if (this.$volumeSliderTrackOn) {
+  		this.$volumeSliderTrackOn.css({
+	  		'height': trackOnHeight + 'px',
+        'top': trackOnTop + 'px'
+		  });
+		}
+		if (this.$volumeSliderHead) {
+      this.$volumeSliderHead.attr({
+			  'aria-valuenow': volume,
+        'aria-valuetext': volumePctText
+		  });
+      this.$volumeSliderHead.css({
+			  'top': headTop + 'px'
+		  });
+		}
+		if (this.$volumeAlert) {
+  		this.$volumeAlert.text(volumePct + '%');
+    }
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
