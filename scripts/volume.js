@@ -96,8 +96,8 @@
 			else if (e.which === 39 || e.which === 38) {
 				thisObj.handleVolume('up');
 			}
-			// Escape key or Enter key
-			else if (e.which === 27 || e.which === 13) {
+			// Escape key or Enter key or Tab key
+			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
 					thisObj.hideVolumePopup();
