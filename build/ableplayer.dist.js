@@ -6024,7 +6024,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// trackingMedia is true if this is a media timeline; otherwise false
 		// initialState is either 'visible' or 'hidden'
 
-		var thisObj;
+		var thisObj, coords;
 
 		thisObj = this;
 
@@ -6104,18 +6104,20 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     // handle seekHead events
 		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
+      coords = thisObj.pointerEventToXY(e);
+
 		  if (e.type === 'mouseenter' || e.type === 'focus') {
   			thisObj.overHead = true;
       }
       else if (e.type === 'mouseleave' || e.type === 'blur') {
   			thisObj.overHead = false;
         if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+				  thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 			  }
       }
       else if (e.type === 'mousemove' || e.type === 'touchmove') {
   			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.trackHeadAtPageX(e.pageX);
+	  			thisObj.trackHeadAtPageX(coords.x);
         }
       }
       else if (e.type === 'mousedown' || e.type === 'touchstart') {
@@ -6127,7 +6129,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       }
       else if (e.type === 'mouseup' || e.type === 'touchend') {
   			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+	  			thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
         }
       }
       if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
@@ -6139,6 +6141,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.bodyDiv.on(
 		  'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
+      coords = thisObj.pointerEventToXY(e);
+
   		if (e.type === 'mouseenter') {
   			thisObj.overBody = true;
 		  }
@@ -6146,21 +6150,21 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   			thisObj.overBody = false;
         thisObj.overBodyMousePos = null;
   			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+	  			thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 			  }
       }
       else if (e.type === 'mousemove' || e.type === 'touchmove') {
   			thisObj.overBodyMousePos = {
-	  			x: e.pageX,
-          y: e.pageY
+	  			x: coords.x,
+          y: coords.y
 			  };
         if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.trackHeadAtPageX(e.pageX);
+				  thisObj.trackHeadAtPageX(coords.x);
 			  }
       }
       else if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
-        thisObj.trackHeadAtPageX(e.pageX);
+  			thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
+        thisObj.trackHeadAtPageX(coords.x);
         if (!thisObj.seekHead.is(':focus')) {
 				  thisObj.seekHead.focus();
 			  }
@@ -6168,7 +6172,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       }
       else if (e.type === 'mouseup' || e.type === 'touchend') {
         if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+				  thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 			  }
       }
       else if (e.type === 'keydown') {
@@ -6213,131 +6217,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   			thisObj.refreshTooltip();
   		}
 		});
-
-/* Old event listeners on seekHead and bodyDiv...
-
-		this.seekHead.hover(function (e) {
-			thisObj.overHead = true;
-			thisObj.refreshTooltip();
-		}, function (e) {
-			thisObj.overHead = false;
-
-			if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-			thisObj.refreshTooltip();
-		});
-
-		this.seekHead.mousemove(function (e) {
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.trackHeadAtPageX(e.pageX);
-			}
-		});
-
-		this.seekHead.focus(function (e) {
-			thisObj.overHead = true;
-			thisObj.refreshTooltip();
-		});
-
-		this.seekHead.blur(function (e) {
-			thisObj.overHead = false;
-			thisObj.refreshTooltip();
-		});
-
-		this.bodyDiv.hover(function () {
-			thisObj.overBody = true;
-			thisObj.refreshTooltip();
-		}, function (e) {
-			thisObj.overBody = false;
-			thisObj.overBodyMousePos = null;
-			thisObj.refreshTooltip();
-
-			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-		});
-
-		this.bodyDiv.mousemove(function (e) {
-			thisObj.overBodyMousePos = {
-				x: e.pageX,
-				y: e.pageY
-			};
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.trackHeadAtPageX(e.pageX);
-			}
-			thisObj.refreshTooltip();
-		});
-
-		this.bodyDiv.mousedown(function (e) {
-			thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
-			thisObj.trackHeadAtPageX(e.pageX);
-			if (!thisObj.seekHead.is(':focus')) {
-				thisObj.seekHead.focus();
-			}
-			e.preventDefault();
-		});
-
-		this.seekHead.mousedown(function (e) {
-			thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-			if (!thisObj.bodyDiv.is(':focus')) {
-				thisObj.bodyDiv.focus();
-			}
-			e.preventDefault();
-		});
-
-		this.bodyDiv.mouseup(function (e) {
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-		})
-
-		this.seekHead.mouseup(function (e) {
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-		});
-
-		this.bodyDiv.keydown(function (e) {
-			// Home
-			if (e.which === 36) {
-				thisObj.trackImmediatelyTo(0);
-			}
-			// End
-			else if (e.which === 35) {
-				thisObj.trackImmediatelyTo(thisObj.duration);
-			}
-			// Left arrow or down arrow
-			else if (e.which === 37 || e.which === 40) {
-				thisObj.arrowKeyDown(-1);
-			}
-			// Right arrow or up arrow
-			else if (e.which === 39 || e.which === 38) {
-				thisObj.arrowKeyDown(1);
-			}
-			// Page up
-			else if (e.which === 33 && bigInterval > 0) {
-				thisObj.arrowKeyDown(bigInterval);
-			}
-			// Page down
-			else if (e.which === 34 && bigInterval > 0) {
-				thisObj.arrowKeyDown(-bigInterval);
-			}
-
-			else {
-				return;
-			}
-			e.preventDefault();
-		});
-
-		this.bodyDiv.keyup(function (e) {
-			if (e.which >= 33 && e.which <= 40) {
-				if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
-					thisObj.stopTracking(thisObj.keyTrackPosition);
-				}
-				e.preventDefault();
-			}
-		});
-*/
 	}
 
 	AccessibleSlider.prototype.arrowKeyDown = function (multiplier) {
@@ -6389,7 +6268,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	}
 
 	AccessibleSlider.prototype.setDuration = function (duration) {
-
 		if (duration !== this.duration) {
 			this.duration = duration;
 			this.resetHeadLocation();
@@ -6530,10 +6408,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.overHead) {
 			this.timeTooltip.show();
 			if (this.tracking) {
-				this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+  		  this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
 			}
 			else {
-				this.timeTooltip.text(this.positionToStr(this.position));
+  		  this.timeTooltip.text(this.positionToStr(this.position));
 			}
 			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
 		}
@@ -6573,6 +6451,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			return dMinutes + ':' + dSeconds;
 		}
 	};
+
+  AccessibleSlider.prototype.pointerEventToXY = function(e) {
+
+    // returns array of coordinates x and y in response to both mouse and touch events
+    // for mouse events, this comes from e.pageX and e.pageY
+    // for touch events, it's a bit more complicated
+    var out = {x:0, y:0};
+    if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+      var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+      out.x = touch.pageX;
+      out.y = touch.pageY;
+    }
+    else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+      out.x = e.pageX;
+      out.y = e.pageY;
+    }
+    return out;
+  };
 
 })(jQuery);
 
