@@ -6311,8 +6311,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	// TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.	Change this to display them all.
 	AccessibleSlider.prototype.setBuffered = function (ratio) {
-		this.buffered = ratio;
-		this.redrawDivs;
+    if (!isNaN(ratio)) {
+  		this.buffered = ratio;
+      this.redrawDivs;
+    }
 	}
 
 	AccessibleSlider.prototype.startTracking = function (device, position) {
@@ -8333,7 +8335,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 					else {
 						if (this.seekBar) {
-							this.seekBar.setBuffered(buffered / duration);
+              if (!isNaN(buffered)) {
+  							this.seekBar.setBuffered(buffered / duration);
+  						}
 						}
 					}
 				}
@@ -9056,7 +9060,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// But first, capture current settings so they can be restored later
 				this.preFullScreenWidth = this.$ableWrapper.width();
 				this.preFullScreenHeight = this.$ableWrapper.height();
-
 				if (el.requestFullscreen) {
 					el.requestFullscreen();
 				}

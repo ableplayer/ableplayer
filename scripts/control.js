@@ -599,7 +599,9 @@
 					}
 					else {
 						if (this.seekBar) {
-							this.seekBar.setBuffered(buffered / duration);
+              if (!isNaN(buffered)) {
+  							this.seekBar.setBuffered(buffered / duration);
+  						}
 						}
 					}
 				}
@@ -1322,7 +1324,6 @@
 				// But first, capture current settings so they can be restored later
 				this.preFullScreenWidth = this.$ableWrapper.width();
 				this.preFullScreenHeight = this.$ableWrapper.height();
-
 				if (el.requestFullscreen) {
 					el.requestFullscreen();
 				}

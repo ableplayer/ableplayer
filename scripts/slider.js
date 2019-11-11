@@ -308,8 +308,10 @@
 
 	// TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.	Change this to display them all.
 	AccessibleSlider.prototype.setBuffered = function (ratio) {
-		this.buffered = ratio;
-		this.redrawDivs;
+    if (!isNaN(ratio)) {
+  		this.buffered = ratio;
+      this.redrawDivs;
+    }
 	}
 
 	AccessibleSlider.prototype.startTracking = function (device, position) {
