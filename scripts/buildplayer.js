@@ -964,13 +964,14 @@
 		// browser support (e.g., for sliders and speedButtons)
 		// user preferences (???)
 		// some controls are aligned on the left, and others on the right
+
 		var thisObj, baseSliderWidth, controlLayout, numSections,
-		sectionByOrder, useSpeedButtons, useFullScreen,
-		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, mediaTimes, duration, $pipe, $pipeImg,
-		tooltipId, tooltipX, tooltipY, control,
-		buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon, buttonUse, svgPath,
-		leftWidth, rightWidth, widthUsed, controllerWidth, thresholdForPipe,
-		captionLabel, popupMenuId;
+		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, $pipeImg,
+		svgData, svgPath, control,
+    $buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
+    buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
+    tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+    captionLabel, popupMenuId;
 
 		thisObj = this;
 
@@ -1231,66 +1232,68 @@
 					}
 					else {
 						// use images
-						buttonImg = $('<img>',{
+						$buttonImg = $('<img>',{
 							'src': buttonImgSrc,
 							'alt': '',
 							'role': 'presentation'
 						});
-						$newButton.append(buttonImg);
+						$newButton.append($buttonImg);
 					}
 					// add the visibly-hidden label for screen readers that don't support aria-label on the button
-					var buttonLabel = $('<span>',{
+					var $buttonLabel = $('<span>',{
 						'class': 'able-clipped'
 					}).text(buttonTitle);
-					$newButton.append(buttonLabel);
+					$newButton.append($buttonLabel);
 					// add an event listener that displays a tooltip on mouseenter or focus
 					$newButton.on('mouseenter focus',function(e) {
-						var label = $(this).attr('aria-label');
+						var buttonText = $(this).attr('aria-label');
 						// get position of this button
 						var position = $(this).position();
 						var buttonHeight = $(this).height();
 						var buttonWidth = $(this).width();
+
+						// position() is expressed using top and left (of button);
+						// add right (of button) too, for convenience
+						var controllerWidth = thisObj.$controllerDiv.width();
+						position.right = controllerWidth - position.left - buttonWidth;
+
 						var tooltipY = position.top - buttonHeight - 15;
-						var centerTooltip = true;
 						if ($(this).closest('div').hasClass('able-right-controls')) {
 							// this control is on the right side
-							if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
-								// this is the last control on the right
-								// position tooltip using the "right" property
-								centerTooltip = false;
-								var tooltipX = 0;
-								var tooltipStyle = {
-									left: '',
-									right: tooltipX + 'px',
-									top: tooltipY + 'px'
-								};
-							}
+              var buttonSide = 'right';
 						}
 						else {
 							// this control is on the left side
-							if ($(this).is(':first-child')) {
-								// this is the first control on the left
-								centerTooltip = false;
-								var tooltipX = position.left;
-								var tooltipStyle = {
-									left: tooltipX + 'px',
-									right: '',
-									top: tooltipY + 'px'
-								};
-							}
+              var buttonSide = 'left';
 						}
-						if (centerTooltip) {
-							// populate tooltip, then calculate its width before showing it
-							var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).width();
-							// center the tooltip horizontally over the button
-							var tooltipX = position.left - tooltipWidth/2;
-							var tooltipStyle = {
-								left: tooltipX + 'px',
+						// populate tooltip, then calculate its width before showing it
+						var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).width();
+						// center the tooltip horizontally over the button
+            if (buttonSide == 'left') {
+    				  var tooltipX = position.left - tooltipWidth/2;
+              if (tooltipX < 0) {
+                // tooltip would exceed the bounds of the player. Adjust.
+                tooltipX = 2;
+              }
+              var tooltipStyle = {
+							  left: tooltipX + 'px',
 								right: '',
 								top: tooltipY + 'px'
-							};
-						}
-						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).css(tooltipStyle);
+						  };
+            }
+            else {
+              var tooltipX = position.right - tooltipWidth/2;
+              if (tooltipX < 0) {
+                // tooltip would exceed the bounds of the player. Adjust.
+                tooltipX = 2;
+              }
+              var tooltipStyle = {
+								left: '',
+								right: tooltipX + 'px',
+								top: tooltipY + 'px'
+						  };
+            }
+						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
 							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
