@@ -11,6 +11,7 @@
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
 		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
+		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
 		this.getUserAgent();
 		this.setIconColor();
@@ -221,6 +222,7 @@
 				break;
 
 			case 'mute':
+			case 'volume-mute':
 				svg[0] = '0 0 20 20';
 				svg[1] = 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z';
 				break;
@@ -571,11 +573,12 @@
 
 					thisObj.setupTranscript().then(function() {
 
-						if (thisObj.Volume) {
-								thisObj.setMute(false);
-							}
 						thisObj.setFullscreen(false);
-						thisObj.setVolume(thisObj.defaultVolume);
+
+						if (typeof thisObj.volume === 'undefined') {
+  						thisObj.volume = thisObj.defaultVolume;
+						}
+						thisObj.setVolume(thisObj.volume);
 
 						if (thisObj.transcriptType) {
 							thisObj.addTranscriptAreaEvents();

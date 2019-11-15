@@ -13,10 +13,10 @@
 		thisObj = this;
 		// get language of the web page, if specified
 		if ($('body').attr('lang')) {
-			lang = $('body').attr('lang');
+			lang = $('body').attr('lang').toLowerCase();
 		}
 		else if ($('html').attr('lang')) {
-			lang = $('html').attr('lang');
+			lang = $('html').attr('lang').toLowerCase();
 		}
 		else {
 			lang = null;

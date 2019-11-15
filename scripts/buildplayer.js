@@ -25,6 +25,7 @@
 		this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
+    this.$ableWrapper.addClass('able-skin-' + this.skin);
 
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
@@ -511,7 +512,10 @@
 				$menuItem.text(windowOptions[i].label);
 				$menuItem.on('click mousedown',function(e) {
 					e.stopPropagation();
-					if (e.button !== 0) { // not a left click
+					if (typeof e.button !== 'undefined' && e.button !== 0) {
+  					// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
+  					// and the button was not a left click (left click = 0)
+  					// therefore, ignore this click
 						return false;
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
@@ -810,76 +814,145 @@
 	AblePlayer.prototype.calculateControlLayout = function () {
 
 		// Calculates the layout for controls based on media and options.
-		// Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
-		// Each associated value is array of control names to put at that location.
+		// Returns an array with 4 keys (for legacy skin) or 2 keys (for 2020 skin)
+		// Keys are the following order:
+		// 0 = Top left
+		// 1 = Top right
+		// 2 = Bottom left (legacy skin only)
+		// 3 = Bottom right (legacy skin only)
+		// Each key contains an array of control names to put in that section.
 
-		var controlLayout = {
-			'ul': ['play','restart','rewind','forward'],
-			'ur': ['seek'],
-			'bl': [],
-			'br': []
+		var controlLayout, volumeSupported, playbackSupported, totalButtonWidth, numA11yButtons;
+
+		controlLayout = [];
+		controlLayout[0] = [];
+		controlLayout[1] = [];
+    if (this.skin === 'legacy') {
+		  controlLayout[2] = [];
+		  controlLayout[3] = [];
 		}
+
+		controlLayout[0].push('play');
+		controlLayout[0].push('restart');
+		controlLayout[0].push('rewind');
+		controlLayout[0].push('forward');
+
+    if (this.skin === 'legacy') {
+      controlLayout[1].push('seek');
+    }
 
 		if (this.hasPlaylist) {
-  		controlLayout['ur'].push('previous');
-  		controlLayout['ur'].push('next');
+  		if (this.skin === 'legacy') {
+    		controlLayout[0].push('previous');
+        controlLayout[0].push('next');
+      }
+      else if (this.skin == '2020') {
+    		controlLayout[0].push('previous');
+        controlLayout[0].push('next');
+      }
 		}
-
-		// test for browser support for volume before displaying volume button
-		if (this.browserSupportsVolume()) {
-			// volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
-			// previously supported button were: 'volume-up','volume-down'
-			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
-			controlLayout['ur'].push('volume');
-		}
-		else {
-			this.volume = false;
-		}
-
-		// Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
-		var bll = [];
-		var blr = [];
 
 		if (this.isPlaybackRateSupported()) {
-			bll.push('slower');
-			bll.push('faster');
+  		playbackSupported = true;
+  		if (this.skin === 'legacy') {
+  			controlLayout[2].push('slower');
+  			controlLayout[2].push('faster');
+  		}
+		}
+		else {
+  		playbackSupported = false;
 		}
 
 		if (this.mediaType === 'video') {
+  		numA11yButtons = 0;
 			if (this.hasCaptions) {
-				bll.push('captions'); //closed captions
+  			numA11yButtons++;
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('captions');
+				}
+				else if (this.skin == '2020') {
+  				controlLayout[1].push('captions');
+        }
 			}
 			if (this.hasSignLanguage) {
-				bll.push('sign'); // sign language
+  			numA11yButtons++;
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('sign');
+				}
+				else if (this.skin == '2020') {
+  				controlLayout[1].push('sign');
+        }
 			}
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
-				bll.push('descriptions'); //audio description
+  			numA11yButtons++;
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('descriptions');
+				}
+				else if (this.skin == '2020') {
+  				controlLayout[1].push('descriptions');
+        }
 			}
 		}
 		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
-			bll.push('transcript');
+  		numA11yButtons++;
+  		if (this.skin === 'legacy') {
+				controlLayout[2].push('transcript');
+		  }
+      else if (this.skin == '2020') {
+  		  controlLayout[1].push('transcript');
+      }
 		}
 
 		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
-			bll.push('chapters');
+  		numA11yButtons++;
+  		if (this.skin === 'legacy') {
+				controlLayout[2].push('chapters');
+		  }
+			else if (this.skin == '2020') {
+  		  controlLayout[1].push('chapters');
+      }
 		}
 
-		controlLayout['br'].push('preferences');
+    if (this.skin == '2020' && numA11yButtons > 0) {
+  		controlLayout[1].push('pipe');
+		}
+
+    if (playbackSupported && this.skin === '2020') {
+      controlLayout[1].push('faster');
+    	controlLayout[1].push('slower');
+    	controlLayout[1].push('pipe');
+		}
+
+    if (this.skin === 'legacy') {
+  		controlLayout[3].push('preferences');
+    }
+    else if (this.skin == '2020') {
+      controlLayout[1].push('preferences');
+    }
 
 		if (this.mediaType === 'video' && this.allowFullScreen) {
-			controlLayout['br'].push('fullscreen');
+      if (this.skin === 'legacy') {
+    		controlLayout[3].push('fullscreen');
+      }
+      else {
+        controlLayout[1].push('fullscreen');
+      }
 		}
 
-		// Include the pipe only if we need to.
-		if (bll.length > 0 && blr.length > 0) {
-			controlLayout['bl'] = bll;
-			controlLayout['bl'].push('pipe');
-			controlLayout['bl'] = controlLayout['bl'].concat(blr);
+		if (this.browserSupportsVolume()) {
+  		volumeSupported = true; // defined in case we decide to move volume button elsewhere
+			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
+			if (this.skin === 'legacy') {
+  			controlLayout[1].push('volume');
+  		}
+  		else if (this.skin == '2020') {
+    		controlLayout[1].push('volume');
+  		}
 		}
 		else {
-			controlLayout['bl'] = bll.concat(blr);
+  		volumeSupported = false;
+			this.volume = false;
 		}
-
 		return controlLayout;
 	};
 
@@ -891,12 +964,14 @@
 		// browser support (e.g., for sliders and speedButtons)
 		// user preferences (???)
 		// some controls are aligned on the left, and others on the right
-		var thisObj, baseSliderWidth, controlLayout, sectionByOrder, useSpeedButtons, useFullScreen,
-		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, mediaTimes, duration, $pipe, $pipeImg,
-		tooltipId, tooltipX, tooltipY, control,
-		buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon, buttonUse, svgPath,
-		leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
-		controllerStyles, vidcapStyles, captionLabel, popupMenuId;
+
+		var thisObj, baseSliderWidth, controlLayout, numSections,
+		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, $pipeImg,
+		svgData, svgPath, control,
+    $buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
+    buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
+    tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+    captionLabel, popupMenuId;
 
 		thisObj = this;
 
@@ -904,8 +979,7 @@
 
 		// Initialize the layout into the this.controlLayout variable.
 		controlLayout = this.calculateControlLayout();
-
-		sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
+		numSections = controlLayout.length;
 
 		// add an empty div to serve as a tooltip
 		tooltipId = this.mediaId + '-tooltip';
@@ -915,15 +989,29 @@
 		}).hide();
 		this.$controllerDiv.append(this.$tooltipDiv);
 
+		if (this.skin == '2020') {
+  		// add a full-width seek bar
+      $sliderDiv = $('<div class="able-seekbar"></div>');
+			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+			this.$controllerDiv.append($sliderDiv);
+			if (typeof this.duration === 'undefined' || this.duration === 0) {
+			  // set arbitrary starting duration, and change it when duration is known
+				this.duration = 60;
+				// also set elapsed to 0
+				this.elapsed = 0;
+		  }
+			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
+		}
+
 		// step separately through left and right controls
-		for (i = 0; i <= 3; i++) {
-			controls = controlLayout[sectionByOrder[i]];
-			if ((i % 2) === 0) {
+		for (i = 0; i < numSections; i++) {
+			controls = controlLayout[i];
+			if ((i % 2) === 0) { // even keys on the left
 				$controllerSpan = $('<div>',{
 					'class': 'able-left-controls'
 				});
 			}
-			else {
+			else { // odd keys on the right
 				$controllerSpan = $('<div>',{
 					'class': 'able-right-controls'
 				});
@@ -944,7 +1032,6 @@
 					this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 				}
 				else if (control === 'pipe') {
-					// TODO: Unify this with buttons somehow to avoid code duplication
 					$pipe = $('<span>', {
 						'tabindex': '-1',
 						'aria-hidden': 'true'
@@ -1145,66 +1232,68 @@
 					}
 					else {
 						// use images
-						buttonImg = $('<img>',{
+						$buttonImg = $('<img>',{
 							'src': buttonImgSrc,
 							'alt': '',
 							'role': 'presentation'
 						});
-						$newButton.append(buttonImg);
+						$newButton.append($buttonImg);
 					}
 					// add the visibly-hidden label for screen readers that don't support aria-label on the button
-					var buttonLabel = $('<span>',{
+					var $buttonLabel = $('<span>',{
 						'class': 'able-clipped'
 					}).text(buttonTitle);
-					$newButton.append(buttonLabel);
+					$newButton.append($buttonLabel);
 					// add an event listener that displays a tooltip on mouseenter or focus
 					$newButton.on('mouseenter focus',function(e) {
-						var label = $(this).attr('aria-label');
+						var buttonText = $(this).attr('aria-label');
 						// get position of this button
 						var position = $(this).position();
 						var buttonHeight = $(this).height();
 						var buttonWidth = $(this).width();
+
+						// position() is expressed using top and left (of button);
+						// add right (of button) too, for convenience
+						var controllerWidth = thisObj.$controllerDiv.width();
+						position.right = controllerWidth - position.left - buttonWidth;
+
 						var tooltipY = position.top - buttonHeight - 15;
-						var centerTooltip = true;
 						if ($(this).closest('div').hasClass('able-right-controls')) {
 							// this control is on the right side
-							if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
-								// this is the last control on the right
-								// position tooltip using the "right" property
-								centerTooltip = false;
-								var tooltipX = 0;
-								var tooltipStyle = {
-									left: '',
-									right: tooltipX + 'px',
-									top: tooltipY + 'px'
-								};
-							}
+              var buttonSide = 'right';
 						}
 						else {
 							// this control is on the left side
-							if ($(this).is(':first-child')) {
-								// this is the first control on the left
-								centerTooltip = false;
-								var tooltipX = position.left;
-								var tooltipStyle = {
-									left: tooltipX + 'px',
-									right: '',
-									top: tooltipY + 'px'
-								};
-							}
+              var buttonSide = 'left';
 						}
-						if (centerTooltip) {
-							// populate tooltip, then calculate its width before showing it
-							var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).width();
-							// center the tooltip horizontally over the button
-							var tooltipX = position.left - tooltipWidth/2;
-							var tooltipStyle = {
-								left: tooltipX + 'px',
+						// populate tooltip, then calculate its width before showing it
+						var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).width();
+						// center the tooltip horizontally over the button
+            if (buttonSide == 'left') {
+    				  var tooltipX = position.left - tooltipWidth/2;
+              if (tooltipX < 0) {
+                // tooltip would exceed the bounds of the player. Adjust.
+                tooltipX = 2;
+              }
+              var tooltipStyle = {
+							  left: tooltipX + 'px',
 								right: '',
 								top: tooltipY + 'px'
-							};
-						}
-						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).css(tooltipStyle);
+						  };
+            }
+            else {
+              var tooltipX = position.right - tooltipWidth/2;
+              if (tooltipX < 0) {
+                // tooltip would exceed the bounds of the player. Adjust.
+                tooltipX = 2;
+              }
+              var tooltipStyle = {
+								left: '',
+								right: tooltipX + 'px',
+								top: tooltipY + 'px'
+						  };
+            }
+						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
 							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
@@ -1237,6 +1326,24 @@
 					// create variables of buttons that are referenced throughout the AblePlayer object
 					if (control === 'play') {
 						this.$playpauseButton = $newButton;
+					}
+					else if (control == 'previous') {
+  					this.$prevButton = $newButton;
+            // if player is being rebuilt because user clicked the Prev button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'previous') {
+              this.$prevButton.focus();
+              this.buttonWithFocus = null;
+            }
+					}
+					else if (control == 'next') {
+  					this.$nextButton = $newButton;
+            // if player is being rebuilt because user clicked the Next button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'next') {
+              this.$nextButton.focus();
+              this.buttonWithFocus = null;
+            }
 					}
 					else if (control === 'captions') {
 						this.$ccButton = $newButton;
@@ -1644,16 +1751,6 @@
 				nowPlayingSpan.html('<span>' + this.tt.selectedTrack + ':</span>' + itemTitle);
 				this.$nowPlayingDiv.html(nowPlayingSpan);
 			}
-		}
-
-		// finished swapping src, now reload the new source file.
-		this.swappingSrc = false;
-
-		if (this.player === 'html5') {
-			this.media.load();
-		}
-		else if (this.player === 'youtube') {
-			// TODO: Load new youTubeId
 		}
 
 		// if this.swappingSrc is true, media will autoplay when ready

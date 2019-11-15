@@ -324,6 +324,17 @@ var AblePlayerInstances = [];
 			this.vimeoDescId = $(media).data('vimeo-desc-id');
 		}
 
+		// Skin
+		// valid values of data-skin are:
+		// 'legacy' (default), two rows of controls; seekbar positioned in available space within top row
+		// '2020', all buttons in one row beneath a full-width seekbar
+		if ($(media).data('skin') == '2020') {
+			this.skin = '2020';
+		}
+		else {
+			this.skin = 'legacy';
+		}
+
 		// Icon type
 		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
 		// Fallback for browsers that don't support SVG is scalable icomoon fonts
@@ -554,6 +565,7 @@ var AblePlayerInstances = [];
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
 		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
+		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
 		this.getUserAgent();
 		this.setIconColor();
@@ -764,6 +776,7 @@ var AblePlayerInstances = [];
 				break;
 
 			case 'mute':
+			case 'volume-mute':
 				svg[0] = '0 0 20 20';
 				svg[1] = 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z';
 				break;
@@ -1114,11 +1127,12 @@ var AblePlayerInstances = [];
 
 					thisObj.setupTranscript().then(function() {
 
-						if (thisObj.Volume) {
-								thisObj.setMute(false);
-							}
 						thisObj.setFullscreen(false);
-						thisObj.setVolume(thisObj.defaultVolume);
+
+						if (typeof thisObj.volume === 'undefined') {
+  						thisObj.volume = thisObj.defaultVolume;
+						}
+						thisObj.setVolume(thisObj.volume);
 
 						if (thisObj.transcriptType) {
 							thisObj.addTranscriptAreaEvents();
@@ -3011,6 +3025,7 @@ var AblePlayerInstances = [];
 		this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
+    this.$ableWrapper.addClass('able-skin-' + this.skin);
 
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
@@ -3497,7 +3512,10 @@ var AblePlayerInstances = [];
 				$menuItem.text(windowOptions[i].label);
 				$menuItem.on('click mousedown',function(e) {
 					e.stopPropagation();
-					if (e.button !== 0) { // not a left click
+					if (typeof e.button !== 'undefined' && e.button !== 0) {
+  					// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
+  					// and the button was not a left click (left click = 0)
+  					// therefore, ignore this click
 						return false;
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
@@ -3796,76 +3814,145 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.calculateControlLayout = function () {
 
 		// Calculates the layout for controls based on media and options.
-		// Returns an object with keys 'ul', 'ur', 'bl', 'br' for upper-left, etc.
-		// Each associated value is array of control names to put at that location.
+		// Returns an array with 4 keys (for legacy skin) or 2 keys (for 2020 skin)
+		// Keys are the following order:
+		// 0 = Top left
+		// 1 = Top right
+		// 2 = Bottom left (legacy skin only)
+		// 3 = Bottom right (legacy skin only)
+		// Each key contains an array of control names to put in that section.
 
-		var controlLayout = {
-			'ul': ['play','restart','rewind','forward'],
-			'ur': ['seek'],
-			'bl': [],
-			'br': []
+		var controlLayout, volumeSupported, playbackSupported, totalButtonWidth, numA11yButtons;
+
+		controlLayout = [];
+		controlLayout[0] = [];
+		controlLayout[1] = [];
+    if (this.skin === 'legacy') {
+		  controlLayout[2] = [];
+		  controlLayout[3] = [];
 		}
+
+		controlLayout[0].push('play');
+		controlLayout[0].push('restart');
+		controlLayout[0].push('rewind');
+		controlLayout[0].push('forward');
+
+    if (this.skin === 'legacy') {
+      controlLayout[1].push('seek');
+    }
 
 		if (this.hasPlaylist) {
-  		controlLayout['ur'].push('previous');
-  		controlLayout['ur'].push('next');
+  		if (this.skin === 'legacy') {
+    		controlLayout[0].push('previous');
+        controlLayout[0].push('next');
+      }
+      else if (this.skin == '2020') {
+    		controlLayout[0].push('previous');
+        controlLayout[0].push('next');
+      }
 		}
-
-		// test for browser support for volume before displaying volume button
-		if (this.browserSupportsVolume()) {
-			// volume buttons are: 'mute','volume-soft','volume-medium','volume-loud'
-			// previously supported button were: 'volume-up','volume-down'
-			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
-			controlLayout['ur'].push('volume');
-		}
-		else {
-			this.volume = false;
-		}
-
-		// Calculate the two sides of the bottom-left grouping to see if we need separator pipe.
-		var bll = [];
-		var blr = [];
 
 		if (this.isPlaybackRateSupported()) {
-			bll.push('slower');
-			bll.push('faster');
+  		playbackSupported = true;
+  		if (this.skin === 'legacy') {
+  			controlLayout[2].push('slower');
+  			controlLayout[2].push('faster');
+  		}
+		}
+		else {
+  		playbackSupported = false;
 		}
 
 		if (this.mediaType === 'video') {
+  		numA11yButtons = 0;
 			if (this.hasCaptions) {
-				bll.push('captions'); //closed captions
+  			numA11yButtons++;
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('captions');
+				}
+				else if (this.skin == '2020') {
+  				controlLayout[1].push('captions');
+        }
 			}
 			if (this.hasSignLanguage) {
-				bll.push('sign'); // sign language
+  			numA11yButtons++;
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('sign');
+				}
+				else if (this.skin == '2020') {
+  				controlLayout[1].push('sign');
+        }
 			}
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
-				bll.push('descriptions'); //audio description
+  			numA11yButtons++;
+  			if (this.skin === 'legacy') {
+				  controlLayout[2].push('descriptions');
+				}
+				else if (this.skin == '2020') {
+  				controlLayout[1].push('descriptions');
+        }
 			}
 		}
 		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
-			bll.push('transcript');
+  		numA11yButtons++;
+  		if (this.skin === 'legacy') {
+				controlLayout[2].push('transcript');
+		  }
+      else if (this.skin == '2020') {
+  		  controlLayout[1].push('transcript');
+      }
 		}
 
 		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
-			bll.push('chapters');
+  		numA11yButtons++;
+  		if (this.skin === 'legacy') {
+				controlLayout[2].push('chapters');
+		  }
+			else if (this.skin == '2020') {
+  		  controlLayout[1].push('chapters');
+      }
 		}
 
-		controlLayout['br'].push('preferences');
+    if (this.skin == '2020' && numA11yButtons > 0) {
+  		controlLayout[1].push('pipe');
+		}
+
+    if (playbackSupported && this.skin === '2020') {
+      controlLayout[1].push('faster');
+    	controlLayout[1].push('slower');
+    	controlLayout[1].push('pipe');
+		}
+
+    if (this.skin === 'legacy') {
+  		controlLayout[3].push('preferences');
+    }
+    else if (this.skin == '2020') {
+      controlLayout[1].push('preferences');
+    }
 
 		if (this.mediaType === 'video' && this.allowFullScreen) {
-			controlLayout['br'].push('fullscreen');
+      if (this.skin === 'legacy') {
+    		controlLayout[3].push('fullscreen');
+      }
+      else {
+        controlLayout[1].push('fullscreen');
+      }
 		}
 
-		// Include the pipe only if we need to.
-		if (bll.length > 0 && blr.length > 0) {
-			controlLayout['bl'] = bll;
-			controlLayout['bl'].push('pipe');
-			controlLayout['bl'] = controlLayout['bl'].concat(blr);
+		if (this.browserSupportsVolume()) {
+  		volumeSupported = true; // defined in case we decide to move volume button elsewhere
+			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
+			if (this.skin === 'legacy') {
+  			controlLayout[1].push('volume');
+  		}
+  		else if (this.skin == '2020') {
+    		controlLayout[1].push('volume');
+  		}
 		}
 		else {
-			controlLayout['bl'] = bll.concat(blr);
+  		volumeSupported = false;
+			this.volume = false;
 		}
-
 		return controlLayout;
 	};
 
@@ -3877,12 +3964,14 @@ var AblePlayerInstances = [];
 		// browser support (e.g., for sliders and speedButtons)
 		// user preferences (???)
 		// some controls are aligned on the left, and others on the right
-		var thisObj, baseSliderWidth, controlLayout, sectionByOrder, useSpeedButtons, useFullScreen,
-		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, mediaTimes, duration, $pipe, $pipeImg,
-		tooltipId, tooltipX, tooltipY, control,
-		buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon, buttonUse, svgPath,
-		leftWidth, rightWidth, totalWidth, leftWidthStyle, rightWidthStyle,
-		controllerStyles, vidcapStyles, captionLabel, popupMenuId;
+
+		var thisObj, baseSliderWidth, controlLayout, numSections,
+		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, $pipeImg,
+		svgData, svgPath, control,
+    $buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
+    buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
+    tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+    captionLabel, popupMenuId;
 
 		thisObj = this;
 
@@ -3890,8 +3979,7 @@ var AblePlayerInstances = [];
 
 		// Initialize the layout into the this.controlLayout variable.
 		controlLayout = this.calculateControlLayout();
-
-		sectionByOrder = {0: 'ul', 1:'ur', 2:'bl', 3:'br'};
+		numSections = controlLayout.length;
 
 		// add an empty div to serve as a tooltip
 		tooltipId = this.mediaId + '-tooltip';
@@ -3901,15 +3989,29 @@ var AblePlayerInstances = [];
 		}).hide();
 		this.$controllerDiv.append(this.$tooltipDiv);
 
+		if (this.skin == '2020') {
+  		// add a full-width seek bar
+      $sliderDiv = $('<div class="able-seekbar"></div>');
+			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+			this.$controllerDiv.append($sliderDiv);
+			if (typeof this.duration === 'undefined' || this.duration === 0) {
+			  // set arbitrary starting duration, and change it when duration is known
+				this.duration = 60;
+				// also set elapsed to 0
+				this.elapsed = 0;
+		  }
+			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
+		}
+
 		// step separately through left and right controls
-		for (i = 0; i <= 3; i++) {
-			controls = controlLayout[sectionByOrder[i]];
-			if ((i % 2) === 0) {
+		for (i = 0; i < numSections; i++) {
+			controls = controlLayout[i];
+			if ((i % 2) === 0) { // even keys on the left
 				$controllerSpan = $('<div>',{
 					'class': 'able-left-controls'
 				});
 			}
-			else {
+			else { // odd keys on the right
 				$controllerSpan = $('<div>',{
 					'class': 'able-right-controls'
 				});
@@ -3930,7 +4032,6 @@ var AblePlayerInstances = [];
 					this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 				}
 				else if (control === 'pipe') {
-					// TODO: Unify this with buttons somehow to avoid code duplication
 					$pipe = $('<span>', {
 						'tabindex': '-1',
 						'aria-hidden': 'true'
@@ -4131,66 +4232,68 @@ var AblePlayerInstances = [];
 					}
 					else {
 						// use images
-						buttonImg = $('<img>',{
+						$buttonImg = $('<img>',{
 							'src': buttonImgSrc,
 							'alt': '',
 							'role': 'presentation'
 						});
-						$newButton.append(buttonImg);
+						$newButton.append($buttonImg);
 					}
 					// add the visibly-hidden label for screen readers that don't support aria-label on the button
-					var buttonLabel = $('<span>',{
+					var $buttonLabel = $('<span>',{
 						'class': 'able-clipped'
 					}).text(buttonTitle);
-					$newButton.append(buttonLabel);
+					$newButton.append($buttonLabel);
 					// add an event listener that displays a tooltip on mouseenter or focus
 					$newButton.on('mouseenter focus',function(e) {
-						var label = $(this).attr('aria-label');
+						var buttonText = $(this).attr('aria-label');
 						// get position of this button
 						var position = $(this).position();
 						var buttonHeight = $(this).height();
 						var buttonWidth = $(this).width();
+
+						// position() is expressed using top and left (of button);
+						// add right (of button) too, for convenience
+						var controllerWidth = thisObj.$controllerDiv.width();
+						position.right = controllerWidth - position.left - buttonWidth;
+
 						var tooltipY = position.top - buttonHeight - 15;
-						var centerTooltip = true;
 						if ($(this).closest('div').hasClass('able-right-controls')) {
 							// this control is on the right side
-							if ($(this).closest('div').find('button:last').get(0) == $(this).get(0)) {
-								// this is the last control on the right
-								// position tooltip using the "right" property
-								centerTooltip = false;
-								var tooltipX = 0;
-								var tooltipStyle = {
-									left: '',
-									right: tooltipX + 'px',
-									top: tooltipY + 'px'
-								};
-							}
+              var buttonSide = 'right';
 						}
 						else {
 							// this control is on the left side
-							if ($(this).is(':first-child')) {
-								// this is the first control on the left
-								centerTooltip = false;
-								var tooltipX = position.left;
-								var tooltipStyle = {
-									left: tooltipX + 'px',
-									right: '',
-									top: tooltipY + 'px'
-								};
-							}
+              var buttonSide = 'left';
 						}
-						if (centerTooltip) {
-							// populate tooltip, then calculate its width before showing it
-							var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).width();
-							// center the tooltip horizontally over the button
-							var tooltipX = position.left - tooltipWidth/2;
-							var tooltipStyle = {
-								left: tooltipX + 'px',
+						// populate tooltip, then calculate its width before showing it
+						var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).width();
+						// center the tooltip horizontally over the button
+            if (buttonSide == 'left') {
+    				  var tooltipX = position.left - tooltipWidth/2;
+              if (tooltipX < 0) {
+                // tooltip would exceed the bounds of the player. Adjust.
+                tooltipX = 2;
+              }
+              var tooltipStyle = {
+							  left: tooltipX + 'px',
 								right: '',
 								top: tooltipY + 'px'
-							};
-						}
-						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label).css(tooltipStyle);
+						  };
+            }
+            else {
+              var tooltipX = position.right - tooltipWidth/2;
+              if (tooltipX < 0) {
+                // tooltip would exceed the bounds of the player. Adjust.
+                tooltipX = 2;
+              }
+              var tooltipStyle = {
+								left: '',
+								right: tooltipX + 'px',
+								top: tooltipY + 'px'
+						  };
+            }
+						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
 							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
@@ -4223,6 +4326,24 @@ var AblePlayerInstances = [];
 					// create variables of buttons that are referenced throughout the AblePlayer object
 					if (control === 'play') {
 						this.$playpauseButton = $newButton;
+					}
+					else if (control == 'previous') {
+  					this.$prevButton = $newButton;
+            // if player is being rebuilt because user clicked the Prev button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'previous') {
+              this.$prevButton.focus();
+              this.buttonWithFocus = null;
+            }
+					}
+					else if (control == 'next') {
+  					this.$nextButton = $newButton;
+            // if player is being rebuilt because user clicked the Next button
+            // return focus to that (newly built) button
+            if (this.buttonWithFocus == 'next') {
+              this.$nextButton.focus();
+              this.buttonWithFocus = null;
+            }
 					}
 					else if (control === 'captions') {
 						this.$ccButton = $newButton;
@@ -4630,16 +4751,6 @@ var AblePlayerInstances = [];
 				nowPlayingSpan.html('<span>' + this.tt.selectedTrack + ':</span>' + itemTitle);
 				this.$nowPlayingDiv.html(nowPlayingSpan);
 			}
-		}
-
-		// finished swapping src, now reload the new source file.
-		this.swappingSrc = false;
-
-		if (this.player === 'html5') {
-			this.media.load();
-		}
-		else if (this.player === 'youtube') {
-			// TODO: Load new youTubeId
 		}
 
 		// if this.swappingSrc is true, media will autoplay when ready
@@ -5916,7 +6027,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// trackingMedia is true if this is a media timeline; otherwise false
 		// initialState is either 'visible' or 'hidden'
 
-		var thisObj;
+		var thisObj, coords;
 
 		thisObj = this;
 
@@ -5971,13 +6082,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.bodyDiv.wrap('<div></div>');
 		this.wrapperDiv = this.bodyDiv.parent();
 
-		if (orientation === 'horizontal') {
-			this.wrapperDiv.width(length);
-			this.loadedDiv.width(0);
-		}
-		else {
-			this.wrapperDiv.height(length);
-			this.loadedDiv.height(0);
+    if (this.skin === 'legacy') {
+  		if (orientation === 'horizontal') {
+	  		this.wrapperDiv.width(length);
+        this.loadedDiv.width(0);
+		  }
+      else {
+			  this.wrapperDiv.height(length);
+        this.loadedDiv.height(0);
+		  }
 		}
 		this.wrapperDiv.addClass('able-' + className + '-wrapper');
 
@@ -5994,18 +6107,20 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     // handle seekHead events
 		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
+      coords = thisObj.pointerEventToXY(e);
+
 		  if (e.type === 'mouseenter' || e.type === 'focus') {
   			thisObj.overHead = true;
       }
       else if (e.type === 'mouseleave' || e.type === 'blur') {
   			thisObj.overHead = false;
         if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+				  thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 			  }
       }
       else if (e.type === 'mousemove' || e.type === 'touchmove') {
   			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.trackHeadAtPageX(e.pageX);
+	  			thisObj.trackHeadAtPageX(coords.x);
         }
       }
       else if (e.type === 'mousedown' || e.type === 'touchstart') {
@@ -6017,7 +6132,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       }
       else if (e.type === 'mouseup' || e.type === 'touchend') {
   			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+	  			thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
         }
       }
       if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
@@ -6029,6 +6144,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.bodyDiv.on(
 		  'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
+      coords = thisObj.pointerEventToXY(e);
+
   		if (e.type === 'mouseenter') {
   			thisObj.overBody = true;
 		  }
@@ -6036,21 +6153,21 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   			thisObj.overBody = false;
         thisObj.overBodyMousePos = null;
   			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+	  			thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 			  }
       }
       else if (e.type === 'mousemove' || e.type === 'touchmove') {
   			thisObj.overBodyMousePos = {
-	  			x: e.pageX,
-          y: e.pageY
+	  			x: coords.x,
+          y: coords.y
 			  };
         if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.trackHeadAtPageX(e.pageX);
+				  thisObj.trackHeadAtPageX(coords.x);
 			  }
       }
       else if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
-        thisObj.trackHeadAtPageX(e.pageX);
+  			thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
+        thisObj.trackHeadAtPageX(coords.x);
         if (!thisObj.seekHead.is(':focus')) {
 				  thisObj.seekHead.focus();
 			  }
@@ -6058,7 +6175,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       }
       else if (e.type === 'mouseup' || e.type === 'touchend') {
         if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
+				  thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 			  }
       }
       else if (e.type === 'keydown') {
@@ -6103,131 +6220,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   			thisObj.refreshTooltip();
   		}
 		});
-
-/* Old event listeners on seekHead and bodyDiv...
-
-		this.seekHead.hover(function (e) {
-			thisObj.overHead = true;
-			thisObj.refreshTooltip();
-		}, function (e) {
-			thisObj.overHead = false;
-
-			if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-			thisObj.refreshTooltip();
-		});
-
-		this.seekHead.mousemove(function (e) {
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.trackHeadAtPageX(e.pageX);
-			}
-		});
-
-		this.seekHead.focus(function (e) {
-			thisObj.overHead = true;
-			thisObj.refreshTooltip();
-		});
-
-		this.seekHead.blur(function (e) {
-			thisObj.overHead = false;
-			thisObj.refreshTooltip();
-		});
-
-		this.bodyDiv.hover(function () {
-			thisObj.overBody = true;
-			thisObj.refreshTooltip();
-		}, function (e) {
-			thisObj.overBody = false;
-			thisObj.overBodyMousePos = null;
-			thisObj.refreshTooltip();
-
-			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-		});
-
-		this.bodyDiv.mousemove(function (e) {
-			thisObj.overBodyMousePos = {
-				x: e.pageX,
-				y: e.pageY
-			};
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.trackHeadAtPageX(e.pageX);
-			}
-			thisObj.refreshTooltip();
-		});
-
-		this.bodyDiv.mousedown(function (e) {
-			thisObj.startTracking('mouse', thisObj.pageXToPosition(e.pageX));
-			thisObj.trackHeadAtPageX(e.pageX);
-			if (!thisObj.seekHead.is(':focus')) {
-				thisObj.seekHead.focus();
-			}
-			e.preventDefault();
-		});
-
-		this.seekHead.mousedown(function (e) {
-			thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-			if (!thisObj.bodyDiv.is(':focus')) {
-				thisObj.bodyDiv.focus();
-			}
-			e.preventDefault();
-		});
-
-		this.bodyDiv.mouseup(function (e) {
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-		})
-
-		this.seekHead.mouseup(function (e) {
-			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				thisObj.stopTracking(thisObj.pageXToPosition(e.pageX));
-			}
-		});
-
-		this.bodyDiv.keydown(function (e) {
-			// Home
-			if (e.which === 36) {
-				thisObj.trackImmediatelyTo(0);
-			}
-			// End
-			else if (e.which === 35) {
-				thisObj.trackImmediatelyTo(thisObj.duration);
-			}
-			// Left arrow or down arrow
-			else if (e.which === 37 || e.which === 40) {
-				thisObj.arrowKeyDown(-1);
-			}
-			// Right arrow or up arrow
-			else if (e.which === 39 || e.which === 38) {
-				thisObj.arrowKeyDown(1);
-			}
-			// Page up
-			else if (e.which === 33 && bigInterval > 0) {
-				thisObj.arrowKeyDown(bigInterval);
-			}
-			// Page down
-			else if (e.which === 34 && bigInterval > 0) {
-				thisObj.arrowKeyDown(-bigInterval);
-			}
-
-			else {
-				return;
-			}
-			e.preventDefault();
-		});
-
-		this.bodyDiv.keyup(function (e) {
-			if (e.which >= 33 && e.which <= 40) {
-				if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
-					thisObj.stopTracking(thisObj.keyTrackPosition);
-				}
-				e.preventDefault();
-			}
-		});
-*/
 	}
 
 	AccessibleSlider.prototype.arrowKeyDown = function (multiplier) {
@@ -6279,7 +6271,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	}
 
 	AccessibleSlider.prototype.setDuration = function (duration) {
-
 		if (duration !== this.duration) {
 			this.duration = duration;
 			this.resetHeadLocation();
@@ -6323,8 +6314,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	// TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.	Change this to display them all.
 	AccessibleSlider.prototype.setBuffered = function (ratio) {
-		this.buffered = ratio;
-		this.redrawDivs;
+    if (!isNaN(ratio)) {
+  		this.buffered = ratio;
+      this.redrawDivs;
+    }
 	}
 
 	AccessibleSlider.prototype.startTracking = function (device, position) {
@@ -6420,10 +6413,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.overHead) {
 			this.timeTooltip.show();
 			if (this.tracking) {
-				this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+  		  this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
 			}
 			else {
-				this.timeTooltip.text(this.positionToStr(this.position));
+  		  this.timeTooltip.text(this.positionToStr(this.position));
 			}
 			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
 		}
@@ -6463,6 +6456,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			return dMinutes + ':' + dSeconds;
 		}
 	};
+
+  AccessibleSlider.prototype.pointerEventToXY = function(e) {
+
+    // returns array of coordinates x and y in response to both mouse and touch events
+    // for mouse events, this comes from e.pageX and e.pageY
+    // for touch events, it's a bit more complicated
+    var out = {x:0, y:0};
+    if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+      var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+      out.x = touch.pageX;
+      out.y = touch.pageY;
+    }
+    else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+      out.x = e.pageX;
+      out.y = e.pageY;
+    }
+    return out;
+  };
 
 })(jQuery);
 
@@ -6527,7 +6538,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		});
 		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)
 		$div.append(this.$volumeSlider);
-
 		this.refreshVolumeSlider(this.volume);
 
 		// add event listeners
@@ -6565,8 +6575,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			else if (e.which === 39 || e.which === 38) {
 				thisObj.handleVolume('up');
 			}
-			// Escape key or Enter key
-			else if (e.which === 27 || e.which === 13) {
+			// Escape key or Enter key or Tab key
+			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
 					thisObj.hideVolumePopup();
@@ -6594,19 +6604,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		trackOnTop = this.volumeTrackHeight - trackOnHeight;
 		headTop = trackOnTop - this.volumeHeadHeight;
 
-		this.$volumeSliderTrackOn.css({
-			'height': trackOnHeight + 'px',
-			'top': trackOnTop + 'px'
-		});
-		this.$volumeSliderHead.attr({
-			'aria-valuenow': volume,
-			'aria-valuetext': volumePctText
-		});
-		this.$volumeSliderHead.css({
-			'top': headTop + 'px'
-		});
-		this.$volumeAlert.text(volumePct + '%');
-
+    if (this.$volumeSliderTrackOn) {
+  		this.$volumeSliderTrackOn.css({
+	  		'height': trackOnHeight + 'px',
+        'top': trackOnTop + 'px'
+		  });
+		}
+		if (this.$volumeSliderHead) {
+      this.$volumeSliderHead.attr({
+			  'aria-valuenow': volume,
+        'aria-valuetext': volumePctText
+		  });
+      this.$volumeSliderHead.css({
+			  'top': headTop + 'px'
+		  });
+		}
+		if (this.$volumeAlert) {
+  		this.$volumeAlert.text(volumePct + '%');
+    }
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
@@ -8276,33 +8291,36 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (typeof this.$elapsedTimeContainer !== 'undefined') {
 				this.$elapsedTimeContainer.text(this.formatSecondsAsColonTime(displayElapsed));
 			}
-			// Update seekbar width.
-			// To do this, we need to calculate the width of all buttons surrounding it.
-			if (this.seekBar) {
-				widthUsed = 0;
-				leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
-				rightControls = leftControls.next('div.able-right-controls');
-				leftControls.children().each(function () {
-					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).outerWidth(true); // true = include margin
-					}
-				});
-				rightControls.children().each(function () {
-					if ($(this).prop('tagName')=='BUTTON') {
-						widthUsed += $(this).outerWidth(true);
-					}
-				});
-				if (this.fullscreen) {
-					seekbarWidth = $(window).width() - widthUsed;
-				}
-				else {
-					seekbarWidth = this.$ableWrapper.width() - widthUsed;
-				}
-				// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-				if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
-					this.seekBar.setWidth(seekbarWidth);
-				}
-			}
+
+			if (this.skin === 'legacy') {
+  			// Update seekbar width.
+        // To do this, we need to calculate the width of all buttons surrounding it.
+        if (this.seekBar) {
+				  widthUsed = 0;
+          leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+          rightControls = leftControls.next('div.able-right-controls');
+          leftControls.children().each(function () {
+					  if ($(this).prop('tagName')=='BUTTON') {
+						  widthUsed += $(this).outerWidth(true); // true = include margin
+					  }
+				  });
+          rightControls.children().each(function () {
+					  if ($(this).prop('tagName')=='BUTTON') {
+						  widthUsed += $(this).outerWidth(true);
+					  }
+				  });
+          if (this.fullscreen) {
+					  seekbarWidth = $(window).width() - widthUsed;
+				  }
+          else {
+					  seekbarWidth = this.$ableWrapper.width() - widthUsed;
+				  }
+          // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+          if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+					  this.seekBar.setWidth(seekbarWidth);
+				  }
+			  }
+      }
 
 			// Update buffering progress.
 			// TODO: Currently only using the first HTML5 buffered interval,
@@ -8320,7 +8338,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 					else {
 						if (this.seekBar) {
-							this.seekBar.setBuffered(buffered / duration);
+              if (!isNaN(buffered)) {
+  							this.seekBar.setBuffered(buffered / duration);
+  						}
 						}
 					}
 				}
@@ -9043,7 +9063,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// But first, capture current settings so they can be restored later
 				this.preFullScreenWidth = this.$ableWrapper.width();
 				this.preFullScreenHeight = this.$ableWrapper.height();
-
 				if (el.requestFullscreen) {
 					el.requestFullscreen();
 				}
@@ -10352,6 +10371,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						else {
 							if ($(line).length) {
 								// selector exists
+                this.currentMeta = thisMeta;
 								showDuration = parseInt($(line).attr('data-duration'));
 								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
 									$(line).show().delay(showDuration).fadeOut();
@@ -10363,6 +10383,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 								// add to array of visible selectors so it can be hidden at end time
 								this.visibleSelectors.push(line);
 								tempSelectors.push(line);
+
 							}
 						}
 					}
@@ -10379,7 +10400,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 
 				}
-				this.currentMeta = thisMeta;
 			}
 		}
 		else {
@@ -11501,10 +11521,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else if (whichButton === 'previous') {
 			this.seekTrigger = 'previous';
+			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
 			this.seekTrigger = 'next';
+			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
 		}
 		else if (whichButton === 'rewind') {
@@ -11605,7 +11627,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		// Convert to lower case.
 		var which = e.which;
-
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
@@ -11628,6 +11649,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
 					// only toggle play if a button does not have focus
 					// if a button has focus, space should activate that button
+          this.clickedPlay = true; // important to set this var for program control
 					this.handlePlay();
 				}
 			}
@@ -12613,7 +12635,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			$windowButton = this.$signPopupButton;
 			resizeDialog = this.signResizeDialog;
 		}
-
 		if (e.type === 'keydown') {
 			if (e.which === 27) { // escape
 				// hide the popup menu
@@ -12629,6 +12650,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			else {
 				// all other keys will be handled by upstream functions
+        if (choice !== 'close') {
+          this.$activeWindow = $window;
+		    }
 				return false;
 			}
 		}
@@ -12679,11 +12703,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.startDrag = function(which, $element) {
+
 		var thisObj, $windowPopup, zIndex, startPos, newX, newY;
+
 		thisObj = this;
 
-		this.$activeWindow = $element;
-		this.dragging = true;
+    if (!this.$activeWindow) {
+  		this.$activeWindow = $element;
+    }
+    this.dragging = true;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -12894,8 +12922,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.startResize = function(which, $element) {
 
 		var thisObj, $windowPopup, zIndex, startPos, newWidth, newHeight;
-		thisObj = this;
 
+		thisObj = this;
 		this.$activeWindow = $element;
 		this.resizing = true;
 
@@ -14069,10 +14097,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 		// get language of the web page, if specified
 		if ($('body').attr('lang')) {
-			lang = $('body').attr('lang');
+			lang = $('body').attr('lang').toLowerCase();
 		}
 		else if ($('html').attr('lang')) {
-			lang = $('html').attr('lang');
+			lang = $('html').attr('lang').toLowerCase();
 		}
 		else {
 			lang = null;
@@ -15668,7 +15696,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.setupVimeoCaptions = function () {
-
 
 		// called from setupAltCaptions if player is YouTube and there are no <track> captions
 

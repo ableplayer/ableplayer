@@ -59,7 +59,6 @@
 		});
 		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)
 		$div.append(this.$volumeSlider);
-
 		this.refreshVolumeSlider(this.volume);
 
 		// add event listeners
@@ -97,8 +96,8 @@
 			else if (e.which === 39 || e.which === 38) {
 				thisObj.handleVolume('up');
 			}
-			// Escape key or Enter key
-			else if (e.which === 27 || e.which === 13) {
+			// Escape key or Enter key or Tab key
+			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
 					thisObj.hideVolumePopup();
@@ -126,19 +125,24 @@
 		trackOnTop = this.volumeTrackHeight - trackOnHeight;
 		headTop = trackOnTop - this.volumeHeadHeight;
 
-		this.$volumeSliderTrackOn.css({
-			'height': trackOnHeight + 'px',
-			'top': trackOnTop + 'px'
-		});
-		this.$volumeSliderHead.attr({
-			'aria-valuenow': volume,
-			'aria-valuetext': volumePctText
-		});
-		this.$volumeSliderHead.css({
-			'top': headTop + 'px'
-		});
-		this.$volumeAlert.text(volumePct + '%');
-
+    if (this.$volumeSliderTrackOn) {
+  		this.$volumeSliderTrackOn.css({
+	  		'height': trackOnHeight + 'px',
+        'top': trackOnTop + 'px'
+		  });
+		}
+		if (this.$volumeSliderHead) {
+      this.$volumeSliderHead.attr({
+			  'aria-valuenow': volume,
+        'aria-valuetext': volumePctText
+		  });
+      this.$volumeSliderHead.css({
+			  'top': headTop + 'px'
+		  });
+		}
+		if (this.$volumeAlert) {
+  		this.$volumeAlert.text(volumePct + '%');
+    }
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {

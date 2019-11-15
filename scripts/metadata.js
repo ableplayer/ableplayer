@@ -55,6 +55,7 @@
 						else {
 							if ($(line).length) {
 								// selector exists
+                this.currentMeta = thisMeta;
 								showDuration = parseInt($(line).attr('data-duration'));
 								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
 									$(line).show().delay(showDuration).fadeOut();
@@ -66,6 +67,7 @@
 								// add to array of visible selectors so it can be hidden at end time
 								this.visibleSelectors.push(line);
 								tempSelectors.push(line);
+
 							}
 						}
 					}
@@ -82,7 +84,6 @@
 					}
 
 				}
-				this.currentMeta = thisMeta;
 			}
 		}
 		else {
