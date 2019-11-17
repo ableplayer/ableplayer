@@ -1117,9 +1117,7 @@ var AblePlayerInstances = [];
 
 		this.initSignLanguage();
 
-// 	thisObj.initializing = true;
-		this.initPlayer().then(function() { // initPlayer success
-//		thisObj.initializing = false;
+		this.initPlayer().then(function() {
 
 			 thisObj.setupTracks().then(function() {
 
@@ -1192,7 +1190,6 @@ var AblePlayerInstances = [];
 
 		var thisObj = this;
 		var playerPromise;
-
 		// First run player specific initialization.
 		if (this.player === 'html5') {
 			playerPromise = this.initHtml5Player();
@@ -1203,7 +1200,6 @@ var AblePlayerInstances = [];
 		else if (this.player === 'vimeo') {
 			playerPromise = this.initVimeoPlayer();
 		}
-
 		// After player specific initialization is done, run remaining general initialization.
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
@@ -1268,7 +1264,6 @@ var AblePlayerInstances = [];
 		var captions, i;
 
 		captions = this.captions;
-
 		if (captions.length > 0) {
 			for (i=0; i<captions.length; i++) {
 				if (captions[i].def === true) {
@@ -1299,6 +1294,38 @@ var AblePlayerInstances = [];
 				}
 				// sync all other tracks to this same languge
 				this.syncTrackLanguages('init',this.captionLang);
+			}
+			if (this.usingVimeoCaptions && this.prefCaptions == 1) {
+  			// initialize Vimeo captions to the default language
+				this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
+					// track.language = the iso code for the language
+					// track.kind = 'captions' or 'subtitles'
+					// track.label = the human-readable label
+				}).catch(function(error) {
+					switch (error.name) {
+						case 'InvalidTrackLanguageError':
+							// no track was available with the specified language
+							console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+							break;
+						case 'InvalidTrackError':
+							// no track was available with the specified language and kind
+							console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+							break;
+						default:
+							// some other error occurred
+							console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+							break;
+    		  }
+				});
+			}
+			else {
+  			// disable Vimeo captions.
+  			// captions are either provided locally, or user has them turned off.
+  			this.vimeoPlayer.disableTextTrack().then(function() {
+    			// Vimeo captions disabled
+  			}).catch(function(error) {
+          console.log('Error disabling Vimeo text track: ',error);
+        });
 			}
 		}
 	};
@@ -3457,7 +3484,7 @@ var AblePlayerInstances = [];
 					'tabindex': '-1',
 					'lang': track.language
 				});
-				if (track.def) {
+				if (track.def && this.prefCaptions == 1) {
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
 				}
@@ -8016,7 +8043,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else if (this.player === 'vimeo') {
-			// since this takes longer to determine, it was set previous in initVimeoPlayer()
+			// since this takes longer to determine, it was set previously in initVimeoPlayer()
 			return this.vimeoSupportsPlaybackRateChange;
 		}
 	};
@@ -9732,11 +9759,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	// Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
 	AblePlayer.prototype.getCaptionOffFunction = function () {
-
 		var thisObj = this;
 		return function () {
 			if (thisObj.player == 'youtube') {
 				thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
+			}
+			else if (thisObj.usingVimeoCaptions) {
+        thisObj.vimeoPlayer.disableTextTrack();
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
@@ -15459,8 +15488,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 
-		deferred.resolve();
-
 		containerId = this.mediaId + '_vimeo';
 
 		// add container to which Vimeo player iframe will be appended
@@ -15478,14 +15505,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Notes re. Vimeo Embed Options:
 		// If a video is owned by a user with a paid Plus, PRO, or Business account,
-		// setting the "background" option to "true" will hide the default controls.
-		// It has no effect on videos owned by a free basic account owner (their controls cannot be hidden).
-		// Also, setting "background" to "true" has a couple of side effects:
-		// In addition to hiding the controls, it also autoplays and loops the video.
-		// If the player is initialized with options to set both "autoplay" and "loop" to "false",
-		// this does not override the "background" setting.
-		// Passing this.autoplay and this.loop anyway, just in case it works someday
-		// Meanwhile, workaround is to setup an event listener to immediately pause after video autoplays
+    // setting the "controls" option to "false" will hide the default controls, without hiding captions.
+		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
+		// but that had unwanted side effects:
+		//  - In addition to hiding the controls, it also hides captions
+		//  - It automatically autoplays (initializing the player with autoplay:false does not override this)
+		//  - It automatically loops (but this can be overridden by initializing the player with loop:false)
+		//  - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
 		if (this.autoplay && this.okToPlay) {
 			autoplay = 'true';
@@ -15507,12 +15533,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.vimeoWidth = null;
 			this.vimeoHeight = null;
 		}
+
 		options = {
-				id: vimeoId,
-				width: this.vimeoWidth,
-				background: true,
-				autoplay: this.autoplay,
-				loop: this.loop
+		  id: vimeoId,
+			width: this.vimeoWidth,
+			controls: false
 		};
 
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
@@ -15787,7 +15812,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 								isDefaultTrack = false;
 						}
 						thisObj.tracks.push({
-								'kind': tracks[i]['kind'],
+						  'kind': tracks[i]['kind'],
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
@@ -15799,7 +15824,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					deferred.resolve();
 			 	}
 			 	else {
-						thisObj.hasCaptions = false;
+				  thisObj.hasCaptions = false;
 					thisObj.usingVimeoCaptions = false;
 					deferred.resolve();
 				}
@@ -15812,7 +15837,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
     // NOTE: This function is modeled after same function in youtube.js
     // in case useful for Vimeo, but is not currently used
-
 
 		// This function is called when YouTube onApiChange event fires
 		// to indicate that the player has loaded (or unloaded) a module with exposed API methods

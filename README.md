@@ -624,12 +624,11 @@ on the `<video>` element. The value of this attribute must be the Vimeo ID
 of the described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
-Note that Vimeo currently has a few major limitations:  
+Note that Vimeo currently has some limitations:  
 
--   A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is extremely cluttered and confusing
--   Hiding Vimeo's playback controls (as per the previous item) also hides captions and subtitles. Therefore the only way to include captions and subtitles is to host them locally and reference them with a &lt;track&gt; element. This is necessary anyway in order to have an interactive transcript, since Vimeo does not expose its caption data in a way that would enable Able Player to repurpose captions into a transcript.
--   A Pro or Business account is required in order to change playback rate (with faster and slower buttons). Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.
-
+-   A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is cluttered and confusing. 
+-   A Pro or Business account is required in order to change playback rate (with faster and slower buttons). This functionality is *not* supported with a Plus account. Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.
+-   Able Player can display captions if they're hosted on Vimeo. However, if the user changes their caption display preferences in Able Player, that has no effect on the Vimeo captions. Also, Able Player is unable to auto-generate an interactive transcript if captions are hosted on Vimeo. For captions that support user display preferences and that can be repurposed as an interactive transcript, captions and subtitles must be stored locally and referenced with a &lt;track&gt; element. If captions and subtitles are provided both on Vimeo and locally, the local captions will take precedence in order to provide full functionality. 
 
 MIME Types
 ----------
