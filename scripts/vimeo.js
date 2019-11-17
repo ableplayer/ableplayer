@@ -8,8 +8,6 @@
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 
-		deferred.resolve();
-
 		containerId = this.mediaId + '_vimeo';
 
 		// add container to which Vimeo player iframe will be appended
@@ -27,14 +25,13 @@
 
 		// Notes re. Vimeo Embed Options:
 		// If a video is owned by a user with a paid Plus, PRO, or Business account,
-		// setting the "background" option to "true" will hide the default controls.
-		// It has no effect on videos owned by a free basic account owner (their controls cannot be hidden).
-		// Also, setting "background" to "true" has a couple of side effects:
-		// In addition to hiding the controls, it also autoplays and loops the video.
-		// If the player is initialized with options to set both "autoplay" and "loop" to "false",
-		// this does not override the "background" setting.
-		// Passing this.autoplay and this.loop anyway, just in case it works someday
-		// Meanwhile, workaround is to setup an event listener to immediately pause after video autoplays
+    // setting the "controls" option to "false" will hide the default controls, without hiding captions.
+		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
+		// but that had unwanted side effects:
+		//  - In addition to hiding the controls, it also hides captions
+		//  - It automatically autoplays (initializing the player with autoplay:false does not override this)
+		//  - It automatically loops (but this can be overridden by initializing the player with loop:false)
+		//  - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
 		if (this.autoplay && this.okToPlay) {
 			autoplay = 'true';
@@ -56,12 +53,11 @@
 			this.vimeoWidth = null;
 			this.vimeoHeight = null;
 		}
+
 		options = {
-				id: vimeoId,
-				width: this.vimeoWidth,
-				background: true,
-				autoplay: this.autoplay,
-				loop: this.loop
+		  id: vimeoId,
+			width: this.vimeoWidth,
+			controls: false
 		};
 
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
@@ -336,7 +332,7 @@
 								isDefaultTrack = false;
 						}
 						thisObj.tracks.push({
-								'kind': tracks[i]['kind'],
+						  'kind': tracks[i]['kind'],
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
@@ -348,7 +344,7 @@
 					deferred.resolve();
 			 	}
 			 	else {
-						thisObj.hasCaptions = false;
+				  thisObj.hasCaptions = false;
 					thisObj.usingVimeoCaptions = false;
 					deferred.resolve();
 				}
@@ -361,7 +357,6 @@
 
     // NOTE: This function is modeled after same function in youtube.js
     // in case useful for Vimeo, but is not currently used
-
 
 		// This function is called when YouTube onApiChange event fires
 		// to indicate that the player has loaded (or unloaded) a module with exposed API methods

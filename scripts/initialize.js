@@ -563,9 +563,7 @@
 
 		this.initSignLanguage();
 
-// 	thisObj.initializing = true;
-		this.initPlayer().then(function() { // initPlayer success
-//		thisObj.initializing = false;
+		this.initPlayer().then(function() {
 
 			 thisObj.setupTracks().then(function() {
 
@@ -638,7 +636,6 @@
 
 		var thisObj = this;
 		var playerPromise;
-
 		// First run player specific initialization.
 		if (this.player === 'html5') {
 			playerPromise = this.initHtml5Player();
@@ -649,7 +646,6 @@
 		else if (this.player === 'vimeo') {
 			playerPromise = this.initVimeoPlayer();
 		}
-
 		// After player specific initialization is done, run remaining general initialization.
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
@@ -714,7 +710,6 @@
 		var captions, i;
 
 		captions = this.captions;
-
 		if (captions.length > 0) {
 			for (i=0; i<captions.length; i++) {
 				if (captions[i].def === true) {
@@ -745,6 +740,38 @@
 				}
 				// sync all other tracks to this same languge
 				this.syncTrackLanguages('init',this.captionLang);
+			}
+			if (this.usingVimeoCaptions && this.prefCaptions == 1) {
+  			// initialize Vimeo captions to the default language
+				this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
+					// track.language = the iso code for the language
+					// track.kind = 'captions' or 'subtitles'
+					// track.label = the human-readable label
+				}).catch(function(error) {
+					switch (error.name) {
+						case 'InvalidTrackLanguageError':
+							// no track was available with the specified language
+							console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+							break;
+						case 'InvalidTrackError':
+							// no track was available with the specified language and kind
+							console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+							break;
+						default:
+							// some other error occurred
+							console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+							break;
+    		  }
+				});
+			}
+			else {
+  			// disable Vimeo captions.
+  			// captions are either provided locally, or user has them turned off.
+  			this.vimeoPlayer.disableTextTrack().then(function() {
+    			// Vimeo captions disabled
+  			}).catch(function(error) {
+          console.log('Error disabling Vimeo text track: ',error);
+        });
 			}
 		}
 	};

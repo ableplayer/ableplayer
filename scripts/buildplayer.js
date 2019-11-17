@@ -457,7 +457,7 @@
 					'tabindex': '-1',
 					'lang': track.language
 				});
-				if (track.def) {
+				if (track.def && this.prefCaptions == 1) {
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
 				}

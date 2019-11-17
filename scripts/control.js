@@ -277,7 +277,7 @@
 			}
 		}
 		else if (this.player === 'vimeo') {
-			// since this takes longer to determine, it was set previous in initVimeoPlayer()
+			// since this takes longer to determine, it was set previously in initVimeoPlayer()
 			return this.vimeoSupportsPlaybackRateChange;
 		}
 	};

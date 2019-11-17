@@ -109,11 +109,13 @@
 
 	// Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
 	AblePlayer.prototype.getCaptionOffFunction = function () {
-
 		var thisObj = this;
 		return function () {
 			if (thisObj.player == 'youtube') {
 				thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
+			}
+			else if (thisObj.usingVimeoCaptions) {
+        thisObj.vimeoPlayer.disableTextTrack();
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
