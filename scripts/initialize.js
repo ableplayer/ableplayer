@@ -741,38 +741,40 @@
 				// sync all other tracks to this same languge
 				this.syncTrackLanguages('init',this.captionLang);
 			}
-			if (this.usingVimeoCaptions && this.prefCaptions == 1) {
-  			// initialize Vimeo captions to the default language
-				this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
-					// track.language = the iso code for the language
-					// track.kind = 'captions' or 'subtitles'
-					// track.label = the human-readable label
-				}).catch(function(error) {
-					switch (error.name) {
-						case 'InvalidTrackLanguageError':
-							// no track was available with the specified language
-							console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
-							break;
-						case 'InvalidTrackError':
-							// no track was available with the specified language and kind
-							console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
-							break;
-						default:
-							// some other error occurred
-							console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
-							break;
-    		  }
-				});
-			}
-			else {
-  			// disable Vimeo captions.
-  			// captions are either provided locally, or user has them turned off.
-  			this.vimeoPlayer.disableTextTrack().then(function() {
-    			// Vimeo captions disabled
-  			}).catch(function(error) {
-          console.log('Error disabling Vimeo text track: ',error);
-        });
-			}
+			if (this.usingVimeoCaptions) {
+  			if (this.prefCaptions == 1) {
+    			// initialize Vimeo captions to the default language
+          this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
+					  // track.language = the iso code for the language
+            // track.kind = 'captions' or 'subtitles'
+            // track.label = the human-readable label
+				  }).catch(function(error) {
+					  switch (error.name) {
+						  case 'InvalidTrackLanguageError':
+							  // no track was available with the specified language
+                console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+                break;
+              case 'InvalidTrackError':
+							  // no track was available with the specified language and kind
+                console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+                break;
+              default:
+							  // some other error occurred
+                console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+                break;
+    		      }
+				    });
+			  }
+        else {
+  			  // disable Vimeo captions.
+          // user has them turned off.
+          this.vimeoPlayer.disableTextTrack().then(function() {
+    			  // Vimeo captions disabled
+  			  }).catch(function(error) {
+            console.log('Error disabling Vimeo text track: ',error);
+          });
+			  }
+      }
 		}
 	};
 
