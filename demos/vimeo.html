@@ -34,25 +34,28 @@
 <body>
 
 <h1>Able Player for Vimeo Demo 1:<br/>
-  Captions and Subtitles via Vimeo
+  Captions and Subtitles hosted on Vimeo
 </h1>
 
 <p>This page features an example of Able Player being used to play a Vimeo video. The video featured is hosted in a Vimeo Pro account, required for hiding the controller and for being able to control playback rate with faster/slower buttons. Captions and subtitles in this demo are stored solely on Vimeo, therefore Able Player is unable to auto-generate an interactive transcript.</p>
 
-<p>Vimeo currently has some limitations:</p>
+<p>For additional demos see:</p>
 <ul>
-	<li>A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is cluttered and confusing (see this <a href="http://terrillthompson.com/tests/vimeo/demo2.html">Player with custom and default controls</a> demo for an example).</li>
-	<li>Vimeo does not expose caption data via its API, as noted above. Therefore, the only way to repurpose captions and/or subtitles into an interactive transcript is to host them locally (see <a href="vimeo2.html">Vimeo Demo 2</a> for an example.</li>
-	<li>A Pro or Business account is required in order to change playback rate (with faster and slower buttons). A Plus account does not currently support this feature. Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.</li>
+  <li><a href="vimeo2.html">Vimeo Demo 2: Captions via local VTT files</a></li>
+  <li>the complete <a href="index.html">Index of <em>Able Player</em> Examples</a></li>
 </ul>
-
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
 
 <div class="wrapper">
   <video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
   </video>
 </div>
+
+<h2>Vimeo's current limitations:</h2>
+<ul>
+	<li>A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is cluttered and confusing (see this <a href="http://terrillthompson.com/tests/vimeo/demo2.html">Player with custom and default controls</a> demo for an example).</li>
+	<li>Vimeo does not expose caption data via its API, as noted above. Therefore, the only way to repurpose captions and/or subtitles into an interactive transcript is to host them locally (see <a href="vimeo2.html">Vimeo Demo 2</a> for an example.</li>
+	<li>A Pro or Business account is required in order to change playback rate (with faster and slower buttons). A Plus account does not currently support this feature. Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.</li>
+</ul>
 
 </body>
 </html>
