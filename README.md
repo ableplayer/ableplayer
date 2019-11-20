@@ -748,7 +748,7 @@ at the University of Washington, with financial support from the National Scienc
 [Committee on Institutional Cooperation][] (CIC).
 - Turtle and rabbit icons (available as optional alternatives for the speed buttons) are provided courtesy of [Icons8][].
 - Sample video tracks are provided courtesy of [The DO-IT Center][] at the University of Washington. Additional videos are available on the [DO-IT Video][] website, which uses Able Player.
-- Sample audio tracks are provided courtesy of Terrill Thompson from his album [Flavors, by Flow Theory][].
+- Sample audio tracks feature songs by Terrill Thompson, Able Player's creator and lead developer. Check out [Terrill's music site] for more listening, and to support his work.
 
 
   [AccessComputing]: http://washington.edu/accesscomputing
@@ -773,6 +773,7 @@ at the University of Washington, with financial support from the National Scienc
   [Modernizr]: http://modernizr.com/
   [npm]: https://www.npmjs.com/
   [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
+  [Terrill's music site]: https://terrillthompson.com/music
   [The DO-IT Center]: http://washington.edu/doit
   [Video Demo #7]: demos/video7.html
   [WebVTT validator]: https://quuz.org/webvtt/
