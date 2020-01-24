@@ -252,11 +252,11 @@
 		switch (pref) {
 
 			case 'prefCaptionsFont':
-				options[0] = this.tt.serif;
-				options[1] = this.tt.sans;
-				options[3] = this.tt.cursive;
-				options[4] = this.tt.fantasy;
-				options[2] = this.tt.monospace;
+				options[0] = ['serif',this.tt.serif];
+				options[1] = ['sans-serif',this.tt.sans];
+				options[2] = ['cursive',this.tt.cursive];
+				options[3] = ['fantasy',this.tt.fantasy];
+				options[4] = ['monospace',this.tt.monospace];
 				break;
 
 			case 'prefCaptionsColor':

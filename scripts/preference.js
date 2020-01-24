@@ -180,7 +180,7 @@
 				'name': 'prefCaptionsFont',
 				'label': this.tt.prefCaptionsFont,
 				'group': 'captions',
-				'default': this.tt.sans
+				'default': 'sans'
 			});
 			prefs.push({
 				'name': 'prefCaptionsSize',
@@ -422,7 +422,7 @@
 								optionText = this.tt.captionsPositionBelow;
 							}
 						}
-						else if (thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
+						else if (thisPref === 'prefCaptionsFont' || thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
 							optionValue = options[j][0];
 							optionText = options[j][1];
 						}
