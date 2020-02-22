@@ -651,7 +651,16 @@
 		var promise = deferred.promise();
 		playerPromise.done(
 			function () { // done/resolved
-				if (thisObj.useFixedSeekInterval === false) {
+				if (thisObj.useFixedSeekInterval) {
+  				if (!thisObj.seekInterval) {
+            thisObj.seekInterval = thisObj.defaultSeekInterval;
+          }
+          else {
+            // fixed seekInterval was already assigned, using value of data-seek-interval attribute
+          }
+          thisObj.seekIntervalCalculated = true;
+        }
+        else {
 					thisObj.setSeekInterval();
 				}
 				deferred.resolve();
@@ -672,7 +681,6 @@
 		var thisObj, duration;
 		thisObj = this;
 		this.seekInterval = this.defaultSeekInterval;
-
 		if (this.useChapterTimes) {
 			duration = this.chapterDuration;
 		}

@@ -362,7 +362,7 @@ var AblePlayerInstances = [];
 		// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
 		// Calculation attempts to intelligently assign a reasonable interval based on media length
 		this.defaultSeekInterval = 10;
-		this.useFixedSeekInterval = false;
+		this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
 		if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
 			var seekInterval = $(media).data('seek-interval');
 			if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
@@ -1205,7 +1205,16 @@ var AblePlayerInstances = [];
 		var promise = deferred.promise();
 		playerPromise.done(
 			function () { // done/resolved
-				if (thisObj.useFixedSeekInterval === false) {
+				if (thisObj.useFixedSeekInterval) {
+  				if (!thisObj.seekInterval) {
+            thisObj.seekInterval = thisObj.defaultSeekInterval;
+          }
+          else {
+            // fixed seekInterval was already assigned, using value of data-seek-interval attribute
+          }
+          thisObj.seekIntervalCalculated = true;
+        }
+        else {
 					thisObj.setSeekInterval();
 				}
 				deferred.resolve();
@@ -1226,7 +1235,6 @@ var AblePlayerInstances = [];
 		var thisObj, duration;
 		thisObj = this;
 		this.seekInterval = this.defaultSeekInterval;
-
 		if (this.useChapterTimes) {
 			duration = this.chapterDuration;
 		}
@@ -8250,10 +8258,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.chapterElapsed = this.getChapterElapsed();
 			}
 
-			if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
-				// couldn't calculate seekInterval previously; try again.
-				this.setSeekInterval();
-			}
+      if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
+  		  // couldn't calculate seekInterval previously; try again.
+        this.setSeekInterval();
+		  }
 
 			if (this.seekBar) {
 				if (this.useChapterTimes) {

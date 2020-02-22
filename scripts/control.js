@@ -483,10 +483,10 @@
 				this.chapterElapsed = this.getChapterElapsed();
 			}
 
-			if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
-				// couldn't calculate seekInterval previously; try again.
-				this.setSeekInterval();
-			}
+      if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
+  		  // couldn't calculate seekInterval previously; try again.
+        this.setSeekInterval();
+		  }
 
 			if (this.seekBar) {
 				if (this.useChapterTimes) {

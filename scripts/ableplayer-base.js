@@ -362,7 +362,7 @@ var AblePlayerInstances = [];
 		// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
 		// Calculation attempts to intelligently assign a reasonable interval based on media length
 		this.defaultSeekInterval = 10;
-		this.useFixedSeekInterval = false;
+		this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
 		if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
 			var seekInterval = $(media).data('seek-interval');
 			if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
