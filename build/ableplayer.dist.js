@@ -7776,6 +7776,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
 	AblePlayer.prototype.seekTo = function (newTime) {
 
+    var thisObj = this;
+
 		// define variables to be used for analytics
 		// e.g., to measure the extent to which users seek back and forward
 		this.seekFromTime = this.media.currentTime;
@@ -7783,7 +7785,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		this.seeking = true;
 		this.liveUpdatePending = true;
-
 		if (this.player === 'html5') {
 			var seekable;
 
@@ -7812,8 +7813,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else if (this.player === 'vimeo') {
 			this.vimeoPlayer.setCurrentTime(newTime).then(function() {
 				// seek finished.
-				// could do something here
 				// successful completion also fires a 'seeked' event (see event.js)
+				thisObj.elapsed = newTime;
+				thisObj.refreshControls('timeline');
 			})
 		}
 		this.refreshControls('timeline');
