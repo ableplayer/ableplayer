@@ -21,7 +21,7 @@
 					}
 				}
 			}
-			else if (thisObj.startedPlaying) {
+      else {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);

@@ -8774,7 +8774,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		lastChapterIndex = this.chapters.length-1;
 		targetTime = this.elapsed + this.seekInterval;
-
 		if (this.useChapterTimes) {
 			if (this.chapters[lastChapterIndex] == this.currentChapter) {
 				// this is the last chapter
@@ -11381,7 +11380,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 				}
 			}
-			else if (thisObj.startedPlaying) {
+      else {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);

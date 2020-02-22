@@ -999,7 +999,6 @@
 
 		lastChapterIndex = this.chapters.length-1;
 		targetTime = this.elapsed + this.seekInterval;
-
 		if (this.useChapterTimes) {
 			if (this.chapters[lastChapterIndex] == this.currentChapter) {
 				// this is the last chapter
