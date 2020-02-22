@@ -994,12 +994,6 @@
       $sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 			this.$controllerDiv.append($sliderDiv);
-			if (typeof this.duration === 'undefined' || this.duration === 0) {
-			  // set arbitrary starting duration, and change it when duration is known
-				this.duration = 60;
-				// also set elapsed to 0
-				this.elapsed = 0;
-		  }
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
 
