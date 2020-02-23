@@ -470,8 +470,12 @@
 
 		thisObj = this;
 		if (this.swappingSrc) {
-			// wait until new source has loaded before refreshing controls
-			return;
+  		if (this.playing) {
+  			// wait until new source has loaded before refreshing controls
+  			// can't wait if player is NOT playing because some critical events
+  			// won't fire until playback of new media starts
+        return;
+		  }
 		}
 
 		if (context === 'timeline' || context === 'init') {
@@ -1198,6 +1202,7 @@
 	};
 
 	AblePlayer.prototype.handleDescriptionToggle = function() {
+
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
