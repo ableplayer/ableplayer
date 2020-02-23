@@ -27,11 +27,12 @@
 						var resultsItem = $('<li>',{
 						});
 						var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
-						var itemStartSpan = $('<span>',{
+						// TODO: Consider adding aria-label and/or title to the button,
+						// pending outcome of Issue "Localize search"
+						// var itemLabel = this.tt.searchButtonText + ' ' + itemStartTime['title'];
+						var itemStartSpan = $('<button>',{
 							'class': 'able-search-results-time',
-							'data-start': resultsArray[i]['start'],
-							'title': itemStartTime['title'],
-							'tabindex': '0'
+							'data-start': resultsArray[i]['start']
 						});
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
