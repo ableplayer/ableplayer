@@ -385,7 +385,6 @@
 		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
 
 		thisObj = this;
-
 		if (which === 'transcript') {
 			$window = this.$transcriptArea;
 			$windowPopup = this.$transcriptPopup;
@@ -398,6 +397,8 @@
 			$windowButton = this.$signPopupButton;
 			resizeDialog = this.signResizeDialog;
 		}
+		this.$activeWindow = $window;
+
 		if (e.type === 'keydown') {
 			if (e.which === 27) { // escape
 				// hide the popup menu
@@ -595,6 +596,7 @@
 	};
 
 	AblePlayer.prototype.resetDraggedObject = function ( x, y) {
+
 		this.$activeWindow.css({
 			'left': x + 'px',
 			'top': y + 'px'
@@ -635,6 +637,7 @@
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
+		this.$activeWindow = null;
 
 		if (this.dragDevice === 'keyboard') {
 			$windowButton.focus();
