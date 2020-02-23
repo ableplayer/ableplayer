@@ -11,7 +11,6 @@
 		// ALSO: Add localization support
 
 		var thisObj = this;
-
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
 				var resultsArray = this.searchFor(this.searchString);
@@ -36,7 +35,8 @@
 						});
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
-						itemStartSpan.click(function(e) {
+						itemStartSpan.on('click',function(e) {
+              thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;

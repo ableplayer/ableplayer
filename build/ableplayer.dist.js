@@ -11197,7 +11197,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// ALSO: Add localization support
 
 		var thisObj = this;
-
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
 				var resultsArray = this.searchFor(this.searchString);
@@ -11222,7 +11221,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						});
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
-						itemStartSpan.click(function(e) {
+						itemStartSpan.on('click',function(e) {
+              thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;
@@ -11791,12 +11791,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			.on('canplaythrough',function() {
 				if (thisObj.userClickedPlaylist) {
 					if (!thisObj.startedPlaying) {
-							// start playing; no further user action is required
+						// start playing; no further user action is required
 						thisObj.playMedia();
 				 	}
 					thisObj.userClickedPlaylist = false; // reset
 				}
-				if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
+				if (thisObj.seekTrigger == 'restart' ||
+				    thisObj.seekTrigger == 'chapter' ||
+				    thisObj.seekTrigger == 'transcript' ||
+				    thisObj.seekTrigger == 'search'
+            ) {
 					// by clicking on any of these elements, user is likely intending to play
 					// Not included: elements where user might click multiple times in succession
 					// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
