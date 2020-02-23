@@ -11219,14 +11219,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					$resultsSummary.html(resultsSummaryText);
 					var $resultsList = $('<ul>');
 					for (var i = 0; i < resultsArray.length; i++) {
+  					var resultId = 'aria-search-result-' + i;
 						var $resultsItem = $('<li>',{});
 						var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
 						var itemLabel = this.tt.searchButtonLabel + ' ' + itemStartTime['title'];
 						var itemStartSpan = $('<button>',{
 							'class': 'able-search-results-time',
 							'data-start': resultsArray[i]['start'],
+							'title': itemLabel,
 							'aria-label': itemLabel,
-							'title': itemLabel
+							'aria-describedby': resultId
 						});
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
@@ -11240,7 +11242,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						});
 
 						var itemText = $('<span>',{
-							'class': 'able-search-result-text'
+							'class': 'able-search-result-text',
+							'id': resultId
 						})
 						itemText.html('...' + resultsArray[i]['caption'] + '...');
 						$resultsItem.append(itemStartSpan, itemText);
