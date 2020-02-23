@@ -11704,12 +11704,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.closePopups();
 			}
 			else if (which === 32) { // spacebar = play/pause
-				if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
-					// only toggle play if a button does not have focus
-					// if a button has focus, space should activate that button
-          this.clickedPlay = true; // important to set this var for program control
-					this.handlePlay();
-				}
+  			// disable spacebar support for play/pause toggle as of 4.2.10
+  			// spacebar should not be handled everywhere on the page, since users use that to scroll the page
+  			// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
 			}
 			else if (which === 112) { // p = play/pause
 				if (this.usingModifierKeys(e)) {
