@@ -306,6 +306,30 @@ var es = {
 
 "windowBringTop": "Traer al frente",
 
-"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página."
+"windowBringTopAlert": "Esta ventan está ahora en el frente de otros objetos en la página.",
+
+"resultsSummary1": "You searched for:",
+
+"resultsSummary2": "Found",
+
+"resultsSummary3": "matching items.",
+
+"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+
+"noResultsFound": "No results found.",
+
+"searchButtonLabel": "Play at",
+
+"hour": "hour",
+
+"minute": "minute",
+
+"second": "second",
+
+"hours": "hours",
+
+"minutes": "minutes",
+
+"seconds": "seconds"
 
 };

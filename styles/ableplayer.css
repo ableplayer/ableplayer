@@ -193,9 +193,11 @@
 .able-controller button:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
-.able-controller button::-moz-focus-inner {
+.able-controller button::-moz-focus-inner,
+.able-search-results button::-moz-focus-inner {
   border: 0;
 }
+
 
 /*
   Seekbar
@@ -1044,21 +1046,24 @@ ul.able-popup {
   Search
 */
 
+#able-search-term-echo {
+  font-weight: bold;
+  font-style: italic;
+}
 .able-search-results ul li {
   font-size: 1.1em;
   margin-bottom: 1em;
 }
-.able-search-results-time {
+button.able-search-results-time {
+  font-size: 1em;
   font-weight: bold;
-  text-decoration: underline;
   cursor: pointer;
 }
-.able-search-results-time:hover,
-.able-search-results-time:focus,
-.able-search-results-time:active {
+button.able-search-results-time:hover,
+button.able-search-results-time:focus,
+button.able-search-results-time:active {
   color: #FFF;
   background-color: #000;
-  text-decoration: none;
 }
 .able-search-results-text {
   padding-left: 1em;
@@ -1067,6 +1072,11 @@ ul.able-popup {
 	background-color: #FFC;
 	font-weight: bold;
 }
+  #search-term {
+    font-weight: bold;
+    font-style: italic;
+  }
+
 
 /*
   Video Transcript Sorter (VTS)

@@ -304,6 +304,30 @@ var it = {
 
 "windowBringTop": "Metti in primo piano",
 
-"windowBringTopAlert": "Questa finestra e' ora davanti agli altri oggetti nella pagina."
+"windowBringTopAlert": "Questa finestra e' ora davanti agli altri oggetti nella pagina.",
+
+"resultsSummary1": "You searched for:",
+
+"resultsSummary2": "Found",
+
+"resultsSummary3": "matching items.",
+
+"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+
+"noResultsFound": "No results found.",
+
+"searchButtonLabel": "Play at",
+
+"hour": "hour",
+
+"minute": "minute",
+
+"second": "second",
+
+"hours": "hours",
+
+"minutes": "minutes",
+
+"seconds": "seconds"
 
 };
