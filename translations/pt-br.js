@@ -330,6 +330,8 @@ var ptbr = {
 
 "minutes": "minutes",
 
-"seconds": "seconds"
+"seconds": "seconds",
+
+"enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
 };

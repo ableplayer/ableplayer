@@ -330,6 +330,8 @@ var fr = {
 
 "minutes": "minutes",
 
-"seconds": "seconds"
+"seconds": "seconds",
+
+"enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
 };
