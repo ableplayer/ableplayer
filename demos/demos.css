@@ -22,6 +22,9 @@ h1 {
   line-height: 1.2em;
   margin-top: 0.75em;
 }
+p {
+  max-width: 60em;
+}
 p.goback {
   clear: left;
   margin: 3em 0 1em;
