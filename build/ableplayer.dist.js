@@ -2248,16 +2248,16 @@ var AblePlayerInstances = [];
 
 		// tabbable transcript
 		if (this.prefTabbable === 1) {
-			$('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
 		}
 		else {
-			$('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').removeAttr('tabindex');
 		}
 
 		// transcript highlights
 		if (this.prefHighlight === 0) {
 			// user doesn't want highlights; remove any existing highlights
-			$('.able-transcript span').removeClass('able-highlight');
+			this.$transcriptDiv.find('span').removeClass('able-highlight');
 		}
 
 		// Re-initialize caption and description in case relevant settings have changed
@@ -8531,19 +8531,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 				// If transcript locked, scroll transcript to current highlight location.
 				if (this.autoScrollTranscript && this.currentHighlight) {
-					newTop = Math.floor($('.able-transcript').scrollTop() +
+					newTop = Math.floor(this.$transcriptDiv.scrollTop() +
 						$(this.currentHighlight).position().top -
-						($('.able-transcript').height() / 2) +
+						(this.$transcriptDiv.height() / 2) +
 						($(this.currentHighlight).height() / 2));
-					if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
+					if (newTop !== Math.floor(this.$transcriptDiv.scrollTop())) {
 						// Set a flag to ignore the coming scroll event.
 						// there's no other way I know of to differentiate programmatic and user-initiated scroll events.
 						this.scrollingTranscript = true;
 						// only scroll once after moving a highlight
 						if (this.movingHighlight) {
-  						$('.able-transcript').scrollTop(newTop);
-              this.movingHighlight = false;
-            }
+							this.$transcriptDiv.scrollTop(newTop);
+			                this.movingHighlight = false;
+			            }
 					}
 				}
 			}
@@ -10767,7 +10767,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Make transcript tabbable if preference is turned on.
 		if (this.prefTabbable === 1) {
-			$('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
 		}
 
 		// handle clicks on text within transcript
