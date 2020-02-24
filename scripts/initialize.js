@@ -581,7 +581,9 @@
               if (typeof thisObj.volume === 'undefined') {
   						  thisObj.volume = thisObj.defaultVolume;
 						  }
-              thisObj.setVolume(thisObj.volume);
+						  if (thisObj.volume) {
+                thisObj.setVolume(thisObj.volume);
+              }
 
               if (thisObj.transcriptType) {
 							  thisObj.addTranscriptAreaEvents();
