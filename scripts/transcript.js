@@ -322,7 +322,7 @@
         return false;
 			}
 		});
-		thisObj.currentHighlight = $('.able-highlight');
+		thisObj.currentHighlight = thisObj.$transcriptArea.find('.able-highlight');
 		if (thisObj.currentHighlight.length === 0) {
 			// Nothing highlighted.
 			thisObj.currentHighlight = null;
