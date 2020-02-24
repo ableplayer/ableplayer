@@ -464,6 +464,16 @@ var AblePlayerInstances = [];
 			this.hideControlsOriginal = false;
 		}
 
+		// Steno mode
+		// Enable support for Able Player keyboard shortcuts in textaarea fields
+		// so users can control the player while transcribing
+		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
+			this.stenoMode = true;
+		}
+		else {
+			this.stenoMode = false;
+		}
+
 		// Define built-in variables that CANNOT be overridden with HTML attributes
 		this.setDefaults();
 

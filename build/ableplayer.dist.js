@@ -464,6 +464,16 @@ var AblePlayerInstances = [];
 			this.hideControlsOriginal = false;
 		}
 
+		// Steno mode
+		// Enable support for Able Player keyboard shortcuts in textaarea fields
+		// so users can control the player while transcribing
+		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
+			this.stenoMode = true;
+		}
+		else {
+			this.stenoMode = false;
+		}
+
 		// Define built-in variables that CANNOT be overridden with HTML attributes
 		this.setDefaults();
 
@@ -11702,17 +11712,17 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			which += 32;
 		}
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
+		// (or a textarea element with player in stenoMode)
 		if (!(
 			$(':focus').is('[contenteditable]') ||
 			$(':focus').is('input') ||
-			$(':focus').is('textarea') ||
+			($(':focus').is('textarea') && !this.stenoMode) ||
 			$(':focus').is('select') ||
 			e.target.hasAttribute('contenteditable') ||
 			e.target.tagName === 'INPUT' ||
-			e.target.tagName === 'TEXTAREA' ||
+			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
 			e.target.tagName === 'SELECT'
 		)){
-
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -11723,61 +11733,73 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			else if (which === 112) { // p = play/pause
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handlePlay();
 				}
 			}
 			else if (which === 115) { // s = stop (now restart)
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleRestart();
 				}
 			}
 			else if (which === 109) { // m = mute
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleMute();
 				}
 			}
 			else if (which === 118) { // v = volume
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleVolume();
 				}
 			}
 			else if (which >= 49 && which <= 57) { // set volume 1-9
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleVolume(which);
 				}
 			}
 			else if (which === 99) { // c = caption toggle
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleCaptionToggle();
 				}
 			}
 			else if (which === 100) { // d = description
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleDescriptionToggle();
 				}
 			}
 			else if (which === 102) { // f = forward
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleFastForward();
 				}
 			}
 			else if (which === 114) { // r = rewind
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleRewind();
 				}
 			}
 			else if (which === 98) { // b = back (previous track)
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handlePrevTrack();
 				}
 			}
 			else if (which === 110) { // n = next track
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleNextTrack();
 				}
 			}
 			else if (which === 101) { // e = preferences
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handlePrefsClick();
 				}
 			}
