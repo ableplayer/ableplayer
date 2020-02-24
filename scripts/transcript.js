@@ -258,7 +258,7 @@
 
 		// Make transcript tabbable if preference is turned on.
 		if (this.prefTabbable === 1) {
-			$('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
 		}
 
 		// handle clicks on text within transcript
