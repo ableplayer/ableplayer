@@ -299,6 +299,7 @@
 		if (this.hasSignLanguage && this.signVideo) {
 			this.signVideo.playbackRate = rate;
 		}
+		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
 	};
 

@@ -8074,6 +8074,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.hasSignLanguage && this.signVideo) {
 			this.signVideo.playbackRate = rate;
 		}
+		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
 	};
 
@@ -11586,11 +11587,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.handleRestart();
 		}
 		else if (whichButton === 'previous') {
+  		this.userClickedPlaylist = true;
 			this.seekTrigger = 'previous';
 			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
+  		this.userClickedPlaylist = true;
 			this.seekTrigger = 'next';
 			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
@@ -11813,6 +11816,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// so we know player can seek ahead to anything
 			})
 			.on('canplaythrough',function() {
+  		  if (thisObj.playbackRate) {
+          // user has set playbackRate on a previous src or track
+          // use that setting on the new src or track too
+          thisObj.setPlaybackRate(thisObj.playbackRate);
+  		  }
 				if (thisObj.userClickedPlaylist) {
 					if (!thisObj.startedPlaying) {
 						// start playing; no further user action is required
