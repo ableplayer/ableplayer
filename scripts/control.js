@@ -744,19 +744,19 @@
 
 				// If transcript locked, scroll transcript to current highlight location.
 				if (this.autoScrollTranscript && this.currentHighlight) {
-					newTop = Math.floor($('.able-transcript').scrollTop() +
+					newTop = Math.floor(this.$transcriptDiv.scrollTop() +
 						$(this.currentHighlight).position().top -
-						($('.able-transcript').height() / 2) +
+						(this.$transcriptDiv.height() / 2) +
 						($(this.currentHighlight).height() / 2));
-					if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
+					if (newTop !== Math.floor(this.$transcriptDiv.scrollTop())) {
 						// Set a flag to ignore the coming scroll event.
 						// there's no other way I know of to differentiate programmatic and user-initiated scroll events.
 						this.scrollingTranscript = true;
 						// only scroll once after moving a highlight
 						if (this.movingHighlight) {
-  						$('.able-transcript').scrollTop(newTop);
-              this.movingHighlight = false;
-            }
+							this.$transcriptDiv.scrollTop(newTop);
+			                this.movingHighlight = false;
+			            }
 					}
 				}
 			}
