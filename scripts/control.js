@@ -568,12 +568,12 @@
           leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
           rightControls = leftControls.next('div.able-right-controls');
           leftControls.children().each(function () {
-					  if ($(this).prop('tagName')=='BUTTON') {
+					  if ($(this).attr('role')=='button') {
 						  widthUsed += $(this).outerWidth(true); // true = include margin
 					  }
 				  });
           rightControls.children().each(function () {
-					  if ($(this).prop('tagName')=='BUTTON') {
+					  if ($(this).attr('role')=='button') {
 						  widthUsed += $(this).outerWidth(true);
 					  }
 				  });
@@ -1257,12 +1257,20 @@
 	};
 
 	AblePlayer.prototype.handleTranscriptToggle = function () {
+
+  	var thisObj = this;
+
 		if (this.$transcriptDiv.is(':visible')) {
 			this.$transcriptArea.hide();
 			this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
 			this.prefTranscript = 0;
 			this.$transcriptButton.focus().addClass('able-focus');
+      // wait a second before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      setTimeout(function() {
+        thisObj.closingTranscript = false;
+      }, 1000);
 		}
 		else {
 			this.positionDraggableWindow('transcript');
@@ -1275,12 +1283,20 @@
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
+
+  	var thisObj = this;
+
 		if (this.$signWindow.is(':visible')) {
 			this.$signWindow.hide();
 			this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.showSign);
 			this.prefSign = 0;
 			this.$signButton.focus().addClass('able-focus');
+      // wait a second before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      setTimeout(function() {
+        thisObj.closingSign = false;
+      }, 1000);
 		}
 		else {
 			this.positionDraggableWindow('sign');

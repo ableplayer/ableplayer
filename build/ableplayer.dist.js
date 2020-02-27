@@ -630,7 +630,6 @@ var AblePlayerInstances = [];
 			}
 			$('body').append($el);
 			bgColor = $el.css('background-color');
-
 			// bgColor is a string in the form 'rgb(R, G, B)', perhaps with a 4th item for alpha;
 			// split the 3 or 4 channels into an array
 			rgb = bgColor.replace(/[^\d,]/g, '').split(',');
@@ -645,7 +644,6 @@ var AblePlayerInstances = [];
 			else { // background is light
 				iconColor = 'black';
 			}
-
 			if ($elements[i] === 'controller') {
 				this.iconColor = iconColor;
 			}
@@ -4136,12 +4134,17 @@ var AblePlayerInstances = [];
 					// And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
-					$newButton = $('<button>',{
-						'type': 'button',
+
+          // NOTE: Changed from <button> to <div role="button" as of 4.2.18
+          // because <button> elements are rendered poorly in high contrast mode
+          // in some OS/browser/plugin combinations
+					$newButton = $('<div>',{
+						'role': 'button',
 						'tabindex': '0',
 						'aria-label': buttonTitle,
 						'class': 'able-button-handler-' + control
 					});
+
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
   						this.prefCats = this.getPreferencesGroups();
@@ -8357,12 +8360,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
           leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
           rightControls = leftControls.next('div.able-right-controls');
           leftControls.children().each(function () {
-					  if ($(this).prop('tagName')=='BUTTON') {
+					  if ($(this).attr('role')=='button') {
 						  widthUsed += $(this).outerWidth(true); // true = include margin
 					  }
 				  });
           rightControls.children().each(function () {
-					  if ($(this).prop('tagName')=='BUTTON') {
+					  if ($(this).attr('role')=='button') {
 						  widthUsed += $(this).outerWidth(true);
 					  }
 				  });
@@ -9046,12 +9049,20 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.handleTranscriptToggle = function () {
+
+  	var thisObj = this;
+
 		if (this.$transcriptDiv.is(':visible')) {
 			this.$transcriptArea.hide();
 			this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
 			this.prefTranscript = 0;
 			this.$transcriptButton.focus().addClass('able-focus');
+      // wait a second before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      setTimeout(function() {
+        thisObj.closingTranscript = false;
+      }, 1000);
 		}
 		else {
 			this.positionDraggableWindow('transcript');
@@ -9064,12 +9075,20 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
+
+  	var thisObj = this;
+
 		if (this.$signWindow.is(':visible')) {
 			this.$signWindow.hide();
 			this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.showSign);
 			this.prefSign = 0;
 			this.$signButton.focus().addClass('able-focus');
+      // wait a second before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      setTimeout(function() {
+        thisObj.closingSign = false;
+      }, 1000);
 		}
 		else {
 			this.positionDraggableWindow('sign');
@@ -11642,7 +11661,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.handleDescriptionToggle();
 		}
 		else if (whichButton === 'sign') {
-			this.handleSignToggle();
+  		if (!this.closingSign) {
+  			this.handleSignToggle();
+  		}
 		}
 		else if (whichButton === 'preferences') {
       if ($(el).attr('data-prefs-popup') === 'menu') {
@@ -11669,7 +11690,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.handleHelpClick();
 		}
 		else if (whichButton === 'transcript') {
-			this.handleTranscriptToggle();
+      if (!this.closingTranscript) {
+  			this.handleTranscriptToggle();
+  		}
 		}
 		else if (whichButton === 'fullscreen') {
 			this.clickedFullscreenButton = true;
@@ -11705,11 +11728,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// including removal of the "media player" design pattern. There's an issue about that:
 		// https://github.com/w3c/aria-practices/issues/27
 
+		var which, $thisElement;
+
 		if (!this.okToHandleKeyPress()) {
 			return false;
 		}
 		// Convert to lower case.
-		var which = e.which;
+		which = e.which;
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
@@ -11725,6 +11750,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
 			e.target.tagName === 'SELECT'
 		)){
+		  $thisElement = $(document.activeElement);
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -11732,6 +11758,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   			// disable spacebar support for play/pause toggle as of 4.2.10
   			// spacebar should not be handled everywhere on the page, since users use that to scroll the page
   			// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
+				if ($thisElement.attr('role') === 'button') {
+					// register a click on this element
+					e.preventDefault();
+					$thisElement.click();
+				}
 			}
 			else if (which === 112) { // p = play/pause
 				if (this.usingModifierKeys(e)) {
@@ -11806,14 +11837,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 			else if (which === 13) { // Enter
-				var thisElement = $(document.activeElement);
-				if (thisElement.prop('tagName') === 'SPAN') {
-					// register a click on this SPAN
+				if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+					// register a click on this element
 					// if it's a transcript span the transcript span click handler will take over
-					thisElement.click();
+					$thisElement.click();
 				}
-				else if (thisElement.prop('tagName') === 'LI') {
-					thisElement.click();
+				else if ($thisElement.prop('tagName') === 'LI') {
+					$thisElement.click();
 				}
 			}
 		}
@@ -12213,7 +12243,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 
 		// handle clicks on player buttons
-		this.$controllerDiv.find('button').on('click',function(e){
+		this.$controllerDiv.find('div[role="button"]').on('click',function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});
@@ -12769,7 +12799,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (choice !== 'close') {
 			$windowButton.focus();
 		}
-
 		if (choice === 'move') {
 			if (!this.showedAlert(which)) {
 				this.showAlert(this.tt.windowMoveAlert,which);
@@ -12796,9 +12825,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else if (choice == 'close') {
 			// close window, place focus on corresponding button on controller bar
 			if (which === 'transcript') {
+        this.closingTranscript = true; // stopgrap to prevent double-firing of keypress
 				this.handleTranscriptToggle();
 			}
 			else if (which === 'sign') {
+        this.closingSign = true; // stopgrap to prevent double-firing of keypress
 				this.handleSignToggle();
 			}
 		}

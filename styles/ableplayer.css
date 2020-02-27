@@ -23,9 +23,9 @@
   * Player controls: (5000 - 6000)
   .able-controller .able-seekbar = 6900
   .able-controller .buttonOff = 6800
-  .able-controller button > img = 6700
-  .able-controller button > span = 6700
-	.able-controller button = 6600
+  .able-controller div[role="button"] > img = 6700
+  .able-controller div[role="button"] > span = 6700
+	.able-controller div[role="button"] = 6600
 	.able-big-play-button = 6500
 	div.able-captions-wrapper = 6000
   .able-seekbar-head = 5500
@@ -126,7 +126,7 @@
 .able-left-controls, .able-right-controls {
     overflow: visible;
 }
-.able-left-controls button, .able-right-controls button {
+.able-left-controls div[role="button"], .able-right-controls div[role="button"] {
     vertical-align: middle;
 }
 .able-left-controls {
@@ -136,7 +136,7 @@
   float: right;
 }
 .able-black-controls,
-.able-black-controls button,
+.able-black-controls div[role="button"],
 .able-black-controls label  {
   color: #000 !important;
 }
@@ -144,14 +144,14 @@
   border: 1px solid #000;
 }
 .able-white-controls,
-.able-white-controls button,
+.able-white-controls div[role="button"],
 .able-black-controls label {
   color: #FFF !important;
 }
 .able-white-controls .able-seekbar {
   border: 1px solid #FFF;
 }
-.able-controller button {
+.able-controller div[role="button"] {
   background: none;
   position: relative;
   display: inline-block;
@@ -160,13 +160,13 @@
   padding: 0;
   font-size: 20px;
   min-width: 24px;
-  outline: 2px solid #464646; /* same color as .able-controller background-color */
+/*  outline: 2px solid #464646; */ /* same color as .able-controller background-color */
   border: none;
   overflow: visible !important;
   z-index: 6600;
 }
-.able-controller button > span,
-.able-controller button > img {
+.able-controller div[role="button"] > span,
+.able-controller div[role="button"] > img {
   width: 20px;
   margin: 0 auto;
   padding: 0;
@@ -181,15 +181,15 @@
   margin: 0 5px;
   z-index: 6900;
 }
-.able-controller button:hover,
-.able-controller button:focus {
+.able-controller div[role="button"]:hover,
+.able-controller div[role="button"]:focus {
   outline-style: solid;
   outline-width: medium;
 }
-.able-controller button:hover {
+.able-controller div[role="button"]:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-controller button:focus {
+.able-controller div[role="button"]:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
 .able-controller button::-moz-focus-inner,
@@ -960,8 +960,8 @@ ul.able-popup {
 .able-window-toolbar select:hover,
 .able-controller input:focus,
 .able-controller input:hover,
-.able-controller button:focus,
-.able-controller button:hover,
+.able-controller div[role="button"]:focus,
+.able-controller div[role="button"]:hover,
 .able-seekbar-head:focus,
 .able-seekbar-head:hover {
   outline-style: solid;
@@ -970,14 +970,14 @@ ul.able-popup {
 .able-window-toolbar input:focus,
 .able-window-toolbar select:focus,
 .able-controller input:focus,
-.able-controller button:focus,
+.able-controller  div[role="button"]:focus,
 .able-seekbar-head:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 .able-window-toolbar input:hover,
 .able-window-toolbar select:hover,
 .able-controller input:hover,
-.able-controller button:hover,
+.able-controller  div[role="button"]:hover,
 .able-seekbar-head:hover {
 	outline-color: #8AB839; /* green */
 }
@@ -1237,7 +1237,7 @@ button#able-vts-save:focus {
 /*
   SVG Icons
 */
-button svg {
+div[role="button"] svg {
 	display: inline-block;
 	width: 1em;
 	height: 1em;

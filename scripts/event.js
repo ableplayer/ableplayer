@@ -239,7 +239,9 @@
 			this.handleDescriptionToggle();
 		}
 		else if (whichButton === 'sign') {
-			this.handleSignToggle();
+  		if (!this.closingSign) {
+  			this.handleSignToggle();
+  		}
 		}
 		else if (whichButton === 'preferences') {
       if ($(el).attr('data-prefs-popup') === 'menu') {
@@ -266,7 +268,9 @@
 			this.handleHelpClick();
 		}
 		else if (whichButton === 'transcript') {
-			this.handleTranscriptToggle();
+      if (!this.closingTranscript) {
+  			this.handleTranscriptToggle();
+  		}
 		}
 		else if (whichButton === 'fullscreen') {
 			this.clickedFullscreenButton = true;
@@ -302,11 +306,13 @@
 		// including removal of the "media player" design pattern. There's an issue about that:
 		// https://github.com/w3c/aria-practices/issues/27
 
+		var which, $thisElement;
+
 		if (!this.okToHandleKeyPress()) {
 			return false;
 		}
 		// Convert to lower case.
-		var which = e.which;
+		which = e.which;
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
@@ -322,6 +328,7 @@
 			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
 			e.target.tagName === 'SELECT'
 		)){
+		  $thisElement = $(document.activeElement);
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -329,6 +336,11 @@
   			// disable spacebar support for play/pause toggle as of 4.2.10
   			// spacebar should not be handled everywhere on the page, since users use that to scroll the page
   			// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
+				if ($thisElement.attr('role') === 'button') {
+					// register a click on this element
+					e.preventDefault();
+					$thisElement.click();
+				}
 			}
 			else if (which === 112) { // p = play/pause
 				if (this.usingModifierKeys(e)) {
@@ -403,14 +415,13 @@
 				}
 			}
 			else if (which === 13) { // Enter
-				var thisElement = $(document.activeElement);
-				if (thisElement.prop('tagName') === 'SPAN') {
-					// register a click on this SPAN
+				if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+					// register a click on this element
 					// if it's a transcript span the transcript span click handler will take over
-					thisElement.click();
+					$thisElement.click();
 				}
-				else if (thisElement.prop('tagName') === 'LI') {
-					thisElement.click();
+				else if ($thisElement.prop('tagName') === 'LI') {
+					$thisElement.click();
 				}
 			}
 		}
@@ -810,7 +821,7 @@
 		}
 
 		// handle clicks on player buttons
-		this.$controllerDiv.find('button').on('click',function(e){
+		this.$controllerDiv.find('div[role="button"]').on('click',function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});
