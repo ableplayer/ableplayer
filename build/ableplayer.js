@@ -6631,10 +6631,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
+  				thisObj.closingVolume = true; // stopgap
 					thisObj.hideVolumePopup();
 				}
 				else {
-					thisObj.showVolumePopup();
+  				if (!thisObj.closingVolume) {
+  					thisObj.showVolumePopup();
+  				}
 				}
 			}
 			else {
@@ -6764,7 +6767,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.hideVolumePopup();
 			}
 			else {
-				this.showVolumePopup();
+        if (!this.closingVolume) {
+  				this.showVolumePopup();
+        }
 			}
 			return;
 		}
@@ -6818,9 +6823,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.hideVolumePopup = function() {
 
+    var thisObj = this;
+
 		this.$volumeSlider.hide().attr('aria-hidden','true');
 		this.$volumeSliderHead.attr('tabindex','-1');
 		this.$volumeButton.attr('aria-expanded','false').focus();
+    // wait a second before resetting stopgap var
+    // otherwise the keypress used to close volume popup will trigger the volume button
+    setTimeout(function() {
+      thisObj.closingVolume = false;
+    }, 1000);
 	};
 
 	AblePlayer.prototype.isMuted = function () {
