@@ -1250,14 +1250,13 @@
 						var position = $(this).position();
 						var buttonHeight = $(this).height();
 						var buttonWidth = $(this).width();
-
 						// position() is expressed using top and left (of button);
 						// add right (of button) too, for convenience
 						var controllerWidth = thisObj.$controllerDiv.width();
 						position.right = controllerWidth - position.left - buttonWidth;
-
 						var tooltipY = position.top - buttonHeight - 15;
-						if ($(this).closest('div').hasClass('able-right-controls')) {
+
+						if ($(this).parent().hasClass('able-right-controls')) {
 							// this control is on the right side
               var buttonSide = 'right';
 						}
