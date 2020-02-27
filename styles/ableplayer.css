@@ -142,7 +142,7 @@
   color: #000 !important;
 }
 .able-black-controls .able-seekbar {
-  border: 2px solid #000;
+  border: 1px solid #000;
 }
 .able-white-controls,
 .able-white-controls button,
@@ -150,7 +150,7 @@
   color: #FFF !important;
 }
 .able-white-controls .able-seekbar {
-  border: 2px solid #FFF;
+  border: 1px solid #FFF;
 }
 .able-controller button {
   background: none;
@@ -265,15 +265,19 @@
   display: block;
   position: relative;
   height: 100%; /* = 50px after padding */
-  width: 5px;
+  width: 7px;
   margin: 0 auto;
-  background-color: #999;
+  background-color: #000;
 }
 .able-volume-track.able-volume-track-on {
   background-color: #dadada;
   position: absolute;
   height: 20px; /* change dynamically; 5px per volume tick */
   top: 30px;  /* change dynamically; 50px - height */
+}
+.able-volume-slider > .able-volume-track {
+  /* add border only to the outer track */
+  border: 1px solid #FFF;
 }
 .able-volume-head {
   display: inline-block;

@@ -630,6 +630,7 @@ var AblePlayerInstances = [];
 			}
 			$('body').append($el);
 			bgColor = $el.css('background-color');
+console.log('bgColor is ' + bgColor);
 			// bgColor is a string in the form 'rgb(R, G, B)', perhaps with a 4th item for alpha;
 			// split the 3 or 4 channels into an array
 			rgb = bgColor.replace(/[^\d,]/g, '').split(',');
@@ -644,6 +645,7 @@ var AblePlayerInstances = [];
 			else { // background is light
 				iconColor = 'black';
 			}
+console.log('iconColor: ' + iconColor);
 			if ($elements[i] === 'controller') {
 				this.iconColor = iconColor;
 			}
