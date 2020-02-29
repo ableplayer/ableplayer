@@ -9099,6 +9099,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
+			// move focus to first focusable element (window options button)
+      this.focusNotClick = true;
+			this.$transcriptArea.find('button').first().focus();
+      // wait half a second before resetting stopgap var
+      setTimeout(function() {
+        thisObj.focusNotClick = false;
+      }, 500);
 		}
 		this.updateCookie('prefTranscript');
 	};
@@ -9125,6 +9132,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
 			this.prefSign = 1;
+      this.focusNotClick = true;
+			this.$signWindow.find('button').first().focus();
+      // wait half a second before resetting stopgap var
+      setTimeout(function() {
+        thisObj.focusNotClick = false;
+      }, 500);
 		}
 		this.updateCookie('prefSign');
 	};
@@ -10599,7 +10612,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 		this.$transcriptArea = $('<div>', {
 			'class': 'able-transcript-area',
-			'tabindex': '-1'
+			'tabindex': '-1',
+  		'role': 'dialog',
+      'aria-label': this.tt.transcriptTitle
 		});
 
 		this.$transcriptToolbar = $('<div>', {
@@ -10620,7 +10635,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		$autoScrollLabel = $('<label>', {
 			 'for': 'autoscroll-transcript-checkbox'
 			}).text(this.tt.autoScroll);
-		this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
+    this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
 
 		// Add field for selecting a transcript language
 		// Only necessary if there is more than one language
@@ -12493,7 +12508,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
-
 		var thisObj, $windowAlert, menuId, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
 			$buttonLabel, tooltipId, $tooltip, $popup,
 			label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
@@ -12587,7 +12601,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$transcriptAlert = $windowAlert;
 			this.$transcriptPopupButton = $newButton;
 			this.$transcriptPopup = $popup;
-			this.$transcriptToolbar.append($windowAlert,$newButton,$tooltip,$popup);
+			this.$transcriptToolbar.prepend($windowAlert,$newButton,$tooltip,$popup);
 		}
 		else if (which === 'sign') {
 			this.$signAlert = $windowAlert;
@@ -12721,6 +12735,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
 
 		thisObj = this;
+
+		if (this.focusNotClick) {
+  		// transcript or sign window has just opened,
+  		// and focus moved to the window button
+  		// ignore the keystroke that triggered the popup
+  		return false;
+		}
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -13234,7 +13255,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		this.$signWindow = $('<div>',{
 			'class' : 'able-sign-window',
-			'tabindex': '-1'
+			'tabindex': '-1',
+  		'role': 'dialog',
+      'aria-label': this.tt.sign
 		});
 		this.$signToolbar = $('<div>',{
 			'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'

@@ -1286,6 +1286,13 @@
 			this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
+			// move focus to first focusable element (window options button)
+      this.focusNotClick = true;
+			this.$transcriptArea.find('button').first().focus();
+      // wait half a second before resetting stopgap var
+      setTimeout(function() {
+        thisObj.focusNotClick = false;
+      }, 500);
 		}
 		this.updateCookie('prefTranscript');
 	};
@@ -1312,6 +1319,12 @@
 			this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
 			this.prefSign = 1;
+      this.focusNotClick = true;
+			this.$signWindow.find('button').first().focus();
+      // wait half a second before resetting stopgap var
+      setTimeout(function() {
+        thisObj.focusNotClick = false;
+      }, 500);
 		}
 		this.updateCookie('prefSign');
 	};

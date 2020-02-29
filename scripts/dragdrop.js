@@ -94,7 +94,6 @@
 
 	AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
-
 		var thisObj, $windowAlert, menuId, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
 			$buttonLabel, tooltipId, $tooltip, $popup,
 			label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
@@ -188,7 +187,7 @@
 			this.$transcriptAlert = $windowAlert;
 			this.$transcriptPopupButton = $newButton;
 			this.$transcriptPopup = $popup;
-			this.$transcriptToolbar.append($windowAlert,$newButton,$tooltip,$popup);
+			this.$transcriptToolbar.prepend($windowAlert,$newButton,$tooltip,$popup);
 		}
 		else if (which === 'sign') {
 			this.$signAlert = $windowAlert;
@@ -322,6 +321,13 @@
 		var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
 
 		thisObj = this;
+
+		if (this.focusNotClick) {
+  		// transcript or sign window has just opened,
+  		// and focus moved to the window button
+  		// ignore the keystroke that triggered the popup
+  		return false;
+		}
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
