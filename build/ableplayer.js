@@ -3652,6 +3652,8 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.closePopups = function () {
 
+    var thisObj = this;
+
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.$chaptersButton.removeAttr('aria-expanded').focus();
@@ -3660,11 +3662,16 @@ var AblePlayerInstances = [];
 			this.captionsPopup.hide();
 			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
-		if (this.prefsPopup && this.prefsPopup.is(':visible')) {
+		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
+      this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$prefsButton.removeAttr('aria-expanded').focus();
+			// wait half a second, then reset hidingPopup
+			setTimeout(function() {
+  			thisObj.hidingPopup = false;
+  		},500);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
@@ -9024,7 +9031,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
 
-		var prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+
+		thisObj = this;
 
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
@@ -9034,10 +9043,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.hidingPopup = false;
 			this.$prefsButton.removeAttr('aria-expanded').focus();
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			// wait half a second, then reset hidingPopup
+			setTimeout(function() {
+  			thisObj.hidingPopup = false;
+  		},500);
 		}
 		else {
 			this.closePopups();
@@ -9051,6 +9063,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
 			this.prefsPopup.find('li').first().focus().addClass('able-focus');
+
 		}
 	};
 

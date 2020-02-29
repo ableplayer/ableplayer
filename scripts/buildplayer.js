@@ -598,6 +598,8 @@
 
 	AblePlayer.prototype.closePopups = function () {
 
+    var thisObj = this;
+
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.$chaptersButton.removeAttr('aria-expanded').focus();
@@ -606,11 +608,16 @@
 			this.captionsPopup.hide();
 			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
-		if (this.prefsPopup && this.prefsPopup.is(':visible')) {
+		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
+      this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$prefsButton.removeAttr('aria-expanded').focus();
+			// wait half a second, then reset hidingPopup
+			setTimeout(function() {
+  			thisObj.hidingPopup = false;
+  		},500);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');

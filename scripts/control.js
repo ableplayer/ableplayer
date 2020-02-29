@@ -1221,7 +1221,9 @@
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
 
-		var prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+
+		thisObj = this;
 
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
@@ -1231,10 +1233,13 @@
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.hidingPopup = false;
 			this.$prefsButton.removeAttr('aria-expanded').focus();
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			// wait half a second, then reset hidingPopup
+			setTimeout(function() {
+  			thisObj.hidingPopup = false;
+  		},500);
 		}
 		else {
 			this.closePopups();
@@ -1248,6 +1253,7 @@
 			// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
 			this.prefsPopup.find('li').first().focus().addClass('able-focus');
+
 		}
 	};
 
