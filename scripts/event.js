@@ -248,6 +248,7 @@
   			this.handlePrefsClick();
   		}
   		else {
+    		this.showingPrefsDialog = true; // stopgap
         this.closePopups();
     		prefsPopup = $(el).attr('data-prefs-popup');
         if (prefsPopup === 'keyboard') {
@@ -262,6 +263,7 @@
         else if (prefsPopup === 'transcript') {
 				  this.transcriptPrefsDialog.show();
 				}
+        this.showingPrefsDialog = false;
   		}
 		}
 		else if (whichButton === 'help') {

@@ -127,10 +127,8 @@
 		}
 		var thisObj = this;
 		setTimeout(function () {
-			// originally set focus on the first focusable element
-			// thisObj.modal.find('button.modalCloseButton').first().focus();
-			// but setting focus on dialog seems to provide more reliable access to ALL content within
-			thisObj.modal.focus();
+			// set focus on the first focusable element
+			thisObj.modal.find('button.modalCloseButton').first().focus();
 		}, 300);
 	};
 

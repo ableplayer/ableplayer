@@ -3477,6 +3477,7 @@ var AblePlayerInstances = [];
 				  }
           $menuItem.on('click',function() {
 					  whichPref = $(this).text();
+					  thisObj.showingPrefsDialog = true;
             thisObj.setFullscreen(false);
             if (whichPref === thisObj.tt.prefMenuCaptions) {
 						  thisObj.captionPrefsDialog.show();
@@ -3491,6 +3492,7 @@ var AblePlayerInstances = [];
 						  thisObj.transcriptPrefsDialog.show();
 					  }
             thisObj.closePopups();
+            thisObj.showingPrefsDialog = false;
 				  });
           $menu.append($menuItem);
 			  }
@@ -3667,7 +3669,10 @@ var AblePlayerInstances = [];
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded').focus();
+			this.$prefsButton.removeAttr('aria-expanded');
+			if (!this.showingPrefsDialog) {
+  			this.$prefsButton.focus();
+			}
 			// wait half a second, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;
@@ -7090,10 +7095,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		var thisObj = this;
 		setTimeout(function () {
-			// originally set focus on the first focusable element
-			// thisObj.modal.find('button.modalCloseButton').first().focus();
-			// but setting focus on dialog seems to provide more reliable access to ALL content within
-			thisObj.modal.focus();
+			// set focus on the first focusable element
+			thisObj.modal.find('button.modalCloseButton').first().focus();
 		}, 300);
 	};
 
@@ -9030,7 +9033,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
-
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
 		thisObj = this;
@@ -9043,9 +9045,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.$prefsButton.removeAttr('aria-expanded').focus();
+			this.$prefsButton.removeAttr('aria-expanded');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			if (!this.showingPrefsDialog) {
+  			this.$prefsButton.focus();
+			}
 			// wait half a second, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;
@@ -11694,6 +11699,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
   			this.handlePrefsClick();
   		}
   		else {
+    		this.showingPrefsDialog = true; // stopgap
         this.closePopups();
     		prefsPopup = $(el).attr('data-prefs-popup');
         if (prefsPopup === 'keyboard') {
@@ -11708,6 +11714,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
         else if (prefsPopup === 'transcript') {
 				  this.transcriptPrefsDialog.show();
 				}
+        this.showingPrefsDialog = false;
   		}
 		}
 		else if (whichButton === 'help') {

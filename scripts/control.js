@@ -1220,7 +1220,6 @@
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
-
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
 		thisObj = this;
@@ -1233,9 +1232,12 @@
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.$prefsButton.removeAttr('aria-expanded').focus();
+			this.$prefsButton.removeAttr('aria-expanded');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			if (!this.showingPrefsDialog) {
+  			this.$prefsButton.focus();
+			}
 			// wait half a second, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;

@@ -423,6 +423,7 @@
 				  }
           $menuItem.on('click',function() {
 					  whichPref = $(this).text();
+					  thisObj.showingPrefsDialog = true;
             thisObj.setFullscreen(false);
             if (whichPref === thisObj.tt.prefMenuCaptions) {
 						  thisObj.captionPrefsDialog.show();
@@ -437,6 +438,7 @@
 						  thisObj.transcriptPrefsDialog.show();
 					  }
             thisObj.closePopups();
+            thisObj.showingPrefsDialog = false;
 				  });
           $menu.append($menuItem);
 			  }
@@ -613,7 +615,10 @@
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded').focus();
+			this.$prefsButton.removeAttr('aria-expanded');
+			if (!this.showingPrefsDialog) {
+  			this.$prefsButton.focus();
+			}
 			// wait half a second, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;
