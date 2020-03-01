@@ -40,7 +40,6 @@
 		thisObj = this;
 		this.$transcriptArea = $('<div>', {
 			'class': 'able-transcript-area',
-			'tabindex': '-1',
   		'role': 'dialog',
       'aria-label': this.tt.transcriptTitle
 		});

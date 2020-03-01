@@ -198,7 +198,14 @@
 
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
-			e.stopPropagation();
+      if (thisObj.focusNotClick) {
+        return false;
+      }
+      if (thisObj.dragging) {
+				thisObj.dragKeys(which, e);
+				return false;
+		  }
+      e.stopPropagation();
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
@@ -347,15 +354,26 @@
 				this.windowMenuClickRegistered = true;
 			}
 			else if (e.which === 27) { // escape
-				// hide the popup menu
-				$windowPopup.hide('fast', function() {
-					// also reset the Boolean
-					thisObj.windowMenuClickRegistered = false;
-					// also restore menu items to their original state
-					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-					// also return focus to window options button
-					$windowButton.focus();
-				});
+        if ($windowPopup.is(':visible')) {
+  				// close the popup menu
+          $windowPopup.hide('fast', function() {
+					  // also reset the Boolean
+            thisObj.windowMenuClickRegistered = false;
+            // also restore menu items to their original state
+            $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+            // also return focus to window options button
+            $windowButton.focus();
+				  });
+				}
+				else {
+  				// popup isn't open. Close the window
+          if (which === 'sign') {
+            this.handleSignToggle();
+          }
+          else if (which === 'transcript') {
+            this.handleTranscriptToggle();
+          }
+				}
 			}
 			else {
 				return false;
@@ -388,7 +406,7 @@
 
 	AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
-		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
+		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, width, height, $thisRadio;
 
 		thisObj = this;
 		if (which === 'transcript') {
@@ -438,6 +456,11 @@
 			$windowButton.focus();
 		}
 		if (choice === 'move') {
+
+      // temporarily add role="application" to activeWindow
+      // otherwise, screen readers incercept arrow keys and moving window will not work
+      this.$activeWindow.attr('role','application');
+
 			if (!this.showedAlert(which)) {
 				this.showAlert(this.tt.windowMoveAlert,which);
 				if (which === 'transcript') {
@@ -458,6 +481,12 @@
 		}
 		else if (choice == 'resize') {
 			// resize through the menu uses a form, not drag
+      var resizeFields = resizeDialog.getInputs();
+      if (resizeFields) {
+        // reset width and height values in form
+        resizeFields[0].value = $window.width();
+        resizeFields[1].value = $window.height();
+      }
 			resizeDialog.show();
 		}
 		else if (choice == 'close') {
@@ -644,6 +673,8 @@
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
+		// restore activeWindow role from 'application' to 'dialog'
+		this.$activeWindow.attr('role','dialog');
 		this.$activeWindow = null;
 
 		if (this.dragDevice === 'keyboard') {
@@ -746,7 +777,6 @@
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown');
-
 		$windowButton.show().focus();
 		this.resizing = false;
 		this.$activeWindow.removeClass('able-resize');

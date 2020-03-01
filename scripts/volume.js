@@ -88,6 +88,7 @@
 		});
 
 		this.$volumeSliderHead.on('keydown',function (e) {
+
 			// Left arrow or down arrow
 			if (e.which === 37 || e.which === 40) {
 				thisObj.handleVolume('down');

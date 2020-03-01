@@ -52,7 +52,6 @@ var AblePlayerInstances = [];
 		AblePlayer.youtubeIframeAPIReady = true;
 		$('body').trigger('youtubeIframeAPIReady', []);
 	};
-
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
 	$(window).keydown(function(e) {
@@ -3605,6 +3604,7 @@ var AblePlayerInstances = [];
 		}
 		// add keyboard handlers for navigating within popups
 		$menu.on('keydown',function (e) {
+
 			whichMenu = $(this).attr('id').split('-')[1];
 			$thisItem = $(this).find('li:focus');
 			if ($thisItem.is(':first-child')) {
@@ -6631,6 +6631,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		});
 
 		this.$volumeSliderHead.on('keydown',function (e) {
+
 			// Left arrow or down arrow
 			if (e.which === 37 || e.which === 40) {
 				thisObj.handleVolume('down');
@@ -7110,6 +7111,17 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		this.focusedElementBeforeModal.focus();
 	};
+
+  AccessibleDialog.prototype.getInputs = function () {
+
+    // return an array of input elements within this dialog
+    if (this.modal) {
+		  var inputs = this.modal.find('input');
+			return inputs;
+		}
+		return false;
+	};
+
 })(jQuery);
 
 (function ($) {
@@ -9096,6 +9108,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else {
 			this.positionDraggableWindow('transcript');
 			this.$transcriptArea.show();
+			// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
+			// need to re-hide the popup menu
+			this.$transcriptPopup.hide();
 			this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
@@ -9129,6 +9144,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else {
 			this.positionDraggableWindow('sign');
 			this.$signWindow.show();
+			// showing signWindow has a cascading effect of showing all content *within* signWindow
+			// need to re-hide the popup menu
+			this.$signPopup.hide();
 			this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
 			this.prefSign = 1;
@@ -10612,7 +10630,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 		this.$transcriptArea = $('<div>', {
 			'class': 'able-transcript-area',
-			'tabindex': '-1',
   		'role': 'dialog',
       'aria-label': this.tt.transcriptTitle
 		});
@@ -11776,14 +11793,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		var which, $thisElement;
 
-		if (!this.okToHandleKeyPress()) {
-			return false;
-		}
 		// Convert to lower case.
 		which = e.which;
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
+		$thisElement = $(document.activeElement);
+
+    if (which === 27) { // escape
+      if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+        // This element is part of transcript area.
+        this.handleTranscriptToggle();
+        return false;
+      }
+    }
+		if (!this.okToHandleKeyPress()) {
+			return false;
+		}
+
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		// (or a textarea element with player in stenoMode)
 		if (!(
@@ -11796,7 +11823,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
 			e.target.tagName === 'SELECT'
 		)){
-		  $thisElement = $(document.activeElement);
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -12334,7 +12360,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		});
 
 		// if user presses a key from anywhere on the page, show player controls
-		$(document).keydown(function() {
+		$(document).keydown(function(e) {
+
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
@@ -12364,6 +12391,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base,js)
 		this.$ableDiv.keydown(function (e) {
+
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);
 			}
@@ -12372,7 +12400,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// transcript is not a child of this.$ableDiv
 		// therefore, must be added separately
 		if (this.$transcriptArea) {
-			this.$transcriptArea.keydown(function (e) {
+			this.$transcriptArea.on('keydown',function (e) {
 				if (AblePlayer.nextIndex > 1) {
 					thisObj.onPlayerKeyPress(e);
 				}
@@ -12612,7 +12640,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
-			e.stopPropagation();
+      if (thisObj.focusNotClick) {
+        return false;
+      }
+      if (thisObj.dragging) {
+				thisObj.dragKeys(which, e);
+				return false;
+		  }
+      e.stopPropagation();
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
@@ -12761,15 +12796,26 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.windowMenuClickRegistered = true;
 			}
 			else if (e.which === 27) { // escape
-				// hide the popup menu
-				$windowPopup.hide('fast', function() {
-					// also reset the Boolean
-					thisObj.windowMenuClickRegistered = false;
-					// also restore menu items to their original state
-					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-					// also return focus to window options button
-					$windowButton.focus();
-				});
+        if ($windowPopup.is(':visible')) {
+  				// close the popup menu
+          $windowPopup.hide('fast', function() {
+					  // also reset the Boolean
+            thisObj.windowMenuClickRegistered = false;
+            // also restore menu items to their original state
+            $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+            // also return focus to window options button
+            $windowButton.focus();
+				  });
+				}
+				else {
+  				// popup isn't open. Close the window
+          if (which === 'sign') {
+            this.handleSignToggle();
+          }
+          else if (which === 'transcript') {
+            this.handleTranscriptToggle();
+          }
+				}
 			}
 			else {
 				return false;
@@ -12802,7 +12848,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
-		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
+		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, width, height, $thisRadio;
 
 		thisObj = this;
 		if (which === 'transcript') {
@@ -12852,6 +12898,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			$windowButton.focus();
 		}
 		if (choice === 'move') {
+
+      // temporarily add role="application" to activeWindow
+      // otherwise, screen readers incercept arrow keys and moving window will not work
+      this.$activeWindow.attr('role','application');
+
 			if (!this.showedAlert(which)) {
 				this.showAlert(this.tt.windowMoveAlert,which);
 				if (which === 'transcript') {
@@ -12872,6 +12923,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else if (choice == 'resize') {
 			// resize through the menu uses a form, not drag
+      var resizeFields = resizeDialog.getInputs();
+      if (resizeFields) {
+        // reset width and height values in form
+        resizeFields[0].value = $window.width();
+        resizeFields[1].value = $window.height();
+      }
 			resizeDialog.show();
 		}
 		else if (choice == 'close') {
@@ -13058,6 +13115,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
+		// restore activeWindow role from 'application' to 'dialog'
+		this.$activeWindow.attr('role','dialog');
 		this.$activeWindow = null;
 
 		if (this.dragDevice === 'keyboard') {
@@ -13160,7 +13219,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown');
-
 		$windowButton.show().focus();
 		this.resizing = false;
 		this.$activeWindow.removeClass('able-resize');
@@ -13255,7 +13313,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		this.$signWindow = $('<div>',{
 			'class' : 'able-sign-window',
-			'tabindex': '-1',
   		'role': 'dialog',
       'aria-label': this.tt.sign
 		});

@@ -310,14 +310,24 @@
 
 		var which, $thisElement;
 
-		if (!this.okToHandleKeyPress()) {
-			return false;
-		}
 		// Convert to lower case.
 		which = e.which;
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
+		$thisElement = $(document.activeElement);
+
+    if (which === 27) { // escape
+      if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+        // This element is part of transcript area.
+        this.handleTranscriptToggle();
+        return false;
+      }
+    }
+		if (!this.okToHandleKeyPress()) {
+			return false;
+		}
+
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		// (or a textarea element with player in stenoMode)
 		if (!(
@@ -330,7 +340,6 @@
 			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
 			e.target.tagName === 'SELECT'
 		)){
-		  $thisElement = $(document.activeElement);
 			if (which === 27) { // escape
 				this.closePopups();
 			}
@@ -868,7 +877,8 @@
 		});
 
 		// if user presses a key from anywhere on the page, show player controls
-		$(document).keydown(function() {
+		$(document).keydown(function(e) {
+
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
@@ -898,6 +908,7 @@
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base,js)
 		this.$ableDiv.keydown(function (e) {
+
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);
 			}
@@ -906,7 +917,7 @@
 		// transcript is not a child of this.$ableDiv
 		// therefore, must be added separately
 		if (this.$transcriptArea) {
-			this.$transcriptArea.keydown(function (e) {
+			this.$transcriptArea.on('keydown',function (e) {
 				if (AblePlayer.nextIndex > 1) {
 					thisObj.onPlayerKeyPress(e);
 				}
