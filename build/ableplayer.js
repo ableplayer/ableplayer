@@ -10125,15 +10125,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				opacity = parseFloat(this.prefCaptionsOpacity) / 100.0;
 				$element.css({
 					'font-family': this.prefCaptionsFont,
-					'font-size': this.prefCaptionsSize,
 					'color': this.prefCaptionsColor,
 					'background-color': this.prefCaptionsBGColor,
 					'opacity': opacity
 				});
 				if ($element === this.$captionsDiv) {
 					if (typeof this.$captionsWrapper !== 'undefined') {
-						lineHeight = parseInt(this.prefCaptionsSize,10) + 25;
-						this.$captionsWrapper.css('line-height',lineHeight + '%');
+						this.$captionsWrapper.css({
+  						'font-size': this.prefCaptionsSize
+            });
 					}
 				}
 				if (this.prefCaptionsPosition === 'below') {
