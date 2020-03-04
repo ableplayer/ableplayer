@@ -620,10 +620,10 @@
 			if (!this.showingPrefsDialog) {
   			this.$prefsButton.focus();
 			}
-			// wait half a second, then reset hidingPopup
+			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;
-  		},500);
+  		},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');

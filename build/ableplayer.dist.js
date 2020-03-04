@@ -3673,10 +3673,10 @@ var AblePlayerInstances = [];
 			if (!this.showingPrefsDialog) {
   			this.$prefsButton.focus();
 			}
-			// wait half a second, then reset hidingPopup
+			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;
-  		},500);
+  		},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
@@ -9063,10 +9063,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (!this.showingPrefsDialog) {
   			this.$prefsButton.focus();
 			}
-			// wait half a second, then reset hidingPopup
+			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
   			thisObj.hidingPopup = false;
-  		},500);
+  		},100);
 		}
 		else {
 			this.closePopups();
@@ -9099,11 +9099,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
 			this.prefTranscript = 0;
 			this.$transcriptButton.focus().addClass('able-focus');
-      // wait a second before resetting stopgap var
+      // wait briefly before resetting stopgap var
       // otherwise the keypress used to select 'Close' will trigger the transcript button
+      // Benchmark tests: If this is gonna happen, it typically happens in around 3ms; max 12ms
+      // Setting timeout to 100ms is a virtual guarantee of proper functionality
       setTimeout(function() {
         thisObj.closingTranscript = false;
-      }, 1000);
+      }, 100);
 		}
 		else {
 			this.positionDraggableWindow('transcript');
@@ -9117,10 +9119,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// move focus to first focusable element (window options button)
       this.focusNotClick = true;
 			this.$transcriptArea.find('button').first().focus();
-      // wait half a second before resetting stopgap var
+      // wait briefly before resetting stopgap var
       setTimeout(function() {
         thisObj.focusNotClick = false;
-      }, 500);
+      }, 100);
 		}
 		this.updateCookie('prefTranscript');
 	};
@@ -9135,11 +9137,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$signButton.find('span.able-clipped').text(this.tt.showSign);
 			this.prefSign = 0;
 			this.$signButton.focus().addClass('able-focus');
-      // wait a second before resetting stopgap var
+      // wait briefly before resetting stopgap var
       // otherwise the keypress used to select 'Close' will trigger the transcript button
       setTimeout(function() {
         thisObj.closingSign = false;
-      }, 1000);
+      }, 100);
 		}
 		else {
 			this.positionDraggableWindow('sign');
@@ -9152,10 +9154,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.prefSign = 1;
       this.focusNotClick = true;
 			this.$signWindow.find('button').first().focus();
-      // wait half a second before resetting stopgap var
+      // wait briefly before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
       setTimeout(function() {
         thisObj.focusNotClick = false;
-      }, 500);
+      }, 100);
 		}
 		this.updateCookie('prefSign');
 	};
@@ -11801,13 +11804,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		$thisElement = $(document.activeElement);
 
     if (which === 27) { // escape
+
       if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+
         // This element is part of transcript area.
         this.handleTranscriptToggle();
         return false;
       }
     }
 		if (!this.okToHandleKeyPress()) {
+
 			return false;
 		}
 
@@ -11824,6 +11830,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			e.target.tagName === 'SELECT'
 		)){
 			if (which === 27) { // escape
+
 				this.closePopups();
 			}
 			else if (which === 32) { // spacebar = play/pause
@@ -12640,6 +12647,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
+
       if (thisObj.focusNotClick) {
         return false;
       }
@@ -13134,7 +13142,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// Boolean to stop stray events from firing
 		this.windowMenuClickRegistered = false;
 		this.finishingDrag = true; // will be reset after window click event
-
 		// finishingDrag should e reset after window click event,
 		// which is triggered automatically after mouseup
 		// However, in case that's not reliable in some browsers

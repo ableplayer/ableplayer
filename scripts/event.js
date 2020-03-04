@@ -318,13 +318,16 @@
 		$thisElement = $(document.activeElement);
 
     if (which === 27) { // escape
+console.log('onPlayerKeyPress, you pressed Escape');
       if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+console.log('element is part of the transcript area');
         // This element is part of transcript area.
         this.handleTranscriptToggle();
         return false;
       }
     }
 		if (!this.okToHandleKeyPress()) {
+console.log('NOT ok!');
 			return false;
 		}
 
@@ -341,6 +344,7 @@
 			e.target.tagName === 'SELECT'
 		)){
 			if (which === 27) { // escape
+console.log('You pushed ESC');
 				this.closePopups();
 			}
 			else if (which === 32) { // spacebar = play/pause

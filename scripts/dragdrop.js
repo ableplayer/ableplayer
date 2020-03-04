@@ -198,6 +198,7 @@
 
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
+
       if (thisObj.focusNotClick) {
         return false;
       }
@@ -692,7 +693,6 @@
 		// Boolean to stop stray events from firing
 		this.windowMenuClickRegistered = false;
 		this.finishingDrag = true; // will be reset after window click event
-
 		// finishingDrag should e reset after window click event,
 		// which is triggered automatically after mouseup
 		// However, in case that's not reliable in some browsers
