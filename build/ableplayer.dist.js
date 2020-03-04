@@ -13110,7 +13110,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.endDrag = function(which) {
 
-		var $window, $windowPopup, $windowButton;
+		var thisObj, $window, $windowPopup, $windowButton;
+    thisObj = this;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -13147,7 +13148,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// However, in case that's not reliable in some browsers
 		// need to ensure this gets cancelled
 		setTimeout(function() {
-			this.finishingDrag = false;
+			thisObj.finishingDrag = false;
 		}, 100);
 	};
 
