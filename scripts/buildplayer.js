@@ -423,6 +423,7 @@
 				  }
           $menuItem.on('click',function() {
 					  whichPref = $(this).text();
+					  thisObj.showingPrefsDialog = true;
             thisObj.setFullscreen(false);
             if (whichPref === thisObj.tt.prefMenuCaptions) {
 						  thisObj.captionPrefsDialog.show();
@@ -437,6 +438,7 @@
 						  thisObj.transcriptPrefsDialog.show();
 					  }
             thisObj.closePopups();
+            thisObj.showingPrefsDialog = false;
 				  });
           $menu.append($menuItem);
 			  }
@@ -549,6 +551,7 @@
 		}
 		// add keyboard handlers for navigating within popups
 		$menu.on('keydown',function (e) {
+
 			whichMenu = $(this).attr('id').split('-')[1];
 			$thisItem = $(this).find('li:focus');
 			if ($thisItem.is(':first-child')) {
@@ -598,6 +601,8 @@
 
 	AblePlayer.prototype.closePopups = function () {
 
+    var thisObj = this;
+
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.$chaptersButton.removeAttr('aria-expanded').focus();
@@ -606,11 +611,19 @@
 			this.captionsPopup.hide();
 			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
-		if (this.prefsPopup && this.prefsPopup.is(':visible')) {
+		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
+      this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded').focus();
+			this.$prefsButton.removeAttr('aria-expanded');
+			if (!this.showingPrefsDialog) {
+  			this.$prefsButton.focus();
+			}
+			// wait briefly, then reset hidingPopup
+			setTimeout(function() {
+  			thisObj.hidingPopup = false;
+  		},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
@@ -994,12 +1007,6 @@
       $sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 			this.$controllerDiv.append($sliderDiv);
-			if (typeof this.duration === 'undefined' || this.duration === 0) {
-			  // set arbitrary starting duration, and change it when duration is known
-				this.duration = 60;
-				// also set elapsed to 0
-				this.elapsed = 0;
-		  }
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
 
@@ -1086,12 +1093,17 @@
 					// And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
-					$newButton = $('<button>',{
-						'type': 'button',
+
+          // NOTE: Changed from <button> to <div role="button" as of 4.2.18
+          // because <button> elements are rendered poorly in high contrast mode
+          // in some OS/browser/plugin combinations
+					$newButton = $('<div>',{
+						'role': 'button',
 						'tabindex': '0',
 						'aria-label': buttonTitle,
 						'class': 'able-button-handler-' + control
 					});
+
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
   						this.prefCats = this.getPreferencesGroups();
@@ -1251,14 +1263,13 @@
 						var position = $(this).position();
 						var buttonHeight = $(this).height();
 						var buttonWidth = $(this).width();
-
 						// position() is expressed using top and left (of button);
 						// add right (of button) too, for convenience
 						var controllerWidth = thisObj.$controllerDiv.width();
 						position.right = controllerWidth - position.left - buttonWidth;
-
 						var tooltipY = position.top - buttonHeight - 15;
-						if ($(this).closest('div').hasClass('able-right-controls')) {
+
+						if ($(this).parent().hasClass('able-right-controls')) {
 							// this control is on the right side
               var buttonSide = 'right';
 						}

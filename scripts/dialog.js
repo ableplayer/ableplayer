@@ -127,10 +127,8 @@
 		}
 		var thisObj = this;
 		setTimeout(function () {
-			// originally set focus on the first focusable element
-			// thisObj.modal.find('button.modalCloseButton').first().focus();
-			// but setting focus on dialog seems to provide more reliable access to ALL content within
-			thisObj.modal.focus();
+			// set focus on the first focusable element
+			thisObj.modal.find('button.modalCloseButton').first().focus();
 		}, 300);
 	};
 
@@ -144,4 +142,15 @@
 
 		this.focusedElementBeforeModal.focus();
 	};
+
+  AccessibleDialog.prototype.getInputs = function () {
+
+    // return an array of input elements within this dialog
+    if (this.modal) {
+		  var inputs = this.modal.find('input');
+			return inputs;
+		}
+		return false;
+	};
+
 })(jQuery);

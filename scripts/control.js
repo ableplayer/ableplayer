@@ -1,6 +1,8 @@
 (function ($) {
 	AblePlayer.prototype.seekTo = function (newTime) {
 
+    var thisObj = this;
+
 		// define variables to be used for analytics
 		// e.g., to measure the extent to which users seek back and forward
 		this.seekFromTime = this.media.currentTime;
@@ -8,7 +10,6 @@
 
 		this.seeking = true;
 		this.liveUpdatePending = true;
-
 		if (this.player === 'html5') {
 			var seekable;
 
@@ -37,8 +38,9 @@
 		else if (this.player === 'vimeo') {
 			this.vimeoPlayer.setCurrentTime(newTime).then(function() {
 				// seek finished.
-				// could do something here
 				// successful completion also fires a 'seeked' event (see event.js)
+				thisObj.elapsed = newTime;
+				thisObj.refreshControls('timeline');
 			})
 		}
 		this.refreshControls('timeline');
@@ -297,6 +299,7 @@
 		if (this.hasSignLanguage && this.signVideo) {
 			this.signVideo.playbackRate = rate;
 		}
+		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
 	};
 
@@ -468,8 +471,12 @@
 
 		thisObj = this;
 		if (this.swappingSrc) {
-			// wait until new source has loaded before refreshing controls
-			return;
+  		if (this.playing) {
+  			// wait until new source has loaded before refreshing controls
+  			// can't wait if player is NOT playing because some critical events
+  			// won't fire until playback of new media starts
+        return;
+		  }
 		}
 
 		if (context === 'timeline' || context === 'init') {
@@ -483,10 +490,10 @@
 				this.chapterElapsed = this.getChapterElapsed();
 			}
 
-			if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
-				// couldn't calculate seekInterval previously; try again.
-				this.setSeekInterval();
-			}
+      if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
+  		  // couldn't calculate seekInterval previously; try again.
+        this.setSeekInterval();
+		  }
 
 			if (this.seekBar) {
 				if (this.useChapterTimes) {
@@ -561,12 +568,12 @@
           leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
           rightControls = leftControls.next('div.able-right-controls');
           leftControls.children().each(function () {
-					  if ($(this).prop('tagName')=='BUTTON') {
+					  if ($(this).attr('role')=='button') {
 						  widthUsed += $(this).outerWidth(true); // true = include margin
 					  }
 				  });
           rightControls.children().each(function () {
-					  if ($(this).prop('tagName')=='BUTTON') {
+					  if ($(this).attr('role')=='button') {
 						  widthUsed += $(this).outerWidth(true);
 					  }
 				  });
@@ -737,19 +744,19 @@
 
 				// If transcript locked, scroll transcript to current highlight location.
 				if (this.autoScrollTranscript && this.currentHighlight) {
-					newTop = Math.floor($('.able-transcript').scrollTop() +
+					newTop = Math.floor(this.$transcriptDiv.scrollTop() +
 						$(this.currentHighlight).position().top -
-						($('.able-transcript').height() / 2) +
+						(this.$transcriptDiv.height() / 2) +
 						($(this.currentHighlight).height() / 2));
-					if (newTop !== Math.floor($('.able-transcript').scrollTop())) {
+					if (newTop !== Math.floor(this.$transcriptDiv.scrollTop())) {
 						// Set a flag to ignore the coming scroll event.
 						// there's no other way I know of to differentiate programmatic and user-initiated scroll events.
 						this.scrollingTranscript = true;
 						// only scroll once after moving a highlight
 						if (this.movingHighlight) {
-  						$('.able-transcript').scrollTop(newTop);
-              this.movingHighlight = false;
-            }
+							this.$transcriptDiv.scrollTop(newTop);
+			                this.movingHighlight = false;
+			            }
 					}
 				}
 			}
@@ -999,7 +1006,6 @@
 
 		lastChapterIndex = this.chapters.length-1;
 		targetTime = this.elapsed + this.seekInterval;
-
 		if (this.useChapterTimes) {
 			if (this.chapters[lastChapterIndex] == this.currentChapter) {
 				// this is the last chapter
@@ -1197,6 +1203,7 @@
 	};
 
 	AblePlayer.prototype.handleDescriptionToggle = function() {
+
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
@@ -1213,8 +1220,9 @@
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
+		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
-		var prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
+		thisObj = this;
 
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
@@ -1224,10 +1232,16 @@
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.hidingPopup = false;
-			this.$prefsButton.removeAttr('aria-expanded').focus();
+			this.$prefsButton.removeAttr('aria-expanded');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			if (!this.showingPrefsDialog) {
+  			this.$prefsButton.focus();
+			}
+			// wait briefly, then reset hidingPopup
+			setTimeout(function() {
+  			thisObj.hidingPopup = false;
+  		},100);
 		}
 		else {
 			this.closePopups();
@@ -1241,6 +1255,7 @@
 			// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
 			this.prefsPopup.find('li').first().focus().addClass('able-focus');
+
 		}
 	};
 
@@ -1250,37 +1265,75 @@
 	};
 
 	AblePlayer.prototype.handleTranscriptToggle = function () {
+
+  	var thisObj = this;
+
 		if (this.$transcriptDiv.is(':visible')) {
 			this.$transcriptArea.hide();
 			this.$transcriptButton.addClass('buttonOff').attr('aria-label',this.tt.showTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
 			this.prefTranscript = 0;
 			this.$transcriptButton.focus().addClass('able-focus');
+      // wait briefly before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      // Benchmark tests: If this is gonna happen, it typically happens in around 3ms; max 12ms
+      // Setting timeout to 100ms is a virtual guarantee of proper functionality
+      setTimeout(function() {
+        thisObj.closingTranscript = false;
+      }, 100);
 		}
 		else {
 			this.positionDraggableWindow('transcript');
 			this.$transcriptArea.show();
+			// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
+			// need to re-hide the popup menu
+			this.$transcriptPopup.hide();
 			this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
+			// move focus to first focusable element (window options button)
+      this.focusNotClick = true;
+			this.$transcriptArea.find('button').first().focus();
+      // wait briefly before resetting stopgap var
+      setTimeout(function() {
+        thisObj.focusNotClick = false;
+      }, 100);
 		}
 		this.updateCookie('prefTranscript');
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
+
+  	var thisObj = this;
+
 		if (this.$signWindow.is(':visible')) {
 			this.$signWindow.hide();
 			this.$signButton.addClass('buttonOff').attr('aria-label',this.tt.showSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.showSign);
 			this.prefSign = 0;
 			this.$signButton.focus().addClass('able-focus');
+      // wait briefly before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      setTimeout(function() {
+        thisObj.closingSign = false;
+      }, 100);
 		}
 		else {
 			this.positionDraggableWindow('sign');
 			this.$signWindow.show();
+			// showing signWindow has a cascading effect of showing all content *within* signWindow
+			// need to re-hide the popup menu
+			this.$signPopup.hide();
 			this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
 			this.prefSign = 1;
+      this.focusNotClick = true;
+			this.$signWindow.find('button').first().focus();
+      // wait briefly before resetting stopgap var
+      // otherwise the keypress used to select 'Close' will trigger the transcript button
+      setTimeout(function() {
+        thisObj.focusNotClick = false;
+      }, 100);
 		}
 		this.updateCookie('prefSign');
 	};

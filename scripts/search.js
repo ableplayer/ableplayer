@@ -11,32 +11,38 @@
 		// ALSO: Add localization support
 
 		var thisObj = this;
-
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
+  			var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
+  			searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
+  			searchStringHtml += '</p>';
 				var resultsArray = this.searchFor(this.searchString);
 				if (resultsArray.length > 0) {
-					var resultsSummary = $('<p>',{
+					var $resultsSummary = $('<p>',{
 						'class': 'able-search-results-summary'
 					});
-					var resultsSummaryText = 'Found <strong>' + resultsArray.length + '</strong> matching items. ';
-					resultsSummaryText += 'Click the time associated with any item ';
-					resultsSummaryText += 'to play the video from that point.';
-					resultsSummary.html(resultsSummaryText);
-					var resultsList = $('<ul>');
+					var resultsSummaryText = this.tt.resultsSummary2;
+					resultsSummaryText += ' <strong>' + resultsArray.length + '</strong> ';
+					resultsSummaryText += this.tt.resultsSummary3 + ' ';
+					resultsSummaryText += this.tt.resultsSummary4;
+					$resultsSummary.html(resultsSummaryText);
+					var $resultsList = $('<ul>');
 					for (var i = 0; i < resultsArray.length; i++) {
-						var resultsItem = $('<li>',{
-						});
+  					var resultId = 'aria-search-result-' + i;
+						var $resultsItem = $('<li>',{});
 						var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
-						var itemStartSpan = $('<span>',{
+						var itemLabel = this.tt.searchButtonLabel + ' ' + itemStartTime['title'];
+						var itemStartSpan = $('<button>',{
 							'class': 'able-search-results-time',
 							'data-start': resultsArray[i]['start'],
-							'title': itemStartTime['title'],
-							'tabindex': '0'
+							'title': itemLabel,
+							'aria-label': itemLabel,
+							'aria-describedby': resultId
 						});
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
-						itemStartSpan.click(function(e) {
+						itemStartSpan.on('click',function(e) {
+              thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;
@@ -45,16 +51,17 @@
 						});
 
 						var itemText = $('<span>',{
-							'class': 'able-search-result-text'
+							'class': 'able-search-result-text',
+							'id': resultId
 						})
 						itemText.html('...' + resultsArray[i]['caption'] + '...');
-						resultsItem.append(itemStartSpan, itemText);
-						resultsList.append(resultsItem);
+						$resultsItem.append(itemStartSpan, itemText);
+						$resultsList.append($resultsItem);
 					}
-					$('#' + this.searchDiv).append(resultsSummary, resultsList);
+					$('#' + this.searchDiv).append(searchStringHtml,$resultsSummary,$resultsList);
 				}
 				else {
-					var noResults = $('<p>').text('No results found.');
+					var noResults = $('<p>').text(this.tt.noResultsFound);
 					$('#' + this.searchDiv).append(noResults);
 				}
 			}
@@ -144,27 +151,42 @@
 		var title = '';
 		if (hours > 0) {
 			value += hours + ':';
-			title + hours + ' hours ';
+      if (hours == 1) {
+  			title += '1 ' + this.tt.hour + ' ';
+      }
+      else {
+  			title += hours + ' ' + this.tt.hours + ' ';
+		  }
 		}
 		if (minutes < 10) {
 			value += '0' + minutes + ':';
 			if (minutes > 0) {
-				title += minutes + ' minutes ';
+  			if (minutes == 1) {
+  				title += '1 ' + this.tt.minute + ' ';
+        }
+        else {
+  				title += minutes + ' ' + this.tt.minutes + ' ';
+        }
 			}
 		}
 		else {
 			value += minutes + ':';
-			title += minutes + ' minutes ';
+			title += minutes + ' ' + this.tt.minutes + ' ';
 		}
 		if (seconds < 10) {
 			value += '0' + seconds;
 			if (seconds > 0) {
-				title += seconds + ' seconds ';
+  			if (seconds == 1) {
+  				title += '1 ' + this.tt.second + ' ';
+  			}
+  			else {
+  				title += seconds + ' ' + this.tt.seconds + ' ';
+        }
 			}
 		}
 		else {
 			value += seconds;
-			title += seconds + ' seconds ';
+			title += seconds + ' ' + this.tt.seconds + ' ';
 		}
 		var time = [];
 		time['value'] = value;

@@ -180,7 +180,7 @@
 				'name': 'prefCaptionsFont',
 				'label': this.tt.prefCaptionsFont,
 				'group': 'captions',
-				'default': this.tt.sans
+				'default': 'sans'
 			});
 			prefs.push({
 				'name': 'prefCaptionsSize',
@@ -422,7 +422,7 @@
 								optionText = this.tt.captionsPositionBelow;
 							}
 						}
-						else if (thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
+						else if (thisPref === 'prefCaptionsFont' || thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
 							optionValue = options[j][0];
 							optionText = options[j][1];
 						}
@@ -816,16 +816,16 @@
 
 		// tabbable transcript
 		if (this.prefTabbable === 1) {
-			$('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
 		}
 		else {
-			$('.able-transcript span.able-transcript-seekpoint').removeAttr('tabindex');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').removeAttr('tabindex');
 		}
 
 		// transcript highlights
 		if (this.prefHighlight === 0) {
 			// user doesn't want highlights; remove any existing highlights
-			$('.able-transcript span').removeClass('able-highlight');
+			this.$transcriptDiv.find('span').removeClass('able-highlight');
 		}
 
 		// Re-initialize caption and description in case relevant settings have changed

@@ -52,7 +52,6 @@ var AblePlayerInstances = [];
 		AblePlayer.youtubeIframeAPIReady = true;
 		$('body').trigger('youtubeIframeAPIReady', []);
 	};
-
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
 	$(window).keydown(function(e) {
@@ -362,7 +361,7 @@ var AblePlayerInstances = [];
 		// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
 		// Calculation attempts to intelligently assign a reasonable interval based on media length
 		this.defaultSeekInterval = 10;
-		this.useFixedSeekInterval = false;
+		this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
 		if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
 			var seekInterval = $(media).data('seek-interval');
 			if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
@@ -462,6 +461,16 @@ var AblePlayerInstances = [];
 		else {
 			this.hideControls = false;
 			this.hideControlsOriginal = false;
+		}
+
+		// Steno mode
+		// Enable support for Able Player keyboard shortcuts in textaarea fields
+		// so users can control the player while transcribing
+		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
+			this.stenoMode = true;
+		}
+		else {
+			this.stenoMode = false;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
