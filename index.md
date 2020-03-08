@@ -213,6 +213,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-skin** - optional; "legacy (default) or "2020". The default skin has two rows of controls, with the seekbar positioned in available space within the top row. The "2020" skin, introduced in version 4.2, has all buttons in one row beneath a full-width seekbar. 
 -   **data-speed-icons** - optional; "animals" (default) or "arrows". The default setting uses a turtle icon for *slower* and a rabbit icon for *faster*. Setting this to "arrows" uses the original Able Player icons (prior to version 3.5), arrows pointing up for *faster* and down for *slower*.
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **data-steno-mode** - optional; "true" to allow keyboard shortcuts for controlling the player remotely within textarea form fields, e.g., for transcribing media content.
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
 -   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is intelligently calculated based on  duration of the media.
 -   **data-show-now-playing** - optional; "true" or "false" to include "Selected track" section within player; only applies when a playlist is present
@@ -749,7 +750,7 @@ at the University of Washington, with financial support from the National Scienc
 [Committee on Institutional Cooperation][] (CIC).
 - Turtle and rabbit icons (available as optional alternatives for the speed buttons) are provided courtesy of [Icons8][].
 - Sample video tracks are provided courtesy of [The DO-IT Center][] at the University of Washington. Additional videos are available on the [DO-IT Video][] website, which uses Able Player.
-- Sample audio tracks are provided courtesy of Terrill Thompson from his album [Flavors, by Flow Theory][].
+- Sample audio tracks feature songs by Terrill Thompson, Able Player's creator and lead developer. Check out [Terrill's music site][] for more listening, and to support his work.
 
 
   [AccessComputing]: http://washington.edu/accesscomputing
@@ -759,7 +760,6 @@ at the University of Washington, with financial support from the National Scienc
   [develop]: https://github.com/ableplayer/ableplayer/tree/develop
   [examples]: http://ableplayer.github.io/ableplayer/demos/
   [Filming the Signer]: http://www.sign-lang.uni-hamburg.de/signingbooks/sbrc/grid/d71/guide12.htm
-  [Flavors, by Flow Theory]: http://www.terrillthompson.com/music/2012/01/flow-theory-flavors/
   [DO-IT Video]: http://washington.edu/doit/video
   [Google Developer Console]: https://console.developers.google.com/
   [Google's Getting Started page]: https://developers.google.com/api-client-library/javascript/start/start-js#Getkeysforyourapplication
@@ -774,6 +774,7 @@ at the University of Washington, with financial support from the National Scienc
   [Modernizr]: http://modernizr.com/
   [npm]: https://www.npmjs.com/
   [Signing Books for the Deaf]: http://www.sign-lang.uni-hamburg.de/signingbooks/
+  [Terrill's music site]: https://terrillthompson.com/music
   [The DO-IT Center]: http://washington.edu/doit
   [Video Demo #7]: demos/video7.html
   [WebVTT validator]: https://quuz.org/webvtt/
