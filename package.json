@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/ableplayer/ableplayer.git"
   },
-  "main": "build/ableplayer.min.js",
+  "main": "build/ableplayer.dist.js",
   "scripts": {
     "build": "grunt"
   },
