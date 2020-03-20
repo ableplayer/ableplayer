@@ -309,3 +309,4 @@ var tr = {
 "windowBringTopAlert": "Bu pencere artık saydadaki diğer objenin önünde."
 
 };
+module.exports = tr;

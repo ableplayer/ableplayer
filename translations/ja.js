@@ -309,3 +309,4 @@ var ja = {
 "windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。"
 
 };
+module.exports = ja;

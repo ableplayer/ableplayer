@@ -309,3 +309,4 @@ var ca = {
 "windowBringTopAlert": "Aquesta finestra es troba davant de la resta d\'objectes de la pàgina."
 
 };
+module.exports = ca;

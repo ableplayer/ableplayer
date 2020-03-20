@@ -309,3 +309,4 @@ var fr = {
 "windowBringTopAlert": "Cette fenêtre est maintenant devant d’autres objets sur la page.",
 
 };
+module.exports = fr;

@@ -309,3 +309,4 @@ var he = {
 "windowBringTopAlert": "חלון זה נמצא עתה מעל אלמנטים אחרים בעמוד."
 
 };
+module.exports = he;

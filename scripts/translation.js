@@ -43,13 +43,10 @@
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}
-		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-		this.importTranslationFile(translationFile).then(function(result) {
-			collapsedLang = thisObj.lang.replace('-','');
-			thisObj.tt = eval(collapsedLang);
-			deferred.resolve();
-		});
-		return deferred.promise();
+		translationFile = require("../translations/" + this.lang + ".js");
+    thisObj.tt = eval(translationFile);
+    deferred.resolve();
+    return deferred.promise();
 	};
 
 	AblePlayer.prototype.importTranslationFile = function(translationFile) {
