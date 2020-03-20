@@ -19,22 +19,9 @@
 	};
 
 	AblePlayer.prototype.getRootPath = function() {
-
-		// returns Able Player root path (assumes ableplayer.js is in /build, one directory removed from root)
-		var scripts, i, scriptSrc, scriptFile, fullPath, ablePath, parentFolderIndex, rootPath;
-		scripts= document.getElementsByTagName('script');
-		for (i=0; i < scripts.length; i++) {
-			scriptSrc = scripts[i].src;
-			scriptFile = scriptSrc.substr(scriptSrc.lastIndexOf('/'));
-			if (scriptFile.indexOf('ableplayer') !== -1) {
-				// this is the ableplayerscript
-				fullPath = scriptSrc.split('?')[0]; // remove any ? params
-				break;
-			}
-		}
-		ablePath= fullPath.split('/').slice(0, -1).join('/'); // remove last filename part of path
-		parentFolderIndex = ablePath.lastIndexOf('/');
-		rootPath = ablePath.substring(0, parentFolderIndex) + '/';
+		// no need to find root path from script tag anymore, just
+		// return 'ableplayer' (most probably won't need this anyway)
+		rootPath = "ableplayer/";
 		return rootPath;
 	}
 
@@ -93,38 +80,37 @@
 	AblePlayer.prototype.setButtonImages = function() {
 
 		// NOTE: volume button images are now set dynamically within volume.js
-		this.imgPath = this.rootPath + 'button-icons/' + this.iconColor + '/';
-		this.playButtonImg = this.imgPath + 'play.png';
-		this.pauseButtonImg = this.imgPath + 'pause.png';
+		this.playButtonImg = require('../button-icons/' + this.iconColor + '/' + 'play.png');
+		this.pauseButtonImg = require('../button-icons/' + this.iconColor + '/' + 'pause.png');
 
-		this.restartButtonImg = this.imgPath + 'restart.png';
+		this.restartButtonImg = require('../button-icons/' + this.iconColor + '/' + 'restart.png');
 
-		this.rewindButtonImg = this.imgPath + 'rewind.png';
-		this.forwardButtonImg = this.imgPath + 'forward.png';
+		this.rewindButtonImg = require('../button-icons/' + this.iconColor + '/' + 'rewind.png');
+		this.forwardButtonImg = require('../button-icons/' + this.iconColor + '/' + 'forward.png');
 
-		this.previousButtonImg = this.imgPath + 'previous.png';
-		this.nextButtonImg = this.imgPath + 'next.png';
+		this.previousButtonImg = require('../button-icons/' + this.iconColor + '/' + 'previous.png');
+		this.nextButtonImg = require('../button-icons/' + this.iconColor + '/' + 'next.png');
 
 		if (this.speedIcons === 'arrows') {
-			this.fasterButtonImg = this.imgPath + 'slower.png';
-			this.slowerButtonImg = this.imgPath + 'faster.png';
+			this.fasterButtonImg = require('../button-icons/' + this.iconColor + '/' + 'slower.png');
+			this.slowerButtonImg = require('../button-icons/' + this.iconColor + '/' + 'faster.png');
 		}
 		else if (this.speedIcons === 'animals') {
-			this.fasterButtonImg = this.imgPath + 'rabbit.png';
-			this.slowerButtonImg = this.imgPath + 'turtle.png';
+			this.fasterButtonImg = require('../button-icons/' + this.iconColor + '/' + 'rabbit.png');
+			this.slowerButtonImg = require('../button-icons/' + this.iconColor + '/' + 'turtle.png');
 		}
 
-		this.captionsButtonImg = this.imgPath + 'captions.png';
-		this.chaptersButtonImg = this.imgPath + 'chapters.png';
-		this.signButtonImg = this.imgPath + 'sign.png';
-		this.transcriptButtonImg = this.imgPath + 'transcript.png';
-		this.descriptionsButtonImg = this.imgPath + 'descriptions.png';
+		this.captionsButtonImg = require('../button-icons/' + this.iconColor + '/' + 'captions.png');
+		this.chaptersButtonImg = require('../button-icons/' + this.iconColor + '/' + 'chapters.png');
+		this.signButtonImg = require('../button-icons/' + this.iconColor + '/' + 'sign.png');
+		this.transcriptButtonImg = require('../button-icons/' + this.iconColor + '/' + 'transcript.png');
+		this.descriptionsButtonImg = require('../button-icons/' + this.iconColor + '/' + 'descriptions.png');
 
-		this.fullscreenExpandButtonImg = this.imgPath + 'fullscreen-expand.png';
-		this.fullscreenCollapseButtonImg = this.imgPath + 'fullscreen-collapse.png';
+		this.fullscreenExpandButtonImg = require('../button-icons/' + this.iconColor + '/' + 'fullscreen-expand.png');
+		this.fullscreenCollapseButtonImg = require('../button-icons/' + this.iconColor + '/' + 'fullscreen-collapse.png');
 
-		this.prefsButtonImg = this.imgPath + 'preferences.png';
-		this.helpButtonImg = this.imgPath + 'help.png';
+		this.prefsButtonImg = require('../button-icons/' + this.iconColor + '/' + 'preferences.png');
+		this.helpButtonImg = require('../button-icons/' + this.iconColor + '/' + 'help.png');
 	};
 
 	AblePlayer.prototype.getSvgData = function(button) {
