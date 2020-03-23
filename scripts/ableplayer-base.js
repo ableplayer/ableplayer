@@ -558,7 +558,8 @@ var AblePlayerInstances = [];
 	AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
 
-// Exports the creating of AblePlayer instances, as well as
-// the instances themselves
+// Exports the creating of AblePlayer instances, which
+// needs to be called after a react component is mounted
 exports.getAllAblePlayers = window.getAllAblePlayers;
+//  Exports the instances created, for debugging purposes
 exports.ablePlayerInstances = AblePlayerInstances;
