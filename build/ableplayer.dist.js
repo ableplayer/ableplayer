@@ -11804,16 +11804,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		$thisElement = $(document.activeElement);
 
     if (which === 27) { // escape
-
       if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
-
         // This element is part of transcript area.
         this.handleTranscriptToggle();
         return false;
       }
     }
 		if (!this.okToHandleKeyPress()) {
-
 			return false;
 		}
 
@@ -11830,7 +11827,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			e.target.tagName === 'SELECT'
 		)){
 			if (which === 27) { // escape
-
 				this.closePopups();
 			}
 			else if (which === 32) { // spacebar = play/pause
