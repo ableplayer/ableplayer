@@ -429,12 +429,15 @@ var AblePlayerInstances = [];
 		}
 
 		// Search
-		if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
-			// conducting a search currently requires an external div in which to write the results
-			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+		// conducting a search requires an external div in which to write the results
+		if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+
+      this.searchDiv = $(media).data('search-div');
+
+      // Search term (optional; could be assigned later in a JavaScript application)
+      if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
 				this.searchString = $(media).data('search');
-				this.searchDiv = $(media).data('search-div');
-			}
+      }
 
 			// Search Language
 			if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {

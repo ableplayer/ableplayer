@@ -58,11 +58,11 @@
 						$resultsItem.append(itemStartSpan, itemText);
 						$resultsList.append($resultsItem);
 					}
-					$('#' + this.searchDiv).append(searchStringHtml,$resultsSummary,$resultsList);
+					$('#' + this.searchDiv).html(searchStringHtml).append($resultsSummary,$resultsList);
 				}
 				else {
 					var noResults = $('<p>').text(this.tt.noResultsFound);
-					$('#' + this.searchDiv).append(noResults);
+					$('#' + this.searchDiv).html(searchStringHtml).append(noResults);
 				}
 			}
 		}

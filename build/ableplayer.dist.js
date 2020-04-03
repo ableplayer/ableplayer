@@ -429,12 +429,15 @@ var AblePlayerInstances = [];
 		}
 
 		// Search
-		if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
-			// conducting a search currently requires an external div in which to write the results
-			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+		// conducting a search requires an external div in which to write the results
+		if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+
+      this.searchDiv = $(media).data('search-div');
+
+      // Search term (optional; could be assigned later in a JavaScript application)
+      if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
 				this.searchString = $(media).data('search');
-				this.searchDiv = $(media).data('search-div');
-			}
+      }
 
 			// Search Language
 			if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {
@@ -11347,11 +11350,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						$resultsItem.append(itemStartSpan, itemText);
 						$resultsList.append($resultsItem);
 					}
-					$('#' + this.searchDiv).append(searchStringHtml,$resultsSummary,$resultsList);
+					$('#' + this.searchDiv).html(searchStringHtml).append($resultsSummary,$resultsList);
 				}
 				else {
 					var noResults = $('<p>').text(this.tt.noResultsFound);
-					$('#' + this.searchDiv).append(noResults);
+					$('#' + this.searchDiv).html(searchStringHtml).append(noResults);
 				}
 			}
 		}
