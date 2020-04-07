@@ -18,6 +18,7 @@
 		this.setButtonImages();
 	};
 
+	// TODO: Remove later when we replaced all this.rootPath occurrances
 	AblePlayer.prototype.getRootPath = function() {
 		// no need to find root path from script tag anymore, just
 		// return 'ableplayer' (most probably won't need this anyway)
