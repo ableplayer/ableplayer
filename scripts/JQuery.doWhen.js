@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 /*! Copyright (c) 2014 - Paul Tavares - purtuga - @paul_tavares - MIT License */
 ;(function($){
 

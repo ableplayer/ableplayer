@@ -1,3 +1,6 @@
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 
 	AblePlayer.prototype.injectPlayerCode = function() {

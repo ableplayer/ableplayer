@@ -562,6 +562,9 @@ var AblePlayerInstances = [];
 // Exports AblePlayer construtor
 exports.AblePlayer = window.AblePlayer;
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 	// Set default variable values.
 	AblePlayer.prototype.setDefaults = function () {
@@ -1400,6 +1403,9 @@ exports.AblePlayer = window.AblePlayer;
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
@@ -2254,6 +2260,7 @@ exports.AblePlayer = window.AblePlayer;
 
 })(jQuery);
 
+var jQuery = require("jquery");
 (function ($) {
 	// See section 4.1 of dev.w3.org/html5/webvtt for format details.
 	AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
@@ -3022,6 +3029,9 @@ exports.AblePlayer = window.AblePlayer;
 		return time;
 	}
 })(jQuery);
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 
@@ -4916,6 +4926,8 @@ exports.AblePlayer = window.AblePlayer;
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	// Loads files referenced in track elements, and performs appropriate setup.
 	// For example, captions and text descriptions.
@@ -5329,6 +5341,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 	AblePlayer.prototype.initYouTubePlayer = function () {
@@ -6029,6 +6043,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 
@@ -6502,6 +6518,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.addVolumeSlider = function($div) {
@@ -6915,6 +6933,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
@@ -7062,6 +7082,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.focusedElementBeforeModal.focus();
 	};
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 
@@ -7237,6 +7259,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 	AblePlayer.prototype.initDescription = function() {
@@ -7599,6 +7623,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.getUserAgent = function() {
@@ -7761,6 +7787,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 	AblePlayer.prototype.seekTo = function (newTime) {
@@ -9646,6 +9675,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 	AblePlayer.prototype.updateCaption = function (time) {
 
@@ -10077,6 +10109,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.populateChaptersDiv = function() {
@@ -10341,6 +10375,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.updateMeta = function (time) {
 		if (this.hasMeta) {
@@ -10476,6 +10512,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 
@@ -11172,6 +11210,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.showSearchResults = function() {
 
@@ -11346,6 +11386,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		return time;
 	};
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 	// Media events
@@ -12262,6 +12304,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 })(jQuery);
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 
 	AblePlayer.prototype.initDragDrop = function ( which ) {
@@ -13023,6 +13068,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.initSignLanguage = function() {
 
@@ -13118,6 +13165,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 	// Look up ISO 639-1 language codes to be used as subtitle labels
@@ -14109,6 +14158,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	}
 
 })(jQuery);
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
@@ -14178,6 +14229,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function($) {
 	AblePlayer.prototype.computeEndTime = function(startTime, durationTime) {
@@ -14266,6 +14319,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		return vttCaptions;
 	};
 })(jQuery);
+
+var jQuery = require("jquery");
 
 /*! Copyright (c) 2014 - Paul Tavares - purtuga - @paul_tavares - MIT License */
 ;(function($){
@@ -14380,6 +14435,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     };
 
 })(jQuery);
+var jQuery = require("jquery");
+
 /* Video Transcript Sorter (VTS)
  * Used to synchronize time stamps from WebVTT resources
  * so they appear in the proper sequence within an auto-generated interactive transcript
@@ -15474,6 +15531,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
 
 (function ($) {
 	AblePlayer.prototype.initVimeoPlayer = function () {

@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables

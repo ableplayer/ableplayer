@@ -1,3 +1,4 @@
+var jQuery = require("jquery");
 
 (function ($) {
 	AblePlayer.prototype.initVimeoPlayer = function () {

@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 (function ($) {
 	// Look up ISO 639-1 language codes to be used as subtitle labels
 	// In some instances "name" has been trunctation for readability

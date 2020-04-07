@@ -1,3 +1,6 @@
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 	// Set default variable values.
 	AblePlayer.prototype.setDefaults = function () {
