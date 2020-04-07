@@ -1,4 +1,4 @@
-var en = {
+exports.strings = {
 
 "audio": "audio",
 
@@ -309,4 +309,3 @@ var en = {
 "windowBringTopAlert": "This window is now in front of other objects on the page."
 
 };
-module.exports = en;

@@ -1,4 +1,4 @@
-var it = {
+exports.strings = {
 
 "audio": "audio",
 
@@ -333,4 +333,3 @@ var it = {
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
 };
-module.exports = it;

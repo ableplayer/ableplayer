@@ -1,4 +1,4 @@
-var ptbr = {
+exports.strings = {
 
 "audio": "áudio",
 
@@ -309,4 +309,3 @@ var ptbr = {
 "windowBringTopAlert": "Essa janela está agora atrás dos outros objetos nesta página."
 
 };
-module.exports = pt-br;

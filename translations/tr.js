@@ -1,4 +1,4 @@
-var tr = {
+exports.strings = {
 
 "audio": "ses",
 
@@ -309,4 +309,3 @@ var tr = {
 "windowBringTopAlert": "Bu pencere artık saydadaki diğer objenin önünde."
 
 };
-module.exports = tr;

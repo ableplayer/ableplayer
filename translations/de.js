@@ -1,4 +1,4 @@
-var de = {
+exports.strings = {
 
 "audio": "audio",
 
@@ -309,4 +309,3 @@ var de = {
 "windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund."
 
 };
-module.exports = de;

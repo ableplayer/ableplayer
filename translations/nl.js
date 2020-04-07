@@ -1,4 +1,4 @@
-var nl = {
+exports.strings = {
 
 "audio": "audio",
 
@@ -309,4 +309,3 @@ var nl = {
 "windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
 
 };
-module.exports = nl;

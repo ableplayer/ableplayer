@@ -1,4 +1,4 @@
-var he = {
+exports.strings = {
 
 "audio": "שמע",
 
@@ -309,4 +309,3 @@ var he = {
 "windowBringTopAlert": "חלון זה נמצא עתה מעל אלמנטים אחרים בעמוד."
 
 };
-module.exports = he;

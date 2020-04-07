@@ -1,4 +1,4 @@
-var nb = {
+exports.strings = {
 
 "audio": "audio",
 
@@ -309,4 +309,3 @@ var nb = {
 "windowBringTopAlert": "Dette vinduet ligger nå foran andre vinduer."
 
 };
-module.exports = nb;
