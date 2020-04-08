@@ -43,8 +43,7 @@ var Cookies = require("js-cookie");
 var AblePlayerInstances = [];
 
 (function ($) {
-	// Initialise all AblePlayerInstances - this can be called
-	// by the React component that imports ableplayer
+	// Initialise all AblePlayerInstances
   window.initAllAblePlayers = function() {
     $("video, audio").each(function(index, element) {
       if ($(element).data("able-player") !== undefined) {
