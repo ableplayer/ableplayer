@@ -1,4 +1,4 @@
-var it = {
+exports.strings = {
 
 "audio": "audio",
 
@@ -6,9 +6,9 @@ var it = {
 
 "playerHeading": "Lettore multimediale",
 
-"faster": "Pi˘ veloce",
+"faster": "Pi√π veloce",
 
-"slower": "Pi˘ lento",
+"slower": "Pi√π lento",
 
 "play": "Riproduci",
 
@@ -80,7 +80,7 @@ var it = {
 
 "fullScreen": "Schermo intero",
 
-"speed": "Velocit‡",
+"speed": "Velocit√†",
 
 "and": "e",
 
@@ -124,7 +124,7 @@ var it = {
 
 "alertNonDescribedVersion": "Sto usando la versione non audiodescritta di questo video",
 
-"fallbackError1": "Spiacente il tuo browser non Ë in grado di riprodurre questo",
+"fallbackError1": "Spiacente il tuo browser non √® in grado di riprodurre questo",
 
 "fallbackError2": "I seguenti browser supportano questo lettore multimediale",
 
@@ -156,7 +156,7 @@ var it = {
 
 "prefIntroDescription4": "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.",
 
-"prefIntroKeyboard1": "Il lettore multimediale puÚ essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",
+"prefIntroKeyboard1": "Il lettore multimediale pu√≤ essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",
 
 "prefIntroKeyboard2": "I tasti di scelta rapida, (Shift, Alt, e Control) possono essere assegnati di seguito.",
 
@@ -190,7 +190,7 @@ var it = {
 
 "prefDescFormat": "Formato preferito",
 
-"prefDescFormatHelp": "Se entrambi i formati sono disponibili, ne verr‡ usato soltanto uno.",
+"prefDescFormatHelp": "Se entrambi i formati sono disponibili, ne verr√† usato soltanto uno.",
 
 "prefDescFormatOption1": "Versione di descrizione alternativa per il video",
 
@@ -216,7 +216,7 @@ var it = {
 
 "prefCaptionsSize": "Dimensione del carattere",
 
-"prefCaptionsOpacity": "Opacit‡",
+"prefCaptionsOpacity": "Opacit√†",
 
 "prefCaptionsStyle": "Stile",
 
@@ -264,7 +264,7 @@ var it = {
 
 "prefSuccess": "I cambiamenti sono stati salvati.",
 
-"prefNoChange": "Non Ë stato effettuato alcun cambiamento.",
+"prefNoChange": "Non √® stato effettuato alcun cambiamento.",
 
 "help": "Aiuto",
 
@@ -300,7 +300,7 @@ var it = {
 
 "windowSendBack": "Manda in fondo",
 
-"windowSendBackAlert": "Questa finestra Ë ora dietro agli altri oggetti della pagina.",
+"windowSendBackAlert": "Questa finestra √® ora dietro agli altri oggetti della pagina.",
 
 "windowBringTop": "Metti in primo piano",
 

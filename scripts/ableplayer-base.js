@@ -30,6 +30,11 @@
 	// https://developer.mozilla.org/en-US/docs/Web/API/Window/speechSynthesis
 */
 
+// Add dependencies here so that including ableplayer in another
+// package.json, it comes with dependencies included
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
 "use strict";
@@ -37,16 +42,16 @@
 // maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
 var AblePlayerInstances = [];
 
-(function ($) {
-	$(document).ready(function () {
-
-		$('video, audio').each(function (index, element) {
-			if ($(element).data('able-player') !== undefined) {
-				AblePlayerInstances.push(new AblePlayer($(this),$(element)));
-			}
-		});
+// Initialise all AblePlayerInstances
+exports.initAllAblePlayers = function() {
+	$("video, audio").each(function(index, element) {
+		if ($(element).data("able-player") !== undefined) {
+			AblePlayerInstances.push(new AblePlayer($(this), $(element)));
+		}
 	});
+};
 
+(function ($) {
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
 	window.onYouTubeIframeAPIReady = function() {
 		AblePlayer.youtubeIframeAPIReady = true;
@@ -128,15 +133,6 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.debug = false;
-		}
-
-		// Path to root directory of Able Player code
-		if ($(media).data('root-path') !== undefined) {
-			// add a trailing slash if there is none
-			this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
-		}
-		else {
-			this.rootPath = this.getRootPath();
 		}
 
 		// Volume
@@ -505,6 +501,7 @@ var AblePlayerInstances = [];
 		);
 	};
 
+
 	// Index to increment every time new player is created.
 	AblePlayer.nextIndex = 0;
 
@@ -560,3 +557,6 @@ var AblePlayerInstances = [];
 	AblePlayer.youtubeIframeAPIReady = false;
 	AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
+
+// Exports AblePlayer construtor
+exports.AblePlayer = window.AblePlayer;

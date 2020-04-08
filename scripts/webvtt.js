@@ -1,3 +1,4 @@
+var jQuery = require("jquery");
 (function ($) {
 	// See section 4.1 of dev.w3.org/html5/webvtt for format details.
 	AblePlayer.prototype.parseWebVTT = function(srcFile,text) {

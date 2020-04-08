@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 (function ($) {
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {

@@ -30,6 +30,11 @@
 	// https://developer.mozilla.org/en-US/docs/Web/API/Window/speechSynthesis
 */
 
+// Add dependencies here so that including ableplayer in another
+// package.json, it comes with dependencies included
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
 "use strict";
@@ -37,16 +42,16 @@
 // maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
 var AblePlayerInstances = [];
 
-(function ($) {
-	$(document).ready(function () {
-
-		$('video, audio').each(function (index, element) {
-			if ($(element).data('able-player') !== undefined) {
-				AblePlayerInstances.push(new AblePlayer($(this),$(element)));
-			}
-		});
+// Initialise all AblePlayerInstances
+exports.initAllAblePlayers = function() {
+	$("video, audio").each(function(index, element) {
+		if ($(element).data("able-player") !== undefined) {
+			AblePlayerInstances.push(new AblePlayer($(this), $(element)));
+		}
 	});
+};
 
+(function ($) {
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
 	window.onYouTubeIframeAPIReady = function() {
 		AblePlayer.youtubeIframeAPIReady = true;
@@ -128,15 +133,6 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.debug = false;
-		}
-
-		// Path to root directory of Able Player code
-		if ($(media).data('root-path') !== undefined) {
-			// add a trailing slash if there is none
-			this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
-		}
-		else {
-			this.rootPath = this.getRootPath();
 		}
 
 		// Volume
@@ -505,6 +501,7 @@ var AblePlayerInstances = [];
 		);
 	};
 
+
 	// Index to increment every time new player is created.
 	AblePlayer.nextIndex = 0;
 
@@ -561,6 +558,12 @@ var AblePlayerInstances = [];
 	AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
 
+// Exports AblePlayer construtor
+exports.AblePlayer = window.AblePlayer;
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 	// Set default variable values.
 	AblePlayer.prototype.setDefaults = function () {
@@ -580,26 +583,6 @@ var AblePlayerInstances = [];
 		this.setIconColor();
 		this.setButtonImages();
 	};
-
-	AblePlayer.prototype.getRootPath = function() {
-
-		// returns Able Player root path (assumes ableplayer.js is in /build, one directory removed from root)
-		var scripts, i, scriptSrc, scriptFile, fullPath, ablePath, parentFolderIndex, rootPath;
-		scripts= document.getElementsByTagName('script');
-		for (i=0; i < scripts.length; i++) {
-			scriptSrc = scripts[i].src;
-			scriptFile = scriptSrc.substr(scriptSrc.lastIndexOf('/'));
-			if (scriptFile.indexOf('ableplayer') !== -1) {
-				// this is the ableplayerscript
-				fullPath = scriptSrc.split('?')[0]; // remove any ? params
-				break;
-			}
-		}
-		ablePath= fullPath.split('/').slice(0, -1).join('/'); // remove last filename part of path
-		parentFolderIndex = ablePath.lastIndexOf('/');
-		rootPath = ablePath.substring(0, parentFolderIndex) + '/';
-		return rootPath;
-	}
 
 	AblePlayer.prototype.setIconColor = function() {
 
@@ -656,38 +639,37 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.setButtonImages = function() {
 
 		// NOTE: volume button images are now set dynamically within volume.js
-		this.imgPath = this.rootPath + 'button-icons/' + this.iconColor + '/';
-		this.playButtonImg = this.imgPath + 'play.png';
-		this.pauseButtonImg = this.imgPath + 'pause.png';
+		this.playButtonImg = require('../button-icons/' + this.iconColor + '/' + 'play.png');
+		this.pauseButtonImg = require('../button-icons/' + this.iconColor + '/' + 'pause.png');
 
-		this.restartButtonImg = this.imgPath + 'restart.png';
+		this.restartButtonImg = require('../button-icons/' + this.iconColor + '/' + 'restart.png');
 
-		this.rewindButtonImg = this.imgPath + 'rewind.png';
-		this.forwardButtonImg = this.imgPath + 'forward.png';
+		this.rewindButtonImg = require('../button-icons/' + this.iconColor + '/' + 'rewind.png');
+		this.forwardButtonImg = require('../button-icons/' + this.iconColor + '/' + 'forward.png');
 
-		this.previousButtonImg = this.imgPath + 'previous.png';
-		this.nextButtonImg = this.imgPath + 'next.png';
+		this.previousButtonImg = require('../button-icons/' + this.iconColor + '/' + 'previous.png');
+		this.nextButtonImg = require('../button-icons/' + this.iconColor + '/' + 'next.png');
 
 		if (this.speedIcons === 'arrows') {
-			this.fasterButtonImg = this.imgPath + 'slower.png';
-			this.slowerButtonImg = this.imgPath + 'faster.png';
+			this.fasterButtonImg = require('../button-icons/' + this.iconColor + '/' + 'slower.png');
+			this.slowerButtonImg = require('../button-icons/' + this.iconColor + '/' + 'faster.png');
 		}
 		else if (this.speedIcons === 'animals') {
-			this.fasterButtonImg = this.imgPath + 'rabbit.png';
-			this.slowerButtonImg = this.imgPath + 'turtle.png';
+			this.fasterButtonImg = require('../button-icons/' + this.iconColor + '/' + 'rabbit.png');
+			this.slowerButtonImg = require('../button-icons/' + this.iconColor + '/' + 'turtle.png');
 		}
 
-		this.captionsButtonImg = this.imgPath + 'captions.png';
-		this.chaptersButtonImg = this.imgPath + 'chapters.png';
-		this.signButtonImg = this.imgPath + 'sign.png';
-		this.transcriptButtonImg = this.imgPath + 'transcript.png';
-		this.descriptionsButtonImg = this.imgPath + 'descriptions.png';
+		this.captionsButtonImg = require('../button-icons/' + this.iconColor + '/' + 'captions.png');
+		this.chaptersButtonImg = require('../button-icons/' + this.iconColor + '/' + 'chapters.png');
+		this.signButtonImg = require('../button-icons/' + this.iconColor + '/' + 'sign.png');
+		this.transcriptButtonImg = require('../button-icons/' + this.iconColor + '/' + 'transcript.png');
+		this.descriptionsButtonImg = require('../button-icons/' + this.iconColor + '/' + 'descriptions.png');
 
-		this.fullscreenExpandButtonImg = this.imgPath + 'fullscreen-expand.png';
-		this.fullscreenCollapseButtonImg = this.imgPath + 'fullscreen-collapse.png';
+		this.fullscreenExpandButtonImg = require('../button-icons/' + this.iconColor + '/' + 'fullscreen-expand.png');
+		this.fullscreenCollapseButtonImg = require('../button-icons/' + this.iconColor + '/' + 'fullscreen-collapse.png');
 
-		this.prefsButtonImg = this.imgPath + 'preferences.png';
-		this.helpButtonImg = this.imgPath + 'help.png';
+		this.prefsButtonImg = require('../button-icons/' + this.iconColor + '/' + 'preferences.png');
+		this.helpButtonImg = require('../button-icons/' + this.iconColor + '/' + 'help.png');
 	};
 
 	AblePlayer.prototype.getSvgData = function(button) {
@@ -1428,6 +1410,9 @@ var AblePlayerInstances = [];
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
@@ -2282,6 +2267,7 @@ var AblePlayerInstances = [];
 
 })(jQuery);
 
+var jQuery = require("jquery");
 (function ($) {
 	// See section 4.1 of dev.w3.org/html5/webvtt for format details.
 	AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
@@ -3050,6 +3036,9 @@ var AblePlayerInstances = [];
 		return time;
 	}
 })(jQuery);
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 
@@ -4101,7 +4090,7 @@ var AblePlayerInstances = [];
 					}
 					else {
 						$pipeImg = $('<img>', {
-							src: this.rootPath + 'button-icons/' + this.iconColor + '/pipe.png',
+							src: require('../button-icons/' +  this.iconColor + '/pipe.png'),
 							alt: '',
 							role: 'presentation'
 						});
@@ -4112,29 +4101,29 @@ var AblePlayerInstances = [];
 				else {
 					// this control is a button
 					if (control === 'volume') {
-						buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/' + this.volumeButton + '.png';
+						buttonImgSrc = require('../button-icons/' + this.iconColor + '/' + this.volumeButton + '.png');
 					}
 					else if (control === 'fullscreen') {
-						buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/fullscreen-expand.png';
+						buttonImgSrc = require('../button-icons/' + this.iconColor + '/fullscreen-expand.png');
 					}
 					else if (control === 'slower') {
 						if (this.speedIcons === 'animals') {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/turtle.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/turtle.png');
 						}
 						else {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/slower.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/slower.png');
 						}
 					}
 					else if (control === 'faster') {
 						if (this.speedIcons === 'animals') {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/rabbit.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/rabbit.png');
 						}
 						else {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/faster.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/faster.png');
 						}
 					}
 					else {
-						buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/' + control + '.png';
+						buttonImgSrc = require('../button-icons/' + this.iconColor + '/' + control + '.png');
 					}
 					buttonTitle = this.getButtonTitle(control);
 
@@ -4251,7 +4240,7 @@ var AblePlayerInstances = [];
 							'class': iconClass
 						});
 						buttonUse = $('<use>',{
-							'xlink:href': this.rootPath + 'button-icons/able-icons.svg#' + iconClass
+							'xlink:href': require('../button-icons/able-icons.svg#' + iconClass);
 						});
 						buttonIcon.append(buttonUse);
 						*/
@@ -4955,6 +4944,8 @@ var AblePlayerInstances = [];
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	// Loads files referenced in track elements, and performs appropriate setup.
 	// For example, captions and text descriptions.
@@ -5368,6 +5359,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 	AblePlayer.prototype.initYouTubePlayer = function () {
@@ -6068,6 +6061,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 
@@ -6541,6 +6536,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.addVolumeSlider = function($div) {
@@ -6967,6 +6964,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
@@ -7123,6 +7122,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 
@@ -7298,6 +7299,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 	AblePlayer.prototype.initDescription = function() {
@@ -7660,6 +7663,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.getUserAgent = function() {
@@ -7822,6 +7827,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
 
 (function ($) {
 	AblePlayer.prototype.seekTo = function (newTime) {
@@ -9760,6 +9768,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 	AblePlayer.prototype.updateCaption = function (time) {
 
@@ -10191,6 +10202,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.populateChaptersDiv = function() {
@@ -10455,6 +10468,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.updateMeta = function (time) {
 		if (this.hasMeta) {
@@ -10590,6 +10605,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 
@@ -11287,6 +11304,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.showSearchResults = function() {
 
@@ -11483,6 +11502,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		return time;
 	};
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 	// Media events
@@ -12447,6 +12468,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 })(jQuery);
 
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 
 	AblePlayer.prototype.initDragDrop = function ( which ) {
@@ -12588,7 +12612,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else {
 			// use image
-			buttonImgSrc = this.rootPath + 'button-icons/' + this.toolbarIconColor + '/preferences.png';
+			buttonImgSrc = require('../button-icons/' + this.toolbarIconColor + '/preferences.png');
 			$buttonImg = $('<img>',{
 				'src': buttonImgSrc,
 				'alt': '',
@@ -13249,6 +13273,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.initSignLanguage = function() {
 
@@ -13345,6 +13371,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function ($) {
 	// Look up ISO 639-1 language codes to be used as subtitle labels
@@ -14336,6 +14364,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	}
 
 })(jQuery);
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
@@ -14381,10 +14411,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}
-		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-		this.importTranslationFile(translationFile).then(function(result) {
-			collapsedLang = thisObj.lang.replace('-','');
-			thisObj.tt = eval(collapsedLang);
+		import("../translations/" + this.lang + ".js").then(function (translationFile) {
+			thisObj.tt = translationFile.strings;
 			deferred.resolve();
 		});
 		return deferred.promise();
@@ -14407,6 +14435,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 })(jQuery);
+
+var jQuery = require("jquery");
 
 (function($) {
 	AblePlayer.prototype.computeEndTime = function(startTime, durationTime) {
@@ -14495,6 +14525,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		return vttCaptions;
 	};
 })(jQuery);
+
+var jQuery = require("jquery");
 
 /*! Copyright (c) 2014 - Paul Tavares - purtuga - @paul_tavares - MIT License */
 ;(function($){
@@ -14609,6 +14641,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     };
 
 })(jQuery);
+var jQuery = require("jquery");
+
 /* Video Transcript Sorter (VTS)
  * Used to synchronize time stamps from WebVTT resources
  * so they appear in the proper sequence within an auto-generated interactive transcript
@@ -15703,6 +15737,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
+var jQuery = require("jquery");
 
 (function ($) {
 	AblePlayer.prototype.initVimeoPlayer = function () {

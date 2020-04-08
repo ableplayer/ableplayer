@@ -1,4 +1,4 @@
-var ja = {
+exports.strings = {
 
 "audio": "オーディオ",
 

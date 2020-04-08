@@ -1,3 +1,6 @@
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 
 	AblePlayer.prototype.injectPlayerCode = function() {
@@ -1048,7 +1051,7 @@
 					}
 					else {
 						$pipeImg = $('<img>', {
-							src: this.rootPath + 'button-icons/' + this.iconColor + '/pipe.png',
+							src: require('../button-icons/' +  this.iconColor + '/pipe.png'),
 							alt: '',
 							role: 'presentation'
 						});
@@ -1059,29 +1062,29 @@
 				else {
 					// this control is a button
 					if (control === 'volume') {
-						buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/' + this.volumeButton + '.png';
+						buttonImgSrc = require('../button-icons/' + this.iconColor + '/' + this.volumeButton + '.png');
 					}
 					else if (control === 'fullscreen') {
-						buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/fullscreen-expand.png';
+						buttonImgSrc = require('../button-icons/' + this.iconColor + '/fullscreen-expand.png');
 					}
 					else if (control === 'slower') {
 						if (this.speedIcons === 'animals') {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/turtle.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/turtle.png');
 						}
 						else {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/slower.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/slower.png');
 						}
 					}
 					else if (control === 'faster') {
 						if (this.speedIcons === 'animals') {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/rabbit.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/rabbit.png');
 						}
 						else {
-							buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/faster.png';
+							buttonImgSrc = require('../button-icons/' + this.iconColor + '/faster.png');
 						}
 					}
 					else {
-						buttonImgSrc = this.rootPath + 'button-icons/' + this.iconColor + '/' + control + '.png';
+						buttonImgSrc = require('../button-icons/' + this.iconColor + '/' + control + '.png');
 					}
 					buttonTitle = this.getButtonTitle(control);
 
@@ -1198,7 +1201,7 @@
 							'class': iconClass
 						});
 						buttonUse = $('<use>',{
-							'xlink:href': this.rootPath + 'button-icons/able-icons.svg#' + iconClass
+							'xlink:href': require('../button-icons/able-icons.svg#' + iconClass);
 						});
 						buttonIcon.append(buttonUse);
 						*/

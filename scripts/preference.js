@@ -1,3 +1,6 @@
+var jQuery = require("jquery");
+var Cookies = require("js-cookie");
+
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
 		Cookies.set('Able-Player', cookieValue, { expires:90 });
