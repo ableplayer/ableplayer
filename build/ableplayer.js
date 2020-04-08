@@ -137,15 +137,6 @@ var AblePlayerInstances = [];
 			this.debug = false;
 		}
 
-		// Path to root directory of Able Player code
-		if ($(media).data('root-path') !== undefined) {
-			// add a trailing slash if there is none
-			this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
-		}
-		else {
-			this.rootPath = this.getRootPath();
-		}
-
 		// Volume
 		// Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
 		this.defaultVolume = 7;
@@ -584,14 +575,6 @@ var Cookies = require("js-cookie");
 		this.setIconColor();
 		this.setButtonImages();
 	};
-
-	// TODO: Remove later when we replaced all this.rootPath occurrances
-	AblePlayer.prototype.getRootPath = function() {
-		// no need to find root path from script tag anymore, just
-		// return 'ableplayer' (most probably won't need this anyway)
-		rootPath = "ableplayer/";
-		return rootPath;
-	}
 
 	AblePlayer.prototype.setIconColor = function() {
 
@@ -4221,7 +4204,7 @@ var Cookies = require("js-cookie");
 							'class': iconClass
 						});
 						buttonUse = $('<use>',{
-							'xlink:href': this.rootPath + 'button-icons/able-icons.svg#' + iconClass
+							'xlink:href': require('../button-icons/able-icons.svg#' + iconClass);
 						});
 						buttonIcon.append(buttonUse);
 						*/
@@ -12449,7 +12432,7 @@ var Cookies = require("js-cookie");
 		}
 		else {
 			// use image
-			buttonImgSrc = this.rootPath + 'button-icons/' + this.toolbarIconColor + '/preferences.png';
+			buttonImgSrc = require('../button-icons/' + this.toolbarIconColor + '/preferences.png');
 			$buttonImg = $('<img>',{
 				'src': buttonImgSrc,
 				'alt': '',

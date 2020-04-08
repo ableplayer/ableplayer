@@ -1189,7 +1189,7 @@ var Cookies = require("js-cookie");
 							'class': iconClass
 						});
 						buttonUse = $('<use>',{
-							'xlink:href': this.rootPath + 'button-icons/able-icons.svg#' + iconClass
+							'xlink:href': require('../button-icons/able-icons.svg#' + iconClass);
 						});
 						buttonIcon.append(buttonUse);
 						*/
