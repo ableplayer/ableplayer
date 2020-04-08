@@ -97,7 +97,6 @@ var Cookies = require("js-cookie");
 
 	AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
-
 		var thisObj, $windowAlert, menuId, $newButton, $buttonIcon, buttonImgSrc, $buttonImg,
 			$buttonLabel, tooltipId, $tooltip, $popup,
 			label, position, buttonHeight, buttonWidth, tooltipY, tooltipX, tooltipStyle, tooltip,
@@ -191,7 +190,7 @@ var Cookies = require("js-cookie");
 			this.$transcriptAlert = $windowAlert;
 			this.$transcriptPopupButton = $newButton;
 			this.$transcriptPopup = $popup;
-			this.$transcriptToolbar.append($windowAlert,$newButton,$tooltip,$popup);
+			this.$transcriptToolbar.prepend($windowAlert,$newButton,$tooltip,$popup);
 		}
 		else if (which === 'sign') {
 			this.$signAlert = $windowAlert;
@@ -202,7 +201,15 @@ var Cookies = require("js-cookie");
 
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
-			e.stopPropagation();
+
+      if (thisObj.focusNotClick) {
+        return false;
+      }
+      if (thisObj.dragging) {
+				thisObj.dragKeys(which, e);
+				return false;
+		  }
+      e.stopPropagation();
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
@@ -326,6 +333,13 @@ var Cookies = require("js-cookie");
 
 		thisObj = this;
 
+		if (this.focusNotClick) {
+  		// transcript or sign window has just opened,
+  		// and focus moved to the window button
+  		// ignore the keystroke that triggered the popup
+  		return false;
+		}
+
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
 			$windowButton = this.$transcriptPopupButton;
@@ -344,15 +358,26 @@ var Cookies = require("js-cookie");
 				this.windowMenuClickRegistered = true;
 			}
 			else if (e.which === 27) { // escape
-				// hide the popup menu
-				$windowPopup.hide('fast', function() {
-					// also reset the Boolean
-					thisObj.windowMenuClickRegistered = false;
-					// also restore menu items to their original state
-					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-					// also return focus to window options button
-					$windowButton.focus();
-				});
+        if ($windowPopup.is(':visible')) {
+  				// close the popup menu
+          $windowPopup.hide('fast', function() {
+					  // also reset the Boolean
+            thisObj.windowMenuClickRegistered = false;
+            // also restore menu items to their original state
+            $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+            // also return focus to window options button
+            $windowButton.focus();
+				  });
+				}
+				else {
+  				// popup isn't open. Close the window
+          if (which === 'sign') {
+            this.handleSignToggle();
+          }
+          else if (which === 'transcript') {
+            this.handleTranscriptToggle();
+          }
+				}
 			}
 			else {
 				return false;
@@ -385,10 +410,9 @@ var Cookies = require("js-cookie");
 
 	AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
-		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, $thisRadio;
+		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, width, height, $thisRadio;
 
 		thisObj = this;
-
 		if (which === 'transcript') {
 			$window = this.$transcriptArea;
 			$windowPopup = this.$transcriptPopup;
@@ -401,6 +425,8 @@ var Cookies = require("js-cookie");
 			$windowButton = this.$signPopupButton;
 			resizeDialog = this.signResizeDialog;
 		}
+		this.$activeWindow = $window;
+
 		if (e.type === 'keydown') {
 			if (e.which === 27) { // escape
 				// hide the popup menu
@@ -433,8 +459,12 @@ var Cookies = require("js-cookie");
 		if (choice !== 'close') {
 			$windowButton.focus();
 		}
-
 		if (choice === 'move') {
+
+      // temporarily add role="application" to activeWindow
+      // otherwise, screen readers incercept arrow keys and moving window will not work
+      this.$activeWindow.attr('role','application');
+
 			if (!this.showedAlert(which)) {
 				this.showAlert(this.tt.windowMoveAlert,which);
 				if (which === 'transcript') {
@@ -455,14 +485,22 @@ var Cookies = require("js-cookie");
 		}
 		else if (choice == 'resize') {
 			// resize through the menu uses a form, not drag
+      var resizeFields = resizeDialog.getInputs();
+      if (resizeFields) {
+        // reset width and height values in form
+        resizeFields[0].value = $window.width();
+        resizeFields[1].value = $window.height();
+      }
 			resizeDialog.show();
 		}
 		else if (choice == 'close') {
 			// close window, place focus on corresponding button on controller bar
 			if (which === 'transcript') {
+        this.closingTranscript = true; // stopgrap to prevent double-firing of keypress
 				this.handleTranscriptToggle();
 			}
 			else if (which === 'sign') {
+        this.closingSign = true; // stopgrap to prevent double-firing of keypress
 				this.handleSignToggle();
 			}
 		}
@@ -598,6 +636,7 @@ var Cookies = require("js-cookie");
 	};
 
 	AblePlayer.prototype.resetDraggedObject = function ( x, y) {
+
 		this.$activeWindow.css({
 			'left': x + 'px',
 			'top': y + 'px'
@@ -625,7 +664,8 @@ var Cookies = require("js-cookie");
 
 	AblePlayer.prototype.endDrag = function(which) {
 
-		var $window, $windowPopup, $windowButton;
+		var thisObj, $window, $windowPopup, $windowButton;
+    thisObj = this;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -638,6 +678,9 @@ var Cookies = require("js-cookie");
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
+		// restore activeWindow role from 'application' to 'dialog'
+		this.$activeWindow.attr('role','dialog');
+		this.$activeWindow = null;
 
 		if (this.dragDevice === 'keyboard') {
 			$windowButton.focus();
@@ -654,13 +697,12 @@ var Cookies = require("js-cookie");
 		// Boolean to stop stray events from firing
 		this.windowMenuClickRegistered = false;
 		this.finishingDrag = true; // will be reset after window click event
-
 		// finishingDrag should e reset after window click event,
 		// which is triggered automatically after mouseup
 		// However, in case that's not reliable in some browsers
 		// need to ensure this gets cancelled
 		setTimeout(function() {
-			this.finishingDrag = false;
+			thisObj.finishingDrag = false;
 		}, 100);
 	};
 
@@ -739,7 +781,6 @@ var Cookies = require("js-cookie");
 
 		$(document).off('mousemove mouseup touchmove touchup');
 		this.$activeWindow.off('keydown');
-
 		$windowButton.show().focus();
 		this.resizing = false;
 		this.$activeWindow.removeClass('able-resize');

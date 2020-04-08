@@ -308,4 +308,30 @@ exports.strings = {
 
 "windowBringTopAlert": "Cette fenêtre est maintenant devant d’autres objets sur la page.",
 
+"resultsSummary1": "You searched for:",
+
+"resultsSummary2": "Found",
+
+"resultsSummary3": "matching items.",
+
+"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+
+"noResultsFound": "No results found.",
+
+"searchButtonLabel": "Play at",
+
+"hour": "hour",
+
+"minute": "minute",
+
+"second": "second",
+
+"hours": "hours",
+
+"minutes": "minutes",
+
+"seconds": "seconds",
+
+"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+
 };

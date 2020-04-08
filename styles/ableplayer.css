@@ -23,9 +23,9 @@
   * Player controls: (5000 - 6000)
   .able-controller .able-seekbar = 6900
   .able-controller .buttonOff = 6800
-  .able-controller button > img = 6700
-  .able-controller button > span = 6700
-	.able-controller button = 6600
+  .able-controller div[role="button"] > img = 6700
+  .able-controller div[role="button"] > span = 6700
+	.able-controller div[role="button"] = 6600
 	.able-big-play-button = 6500
 	div.able-captions-wrapper = 6000
   .able-seekbar-head = 5500
@@ -86,8 +86,7 @@
 }
 .able-controller {
 	position: relative;
-	border-top: 2px solid #4c4c4c;
-	border-bottom: 2px solid #4c4c4c;
+	border-bottom: 1px solid #4c4c4c;
 	background-color: #464646; /* background color of controller bar */
 	min-height: 38px; /* height of button (20px) + 4px border + 4px padding */
 	padding: 0;
@@ -127,7 +126,7 @@
 .able-left-controls, .able-right-controls {
     overflow: visible;
 }
-.able-left-controls button, .able-right-controls button {
+.able-left-controls div[role="button"], .able-right-controls div[role="button"] {
     vertical-align: middle;
 }
 .able-left-controls {
@@ -137,22 +136,22 @@
   float: right;
 }
 .able-black-controls,
-.able-black-controls button,
+.able-black-controls div[role="button"],
 .able-black-controls label  {
   color: #000 !important;
 }
 .able-black-controls .able-seekbar {
-  border: 2px solid #000;
+  border: 1px solid #000;
 }
 .able-white-controls,
-.able-white-controls button,
+.able-white-controls div[role="button"],
 .able-black-controls label {
   color: #FFF !important;
 }
 .able-white-controls .able-seekbar {
-  border: 2px solid #FFF;
+  border: 1px solid #FFF;
 }
-.able-controller button {
+.able-controller div[role="button"] {
   background: none;
   position: relative;
   display: inline-block;
@@ -161,13 +160,13 @@
   padding: 0;
   font-size: 20px;
   min-width: 24px;
-  outline: 2px solid #464646; /* same color as .able-controller background-color */
+/*  outline: 2px solid #464646; */ /* same color as .able-controller background-color */
   border: none;
   overflow: visible !important;
   z-index: 6600;
 }
-.able-controller button > span,
-.able-controller button > img {
+.able-controller div[role="button"] > span,
+.able-controller div[role="button"] > img {
   width: 20px;
   margin: 0 auto;
   padding: 0;
@@ -182,20 +181,22 @@
   margin: 0 5px;
   z-index: 6900;
 }
-.able-controller button:hover,
-.able-controller button:focus {
+.able-controller div[role="button"]:hover,
+.able-controller div[role="button"]:focus {
   outline-style: solid;
   outline-width: medium;
 }
-.able-controller button:hover {
+.able-controller div[role="button"]:hover {
 	outline-color: #8AB839 !important; /* green */
 }
-.able-controller button:focus {
+.able-controller div[role="button"]:focus {
 	outline-color: #ffbb37 !important; /* yellow */
 }
-.able-controller button::-moz-focus-inner {
+.able-controller button::-moz-focus-inner,
+.able-search-results button::-moz-focus-inner {
   border: 0;
 }
+
 
 /*
   Seekbar
@@ -263,15 +264,19 @@
   display: block;
   position: relative;
   height: 100%; /* = 50px after padding */
-  width: 5px;
+  width: 7px;
   margin: 0 auto;
-  background-color: #999;
+  background-color: #000;
 }
 .able-volume-track.able-volume-track-on {
   background-color: #dadada;
   position: absolute;
   height: 20px; /* change dynamically; 5px per volume tick */
   top: 30px;  /* change dynamically; 50px - height */
+}
+.able-volume-slider > .able-volume-track {
+  /* add border only to the outer track */
+  border: 1px solid #FFF;
 }
 .able-volume-head {
   display: inline-block;
@@ -437,7 +442,7 @@ div.able-captions-overlay {
 }
 div.able-captions-below {
   position: relative;
-  min-height: 2.8em;
+  min-height: 3.2em;
 }
 div.able-descriptions {
   position: relative;
@@ -955,8 +960,8 @@ ul.able-popup {
 .able-window-toolbar select:hover,
 .able-controller input:focus,
 .able-controller input:hover,
-.able-controller button:focus,
-.able-controller button:hover,
+.able-controller div[role="button"]:focus,
+.able-controller div[role="button"]:hover,
 .able-seekbar-head:focus,
 .able-seekbar-head:hover {
   outline-style: solid;
@@ -965,14 +970,14 @@ ul.able-popup {
 .able-window-toolbar input:focus,
 .able-window-toolbar select:focus,
 .able-controller input:focus,
-.able-controller button:focus,
+.able-controller  div[role="button"]:focus,
 .able-seekbar-head:focus {
 	outline-color: #ffbb37; /* yellow */
 }
 .able-window-toolbar input:hover,
 .able-window-toolbar select:hover,
 .able-controller input:hover,
-.able-controller button:hover,
+.able-controller  div[role="button"]:hover,
 .able-seekbar-head:hover {
 	outline-color: #8AB839; /* green */
 }
@@ -1044,21 +1049,24 @@ ul.able-popup {
   Search
 */
 
+#able-search-term-echo {
+  font-weight: bold;
+  font-style: italic;
+}
 .able-search-results ul li {
   font-size: 1.1em;
   margin-bottom: 1em;
 }
-.able-search-results-time {
+button.able-search-results-time {
+  font-size: 1em;
   font-weight: bold;
-  text-decoration: underline;
   cursor: pointer;
 }
-.able-search-results-time:hover,
-.able-search-results-time:focus,
-.able-search-results-time:active {
+button.able-search-results-time:hover,
+button.able-search-results-time:focus,
+button.able-search-results-time:active {
   color: #FFF;
   background-color: #000;
-  text-decoration: none;
 }
 .able-search-results-text {
   padding-left: 1em;
@@ -1067,6 +1075,11 @@ ul.able-popup {
 	background-color: #FFC;
 	font-weight: bold;
 }
+  #search-term {
+    font-weight: bold;
+    font-style: italic;
+  }
+
 
 /*
   Video Transcript Sorter (VTS)
@@ -1224,7 +1237,7 @@ button#able-vts-save:focus {
 /*
   SVG Icons
 */
-button svg {
+div[role="button"] svg {
 	display: inline-block;
 	width: 1em;
 	height: 1em;

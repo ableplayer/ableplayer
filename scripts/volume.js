@@ -90,6 +90,7 @@ var jQuery = require("jquery");
 		});
 
 		this.$volumeSliderHead.on('keydown',function (e) {
+
 			// Left arrow or down arrow
 			if (e.which === 37 || e.which === 40) {
 				thisObj.handleVolume('down');
@@ -102,10 +103,13 @@ var jQuery = require("jquery");
 			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
+  				thisObj.closingVolume = true; // stopgap
 					thisObj.hideVolumePopup();
 				}
 				else {
-					thisObj.showVolumePopup();
+  				if (!thisObj.closingVolume) {
+  					thisObj.showVolumePopup();
+  				}
 				}
 			}
 			else {
@@ -235,7 +239,9 @@ var jQuery = require("jquery");
 				this.hideVolumePopup();
 			}
 			else {
-				this.showVolumePopup();
+        if (!this.closingVolume) {
+  				this.showVolumePopup();
+        }
 			}
 			return;
 		}
@@ -289,9 +295,16 @@ var jQuery = require("jquery");
 
 	AblePlayer.prototype.hideVolumePopup = function() {
 
+    var thisObj = this;
+
 		this.$volumeSlider.hide().attr('aria-hidden','true');
 		this.$volumeSliderHead.attr('tabindex','-1');
 		this.$volumeButton.attr('aria-expanded','false').focus();
+    // wait a second before resetting stopgap var
+    // otherwise the keypress used to close volume popup will trigger the volume button
+    setTimeout(function() {
+      thisObj.closingVolume = false;
+    }, 1000);
 	};
 
 	AblePlayer.prototype.isMuted = function () {

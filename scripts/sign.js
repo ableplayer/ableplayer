@@ -72,7 +72,8 @@ var jQuery = require("jquery");
 
 		this.$signWindow = $('<div>',{
 			'class' : 'able-sign-window',
-			'tabindex': '-1'
+  		'role': 'dialog',
+      'aria-label': this.tt.sign
 		});
 		this.$signToolbar = $('<div>',{
 			'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'

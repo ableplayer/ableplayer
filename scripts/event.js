@@ -23,7 +23,7 @@ var jQuery = require("jquery");
 					}
 				}
 			}
-			else if (thisObj.startedPlaying) {
+      else {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);
@@ -200,11 +200,13 @@ var jQuery = require("jquery");
 			this.handleRestart();
 		}
 		else if (whichButton === 'previous') {
+  		this.userClickedPlaylist = true;
 			this.seekTrigger = 'previous';
 			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
+  		this.userClickedPlaylist = true;
 			this.seekTrigger = 'next';
 			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
@@ -239,13 +241,16 @@ var jQuery = require("jquery");
 			this.handleDescriptionToggle();
 		}
 		else if (whichButton === 'sign') {
-			this.handleSignToggle();
+  		if (!this.closingSign) {
+  			this.handleSignToggle();
+  		}
 		}
 		else if (whichButton === 'preferences') {
       if ($(el).attr('data-prefs-popup') === 'menu') {
   			this.handlePrefsClick();
   		}
   		else {
+    		this.showingPrefsDialog = true; // stopgap
         this.closePopups();
     		prefsPopup = $(el).attr('data-prefs-popup');
         if (prefsPopup === 'keyboard') {
@@ -260,13 +265,16 @@ var jQuery = require("jquery");
         else if (prefsPopup === 'transcript') {
 				  this.transcriptPrefsDialog.show();
 				}
+        this.showingPrefsDialog = false;
   		}
 		}
 		else if (whichButton === 'help') {
 			this.handleHelpClick();
 		}
 		else if (whichButton === 'transcript') {
-			this.handleTranscriptToggle();
+      if (!this.closingTranscript) {
+  			this.handleTranscriptToggle();
+  		}
 		}
 		else if (whichButton === 'fullscreen') {
 			this.clickedFullscreenButton = true;
@@ -302,106 +310,135 @@ var jQuery = require("jquery");
 		// including removal of the "media player" design pattern. There's an issue about that:
 		// https://github.com/w3c/aria-practices/issues/27
 
-		if (!this.okToHandleKeyPress()) {
-			return false;
-		}
+		var which, $thisElement;
+
 		// Convert to lower case.
-		var which = e.which;
+		which = e.which;
 		if (which >= 65 && which <= 90) {
 			which += 32;
 		}
+		$thisElement = $(document.activeElement);
+
+    if (which === 27) { // escape
+console.log('onPlayerKeyPress, you pressed Escape');
+      if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+console.log('element is part of the transcript area');
+        // This element is part of transcript area.
+        this.handleTranscriptToggle();
+        return false;
+      }
+    }
+		if (!this.okToHandleKeyPress()) {
+console.log('NOT ok!');
+			return false;
+		}
+
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
+		// (or a textarea element with player in stenoMode)
 		if (!(
 			$(':focus').is('[contenteditable]') ||
 			$(':focus').is('input') ||
-			$(':focus').is('textarea') ||
+			($(':focus').is('textarea') && !this.stenoMode) ||
 			$(':focus').is('select') ||
 			e.target.hasAttribute('contenteditable') ||
 			e.target.tagName === 'INPUT' ||
-			e.target.tagName === 'TEXTAREA' ||
+			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
 			e.target.tagName === 'SELECT'
 		)){
-
 			if (which === 27) { // escape
+console.log('You pushed ESC');
 				this.closePopups();
 			}
 			else if (which === 32) { // spacebar = play/pause
-				if (this.$ableWrapper.find('.able-controller button:focus').length === 0) {
-					// only toggle play if a button does not have focus
-					// if a button has focus, space should activate that button
-          this.clickedPlay = true; // important to set this var for program control
-					this.handlePlay();
+  			// disable spacebar support for play/pause toggle as of 4.2.10
+  			// spacebar should not be handled everywhere on the page, since users use that to scroll the page
+  			// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
+				if ($thisElement.attr('role') === 'button') {
+					// register a click on this element
+					e.preventDefault();
+					$thisElement.click();
 				}
 			}
 			else if (which === 112) { // p = play/pause
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handlePlay();
 				}
 			}
 			else if (which === 115) { // s = stop (now restart)
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleRestart();
 				}
 			}
 			else if (which === 109) { // m = mute
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleMute();
 				}
 			}
 			else if (which === 118) { // v = volume
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleVolume();
 				}
 			}
 			else if (which >= 49 && which <= 57) { // set volume 1-9
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleVolume(which);
 				}
 			}
 			else if (which === 99) { // c = caption toggle
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleCaptionToggle();
 				}
 			}
 			else if (which === 100) { // d = description
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleDescriptionToggle();
 				}
 			}
 			else if (which === 102) { // f = forward
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleFastForward();
 				}
 			}
 			else if (which === 114) { // r = rewind
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleRewind();
 				}
 			}
 			else if (which === 98) { // b = back (previous track)
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handlePrevTrack();
 				}
 			}
 			else if (which === 110) { // n = next track
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handleNextTrack();
 				}
 			}
 			else if (which === 101) { // e = preferences
 				if (this.usingModifierKeys(e)) {
+  				e.preventDefault();
 					this.handlePrefsClick();
 				}
 			}
 			else if (which === 13) { // Enter
-				var thisElement = $(document.activeElement);
-				if (thisElement.prop('tagName') === 'SPAN') {
-					// register a click on this SPAN
+				if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+					// register a click on this element
 					// if it's a transcript span the transcript span click handler will take over
-					thisElement.click();
+					$thisElement.click();
 				}
-				else if (thisElement.prop('tagName') === 'LI') {
-					thisElement.click();
+				else if ($thisElement.prop('tagName') === 'LI') {
+					$thisElement.click();
 				}
 			}
 		}
@@ -430,14 +467,23 @@ var jQuery = require("jquery");
 				// so we know player can seek ahead to anything
 			})
 			.on('canplaythrough',function() {
+  		  if (thisObj.playbackRate) {
+          // user has set playbackRate on a previous src or track
+          // use that setting on the new src or track too
+          thisObj.setPlaybackRate(thisObj.playbackRate);
+  		  }
 				if (thisObj.userClickedPlaylist) {
 					if (!thisObj.startedPlaying) {
-							// start playing; no further user action is required
+						// start playing; no further user action is required
 						thisObj.playMedia();
 				 	}
 					thisObj.userClickedPlaylist = false; // reset
 				}
-				if (thisObj.seekTrigger == 'restart' || thisObj.seekTrigger == 'chapter' || thisObj.seekTrigger == 'transcript') {
+				if (thisObj.seekTrigger == 'restart' ||
+				    thisObj.seekTrigger == 'chapter' ||
+				    thisObj.seekTrigger == 'transcript' ||
+				    thisObj.seekTrigger == 'search'
+            ) {
 					// by clicking on any of these elements, user is likely intending to play
 					// Not included: elements where user might click multiple times in succession
 					// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
@@ -792,7 +838,7 @@ var jQuery = require("jquery");
 		}
 
 		// handle clicks on player buttons
-		this.$controllerDiv.find('button').on('click',function(e){
+		this.$controllerDiv.find('div[role="button"]').on('click',function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});
@@ -837,7 +883,8 @@ var jQuery = require("jquery");
 		});
 
 		// if user presses a key from anywhere on the page, show player controls
-		$(document).keydown(function() {
+		$(document).keydown(function(e) {
+
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
@@ -867,6 +914,7 @@ var jQuery = require("jquery");
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base,js)
 		this.$ableDiv.keydown(function (e) {
+
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);
 			}
@@ -875,7 +923,7 @@ var jQuery = require("jquery");
 		// transcript is not a child of this.$ableDiv
 		// therefore, must be added separately
 		if (this.$transcriptArea) {
-			this.$transcriptArea.keydown(function (e) {
+			this.$transcriptArea.on('keydown',function (e) {
 				if (AblePlayer.nextIndex > 1) {
 					thisObj.onPlayerKeyPress(e);
 				}

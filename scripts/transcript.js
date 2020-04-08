@@ -42,7 +42,8 @@ var jQuery = require("jquery");
 		thisObj = this;
 		this.$transcriptArea = $('<div>', {
 			'class': 'able-transcript-area',
-			'tabindex': '-1'
+  		'role': 'dialog',
+      'aria-label': this.tt.transcriptTitle
 		});
 
 		this.$transcriptToolbar = $('<div>', {
@@ -63,7 +64,7 @@ var jQuery = require("jquery");
 		$autoScrollLabel = $('<label>', {
 			 'for': 'autoscroll-transcript-checkbox'
 			}).text(this.tt.autoScroll);
-		this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
+    this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
 
 		// Add field for selecting a transcript language
 		// Only necessary if there is more than one language
@@ -260,7 +261,7 @@ var jQuery = require("jquery");
 
 		// Make transcript tabbable if preference is turned on.
 		if (this.prefTabbable === 1) {
-			$('.able-transcript span.able-transcript-seekpoint').attr('tabindex','0');
+			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
 		}
 
 		// handle clicks on text within transcript
@@ -324,7 +325,7 @@ var jQuery = require("jquery");
         return false;
 			}
 		});
-		thisObj.currentHighlight = $('.able-highlight');
+		thisObj.currentHighlight = thisObj.$transcriptArea.find('.able-highlight');
 		if (thisObj.currentHighlight.length === 0) {
 			// Nothing highlighted.
 			thisObj.currentHighlight = null;
