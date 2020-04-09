@@ -308,30 +308,30 @@ var fr = {
 
 "windowBringTopAlert": "Cette fenêtre est maintenant devant d’autres objets sur la page.",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "Vos résultats de recherche",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "Trouvé",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "éléments correspondants.",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "Cliquez sur le temps associé à n'importe quel élément pour lire la vidéo à partir de ce point.",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "Aucun résultat trouvé.",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "Lecture à",
 
-"hour": "hour",
+"hour": "heure",
 
 "minute": "minute",
 
-"second": "second",
+"second": "seconde",
 
-"hours": "hours",
+"hours": "heures",
 
 "minutes": "minutes",
 
 "seconds": "seconds",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "Permettre les raccourcis clavier"
 
 };
