@@ -394,7 +394,7 @@ input[type=range]:focus::-ms-fill-upper {
 	font-size: 0.9em;
 	background-color: transparent;
 	padding: 0.5em 0.5em 0.25em;
-	box-sizing: content-box; /* overrides the border-box set by openlearning.scss */
+	box-sizing: content-box;
 }
 .able-status-bar span.able-timer {
 	/* contains both span.elapsedTime and span.duration */
@@ -903,7 +903,7 @@ ul.able-popup {
   outline: none;
   padding-bottom: 25px; /* keep content above 16x16px drag icon */
   background-color: #FFF;
-  box-sizing: content-box; /* overrides the border-box set by openlearning.scss */
+  box-sizing: content-box;
 }
 .able-transcript {
 	position: relative; /* must be positioned for scrolling */
