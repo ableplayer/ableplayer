@@ -48,6 +48,13 @@ module.exports = function(grunt) {
                 dest: 'build/<%= pkg.name %>.js'
             },
         },
+        copy: {
+            files: {
+                cwd: '.',
+                src: 'scripts/ableplayer.d.ts',
+                dest: 'build/ableplayer.d.ts'
+            }
+        },
         removelogging: {
             dist: {
                 src: [
@@ -103,6 +110,6 @@ module.exports = function(grunt) {
 
     });
 
-    grunt.registerTask('default', ['concat', 'removelogging', 'uglify', 'cssmin']);
+    grunt.registerTask('default', ['concat', 'copy', 'removelogging', 'uglify', 'cssmin']);
     grunt.registerTask('test', ['jshint']);
 };
