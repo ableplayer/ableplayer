@@ -1,4 +1,4 @@
-var he = {
+exports.strings = {
 
 "audio": "שמע",
 

@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 /* Video Transcript Sorter (VTS)
  * Used to synchronize time stamps from WebVTT resources
  * so they appear in the proper sequence within an auto-generated interactive transcript

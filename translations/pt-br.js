@@ -1,4 +1,4 @@
-var ptbr = {
+exports.strings = {
 
 "audio": "áudio",
 

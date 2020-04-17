@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 (function ($) {
 
 	AblePlayer.prototype.getNextHeadingLevel = function($element) {

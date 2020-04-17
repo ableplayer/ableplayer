@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 (function($) {
 	AblePlayer.prototype.computeEndTime = function(startTime, durationTime) {
 		var SECONDS = 0;

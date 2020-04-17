@@ -1,3 +1,5 @@
+var jQuery = require("jquery");
+
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
@@ -43,10 +45,8 @@
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}
-		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-		this.importTranslationFile(translationFile).then(function(result) {
-			collapsedLang = thisObj.lang.replace('-','');
-			thisObj.tt = eval(collapsedLang);
+		import("../translations/" + this.lang + ".js").then(function (translationFile) {
+			thisObj.tt = translationFile.strings;
 			deferred.resolve();
 		});
 		return deferred.promise();

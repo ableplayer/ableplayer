@@ -1,4 +1,4 @@
-var tr = {
+exports.strings = {
 
 "audio": "ses",
 

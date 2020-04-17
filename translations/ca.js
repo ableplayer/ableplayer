@@ -1,4 +1,4 @@
-var ca = {
+exports.strings = {
 
 "audio": "audio",
 
