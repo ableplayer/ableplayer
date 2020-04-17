@@ -1,3 +1,1 @@
-declare module 'ableplayer' {
-	export default AblePlayer;
-};
+declare module 'ableplayer';
