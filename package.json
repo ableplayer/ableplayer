@@ -10,6 +10,7 @@
     "url": "https://github.com/ableplayer/ableplayer.git"
   },
   "main": "build/ableplayer.min.js",
+  "types": "build/ableplayer.d.ts",
   "scripts": {
     "build": "grunt"
   },

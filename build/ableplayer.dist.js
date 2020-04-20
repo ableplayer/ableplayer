@@ -558,7 +558,7 @@ exports.initAllAblePlayers = function() {
 	AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
 
-// Exports AblePlayer construtor
+// Exports AblePlayer constructor
 exports.AblePlayer = window.AblePlayer;
 
 var jQuery = require("jquery");
