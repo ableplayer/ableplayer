@@ -556,7 +556,7 @@ exports.initAllAblePlayers = function () {
 	AblePlayer.loadingYoutubeIframeAPI = false;
 })(jQuery);
 
-// Exports AblePlayer construtor
+// Exports AblePlayer constructor
 exports.AblePlayer = window.AblePlayer;
 
 var jQuery = require("jquery");
@@ -15796,8 +15796,6 @@ var Player = require("@vimeo/player");
 		options = {
 			id: vimeoId,
 			width: this.vimeoWidth,
-			controls: false,
-			byline: false,
 		};
 		this.vimeoPlayer = new Player.default(containerId, options);
 
