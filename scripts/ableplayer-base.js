@@ -33,7 +33,7 @@
 // Add dependencies here so that including ableplayer in another
 // package.json, it comes with dependencies included
 var jQuery = require("jquery");
-var Cookies = require("js-cookie");
+
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
@@ -43,8 +43,8 @@ var Cookies = require("js-cookie");
 var AblePlayerInstances = [];
 
 // Initialise all AblePlayerInstances
-exports.initAllAblePlayers = function() {
-	$("video, audio").each(function(index, element) {
+exports.initAllAblePlayers = function () {
+	$("video, audio").each(function (index, element) {
 		if ($(element).data("able-player") !== undefined) {
 			AblePlayerInstances.push(new AblePlayer($(this), $(element)));
 		}
@@ -53,13 +53,13 @@ exports.initAllAblePlayers = function() {
 
 (function ($) {
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
-	window.onYouTubeIframeAPIReady = function() {
+	window.onYouTubeIframeAPIReady = function () {
 		AblePlayer.youtubeIframeAPIReady = true;
 		$('body').trigger('youtubeIframeAPIReady', []);
 	};
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).keydown(function(e) {
+	$(window).keydown(function (e) {
 		if (AblePlayer.nextIndex === 1) {
 			AblePlayer.lastCreated.onPlayerKeyPress(e);
 		}
@@ -68,7 +68,7 @@ exports.initAllAblePlayers = function() {
 	// Construct an AblePlayer object
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
-	window.AblePlayer = function(media) {
+	window.AblePlayer = function (media) {
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
@@ -172,7 +172,7 @@ exports.initAllAblePlayers = function() {
 			this.exposeTextDescriptions = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-  		// support both singular and plural spelling of attribute
+			// support both singular and plural spelling of attribute
 			this.exposeTextDescriptions = false;
 		}
 		else {
@@ -201,17 +201,17 @@ exports.initAllAblePlayers = function() {
 		// If data-include-transcript="false", there is no "popup" transcript
 
 		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-		  this.transcriptDivLocation = $(media).data('transcript-div');
+			this.transcriptDivLocation = $(media).data('transcript-div');
 		}
 		else {
-  		this.transcriptDivLocation = null;
-    }
+			this.transcriptDivLocation = null;
+		}
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-  		this.hideTranscriptButton = true;
-    }
-    else {
-      this.hideTranscriptButton = null;
-    }
+			this.hideTranscriptButton = true;
+		}
+		else {
+			this.hideTranscriptButton = null;
+		}
 
 		this.transcriptType = null;
 		if ($(media).data('transcript-src') !== undefined) {
@@ -222,7 +222,7 @@ exports.initAllAblePlayers = function() {
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
-      if (this.transcriptDivLocation) {
+			if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
 			}
 			else {
@@ -505,7 +505,7 @@ exports.initAllAblePlayers = function() {
 	// Index to increment every time new player is created.
 	AblePlayer.nextIndex = 0;
 
-	AblePlayer.prototype.setup = function() {
+	AblePlayer.prototype.setup = function () {
 
 		var thisObj = this;
 		this.initializing = true; // will remain true until entire sequence of function calls is complete
@@ -539,14 +539,12 @@ exports.initAllAblePlayers = function() {
 		return activeElement;
 	};
 
-	AblePlayer.localGetElementById = function(element, id) {
-		if (element.getRootNode)
-		{
+	AblePlayer.localGetElementById = function (element, id) {
+		if (element.getRootNode) {
 			// Use getRootNode() and querySelector() where supported (for shadow DOM support)
 			return $(element.getRootNode().querySelector('#' + id));
 		}
-		else
-		{
+		else {
 			// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
 			return $(document.getElementById(id));
 		}

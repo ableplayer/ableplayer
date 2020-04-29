@@ -33,7 +33,7 @@
 // Add dependencies here so that including ableplayer in another
 // package.json, it comes with dependencies included
 var jQuery = require("jquery");
-var Cookies = require("js-cookie");
+
 
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
@@ -43,8 +43,8 @@ var Cookies = require("js-cookie");
 var AblePlayerInstances = [];
 
 // Initialise all AblePlayerInstances
-exports.initAllAblePlayers = function() {
-	$("video, audio").each(function(index, element) {
+exports.initAllAblePlayers = function () {
+	$("video, audio").each(function (index, element) {
 		if ($(element).data("able-player") !== undefined) {
 			AblePlayerInstances.push(new AblePlayer($(this), $(element)));
 		}
@@ -53,13 +53,13 @@ exports.initAllAblePlayers = function() {
 
 (function ($) {
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
-	window.onYouTubeIframeAPIReady = function() {
+	window.onYouTubeIframeAPIReady = function () {
 		AblePlayer.youtubeIframeAPIReady = true;
 		$('body').trigger('youtubeIframeAPIReady', []);
 	};
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).keydown(function(e) {
+	$(window).keydown(function (e) {
 		if (AblePlayer.nextIndex === 1) {
 			AblePlayer.lastCreated.onPlayerKeyPress(e);
 		}
@@ -68,7 +68,7 @@ exports.initAllAblePlayers = function() {
 	// Construct an AblePlayer object
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
-	window.AblePlayer = function(media) {
+	window.AblePlayer = function (media) {
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
@@ -172,7 +172,7 @@ exports.initAllAblePlayers = function() {
 			this.exposeTextDescriptions = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-  		// support both singular and plural spelling of attribute
+			// support both singular and plural spelling of attribute
 			this.exposeTextDescriptions = false;
 		}
 		else {
@@ -201,17 +201,17 @@ exports.initAllAblePlayers = function() {
 		// If data-include-transcript="false", there is no "popup" transcript
 
 		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-		  this.transcriptDivLocation = $(media).data('transcript-div');
+			this.transcriptDivLocation = $(media).data('transcript-div');
 		}
 		else {
-  		this.transcriptDivLocation = null;
-    }
+			this.transcriptDivLocation = null;
+		}
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-  		this.hideTranscriptButton = true;
-    }
-    else {
-      this.hideTranscriptButton = null;
-    }
+			this.hideTranscriptButton = true;
+		}
+		else {
+			this.hideTranscriptButton = null;
+		}
 
 		this.transcriptType = null;
 		if ($(media).data('transcript-src') !== undefined) {
@@ -222,7 +222,7 @@ exports.initAllAblePlayers = function() {
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
-      if (this.transcriptDivLocation) {
+			if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
 			}
 			else {
@@ -505,7 +505,7 @@ exports.initAllAblePlayers = function() {
 	// Index to increment every time new player is created.
 	AblePlayer.nextIndex = 0;
 
-	AblePlayer.prototype.setup = function() {
+	AblePlayer.prototype.setup = function () {
 
 		var thisObj = this;
 		this.initializing = true; // will remain true until entire sequence of function calls is complete
@@ -539,14 +539,12 @@ exports.initAllAblePlayers = function() {
 		return activeElement;
 	};
 
-	AblePlayer.localGetElementById = function(element, id) {
-		if (element.getRootNode)
-		{
+	AblePlayer.localGetElementById = function (element, id) {
+		if (element.getRootNode) {
 			// Use getRootNode() and querySelector() where supported (for shadow DOM support)
 			return $(element.getRootNode().querySelector('#' + id));
 		}
-		else
-		{
+		else {
 			// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
 			return $(document.getElementById(id));
 		}
@@ -15738,6 +15736,7 @@ var jQuery = require("jquery");
 })(jQuery);
 
 var jQuery = require("jquery");
+var Player = require("@vimeo/player");
 
 (function ($) {
 	AblePlayer.prototype.initVimeoPlayer = function () {
@@ -15765,7 +15764,7 @@ var jQuery = require("jquery");
 
 		// Notes re. Vimeo Embed Options:
 		// If a video is owned by a user with a paid Plus, PRO, or Business account,
-    // setting the "controls" option to "false" will hide the default controls, without hiding captions.
+		// setting the "controls" option to "false" will hide the default controls, without hiding captions.
 		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
 		// but that had unwanted side effects:
 		//  - In addition to hiding the controls, it also hides captions
@@ -15795,14 +15794,14 @@ var jQuery = require("jquery");
 		}
 
 		options = {
-		  id: vimeoId,
+			id: vimeoId,
 			width: this.vimeoWidth,
-			controls: false
+			controls: false,
+			byline: false,
 		};
+		this.vimeoPlayer = new Player.default(containerId, options);
 
-		this.vimeoPlayer = new Vimeo.Player(containerId, options);
-
-		this.vimeoPlayer.ready().then(function() {
+		this.vimeoPlayer.ready().then(function () {
 
 			if (!thisObj.hasPlaylist) {
 				// remove the media element, since Vimeo replaces that with its own element in an iframe
@@ -15819,10 +15818,10 @@ var jQuery = require("jquery");
 				// Attempt to change the playbackRate. If it results in an error, assume changing playbackRate is not supported.
 				// Supported playbackRate values are 0.5 to 2.
 				thisObj.vimeoPlaybackRate = 1;
-				thisObj.vimeoPlayer.setPlaybackRate(thisObj.vimeoPlaybackRate).then(function(playbackRate) {
-				// playback rate was set
+				thisObj.vimeoPlayer.setPlaybackRate(thisObj.vimeoPlaybackRate).then(function (playbackRate) {
+					// playback rate was set
 					thisObj.vimeoSupportsPlaybackRateChange = true;
-				}).catch(function(error) {
+				}).catch(function (error) {
 					thisObj.vimeoSupportsPlaybackRateChange = false;
 				});
 				deferred.resolve();
@@ -15921,10 +15920,10 @@ var jQuery = require("jquery");
 		return false;
 	};
 
-	AblePlayer.prototype.resizeVimeoPlayer = function(youTubeId, youTubeContainerId) {
+	AblePlayer.prototype.resizeVimeoPlayer = function (youTubeId, youTubeContainerId) {
 
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
+		// NOTE: This function is modeled after same function in youtube.js
+		// in case useful for Vimeo, but is not currently used
 
 		// called after player is ready, if youTube dimensions were previously unknown
 		// Now need to get them from the iframe element that YouTube injected
@@ -16012,18 +16011,18 @@ var jQuery = require("jquery");
 			// Thanks to Paul Tavares for $.doWhen()
 			// https://gist.github.com/purtuga/8257269
 			$.doWhen({
-				when: function(){
+				when: function () {
 					return googleApiReady;
 				},
 				interval: 100, // ms
 				attempts: 1000
 			})
-			.done(function(){
+				.done(function () {
 					deferred.resolve();
-			})
-			.fail(function(){
-				console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
-			});
+				})
+				.fail(function () {
+					console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
+				});
 		}
 		else {
 			deferred.resolve();
@@ -16043,60 +16042,60 @@ var jQuery = require("jquery");
 
 		thisObj = this;
 
-		this.vimeoPlayer.getTextTracks().then(function(tracks) {
+		this.vimeoPlayer.getTextTracks().then(function (tracks) {
 
-				// each Vimeo track includes the following:
-				// label (local name of the language)
-				// language (2-character code)
-				// kind (captions or subtitles, as declared by video owner)
-				// mode ('disabled' or 'showing')
+			// each Vimeo track includes the following:
+			// label (local name of the language)
+			// language (2-character code)
+			// kind (captions or subtitles, as declared by video owner)
+			// mode ('disabled' or 'showing')
 
-				if (tracks.length) {
+			if (tracks.length) {
 
-					// create a new button for each caption track
-					for (i=0; i<tracks.length; i++) {
+				// create a new button for each caption track
+				for (i = 0; i < tracks.length; i++) {
 
-						thisObj.hasCaptions = true;
-						thisObj.usingVimeoCaptions = true;
-						if (thisObj.prefCaptions === 1) {
-								thisObj.captionsOn = true;
-						}
-						else {
-							thisObj.captionsOn = false;
-						}
-						// assign the default track based on language of the player
-						if (tracks[i]['language'] === thisObj.lang) {
-							isDefaultTrack = true;
-						}
-						else {
-								isDefaultTrack = false;
-						}
-						thisObj.tracks.push({
-						  'kind': tracks[i]['kind'],
-							'language': tracks[i]['language'],
-							'label': tracks[i]['label'],
-							'def': isDefaultTrack
-						});
+					thisObj.hasCaptions = true;
+					thisObj.usingVimeoCaptions = true;
+					if (thisObj.prefCaptions === 1) {
+						thisObj.captionsOn = true;
 					}
-
-					// setupPopups again with new captions array, replacing original
-					thisObj.setupPopups('captions');
-					deferred.resolve();
-			 	}
-			 	else {
-				  thisObj.hasCaptions = false;
-					thisObj.usingVimeoCaptions = false;
-					deferred.resolve();
+					else {
+						thisObj.captionsOn = false;
+					}
+					// assign the default track based on language of the player
+					if (tracks[i]['language'] === thisObj.lang) {
+						isDefaultTrack = true;
+					}
+					else {
+						isDefaultTrack = false;
+					}
+					thisObj.tracks.push({
+						'kind': tracks[i]['kind'],
+						'language': tracks[i]['language'],
+						'label': tracks[i]['label'],
+						'def': isDefaultTrack
+					});
 				}
-			});
+
+				// setupPopups again with new captions array, replacing original
+				thisObj.setupPopups('captions');
+				deferred.resolve();
+			}
+			else {
+				thisObj.hasCaptions = false;
+				thisObj.usingVimeoCaptions = false;
+				deferred.resolve();
+			}
+		});
 
 		return promise;
 	};
 
 	AblePlayer.prototype.initVimeoCaptionModule = function () {
 
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
+		// NOTE: This function is modeled after same function in youtube.js
+		// in case useful for Vimeo, but is not currently used
 
 		// This function is called when YouTube onApiChange event fires
 		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
@@ -16117,7 +16116,7 @@ var jQuery = require("jquery");
 
 		options = this.youTubePlayer.getOptions();
 		if (options.length) {
-			for (var i=0; i<options.length; i++) {
+			for (var i = 0; i < options.length; i++) {
 				if (options[i] == 'cc') { // this is the AS3 (Flash) player
 					this.ytCaptionModule = 'cc';
 					if (!this.hasCaptions) {
@@ -16142,9 +16141,9 @@ var jQuery = require("jquery");
 			if (typeof this.ytCaptionModule !== 'undefined') {
 				if (this.usingYouTubeCaptions) {
 					// set default languaage
-					this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
+					this.youTubePlayer.setOption(this.ytCaptionModule, 'track', { 'languageCode': this.captionLang });
 					// set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
-					this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
+					this.youTubePlayer.setOption(this.ytCaptionModule, 'fontSize', this.translatePrefs('size', this.prefCaptionsSize, 'youtube'));
 					// ideally could set other display options too, but no others seem to be supported by setOption()
 				}
 				else {
@@ -16165,30 +16164,30 @@ var jQuery = require("jquery");
 
 	AblePlayer.prototype.getVimeoPosterUrl = function (youTubeId, width) {
 
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
+		// NOTE: This function is modeled after same function in youtube.js
+		// in case useful for Vimeo, but is not currently used
 
-			 // return a URL for retrieving a YouTube poster image
-			 // supported values of width: 120, 320, 480, 640
+		// return a URL for retrieving a YouTube poster image
+		// supported values of width: 120, 320, 480, 640
 
-			 var url = 'https://img.youtube.com/vi/' + youTubeId;
-			 if (width == '120') {
-				 // default (small) thumbnail, 120 x 90
-				 return url + '/default.jpg';
-			 }
-			 else if (width == '320') {
-				 // medium quality thumbnail, 320 x 180
-				 return url + '/hqdefault.jpg';
-			 }
-			 else if (width == '480') {
-				 // high quality thumbnail, 480 x 360
-				 return url + '/hqdefault.jpg';
-			 }
-			 else if (width == '640') {
-				 // standard definition poster image, 640 x 480
-				 return url + '/sddefault.jpg';
-			 }
-			 return false;
+		var url = 'https://img.youtube.com/vi/' + youTubeId;
+		if (width == '120') {
+			// default (small) thumbnail, 120 x 90
+			return url + '/default.jpg';
+		}
+		else if (width == '320') {
+			// medium quality thumbnail, 320 x 180
+			return url + '/hqdefault.jpg';
+		}
+		else if (width == '480') {
+			// high quality thumbnail, 480 x 360
+			return url + '/hqdefault.jpg';
+		}
+		else if (width == '640') {
+			// standard definition poster image, 640 x 480
+			return url + '/sddefault.jpg';
+		}
+		return false;
 	};
 
 })(jQuery);

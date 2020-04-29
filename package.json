@@ -9,14 +9,16 @@
     "type": "git",
     "url": "https://github.com/ableplayer/ableplayer.git"
   },
-  "main": "build/ableplayer.min.js",
+  "main": "build/ableplayer.dist.js",
+  "types": "build/ableplayer.d.ts",
   "scripts": {
     "build": "grunt"
   },
   "dependencies": {
     "jquery": "^3.4.1",
     "js-cookie": "2.2.0",
-    "xml-js": "1.6.2"
+    "xml-js": "1.6.2",
+    "@vimeo/player": "2.10.0"
   },
   "devDependencies": {
     "grunt": "^1.0.4",
