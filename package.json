@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "jquery": "^3.4.1",
-    "js-cookie": "2.2.0",
-    "xml-js": "1.6.2",
-    "@vimeo/player": "2.10.0"
+    "js-cookie": "^2.2.0",
+    "xml-js": "^1.6.2",
+    "@vimeo/player": "^2.10.0"
   },
   "devDependencies": {
     "grunt": "^1.0.4",
