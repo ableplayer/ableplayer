@@ -1337,6 +1337,8 @@ var Cookies = require("js-cookie");
 	};
 
 	AblePlayer.prototype.initHtml5Player = function () {
+		this.injectPoster(this.$mediaContainer, 'html5');
+		
 		// Nothing special to do!
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
@@ -3353,6 +3355,16 @@ var Cookies = require("js-cookie");
 				height = this.ytHeight;
 			}
 			else if (typeof this.playerMaxWidth !== 'undefined') {
+				width = this.playerMaxWidth;
+				height = this.playerMaxHeight;
+			}
+			else if (typeof this.playerWidth !== 'undefined') {
+				width = this.playerWidth;
+				height = this.playerHeight;
+			}
+		}
+		else if (context === 'html5') {
+			if (typeof this.playerMaxWidth !== 'undefined') {
 				width = this.playerMaxWidth;
 				height = this.playerMaxHeight;
 			}
@@ -7857,6 +7869,12 @@ var Cookies = require("js-cookie");
 					this.signVideo.currentTime = this.startTime;
 				}
 			}
+
+			if (newTime > 0) {
+				if (typeof this.$posterImg !== 'undefined') {
+					this.$posterImg.hide();
+				}
+			}
 		}
 		else if (this.player === 'youtube') {
 			this.youTubePlayer.seekTo(newTime,true);
@@ -8195,6 +8213,9 @@ var Cookies = require("js-cookie");
 			this.media.play(true);
 			if (this.hasSignLanguage && this.signVideo) {
 				this.signVideo.play(true);
+			}
+			if (typeof this.$posterImg !== 'undefined') {
+				this.$posterImg.hide();
 			}
 		}
 		else if (this.player === 'youtube') {
