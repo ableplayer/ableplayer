@@ -794,6 +794,8 @@
 	};
 
 	AblePlayer.prototype.initHtml5Player = function () {
+		this.injectPoster(this.$mediaContainer, 'html5');
+		
 		// Nothing special to do!
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();

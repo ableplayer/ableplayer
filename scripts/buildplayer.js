@@ -321,6 +321,16 @@
 				height = this.playerHeight;
 			}
 		}
+		else if (context === 'html5') {
+			if (typeof this.playerMaxWidth !== 'undefined') {
+				width = this.playerMaxWidth;
+				height = this.playerMaxHeight;
+			}
+			else if (typeof this.playerWidth !== 'undefined') {
+				width = this.playerWidth;
+				height = this.playerHeight;
+			}
+		}
 		else if (context === 'fallback') {
 			width = '100%';
 			height = 'auto';
