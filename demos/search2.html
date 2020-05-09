@@ -97,6 +97,8 @@ $(document).ready(function() {
     // be passed to the player via the data-search attribute
     player.searchString = cleanLetters.join('');
 
+    player.searchIgnoreCaps = $("#ignorecaps").prop("checked");
+
     // Assign user's selected language to player.searchLang
     player.searchLang = $('#lang option:selected').val();
 
@@ -140,6 +142,10 @@ $(document).ready(function() {
       <option lang="es" value="es">Español</option>
       <option lang="ja" value="ja">日本語</option>
     </select>
+  </div>
+  <div>
+    <label for="ignorecaps">Ignore Capitalization:</label>
+    <input type="checkbox" id="ignorecaps">
   </div>
   <div>
     <button type="button" id="go">Go</button>
