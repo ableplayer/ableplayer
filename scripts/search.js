@@ -13,10 +13,10 @@
 		var thisObj = this;
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
-  			var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
-  			searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
-  			searchStringHtml += '</p>';
-			  var resultsArray = this.searchFor(this.searchString, this.searchIgnoreCaps);
+  				var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
+  				searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
+  				searchStringHtml += '</p>';
+				var resultsArray = this.searchFor(this.searchString, this.searchIgnoreCaps);
 				if (resultsArray.length > 0) {
 					var $resultsSummary = $('<p>',{
 						'class': 'able-search-results-summary'
@@ -42,7 +42,7 @@
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
 						itemStartSpan.on('click',function(e) {
-              thisObj.seekTrigger = 'search';
+              				thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;
