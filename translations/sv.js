@@ -42,9 +42,9 @@ var en = {
 
 "hideTranscript": "Göm transkript",
 
-"turnOnDescriptions": "Sätt på beskrivningar",
+"turnOnDescriptions": "Sätt på syntolkning",
 
-"turnOffDescriptions": "Stäng av beskrivningar",
+"turnOffDescriptions": "Stäng av syntolkning",
 
 "chapters": "Kapitel",
 
@@ -106,93 +106,93 @@ var en = {
 
 "statusBuffering": "Buffrar",
 
-"statusUsingDesc": "Using described version",
+"statusUsingDesc": "Använder syntolkad version",
 
-"statusLoadingDesc": "Loading described version",
+"statusLoadingDesc": "Laddar syntolkad version",
 
-"statusUsingNoDesc": "Using non-described version",
+"statusUsingNoDesc": "Använder version utan syntolkning",
 
-"statusLoadingNoDesc": "Loading non-described version",
+"statusLoadingNoDesc": "Laddar version utan syntolkning",
 
-"statusLoadingNext": "Loading next track",
+"statusLoadingNext": "Laddar nästa spår",
 
-"statusEnd": "End of track",
+"statusEnd": "Slut på spåret",
 
-"selectedTrack": "Selected Track",
+"selectedTrack": "Valt spår",
 
-"alertDescribedVersion": "Using the audio described version of this video",
+"alertDescribedVersion": "Använder syntolkad version av denna video",
 
-"alertNonDescribedVersion": "Using the non-described version of this video",
+"alertNonDescribedVersion": "Använder ej syntolkad version av denna video",
 
-"fallbackError1": "Sorry, your browser is unable to play this",
+"fallbackError1": "Ledsen, din webbläsare kan inte spela upp detta",
 
-"fallbackError2": "The following browsers are known to work with this media player",
+"fallbackError2": "Följande webbläsare är kända att fungera med denna mediaspelare",
 
-"orHigher": "or higher",
+"orHigher": "eller högre",
 
-"prefMenuCaptions": "Captions",
+"prefMenuCaptions": "Undertexter",
 
-"prefMenuDescriptions": "Descriptions",
+"prefMenuDescriptions": "Syntolkning",
 
-"prefMenuKeyboard": "Keyboard",
+"prefMenuKeyboard": "Tangentbord",
 
-"prefMenuTranscript": "Transcript",
+"prefMenuTranscript": "Transkript",
 
-"prefTitleCaptions": "Captions Preferences",
+"prefTitleCaptions": "Undertextprefenser",
 
-"prefTitleDescriptions": "Audio Description Preferences",
+"prefTitleDescriptions": "Syntolkningspreferenser",
 
-"prefTitleKeyboard": "Keyboard Preferences",
+"prefTitleKeyboard": "Tangentbordspreferenser",
 
-"prefTitleTranscript": "Transcript Preferences",
+"prefTitleTranscript": "Transkriptpreferenser",
 
-"prefIntroCaptions": "The following preferences control how captions are displayed.",
+"prefIntroCaptions": "Följande inställningar styr hur undertexter visas.",
 
-"prefIntroDescription1": "This media player supports audio description in two ways: ",
+"prefIntroDescription1": "Denna mediaspelare stöder syntolkning på två sätt: ",
 
-"prefIntroDescription2": "The current video has ",
+"prefIntroDescription2": "Följande video har ",
 
-"prefIntroDescriptionNone": "The current video has no audio description in either format.",
+"prefIntroDescriptionNone": "Nuvarande video har ingen syntolkning i något format.",
 
-"prefIntroDescription3": "Use the following form to set your preferences related to text-based audio description.",
+"prefIntroDescription3": "Använd följande formulär för att ställa in dina prefenser gällande textbaserad syntolkning.",
 
-"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
+"prefIntroDescription4": "Efter du sparar dina prefenser, kan syntolkning växlas av och på med syntolkningsknappen.",
 
-"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
+"prefIntroKeyboard1": "Mediaspelaren på denna webbsida kan styras från varsomhelst på sidan med hjälp av tangentbordsgenvägar (se nedan för en lista).",
 
-"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
+"prefIntroKeyboard2": "Metatangenter (Shift, Alt, och Ctrl) kan tilldelas nedan.",
 
-"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
+"prefIntroKeyboard3": "NOTERA: Vissa tangentkombinationer kan vara i konflikt med din webbläsare eller andra mjukvarors inställningar. Prova olika kombinationer av metatangeter för att hitta en som fungerar för dig.",
 
-"prefIntroTranscript": "The following preferences affect the interactive transcript.",
+"prefIntroTranscript": "Följande preferenser påverkar det interaktiva transkriptet.",
 
-"prefCookieWarning": "Saving your preferences requires cookies.",
+"prefCookieWarning": "Att spara dina preferenser kräver kakor.",
 
-"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
+"prefHeadingKeyboard1": "Metatangenter använda till genvägar",
 
-"prefHeadingKeyboard2": "Current keyboard shortcuts",
+"prefHeadingKeyboard2": "Nuvarande tangentbordsgenvägar",
 
-"prefHeadingDescription": "Audio description",
+"prefHeadingDescription": "Syntolkning",
 
-"prefHeadingTextDescription": "Text-based audio description",
+"prefHeadingTextDescription": "Textbaserad syntolkning",
 
-"prefHeadingCaptions": "Captions",
+"prefHeadingCaptions": "Undertexter",
 
-"prefHeadingTranscript": "Interactive Transcript",
+"prefHeadingTranscript": "Interaktivt transkript",
 
 "prefAltKey": "Alt",
 
-"prefCtrlKey": "Control",
+"prefCtrlKey": "Ctrl",
 
 "prefShiftKey": "Shift",
 
 "escapeKey": "Escape",
 
-"escapeKeyFunction": "Close current dialog or popup menu",
+"escapeKeyFunction": "Stäng nuvarande dialog eller popupmeny",
 
-"prefDescFormat": "Preferred format",
+"prefDescFormat": "Föredraget format",
 
-"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
+"prefDescFormatHelp": "Om båda formaten är tillgängliga, kommer bara en användas.",
 
 "prefDescFormatOption1": "alternative described version of video",
 
