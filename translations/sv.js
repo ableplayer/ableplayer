@@ -1,110 +1,110 @@
 var en = {
 
-"audio": "audio",
+"audio": "ljud",
 
 "video": "video",
 
-"playerHeading": "Media player",
+"playerHeading": "Mediaspelare",
 
-"faster": "Faster",
+"faster": "Snabbare",
 
-"slower": "Slower",
+"slower": "Långsammare",
 
-"play": "Play",
+"play": "Spela upp",
 
-"pause": "Pause",
+"pause": "Pausa",
 
-"stop": "Stop",
+"stop": "Stoppa",
 
-"restart": "Restart",
+"restart": "Starta om",
 
-"prevChapter": "Previous chapter",
+"prevChapter": "Föregående kapitel",
 
-"nextChapter": "Next chapter",
+"nextChapter": "Nästa kapitel",
 
-"prevTrack": "Previous track",
+"prevTrack": "Föregående spår",
 
-"nextTrack": "Next track",
+"nextTrack": "Nästa spår",
 
-"rewind": "Rewind",
+"rewind": "Spola tillbaka",
 
-"forward": "Forward",
+"forward": "Spola framåt",
 
-"captions": "Captions",
+"captions": "Undertexter",
 
-"showCaptions": "Show captions",
+"showCaptions": "Visa undertexter",
 
-"hideCaptions": "Hide captions",
+"hideCaptions": "Göm undertexter",
 
-"captionsOff": "Captions off",
+"captionsOff": "Stäng av undertexter",
 
-"showTranscript": "Show transcript",
+"showTranscript": "Visa transkript",
 
-"hideTranscript": "Hide transcript",
+"hideTranscript": "Göm transkript",
 
-"turnOnDescriptions": "Turn on descriptions",
+"turnOnDescriptions": "Sätt på beskrivningar",
 
-"turnOffDescriptions": "Turn off descriptions",
+"turnOffDescriptions": "Stäng av beskrivningar",
 
-"chapters": "Chapters",
+"chapters": "Kapitel",
 
-"newChapter": "New chapter",
+"newChapter": "Nytt kapitel",
 
-"language": "Language",
+"language": "Språk",
 
-"sign": "Sign language",
+"sign": "Teckenspråk",
 
-"showSign": "Show sign language",
+"showSign": "Visa teckenspråk",
 
-"hideSign": "Hide sign language",
+"hideSign": "Göm teckenspråk",
 
-"seekbarLabel": "timeline",
+"seekbarLabel": "tidslinje",
 
-"mute": "Mute",
+"mute": "Slå av ljud",
 
-"unmute": "Unmute",
+"unmute": "Slå på ljud",
 
-"volume": "Volume",
+"volume": "Volym",
 
-"volumeHelp": "Click to access volume slider",
+"volumeHelp": "Klicka för att nå volymreglaget",
 
-"volumeUpDown": "Volume up down",
+"volumeUpDown": "Volym up ner",
 
-"volumeSliderClosed": "Volume slider closed",
+"volumeSliderClosed": "Volymreglage stängt",
 
-"preferences": "Preferences",
+"preferences": "Preferenser",
 
-"enterFullScreen": "Enter full screen",
+"enterFullScreen": "Visa i fullskärmsläge",
 
-"exitFullScreen": "Exit full screen",
+"exitFullScreen": "Gå ur fullskärmsläge",
 
-"fullScreen": "Full screen",
+"fullScreen": "Fullskärmsläge",
 
-"speed": "Speed",
+"speed": "Hastighet",
 
-"and": "and",
+"and": "och",
 
-"or": "or",
+"or": "eller",
 
-"spacebar": "spacebar",
+"spacebar": "mellanslag",
 
-"transcriptTitle": "Transcript",
+"transcriptTitle": "Transkript",
 
-"lyricsTitle": "Lyrics",
+"lyricsTitle": "Lyrik",
 
-"autoScroll": "Auto scroll",
+"autoScroll": "Auto-scrolla",
 
-"unknown": "Unknown",
+"unknown": "Okänd",
 
-"statusPlaying": "Playing",
+"statusPlaying": "Spelar upp",
 
-"statusPaused": "Paused",
+"statusPaused": "Pausad",
 
-"statusStopped": "Stopped",
+"statusStopped": "Stoppad",
 
-"statusWaiting": "Waiting",
+"statusWaiting": "Väntar",
 
-"statusBuffering": "Buffering",
+"statusBuffering": "Buffrar",
 
 "statusUsingDesc": "Using described version",
 
