@@ -42,6 +42,7 @@ Able Player has been translated into the following languages. To add another lan
   <li><strong lang="ja">日本語</strong> (Japanese)</li>  
   <li><strong lang="nb">Norsk Bokmål</strong> (Norwegian)</li> 
   <li><strong lang="nl">Nederlands, Vlaams</strong> (Dutch)</li> 
+  <li><strong lang="sv">Svenska</strong> (Swedish)</li> 
   <li><strong lang="tr">Türkçe</strong> (Turkish)</li>
 </ul>
 
