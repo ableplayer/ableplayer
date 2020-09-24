@@ -252,86 +252,86 @@ var en = {
 
 "solid": "massiv",
 
-"captionsStylePopOn": "Plötslig",
+"captionsStylePopOn": "Dyker upp",
 
-"captionsStyleRollUp": "Roll-up",
+"captionsStyleRollUp": "Rullar upp",
 
 "prefCaptionsPosition": "Position",
 
-"captionsPositionOverlay": "Overlay",
+"captionsPositionOverlay": "Täck över videon",
 
-"captionsPositionBelow": "Below video",
+"captionsPositionBelow": "Under videon",
 
-"sampleCaptionText": "Sample caption text",
+"sampleCaptionText": "Exempel på undertext",
 
-"prefSuccess": "Your changes have been saved.",
+"prefSuccess": "Dina ändringar har blivit sparade.",
 
-"prefNoChange": "You didn't make any changes.",
+"prefNoChange": "Du gjorde inga ändringar.",
 
-"help": "Help",
+"help": "Hjälp",
 
-"helpTitle": "Help",
+"helpTitle": "Hjälp",
 
-"save": "Save",
+"save": "Spara",
 
-"cancel": "Cancel",
+"cancel": "Avbryt",
 
-"ok": "ok",
+"ok": "Ok",
 
-"done": "Done",
+"done": "Klart",
 
-"closeButtonLabel": "Close dialog",
+"closeButtonLabel": "Stäng",
 
-"windowButtonLabel": "Window options",
+"windowButtonLabel": "Fönsteralternativ",
 
-"windowMove": "Move",
+"windowMove": "Flytta",
 
-"windowMoveAlert": "Drag or use arrow keys to move the window; Enter to stop",
+"windowMoveAlert": "Drag eller använd piltangenter för att flytta fönstret; Enter för att sluta",
 
-"windowResize": "Resize",
+"windowResize": "Ändra storlek",
 
-"windowResizeHeading": "Resize Window",
+"windowResizeHeading": "Ändra fönsterstorlek",
 
-"windowResizeAlert": "The window has been resized.",
+"windowResizeAlert": "Fönstret har blivit omformat.",
 
-"windowClose": "Close",
+"windowClose": "Stäng",
 
-"width": "Width",
+"width": "Bredd",
 
-"height": "Height",
+"height": "Höjd",
 
-"windowSendBack": "Send to back",
+"windowSendBack": "Placera längst bak",
 
-"windowSendBackAlert": "This window is now behind other objects on the page.",
+"windowSendBackAlert": "Detta fönster är nu bakom andra objekt på sidan.";
 
-"windowBringTop": "Bring to front",
+"windowBringTop": "Placera längst fram",
 
-"windowBringTopAlert": "This window is now in front of other objects on the page.",
+"windowBringTopAlert": "Detta fönster är nu framför andra objekt på sidan.",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "Du sökte efter:",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "Hittade",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "träffar.",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "Klicka på tiden för en punkt för att spela video från den tiden.",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "Inga träffar hittade.",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "Spela från",
 
-"hour": "hour",
+"hour": "timme",
 
-"minute": "minute",
+"minute": "minut",
 
-"second": "second",
+"second": "sekund",
 
-"hours": "hours",
+"hours": "timmar",
 
-"minutes": "minutes",
+"minutes": "minuter",
 
-"seconds": "seconds",
+"seconds": "sekunder",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "Aktivera tangentbordsgenvägar"
 
 };
