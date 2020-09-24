@@ -194,65 +194,65 @@ var en = {
 
 "prefDescFormatHelp": "Om båda formaten är tillgängliga, kommer bara en användas.",
 
-"prefDescFormatOption1": "alternative described version of video",
+"prefDescFormatOption1": "alternativ syntolkad version av videon",
 
-"prefDescFormatOption1b": "an alternative described version",
+"prefDescFormatOption1b": "en alternativ syntolkad version",
 
-"prefDescFormatOption2": "text-based description, announced by screen reader",
+"prefDescFormatOption2": "textbaserad syntolkning, uppläst av skärmläsare",
 
-"prefDescFormatOption2b": "text-based description",
+"prefDescFormatOption2b": "textbaserad syntolkning",
 
-"prefDescPause": "Automatically pause video when description starts",
+"prefDescPause": "Pausa automatiskt video när syntolkning startar",
 
-"prefVisibleDesc": "Make description visible",
+"prefVisibleDesc": "Synliggör syntolkning",
 
-"prefHighlight": "Highlight transcript as media plays",
+"prefHighlight": "Markera det som läses upp i transkriptet",
 
-"prefTabbable": "Keyboard-enable transcript",
+"prefTabbable": "Tangentbordsaktiverat transkript",
 
-"prefCaptionsFont": "Font",
+"prefCaptionsFont": "Typsnitt",
 
-"prefCaptionsColor": "Text Color",
+"prefCaptionsColor": "Textfärg",
 
-"prefCaptionsBGColor": "Background",
+"prefCaptionsBGColor": "Bakgrund",
 
-"prefCaptionsSize": "Font Size",
+"prefCaptionsSize": "Textstorlek",
 
-"prefCaptionsOpacity": "Opacity",
+"prefCaptionsOpacity": "Ogenomskinlighet",
 
-"prefCaptionsStyle": "Style",
+"prefCaptionsStyle": "Stil",
 
 "serif": "serif",
 
 "sans": "sans-serif",
 
-"cursive": "cursive",
+"cursive": "kursiv",
 
-"fantasy": "fantasy",
+"fantasy": "fantasi",
 
 "monospace": "monospace",
 
-"white": "white",
+"white": "vit",
 
-"yellow": "yellow",
+"yellow": "gul",
 
-"green": "green",
+"green": "grön",
 
-"cyan": "cyan",
+"cyan": "ljusblå",
 
-"blue": "blue",
+"blue": "blå",
 
-"magenta": "magenta",
+"magenta": "lila",
 
-"red": "red",
+"red": "röd",
 
-"black": "black",
+"black": "svart",
 
-"transparent": "transparent",
+"transparent": "genomskinligt",
 
-"solid": "solid",
+"solid": "massiv",
 
-"captionsStylePopOn": "Pop-on",
+"captionsStylePopOn": "Plötslig",
 
 "captionsStyleRollUp": "Roll-up",
 
