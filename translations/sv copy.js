@@ -302,7 +302,7 @@ var sv = {
 
 "windowSendBack": "Placera längst bak",
 
-"windowSendBackAlert": "Detta fönster är nu bakom andra objekt på sidan.",
+"windowSendBackAlert": "Detta fönster är nu bakom andra objekt på sidan.";
 
 "windowBringTop": "Placera längst fram",
 

@@ -14357,7 +14357,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
-		var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','tr','zh-tw'];
+		var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','sv','tr','zh-tw'];
 		return langs;
 	};
 
@@ -14400,7 +14400,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.searchLang = this.lang;
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
+
 		this.importTranslationFile(translationFile).then(function(result) {
+
 			collapsedLang = thisObj.lang.replace('-','');
 			thisObj.tt = eval(collapsedLang);
 			deferred.resolve();
@@ -14413,10 +14415,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var deferred = $.Deferred();
 		$.getScript(translationFile)
 			.done(function(translationVar,textStatus) {
+
 				// translation file successfully retrieved
 				deferred.resolve(translationVar);
 			})
 			.fail(function(jqxhr, settings, exception) {
+
 				deferred.fail();
 				// error retrieving file
 				// TODO: handle this
