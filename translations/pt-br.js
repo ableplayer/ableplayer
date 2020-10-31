@@ -8,7 +8,7 @@ var ptbr = {
 
 "faster": "Rápido",
 
-"slower": "Devagar",
+"slower": "Lento",
 
 "play": "Reproduzir",
 
@@ -60,17 +60,17 @@ var ptbr = {
 
 "seekbarLabel": "Linha do tempo",
 
-"mute": "Mutar",
+"mute": "Silenciar",
 
-"unmute": "Desmutar",
+"unmute": "Ativar som",
 
 "volume": "Volume",
 
-"volumeHelp": "Clique para acessar o controlador de volume",
+"volumeHelp": "Acessar o controle de volume",
 
 "volumeUpDown": "Ampliar/reduzir volume",
 
-"volumeSliderClosed": "Controlador de volume fechado",
+"volumeSliderClosed": "Controle de volume fechado",
 
 "preferences": "Preferências",
 
@@ -104,23 +104,23 @@ var ptbr = {
 
 "statusWaiting": "Aguardando",
 
-"statusBuffering": "Pré-carregando",
+"statusBuffering": "Carregando",
 
 "statusUsingDesc": "Utilizando versão descrita",
 
 "statusLoadingDesc": "Carregando versão descrita",
 
-"statusUsingNoDesc": "Não-utlizando versão descrita",
+"statusUsingNoDesc": "Não utilizando versão descrita",
 
-"statusLoadingNoDesc": "Não-carregando versão descrita",
+"statusLoadingNoDesc": "Não carregando versão descrita",
 
 "statusLoadingNext": "Carregando próxima faixa",
 
-"statusEnd": "Fim da feixa",
+"statusEnd": "Fim da faixa",
 
 "selectedTrack": "Faixa Selecionada",
 
-"alertDescribedVersion": "Usando a versão com audiodescrição dessse vídeo",
+"alertDescribedVersion": "Usando a versão com audiodescrição deste vídeo",
 
 "alertNonDescribedVersion": "Utilizando a versão sem audiodescrição desse vídeo",
 
@@ -214,11 +214,11 @@ var ptbr = {
 
 "prefCaptionsColor": "Cor do Texto",
 
-"prefCaptionsBGColor": "Plano de Fundo",
+"prefCaptionsBGColor": "Cor do plano de Fundo",
 
 "prefCaptionsSize": "Tamanho da Fonte",
 
-"prefCaptionsOpacity": "Opacidade",
+"prefCaptionsOpacity": "transparência",
 
 "prefCaptionsStyle": "Estilo",
 
@@ -264,9 +264,9 @@ var ptbr = {
 
 "sampleCaptionText": "Um texto de exemplo para legendas",
 
-"prefSuccess": "Suas alterações foram salvas.",
+"prefSuccess": "Suas alterações foram salvas",
 
-"prefNoChange": "Você não fez nenhuma alteração.",
+"prefNoChange": "Você não fez nenhuma alteração",
 
 "help": "Ajuda",
 
@@ -306,32 +306,32 @@ var ptbr = {
 
 "windowBringTop": "Trazer para frente",
 
-"windowBringTopAlert": "Essa janela está agora atrás dos outros objetos nesta página.",
+"windowBringTopAlert": "Essa janela está agora atrás dos outros objetos nesta página",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "Você buscou por:",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "Encontrado",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "itens correspondentes",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "Ative o item de tempo associado para reproduzir o vídeo a partir desse ponto.",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "Nenhum resultado encontrado",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "Tocar no",
 
-"hour": "hour",
+"hour": "hora",
 
-"minute": "minute",
+"minute": "minuto",
 
-"second": "second",
+"second": "segundos",
 
-"hours": "hours",
+"hours": "horas",
 
-"minutes": "minutes",
+"minutes": "minutos",
 
-"seconds": "seconds",
+"seconds": "segundos",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "Ativar atalhos de teclado"
 
 };

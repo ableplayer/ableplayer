@@ -14400,9 +14400,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.searchLang = this.lang;
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-console.log('translationFile',translationFile);
 		this.importTranslationFile(translationFile).then(function(result) {
-console.log('translation file has been imported');
 			collapsedLang = thisObj.lang.replace('-','');
 			thisObj.tt = eval(collapsedLang);
 			deferred.resolve();
@@ -14415,12 +14413,10 @@ console.log('translation file has been imported');
 		var deferred = $.Deferred();
 		$.getScript(translationFile)
 			.done(function(translationVar,textStatus) {
-console.log('DONE!');
 				// translation file successfully retrieved
 				deferred.resolve(translationVar);
 			})
 			.fail(function(jqxhr, settings, exception) {
-console.log('ERROR retrieving file');
 				deferred.fail();
 				// error retrieving file
 				// TODO: handle this
