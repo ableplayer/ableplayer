@@ -14357,7 +14357,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
-		var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','sv','tr','zh-tw'];
+		var langs = ['ca','de','en','es','fr','he','id','it','ja','nb','nl','pt-br','sv','tr','zh-tw'];
 		return langs;
 	};
 

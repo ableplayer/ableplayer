@@ -31,6 +31,7 @@ Supported Languages
 Able Player has been translated into the following languages. To add another language, see instructions below under **Contributing**.
 
 <ul>
+  <li><strong lang="id">Bahasa Indonesia</strong> (Indonesian)</li>
   <li><strong lang="ca">Català</strong> (Catalan)</li>
   <li><strong lang="zh-tw">Chinese, Traditional (Taiwan)</strong></li>    
   <li><strong lang="de">Deutsch</strong> (German)</li>
