@@ -878,7 +878,6 @@
 
 		// if user presses a key from anywhere on the page, show player controls
 		$(document).keydown(function(e) {
-
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
@@ -908,11 +907,17 @@
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base,js)
 		this.$ableDiv.keydown(function (e) {
-
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);
 			}
 		});
+
+		// If stenoMode is enabled in an iframe, handle keydown events from the iframe
+    if (this.stenoMode && this.stenoFrame && (typeof this.stenoFrameContents !== 'undefined')) {
+      this.stenoFrameContents.on('keydown',function(e) {
+        thisObj.onPlayerKeyPress(e);
+      });
+    };
 
 		// transcript is not a child of this.$ableDiv
 		// therefore, must be added separately

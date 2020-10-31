@@ -64,6 +64,10 @@ var AblePlayerInstances = [];
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
 	window.AblePlayer = function(media) {
+
+
+  	var thisObj = this;
+
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
@@ -471,6 +475,16 @@ var AblePlayerInstances = [];
 		// so users can control the player while transcribing
 		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
 			this.stenoMode = true;
+			// Add support for stenography in an iframe via data-steno-iframe-id
+      if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
+			  this.stenoFrame = $(media).data('steno-iframe-id');
+        $('#' + this.stenoFrame).on('load',function() {
+          thisObj.stenoFrameContents = $(this).contents();
+			  });
+      }
+      else {
+        this.stenoFrame = null;
+      }
 		}
 		else {
 			this.stenoMode = false;
@@ -12367,7 +12381,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// if user presses a key from anywhere on the page, show player controls
 		$(document).keydown(function(e) {
-
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
@@ -12397,11 +12410,17 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base,js)
 		this.$ableDiv.keydown(function (e) {
-
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);
 			}
 		});
+
+		// If stenoMode is enabled in an iframe, handle keydown events from the iframe
+    if (this.stenoMode && this.stenoFrame && (typeof this.stenoFrameContents !== 'undefined')) {
+      this.stenoFrameContents.on('keydown',function(e) {
+        thisObj.onPlayerKeyPress(e);
+      });
+    };
 
 		// transcript is not a child of this.$ableDiv
 		// therefore, must be added separately

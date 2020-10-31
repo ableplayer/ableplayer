@@ -214,6 +214,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-skin** - optional; "legacy (default) or "2020". The default skin has two rows of controls, with the seekbar positioned in available space within the top row. The "2020" skin, introduced in version 4.2, has all buttons in one row beneath a full-width seekbar. 
 -   **data-speed-icons** - optional; "animals" (default) or "arrows". The default setting uses a turtle icon for *slower* and a rabbit icon for *faster*. Setting this to "arrows" uses the original Able Player icons (prior to version 3.5), arrows pointing up for *faster* and down for *slower*.
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **data-steno-iframe-id** - optional; id of an iframe in which users will be typing with steno-mode enabled (see next item).
 -   **data-steno-mode** - optional; "true" to allow keyboard shortcuts for controlling the player remotely within textarea form fields, e.g., for transcribing media content. 
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
 -   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is intelligently calculated based on  duration of the media.

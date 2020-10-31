@@ -64,6 +64,10 @@ var AblePlayerInstances = [];
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
 	window.AblePlayer = function(media) {
+
+
+  	var thisObj = this;
+
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
@@ -471,6 +475,16 @@ var AblePlayerInstances = [];
 		// so users can control the player while transcribing
 		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
 			this.stenoMode = true;
+			// Add support for stenography in an iframe via data-steno-iframe-id
+      if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
+			  this.stenoFrame = $(media).data('steno-iframe-id');
+        $('#' + this.stenoFrame).on('load',function() {
+          thisObj.stenoFrameContents = $(this).contents();
+			  });
+      }
+      else {
+        this.stenoFrame = null;
+      }
 		}
 		else {
 			this.stenoMode = false;
