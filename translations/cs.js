@@ -16,7 +16,7 @@ var cs = {
 
 "stop": "Zastavit",
 
-"restart": "Restart",
+"restart": "Přehrát od začátku",
 
 "prevChapter": "Předchozí kapitola",
 
