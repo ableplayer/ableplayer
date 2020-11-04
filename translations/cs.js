@@ -26,9 +26,9 @@ var cs = {
 
 "nextTrack": "Další stopa",
 
-"rewind": "Přetočit",
+"rewind": "Přetočit vzad",
 
-"forward": "Vpřed",
+"forward": "Přetočit vpřed",
 
 "captions": "Titulky",
 
@@ -74,7 +74,7 @@ var cs = {
 
 "preferences": "Předvolby",
 
-"enterFullScreen": "Vstup na celou obrazovku",
+"enterFullScreen": "Zobrazit na celou obrazovku",
 
 "exitFullScreen": "Ukončit celou obrazovku",
 
@@ -88,9 +88,9 @@ var cs = {
 
 "spacebar": "mezerník",
 
-"transcriptTitle": "Transcript",
+"transcriptTitle": "Přepis",
 
-"lyricsTitle": "Lyrics",
+"lyricsTitle": "Text",
 
 "autoScroll": "Automatické posouvání",
 
@@ -242,7 +242,7 @@ var cs = {
 
 "blue": "modrá",
 
-"magenta": "magenta",
+"magenta": "purpurová",
 
 "red": "červená",
 
