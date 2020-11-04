@@ -1,337 +1,337 @@
 var cs = {
 
-"audio": "audio",
+    "audio": "audio",
 
-"video": "video",
+    "video": "video",
 
-"playerHeading": "Přehrávač médií",
+    "playerHeading": "Přehrávač médií",
 
-"faster": "Rychleji",
+    "faster": "Rychleji",
 
-"slower": "Pomaleji",
+    "slower": "Pomaleji",
 
-"play": "Spustit",
+    "play": "Spustit",
 
-"pause": "Pauza",
+    "pause": "Pauza",
 
-"stop": "Zastavit",
+    "stop": "Zastavit",
 
-"restart": "Přehrát od začátku",
+    "restart": "Přehrát od začátku",
 
-"prevChapter": "Předchozí kapitola",
+    "prevChapter": "Předchozí kapitola",
 
-"nextChapter": "Další kapitola",
+    "nextChapter": "Další kapitola",
 
-"prevTrack": "Předchozí stopa",
+    "prevTrack": "Předchozí stopa",
 
-"nextTrack": "Další stopa",
+    "nextTrack": "Další stopa",
 
-"rewind": "Přetočit vzad",
+    "rewind": "Přetočit vzad",
 
-"forward": "Přetočit vpřed",
+    "forward": "Přetočit vpřed",
 
-"captions": "Titulky",
+    "captions": "Titulky",
 
-"showCaptions": "Zobrazit titulky",
+    "showCaptions": "Zobrazit titulky",
 
-"hideCaptions": "Skrýt titulky",
+    "hideCaptions": "Skrýt titulky",
 
-"captionsOff": "Titulky vypnuty",
+    "captionsOff": "Titulky vypnuty",
 
-"showTranscript": "Zobrazit přepis",
+    "showTranscript": "Zobrazit přepis",
 
-"hideTranscript": "Skrýt přepis",
+    "hideTranscript": "Skrýt přepis",
 
-"turnOnDescriptions": "Zapnout popisy",
+    "turnOnDescriptions": "Zapnout popisy",
 
-"turnOffDescriptions": "vypnout popisy",
+    "turnOffDescriptions": "vypnout popisy",
 
-"chapters": "Kapitoly",
+    "chapters": "Kapitoly",
 
-"newChapter": "Nová kapitola",
+    "newChapter": "Nová kapitola",
 
-"language": "Jazyk",
+    "language": "Jazyk",
 
-"sign": "Znaková řeč",
+    "sign": "Znaková řeč",
 
-"showSign": "Zobrazit znakovou řeč",
+    "showSign": "Zobrazit znakovou řeč",
 
-"hideSign": "Skrýt znakovou řeč",
+    "hideSign": "Skrýt znakovou řeč",
 
-"seekbarLabel": "časová osa",
+    "seekbarLabel": "časová osa",
 
-"mute": "Vypnout zvuk",
+    "mute": "Vypnout zvuk",
 
-"unmute": "Zapnout zvuk",
+    "unmute": "Zapnout zvuk",
 
-"volume": "Hlasitost",
+    "volume": "Hlasitost",
 
-"volumeHelp": "Klepnutím otevřete posuvník hlasitosti",
+    "volumeHelp": "Klepnutím otevřete posuvník hlasitosti",
 
-"volumeUpDown": "Hlasitost zvýšit snížit",
+    "volumeUpDown": "Hlasitost zvýšit snížit",
 
-"volumeSliderClosed": "Jezdec hlasitosti zavřený",
+    "volumeSliderClosed": "Jezdec hlasitosti zavřený",
 
-"preferences": "Předvolby",
+    "preferences": "Předvolby",
 
-"enterFullScreen": "Zobrazit na celou obrazovku",
+    "enterFullScreen": "Zobrazit na celou obrazovku",
 
-"exitFullScreen": "Ukončit celou obrazovku",
+    "exitFullScreen": "Ukončit celou obrazovku",
 
-"fullScreen": "Celá obrazovka",
+    "fullScreen": "Celá obrazovka",
 
-"speed": "Rychlost",
+    "speed": "Rychlost",
 
-"and": "a",
+    "and": "a",
 
-"or": "nebo",
+    "or": "nebo",
 
-"spacebar": "mezerník",
+    "spacebar": "mezerník",
 
-"transcriptTitle": "Přepis",
+    "transcriptTitle": "Přepis",
 
-"lyricsTitle": "Text",
+    "lyricsTitle": "Text",
 
-"autoScroll": "Automatické posouvání",
+    "autoScroll": "Automatické posouvání",
 
-"unknown": "Neznámý",
+    "unknown": "Neznámý",
 
-"statusPlaying": "Přehrávání",
+    "statusPlaying": "Přehrávání",
 
-"statusPaused": "Pozastaveno",
+    "statusPaused": "Pozastaveno",
 
-"statusStopped": "Zastaveno",
+    "statusStopped": "Zastaveno",
 
-"statusWaiting": "Čekání",
+    "statusWaiting": "Čekání",
 
-"statusBuffering": "Vyrovnávací paměť",
+    "statusBuffering": "Vyrovnávací paměť",
 
-"statusUsingDesc": "Použití popsané verze",
+    "statusUsingDesc": "Použití popsané verze",
 
-"statusLoadingDesc": "Načítání popsané verze",
+    "statusLoadingDesc": "Načítání popsané verze",
 
-"statusUsingNoDesc": "Používání nepopsané verze",
+    "statusUsingNoDesc": "Používání nepopsané verze",
 
-"statusLoadingNoDesc": "Načítání nepopsané verze",
+    "statusLoadingNoDesc": "Načítání nepopsané verze",
 
-"statusLoadingNext": "Načítání další stopy",
+    "statusLoadingNext": "Načítání další stopy",
 
-"statusEnd": "Konec stopy",
+    "statusEnd": "Konec stopy",
 
-"selectedTrack": "Vybraná stopa",
+    "selectedTrack": "Vybraná stopa",
 
-"alertDescribVersion": "Používání zvukově popsané verze tohoto videa",
+    "alertDescribVersion": "Používání zvukově popsané verze tohoto videa",
 
-"alertNonDescribVersion": "Použití nepopsané verze tohoto videa",
+    "alertNonDescribVersion": "Použití nepopsané verze tohoto videa",
 
-"fallbackError1": "Je nám líto, ale váš prohlížeč to nedokáže přehrát",
+    "fallbackError1": "Je nám líto, ale váš prohlížeč to nedokáže přehrát",
 
-"fallbackError2": "Je známo, že s tímto přehrávačem médií fungují následující prohlížeče",
+    "fallbackError2": "Je známo, že s tímto přehrávačem médií fungují následující prohlížeče",
 
-"orHigher": "nebo vyšší",
+    "orHigher": "nebo vyšší",
 
-"prefMenuCaptions": "Titulky",
+    "prefMenuCaptions": "Titulky",
 
-"prefMenuDescriptions": "Popisy",
+    "prefMenuDescriptions": "Popisy",
 
-"prefMenuKeyboard": "Klávesnice",
+    "prefMenuKeyboard": "Klávesnice",
 
-"prefMenuTranscript": "Přepis",
+    "prefMenuTranscript": "Přepis",
 
-"prefTitleCaptions": "Předvolby titulků",
+    "prefTitleCaptions": "Předvolby titulků",
 
-"prefTitleDescriptions": "Předvolby zvukového popisu",
+    "prefTitleDescriptions": "Předvolby zvukového popisu",
 
-"prefTitleKeyboard": "Předvolby klávesnice",
+    "prefTitleKeyboard": "Předvolby klávesnice",
 
-"prefTitleTranscript": "Předvolby přepisu",
+    "prefTitleTranscript": "Předvolby přepisu",
 
-"prefIntroCaptions": "Následující předvolby řídí způsob zobrazování titulků.",
+    "prefIntroCaptions": "Následující předvolby řídí způsob zobrazování titulků.",
 
-"prefIntroDescription1": "Tento přehrávač médií podporuje zvukový popis dvěma způsoby:",
+    "prefIntroDescription1": "Tento přehrávač médií podporuje zvukový popis dvěma způsoby:",
 
-"prefIntroDescription2": "Aktuální video má",
+    "prefIntroDescription2": "Aktuální video má",
 
-"prefIntroDescriptionNone": "Aktuální video nemá žádný zvukový popis v žádném formátu.",
+    "prefIntroDescriptionNone": "Aktuální video nemá žádný zvukový popis v žádném formátu.",
 
-"prefIntroDescription3": "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.",
+    "prefIntroDescription3": "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.",
 
-"prefIntroDescription4": "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.",
+    "prefIntroDescription4": "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.",
 
-"prefIntroKeyboard1": "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).",
+    "prefIntroKeyboard1": "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).",
 
-"prefIntroKeyboard2": "Níže lze přiřadit modifikační klávesy (Shift, Alt a Control).",
+    "prefIntroKeyboard2": "Níže lze přiřadit modifikační klávesy (Shift, Alt a Control).",
 
-"prefIntroKeyboard3": "POZNÁMKA: Některé kombinace kláves mohou být v konfliktu s klávesami používanými vaším prohlížečem nebo jinými softwarovými aplikacemi. Zkuste najít různé kombinace modifikačních kláves, které vám vyhovují.",
+    "prefIntroKeyboard3": "POZNÁMKA: Některé kombinace kláves mohou být v konfliktu s klávesami používanými vaším prohlížečem nebo jinými softwarovými aplikacemi. Zkuste najít různé kombinace modifikačních kláves, které vám vyhovují.",
 
-"prefIntroTranscript": "Následující preference ovlivní interaktivní přepis.",
+    "prefIntroTranscript": "Následující preference ovlivní interaktivní přepis.",
 
-"prefCookieWarning": "Uložení vašich předvoleb vyžaduje soubory cookie.",
+    "prefCookieWarning": "Uložení vašich předvoleb vyžaduje soubory cookie.",
 
-"prefHeadingKeyboard1": "Modifikační klávesy používané pro zástupce",
+    "prefHeadingKeyboard1": "Modifikační klávesy používané pro zástupce",
 
-"prefHeadingKeyboard2": "Aktuální klávesové zkratky",
+    "prefHeadingKeyboard2": "Aktuální klávesové zkratky",
 
-"prefHeadingDescription": "Zvukový popis",
+    "prefHeadingDescription": "Zvukový popis",
 
-"prefHeadingTextDescription": "Textový zvukový popis",
+    "prefHeadingTextDescription": "Textový zvukový popis",
 
-"prefHeadingCaptions": "Titulky",
+    "prefHeadingCaptions": "Titulky",
 
-"prefHeadingTranscript": "Interaktivní přepis",
+    "prefHeadingTranscript": "Interaktivní přepis",
 
-"prefAltKey": "Alt",
+    "prefAltKey": "Alt",
 
-"prefCtrlKey": "Control",
+    "prefCtrlKey": "Control",
 
-"prefShiftKey": "Shift",
+    "prefShiftKey": "Shift",
 
-"escapeKey": "Escape",
+    "escapeKey": "Escape",
 
-"escapeKeyFunction": "Zavřít aktuální dialogové okno nebo vyskakovací nabídku",
+    "escapeKeyFunction": "Zavřít aktuální dialogové okno nebo vyskakovací nabídku",
 
-"prefDescFormat": "Preferovaný formát",
+    "prefDescFormat": "Preferovaný formát",
 
-"prefDescFormatHelp": "Pokud jsou k dispozici oba formáty, použije se pouze jeden.",
+    "prefDescFormatHelp": "Pokud jsou k dispozici oba formáty, použije se pouze jeden.",
 
-"prefDescFormatOption1": "alternativní popsaná verze videa",
+    "prefDescFormatOption1": "alternativní popsaná verze videa",
 
-"prefDescFormatOption1b": "alternativně popsaná verze",
+    "prefDescFormatOption1b": "alternativně popsaná verze",
 
-"prefDescFormatOption2": "textový popis, oznámený čtečkou obrazovky",
+    "prefDescFormatOption2": "textový popis, oznámený čtečkou obrazovky",
 
-"prefDescFormatOption2b": "textový popis",
+    "prefDescFormatOption2b": "textový popis",
 
-"prefDescPause": "Automaticky pozastavit video při spuštění popisu",
+    "prefDescPause": "Automaticky pozastavit video při spuštění popisu",
 
-"prefVisibleDesc": "Zviditelnit popis",
+    "prefVisibleDesc": "Zviditelnit popis",
 
-"prefHighlight": "Zvýraznit přepis při přehrávání médií",
+    "prefHighlight": "Zvýraznit přepis při přehrávání médií",
 
-"prefTabbable": "Přepis umožňující klávesnici",
+    "prefTabbable": "Přepis umožňující klávesnici",
 
-"prefCaptionsFont": "Písmo",
+    "prefCaptionsFont": "Písmo",
 
-"prefCaptionsColor": "Barva textu",
+    "prefCaptionsColor": "Barva textu",
 
-"prefCaptionsBGColor": "Pozadí",
+    "prefCaptionsBGColor": "Pozadí",
 
-"prefCaptionsSize": "Velikost písma",
+    "prefCaptionsSize": "Velikost písma",
 
-"prefCaptionsOpacity": "Neprůhlednost",
+    "prefCaptionsOpacity": "Neprůhlednost",
 
-"prefCaptionsStyle": "Styl",
+    "prefCaptionsStyle": "Styl",
 
-"serif": "patkové",
+    "serif": "patkové",
 
-"sans": "bezpatkové",
+    "sans": "bezpatkové",
 
-"cursive": "kurzíva",
+    "cursive": "kurzíva",
 
-"fantasy": "fantasy",
+    "fantasy": "fantasy",
 
-"monospace": "jednoprostorový",
+    "monospace": "jednoprostorový",
 
-"white": "bílá",
+    "white": "bílá",
 
-"yellow": "žlutá",
+    "yellow": "žlutá",
 
-"green": "zelená",
+    "green": "zelená",
 
-"cyan": "azurová",
+    "cyan": "azurová",
 
-"blue": "modrá",
+    "blue": "modrá",
 
-"magenta": "purpurová",
+    "magenta": "purpurová",
 
-"red": "červená",
+    "red": "červená",
 
-"black": "černá",
+    "black": "černá",
 
-"transparent": "transparentní",
+    "transparent": "transparentní",
 
-"solid": "jednolitý",
+    "solid": "jednolitý",
 
-"captionsStylePopOn": "Vyskakovat",
+    "captionsStylePopOn": "Vyskakovat",
 
-"captionsStyleRollUp": "Srolovat",
+    "captionsStyleRollUp": "Srolovat",
 
-"prefCaptionsPosition": "Pozice",
+    "prefCaptionsPosition": "Pozice",
 
-"captionsPositionOverlay": "Překrytí",
+    "captionsPositionOverlay": "Překrytí",
 
-"captionsPositionBelow": "Níže video",
+    "captionsPositionBelow": "Níže video",
 
-"sampleCaptionText": "Ukázkový text titulku",
+    "sampleCaptionText": "Ukázkový text titulku",
 
-"prefSuccess": "Vaše změny byly uloženy.",
+    "prefSuccess": "Vaše změny byly uloženy.",
 
-"prefNoChange": "Neprovedli jste žádné změny.",
+    "prefNoChange": "Neprovedli jste žádné změny.",
 
-"help": "pomoc",
+    "help": "pomoc",
 
-"helpTitle": "Nápověda",
+    "helpTitle": "Nápověda",
 
-"save": "Uložit",
+    "save": "Uložit",
 
-"cancel": "Zrušit",
+    "cancel": "Zrušit",
 
-"ok": "ok",
+    "ok": "ok",
 
-"done": "Hotovo",
+    "done": "Hotovo",
 
-"closeButtonLabel": "Zavřít dialog",
+    "closeButtonLabel": "Zavřít dialog",
 
-"windowButtonLabel": "Možnosti okna",
+    "windowButtonLabel": "Možnosti okna",
 
-"windowMove": "Přesunout",
+    "windowMove": "Přesunout",
 
-"windowMoveAlert": "Přetažením nebo použitím kláves se šipkami přesuňte okno; klávesou Enter zastavíte",
+    "windowMoveAlert": "Přetažením nebo použitím kláves se šipkami přesuňte okno; klávesou Enter zastavíte",
 
-"windowResize": "Změnit velikost",
+    "windowResize": "Změnit velikost",
 
-"windowResizeHeading": "Změnit velikost okna",
+    "windowResizeHeading": "Změnit velikost okna",
 
-"windowResizeAlert": "Velikost okna byla změněna.",
+    "windowResizeAlert": "Velikost okna byla změněna.",
 
-"windowClose": "Zavřít",
+    "windowClose": "Zavřít",
 
-"width": "Šířka",
+    "width": "Šířka",
 
-"height": "Výška",
+    "height": "Výška",
 
-"windowSendBack": "Odeslat zpět",
+    "windowSendBack": "Odeslat zpět",
 
-"windowSendBackAlert": "Toto okno je nyní za ostatními objekty na stránce.",
+    "windowSendBackAlert": "Toto okno je nyní za ostatními objekty na stránce.",
 
-"windowBringTop": "Přenést dopředu",
+    "windowBringTop": "Přenést dopředu",
 
-"windowBringTopAlert": "Toto okno je nyní před ostatními objekty na stránce.",
+    "windowBringTopAlert": "Toto okno je nyní před ostatními objekty na stránce.",
 
-"resultsSummary1": "Hledali jste:",
+    "resultsSummary1": "Hledali jste:",
 
-"resultsSummary2": "Nalezeno",
+    "resultsSummary2": "Nalezeno",
 
-"resultsSummary3": "odpovídající položky.",
+    "resultsSummary3": "odpovídající položky.",
 
-"resultsSummary4": "Klepnutím na čas spojený s libovolnou položkou přehrajete video od tohoto bodu.",
+    "resultsSummary4": "Klepnutím na čas spojený s libovolnou položkou přehrajete video od tohoto bodu.",
 
-"noResultsFound": "Nebyly nalezeny žádné výsledky.",
+    "noResultsFound": "Nebyly nalezeny žádné výsledky.",
 
-"searchButtonLabel": "Přehrát v",
+    "searchButtonLabel": "Přehrát v",
 
-"hour": "hodina",
+    "hour": "hodina",
 
-"minuta": "minuta",
+    "minuta": "minuta",
 
-"second": "sekunda",
+    "second": "sekunda",
 
-"hours": "hodiny",
+    "hours": "hodiny",
 
-"minutes": "minuty",
+    "minutes": "minuty",
 
-"seconds": "sekundy",
+    "seconds": "sekundy",
 
-"enableKeyboardShortcuts": "Povolit klávesové zkratky"
+    "enableKeyboardShortcuts": "Povolit klávesové zkratky"
 
 };
