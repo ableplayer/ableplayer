@@ -477,17 +477,23 @@ var AblePlayerInstances = [];
 			this.stenoMode = true;
 			// Add support for stenography in an iframe via data-steno-iframe-id
       if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
-			  this.stenoFrame = $(media).data('steno-iframe-id');
-        $('#' + this.stenoFrame).on('load',function() {
-          thisObj.stenoFrameContents = $(this).contents();
-			  });
+			  this.stenoFrameId = $(media).data('steno-iframe-id');
+        this.$stenoFrame = $('#' + this.stenoFrameId);
+        if (!(this.$stenoFrame.length)) {
+          // iframe not found
+          this.stenoFrameId = null;
+          this.$stenoFrame = null;
+        }
       }
       else {
-        this.stenoFrame = null;
+        this.stenoFrameId = null;
+        this.$stenoFrame = null;
       }
 		}
 		else {
 			this.stenoMode = false;
+      this.stenoFrameId = null;
+      this.$stenoFrame = null;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
@@ -571,8 +577,6 @@ var AblePlayerInstances = [];
 			return $(document.getElementById(id));
 		}
 	};
-
-
 
 	AblePlayer.youtubeIframeAPIReady = false;
 	AblePlayer.loadingYoutubeIframeAPI = false;

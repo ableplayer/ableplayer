@@ -913,7 +913,7 @@
 		});
 
 		// If stenoMode is enabled in an iframe, handle keydown events from the iframe
-    if (this.stenoMode && this.stenoFrame && (typeof this.stenoFrameContents !== 'undefined')) {
+    if (this.stenoMode && (typeof this.stenoFrameContents !== 'undefined')) {
       this.stenoFrameContents.on('keydown',function(e) {
         thisObj.onPlayerKeyPress(e);
       });

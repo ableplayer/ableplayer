@@ -477,17 +477,23 @@ var AblePlayerInstances = [];
 			this.stenoMode = true;
 			// Add support for stenography in an iframe via data-steno-iframe-id
       if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
-			  this.stenoFrame = $(media).data('steno-iframe-id');
-        $('#' + this.stenoFrame).on('load',function() {
-          thisObj.stenoFrameContents = $(this).contents();
-			  });
+			  this.stenoFrameId = $(media).data('steno-iframe-id');
+        this.$stenoFrame = $('#' + this.stenoFrameId);
+        if (!(this.$stenoFrame.length)) {
+          // iframe not found
+          this.stenoFrameId = null;
+          this.$stenoFrame = null;
+        }
       }
       else {
-        this.stenoFrame = null;
+        this.stenoFrameId = null;
+        this.$stenoFrame = null;
       }
 		}
 		else {
 			this.stenoMode = false;
+      this.stenoFrameId = null;
+      this.$stenoFrame = null;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
@@ -571,8 +577,6 @@ var AblePlayerInstances = [];
 			return $(document.getElementById(id));
 		}
 	};
-
-
 
 	AblePlayer.youtubeIframeAPIReady = false;
 	AblePlayer.loadingYoutubeIframeAPI = false;
@@ -1151,72 +1155,80 @@ var AblePlayerInstances = [];
 
 					thisObj.setupTranscript().then(function() {
 
-            thisObj.getMediaTimes().then(function(mediaTimes) {
+        		thisObj.initStenoFrame().then(function() {
 
-              thisObj.duration = mediaTimes['duration'];
-              thisObj.elapsed = mediaTimes['elapsed'];
+              if (thisObj.stenoMode && thisObj.$stenoFrame) {
+                thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+			        }
 
-              thisObj.setFullscreen(false);
+              thisObj.getMediaTimes().then(function(mediaTimes) {
 
-              if (typeof thisObj.volume === 'undefined') {
-  						  thisObj.volume = thisObj.defaultVolume;
-						  }
-						  if (thisObj.volume) {
-                thisObj.setVolume(thisObj.volume);
-              }
+                thisObj.duration = mediaTimes['duration'];
+                thisObj.elapsed = mediaTimes['elapsed'];
 
-              if (thisObj.transcriptType) {
-							  thisObj.addTranscriptAreaEvents();
-                thisObj.updateTranscript();
-						  }
-              if (thisObj.mediaType === 'video') {
-							  thisObj.initDescription();
-						  }
-              if (thisObj.captions.length) {
-							  thisObj.initDefaultCaption();
-						  }
+                thisObj.setFullscreen(false);
 
-              // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-              // This tells browsers to ignore the text tracks so Able Player can handle them
-              // However, timing is critical as browsers - especially Safari - tend to ignore this request
-              // unless it's sent late in the intialization process.
-              // If browsers ignore the request, the result is redundant captions
-              thisObj.setMediaAttributes();
-              thisObj.addControls();
-              thisObj.addEventListeners();
+                if (typeof thisObj.volume === 'undefined') {
+  						    thisObj.volume = thisObj.defaultVolume;
+						    }
+                if (thisObj.volume) {
+                  thisObj.setVolume(thisObj.volume);
+                }
 
-              // inject each of the hidden forms that will be accessed from the Preferences popup menu
-              prefsGroups = thisObj.getPreferencesGroups();
-              for (i = 0; i < prefsGroups.length; i++) {
-							  thisObj.injectPrefsForm(prefsGroups[i]);
-				      }
-              thisObj.setupPopups();
-              thisObj.updateCaption();
-              thisObj.injectVTS();
-              if (thisObj.chaptersDivLocation) {
-							  thisObj.populateChaptersDiv();
-				      }
-              thisObj.showSearchResults();
+                if (thisObj.transcriptType) {
+							    thisObj.addTranscriptAreaEvents();
+                  thisObj.updateTranscript();
+						    }
+                if (thisObj.mediaType === 'video') {
+							    thisObj.initDescription();
+						    }
+                if (thisObj.captions.length) {
+							    thisObj.initDefaultCaption();
+						    }
 
-              // Go ahead and load media, without user requesting it
-              // Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-              // However, the media needs to load before the 'loadedmetadata' event is fired
-              // and until that happens we can't get the media's duration
-              if (thisObj.player === 'html5') {
-							  thisObj.$media[0].load();
-						  }
-              // refreshControls is called twice building/initializing the player
-              // this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
-              setTimeout(function() {
-							  thisObj.refreshControls('init');
-						  },100);
-            });
-					},
-					function() {	 // initPlayer fail
-						thisObj.provideFallback();
-					});
-				});
-			});
+                // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+                // This tells browsers to ignore the text tracks so Able Player can handle them
+                // However, timing is critical as browsers - especially Safari - tend to ignore this request
+                // unless it's sent late in the intialization process.
+                // If browsers ignore the request, the result is redundant captions
+                thisObj.setMediaAttributes();
+                thisObj.addControls();
+
+                thisObj.addEventListeners();
+
+                // inject each of the hidden forms that will be accessed from the Preferences popup menu
+                prefsGroups = thisObj.getPreferencesGroups();
+                for (i = 0; i < prefsGroups.length; i++) {
+							    thisObj.injectPrefsForm(prefsGroups[i]);
+				        }
+                thisObj.setupPopups();
+                thisObj.updateCaption();
+                thisObj.injectVTS();
+                if (thisObj.chaptersDivLocation) {
+							    thisObj.populateChaptersDiv();
+				        }
+                thisObj.showSearchResults();
+
+                // Go ahead and load media, without user requesting it
+                // Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+                // However, the media needs to load before the 'loadedmetadata' event is fired
+                // and until that happens we can't get the media's duration
+                if (thisObj.player === 'html5') {
+							    thisObj.$media[0].load();
+						    }
+                // refreshControls is called twice building/initializing the player
+                // this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
+                setTimeout(function() {
+							    thisObj.refreshControls('init');
+						    },100);
+              }); // end getMediaTimes
+					  }); // end initStenoFrame
+          }); // end setupTranscript
+        }); // end setupAltCaptions
+      }); // end setupTracks
+    },
+    function() {	 // initPlayer fail
+		  thisObj.provideFallback();
 		});
 	};
 
@@ -1258,6 +1270,34 @@ var AblePlayerInstances = [];
 			}
 		);
 
+		return promise;
+	};
+
+	AblePlayer.prototype.initStenoFrame = function() {
+
+		var thisObj, deferred, promise, $iframe;
+		thisObj = this;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+
+    if (this.stenoMode && this.$stenoFrame) {
+
+      if (this.$stenoFrame[0].contentWindow,document.readyState == 'complete') {
+        // iframe has already loaded
+        deferred.resolve();
+      }
+      else {
+        // iframe has not loaded. Wait for it.
+        this.$stenoFrame.on('load',function() {
+          deferred.resolve();
+		    });
+		  }
+		}
+		else {
+  		// there is no stenoFrame to initialize
+  		deferred.resolve();
+		}
 		return promise;
 	};
 
@@ -12416,7 +12456,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		});
 
 		// If stenoMode is enabled in an iframe, handle keydown events from the iframe
-    if (this.stenoMode && this.stenoFrame && (typeof this.stenoFrameContents !== 'undefined')) {
+    if (this.stenoMode && (typeof this.stenoFrameContents !== 'undefined')) {
       this.stenoFrameContents.on('keydown',function(e) {
         thisObj.onPlayerKeyPress(e);
       });
