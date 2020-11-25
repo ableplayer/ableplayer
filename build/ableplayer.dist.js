@@ -1488,8 +1488,11 @@ var AblePlayerInstances = [];
 
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
-		Cookies.set('Able-Player', cookieValue, { expires:90 });
-		// set the cookie lifetime for 90 days
+
+		Cookies.set('Able-Player', cookieValue, {
+  		expires: 90,
+  		sameSite: 'strict'
+    });
 	};
 
 	AblePlayer.prototype.getCookie = function() {
