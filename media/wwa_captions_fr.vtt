@@ -2,7 +2,7 @@ WEBVTT
 kind: captions
 lang: fr
 
-NOTE. Ce fichier VTT comprend quelques extras :
+NOTE Ce fichier VTT comprend quelques extras :
 - Métadonnées en haut (lignes 2 et 3)
 - Le bloc de commentaires actuel, identifié par NOTE et encadré par des espaces.
 - Des paramètres de repère à la fin du premier horodatage
