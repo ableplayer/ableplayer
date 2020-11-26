@@ -404,23 +404,16 @@ var AblePlayerInstances = [];
 		}
 
 		// Language
-		this.lang = 'en';
-		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
-			var lang = $(media).data('lang');
-			if (lang.length == 2) {
-				this.lang = lang;
-			}
-		}
-		// Player language is determined as follows (in translation.js > getTranslationText() ):
-		// 1. Lang attributes on <html> or <body>, if a matching translation file is available
-		// 2. The value of this.lang, if a matching translation file is available
+		// Player language is determined given the following precedence:
+    // 1. The value of data-lang on the media element, if provided and a matching translation file is available
+		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
 		// 3. English
-		// To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
-		if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== false) {
-			this.forceLang = true;
+		// Final calculation occurs in translation.js > getTranslationText()
+		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
+		  this.lang = $(media).data('lang').toLowerCase();
 		}
 		else {
-			this.forceLang = false;
+  		this.lang = null;
 		}
 
 		// Metadata Tracks
@@ -14405,40 +14398,75 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	};
 
 	AblePlayer.prototype.getTranslationText = function() {
+
 		// determine language, then get labels and prompts from corresponding translation var
-		var deferred, thisObj, lang, thisObj, msg, translationFile, collapsedLang;
+
+		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang;
 		deferred = $.Deferred();
-
 		thisObj = this;
-		// get language of the web page, if specified
-		if ($('body').attr('lang')) {
-			lang = $('body').attr('lang').toLowerCase();
-		}
-		else if ($('html').attr('lang')) {
-			lang = $('html').attr('lang').toLowerCase();
-		}
-		else {
-			lang = null;
-		}
 
-		// override this.lang to language of the web page, if known and supported
-		// otherwise this.lang will continue using default
-		if (!this.forceLang) {
-			if (lang) {
-				if (lang !== this.lang) {
-					if ($.inArray(lang,this.getSupportedLangs()) !== -1) {
-						// this is a supported lang
-						this.lang = lang;
-					}
-					else {
-						msg = lang + ' is not currently supported. Using default language (' + this.lang + ')';
-						if (this.debug) {
-							
-						}
-					}
-				}
-			}
-		}
+    supportedLangs = this.getSupportedLangs(); // returns an array
+
+    if (this.lang) { // a data-lang attribute is included on the media element
+		  if ($.inArray(this.lang,supportedLangs) === -1) {
+    		// the specified language is not supported
+    		if (this.lang.indexOf('-') == 2) {
+      		// this is a localized lang attribute (e.g., fr-CA)
+      		// try the parent language, given the first two characters
+      		if ($.inArray(this.lang.substring(0,2),supportedLangs) !== -1) {
+            // parent lang is supported. Use that.
+            this.lang = this.lang.substring(0,2);
+          }
+          else {
+      		  // the parent language is not supported either
+      		  // unable to use the specified language
+      		  this.lang = null;
+    		  }
+    		}
+    		else {
+      		// this is not a localized language.
+      		// since it's not supported, we're unable to use it.
+      		this.lang = null;
+        }
+      }
+    }
+
+    if (!this.lang) {
+      // try the language of the web page, if specified
+      if ($('body').attr('lang')) {
+        docLang = $('body').attr('lang').toLowerCase();
+      }
+      else if ($('html').attr('lang')) {
+        docLang = $('html').attr('lang').toLowerCase();
+		  }
+      else {
+        docLang = null;
+		  }
+		  if (docLang) {
+        if ($.inArray(docLang,supportedLangs) !== -1) {
+          // the document language is supported
+          this.lang = docLang;
+        }
+        else {
+          // the document language is not supported
+          if (docLang.indexOf('-') == 2) {
+            // this is a localized lang attribute (e.g., fr-CA)
+            // try the parent language, given the first two characters
+            if ($.inArray(docLang.substring(0,2),supportedLangs) !== -1) {
+              // the parent language is supported. use that.
+              this.lang = docLang.substring(0,2);
+    		    }
+    		  }
+    		}
+      }
+    }
+
+    if (!this.lang) {
+      // No supported language has been specified by any means
+      // Fallback to English
+      this.lang = 'en';
+    }
+
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}
