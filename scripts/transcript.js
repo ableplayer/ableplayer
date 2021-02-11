@@ -176,10 +176,19 @@
 
 	AblePlayer.prototype.setupManualTranscript = function() {
 
-		// Add an auto-scroll checkbox to the toolbar
+		var $autoScrollInput, $autoScrollLabel;
 
-		this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-		this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
+		$autoScrollInput = $('<input>', {
+			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
+			'type': 'checkbox'
+		});
+		$autoScrollLabel = $('<label>', {
+				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
+		}).text(this.tt.autoScroll);
+
+		// Add an auto-scroll checkbox to the toolbar.
+		this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+		this.$transcriptToolbar.append($autoScrollLabel, this.$autoScrollTranscriptCheckbox);
 
 	};
 
