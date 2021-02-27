@@ -444,6 +444,14 @@ var AblePlayerInstances = [];
 				this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
 			}
 
+			// Search option: Ignore capitalization in search terms
+      if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
+  			this.searchIgnoreCaps = true;
+		  }
+      else {
+			  this.searchIgnoreCaps = false;
+		  }
+
 			// conducting a search currently requires an external div in which to write the results
 			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
 				this.searchString = $(media).data('search');
@@ -11364,9 +11372,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var thisObj = this;
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
-  				var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
-  				searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
-  				searchStringHtml += '</p>';
+  		  var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
+  			  searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
+          searchStringHtml += '</p>';
 				var resultsArray = this.searchFor(this.searchString, this.searchIgnoreCaps);
 				if (resultsArray.length > 0) {
 					var $resultsSummary = $('<p>',{
@@ -11393,7 +11401,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
 						itemStartSpan.on('click',function(e) {
-              				thisObj.seekTrigger = 'search';
+              thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;

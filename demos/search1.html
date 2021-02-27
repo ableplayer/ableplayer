@@ -67,6 +67,7 @@
   <li><strong>data-search-div</strong> - contains the id of a &lt;div&gt; in which to display the search results.</li>
   <li><strong>data-search</strong> - contains the search term, expressed as one or more words, separated with space. Able Player will search for any of these words (using <em>OR</em> logic).</li>
   <li><strong>data-search-lang</strong> - optional, specifies the language of the caption or subtitle track to search. If omitted it will search the caption track for the default language.</li>
+  <li><strong>data-search-ignore-caps</strong> - contains the id of a &lt;div&gt; in which to display the search results.</li>
 </ul>
 
 <p>This works as follows in a server-side application:</p>
@@ -76,10 +77,12 @@
   <li>Results are displayed in the &lt;div&gt; element specified by the <strong>data-search-div</strong> attribute.</li>
 </ul>
 
-<p>The current demo assumes a user has already submitted a search for "web mouse".</p>
+<p>The current demo assumes a user has already submitted a search for the word "you".</p>
 
-<p>Also, in this example, <em>data-include-transcript</em> is set to "false", since there isn't room on this page
-  for both search results and a transcript. A better design would accommodate both features.
+<p>In this example, <em>data-search-ignore-caps</em> is enabled, so the search results include all instances of "you", regardless of case.
+</p>
+
+<p>Also in this example, <em>data-include-transcript</em> is set to "false", since there isn't room on this page for both search results and a transcript. A better design would accommodate both features.
 </p>
 
 <p>See also the <a href="search2.html">client-side search demo</a>. For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
@@ -87,7 +90,7 @@
 <!-- to write transcript to an external div, pass id of an empty div via data-transcript-div -->
 <main role="main">
   <div id="player">
-    <video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-search="web mouse" data-search-div="results" data-include-transcript="false" playsinline>
+    <video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-search="you" data-search-div="results" data-include-transcript="false" playsinline data-search-ignore-caps>
       <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
       <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
       <track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>

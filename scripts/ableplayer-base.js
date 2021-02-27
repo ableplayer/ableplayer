@@ -444,6 +444,14 @@ var AblePlayerInstances = [];
 				this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
 			}
 
+			// Search option: Ignore capitalization in search terms
+      if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
+  			this.searchIgnoreCaps = true;
+		  }
+      else {
+			  this.searchIgnoreCaps = false;
+		  }
+
 			// conducting a search currently requires an external div in which to write the results
 			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
 				this.searchString = $(media).data('search');
