@@ -1237,7 +1237,10 @@ button#able-vts-save:focus {
 /*
   SVG Icons
 */
-div[role="button"] svg {
+.able-wrapper div[role="button"] svg,
+.able-modal-dialog div[role="button"] svg,
+.able-wrapper button svg,
+.able-modal-dialog button svg {
 	display: inline-block;
 	width: 1em;
 	height: 1em;
