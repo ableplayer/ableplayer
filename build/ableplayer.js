@@ -10665,7 +10665,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.transcriptType) {
 			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
 				 this.injectTranscriptArea();
-		 			deferred.resolve();
+					deferred.resolve();
 			}
 			else if (this.transcriptType === 'manual') {
 				this.setupManualTranscript();
@@ -10686,8 +10686,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 		this.$transcriptArea = $('<div>', {
 			'class': 'able-transcript-area',
-  		'role': 'dialog',
-      'aria-label': this.tt.transcriptTitle
+			'role': 'dialog',
+			'aria-label': this.tt.transcriptTitle
 		});
 
 		this.$transcriptToolbar = $('<div>', {
@@ -10702,13 +10702,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Add auto Scroll checkbox
 		this.$autoScrollTranscriptCheckbox = $('<input>', {
-		 	'id': 'autoscroll-transcript-checkbox',
-		 	'type': 'checkbox'
-		 });
+			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
+			'type': 'checkbox'
+		});
 		$autoScrollLabel = $('<label>', {
-			 'for': 'autoscroll-transcript-checkbox'
-			}).text(this.tt.autoScroll);
-    this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
+				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
+		}).text(this.tt.autoScroll);
+		this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
 
 		// Add field for selecting a transcript language
 		// Only necessary if there is more than one language
@@ -10717,10 +10717,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				'class': 'transcript-language-select-wrapper'
 			});
 			$languageSelectLabel = $('<label>',{
-				'for': 'transcript-language-select'
+				'for': 'transcript-language-select-' + this.mediaId
 			}).text(this.tt.language);
 			this.$transcriptLanguageSelect = $('<select>',{
-				'id': 'transcript-language-select'
+				'id': 'transcript-language-select-' + this.mediaId
 			});
 			for (i=0; i < this.captions.length; i++) {
 				$option = $('<option></option>',{
@@ -10728,7 +10728,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					lang: this.captions[i]['language']
 				}).text(this.captions[i]['label']);
 				if (this.captions[i]['def']) {
-				 	$option.prop('selected',true);
+					$option.prop('selected',true);
 				 }
 				this.$transcriptLanguageSelect.append($option);
 			 }
@@ -10822,10 +10822,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.setupManualTranscript = function() {
 
-		// Add an auto-scroll checkbox to the toolbar
+		var $autoScrollInput, $autoScrollLabel;
 
-		this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-		this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
+		$autoScrollInput = $('<input>', {
+			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
+			'type': 'checkbox'
+		});
+		$autoScrollLabel = $('<label>', {
+				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
+		}).text(this.tt.autoScroll);
+
+		// Add an auto-scroll checkbox to the toolbar.
+		this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+		this.$transcriptToolbar.append($autoScrollLabel, this.$autoScrollTranscriptCheckbox);
 
 	};
 
@@ -10934,7 +10943,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.highlightTranscript = function (currentTime) {
 
-		//show highlight in transcript marking current caption
+		// Show highlight in transcript marking current caption.
 
 		if (!this.transcriptType) {
 			return;
@@ -10959,14 +10968,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 			if (currentTime >= start && currentTime <= end && !isChapterHeading) {
 
-  		  // If this item isn't already highlighted, it should be
-  		  if (!($(this).hasClass('able-highlight'))) {
-  				// remove all previous highlights before adding one to current span
-          thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
-          $(this).addClass('able-highlight');
-          thisObj.movingHighlight = true;
-        }
-        return false;
+				// If this item isn't already highlighted, it should be
+				if (!($(this).hasClass('able-highlight'))) {
+					// remove all previous highlights before adding one to current span
+					thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
+					$(this).addClass('able-highlight');
+					thisObj.movingHighlight = true;
+				}
+				return false;
 			}
 		});
 		thisObj.currentHighlight = thisObj.$transcriptArea.find('.able-highlight');
