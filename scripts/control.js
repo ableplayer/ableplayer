@@ -1220,6 +1220,18 @@
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
+
+		// NOTE: If previously unable to fully populate the Description dialog
+		// because the Web Speech API failed to getVoices()
+		// now is a good time to try again
+		// so the Description dialog can be rebuilt before the user requests it
+    if (!this.descVoices) {
+      this.getBrowserVoices();
+      if (this.descVoices) {
+        this.rebuildDescPrefsForm();
+      }
+    }
+
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
 		thisObj = this;

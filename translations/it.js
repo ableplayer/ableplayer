@@ -202,7 +202,25 @@ var it = {
 
 "prefDescPause": "Mette automaticamente il video in pausa, quando inizia la descrizione",
 
-"prefVisibleDesc": "Rende la descrizione visibile",
+"prefDescVisible": "Rende la descrizione visibile",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Evidenzia la descrizione",
 

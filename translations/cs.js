@@ -204,7 +204,25 @@ var cs = {
 
     "prefDescPause": "Automaticky pozastavit video při spuštění popisu",
 
-    "prefVisibleDesc": "Zviditelnit popis",
+    "prefDescVisible": "Zviditelnit popis",
+
+    "prefDescVoice": "Voice",
+
+    "prefDescRate": "Rate",
+
+    "prefDescPitch": "Pitch",
+
+    "prefDescPitch1": "Very low",
+
+    "prefDescPitch2": "Low",
+
+    "prefDescPitch3": "Default",
+
+    "prefDescPitch4": "High",
+
+    "prefDescPitch5": "Very high",
+
+    "sampleDescriptionText": "Adjust settings to hear this sample text.",
 
     "prefHighlight": "Zvýraznit přepis při přehrávání médií",
 

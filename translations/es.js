@@ -204,7 +204,25 @@ var es = {
 
 "prefDescPause": "Pausar automáticamente el video cuando arranque una descripción",
 
-"prefVisibleDesc": "Hacer visibles las descripciones en texto si se están usando",
+"prefDescVisible": "Hacer visibles las descripciones en texto si se están usando",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Resaltar la transcripción según avanza el contenido",
 

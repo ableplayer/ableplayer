@@ -604,9 +604,30 @@ fieldset.able-prefs-captions select {
   font-size: 0.9em;
   border-radius: none;
 }
+fieldset.able-prefs-descriptions >  div.able-prefs-select > label,
+fieldset.able-prefs-descriptions >  div.able-prefs-slider > label {
+  width: 6em;
+  text-align: right;
+  padding-right: 1em;
+}
+fieldset.able-prefs-descriptions > div.able-prefs-select > select,
+fieldset.able-prefs-descriptions > div.able-prefs-slider > select {
+  width: 10em;
+  font-size: 0.9em;
+  border-radius: none;
+}
+div.able-prefDescPause {
+  margin-top: 1em;
+}
 .able-prefs-form div.able-captions-sample {
   padding: 0.5em;
   text-align: center;
+}
+.able-prefs-form div.able-desc-sample {
+  padding: 0.5em;
+  text-align: center;
+  color: #FFF;
+  background-color: #000;
 }
 .able-prefs-form h2 {
   margin-top: 0;

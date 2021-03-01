@@ -555,8 +555,9 @@
 		}
 		if (!this.playerCreated) {
 			// only call these functions once
-			 this.loadCurrentPreferences();
+      this.loadCurrentPreferences();
 			this.injectPlayerCode();
+			this.getBrowserVoices();
 		}
 
 		// call all remaining functions each time a new media instance is loaded

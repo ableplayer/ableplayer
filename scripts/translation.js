@@ -74,7 +74,6 @@
       // Fallback to English
       this.lang = 'en';
     }
-
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}

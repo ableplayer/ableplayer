@@ -204,7 +204,25 @@ var zhtw = {
 
 "prefDescPause": "開始口述時自動暫停影片",
 
-"prefVisibleDesc": "同時以視覺方式呈現口述影像",
+"prefDescVisible": "同時以視覺方式呈現口述影像",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "播放媒體內容時凸顯相對應的逐字稿段落",
 

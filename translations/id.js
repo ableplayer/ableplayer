@@ -204,7 +204,25 @@ var id = {
 
 "prefDescPause": "Otomatis pause video ketika deskripsi dimulai",
 
-"prefVisibleDesc": "Menampakkan deskripsi",
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
+
+"prefDescVisible": "Menampakkan deskripsi",
 
 "prefHighlight": "Sorotu transkrip saat media diputar",
 

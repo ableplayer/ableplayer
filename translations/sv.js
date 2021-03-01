@@ -204,7 +204,25 @@ var sv = {
 
 "prefDescPause": "Pausa automatiskt video när syntolkning startar",
 
-"prefVisibleDesc": "Synliggör syntolkning",
+"prefDescVisible": "Synliggör syntolkning",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Markera det som läses upp i transkriptet",
 

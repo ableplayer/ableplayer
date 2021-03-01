@@ -204,7 +204,25 @@ var ptbr = {
 
 "prefDescPause": "Automaticamente pausar um vídeo quando a descrição iniciar",
 
-"prefVisibleDesc": "Fazer com que a descrição esteja visível",
+"prefDescVisible": "Fazer com que a descrição esteja visível",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Destacar a descrição conforme a mídia for reproduzida",
 

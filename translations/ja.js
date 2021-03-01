@@ -204,7 +204,25 @@ var ja = {
 
 "prefDescPause": "解説が表示されたら動画を自動的に停止する",
 
-"prefVisibleDesc": "解説が見えるようにする",
+"prefDescVisible": "解説が見えるようにする",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "メディアの再生に合わせて字幕をハイライトする",
 

@@ -1140,8 +1140,9 @@ var AblePlayerInstances = [];
 		}
 		if (!this.playerCreated) {
 			// only call these functions once
-			 this.loadCurrentPreferences();
+      this.loadCurrentPreferences();
 			this.injectPlayerCode();
+			this.getBrowserVoices();
 		}
 
 		// call all remaining functions each time a new media instance is loaded
@@ -1707,22 +1708,50 @@ var AblePlayerInstances = [];
 				'default': 0 // off because users who don't need it might find it distracting
 			});
 			prefs.push({
-				'name': 'prefDescFormat', // audio description default state
+				'name': 'prefDescFormat', // audio description default format (if both 'video' and 'text' are available)
 				'label': null,
 				'group': 'descriptions',
-				'default': 'video'
+				'default': 'video' // video (an alternative described version) always wins
+			});
+			// Preferences related to web speech API (for voicing audio description)
+			/* // TEMP DISABLED WHILE TROUBLESHOOTING PROBLEMS WITH PARTICULAR VOICES
+  			// SEE description.js > announceDescriptionText() for details
+			prefs.push({
+				'name': 'prefDescVoice',
+				'label': this.tt.prefDescVoice,
+				'group': 'descriptions',
+				'default': null // will be set later, in injectPrefsForm()
+			});
+			*/
+			prefs.push({
+				'name': 'prefDescPitch',
+				'label': this.tt.prefDescPitch,
+				'group': 'descriptions',
+				'default': 1 // 0 to 2
+			});
+			prefs.push({
+				'name': 'prefDescRate',
+				'label': this.tt.prefDescRate,
+				'group': 'descriptions',
+				'default': 1 // 0.1 to 10 (1 is normal speech; 2 is fast but decipherable; >2 is super fast)
+			});
+			prefs.push({
+				'name': 'prefDescVolume',
+				'label': this.tt.volume,
+				'group': 'descriptions',
+				'default': 1 // 0 to 1
 			});
 			prefs.push({
 				'name': 'prefDescPause', // automatically pause when closed description starts
 				'label': this.tt.prefDescPause,
 				'group': 'descriptions',
-				'default': 0 // off because it burdens user with restarting after every pause
+				'default': 1 // on as of 4.3.16, because extended description is frequently necessary
 			});
 			prefs.push({
-				'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
-				'label': this.tt.prefVisibleDesc,
+				'name': 'prefDescVisible', // visibly show closed description (if avilable and used)
+				'label': this.tt.prefDescVisible,
 				'group': 'descriptions',
-				'default': 1 // on because sighted users probably want to see this cool feature in action
+				'default': 0 // off as of 4.3.16, to avoid overloading the player with visible features
 			});
 
 			// Video preferences without a category (not shown in Preferences dialogs)
@@ -1743,7 +1772,6 @@ var AblePlayerInstances = [];
 
 		var available = this.getAvailablePreferences();
 		var cookie = this.getCookie();
-
 		// Copy current cookie values into this object, and fill in any default values.
 		for (var ii = 0; ii < available.length; ii++) {
 			var prefName = available[ii]['name'];
@@ -1943,6 +1971,77 @@ var AblePlayerInstances = [];
 					}
 					$thisDiv.append($thisLabel,$thisField);
 				}
+				else if (form === 'descriptions') {
+					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
+          if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
+            // these preferences are checkboxes
+            $thisDiv.addClass('able-prefs-checkbox');
+            $thisField = $('<input>',{
+						  type: 'checkbox',
+              name: thisPref,
+              id: thisId,
+              value: 'true'
+					  });
+            // check current active value for this preference
+            if (this[thisPref] === 1) {
+						  $thisField.prop('checked',true);
+					  }
+            $thisDiv.append($thisField,$thisLabel);
+          }
+          else if (this.synth) {
+            // Only show these options if browser supports speech synthesis
+            $thisDiv.addClass('able-prefs-select');
+            $thisField = $('<select>',{
+						  name: thisPref,
+              id: thisId,
+					  });
+					  if (thisPref === 'prefDescVoice' && this.descVoices) {
+              for (j=0; j < this.descVoices.length; j++) {
+	  						optionValue = this.descVoices[j].name;
+                optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
+                $thisOption = $('<option>',{
+							    value: optionValue,
+                  text: optionText
+                });
+                if (this[thisPref] == optionValue) {
+							    $thisOption.prop('selected',true);
+                }
+                $thisField.append($thisOption);
+              }
+            }
+            else {
+					    if (thisPref == 'prefDescPitch') { // 0 to 2
+  					    options = [0,0.5,1,1.5,2];
+              }
+              else if (thisPref == 'prefDescRate') { // 0.1 to 10 (values <1 are silly slow)
+  					    options = [1,2,3,4,5,6,7,8,9,10];
+              }
+              else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
+  					    options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+              }
+              if (typeof options !== 'undefined') {
+                for (j=0; j < options.length; j++) {
+	  						  optionValue = options[j];
+                  optionText = this.makePrefsValueReadable(thisPref,optionValue);
+                  $thisOption = $('<option>',{
+							      value: optionValue,
+                    text: optionText
+                  });
+                  if (this[thisPref] == optionValue) {
+							      $thisOption.prop('selected',true);
+                  }
+                  $thisField.append($thisOption);
+                  $thisDiv.append($thisLabel,$thisField);
+                }
+              }
+            }
+            // add a change handler that announces the sample description text
+						$thisField.on('change',function() {
+							thisObj.announceDescriptionText('sample',thisObj.tt.sampleDescriptionText);
+						});
+            $thisDiv.append($thisLabel,$thisField);
+					}
+				}
 				else { // all other fields are checkboxes
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<input>',{
@@ -1957,7 +2056,7 @@ var AblePlayerInstances = [];
 					}
 					if (form === 'keyboard') {
 						// add a change handler that updates the list of current keyboard shortcuts
-						$thisField.change(function() {
+						$thisField.on('change',function() {
 							changedPref = $(this).attr('name');
 							if (changedPref === 'prefAltKey') {
 								changedSpan = '.able-modkey-alt';
@@ -1995,6 +2094,15 @@ var AblePlayerInstances = [];
 				$prefsDiv.append(this.$sampleCapsDiv);
 				this.stylizeCaptions(this.$sampleCapsDiv);
 			}
+		}
+		else if (form === 'descriptions') {
+  		if (this.synth) {
+    		// add a div with sample audio description text
+        this.$sampleDescDiv = $('<div>',{
+				  'class': 'able-desc-sample'
+        }).text(this.tt.sampleDescriptionText);
+        $prefsDiv.append(this.$sampleDescDiv);
+      }
 		}
 		else if (form === 'keyboard') {
 			// add a current list of keyboard shortcuts
@@ -2159,6 +2267,57 @@ var AblePlayerInstances = [];
 		});
 	};
 
+	AblePlayer.prototype.rebuildDescPrefsForm = function () {
+
+    // Called if getBrowserVoices() succeeded after an earlier failure
+
+    var $voiceSelect, i, optionValue, optionText, $thisOption;
+
+    $voiceSelect = $('#' + this.mediaId + '_prefDescVoice');
+    for (i=0; i < this.descVoices.length; i++) {
+	  	optionValue = this.descVoices[i].name;
+      optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
+      $thisOption = $('<option>',{
+        value: optionValue,
+        text: optionText
+      });
+      if (this.prefDescVoice == optionValue) {
+				$thisOption.prop('selected',true);
+      }
+      $voiceSelect.append($thisOption);
+    }
+	};
+
+	 AblePlayer.prototype.makePrefsValueReadable = function(pref,value) {
+
+  	 // The values for pitch, rate, and volume (web speech API)
+  	 // are strange and inconsistent between variables
+  	 // this function returns text that is more readable than the values themselves
+
+  	 if (pref === 'prefDescPitch') {
+    	 if (value === 0) {
+      	 return this.tt.prefDescPitch1;
+    	 }
+    	 else if (value === 0.5) {
+      	 return this.tt.prefDescPitch2;
+    	 }
+    	 else if (value === 1) {
+      	 return this.tt.prefDescPitch3;
+    	 }
+    	 else if (value === 1.5) {
+      	 return this.tt.prefDescPitch4;
+    	 }
+    	 else if (value === 2) {
+      	 return this.tt.prefDescPitch5;
+    	 }
+  	 }
+  	 else if (pref === 'prefDescVolume') {
+    	 // values range from 0.1 to 1.0
+    	 return value * 10;
+  	 }
+  	 return value;
+	 };
+
 	 AblePlayer.prototype.resetPrefsForm = function () {
 
   	 // Reset preferences form with default values from cookie
@@ -2234,6 +2393,16 @@ var AblePlayerInstances = [];
 						capSizeValue = newValue;
 					}
 				}
+				else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
+				  // this is one of the description-related select fields
+					newValue = $('select[id="' + prefId + '"]').val();
+					if (cookie.preferences[prefName] !== newValue) { // user changed setting
+						cookie.preferences[prefName] = newValue;
+						// also update global var for this pref
+						this[prefName] = newValue;
+						numChanges++;
+					}
+				}
 				else { // all other fields are checkboxes
 					if ($('input[id="' + prefId + '"]').is(':checked')) {
 						cookie.preferences[prefName] = 1;
@@ -2278,7 +2447,7 @@ var AblePlayerInstances = [];
       // update prefs for ALL of them
       for (var i=0; i<AblePlayerInstances.length; i++) {
         AblePlayerInstances[i].updatePrefs();
-        AblePlayerInstances[i].loadCurrentPreferences();
+        AblePlayerInstances[i].geteferences();
         AblePlayerInstances[i].resetPrefsForm();
         if (numCapChanges > 0) {
           AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
@@ -7374,7 +7543,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
 		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
 		// prefDescPause == 1 to pause video when description starts; else 0
-		// prefVisibleDesc == 1 to visibly show text-based description area; else 0
+		// prefDescVisible == 1 to visibly show text-based description area; else 0
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
 		// hasClosedDesc == true if a description text track is available
 		// this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
@@ -7428,35 +7597,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       this.useDescFormat = false;
 			this.descOn = false;
 		}
-
-		if (this.useDescFormat === 'text') {
-			// check whether browser supports the Web Speech API
-			if (window.speechSynthesis) {
-				// It does!
-				this.synth = window.speechSynthesis;
-				this.descVoices = this.synth.getVoices();
-				// select the first voice that matches the track language
-				// available languages are identified with local suffixes (e.g., en-US)
-				// in case no matching voices are found, use the first voice in the voices array
-				this.descVoiceIndex = 0;
-				for (var i=0; i<this.descVoices.length; i++) {
-					if (this.captionLang.length === 2) {
-						// match only the first 2 characters of the lang code
-						if (this.descVoices[i].lang.substr(0,2).toLowerCase() === this.captionLang.toLowerCase()) {
-							this.descVoiceIndex = i;
-							break;
-						}
-					}
-					else {
-						// match the entire lang code
-						if (this.descVoices[i].lang.toLowerCase() === this.captionLang.toLowerCase()) {
-							this.descVoiceIndex = i;
-							break;
-						}
-					}
-				}
-			}
-		}
 		if (this.descOn) {
 			if (this.useDescFormat === 'video') {
 				if (!this.usingAudioDescription()) {
@@ -7465,7 +7605,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 			if (this.hasClosedDesc) {
-				if (this.prefVisibleDesc) {
+				if (this.prefDescVisible) {
   				// make description text visible
   				// New in v4.0.10: Do this regardless of useDescFormat
   				this.$descDiv.show();
@@ -7495,8 +7635,43 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.refreshingDesc = false;
 	};
 
-	// Returns true if currently using audio description, false otherwise.
+	AblePlayer.prototype.getBrowserVoices = function () {
+
+  	// define this.descVoices
+  	// NOTE: Some browsers require a user-initiated click before
+  	// this.synth.getVoices() will work
+
+    var voices;
+
+    // if browser supports Web Speech API
+    // define this.descvoices (an array of available voices in this browser)
+    if (window.speechSynthesis) {
+			this.synth = window.speechSynthesis;
+      voices = this.synth.getVoices();
+      if (voices.length > 0) {
+        this.descVoices = [];
+        // available languages are identified with local suffixes (e.g., en-US)
+        for (var i=0; i<voices.length; i++) {
+				  // match only the first 2 characters of the lang code
+          if (voices[i].lang.substr(0,2).toLowerCase() === this.lang.substr(0,2).toLowerCase()) {
+  				  // this is a match. Add to the final array
+            this.descVoices.push(voices[i]);
+				  }
+        }
+        if (!this.descVoices.length) {
+          // no voices available in the default language
+          // just use all voices, regardless of language
+          this.descVoices = voices;
+        }
+      }
+		}
+    return false;
+  };
+
+
 	AblePlayer.prototype.usingAudioDescription = function () {
+
+  	// Returns true if currently using audio description, false otherwise.
 
 		if (this.player === 'youtube') {
 			return (this.activeYouTubeId === this.youTubeDescId);
@@ -7672,32 +7847,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (
-  				this.exposeTextDescriptions &&
-				  typeof this.synth !== 'undefined' &&
-          typeof this.descVoiceIndex !== 'undefined') {
-					// browser supports speech synthesis and a voice has been selected in initDescription()
-					// use the web speech API
-					msg = new SpeechSynthesisUtterance();
-					msg.voice = this.descVoices[this.descVoiceIndex]; // Note: some voices don't support altering params
-					msg.voiceURI = 'native';
-					msg.volume = 1; // 0 to 1
-					msg.rate = 1.5; // 0.1 to 10 (1 is normal human speech; 2 is fast but easily decipherable; anything above 2 is blazing fast)
-					msg.pitch = 1; //0 to 2
-					msg.text = descText;
-					msg.lang = this.captionLang;
-					msg.onend = function(e) {
-						// NOTE: e.elapsedTime might be useful
-						if (thisObj.pausedForDescription) {
-							thisObj.playMedia();
-						}
-      		};
-					this.synth.speak(msg);
-					if (this.prefVisibleDesc) {
-						// write description to the screen for sighted users
-						// but remove ARIA attributes since it isn't intended to be read by screen readers
-						this.$descDiv.html(descText).removeAttr('aria-live aria-atomic');
-					}
+				if (window.speechSynthesis) {
+  				// browser supports speech synthsis
+          this.announceDescriptionText('description',descText);
+          if (this.prefDescVisible) {
+				    // write description to the screen for sighted users
+            // but remove ARIA attributes since it isn't intended to be read by screen readers
+            this.$descDiv.html(descText).removeAttr('aria-live aria-atomic');
+				  }
 				}
 				else {
 					// browser does not support speech synthesis
@@ -7717,6 +7874,109 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// restore aria-live to $status
 			this.$status.attr('aria-live','polite');
 		}
+	};
+
+	AblePlayer.prototype.announceDescriptionText = function(context, text) {
+
+		// this function announces description text using speech synthesis
+		// it's only called if already determined that browser supports speech synthesis
+		// context is either:
+		// 'description' - actual description text extracted from WebVTT file
+		// 'sample' - called when user changes a setting in Description Prefs dialog
+
+    var thisObj, speechTimeout, voiceName, i, voice, pitch, rate, volume, utterance;
+
+    thisObj = this;
+
+    // As of Feb 2021, there are two major issues with the Web Speech API:
+    // 1. In some browsers (e.g., Chrome) window.speechSynthesis.getVoices()
+    //  returns 0 voices unless the request is triggered with a user click
+    //  Therefore, description may have failed to initialized when the page loaded
+    //  This function cannot have been called without a mouse click.
+    //  Therefore, this is a good time to check that, and try again if needed
+    // 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
+    //  and onend event is never fired. This prevents new speech from being spoken.
+    //  This only seems to happen with some voices.
+    //  Typically the first voice in the getVoices() array (index 0) is realiable
+    //  Test results: The following voices seem to be reliable:
+    //  In Firefox on Mac: Alex, Fred, Victoria
+    //  In Chrome on Mac: same as above (and when Chrome stops speaking, it requires a reboot to start again!)
+    //  To ignore user's voice preferences and always use the first voice, set the following var to true
+    var useFirstVoice = true;
+
+    if (!this.descVoices) {
+      // voices array failed to load the first time. Try again
+      this.getBrowserVoices();
+    }
+
+    if (context === 'sample') {
+      // get settings from form
+      voiceName = $('#' + this.mediaId + '_prefDescVoice').val();
+      pitch = $('#' + this.mediaId + '_prefDescPitch').val();
+      rate = $('#' + this.mediaId + '_prefDescRate').val();
+      volume = $('#' + this.mediaId + '_prefDescVolume').val();
+    }
+    else {
+      // get settings from global prefs
+      voiceName = this.prefDescVoice;
+      pitch = this.prefDescPitch;
+      rate = this.prefDescRate;
+      volume = this.prefDescVolume;
+    }
+
+    // get the voice associated with the user's chosen voice name
+    if (this.descVoices) {
+      if (this.descVoices.length > 0) {
+        if (useFirstVoice) {
+          voice = this.descVoices[0];
+        }
+        else if (voiceName) {
+          // get the voice that matches user's preferred voiceName
+          for (i = 0; i < this.descVoices.length; i++) {
+            if (this.descVoices[i].name == voiceName) {
+              voice = this.descVoices[i];
+              break;
+            }
+          }
+        }
+        if (typeof voice === 'undefined') {
+          // no matching voice was found
+          // use the first voice in the array
+          voice = this.descVoices[0];
+        }
+
+        utterance = new SpeechSynthesisUtterance();
+        utterance.voice = voice;
+        utterance.voiceURI = 'native';
+        utterance.volume = volume;
+        utterance.rate = rate;
+        utterance.pitch = pitch;
+        utterance.text = text;
+        // TODO: Consider the best language for the utterance:
+        // language of the web page? (this.lang)
+        // language of the WebVTT description track?
+        // language of the user's chosen voice?
+        // If there's a mismatch between any of these, the description will likely be unintelligible
+        utterance.lang = this.lang;
+        utterance.onend = function(e) {
+          // do something after speaking
+          
+          if (context === 'description') {
+            if (thisObj.prefDescPause) {
+              if (thisObj.pausedForDescription && thisObj.exposeTextDescriptions) {
+		  			    thisObj.playMedia();
+                this.pausedForDescription = false;
+				      }
+				    }
+          }
+        };
+        utterance.onerror = function(e) {
+          // handle error
+          
+        }
+		    this.synth.speak(utterance);
+      }
+    }
 	};
 
 })(jQuery);
@@ -9106,6 +9366,18 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
+
+		// NOTE: If previously unable to fully populate the Description dialog
+		// because the Web Speech API failed to getVoices()
+		// now is a good time to try again
+		// so the Description dialog can be rebuilt before the user requests it
+    if (!this.descVoices) {
+      this.getBrowserVoices();
+      if (this.descVoices) {
+        this.rebuildDescPrefsForm();
+      }
+    }
+
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
 		thisObj = this;
@@ -14465,7 +14737,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
       // Fallback to English
       this.lang = 'en';
     }
-
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}

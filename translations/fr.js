@@ -204,7 +204,25 @@ var fr = {
 
 "prefDescPause": "Mettre la vidéo en pause automatiquement quand la description commence",
 
-"prefVisibleDesc": "Affichez la description",
+"prefDescVisible": "Affichez la description",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Surligner la transcription pendant la lecture",
 
