@@ -357,7 +357,7 @@
 
     thisObj = this;
 
-    // As of Feb 2021, there are two major issues with the Web Speech API:
+    // As of Feb 2021,
     // 1. In some browsers (e.g., Chrome) window.speechSynthesis.getVoices()
     //  returns 0 voices unless the request is triggered with a user click
     //  Therefore, description may have failed to initialized when the page loaded
@@ -371,7 +371,7 @@
     //  In Firefox on Mac: Alex, Fred, Victoria
     //  In Chrome on Mac: same as above (and when Chrome stops speaking, it requires a reboot to start again!)
     //  To ignore user's voice preferences and always use the first voice, set the following var to true
-    var useFirstVoice = true;
+    var useFirstVoice = false;
 
     if (!this.descVoices) {
       // voices array failed to load the first time. Try again

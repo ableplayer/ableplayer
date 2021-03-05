@@ -223,16 +223,12 @@
 				'group': 'descriptions',
 				'default': 'video' // video (an alternative described version) always wins
 			});
-			// Preferences related to web speech API (for voicing audio description)
-			/* // TEMP DISABLED WHILE TROUBLESHOOTING PROBLEMS WITH PARTICULAR VOICES
-  			// SEE description.js > announceDescriptionText() for details
 			prefs.push({
 				'name': 'prefDescVoice',
 				'label': this.tt.prefDescVoice,
 				'group': 'descriptions',
 				'default': null // will be set later, in injectPrefsForm()
 			});
-			*/
 			prefs.push({
 				'name': 'prefDescPitch',
 				'label': this.tt.prefDescPitch,
@@ -523,8 +519,24 @@
 					    if (thisPref == 'prefDescPitch') { // 0 to 2
   					    options = [0,0.5,1,1.5,2];
               }
-              else if (thisPref == 'prefDescRate') { // 0.1 to 10 (values <1 are silly slow)
-  					    options = [1,2,3,4,5,6,7,8,9,10];
+              else if (thisPref == 'prefDescRate') { // 0.1 to 10
+	              // Tests with a variety of voices on MacOS and Windows
+	              // yielded the following choices that seem reasonable for audio description:
+								// 0.5 - too slow (exclude this)
+	              // 0.7 - casual
+	              // 0.8 - add this
+	              // 0.9 - add this
+	              // 1 - normal
+	              // 1.1 - add this
+	              // 1.2 - add this
+	              // 1.5 - quick
+	              // 2 - speedy
+	              // 2.5 - fleet
+	              // 3 - fast! (some voices don't get any faster than this
+
+	              // Note: if these values are modified, must also modfiy them
+	              // in makePrefsValueReadable()
+  					    options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
               }
               else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
   					    options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
@@ -820,6 +832,42 @@
     	 else if (value === 2) {
       	 return this.tt.prefDescPitch5;
     	 }
+  	 }
+  	 else if (pref === 'prefDescRate') {
+	  	 // default in the API is 0.1 to 10, where 1 is normal speaking voice
+	  	 // our custom range offers severa rates close to 1
+	  	 // plus a couple of crazy fast ones for sport
+	  	 // Our options (1-10) or mapped here to 0.5 to 0.14
+	  	 if (value === 0.7) {
+		  	 return 1;
+	  	 }
+	  	 else if (value === 0.8) {
+		  	 return 2;
+	  	 }
+	  	 else if (value === 0.9) {
+		  	 return 3;
+	  	 }
+	  	 else if (value === 1) {
+		  	 return 4;
+	  	 }
+	  	 else if (value === 1.1) {
+		  	 return 5;
+	  	 }
+	  	 else if (value === 1.2) {
+		  	 return 6;
+	  	 }
+	  	 else if (value === 1.5) {
+		  	 return 7;
+	  	 }
+	  	 else if (value === 2) {
+		  	 return 8;
+	  	 }
+	  	 else if (value === 2.5) {
+		  	 return 9;
+	  	 }
+	  	 else if (value === 3) {
+		  	 return 10;
+	  	 }
   	 }
   	 else if (pref === 'prefDescVolume') {
     	 // values range from 0.1 to 1.0
