@@ -183,7 +183,7 @@
 				'name': 'prefCaptionsFont',
 				'label': this.tt.prefCaptionsFont,
 				'group': 'captions',
-				'default': 'sans'
+				'default': 'sans-serif'
 			});
 			prefs.push({
 				'name': 'prefCaptionsSize',
