@@ -19,27 +19,37 @@
 
 <body>
 
-<h1>Able Player Video Demo #3:<br/>Video player with audio description via VTT track</h1>
+<h1>Able Player Video Demo #3:<br/>Video player with audio description in multiple languages via VTT tracks</h1>
 
-<p>This demo uses a WebVTT file to deliver text-based audio description. If Description is toggled on,
-  supporting browsers will read the description text aloud using the Web Speech API.
-  Video will pause temporarily while description is playing if the user checks
-  "Automatically pause video when description starts" in Audio Description Preferences.
-  The text from the description file is incorporated into the machine-generated interactive transcript.</p>
+<p>This demo uses WebVTT files to deliver text-based audio description. WebVTT description tracks are available in multiple languages, which correspond with the subtitle languages. If the user switches the subtitle language via the Captions button, the description language will change as well.</p>
+<p>If Description is toggled on, supporting browsers will read the description text aloud using the Web Speech API. Speech output settings &mdash; voice, pitch, rate, and volume &mdash; can be configured by the user within the Preferences dialog.</p>
+<p>Also in Preferences, users can toggle a checkbox labeled "Automatically pause video when description starts".</p>
+<p>The text from the description file is incorporated into the machine-generated interactive transcript.</p>
 
-<p>For browsers that do not support the Web Speech API, description text will be written to an ARIA live region
-  on the web page, and will be read aloud by screen readers.</p>
+<p>For browsers that do not support the Web Speech API, description text will be written to an ARIA live region on the web page, and will be read aloud by screen readers.</p>
 
 <p>For an alternative method of delivering audio description, see <a href="video4.html">Video Demo #4</a>.</p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg"data-able-player data-skin="2020" playsinline>
+<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
 	<source type="video/mp4" src="../media/wwa.mp4"/>
   <source type="video/webm" src="../media/wwa.webm"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
-	<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+  <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+  <track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+  <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+  <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+  <track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+  <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+  <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+  <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+  <track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
 </video>
 
 </body>
