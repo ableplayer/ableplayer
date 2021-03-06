@@ -478,13 +478,13 @@ div.able-now-playing span span {
 /*
   Modal Dialogs
 */
-
 div.able-modal-dialog {
   position: absolute;
   height: auto;
   max-width: 90%;
   margin-left: auto;
   margin-right: auto;
+  top: 5%;
   left: 0px;
   right: 0px;
   outline: 0px none;
@@ -494,6 +494,13 @@ div.able-modal-dialog {
   box-sizing: content-box !important;
   z-index: 10000;
 }
+@supports (transform: translateY(calc(-50vh - 50%))) {
+	div.able-modal-dialog {
+	  transform: translateY(calc(-50vh - 50%));
+	  top: auto;
+	}
+}
+
 div.able-modal-overlay {
   position: fixed;
   width: 100%;
