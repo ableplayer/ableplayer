@@ -300,7 +300,8 @@
 		// Creates a preferences form and injects it.
 		// form is one of the supported forms (groups) defined in getPreferencesGroups()
 
-		var available, thisObj, $prefsDiv, formTitle, introText,
+		var thisObj, available, descLangs,
+			$prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
 			$descFieldset, $descLegend, $legend,
@@ -513,6 +514,7 @@
 							    $thisOption.prop('selected',true);
                 }
                 $thisField.append($thisOption);
+                this.$voiceSelectField = $thisField;
               }
             }
             else {
@@ -793,9 +795,9 @@
 
     // Called if getBrowserVoices() succeeded after an earlier failure
 
-    var $voiceSelect, i, optionValue, optionText, $thisOption;
+    var i, optionValue, optionText, $thisOption;
 
-    $voiceSelect = $('#' + this.mediaId + '_prefDescVoice');
+    this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
     for (i=0; i < this.descVoices.length; i++) {
 	  	optionValue = this.descVoices[i].name;
       optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
@@ -806,7 +808,7 @@
       if (this.prefDescVoice == optionValue) {
 				$thisOption.prop('selected',true);
       }
-      $voiceSelect.append($thisOption);
+      this.$voiceSelectField.append($thisOption);
     }
 	};
 

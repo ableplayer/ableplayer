@@ -1918,7 +1918,6 @@
 				meta = this.meta[i];
 			}
 		}
-
 		// regardless of source...
 		this.transcriptLang = language;
 
@@ -1941,6 +1940,12 @@
 			this.transcriptCaptions = captions;
 			this.transcriptChapters = chapters;
 			this.transcriptDescriptions = descriptions;
+		}
+		if (this.selectedDescriptions) {
+			if (this.selectedDescriptions.language !== this.lang) {
+				// updating description voice to match new description language
+				this.updateDescriptionVoice();
+			}
 		}
 		this.updateTranscript();
 	};

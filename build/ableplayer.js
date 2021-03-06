@@ -1142,7 +1142,6 @@ var AblePlayerInstances = [];
 			// only call these functions once
       this.loadCurrentPreferences();
 			this.injectPlayerCode();
-			this.getBrowserVoices();
 		}
 
 		// call all remaining functions each time a new media instance is loaded
@@ -1152,6 +1151,8 @@ var AblePlayerInstances = [];
 		this.initPlayer().then(function() {
 
 			 thisObj.setupTracks().then(function() {
+
+				thisObj.getBrowserVoices();
 
 				thisObj.setupAltCaptions().then(function() {
 
@@ -1790,7 +1791,8 @@ var AblePlayerInstances = [];
 		// Creates a preferences form and injects it.
 		// form is one of the supported forms (groups) defined in getPreferencesGroups()
 
-		var available, thisObj, $prefsDiv, formTitle, introText,
+		var thisObj, available, descLangs,
+			$prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
 			$descFieldset, $descLegend, $legend,
@@ -2003,6 +2005,7 @@ var AblePlayerInstances = [];
 							    $thisOption.prop('selected',true);
                 }
                 $thisField.append($thisOption);
+                this.$voiceSelectField = $thisField;
               }
             }
             else {
@@ -2283,9 +2286,9 @@ var AblePlayerInstances = [];
 
     // Called if getBrowserVoices() succeeded after an earlier failure
 
-    var $voiceSelect, i, optionValue, optionText, $thisOption;
+    var i, optionValue, optionText, $thisOption;
 
-    $voiceSelect = $('#' + this.mediaId + '_prefDescVoice');
+    this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
     for (i=0; i < this.descVoices.length; i++) {
 	  	optionValue = this.descVoices[i].name;
       optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
@@ -2296,7 +2299,7 @@ var AblePlayerInstances = [];
       if (this.prefDescVoice == optionValue) {
 				$thisOption.prop('selected',true);
       }
-      $voiceSelect.append($thisOption);
+      this.$voiceSelectField.append($thisOption);
     }
 	};
 
@@ -7716,23 +7719,103 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     return false;
   };
 
+	AblePlayer.prototype.getBrowserVoices = function () {
 
-	AblePlayer.prototype.usingAudioDescription = function () {
+  	// define this.descVoices
+  	// NOTE: Some browsers require a user-initiated click before
+  	// this.synth.getVoices() will work
 
-  	// Returns true if currently using audio description, false otherwise.
+    var voices, descLangs, voiceLang, playerLang;
 
-		if (this.player === 'youtube') {
-			return (this.activeYouTubeId === this.youTubeDescId);
+    // if browser supports Web Speech API
+    // define this.descvoices (an array of available voices in this browser)
+    if (window.speechSynthesis) {
+			this.synth = window.speechSynthesis;
+      voices = this.synth.getVoices();
+      descLangs = this.getDescriptionLangs();
+
+      if (voices.length > 0) {
+        this.descVoices = [];
+        // available languages are identified with local suffixes (e.g., en-US)
+        for (var i=0; i<voices.length; i++) {
+				  // match only the first 2 characters of the lang code
+				  // include any language for which there is a matching description track
+				  // as well as the overall player lang
+				  voiceLang = voices[i].lang.substr(0,2).toLowerCase();
+				  playerLang = this.lang.substr(0,2).toLowerCase();
+          if (voiceLang === playerLang || (descLangs.indexOf(voiceLang) !== -1)) {
+  				  // this is a match. Add to the final array
+            this.descVoices.push(voices[i]);
+				  }
+        }
+        if (!this.descVoices.length) {
+          // no voices available in the default language(s)
+          // just use all voices, regardless of language
+          this.descVoices = voices;
+        }
+      }
 		}
-		else if (this.player === 'vimeo') {
-			return (this.activeVimeoId === this.vimeoDescId);
+    return false;
+  };
+
+	AblePlayer.prototype.getDescriptionLangs = function () {
+
+		// returns an array of languages (from srclang atttributes)
+		// in which there are description tracks
+		// use only first two characters of the lang code
+		var descLangs = [];
+		if (this.tracks) {
+			for (var i=0; i < this.tracks.length; i++) {
+				if (this.tracks[i].kind === 'descriptions') {
+					descLangs.push(this.tracks[i].language.substr(0,2).toLowerCase());
+				}
+			}
 		}
-		else {
-			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+		return descLangs;
+	};
+
+	AblePlayer.prototype.updateDescriptionVoice = function () {
+
+  	// Called if user chooses a subtitle language for which there is a matching
+  	// description track, and the subtitle language is different than the player language
+  	// This ensures the description is read in a proper voice for the selected language
+
+		var voices, descVoice;
+
+    if (!this.descVoices) {
+      this.getBrowserVoices();
+      if (this.descVoices) {
+        this.rebuildDescPrefsForm();
+      }
+		}
+		else if (!this.$voiceSelectField) {
+			this.rebuildDescPrefsForm();
+		}
+
+		descVoice = this.selectedDescriptions.language;
+
+    if (this.synth) {
+      voices = this.synth.getVoices();
+      if (voices.length > 0) {
+        // available languages are identified with local suffixes (e.g., en-US)
+        for (var i=0; i<voices.length; i++) {
+				  // select the first language that matches the first 2 characters of the lang code
+          if (voices[i].lang.substr(0,2).toLowerCase() === descVoice.substr(0,2).toLowerCase()) {
+            // make this the user's current preferred voice
+            this.prefDescVoice = voices[i].name;
+						// select this voice in the Description Prefs dialog
+						if (this.$voiceSelectField) {
+							this.$voiceSelectField.val(this.prefDescVoice);
+						}
+						break;
+				  }
+        }
+      }
 		}
 	};
 
 	AblePlayer.prototype.swapDescription = function() {
+
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -7944,12 +8027,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
     //  Therefore, this is a good time to check that, and try again if needed
     // 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
     //  and onend event is never fired. This prevents new speech from being spoken.
+    //  window.speechSynthesis.cancel() also fails, so it's impossible to recover.
     //  This only seems to happen with some voices.
     //  Typically the first voice in the getVoices() array (index 0) is realiable
-    //  Test results: The following voices seem to be reliable:
-    //  In Firefox on Mac: Alex, Fred, Victoria
-    //  In Chrome on Mac: same as above (and when Chrome stops speaking, it requires a reboot to start again!)
+    //  When speech synthesis gets wonky, this is a deep problem that impacts all browsers
+    //  and typically requires a computer reboot to make right again.
+    //  This has been observed frequently in macOS Big Sur, but also in Windows 10
     //  To ignore user's voice preferences and always use the first voice, set the following var to true
+    //	This is for testing only; not recommended for production
+    // 	unless the voice select field is also removed from the Prefs dialog
     var useFirstVoice = false;
 
     if (!this.descVoices) {
@@ -10112,7 +10198,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				meta = this.meta[i];
 			}
 		}
-
 		// regardless of source...
 		this.transcriptLang = language;
 
@@ -10135,6 +10220,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.transcriptCaptions = captions;
 			this.transcriptChapters = chapters;
 			this.transcriptDescriptions = descriptions;
+		}
+		if (this.selectedDescriptions) {
+			if (this.selectedDescriptions.language !== this.lang) {
+				// updating description voice to match new description language
+				this.updateDescriptionVoice();
+			}
 		}
 		this.updateTranscript();
 	};

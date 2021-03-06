@@ -137,23 +137,103 @@
     return false;
   };
 
+	AblePlayer.prototype.getBrowserVoices = function () {
 
-	AblePlayer.prototype.usingAudioDescription = function () {
+  	// define this.descVoices
+  	// NOTE: Some browsers require a user-initiated click before
+  	// this.synth.getVoices() will work
 
-  	// Returns true if currently using audio description, false otherwise.
+    var voices, descLangs, voiceLang, playerLang;
 
-		if (this.player === 'youtube') {
-			return (this.activeYouTubeId === this.youTubeDescId);
+    // if browser supports Web Speech API
+    // define this.descvoices (an array of available voices in this browser)
+    if (window.speechSynthesis) {
+			this.synth = window.speechSynthesis;
+      voices = this.synth.getVoices();
+      descLangs = this.getDescriptionLangs();
+
+      if (voices.length > 0) {
+        this.descVoices = [];
+        // available languages are identified with local suffixes (e.g., en-US)
+        for (var i=0; i<voices.length; i++) {
+				  // match only the first 2 characters of the lang code
+				  // include any language for which there is a matching description track
+				  // as well as the overall player lang
+				  voiceLang = voices[i].lang.substr(0,2).toLowerCase();
+				  playerLang = this.lang.substr(0,2).toLowerCase();
+          if (voiceLang === playerLang || (descLangs.indexOf(voiceLang) !== -1)) {
+  				  // this is a match. Add to the final array
+            this.descVoices.push(voices[i]);
+				  }
+        }
+        if (!this.descVoices.length) {
+          // no voices available in the default language(s)
+          // just use all voices, regardless of language
+          this.descVoices = voices;
+        }
+      }
 		}
-		else if (this.player === 'vimeo') {
-			return (this.activeVimeoId === this.vimeoDescId);
+    return false;
+  };
+
+	AblePlayer.prototype.getDescriptionLangs = function () {
+
+		// returns an array of languages (from srclang atttributes)
+		// in which there are description tracks
+		// use only first two characters of the lang code
+		var descLangs = [];
+		if (this.tracks) {
+			for (var i=0; i < this.tracks.length; i++) {
+				if (this.tracks[i].kind === 'descriptions') {
+					descLangs.push(this.tracks[i].language.substr(0,2).toLowerCase());
+				}
+			}
 		}
-		else {
-			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+		return descLangs;
+	};
+
+	AblePlayer.prototype.updateDescriptionVoice = function () {
+
+  	// Called if user chooses a subtitle language for which there is a matching
+  	// description track, and the subtitle language is different than the player language
+  	// This ensures the description is read in a proper voice for the selected language
+
+		var voices, descVoice;
+
+    if (!this.descVoices) {
+      this.getBrowserVoices();
+      if (this.descVoices) {
+        this.rebuildDescPrefsForm();
+      }
+		}
+		else if (!this.$voiceSelectField) {
+			this.rebuildDescPrefsForm();
+		}
+
+		descVoice = this.selectedDescriptions.language;
+
+    if (this.synth) {
+      voices = this.synth.getVoices();
+      if (voices.length > 0) {
+        // available languages are identified with local suffixes (e.g., en-US)
+        for (var i=0; i<voices.length; i++) {
+				  // select the first language that matches the first 2 characters of the lang code
+          if (voices[i].lang.substr(0,2).toLowerCase() === descVoice.substr(0,2).toLowerCase()) {
+            // make this the user's current preferred voice
+            this.prefDescVoice = voices[i].name;
+						// select this voice in the Description Prefs dialog
+						if (this.$voiceSelectField) {
+							this.$voiceSelectField.val(this.prefDescVoice);
+						}
+						break;
+				  }
+        }
+      }
 		}
 	};
 
 	AblePlayer.prototype.swapDescription = function() {
+
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -365,12 +445,15 @@
     //  Therefore, this is a good time to check that, and try again if needed
     // 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
     //  and onend event is never fired. This prevents new speech from being spoken.
+    //  window.speechSynthesis.cancel() also fails, so it's impossible to recover.
     //  This only seems to happen with some voices.
     //  Typically the first voice in the getVoices() array (index 0) is realiable
-    //  Test results: The following voices seem to be reliable:
-    //  In Firefox on Mac: Alex, Fred, Victoria
-    //  In Chrome on Mac: same as above (and when Chrome stops speaking, it requires a reboot to start again!)
+    //  When speech synthesis gets wonky, this is a deep problem that impacts all browsers
+    //  and typically requires a computer reboot to make right again.
+    //  This has been observed frequently in macOS Big Sur, but also in Windows 10
     //  To ignore user's voice preferences and always use the first voice, set the following var to true
+    //	This is for testing only; not recommended for production
+    // 	unless the voice select field is also removed from the Prefs dialog
     var useFirstVoice = false;
 
     if (!this.descVoices) {
