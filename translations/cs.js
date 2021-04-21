@@ -1,4 +1,4 @@
-var cs = {
+{
 
     "audio": "audio",
 
@@ -352,4 +352,4 @@ var cs = {
 
     "enableKeyboardShortcuts": "Povolit klávesové zkratky"
 
-};
+}

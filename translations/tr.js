@@ -1,4 +1,4 @@
-var tr = {
+{
 
 "audio": "ses",
 
@@ -352,4 +352,4 @@ var tr = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

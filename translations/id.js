@@ -1,4 +1,4 @@
-var id = {
+{
 
 "audio": "audio",
 
@@ -352,4 +352,4 @@ var id = {
 
 "enableKeyboardShortcuts": "Aktifkan pintasan kibor"
 
-};
+}

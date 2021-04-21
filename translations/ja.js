@@ -1,4 +1,4 @@
-var ja = {
+{
 
 "audio": "オーディオ",
 
@@ -353,4 +353,4 @@ var ja = {
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
 
-};
+}

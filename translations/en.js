@@ -1,4 +1,4 @@
-var en = {
+{
 
 "audio": "audio",
 
@@ -352,4 +352,4 @@ var en = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

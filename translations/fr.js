@@ -1,4 +1,4 @@
-var fr = {
+{
 
 "audio": "audio",
 
@@ -352,4 +352,4 @@ var fr = {
 
 "enableKeyboardShortcuts": "Permettre les raccourcis clavier"
 
-};
+}

@@ -1,4 +1,4 @@
-var ptbr = {
+{
 
 "audio": "áudio",
 
@@ -352,4 +352,4 @@ var ptbr = {
 
 "enableKeyboardShortcuts": "Ativar atalhos de teclado"
 
-};
+}

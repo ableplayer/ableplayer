@@ -1,4 +1,4 @@
-var ca = {
+{
 
 "audio": "audio",
 
@@ -352,4 +352,4 @@ var ca = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

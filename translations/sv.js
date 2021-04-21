@@ -1,4 +1,4 @@
-var sv = {
+{
 
 "audio": "ljud",
 
@@ -352,4 +352,4 @@ var sv = {
 
 "enableKeyboardShortcuts": "Aktivera tangentbordsgenvägar"
 
-};
+}

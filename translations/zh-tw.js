@@ -1,4 +1,4 @@
-var zhtw = {
+{
 
 "audio": "音訊",
 
@@ -352,4 +352,4 @@ var zhtw = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

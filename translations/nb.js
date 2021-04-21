@@ -1,4 +1,4 @@
-var nb = {
+{
 
 "audio": "audio",
 
@@ -352,4 +352,4 @@ var nb = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

@@ -78,27 +78,10 @@
 			this.searchLang = this.lang;
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-		this.importTranslationFile(translationFile).then(function(result) {
-			collapsedLang = thisObj.lang.replace('-','');
-			thisObj.tt = eval(collapsedLang);
-			deferred.resolve();
-		});
-		return deferred.promise();
-	};
-
-	AblePlayer.prototype.importTranslationFile = function(translationFile) {
-
-		var deferred = $.Deferred();
-		$.getScript(translationFile)
-			.done(function(translationVar,textStatus) {
-				// translation file successfully retrieved
-				deferred.resolve(translationVar);
-			})
-			.fail(function(jqxhr, settings, exception) {
-				deferred.fail();
-				// error retrieving file
-				// TODO: handle this
-			});
+		$.getJSON(translationFile, function(data) {
+			thisObj.tt = data; 
+			deferred.resolve(); 
+		}); 
 		return deferred.promise();
 	};
 

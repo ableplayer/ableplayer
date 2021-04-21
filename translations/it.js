@@ -1,4 +1,4 @@
-var it = {
+{
 
 "audio": "audio",
 
@@ -6,9 +6,9 @@ var it = {
 
 "playerHeading": "Lettore multimediale",
 
-"faster": "Più veloce",
+"faster": "Piï¿½ veloce",
 
-"slower": "Più lento",
+"slower": "Piï¿½ lento",
 
 "play": "Riproduci",
 
@@ -80,7 +80,7 @@ var it = {
 
 "fullScreen": "Schermo intero",
 
-"speed": "Velocità",
+"speed": "Velocitï¿½",
 
 "and": "e",
 
@@ -124,7 +124,7 @@ var it = {
 
 "alertNonDescribedVersion": "Sto usando la versione non audiodescritta di questo video",
 
-"fallbackError1": "Spiacente il tuo browser non è in grado di riprodurre questo",
+"fallbackError1": "Spiacente il tuo browser non ï¿½ in grado di riprodurre questo",
 
 "fallbackError2": "I seguenti browser supportano questo lettore multimediale",
 
@@ -156,7 +156,7 @@ var it = {
 
 "prefIntroDescription4": "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.",
 
-"prefIntroKeyboard1": "Il lettore multimediale può essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",
+"prefIntroKeyboard1": "Il lettore multimediale puï¿½ essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",
 
 "prefIntroKeyboard2": "I tasti di scelta rapida, (Shift, Alt, e Control) possono essere assegnati di seguito.",
 
@@ -190,7 +190,7 @@ var it = {
 
 "prefDescFormat": "Formato preferito",
 
-"prefDescFormatHelp": "Se entrambi i formati sono disponibili, ne verrà usato soltanto uno.",
+"prefDescFormatHelp": "Se entrambi i formati sono disponibili, ne verrï¿½ usato soltanto uno.",
 
 "prefDescFormatOption1": "Versione di descrizione alternativa per il video",
 
@@ -234,7 +234,7 @@ var it = {
 
 "prefCaptionsSize": "Dimensione del carattere",
 
-"prefCaptionsOpacity": "Opacità",
+"prefCaptionsOpacity": "Opacitï¿½",
 
 "prefCaptionsStyle": "Stile",
 
@@ -282,7 +282,7 @@ var it = {
 
 "prefSuccess": "I cambiamenti sono stati salvati.",
 
-"prefNoChange": "Non è stato effettuato alcun cambiamento.",
+"prefNoChange": "Non ï¿½ stato effettuato alcun cambiamento.",
 
 "help": "Aiuto",
 
@@ -318,7 +318,7 @@ var it = {
 
 "windowSendBack": "Manda in fondo",
 
-"windowSendBackAlert": "Questa finestra è ora dietro agli altri oggetti della pagina.",
+"windowSendBackAlert": "Questa finestra ï¿½ ora dietro agli altri oggetti della pagina.",
 
 "windowBringTop": "Metti in primo piano",
 
@@ -350,4 +350,4 @@ var it = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}
