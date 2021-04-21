@@ -44,7 +44,7 @@
 
 		// Add a seekhead
 		this.seekHead = $('<div>',{
-			'orientation': orientation,
+			'aria-orientation': orientation,
 			'class': 'able-' + className + '-head'
 		});
 

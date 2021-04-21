@@ -3821,6 +3821,9 @@ var AblePlayerInstances = [];
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
 				}
+				else { 
+					$menuItem.attr('aria-checked','false');
+				}
 				$menuItem.on('click',this.getCaptionOffFunction());
 				$menu.append($menuItem);
 			}
@@ -6395,7 +6398,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Add a seekhead
 		this.seekHead = $('<div>',{
-			'orientation': orientation,
+			'aria-orientation': orientation,
 			'class': 'able-' + className + '-head'
 		});
 

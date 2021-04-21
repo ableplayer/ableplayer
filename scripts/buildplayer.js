@@ -487,6 +487,9 @@
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
 				}
+				else { 
+					$menuItem.attr('aria-checked','false');
+				}
 				$menuItem.on('click',this.getCaptionOffFunction());
 				$menu.append($menuItem);
 			}
