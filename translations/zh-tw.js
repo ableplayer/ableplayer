@@ -206,23 +206,23 @@
 
 "prefDescVisible": "同時以視覺方式呈現口述影像",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "語音",
 
-"prefDescRate": "Rate",
+"prefDescRate": "語速",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "音調",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "非常低沈",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "低沈",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "預設",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "高亢",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "非常高亢",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "調整設定以聆聽這段範例文字。",
 
 "prefHighlight": "播放媒體內容時凸顯相對應的逐字稿段落",
 
