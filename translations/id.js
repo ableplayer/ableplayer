@@ -38,9 +38,9 @@
 
 "captionsOff": "Matikan teks",
 
-"showTranscript": "Tampilkan transkrip",
+"showTranscript": "Tampilkan transkripsi",
 
-"hideTranscript": "Sembunyikan transkrip",
+"hideTranscript": "Sembunyikan transkripsi",
 
 "turnOnDescriptions": "Nyalakan deskripsi",
 
@@ -88,7 +88,7 @@
 
 "spacebar": "kunci spasi",
 
-"transcriptTitle": "Transkrip",
+"transcriptTitle": "Transkripsi",
 
 "lyricsTitle": "Lirik",
 
@@ -136,7 +136,7 @@
 
 "prefMenuKeyboard": "Kibor",
 
-"prefMenuTranscript": "Transkrip",
+"prefMenuTranscript": "Transkripsi",
 
 "prefTitleCaptions": "Preferensi Teks",
 
@@ -144,7 +144,7 @@
 
 "prefTitleKeyboard": "Preferensi Kibor",
 
-"prefTitleTranscript": "Preferensi Transkrip",
+"prefTitleTranscript": "Preferensi transkripsi",
 
 "prefIntroCaptions": "Preferensi berikut mengontrol cara menampilkan teks.",
 
@@ -164,7 +164,7 @@
 
 "prefIntroKeyboard3": "CATATAN: Beberapa kombinasi kunci mungkin akan konflik dengan yang digunakan oleh browser Anda dan/atau aplikasi perangkat lunak lainnya. Cobalah beragam kombinasi untuk menemukan yang bekerja untuk Anda.",
 
-"prefIntroTranscript": "Preferensi berikut mempengarushi transkrip interaktif.",
+"prefIntroTranscript": "Preferensi berikut mempengarushi transkripsi interaktif.",
 
 "prefCookieWarning": "Untuk menyimpan preferesi dibutuhkan kukis.",
 
@@ -178,7 +178,7 @@
 
 "prefHeadingCaptions": "Teks",
 
-"prefHeadingTranscript": "Transkrip Interaktid",
+"prefHeadingTranscript": "Transkripsi Interaktif",
 
 "prefAltKey": "Alt",
 
@@ -204,29 +204,29 @@
 
 "prefDescPause": "Otomatis pause video ketika deskripsi dimulai",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Suara",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Kecepatan",
 
 "prefDescPitch": "Pitch",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Sangat rendah",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Rendah",
 
 "prefDescPitch3": "Default",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Tinggi",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Sangat tinggi",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Sesuaikan pengaturan untuk mendengarkan teks contoh ini.",
 
 "prefDescVisible": "Menampakkan deskripsi",
 
-"prefHighlight": "Sorotu transkrip saat media diputar",
+"prefHighlight": "Sorot transkripsi saat media diputar",
 
-"prefTabbable": "Transkrip dengan kontrol kibor",
+"prefTabbable": "Transkripsi dengan kontrol kibor",
 
 "prefCaptionsFont": "Jenis Huruf",
 
