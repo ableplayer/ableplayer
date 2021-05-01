@@ -16,7 +16,7 @@
 
 "stop": "Hentikan",
 
-"restart": "Reset",
+"restart": "Ulang",
 
 "prevChapter": "Bagian sebelumnya",
 
@@ -122,11 +122,11 @@
 
 "alertDescribedVersion": "Menggunakan versi audio yang tertera dari video ini",
 
-"alertNonDescribedVersion": "Bukan menggunakan versi audio yang tertera dari video ini",
+"alertNonDescribedVersion": "Mnggunakan versi yang bukan tertera dari video ini",
 
 "fallbackError1": "Maaf, browser Anda tidak bisa memainkan ini",
 
-"fallbackError2": "Browser berikut diketahui tidak dapat menggunakan pemutar video ini",
+"fallbackError2": "Browser berikut diketahui bisa menggunakan pemutar video ini",
 
 "orHigher": "atau lebih tinggi",
 
@@ -148,7 +148,7 @@
 
 "prefIntroCaptions": "Preferensi berikut mengontrol cara menampilkan teks.",
 
-"prefIntroDescription1": "Pemutar media ini mendukung deskripsi audo dengan dua cara: ",
+"prefIntroDescription1": "Pemutar media ini mendukung deskripsi audio dengan dua cara: ",
 
 "prefIntroDescription2": "Video ini memiliki ",
 
@@ -156,15 +156,15 @@
 
 "prefIntroDescription3": "Gunakan formulir berikut untuk memasang preferensi terkait deskripsi audio berbasis teks.",
 
-"prefIntroDescription4": "Setelah menyimpan pengaturan Anda, deskripsi audio dapat dinyala/matikan melalui tombol Deskripsi.",
+"prefIntroDescription4": "Setelah menyimpan pengaturan Anda, deskripsi audio dapat dinyalakan/dimatikan melalui tombol Deskripsi.",
 
-"prefIntroKeyboard1": "Pemutar media dalam halaman ini dapat dioperasikan dari bagian manapun di halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).",
+"prefIntroKeyboard1": "Pemutar media dalam halaman ini dapat dioperasikan dari bagian mana pun di halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).",
 
-"prefIntroKeyboard2": "Kunci pengubah (Shift, Alt, Control) dapat diberikan peruntukan di bawah.",
+"prefIntroKeyboard2": "Kunci pengubah (Shift, Alt, Control) dapat diperuntukkan di bawah.",
 
-"prefIntroKeyboard3": "CATATAN: Beberapa kombinasi kunci mungkin akan konflik dengan yang digunakan oleh browser Anda dan/atau aplikasi perangkat lunak lainnya. Cobalah beragam kombinasi untuk menemukan yang bekerja untuk Anda.",
+"prefIntroKeyboard3": "CATATAN: Beberapa kombinasi kunci mungkin akan konflik dengan yang digunakan oleh browser Anda dan/atau aplikasi perangkat lunak lainnya. Cobalah beragam kombinasi untuk menemukan yang sesuai untuk Anda.",
 
-"prefIntroTranscript": "Preferensi berikut mempengarushi transkripsi interaktif.",
+"prefIntroTranscript": "Preferensi berikut mempengaruhi transkripsi interaktif.",
 
 "prefCookieWarning": "Untuk menyimpan preferesi dibutuhkan kukis.",
 
@@ -174,7 +174,7 @@
 
 "prefHeadingDescription": "Deskripsi audio",
 
-"prefHeadingTextDescription": "Deskripsi audio basis teks",
+"prefHeadingTextDescription": "Deskripsi audio berbasis teks",
 
 "prefHeadingCaptions": "Teks",
 
@@ -276,13 +276,13 @@
 
 "prefCaptionsPosition": "Posisi",
 
-"captionsPositionOverlay": "Menindih video",
+"captionsPositionOverlay": "Melapisi video",
 
 "captionsPositionBelow": "Di bawah video",
 
 "sampleCaptionText": "Contoh tampilan teks",
 
-"prefSuccess": "Pengubahan yang Anda buat sudah disimpan.",
+"prefSuccess": "Perubahan yang Anda buat sudah disimpan.",
 
 "prefNoChange": "Anda tidak mengubah apa pun.",
 
