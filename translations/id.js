@@ -12,7 +12,7 @@
 
 "play": "Putar",
 
-"pause": "Pause",
+"pause": "Jeda",
 
 "stop": "Hentikan",
 
@@ -98,7 +98,7 @@
 
 "statusPlaying": "Diputar",
 
-"statusPaused": "Dipause",
+"statusPaused": "Dijedakan",
 
 "statusStopped": "Dihentikan",
 
@@ -202,13 +202,13 @@
 
 "prefDescFormatOption2b": "deskripsi berbasis teks",
 
-"prefDescPause": "Otomatis pause video ketika deskripsi dimulai",
+"prefDescPause": "Otomatis jedakan video ketika deskripsi dimulai",
 
 "prefDescVoice": "Suara",
 
 "prefDescRate": "Kecepatan",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Titinada",
 
 "prefDescPitch1": "Sangat rendah",
 
