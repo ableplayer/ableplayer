@@ -2,9 +2,9 @@
 	AblePlayer.prototype.setCookie = function(cookieValue) {
 
 		Cookies.set('Able-Player', cookieValue, {
-  		expires: 90,
-  		sameSite: 'strict'
-    });
+			expires: 90,
+			sameSite: 'strict'
+		});
 	};
 
 	AblePlayer.prototype.getCookie = function() {
@@ -274,7 +274,7 @@
 
 	AblePlayer.prototype.loadCurrentPreferences = function () {
 
-  	// Load current/default preferences from cookie into the AblePlayer object.
+		// Load current/default preferences from cookie into the AblePlayer object.
 
 		var available = this.getAvailablePreferences();
 		var cookie = this.getCookie();
@@ -407,12 +407,12 @@
 		fieldsetId = this.mediaId + '-prefs-' + form;
 		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
 		if (form === 'keyboard') {
-		  $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
 			$fieldset.append($legend);
 		}
 		else if (form === 'descriptions') {
-  		$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
-  		$fieldset.append($legend);
+			$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+			$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
 
@@ -480,90 +480,90 @@
 				}
 				else if (form === 'descriptions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-          if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
-            // these preferences are checkboxes
-            $thisDiv.addClass('able-prefs-checkbox');
-            $thisField = $('<input>',{
-						  type: 'checkbox',
-              name: thisPref,
-              id: thisId,
-              value: 'true'
-					  });
-            // check current active value for this preference
-            if (this[thisPref] === 1) {
-						  $thisField.prop('checked',true);
-					  }
-            $thisDiv.append($thisField,$thisLabel);
-          }
-          else if (this.synth) {
-            // Only show these options if browser supports speech synthesis
-            $thisDiv.addClass('able-prefs-select');
-            $thisField = $('<select>',{
-						  name: thisPref,
-              id: thisId,
-					  });
-					  if (thisPref === 'prefDescVoice' && this.descVoices) {
-              for (j=0; j < this.descVoices.length; j++) {
-	  						optionValue = this.descVoices[j].name;
-                optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
-                $thisOption = $('<option>',{
-							    value: optionValue,
-                  text: optionText
-                });
-                if (this[thisPref] == optionValue) {
-							    $thisOption.prop('selected',true);
-                }
-                $thisField.append($thisOption);
-                this.$voiceSelectField = $thisField;
-              }
-            }
-            else {
-					    if (thisPref == 'prefDescPitch') { // 0 to 2
-  					    options = [0,0.5,1,1.5,2];
-              }
-              else if (thisPref == 'prefDescRate') { // 0.1 to 10
-	              // Tests with a variety of voices on MacOS and Windows
-	              // yielded the following choices that seem reasonable for audio description:
+					if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
+						// these preferences are checkboxes
+						$thisDiv.addClass('able-prefs-checkbox');
+						$thisField = $('<input>',{
+							type: 'checkbox',
+							name: thisPref,
+							id: thisId,
+							value: 'true'
+						});
+						// check current active value for this preference
+						if (this[thisPref] === 1) {
+							$thisField.prop('checked',true);
+						}
+						$thisDiv.append($thisField,$thisLabel);
+					}
+					else if (this.synth) {
+						// Only show these options if browser supports speech synthesis
+						$thisDiv.addClass('able-prefs-select');
+						$thisField = $('<select>',{
+							name: thisPref,
+							id: thisId,
+						});
+						if (thisPref === 'prefDescVoice' && this.descVoices) {
+							for (j=0; j < this.descVoices.length; j++) {
+								optionValue = this.descVoices[j].name;
+								optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
+								$thisOption = $('<option>',{
+									value: optionValue,
+									text: optionText
+								});
+								if (this[thisPref] == optionValue) {
+									$thisOption.prop('selected',true);
+								}
+								$thisField.append($thisOption);
+								this.$voiceSelectField = $thisField;
+							}
+						}
+						else {
+							if (thisPref == 'prefDescPitch') { // 0 to 2
+								options = [0,0.5,1,1.5,2];
+							}
+							else if (thisPref == 'prefDescRate') { // 0.1 to 10
+								// Tests with a variety of voices on MacOS and Windows
+								// yielded the following choices that seem reasonable for audio description:
 								// 0.5 - too slow (exclude this)
-	              // 0.7 - casual
-	              // 0.8 - add this
-	              // 0.9 - add this
-	              // 1 - normal
-	              // 1.1 - add this
-	              // 1.2 - add this
-	              // 1.5 - quick
-	              // 2 - speedy
-	              // 2.5 - fleet
-	              // 3 - fast! (some voices don't get any faster than this
+								// 0.7 - casual
+								// 0.8 - add this
+								// 0.9 - add this
+								// 1 - normal
+								// 1.1 - add this
+								// 1.2 - add this
+								// 1.5 - quick
+								// 2 - speedy
+								// 2.5 - fleet
+								// 3 - fast! (some voices don't get any faster than this
 
-	              // Note: if these values are modified, must also modfiy them
-	              // in makePrefsValueReadable()
-  					    options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
-              }
-              else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
-  					    options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
-              }
-              if (typeof options !== 'undefined') {
-                for (j=0; j < options.length; j++) {
-	  						  optionValue = options[j];
-                  optionText = this.makePrefsValueReadable(thisPref,optionValue);
-                  $thisOption = $('<option>',{
-							      value: optionValue,
-                    text: optionText
-                  });
-                  if (this[thisPref] == optionValue) {
-							      $thisOption.prop('selected',true);
-                  }
-                  $thisField.append($thisOption);
-                  $thisDiv.append($thisLabel,$thisField);
-                }
-              }
-            }
-            // add a change handler that announces the sample description text
+								// Note: if these values are modified, must also modfiy them
+								// in makePrefsValueReadable()
+								options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
+							}
+							else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
+								options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+							}
+							if (typeof options !== 'undefined') {
+								for (j=0; j < options.length; j++) {
+									optionValue = options[j];
+									optionText = this.makePrefsValueReadable(thisPref,optionValue);
+									$thisOption = $('<option>',{
+										value: optionValue,
+										text: optionText
+									});
+									if (this[thisPref] == optionValue) {
+										$thisOption.prop('selected',true);
+									}
+									$thisField.append($thisOption);
+									$thisDiv.append($thisLabel,$thisField);
+								}
+							}
+						}
+						// add a change handler that announces the sample description text
 						$thisField.on('change',function() {
 							thisObj.announceDescriptionText('sample',thisObj.tt.sampleDescriptionText);
 						});
-            $thisDiv.append($thisLabel,$thisField);
+						$thisDiv.append($thisLabel,$thisField);
 					}
 				}
 				else { // all other fields are checkboxes
@@ -620,13 +620,13 @@
 			}
 		}
 		else if (form === 'descriptions') {
-  		if (this.synth) {
-    		// add a div with sample audio description text
-        this.$sampleDescDiv = $('<div>',{
-				  'class': 'able-desc-sample'
-        }).text(this.tt.sampleDescriptionText);
-        $prefsDiv.append(this.$sampleDescDiv);
-      }
+			if (this.synth) {
+				// add a div with sample audio description text
+				this.$sampleDescDiv = $('<div>',{
+					'class': 'able-desc-sample'
+				}).text(this.tt.sampleDescriptionText);
+				$prefsDiv.append(this.$sampleDescDiv);
+			}
 		}
 		else if (form === 'keyboard') {
 			// add a current list of keyboard shortcuts
@@ -754,7 +754,7 @@
 		cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
 		saveButton.click(function () {
 			dialog.hide();
-		  thisObj.savePrefsFromForm();
+			thisObj.savePrefsFromForm();
 		});
 		cancelButton.click(function () {
 			dialog.hide();
@@ -795,96 +795,96 @@
 
 		// Called if getBrowserVoices() succeeded after an earlier failure
 
-    var i, optionValue, optionText, $thisOption;
+		var i, optionValue, optionText, $thisOption;
 
-    this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
-    for (i=0; i < this.descVoices.length; i++) {
-	  	optionValue = this.descVoices[i].name;
-      optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
-      $thisOption = $('<option>',{
-        value: optionValue,
-        text: optionText
-      });
-      if (this.prefDescVoice == optionValue) {
+		this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
+		for (i=0; i < this.descVoices.length; i++) {
+			optionValue = this.descVoices[i].name;
+			optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
+			$thisOption = $('<option>',{
+				value: optionValue,
+				text: optionText
+			});
+			if (this.prefDescVoice == optionValue) {
 				$thisOption.prop('selected',true);
-      }
-      this.$voiceSelectField.append($thisOption);
-    }
+			}
+			this.$voiceSelectField.append($thisOption);
+		}
 	};
 
 	 AblePlayer.prototype.makePrefsValueReadable = function(pref,value) {
 
-  	 // The values for pitch, rate, and volume (web speech API)
-  	 // are strange and inconsistent between variables
-  	 // this function returns text that is more readable than the values themselves
+		 // The values for pitch, rate, and volume (web speech API)
+		 // are strange and inconsistent between variables
+		 // this function returns text that is more readable than the values themselves
 
-  	 if (pref === 'prefDescPitch') {
-    	 if (value === 0) {
-      	 return this.tt.prefDescPitch1;
-    	 }
-    	 else if (value === 0.5) {
-      	 return this.tt.prefDescPitch2;
-    	 }
-    	 else if (value === 1) {
-      	 return this.tt.prefDescPitch3;
-    	 }
-    	 else if (value === 1.5) {
-      	 return this.tt.prefDescPitch4;
-    	 }
-    	 else if (value === 2) {
-      	 return this.tt.prefDescPitch5;
-    	 }
-  	 }
-  	 else if (pref === 'prefDescRate') {
-	  	 // default in the API is 0.1 to 10, where 1 is normal speaking voice
-	  	 // our custom range offers severa rates close to 1
-	  	 // plus a couple of crazy fast ones for sport
-	  	 // Our options (1-10) or mapped here to 0.5 to 0.14
-	  	 if (value === 0.7) {
-		  	 return 1;
-	  	 }
-	  	 else if (value === 0.8) {
-		  	 return 2;
-	  	 }
-	  	 else if (value === 0.9) {
-		  	 return 3;
-	  	 }
-	  	 else if (value === 1) {
-		  	 return 4;
-	  	 }
-	  	 else if (value === 1.1) {
-		  	 return 5;
-	  	 }
-	  	 else if (value === 1.2) {
-		  	 return 6;
-	  	 }
-	  	 else if (value === 1.5) {
-		  	 return 7;
-	  	 }
-	  	 else if (value === 2) {
-		  	 return 8;
-	  	 }
-	  	 else if (value === 2.5) {
-		  	 return 9;
-	  	 }
-	  	 else if (value === 3) {
-		  	 return 10;
-	  	 }
-  	 }
-  	 else if (pref === 'prefDescVolume') {
-    	 // values range from 0.1 to 1.0
-    	 return value * 10;
-  	 }
-  	 return value;
+		 if (pref === 'prefDescPitch') {
+			 if (value === 0) {
+				 return this.tt.prefDescPitch1;
+			 }
+			 else if (value === 0.5) {
+				 return this.tt.prefDescPitch2;
+			 }
+			 else if (value === 1) {
+				 return this.tt.prefDescPitch3;
+			 }
+			 else if (value === 1.5) {
+				 return this.tt.prefDescPitch4;
+			 }
+			 else if (value === 2) {
+				 return this.tt.prefDescPitch5;
+			 }
+		 }
+		 else if (pref === 'prefDescRate') {
+			 // default in the API is 0.1 to 10, where 1 is normal speaking voice
+			 // our custom range offers severa rates close to 1
+			 // plus a couple of crazy fast ones for sport
+			 // Our options (1-10) or mapped here to 0.5 to 0.14
+			 if (value === 0.7) {
+				 return 1;
+			 }
+			 else if (value === 0.8) {
+				 return 2;
+			 }
+			 else if (value === 0.9) {
+				 return 3;
+			 }
+			 else if (value === 1) {
+				 return 4;
+			 }
+			 else if (value === 1.1) {
+				 return 5;
+			 }
+			 else if (value === 1.2) {
+				 return 6;
+			 }
+			 else if (value === 1.5) {
+				 return 7;
+			 }
+			 else if (value === 2) {
+				 return 8;
+			 }
+			 else if (value === 2.5) {
+				 return 9;
+			 }
+			 else if (value === 3) {
+				 return 10;
+			 }
+		 }
+		 else if (pref === 'prefDescVolume') {
+			 // values range from 0.1 to 1.0
+			 return value * 10;
+		 }
+		 return value;
 	 };
 
 	 AblePlayer.prototype.resetPrefsForm = function () {
 
-  	 // Reset preferences form with default values from cookie
-     // Called when:
-     // User clicks cancel or close button in Prefs Dialog
-     // User presses Escape to close Prefs dialog
-     // User clicks Save in Prefs dialog, & there's more than one player on page
+		 // Reset preferences form with default values from cookie
+		 // Called when:
+		 // User clicks cancel or close button in Prefs Dialog
+		 // User presses Escape to close Prefs dialog
+		 // User clicks Save in Prefs dialog, & there's more than one player on page
 
 		 var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
 
@@ -913,11 +913,11 @@
 
 	AblePlayer.prototype.savePrefsFromForm = function () {
 
-  	// Return a prefs object constructed from the form.
+		// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
 		// update cookie with new value
 		var cookie, available, prefName, prefId, numChanges,
-		  numCapChanges, capSizeChanged, capSizeValue, newValue;
+			numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
 		numCapChanges = 0; // changes to caption-style-related preferences
@@ -930,7 +930,7 @@
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
 				if (prefName == 'prefDescFormat') {
-  				// As of v4.0.10, prefDescFormat is no longer a choice
+					// As of v4.0.10, prefDescFormat is no longer a choice
 					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
 					this.prefDescFormat = 'video';
 					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
@@ -954,7 +954,7 @@
 					}
 				}
 				else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
-				  // this is one of the description-related select fields
+					// this is one of the description-related select fields
 					newValue = $('select[id="' + prefId + '"]').val();
 					if (cookie.preferences[prefName] !== newValue) { // user changed setting
 						cookie.preferences[prefName] = newValue;
@@ -1002,38 +1002,38 @@
 				// update font size of YouTube captions
 				this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
-    if (AblePlayerInstances.length > 1) {
-      // there are multiple players on this page.
-      // update prefs for ALL of them
-      for (var i=0; i<AblePlayerInstances.length; i++) {
-        AblePlayerInstances[i].updatePrefs();
-        AblePlayerInstances[i].geteferences();
-        AblePlayerInstances[i].resetPrefsForm();
-        if (numCapChanges > 0) {
-          AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
-          // also apply same changes to descriptions, if present
-          if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
-            AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
-			    }
-        }
-      }
-    }
-    else {
-      // there is only one player
-      this.updatePrefs();
-      if (numCapChanges > 0) {
-        this.stylizeCaptions(this.$captionsDiv);
-        // also apply same changes to descriptions, if present
-        if (typeof this.$descDiv !== 'undefined') {
-          this.stylizeCaptions(this.$descDiv);
-			  }
-      }
-    }
+		if (AblePlayerInstances.length > 1) {
+			// there are multiple players on this page.
+			// update prefs for ALL of them
+			for (var i=0; i<AblePlayerInstances.length; i++) {
+				AblePlayerInstances[i].updatePrefs();
+				AblePlayerInstances[i].geteferences();
+				AblePlayerInstances[i].resetPrefsForm();
+				if (numCapChanges > 0) {
+					AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
+					// also apply same changes to descriptions, if present
+					if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
+						AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
+					}
+				}
+			}
+		}
+		else {
+			// there is only one player
+			this.updatePrefs();
+			if (numCapChanges > 0) {
+				this.stylizeCaptions(this.$captionsDiv);
+				// also apply same changes to descriptions, if present
+				if (typeof this.$descDiv !== 'undefined') {
+					this.stylizeCaptions(this.$descDiv);
+				}
+			}
+		}
 	}
 
 	AblePlayer.prototype.updatePrefs = function () {
 
-  	// Update player based on current prefs. Safe to call multiple times.
+		// Update player based on current prefs. Safe to call multiple times.
 
 		// tabbable transcript
 		if (this.prefTabbable === 1) {

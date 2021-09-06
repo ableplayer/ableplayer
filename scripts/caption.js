@@ -77,7 +77,7 @@
 							// some other error occurred
 							console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
 							break;
-    				}
+						}
 				});
 			}
 			else { // using local track elements for captions/subtitles
@@ -115,7 +115,7 @@
 				thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
 			}
 			else if (thisObj.usingVimeoCaptions) {
-        thisObj.vimeoPlayer.disableTextTrack();
+				thisObj.vimeoPlayer.disableTextTrack();
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
@@ -373,8 +373,8 @@
 				if ($element === this.$captionsDiv) {
 					if (typeof this.$captionsWrapper !== 'undefined') {
 						this.$captionsWrapper.css({
-  						'font-size': this.prefCaptionsSize
-            });
+							'font-size': this.prefCaptionsSize
+						});
 					}
 				}
 				if (this.prefCaptionsPosition === 'below') {

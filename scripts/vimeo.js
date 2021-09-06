@@ -25,7 +25,7 @@
 
 		// Notes re. Vimeo Embed Options:
 		// If a video is owned by a user with a paid Plus, PRO, or Business account,
-    // setting the "controls" option to "false" will hide the default controls, without hiding captions.
+		// setting the "controls" option to "false" will hide the default controls, without hiding captions.
 		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
 		// but that had unwanted side effects:
 		//  - In addition to hiding the controls, it also hides captions
@@ -55,7 +55,7 @@
 		}
 
 		options = {
-		  id: vimeoId,
+			id: vimeoId,
 			width: this.vimeoWidth,
 			controls: false
 		};
@@ -183,8 +183,8 @@
 
 	AblePlayer.prototype.resizeVimeoPlayer = function(youTubeId, youTubeContainerId) {
 
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
+		// NOTE: This function is modeled after same function in youtube.js
+		// in case useful for Vimeo, but is not currently used
 
 		// called after player is ready, if youTube dimensions were previously unknown
 		// Now need to get them from the iframe element that YouTube injected
@@ -332,7 +332,7 @@
 								isDefaultTrack = false;
 						}
 						thisObj.tracks.push({
-						  'kind': tracks[i]['kind'],
+							'kind': tracks[i]['kind'],
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
@@ -344,7 +344,7 @@
 					deferred.resolve();
 			 	}
 			 	else {
-				  thisObj.hasCaptions = false;
+					thisObj.hasCaptions = false;
 					thisObj.usingVimeoCaptions = false;
 					deferred.resolve();
 				}
@@ -355,8 +355,8 @@
 
 	AblePlayer.prototype.initVimeoCaptionModule = function () {
 
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
+		// NOTE: This function is modeled after same function in youtube.js
+		// in case useful for Vimeo, but is not currently used
 
 		// This function is called when YouTube onApiChange event fires
 		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
@@ -425,8 +425,8 @@
 
 	AblePlayer.prototype.getVimeoPosterUrl = function (youTubeId, width) {
 
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
+		// NOTE: This function is modeled after same function in youtube.js
+		// in case useful for Vimeo, but is not currently used
 
 			 // return a URL for retrieving a YouTube poster image
 			 // supported values of width: 120, 320, 480, 640

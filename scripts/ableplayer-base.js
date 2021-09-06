@@ -66,7 +66,7 @@ var AblePlayerInstances = [];
 	window.AblePlayer = function(media) {
 
 
-  	var thisObj = this;
+		var thisObj = this;
 
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
@@ -180,7 +180,7 @@ var AblePlayerInstances = [];
 			this.exposeTextDescriptions = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-  		// support both singular and plural spelling of attribute
+			// support both singular and plural spelling of attribute
 			this.exposeTextDescriptions = false;
 		}
 		else {
@@ -209,17 +209,17 @@ var AblePlayerInstances = [];
 		// If data-include-transcript="false", there is no "popup" transcript
 
 		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-		  this.transcriptDivLocation = $(media).data('transcript-div');
+			this.transcriptDivLocation = $(media).data('transcript-div');
 		}
 		else {
-  		this.transcriptDivLocation = null;
-    }
+			this.transcriptDivLocation = null;
+		}
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-  		this.hideTranscriptButton = true;
-    }
-    else {
-      this.hideTranscriptButton = null;
-    }
+			this.hideTranscriptButton = true;
+		}
+		else {
+			this.hideTranscriptButton = null;
+		}
 
 		this.transcriptType = null;
 		if ($(media).data('transcript-src') !== undefined) {
@@ -230,7 +230,7 @@ var AblePlayerInstances = [];
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
-      if (this.transcriptDivLocation) {
+			if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
 			}
 			else {
@@ -405,15 +405,15 @@ var AblePlayerInstances = [];
 
 		// Language
 		// Player language is determined given the following precedence:
-    // 1. The value of data-lang on the media element, if provided and a matching translation file is available
+		// 1. The value of data-lang on the media element, if provided and a matching translation file is available
 		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
 		// 3. English
 		// Final calculation occurs in translation.js > getTranslationText()
 		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
-		  this.lang = $(media).data('lang').toLowerCase();
+			this.lang = $(media).data('lang').toLowerCase();
 		}
 		else {
-  		this.lang = null;
+			this.lang = null;
 		}
 
 		// Metadata Tracks
@@ -429,12 +429,12 @@ var AblePlayerInstances = [];
 		// conducting a search requires an external div in which to write the results
 		if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
 
-      this.searchDiv = $(media).data('search-div');
+			this.searchDiv = $(media).data('search-div');
 
-      // Search term (optional; could be assigned later in a JavaScript application)
-      if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
+			// Search term (optional; could be assigned later in a JavaScript application)
+			if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
 				this.searchString = $(media).data('search');
-      }
+			}
 
 			// Search Language
 			if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {
@@ -445,12 +445,12 @@ var AblePlayerInstances = [];
 			}
 
 			// Search option: Ignore capitalization in search terms
-      if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
-  			this.searchIgnoreCaps = true;
-		  }
-      else {
-			  this.searchIgnoreCaps = false;
-		  }
+			if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
+				this.searchIgnoreCaps = true;
+			}
+			else {
+				this.searchIgnoreCaps = false;
+			}
 
 			// conducting a search currently requires an external div in which to write the results
 			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
@@ -477,24 +477,24 @@ var AblePlayerInstances = [];
 		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
 			this.stenoMode = true;
 			// Add support for stenography in an iframe via data-steno-iframe-id
-      if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
-			  this.stenoFrameId = $(media).data('steno-iframe-id');
-        this.$stenoFrame = $('#' + this.stenoFrameId);
-        if (!(this.$stenoFrame.length)) {
-          // iframe not found
-          this.stenoFrameId = null;
-          this.$stenoFrame = null;
-        }
-      }
-      else {
-        this.stenoFrameId = null;
-        this.$stenoFrame = null;
-      }
+			if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
+				this.stenoFrameId = $(media).data('steno-iframe-id');
+				this.$stenoFrame = $('#' + this.stenoFrameId);
+				if (!(this.$stenoFrame.length)) {
+					// iframe not found
+					this.stenoFrameId = null;
+					this.$stenoFrame = null;
+				}
+			}
+			else {
+				this.stenoFrameId = null;
+				this.$stenoFrame = null;
+			}
 		}
 		else {
 			this.stenoMode = false;
-      this.stenoFrameId = null;
-      this.$stenoFrame = null;
+			this.stenoFrameId = null;
+			this.$stenoFrame = null;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes

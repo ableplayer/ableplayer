@@ -13,9 +13,9 @@
 		var thisObj = this;
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
-  		  var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
-  			  searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
-          searchStringHtml += '</p>';
+				var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
+					searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
+					searchStringHtml += '</p>';
 				var resultsArray = this.searchFor(this.searchString, this.searchIgnoreCaps);
 				if (resultsArray.length > 0) {
 					var $resultsSummary = $('<p>',{
@@ -28,7 +28,7 @@
 					$resultsSummary.html(resultsSummaryText);
 					var $resultsList = $('<ul>');
 					for (var i = 0; i < resultsArray.length; i++) {
-  					var resultId = 'aria-search-result-' + i;
+						var resultId = 'aria-search-result-' + i;
 						var $resultsItem = $('<li>',{});
 						var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
 						var itemLabel = this.tt.searchButtonLabel + ' ' + itemStartTime['title'];
@@ -42,7 +42,7 @@
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
 						itemStartSpan.on('click',function(e) {
-              thisObj.seekTrigger = 'search';
+							thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;
@@ -133,22 +133,22 @@
 		var title = '';
 		if (hours > 0) {
 			value += hours + ':';
-      if (hours == 1) {
-  			title += '1 ' + this.tt.hour + ' ';
-      }
-      else {
-  			title += hours + ' ' + this.tt.hours + ' ';
-		  }
+			if (hours == 1) {
+				title += '1 ' + this.tt.hour + ' ';
+			}
+			else {
+				title += hours + ' ' + this.tt.hours + ' ';
+			}
 		}
 		if (minutes < 10) {
 			value += '0' + minutes + ':';
 			if (minutes > 0) {
-  			if (minutes == 1) {
-  				title += '1 ' + this.tt.minute + ' ';
-        }
-        else {
-  				title += minutes + ' ' + this.tt.minutes + ' ';
-        }
+				if (minutes == 1) {
+					title += '1 ' + this.tt.minute + ' ';
+				}
+				else {
+					title += minutes + ' ' + this.tt.minutes + ' ';
+				}
 			}
 		}
 		else {
@@ -158,12 +158,12 @@
 		if (seconds < 10) {
 			value += '0' + seconds;
 			if (seconds > 0) {
-  			if (seconds == 1) {
-  				title += '1 ' + this.tt.second + ' ';
-  			}
-  			else {
-  				title += seconds + ' ' + this.tt.seconds + ' ';
-        }
+				if (seconds == 1) {
+					title += '1 ' + this.tt.second + ' ';
+				}
+				else {
+					title += seconds + ' ' + this.tt.seconds + ' ';
+				}
 			}
 		}
 		else {

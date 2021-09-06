@@ -1,7 +1,7 @@
 (function ($) {
 	AblePlayer.prototype.seekTo = function (newTime) {
 
-    var thisObj = this;
+		var thisObj = this;
 
 		// define variables to be used for analytics
 		// e.g., to measure the extent to which users seek back and forward
@@ -210,7 +210,7 @@
 				deferred.resolve('ended');
 			}
 			else if (this.media.paused) {
-  		  deferred.resolve('paused');
+				deferred.resolve('paused');
 			}
 			else if (this.media.readyState !== 4) {
 				deferred.resolve('buffering');
@@ -471,12 +471,12 @@
 
 		thisObj = this;
 		if (this.swappingSrc) {
-  		if (this.playing) {
-  			// wait until new source has loaded before refreshing controls
-  			// can't wait if player is NOT playing because some critical events
-  			// won't fire until playback of new media starts
-        return;
-		  }
+			if (this.playing) {
+				// wait until new source has loaded before refreshing controls
+				// can't wait if player is NOT playing because some critical events
+				// won't fire until playback of new media starts
+				return;
+			}
 		}
 
 		if (context === 'timeline' || context === 'init') {
@@ -490,10 +490,10 @@
 				this.chapterElapsed = this.getChapterElapsed();
 			}
 
-      if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
-  		  // couldn't calculate seekInterval previously; try again.
-        this.setSeekInterval();
-		  }
+			if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
+				// couldn't calculate seekInterval previously; try again.
+				this.setSeekInterval();
+			}
 
 			if (this.seekBar) {
 				if (this.useChapterTimes) {
@@ -561,34 +561,34 @@
 			}
 
 			if (this.skin === 'legacy') {
-  			// Update seekbar width.
-        // To do this, we need to calculate the width of all buttons surrounding it.
-        if (this.seekBar) {
-				  widthUsed = 0;
-          leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
-          rightControls = leftControls.next('div.able-right-controls');
-          leftControls.children().each(function () {
-					  if ($(this).attr('role')=='button') {
-						  widthUsed += $(this).outerWidth(true); // true = include margin
-					  }
-				  });
-          rightControls.children().each(function () {
-					  if ($(this).attr('role')=='button') {
-						  widthUsed += $(this).outerWidth(true);
-					  }
-				  });
-          if (this.fullscreen) {
-					  seekbarWidth = $(window).width() - widthUsed;
-				  }
-          else {
-					  seekbarWidth = this.$ableWrapper.width() - widthUsed;
-				  }
-          // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-          if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
-					  this.seekBar.setWidth(seekbarWidth);
-				  }
-			  }
-      }
+				// Update seekbar width.
+				// To do this, we need to calculate the width of all buttons surrounding it.
+				if (this.seekBar) {
+					widthUsed = 0;
+					leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+					rightControls = leftControls.next('div.able-right-controls');
+					leftControls.children().each(function () {
+						if ($(this).attr('role')=='button') {
+							widthUsed += $(this).outerWidth(true); // true = include margin
+						}
+					});
+					rightControls.children().each(function () {
+						if ($(this).attr('role')=='button') {
+							widthUsed += $(this).outerWidth(true);
+						}
+					});
+					if (this.fullscreen) {
+						seekbarWidth = $(window).width() - widthUsed;
+					}
+					else {
+						seekbarWidth = this.$ableWrapper.width() - widthUsed;
+					}
+					// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+					if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+						this.seekBar.setWidth(seekbarWidth);
+					}
+				}
+			}
 
 			// Update buffering progress.
 			// TODO: Currently only using the first HTML5 buffered interval,
@@ -606,9 +606,9 @@
 					}
 					else {
 						if (this.seekBar) {
-              if (!isNaN(buffered)) {
-  							this.seekBar.setBuffered(buffered / duration);
-  						}
+							if (!isNaN(buffered)) {
+								this.seekBar.setBuffered(buffered / duration);
+							}
 						}
 					}
 				}
@@ -755,8 +755,8 @@
 						// only scroll once after moving a highlight
 						if (this.movingHighlight) {
 							this.$transcriptDiv.scrollTop(newTop);
-			                this.movingHighlight = false;
-			            }
+											this.movingHighlight = false;
+									}
 					}
 				}
 			}
@@ -815,35 +815,35 @@
 							// Debounce updates; only update after status has stayed steadily different for a while
 							// "A while" is defined differently depending on context
 							if (thisObj.swappingSrc) {
-                // this is where most of the chatter occurs (e.g., playing, paused, buffering, playing),
-                // so set a longer wait time before writing a status message
-                if (!thisObj.debouncingStatus) {
-                  thisObj.statusMessageThreshold = 2000; // in ms (2 seconds)
-                }
-              }
-              else {
-                // for all other contexts (e.g., users clicks Play/Pause)
-                // user should receive more rapid feedback
-                if (!thisObj.debouncingStatus) {
-                  thisObj.statusMessageThreshold = 250; // in ms
-                }
-              }
-  						timestamp = (new Date()).getTime();
+								// this is where most of the chatter occurs (e.g., playing, paused, buffering, playing),
+								// so set a longer wait time before writing a status message
+								if (!thisObj.debouncingStatus) {
+									thisObj.statusMessageThreshold = 2000; // in ms (2 seconds)
+								}
+							}
+							else {
+								// for all other contexts (e.g., users clicks Play/Pause)
+								// user should receive more rapid feedback
+								if (!thisObj.debouncingStatus) {
+									thisObj.statusMessageThreshold = 250; // in ms
+								}
+							}
+							timestamp = (new Date()).getTime();
 							if (!thisObj.statusDebounceStart) {
 								thisObj.statusDebounceStart = timestamp;
 								// Call refreshControls() again after allotted time has passed
 								thisObj.debouncingStatus = true;
 								thisObj.statusTimeout = setTimeout(function () {
-                  thisObj.debouncingStatus = false;
+									thisObj.debouncingStatus = false;
 									thisObj.refreshControls(context);
 								}, thisObj.statusMessageThreshold);
 							}
 							else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
-    						thisObj.$status.text(textByState[currentState]);
-                thisObj.statusDebounceStart = null;
-                clearTimeout(thisObj.statusTimeout);
-                thisObj.statusTimeout = null;
-						  }
+								thisObj.$status.text(textByState[currentState]);
+								thisObj.statusDebounceStart = null;
+								clearTimeout(thisObj.statusTimeout);
+								thisObj.statusTimeout = null;
+							}
 						}
 						else {
 							thisObj.statusDebounceStart = null;
@@ -956,30 +956,30 @@
 
 	AblePlayer.prototype.handlePrevTrack = function() {
 
-    if (this.playlistIndex === 0) {
-      // currently on the first track
-      // wrap to bottom and play the last track
-      this.playlistIndex = this.$playlist.length - 1;
-    }
-    else {
-		  this.playlistIndex--;
-    }
+		if (this.playlistIndex === 0) {
+			// currently on the first track
+			// wrap to bottom and play the last track
+			this.playlistIndex = this.$playlist.length - 1;
+		}
+		else {
+			this.playlistIndex--;
+		}
 		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
-    this.cuePlaylistItem(this.playlistIndex);
+		this.cuePlaylistItem(this.playlistIndex);
 	};
 
 	AblePlayer.prototype.handleNextTrack = function() {
 
-    if (this.playlistIndex === this.$playlist.length - 1) {
-      // currently on the last track
-      // wrap to top and play the forst track
-      this.playlistIndex = 0;
-    }
-    else {
-		  this.playlistIndex++;
-    }
+		if (this.playlistIndex === this.$playlist.length - 1) {
+			// currently on the last track
+			// wrap to top and play the forst track
+			this.playlistIndex = 0;
+		}
+		else {
+			this.playlistIndex++;
+		}
 		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
-    this.cuePlaylistItem(this.playlistIndex);
+		this.cuePlaylistItem(this.playlistIndex);
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
@@ -1225,12 +1225,12 @@
 		// because the Web Speech API failed to getVoices()
 		// now is a good time to try again
 		// so the Description dialog can be rebuilt before the user requests it
-    if (!this.descVoices) {
-      this.getBrowserVoices();
-      if (this.descVoices) {
-        this.rebuildDescPrefsForm();
-      }
-    }
+		if (!this.descVoices) {
+			this.getBrowserVoices();
+			if (this.descVoices) {
+				this.rebuildDescPrefsForm();
+			}
+		}
 
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
@@ -1248,12 +1248,12 @@
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			if (!this.showingPrefsDialog) {
-  			this.$prefsButton.focus();
+				this.$prefsButton.focus();
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
-  			thisObj.hidingPopup = false;
-  		},100);
+				thisObj.hidingPopup = false;
+			},100);
 		}
 		else {
 			this.closePopups();
@@ -1278,7 +1278,7 @@
 
 	AblePlayer.prototype.handleTranscriptToggle = function () {
 
-  	var thisObj = this;
+		var thisObj = this;
 
 		if (this.$transcriptDiv.is(':visible')) {
 			this.$transcriptArea.hide();
@@ -1286,13 +1286,13 @@
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
 			this.prefTranscript = 0;
 			this.$transcriptButton.focus().addClass('able-focus');
-      // wait briefly before resetting stopgap var
-      // otherwise the keypress used to select 'Close' will trigger the transcript button
-      // Benchmark tests: If this is gonna happen, it typically happens in around 3ms; max 12ms
-      // Setting timeout to 100ms is a virtual guarantee of proper functionality
-      setTimeout(function() {
-        thisObj.closingTranscript = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			// otherwise the keypress used to select 'Close' will trigger the transcript button
+			// Benchmark tests: If this is gonna happen, it typically happens in around 3ms; max 12ms
+			// Setting timeout to 100ms is a virtual guarantee of proper functionality
+			setTimeout(function() {
+				thisObj.closingTranscript = false;
+			}, 100);
 		}
 		else {
 			this.positionDraggableWindow('transcript');
@@ -1304,19 +1304,19 @@
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
 			// move focus to first focusable element (window options button)
-      this.focusNotClick = true;
+			this.focusNotClick = true;
 			this.$transcriptArea.find('button').first().focus();
-      // wait briefly before resetting stopgap var
-      setTimeout(function() {
-        thisObj.focusNotClick = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			setTimeout(function() {
+				thisObj.focusNotClick = false;
+			}, 100);
 		}
 		this.updateCookie('prefTranscript');
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
 
-  	var thisObj = this;
+		var thisObj = this;
 
 		if (this.$signWindow.is(':visible')) {
 			this.$signWindow.hide();
@@ -1324,11 +1324,11 @@
 			this.$signButton.find('span.able-clipped').text(this.tt.showSign);
 			this.prefSign = 0;
 			this.$signButton.focus().addClass('able-focus');
-      // wait briefly before resetting stopgap var
-      // otherwise the keypress used to select 'Close' will trigger the transcript button
-      setTimeout(function() {
-        thisObj.closingSign = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			// otherwise the keypress used to select 'Close' will trigger the transcript button
+			setTimeout(function() {
+				thisObj.closingSign = false;
+			}, 100);
 		}
 		else {
 			this.positionDraggableWindow('sign');
@@ -1339,13 +1339,13 @@
 			this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
 			this.prefSign = 1;
-      this.focusNotClick = true;
+			this.focusNotClick = true;
 			this.$signWindow.find('button').first().focus();
-      // wait briefly before resetting stopgap var
-      // otherwise the keypress used to select 'Close' will trigger the transcript button
-      setTimeout(function() {
-        thisObj.focusNotClick = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			// otherwise the keypress used to select 'Close' will trigger the transcript button
+			setTimeout(function() {
+				thisObj.focusNotClick = false;
+			}, 100);
 		}
 		this.updateCookie('prefSign');
 	};
