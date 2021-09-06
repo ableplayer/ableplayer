@@ -1891,6 +1891,14 @@
 		else if (control === 'help') {
 			// return this.tt.help;
 		}
+		else if (control === 'fullscreen') { 
+			if (!this.fullscreen) {
+				return this.tt.enterFullScreen; 
+			}
+			else { 
+				return this.tt.exitFullScreen; 
+			}
+		}
 		else {
 			// there should be no other controls, but just in case:
 			// return the name of the control with first letter in upper case

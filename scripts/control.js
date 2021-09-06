@@ -685,6 +685,7 @@
 						newSvgData = this.getSvgData('fullscreen-expand');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
@@ -700,6 +701,7 @@
 						newSvgData = this.getSvgData('fullscreen-collapse');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
@@ -800,6 +802,7 @@
 						newSvgData = this.getSvgData('play');
 						this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$playpauseButton.find('path').attr('d',newSvgData[1]);
+						this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
 					}
 					else {
 						this.$playpauseButton.find('img').attr('src',this.playButtonImg);
@@ -864,6 +867,7 @@
 									newSvgData = thisObj.getSvgData('play');
 									thisObj.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
 									thisObj.$playpauseButton.find('path').attr('d',newSvgData[1]);
+									thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.play);
 								}
 								else {
 									thisObj.$playpauseButton.find('img').attr('src',thisObj.playButtonImg);
@@ -880,6 +884,7 @@
 									newSvgData = thisObj.getSvgData('pause');
 									thisObj.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
 									thisObj.$playpauseButton.find('path').attr('d',newSvgData[1]);
+									thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.pause);
 								}
 								else {
 									thisObj.$playpauseButton.find('img').attr('src',thisObj.pauseButtonImg);
