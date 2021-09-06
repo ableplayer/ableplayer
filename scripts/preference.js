@@ -793,7 +793,7 @@
 
 	AblePlayer.prototype.rebuildDescPrefsForm = function () {
 
-    // Called if getBrowserVoices() succeeded after an earlier failure
+		// Called if getBrowserVoices() succeeded after an earlier failure
 
     var i, optionValue, optionText, $thisOption;
 

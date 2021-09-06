@@ -611,6 +611,9 @@ fieldset.able-prefs-captions select {
   font-size: 0.9em;
   border-radius: none;
 }
+fieldset.able-prefs-descriptions >  div.able-prefs-select { 
+	margin: 0.5em 1em;
+}
 fieldset.able-prefs-descriptions >  div.able-prefs-select > label,
 fieldset.able-prefs-descriptions >  div.able-prefs-slider > label {
   width: 6em;

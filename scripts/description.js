@@ -129,7 +129,7 @@
 	AblePlayer.prototype.getBrowserVoices = function () {
 
   	// define this.descVoices
-  	// NOTE: Some browsers require a user-initiated click before
+  	// NOTE: Some browsers (e.g., Chrome) require a user-initiated click before
   	// this.synth.getVoices() will work
 
     var voices, descLangs, voiceLang, playerLang;
@@ -140,7 +140,6 @@
 			this.synth = window.speechSynthesis;
       voices = this.synth.getVoices();
       descLangs = this.getDescriptionLangs();
-
       if (voices.length > 0) {
         this.descVoices = [];
         // available languages are identified with local suffixes (e.g., en-US)
@@ -188,7 +187,6 @@
   	// This ensures the description is read in a proper voice for the selected language
 
 		var voices, descVoice;
-
     if (!this.descVoices) {
       this.getBrowserVoices();
       if (this.descVoices) {
@@ -429,7 +427,7 @@
     // As of Feb 2021,
     // 1. In some browsers (e.g., Chrome) window.speechSynthesis.getVoices()
     //  returns 0 voices unless the request is triggered with a user click
-    //  Therefore, description may have failed to initialized when the page loaded
+    //  Therefore, description may have failed to initialize when the page loaded
     //  This function cannot have been called without a mouse click.
     //  Therefore, this is a good time to check that, and try again if needed
     // 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
