@@ -34,6 +34,11 @@
   <li>Both the described and non-described versions of the video need to be the same duration.</li>
 </ul>
 
+<p><strong>NOTE:</strong> The description text <em>can</em> be included in the machine-generated 
+	interactive transcript by adding a transcript of the description text in a WebVTT descriptions track.  
+	The description will be provided in the video, not externally using synthesized speech. 
+	This demo demonstrates that functionality.</p>
+
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
@@ -41,6 +46,7 @@
 	<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
   <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
 	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
+  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
 </video>
 
 </body>

@@ -11,18 +11,19 @@
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
 		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
+		// useDescFormat is the format actually used ('video' or 'text'), regardless of user preference 
+		// prevDescFormat is the value of useDescFormat before user toggled off description 
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefDescVisible == 1 to visibly show text-based description area; else 0
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
 		// hasClosedDesc == true if a description text track is available
-		// this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
 		// descOn == true if description of either type is on
 		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
 
 		var thisObj = this;
     if (this.refreshingDesc) {
-		  this.prevDescFormat = this.useDescFormat;
-    }
+			this.prevDescFormat = this.useDescFormat;
+		}
 		else {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
@@ -44,14 +45,12 @@
 			}
 		}
 
-		// update this.useDescFormat based on media availability & user preferences
+		// Set this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. Always use 'video'
+				// both formats are available. User gets their preference. 
 				this.useDescFormat = this.prefDescFormat;
 				this.descOn = true;
-				// Do not pause during descriptions when playing described video
-				this.prefDescPause = false;
 			}
 			else if (this.hasOpenDesc) {
 				this.useDescFormat = 'video';
@@ -62,13 +61,20 @@
 				this.descOn = true;
 			}
 		}
-		else { // description button is off
-      this.useDescFormat = false;
+		else { 
+			// prefDesc is not set for this user 
+      this.useDescFormat = null;
 			this.descOn = false;
 		}
+
+		if (this.useDescFormat === 'video') { 
+			// If text descriptions are also available, silence them 
+			this.exposeTextDescriptions = false; 
+		}
+
 		if (this.descOn) {
 			if (this.useDescFormat === 'video') {
-				if (!this.usingAudioDescription()) {
+				if (!this.usingDescribedVersion()) {
 					// switched from non-described to described version
 					this.swapDescription();
 				}
@@ -90,12 +96,13 @@
 			}
 		}
 		else { // description is off.
-			if (this.prevDescFormat === 'video') { // user was previously using description via video
-				if (this.usingAudioDescription()) {
+			if (this.prevDescFormat === 'video') { // user has turned off described version of video
+				if (this.usingDescribedVersion()) {
+					// user was using the described verion. Swap for non-described version
 					this.swapDescription();
 				}
 			}
-			else if (this.prevDescFormat === 'text') { // user was previously using text description
+			else if (this.prevDescFormat === 'text') { // user has turned off text description
 				// hide description div from everyone, including screen reader users
 				this.$descDiv.hide();
 				this.$descDiv.removeClass('able-clipped');
@@ -104,38 +111,20 @@
 		this.refreshingDesc = false;
 	};
 
-	AblePlayer.prototype.getBrowserVoices = function () {
+	AblePlayer.prototype.usingDescribedVersion = function () {
 
-  	// define this.descVoices
-  	// NOTE: Some browsers require a user-initiated click before
-  	// this.synth.getVoices() will work
+		// Returns true if currently using audio description, false otherwise.
 
-    var voices;
-
-    // if browser supports Web Speech API
-    // define this.descvoices (an array of available voices in this browser)
-    if (window.speechSynthesis) {
-			this.synth = window.speechSynthesis;
-      voices = this.synth.getVoices();
-      if (voices.length > 0) {
-        this.descVoices = [];
-        // available languages are identified with local suffixes (e.g., en-US)
-        for (var i=0; i<voices.length; i++) {
-				  // match only the first 2 characters of the lang code
-          if (voices[i].lang.substr(0,2).toLowerCase() === this.lang.substr(0,2).toLowerCase()) {
-  				  // this is a match. Add to the final array
-            this.descVoices.push(voices[i]);
-				  }
-        }
-        if (!this.descVoices.length) {
-          // no voices available in the default language
-          // just use all voices, regardless of language
-          this.descVoices = voices;
-        }
-      }
+		if (this.player === 'youtube') {
+			return (this.activeYouTubeId === this.youTubeDescId);
 		}
-    return false;
-  };
+		else if (this.player === 'vimeo') {
+			return (this.activeVimeoId === this.vimeoDescId);
+		}
+		else {
+			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+		}
+	};
 
 	AblePlayer.prototype.getBrowserVoices = function () {
 
@@ -259,7 +248,7 @@
 		}
 		if (this.player === 'html5') {
 
-			if (this.usingAudioDescription()) {
+			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-orig-src
@@ -297,7 +286,7 @@
 		}
 		else if (this.player === 'youtube') {
 
-			if (this.usingAudioDescription()) {
+			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeYouTubeId = this.youTubeId;
 				this.showAlert(this.tt.alertNonDescribedVersion);
@@ -324,7 +313,7 @@
 			}
 		}
 		else if (this.player === 'vimeo') {
-			if (this.usingAudioDescription()) {
+			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeVimeoId = this.vimeoId;
 				this.showAlert(this.tt.alertNonDescribedVersion);
@@ -356,7 +345,7 @@
 		// there's a lot of redundancy between this function and showCaptions
 		// Trying to combine them ended up in a mess though. Keeping as is for now.
 
-		if (this.swappingSrc || !this.descOn) {
+		if (!this.exposeTextDescriptions || this.swappingSrc || !this.descOn) {
 			return;
 		}
 
