@@ -25,8 +25,8 @@
 
 <!-- use the following markup for each media element -->
 <audio id="audio1" width="480" preload="auto" data-able-player data-skin="2020">
-  <source type="audio/mpeg" src="../media/smallf.mp3"/>
-  <source type="audio/ogg" src="../media/smallf.ogg"/>
+	<source type="audio/mpeg" src="../media/smallf.mp3"/>
+	<source type="audio/ogg" src="../media/smallf.ogg"/>
 </audio>
 
 <h2>Form Fields</h2>
@@ -35,50 +35,49 @@
 
 <style>
 .form label, .form input {
-  display: block;
-  margin-bottom: 0.5em;
-  font-size: 1em;
+	display: block;
+	margin-bottom: 0.5em;
+	font-size: 1em;
 }
 .form label {
-  font-weight: bold;
+	font-weight: bold;
 }
 .form #feedback {
-  font-weight: bold;
-  font-size: 1.1em;
-  color: black;
-  background-color: #FFC;
-  padding: 0.5em;
-  margin: 1em 0;
-  width: 20em;
-  text-align: center;
-  border: thin solid #340449;
-  display: none;
-  width:
+	font-weight: bold;
+	font-size: 1.1em;
+	color: black;
+	background-color: #FFC;
+	padding: 0.5em;
+	margin: 1em 0;
+	width: 20em;
+	text-align: center;
+	border: thin solid #340449;
+	display: none;
 }
 </style>
 <script>
 (function () {
-  var feedback, answer;
-  $(document).ready(function () {
-    $('#submit').click(function() {
-      answer = $('#favplayer').val().toLowerCase();
-      if (answer.substring(0,4) == 'able') {
-        feedback = 'Correct!';
-      }
-      else {
-        feedback = 'Wrong answer! Please try again.';
-      }
-      $('#feedback').text(feedback).show();
-      $('#favplayer').focus();
-    })
-  });
+	var feedback, answer;
+	$(document).ready(function () {
+		$('#submit').click(function() {
+			answer = $('#favplayer').val().toLowerCase();
+			if (answer.substring(0,4) == 'able') {
+				feedback = 'Correct!';
+			}
+			else {
+				feedback = 'Wrong answer! Please try again.';
+			}
+			$('#feedback').text(feedback).show();
+			$('#favplayer').focus();
+		})
+	});
 })();
 </script>
 <div class="form">
-  <div id="feedback" role="alert"></div>
-  <label for="favplayer">What's your favorite media player?</label>
-  <input type="text" id="favplayer">
-  <input type="submit" value="Submit" id="submit">
+	<div id="feedback" role="alert"></div>
+	<label for="favplayer">What's your favorite media player?</label>
+	<input type="text" id="favplayer">
+	<input type="submit" value="Submit" id="submit">
 </div>
 
 
