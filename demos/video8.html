@@ -17,94 +17,94 @@
 
 <!-- CSS for hidden blocks on content in this example -->
 <style>
-  div#video-and-meta-wrapper {
-    position: relative;
-    width: 480px;
-    height: 360px;
-  }
-  div.meta {
-    position: absolute;
-    z-index: 10000;
-    display: none;
-  }
-  div#info,
-  div#instructions {
-    background-color: #ffc;
-    border: 3px solid #412C84;
-    color: #000;
-    font-size: 1.2em;
-    line-height: 1.25em;
-    padding: 0.5em;
-  }
-  div#info {
-    top: 40px;
-    left: 20px;
-    width: 200px;
-    height: auto;
-  }
-  div#instructions {
-    top: 240px;
-    left: 90px;
-    width: 200px;
-    height: auto;
-  }
-  div#instructions:focus,
-  div#terrill:focus,
-  div#terrill:hover {
-    border: 3px solid #C00;
-  }
-  div#terrill {
-    top: 40px;
-    left: 136px;
-    width: 120px;
-    height: 140px;
-    background-color: #FFF;
-    border: 3px solid #412C84;
-    opacity: 0.3;
-  }
-  div#terrill:focus {
-    border: 3px solid yellow;
-  }
-  div#response {
-    top: 40px;
-    right: 80px;
-    width: 150px;
-    height: 90px;
-    background-image: url('cartoon-bubble.png');
-    background-position: top left;
-    background-repeat: no-repeat;
-    font-weight: bold;
-    font-size: 1.2em;
-    padding-top: 20px;
-    text-align: center;
-  }
+	div#video-and-meta-wrapper {
+		position: relative;
+		width: 480px;
+		height: 360px;
+	}
+	div.meta {
+		position: absolute;
+		z-index: 10000;
+		display: none;
+	}
+	div#info,
+	div#instructions {
+		background-color: #ffc;
+		border: 3px solid #412C84;
+		color: #000;
+		font-size: 1.2em;
+		line-height: 1.25em;
+		padding: 0.5em;
+	}
+	div#info {
+		top: 40px;
+		left: 20px;
+		width: 200px;
+		height: auto;
+	}
+	div#instructions {
+		top: 240px;
+		left: 90px;
+		width: 200px;
+		height: auto;
+	}
+	div#instructions:focus,
+	div#terrill:focus,
+	div#terrill:hover {
+		border: 3px solid #C00;
+	}
+	div#terrill {
+		top: 40px;
+		left: 136px;
+		width: 120px;
+		height: 140px;
+		background-color: #FFF;
+		border: 3px solid #412C84;
+		opacity: 0.3;
+	}
+	div#terrill:focus {
+		border: 3px solid yellow;
+	}
+	div#response {
+		top: 40px;
+		right: 80px;
+		width: 150px;
+		height: 90px;
+		background-image: url('cartoon-bubble.png');
+		background-position: top left;
+		background-repeat: no-repeat;
+		font-weight: bold;
+		font-size: 1.2em;
+		padding-top: 20px;
+		text-align: center;
+	}
 </style>
 
 <!-- Example script: handle user's click on Terrill button -->
 <script>
-  $(document).ready(function() {
-    $('#instructions').on('focus',function() {
-      $('#terrill').attr('tabindex','0');
-    })
-    $('#terrill').on('click',function() {
-      toggleResponse();
-    });
-    $('#terrill').on('keypress',function(e) {
-      if (e.which === 13 || e.which === 32) {
-        toggleResponse();
-      }
-    });
-  });
-  function toggleResponse() {
-    if ($('#response').is(':visible')) {
-      $('#response').hide();
-    }
-    else {
-      // response is an interactive element not included in metadata file
-      // therefore it doesn't disappear automatically
-      $('#response').show().delay(5000).fadeOut();
-    }
-  }
+	$(document).ready(function() {
+		$('#instructions').on('focus',function() {
+			$('#terrill').attr('tabindex','0');
+		})
+		$('#terrill').on('click',function() {
+			toggleResponse();
+		});
+		$('#terrill').on('keypress',function(e) {
+			if (e.which === 13 || e.which === 32) {
+				toggleResponse();
+			}
+		});
+	});
+	function toggleResponse() {
+		if ($('#response').is(':visible')) {
+			$('#response').hide();
+		}
+		else {
+			// response is an interactive element not included in metadata file
+			// therefore it doesn't disappear automatically
+			$('#response').show().delay(5000).fadeOut();
+		}
+	}
 </script>
 </head>
 
@@ -113,28 +113,28 @@
 <h1>Able Player Video Demo #8:<br/>Video player with Metadata Track (type = selector)</h1>
 
 <p>Time-synced metadata is provided in a WebVTT file with kind="metadata".
-  A <strong>data-meta-type</strong> attribute has value "selector", which is one of two types of supported metadata tracks
-  (the other is "text"). With "selector" as the metadata type, the contents of the WebVTT file is used to identify
-  blocks of existing hidden content that are shown at the designated times during playback.
-  The keyword <strong>PAUSE</strong> on a single line within the WebVTT file causes the player to pause
-  at the designated times.
+	A <strong>data-meta-type</strong> attribute has value "selector", which is one of two types of supported metadata tracks
+	(the other is "text"). With "selector" as the metadata type, the contents of the WebVTT file is used to identify
+	blocks of existing hidden content that are shown at the designated times during playback.
+	The keyword <strong>PAUSE</strong> on a single line within the WebVTT file causes the player to pause
+	at the designated times.
 </p>
 
 <p>See also <a href="video8b.html">a responsive version of this demo</a>.
-  For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+	For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <div id="video-and-meta-wrapper">
-  <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-meta-type="selector" playsinline>
-    <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-    <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-    <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-    <track kind="metadata" src="../media/wwa_meta.vtt" srclang="en"/>
-  </video>
-  <!-- metadata content -->
-  <div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
-  <div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
-  <div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
-  <div class="meta" id="response" role="alert">Ouch!</div>
+	<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-meta-type="selector" playsinline>
+		<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+		<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+		<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+		<track kind="metadata" src="../media/wwa_meta.vtt" srclang="en"/>
+	</video>
+	<!-- metadata content -->
+	<div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
+	<div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
+	<div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
+	<div class="meta" id="response" role="alert">Ouch!</div>
 </div>
 
 <ul id="debug"></ul>

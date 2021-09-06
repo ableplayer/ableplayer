@@ -23,15 +23,15 @@
 <h1>Able Player Video Demo #4:<br/>Video player with audio description via video swap</h1>
 
 <p>This demo uses a separate video deliver audio description. If Description is toggled on,
-  the user gets the described version; otherwise they get the non-described version.
+	the user gets the described version; otherwise they get the non-described version.
 </p>
 <p>This method for delivering audio description, in contrast to the method used in
-  <a href="video3.html">Video Demo #3</a>, has some limitations:
+	<a href="video3.html">Video Demo #3</a>, has some limitations:
 </p>
 <ul>
-  <li>It cannot automatically pause when description is playing.</li>
-  <li>The description text is not included in the machine-generated interactive transcript.</li>
-  <li>Both the described and non-described versions of the video need to be the same duration.</li>
+	<li>It cannot automatically pause when description is playing.</li>
+	<li>The description text is not included in the machine-generated interactive transcript.</li>
+	<li>Both the described and non-described versions of the video need to be the same duration.</li>
 </ul>
 
 <p><strong>NOTE:</strong> The description text <em>can</em> be included in the machine-generated 
@@ -44,9 +44,9 @@
 <!-- use the following markup for each media element -->
 <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
 	<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+	<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
 	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
-  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+	<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
 </video>
 
 </body>

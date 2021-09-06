@@ -17,28 +17,28 @@
 
 <!-- Style for this example only -->
 <style>
-  main {
-    position: relative;
-    width: 100%;
-    margin: 0;
-  }
-  #player {
-    float: left;
-    width: 480px;
-    margin: 0;
-  }
-  #transcript {
-    float: left;
-    height: 500px;
-    margin: 20px;
-    width: 500px;
-  }
-  #transcript div.able-transcript {
-    height: 450px;
-  }
-  #transcript div.able-desc {
-    width: 90%;
-  }
+	main {
+		position: relative;
+		width: 100%;
+		margin: 0;
+	}
+	#player {
+		float: left;
+		width: 480px;
+		margin: 0;
+	}
+	#transcript {
+		float: left;
+		height: 500px;
+		margin: 20px;
+		width: 500px;
+	}
+	#transcript div.able-transcript {
+		height: 450px;
+	}
+	#transcript div.able-desc {
+		width: 90%;
+	}
 </style>
 
 </head>
@@ -48,163 +48,163 @@
 <h1>Able Player Video Demo #7:<br/>Video player with manually coded external transcript</h1>
 
 <p>The <strong>data-transcript-src</strong> attribute is used to identify the <em>id</em> of a container that contains a pre-existing manually coded transcript.
-  Manually-created transcripts can include better overall structure than automated ones, and can include additional HTML markup beyond the simple markup that is generated automatically by Able Player. This feature therefore gives authors greater control over the content of their transcripts.</p>
+	Manually-created transcripts can include better overall structure than automated ones, and can include additional HTML markup beyond the simple markup that is generated automatically by Able Player. This feature therefore gives authors greater control over the content of their transcripts.</p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <main role="main">
-  <div id="player">
-    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-transcript-src="transcript" playsinline>
-      <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-      <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-      <track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-      <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-      <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-      <track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-      <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-      <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-      <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-      <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-      <track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-      <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-      <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-      <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-      <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-      <track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
-    </video>
-  </div>
+	<div id="player">
+		<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-transcript-src="transcript" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+			<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+			<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+			<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+			<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+			<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+			<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+			<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+			<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+			<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+			<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+			<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+			<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+		</video>
+	</div>
 
-  <!--
-    # Use the following template to understand required transcript structure.
-    # Anything with a class name is critical to the functionality of the transcript.
-    # You can also supplement this with any additional HTML or CSS.
-    # Able Player will simply ignore anything it doesn't recognize.
-  -->
-  <div id="transcript" class="able-transcript-area">
+	<!--
+		# Use the following template to understand required transcript structure.
+		# Anything with a class name is critical to the functionality of the transcript.
+		# You can also supplement this with any additional HTML or CSS.
+		# Able Player will simply ignore anything it doesn't recognize.
+	-->
+	<div id="transcript" class="able-transcript-area">
 
-    <!-- the toolbar will be populated with an "Auto Scroll" checkbox -->
-    <div class="able-window-toolbar"></div>
+		<!-- the toolbar will be populated with an "Auto Scroll" checkbox -->
+		<div class="able-window-toolbar"></div>
 
-    <div class="able-transcript">
+		<div class="able-transcript">
 
-      <!-- headings are optional, but encouraged -->
-      <h2>Interactive Transcript</h2>
+			<!-- headings are optional, but encouraged -->
+			<h2>Interactive Transcript</h2>
 
-      <!-- Audio description -->
-      <div class="able-desc">
-        <span class="able-hidden">Description: </span>
-        <span class="able-transcript-seekpoint" data-start="0.005" data-end="6">
-          A blue circle has pairs of arching pairs inside. Underneath, DO-IT.
-        </span>
-      </div>
+			<!-- Audio description -->
+			<div class="able-desc">
+				<span class="able-hidden">Description: </span>
+				<span class="able-transcript-seekpoint" data-start="0.005" data-end="6">
+					A blue circle has pairs of arching pairs inside. Underneath, DO-IT.
+				</span>
+			</div>
 
-      <div><span class="able-unspoken">[ music ]</span></div>
+			<div><span class="able-unspoken">[ music ]</span></div>
 
-      <!-- More audio description -->
-      <div class="able-desc">
-        <span class="able-hidden">Description: </span>
-        <span class="able-transcript-seekpoint" data-start="6" data-end="12">
-          Words appear in a white box: World Wide Access.
-        </span>
-      </div>
+			<!-- More audio description -->
+			<div class="able-desc">
+				<span class="able-hidden">Description: </span>
+				<span class="able-transcript-seekpoint" data-start="6" data-end="12">
+					Words appear in a white box: World Wide Access.
+				</span>
+			</div>
 
-      <div class="able-unspoken">[Narrator]</div>
+			<div class="able-unspoken">[Narrator]</div>
 
-      <!-- in-line styles on this div are optional, just used for demo purposes -->
-      <!-- Note the use of <br/> tags to preserve line breaks in this section -->
-      <div style="margin:1em 2em">
+			<!-- in-line styles on this div are optional, just used for demo purposes -->
+			<!-- Note the use of <br/> tags to preserve line breaks in this section -->
+			<div style="margin:1em 2em">
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="9.000" data-end="10.792">
-          You want these people.<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="9.000" data-end="10.792">
+					You want these people.<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="10.792" data-end="12.259">
-          They order your products<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="10.792" data-end="12.259">
+					They order your products<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="12.259" data-end="13.759">
-          sign up for your services,<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="12.259" data-end="13.759">
+					sign up for your services,<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="13.759" data-end="15.000">
-          enroll in your classes,<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="13.759" data-end="15.000">
+					enroll in your classes,<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="15.000" data-end="16.627">
-          read your opinions,<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="15.000" data-end="16.627">
+					read your opinions,<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="16.627" data-end="18.561">
-          and watch your videos.<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="16.627" data-end="18.561">
+					and watch your videos.<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="18.561" data-end="20.165">
-          You'll never see them, <br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="18.561" data-end="20.165">
+					You'll never see them, <br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="20.165" data-end="22.165">
-          but they know you&mdash;<br/>
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="20.165" data-end="22.165">
+					but they know you&mdash;<br/>
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="22.165" data-end="24.165">
-          through your website.
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="22.165" data-end="24.165">
+					through your website.
+				</span>
 
-      </div>
+			</div>
 
-      <p style="font-size:1.2em;font-weight:bold;font-style:italic">
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="24.165" data-end="25.891">
-          Or maybe not.
-        </span>
-      </p>
+			<p style="font-size:1.2em;font-weight:bold;font-style:italic">
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="24.165" data-end="25.891">
+					Or maybe not.
+				</span>
+			</p>
 
-      <!-- In contrast to the above block, the following block features captions spliced
-        together to form a paragraph. -->
-      <p>
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="25.891" data-end="30.396">
-          Your website's visitors aren't a faceless mass of identical mouse-clickers,
-        </span>
+			<!-- In contrast to the above block, the following block features captions spliced
+				together to form a paragraph. -->
+			<p>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="25.891" data-end="30.396">
+					Your website's visitors aren't a faceless mass of identical mouse-clickers,
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="30.396" data-end="32.363">
-          but a vibrant community of individuals
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="30.396" data-end="32.363">
+					but a vibrant community of individuals
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="32.363" data-end="35.297">
-          with varying tastes, styles, and abilities.
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="32.363" data-end="35.297">
+					with varying tastes, styles, and abilities.
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="35.297" data-end="36.9">
-          This includes people with disabilities.
-        </span>
-      </p>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="35.297" data-end="36.9">
+					This includes people with disabilities.
+				</span>
+			</p>
 
-      <div class="able-desc">
-        <span class="able-hidden">Description: </span>
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="37.1" data-end="47">
-          Terrill Thompson, Technology Accessibility Specialist
-        </span>
-      </div>
+			<div class="able-desc">
+				<span class="able-hidden">Description: </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="37.1" data-end="47">
+					Terrill Thompson, Technology Accessibility Specialist
+				</span>
+			</div>
 
-      <p>
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="39.132" data-end="41">
-          <span class="able-unspoken">[Terrill]</span>
-          It's important for web designers and developers
-        </span>
+			<p>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="39.132" data-end="41">
+					<span class="able-unspoken">[Terrill]</span>
+					It's important for web designers and developers
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="41" data-end="45.5">
-          to realize that what they see currently on their computer,
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="41" data-end="45.5">
+					to realize that what they see currently on their computer,
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="45.5" data-end="49.264">
-          at their resolution, with their browser and their operating system
-        </span>
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="45.5" data-end="49.264">
+					at their resolution, with their browser and their operating system
+				</span>
 
-        <span class="able-transcript-seekpoint able-transcript-caption" data-start="49.264" data-end="52">
-          is not going to be necessarily the same thing that everybody else sees.
-        </span>
-      </p>
-    </div><!-- end .able-transcript -->
-  </div><!-- end .able-transcript-area -->
+				<span class="able-transcript-seekpoint able-transcript-caption" data-start="49.264" data-end="52">
+					is not going to be necessarily the same thing that everybody else sees.
+				</span>
+			</p>
+		</div><!-- end .able-transcript -->
+	</div><!-- end .able-transcript-area -->
 
 </main>
 </body>

@@ -17,28 +17,28 @@
 
 <!-- styles for this example page -->
 <style>
-  #wrapper {
-    width: 100%;
-  }
-  #chapters {
-    float: left;
-    min-width: 12em;
-    width: 30%;
-    padding-right: 1em;
-  }
-  #chapters ul {
-    border: 1px solid #AAA;
-  }
-  #player-plus {
-    float: left;
-    width: 65%;
-  }
-  div.able-chapters-div button:focus,
-  div.able-chapters-div button:hover,
-  div.able-chapters-div button::-moz-focus-inner {
-    background-color: #666;
-    color: #FFF;
-  }
+	#wrapper {
+		width: 100%;
+	}
+	#chapters {
+		float: left;
+		min-width: 12em;
+		width: 30%;
+		padding-right: 1em;
+	}
+	#chapters ul {
+		border: 1px solid #AAA;
+	}
+	#player-plus {
+		float: left;
+		width: 65%;
+	}
+	div.able-chapters-div button:focus,
+	div.able-chapters-div button:hover,
+	div.able-chapters-div button::-moz-focus-inner {
+		background-color: #666;
+		color: #FFF;
+	}
 </style>
 </head>
 
@@ -49,36 +49,36 @@
 <p>This page features a relatively <strong>complex</strong> example of Able Player being used to play a YouTube video. Its features include:</p>
 
 <ul>
-  <li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
-  <li>Captions and subtitles, both hosted on YouTube.</li>
-  <li>Chapters, hosted in a local WebVTT file, and referenced in a &lt;track&gt; element.</li>
-  <li>An interactive transcript that combines all of the above text tracks.</li>
-  <li>An external container to which Able Player adds chapters.</li>
+	<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
+	<li>Captions and subtitles, both hosted on YouTube.</li>
+	<li>Chapters, hosted in a local WebVTT file, and referenced in a &lt;track&gt; element.</li>
+	<li>An interactive transcript that combines all of the above text tracks.</li>
+	<li>An external container to which Able Player adds chapters.</li>
 </ul>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>. In particular, check out the <a href="youtube.html">Simple YouTube Example</a> page.</p>
 
 <div id="wrapper">
-  <div id="chapters"></div>
-  <div id="player-plus">
-    <div id="player">
-      <video data-able-player
-        data-skin="2020"
-        id="video1"
-        preload="auto"
-        data-youtube-id="dhwpLACAls8"
-        data-youtube-desc-id="Ck2TdVMhWcU"
-        data-transcript-div="transcript"
-        data-chapters-div="chapters"
-        data-use-chapters-button="false"
-        data-include-transcript="false"
-        playsinline
-      >
-        <track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
-      </video>
-    </div>
-    <div id="transcript"></div>
-  </div>
+	<div id="chapters"></div>
+	<div id="player-plus">
+		<div id="player">
+			<video data-able-player
+				data-skin="2020"
+				id="video1"
+				preload="auto"
+				data-youtube-id="dhwpLACAls8"
+				data-youtube-desc-id="Ck2TdVMhWcU"
+				data-transcript-div="transcript"
+				data-chapters-div="chapters"
+				data-use-chapters-button="false"
+				data-include-transcript="false"
+				playsinline
+			>
+				<track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
+			</video>
+		</div>
+		<div id="transcript"></div>
+	</div>
 </div>
 </body>
 </html>

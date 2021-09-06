@@ -18,105 +18,105 @@
 <!-- CSS for this example -->
 <style>
 #control-panel {
-  float: left;
-  padding-left: 30px;
+	float: left;
+	padding-left: 30px;
 }
 #control-panel button {
-  font-size: 1.1em;
-  font-weight: bold;
-  color: #000;
-  background-color: #EEE;
-  width: 5em;
-  padding: 0.15em;
+	font-size: 1.1em;
+	font-weight: bold;
+	color: #000;
+	background-color: #EEE;
+	width: 5em;
+	padding: 0.15em;
 }
 #control-panel button#go {
-  width: 3em;
+	width: 3em;
 }
 #control-panel button:hover,
 #control-panel button:focus {
-  color: #FFF;
-  background-color: #030;
+	color: #FFF;
+	background-color: #030;
 }
 #seek-field {
-  margin: 1em 0;
+	margin: 1em 0;
 }
 input#skipTo {
-  width: 3em;
-  font-size: 1.1em;
-  height: 1.5em;
+	width: 3em;
+	font-size: 1.1em;
+	height: 1.5em;
 }
 #control-panel ul {
-  padding-left: 1.5em;
+	padding-left: 1.5em;
 }
 #control-panel li span {
-  font-weight: bold;
-  color: #C00;
+	font-weight: bold;
+	color: #C00;
 }
 #control-panel #error {
-  margin: 1em 0;
-  padding: 1em;
-  background-color: #FFC;
-  border: 1px solid #340449;
-  font-weight: bold;
-  display: none;
+	margin: 1em 0;
+	padding: 1em;
+	background-color: #FFC;
+	border: 1px solid #340449;
+	font-weight: bold;
+	display: none;
 }
 </style>
 
 <!-- JavaScript for this example -->
 <script>
 $(document).ready(function() {
-  var player = new AblePlayer($('#video1'));
+	var player = new AblePlayer($('#video1'));
 
-  // handle button clicks by calling Able Player functions
-  $('button').on('click',function() {
-    var button = $(this).attr('id');
-    if (button === 'play') {
-      if (player.playing) {
-        player.pauseMedia();
-        $(this).text('Play');
-      }
-      else {
-        player.playMedia();
-        $(this).text('Pause');
-      }
-    }
-    else if (button === 'mute') {
-      if (player.isMuted()) {
-        player.setMute(false);
-        $(this).text('Mute');
-      }
-      else {
-        player.setMute(true);
-        $(this).text('Unmute');
-      }
-    }
-    else if (button === 'go') {
-      var seconds = $('#skipTo').val();
-      var duration = player.getDuration();
-      if (seconds >= 0 && seconds < duration) {
-        player.seekTo(seconds);
-        player.playMedia();
-        $('#play').text('Pause');
-      }
-      else {
-        var error = "You can't play at ";
-        error += seconds + " seconds in a " + Math.round(duration);
-        error += " second video!";
-        $('#error').text(error).show().delay(5000).fadeOut(function() {
-          $(this).text('');
-        });
-      }
-    }
-  });
+	// handle button clicks by calling Able Player functions
+	$('button').on('click',function() {
+		var button = $(this).attr('id');
+		if (button === 'play') {
+			if (player.playing) {
+				player.pauseMedia();
+				$(this).text('Play');
+			}
+			else {
+				player.playMedia();
+				$(this).text('Pause');
+			}
+		}
+		else if (button === 'mute') {
+			if (player.isMuted()) {
+				player.setMute(false);
+				$(this).text('Mute');
+			}
+			else {
+				player.setMute(true);
+				$(this).text('Unmute');
+			}
+		}
+		else if (button === 'go') {
+			var seconds = $('#skipTo').val();
+			var duration = player.getDuration();
+			if (seconds >= 0 && seconds < duration) {
+				player.seekTo(seconds);
+				player.playMedia();
+				$('#play').text('Pause');
+			}
+			else {
+				var error = "You can't play at ";
+				error += seconds + " seconds in a " + Math.round(duration);
+				error += " second video!";
+				$('#error').text(error).show().delay(5000).fadeOut(function() {
+					$(this).text('');
+				});
+			}
+		}
+	});
 
-  // Able Player is not required for listending for HTML5 media events
-  var $video = $('#video1');
-  $video.on('playing',function() {
-    $('#status-play').text('true');
-  });
-  $video.on('ended',function() {
-    $('#status-end').text('true');
-  });
+	// Able Player is not required for listending for HTML5 media events
+	var $video = $('#video1');
+	$video.on('playing',function() {
+		$('#status-play').text('true');
+	});
+	$video.on('ended',function() {
+		$('#status-end').text('true');
+	});
 })
 </script>
 </head>
@@ -126,47 +126,47 @@ $(document).ready(function() {
 <h1>Able Player Video Demo #13:<br/>Able Player API</h1>
 
 <p>To control Able Player via external controls, assign a new AblePlayer instance to a variable
-  and omit the <strong>data-able-player</strong> attribute from the media element.
-  Then, all Able Player functions are exposed and can be accessed via your custom JavaScript.</p>
+	and omit the <strong>data-able-player</strong> attribute from the media element.
+	Then, all Able Player functions are exposed and can be accessed via your custom JavaScript.</p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <video id="video1" data-skin="2020" preload="auto" width="480" height="360" poster="../media/wwa.jpg" playsinline>
-  <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-  <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-  <track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-  <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-  <track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-  <track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-  <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-  <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-  <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-  <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-  <track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-  <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-  <track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-  <track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-  <track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-  <track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+	<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+	<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+	<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+	<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+	<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+	<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+	<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+	<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+	<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+	<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+	<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+	<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+	<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+	<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+	<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
 </video>
 
 <div id="control-panel">
 
-  <h2>External Controls</h2>
+	<h2>External Controls</h2>
 
-  <button id="play">Play</button>
-  <button id="mute">Mute</button>
-  <div id="seek-field">
-    <label for="skipTo">Play at (seconds):</label>
-    <input type="text" id="skipTo" name="skipTo"/>
-    <button id="go">Go</button>
-  </div>
-  <div id="error" role="alert"></div>
-  <h3>Playback Status</h3>
-  <ul>
-    <li>User played video: <span id="status-play">false</span></li>
-    <li>User played to end: <span id="status-end">false</span></li>
-  </ul>
+	<button id="play">Play</button>
+	<button id="mute">Mute</button>
+	<div id="seek-field">
+		<label for="skipTo">Play at (seconds):</label>
+		<input type="text" id="skipTo" name="skipTo"/>
+		<button id="go">Go</button>
+	</div>
+	<div id="error" role="alert"></div>
+	<h3>Playback Status</h3>
+	<ul>
+		<li>User played video: <span id="status-play">false</span></li>
+		<li>User played to end: <span id="status-end">false</span></li>
+	</ul>
 </div>
 
 </body>
