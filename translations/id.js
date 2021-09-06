@@ -12,11 +12,11 @@
 
 "play": "Putar",
 
-"pause": "Pause",
+"pause": "Jeda",
 
 "stop": "Hentikan",
 
-"restart": "Reset",
+"restart": "Ulang",
 
 "prevChapter": "Bagian sebelumnya",
 
@@ -38,9 +38,9 @@
 
 "captionsOff": "Matikan teks",
 
-"showTranscript": "Tampilkan transkrip",
+"showTranscript": "Tampilkan transkripsi",
 
-"hideTranscript": "Sembunyikan transkrip",
+"hideTranscript": "Sembunyikan transkripsi",
 
 "turnOnDescriptions": "Nyalakan deskripsi",
 
@@ -88,7 +88,7 @@
 
 "spacebar": "kunci spasi",
 
-"transcriptTitle": "Transkrip",
+"transcriptTitle": "Transkripsi",
 
 "lyricsTitle": "Lirik",
 
@@ -98,7 +98,7 @@
 
 "statusPlaying": "Diputar",
 
-"statusPaused": "Dipause",
+"statusPaused": "Dijedakan",
 
 "statusStopped": "Dihentikan",
 
@@ -122,11 +122,11 @@
 
 "alertDescribedVersion": "Menggunakan versi audio yang tertera dari video ini",
 
-"alertNonDescribedVersion": "Bukan menggunakan versi audio yang tertera dari video ini",
+"alertNonDescribedVersion": "Mnggunakan versi yang bukan tertera dari video ini",
 
 "fallbackError1": "Maaf, browser Anda tidak bisa memainkan ini",
 
-"fallbackError2": "Browser berikut diketahui tidak dapat menggunakan pemutar video ini",
+"fallbackError2": "Browser berikut diketahui bisa menggunakan pemutar video ini",
 
 "orHigher": "atau lebih tinggi",
 
@@ -136,7 +136,7 @@
 
 "prefMenuKeyboard": "Kibor",
 
-"prefMenuTranscript": "Transkrip",
+"prefMenuTranscript": "Transkripsi",
 
 "prefTitleCaptions": "Preferensi Teks",
 
@@ -144,11 +144,11 @@
 
 "prefTitleKeyboard": "Preferensi Kibor",
 
-"prefTitleTranscript": "Preferensi Transkrip",
+"prefTitleTranscript": "Preferensi transkripsi",
 
 "prefIntroCaptions": "Preferensi berikut mengontrol cara menampilkan teks.",
 
-"prefIntroDescription1": "Pemutar media ini mendukung deskripsi audo dengan dua cara: ",
+"prefIntroDescription1": "Pemutar media ini mendukung deskripsi audio dengan dua cara: ",
 
 "prefIntroDescription2": "Video ini memiliki ",
 
@@ -156,15 +156,15 @@
 
 "prefIntroDescription3": "Gunakan formulir berikut untuk memasang preferensi terkait deskripsi audio berbasis teks.",
 
-"prefIntroDescription4": "Setelah menyimpan pengaturan Anda, deskripsi audio dapat dinyala/matikan melalui tombol Deskripsi.",
+"prefIntroDescription4": "Setelah menyimpan pengaturan Anda, deskripsi audio dapat dinyalakan/dimatikan melalui tombol Deskripsi.",
 
-"prefIntroKeyboard1": "Pemutar media dalam halaman ini dapat dioperasikan dari bagian manapun di halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).",
+"prefIntroKeyboard1": "Pemutar media dalam halaman ini dapat dioperasikan dari bagian mana pun di halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).",
 
-"prefIntroKeyboard2": "Kunci pengubah (Shift, Alt, Control) dapat diberikan peruntukan di bawah.",
+"prefIntroKeyboard2": "Kunci pengubah (Shift, Alt, Control) dapat diperuntukkan di bawah.",
 
-"prefIntroKeyboard3": "CATATAN: Beberapa kombinasi kunci mungkin akan konflik dengan yang digunakan oleh browser Anda dan/atau aplikasi perangkat lunak lainnya. Cobalah beragam kombinasi untuk menemukan yang bekerja untuk Anda.",
+"prefIntroKeyboard3": "CATATAN: Beberapa kombinasi kunci mungkin akan konflik dengan yang digunakan oleh browser Anda dan/atau aplikasi perangkat lunak lainnya. Cobalah beragam kombinasi untuk menemukan yang sesuai untuk Anda.",
 
-"prefIntroTranscript": "Preferensi berikut mempengarushi transkrip interaktif.",
+"prefIntroTranscript": "Preferensi berikut mempengaruhi transkripsi interaktif.",
 
 "prefCookieWarning": "Untuk menyimpan preferesi dibutuhkan kukis.",
 
@@ -174,11 +174,11 @@
 
 "prefHeadingDescription": "Deskripsi audio",
 
-"prefHeadingTextDescription": "Deskripsi audio basis teks",
+"prefHeadingTextDescription": "Deskripsi audio berbasis teks",
 
 "prefHeadingCaptions": "Teks",
 
-"prefHeadingTranscript": "Transkrip Interaktid",
+"prefHeadingTranscript": "Transkripsi Interaktif",
 
 "prefAltKey": "Alt",
 
@@ -202,31 +202,31 @@
 
 "prefDescFormatOption2b": "deskripsi berbasis teks",
 
-"prefDescPause": "Otomatis pause video ketika deskripsi dimulai",
+"prefDescPause": "Otomatis jedakan video ketika deskripsi dimulai",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Suara",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Kecepatan",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Titinada",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Sangat rendah",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Rendah",
 
 "prefDescPitch3": "Default",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Tinggi",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Sangat tinggi",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Sesuaikan pengaturan untuk mendengarkan teks contoh ini.",
 
 "prefDescVisible": "Menampakkan deskripsi",
 
-"prefHighlight": "Sorotu transkrip saat media diputar",
+"prefHighlight": "Sorot transkripsi saat media diputar",
 
-"prefTabbable": "Transkrip dengan kontrol kibor",
+"prefTabbable": "Transkripsi dengan kontrol kibor",
 
 "prefCaptionsFont": "Jenis Huruf",
 
@@ -276,13 +276,13 @@
 
 "prefCaptionsPosition": "Posisi",
 
-"captionsPositionOverlay": "Menindih video",
+"captionsPositionOverlay": "Melapisi video",
 
 "captionsPositionBelow": "Di bawah video",
 
 "sampleCaptionText": "Contoh tampilan teks",
 
-"prefSuccess": "Pengubahan yang Anda buat sudah disimpan.",
+"prefSuccess": "Perubahan yang Anda buat sudah disimpan.",
 
 "prefNoChange": "Anda tidak mengubah apa pun.",
 
