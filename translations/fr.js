@@ -206,23 +206,23 @@
 
 "prefDescVisible": "Affichez la description",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Voix",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Vitesse",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Volume",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Très faible",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Faible",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "Par défaut",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Fort",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Très fort",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Régler les paramètres afin d'entendre cet extrait de texte",
 
 "prefHighlight": "Surligner la transcription pendant la lecture",
 
