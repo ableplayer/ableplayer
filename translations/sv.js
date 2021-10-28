@@ -206,23 +206,23 @@
 
 "prefDescVisible": "Synliggör syntolkning",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Röst",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Takt",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Tonhöjd",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Mycket lågt",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Låg",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "Normal",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Högt",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Mycket högt",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Justera inställningarna för att höra denna exempeltext.",
 
 "prefHighlight": "Markera det som läses upp i transkriptet",
 
