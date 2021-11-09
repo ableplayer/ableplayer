@@ -67,7 +67,7 @@
 				var trackSrc = track.src;
 
 				loadingPromise = thisObj.loadTextObject(trackSrc); // resolves with src, trackText
-				loadingPromises.push(loadingPromise);
+				loadingPromises.push(loadingPromise.catch(function(src) { console.warn('Failed to load captions track from ' + src); }));
 
 				loadingPromise.then((function (track, kind) {
 
@@ -369,7 +369,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if (thisObj.debug) {
 					console.log ('error reading file ' + src + ': ' + status);
 				}
-				deferred.fail();
+				deferred.reject(src);
 			}
 			else {
 				deferred.resolve(src, trackText);
