@@ -1122,7 +1122,7 @@
 				this.prefCaptions = 0;
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
-					this.youTubePlayer.unloadModule(this.ytCaptionModule);
+					this.youTubePlayer.unloadModule('captions');
 				}
 				else {
 					this.$captionsWrapper.hide();
@@ -1134,9 +1134,7 @@
 				this.prefCaptions = 1;
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
-					if (typeof this.ytCaptionModule !== 'undefined') {
-						this.youTubePlayer.loadModule(this.ytCaptionModule);
-					}
+					this.youTubePlayer.loadModule('captions');
 				}
 				else {
 					this.$captionsWrapper.show();

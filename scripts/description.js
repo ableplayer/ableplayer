@@ -296,18 +296,14 @@
 			}
 			if (typeof this.youTubePlayer !== 'undefined') {
 
-				// retrieve/setup captions for the new video from YouTube
-				this.setupAltCaptions().then(function() {
-
-					if (thisObj.playing) {
-						// loadVideoById() loads and immediately plays the new video at swapTime
-						thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-					}
-					else {
-						// cueVideoById() loads the new video and seeks to swapTime, but does not play
-						thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-					}
-				});
+				if (thisObj.playing) {
+					// loadVideoById() loads and immediately plays the new video at swapTime
+					thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+				}
+				else {
+					// cueVideoById() loads the new video and seeks to swapTime, but does not play
+					thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+				}
 			}
 		}
 		else if (this.player === 'vimeo') {

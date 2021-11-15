@@ -29,9 +29,10 @@
 		}
 	};
 
-	// Returns the function used when a caption is clicked in the captions menu.
-	// Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
 	AblePlayer.prototype.getCaptionClickFunction = function (track) {
+
+		// Returns the function used when a caption is clicked in the captions menu.
+		// Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
 
 		var thisObj = this;
 		return function () {
@@ -40,22 +41,27 @@
 			thisObj.currentCaption = -1;
 			if (thisObj.usingYouTubeCaptions) {
 				if (thisObj.captionsOn) {
-					if (typeof thisObj.ytCaptionModule !== 'undefined') {
-						// captions are already on. Just need to change the language
-						thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang});
+					// Two things must be true in order for setOption() to work: 
+					// The YouTube caption module must be loaded 
+					// and the video must have started playing 
+					if (thisObj.youTubePlayer.getOptions('captions') && thisObj.startedPlaying) {						
+						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLang});
 					}
 					else {
-						// need to wait for caption module to be loaded to change the language
-						// caption module will be loaded after video starts playing, triggered by onApiChange event
-						// at that point, thosObj.captionLang will be passed to the module as the default language
+						// the two conditions were not met 
+						// try again to set the language after onApiChange event is triggered 
+						// meanwhile, the following variable will hold the value
+						thisObj.captionLangPending = thisObj.captionLang;
 					}
 				}
 				else {
-					// captions are off (i.e., captions module has been unloaded; need to reload it)
-					// user's selected language will be reset after module has successfully loaded
-					// (the onApiChange event will be fired -- see initialize.js > initYouTubePlayer())
-					thisObj.resettingYouTubeCaptions = true;
-					thisObj.youTubePlayer.loadModule(thisObj.ytCaptionModule);
+					if (thisObj.youTubePlayer.getOptions('captions')) { 
+						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLang});
+					}					
+					else { 
+						thisObj.youTubePlayer.loadModule('captions');
+						thisObj.captionLangPending = thisObj.captionLang; 
+					}
 				}
 			}
 			else if (thisObj.usingVimeoCaptions) {
@@ -112,7 +118,7 @@
 		var thisObj = this;
 		return function () {
 			if (thisObj.player == 'youtube') {
-				thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
+				thisObj.youTubePlayer.unloadModule('captions');
 			}
 			else if (thisObj.usingVimeoCaptions) {
 				thisObj.vimeoPlayer.disableTextTrack();

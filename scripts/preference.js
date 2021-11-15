@@ -1000,7 +1000,7 @@
 			(typeof this.usingYouTubeCaptions !== 'undefined' && this.usingYouTubeCaptions) &&
 			capSizeChanged) {
 				// update font size of YouTube captions
-				this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
+				this.youTubePlayer.setOption('captions','fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
 		if (AblePlayerInstances.length > 1) {
 			// there are multiple players on this page.
@@ -1035,18 +1035,20 @@
 
 		// Update player based on current prefs. Safe to call multiple times.
 
-		// tabbable transcript
-		if (this.prefTabbable === 1) {
-			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
-		}
-		else {
-			this.$transcriptDiv.find('span.able-transcript-seekpoint').removeAttr('tabindex');
-		}
+		if (this.$transcriptDiv) { 
+			// tabbable transcript
+			if (this.prefTabbable === 1) {
+				this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
+			}
+			else {
+				this.$transcriptDiv.find('span.able-transcript-seekpoint').removeAttr('tabindex');
+			}
 
-		// transcript highlights
-		if (this.prefHighlight === 0) {
-			// user doesn't want highlights; remove any existing highlights
-			this.$transcriptDiv.find('span').removeClass('able-highlight');
+			// transcript highlights
+			if (this.prefHighlight === 0) {
+				// user doesn't want highlights; remove any existing highlights
+				this.$transcriptDiv.find('span').removeClass('able-highlight');
+			}
 		}
 
 		// Re-initialize caption and description in case relevant settings have changed

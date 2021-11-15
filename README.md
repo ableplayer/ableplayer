@@ -584,41 +584,17 @@ YouTube Support
 To play a YouTube video in *Able Player*, simply include a **data-youtube-id** attribute
 on the `<video>` element. The value of this attribute must be the video's 11-character YouTube ID.
 
-If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute
-on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
+If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
 of the described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
-Versions 2.3.1 through 3.2.12 required a YouTube Data API key for retrieving caption data from YouTube.
-Get a YouTube Data API key by registering your application at the [Google Developer Console][].
-For complete instructions, see [Google's Getting Started page]. Note: All that's needed for
-playing YouTube videos in Able Player is a simple API key, **not** OAuth 2.0. 
+### Important Changes to YouTube Support
 
-After obtaining your YouTube Data API Key, insert the following code into your HTML page:
-
-```HTML
-<script>
-  var youTubeDataAPIKey = "paste your API key here";
-  var googleApiReady = false;
-  function initGoogleClientApi() {
-    googleApiReady = true;
-  }
-</script>
-<script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
-```
-
-Starting with version 3.2.13, Able Player no longer requires a YouTube Data API key in order to access caption tracks from YouTube. However, an API key is still encouraged, as it relies on well-documented methods from Google, 
-whereas operating without an API key relies on methods that are not well documented, and therefore 
-may not be reliable.  
-
-Also new in 3.2.13, Able Player now handles YouTube captions in the same way it handles HTML `<track kind="captions">` elements. The display of the caption text can be customized via the Preferences menu, and the caption text is used to automatically create an interactive transcript. 
-
-YouTube does not currently support chapters, descriptions, and metadata tracks. With Able Player, these features can be added to the video using HTML `<track>` elements, even if the video's captions and subtitles are stored on YouTube. The advantage of managing captions entirely on YouTube is that you only have to manage them in one place, and they're available everywhere your YouTube video is played.  
-
-If your video has HTML `<track>` elements for captions and subtitles, these will be used *instead of* the captions on YouTube.
-
-
-Adjustable playback rate is available for some videos.
+On November 10, 2021, Google eliminated the *timedtext* API, which for years had been a dependable, albeit undocumented, means of getting access to YouTube caption files. 
+Able Player version 4.3.27 restores Able Player's ability to toggle captions on and off using the CC button, and to select available languages from a popup menu. 
+However, it is no longer possible to have full Able Player functionality 
+unless captions and subtitles are hosted locally. 
+See the section below on *Limitations of hosting captions and subtitles on YouTube or Vimeo*. 
 
 Vimeo Support
 ---------------
@@ -635,7 +611,23 @@ Note that Vimeo currently has some limitations:
 
 -   A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is cluttered and confusing. 
 -   A Pro or Business account is required in order to change playback rate (with faster and slower buttons). This functionality is *not* supported with a Plus account. Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.
--   Able Player can display captions if they're hosted on Vimeo. However, if the user changes their caption display preferences in Able Player, that has no effect on the Vimeo captions. Also, Able Player is unable to auto-generate an interactive transcript if captions are hosted on Vimeo. For captions that support user display preferences and that can be repurposed as an interactive transcript, captions and subtitles must be stored locally and referenced with a &lt;track&gt; element. If captions and subtitles are provided both on Vimeo and locally, the local captions will take precedence in order to provide full functionality. 
+
+In addition, if captions and subtitles are hosted on Vimeo, Able Player can control toggling them on/off and choosing languages via the CC button. However, Able Player's full functionality is not available. See the section below on *Limitations of hosting captions and subtitles on YouTube or Vimeo*. 
+
+Limitations of hosting captions and subtitles on YouTube or Vimeo
+----------
+
+If captions and subtitles are hosted on YouTube or Vimeo, Able Player can control toggling them on/off and choosing languages via the CC button. However, Able Player's full functionality is not available. Specifically: 
+
+*  Able Player is unable to auto-generate an interactive transcript from the caption text. 
+*  Able Player's caption search features don't work. 
+*  Users have limited control over how captions are displayed. If captions are hosted locally, users have control over their position, font, font size, text and background colors, and opacity through the Caption Preferences dialog. If captions are hosted solely on YouTube, users can change font size via Able Player but not the other settings. If captions are hosted solely on Vimeo, users have no control over their appearance via Able Player.
+
+Given these limitations, we recommend storing captions and subtitles locally and referencing them with a `<track>` element. In fact, all local `<track>` elements (captions, subtitles, chapters, descriptions, and metadata tracks) work for YouTube and Vimeo videos, just as they do for videos hosted locally. 
+
+If captions and subtitles are hosted locally, in addition to being hosted on YouTube or Vimeo 
+(i.e., to ensure accessibility of videos when viewed directly on these platforms), the local captions will take precedence in Able PLayer in order to provide full functionality. 
+
 
 MIME Types
 ----------

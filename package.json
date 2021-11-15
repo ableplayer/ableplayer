@@ -1,6 +1,6 @@
 {
   "name": "ableplayer",
-  "version": "4.3.25",
+  "version": "4.3.27",
   "description": "fully accessible HTML5 media player",
   "homepage": "http://ableplayer.github.io/ableplayer",
   "bugs": "https://github.com/ableplayer/ableplayer/issues",
@@ -14,6 +14,7 @@
     "build": "grunt"
   },
   "dependencies": {
+    "dotenv": "^10.0.0",
     "jquery": "^3.5.0",
     "js-cookie": "2.2.0",
     "xml-js": "1.6.2"

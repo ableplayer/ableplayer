@@ -240,57 +240,6 @@
 		}
 	};
 
-	AblePlayer.prototype.setupVimeoCaptions = function () {
-
-		// called from setupAltCaptions if player is YouTube and there are no <track> captions
-
-		// use YouTube Data API to get caption data from YouTube
-		// function is called only if these conditions are met:
-		// 1. this.player === 'youtube'
-		// 2. there are no <track> elements with kind="captions"
-		// 3. youTubeDataApiKey is defined
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		var thisObj, googleApiPromise, youTubeId, i;
-
-		thisObj = this;
-
-		// if a described version is available && user prefers desription
-		// Use the described version, and get its captions
-		if (this.youTubeDescId && this.prefDesc) {
-			youTubeId = this.youTubeDescId;
-		}
-		else {
-			youTubeId = this.youTubeId;
-		}
-		if (typeof youTubeDataAPIKey !== 'undefined') {
-			// Wait until Google Client API is loaded
-			// When loaded, it sets global var googleApiReady to true
-
-			// Thanks to Paul Tavares for $.doWhen()
-			// https://gist.github.com/purtuga/8257269
-			$.doWhen({
-				when: function(){
-					return googleApiReady;
-				},
-				interval: 100, // ms
-				attempts: 1000
-			})
-			.done(function(){
-					deferred.resolve();
-			})
-			.fail(function(){
-				console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
-			});
-		}
-		else {
-			deferred.resolve();
-		}
-		return promise;
-	};
-
 	AblePlayer.prototype.getVimeoCaptionTracks = function () {
 
 		// get data via Vimeo Player API, and push data to this.captions
@@ -317,7 +266,6 @@
 					for (i=0; i<tracks.length; i++) {
 
 						thisObj.hasCaptions = true;
-						thisObj.usingVimeoCaptions = true;
 						if (thisObj.prefCaptions === 1) {
 								thisObj.captionsOn = true;
 						}
@@ -338,6 +286,8 @@
 							'def': isDefaultTrack
 						});
 					}
+					thisObj.captions = thisObj.tracks; 
+					thisObj.hasCaptions = true;
 
 					// setupPopups again with new captions array, replacing original
 					thisObj.setupPopups('captions');
@@ -345,7 +295,7 @@
 			 	}
 			 	else {
 					thisObj.hasCaptions = false;
-					thisObj.usingVimeoCaptions = false;
+					thisObj.usingVimeoCaptions = false; 
 					deferred.resolve();
 				}
 			});

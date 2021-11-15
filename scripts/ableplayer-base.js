@@ -49,12 +49,12 @@ var AblePlayerInstances = [];
 
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
 	window.onYouTubeIframeAPIReady = function() {
-		AblePlayer.youtubeIframeAPIReady = true;
-		$('body').trigger('youtubeIframeAPIReady', []);
+		AblePlayer.youTubeIframeAPIReady = true;
+		$('body').trigger('youTubeIframeAPIReady', []);
 	};
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).keydown(function(e) {
+	$(window).on('keydown',function(e) {
 		if (AblePlayer.nextIndex === 1) {
 			AblePlayer.lastCreated.onPlayerKeyPress(e);
 		}
@@ -579,6 +579,6 @@ var AblePlayerInstances = [];
 		}
 	};
 
-	AblePlayer.youtubeIframeAPIReady = false;
-	AblePlayer.loadingYoutubeIframeAPI = false;
+	AblePlayer.youTubeIframeAPIReady = false;
+	AblePlayer.loadingYouTubeIframeAPI = false;
 })(jQuery);
