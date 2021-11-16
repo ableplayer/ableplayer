@@ -16096,9 +16096,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.getVimeoDimensions = function (vimeoContainerId) {
 
 		// get dimensions of Vimeo video, return array with width & height
-		// Sources, in order of priority:
-		// 1. The width and height attributes on <video>
-		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
 
 		var d, url, $iframe, width, height;
 
@@ -16106,7 +16103,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		if (typeof this.playerMaxWidth !== 'undefined') {
 			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since YouTube will adjust height to match width
+			// optional: set height as well; not required though since Vimeo will adjust height to match width
 			if (typeof this.playerMaxHeight !== 'undefined') {
 				d[1] = this.playerMaxHeight;
 			}
@@ -16125,65 +16122,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		return false;
-	};
-
-	AblePlayer.prototype.resizeVimeoPlayer = function(youTubeId, youTubeContainerId) {
-
-		// NOTE: This function is modeled after same function in youtube.js
-		// in case useful for Vimeo, but is not currently used
-
-		// called after player is ready, if youTube dimensions were previously unknown
-		// Now need to get them from the iframe element that YouTube injected
-		// and resize Able Player to match
-		var d, width, height;
-		if (typeof this.aspectRatio !== 'undefined') {
-			// video dimensions have already been collected
-			if (this.restoringAfterFullScreen) {
-				// restore using saved values
-				if (this.youTubePlayer) {
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-				this.restoringAfterFullScreen = false;
-			}
-			else {
-				// recalculate with new wrapper size
-				width = this.$ableWrapper.parent().width();
-				height = Math.round(width / this.aspectRatio);
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				this.youTubePlayer.setSize(width, height);
-				if (this.fullscreen) {
-					this.youTubePlayer.setSize(width, height);
-				}
-				else {
-					// resizing due to a change in window size, not full screen
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-			}
-		}
-		else {
-			d = this.getYouTubeDimensions(youTubeId, youTubeContainerId);
-			if (d) {
-				width = d[0];
-				height = d[1];
-				if (width > 0 && height > 0) {
-					this.aspectRatio = width / height;
-					this.ytWidth = width;
-					this.ytHeight = height;
-					if (width !== this.$ableWrapper.width()) {
-						// now that we've retrieved YouTube's default width,
-						// need to adjust to fit the current player wrapper
-						width = this.$ableWrapper.width();
-						height = Math.round(width / this.aspectRatio);
-						if (this.youTubePlayer) {
-							this.youTubePlayer.setSize(width, height);
-						}
-					}
-				}
-			}
-		}
 	};
 
 	AblePlayer.prototype.getVimeoCaptionTracks = function () {
@@ -16247,104 +16185,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			});
 
 		return promise;
-	};
-
-	AblePlayer.prototype.initVimeoCaptionModule = function () {
-
-		// NOTE: This function is modeled after same function in youtube.js
-		// in case useful for Vimeo, but is not currently used
-
-		// This function is called when YouTube onApiChange event fires
-		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
-		// it isn't fired until the video starts playing
-		// and only fires if captions are available for this video (automated captions don't count)
-		// If no captions are available, onApichange event never fires & this function is never called
-
-		// YouTube iFrame API documentation is incomplete related to captions
-		// Found undocumented features on user forums and by playing around
-		// Details are here: http://terrillthompson.com/blog/648
-		// Summary:
-		// User might get either the AS3 (Flash) or HTML5 YouTube player
-		// The API uses a different caption module for each player (AS3 = 'cc'; HTML5 = 'captions')
-		// There are differences in the data and methods available through these modules
-		// This function therefore is used to determine which captions module is being used
-		// If it's a known module, this.ytCaptionModule will be used elsewhere to control captions
-		var options, fontSize, displaySettings;
-
-		options = this.youTubePlayer.getOptions();
-		if (options.length) {
-			for (var i=0; i<options.length; i++) {
-				if (options[i] == 'cc') { // this is the AS3 (Flash) player
-					this.ytCaptionModule = 'cc';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-				else if (options[i] == 'captions') { // this is the HTML5 player
-					this.ytCaptionModule = 'captions';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-			}
-			if (typeof this.ytCaptionModule !== 'undefined') {
-				if (this.usingYouTubeCaptions) {
-					// set default languaage
-					this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
-					// set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
-					this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
-					// ideally could set other display options too, but no others seem to be supported by setOption()
-				}
-				else {
-					// now that we know which cc module was loaded, unload it!
-					// we don't want it if we're using local <track> elements for captions
-					this.youTubePlayer.unloadModule(this.ytCaptionModule)
-				}
-			}
-		}
-		else {
-			// no modules were loaded onApiChange
-			// unfortunately, gonna have to disable captions if we can't control them
-			this.hasCaptions = false;
-			this.usingYouTubeCaptions = false;
-		}
-		this.refreshControls('captions');
-	};
-
-	AblePlayer.prototype.getVimeoPosterUrl = function (youTubeId, width) {
-
-		// NOTE: This function is modeled after same function in youtube.js
-		// in case useful for Vimeo, but is not currently used
-
-			 // return a URL for retrieving a YouTube poster image
-			 // supported values of width: 120, 320, 480, 640
-
-			 var url = 'https://img.youtube.com/vi/' + youTubeId;
-			 if (width == '120') {
-				 // default (small) thumbnail, 120 x 90
-				 return url + '/default.jpg';
-			 }
-			 else if (width == '320') {
-				 // medium quality thumbnail, 320 x 180
-				 return url + '/hqdefault.jpg';
-			 }
-			 else if (width == '480') {
-				 // high quality thumbnail, 480 x 360
-				 return url + '/hqdefault.jpg';
-			 }
-			 else if (width == '640') {
-				 // standard definition poster image, 640 x 480
-				 return url + '/sddefault.jpg';
-			 }
-			 return false;
 	};
 
 })(jQuery);
