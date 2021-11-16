@@ -494,10 +494,11 @@ div.able-modal-dialog {
   box-sizing: content-box !important;
   z-index: 10000;
 }
-@supports (transform: translateY(calc(-50vh - 50%))) {
+@supports (transform: translate(-50%,-50%)) {
 	div.able-modal-dialog {
-	  transform: translateY(calc(-50vh - 50%));
-	  top: auto;
+	  top: 50%;
+		left: 50%;
+	  transform: translate(-50%,-50%) !important;
 	}
 }
 
