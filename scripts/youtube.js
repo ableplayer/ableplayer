@@ -343,6 +343,11 @@
 					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
 					thisObj.captionLangPending = null; 
 				}
+				if (typeof thisObj.prefCaptionsSize !== 'undefined') { 
+					// set the default caption size 
+					// this doesn't work until the captions module is loaded 
+					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
+				}
 				deferred.resolve();
 			});
 			// Trigger the above event listener by briefly playing the video 		

@@ -1581,7 +1581,18 @@ var AblePlayerInstances = [];
 		// in the Preferences popup menu
 		// Human-readable label for each group is defined in translation table
 		if (this.mediaType === 'video') {
-			return ['captions','descriptions','keyboard','transcript'];
+			if (this.usingYouTubeCaptions) {
+				// no transcript is possible 
+				return ['captions','descriptions','keyboard']; 
+			}
+			else if (this.usingVimeoCaptions) { 
+				// users cannot control caption appearance
+				// and no transcript is possible
+				return ['descriptions','keyboard']; 
+			}
+			else { 
+				return ['captions','descriptions','keyboard','transcript']; 
+			} 
 		}
 		else if (this.mediaType === 'audio') {
 			var groups = [];
@@ -1648,56 +1659,68 @@ var AblePlayerInstances = [];
 		if (this.mediaType === 'video') {
 
 			// Caption preferences
+
 			prefs.push({
 				'name': 'prefCaptions', // closed captions default state
 				'label': null,
 				'group': 'captions',
 				'default': 1
 			});
-/* // not supported yet
-			prefs.push({
-				'name': 'prefCaptionsStyle',
-				'label': this.tt.prefCaptionsStyle,
-				'group': 'captions',
-				'default': this.tt.captionsStylePopOn
-			});
-*/
-			prefs.push({
-				'name': 'prefCaptionsPosition',
-				'label': this.tt.prefCaptionsPosition,
-				'group': 'captions',
-				'default': this.defaultCaptionsPosition
-			});
-			prefs.push({
-				'name': 'prefCaptionsFont',
-				'label': this.tt.prefCaptionsFont,
-				'group': 'captions',
-				'default': 'sans-serif'
-			});
+
+			if (!this.usingYouTubeCaptions) {
+
+				/* // not supported yet
+				prefs.push({
+					'name': 'prefCaptionsStyle',
+					'label': this.tt.prefCaptionsStyle,
+					'group': 'captions',
+					'default': this.tt.captionsStylePopOn
+				});
+				*/
+				prefs.push({
+					'name': 'prefCaptionsPosition',
+					'label': this.tt.prefCaptionsPosition,
+					'group': 'captions',
+					'default': this.defaultCaptionsPosition
+				});
+
+				prefs.push({
+					'name': 'prefCaptionsFont',
+					'label': this.tt.prefCaptionsFont,
+					'group': 'captions',
+					'default': 'sans-serif'
+				});
+			}
+
+			// This is the one option that is supported by YouTube IFrame API
 			prefs.push({
 				'name': 'prefCaptionsSize',
 				'label': this.tt.prefCaptionsSize,
 				'group': 'captions',
 				'default': '100%'
 			});
-			prefs.push({
-				'name': 'prefCaptionsColor',
-				'label': this.tt.prefCaptionsColor,
-				'group': 'captions',
-				'default': 'white'
-			});
-			prefs.push({
-				'name': 'prefCaptionsBGColor',
-				'label': this.tt.prefCaptionsBGColor,
-				'group': 'captions',
-				'default': 'black'
-			});
-			prefs.push({
-				'name': 'prefCaptionsOpacity',
-				'label': this.tt.prefCaptionsOpacity,
-				'group': 'captions',
-				'default': '100%'
-			});
+
+			if (!this.usingYouTubeCaptions) {
+
+				prefs.push({
+					'name': 'prefCaptionsColor',
+					'label': this.tt.prefCaptionsColor,
+					'group': 'captions',
+					'default': 'white'
+				});
+				prefs.push({
+					'name': 'prefCaptionsBGColor',
+					'label': this.tt.prefCaptionsBGColor,
+					'group': 'captions',
+					'default': 'black'
+				});
+				prefs.push({
+					'name': 'prefCaptionsOpacity',
+					'label': this.tt.prefCaptionsOpacity,
+					'group': 'captions',
+					'default': '100%'
+				});
+			}
 
 			// Description preferences
 			prefs.push({
@@ -2100,7 +2123,8 @@ var AblePlayerInstances = [];
 
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
-			if (this.mediaType === 'video') {
+			// do not show this for YouTube captions, since it's not an accurate reflection
+			if (this.mediaType === 'video' && !this.usingYouTubeCaptions) {
 				this.$sampleCapsDiv = $('<div>',{
 					'class': 'able-captions-sample'
 				}).text(this.tt.sampleCaptionText);
@@ -5993,6 +6017,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					// set it now 
 					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
 					thisObj.captionLangPending = null; 
+				}
+				if (typeof thisObj.prefCaptionsSize !== 'undefined') { 
+					// set the default caption size 
+					// this doesn't work until the captions module is loaded 
+					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
 				}
 				deferred.resolve();
 			});
