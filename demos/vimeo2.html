@@ -20,24 +20,34 @@
 
 <!-- styles for this example page -->
 <style>
-	.wrapper, ul {
+	div#intro { 
+		width: 80em;
+		max-width: 100%;
+	}
+	div#intro h2 { 
+		font-size: 1.2em;
+		margin-bottom: 0.25em;
+	}
+	div#intro ul { 
+		margin-top: 0.5em;
+		margin-bottom: 2em;
+	}
+	.wrapper {
 		width: 500px;
 		max-width: 100%;
 	}
-	p {
-		width: 600px;
-		max-width: 100%;
-	}
-</style>
+	</style>
 </head>
 
 <body>
 
-<h1>Able Player for Vimeo<br/>
-	Example 2, Captions via Local VTT Files
-</h1>
+	<div id="intro">
 
-<p>This page features an example of Able Player being used to play a Vimeo video. 
+		<h1>Able Player for Vimeo<br/>
+		Example 2, Captions via Local VTT Files
+		</h1>
+
+		<p>This page features an example of Able Player being used to play a Vimeo video. 
 	The video featured is hosted in a Vimeo Pro account, 
 	required for hiding the controller and for being able to control 
 	playback rate with faster/slower buttons. 
@@ -49,11 +59,12 @@
 	not currently possible if captions and subtitles 
 	are stored solely on Vimeo (as in <a href="vimeo.html">Vimeo Demo 1</a>).</p>
 
-<p>Additional examples:</p>
-<ul>
-	<li><a href="vimeo1.html">Vimeo Demo 1: Captions and Subtitles hosted on Vimeo</a></li>
-	<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
-</ul>
+		<h2>Additional examples:</h2>
+		<ul>
+			<li><a href="vimeo1.html">Vimeo Demo 1: Captions and Subtitles hosted on Vimeo</a></li>
+			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
+		</ul>
+	</div>
 
 <div class="wrapper">
 	<video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">

@@ -20,12 +20,20 @@
 
 <!-- styles for this example page -->
 <style>
-	.wrapper, ul {
-		width: 500px;
+	div#intro { 
+		width: 80em;
 		max-width: 100%;
 	}
-	p {
-		width: 600px;
+	div#intro h2 { 
+		font-size: 1.2em;
+		margin-bottom: 0.25em;
+	}
+	div#intro ul { 
+		margin-top: 0.5em;
+		margin-bottom: 2em;
+	}
+	.wrapper {
+		width: 500px;
 		max-width: 100%;
 	}
 </style>
@@ -33,11 +41,13 @@
 
 <body>
 
-<h1>Able Player for Vimeo<br/>
-	Example 1, Captions and Subtitles hosted on Vimeo
-</h1>
+	<div id="intro">
 
-<p>This page features an example of Able Player being used to play a Vimeo video. 4
+		<h1>Able Player for Vimeo<br/>
+		Example 1, Captions and Subtitles hosted on Vimeo
+		</h1>
+
+		<p>This page features an example of Able Player being used to play a Vimeo video.
 	The video featured is hosted in a Vimeo Pro account, 
 	required for hiding the controller and for being able to 
 	control playback rate with faster/slower buttons. 
@@ -45,15 +55,16 @@
 	therefore Able Player is unable to auto-generate an interactive transcript, 
 	and users have no control of the appearance of captions.</p>
 
-<p>For more information about the limitations of hosting captions on 
-	Vimeo and YouTube, see the 
-	<a href="https://ableplayer.github.io/ableplayer">Able Player documentation</a>.</p>
+		<p>For more information about the limitations of hosting captions on 
+		Vimeo and YouTube, see the 
+		<a href="https://ableplayer.github.io/ableplayer">Able Player documentation</a>.</p>
 
-<p>Additional examples:</p>
-<ul>
-	<li><a href="vimeo2.html">Vimeo Demo 2: Captions via local VTT files</a></li>
-	<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
-</ul>
+		<h2>Additional examples:</h2>
+		<ul>
+			<li><a href="vimeo2.html">Vimeo Demo 2: Captions via local VTT files</a></li>
+			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
+		</ul>
+	</div>
 
 <div class="wrapper">
 	<video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">

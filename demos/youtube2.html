@@ -17,12 +17,20 @@
 
 <!-- styles for this example page -->
 <style>
-	.wrapper {
-		width: 500px;
+	div#intro { 
+		width: 80em;
 		max-width: 100%;
 	}
-	p {
-		width: 600px;
+	div#intro h2 { 
+		font-size: 1.2em;
+		margin-bottom: 0.25em;
+	}
+	div#intro ul { 
+		margin-top: 0.5em;
+		margin-bottom: 2em;
+	}
+	.wrapper {
+		width: 500px;
 		max-width: 100%;
 	}
 </style>
@@ -31,25 +39,29 @@
 
 <body>
 
-<h1>Able Player for YouTube<br/>
-	Example 2, All Tracks Hosted Locally</h1>
+	<div id="intro">
 
-<p>This page features an example of Able Player being used to play a YouTube video. 
-	Its features include:</p>
+		<h1>Able Player for YouTube<br/>
+		Example 2, All Tracks Hosted Locally</h1>
 
-<ul>
-	<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
-	<li>Captions, subtitles, and chapters, <strong>all hosted locally</strong>.</li>
-	<li>An interactive transcript built from the chapters, captions and subtitle files.</li>
-	<li>A full set of options in the Captions Preferences dialog.</li>
-</ul>
+		<p>This page features an example of Able Player being used to play a YouTube video. 
+		Its features include:</p>
 
-<p>Additional examples:</p>
-<ul>
-	<li><a href="youtube1.html">YouTube Demo 1 (Captions hosted on YouTube)</a></li>
-	<li><a href="youtube3.html">YouTube Demo 3 (Complex Example)</a></li>
-	<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
-</ul>
+		<ul>
+			<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
+			<li>Captions, subtitles, and chapters, <strong>all hosted locally</strong>.</li>
+			<li>An interactive transcript built from the chapters, captions and subtitle files.</li>
+			<li>A full set of options in the Captions Preferences dialog.</li>
+		</ul>
+
+		<h2>Additional examples:</h2>
+		<ul>
+			<li><a href="youtube1.html">YouTube Demo 1 (Captions hosted on YouTube)</a></li>
+			<li><a href="youtube3.html">YouTube Demo 3 (Complex Example)</a></li>
+			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
+		</ul>
+
+	</div>
 
 <div class="wrapper">
 	<video id="video1" data-able-player 
