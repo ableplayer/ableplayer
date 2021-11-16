@@ -49,12 +49,12 @@ var AblePlayerInstances = [];
 
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
 	window.onYouTubeIframeAPIReady = function() {
-		AblePlayer.youtubeIframeAPIReady = true;
-		$('body').trigger('youtubeIframeAPIReady', []);
+		AblePlayer.youTubeIframeAPIReady = true;
+		$('body').trigger('youTubeIframeAPIReady', []);
 	};
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).keydown(function(e) {
+	$(window).on('keydown',function(e) {
 		if (AblePlayer.nextIndex === 1) {
 			AblePlayer.lastCreated.onPlayerKeyPress(e);
 		}
@@ -64,6 +64,10 @@ var AblePlayerInstances = [];
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
 	window.AblePlayer = function(media) {
+
+
+		var thisObj = this;
+
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
@@ -176,7 +180,7 @@ var AblePlayerInstances = [];
 			this.exposeTextDescriptions = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-  		// support both singular and plural spelling of attribute
+			// support both singular and plural spelling of attribute
 			this.exposeTextDescriptions = false;
 		}
 		else {
@@ -205,17 +209,17 @@ var AblePlayerInstances = [];
 		// If data-include-transcript="false", there is no "popup" transcript
 
 		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-		  this.transcriptDivLocation = $(media).data('transcript-div');
+			this.transcriptDivLocation = $(media).data('transcript-div');
 		}
 		else {
-  		this.transcriptDivLocation = null;
-    }
+			this.transcriptDivLocation = null;
+		}
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-  		this.hideTranscriptButton = true;
-    }
-    else {
-      this.hideTranscriptButton = null;
-    }
+			this.hideTranscriptButton = true;
+		}
+		else {
+			this.hideTranscriptButton = null;
+		}
 
 		this.transcriptType = null;
 		if ($(media).data('transcript-src') !== undefined) {
@@ -226,7 +230,7 @@ var AblePlayerInstances = [];
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
-      if (this.transcriptDivLocation) {
+			if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
 			}
 			else {
@@ -400,23 +404,16 @@ var AblePlayerInstances = [];
 		}
 
 		// Language
-		this.lang = 'en';
-		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
-			var lang = $(media).data('lang');
-			if (lang.length == 2) {
-				this.lang = lang;
-			}
-		}
-		// Player language is determined as follows (in translation.js > getTranslationText() ):
-		// 1. Lang attributes on <html> or <body>, if a matching translation file is available
-		// 2. The value of this.lang, if a matching translation file is available
+		// Player language is determined given the following precedence:
+		// 1. The value of data-lang on the media element, if provided and a matching translation file is available
+		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
 		// 3. English
-		// To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
-		if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== false) {
-			this.forceLang = true;
+		// Final calculation occurs in translation.js > getTranslationText()
+		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
+			this.lang = $(media).data('lang').toLowerCase();
 		}
 		else {
-			this.forceLang = false;
+			this.lang = null;
 		}
 
 		// Metadata Tracks
@@ -429,11 +426,14 @@ var AblePlayerInstances = [];
 		}
 
 		// Search
-		if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
-			// conducting a search currently requires an external div in which to write the results
-			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+		// conducting a search requires an external div in which to write the results
+		if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+
+			this.searchDiv = $(media).data('search-div');
+
+			// Search term (optional; could be assigned later in a JavaScript application)
+			if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
 				this.searchString = $(media).data('search');
-				this.searchDiv = $(media).data('search-div');
 			}
 
 			// Search Language
@@ -442,6 +442,14 @@ var AblePlayerInstances = [];
 			}
 			else {
 				this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
+			}
+
+			// Search option: Ignore capitalization in search terms
+			if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
+				this.searchIgnoreCaps = true;
+			}
+			else {
+				this.searchIgnoreCaps = false;
 			}
 
 			// conducting a search currently requires an external div in which to write the results
@@ -468,9 +476,25 @@ var AblePlayerInstances = [];
 		// so users can control the player while transcribing
 		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
 			this.stenoMode = true;
+			// Add support for stenography in an iframe via data-steno-iframe-id
+			if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
+				this.stenoFrameId = $(media).data('steno-iframe-id');
+				this.$stenoFrame = $('#' + this.stenoFrameId);
+				if (!(this.$stenoFrame.length)) {
+					// iframe not found
+					this.stenoFrameId = null;
+					this.$stenoFrame = null;
+				}
+			}
+			else {
+				this.stenoFrameId = null;
+				this.$stenoFrame = null;
+			}
 		}
 		else {
 			this.stenoMode = false;
+			this.stenoFrameId = null;
+			this.$stenoFrame = null;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
@@ -555,8 +579,6 @@ var AblePlayerInstances = [];
 		}
 	};
 
-
-
-	AblePlayer.youtubeIframeAPIReady = false;
-	AblePlayer.loadingYoutubeIframeAPI = false;
+	AblePlayer.youTubeIframeAPIReady = false;
+	AblePlayer.loadingYouTubeIframeAPI = false;
 })(jQuery);

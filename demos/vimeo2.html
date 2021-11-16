@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
 <script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
@@ -20,50 +20,62 @@
 
 <!-- styles for this example page -->
 <style>
-  .wrapper, ul {
-    width: 500px;
-    max-width: 100%;
-  }
-  p {
-    width: 600px;
-    max-width: 100%;
-  }
-</style>
+	div#intro { 
+		width: 80em;
+		max-width: 100%;
+	}
+	div#intro h2 { 
+		font-size: 1.2em;
+		margin-bottom: 0.25em;
+	}
+	div#intro ul { 
+		margin-top: 0.5em;
+		margin-bottom: 2em;
+	}
+	.wrapper {
+		width: 500px;
+		max-width: 100%;
+	}
+	</style>
 </head>
 
 <body>
 
-<h1>Able Player for Vimeo Demo 2:<br/>
-  Captions via Local VTT Files
-</h1>
+	<div id="intro">
 
-<p>This page features an example of Able Player being used to play a Vimeo video. The video featured is hosted in a Vimeo Pro account, required for hiding the controller and for being able to control playback rate with faster/slower buttons. Captions and subtitles in this demo are stored locally (in addition to being stored on Vimeo), and referenced via HTML &lt;track&gt; elements. Chapters and descriptions are also provided via &lt;track&gt; elements. All of this is incorporated into an auto-generated interactive transcript, not currently possible if captions and subtitles are stored solely on Vimeo (as in <a href="vimeo.html">Vimeo Demo 1</a>).</p>
+		<h1>Able Player for Vimeo<br/>
+		Example 2, Captions via Local VTT Files
+		</h1>
 
-<p>For additional demos see:</p>
-<ul>
-  <li><a href="vimeo.html">Vimeo Demo 1: Captions and Subtitles hosted on Vimeo</a></li>
-  <li>the complete <a href="index.html">Index of <em>Able Player</em> Examples</a></li>
-</ul>
+		<p>This page features an example of Able Player being used to play a Vimeo video. 
+	The video featured is hosted in a Vimeo Pro account, 
+	required for hiding the controller and for being able to control 
+	playback rate with faster/slower buttons. 
+	Captions and subtitles in this demo are stored locally 
+	(in addition to being stored on Vimeo), 
+	and referenced via HTML &lt;track&gt; elements. 
+	Chapters and descriptions are also provided via &lt;track&gt; elements. 
+	All of this is incorporated into an auto-generated interactive transcript, 
+	not currently possible if captions and subtitles 
+	are stored solely on Vimeo (as in <a href="vimeo.html">Vimeo Demo 1</a>).</p>
 
-
+		<h2>Additional examples:</h2>
+		<ul>
+			<li><a href="vimeo1.html">Vimeo Demo 1: Captions and Subtitles hosted on Vimeo</a></li>
+			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
+		</ul>
+	</div>
 
 <div class="wrapper">
-  <video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
-    <track kind="captions" src="../media/blocks4all_captions_en.vtt" srclang="en-US" label="English">
-    <track kind="captions" src="../media/blocks4all_captions_es.vtt" srclang="es" label="Spanish">
-    <track kind="captions" src="../media/blocks4all_captions_pt-br.vtt" srclang="pt-BR" label="Portuguese (Brazil)">
-    <track kind="captions" src="../media/blocks4all_captions_ko.vtt" srclang="ko" label="Korean">
-    <track kind="chapters" src="../media/blocks4all_chapters.vtt" srclang="en-US" label="Chapters">
-    <track kind="descriptions" src="../media/blocks4all_descriptions_en.vtt" srclang="en-US" label="English descriptions">
-  </video>
+	<video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
+		<track kind="captions" src="../media/blocks4all_captions_en.vtt" srclang="en-US" label="English">
+		<track kind="captions" src="../media/blocks4all_captions_es.vtt" srclang="es" label="Spanish">
+		<track kind="captions" src="../media/blocks4all_captions_pt-br.vtt" srclang="pt-BR" label="Portuguese (Brazil)">
+		<track kind="captions" src="../media/blocks4all_captions_ko.vtt" srclang="ko" label="Korean">
+		<track kind="chapters" src="../media/blocks4all_chapters.vtt" srclang="en-US" label="Chapters">
+		<track kind="descriptions" src="../media/blocks4all_descriptions_en.vtt" srclang="en-US" label="English descriptions">
+	</video>
 </div>
-
-<h2>Vimeo's current limitations:</h2>
-<ul>
-	<li>A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is extremely cluttered and confusing.</li>
-	<li>Vimeo does not expose caption data via its API, as noted above. Therefore, the only way to repurpose captions and/or subtitles into an interactive transcript is to host them locally, as in the current demo.</li>
-	<li>A Pro or Business account is required in order to change playback rate (with faster and slower buttons). A Plus account does not currently support this feature. Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.</li>
-</ul>
 
 </body>
 </html>

@@ -16,7 +16,6 @@
 		loadingPromises = [];
 
 		this.captions = [];
-		this.captionLabels = [];
 		this.descriptions = [];
 		this.chapters = [];
 		this.meta = [];
@@ -33,17 +32,7 @@
 		this.getTracks().then(function() {
 
 			tracks = thisObj.tracks;
-
-			if (thisObj.player === 'youtube') {
-				// If captions have been loaded into the captions array (either from YouTube or a local source),
-				// we no longer have a need to use YouTube captions
-				// TODO: Consider whether this is the right place to make this decision
-				// Probably better to make it when cues are identified from YouTube caption sources
-				if (tracks.length) {
-					thisObj.usingYouTubeCaptions = false;
-				}
-			}
-
+			
 			for (i=0; i < tracks.length; i++) {
 
 				track = tracks[i];
@@ -67,7 +56,7 @@
 				var trackSrc = track.src;
 
 				loadingPromise = thisObj.loadTextObject(trackSrc); // resolves with src, trackText
-				loadingPromises.push(loadingPromise);
+				loadingPromises.push(loadingPromise.catch(function(src) { console.warn('Failed to load captions track from ' + src); }));
 
 				loadingPromise.then((function (track, kind) {
 
@@ -118,7 +107,8 @@
 		// def - Boolean, true if this is the default track
 		// cues - array with startTime, endTime, and payload
 
-		var thisObj, deferred, promise, captionTracks, trackLang, trackLabel, isDefault;
+		var thisObj, deferred, promise, captionTracks, trackLang, trackLabel, isDefault, 
+				i, j, capLabel, inserted;
 
 		thisObj = this;
 
@@ -127,6 +117,8 @@
 
 		this.$tracks = this.$media.find('track');
 		this.tracks = [];
+		captionTracks = []; 
+		this.captions = [];
 
 		if (this.$tracks.length) {
 
@@ -141,7 +133,6 @@
 				else {
 					trackLang = thisObj.lang;
 				}
-
 				if ($(this).attr('label')) {
 					trackLabel = $(this).attr('label');
 				}
@@ -174,30 +165,78 @@
 					'label': trackLabel,
 					'def': isDefault
 				});
+
+				if ($(this).attr('kind') === 'captions' || $(this).attr('kind') == 'subtitles') { 
+					// also add this track to a dedicated captions object 
+					captionTracks.push({
+						'kind': $(this).attr('kind'),
+						'src': $(this).attr('src'),
+						'language': trackLang,
+						'label': trackLabel,
+						'def': isDefault
+					});
+				}
 			});
 		}
 
-		// check to see if any HTML caption or subitle tracks were found.
-		captionTracks = this.$media.find('track[kind="captions"],track[kind="subtitles"]');
 		if (captionTracks.length) {
-			// HTML captions or subtitles were found. Use those.
+			// HTML captions or subtitles were found. 
+			// Use those, and sort them alphabetically. 
+			this.usingYouTubeCaptions = false; 
+			this.usingVimeoCaptions = false; 
+			for (i = 0; i < captionTracks.length; i++) { 
+				if (this.captions.length === 0) { // this is the first
+					this.captions.push({
+						'language': captionTracks[i].language,
+						'label': captionTracks[i].label,
+						'def': captionTracks[i].def
+					});
+				}
+				else { // there are already captions in the array
+					inserted = false;
+					for (j = 0; j < this.captions.length; j++) {
+						capLabel = captionTracks[i].label; 
+						if (capLabel.toLowerCase() < this.captions[j].label.toLowerCase()) {
+							// insert before track j
+							this.captions.splice(j,0,{
+								'language': captionTracks[i].language,
+								'label': captionTracks[i].label,
+								'def': captionTracks[i].def
+							});
+							inserted = true;
+							break;
+						}
+					}
+					if (!inserted) {
+						// just add track to the end
+						this.captions.push({
+							'language': captionTracks[i].language,
+							'label': captionTracks[i].label,
+							'def': captionTracks[i].def
+						});
+					}
+				}
+			}
 			deferred.resolve();
 		}
 		else {
 			// if this is a youtube or vimeo player, check there for captions/subtitles
 			if (this.player === 'youtube') {
 				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
+					thisObj.usingYouTubeCaptions = true; 	
 					deferred.resolve();
 				});
 			}
 			else if (this.player === 'vimeo') {
 				this.getVimeoCaptionTracks().then(function() {
+					thisObj.usingVimeoCaptions = true; 
 					deferred.resolve();
 				});
 			}
 			else {
 				// this is neither YouTube nor Vimeo
 				// there just ain't no caption tracks
+				this.hasCaptions = false; 
 				deferred.resolve();
 			}
 		}
@@ -206,6 +245,7 @@
 
 	AblePlayer.prototype.setupCaptions = function (track, trackLang, trackLabel, cues) {
 
+		// Setup player for display of captions 
 		var thisObj, inserted, i, capLabel;
 
 		thisObj = this;
@@ -214,15 +254,28 @@
 			cues = null;
 		}
 
-		this.hasCaptions = true;
+		if (this.captions.length) { 
+			// there are captions available 
+			this.hasCaptions = true; 
+			this.currentCaption = -1; // TODO: clarify purpose of this 
+			if (this.prefCaptions === 1) { 
+				this.captionsOn = true; 
+			}
+			else { 
+				this.captionsOn = false; 
+			}
+		}
+		else { 
+			this.hasCaptions = false; 
+		}
 
 		// Remove 'default' attribute from all <track> elements
 		// This data has already been saved to this.tracks
 		// and some browsers will display the default captions, despite all standard efforts to suppress them
 		this.$media.find('track').removeAttr('default');
 
-		// caption cues from WebVTT are used to build a transcript for both audio and video
-		// but captions are currently only supported for video
+		// Currently only showing captions for video, not audio 
+		// TODO: Revisit this to enable captions for audio 
 		if (this.mediaType === 'video') {
 
 			if (!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
@@ -248,51 +301,17 @@
 					this.$vidcapContainer.append(this.$captionsWrapper);
 				}
 			}
-		}
-
-		this.currentCaption = -1;
-		if (this.prefCaptions === 1) {
-			// Captions default to on.
-			this.captionsOn = true;
-		}
-		else {
-			this.captionsOn = false;
-		}
-		if (this.captions.length === 0) { // this is the first
-			this.captions.push({
-				'cues': cues,
-				'language': trackLang,
-				'label': trackLabel,
-				'def': track.def
-			});
-			this.captionLabels.push(trackLabel);
-		}
-		else { // there are already tracks in the array
-			inserted = false;
-			for (i = 0; i < this.captions.length; i++) {
-				capLabel = this.captionLabels[i];
-				if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
-					// insert before track i
-					this.captions.splice(i,0,{
-						'cues': cues,
-						'language': trackLang,
-						'label': trackLabel,
-						'def': track.def
-					});
-					this.captionLabels.splice(i,0,trackLabel);
-					inserted = true;
-					break;
+			// Add cues to this.captions for the current language 
+			for (i = 0; i < this.captions.length; i++) { 
+				if (this.captions[i].language === trackLang) { 
+					this.captions[i].cues = cues; 
 				}
 			}
-			if (!inserted) {
-				// just add track to the end
-				this.captions.push({
-					'cues': cues,
-					'language': trackLang,
-					'label': trackLabel,
-					'def': track.def
-				});
-				this.captionLabels.push(trackLabel);
+			// Do the same for this.tracks 
+			for (i = 0; i < this.tracks.length; i++) { 
+				if (this.tracks[i].language === trackLang) { 
+					this.tracks[i].cues = cues; 
+				}
 			}
 		}
 	};
@@ -369,43 +388,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if (thisObj.debug) {
 					console.log ('error reading file ' + src + ': ' + status);
 				}
-				deferred.fail();
+				deferred.reject(src);
 			}
 			else {
 				deferred.resolve(src, trackText);
 			}
 			$tempDiv.remove();
 		});
-		return promise;
-	};
-
-	AblePlayer.prototype.setupAltCaptions = function() {
-
-		// setup captions from an alternative source (not <track> elements)
-		// only do this if no <track> captions are provided
-		// currently supports: YouTube, Vimeo
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-		if (this.captions.length === 0) {
-			if (this.player === 'youtube' && this.usingYouTubeCaptions) {
-				this.setupYouTubeCaptions().done(function() {
-					deferred.resolve();
-				});
-			}
-			else if (this.player === 'vimeo' && this.usingVimeoCaptions) {
-				this.setupVimeoCaptions().done(function() {
-					deferred.resolve();
-				});
-			}
-
-			else {
-				// repeat for other alt sources once supported (e.g., Vimeo, DailyMotion)
-				deferred.resolve();
-			}
-		}
-		else { // there are <track> captions, so no need for alt source captions
-			deferred.resolve();
-		}
 		return promise;
 	};
 

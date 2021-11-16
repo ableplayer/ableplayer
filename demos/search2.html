@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Video Search (Client-side)</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- Style for this example only -->
+<style>
+	main {
+		position: relative;
+		width: 100%;
+		margin: 0;
+	}
+	#search {
+		border: 2px solid #340449;
+		padding: 0.5em;
+		background-color: #FFC;
+		max-width: 60em;
+		margin-bottom: 1em;
+	}
+	#search div {
+		display: inline-block;
+		padding: 0.25em;
+	}
+	#search div label {
+		font-weight: bold;
+	}
+	#search input,
+	#search select,
+	#search button {
+		font-size: 1em;
+	}
+	#player {
+		float: left;
+		width: 45%;
+		max-width: 500px;
+		margin: 0 1em 0 0;
+	}
+	#results-wrapper {
+		display: none; /* hide this until there are results to show */
+		float: left;
+		width: 45%;
+		margin: 0;
+		padding-top: 1em;
+	}
+	#results-wrapper p {
+		font-size: 1.1em;
+		margin-left: 1em;
+	}
+	footer {
+		display: block;
+	}
+	@media (max-width: 800px) {
+		#player, #results-wrapper {
+			float: none;
+			width: 90%;
+			margin: 1em 0;
+		}
+	}
+</style>
+
+<!-- JavaScript for this example -->
+<script>
+$(document).ready(function() {
+
+	var player = new AblePlayer($('#video1'));
+
+	// handle click on 'Go' button
+	$('#go').on('click',function() {
+
+		// get user's search string from input field
+		var rawSearch = $('#terms').val();
+
+		// Strip HTML from search string to reduce possibility of nefarious submissions
+		var cleanSearch = $('<div>').html(rawSearch).text();
+
+		// Strip punctation
+		var punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
+		var searchLetters = cleanSearch.split('');
+		var cleanLetters = searchLetters.filter(function(letter) {
+			return punctuation.indexOf(letter) === -1;
+		});
+
+		// Assign finalSearch to player.searchText
+		// In a server-side application, this is the variable that would
+		// be passed to the player via the data-search attribute
+		player.searchString = cleanLetters.join('');
+
+		player.searchIgnoreCaps = $("#ignorecaps").prop("checked");
+
+		// Assign user's selected language to player.searchLang
+		player.searchLang = $('#lang option:selected').val();
+
+		// Conduct the search and show the results
+		player.showSearchResults();
+
+		// make the results visible
+		$('#results-wrapper').show();
+
+	});
+})
+</script>
+</head>
+
+<body>
+
+<h1>Able Player Video Demo:<br/>Video player with search (client-side)</h1>
+
+<p>Able Player can search a video's caption or subtitle files, with variables defined in <strong>data-search-div</strong>, <strong>data-search</strong>, and <strong>data-search-lang</strong> attributes on the media element. See the <a href-"search1.html">server-side search demo</a> for more details about each of these attributes.</p>
+
+<p>The current demo shows how this same functionality can be implemented in a client-side application using JQuery. In this context, the only required attribute of the above three is <strong>data-search-div</strong>, which specifies the id of a container element in which to write the search results. Otherwise, Able Player is initiated as a variable, which enables us to assign values directly to Able Player's search-related variables based on user input, then call  Able Player's showSearchResults() function to display the results. See the source code for details.</p>
+
+<p>See also the <a href="http://localhost/ableplayer/demos/video13.html">Able Player API</a> demo for another example of defining Able Player for external control. For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<p>Also, in this example, <em>data-include-transcript</em> is set to "false", since there isn't room on this page
+	for both search results and a transcript. A better design would accommodate both features.
+</p>
+
+<p>Enter a search term below. (hint: "web mouse" is a good choice in English; or "<span lang="es">web clicladores idénticos</em>" in <span lang="es">Español</span>).</p>
+
+<div id="search">
+	<div>
+		<label for="terms">Search:</label>
+		<input type="text" id="terms">
+	</div>
+	<div>
+		<label for="lang">Language:</label>
+		<select id="lang">
+			<option value="en">English</option>
+			<option lang="de" value="de">Deutsche</option>
+			<option lang="es" value="es">Español</option>
+			<option lang="ja" value="ja">日本語</option>
+		</select>
+	</div>
+	<div>
+		<label for="ignorecaps">Ignore Capitalization:</label>
+		<input type="checkbox" id="ignorecaps">
+	</div>
+	<div>
+		<button type="button" id="go">Go</button>
+	</div>
+</div>
+
+<!-- to write transcript to an external div, pass id of an empty div via data-transcript-div -->
+<main role="main">
+	<div id="player">
+		<video id="video1" preload="auto" poster="../media/wwa.jpg" data-skin="2020" data-search-div="results" data-include-transcript="false" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+			<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+			<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+			<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+			<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+			<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+			<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+			<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+			<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+			<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+			<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+			<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+			<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+		</video>
+	</div>
+	<div id="results-wrapper">
+		<h2>Your Search Results</h2>
+		<div id="results" class="able-search-results"></div>
+	</div>
+</main>
+
+</body>
+</html>

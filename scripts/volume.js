@@ -101,13 +101,13 @@
 			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
-  				thisObj.closingVolume = true; // stopgap
+					thisObj.closingVolume = true; // stopgap
 					thisObj.hideVolumePopup();
 				}
 				else {
-  				if (!thisObj.closingVolume) {
-  					thisObj.showVolumePopup();
-  				}
+					if (!thisObj.closingVolume) {
+						thisObj.showVolumePopup();
+					}
 				}
 			}
 			else {
@@ -129,24 +129,24 @@
 		trackOnTop = this.volumeTrackHeight - trackOnHeight;
 		headTop = trackOnTop - this.volumeHeadHeight;
 
-    if (this.$volumeSliderTrackOn) {
-  		this.$volumeSliderTrackOn.css({
-	  		'height': trackOnHeight + 'px',
-        'top': trackOnTop + 'px'
-		  });
+		if (this.$volumeSliderTrackOn) {
+			this.$volumeSliderTrackOn.css({
+				'height': trackOnHeight + 'px',
+				'top': trackOnTop + 'px'
+			});
 		}
 		if (this.$volumeSliderHead) {
-      this.$volumeSliderHead.attr({
-			  'aria-valuenow': volume,
-        'aria-valuetext': volumePctText
-		  });
-      this.$volumeSliderHead.css({
-			  'top': headTop + 'px'
-		  });
+			this.$volumeSliderHead.attr({
+				'aria-valuenow': volume,
+				'aria-valuetext': volumePctText
+			});
+			this.$volumeSliderHead.css({
+				'top': headTop + 'px'
+			});
 		}
 		if (this.$volumeAlert) {
-  		this.$volumeAlert.text(volumePct + '%');
-    }
+			this.$volumeAlert.text(volumePct + '%');
+		}
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
@@ -167,13 +167,13 @@
 			this.$volumeButton.find('img').attr('src',volumeImg);
 		}
 		else if (this.iconType === 'svg') {
-  		if (volumeName !== 'mute') {
-    		volumeName = 'volume-' + volumeName;
-      }
-		  newSvgData = this.getSvgData(volumeName);
-      this.$volumeButton.find('svg').attr('viewBox',newSvgData[0]);
-      this.$volumeButton.find('path').attr('d',newSvgData[1]);
-    }
+			if (volumeName !== 'mute') {
+				volumeName = 'volume-' + volumeName;
+			}
+			newSvgData = this.getSvgData(volumeName);
+			this.$volumeButton.find('svg').attr('viewBox',newSvgData[0]);
+			this.$volumeButton.find('path').attr('d',newSvgData[1]);
+		}
 	};
 
 	AblePlayer.prototype.moveVolumeHead = function(y) {
@@ -237,9 +237,9 @@
 				this.hideVolumePopup();
 			}
 			else {
-        if (!this.closingVolume) {
-  				this.showVolumePopup();
-        }
+				if (!this.closingVolume) {
+					this.showVolumePopup();
+				}
 			}
 			return;
 		}
@@ -293,16 +293,16 @@
 
 	AblePlayer.prototype.hideVolumePopup = function() {
 
-    var thisObj = this;
+		var thisObj = this;
 
 		this.$volumeSlider.hide().attr('aria-hidden','true');
 		this.$volumeSliderHead.attr('tabindex','-1');
 		this.$volumeButton.attr('aria-expanded','false').focus();
-    // wait a second before resetting stopgap var
-    // otherwise the keypress used to close volume popup will trigger the volume button
-    setTimeout(function() {
-      thisObj.closingVolume = false;
-    }, 1000);
+		// wait a second before resetting stopgap var
+		// otherwise the keypress used to close volume popup will trigger the volume button
+		setTimeout(function() {
+			thisObj.closingVolume = false;
+		}, 1000);
 	};
 
 	AblePlayer.prototype.isMuted = function () {

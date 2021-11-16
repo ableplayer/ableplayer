@@ -1,4 +1,4 @@
-var en = {
+{
 
 "audio": "audio",
 
@@ -204,7 +204,25 @@ var en = {
 
 "prefDescPause": "Automatically pause video when description starts",
 
-"prefVisibleDesc": "Make description visible",
+"prefDescVisible": "Make description visible",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Highlight transcript as media plays",
 
@@ -334,4 +352,4 @@ var en = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

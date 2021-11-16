@@ -13,10 +13,10 @@
 		var thisObj = this;
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
-  			var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
-  			searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
-  			searchStringHtml += '</p>';
-				var resultsArray = this.searchFor(this.searchString);
+				var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
+					searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
+					searchStringHtml += '</p>';
+				var resultsArray = this.searchFor(this.searchString, this.searchIgnoreCaps);
 				if (resultsArray.length > 0) {
 					var $resultsSummary = $('<p>',{
 						'class': 'able-search-results-summary'
@@ -28,7 +28,7 @@
 					$resultsSummary.html(resultsSummaryText);
 					var $resultsList = $('<ul>');
 					for (var i = 0; i < resultsArray.length; i++) {
-  					var resultId = 'aria-search-result-' + i;
+						var resultId = 'aria-search-result-' + i;
 						var $resultsItem = $('<li>',{});
 						var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
 						var itemLabel = this.tt.searchButtonLabel + ' ' + itemStartTime['title'];
@@ -42,7 +42,7 @@
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
 						itemStartSpan.on('click',function(e) {
-              thisObj.seekTrigger = 'search';
+							thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;
@@ -58,17 +58,17 @@
 						$resultsItem.append(itemStartSpan, itemText);
 						$resultsList.append($resultsItem);
 					}
-					$('#' + this.searchDiv).append(searchStringHtml,$resultsSummary,$resultsList);
+					$('#' + this.searchDiv).html(searchStringHtml).append($resultsSummary,$resultsList);
 				}
 				else {
 					var noResults = $('<p>').text(this.tt.noResultsFound);
-					$('#' + this.searchDiv).append(noResults);
+					$('#' + this.searchDiv).html(searchStringHtml).append(noResults);
 				}
 			}
 		}
 	};
 
-	AblePlayer.prototype.searchFor = function(searchString) {
+	AblePlayer.prototype.searchFor = function(searchString, ignoreCaps) {
 
 		// return chronological array of caption cues that match searchTerms
 		var captionLang, captions, results, caption, c, i, j;
@@ -88,12 +88,14 @@
 				for (i = 0; i < captions.length; i++) {
 					if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
 						caption = this.flattenCueForCaption(captions[i]);
+						var captionNormalized = ignoreCaps ? caption.toLowerCase() : caption;
 						for (j = 0; j < searchTerms.length; j++) {
-							if (caption.indexOf(searchTerms[j]) !== -1) {
+							var searchTermNormalized = ignoreCaps ? searchTerms[j].toLowerCase() : searchTerms[j];
+							if (captionNormalized.indexOf(searchTermNormalized) !== -1) {
 								results[c] = [];
 								results[c]['start'] = captions[i].start;
 								results[c]['lang'] = captionLang;
-								results[c]['caption'] = this.highlightSearchTerm(searchTerms,j,caption);
+								results[c]['caption'] = this.highlightSearchTerm(searchTerms,caption);
 								c++;
 								break;
 							}
@@ -105,33 +107,13 @@
 		return results;
 	};
 
-	AblePlayer.prototype.highlightSearchTerm = function(searchTerms, index, resultString) {
-
+	AblePlayer.prototype.highlightSearchTerm = function(searchTerms, resultString) {
 		// highlight ALL found searchTerms in the current resultString
-		// index is the first index in the searchTerm array where a match has already been found
 		// Need to step through the remaining terms to see if they're present as well
-
-		var i, searchTerm, termIndex, termLength, str1, str2, str3;
-
-		for (i=index; i<searchTerms.length; i++) {
-
-			searchTerm = searchTerms[i];
-			termIndex = resultString.indexOf(searchTerm);
-			if (termIndex !== -1) {
-				termLength = searchTerm.length;
-				if (termLength > 0) {
-					str1 = resultString.substring(0, termIndex);
-					str2 = '<span class="able-search-term">' + searchTerm + '</span>';
-					str3 = resultString.substring(termIndex+termLength);
-					resultString = str1 + str2 + str3;
-				}
-				else {
-					str1 = '<span class="able-search-term">' + searchTerm + '</span>';
-					str2 = resultString.substring(termIndex+termLength);
-					resultString = str1 + str2;
-				}
-			}
-		}
+		searchTerms.forEach(function(searchTerm) {
+			var reg = new RegExp(searchTerm, 'gi');
+			resultString = resultString.replace(reg, '<span class="able-search-term">$&</span>');
+		});
 		return resultString;
 	};
 
@@ -151,22 +133,22 @@
 		var title = '';
 		if (hours > 0) {
 			value += hours + ':';
-      if (hours == 1) {
-  			title += '1 ' + this.tt.hour + ' ';
-      }
-      else {
-  			title += hours + ' ' + this.tt.hours + ' ';
-		  }
+			if (hours == 1) {
+				title += '1 ' + this.tt.hour + ' ';
+			}
+			else {
+				title += hours + ' ' + this.tt.hours + ' ';
+			}
 		}
 		if (minutes < 10) {
 			value += '0' + minutes + ':';
 			if (minutes > 0) {
-  			if (minutes == 1) {
-  				title += '1 ' + this.tt.minute + ' ';
-        }
-        else {
-  				title += minutes + ' ' + this.tt.minutes + ' ';
-        }
+				if (minutes == 1) {
+					title += '1 ' + this.tt.minute + ' ';
+				}
+				else {
+					title += minutes + ' ' + this.tt.minutes + ' ';
+				}
 			}
 		}
 		else {
@@ -176,12 +158,12 @@
 		if (seconds < 10) {
 			value += '0' + seconds;
 			if (seconds > 0) {
-  			if (seconds == 1) {
-  				title += '1 ' + this.tt.second + ' ';
-  			}
-  			else {
-  				title += seconds + ' ' + this.tt.seconds + ' ';
-        }
+				if (seconds == 1) {
+					title += '1 ' + this.tt.second + ' ';
+				}
+				else {
+					title += seconds + ' ' + this.tt.seconds + ' ';
+				}
 			}
 		}
 		else {

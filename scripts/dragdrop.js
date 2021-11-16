@@ -45,39 +45,39 @@
 		$toolbar.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
 			if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			if (!thisObj.windowMenuClickRegistered) {
-	  			thisObj.windowMenuClickRegistered = true;
-          thisObj.startMouseX = e.pageX;
-          thisObj.startMouseY = e.pageY;
-          thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
-          thisObj.startDrag(which, $window);
-			  }
-      }
-      else if (e.type === 'mouseup' || e.type === 'touchend') {
-        if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-				  thisObj.endDrag(which);
-			  }
-      }
-      return false;
+				if (!thisObj.windowMenuClickRegistered) {
+					thisObj.windowMenuClickRegistered = true;
+					thisObj.startMouseX = e.pageX;
+					thisObj.startMouseY = e.pageY;
+					thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
+					thisObj.startDrag(which, $window);
+				}
+			}
+			else if (e.type === 'mouseup' || e.type === 'touchend') {
+				if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
+					thisObj.endDrag(which);
+				}
+			}
+			return false;
 		});
 
 		// add event listeners for resizing
 		$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
 			if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			if (!thisObj.windowMenuClickRegistered) {
-	  			thisObj.windowMenuClickRegistered = true;
-          thisObj.startMouseX = e.pageX;
-          thisObj.startMouseY = e.pageY;
-          thisObj.startResize(which, $window);
-			  }
-      }
-      else if (e.type === 'mouseup' || e.type === 'touchend') {
-  			if (thisObj.resizing) {
-	  			thisObj.endResize(which);
-        }
-      }
-      return false;
+				if (!thisObj.windowMenuClickRegistered) {
+					thisObj.windowMenuClickRegistered = true;
+					thisObj.startMouseX = e.pageX;
+					thisObj.startMouseY = e.pageY;
+					thisObj.startResize(which, $window);
+				}
+			}
+			else if (e.type === 'mouseup' || e.type === 'touchend') {
+				if (thisObj.resizing) {
+					thisObj.endResize(which);
+				}
+			}
+			return false;
 		});
 
 		// whenever a window is clicked, bring it to the foreground
@@ -199,14 +199,14 @@
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
 
-      if (thisObj.focusNotClick) {
-        return false;
-      }
-      if (thisObj.dragging) {
+			if (thisObj.focusNotClick) {
+				return false;
+			}
+			if (thisObj.dragging) {
 				thisObj.dragKeys(which, e);
 				return false;
-		  }
-      e.stopPropagation();
+			}
+			e.stopPropagation();
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
@@ -331,10 +331,10 @@
 		thisObj = this;
 
 		if (this.focusNotClick) {
-  		// transcript or sign window has just opened,
-  		// and focus moved to the window button
-  		// ignore the keystroke that triggered the popup
-  		return false;
+			// transcript or sign window has just opened,
+			// and focus moved to the window button
+			// ignore the keystroke that triggered the popup
+			return false;
 		}
 
 		if (which === 'transcript') {
@@ -355,25 +355,25 @@
 				this.windowMenuClickRegistered = true;
 			}
 			else if (e.which === 27) { // escape
-        if ($windowPopup.is(':visible')) {
-  				// close the popup menu
-          $windowPopup.hide('fast', function() {
-					  // also reset the Boolean
-            thisObj.windowMenuClickRegistered = false;
-            // also restore menu items to their original state
-            $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-            // also return focus to window options button
-            $windowButton.focus();
-				  });
+				if ($windowPopup.is(':visible')) {
+					// close the popup menu
+					$windowPopup.hide('fast', function() {
+						// also reset the Boolean
+						thisObj.windowMenuClickRegistered = false;
+						// also restore menu items to their original state
+						$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+						// also return focus to window options button
+						$windowButton.focus();
+					});
 				}
 				else {
-  				// popup isn't open. Close the window
-          if (which === 'sign') {
-            this.handleSignToggle();
-          }
-          else if (which === 'transcript') {
-            this.handleTranscriptToggle();
-          }
+					// popup isn't open. Close the window
+					if (which === 'sign') {
+						this.handleSignToggle();
+					}
+					else if (which === 'transcript') {
+						this.handleTranscriptToggle();
+					}
 				}
 			}
 			else {
@@ -439,9 +439,9 @@
 			}
 			else {
 				// all other keys will be handled by upstream functions
-        if (choice !== 'close') {
-          this.$activeWindow = $window;
-		    }
+				if (choice !== 'close') {
+					this.$activeWindow = $window;
+				}
 				return false;
 			}
 		}
@@ -458,9 +458,9 @@
 		}
 		if (choice === 'move') {
 
-      // temporarily add role="application" to activeWindow
-      // otherwise, screen readers incercept arrow keys and moving window will not work
-      this.$activeWindow.attr('role','application');
+			// temporarily add role="application" to activeWindow
+			// otherwise, screen readers incercept arrow keys and moving window will not work
+			this.$activeWindow.attr('role','application');
 
 			if (!this.showedAlert(which)) {
 				this.showAlert(this.tt.windowMoveAlert,which);
@@ -482,22 +482,22 @@
 		}
 		else if (choice == 'resize') {
 			// resize through the menu uses a form, not drag
-      var resizeFields = resizeDialog.getInputs();
-      if (resizeFields) {
-        // reset width and height values in form
-        resizeFields[0].value = $window.width();
-        resizeFields[1].value = $window.height();
-      }
+			var resizeFields = resizeDialog.getInputs();
+			if (resizeFields) {
+				// reset width and height values in form
+				resizeFields[0].value = $window.width();
+				resizeFields[1].value = $window.height();
+			}
 			resizeDialog.show();
 		}
 		else if (choice == 'close') {
 			// close window, place focus on corresponding button on controller bar
 			if (which === 'transcript') {
-        this.closingTranscript = true; // stopgrap to prevent double-firing of keypress
+				this.closingTranscript = true; // stopgrap to prevent double-firing of keypress
 				this.handleTranscriptToggle();
 			}
 			else if (which === 'sign') {
-        this.closingSign = true; // stopgrap to prevent double-firing of keypress
+				this.closingSign = true; // stopgrap to prevent double-firing of keypress
 				this.handleSignToggle();
 			}
 		}
@@ -509,10 +509,10 @@
 
 		thisObj = this;
 
-    if (!this.$activeWindow) {
-  		this.$activeWindow = $element;
-    }
-    this.dragging = true;
+		if (!this.$activeWindow) {
+			this.$activeWindow = $element;
+		}
+		this.dragging = true;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -662,7 +662,7 @@
 	AblePlayer.prototype.endDrag = function(which) {
 
 		var thisObj, $window, $windowPopup, $windowButton;
-    thisObj = this;
+		thisObj = this;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;

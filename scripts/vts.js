@@ -84,8 +84,8 @@
 					$label = $('<label>', {
 						'for': radioId
 						// Two options for label:
-						// getLanguageNativeName() - returns native name; if using this be sure to add lang attr to <div> (see above)
-						// getLanguageName() - returns name in English; doesn't require lang attr on <label>
+						// getLanguageName() - with second parameter "local" would return native name, otherwise returns English; 
+						// TODO: if using this be sure to add lang attr to <div> (see above)
 					}).text(this.getLanguageName(this.langs[i]));
 					$radioDiv.append($radio,$label);
 					$fieldset.append($radioDiv);

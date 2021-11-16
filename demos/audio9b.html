@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Audio Demo #9b</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<style>
+	iframe {
+		width: 75%;
+		height: 25em;
+	}
+</style>
+
+</head>
+
+<body>
+
+<h1>Able Player Audio Demo #9b:<br/>Audio player on a page with form fields in an iframe, using "Steno Mode"</h1>
+
+<p>This is a variation on <a href="audio9.html">Audio Demo 9</a>, which does not use an iframe.</p>
+
+<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<!-- use the following markup for each media element -->
+<audio id="audio1" width="480" preload="auto" data-able-player data-skin="2020" data-steno-mode data-steno-iframe-id="myIframe">
+	<source type="audio/mpeg" src="../media/smallf.mp3"/>
+	<source type="audio/ogg" src="../media/smallf.ogg"/>
+</audio>
+
+<h2>Audio Transcription Example</h2>
+
+<p>Ordinarily, when users are interacting with form fields, their keystrokes should not be handled by the player.
+	However, in some contexts (e.g., in a transcription application), users may want to control the player
+	from within a textarea field. To enable this functionality, add <strong>data-steno-mode</strong> to the &lt;audio&gt; or &lt;video&gt; element. Note: Modifier keys for keyboard shortcuts can be configured within <em>Preferences > Keyboard</em>.</p>
+<p>In this variation, the transcription form is contained within an iframe. To make this work, the &lt;iframe&gt; element must have a unique id. Then add <strong>data-steno-iframe-id</strong> to the &lt;audio&gt; or &lt;video&gt; element, with a value that matches the id of the iframe.</p>
+
+
+<iframe id="myIframe" src="audio9b-form.html" title="Sample Steno Form"></iframe>
+
+</body>
+</html>

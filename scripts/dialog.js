@@ -13,8 +13,7 @@
 		var modal = modalDiv;
 		this.modal = modal;
 		modal.css({
-			'width': width || '50%',
-			'top': (fullscreen ? '0' : '5%')
+			'width': width || '50%'
 		});
 		modal.addClass('able-modal-dialog');
 
@@ -143,11 +142,11 @@
 		this.focusedElementBeforeModal.focus();
 	};
 
-  AccessibleDialog.prototype.getInputs = function () {
+	AccessibleDialog.prototype.getInputs = function () {
 
-    // return an array of input elements within this dialog
-    if (this.modal) {
-		  var inputs = this.modal.find('input');
+		// return an array of input elements within this dialog
+		if (this.modal) {
+			var inputs = this.modal.find('input');
 			return inputs;
 		}
 		return false;

@@ -1,0 +1,75 @@
+WEBVTT
+kind: captions
+lang: fr
+
+NOTE Ce fichier VTT comprend quelques extras :
+- Métadonnées en haut (lignes 2 et 3)
+- Le bloc de commentaires actuel, identifié par NOTE et encadré par des espaces.
+- Des paramètres de repère à la fin du premier horodatage
+- Une plage d'indications au début du chargement du deuxième repère
+- (dans ce cas, un "repère vocal" <v> identifie le locuteur)
+- Une liste des paramètres de repère WebVTT après l'horodatage à 39.132
+- Actuellement, AblePlayer ne prend pas en charge ces fonctionnalités supplémentaires
+- mais l'analyseur doit être capable de les filtrer
+-
+- Ajouté le 1er avril 2015 à des fins de test (ils sont tous les deux valides):
+- Un bloc de repère sans contenu
+- Plusieurs sauts de ligne entre certains blocs de repère
+-
+- Plus d'informations dans la spécification WebVTT (toujours en évolution):
+- http://dev.w3.org/html5/webvtt
+
+00:00:00.429 --> 00:00:09.165
+[Musique]
+
+00:00:09.165 --> 00:00:10.792
+<v Narrateur> Vous <i> voulez </i> ces gens.
+
+00:00:10.792 --> 00:00:13.759
+Ils <b> commandent </b> vos produits,
+ils <b> demandent </b> vos services,
+
+00:00:13.759 --> 00:00:16.627
+ils <b> s'inscrivent </b> à vos cours,
+ils <b> lisent </b> vos opinions,
+
+00:00:16.627 --> 00:00:18.561
+et ils <b> regardent </b> vos vidéos.
+
+00:00:18.561 --> 00:00:24.165
+Vous ne les verrez jamais, mais ils vous connaissent
+via votre site Web,
+
+00:00:24.165 --> 00:00:25.891
+ou peut être pas.
+
+00:00:25.891 --> 00:00:30.396
+<c.quotable> Les visiteurs de votre site Web ne sont pas
+une masse sans visage de clics de souris identiques </c>
+
+00:00:30.396 --> 00:00:32.363
+mais une vibrante
+communauté d'individus
+
+00:00:32.363 --> 00:00:35.297
+avec des goûts, des styles
+et des capacités variés.
+
+00:00:35.297 --> 00:00:36.900
+Cela inclut les personnes handicapées.
+
+00:00:39.132 --> 00:00:41.000 position:10%,start align:start size:35%
+<v Terrill> C'est important pour
+les concepteurs et les développeurs web
+
+00:00:41.000 --> 00:00:45.500
+de réaliser que ce qu'ils voient
+actuellement sur leur ordinateur,
+
+00:00:45.500 --> 00:00:49.264
+avec leur résolution d'écran, avec leur navigateur
+et leur système d'exploitation
+
+00:00:49.264 --> 00:00:52.000
+ne va pas être nécessairement
+la même chose que tout le monde voit.

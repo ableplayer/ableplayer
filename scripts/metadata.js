@@ -55,7 +55,7 @@
 						else {
 							if ($(line).length) {
 								// selector exists
-                this.currentMeta = thisMeta;
+								this.currentMeta = thisMeta;
 								showDuration = parseInt($(line).attr('data-duration'));
 								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
 									$(line).show().delay(showDuration).fadeOut();

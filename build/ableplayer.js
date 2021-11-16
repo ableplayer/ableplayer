@@ -49,12 +49,12 @@ var AblePlayerInstances = [];
 
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
 	window.onYouTubeIframeAPIReady = function() {
-		AblePlayer.youtubeIframeAPIReady = true;
-		$('body').trigger('youtubeIframeAPIReady', []);
+		AblePlayer.youTubeIframeAPIReady = true;
+		$('body').trigger('youTubeIframeAPIReady', []);
 	};
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).keydown(function(e) {
+	$(window).on('keydown',function(e) {
 		if (AblePlayer.nextIndex === 1) {
 			AblePlayer.lastCreated.onPlayerKeyPress(e);
 		}
@@ -64,6 +64,10 @@ var AblePlayerInstances = [];
 	// Parameters are:
 	// media - jQuery selector or element identifying the media.
 	window.AblePlayer = function(media) {
+
+
+		var thisObj = this;
+
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
@@ -176,7 +180,7 @@ var AblePlayerInstances = [];
 			this.exposeTextDescriptions = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-  		// support both singular and plural spelling of attribute
+			// support both singular and plural spelling of attribute
 			this.exposeTextDescriptions = false;
 		}
 		else {
@@ -205,17 +209,17 @@ var AblePlayerInstances = [];
 		// If data-include-transcript="false", there is no "popup" transcript
 
 		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-		  this.transcriptDivLocation = $(media).data('transcript-div');
+			this.transcriptDivLocation = $(media).data('transcript-div');
 		}
 		else {
-  		this.transcriptDivLocation = null;
-    }
+			this.transcriptDivLocation = null;
+		}
 		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-  		this.hideTranscriptButton = true;
-    }
-    else {
-      this.hideTranscriptButton = null;
-    }
+			this.hideTranscriptButton = true;
+		}
+		else {
+			this.hideTranscriptButton = null;
+		}
 
 		this.transcriptType = null;
 		if ($(media).data('transcript-src') !== undefined) {
@@ -226,7 +230,7 @@ var AblePlayerInstances = [];
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
-      if (this.transcriptDivLocation) {
+			if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
 			}
 			else {
@@ -400,23 +404,16 @@ var AblePlayerInstances = [];
 		}
 
 		// Language
-		this.lang = 'en';
-		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
-			var lang = $(media).data('lang');
-			if (lang.length == 2) {
-				this.lang = lang;
-			}
-		}
-		// Player language is determined as follows (in translation.js > getTranslationText() ):
-		// 1. Lang attributes on <html> or <body>, if a matching translation file is available
-		// 2. The value of this.lang, if a matching translation file is available
+		// Player language is determined given the following precedence:
+		// 1. The value of data-lang on the media element, if provided and a matching translation file is available
+		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
 		// 3. English
-		// To override this formula and force #2 to take precedence over #1, set data-force-lang="true"
-		if ($(media).data('force-lang') !== undefined && $(media).data('force-lang') !== false) {
-			this.forceLang = true;
+		// Final calculation occurs in translation.js > getTranslationText()
+		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
+			this.lang = $(media).data('lang').toLowerCase();
 		}
 		else {
-			this.forceLang = false;
+			this.lang = null;
 		}
 
 		// Metadata Tracks
@@ -429,11 +426,14 @@ var AblePlayerInstances = [];
 		}
 
 		// Search
-		if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
-			// conducting a search currently requires an external div in which to write the results
-			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+		// conducting a search requires an external div in which to write the results
+		if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
+
+			this.searchDiv = $(media).data('search-div');
+
+			// Search term (optional; could be assigned later in a JavaScript application)
+			if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
 				this.searchString = $(media).data('search');
-				this.searchDiv = $(media).data('search-div');
 			}
 
 			// Search Language
@@ -442,6 +442,14 @@ var AblePlayerInstances = [];
 			}
 			else {
 				this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
+			}
+
+			// Search option: Ignore capitalization in search terms
+			if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
+				this.searchIgnoreCaps = true;
+			}
+			else {
+				this.searchIgnoreCaps = false;
 			}
 
 			// conducting a search currently requires an external div in which to write the results
@@ -468,9 +476,25 @@ var AblePlayerInstances = [];
 		// so users can control the player while transcribing
 		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
 			this.stenoMode = true;
+			// Add support for stenography in an iframe via data-steno-iframe-id
+			if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
+				this.stenoFrameId = $(media).data('steno-iframe-id');
+				this.$stenoFrame = $('#' + this.stenoFrameId);
+				if (!(this.$stenoFrame.length)) {
+					// iframe not found
+					this.stenoFrameId = null;
+					this.$stenoFrame = null;
+				}
+			}
+			else {
+				this.stenoFrameId = null;
+				this.$stenoFrame = null;
+			}
 		}
 		else {
 			this.stenoMode = false;
+			this.stenoFrameId = null;
+			this.$stenoFrame = null;
 		}
 
 		// Define built-in variables that CANNOT be overridden with HTML attributes
@@ -555,10 +579,8 @@ var AblePlayerInstances = [];
 		}
 	};
 
-
-
-	AblePlayer.youtubeIframeAPIReady = false;
-	AblePlayer.loadingYoutubeIframeAPI = false;
+	AblePlayer.youTubeIframeAPIReady = false;
+	AblePlayer.loadingYouTubeIframeAPI = false;
 })(jQuery);
 
 (function ($) {
@@ -1118,7 +1140,7 @@ var AblePlayerInstances = [];
 		}
 		if (!this.playerCreated) {
 			// only call these functions once
-			 this.loadCurrentPreferences();
+			this.loadCurrentPreferences();
 			this.injectPlayerCode();
 		}
 
@@ -1128,78 +1150,86 @@ var AblePlayerInstances = [];
 
 		this.initPlayer().then(function() {
 
-			 thisObj.setupTracks().then(function() {
+			thisObj.setupTracks().then(function() {
 
-				thisObj.setupAltCaptions().then(function() {
+				thisObj.getBrowserVoices();
 
-					thisObj.setupTranscript().then(function() {
+				thisObj.setupTranscript().then(function() {
 
-            thisObj.getMediaTimes().then(function(mediaTimes) {
+					thisObj.initStenoFrame().then(function() {
 
-              thisObj.duration = mediaTimes['duration'];
-              thisObj.elapsed = mediaTimes['elapsed'];
+						if (thisObj.stenoMode && thisObj.$stenoFrame) {
+							thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+						}
 
-              thisObj.setFullscreen(false);
+						thisObj.getMediaTimes().then(function(mediaTimes) {
 
-              if (typeof thisObj.volume === 'undefined') {
-  						  thisObj.volume = thisObj.defaultVolume;
-						  }
-						  if (thisObj.volume) {
-                thisObj.setVolume(thisObj.volume);
-              }
+							thisObj.duration = mediaTimes['duration'];
+							thisObj.elapsed = mediaTimes['elapsed'];
 
-              if (thisObj.transcriptType) {
-							  thisObj.addTranscriptAreaEvents();
-                thisObj.updateTranscript();
-						  }
-              if (thisObj.mediaType === 'video') {
-							  thisObj.initDescription();
-						  }
-              if (thisObj.captions.length) {
-							  thisObj.initDefaultCaption();
-						  }
+							thisObj.setFullscreen(false);
 
-              // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-              // This tells browsers to ignore the text tracks so Able Player can handle them
-              // However, timing is critical as browsers - especially Safari - tend to ignore this request
-              // unless it's sent late in the intialization process.
-              // If browsers ignore the request, the result is redundant captions
-              thisObj.setMediaAttributes();
-              thisObj.addControls();
-              thisObj.addEventListeners();
+							if (typeof thisObj.volume === 'undefined') {
+								thisObj.volume = thisObj.defaultVolume;
+							}
+							if (thisObj.volume) {
+								thisObj.setVolume(thisObj.volume);
+							}
 
-              // inject each of the hidden forms that will be accessed from the Preferences popup menu
-              prefsGroups = thisObj.getPreferencesGroups();
-              for (i = 0; i < prefsGroups.length; i++) {
-							  thisObj.injectPrefsForm(prefsGroups[i]);
-				      }
-              thisObj.setupPopups();
-              thisObj.updateCaption();
-              thisObj.injectVTS();
-              if (thisObj.chaptersDivLocation) {
-							  thisObj.populateChaptersDiv();
-				      }
-              thisObj.showSearchResults();
+							if (thisObj.transcriptType) {
+								thisObj.addTranscriptAreaEvents();
+								thisObj.updateTranscript();
+							}
+							if (thisObj.mediaType === 'video') {
+								thisObj.initDescription();
+							}
+							if (thisObj.captions.length) {
+								thisObj.initDefaultCaption();
+							}
 
-              // Go ahead and load media, without user requesting it
-              // Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-              // However, the media needs to load before the 'loadedmetadata' event is fired
-              // and until that happens we can't get the media's duration
-              if (thisObj.player === 'html5') {
-							  thisObj.$media[0].load();
-						  }
-              // refreshControls is called twice building/initializing the player
-              // this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
-              setTimeout(function() {
-							  thisObj.refreshControls('init');
-						  },100);
-            });
-					},
-					function() {	 // initPlayer fail
-						thisObj.provideFallback();
-					});
+							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+							// This tells browsers to ignore the text tracks so Able Player can handle them
+							// However, timing is critical as browsers - especially Safari - tend to ignore this request
+							// unless it's sent late in the intialization process.
+							// If browsers ignore the request, the result is redundant captions
+							thisObj.setMediaAttributes();
+							thisObj.addControls();
+
+							thisObj.addEventListeners();
+
+							// inject each of the hidden forms that will be accessed from the Preferences popup menu
+							prefsGroups = thisObj.getPreferencesGroups();
+							for (i = 0; i < prefsGroups.length; i++) {
+								thisObj.injectPrefsForm(prefsGroups[i]);
+							}
+							thisObj.setupPopups();
+							thisObj.updateCaption();
+							thisObj.injectVTS();
+							if (thisObj.chaptersDivLocation) {
+								thisObj.populateChaptersDiv();
+							}
+							thisObj.showSearchResults();
+
+							// Go ahead and load media, without user requesting it
+							// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+							// However, the media needs to load before the 'loadedmetadata' event is fired
+							// and until that happens we can't get the media's duration
+							if (thisObj.player === 'html5') {
+								thisObj.$media[0].load();
+							}
+							// refreshControls is called twice building/initializing the player
+							// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
+							setTimeout(function() {
+								thisObj.refreshControls('init');
+							},100);
+						}); 
+					}); 
 				});
-			});
+			 
+			}); 
+		},
+		function() {	 // initPlayer fail
+			thisObj.provideFallback();
 		});
 	};
 
@@ -1223,15 +1253,15 @@ var AblePlayerInstances = [];
 		playerPromise.done(
 			function () { // done/resolved
 				if (thisObj.useFixedSeekInterval) {
-  				if (!thisObj.seekInterval) {
-            thisObj.seekInterval = thisObj.defaultSeekInterval;
-          }
-          else {
-            // fixed seekInterval was already assigned, using value of data-seek-interval attribute
-          }
-          thisObj.seekIntervalCalculated = true;
-        }
-        else {
+					if (!thisObj.seekInterval) {
+						thisObj.seekInterval = thisObj.defaultSeekInterval;
+					}
+					else {
+						// fixed seekInterval was already assigned, using value of data-seek-interval attribute
+					}
+					thisObj.seekIntervalCalculated = true;
+				}
+				else {
 					thisObj.setSeekInterval();
 				}
 				deferred.resolve();
@@ -1241,6 +1271,34 @@ var AblePlayerInstances = [];
 			}
 		);
 
+		return promise;
+	};
+
+	AblePlayer.prototype.initStenoFrame = function() {
+
+		var thisObj, deferred, promise, $iframe;
+		thisObj = this;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+
+		if (this.stenoMode && this.$stenoFrame) {
+
+			if (this.$stenoFrame[0].contentWindow,document.readyState == 'complete') {
+				// iframe has already loaded
+				deferred.resolve();
+			}
+			else {
+				// iframe has not loaded. Wait for it.
+				this.$stenoFrame.on('load',function() {
+					deferred.resolve();
+				});
+			}
+		}
+		else {
+			// there is no stenoFrame to initialize
+			deferred.resolve();
+		}
 		return promise;
 	};
 
@@ -1320,40 +1378,40 @@ var AblePlayerInstances = [];
 				// sync all other tracks to this same languge
 				this.syncTrackLanguages('init',this.captionLang);
 			}
-      if (this.player === 'vimeo') {
-  			if (this.usingVimeoCaptions && this.prefCaptions == 1) {
-      			// initialize Vimeo captions to the default language
-            this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
-	  				  // track.language = the iso code for the language
-              // track.kind = 'captions' or 'subtitles'
-              // track.label = the human-readable label
-				    }).catch(function(error) {
-					    switch (error.name) {
-						    case 'InvalidTrackLanguageError':
-							    // no track was available with the specified language
-                  console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
-                  break;
-                case 'InvalidTrackError':
-							    // no track was available with the specified language and kind
-                  console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
-                  break;
-                default:
-							    // some other error occurred
-                  console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
-                  break;
-    		      }
-				    });
-			    }
-          else {
-  			    // disable Vimeo captions.
-            this.vimeoPlayer.disableTextTrack().then(function() {
-    			    // Vimeo captions disabled
-  			    }).catch(function(error) {
-              console.log('Error disabling Vimeo text track: ',error);
-            });
-			    }
-        }
-    }
+			if (this.player === 'vimeo') {
+				if (this.usingVimeoCaptions && this.prefCaptions == 1) {
+						// initialize Vimeo captions to the default language
+						this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
+							// track.language = the iso code for the language
+							// track.kind = 'captions' or 'subtitles'
+							// track.label = the human-readable label
+						}).catch(function(error) {
+							switch (error.name) {
+								case 'InvalidTrackLanguageError':
+									// no track was available with the specified language
+									console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+									break;
+								case 'InvalidTrackError':
+									// no track was available with the specified language and kind
+									console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+									break;
+								default:
+									// some other error occurred
+									console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+									break;
+							}
+						});
+					}
+					else {
+						// disable Vimeo captions.
+						this.vimeoPlayer.disableTextTrack().then(function() {
+							// Vimeo captions disabled
+						}).catch(function(error) {
+							console.log('Error disabling Vimeo text track: ',error);
+						});
+					}
+				}
+		}
 	};
 
 	AblePlayer.prototype.initHtml5Player = function () {
@@ -1431,8 +1489,11 @@ var AblePlayerInstances = [];
 
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
-		Cookies.set('Able-Player', cookieValue, { expires:90 });
-		// set the cookie lifetime for 90 days
+
+		Cookies.set('Able-Player', cookieValue, {
+			expires: 90,
+			sameSite: 'strict'
+		});
 	};
 
 	AblePlayer.prototype.getCookie = function() {
@@ -1520,7 +1581,18 @@ var AblePlayerInstances = [];
 		// in the Preferences popup menu
 		// Human-readable label for each group is defined in translation table
 		if (this.mediaType === 'video') {
-			return ['captions','descriptions','keyboard','transcript'];
+			if (this.usingYouTubeCaptions) {
+				// no transcript is possible 
+				return ['captions','descriptions','keyboard']; 
+			}
+			else if (this.usingVimeoCaptions) { 
+				// users cannot control caption appearance
+				// and no transcript is possible
+				return ['descriptions','keyboard']; 
+			}
+			else { 
+				return ['captions','descriptions','keyboard','transcript']; 
+			} 
 		}
 		else if (this.mediaType === 'audio') {
 			var groups = [];
@@ -1587,56 +1659,68 @@ var AblePlayerInstances = [];
 		if (this.mediaType === 'video') {
 
 			// Caption preferences
+
 			prefs.push({
 				'name': 'prefCaptions', // closed captions default state
 				'label': null,
 				'group': 'captions',
 				'default': 1
 			});
-/* // not supported yet
-			prefs.push({
-				'name': 'prefCaptionsStyle',
-				'label': this.tt.prefCaptionsStyle,
-				'group': 'captions',
-				'default': this.tt.captionsStylePopOn
-			});
-*/
-			prefs.push({
-				'name': 'prefCaptionsPosition',
-				'label': this.tt.prefCaptionsPosition,
-				'group': 'captions',
-				'default': this.defaultCaptionsPosition
-			});
-			prefs.push({
-				'name': 'prefCaptionsFont',
-				'label': this.tt.prefCaptionsFont,
-				'group': 'captions',
-				'default': 'sans'
-			});
+
+			if (!this.usingYouTubeCaptions) {
+
+				/* // not supported yet
+				prefs.push({
+					'name': 'prefCaptionsStyle',
+					'label': this.tt.prefCaptionsStyle,
+					'group': 'captions',
+					'default': this.tt.captionsStylePopOn
+				});
+				*/
+				prefs.push({
+					'name': 'prefCaptionsPosition',
+					'label': this.tt.prefCaptionsPosition,
+					'group': 'captions',
+					'default': this.defaultCaptionsPosition
+				});
+
+				prefs.push({
+					'name': 'prefCaptionsFont',
+					'label': this.tt.prefCaptionsFont,
+					'group': 'captions',
+					'default': 'sans-serif'
+				});
+			}
+
+			// This is the one option that is supported by YouTube IFrame API
 			prefs.push({
 				'name': 'prefCaptionsSize',
 				'label': this.tt.prefCaptionsSize,
 				'group': 'captions',
 				'default': '100%'
 			});
-			prefs.push({
-				'name': 'prefCaptionsColor',
-				'label': this.tt.prefCaptionsColor,
-				'group': 'captions',
-				'default': 'white'
-			});
-			prefs.push({
-				'name': 'prefCaptionsBGColor',
-				'label': this.tt.prefCaptionsBGColor,
-				'group': 'captions',
-				'default': 'black'
-			});
-			prefs.push({
-				'name': 'prefCaptionsOpacity',
-				'label': this.tt.prefCaptionsOpacity,
-				'group': 'captions',
-				'default': '100%'
-			});
+
+			if (!this.usingYouTubeCaptions) {
+
+				prefs.push({
+					'name': 'prefCaptionsColor',
+					'label': this.tt.prefCaptionsColor,
+					'group': 'captions',
+					'default': 'white'
+				});
+				prefs.push({
+					'name': 'prefCaptionsBGColor',
+					'label': this.tt.prefCaptionsBGColor,
+					'group': 'captions',
+					'default': 'black'
+				});
+				prefs.push({
+					'name': 'prefCaptionsOpacity',
+					'label': this.tt.prefCaptionsOpacity,
+					'group': 'captions',
+					'default': '100%'
+				});
+			}
 
 			// Description preferences
 			prefs.push({
@@ -1646,22 +1730,46 @@ var AblePlayerInstances = [];
 				'default': 0 // off because users who don't need it might find it distracting
 			});
 			prefs.push({
-				'name': 'prefDescFormat', // audio description default state
+				'name': 'prefDescFormat', // audio description default format (if both 'video' and 'text' are available)
 				'label': null,
 				'group': 'descriptions',
-				'default': 'video'
+				'default': 'video' // video (an alternative described version) always wins
+			});
+			prefs.push({
+				'name': 'prefDescVoice',
+				'label': this.tt.prefDescVoice,
+				'group': 'descriptions',
+				'default': null // will be set later, in injectPrefsForm()
+			});
+			prefs.push({
+				'name': 'prefDescPitch',
+				'label': this.tt.prefDescPitch,
+				'group': 'descriptions',
+				'default': 1 // 0 to 2
+			});
+			prefs.push({
+				'name': 'prefDescRate',
+				'label': this.tt.prefDescRate,
+				'group': 'descriptions',
+				'default': 1 // 0.1 to 10 (1 is normal speech; 2 is fast but decipherable; >2 is super fast)
+			});
+			prefs.push({
+				'name': 'prefDescVolume',
+				'label': this.tt.volume,
+				'group': 'descriptions',
+				'default': 1 // 0 to 1
 			});
 			prefs.push({
 				'name': 'prefDescPause', // automatically pause when closed description starts
 				'label': this.tt.prefDescPause,
 				'group': 'descriptions',
-				'default': 0 // off because it burdens user with restarting after every pause
+				'default': 1 // on as of 4.3.16, because extended description is frequently necessary
 			});
 			prefs.push({
-				'name': 'prefVisibleDesc', // visibly show closed description (if avilable and used)
-				'label': this.tt.prefVisibleDesc,
+				'name': 'prefDescVisible', // visibly show closed description (if avilable and used)
+				'label': this.tt.prefDescVisible,
 				'group': 'descriptions',
-				'default': 1 // on because sighted users probably want to see this cool feature in action
+				'default': 0 // off as of 4.3.16, to avoid overloading the player with visible features
 			});
 
 			// Video preferences without a category (not shown in Preferences dialogs)
@@ -1678,11 +1786,10 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.loadCurrentPreferences = function () {
 
-  	// Load current/default preferences from cookie into the AblePlayer object.
+		// Load current/default preferences from cookie into the AblePlayer object.
 
 		var available = this.getAvailablePreferences();
 		var cookie = this.getCookie();
-
 		// Copy current cookie values into this object, and fill in any default values.
 		for (var ii = 0; ii < available.length; ii++) {
 			var prefName = available[ii]['name'];
@@ -1705,7 +1812,8 @@ var AblePlayerInstances = [];
 		// Creates a preferences form and injects it.
 		// form is one of the supported forms (groups) defined in getPreferencesGroups()
 
-		var available, thisObj, $prefsDiv, formTitle, introText,
+		var thisObj, available, descLangs,
+			$prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
 			$descFieldset, $descLegend, $legend,
@@ -1811,12 +1919,12 @@ var AblePlayerInstances = [];
 		fieldsetId = this.mediaId + '-prefs-' + form;
 		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
 		if (form === 'keyboard') {
-		  $legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
 			$fieldset.append($legend);
 		}
 		else if (form === 'descriptions') {
-  		$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
-  		$fieldset.append($legend);
+			$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+			$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
 
@@ -1882,6 +1990,94 @@ var AblePlayerInstances = [];
 					}
 					$thisDiv.append($thisLabel,$thisField);
 				}
+				else if (form === 'descriptions') {
+					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
+					if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
+						// these preferences are checkboxes
+						$thisDiv.addClass('able-prefs-checkbox');
+						$thisField = $('<input>',{
+							type: 'checkbox',
+							name: thisPref,
+							id: thisId,
+							value: 'true'
+						});
+						// check current active value for this preference
+						if (this[thisPref] === 1) {
+							$thisField.prop('checked',true);
+						}
+						$thisDiv.append($thisField,$thisLabel);
+					}
+					else if (this.synth) {
+						// Only show these options if browser supports speech synthesis
+						$thisDiv.addClass('able-prefs-select');
+						$thisField = $('<select>',{
+							name: thisPref,
+							id: thisId,
+						});
+						if (thisPref === 'prefDescVoice' && this.descVoices) {
+							for (j=0; j < this.descVoices.length; j++) {
+								optionValue = this.descVoices[j].name;
+								optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
+								$thisOption = $('<option>',{
+									value: optionValue,
+									text: optionText
+								});
+								if (this[thisPref] == optionValue) {
+									$thisOption.prop('selected',true);
+								}
+								$thisField.append($thisOption);
+								this.$voiceSelectField = $thisField;
+							}
+						}
+						else {
+							if (thisPref == 'prefDescPitch') { // 0 to 2
+								options = [0,0.5,1,1.5,2];
+							}
+							else if (thisPref == 'prefDescRate') { // 0.1 to 10
+								// Tests with a variety of voices on MacOS and Windows
+								// yielded the following choices that seem reasonable for audio description:
+								// 0.5 - too slow (exclude this)
+								// 0.7 - casual
+								// 0.8 - add this
+								// 0.9 - add this
+								// 1 - normal
+								// 1.1 - add this
+								// 1.2 - add this
+								// 1.5 - quick
+								// 2 - speedy
+								// 2.5 - fleet
+								// 3 - fast! (some voices don't get any faster than this
+
+								// Note: if these values are modified, must also modfiy them
+								// in makePrefsValueReadable()
+								options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
+							}
+							else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
+								options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+							}
+							if (typeof options !== 'undefined') {
+								for (j=0; j < options.length; j++) {
+									optionValue = options[j];
+									optionText = this.makePrefsValueReadable(thisPref,optionValue);
+									$thisOption = $('<option>',{
+										value: optionValue,
+										text: optionText
+									});
+									if (this[thisPref] == optionValue) {
+										$thisOption.prop('selected',true);
+									}
+									$thisField.append($thisOption);
+									$thisDiv.append($thisLabel,$thisField);
+								}
+							}
+						}
+						// add a change handler that announces the sample description text
+						$thisField.on('change',function() {
+							thisObj.announceDescriptionText('sample',thisObj.tt.sampleDescriptionText);
+						});
+						$thisDiv.append($thisLabel,$thisField);
+					}
+				}
 				else { // all other fields are checkboxes
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<input>',{
@@ -1896,7 +2092,7 @@ var AblePlayerInstances = [];
 					}
 					if (form === 'keyboard') {
 						// add a change handler that updates the list of current keyboard shortcuts
-						$thisField.change(function() {
+						$thisField.on('change',function() {
 							changedPref = $(this).attr('name');
 							if (changedPref === 'prefAltKey') {
 								changedSpan = '.able-modkey-alt';
@@ -1927,12 +2123,22 @@ var AblePlayerInstances = [];
 
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
-			if (this.mediaType === 'video') {
+			// do not show this for YouTube captions, since it's not an accurate reflection
+			if (this.mediaType === 'video' && !this.usingYouTubeCaptions) {
 				this.$sampleCapsDiv = $('<div>',{
 					'class': 'able-captions-sample'
 				}).text(this.tt.sampleCaptionText);
 				$prefsDiv.append(this.$sampleCapsDiv);
 				this.stylizeCaptions(this.$sampleCapsDiv);
+			}
+		}
+		else if (form === 'descriptions') {
+			if (this.synth) {
+				// add a div with sample audio description text
+				this.$sampleDescDiv = $('<div>',{
+					'class': 'able-desc-sample'
+				}).text(this.tt.sampleDescriptionText);
+				$prefsDiv.append(this.$sampleDescDiv);
 			}
 		}
 		else if (form === 'keyboard') {
@@ -2061,7 +2267,7 @@ var AblePlayerInstances = [];
 		cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
 		saveButton.click(function () {
 			dialog.hide();
-		  thisObj.savePrefsFromForm();
+			thisObj.savePrefsFromForm();
 		});
 		cancelButton.click(function () {
 			dialog.hide();
@@ -2098,13 +2304,100 @@ var AblePlayerInstances = [];
 		});
 	};
 
+	AblePlayer.prototype.rebuildDescPrefsForm = function () {
+
+		// Called if getBrowserVoices() succeeded after an earlier failure
+
+		var i, optionValue, optionText, $thisOption;
+
+		this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
+		for (i=0; i < this.descVoices.length; i++) {
+			optionValue = this.descVoices[i].name;
+			optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
+			$thisOption = $('<option>',{
+				value: optionValue,
+				text: optionText
+			});
+			if (this.prefDescVoice == optionValue) {
+				$thisOption.prop('selected',true);
+			}
+			this.$voiceSelectField.append($thisOption);
+		}
+	};
+
+	 AblePlayer.prototype.makePrefsValueReadable = function(pref,value) {
+
+		 // The values for pitch, rate, and volume (web speech API)
+		 // are strange and inconsistent between variables
+		 // this function returns text that is more readable than the values themselves
+
+		 if (pref === 'prefDescPitch') {
+			 if (value === 0) {
+				 return this.tt.prefDescPitch1;
+			 }
+			 else if (value === 0.5) {
+				 return this.tt.prefDescPitch2;
+			 }
+			 else if (value === 1) {
+				 return this.tt.prefDescPitch3;
+			 }
+			 else if (value === 1.5) {
+				 return this.tt.prefDescPitch4;
+			 }
+			 else if (value === 2) {
+				 return this.tt.prefDescPitch5;
+			 }
+		 }
+		 else if (pref === 'prefDescRate') {
+			 // default in the API is 0.1 to 10, where 1 is normal speaking voice
+			 // our custom range offers severa rates close to 1
+			 // plus a couple of crazy fast ones for sport
+			 // Our options (1-10) or mapped here to 0.5 to 0.14
+			 if (value === 0.7) {
+				 return 1;
+			 }
+			 else if (value === 0.8) {
+				 return 2;
+			 }
+			 else if (value === 0.9) {
+				 return 3;
+			 }
+			 else if (value === 1) {
+				 return 4;
+			 }
+			 else if (value === 1.1) {
+				 return 5;
+			 }
+			 else if (value === 1.2) {
+				 return 6;
+			 }
+			 else if (value === 1.5) {
+				 return 7;
+			 }
+			 else if (value === 2) {
+				 return 8;
+			 }
+			 else if (value === 2.5) {
+				 return 9;
+			 }
+			 else if (value === 3) {
+				 return 10;
+			 }
+		 }
+		 else if (pref === 'prefDescVolume') {
+			 // values range from 0.1 to 1.0
+			 return value * 10;
+		 }
+		 return value;
+	 };
+
 	 AblePlayer.prototype.resetPrefsForm = function () {
 
-  	 // Reset preferences form with default values from cookie
-     // Called when:
-     // User clicks cancel or close button in Prefs Dialog
-     // User presses Escape to close Prefs dialog
-     // User clicks Save in Prefs dialog, & there's more than one player on page
+		 // Reset preferences form with default values from cookie
+		 // Called when:
+		 // User clicks cancel or close button in Prefs Dialog
+		 // User presses Escape to close Prefs dialog
+		 // User clicks Save in Prefs dialog, & there's more than one player on page
 
 		 var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
 
@@ -2133,11 +2426,11 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.savePrefsFromForm = function () {
 
-  	// Return a prefs object constructed from the form.
+		// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
 		// update cookie with new value
 		var cookie, available, prefName, prefId, numChanges,
-		  numCapChanges, capSizeChanged, capSizeValue, newValue;
+			numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
 		numCapChanges = 0; // changes to caption-style-related preferences
@@ -2150,7 +2443,7 @@ var AblePlayerInstances = [];
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
 				if (prefName == 'prefDescFormat') {
-  				// As of v4.0.10, prefDescFormat is no longer a choice
+					// As of v4.0.10, prefDescFormat is no longer a choice
 					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
 					this.prefDescFormat = 'video';
 					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
@@ -2171,6 +2464,16 @@ var AblePlayerInstances = [];
 					if (prefName === 'prefCaptionsSize') {
 						capSizeChanged = true;
 						capSizeValue = newValue;
+					}
+				}
+				else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
+					// this is one of the description-related select fields
+					newValue = $('select[id="' + prefId + '"]').val();
+					if (cookie.preferences[prefName] !== newValue) { // user changed setting
+						cookie.preferences[prefName] = newValue;
+						// also update global var for this pref
+						this[prefName] = newValue;
+						numChanges++;
 					}
 				}
 				else { // all other fields are checkboxes
@@ -2210,53 +2513,55 @@ var AblePlayerInstances = [];
 			(typeof this.usingYouTubeCaptions !== 'undefined' && this.usingYouTubeCaptions) &&
 			capSizeChanged) {
 				// update font size of YouTube captions
-				this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
+				this.youTubePlayer.setOption('captions','fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
-    if (AblePlayerInstances.length > 1) {
-      // there are multiple players on this page.
-      // update prefs for ALL of them
-      for (var i=0; i<AblePlayerInstances.length; i++) {
-        AblePlayerInstances[i].updatePrefs();
-        AblePlayerInstances[i].loadCurrentPreferences();
-        AblePlayerInstances[i].resetPrefsForm();
-        if (numCapChanges > 0) {
-          AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
-          // also apply same changes to descriptions, if present
-          if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
-            AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
-			    }
-        }
-      }
-    }
-    else {
-      // there is only one player
-      this.updatePrefs();
-      if (numCapChanges > 0) {
-        this.stylizeCaptions(this.$captionsDiv);
-        // also apply same changes to descriptions, if present
-        if (typeof this.$descDiv !== 'undefined') {
-          this.stylizeCaptions(this.$descDiv);
-			  }
-      }
-    }
+		if (AblePlayerInstances.length > 1) {
+			// there are multiple players on this page.
+			// update prefs for ALL of them
+			for (var i=0; i<AblePlayerInstances.length; i++) {
+				AblePlayerInstances[i].updatePrefs();
+				AblePlayerInstances[i].geteferences();
+				AblePlayerInstances[i].resetPrefsForm();
+				if (numCapChanges > 0) {
+					AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
+					// also apply same changes to descriptions, if present
+					if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
+						AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
+					}
+				}
+			}
+		}
+		else {
+			// there is only one player
+			this.updatePrefs();
+			if (numCapChanges > 0) {
+				this.stylizeCaptions(this.$captionsDiv);
+				// also apply same changes to descriptions, if present
+				if (typeof this.$descDiv !== 'undefined') {
+					this.stylizeCaptions(this.$descDiv);
+				}
+			}
+		}
 	}
 
 	AblePlayer.prototype.updatePrefs = function () {
 
-  	// Update player based on current prefs. Safe to call multiple times.
+		// Update player based on current prefs. Safe to call multiple times.
 
-		// tabbable transcript
-		if (this.prefTabbable === 1) {
-			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
-		}
-		else {
-			this.$transcriptDiv.find('span.able-transcript-seekpoint').removeAttr('tabindex');
-		}
+		if (this.$transcriptDiv) { 
+			// tabbable transcript
+			if (this.prefTabbable === 1) {
+				this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
+			}
+			else {
+				this.$transcriptDiv.find('span.able-transcript-seekpoint').removeAttr('tabindex');
+			}
 
-		// transcript highlights
-		if (this.prefHighlight === 0) {
-			// user doesn't want highlights; remove any existing highlights
-			this.$transcriptDiv.find('span').removeClass('able-highlight');
+			// transcript highlights
+			if (this.prefHighlight === 0) {
+				// user doesn't want highlights; remove any existing highlights
+				this.$transcriptDiv.find('span').removeClass('able-highlight');
+			}
 		}
 
 		// Re-initialize caption and description in case relevant settings have changed
@@ -3078,7 +3383,7 @@ var AblePlayerInstances = [];
 		this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-    this.$ableWrapper.addClass('able-skin-' + this.skin);
+		this.$ableWrapper.addClass('able-skin-' + this.skin);
 
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
@@ -3210,10 +3515,10 @@ var AblePlayerInstances = [];
 			'class': 'able-descriptions'
 		});
 		if (this.exposeTextDescriptions) {
-  		this.$descDiv.attr({
-  			'aria-live': 'assertive',
-        'aria-atomic': 'true'
-		  });
+			this.$descDiv.attr({
+				'aria-live': 'assertive',
+				'aria-atomic': 'true'
+			});
 		}
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
@@ -3455,53 +3760,53 @@ var AblePlayerInstances = [];
 
 		// Populate menu with menu items
 		if (which === 'prefs') {
-      if (this.prefCats.length > 1) {
-  			for (i = 0; i < this.prefCats.length; i++) {
-	  			$menuItem = $('<li></li>',{
-		  			'role': 'menuitem',
-            'tabindex': '-1'
-				  });
-          prefCat = this.prefCats[i];
-          if (prefCat === 'captions') {
-					  $menuItem.text(this.tt.prefMenuCaptions);
-				  }
-          else if (prefCat === 'descriptions') {
-					  $menuItem.text(this.tt.prefMenuDescriptions);
-				  }
-          else if (prefCat === 'keyboard') {
-					  $menuItem.text(this.tt.prefMenuKeyboard);
-				  }
-          else if (prefCat === 'transcript') {
-					  $menuItem.text(this.tt.prefMenuTranscript);
-				  }
-          $menuItem.on('click',function() {
-					  whichPref = $(this).text();
-					  thisObj.showingPrefsDialog = true;
-            thisObj.setFullscreen(false);
-            if (whichPref === thisObj.tt.prefMenuCaptions) {
-						  thisObj.captionPrefsDialog.show();
-					  }
-            else if (whichPref === thisObj.tt.prefMenuDescriptions) {
-						  thisObj.descPrefsDialog.show();
-					  }
-            else if (whichPref === thisObj.tt.prefMenuKeyboard) {
-						  thisObj.keyboardPrefsDialog.show();
-					  }
-            else if (whichPref === thisObj.tt.prefMenuTranscript) {
-						  thisObj.transcriptPrefsDialog.show();
-					  }
-            thisObj.closePopups();
-            thisObj.showingPrefsDialog = false;
-				  });
-          $menu.append($menuItem);
-			  }
-			  this.$prefsButton.attr('data-prefs-popup','menu');
-      }
-      else if (this.prefCats.length == 1) {
-        // only 1 category, so don't create a popup menu.
-        // Instead, open dialog directly when user clicks Prefs button
-        this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
-      }
+			if (this.prefCats.length > 1) {
+				for (i = 0; i < this.prefCats.length; i++) {
+					$menuItem = $('<li></li>',{
+						'role': 'menuitem',
+						'tabindex': '-1'
+					});
+					prefCat = this.prefCats[i];
+					if (prefCat === 'captions') {
+						$menuItem.text(this.tt.prefMenuCaptions);
+					}
+					else if (prefCat === 'descriptions') {
+						$menuItem.text(this.tt.prefMenuDescriptions);
+					}
+					else if (prefCat === 'keyboard') {
+						$menuItem.text(this.tt.prefMenuKeyboard);
+					}
+					else if (prefCat === 'transcript') {
+						$menuItem.text(this.tt.prefMenuTranscript);
+					}
+					$menuItem.on('click',function() {
+						whichPref = $(this).text();
+						thisObj.showingPrefsDialog = true;
+						thisObj.setFullscreen(false);
+						if (whichPref === thisObj.tt.prefMenuCaptions) {
+							thisObj.captionPrefsDialog.show();
+						}
+						else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+							thisObj.descPrefsDialog.show();
+						}
+						else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+							thisObj.keyboardPrefsDialog.show();
+						}
+						else if (whichPref === thisObj.tt.prefMenuTranscript) {
+							thisObj.transcriptPrefsDialog.show();
+						}
+						thisObj.closePopups();
+						thisObj.showingPrefsDialog = false;
+					});
+					$menu.append($menuItem);
+				}
+				this.$prefsButton.attr('data-prefs-popup','menu');
+			}
+			else if (this.prefCats.length == 1) {
+				// only 1 category, so don't create a popup menu.
+				// Instead, open dialog directly when user clicks Prefs button
+				this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
+			}
 		}
 		else if (which === 'captions' || which === 'chapters') {
 			hasDefault = false;
@@ -3540,6 +3845,9 @@ var AblePlayerInstances = [];
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
 				}
+				else { 
+					$menuItem.attr('aria-checked','false');
+				}
 				$menuItem.on('click',this.getCaptionOffFunction());
 				$menu.append($menuItem);
 			}
@@ -3568,9 +3876,9 @@ var AblePlayerInstances = [];
 				$menuItem.on('click mousedown',function(e) {
 					e.stopPropagation();
 					if (typeof e.button !== 'undefined' && e.button !== 0) {
-  					// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
-  					// and the button was not a left click (left click = 0)
-  					// therefore, ignore this click
+						// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
+						// and the button was not a left click (left click = 0)
+						// therefore, ignore this click
 						return false;
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
@@ -3654,7 +3962,7 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.closePopups = function () {
 
-    var thisObj = this;
+		var thisObj = this;
 
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
@@ -3665,18 +3973,18 @@ var AblePlayerInstances = [];
 			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
-      this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
+			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$prefsButton.removeAttr('aria-expanded');
 			if (!this.showingPrefsDialog) {
-  			this.$prefsButton.focus();
+				this.$prefsButton.focus();
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
-  			thisObj.hidingPopup = false;
-  		},100);
+				thisObj.hidingPopup = false;
+			},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
@@ -3893,9 +4201,9 @@ var AblePlayerInstances = [];
 		controlLayout = [];
 		controlLayout[0] = [];
 		controlLayout[1] = [];
-    if (this.skin === 'legacy') {
-		  controlLayout[2] = [];
-		  controlLayout[3] = [];
+		if (this.skin === 'legacy') {
+			controlLayout[2] = [];
+			controlLayout[3] = [];
 		}
 
 		controlLayout[0].push('play');
@@ -3903,120 +4211,120 @@ var AblePlayerInstances = [];
 		controlLayout[0].push('rewind');
 		controlLayout[0].push('forward');
 
-    if (this.skin === 'legacy') {
-      controlLayout[1].push('seek');
-    }
+		if (this.skin === 'legacy') {
+			controlLayout[1].push('seek');
+		}
 
 		if (this.hasPlaylist) {
-  		if (this.skin === 'legacy') {
-    		controlLayout[0].push('previous');
-        controlLayout[0].push('next');
-      }
-      else if (this.skin == '2020') {
-    		controlLayout[0].push('previous');
-        controlLayout[0].push('next');
-      }
+			if (this.skin === 'legacy') {
+				controlLayout[0].push('previous');
+				controlLayout[0].push('next');
+			}
+			else if (this.skin == '2020') {
+				controlLayout[0].push('previous');
+				controlLayout[0].push('next');
+			}
 		}
 
 		if (this.isPlaybackRateSupported()) {
-  		playbackSupported = true;
-  		if (this.skin === 'legacy') {
-  			controlLayout[2].push('slower');
-  			controlLayout[2].push('faster');
-  		}
+			playbackSupported = true;
+			if (this.skin === 'legacy') {
+				controlLayout[2].push('slower');
+				controlLayout[2].push('faster');
+			}
 		}
 		else {
-  		playbackSupported = false;
+			playbackSupported = false;
 		}
 
 		if (this.mediaType === 'video') {
-  		numA11yButtons = 0;
+			numA11yButtons = 0;
 			if (this.hasCaptions) {
-  			numA11yButtons++;
-  			if (this.skin === 'legacy') {
-				  controlLayout[2].push('captions');
+				numA11yButtons++;
+				if (this.skin === 'legacy') {
+					controlLayout[2].push('captions');
 				}
 				else if (this.skin == '2020') {
-  				controlLayout[1].push('captions');
-        }
+					controlLayout[1].push('captions');
+				}
 			}
 			if (this.hasSignLanguage) {
-  			numA11yButtons++;
-  			if (this.skin === 'legacy') {
-				  controlLayout[2].push('sign');
+				numA11yButtons++;
+				if (this.skin === 'legacy') {
+					controlLayout[2].push('sign');
 				}
 				else if (this.skin == '2020') {
-  				controlLayout[1].push('sign');
-        }
+					controlLayout[1].push('sign');
+				}
 			}
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
-  			numA11yButtons++;
-  			if (this.skin === 'legacy') {
-				  controlLayout[2].push('descriptions');
+				numA11yButtons++;
+				if (this.skin === 'legacy') {
+					controlLayout[2].push('descriptions');
 				}
 				else if (this.skin == '2020') {
-  				controlLayout[1].push('descriptions');
-        }
+					controlLayout[1].push('descriptions');
+				}
 			}
 		}
 		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
-  		numA11yButtons++;
-  		if (this.skin === 'legacy') {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
 				controlLayout[2].push('transcript');
-		  }
-      else if (this.skin == '2020') {
-  		  controlLayout[1].push('transcript');
-      }
+			}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('transcript');
+			}
 		}
 
 		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
-  		numA11yButtons++;
-  		if (this.skin === 'legacy') {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
 				controlLayout[2].push('chapters');
-		  }
+			}
 			else if (this.skin == '2020') {
-  		  controlLayout[1].push('chapters');
-      }
+				controlLayout[1].push('chapters');
+			}
 		}
 
-    if (this.skin == '2020' && numA11yButtons > 0) {
-  		controlLayout[1].push('pipe');
+		if (this.skin == '2020' && numA11yButtons > 0) {
+			controlLayout[1].push('pipe');
 		}
 
-    if (playbackSupported && this.skin === '2020') {
-      controlLayout[1].push('faster');
-    	controlLayout[1].push('slower');
-    	controlLayout[1].push('pipe');
+		if (playbackSupported && this.skin === '2020') {
+			controlLayout[1].push('faster');
+			controlLayout[1].push('slower');
+			controlLayout[1].push('pipe');
 		}
 
-    if (this.skin === 'legacy') {
-  		controlLayout[3].push('preferences');
-    }
-    else if (this.skin == '2020') {
-      controlLayout[1].push('preferences');
-    }
+		if (this.skin === 'legacy') {
+			controlLayout[3].push('preferences');
+		}
+		else if (this.skin == '2020') {
+			controlLayout[1].push('preferences');
+		}
 
 		if (this.mediaType === 'video' && this.allowFullScreen) {
-      if (this.skin === 'legacy') {
-    		controlLayout[3].push('fullscreen');
-      }
-      else {
-        controlLayout[1].push('fullscreen');
-      }
+			if (this.skin === 'legacy') {
+				controlLayout[3].push('fullscreen');
+			}
+			else {
+				controlLayout[1].push('fullscreen');
+			}
 		}
 
 		if (this.browserSupportsVolume()) {
-  		volumeSupported = true; // defined in case we decide to move volume button elsewhere
+			volumeSupported = true; // defined in case we decide to move volume button elsewhere
 			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
 			if (this.skin === 'legacy') {
-  			controlLayout[1].push('volume');
-  		}
-  		else if (this.skin == '2020') {
-    		controlLayout[1].push('volume');
-  		}
+				controlLayout[1].push('volume');
+			}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('volume');
+			}
 		}
 		else {
-  		volumeSupported = false;
+			volumeSupported = false;
 			this.volume = false;
 		}
 		return controlLayout;
@@ -4034,10 +4342,10 @@ var AblePlayerInstances = [];
 		var thisObj, baseSliderWidth, controlLayout, numSections,
 		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, $pipeImg,
 		svgData, svgPath, control,
-    $buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
-    buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
-    tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
-    captionLabel, popupMenuId;
+		$buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
+		buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
+		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+		captionLabel, popupMenuId;
 
 		thisObj = this;
 
@@ -4056,8 +4364,8 @@ var AblePlayerInstances = [];
 		this.$controllerDiv.append(this.$tooltipDiv);
 
 		if (this.skin == '2020') {
-  		// add a full-width seek bar
-      $sliderDiv = $('<div class="able-seekbar"></div>');
+			// add a full-width seek bar
+			$sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
@@ -4147,9 +4455,9 @@ var AblePlayerInstances = [];
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
-          // NOTE: Changed from <button> to <div role="button" as of 4.2.18
-          // because <button> elements are rendered poorly in high contrast mode
-          // in some OS/browser/plugin combinations
+					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
+					// because <button> elements are rendered poorly in high contrast mode
+					// in some OS/browser/plugin combinations
 					$newButton = $('<div>',{
 						'role': 'button',
 						'tabindex': '0',
@@ -4159,30 +4467,30 @@ var AblePlayerInstances = [];
 
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
-  						this.prefCats = this.getPreferencesGroups();
-              if (this.prefCats.length > 1) {
-  						  // Prefs button will trigger a menu
-                popupMenuId = this.mediaId + '-prefs-menu';
-                $newButton.attr({
-							    'aria-controls': popupMenuId,
-                  'aria-haspopup': 'menu'
-                });
-						  }
-              else if (this.prefCats.length === 1) {
-  						  // Prefs button will trigger a dialog
-                $newButton.attr({
-    						  'aria-haspopup': 'dialog'
-                });
-						  }
+							this.prefCats = this.getPreferencesGroups();
+							if (this.prefCats.length > 1) {
+								// Prefs button will trigger a menu
+								popupMenuId = this.mediaId + '-prefs-menu';
+								$newButton.attr({
+									'aria-controls': popupMenuId,
+									'aria-haspopup': 'menu'
+								});
+							}
+							else if (this.prefCats.length === 1) {
+								// Prefs button will trigger a dialog
+								$newButton.attr({
+									'aria-haspopup': 'dialog'
+								});
+							}
 						}
 						else if (control === 'volume') {
 							popupMenuId = this.mediaId + '-volume-slider';
 							// volume slider popup is not a menu or a dialog
 							// therefore, using aria-expanded rather than aria-haspopup to communicate properties/state
-              $newButton.attr({
-                'aria-controls': popupMenuId,
-    						'aria-expanded': 'false'
-              });
+							$newButton.attr({
+								'aria-controls': popupMenuId,
+								'aria-expanded': 'false'
+							});
 						}
 					}
 					if (this.iconType === 'font') {
@@ -4324,39 +4632,39 @@ var AblePlayerInstances = [];
 
 						if ($(this).parent().hasClass('able-right-controls')) {
 							// this control is on the right side
-              var buttonSide = 'right';
+							var buttonSide = 'right';
 						}
 						else {
 							// this control is on the left side
-              var buttonSide = 'left';
+							var buttonSide = 'left';
 						}
 						// populate tooltip, then calculate its width before showing it
 						var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).width();
 						// center the tooltip horizontally over the button
-            if (buttonSide == 'left') {
-    				  var tooltipX = position.left - tooltipWidth/2;
-              if (tooltipX < 0) {
-                // tooltip would exceed the bounds of the player. Adjust.
-                tooltipX = 2;
-              }
-              var tooltipStyle = {
-							  left: tooltipX + 'px',
+						if (buttonSide == 'left') {
+							var tooltipX = position.left - tooltipWidth/2;
+							if (tooltipX < 0) {
+								// tooltip would exceed the bounds of the player. Adjust.
+								tooltipX = 2;
+							}
+							var tooltipStyle = {
+								left: tooltipX + 'px',
 								right: '',
 								top: tooltipY + 'px'
-						  };
-            }
-            else {
-              var tooltipX = position.right - tooltipWidth/2;
-              if (tooltipX < 0) {
-                // tooltip would exceed the bounds of the player. Adjust.
-                tooltipX = 2;
-              }
-              var tooltipStyle = {
+							};
+						}
+						else {
+							var tooltipX = position.right - tooltipWidth/2;
+							if (tooltipX < 0) {
+								// tooltip would exceed the bounds of the player. Adjust.
+								tooltipX = 2;
+							}
+							var tooltipStyle = {
 								left: '',
 								right: tooltipX + 'px',
 								top: tooltipY + 'px'
-						  };
-            }
+							};
+						}
 						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
@@ -4392,22 +4700,22 @@ var AblePlayerInstances = [];
 						this.$playpauseButton = $newButton;
 					}
 					else if (control == 'previous') {
-  					this.$prevButton = $newButton;
-            // if player is being rebuilt because user clicked the Prev button
-            // return focus to that (newly built) button
-            if (this.buttonWithFocus == 'previous') {
-              this.$prevButton.focus();
-              this.buttonWithFocus = null;
-            }
+						this.$prevButton = $newButton;
+						// if player is being rebuilt because user clicked the Prev button
+						// return focus to that (newly built) button
+						if (this.buttonWithFocus == 'previous') {
+							this.$prevButton.focus();
+							this.buttonWithFocus = null;
+						}
 					}
 					else if (control == 'next') {
-  					this.$nextButton = $newButton;
-            // if player is being rebuilt because user clicked the Next button
-            // return focus to that (newly built) button
-            if (this.buttonWithFocus == 'next') {
-              this.$nextButton.focus();
-              this.buttonWithFocus = null;
-            }
+						this.$nextButton = $newButton;
+						// if player is being rebuilt because user clicked the Next button
+						// return focus to that (newly built) button
+						if (this.buttonWithFocus == 'next') {
+							this.$nextButton.focus();
+							this.buttonWithFocus = null;
+						}
 					}
 					else if (control === 'captions') {
 						this.$ccButton = $newButton;
@@ -4941,6 +5249,14 @@ var AblePlayerInstances = [];
 		else if (control === 'help') {
 			// return this.tt.help;
 		}
+		else if (control === 'fullscreen') { 
+			if (!this.fullscreen) {
+				return this.tt.enterFullScreen; 
+			}
+			else { 
+				return this.tt.exitFullScreen; 
+			}
+		}
 		else {
 			// there should be no other controls, but just in case:
 			// return the name of the control with first letter in upper case
@@ -4973,7 +5289,6 @@ var AblePlayerInstances = [];
 		loadingPromises = [];
 
 		this.captions = [];
-		this.captionLabels = [];
 		this.descriptions = [];
 		this.chapters = [];
 		this.meta = [];
@@ -4990,17 +5305,7 @@ var AblePlayerInstances = [];
 		this.getTracks().then(function() {
 
 			tracks = thisObj.tracks;
-
-			if (thisObj.player === 'youtube') {
-				// If captions have been loaded into the captions array (either from YouTube or a local source),
-				// we no longer have a need to use YouTube captions
-				// TODO: Consider whether this is the right place to make this decision
-				// Probably better to make it when cues are identified from YouTube caption sources
-				if (tracks.length) {
-					thisObj.usingYouTubeCaptions = false;
-				}
-			}
-
+			
 			for (i=0; i < tracks.length; i++) {
 
 				track = tracks[i];
@@ -5024,7 +5329,7 @@ var AblePlayerInstances = [];
 				var trackSrc = track.src;
 
 				loadingPromise = thisObj.loadTextObject(trackSrc); // resolves with src, trackText
-				loadingPromises.push(loadingPromise);
+				loadingPromises.push(loadingPromise.catch(function(src) { console.warn('Failed to load captions track from ' + src); }));
 
 				loadingPromise.then((function (track, kind) {
 
@@ -5075,7 +5380,8 @@ var AblePlayerInstances = [];
 		// def - Boolean, true if this is the default track
 		// cues - array with startTime, endTime, and payload
 
-		var thisObj, deferred, promise, captionTracks, trackLang, trackLabel, isDefault;
+		var thisObj, deferred, promise, captionTracks, trackLang, trackLabel, isDefault, 
+				i, j, capLabel, inserted;
 
 		thisObj = this;
 
@@ -5084,6 +5390,8 @@ var AblePlayerInstances = [];
 
 		this.$tracks = this.$media.find('track');
 		this.tracks = [];
+		captionTracks = []; 
+		this.captions = [];
 
 		if (this.$tracks.length) {
 
@@ -5098,7 +5406,6 @@ var AblePlayerInstances = [];
 				else {
 					trackLang = thisObj.lang;
 				}
-
 				if ($(this).attr('label')) {
 					trackLabel = $(this).attr('label');
 				}
@@ -5131,30 +5438,78 @@ var AblePlayerInstances = [];
 					'label': trackLabel,
 					'def': isDefault
 				});
+
+				if ($(this).attr('kind') === 'captions' || $(this).attr('kind') == 'subtitles') { 
+					// also add this track to a dedicated captions object 
+					captionTracks.push({
+						'kind': $(this).attr('kind'),
+						'src': $(this).attr('src'),
+						'language': trackLang,
+						'label': trackLabel,
+						'def': isDefault
+					});
+				}
 			});
 		}
 
-		// check to see if any HTML caption or subitle tracks were found.
-		captionTracks = this.$media.find('track[kind="captions"],track[kind="subtitles"]');
 		if (captionTracks.length) {
-			// HTML captions or subtitles were found. Use those.
+			// HTML captions or subtitles were found. 
+			// Use those, and sort them alphabetically. 
+			this.usingYouTubeCaptions = false; 
+			this.usingVimeoCaptions = false; 
+			for (i = 0; i < captionTracks.length; i++) { 
+				if (this.captions.length === 0) { // this is the first
+					this.captions.push({
+						'language': captionTracks[i].language,
+						'label': captionTracks[i].label,
+						'def': captionTracks[i].def
+					});
+				}
+				else { // there are already captions in the array
+					inserted = false;
+					for (j = 0; j < this.captions.length; j++) {
+						capLabel = captionTracks[i].label; 
+						if (capLabel.toLowerCase() < this.captions[j].label.toLowerCase()) {
+							// insert before track j
+							this.captions.splice(j,0,{
+								'language': captionTracks[i].language,
+								'label': captionTracks[i].label,
+								'def': captionTracks[i].def
+							});
+							inserted = true;
+							break;
+						}
+					}
+					if (!inserted) {
+						// just add track to the end
+						this.captions.push({
+							'language': captionTracks[i].language,
+							'label': captionTracks[i].label,
+							'def': captionTracks[i].def
+						});
+					}
+				}
+			}
 			deferred.resolve();
 		}
 		else {
 			// if this is a youtube or vimeo player, check there for captions/subtitles
 			if (this.player === 'youtube') {
 				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
+					thisObj.usingYouTubeCaptions = true; 	
 					deferred.resolve();
 				});
 			}
 			else if (this.player === 'vimeo') {
 				this.getVimeoCaptionTracks().then(function() {
+					thisObj.usingVimeoCaptions = true; 
 					deferred.resolve();
 				});
 			}
 			else {
 				// this is neither YouTube nor Vimeo
 				// there just ain't no caption tracks
+				this.hasCaptions = false; 
 				deferred.resolve();
 			}
 		}
@@ -5163,6 +5518,7 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.setupCaptions = function (track, trackLang, trackLabel, cues) {
 
+		// Setup player for display of captions 
 		var thisObj, inserted, i, capLabel;
 
 		thisObj = this;
@@ -5171,15 +5527,28 @@ var AblePlayerInstances = [];
 			cues = null;
 		}
 
-		this.hasCaptions = true;
+		if (this.captions.length) { 
+			// there are captions available 
+			this.hasCaptions = true; 
+			this.currentCaption = -1; // TODO: clarify purpose of this 
+			if (this.prefCaptions === 1) { 
+				this.captionsOn = true; 
+			}
+			else { 
+				this.captionsOn = false; 
+			}
+		}
+		else { 
+			this.hasCaptions = false; 
+		}
 
 		// Remove 'default' attribute from all <track> elements
 		// This data has already been saved to this.tracks
 		// and some browsers will display the default captions, despite all standard efforts to suppress them
 		this.$media.find('track').removeAttr('default');
 
-		// caption cues from WebVTT are used to build a transcript for both audio and video
-		// but captions are currently only supported for video
+		// Currently only showing captions for video, not audio 
+		// TODO: Revisit this to enable captions for audio 
 		if (this.mediaType === 'video') {
 
 			if (!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
@@ -5205,51 +5574,17 @@ var AblePlayerInstances = [];
 					this.$vidcapContainer.append(this.$captionsWrapper);
 				}
 			}
-		}
-
-		this.currentCaption = -1;
-		if (this.prefCaptions === 1) {
-			// Captions default to on.
-			this.captionsOn = true;
-		}
-		else {
-			this.captionsOn = false;
-		}
-		if (this.captions.length === 0) { // this is the first
-			this.captions.push({
-				'cues': cues,
-				'language': trackLang,
-				'label': trackLabel,
-				'def': track.def
-			});
-			this.captionLabels.push(trackLabel);
-		}
-		else { // there are already tracks in the array
-			inserted = false;
-			for (i = 0; i < this.captions.length; i++) {
-				capLabel = this.captionLabels[i];
-				if (trackLabel.toLowerCase() < this.captionLabels[i].toLowerCase()) {
-					// insert before track i
-					this.captions.splice(i,0,{
-						'cues': cues,
-						'language': trackLang,
-						'label': trackLabel,
-						'def': track.def
-					});
-					this.captionLabels.splice(i,0,trackLabel);
-					inserted = true;
-					break;
+			// Add cues to this.captions for the current language 
+			for (i = 0; i < this.captions.length; i++) { 
+				if (this.captions[i].language === trackLang) { 
+					this.captions[i].cues = cues; 
 				}
 			}
-			if (!inserted) {
-				// just add track to the end
-				this.captions.push({
-					'cues': cues,
-					'language': trackLang,
-					'label': trackLabel,
-					'def': track.def
-				});
-				this.captionLabels.push(trackLabel);
+			// Do the same for this.tracks 
+			for (i = 0; i < this.tracks.length; i++) { 
+				if (this.tracks[i].language === trackLang) { 
+					this.tracks[i].cues = cues; 
+				}
 			}
 		}
 	};
@@ -5326,43 +5661,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if (thisObj.debug) {
 					console.log ('error reading file ' + src + ': ' + status);
 				}
-				deferred.fail();
+				deferred.reject(src);
 			}
 			else {
 				deferred.resolve(src, trackText);
 			}
 			$tempDiv.remove();
 		});
-		return promise;
-	};
-
-	AblePlayer.prototype.setupAltCaptions = function() {
-
-		// setup captions from an alternative source (not <track> elements)
-		// only do this if no <track> captions are provided
-		// currently supports: YouTube, Vimeo
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-		if (this.captions.length === 0) {
-			if (this.player === 'youtube' && this.usingYouTubeCaptions) {
-				this.setupYouTubeCaptions().done(function() {
-					deferred.resolve();
-				});
-			}
-			else if (this.player === 'vimeo' && this.usingVimeoCaptions) {
-				this.setupVimeoCaptions().done(function() {
-					deferred.resolve();
-				});
-			}
-
-			else {
-				// repeat for other alt sources once supported (e.g., Vimeo, DailyMotion)
-				deferred.resolve();
-			}
-		}
-		else { // there are <track> captions, so no need for alt source captions
-			deferred.resolve();
-		}
 		return promise;
 	};
 
@@ -5387,7 +5692,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			youTubeId = this.youTubeId;
 		}
 		this.activeYouTubeId = youTubeId;
-		if (AblePlayer.youtubeIframeAPIReady) {
+		if (AblePlayer.youTubeIframeAPIReady) {
 			// Script already loaded and ready.
 			this.finalizeYoutubeInit().then(function() {
 				deferred.resolve();
@@ -5395,14 +5700,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else {
 			// Has another player already started loading the script? If so, abort...
-			if (!AblePlayer.loadingYoutubeIframeAPI) {
+			if (!AblePlayer.loadingYouTubeIframeAPI) {
 				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
 					deferred.fail();
 				});
 			}
 
 			// Otherwise, keeping waiting for script load event...
-			$('body').on('youtubeIframeAPIReady', function () {
+			$('body').on('youTubeIframeAPIReady', function () {
 				thisObj.finalizeYoutubeInit().then(function() {
 					deferred.resolve();
 				});
@@ -5414,6 +5719,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	AblePlayer.prototype.finalizeYoutubeInit = function () {
 
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
+
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions, autoplay;
 
 		deferred = new $.Deferred();
@@ -5433,10 +5739,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// cc_load_policy:
 		// 0 - show captions depending on user's preference on YouTube
 		// 1 - show captions by default, even if the user has turned them off
-		// For Able Player, init player with value of 0
-		// and will turn them on or off after player is initialized
-		// based on availability of local tracks and user's Able Player prefs
-		ccLoadPolicy = 0;
+		// IMPORTANT: This *must* be set to 1 or some browsers 
+		// fail to load any texttracks (observed in Chrome, not in Firefox) 
+		ccLoadPolicy = 1;
 
 		videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
 		if (videoDimensions) {
@@ -5459,11 +5764,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			autoplay = 0;
 		}
 
-		// NOTE: YouTube is changing the following parameters on or after Sep 25, 2018:
-		// rel - No longer able to prevent YouTube from showing related videos
-		//			value of 0 now limits related videos to video's same channel
-		// showinfo - No longer supported (previously, value of 0 hid title, share, & watch later buttons
 		// Documentation https://developers.google.com/youtube/player_parameters
+
+		if (typeof this.captionLang == 'undefined') { 
+			// init using the default player lang
+			this.captionLang = this.lang; 
+		}
 
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
@@ -5478,14 +5784,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				start: this.startTime,
 				controls: 0, // no controls, using our own
 				cc_load_policy: ccLoadPolicy,
-				hl: this.lang, // use the default language UI
+				cc_lang_pref: this.captionLang, // set the caption language 
+				hl: this.lang, // set the UI language to match Able Player 
 				modestbranding: 1, // no YouTube logo in controller
-				rel: 0, // do not show related videos when video ends
-				html5: 1, // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
+				rel: 0, // when video ends, show only related videos from same channel (1 shows any)
 				iv_load_policy: 3 // do not show video annotations
 			},
 			events: {
 				onReady: function () {
+
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
@@ -5506,8 +5813,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				onError: function (x) {
 					deferred.fail();
 				},
-				onStateChange: function (x) {
+				onStateChange: function (x) {					
 					thisObj.getPlayerState().then(function(playerState) {
+
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
 							thisObj.playing = true;
@@ -5531,26 +5839,18 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 							thisObj.paused = true;
 						}
 					});
+					// If caption tracks are hosted locally, but are also available on YouTube,
+					// we need to turn them off on YouTube or there will be redundant captions 
+					// This is the most reliable event on which to unload the caption module 
+					if (thisObj.player === 'youtube' && !thisObj.usingYouTubeCaptions) { 						
+						if (thisObj.youTubePlayer.getOptions('captions')) { 							
+							thisObj.youTubePlayer.unloadModule('captions');
+						}
+					}			 			
 				},
 				onPlaybackQualityChange: function () {
 					// do something
 				},
-				onApiChange: function (x) {
-					// As of Able Player v2.2.23, we are now getting caption data via the YouTube Data API
-					// prior to calling initYouTubePlayer()
-					// Previously we got caption data via the YouTube iFrame API, and doing so was an awful mess.
-					// onApiChange fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
-					// it isn't fired until the video starts playing
-					// if captions are available for this video (automated captions don't count)
-					// the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires
-					// So, to trigger this event we had to play the video briefly, then pause, then reset.
-					// During that brief moment of playback, the onApiChange event was fired and we could setup captions
-					// The 'captions' and 'cc' modules are very different, and have different data and methods
-					// NOW, in v2.2.23, we still need to initialize the caption modules in order to control captions
-					// but we don't have to do that on load in order to get caption data
-					// Instead, we can wait until the video starts playing normally, then retrieve the modules
-					thisObj.initYouTubeCaptionModule();
-				}
 			}
 		});
 
@@ -5653,288 +5953,82 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 	};
 
-	AblePlayer.prototype.setupYouTubeCaptions = function () {
-
-		// called from setupAltCaptions if player is YouTube and there are no <track> captions
-
-		// use YouTube Data API to get caption data from YouTube
-		// function is called only if these conditions are met:
-		// 1. this.player === 'youtube'
-		// 2. there are no <track> elements with kind="captions"
-		// 3. youTubeDataApiKey is defined
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		var thisObj, googleApiPromise, youTubeId, i;
-
-		thisObj = this;
-
-		// if a described version is available && user prefers desription
-		// Use the described version, and get its captions
-		if (this.youTubeDescId && this.prefDesc) {
-			youTubeId = this.youTubeDescId;
-		}
-		else {
-			youTubeId = this.youTubeId;
-		}
-
-		if (typeof youTubeDataAPIKey !== 'undefined') {
-			// Wait until Google Client API is loaded
-			// When loaded, it sets global var googleApiReady to true
-
-			// Thanks to Paul Tavares for $.doWhen()
-			// https://gist.github.com/purtuga/8257269
-			$.doWhen({
-				when: function(){
-					return googleApiReady;
-				},
-				interval: 100, // ms
-				attempts: 1000
-			})
-			.done(function(){
-					deferred.resolve();
-			})
-			.fail(function(){
-				console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
-			});
-		}
-		else {
-			deferred.resolve();
-		}
-		return promise;
-	};
-
-	AblePlayer.prototype.waitForGapi = function () {
-
-		// wait for Google API to initialize
-
-		var thisObj, deferred, promise, maxWaitTime, maxTries, tries, timer, interval;
-
-		thisObj = this;
-		deferred = new $.Deferred();
-		promise = deferred.promise();
-		maxWaitTime = 5000; // 5 seconds
-		maxTries = 100; // number of tries during maxWaitTime
-		tries = 0;
-		interval = Math.floor(maxWaitTime/maxTries);
-
-		timer = setInterval(function() {
-			tries++;
-			if (googleApiReady || tries >= maxTries) {
-				clearInterval(timer);
-				if (googleApiReady) { // success!
-					deferred.resolve(true);
-				}
-				else { // tired of waiting
-					deferred.resolve(false);
-				}
-			}
-			else {
-				thisObj.waitForGapi();
-			}
-		}, interval);
-		return promise;
-	};
-
 	AblePlayer.prototype.getYouTubeCaptionTracks = function (youTubeId) {
 
-		// get data via YouTube Data API, and push data to this.captions
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		var thisObj, useGoogleApi, i, trackId, trackLang, trackName, trackLabel, trackKind, isDraft, isDefaultTrack;
-
-		thisObj = this;
-
-		if (typeof youTubeDataAPIKey !== 'undefined') {
-			this.waitForGapi().then(function(waitResult) {
-
-				useGoogleApi = waitResult;
-
-				// useGoogleApi returns false if API failed to initalize after max wait time
-				// Proceed only if true. Otherwise can still use fallback method (see else loop below)
-				if (useGoogleApi === true) {
-					gapi.client.setApiKey(youTubeDataAPIKey);
-					gapi.client
-						.load('youtube', 'v3')
-						.then(function() {
-							var request = gapi.client.youtube.captions.list({
-								'part': 'id, snippet',
-								'videoId': youTubeId
-							});
-							request.then(function(json) {
-								if (json.result.items.length) { // video has captions!
-									thisObj.hasCaptions = true;
-									thisObj.usingYouTubeCaptions = true;
-									if (thisObj.prefCaptions === 1) {
-										thisObj.captionsOn = true;
-									}
-									else {
-										thisObj.captionsOn = false;
-									}
-									// Step through results and add them to cues array
-									for (i=0; i < json.result.items.length; i++) {
-										trackName = json.result.items[i].snippet.name; // usually seems to be empty
-										trackLang = json.result.items[i].snippet.language;
-										trackKind = json.result.items[i].snippet.trackKind; // ASR, standard, forced
-										isDraft = json.result.items[i].snippet.isDraft; // Boolean
-										// Other variables that could potentially be collected from snippet:
-										// isCC - Boolean, always seems to be false
-										// isLarge - Boolean
-										// isEasyReader - Boolean
-										// isAutoSynced	 Boolean
-										// status - string, always seems to be "serving"
-
-										var srcUrl = thisObj.getYouTubeTimedTextUrl(youTubeId,trackName,trackLang);
-										if (trackKind !== 'ASR' && !isDraft) {
-
-											if (trackName !== '') {
-												 trackLabel = trackName;
-											}
-											else {
-												 // if track name is empty (it always seems to be), assign a label based on trackLang
-												 trackLabel = thisObj.getLanguageName(trackLang);
-											}
-
-											// assign the default track based on language of the player
-											if (trackLang === thisObj.lang) {
-												isDefaultTrack = true;
-											}
-											else {
-												isDefaultTrack = false;
-											}
-											thisObj.tracks.push({
-												'kind': 'captions',
-												'src': srcUrl,
-												'language': trackLang,
-												'label': trackLabel,
-												'def': isDefaultTrack
-											});
-										}
-									}
-									// setupPopups again with new captions array, replacing original
-									thisObj.setupPopups('captions');
-									deferred.resolve();
-								}
-								else {
-									thisObj.hasCaptions = false;
-									thisObj.usingYouTubeCaptions = false;
-									deferred.resolve();
-								}
-							}, function (reason) {
-								// If video has no captions, YouTube returns an error.
-								// Should still proceed, but with captions disabled
-								// The specific error, if needed: reason.result.error.message
-								// If no captions, the error is: "The video identified by the <code>videoId</code> parameter could not be found."
-								console.log('Error retrieving captions.');
-								console.log('Check your video on YouTube to be sure captions are available and published.');
-								thisObj.hasCaptions = false;
-								thisObj.usingYouTubeCaptions = false;
-								deferred.resolve();
-							});
-						})
-				}
-				else {
-					// googleAPi never loaded.
-					this.getYouTubeCaptionTracks2(youTubeId).then(function() {
-						deferred.resolve();
-					});
-				}
-			});
-		}
-		else {
-			// web owner hasn't provided a Google API key
-			// attempt to get YouTube captions via the backup method
-			this.getYouTubeCaptionTracks2(youTubeId).then(function() {
-				deferred.resolve();
-			});
-		}
-		return promise;
-	};
-
-	AblePlayer.prototype.getYouTubeCaptionTracks2 = function (youTubeId) {
-
-	 	// Use alternative backup method of getting caption tracks from YouTube
-	 	// and pushing them to this.captions
-	 	// Called from getYouTubeCaptionTracks if no Google API key is defined
-	 	// or if Google API failed to initiatlize
-	 	// This method seems to be undocumented, but is referenced on StackOverflow
-	 	// We'll use that as a fallback but it could break at any moment
+		// get data via YouTube IFrame Player API, and push data to this.tracks & this.captions
+		// NOTE: Caption tracks are not available through the IFrame Player API 
+		// until AFTER the video has started playing. 
+		// Therefore, this function plays the video briefly in order to load the captions module
+		// then stops the video and collects the data needed to build the cc menu 
+		// This is stupid, but seemingly unavoidable. 
+		// Caption tracks could be obtained through the YouTube Data API 
+		// but this required authors to have a Google API key, 
+		// which would complicate Able Player installation 
 
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
 
-		var thisObj, useGoogleApi, i, trackId, trackLang, trackName, trackLabel, trackKind, isDraft, isDefaultTrack;
+		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack;
 
 		thisObj = this;
-
-		$.ajax({
-			type: 'get',
-			url: 'https://www.youtube.com/api/timedtext?type=list&v=' + youTubeId,
-			dataType: 'xml',
-			success: function(xml) {
-				var $tracks = $(xml).find('track');
-				if ($tracks.length > 0) {	 // video has captions!
-					thisObj.hasCaptions = true;
-					thisObj.usingYouTubeCaptions = true;
-					if (thisObj.prefCaptions === 1) {
-						thisObj.captionsOn = true;
-					}
-					else {
-						thisObj.captionsOn = false;
-					}
-					// Step through results and add them to tracks array
-					$tracks.each(function() {
-						trackId = $(this).attr('id');
-						trackLang = $(this).attr('lang_code');
-						if ($(this).attr('name') !== '') {
-							trackName = $(this).attr('name');
-							trackLabel = trackName;
+		
+		if (!this.youTubePlayer.getOption('captions','tracklist')) { 			
+			// no tracks were found, probably because the captions module hasn't loaded  
+			// play video briefly (required in order to load the captions module) 
+			// and after the apiChange event is triggered, try again to retreive tracks
+			this.youTubePlayer.addEventListener('onApiChange',function(x) { 
+				if (thisObj.loadingYouTubeCaptions) { 				
+					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
+					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
+					thisObj.youTubePlayer.stopVideo(); 
+					// Step through ytTracks and add them to global tracks array
+					// Note: Unlike YouTube Data API, the IFrame Player API only returns 
+					// tracks that are published, and does NOT include ASR captions 
+					// So, no additional filtering is required 
+					for (i=0; i < ytTracks.length; i++) {
+						trackLang = ytTracks[i].languageCode; 
+						trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+						isDefaultTrack = false; 
+						if (typeof thisObj.captionLang !== 'undefined') { 
+							if (trackLang === thisObj.captionLang) {
+								isDefaultTrack = true;						
+							}
 						}
-						else {
-							// @name is typically null except for default track
-							// but lang_translated seems to be reliable
-							trackName = '';
-							trackLabel = $(this).attr('lang_translated');
+						else if (typeof thisObj.lang !== 'undefined') { 
+							if (trackLang === thisObj.lang) {
+								isDefaultTrack = true;						
+							}
 						}
-						if (trackLabel === '') {
-							trackLabel = thisObj.getLanguageName(trackLang);
-						}
-						// assign the default track based on language of the player
-						if (trackLang === thisObj.lang) {
-							isDefaultTrack = true;
-						}
-						else {
-							isDefaultTrack = false;
-						}
-
-						// Build URL for retrieving WebVTT source via YouTube's timedtext API
-						var srcUrl = thisObj.getYouTubeTimedTextUrl(youTubeId,trackName,trackLang);
 						thisObj.tracks.push({
 							'kind': 'captions',
-							'src': srcUrl,
 							'language': trackLang,
 							'label': trackLabel,
 							'def': isDefaultTrack
 						});
-
-					});
+					}
+					thisObj.captions = thisObj.tracks; 
+					thisObj.hasCaptions = true;
 					// setupPopups again with new captions array, replacing original
-					thisObj.setupPopups('captions');
-					deferred.resolve();
+					thisObj.setupPopups('captions');				
+					thisObj.loadingYouTubeCaptions = false; 
 				}
-				else {
-					thisObj.hasCaptions = false;
-					thisObj.usingYouTubeCaptions = false;
-					deferred.resolve();
+				if (thisObj.captionLangPending) { 
+					// user selected a new caption language prior to playback starting 
+					// set it now 
+					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
+					thisObj.captionLangPending = null; 
 				}
-			},
-			error: function(xhr, status) {
-				console.log('Error retrieving YouTube caption data for video ' + youTubeId);
+				if (typeof thisObj.prefCaptionsSize !== 'undefined') { 
+					// set the default caption size 
+					// this doesn't work until the captions module is loaded 
+					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
+				}
 				deferred.resolve();
-			}
-		});
+			});
+			// Trigger the above event listener by briefly playing the video 		
+			this.loadingYouTubeCaptions = true; 			
+			this.youTubePlayer.playVideo();		
+		}
 		return promise;
 	};
 
@@ -5942,6 +6036,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// return URL for retrieving WebVTT source via YouTube's timedtext API
 		// Note: This API seems to be undocumented, and could break anytime
+		// UPDATE: Google removed this API on November 10, 2021 
+		// This function is no longer called, but is preserved here for reference 
 		var url = 'https://www.youtube.com/api/timedtext?fmt=vtt';
 		url += '&v=' + youTubeId;
 		url += '&lang=' + trackLang;
@@ -5972,73 +6068,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		deferred.resolve();
 		return promise;
-	};
-
-	AblePlayer.prototype.initYouTubeCaptionModule = function () {
-
-		// This function is called when YouTube onApiChange event fires
-		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
-		// it isn't fired until the video starts playing
-		// and only fires if captions are available for this video (automated captions don't count)
-		// If no captions are available, onApichange event never fires & this function is never called
-
-		// YouTube iFrame API documentation is incomplete related to captions
-		// Found undocumented features on user forums and by playing around
-		// Details are here: http://terrillthompson.com/blog/648
-		// Summary:
-		// User might get either the AS3 (Flash) or HTML5 YouTube player
-		// The API uses a different caption module for each player (AS3 = 'cc'; HTML5 = 'captions')
-		// There are differences in the data and methods available through these modules
-		// This function therefore is used to determine which captions module is being used
-		// If it's a known module, this.ytCaptionModule will be used elsewhere to control captions
-		var options, fontSize, displaySettings;
-
-		options = this.youTubePlayer.getOptions();
-		if (options.length) {
-			for (var i=0; i<options.length; i++) {
-				if (options[i] == 'cc') { // this is the AS3 (Flash) player
-					this.ytCaptionModule = 'cc';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-				else if (options[i] == 'captions') { // this is the HTML5 player
-					this.ytCaptionModule = 'captions';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-			}
-			if (typeof this.ytCaptionModule !== 'undefined') {
-				if (this.usingYouTubeCaptions) {
-					// set default languaage
-					this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
-					// set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
-					this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
-					// ideally could set other display options too, but no others seem to be supported by setOption()
-				}
-				else {
-					// now that we know which cc module was loaded, unload it!
-					// we don't want it if we're using local <track> elements for captions
-					this.youTubePlayer.unloadModule(this.ytCaptionModule)
-				}
-			}
-		}
-		else {
-			// no modules were loaded onApiChange
-			// unfortunately, gonna have to disable captions if we can't control them
-			this.hasCaptions = false;
-			this.usingYouTubeCaptions = false;
-		}
-		this.refreshControls('captions');
 	};
 
 	AblePlayer.prototype.getYouTubePosterUrl = function (youTubeId, width) {
@@ -6114,7 +6143,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Add a seekhead
 		this.seekHead = $('<div>',{
-			'orientation': orientation,
+			'aria-orientation': orientation,
 			'class': 'able-' + className + '-head'
 		});
 
@@ -6146,15 +6175,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.bodyDiv.wrap('<div></div>');
 		this.wrapperDiv = this.bodyDiv.parent();
 
-    if (this.skin === 'legacy') {
-  		if (orientation === 'horizontal') {
-	  		this.wrapperDiv.width(length);
-        this.loadedDiv.width(0);
-		  }
-      else {
-			  this.wrapperDiv.height(length);
-        this.loadedDiv.height(0);
-		  }
+		if (this.skin === 'legacy') {
+			if (orientation === 'horizontal') {
+				this.wrapperDiv.width(length);
+				this.loadedDiv.width(0);
+			}
+			else {
+				this.wrapperDiv.height(length);
+				this.loadedDiv.height(0);
+			}
 		}
 		this.wrapperDiv.addClass('able-' + className + '-wrapper');
 
@@ -6168,121 +6197,121 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.setDuration(max);
 		}
 
-    // handle seekHead events
+		// handle seekHead events
 		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
-      coords = thisObj.pointerEventToXY(e);
+			coords = thisObj.pointerEventToXY(e);
 
-		  if (e.type === 'mouseenter' || e.type === 'focus') {
-  			thisObj.overHead = true;
-      }
-      else if (e.type === 'mouseleave' || e.type === 'blur') {
-  			thisObj.overHead = false;
-        if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-			  }
-      }
-      else if (e.type === 'mousemove' || e.type === 'touchmove') {
-  			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.trackHeadAtPageX(coords.x);
-        }
-      }
-      else if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-        if (!thisObj.bodyDiv.is(':focus')) {
-				  thisObj.bodyDiv.focus();
-			  }
-        e.preventDefault();
-      }
-      else if (e.type === 'mouseup' || e.type === 'touchend') {
-  			if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-        }
-      }
-      if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
-  			thisObj.refreshTooltip();
-  		}
+			if (e.type === 'mouseenter' || e.type === 'focus') {
+				thisObj.overHead = true;
+			}
+			else if (e.type === 'mouseleave' || e.type === 'blur') {
+				thisObj.overHead = false;
+				if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				}
+			}
+			else if (e.type === 'mousemove' || e.type === 'touchmove') {
+				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+					thisObj.trackHeadAtPageX(coords.x);
+				}
+			}
+			else if (e.type === 'mousedown' || e.type === 'touchstart') {
+				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
+				if (!thisObj.bodyDiv.is(':focus')) {
+					thisObj.bodyDiv.focus();
+				}
+				e.preventDefault();
+			}
+			else if (e.type === 'mouseup' || e.type === 'touchend') {
+				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				}
+			}
+			if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+				thisObj.refreshTooltip();
+			}
 		});
 
-    // handle bodyDiv events
+		// handle bodyDiv events
 		this.bodyDiv.on(
-		  'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
+			'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
-      coords = thisObj.pointerEventToXY(e);
+			coords = thisObj.pointerEventToXY(e);
 
-  		if (e.type === 'mouseenter') {
-  			thisObj.overBody = true;
-		  }
-		  else if (e.type === 'mouseleave') {
-  			thisObj.overBody = false;
-        thisObj.overBodyMousePos = null;
-  			if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-	  			thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-			  }
-      }
-      else if (e.type === 'mousemove' || e.type === 'touchmove') {
-  			thisObj.overBodyMousePos = {
-	  			x: coords.x,
-          y: coords.y
-			  };
-        if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.trackHeadAtPageX(coords.x);
-			  }
-      }
-      else if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
-        thisObj.trackHeadAtPageX(coords.x);
-        if (!thisObj.seekHead.is(':focus')) {
-				  thisObj.seekHead.focus();
-			  }
-        e.preventDefault();
-      }
-      else if (e.type === 'mouseup' || e.type === 'touchend') {
-        if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-				  thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-			  }
-      }
-      else if (e.type === 'keydown') {
-	  		// Home
-  			if (e.which === 36) {
-		  		thisObj.trackImmediatelyTo(0);
-			  }
-        // End
-        else if (e.which === 35) {
-				  thisObj.trackImmediatelyTo(thisObj.duration);
-			  }
-        // Left arrow or down arrow
-        else if (e.which === 37 || e.which === 40) {
-				  thisObj.arrowKeyDown(-1);
-			  }
-        // Right arrow or up arrow
-        else if (e.which === 39 || e.which === 38) {
-				  thisObj.arrowKeyDown(1);
-			  }
-        // Page up
-        else if (e.which === 33 && bigInterval > 0) {
-				  thisObj.arrowKeyDown(bigInterval);
-			  }
-        // Page down
-        else if (e.which === 34 && bigInterval > 0) {
-				  thisObj.arrowKeyDown(-bigInterval);
-			  }
-        else {
-				  return;
-			  }
-        e.preventDefault();
-      }
-      else if (e.type === 'keyup') {
-  			if (e.which >= 33 && e.which <= 40) {
-	  			if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
-		  			thisObj.stopTracking(thisObj.keyTrackPosition);
-          }
-          e.preventDefault();
-			  }
-      }
-      if (e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
-  			thisObj.refreshTooltip();
-  		}
+			if (e.type === 'mouseenter') {
+				thisObj.overBody = true;
+			}
+			else if (e.type === 'mouseleave') {
+				thisObj.overBody = false;
+				thisObj.overBodyMousePos = null;
+				if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
+					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				}
+			}
+			else if (e.type === 'mousemove' || e.type === 'touchmove') {
+				thisObj.overBodyMousePos = {
+					x: coords.x,
+					y: coords.y
+				};
+				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+					thisObj.trackHeadAtPageX(coords.x);
+				}
+			}
+			else if (e.type === 'mousedown' || e.type === 'touchstart') {
+				thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
+				thisObj.trackHeadAtPageX(coords.x);
+				if (!thisObj.seekHead.is(':focus')) {
+					thisObj.seekHead.focus();
+				}
+				e.preventDefault();
+			}
+			else if (e.type === 'mouseup' || e.type === 'touchend') {
+				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
+					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				}
+			}
+			else if (e.type === 'keydown') {
+				// Home
+				if (e.which === 36) {
+					thisObj.trackImmediatelyTo(0);
+				}
+				// End
+				else if (e.which === 35) {
+					thisObj.trackImmediatelyTo(thisObj.duration);
+				}
+				// Left arrow or down arrow
+				else if (e.which === 37 || e.which === 40) {
+					thisObj.arrowKeyDown(-1);
+				}
+				// Right arrow or up arrow
+				else if (e.which === 39 || e.which === 38) {
+					thisObj.arrowKeyDown(1);
+				}
+				// Page up
+				else if (e.which === 33 && bigInterval > 0) {
+					thisObj.arrowKeyDown(bigInterval);
+				}
+				// Page down
+				else if (e.which === 34 && bigInterval > 0) {
+					thisObj.arrowKeyDown(-bigInterval);
+				}
+				else {
+					return;
+				}
+				e.preventDefault();
+			}
+			else if (e.type === 'keyup') {
+				if (e.which >= 33 && e.which <= 40) {
+					if (thisObj.tracking && thisObj.trackDevice === 'keyboard') {
+						thisObj.stopTracking(thisObj.keyTrackPosition);
+					}
+					e.preventDefault();
+				}
+			}
+			if (e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
+				thisObj.refreshTooltip();
+			}
 		});
 	}
 
@@ -6378,10 +6407,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	// TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.	Change this to display them all.
 	AccessibleSlider.prototype.setBuffered = function (ratio) {
-    if (!isNaN(ratio)) {
-  		this.buffered = ratio;
-      this.redrawDivs;
-    }
+		if (!isNaN(ratio)) {
+			this.buffered = ratio;
+			this.redrawDivs;
+		}
 	}
 
 	AccessibleSlider.prototype.startTracking = function (device, position) {
@@ -6477,10 +6506,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.overHead) {
 			this.timeTooltip.show();
 			if (this.tracking) {
-  		  this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+				this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
 			}
 			else {
-  		  this.timeTooltip.text(this.positionToStr(this.position));
+				this.timeTooltip.text(this.positionToStr(this.position));
 			}
 			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
 		}
@@ -6521,23 +6550,23 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 	};
 
-  AccessibleSlider.prototype.pointerEventToXY = function(e) {
+	AccessibleSlider.prototype.pointerEventToXY = function(e) {
 
-    // returns array of coordinates x and y in response to both mouse and touch events
-    // for mouse events, this comes from e.pageX and e.pageY
-    // for touch events, it's a bit more complicated
-    var out = {x:0, y:0};
-    if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
-      var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-      out.x = touch.pageX;
-      out.y = touch.pageY;
-    }
-    else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
-      out.x = e.pageX;
-      out.y = e.pageY;
-    }
-    return out;
-  };
+		// returns array of coordinates x and y in response to both mouse and touch events
+		// for mouse events, this comes from e.pageX and e.pageY
+		// for touch events, it's a bit more complicated
+		var out = {x:0, y:0};
+		if (e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel') {
+			var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+			out.x = touch.pageX;
+			out.y = touch.pageY;
+		}
+		else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+			out.x = e.pageX;
+			out.y = e.pageY;
+		}
+		return out;
+	};
 
 })(jQuery);
 
@@ -6644,13 +6673,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			else if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
-  				thisObj.closingVolume = true; // stopgap
+					thisObj.closingVolume = true; // stopgap
 					thisObj.hideVolumePopup();
 				}
 				else {
-  				if (!thisObj.closingVolume) {
-  					thisObj.showVolumePopup();
-  				}
+					if (!thisObj.closingVolume) {
+						thisObj.showVolumePopup();
+					}
 				}
 			}
 			else {
@@ -6672,24 +6701,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		trackOnTop = this.volumeTrackHeight - trackOnHeight;
 		headTop = trackOnTop - this.volumeHeadHeight;
 
-    if (this.$volumeSliderTrackOn) {
-  		this.$volumeSliderTrackOn.css({
-	  		'height': trackOnHeight + 'px',
-        'top': trackOnTop + 'px'
-		  });
+		if (this.$volumeSliderTrackOn) {
+			this.$volumeSliderTrackOn.css({
+				'height': trackOnHeight + 'px',
+				'top': trackOnTop + 'px'
+			});
 		}
 		if (this.$volumeSliderHead) {
-      this.$volumeSliderHead.attr({
-			  'aria-valuenow': volume,
-        'aria-valuetext': volumePctText
-		  });
-      this.$volumeSliderHead.css({
-			  'top': headTop + 'px'
-		  });
+			this.$volumeSliderHead.attr({
+				'aria-valuenow': volume,
+				'aria-valuetext': volumePctText
+			});
+			this.$volumeSliderHead.css({
+				'top': headTop + 'px'
+			});
 		}
 		if (this.$volumeAlert) {
-  		this.$volumeAlert.text(volumePct + '%');
-    }
+			this.$volumeAlert.text(volumePct + '%');
+		}
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
@@ -6710,13 +6739,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$volumeButton.find('img').attr('src',volumeImg);
 		}
 		else if (this.iconType === 'svg') {
-  		if (volumeName !== 'mute') {
-    		volumeName = 'volume-' + volumeName;
-      }
-		  newSvgData = this.getSvgData(volumeName);
-      this.$volumeButton.find('svg').attr('viewBox',newSvgData[0]);
-      this.$volumeButton.find('path').attr('d',newSvgData[1]);
-    }
+			if (volumeName !== 'mute') {
+				volumeName = 'volume-' + volumeName;
+			}
+			newSvgData = this.getSvgData(volumeName);
+			this.$volumeButton.find('svg').attr('viewBox',newSvgData[0]);
+			this.$volumeButton.find('path').attr('d',newSvgData[1]);
+		}
 	};
 
 	AblePlayer.prototype.moveVolumeHead = function(y) {
@@ -6780,9 +6809,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.hideVolumePopup();
 			}
 			else {
-        if (!this.closingVolume) {
-  				this.showVolumePopup();
-        }
+				if (!this.closingVolume) {
+					this.showVolumePopup();
+				}
 			}
 			return;
 		}
@@ -6836,16 +6865,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.hideVolumePopup = function() {
 
-    var thisObj = this;
+		var thisObj = this;
 
 		this.$volumeSlider.hide().attr('aria-hidden','true');
 		this.$volumeSliderHead.attr('tabindex','-1');
 		this.$volumeButton.attr('aria-expanded','false').focus();
-    // wait a second before resetting stopgap var
-    // otherwise the keypress used to close volume popup will trigger the volume button
-    setTimeout(function() {
-      thisObj.closingVolume = false;
-    }, 1000);
+		// wait a second before resetting stopgap var
+		// otherwise the keypress used to close volume popup will trigger the volume button
+		setTimeout(function() {
+			thisObj.closingVolume = false;
+		}, 1000);
 	};
 
 	AblePlayer.prototype.isMuted = function () {
@@ -6982,8 +7011,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var modal = modalDiv;
 		this.modal = modal;
 		modal.css({
-			'width': width || '50%',
-			'top': (fullscreen ? '0' : '5%')
+			'width': width || '50%'
 		});
 		modal.addClass('able-modal-dialog');
 
@@ -7112,11 +7140,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.focusedElementBeforeModal.focus();
 	};
 
-  AccessibleDialog.prototype.getInputs = function () {
+	AccessibleDialog.prototype.getInputs = function () {
 
-    // return an array of input elements within this dialog
-    if (this.modal) {
-		  var inputs = this.modal.find('input');
+		// return an array of input elements within this dialog
+		if (this.modal) {
+			var inputs = this.modal.find('input');
 			return inputs;
 		}
 		return false;
@@ -7312,18 +7340,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
 		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
+		// useDescFormat is the format actually used ('video' or 'text'), regardless of user preference 
+		// prevDescFormat is the value of useDescFormat before user toggled off description 
 		// prefDescPause == 1 to pause video when description starts; else 0
-		// prefVisibleDesc == 1 to visibly show text-based description area; else 0
+		// prefDescVisible == 1 to visibly show text-based description area; else 0
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
 		// hasClosedDesc == true if a description text track is available
-		// this.useDescFormat == either 'video' or 'text'; the format ultimately delivered
 		// descOn == true if description of either type is on
 		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
 
 		var thisObj = this;
-    if (this.refreshingDesc) {
-		  this.prevDescFormat = this.useDescFormat;
-    }
+		if (this.refreshingDesc) {
+			this.prevDescFormat = this.useDescFormat;
+		}
 		else {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
@@ -7345,14 +7374,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 
-		// update this.useDescFormat based on media availability & user preferences
+		// Set this.useDescFormat based on media availability & user preferences
 		if (this.prefDesc) {
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. Always use 'video'
+				// both formats are available. User gets their preference. 
 				this.useDescFormat = this.prefDescFormat;
 				this.descOn = true;
-				// Do not pause during descriptions when playing described video
-				this.prefDescPause = false;
 			}
 			else if (this.hasOpenDesc) {
 				this.useDescFormat = 'video';
@@ -7363,55 +7390,33 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.descOn = true;
 			}
 		}
-		else { // description button is off
-      this.useDescFormat = false;
+		else { 
+			// prefDesc is not set for this user 
+			this.useDescFormat = null;
 			this.descOn = false;
 		}
 
-		if (this.useDescFormat === 'text') {
-			// check whether browser supports the Web Speech API
-			if (window.speechSynthesis) {
-				// It does!
-				this.synth = window.speechSynthesis;
-				this.descVoices = this.synth.getVoices();
-				// select the first voice that matches the track language
-				// available languages are identified with local suffixes (e.g., en-US)
-				// in case no matching voices are found, use the first voice in the voices array
-				this.descVoiceIndex = 0;
-				for (var i=0; i<this.descVoices.length; i++) {
-					if (this.captionLang.length === 2) {
-						// match only the first 2 characters of the lang code
-						if (this.descVoices[i].lang.substr(0,2).toLowerCase() === this.captionLang.toLowerCase()) {
-							this.descVoiceIndex = i;
-							break;
-						}
-					}
-					else {
-						// match the entire lang code
-						if (this.descVoices[i].lang.toLowerCase() === this.captionLang.toLowerCase()) {
-							this.descVoiceIndex = i;
-							break;
-						}
-					}
-				}
-			}
+		if (this.useDescFormat === 'video') { 
+			// If text descriptions are also available, silence them 
+			this.exposeTextDescriptions = false; 
 		}
+
 		if (this.descOn) {
 			if (this.useDescFormat === 'video') {
-				if (!this.usingAudioDescription()) {
+				if (!this.usingDescribedVersion()) {
 					// switched from non-described to described version
 					this.swapDescription();
 				}
 			}
 			if (this.hasClosedDesc) {
-				if (this.prefVisibleDesc) {
-  				// make description text visible
-  				// New in v4.0.10: Do this regardless of useDescFormat
-  				this.$descDiv.show();
+				if (this.prefDescVisible) {
+					// make description text visible
+					// New in v4.0.10: Do this regardless of useDescFormat
+					this.$descDiv.show();
 					this.$descDiv.removeClass('able-clipped');
 				}
 				else {
-  				// keep it visible to screen readers, but hide it visibly
+					// keep it visible to screen readers, but hide it visibly
 					this.$descDiv.addClass('able-clipped');
 				}
 				if (!this.swappingSrc) {
@@ -7420,12 +7425,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else { // description is off.
-			if (this.prevDescFormat === 'video') { // user was previously using description via video
-				if (this.usingAudioDescription()) {
+			if (this.prevDescFormat === 'video') { // user has turned off described version of video
+				if (this.usingDescribedVersion()) {
+					// user was using the described verion. Swap for non-described version
 					this.swapDescription();
 				}
 			}
-			else if (this.prevDescFormat === 'text') { // user was previously using text description
+			else if (this.prevDescFormat === 'text') { // user has turned off text description
 				// hide description div from everyone, including screen reader users
 				this.$descDiv.hide();
 				this.$descDiv.removeClass('able-clipped');
@@ -7434,8 +7440,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.refreshingDesc = false;
 	};
 
-	// Returns true if currently using audio description, false otherwise.
-	AblePlayer.prototype.usingAudioDescription = function () {
+	AblePlayer.prototype.usingDescribedVersion = function () {
+
+		// Returns true if currently using audio description, false otherwise.
 
 		if (this.player === 'youtube') {
 			return (this.activeYouTubeId === this.youTubeDescId);
@@ -7448,7 +7455,101 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 	};
 
+	AblePlayer.prototype.getBrowserVoices = function () {
+
+		// define this.descVoices
+		// NOTE: Some browsers (e.g., Chrome) require a user-initiated click before
+		// this.synth.getVoices() will work
+
+		var voices, descLangs, voiceLang, playerLang;
+
+		// if browser supports Web Speech API
+		// define this.descvoices (an array of available voices in this browser)
+		if (window.speechSynthesis) {
+			this.synth = window.speechSynthesis;
+			voices = this.synth.getVoices();
+			descLangs = this.getDescriptionLangs();
+			if (voices.length > 0) {
+				this.descVoices = [];
+				// available languages are identified with local suffixes (e.g., en-US)
+				for (var i=0; i<voices.length; i++) {
+					// match only the first 2 characters of the lang code
+					// include any language for which there is a matching description track
+					// as well as the overall player lang
+					voiceLang = voices[i].lang.substr(0,2).toLowerCase();
+					playerLang = this.lang.substr(0,2).toLowerCase();
+					if (voiceLang === playerLang || (descLangs.indexOf(voiceLang) !== -1)) {
+						// this is a match. Add to the final array
+						this.descVoices.push(voices[i]);
+					}
+				}
+				if (!this.descVoices.length) {
+					// no voices available in the default language(s)
+					// just use all voices, regardless of language
+					this.descVoices = voices;
+				}
+			}
+		}
+		return false;
+	};
+
+	AblePlayer.prototype.getDescriptionLangs = function () {
+
+		// returns an array of languages (from srclang atttributes)
+		// in which there are description tracks
+		// use only first two characters of the lang code
+		var descLangs = [];
+		if (this.tracks) {
+			for (var i=0; i < this.tracks.length; i++) {
+				if (this.tracks[i].kind === 'descriptions') {
+					descLangs.push(this.tracks[i].language.substr(0,2).toLowerCase());
+				}
+			}
+		}
+		return descLangs;
+	};
+
+	AblePlayer.prototype.updateDescriptionVoice = function () {
+
+		// Called if user chooses a subtitle language for which there is a matching
+		// description track, and the subtitle language is different than the player language
+		// This ensures the description is read in a proper voice for the selected language
+
+		var voices, descVoice;
+		if (!this.descVoices) {
+			this.getBrowserVoices();
+			if (this.descVoices) {
+				this.rebuildDescPrefsForm();
+			}
+		}
+		else if (!this.$voiceSelectField) {
+			this.rebuildDescPrefsForm();
+		}
+
+		descVoice = this.selectedDescriptions.language;
+
+		if (this.synth) {
+			voices = this.synth.getVoices();
+			if (voices.length > 0) {
+				// available languages are identified with local suffixes (e.g., en-US)
+				for (var i=0; i<voices.length; i++) {
+					// select the first language that matches the first 2 characters of the lang code
+					if (voices[i].lang.substr(0,2).toLowerCase() === descVoice.substr(0,2).toLowerCase()) {
+						// make this the user's current preferred voice
+						this.prefDescVoice = voices[i].name;
+						// select this voice in the Description Prefs dialog
+						if (this.$voiceSelectField) {
+							this.$voiceSelectField.val(this.prefDescVoice);
+						}
+						break;
+					}
+				}
+			}
+		}
+	};
+
 	AblePlayer.prototype.swapDescription = function() {
+
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
@@ -7474,7 +7575,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		if (this.player === 'html5') {
 
-			if (this.usingAudioDescription()) {
+			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-orig-src
@@ -7512,7 +7613,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else if (this.player === 'youtube') {
 
-			if (this.usingAudioDescription()) {
+			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeYouTubeId = this.youTubeId;
 				this.showAlert(this.tt.alertNonDescribedVersion);
@@ -7524,22 +7625,18 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			if (typeof this.youTubePlayer !== 'undefined') {
 
-				// retrieve/setup captions for the new video from YouTube
-				this.setupAltCaptions().then(function() {
-
-					if (thisObj.playing) {
-						// loadVideoById() loads and immediately plays the new video at swapTime
-						thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-					}
-					else {
-						// cueVideoById() loads the new video and seeks to swapTime, but does not play
-						thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-					}
-				});
+				if (thisObj.playing) {
+					// loadVideoById() loads and immediately plays the new video at swapTime
+					thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+				}
+				else {
+					// cueVideoById() loads the new video and seeks to swapTime, but does not play
+					thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
+				}
 			}
 		}
 		else if (this.player === 'vimeo') {
-			if (this.usingAudioDescription()) {
+			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeVimeoId = this.vimeoId;
 				this.showAlert(this.tt.alertNonDescribedVersion);
@@ -7571,7 +7668,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// there's a lot of redundancy between this function and showCaptions
 		// Trying to combine them ended up in a mess though. Keeping as is for now.
 
-		if (this.swappingSrc || !this.descOn) {
+		if (!this.exposeTextDescriptions || this.swappingSrc || !this.descOn) {
 			return;
 		}
 
@@ -7611,28 +7708,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (
-  				this.exposeTextDescriptions &&
-				  typeof this.synth !== 'undefined' &&
-          typeof this.descVoiceIndex !== 'undefined') {
-					// browser supports speech synthesis and a voice has been selected in initDescription()
-					// use the web speech API
-					msg = new SpeechSynthesisUtterance();
-					msg.voice = this.descVoices[this.descVoiceIndex]; // Note: some voices don't support altering params
-					msg.voiceURI = 'native';
-					msg.volume = 1; // 0 to 1
-					msg.rate = 1.5; // 0.1 to 10 (1 is normal human speech; 2 is fast but easily decipherable; anything above 2 is blazing fast)
-					msg.pitch = 1; //0 to 2
-					msg.text = descText;
-					msg.lang = this.captionLang;
-					msg.onend = function(e) {
-						// NOTE: e.elapsedTime might be useful
-						if (thisObj.pausedForDescription) {
-							thisObj.playMedia();
-						}
-      		};
-					this.synth.speak(msg);
-					if (this.prefVisibleDesc) {
+				if (window.speechSynthesis) {
+					// browser supports speech synthsis
+					this.announceDescriptionText('description',descText);
+					if (this.prefDescVisible) {
 						// write description to the screen for sighted users
 						// but remove ARIA attributes since it isn't intended to be read by screen readers
 						this.$descDiv.html(descText).removeAttr('aria-live aria-atomic');
@@ -7655,6 +7734,112 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.currentDescription = -1;
 			// restore aria-live to $status
 			this.$status.attr('aria-live','polite');
+		}
+	};
+
+	AblePlayer.prototype.announceDescriptionText = function(context, text) {
+
+		// this function announces description text using speech synthesis
+		// it's only called if already determined that browser supports speech synthesis
+		// context is either:
+		// 'description' - actual description text extracted from WebVTT file
+		// 'sample' - called when user changes a setting in Description Prefs dialog
+
+		var thisObj, speechTimeout, voiceName, i, voice, pitch, rate, volume, utterance;
+
+		thisObj = this;
+
+		// As of Feb 2021,
+		// 1. In some browsers (e.g., Chrome) window.speechSynthesis.getVoices()
+		//  returns 0 voices unless the request is triggered with a user click
+		//  Therefore, description may have failed to initialize when the page loaded
+		//  This function cannot have been called without a mouse click.
+		//  Therefore, this is a good time to check that, and try again if needed
+		// 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
+		//  and onend event is never fired. This prevents new speech from being spoken.
+		//  window.speechSynthesis.cancel() also fails, so it's impossible to recover.
+		//  This only seems to happen with some voices.
+		//  Typically the first voice in the getVoices() array (index 0) is realiable
+		//  When speech synthesis gets wonky, this is a deep problem that impacts all browsers
+		//  and typically requires a computer reboot to make right again.
+		//  This has been observed frequently in macOS Big Sur, but also in Windows 10
+		//  To ignore user's voice preferences and always use the first voice, set the following var to true
+		//	This is for testing only; not recommended for production
+		// 	unless the voice select field is also removed from the Prefs dialog
+		var useFirstVoice = false;
+
+		if (!this.descVoices) {
+			// voices array failed to load the first time. Try again
+			this.getBrowserVoices();
+		}
+
+		if (context === 'sample') {
+			// get settings from form
+			voiceName = $('#' + this.mediaId + '_prefDescVoice').val();
+			pitch = $('#' + this.mediaId + '_prefDescPitch').val();
+			rate = $('#' + this.mediaId + '_prefDescRate').val();
+			volume = $('#' + this.mediaId + '_prefDescVolume').val();
+		}
+		else {
+			// get settings from global prefs
+			voiceName = this.prefDescVoice;
+			pitch = this.prefDescPitch;
+			rate = this.prefDescRate;
+			volume = this.prefDescVolume;
+		}
+
+		// get the voice associated with the user's chosen voice name
+		if (this.descVoices) {
+			if (this.descVoices.length > 0) {
+				if (useFirstVoice) {
+					voice = this.descVoices[0];
+				}
+				else if (voiceName) {
+					// get the voice that matches user's preferred voiceName
+					for (i = 0; i < this.descVoices.length; i++) {
+						if (this.descVoices[i].name == voiceName) {
+							voice = this.descVoices[i];
+							break;
+						}
+					}
+				}
+				if (typeof voice === 'undefined') {
+					// no matching voice was found
+					// use the first voice in the array
+					voice = this.descVoices[0];
+				}
+
+				utterance = new SpeechSynthesisUtterance();
+				utterance.voice = voice;
+				utterance.voiceURI = 'native';
+				utterance.volume = volume;
+				utterance.rate = rate;
+				utterance.pitch = pitch;
+				utterance.text = text;
+				// TODO: Consider the best language for the utterance:
+				// language of the web page? (this.lang)
+				// language of the WebVTT description track?
+				// language of the user's chosen voice?
+				// If there's a mismatch between any of these, the description will likely be unintelligible
+				utterance.lang = this.lang;
+				utterance.onend = function(e) {
+					// do something after speaking
+					console.log('Finished speaking. That took ' + (e.elapsedTime/1000).toFixed(2) + ' seconds.');
+					if (context === 'description') {
+						if (thisObj.prefDescPause) {
+							if (thisObj.pausedForDescription && thisObj.exposeTextDescriptions) {
+								thisObj.playMedia();
+								this.pausedForDescription = false;
+							}
+						}
+					}
+				};
+				utterance.onerror = function(e) {
+					// handle error
+					console.log('Web Speech API error',e);
+				}
+				this.synth.speak(utterance);
+			}
 		}
 	};
 
@@ -7826,7 +8011,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
 	AblePlayer.prototype.seekTo = function (newTime) {
 
-    var thisObj = this;
+		var thisObj = this;
 
 		// define variables to be used for analytics
 		// e.g., to measure the extent to which users seek back and forward
@@ -8035,7 +8220,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				deferred.resolve('ended');
 			}
 			else if (this.media.paused) {
-  		  deferred.resolve('paused');
+				deferred.resolve('paused');
 			}
 			else if (this.media.readyState !== 4) {
 				deferred.resolve('buffering');
@@ -8296,12 +8481,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		thisObj = this;
 		if (this.swappingSrc) {
-  		if (this.playing) {
-  			// wait until new source has loaded before refreshing controls
-  			// can't wait if player is NOT playing because some critical events
-  			// won't fire until playback of new media starts
-        return;
-		  }
+			if (this.playing) {
+				// wait until new source has loaded before refreshing controls
+				// can't wait if player is NOT playing because some critical events
+				// won't fire until playback of new media starts
+				return;
+			}
 		}
 
 		if (context === 'timeline' || context === 'init') {
@@ -8315,10 +8500,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.chapterElapsed = this.getChapterElapsed();
 			}
 
-      if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
-  		  // couldn't calculate seekInterval previously; try again.
-        this.setSeekInterval();
-		  }
+			if (this.useFixedSeekInterval === false && this.seekIntervalCalculated === false && this.duration > 0) {
+				// couldn't calculate seekInterval previously; try again.
+				this.setSeekInterval();
+			}
 
 			if (this.seekBar) {
 				if (this.useChapterTimes) {
@@ -8386,34 +8571,34 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 
 			if (this.skin === 'legacy') {
-  			// Update seekbar width.
-        // To do this, we need to calculate the width of all buttons surrounding it.
-        if (this.seekBar) {
-				  widthUsed = 0;
-          leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
-          rightControls = leftControls.next('div.able-right-controls');
-          leftControls.children().each(function () {
-					  if ($(this).attr('role')=='button') {
-						  widthUsed += $(this).outerWidth(true); // true = include margin
-					  }
-				  });
-          rightControls.children().each(function () {
-					  if ($(this).attr('role')=='button') {
-						  widthUsed += $(this).outerWidth(true);
-					  }
-				  });
-          if (this.fullscreen) {
-					  seekbarWidth = $(window).width() - widthUsed;
-				  }
-          else {
-					  seekbarWidth = this.$ableWrapper.width() - widthUsed;
-				  }
-          // Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
-          if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
-					  this.seekBar.setWidth(seekbarWidth);
-				  }
-			  }
-      }
+				// Update seekbar width.
+				// To do this, we need to calculate the width of all buttons surrounding it.
+				if (this.seekBar) {
+					widthUsed = 0;
+					leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+					rightControls = leftControls.next('div.able-right-controls');
+					leftControls.children().each(function () {
+						if ($(this).attr('role')=='button') {
+							widthUsed += $(this).outerWidth(true); // true = include margin
+						}
+					});
+					rightControls.children().each(function () {
+						if ($(this).attr('role')=='button') {
+							widthUsed += $(this).outerWidth(true);
+						}
+					});
+					if (this.fullscreen) {
+						seekbarWidth = $(window).width() - widthUsed;
+					}
+					else {
+						seekbarWidth = this.$ableWrapper.width() - widthUsed;
+					}
+					// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
+					if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
+						this.seekBar.setWidth(seekbarWidth);
+					}
+				}
+			}
 
 			// Update buffering progress.
 			// TODO: Currently only using the first HTML5 buffered interval,
@@ -8431,9 +8616,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 					else {
 						if (this.seekBar) {
-              if (!isNaN(buffered)) {
-  							this.seekBar.setBuffered(buffered / duration);
-  						}
+							if (!isNaN(buffered)) {
+								this.seekBar.setBuffered(buffered / duration);
+							}
 						}
 					}
 				}
@@ -8510,6 +8695,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						newSvgData = this.getSvgData('fullscreen-expand');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
@@ -8525,6 +8711,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						newSvgData = this.getSvgData('fullscreen-collapse');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
@@ -8580,8 +8767,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						// only scroll once after moving a highlight
 						if (this.movingHighlight) {
 							this.$transcriptDiv.scrollTop(newTop);
-			                this.movingHighlight = false;
-			            }
+											this.movingHighlight = false;
+									}
 					}
 				}
 			}
@@ -8625,6 +8812,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						newSvgData = this.getSvgData('play');
 						this.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$playpauseButton.find('path').attr('d',newSvgData[1]);
+						this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
 					}
 					else {
 						this.$playpauseButton.find('img').attr('src',this.playButtonImg);
@@ -8640,35 +8828,35 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 							// Debounce updates; only update after status has stayed steadily different for a while
 							// "A while" is defined differently depending on context
 							if (thisObj.swappingSrc) {
-                // this is where most of the chatter occurs (e.g., playing, paused, buffering, playing),
-                // so set a longer wait time before writing a status message
-                if (!thisObj.debouncingStatus) {
-                  thisObj.statusMessageThreshold = 2000; // in ms (2 seconds)
-                }
-              }
-              else {
-                // for all other contexts (e.g., users clicks Play/Pause)
-                // user should receive more rapid feedback
-                if (!thisObj.debouncingStatus) {
-                  thisObj.statusMessageThreshold = 250; // in ms
-                }
-              }
-  						timestamp = (new Date()).getTime();
+								// this is where most of the chatter occurs (e.g., playing, paused, buffering, playing),
+								// so set a longer wait time before writing a status message
+								if (!thisObj.debouncingStatus) {
+									thisObj.statusMessageThreshold = 2000; // in ms (2 seconds)
+								}
+							}
+							else {
+								// for all other contexts (e.g., users clicks Play/Pause)
+								// user should receive more rapid feedback
+								if (!thisObj.debouncingStatus) {
+									thisObj.statusMessageThreshold = 250; // in ms
+								}
+							}
+							timestamp = (new Date()).getTime();
 							if (!thisObj.statusDebounceStart) {
 								thisObj.statusDebounceStart = timestamp;
 								// Call refreshControls() again after allotted time has passed
 								thisObj.debouncingStatus = true;
 								thisObj.statusTimeout = setTimeout(function () {
-                  thisObj.debouncingStatus = false;
+									thisObj.debouncingStatus = false;
 									thisObj.refreshControls(context);
 								}, thisObj.statusMessageThreshold);
 							}
 							else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
-    						thisObj.$status.text(textByState[currentState]);
-                thisObj.statusDebounceStart = null;
-                clearTimeout(thisObj.statusTimeout);
-                thisObj.statusTimeout = null;
-						  }
+								thisObj.$status.text(textByState[currentState]);
+								thisObj.statusDebounceStart = null;
+								clearTimeout(thisObj.statusTimeout);
+								thisObj.statusTimeout = null;
+							}
 						}
 						else {
 							thisObj.statusDebounceStart = null;
@@ -8689,6 +8877,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 									newSvgData = thisObj.getSvgData('play');
 									thisObj.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
 									thisObj.$playpauseButton.find('path').attr('d',newSvgData[1]);
+									thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.play);
 								}
 								else {
 									thisObj.$playpauseButton.find('img').attr('src',thisObj.playButtonImg);
@@ -8705,6 +8894,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 									newSvgData = thisObj.getSvgData('pause');
 									thisObj.$playpauseButton.find('svg').attr('viewBox',newSvgData[0]);
 									thisObj.$playpauseButton.find('path').attr('d',newSvgData[1]);
+									thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.pause);
 								}
 								else {
 									thisObj.$playpauseButton.find('img').attr('src',thisObj.pauseButtonImg);
@@ -8781,30 +8971,30 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.handlePrevTrack = function() {
 
-    if (this.playlistIndex === 0) {
-      // currently on the first track
-      // wrap to bottom and play the last track
-      this.playlistIndex = this.$playlist.length - 1;
-    }
-    else {
-		  this.playlistIndex--;
-    }
+		if (this.playlistIndex === 0) {
+			// currently on the first track
+			// wrap to bottom and play the last track
+			this.playlistIndex = this.$playlist.length - 1;
+		}
+		else {
+			this.playlistIndex--;
+		}
 		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
-    this.cuePlaylistItem(this.playlistIndex);
+		this.cuePlaylistItem(this.playlistIndex);
 	};
 
 	AblePlayer.prototype.handleNextTrack = function() {
 
-    if (this.playlistIndex === this.$playlist.length - 1) {
-      // currently on the last track
-      // wrap to top and play the forst track
-      this.playlistIndex = 0;
-    }
-    else {
-		  this.playlistIndex++;
-    }
+		if (this.playlistIndex === this.$playlist.length - 1) {
+			// currently on the last track
+			// wrap to top and play the forst track
+			this.playlistIndex = 0;
+		}
+		else {
+			this.playlistIndex++;
+		}
 		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
-    this.cuePlaylistItem(this.playlistIndex);
+		this.cuePlaylistItem(this.playlistIndex);
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
@@ -8942,7 +9132,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.prefCaptions = 0;
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
-					this.youTubePlayer.unloadModule(this.ytCaptionModule);
+					this.youTubePlayer.unloadModule('captions');
 				}
 				else {
 					this.$captionsWrapper.hide();
@@ -8954,9 +9144,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.prefCaptions = 1;
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
-					if (typeof this.ytCaptionModule !== 'undefined') {
-						this.youTubePlayer.loadModule(this.ytCaptionModule);
-					}
+					this.youTubePlayer.loadModule('captions');
 				}
 				else {
 					this.$captionsWrapper.show();
@@ -9045,6 +9233,18 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// NOTE: the prefs menu is positioned near the right edge of the player
 		// This assumes the Prefs button is also positioned in that vicinity
 		// (last or second-last button the right)
+
+		// NOTE: If previously unable to fully populate the Description dialog
+		// because the Web Speech API failed to getVoices()
+		// now is a good time to try again
+		// so the Description dialog can be rebuilt before the user requests it
+		if (!this.descVoices) {
+			this.getBrowserVoices();
+			if (this.descVoices) {
+				this.rebuildDescPrefsForm();
+			}
+		}
+
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
 		thisObj = this;
@@ -9061,12 +9261,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			if (!this.showingPrefsDialog) {
-  			this.$prefsButton.focus();
+				this.$prefsButton.focus();
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
-  			thisObj.hidingPopup = false;
-  		},100);
+				thisObj.hidingPopup = false;
+			},100);
 		}
 		else {
 			this.closePopups();
@@ -9091,7 +9291,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.handleTranscriptToggle = function () {
 
-  	var thisObj = this;
+		var thisObj = this;
 
 		if (this.$transcriptDiv.is(':visible')) {
 			this.$transcriptArea.hide();
@@ -9099,13 +9299,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.showTranscript);
 			this.prefTranscript = 0;
 			this.$transcriptButton.focus().addClass('able-focus');
-      // wait briefly before resetting stopgap var
-      // otherwise the keypress used to select 'Close' will trigger the transcript button
-      // Benchmark tests: If this is gonna happen, it typically happens in around 3ms; max 12ms
-      // Setting timeout to 100ms is a virtual guarantee of proper functionality
-      setTimeout(function() {
-        thisObj.closingTranscript = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			// otherwise the keypress used to select 'Close' will trigger the transcript button
+			// Benchmark tests: If this is gonna happen, it typically happens in around 3ms; max 12ms
+			// Setting timeout to 100ms is a virtual guarantee of proper functionality
+			setTimeout(function() {
+				thisObj.closingTranscript = false;
+			}, 100);
 		}
 		else {
 			this.positionDraggableWindow('transcript');
@@ -9117,19 +9317,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
 			// move focus to first focusable element (window options button)
-      this.focusNotClick = true;
+			this.focusNotClick = true;
 			this.$transcriptArea.find('button').first().focus();
-      // wait briefly before resetting stopgap var
-      setTimeout(function() {
-        thisObj.focusNotClick = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			setTimeout(function() {
+				thisObj.focusNotClick = false;
+			}, 100);
 		}
 		this.updateCookie('prefTranscript');
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
 
-  	var thisObj = this;
+		var thisObj = this;
 
 		if (this.$signWindow.is(':visible')) {
 			this.$signWindow.hide();
@@ -9137,11 +9337,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$signButton.find('span.able-clipped').text(this.tt.showSign);
 			this.prefSign = 0;
 			this.$signButton.focus().addClass('able-focus');
-      // wait briefly before resetting stopgap var
-      // otherwise the keypress used to select 'Close' will trigger the transcript button
-      setTimeout(function() {
-        thisObj.closingSign = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			// otherwise the keypress used to select 'Close' will trigger the transcript button
+			setTimeout(function() {
+				thisObj.closingSign = false;
+			}, 100);
 		}
 		else {
 			this.positionDraggableWindow('sign');
@@ -9152,13 +9352,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$signButton.removeClass('buttonOff').attr('aria-label',this.tt.hideSign);
 			this.$signButton.find('span.able-clipped').text(this.tt.hideSign);
 			this.prefSign = 1;
-      this.focusNotClick = true;
+			this.focusNotClick = true;
 			this.$signWindow.find('button').first().focus();
-      // wait briefly before resetting stopgap var
-      // otherwise the keypress used to select 'Close' will trigger the transcript button
-      setTimeout(function() {
-        thisObj.focusNotClick = false;
-      }, 100);
+			// wait briefly before resetting stopgap var
+			// otherwise the keypress used to select 'Close' will trigger the transcript button
+			setTimeout(function() {
+				thisObj.focusNotClick = false;
+			}, 100);
 		}
 		this.updateCookie('prefSign');
 	};
@@ -9731,7 +9931,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				meta = this.meta[i];
 			}
 		}
-
 		// regardless of source...
 		this.transcriptLang = language;
 
@@ -9754,6 +9953,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.transcriptCaptions = captions;
 			this.transcriptChapters = chapters;
 			this.transcriptDescriptions = descriptions;
+		}
+		if (this.selectedDescriptions) {
+			if (this.selectedDescriptions.language !== this.lang) {
+				// updating description voice to match new description language
+				this.updateDescriptionVoice();
+			}
 		}
 		this.updateTranscript();
 	};
@@ -9791,9 +9996,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 	};
 
-	// Returns the function used when a caption is clicked in the captions menu.
-	// Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
 	AblePlayer.prototype.getCaptionClickFunction = function (track) {
+
+		// Returns the function used when a caption is clicked in the captions menu.
+		// Not called if user clicks "Captions off". Instead, that triggers getCaptionOffFunction()
 
 		var thisObj = this;
 		return function () {
@@ -9802,22 +10008,27 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			thisObj.currentCaption = -1;
 			if (thisObj.usingYouTubeCaptions) {
 				if (thisObj.captionsOn) {
-					if (typeof thisObj.ytCaptionModule !== 'undefined') {
-						// captions are already on. Just need to change the language
-						thisObj.youTubePlayer.setOption(thisObj.ytCaptionModule, 'track', {'languageCode': thisObj.captionLang});
+					// Two things must be true in order for setOption() to work: 
+					// The YouTube caption module must be loaded 
+					// and the video must have started playing 
+					if (thisObj.youTubePlayer.getOptions('captions') && thisObj.startedPlaying) {						
+						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLang});
 					}
 					else {
-						// need to wait for caption module to be loaded to change the language
-						// caption module will be loaded after video starts playing, triggered by onApiChange event
-						// at that point, thosObj.captionLang will be passed to the module as the default language
+						// the two conditions were not met 
+						// try again to set the language after onApiChange event is triggered 
+						// meanwhile, the following variable will hold the value
+						thisObj.captionLangPending = thisObj.captionLang;
 					}
 				}
 				else {
-					// captions are off (i.e., captions module has been unloaded; need to reload it)
-					// user's selected language will be reset after module has successfully loaded
-					// (the onApiChange event will be fired -- see initialize.js > initYouTubePlayer())
-					thisObj.resettingYouTubeCaptions = true;
-					thisObj.youTubePlayer.loadModule(thisObj.ytCaptionModule);
+					if (thisObj.youTubePlayer.getOptions('captions')) { 
+						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLang});
+					}					
+					else { 
+						thisObj.youTubePlayer.loadModule('captions');
+						thisObj.captionLangPending = thisObj.captionLang; 
+					}
 				}
 			}
 			else if (thisObj.usingVimeoCaptions) {
@@ -9839,7 +10050,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 							// some other error occurred
 							console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
 							break;
-    				}
+						}
 				});
 			}
 			else { // using local track elements for captions/subtitles
@@ -9874,10 +10085,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var thisObj = this;
 		return function () {
 			if (thisObj.player == 'youtube') {
-				thisObj.youTubePlayer.unloadModule(thisObj.ytCaptionModule);
+				thisObj.youTubePlayer.unloadModule('captions');
 			}
 			else if (thisObj.usingVimeoCaptions) {
-        thisObj.vimeoPlayer.disableTextTrack();
+				thisObj.vimeoPlayer.disableTextTrack();
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
@@ -10135,8 +10346,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if ($element === this.$captionsDiv) {
 					if (typeof this.$captionsWrapper !== 'undefined') {
 						this.$captionsWrapper.css({
-  						'font-size': this.prefCaptionsSize
-            });
+							'font-size': this.prefCaptionsSize
+						});
 					}
 				}
 				if (this.prefCaptionsPosition === 'below') {
@@ -10512,7 +10723,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						else {
 							if ($(line).length) {
 								// selector exists
-                this.currentMeta = thisMeta;
+								this.currentMeta = thisMeta;
 								showDuration = parseInt($(line).attr('data-duration'));
 								if (typeof showDuration !== 'undefined' && !isNaN(showDuration)) {
 									$(line).show().delay(showDuration).fadeOut();
@@ -10612,7 +10823,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.transcriptType) {
 			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
 				 this.injectTranscriptArea();
-		 			deferred.resolve();
+					deferred.resolve();
 			}
 			else if (this.transcriptType === 'manual') {
 				this.setupManualTranscript();
@@ -10633,8 +10844,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 		this.$transcriptArea = $('<div>', {
 			'class': 'able-transcript-area',
-  		'role': 'dialog',
-      'aria-label': this.tt.transcriptTitle
+			'role': 'dialog',
+			'aria-label': this.tt.transcriptTitle
 		});
 
 		this.$transcriptToolbar = $('<div>', {
@@ -10649,13 +10860,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Add auto Scroll checkbox
 		this.$autoScrollTranscriptCheckbox = $('<input>', {
-		 	'id': 'autoscroll-transcript-checkbox',
-		 	'type': 'checkbox'
-		 });
+			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
+			'type': 'checkbox'
+		});
 		$autoScrollLabel = $('<label>', {
-			 'for': 'autoscroll-transcript-checkbox'
-			}).text(this.tt.autoScroll);
-    this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
+				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
+		}).text(this.tt.autoScroll);
+		this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
 
 		// Add field for selecting a transcript language
 		// Only necessary if there is more than one language
@@ -10664,10 +10875,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				'class': 'transcript-language-select-wrapper'
 			});
 			$languageSelectLabel = $('<label>',{
-				'for': 'transcript-language-select'
+				'for': 'transcript-language-select-' + this.mediaId
 			}).text(this.tt.language);
 			this.$transcriptLanguageSelect = $('<select>',{
-				'id': 'transcript-language-select'
+				'id': 'transcript-language-select-' + this.mediaId
 			});
 			for (i=0; i < this.captions.length; i++) {
 				$option = $('<option></option>',{
@@ -10675,7 +10886,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					lang: this.captions[i]['language']
 				}).text(this.captions[i]['label']);
 				if (this.captions[i]['def']) {
-				 	$option.prop('selected',true);
+					$option.prop('selected',true);
 				 }
 				this.$transcriptLanguageSelect.append($option);
 			 }
@@ -10769,10 +10980,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.setupManualTranscript = function() {
 
-		// Add an auto-scroll checkbox to the toolbar
+		var $autoScrollInput, $autoScrollLabel;
 
-		this.$autoScrollTranscriptCheckbox = $('<input id="autoscroll-transcript-checkbox" type="checkbox">');
-		this.$transcriptToolbar.append($('<label for="autoscroll-transcript-checkbox">' + this.tt.autoScroll + ': </label>'), this.$autoScrollTranscriptCheckbox);
+		$autoScrollInput = $('<input>', {
+			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
+			'type': 'checkbox'
+		});
+		$autoScrollLabel = $('<label>', {
+				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
+		}).text(this.tt.autoScroll);
+
+		// Add an auto-scroll checkbox to the toolbar.
+		this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+		this.$transcriptToolbar.append($autoScrollLabel, this.$autoScrollTranscriptCheckbox);
 
 	};
 
@@ -10881,7 +11101,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.highlightTranscript = function (currentTime) {
 
-		//show highlight in transcript marking current caption
+		// Show highlight in transcript marking current caption.
 
 		if (!this.transcriptType) {
 			return;
@@ -10906,14 +11126,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 			if (currentTime >= start && currentTime <= end && !isChapterHeading) {
 
-  		  // If this item isn't already highlighted, it should be
-  		  if (!($(this).hasClass('able-highlight'))) {
-  				// remove all previous highlights before adding one to current span
-          thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
-          $(this).addClass('able-highlight');
-          thisObj.movingHighlight = true;
-        }
-        return false;
+				// If this item isn't already highlighted, it should be
+				if (!($(this).hasClass('able-highlight'))) {
+					// remove all previous highlights before adding one to current span
+					thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
+					$(this).addClass('able-highlight');
+					thisObj.movingHighlight = true;
+				}
+				return false;
 			}
 		});
 		thisObj.currentHighlight = thisObj.$transcriptArea.find('.able-highlight');
@@ -11302,10 +11522,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var thisObj = this;
 		if (this.searchDiv && this.searchString) {
 			if ($('#' + this.SearchDiv)) {
-  			var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
-  			searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
-  			searchStringHtml += '</p>';
-				var resultsArray = this.searchFor(this.searchString);
+				var searchStringHtml = '<p>' + this.tt.resultsSummary1 + ' ';
+					searchStringHtml += '<span id="able-search-term-echo">' + this.searchString + '</span>';
+					searchStringHtml += '</p>';
+				var resultsArray = this.searchFor(this.searchString, this.searchIgnoreCaps);
 				if (resultsArray.length > 0) {
 					var $resultsSummary = $('<p>',{
 						'class': 'able-search-results-summary'
@@ -11317,7 +11537,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					$resultsSummary.html(resultsSummaryText);
 					var $resultsList = $('<ul>');
 					for (var i = 0; i < resultsArray.length; i++) {
-  					var resultId = 'aria-search-result-' + i;
+						var resultId = 'aria-search-result-' + i;
 						var $resultsItem = $('<li>',{});
 						var itemStartTime = this.secondsToTime(resultsArray[i]['start']);
 						var itemLabel = this.tt.searchButtonLabel + ' ' + itemStartTime['title'];
@@ -11331,7 +11551,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						itemStartSpan.text(itemStartTime['value']);
 						// add a listener for clisk on itemStart
 						itemStartSpan.on('click',function(e) {
-              thisObj.seekTrigger = 'search';
+							thisObj.seekTrigger = 'search';
 							var spanStart = parseFloat($(this).attr('data-start'));
 							// Add a tiny amount so that we're inside the span.
 							spanStart += .01;
@@ -11347,17 +11567,17 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						$resultsItem.append(itemStartSpan, itemText);
 						$resultsList.append($resultsItem);
 					}
-					$('#' + this.searchDiv).append(searchStringHtml,$resultsSummary,$resultsList);
+					$('#' + this.searchDiv).html(searchStringHtml).append($resultsSummary,$resultsList);
 				}
 				else {
 					var noResults = $('<p>').text(this.tt.noResultsFound);
-					$('#' + this.searchDiv).append(noResults);
+					$('#' + this.searchDiv).html(searchStringHtml).append(noResults);
 				}
 			}
 		}
 	};
 
-	AblePlayer.prototype.searchFor = function(searchString) {
+	AblePlayer.prototype.searchFor = function(searchString, ignoreCaps) {
 
 		// return chronological array of caption cues that match searchTerms
 		var captionLang, captions, results, caption, c, i, j;
@@ -11377,12 +11597,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				for (i = 0; i < captions.length; i++) {
 					if ($.inArray(captions[i].components.children[0]['type'], ['string','i','b','u','v','c']) !== -1) {
 						caption = this.flattenCueForCaption(captions[i]);
+						var captionNormalized = ignoreCaps ? caption.toLowerCase() : caption;
 						for (j = 0; j < searchTerms.length; j++) {
-							if (caption.indexOf(searchTerms[j]) !== -1) {
+							var searchTermNormalized = ignoreCaps ? searchTerms[j].toLowerCase() : searchTerms[j];
+							if (captionNormalized.indexOf(searchTermNormalized) !== -1) {
 								results[c] = [];
 								results[c]['start'] = captions[i].start;
 								results[c]['lang'] = captionLang;
-								results[c]['caption'] = this.highlightSearchTerm(searchTerms,j,caption);
+								results[c]['caption'] = this.highlightSearchTerm(searchTerms,caption);
 								c++;
 								break;
 							}
@@ -11394,33 +11616,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		return results;
 	};
 
-	AblePlayer.prototype.highlightSearchTerm = function(searchTerms, index, resultString) {
-
+	AblePlayer.prototype.highlightSearchTerm = function(searchTerms, resultString) {
 		// highlight ALL found searchTerms in the current resultString
-		// index is the first index in the searchTerm array where a match has already been found
 		// Need to step through the remaining terms to see if they're present as well
-
-		var i, searchTerm, termIndex, termLength, str1, str2, str3;
-
-		for (i=index; i<searchTerms.length; i++) {
-
-			searchTerm = searchTerms[i];
-			termIndex = resultString.indexOf(searchTerm);
-			if (termIndex !== -1) {
-				termLength = searchTerm.length;
-				if (termLength > 0) {
-					str1 = resultString.substring(0, termIndex);
-					str2 = '<span class="able-search-term">' + searchTerm + '</span>';
-					str3 = resultString.substring(termIndex+termLength);
-					resultString = str1 + str2 + str3;
-				}
-				else {
-					str1 = '<span class="able-search-term">' + searchTerm + '</span>';
-					str2 = resultString.substring(termIndex+termLength);
-					resultString = str1 + str2;
-				}
-			}
-		}
+		searchTerms.forEach(function(searchTerm) {
+			var reg = new RegExp(searchTerm, 'gi');
+			resultString = resultString.replace(reg, '<span class="able-search-term">$&</span>');
+		});
 		return resultString;
 	};
 
@@ -11440,22 +11642,22 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var title = '';
 		if (hours > 0) {
 			value += hours + ':';
-      if (hours == 1) {
-  			title += '1 ' + this.tt.hour + ' ';
-      }
-      else {
-  			title += hours + ' ' + this.tt.hours + ' ';
-		  }
+			if (hours == 1) {
+				title += '1 ' + this.tt.hour + ' ';
+			}
+			else {
+				title += hours + ' ' + this.tt.hours + ' ';
+			}
 		}
 		if (minutes < 10) {
 			value += '0' + minutes + ':';
 			if (minutes > 0) {
-  			if (minutes == 1) {
-  				title += '1 ' + this.tt.minute + ' ';
-        }
-        else {
-  				title += minutes + ' ' + this.tt.minutes + ' ';
-        }
+				if (minutes == 1) {
+					title += '1 ' + this.tt.minute + ' ';
+				}
+				else {
+					title += minutes + ' ' + this.tt.minutes + ' ';
+				}
 			}
 		}
 		else {
@@ -11465,12 +11667,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (seconds < 10) {
 			value += '0' + seconds;
 			if (seconds > 0) {
-  			if (seconds == 1) {
-  				title += '1 ' + this.tt.second + ' ';
-  			}
-  			else {
-  				title += seconds + ' ' + this.tt.seconds + ' ';
-        }
+				if (seconds == 1) {
+					title += '1 ' + this.tt.second + ' ';
+				}
+				else {
+					title += seconds + ' ' + this.tt.seconds + ' ';
+				}
 			}
 		}
 		else {
@@ -11493,8 +11695,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// elapsed is expressed as sss.xxx
 		var thisObj = this;
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
-		  thisObj.duration = mediaTimes['duration'];
-      thisObj.elapsed = mediaTimes['elapsed'];
+			thisObj.duration = mediaTimes['duration'];
+			thisObj.elapsed = mediaTimes['elapsed'];
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
 				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
@@ -11507,7 +11709,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 				}
 			}
-      else {
+			else {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);
@@ -11546,8 +11748,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					this.cuePlaylistItem(0);
 				}
 				else {
-  				this.playing = false;
-  				this.paused = true;
+					this.playing = false;
+					this.paused = true;
 				}
 			}
 			else {
@@ -11676,7 +11878,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var whichButton, prefsPopup;
 		whichButton = $(el).attr('class').split(' ')[0].substr(20);
 		if (whichButton === 'play') {
-  		this.clickedPlay = true;
+			this.clickedPlay = true;
 			this.handlePlay();
 		}
 		else if (whichButton === 'restart') {
@@ -11684,13 +11886,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.handleRestart();
 		}
 		else if (whichButton === 'previous') {
-  		this.userClickedPlaylist = true;
+			this.userClickedPlaylist = true;
 			this.seekTrigger = 'previous';
 			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
-  		this.userClickedPlaylist = true;
+			this.userClickedPlaylist = true;
 			this.seekTrigger = 'next';
 			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
@@ -11725,40 +11927,40 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.handleDescriptionToggle();
 		}
 		else if (whichButton === 'sign') {
-  		if (!this.closingSign) {
-  			this.handleSignToggle();
-  		}
+			if (!this.closingSign) {
+				this.handleSignToggle();
+			}
 		}
 		else if (whichButton === 'preferences') {
-      if ($(el).attr('data-prefs-popup') === 'menu') {
-  			this.handlePrefsClick();
-  		}
-  		else {
-    		this.showingPrefsDialog = true; // stopgap
-        this.closePopups();
-    		prefsPopup = $(el).attr('data-prefs-popup');
-        if (prefsPopup === 'keyboard') {
-				  this.keyboardPrefsDialog.show();
+			if ($(el).attr('data-prefs-popup') === 'menu') {
+				this.handlePrefsClick();
+			}
+			else {
+				this.showingPrefsDialog = true; // stopgap
+				this.closePopups();
+				prefsPopup = $(el).attr('data-prefs-popup');
+				if (prefsPopup === 'keyboard') {
+					this.keyboardPrefsDialog.show();
 				}
-        else if (prefsPopup === 'captions') {
-				  this.captionPrefsDialog.show();
+				else if (prefsPopup === 'captions') {
+					this.captionPrefsDialog.show();
 				}
-        else if (prefsPopup === 'descriptions') {
-				  this.descPrefsDialog.show();
+				else if (prefsPopup === 'descriptions') {
+					this.descPrefsDialog.show();
 				}
-        else if (prefsPopup === 'transcript') {
-				  this.transcriptPrefsDialog.show();
+				else if (prefsPopup === 'transcript') {
+					this.transcriptPrefsDialog.show();
 				}
-        this.showingPrefsDialog = false;
-  		}
+				this.showingPrefsDialog = false;
+			}
 		}
 		else if (whichButton === 'help') {
 			this.handleHelpClick();
 		}
 		else if (whichButton === 'transcript') {
-      if (!this.closingTranscript) {
-  			this.handleTranscriptToggle();
-  		}
+			if (!this.closingTranscript) {
+				this.handleTranscriptToggle();
+			}
 		}
 		else if (whichButton === 'fullscreen') {
 			this.clickedFullscreenButton = true;
@@ -11803,17 +12005,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		$thisElement = $(document.activeElement);
 
-    if (which === 27) { // escape
-console.log('onPlayerKeyPress, you pressed Escape');
-      if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
-console.log('element is part of the transcript area');
-        // This element is part of transcript area.
-        this.handleTranscriptToggle();
-        return false;
-      }
-    }
+		if (which === 27) { // escape
+			if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+				// This element is part of transcript area.
+				this.handleTranscriptToggle();
+				return false;
+			}
+		}
 		if (!this.okToHandleKeyPress()) {
-console.log('NOT ok!');
 			return false;
 		}
 
@@ -11830,13 +12029,12 @@ console.log('NOT ok!');
 			e.target.tagName === 'SELECT'
 		)){
 			if (which === 27) { // escape
-console.log('You pushed ESC');
 				this.closePopups();
 			}
 			else if (which === 32) { // spacebar = play/pause
-  			// disable spacebar support for play/pause toggle as of 4.2.10
-  			// spacebar should not be handled everywhere on the page, since users use that to scroll the page
-  			// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
+				// disable spacebar support for play/pause toggle as of 4.2.10
+				// spacebar should not be handled everywhere on the page, since users use that to scroll the page
+				// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
 				if ($thisElement.attr('role') === 'button') {
 					// register a click on this element
 					e.preventDefault();
@@ -11845,73 +12043,73 @@ console.log('You pushed ESC');
 			}
 			else if (which === 112) { // p = play/pause
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handlePlay();
 				}
 			}
 			else if (which === 115) { // s = stop (now restart)
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleRestart();
 				}
 			}
 			else if (which === 109) { // m = mute
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleMute();
 				}
 			}
 			else if (which === 118) { // v = volume
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleVolume();
 				}
 			}
 			else if (which >= 49 && which <= 57) { // set volume 1-9
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleVolume(which);
 				}
 			}
 			else if (which === 99) { // c = caption toggle
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleCaptionToggle();
 				}
 			}
 			else if (which === 100) { // d = description
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleDescriptionToggle();
 				}
 			}
 			else if (which === 102) { // f = forward
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleFastForward();
 				}
 			}
 			else if (which === 114) { // r = rewind
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleRewind();
 				}
 			}
 			else if (which === 98) { // b = back (previous track)
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handlePrevTrack();
 				}
 			}
 			else if (which === 110) { // n = next track
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handleNextTrack();
 				}
 			}
 			else if (which === 101) { // e = preferences
 				if (this.usingModifierKeys(e)) {
-  				e.preventDefault();
+					e.preventDefault();
 					this.handlePrefsClick();
 				}
 			}
@@ -11941,8 +12139,8 @@ console.log('You pushed ESC');
 				// do something
 			})
 			.on('loadedmetadata',function() {
-        // should be able to get duration now
-        thisObj.duration = thisObj.media.duration;
+				// should be able to get duration now
+				thisObj.duration = thisObj.media.duration;
 				thisObj.onMediaNewSourceLoad();
 			})
 			.on('canplay',function() {
@@ -11951,11 +12149,11 @@ console.log('You pushed ESC');
 				// so we know player can seek ahead to anything
 			})
 			.on('canplaythrough',function() {
-  		  if (thisObj.playbackRate) {
-          // user has set playbackRate on a previous src or track
-          // use that setting on the new src or track too
-          thisObj.setPlaybackRate(thisObj.playbackRate);
-  		  }
+				if (thisObj.playbackRate) {
+					// user has set playbackRate on a previous src or track
+					// use that setting on the new src or track too
+					thisObj.setPlaybackRate(thisObj.playbackRate);
+				}
 				if (thisObj.userClickedPlaylist) {
 					if (!thisObj.startedPlaying) {
 						// start playing; no further user action is required
@@ -11964,10 +12162,10 @@ console.log('You pushed ESC');
 					thisObj.userClickedPlaylist = false; // reset
 				}
 				if (thisObj.seekTrigger == 'restart' ||
-				    thisObj.seekTrigger == 'chapter' ||
-				    thisObj.seekTrigger == 'transcript' ||
-				    thisObj.seekTrigger == 'search'
-            ) {
+						thisObj.seekTrigger == 'chapter' ||
+						thisObj.seekTrigger == 'transcript' ||
+						thisObj.seekTrigger == 'search'
+						) {
 					// by clicking on any of these elements, user is likely intending to play
 					// Not included: elements where user might click multiple times in succession
 					// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
@@ -12368,7 +12566,6 @@ console.log('You pushed ESC');
 
 		// if user presses a key from anywhere on the page, show player controls
 		$(document).keydown(function(e) {
-
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;
@@ -12398,11 +12595,17 @@ console.log('You pushed ESC');
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base,js)
 		this.$ableDiv.keydown(function (e) {
-
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);
 			}
 		});
+
+		// If stenoMode is enabled in an iframe, handle keydown events from the iframe
+		if (this.stenoMode && (typeof this.stenoFrameContents !== 'undefined')) {
+			this.stenoFrameContents.on('keydown',function(e) {
+				thisObj.onPlayerKeyPress(e);
+			});
+		};
 
 		// transcript is not a child of this.$ableDiv
 		// therefore, must be added separately
@@ -12494,39 +12697,39 @@ console.log('You pushed ESC');
 		$toolbar.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
 			if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			if (!thisObj.windowMenuClickRegistered) {
-	  			thisObj.windowMenuClickRegistered = true;
-          thisObj.startMouseX = e.pageX;
-          thisObj.startMouseY = e.pageY;
-          thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
-          thisObj.startDrag(which, $window);
-			  }
-      }
-      else if (e.type === 'mouseup' || e.type === 'touchend') {
-        if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-				  thisObj.endDrag(which);
-			  }
-      }
-      return false;
+				if (!thisObj.windowMenuClickRegistered) {
+					thisObj.windowMenuClickRegistered = true;
+					thisObj.startMouseX = e.pageX;
+					thisObj.startMouseY = e.pageY;
+					thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
+					thisObj.startDrag(which, $window);
+				}
+			}
+			else if (e.type === 'mouseup' || e.type === 'touchend') {
+				if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
+					thisObj.endDrag(which);
+				}
+			}
+			return false;
 		});
 
 		// add event listeners for resizing
 		$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
 			if (e.type === 'mousedown' || e.type === 'touchstart') {
-  			if (!thisObj.windowMenuClickRegistered) {
-	  			thisObj.windowMenuClickRegistered = true;
-          thisObj.startMouseX = e.pageX;
-          thisObj.startMouseY = e.pageY;
-          thisObj.startResize(which, $window);
-			  }
-      }
-      else if (e.type === 'mouseup' || e.type === 'touchend') {
-  			if (thisObj.resizing) {
-	  			thisObj.endResize(which);
-        }
-      }
-      return false;
+				if (!thisObj.windowMenuClickRegistered) {
+					thisObj.windowMenuClickRegistered = true;
+					thisObj.startMouseX = e.pageX;
+					thisObj.startMouseY = e.pageY;
+					thisObj.startResize(which, $window);
+				}
+			}
+			else if (e.type === 'mouseup' || e.type === 'touchend') {
+				if (thisObj.resizing) {
+					thisObj.endResize(which);
+				}
+			}
+			return false;
 		});
 
 		// whenever a window is clicked, bring it to the foreground
@@ -12648,14 +12851,14 @@ console.log('You pushed ESC');
 		// handle button click
 		$newButton.on('click mousedown keydown',function(e) {
 
-      if (thisObj.focusNotClick) {
-        return false;
-      }
-      if (thisObj.dragging) {
+			if (thisObj.focusNotClick) {
+				return false;
+			}
+			if (thisObj.dragging) {
 				thisObj.dragKeys(which, e);
 				return false;
-		  }
-      e.stopPropagation();
+			}
+			e.stopPropagation();
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
@@ -12780,10 +12983,10 @@ console.log('You pushed ESC');
 		thisObj = this;
 
 		if (this.focusNotClick) {
-  		// transcript or sign window has just opened,
-  		// and focus moved to the window button
-  		// ignore the keystroke that triggered the popup
-  		return false;
+			// transcript or sign window has just opened,
+			// and focus moved to the window button
+			// ignore the keystroke that triggered the popup
+			return false;
 		}
 
 		if (which === 'transcript') {
@@ -12804,25 +13007,25 @@ console.log('You pushed ESC');
 				this.windowMenuClickRegistered = true;
 			}
 			else if (e.which === 27) { // escape
-        if ($windowPopup.is(':visible')) {
-  				// close the popup menu
-          $windowPopup.hide('fast', function() {
-					  // also reset the Boolean
-            thisObj.windowMenuClickRegistered = false;
-            // also restore menu items to their original state
-            $windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-            // also return focus to window options button
-            $windowButton.focus();
-				  });
+				if ($windowPopup.is(':visible')) {
+					// close the popup menu
+					$windowPopup.hide('fast', function() {
+						// also reset the Boolean
+						thisObj.windowMenuClickRegistered = false;
+						// also restore menu items to their original state
+						$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+						// also return focus to window options button
+						$windowButton.focus();
+					});
 				}
 				else {
-  				// popup isn't open. Close the window
-          if (which === 'sign') {
-            this.handleSignToggle();
-          }
-          else if (which === 'transcript') {
-            this.handleTranscriptToggle();
-          }
+					// popup isn't open. Close the window
+					if (which === 'sign') {
+						this.handleSignToggle();
+					}
+					else if (which === 'transcript') {
+						this.handleTranscriptToggle();
+					}
 				}
 			}
 			else {
@@ -12888,9 +13091,9 @@ console.log('You pushed ESC');
 			}
 			else {
 				// all other keys will be handled by upstream functions
-        if (choice !== 'close') {
-          this.$activeWindow = $window;
-		    }
+				if (choice !== 'close') {
+					this.$activeWindow = $window;
+				}
 				return false;
 			}
 		}
@@ -12907,9 +13110,9 @@ console.log('You pushed ESC');
 		}
 		if (choice === 'move') {
 
-      // temporarily add role="application" to activeWindow
-      // otherwise, screen readers incercept arrow keys and moving window will not work
-      this.$activeWindow.attr('role','application');
+			// temporarily add role="application" to activeWindow
+			// otherwise, screen readers incercept arrow keys and moving window will not work
+			this.$activeWindow.attr('role','application');
 
 			if (!this.showedAlert(which)) {
 				this.showAlert(this.tt.windowMoveAlert,which);
@@ -12931,22 +13134,22 @@ console.log('You pushed ESC');
 		}
 		else if (choice == 'resize') {
 			// resize through the menu uses a form, not drag
-      var resizeFields = resizeDialog.getInputs();
-      if (resizeFields) {
-        // reset width and height values in form
-        resizeFields[0].value = $window.width();
-        resizeFields[1].value = $window.height();
-      }
+			var resizeFields = resizeDialog.getInputs();
+			if (resizeFields) {
+				// reset width and height values in form
+				resizeFields[0].value = $window.width();
+				resizeFields[1].value = $window.height();
+			}
 			resizeDialog.show();
 		}
 		else if (choice == 'close') {
 			// close window, place focus on corresponding button on controller bar
 			if (which === 'transcript') {
-        this.closingTranscript = true; // stopgrap to prevent double-firing of keypress
+				this.closingTranscript = true; // stopgrap to prevent double-firing of keypress
 				this.handleTranscriptToggle();
 			}
 			else if (which === 'sign') {
-        this.closingSign = true; // stopgrap to prevent double-firing of keypress
+				this.closingSign = true; // stopgrap to prevent double-firing of keypress
 				this.handleSignToggle();
 			}
 		}
@@ -12958,10 +13161,10 @@ console.log('You pushed ESC');
 
 		thisObj = this;
 
-    if (!this.$activeWindow) {
-  		this.$activeWindow = $element;
-    }
-    this.dragging = true;
+		if (!this.$activeWindow) {
+			this.$activeWindow = $element;
+		}
+		this.dragging = true;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -13111,7 +13314,7 @@ console.log('You pushed ESC');
 	AblePlayer.prototype.endDrag = function(which) {
 
 		var thisObj, $window, $windowPopup, $windowButton;
-    thisObj = this;
+		thisObj = this;
 
 		if (which === 'transcript') {
 			$windowPopup = this.$transcriptPopup;
@@ -13259,21 +13462,21 @@ console.log('You pushed ESC');
 			// If sign language is provided, it must be provided for all sources
 			this.signFile = this.$sources.first().attr('data-sign-src');
 			if (this.signFile) {
-  		  if (this.isIOS()) {
-    		  // IOS does not allow multiple videos to play simultaneously
-    		  // Therefore, sign language as rendered by Able Player unfortunately won't work
-          this.hasSignLanguage = false;
-          if (this.debug) {
-            console.log('Sign language has been disabled due to IOS restrictions');
-          }
-        }
-        else {
-  				if (this.debug) {
-	  				console.log('This video has an accompanying sign language video: ' + this.signFile);
-          }
-          this.hasSignLanguage = true;
-          this.injectSignPlayerCode();
-        }
+				if (this.isIOS()) {
+					// IOS does not allow multiple videos to play simultaneously
+					// Therefore, sign language as rendered by Able Player unfortunately won't work
+					this.hasSignLanguage = false;
+					if (this.debug) {
+						console.log('Sign language has been disabled due to IOS restrictions');
+					}
+				}
+				else {
+					if (this.debug) {
+						console.log('This video has an accompanying sign language video: ' + this.signFile);
+					}
+					this.hasSignLanguage = true;
+					this.injectSignPlayerCode();
+				}
 			}
 			else {
 				this.hasSignLanguage = false;
@@ -13321,8 +13524,8 @@ console.log('You pushed ESC');
 
 		this.$signWindow = $('<div>',{
 			'class' : 'able-sign-window',
-  		'role': 'dialog',
-      'aria-label': this.tt.sign
+			'role': 'dialog',
+			'aria-label': this.tt.sign
 		});
 		this.$signToolbar = $('<div>',{
 			'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
@@ -14324,85 +14527,123 @@ console.log('You pushed ESC');
 		}
 	}
 
-	AblePlayer.prototype.getLanguageName = function (key) {
-		// key = key.slice(0,2);
-		var lang = isoLangs[key];
-		return lang ? lang.name : undefined;
+	AblePlayer.prototype.getLanguageName = function (key,whichName) {
+
+		// return language name associated with lang code "key"
+		// whichName is either "English" or "local" (i.e., native name)
+
+		var lang, code, subTag; 
+		lang = isoLangs[key.toLowerCase()];
+		if (lang) { 
+			if (whichName === 'local') { 
+				return lang.nativeName; 
+			}
+			else { 
+				return lang.name; 
+			}
+		}
+		else if (key.includes('-')) {
+			code = key.substr(0,2);
+			subTag = key.substr(3);  
+			lang = isoLangs[code.toLowerCase()]; 
+			if (lang) { 
+				if (whichName === 'local') { 
+					return lang.nativeName + ' (' + subTag + ')'; 
+				}
+				else { 
+					return lang.name + ' (' + subTag + ')'; 
+				}
+			}
+		}
+		// if all else has failed, use the key as the label 
+		return key;
 	};
-	AblePlayer.prototype.getLanguageNativeName = function (key) {
-		// key = key.slice(0,2);
-		var lang = isoLangs[key];
-		return lang ? lang.nativeName : undefined;
-	}
 
 })(jQuery);
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
-		var langs = ['ca','de','en','es','fr','he','it','ja','nb','nl','pt-br','tr','zh-tw'];
+		var langs = ['ca','cs','de','en','es','fr','he','id','it','ja','nb','nl','pt-br','sv','tr','zh-tw'];
 		return langs;
 	};
 
 	AblePlayer.prototype.getTranslationText = function() {
+
 		// determine language, then get labels and prompts from corresponding translation var
-		var deferred, thisObj, lang, thisObj, msg, translationFile, collapsedLang;
+
+		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang;
 		deferred = $.Deferred();
-
 		thisObj = this;
-		// get language of the web page, if specified
-		if ($('body').attr('lang')) {
-			lang = $('body').attr('lang').toLowerCase();
-		}
-		else if ($('html').attr('lang')) {
-			lang = $('html').attr('lang').toLowerCase();
-		}
-		else {
-			lang = null;
-		}
 
-		// override this.lang to language of the web page, if known and supported
-		// otherwise this.lang will continue using default
-		if (!this.forceLang) {
-			if (lang) {
-				if (lang !== this.lang) {
-					if ($.inArray(lang,this.getSupportedLangs()) !== -1) {
-						// this is a supported lang
-						this.lang = lang;
+		supportedLangs = this.getSupportedLangs(); // returns an array
+
+		if (this.lang) { // a data-lang attribute is included on the media element
+			if ($.inArray(this.lang,supportedLangs) === -1) {
+				// the specified language is not supported
+				if (this.lang.indexOf('-') == 2) {
+					// this is a localized lang attribute (e.g., fr-CA)
+					// try the parent language, given the first two characters
+					if ($.inArray(this.lang.substring(0,2),supportedLangs) !== -1) {
+						// parent lang is supported. Use that.
+						this.lang = this.lang.substring(0,2);
 					}
 					else {
-						msg = lang + ' is not currently supported. Using default language (' + this.lang + ')';
-						if (this.debug) {
-							console.log(msg);
+						// the parent language is not supported either
+						// unable to use the specified language
+						this.lang = null;
+					}
+				}
+				else {
+					// this is not a localized language.
+					// since it's not supported, we're unable to use it.
+					this.lang = null;
+				}
+			}
+		}
+
+		if (!this.lang) {
+			// try the language of the web page, if specified
+			if ($('body').attr('lang')) {
+				docLang = $('body').attr('lang').toLowerCase();
+			}
+			else if ($('html').attr('lang')) {
+				docLang = $('html').attr('lang').toLowerCase();
+			}
+			else {
+				docLang = null;
+			}
+			if (docLang) {
+				if ($.inArray(docLang,supportedLangs) !== -1) {
+					// the document language is supported
+					this.lang = docLang;
+				}
+				else {
+					// the document language is not supported
+					if (docLang.indexOf('-') == 2) {
+						// this is a localized lang attribute (e.g., fr-CA)
+						// try the parent language, given the first two characters
+						if ($.inArray(docLang.substring(0,2),supportedLangs) !== -1) {
+							// the parent language is supported. use that.
+							this.lang = docLang.substring(0,2);
 						}
 					}
 				}
 			}
 		}
+
+		if (!this.lang) {
+			// No supported language has been specified by any means
+			// Fallback to English
+			this.lang = 'en';
+		}
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
-		this.importTranslationFile(translationFile).then(function(result) {
-			collapsedLang = thisObj.lang.replace('-','');
-			thisObj.tt = eval(collapsedLang);
-			deferred.resolve();
-		});
-		return deferred.promise();
-	};
-
-	AblePlayer.prototype.importTranslationFile = function(translationFile) {
-
-		var deferred = $.Deferred();
-		$.getScript(translationFile)
-			.done(function(translationVar,textStatus) {
-				// translation file successfully retrieved
-				deferred.resolve(translationVar);
-			})
-			.fail(function(jqxhr, settings, exception) {
-				deferred.fail();
-				// error retrieving file
-				// TODO: handle this
-			});
+		$.getJSON(translationFile, function(data) {
+			thisObj.tt = data; 
+			deferred.resolve(); 
+		}); 
 		return deferred.promise();
 	};
 
@@ -14499,114 +14740,114 @@ console.log('You pushed ESC');
 /*! Copyright (c) 2014 - Paul Tavares - purtuga - @paul_tavares - MIT License */
 ;(function($){
 
-    /**
-     * Delays the execution of a function until an expression returns true.
-     * The expression is checked every 100 milliseconds for as many tries
-     * as defined in in the attempts option
-     *
-     * @param {Object} options
-     * @param {Function} options.when
-     *                      Function to execute on every interval.
-     *                      Must return true (boolean) in order for
-     *                      options.do to be executed.
-     * @param {Function} [options.exec]
-     *                      Function to be executed once options.when()
-     *                      returns true.
-     * @param {Interger} [options.interval=100]
-     *                      How long to wait in-between tries.
-     * @param {Interger} [options.attempts=100]
-     *                      How many tries to use before its considered
-     *                      a failure.
-     * @param {Interger} [options.delayed=0]
-     *                      Number of miliseconds to wait before execution
-                            is started. Default is imediately.
-     *
-     * @return {jQuery.Promise}
-     *
-     * @example
-     *
-     *      $.doWhen({
-     *          when: function(){
-     *              return false;
-     *          },
-     *          exec: function(){
-     *              alert("never called given false response on when param!");
-     *          }
-     *      })
-     *      .fail(function(){
-     *          alert('ALERT: FAILED CONDITION');
-     *      })
-     *      .then(function(){
-     *          alert("resolved.");
-     *      });
-     *
-     */
-    $.doWhen = function(options) {
+		/**
+		 * Delays the execution of a function until an expression returns true.
+		 * The expression is checked every 100 milliseconds for as many tries
+		 * as defined in in the attempts option
+		 *
+		 * @param {Object} options
+		 * @param {Function} options.when
+		 *                      Function to execute on every interval.
+		 *                      Must return true (boolean) in order for
+		 *                      options.do to be executed.
+		 * @param {Function} [options.exec]
+		 *                      Function to be executed once options.when()
+		 *                      returns true.
+		 * @param {Interger} [options.interval=100]
+		 *                      How long to wait in-between tries.
+		 * @param {Interger} [options.attempts=100]
+		 *                      How many tries to use before its considered
+		 *                      a failure.
+		 * @param {Interger} [options.delayed=0]
+		 *                      Number of miliseconds to wait before execution
+														is started. Default is imediately.
+		 *
+		 * @return {jQuery.Promise}
+		 *
+		 * @example
+		 *
+		 *      $.doWhen({
+		 *          when: function(){
+		 *              return false;
+		 *          },
+		 *          exec: function(){
+		 *              alert("never called given false response on when param!");
+		 *          }
+		 *      })
+		 *      .fail(function(){
+		 *          alert('ALERT: FAILED CONDITION');
+		 *      })
+		 *      .then(function(){
+		 *          alert("resolved.");
+		 *      });
+		 *
+		 */
+		$.doWhen = function(options) {
 
-        return $.Deferred(function(dfd){
+				return $.Deferred(function(dfd){
 
-            var opt = $.extend({}, {
-                    when:       null,
-                    exec:       function(){},
-                    interval:   100,
-                    attempts:   100,
-                    delayed:    0
-                },
-                options,
-                {
-                    checkId: null
-                }),
-                startChecking = function(){
+						var opt = $.extend({}, {
+										when:       null,
+										exec:       function(){},
+										interval:   100,
+										attempts:   100,
+										delayed:    0
+								},
+								options,
+								{
+										checkId: null
+								}),
+								startChecking = function(){
 
-                    // Check condition now and if true, then resolve object
-                    if (opt.when() === true) {
+										// Check condition now and if true, then resolve object
+										if (opt.when() === true) {
 
-                        opt.exec.call(dfd.promise());
-                        dfd.resolve();
-                        return;
+												opt.exec.call(dfd.promise());
+												dfd.resolve();
+												return;
 
-                    }
+										}
 
-                    // apply minimal UI and hide the overlay
-                    opt.checkId = setInterval(function(){
+										// apply minimal UI and hide the overlay
+										opt.checkId = setInterval(function(){
 
-                            if (opt.attempts === 0) {
+														if (opt.attempts === 0) {
 
-                                clearInterval(opt.checkId);
-                                dfd.reject();
+																clearInterval(opt.checkId);
+																dfd.reject();
 
-                            } else {
+														} else {
 
-                                --opt.attempts;
+																--opt.attempts;
 
-                                if (opt.when() === true) {
+																if (opt.when() === true) {
 
-                                    opt.attempts = 0;
-                                    clearInterval(opt.checkId);
-                                    opt.exec.call(dfd.promise());
-                                    dfd.resolve();
+																		opt.attempts = 0;
+																		clearInterval(opt.checkId);
+																		opt.exec.call(dfd.promise());
+																		dfd.resolve();
 
-                                }
+																}
 
-                            }
+														}
 
-                        }, opt.interval);
+												}, opt.interval);
 
-                };
+								};
 
-            if (opt.delayed > 0) {
+						if (opt.delayed > 0) {
 
-                setTimeout(startChecking, Number(opt.delayed));
+								setTimeout(startChecking, Number(opt.delayed));
 
-            } else {
+						} else {
 
-                startChecking();
+								startChecking();
 
-            }
+						}
 
-        }).promise();
+				}).promise();
 
-    };
+		};
 
 })(jQuery);
 /* Video Transcript Sorter (VTS)
@@ -14695,8 +14936,8 @@ console.log('You pushed ESC');
 					$label = $('<label>', {
 						'for': radioId
 						// Two options for label:
-						// getLanguageNativeName() - returns native name; if using this be sure to add lang attr to <div> (see above)
-						// getLanguageName() - returns name in English; doesn't require lang attr on <label>
+						// getLanguageName() - with second parameter "local" would return native name, otherwise returns English; 
+						// TODO: if using this be sure to add lang attr to <div> (see above)
 					}).text(this.getLanguageName(this.langs[i]));
 					$radioDiv.append($radio,$label);
 					$fieldset.append($radioDiv);
@@ -15730,7 +15971,7 @@ console.log('You pushed ESC');
 
 		// Notes re. Vimeo Embed Options:
 		// If a video is owned by a user with a paid Plus, PRO, or Business account,
-    // setting the "controls" option to "false" will hide the default controls, without hiding captions.
+		// setting the "controls" option to "false" will hide the default controls, without hiding captions.
 		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
 		// but that had unwanted side effects:
 		//  - In addition to hiding the controls, it also hides captions
@@ -15760,7 +16001,7 @@ console.log('You pushed ESC');
 		}
 
 		options = {
-		  id: vimeoId,
+			id: vimeoId,
 			width: this.vimeoWidth,
 			controls: false
 		};
@@ -15855,9 +16096,6 @@ console.log('You pushed ESC');
 	AblePlayer.prototype.getVimeoDimensions = function (vimeoContainerId) {
 
 		// get dimensions of Vimeo video, return array with width & height
-		// Sources, in order of priority:
-		// 1. The width and height attributes on <video>
-		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
 
 		var d, url, $iframe, width, height;
 
@@ -15865,7 +16103,7 @@ console.log('You pushed ESC');
 
 		if (typeof this.playerMaxWidth !== 'undefined') {
 			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since YouTube will adjust height to match width
+			// optional: set height as well; not required though since Vimeo will adjust height to match width
 			if (typeof this.playerMaxHeight !== 'undefined') {
 				d[1] = this.playerMaxHeight;
 			}
@@ -15884,116 +16122,6 @@ console.log('You pushed ESC');
 			}
 		}
 		return false;
-	};
-
-	AblePlayer.prototype.resizeVimeoPlayer = function(youTubeId, youTubeContainerId) {
-
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
-
-		// called after player is ready, if youTube dimensions were previously unknown
-		// Now need to get them from the iframe element that YouTube injected
-		// and resize Able Player to match
-		var d, width, height;
-		if (typeof this.aspectRatio !== 'undefined') {
-			// video dimensions have already been collected
-			if (this.restoringAfterFullScreen) {
-				// restore using saved values
-				if (this.youTubePlayer) {
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-				this.restoringAfterFullScreen = false;
-			}
-			else {
-				// recalculate with new wrapper size
-				width = this.$ableWrapper.parent().width();
-				height = Math.round(width / this.aspectRatio);
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				this.youTubePlayer.setSize(width, height);
-				if (this.fullscreen) {
-					this.youTubePlayer.setSize(width, height);
-				}
-				else {
-					// resizing due to a change in window size, not full screen
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-			}
-		}
-		else {
-			d = this.getYouTubeDimensions(youTubeId, youTubeContainerId);
-			if (d) {
-				width = d[0];
-				height = d[1];
-				if (width > 0 && height > 0) {
-					this.aspectRatio = width / height;
-					this.ytWidth = width;
-					this.ytHeight = height;
-					if (width !== this.$ableWrapper.width()) {
-						// now that we've retrieved YouTube's default width,
-						// need to adjust to fit the current player wrapper
-						width = this.$ableWrapper.width();
-						height = Math.round(width / this.aspectRatio);
-						if (this.youTubePlayer) {
-							this.youTubePlayer.setSize(width, height);
-						}
-					}
-				}
-			}
-		}
-	};
-
-	AblePlayer.prototype.setupVimeoCaptions = function () {
-
-		// called from setupAltCaptions if player is YouTube and there are no <track> captions
-
-		// use YouTube Data API to get caption data from YouTube
-		// function is called only if these conditions are met:
-		// 1. this.player === 'youtube'
-		// 2. there are no <track> elements with kind="captions"
-		// 3. youTubeDataApiKey is defined
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		var thisObj, googleApiPromise, youTubeId, i;
-
-		thisObj = this;
-
-		// if a described version is available && user prefers desription
-		// Use the described version, and get its captions
-		if (this.youTubeDescId && this.prefDesc) {
-			youTubeId = this.youTubeDescId;
-		}
-		else {
-			youTubeId = this.youTubeId;
-		}
-		if (typeof youTubeDataAPIKey !== 'undefined') {
-			// Wait until Google Client API is loaded
-			// When loaded, it sets global var googleApiReady to true
-
-			// Thanks to Paul Tavares for $.doWhen()
-			// https://gist.github.com/purtuga/8257269
-			$.doWhen({
-				when: function(){
-					return googleApiReady;
-				},
-				interval: 100, // ms
-				attempts: 1000
-			})
-			.done(function(){
-					deferred.resolve();
-			})
-			.fail(function(){
-				console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
-			});
-		}
-		else {
-			deferred.resolve();
-		}
-		return promise;
 	};
 
 	AblePlayer.prototype.getVimeoCaptionTracks = function () {
@@ -16022,7 +16150,6 @@ console.log('You pushed ESC');
 					for (i=0; i<tracks.length; i++) {
 
 						thisObj.hasCaptions = true;
-						thisObj.usingVimeoCaptions = true;
 						if (thisObj.prefCaptions === 1) {
 								thisObj.captionsOn = true;
 						}
@@ -16037,123 +16164,27 @@ console.log('You pushed ESC');
 								isDefaultTrack = false;
 						}
 						thisObj.tracks.push({
-						  'kind': tracks[i]['kind'],
+							'kind': tracks[i]['kind'],
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
 						});
 					}
+					thisObj.captions = thisObj.tracks; 
+					thisObj.hasCaptions = true;
 
 					// setupPopups again with new captions array, replacing original
 					thisObj.setupPopups('captions');
 					deferred.resolve();
 			 	}
 			 	else {
-				  thisObj.hasCaptions = false;
-					thisObj.usingVimeoCaptions = false;
+					thisObj.hasCaptions = false;
+					thisObj.usingVimeoCaptions = false; 
 					deferred.resolve();
 				}
 			});
 
 		return promise;
-	};
-
-	AblePlayer.prototype.initVimeoCaptionModule = function () {
-
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
-
-		// This function is called when YouTube onApiChange event fires
-		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
-		// it isn't fired until the video starts playing
-		// and only fires if captions are available for this video (automated captions don't count)
-		// If no captions are available, onApichange event never fires & this function is never called
-
-		// YouTube iFrame API documentation is incomplete related to captions
-		// Found undocumented features on user forums and by playing around
-		// Details are here: http://terrillthompson.com/blog/648
-		// Summary:
-		// User might get either the AS3 (Flash) or HTML5 YouTube player
-		// The API uses a different caption module for each player (AS3 = 'cc'; HTML5 = 'captions')
-		// There are differences in the data and methods available through these modules
-		// This function therefore is used to determine which captions module is being used
-		// If it's a known module, this.ytCaptionModule will be used elsewhere to control captions
-		var options, fontSize, displaySettings;
-
-		options = this.youTubePlayer.getOptions();
-		if (options.length) {
-			for (var i=0; i<options.length; i++) {
-				if (options[i] == 'cc') { // this is the AS3 (Flash) player
-					this.ytCaptionModule = 'cc';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-				else if (options[i] == 'captions') { // this is the HTML5 player
-					this.ytCaptionModule = 'captions';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-			}
-			if (typeof this.ytCaptionModule !== 'undefined') {
-				if (this.usingYouTubeCaptions) {
-					// set default languaage
-					this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
-					// set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
-					this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
-					// ideally could set other display options too, but no others seem to be supported by setOption()
-				}
-				else {
-					// now that we know which cc module was loaded, unload it!
-					// we don't want it if we're using local <track> elements for captions
-					this.youTubePlayer.unloadModule(this.ytCaptionModule)
-				}
-			}
-		}
-		else {
-			// no modules were loaded onApiChange
-			// unfortunately, gonna have to disable captions if we can't control them
-			this.hasCaptions = false;
-			this.usingYouTubeCaptions = false;
-		}
-		this.refreshControls('captions');
-	};
-
-	AblePlayer.prototype.getVimeoPosterUrl = function (youTubeId, width) {
-
-    // NOTE: This function is modeled after same function in youtube.js
-    // in case useful for Vimeo, but is not currently used
-
-			 // return a URL for retrieving a YouTube poster image
-			 // supported values of width: 120, 320, 480, 640
-
-			 var url = 'https://img.youtube.com/vi/' + youTubeId;
-			 if (width == '120') {
-				 // default (small) thumbnail, 120 x 90
-				 return url + '/default.jpg';
-			 }
-			 else if (width == '320') {
-				 // medium quality thumbnail, 320 x 180
-				 return url + '/hqdefault.jpg';
-			 }
-			 else if (width == '480') {
-				 // high quality thumbnail, 480 x 360
-				 return url + '/hqdefault.jpg';
-			 }
-			 else if (width == '640') {
-				 // standard definition poster image, 640 x 480
-				 return url + '/sddefault.jpg';
-			 }
-			 return false;
 	};
 
 })(jQuery);

@@ -1,4 +1,4 @@
-var ca = {
+{
 
 "audio": "audio",
 
@@ -204,7 +204,25 @@ var ca = {
 
 "prefDescPause": "Pausa automàticament el vídeo en el moment que comenci una audiodescripció",
 
-"prefVisibleDesc": "Fes visible la audiodescripció textual si es troba activada",
+"prefDescVisible": "Fes visible la audiodescripció textual si es troba activada",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Ressalta la transcripció a mesura que avança el contingut",
 
@@ -334,4 +352,4 @@ var ca = {
 
 "enableKeyboardShortcuts": "Enable keyboard shortcuts"
 
-};
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Able Player Video Search (Server-side)</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- Style for this example only -->
+<style>
+	main {
+		position: relative;
+		width: 100%;
+		margin: 0;
+	}
+	#player {
+		float: left;
+		width: 45%;
+		max-width: 500px;
+		margin: 0 1em 0 0;
+	}
+	#results-wrapper {
+		float: left;
+		width: 45%;
+		margin: 0;
+		padding-top: 1em;
+	}
+	#results-wrapper p {
+		font-size: 1.1em;
+		margin-left: 1em;
+	}
+	@media (max-width: 800px) {
+		#player, #results-wrapper {
+			float: none;
+			width: 90%;
+			margin: 1em 0;
+		}
+	}
+</style>
+
+</head>
+
+<body>
+
+<h1>Able Player Video Demo #9:<br/>Video player with search (server-side)</h1>
+
+<p>Search terms are provided to the player using the <em>data-search</em> attribute.
+	In this hypothetical example, we have entered the search term "web mouse" into a search field.
+	On the search results page, the <em>data-search</em> attribute of the &lt;video&gt; element
+	is populated "web mouse" on page. Also the <em>data-search-div</em> attribute is populated with
+	the id of an external &lt;div&gt; in which to display the search results.
+	Finally, <em>data-include-transcript</em> is set to "false", since there isn't room on this page
+	for both search results <em>and</em> a transcript (although the latter is optional).
+	</p>
+
+<p>To search a video's caption or subtitle file in Able Player, add two or three attributes to the HTML media element:</p>
+<ul>
+	<li><strong>data-search-div</strong> - contains the id of a &lt;div&gt; in which to display the search results.</li>
+	<li><strong>data-search</strong> - contains the search term, expressed as one or more words, separated with space. Able Player will search for any of these words (using <em>OR</em> logic).</li>
+	<li><strong>data-search-lang</strong> - optional, specifies the language of the caption or subtitle track to search. If omitted it will search the caption track for the default language.</li>
+	<li><strong>data-search-ignore-caps</strong> - contains the id of a &lt;div&gt; in which to display the search results.</li>
+</ul>
+
+<p>This works as follows in a server-side application:</p>
+<ul>
+	<li>User submits a search term in an HTML form.</li>
+	<li>The target web page receives the search term and generates an Able Player instance that includes the search term as the value of the <strong>data-search</strong> attribute.</li>
+	<li>Results are displayed in the &lt;div&gt; element specified by the <strong>data-search-div</strong> attribute.</li>
+</ul>
+
+<p>The current demo assumes a user has already submitted a search for the word "you".</p>
+
+<p>In this example, <em>data-search-ignore-caps</em> is enabled, so the search results include all instances of "you", regardless of case.
+</p>
+
+<p>Also in this example, <em>data-include-transcript</em> is set to "false", since there isn't room on this page for both search results and a transcript. A better design would accommodate both features.
+</p>
+
+<p>See also the <a href="search2.html">client-side search demo</a>. For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+<!-- to write transcript to an external div, pass id of an empty div via data-transcript-div -->
+<main role="main">
+	<div id="player">
+		<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-search="you" data-search-div="results" data-include-transcript="false" playsinline data-search-ignore-caps>
+			<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+			<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+			<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+			<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+			<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+			<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+			<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+			<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+			<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+			<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+			<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+			<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+			<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+		</video>
+	</div>
+	<div id="results-wrapper">
+		<h2>Your Search Results</h2>
+		<div id="results" class="able-search-results"></div>
+	</div>
+	<div id="transcript"></div>
+</main>
+
+</body>
+</html>

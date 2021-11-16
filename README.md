@@ -37,10 +37,12 @@ Able Player has been translated into the following languages. To add another lan
 -   French
 -   German
 -   Hebrew
+-   Indonesian
 -   Italian
 -   Japanese
 -   Norwegian
 -   Spanish
+-   Swedish
 -   Turkish
 
 Contributing
@@ -49,24 +51,33 @@ Contributing
 There are many ways to contribute to Able Player, and we welcome and appreciate your help! Here are some options:
 
 - If you spot bugs are have feature requests, please submit them to the [Issues][issues] queue.
-- If you have code to contribute, please note that all development occurs on the [develop branch][develop]. This is often many commits ahead of the master branch, so please do all development from *develop*, and submit pull requests there. We particularly appreciate help with any issues in the Issues queue that have been flagged with "help wanted".
+- If you have code to contribute, please note that all development occurs on the [develop branch][develop]. This is often many commits ahead of the main branch, so please do all development from *develop*, and submit pull requests there. We particularly appreciate help with any issues in the Issues queue that have been flagged with "help wanted".
 - If you are multilingual, please consider translating Able Player into another language! All labels, prompts, messages, and help text for each language are contained within a single file, contained within the */translations* directory.
 
 Compatibility
 -------------
 
-*Able Player* has been tested with the following browsers.
+During development, *Able Player* is routinely tested with the latest versions of the following browsers.
 
--   Firefox 3.x and higher
--   Internet Explorer 10 and higher
--   Microsoft Edge all versions 
--   Google Chrome 7.0 and higher
--   Opera 10.63 and higher
--   Safari 5.0 on Mac OS X
--   Safari on IOS 3.2.2 and higher
--   Chrome on Android 4.2 and higher
+### Windows 
+-   Chrome
+-   Firefox 
+-   Edge
 
-Note that mobile browsers have limitations (e.g., volume control and autostart are not supported)
+### Mac OS 
+-   Chrome 
+-   Firefox 
+-   Safari 
+-   Opera 
+
+### iOS (iPhone and iPad)
+-   Safari 
+
+### Android (Google Pixel)
+-   Chrome 
+-   Firefox 
+
+With the release of version 4.4, we are no longer actively supporting Internet Explorer. 
 
 Dependencies
 ------------
@@ -212,6 +223,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 -   **data-skin** - optional; "legacy (default) or "2020". The default skin has two rows of controls, with the seekbar positioned in available space within the top row. The "2020" skin, introduced in version 4.2, has all buttons in one row beneath a full-width seekbar. 
 -   **data-speed-icons** - optional; "animals" (default) or "arrows". The default setting uses a turtle icon for *slower* and a rabbit icon for *faster*. Setting this to "arrows" uses the original Able Player icons (prior to version 3.5), arrows pointing up for *faster* and down for *slower*.
 -   **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
+-   **data-steno-iframe-id** - optional; id of an iframe in which users will be typing with steno-mode enabled (see next item).
 -   **data-steno-mode** - optional; "true" to allow keyboard shortcuts for controlling the player remotely within textarea form fields, e.g., for transcribing media content. 
 -   **data-volume** - optional; set the default volume (0 to 10; default is 7 to avoid overpowering screen reader audio)
 -   **data-seek-interval** - optional; interval (in seconds) of forward and rewind buttons. By default, seek interval is intelligently calculated based on  duration of the media.
@@ -219,8 +231,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 
 #### Language
 
--   **data-lang** - optional; specify language of the player using 2-character language code (default is "en" for English)
--   **data-force-lang** - optional; include this option to force the player to use the value of *data-lang* as the player language. Otherwise, the player language will be set as follows, in order of precedence: 1) the language of the web page or user's web browser if either is known and if there is a matching translation file; 2) the value of *data-lang* if provided; 3) English.
+-   **data-lang** - optional; specify language of the player using 2-character language code. In order to work, the language specified must be one of Able Player's supported languages (see **Supported Languages** above). If **data-lang** is not included or specifies a language that is not supported, Able Player will default to the language of the web page if known and supported; otherwise it will default to English.   
 
 #### Captions
 
@@ -291,9 +302,10 @@ The following attributes make all this possible:
 
 #### Search
 
+-   **data-search-div** - required for search; id of external container in which to display search results
 -   **data-search** - optional; search terms to search for within the caption tracks, separated by a space
 -   **data-search-lang** - optional; specify 2-character language code of caption or subtitle track to search. If unspecified, searches the default language, which is the language of the web page if specified using the *lang* attribute on either the `<html>` or `<body>` tag. 
--   **data-search-div** - optional; id of external container in which to display search results
+-   **data-search-ignore-caps** - optional; ignore capitalization in search terms. If omitted, search is case-sensitive.
 
 #### Fallback Player
 
@@ -578,41 +590,17 @@ YouTube Support
 To play a YouTube video in *Able Player*, simply include a **data-youtube-id** attribute
 on the `<video>` element. The value of this attribute must be the video's 11-character YouTube ID.
 
-If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute
-on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
+If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
 of the described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
-Versions 2.3.1 through 3.2.12 required a YouTube Data API key for retrieving caption data from YouTube.
-Get a YouTube Data API key by registering your application at the [Google Developer Console][].
-For complete instructions, see [Google's Getting Started page]. Note: All that's needed for
-playing YouTube videos in Able Player is a simple API key, **not** OAuth 2.0. 
+### Important Changes to YouTube Support
 
-After obtaining your YouTube Data API Key, insert the following code into your HTML page:
-
-```HTML
-<script>
-  var youTubeDataAPIKey = "paste your API key here";
-  var googleApiReady = false;
-  function initGoogleClientApi() {
-    googleApiReady = true;
-  }
-</script>
-<script src="http://apis.google.com/js/client.js?onload=initGoogleClientApi"></script>
-```
-
-Starting with version 3.2.13, Able Player no longer requires a YouTube Data API key in order to access caption tracks from YouTube. However, an API key is still encouraged, as it relies on well-documented methods from Google, 
-whereas operating without an API key relies on methods that are not well documented, and therefore 
-may not be reliable.  
-
-Also new in 3.2.13, Able Player now handles YouTube captions in the same way it handles HTML `<track kind="captions">` elements. The display of the caption text can be customized via the Preferences menu, and the caption text is used to automatically create an interactive transcript. 
-
-YouTube does not currently support chapters, descriptions, and metadata tracks. With Able Player, these features can be added to the video using HTML `<track>` elements, even if the video's captions and subtitles are stored on YouTube. The advantage of managing captions entirely on YouTube is that you only have to manage them in one place, and they're available everywhere your YouTube video is played.  
-
-If your video has HTML `<track>` elements for captions and subtitles, these will be used *instead of* the captions on YouTube.
-
-
-Adjustable playback rate is available for some videos.
+On November 10, 2021, Google eliminated the *timedtext* API, which for years had been a dependable, albeit undocumented, means of getting access to YouTube caption files. 
+Able Player version 4.3.27 restores Able Player's ability to toggle captions on and off using the CC button, and to select available languages from a popup menu. 
+However, it is no longer possible to have full Able Player functionality 
+unless captions and subtitles are hosted locally. 
+See the section below on *Limitations of hosting captions and subtitles on YouTube or Vimeo*. 
 
 Vimeo Support
 ---------------
@@ -629,7 +617,23 @@ Note that Vimeo currently has some limitations:
 
 -   A Plus, Pro or Business account is required in order to hide Vimeo's default controller. If videos are hosted on a free account, the Vimeo controller and Able Player controller are both shown. The Vimeo controller disappears temporarily after playback begins, but until then having both players present is cluttered and confusing. 
 -   A Pro or Business account is required in order to change playback rate (with faster and slower buttons). This functionality is *not* supported with a Plus account. Even with a Pro or Business account, this feature is off by default and "Speed controls" need to be enabled within the settings for each video.
--   Able Player can display captions if they're hosted on Vimeo. However, if the user changes their caption display preferences in Able Player, that has no effect on the Vimeo captions. Also, Able Player is unable to auto-generate an interactive transcript if captions are hosted on Vimeo. For captions that support user display preferences and that can be repurposed as an interactive transcript, captions and subtitles must be stored locally and referenced with a &lt;track&gt; element. If captions and subtitles are provided both on Vimeo and locally, the local captions will take precedence in order to provide full functionality. 
+
+In addition, if captions and subtitles are hosted on Vimeo, Able Player can control toggling them on/off and choosing languages via the CC button. However, Able Player's full functionality is not available. See the section below on *Limitations of hosting captions and subtitles on YouTube or Vimeo*. 
+
+Limitations of hosting captions and subtitles on YouTube or Vimeo
+----------
+
+If captions and subtitles are hosted on YouTube or Vimeo, Able Player can control toggling them on/off and choosing languages via the CC button. However, Able Player's full functionality is not available. Specifically: 
+
+*  Able Player is unable to auto-generate an interactive transcript from the caption text. 
+*  Able Player's caption search features don't work. 
+*  Users have limited control over how captions are displayed. If captions are hosted locally, users have control over their position, font, font size, text and background colors, and opacity through the Caption Preferences dialog. If captions are hosted solely on YouTube, users can change font size via Able Player but not the other settings. If captions are hosted solely on Vimeo, users have no control over their appearance via Able Player.
+
+Given these limitations, we recommend storing captions and subtitles locally and referencing them with a `<track>` element. In fact, all local `<track>` elements (captions, subtitles, chapters, descriptions, and metadata tracks) work for YouTube and Vimeo videos, just as they do for videos hosted locally. 
+
+If captions and subtitles are hosted locally, in addition to being hosted on YouTube or Vimeo 
+(i.e., to ensure accessibility of videos when viewed directly on these platforms), the local captions will take precedence in Able PLayer in order to provide full functionality. 
+
 
 MIME Types
 ----------
@@ -720,7 +724,13 @@ are ultimately combined into several different files (in the */build* directory)
 [npm][] and [Grunt][]:
 
 ```sh
+# Install Grunt globally 
+npm install -g grunt-cli
+
+# Install project dependencies
 npm install
+
+# Build CSS and JS
 grunt
 ```
 

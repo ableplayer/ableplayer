@@ -17,7 +17,7 @@
 			youTubeId = this.youTubeId;
 		}
 		this.activeYouTubeId = youTubeId;
-		if (AblePlayer.youtubeIframeAPIReady) {
+		if (AblePlayer.youTubeIframeAPIReady) {
 			// Script already loaded and ready.
 			this.finalizeYoutubeInit().then(function() {
 				deferred.resolve();
@@ -25,14 +25,14 @@
 		}
 		else {
 			// Has another player already started loading the script? If so, abort...
-			if (!AblePlayer.loadingYoutubeIframeAPI) {
+			if (!AblePlayer.loadingYouTubeIframeAPI) {
 				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
 					deferred.fail();
 				});
 			}
 
 			// Otherwise, keeping waiting for script load event...
-			$('body').on('youtubeIframeAPIReady', function () {
+			$('body').on('youTubeIframeAPIReady', function () {
 				thisObj.finalizeYoutubeInit().then(function() {
 					deferred.resolve();
 				});
@@ -44,6 +44,7 @@
 	AblePlayer.prototype.finalizeYoutubeInit = function () {
 
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
+
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, videoDimensions, autoplay;
 
 		deferred = new $.Deferred();
@@ -63,10 +64,9 @@
 		// cc_load_policy:
 		// 0 - show captions depending on user's preference on YouTube
 		// 1 - show captions by default, even if the user has turned them off
-		// For Able Player, init player with value of 0
-		// and will turn them on or off after player is initialized
-		// based on availability of local tracks and user's Able Player prefs
-		ccLoadPolicy = 0;
+		// IMPORTANT: This *must* be set to 1 or some browsers 
+		// fail to load any texttracks (observed in Chrome, not in Firefox) 
+		ccLoadPolicy = 1;
 
 		videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
 		if (videoDimensions) {
@@ -89,11 +89,12 @@
 			autoplay = 0;
 		}
 
-		// NOTE: YouTube is changing the following parameters on or after Sep 25, 2018:
-		// rel - No longer able to prevent YouTube from showing related videos
-		//			value of 0 now limits related videos to video's same channel
-		// showinfo - No longer supported (previously, value of 0 hid title, share, & watch later buttons
 		// Documentation https://developers.google.com/youtube/player_parameters
+
+		if (typeof this.captionLang == 'undefined') { 
+			// init using the default player lang
+			this.captionLang = this.lang; 
+		}
 
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
@@ -108,14 +109,15 @@
 				start: this.startTime,
 				controls: 0, // no controls, using our own
 				cc_load_policy: ccLoadPolicy,
-				hl: this.lang, // use the default language UI
+				cc_lang_pref: this.captionLang, // set the caption language 
+				hl: this.lang, // set the UI language to match Able Player 
 				modestbranding: 1, // no YouTube logo in controller
-				rel: 0, // do not show related videos when video ends
-				html5: 1, // force html5 if browser supports it (undocumented parameter; 0 does NOT force Flash)
+				rel: 0, // when video ends, show only related videos from same channel (1 shows any)
 				iv_load_policy: 3 // do not show video annotations
 			},
 			events: {
 				onReady: function () {
+
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
@@ -136,8 +138,9 @@
 				onError: function (x) {
 					deferred.fail();
 				},
-				onStateChange: function (x) {
+				onStateChange: function (x) {					
 					thisObj.getPlayerState().then(function(playerState) {
+
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
 							thisObj.playing = true;
@@ -161,26 +164,18 @@
 							thisObj.paused = true;
 						}
 					});
+					// If caption tracks are hosted locally, but are also available on YouTube,
+					// we need to turn them off on YouTube or there will be redundant captions 
+					// This is the most reliable event on which to unload the caption module 
+					if (thisObj.player === 'youtube' && !thisObj.usingYouTubeCaptions) { 						
+						if (thisObj.youTubePlayer.getOptions('captions')) { 							
+							thisObj.youTubePlayer.unloadModule('captions');
+						}
+					}			 			
 				},
 				onPlaybackQualityChange: function () {
 					// do something
 				},
-				onApiChange: function (x) {
-					// As of Able Player v2.2.23, we are now getting caption data via the YouTube Data API
-					// prior to calling initYouTubePlayer()
-					// Previously we got caption data via the YouTube iFrame API, and doing so was an awful mess.
-					// onApiChange fires to indicate that the player has loaded (or unloaded) a module with exposed API methods
-					// it isn't fired until the video starts playing
-					// if captions are available for this video (automated captions don't count)
-					// the 'captions' (or 'cc') module is loaded. If no captions are available, this event never fires
-					// So, to trigger this event we had to play the video briefly, then pause, then reset.
-					// During that brief moment of playback, the onApiChange event was fired and we could setup captions
-					// The 'captions' and 'cc' modules are very different, and have different data and methods
-					// NOW, in v2.2.23, we still need to initialize the caption modules in order to control captions
-					// but we don't have to do that on load in order to get caption data
-					// Instead, we can wait until the video starts playing normally, then retrieve the modules
-					thisObj.initYouTubeCaptionModule();
-				}
 			}
 		});
 
@@ -283,288 +278,82 @@
 		}
 	};
 
-	AblePlayer.prototype.setupYouTubeCaptions = function () {
-
-		// called from setupAltCaptions if player is YouTube and there are no <track> captions
-
-		// use YouTube Data API to get caption data from YouTube
-		// function is called only if these conditions are met:
-		// 1. this.player === 'youtube'
-		// 2. there are no <track> elements with kind="captions"
-		// 3. youTubeDataApiKey is defined
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		var thisObj, googleApiPromise, youTubeId, i;
-
-		thisObj = this;
-
-		// if a described version is available && user prefers desription
-		// Use the described version, and get its captions
-		if (this.youTubeDescId && this.prefDesc) {
-			youTubeId = this.youTubeDescId;
-		}
-		else {
-			youTubeId = this.youTubeId;
-		}
-
-		if (typeof youTubeDataAPIKey !== 'undefined') {
-			// Wait until Google Client API is loaded
-			// When loaded, it sets global var googleApiReady to true
-
-			// Thanks to Paul Tavares for $.doWhen()
-			// https://gist.github.com/purtuga/8257269
-			$.doWhen({
-				when: function(){
-					return googleApiReady;
-				},
-				interval: 100, // ms
-				attempts: 1000
-			})
-			.done(function(){
-					deferred.resolve();
-			})
-			.fail(function(){
-				console.log('Unable to initialize Google API. YouTube captions are currently unavailable.');
-			});
-		}
-		else {
-			deferred.resolve();
-		}
-		return promise;
-	};
-
-	AblePlayer.prototype.waitForGapi = function () {
-
-		// wait for Google API to initialize
-
-		var thisObj, deferred, promise, maxWaitTime, maxTries, tries, timer, interval;
-
-		thisObj = this;
-		deferred = new $.Deferred();
-		promise = deferred.promise();
-		maxWaitTime = 5000; // 5 seconds
-		maxTries = 100; // number of tries during maxWaitTime
-		tries = 0;
-		interval = Math.floor(maxWaitTime/maxTries);
-
-		timer = setInterval(function() {
-			tries++;
-			if (googleApiReady || tries >= maxTries) {
-				clearInterval(timer);
-				if (googleApiReady) { // success!
-					deferred.resolve(true);
-				}
-				else { // tired of waiting
-					deferred.resolve(false);
-				}
-			}
-			else {
-				thisObj.waitForGapi();
-			}
-		}, interval);
-		return promise;
-	};
-
 	AblePlayer.prototype.getYouTubeCaptionTracks = function (youTubeId) {
 
-		// get data via YouTube Data API, and push data to this.captions
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		var thisObj, useGoogleApi, i, trackId, trackLang, trackName, trackLabel, trackKind, isDraft, isDefaultTrack;
-
-		thisObj = this;
-
-		if (typeof youTubeDataAPIKey !== 'undefined') {
-			this.waitForGapi().then(function(waitResult) {
-
-				useGoogleApi = waitResult;
-
-				// useGoogleApi returns false if API failed to initalize after max wait time
-				// Proceed only if true. Otherwise can still use fallback method (see else loop below)
-				if (useGoogleApi === true) {
-					gapi.client.setApiKey(youTubeDataAPIKey);
-					gapi.client
-						.load('youtube', 'v3')
-						.then(function() {
-							var request = gapi.client.youtube.captions.list({
-								'part': 'id, snippet',
-								'videoId': youTubeId
-							});
-							request.then(function(json) {
-								if (json.result.items.length) { // video has captions!
-									thisObj.hasCaptions = true;
-									thisObj.usingYouTubeCaptions = true;
-									if (thisObj.prefCaptions === 1) {
-										thisObj.captionsOn = true;
-									}
-									else {
-										thisObj.captionsOn = false;
-									}
-									// Step through results and add them to cues array
-									for (i=0; i < json.result.items.length; i++) {
-										trackName = json.result.items[i].snippet.name; // usually seems to be empty
-										trackLang = json.result.items[i].snippet.language;
-										trackKind = json.result.items[i].snippet.trackKind; // ASR, standard, forced
-										isDraft = json.result.items[i].snippet.isDraft; // Boolean
-										// Other variables that could potentially be collected from snippet:
-										// isCC - Boolean, always seems to be false
-										// isLarge - Boolean
-										// isEasyReader - Boolean
-										// isAutoSynced	 Boolean
-										// status - string, always seems to be "serving"
-
-										var srcUrl = thisObj.getYouTubeTimedTextUrl(youTubeId,trackName,trackLang);
-										if (trackKind !== 'ASR' && !isDraft) {
-
-											if (trackName !== '') {
-												 trackLabel = trackName;
-											}
-											else {
-												 // if track name is empty (it always seems to be), assign a label based on trackLang
-												 trackLabel = thisObj.getLanguageName(trackLang);
-											}
-
-											// assign the default track based on language of the player
-											if (trackLang === thisObj.lang) {
-												isDefaultTrack = true;
-											}
-											else {
-												isDefaultTrack = false;
-											}
-											thisObj.tracks.push({
-												'kind': 'captions',
-												'src': srcUrl,
-												'language': trackLang,
-												'label': trackLabel,
-												'def': isDefaultTrack
-											});
-										}
-									}
-									// setupPopups again with new captions array, replacing original
-									thisObj.setupPopups('captions');
-									deferred.resolve();
-								}
-								else {
-									thisObj.hasCaptions = false;
-									thisObj.usingYouTubeCaptions = false;
-									deferred.resolve();
-								}
-							}, function (reason) {
-								// If video has no captions, YouTube returns an error.
-								// Should still proceed, but with captions disabled
-								// The specific error, if needed: reason.result.error.message
-								// If no captions, the error is: "The video identified by the <code>videoId</code> parameter could not be found."
-								console.log('Error retrieving captions.');
-								console.log('Check your video on YouTube to be sure captions are available and published.');
-								thisObj.hasCaptions = false;
-								thisObj.usingYouTubeCaptions = false;
-								deferred.resolve();
-							});
-						})
-				}
-				else {
-					// googleAPi never loaded.
-					this.getYouTubeCaptionTracks2(youTubeId).then(function() {
-						deferred.resolve();
-					});
-				}
-			});
-		}
-		else {
-			// web owner hasn't provided a Google API key
-			// attempt to get YouTube captions via the backup method
-			this.getYouTubeCaptionTracks2(youTubeId).then(function() {
-				deferred.resolve();
-			});
-		}
-		return promise;
-	};
-
-	AblePlayer.prototype.getYouTubeCaptionTracks2 = function (youTubeId) {
-
-	 	// Use alternative backup method of getting caption tracks from YouTube
-	 	// and pushing them to this.captions
-	 	// Called from getYouTubeCaptionTracks if no Google API key is defined
-	 	// or if Google API failed to initiatlize
-	 	// This method seems to be undocumented, but is referenced on StackOverflow
-	 	// We'll use that as a fallback but it could break at any moment
+		// get data via YouTube IFrame Player API, and push data to this.tracks & this.captions
+		// NOTE: Caption tracks are not available through the IFrame Player API 
+		// until AFTER the video has started playing. 
+		// Therefore, this function plays the video briefly in order to load the captions module
+		// then stops the video and collects the data needed to build the cc menu 
+		// This is stupid, but seemingly unavoidable. 
+		// Caption tracks could be obtained through the YouTube Data API 
+		// but this required authors to have a Google API key, 
+		// which would complicate Able Player installation 
 
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
 
-		var thisObj, useGoogleApi, i, trackId, trackLang, trackName, trackLabel, trackKind, isDraft, isDefaultTrack;
+		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack;
 
 		thisObj = this;
-
-		$.ajax({
-			type: 'get',
-			url: 'https://www.youtube.com/api/timedtext?type=list&v=' + youTubeId,
-			dataType: 'xml',
-			success: function(xml) {
-				var $tracks = $(xml).find('track');
-				if ($tracks.length > 0) {	 // video has captions!
-					thisObj.hasCaptions = true;
-					thisObj.usingYouTubeCaptions = true;
-					if (thisObj.prefCaptions === 1) {
-						thisObj.captionsOn = true;
-					}
-					else {
-						thisObj.captionsOn = false;
-					}
-					// Step through results and add them to tracks array
-					$tracks.each(function() {
-						trackId = $(this).attr('id');
-						trackLang = $(this).attr('lang_code');
-						if ($(this).attr('name') !== '') {
-							trackName = $(this).attr('name');
-							trackLabel = trackName;
+		
+		if (!this.youTubePlayer.getOption('captions','tracklist')) { 			
+			// no tracks were found, probably because the captions module hasn't loaded  
+			// play video briefly (required in order to load the captions module) 
+			// and after the apiChange event is triggered, try again to retreive tracks
+			this.youTubePlayer.addEventListener('onApiChange',function(x) { 
+				if (thisObj.loadingYouTubeCaptions) { 				
+					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
+					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
+					thisObj.youTubePlayer.stopVideo(); 
+					// Step through ytTracks and add them to global tracks array
+					// Note: Unlike YouTube Data API, the IFrame Player API only returns 
+					// tracks that are published, and does NOT include ASR captions 
+					// So, no additional filtering is required 
+					for (i=0; i < ytTracks.length; i++) {
+						trackLang = ytTracks[i].languageCode; 
+						trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+						isDefaultTrack = false; 
+						if (typeof thisObj.captionLang !== 'undefined') { 
+							if (trackLang === thisObj.captionLang) {
+								isDefaultTrack = true;						
+							}
 						}
-						else {
-							// @name is typically null except for default track
-							// but lang_translated seems to be reliable
-							trackName = '';
-							trackLabel = $(this).attr('lang_translated');
+						else if (typeof thisObj.lang !== 'undefined') { 
+							if (trackLang === thisObj.lang) {
+								isDefaultTrack = true;						
+							}
 						}
-						if (trackLabel === '') {
-							trackLabel = thisObj.getLanguageName(trackLang);
-						}
-						// assign the default track based on language of the player
-						if (trackLang === thisObj.lang) {
-							isDefaultTrack = true;
-						}
-						else {
-							isDefaultTrack = false;
-						}
-
-						// Build URL for retrieving WebVTT source via YouTube's timedtext API
-						var srcUrl = thisObj.getYouTubeTimedTextUrl(youTubeId,trackName,trackLang);
 						thisObj.tracks.push({
 							'kind': 'captions',
-							'src': srcUrl,
 							'language': trackLang,
 							'label': trackLabel,
 							'def': isDefaultTrack
 						});
-
-					});
+					}
+					thisObj.captions = thisObj.tracks; 
+					thisObj.hasCaptions = true;
 					// setupPopups again with new captions array, replacing original
-					thisObj.setupPopups('captions');
-					deferred.resolve();
+					thisObj.setupPopups('captions');				
+					thisObj.loadingYouTubeCaptions = false; 
 				}
-				else {
-					thisObj.hasCaptions = false;
-					thisObj.usingYouTubeCaptions = false;
-					deferred.resolve();
+				if (thisObj.captionLangPending) { 
+					// user selected a new caption language prior to playback starting 
+					// set it now 
+					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
+					thisObj.captionLangPending = null; 
 				}
-			},
-			error: function(xhr, status) {
-				console.log('Error retrieving YouTube caption data for video ' + youTubeId);
+				if (typeof thisObj.prefCaptionsSize !== 'undefined') { 
+					// set the default caption size 
+					// this doesn't work until the captions module is loaded 
+					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
+				}
 				deferred.resolve();
-			}
-		});
+			});
+			// Trigger the above event listener by briefly playing the video 		
+			this.loadingYouTubeCaptions = true; 			
+			this.youTubePlayer.playVideo();		
+		}
 		return promise;
 	};
 
@@ -572,6 +361,8 @@
 
 		// return URL for retrieving WebVTT source via YouTube's timedtext API
 		// Note: This API seems to be undocumented, and could break anytime
+		// UPDATE: Google removed this API on November 10, 2021 
+		// This function is no longer called, but is preserved here for reference 
 		var url = 'https://www.youtube.com/api/timedtext?fmt=vtt';
 		url += '&v=' + youTubeId;
 		url += '&lang=' + trackLang;
@@ -602,73 +393,6 @@
 
 		deferred.resolve();
 		return promise;
-	};
-
-	AblePlayer.prototype.initYouTubeCaptionModule = function () {
-
-		// This function is called when YouTube onApiChange event fires
-		// to indicate that the player has loaded (or unloaded) a module with exposed API methods
-		// it isn't fired until the video starts playing
-		// and only fires if captions are available for this video (automated captions don't count)
-		// If no captions are available, onApichange event never fires & this function is never called
-
-		// YouTube iFrame API documentation is incomplete related to captions
-		// Found undocumented features on user forums and by playing around
-		// Details are here: http://terrillthompson.com/blog/648
-		// Summary:
-		// User might get either the AS3 (Flash) or HTML5 YouTube player
-		// The API uses a different caption module for each player (AS3 = 'cc'; HTML5 = 'captions')
-		// There are differences in the data and methods available through these modules
-		// This function therefore is used to determine which captions module is being used
-		// If it's a known module, this.ytCaptionModule will be used elsewhere to control captions
-		var options, fontSize, displaySettings;
-
-		options = this.youTubePlayer.getOptions();
-		if (options.length) {
-			for (var i=0; i<options.length; i++) {
-				if (options[i] == 'cc') { // this is the AS3 (Flash) player
-					this.ytCaptionModule = 'cc';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-				else if (options[i] == 'captions') { // this is the HTML5 player
-					this.ytCaptionModule = 'captions';
-					if (!this.hasCaptions) {
-						// there are captions available via other sources (e.g., <track>)
-						// so use these
-						this.hasCaptions = true;
-						this.usingYouTubeCaptions = true;
-					}
-					break;
-				}
-			}
-			if (typeof this.ytCaptionModule !== 'undefined') {
-				if (this.usingYouTubeCaptions) {
-					// set default languaage
-					this.youTubePlayer.setOption(this.ytCaptionModule, 'track', {'languageCode': this.captionLang});
-					// set font size using Able Player prefs (values are -1, 0, 1, 2, and 3, where 0 is default)
-					this.youTubePlayer.setOption(this.ytCaptionModule,'fontSize',this.translatePrefs('size',this.prefCaptionsSize,'youtube'));
-					// ideally could set other display options too, but no others seem to be supported by setOption()
-				}
-				else {
-					// now that we know which cc module was loaded, unload it!
-					// we don't want it if we're using local <track> elements for captions
-					this.youTubePlayer.unloadModule(this.ytCaptionModule)
-				}
-			}
-		}
-		else {
-			// no modules were loaded onApiChange
-			// unfortunately, gonna have to disable captions if we can't control them
-			this.hasCaptions = false;
-			this.usingYouTubeCaptions = false;
-		}
-		this.refreshControls('captions');
 	};
 
 	AblePlayer.prototype.getYouTubePosterUrl = function (youTubeId, width) {

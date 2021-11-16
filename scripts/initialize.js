@@ -555,7 +555,7 @@
 		}
 		if (!this.playerCreated) {
 			// only call these functions once
-			 this.loadCurrentPreferences();
+			this.loadCurrentPreferences();
 			this.injectPlayerCode();
 		}
 
@@ -565,78 +565,86 @@
 
 		this.initPlayer().then(function() {
 
-			 thisObj.setupTracks().then(function() {
+			thisObj.setupTracks().then(function() {
 
-				thisObj.setupAltCaptions().then(function() {
+				thisObj.getBrowserVoices();
 
-					thisObj.setupTranscript().then(function() {
+				thisObj.setupTranscript().then(function() {
 
-            thisObj.getMediaTimes().then(function(mediaTimes) {
+					thisObj.initStenoFrame().then(function() {
 
-              thisObj.duration = mediaTimes['duration'];
-              thisObj.elapsed = mediaTimes['elapsed'];
+						if (thisObj.stenoMode && thisObj.$stenoFrame) {
+							thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+						}
 
-              thisObj.setFullscreen(false);
+						thisObj.getMediaTimes().then(function(mediaTimes) {
 
-              if (typeof thisObj.volume === 'undefined') {
-  						  thisObj.volume = thisObj.defaultVolume;
-						  }
-						  if (thisObj.volume) {
-                thisObj.setVolume(thisObj.volume);
-              }
+							thisObj.duration = mediaTimes['duration'];
+							thisObj.elapsed = mediaTimes['elapsed'];
 
-              if (thisObj.transcriptType) {
-							  thisObj.addTranscriptAreaEvents();
-                thisObj.updateTranscript();
-						  }
-              if (thisObj.mediaType === 'video') {
-							  thisObj.initDescription();
-						  }
-              if (thisObj.captions.length) {
-							  thisObj.initDefaultCaption();
-						  }
+							thisObj.setFullscreen(false);
 
-              // setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-              // This tells browsers to ignore the text tracks so Able Player can handle them
-              // However, timing is critical as browsers - especially Safari - tend to ignore this request
-              // unless it's sent late in the intialization process.
-              // If browsers ignore the request, the result is redundant captions
-              thisObj.setMediaAttributes();
-              thisObj.addControls();
-              thisObj.addEventListeners();
+							if (typeof thisObj.volume === 'undefined') {
+								thisObj.volume = thisObj.defaultVolume;
+							}
+							if (thisObj.volume) {
+								thisObj.setVolume(thisObj.volume);
+							}
 
-              // inject each of the hidden forms that will be accessed from the Preferences popup menu
-              prefsGroups = thisObj.getPreferencesGroups();
-              for (i = 0; i < prefsGroups.length; i++) {
-							  thisObj.injectPrefsForm(prefsGroups[i]);
-				      }
-              thisObj.setupPopups();
-              thisObj.updateCaption();
-              thisObj.injectVTS();
-              if (thisObj.chaptersDivLocation) {
-							  thisObj.populateChaptersDiv();
-				      }
-              thisObj.showSearchResults();
+							if (thisObj.transcriptType) {
+								thisObj.addTranscriptAreaEvents();
+								thisObj.updateTranscript();
+							}
+							if (thisObj.mediaType === 'video') {
+								thisObj.initDescription();
+							}
+							if (thisObj.captions.length) {
+								thisObj.initDefaultCaption();
+							}
 
-              // Go ahead and load media, without user requesting it
-              // Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-              // However, the media needs to load before the 'loadedmetadata' event is fired
-              // and until that happens we can't get the media's duration
-              if (thisObj.player === 'html5') {
-							  thisObj.$media[0].load();
-						  }
-              // refreshControls is called twice building/initializing the player
-              // this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
-              setTimeout(function() {
-							  thisObj.refreshControls('init');
-						  },100);
-            });
-					},
-					function() {	 // initPlayer fail
-						thisObj.provideFallback();
-					});
+							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+							// This tells browsers to ignore the text tracks so Able Player can handle them
+							// However, timing is critical as browsers - especially Safari - tend to ignore this request
+							// unless it's sent late in the intialization process.
+							// If browsers ignore the request, the result is redundant captions
+							thisObj.setMediaAttributes();
+							thisObj.addControls();
+
+							thisObj.addEventListeners();
+
+							// inject each of the hidden forms that will be accessed from the Preferences popup menu
+							prefsGroups = thisObj.getPreferencesGroups();
+							for (i = 0; i < prefsGroups.length; i++) {
+								thisObj.injectPrefsForm(prefsGroups[i]);
+							}
+							thisObj.setupPopups();
+							thisObj.updateCaption();
+							thisObj.injectVTS();
+							if (thisObj.chaptersDivLocation) {
+								thisObj.populateChaptersDiv();
+							}
+							thisObj.showSearchResults();
+
+							// Go ahead and load media, without user requesting it
+							// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+							// However, the media needs to load before the 'loadedmetadata' event is fired
+							// and until that happens we can't get the media's duration
+							if (thisObj.player === 'html5') {
+								thisObj.$media[0].load();
+							}
+							// refreshControls is called twice building/initializing the player
+							// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
+							setTimeout(function() {
+								thisObj.refreshControls('init');
+							},100);
+						}); 
+					}); 
 				});
-			});
+			 
+			}); 
+		},
+		function() {	 // initPlayer fail
+			thisObj.provideFallback();
 		});
 	};
 
@@ -660,15 +668,15 @@
 		playerPromise.done(
 			function () { // done/resolved
 				if (thisObj.useFixedSeekInterval) {
-  				if (!thisObj.seekInterval) {
-            thisObj.seekInterval = thisObj.defaultSeekInterval;
-          }
-          else {
-            // fixed seekInterval was already assigned, using value of data-seek-interval attribute
-          }
-          thisObj.seekIntervalCalculated = true;
-        }
-        else {
+					if (!thisObj.seekInterval) {
+						thisObj.seekInterval = thisObj.defaultSeekInterval;
+					}
+					else {
+						// fixed seekInterval was already assigned, using value of data-seek-interval attribute
+					}
+					thisObj.seekIntervalCalculated = true;
+				}
+				else {
 					thisObj.setSeekInterval();
 				}
 				deferred.resolve();
@@ -678,6 +686,34 @@
 			}
 		);
 
+		return promise;
+	};
+
+	AblePlayer.prototype.initStenoFrame = function() {
+
+		var thisObj, deferred, promise, $iframe;
+		thisObj = this;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+
+		if (this.stenoMode && this.$stenoFrame) {
+
+			if (this.$stenoFrame[0].contentWindow,document.readyState == 'complete') {
+				// iframe has already loaded
+				deferred.resolve();
+			}
+			else {
+				// iframe has not loaded. Wait for it.
+				this.$stenoFrame.on('load',function() {
+					deferred.resolve();
+				});
+			}
+		}
+		else {
+			// there is no stenoFrame to initialize
+			deferred.resolve();
+		}
 		return promise;
 	};
 
@@ -757,40 +793,40 @@
 				// sync all other tracks to this same languge
 				this.syncTrackLanguages('init',this.captionLang);
 			}
-      if (this.player === 'vimeo') {
-  			if (this.usingVimeoCaptions && this.prefCaptions == 1) {
-      			// initialize Vimeo captions to the default language
-            this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
-	  				  // track.language = the iso code for the language
-              // track.kind = 'captions' or 'subtitles'
-              // track.label = the human-readable label
-				    }).catch(function(error) {
-					    switch (error.name) {
-						    case 'InvalidTrackLanguageError':
-							    // no track was available with the specified language
-                  console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
-                  break;
-                case 'InvalidTrackError':
-							    // no track was available with the specified language and kind
-                  console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
-                  break;
-                default:
-							    // some other error occurred
-                  console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
-                  break;
-    		      }
-				    });
-			    }
-          else {
-  			    // disable Vimeo captions.
-            this.vimeoPlayer.disableTextTrack().then(function() {
-    			    // Vimeo captions disabled
-  			    }).catch(function(error) {
-              console.log('Error disabling Vimeo text track: ',error);
-            });
-			    }
-        }
-    }
+			if (this.player === 'vimeo') {
+				if (this.usingVimeoCaptions && this.prefCaptions == 1) {
+						// initialize Vimeo captions to the default language
+						this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
+							// track.language = the iso code for the language
+							// track.kind = 'captions' or 'subtitles'
+							// track.label = the human-readable label
+						}).catch(function(error) {
+							switch (error.name) {
+								case 'InvalidTrackLanguageError':
+									// no track was available with the specified language
+									console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+									break;
+								case 'InvalidTrackError':
+									// no track was available with the specified language and kind
+									console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+									break;
+								default:
+									// some other error occurred
+									console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+									break;
+							}
+						});
+					}
+					else {
+						// disable Vimeo captions.
+						this.vimeoPlayer.disableTextTrack().then(function() {
+							// Vimeo captions disabled
+						}).catch(function(error) {
+							console.log('Error disabling Vimeo text track: ',error);
+						});
+					}
+				}
+		}
 	};
 
 	AblePlayer.prototype.initHtml5Player = function () {

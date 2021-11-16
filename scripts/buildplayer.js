@@ -25,7 +25,7 @@
 		this.$mediaContainer = this.$media.wrap('<div class="able-media-container"></div>').parent();
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
-    this.$ableWrapper.addClass('able-skin-' + this.skin);
+		this.$ableWrapper.addClass('able-skin-' + this.skin);
 
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
@@ -157,10 +157,10 @@
 			'class': 'able-descriptions'
 		});
 		if (this.exposeTextDescriptions) {
-  		this.$descDiv.attr({
-  			'aria-live': 'assertive',
-        'aria-atomic': 'true'
-		  });
+			this.$descDiv.attr({
+				'aria-live': 'assertive',
+				'aria-atomic': 'true'
+			});
 		}
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
@@ -402,53 +402,53 @@
 
 		// Populate menu with menu items
 		if (which === 'prefs') {
-      if (this.prefCats.length > 1) {
-  			for (i = 0; i < this.prefCats.length; i++) {
-	  			$menuItem = $('<li></li>',{
-		  			'role': 'menuitem',
-            'tabindex': '-1'
-				  });
-          prefCat = this.prefCats[i];
-          if (prefCat === 'captions') {
-					  $menuItem.text(this.tt.prefMenuCaptions);
-				  }
-          else if (prefCat === 'descriptions') {
-					  $menuItem.text(this.tt.prefMenuDescriptions);
-				  }
-          else if (prefCat === 'keyboard') {
-					  $menuItem.text(this.tt.prefMenuKeyboard);
-				  }
-          else if (prefCat === 'transcript') {
-					  $menuItem.text(this.tt.prefMenuTranscript);
-				  }
-          $menuItem.on('click',function() {
-					  whichPref = $(this).text();
-					  thisObj.showingPrefsDialog = true;
-            thisObj.setFullscreen(false);
-            if (whichPref === thisObj.tt.prefMenuCaptions) {
-						  thisObj.captionPrefsDialog.show();
-					  }
-            else if (whichPref === thisObj.tt.prefMenuDescriptions) {
-						  thisObj.descPrefsDialog.show();
-					  }
-            else if (whichPref === thisObj.tt.prefMenuKeyboard) {
-						  thisObj.keyboardPrefsDialog.show();
-					  }
-            else if (whichPref === thisObj.tt.prefMenuTranscript) {
-						  thisObj.transcriptPrefsDialog.show();
-					  }
-            thisObj.closePopups();
-            thisObj.showingPrefsDialog = false;
-				  });
-          $menu.append($menuItem);
-			  }
-			  this.$prefsButton.attr('data-prefs-popup','menu');
-      }
-      else if (this.prefCats.length == 1) {
-        // only 1 category, so don't create a popup menu.
-        // Instead, open dialog directly when user clicks Prefs button
-        this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
-      }
+			if (this.prefCats.length > 1) {
+				for (i = 0; i < this.prefCats.length; i++) {
+					$menuItem = $('<li></li>',{
+						'role': 'menuitem',
+						'tabindex': '-1'
+					});
+					prefCat = this.prefCats[i];
+					if (prefCat === 'captions') {
+						$menuItem.text(this.tt.prefMenuCaptions);
+					}
+					else if (prefCat === 'descriptions') {
+						$menuItem.text(this.tt.prefMenuDescriptions);
+					}
+					else if (prefCat === 'keyboard') {
+						$menuItem.text(this.tt.prefMenuKeyboard);
+					}
+					else if (prefCat === 'transcript') {
+						$menuItem.text(this.tt.prefMenuTranscript);
+					}
+					$menuItem.on('click',function() {
+						whichPref = $(this).text();
+						thisObj.showingPrefsDialog = true;
+						thisObj.setFullscreen(false);
+						if (whichPref === thisObj.tt.prefMenuCaptions) {
+							thisObj.captionPrefsDialog.show();
+						}
+						else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+							thisObj.descPrefsDialog.show();
+						}
+						else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+							thisObj.keyboardPrefsDialog.show();
+						}
+						else if (whichPref === thisObj.tt.prefMenuTranscript) {
+							thisObj.transcriptPrefsDialog.show();
+						}
+						thisObj.closePopups();
+						thisObj.showingPrefsDialog = false;
+					});
+					$menu.append($menuItem);
+				}
+				this.$prefsButton.attr('data-prefs-popup','menu');
+			}
+			else if (this.prefCats.length == 1) {
+				// only 1 category, so don't create a popup menu.
+				// Instead, open dialog directly when user clicks Prefs button
+				this.$prefsButton.attr('data-prefs-popup',this.prefCats[0]);
+			}
 		}
 		else if (which === 'captions' || which === 'chapters') {
 			hasDefault = false;
@@ -487,6 +487,9 @@
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
 				}
+				else { 
+					$menuItem.attr('aria-checked','false');
+				}
 				$menuItem.on('click',this.getCaptionOffFunction());
 				$menu.append($menuItem);
 			}
@@ -515,9 +518,9 @@
 				$menuItem.on('click mousedown',function(e) {
 					e.stopPropagation();
 					if (typeof e.button !== 'undefined' && e.button !== 0) {
-  					// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
-  					// and the button was not a left click (left click = 0)
-  					// therefore, ignore this click
+						// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
+						// and the button was not a left click (left click = 0)
+						// therefore, ignore this click
 						return false;
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
@@ -601,7 +604,7 @@
 
 	AblePlayer.prototype.closePopups = function () {
 
-    var thisObj = this;
+		var thisObj = this;
 
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
@@ -612,18 +615,18 @@
 			this.$ccButton.removeAttr('aria-expanded').focus();
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
-      this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
+			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$prefsButton.removeAttr('aria-expanded');
 			if (!this.showingPrefsDialog) {
-  			this.$prefsButton.focus();
+				this.$prefsButton.focus();
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
-  			thisObj.hidingPopup = false;
-  		},100);
+				thisObj.hidingPopup = false;
+			},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
@@ -840,9 +843,9 @@
 		controlLayout = [];
 		controlLayout[0] = [];
 		controlLayout[1] = [];
-    if (this.skin === 'legacy') {
-		  controlLayout[2] = [];
-		  controlLayout[3] = [];
+		if (this.skin === 'legacy') {
+			controlLayout[2] = [];
+			controlLayout[3] = [];
 		}
 
 		controlLayout[0].push('play');
@@ -850,120 +853,120 @@
 		controlLayout[0].push('rewind');
 		controlLayout[0].push('forward');
 
-    if (this.skin === 'legacy') {
-      controlLayout[1].push('seek');
-    }
+		if (this.skin === 'legacy') {
+			controlLayout[1].push('seek');
+		}
 
 		if (this.hasPlaylist) {
-  		if (this.skin === 'legacy') {
-    		controlLayout[0].push('previous');
-        controlLayout[0].push('next');
-      }
-      else if (this.skin == '2020') {
-    		controlLayout[0].push('previous');
-        controlLayout[0].push('next');
-      }
+			if (this.skin === 'legacy') {
+				controlLayout[0].push('previous');
+				controlLayout[0].push('next');
+			}
+			else if (this.skin == '2020') {
+				controlLayout[0].push('previous');
+				controlLayout[0].push('next');
+			}
 		}
 
 		if (this.isPlaybackRateSupported()) {
-  		playbackSupported = true;
-  		if (this.skin === 'legacy') {
-  			controlLayout[2].push('slower');
-  			controlLayout[2].push('faster');
-  		}
+			playbackSupported = true;
+			if (this.skin === 'legacy') {
+				controlLayout[2].push('slower');
+				controlLayout[2].push('faster');
+			}
 		}
 		else {
-  		playbackSupported = false;
+			playbackSupported = false;
 		}
 
 		if (this.mediaType === 'video') {
-  		numA11yButtons = 0;
+			numA11yButtons = 0;
 			if (this.hasCaptions) {
-  			numA11yButtons++;
-  			if (this.skin === 'legacy') {
-				  controlLayout[2].push('captions');
+				numA11yButtons++;
+				if (this.skin === 'legacy') {
+					controlLayout[2].push('captions');
 				}
 				else if (this.skin == '2020') {
-  				controlLayout[1].push('captions');
-        }
+					controlLayout[1].push('captions');
+				}
 			}
 			if (this.hasSignLanguage) {
-  			numA11yButtons++;
-  			if (this.skin === 'legacy') {
-				  controlLayout[2].push('sign');
+				numA11yButtons++;
+				if (this.skin === 'legacy') {
+					controlLayout[2].push('sign');
 				}
 				else if (this.skin == '2020') {
-  				controlLayout[1].push('sign');
-        }
+					controlLayout[1].push('sign');
+				}
 			}
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
-  			numA11yButtons++;
-  			if (this.skin === 'legacy') {
-				  controlLayout[2].push('descriptions');
+				numA11yButtons++;
+				if (this.skin === 'legacy') {
+					controlLayout[2].push('descriptions');
 				}
 				else if (this.skin == '2020') {
-  				controlLayout[1].push('descriptions');
-        }
+					controlLayout[1].push('descriptions');
+				}
 			}
 		}
 		if (this.transcriptType === 'popup' && !(this.hideTranscriptButton)) {
-  		numA11yButtons++;
-  		if (this.skin === 'legacy') {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
 				controlLayout[2].push('transcript');
-		  }
-      else if (this.skin == '2020') {
-  		  controlLayout[1].push('transcript');
-      }
+			}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('transcript');
+			}
 		}
 
 		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
-  		numA11yButtons++;
-  		if (this.skin === 'legacy') {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
 				controlLayout[2].push('chapters');
-		  }
+			}
 			else if (this.skin == '2020') {
-  		  controlLayout[1].push('chapters');
-      }
+				controlLayout[1].push('chapters');
+			}
 		}
 
-    if (this.skin == '2020' && numA11yButtons > 0) {
-  		controlLayout[1].push('pipe');
+		if (this.skin == '2020' && numA11yButtons > 0) {
+			controlLayout[1].push('pipe');
 		}
 
-    if (playbackSupported && this.skin === '2020') {
-      controlLayout[1].push('faster');
-    	controlLayout[1].push('slower');
-    	controlLayout[1].push('pipe');
+		if (playbackSupported && this.skin === '2020') {
+			controlLayout[1].push('faster');
+			controlLayout[1].push('slower');
+			controlLayout[1].push('pipe');
 		}
 
-    if (this.skin === 'legacy') {
-  		controlLayout[3].push('preferences');
-    }
-    else if (this.skin == '2020') {
-      controlLayout[1].push('preferences');
-    }
+		if (this.skin === 'legacy') {
+			controlLayout[3].push('preferences');
+		}
+		else if (this.skin == '2020') {
+			controlLayout[1].push('preferences');
+		}
 
 		if (this.mediaType === 'video' && this.allowFullScreen) {
-      if (this.skin === 'legacy') {
-    		controlLayout[3].push('fullscreen');
-      }
-      else {
-        controlLayout[1].push('fullscreen');
-      }
+			if (this.skin === 'legacy') {
+				controlLayout[3].push('fullscreen');
+			}
+			else {
+				controlLayout[1].push('fullscreen');
+			}
 		}
 
 		if (this.browserSupportsVolume()) {
-  		volumeSupported = true; // defined in case we decide to move volume button elsewhere
+			volumeSupported = true; // defined in case we decide to move volume button elsewhere
 			this.volumeButton = 'volume-' + this.getVolumeName(this.volume);
 			if (this.skin === 'legacy') {
-  			controlLayout[1].push('volume');
-  		}
-  		else if (this.skin == '2020') {
-    		controlLayout[1].push('volume');
-  		}
+				controlLayout[1].push('volume');
+			}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('volume');
+			}
 		}
 		else {
-  		volumeSupported = false;
+			volumeSupported = false;
 			this.volume = false;
 		}
 		return controlLayout;
@@ -981,10 +984,10 @@
 		var thisObj, baseSliderWidth, controlLayout, numSections,
 		i, j, k, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, $pipeImg,
 		svgData, svgPath, control,
-    $buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
-    buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
-    tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
-    captionLabel, popupMenuId;
+		$buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
+		buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
+		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+		captionLabel, popupMenuId;
 
 		thisObj = this;
 
@@ -1003,8 +1006,8 @@
 		this.$controllerDiv.append(this.$tooltipDiv);
 
 		if (this.skin == '2020') {
-  		// add a full-width seek bar
-      $sliderDiv = $('<div class="able-seekbar"></div>');
+			// add a full-width seek bar
+			$sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
@@ -1094,9 +1097,9 @@
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
-          // NOTE: Changed from <button> to <div role="button" as of 4.2.18
-          // because <button> elements are rendered poorly in high contrast mode
-          // in some OS/browser/plugin combinations
+					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
+					// because <button> elements are rendered poorly in high contrast mode
+					// in some OS/browser/plugin combinations
 					$newButton = $('<div>',{
 						'role': 'button',
 						'tabindex': '0',
@@ -1106,30 +1109,30 @@
 
 					if (control === 'volume' || control === 'preferences') {
 						if (control == 'preferences') {
-  						this.prefCats = this.getPreferencesGroups();
-              if (this.prefCats.length > 1) {
-  						  // Prefs button will trigger a menu
-                popupMenuId = this.mediaId + '-prefs-menu';
-                $newButton.attr({
-							    'aria-controls': popupMenuId,
-                  'aria-haspopup': 'menu'
-                });
-						  }
-              else if (this.prefCats.length === 1) {
-  						  // Prefs button will trigger a dialog
-                $newButton.attr({
-    						  'aria-haspopup': 'dialog'
-                });
-						  }
+							this.prefCats = this.getPreferencesGroups();
+							if (this.prefCats.length > 1) {
+								// Prefs button will trigger a menu
+								popupMenuId = this.mediaId + '-prefs-menu';
+								$newButton.attr({
+									'aria-controls': popupMenuId,
+									'aria-haspopup': 'menu'
+								});
+							}
+							else if (this.prefCats.length === 1) {
+								// Prefs button will trigger a dialog
+								$newButton.attr({
+									'aria-haspopup': 'dialog'
+								});
+							}
 						}
 						else if (control === 'volume') {
 							popupMenuId = this.mediaId + '-volume-slider';
 							// volume slider popup is not a menu or a dialog
 							// therefore, using aria-expanded rather than aria-haspopup to communicate properties/state
-              $newButton.attr({
-                'aria-controls': popupMenuId,
-    						'aria-expanded': 'false'
-              });
+							$newButton.attr({
+								'aria-controls': popupMenuId,
+								'aria-expanded': 'false'
+							});
 						}
 					}
 					if (this.iconType === 'font') {
@@ -1271,39 +1274,39 @@
 
 						if ($(this).parent().hasClass('able-right-controls')) {
 							// this control is on the right side
-              var buttonSide = 'right';
+							var buttonSide = 'right';
 						}
 						else {
 							// this control is on the left side
-              var buttonSide = 'left';
+							var buttonSide = 'left';
 						}
 						// populate tooltip, then calculate its width before showing it
 						var tooltipWidth = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).width();
 						// center the tooltip horizontally over the button
-            if (buttonSide == 'left') {
-    				  var tooltipX = position.left - tooltipWidth/2;
-              if (tooltipX < 0) {
-                // tooltip would exceed the bounds of the player. Adjust.
-                tooltipX = 2;
-              }
-              var tooltipStyle = {
-							  left: tooltipX + 'px',
+						if (buttonSide == 'left') {
+							var tooltipX = position.left - tooltipWidth/2;
+							if (tooltipX < 0) {
+								// tooltip would exceed the bounds of the player. Adjust.
+								tooltipX = 2;
+							}
+							var tooltipStyle = {
+								left: tooltipX + 'px',
 								right: '',
 								top: tooltipY + 'px'
-						  };
-            }
-            else {
-              var tooltipX = position.right - tooltipWidth/2;
-              if (tooltipX < 0) {
-                // tooltip would exceed the bounds of the player. Adjust.
-                tooltipX = 2;
-              }
-              var tooltipStyle = {
+							};
+						}
+						else {
+							var tooltipX = position.right - tooltipWidth/2;
+							if (tooltipX < 0) {
+								// tooltip would exceed the bounds of the player. Adjust.
+								tooltipX = 2;
+							}
+							var tooltipStyle = {
 								left: '',
 								right: tooltipX + 'px',
 								top: tooltipY + 'px'
-						  };
-            }
+							};
+						}
 						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
@@ -1339,22 +1342,22 @@
 						this.$playpauseButton = $newButton;
 					}
 					else if (control == 'previous') {
-  					this.$prevButton = $newButton;
-            // if player is being rebuilt because user clicked the Prev button
-            // return focus to that (newly built) button
-            if (this.buttonWithFocus == 'previous') {
-              this.$prevButton.focus();
-              this.buttonWithFocus = null;
-            }
+						this.$prevButton = $newButton;
+						// if player is being rebuilt because user clicked the Prev button
+						// return focus to that (newly built) button
+						if (this.buttonWithFocus == 'previous') {
+							this.$prevButton.focus();
+							this.buttonWithFocus = null;
+						}
 					}
 					else if (control == 'next') {
-  					this.$nextButton = $newButton;
-            // if player is being rebuilt because user clicked the Next button
-            // return focus to that (newly built) button
-            if (this.buttonWithFocus == 'next') {
-              this.$nextButton.focus();
-              this.buttonWithFocus = null;
-            }
+						this.$nextButton = $newButton;
+						// if player is being rebuilt because user clicked the Next button
+						// return focus to that (newly built) button
+						if (this.buttonWithFocus == 'next') {
+							this.$nextButton.focus();
+							this.buttonWithFocus = null;
+						}
 					}
 					else if (control === 'captions') {
 						this.$ccButton = $newButton;
@@ -1887,6 +1890,14 @@
 		}
 		else if (control === 'help') {
 			// return this.tt.help;
+		}
+		else if (control === 'fullscreen') { 
+			if (!this.fullscreen) {
+				return this.tt.enterFullScreen; 
+			}
+			else { 
+				return this.tt.exitFullScreen; 
+			}
 		}
 		else {
 			// there should be no other controls, but just in case:

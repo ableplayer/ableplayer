@@ -478,13 +478,13 @@ div.able-now-playing span span {
 /*
   Modal Dialogs
 */
-
 div.able-modal-dialog {
   position: absolute;
   height: auto;
   max-width: 90%;
   margin-left: auto;
   margin-right: auto;
+  top: 5%;
   left: 0px;
   right: 0px;
   outline: 0px none;
@@ -494,6 +494,14 @@ div.able-modal-dialog {
   box-sizing: content-box !important;
   z-index: 10000;
 }
+@supports (transform: translate(-50%,-50%)) {
+	div.able-modal-dialog {
+	  top: 50%;
+		left: 50%;
+	  transform: translate(-50%,-50%) !important;
+	}
+}
+
 div.able-modal-overlay {
   position: fixed;
   width: 100%;
@@ -604,9 +612,33 @@ fieldset.able-prefs-captions select {
   font-size: 0.9em;
   border-radius: none;
 }
+fieldset.able-prefs-descriptions >  div.able-prefs-select { 
+	margin: 0.5em 1em;
+}
+fieldset.able-prefs-descriptions >  div.able-prefs-select > label,
+fieldset.able-prefs-descriptions >  div.able-prefs-slider > label {
+  width: 6em;
+  text-align: right;
+  padding-right: 1em;
+}
+fieldset.able-prefs-descriptions > div.able-prefs-select > select,
+fieldset.able-prefs-descriptions > div.able-prefs-slider > select {
+  width: 10em;
+  font-size: 0.9em;
+  border-radius: none;
+}
+div.able-prefDescPause {
+  margin-top: 1em;
+}
 .able-prefs-form div.able-captions-sample {
   padding: 0.5em;
   text-align: center;
+}
+.able-prefs-form div.able-desc-sample {
+  padding: 0.5em;
+  text-align: center;
+  color: #FFF;
+  background-color: #000;
 }
 .able-prefs-form h2 {
   margin-top: 0;
@@ -1237,7 +1269,10 @@ button#able-vts-save:focus {
 /*
   SVG Icons
 */
-div[role="button"] svg {
+.able-wrapper div[role="button"] svg,
+.able-modal-dialog div[role="button"] svg,
+.able-wrapper button svg,
+.able-modal-dialog button svg {
 	display: inline-block;
 	width: 1em;
 	height: 1em;
