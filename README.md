@@ -60,18 +60,27 @@ There are many ways to contribute to Able Player, and we welcome and appreciate 
 Compatibility
 -------------
 
-*Able Player* has been tested with the following browsers.
+During development, *Able Player* is routinely tested with the latest versions of the following browsers.
 
--   Firefox 3.x and higher
--   Internet Explorer 10 and higher
--   Microsoft Edge all versions 
--   Google Chrome 7.0 and higher
--   Opera 10.63 and higher
--   Safari 5.0 on Mac OS X
--   Safari on IOS 3.2.2 and higher
--   Chrome on Android 4.2 and higher
+### Windows 
+-   Chrome
+-   Firefox 
+-   Edge
 
-Note that mobile browsers have limitations (e.g., volume control and autostart are not supported)
+### Mac OS 
+-   Chrome 
+-   Firefox 
+-   Safari 
+-   Opera 
+
+### iOS (iPhone and iPad)
+-   Safari 
+
+### Android (Google Pixel)
+-   Chrome 
+-   Firefox 
+
+With the release of version 4.4, we are no longer actively supporting Internet Explorer. 
 
 Dependencies
 ------------
