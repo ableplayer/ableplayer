@@ -2,7 +2,11 @@
   * Styles for Able Player demo pages
   * Not affiliated with with Able Player itself
 */
+html { 
+	height: 100%; 
+}
 body {
+	min-height: 100%;
 	margin: 2em;
 	font-family: Arial, Helvetica, sans-serif;
 	color: black;

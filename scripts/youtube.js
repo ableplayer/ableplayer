@@ -64,10 +64,9 @@
 		// cc_load_policy:
 		// 0 - show captions depending on user's preference on YouTube
 		// 1 - show captions by default, even if the user has turned them off
-		// For Able Player, init player with value of 0
-		// and will turn them on or off after player is initialized
-		// based on availability of local tracks and user's Able Player prefs
-		ccLoadPolicy = 0;
+		// IMPORTANT: This *must* be set to 1 or some browsers 
+		// fail to load any texttracks (observed in Chrome, not in Firefox) 
+		ccLoadPolicy = 1;
 
 		videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
 		if (videoDimensions) {
@@ -118,6 +117,7 @@
 			},
 			events: {
 				onReady: function () {
+
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
@@ -139,7 +139,6 @@
 					deferred.fail();
 				},
 				onStateChange: function (x) {					
-
 					thisObj.getPlayerState().then(function(playerState) {
 
 						// values of playerState: 'playing','paused','buffering','ended'
