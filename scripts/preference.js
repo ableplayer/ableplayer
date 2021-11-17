@@ -1,7 +1,7 @@
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
 
-		Cookies.set('Able-Player', cookieValue, {
+		Cookies.set('Able-Player', JSON.stringify(cookieValue), {
 			expires: 90,
 			sameSite: 'strict'
 		});
@@ -17,11 +17,11 @@
 
 		var cookie;
 		try {
-			cookie = Cookies.getJSON('Able-Player');
+			cookie = JSON.parse(Cookies.get('Able-Player'));
 		}
 		catch (err) {
 			// Original cookie can't be parsed; update to default
-			Cookies.getJSON(defaultCookie);
+			this.setCookie(defaultCookie);
 			cookie = defaultCookie;
 		}
 		if (cookie) {
