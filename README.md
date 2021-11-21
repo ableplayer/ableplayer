@@ -87,11 +87,11 @@ Dependencies
 
 *Able Player* has the following third party dependencies: 
 
--   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
+- *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
--   *Able Player* uses [js-cookie][] to store and retrieve user
-    preferences in cookies. This script is distributed with *Able
-    Player*. Prior to version 2.3, Able Player used [jquery.cookie][]
+- *Able Player* uses [js-cookie][] to store and retrieve user
+    preferences in cookies. The example code below uses CDN’s hosted libraries; 
+    no download required. Prior to version 2.3, Able Player used [jquery.cookie][]
     for this same purpose.
     
 To install Able Player, copy the following files from the Able Player repo into a folder on your web server:
@@ -99,7 +99,6 @@ To install Able Player, copy the following files from the Able Player repo into 
 -		button-icons/*
 - 		images/*
 -		styles/* (optional, see note below)
--		thirdparty/* (includes js-cookie, as mentioned above)
 -		translations/* 
 -		LICENSE 
 
@@ -151,7 +150,7 @@ to all use cases, both audio and video.
 ```HTML
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- CSS -->
 <link rel="stylesheet" href="build/ableplayer.min.css" type="text/css"/>
