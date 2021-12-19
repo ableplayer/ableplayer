@@ -34,7 +34,8 @@ Able Player has been translated into the following languages. To add another lan
   <li><strong lang="id">Bahasa Indonesia</strong> (Indonesian)</li>
   <li><strong lang="ca">Català</strong> (Catalan)</li>
   <li><strong lang="cs">čeština</strong> (Czech)</li>
-  <li><strong lang="zh-tw">Chinese, Traditional (Taiwan)</strong></li>    
+  <li><strong lang="zh-tw">Chinese, Traditional (Taiwan)</strong></li>  
+	<li><strong lang="da">Dansk</strong> (Danish)</li>  
   <li><strong lang="de">Deutsch</strong> (German)</li>
   <li><strong>English</strong></li> 
   <li><strong lang="en">Español</strong> (Spanish)</li> 
