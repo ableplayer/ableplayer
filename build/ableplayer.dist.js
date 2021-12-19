@@ -11182,7 +11182,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			transcriptTitle = this.tt.transcriptTitle;
 		}
 
-		if (typeof this.transcriptDivLocation === 'undefined') {
+		if (!this.transcriptDivLocation) {
 			// only add an HTML heading to internal transcript
 			// external transcript is expected to have its own heading
 			var headingNumber = this.playerHeadingLevel;
@@ -11195,7 +11195,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			else {
 				var transcriptHeading = 'div';
 			}
-			// var transcriptHeadingTag = '<' + transcriptHeading + ' class="able-transcript-heading">';
 			var $transcriptHeadingTag = $('<' + transcriptHeading + '>');
 			$transcriptHeadingTag.addClass('able-transcript-heading');
 			if (headingNumber > 6) {
