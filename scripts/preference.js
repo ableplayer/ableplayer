@@ -91,28 +91,18 @@
 		// return array of groups in the order in which they will appear
 		// in the Preferences popup menu
 		// Human-readable label for each group is defined in translation table
-		if (this.mediaType === 'video') {
-			if (this.usingYouTubeCaptions) {
-				// no transcript is possible 
-				return ['captions','descriptions','keyboard']; 
-			}
-			else if (this.usingVimeoCaptions) { 
-				// users cannot control caption appearance
-				// and no transcript is possible
-				return ['descriptions','keyboard']; 
-			}
-			else { 
-				return ['captions','descriptions','keyboard','transcript']; 
-			} 
+		if (this.usingYouTubeCaptions) {
+			// no transcript is possible 
+			return ['captions','descriptions','keyboard']; 
 		}
-		else if (this.mediaType === 'audio') {
-			var groups = [];
-			groups.push('keyboard');
-			if (this.lyricsMode) {
-				groups.push('transcript');
-			}
-			return groups;
+		else if (this.usingVimeoCaptions) { 
+			// users cannot control caption appearance
+			// and no transcript is possible
+			return ['descriptions','keyboard']; 
 		}
+		else { 
+			return ['captions','descriptions','keyboard','transcript']; 
+		} 
 	}
 
 	AblePlayer.prototype.getAvailablePreferences = function() {
@@ -167,72 +157,72 @@
 			'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
 		});
 
-		if (this.mediaType === 'video') {
+		// Caption preferences
 
-			// Caption preferences
+		prefs.push({
+			'name': 'prefCaptions', // closed captions default state
+			'label': null,
+			'group': 'captions',
+			'default': 1
+		});
 
+		if (!this.usingYouTubeCaptions) {
+
+			/* // not supported yet
 			prefs.push({
-				'name': 'prefCaptions', // closed captions default state
-				'label': null,
+				'name': 'prefCaptionsStyle',
+				'label': this.tt.prefCaptionsStyle,
 				'group': 'captions',
-				'default': 1
+				'default': this.tt.captionsStylePopOn
 			});
-
-			if (!this.usingYouTubeCaptions) {
-
-				/* // not supported yet
-				prefs.push({
-					'name': 'prefCaptionsStyle',
-					'label': this.tt.prefCaptionsStyle,
-					'group': 'captions',
-					'default': this.tt.captionsStylePopOn
-				});
-				*/
+			*/
+			// captions are always positioned above the player for audio 
+			if (this.mediaType === 'video') {
 				prefs.push({
 					'name': 'prefCaptionsPosition',
 					'label': this.tt.prefCaptionsPosition,
 					'group': 'captions',
 					'default': this.defaultCaptionsPosition
 				});
-
-				prefs.push({
-					'name': 'prefCaptionsFont',
-					'label': this.tt.prefCaptionsFont,
-					'group': 'captions',
-					'default': 'sans-serif'
-				});
-			}
-
-			// This is the one option that is supported by YouTube IFrame API
+			}	
 			prefs.push({
-				'name': 'prefCaptionsSize',
-				'label': this.tt.prefCaptionsSize,
+				'name': 'prefCaptionsFont',
+				'label': this.tt.prefCaptionsFont,
+				'group': 'captions',
+				'default': 'sans-serif'
+			});
+		}
+		// This is the one option that is supported by YouTube IFrame API
+		prefs.push({
+			'name': 'prefCaptionsSize',
+			'label': this.tt.prefCaptionsSize,
+			'group': 'captions',
+			'default': '100%'
+		});
+
+		if (!this.usingYouTubeCaptions) {
+
+			prefs.push({
+				'name': 'prefCaptionsColor',
+				'label': this.tt.prefCaptionsColor,
+				'group': 'captions',
+				'default': 'white'
+			});
+			prefs.push({
+				'name': 'prefCaptionsBGColor',
+				'label': this.tt.prefCaptionsBGColor,
+				'group': 'captions',
+				'default': 'black'
+			});
+			prefs.push({
+				'name': 'prefCaptionsOpacity',
+				'label': this.tt.prefCaptionsOpacity,
 				'group': 'captions',
 				'default': '100%'
 			});
+		}
 
-			if (!this.usingYouTubeCaptions) {
-
-				prefs.push({
-					'name': 'prefCaptionsColor',
-					'label': this.tt.prefCaptionsColor,
-					'group': 'captions',
-					'default': 'white'
-				});
-				prefs.push({
-					'name': 'prefCaptionsBGColor',
-					'label': this.tt.prefCaptionsBGColor,
-					'group': 'captions',
-					'default': 'black'
-				});
-				prefs.push({
-					'name': 'prefCaptionsOpacity',
-					'label': this.tt.prefCaptionsOpacity,
-					'group': 'captions',
-					'default': '100%'
-				});
-			}
-
+		if (this.mediaType === 'video') { 
 			// Description preferences
 			prefs.push({
 				'name': 'prefDesc', // audio description default state
@@ -282,16 +272,15 @@
 				'group': 'descriptions',
 				'default': 0 // off as of 4.3.16, to avoid overloading the player with visible features
 			});
-
-			// Video preferences without a category (not shown in Preferences dialogs)
-			prefs.push({
-				'name': 'prefSign', // open sign language window by default if avilable
-				'label': null,
-				'group': null,
-				'default': 0 // off because clicking an icon to see the sign window has a powerful impact
-			});
-
 		}
+		// Preferences without a category (not shown in Preferences dialogs)
+		prefs.push({
+			'name': 'prefSign', // open sign language window by default if avilable
+			'label': null,
+			'group': null,
+			'default': 0 // off because clicking an icon to see the sign window has a powerful impact
+		});
+
 		return prefs;
 	};
 
@@ -635,7 +624,7 @@
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
 			// do not show this for YouTube captions, since it's not an accurate reflection
-			if (this.mediaType === 'video' && !this.usingYouTubeCaptions) {
+			if (!this.usingYouTubeCaptions) {
 				this.$sampleCapsDiv = $('<div>',{
 					'class': 'able-captions-sample'
 				}).text(this.tt.sampleCaptionText);

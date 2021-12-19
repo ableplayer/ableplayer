@@ -64,9 +64,18 @@
   position: relative;
   top: 0;
 }
+.able .able-audcap-container { 
+  background-color: black;
+  position: relative;
+  margin: 0;
+	padding: 1.5em 0.25em;
+}
 .able-player {
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #262626; /* background color of player (appears on top & bottom) */
+}
+.able-audio { 
+	padding-top: 1em;
 }
 .able-offscreen {
 	position: absolute;
@@ -78,11 +87,6 @@
 }
 .able-media-container audio {
   display: none !important;
-}
-.able-video {
-}
-.able-video .able-now-playing {
-	display: none; /* not currently used for video */
 }
 .able-controller {
 	position: relative;
@@ -435,14 +439,17 @@ div.able-captions {
   color: white;
   opacity: 0.75;
 }
-div.able-captions-overlay {
+div.able-vidcap-container div.able-captions-overlay {
   position: absolute;
   margin: 0;
   bottom: 0;
 }
-div.able-captions-below {
+div.able-vidcap-container div.able-captions-below {
   position: relative;
   min-height: 3.2em;
+}
+div.able-audcap-container.captions-off { 
+	display: none;
 }
 div.able-descriptions {
   position: relative;

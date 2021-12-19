@@ -36,6 +36,7 @@
 
 		var thisObj = this;
 		return function () {
+
 			thisObj.selectedCaptions = track;
 			thisObj.captionLang = track.language;
 			thisObj.currentCaption = -1;
@@ -98,6 +99,9 @@
 			// immediately after closing it (used in handleCaptionToggle())
 			thisObj.hidingPopup = true;
 			thisObj.captionsPopup.hide();
+			if (thisObj.mediaType === 'audio') {
+				thisObj.$captionsContainer.removeClass('captions-off');
+			}
 			// Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
 			// e.g., if user triggered button with Enter or mouse click, not spacebar
 			setTimeout(function() {
@@ -115,8 +119,10 @@
 
 	// Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
 	AblePlayer.prototype.getCaptionOffFunction = function () {
+
 		var thisObj = this;
 		return function () {
+
 			if (thisObj.player == 'youtube') {
 				thisObj.youTubePlayer.unloadModule('captions');
 			}
@@ -125,6 +131,11 @@
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
+
+			if (thisObj.mediaType === 'audio') {
+				thisObj.$captionsContainer.addClass('captions-off');
+			}
+
 			// stopgap to prevent spacebar in Firefox from reopening popup
 			// immediately after closing it (used in handleCaptionToggle())
 			thisObj.hidingPopup = true;

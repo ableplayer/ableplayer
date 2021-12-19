@@ -19,12 +19,13 @@
 
 <body>
 
-<h1>Able Player Audio Demo #4:<br/>Audio player with interactive transcript in "Lyrics Mode"</h1>
+<h1>Able Player Audio Demo #4:<br/>Audio player with captions, chapters, and a transcript in "Lyrics Mode"</h1>
 
-<p>The transcript (in this case, song lyrics) is provided in
-	a WebVTT file with kind="captions" and linked using a &lt;track&gt; element, just as with video.
-	The captions are currently rendered as a transcript only, not as captions.
-	Note the two additional optional attributes that are relevant for this example:
+<p>All tracks are supported in Able Player for both video and audio, with the exception of 
+	descriptions. This example includes captions, subtitles, and chapters tracks.
+</p>
+<p>The transcript (in this case, song lyrics) is provided in a captions file (in French) 
+	and a subtitles file (in English). The following optional attributes affect the transcript:</p>
 </p>
 <ul>
 	<li><strong>data-lyrics-mode</strong> - forces a line break between and within captions in the transcript</li>
@@ -34,10 +35,13 @@
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
-<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="2020" data-lyrics-mode data-transcript-title="Sing along!">
-	<source type="audio/mpeg" src="../media/paulallen.mp3"/>
-	<source type="audio/ogg" src="../media/paulallen.ogg"/>
-	<track kind="captions" src="../media/paulallen_en.vtt" srclang="en" label="English"/>
+<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="legacy" data-lyrics-mode data-transcript-title="Sing along!">
+	<source type="audio/mpeg" src="../media/frenchsong.mp3"/>
+	<source type="audio/ogg" src="../media/frenchsong.ogg"/>
+	<track kind="captions" src="../media/frenchsong_captions_fr.vtt" srclang="fr" label="Français" default/>
+	<track kind="subtitles" src="../media/frenchsong_captions_en.vtt" srclang="en" label="English"/>
+	<track kind="chapters" src="../media/frenchsong_chapters_fr.vtt" srclang="fr" label="Français"/>
+	<track kind="chapters" src="../media/frenchsong_chapters_en.vtt" srclang="en" label="English"/>
 </audio>
 
 </body>

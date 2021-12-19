@@ -15,11 +15,10 @@
 				this.transcriptType = 'popup';
 			}
 		}
-
 		if (this.transcriptType) {
 			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
-				 this.injectTranscriptArea();
-					deferred.resolve();
+				this.injectTranscriptArea();
+				deferred.resolve();
 			}
 			else if (this.transcriptType === 'manual') {
 				this.setupManualTranscript();

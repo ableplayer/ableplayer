@@ -1161,12 +1161,10 @@ var AblePlayerInstances = [];
 						if (thisObj.stenoMode && thisObj.$stenoFrame) {
 							thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
 						}
-
 						thisObj.getMediaTimes().then(function(mediaTimes) {
 
 							thisObj.duration = mediaTimes['duration'];
 							thisObj.elapsed = mediaTimes['elapsed'];
-
 							thisObj.setFullscreen(false);
 
 							if (typeof thisObj.volume === 'undefined') {
@@ -1175,7 +1173,6 @@ var AblePlayerInstances = [];
 							if (thisObj.volume) {
 								thisObj.setVolume(thisObj.volume);
 							}
-
 							if (thisObj.transcriptType) {
 								thisObj.addTranscriptAreaEvents();
 								thisObj.updateTranscript();
@@ -1580,28 +1577,18 @@ var AblePlayerInstances = [];
 		// return array of groups in the order in which they will appear
 		// in the Preferences popup menu
 		// Human-readable label for each group is defined in translation table
-		if (this.mediaType === 'video') {
-			if (this.usingYouTubeCaptions) {
-				// no transcript is possible 
-				return ['captions','descriptions','keyboard']; 
-			}
-			else if (this.usingVimeoCaptions) { 
-				// users cannot control caption appearance
-				// and no transcript is possible
-				return ['descriptions','keyboard']; 
-			}
-			else { 
-				return ['captions','descriptions','keyboard','transcript']; 
-			} 
+		if (this.usingYouTubeCaptions) {
+			// no transcript is possible 
+			return ['captions','descriptions','keyboard']; 
 		}
-		else if (this.mediaType === 'audio') {
-			var groups = [];
-			groups.push('keyboard');
-			if (this.lyricsMode) {
-				groups.push('transcript');
-			}
-			return groups;
+		else if (this.usingVimeoCaptions) { 
+			// users cannot control caption appearance
+			// and no transcript is possible
+			return ['descriptions','keyboard']; 
 		}
+		else { 
+			return ['captions','descriptions','keyboard','transcript']; 
+		} 
 	}
 
 	AblePlayer.prototype.getAvailablePreferences = function() {
@@ -1656,72 +1643,72 @@ var AblePlayerInstances = [];
 			'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
 		});
 
-		if (this.mediaType === 'video') {
+		// Caption preferences
 
-			// Caption preferences
+		prefs.push({
+			'name': 'prefCaptions', // closed captions default state
+			'label': null,
+			'group': 'captions',
+			'default': 1
+		});
 
+		if (!this.usingYouTubeCaptions) {
+
+			/* // not supported yet
 			prefs.push({
-				'name': 'prefCaptions', // closed captions default state
-				'label': null,
+				'name': 'prefCaptionsStyle',
+				'label': this.tt.prefCaptionsStyle,
 				'group': 'captions',
-				'default': 1
+				'default': this.tt.captionsStylePopOn
 			});
-
-			if (!this.usingYouTubeCaptions) {
-
-				/* // not supported yet
-				prefs.push({
-					'name': 'prefCaptionsStyle',
-					'label': this.tt.prefCaptionsStyle,
-					'group': 'captions',
-					'default': this.tt.captionsStylePopOn
-				});
-				*/
+			*/
+			// captions are always positioned above the player for audio 
+			if (this.mediaType === 'video') {
 				prefs.push({
 					'name': 'prefCaptionsPosition',
 					'label': this.tt.prefCaptionsPosition,
 					'group': 'captions',
 					'default': this.defaultCaptionsPosition
 				});
-
-				prefs.push({
-					'name': 'prefCaptionsFont',
-					'label': this.tt.prefCaptionsFont,
-					'group': 'captions',
-					'default': 'sans-serif'
-				});
-			}
-
-			// This is the one option that is supported by YouTube IFrame API
+			}	
 			prefs.push({
-				'name': 'prefCaptionsSize',
-				'label': this.tt.prefCaptionsSize,
+				'name': 'prefCaptionsFont',
+				'label': this.tt.prefCaptionsFont,
+				'group': 'captions',
+				'default': 'sans-serif'
+			});
+		}
+		// This is the one option that is supported by YouTube IFrame API
+		prefs.push({
+			'name': 'prefCaptionsSize',
+			'label': this.tt.prefCaptionsSize,
+			'group': 'captions',
+			'default': '100%'
+		});
+
+		if (!this.usingYouTubeCaptions) {
+
+			prefs.push({
+				'name': 'prefCaptionsColor',
+				'label': this.tt.prefCaptionsColor,
+				'group': 'captions',
+				'default': 'white'
+			});
+			prefs.push({
+				'name': 'prefCaptionsBGColor',
+				'label': this.tt.prefCaptionsBGColor,
+				'group': 'captions',
+				'default': 'black'
+			});
+			prefs.push({
+				'name': 'prefCaptionsOpacity',
+				'label': this.tt.prefCaptionsOpacity,
 				'group': 'captions',
 				'default': '100%'
 			});
+		}
 
-			if (!this.usingYouTubeCaptions) {
-
-				prefs.push({
-					'name': 'prefCaptionsColor',
-					'label': this.tt.prefCaptionsColor,
-					'group': 'captions',
-					'default': 'white'
-				});
-				prefs.push({
-					'name': 'prefCaptionsBGColor',
-					'label': this.tt.prefCaptionsBGColor,
-					'group': 'captions',
-					'default': 'black'
-				});
-				prefs.push({
-					'name': 'prefCaptionsOpacity',
-					'label': this.tt.prefCaptionsOpacity,
-					'group': 'captions',
-					'default': '100%'
-				});
-			}
-
+		if (this.mediaType === 'video') { 
 			// Description preferences
 			prefs.push({
 				'name': 'prefDesc', // audio description default state
@@ -1771,16 +1758,15 @@ var AblePlayerInstances = [];
 				'group': 'descriptions',
 				'default': 0 // off as of 4.3.16, to avoid overloading the player with visible features
 			});
-
-			// Video preferences without a category (not shown in Preferences dialogs)
-			prefs.push({
-				'name': 'prefSign', // open sign language window by default if avilable
-				'label': null,
-				'group': null,
-				'default': 0 // off because clicking an icon to see the sign window has a powerful impact
-			});
-
 		}
+		// Preferences without a category (not shown in Preferences dialogs)
+		prefs.push({
+			'name': 'prefSign', // open sign language window by default if avilable
+			'label': null,
+			'group': null,
+			'default': 0 // off because clicking an icon to see the sign window has a powerful impact
+		});
+
 		return prefs;
 	};
 
@@ -2124,7 +2110,7 @@ var AblePlayerInstances = [];
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
 			// do not show this for YouTube captions, since it's not an accurate reflection
-			if (this.mediaType === 'video' && !this.usingYouTubeCaptions) {
+			if (!this.usingYouTubeCaptions) {
 				this.$sampleCapsDiv = $('<div>',{
 					'class': 'able-captions-sample'
 				}).text(this.tt.sampleCaptionText);
@@ -3373,10 +3359,11 @@ var AblePlayerInstances = [];
 		//	 This is only a problem in IOS 6 and earlier,
 		//	 & is a known bug, fixed in IOS 7
 
-		var thisObj, vidcapContainer, prefsGroups, i;
+		var thisObj, captionsContainer, prefsGroups, i;
 		thisObj = this;
 
-		// create three wrappers and wrap them around the media element. From inner to outer:
+		// create three wrappers and wrap them around the media element. 
+		// From inner to outer:
 		// $mediaContainer - contains the original media element
 		// $ableDiv - contains the media player and all its objects (e.g., captions, controls, descriptions)
 		// $ableWrapper - contains additional widgets (e.g., transcript window, sign window)
@@ -3384,7 +3371,7 @@ var AblePlayerInstances = [];
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 		this.$ableWrapper.addClass('able-skin-' + this.skin);
-
+		
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
 		// Unclear why it was originally excluded; commented out in 3.1.20
@@ -3402,16 +3389,23 @@ var AblePlayerInstances = [];
 			if (this.iconType != 'image' && (this.player !== 'youtube' || this.hasPoster)) {
 				this.injectBigPlayButton();
 			}
-
-			// add container that captions or description will be appended to
-			// Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable
-			vidcapContainer = $('<div>',{
-				'class' : 'able-vidcap-container'
-			});
-			this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
 		}
-		this.injectPlayerControlArea();
-		this.injectTextDescriptionArea();
+
+		// add container that captions or description will be appended to
+		// Note: new Jquery object must be assigned _after_ wrap, hence the temp captionsContainer variable
+		captionsContainer = $('<div>'); 
+		if (this.mediaType === 'video') { 
+			captionsContainer.addClass('able-vidcap-container'); 
+		}
+		else if (this.mediaType === 'audio') { 
+			captionsContainer.addClass('able-audcap-container'); 
+		}
+
+		this.injectPlayerControlArea(); // this may need to be injected after captions??? 
+		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
+		if (this.mediaType === 'video') { 
+			this.injectTextDescriptionArea();
+		}
 		this.injectAlert();
 		this.injectPlaylist();
 	};
@@ -3462,14 +3456,13 @@ var AblePlayerInstances = [];
 		});
 		this.$playerDiv.addClass('able-'+this.mediaType);
 
-		// The default skin depends a bit on a Now Playing div
-		// so go ahead and add one
-		// However, it's only populated if this.showNowPlaying = true
-		this.$nowPlayingDiv = $('<div>',{
-			'class' : 'able-now-playing',
-			'aria-live' : 'assertive',
-			'aria-atomic': 'true'
-		});
+		if (this.hasPlaylist && this.showNowPlaying) { 
+			this.$nowPlayingDiv = $('<div>',{
+				'class' : 'able-now-playing',
+				'aria-live' : 'assertive',
+				'aria-atomic': 'true'
+			});
+		}
 
 		this.$controllerDiv = $('<div>',{
 			'class' : 'able-controller'
@@ -3503,8 +3496,20 @@ var AblePlayerInstances = [];
 
 		// Put everything together.
 		this.$statusBarDiv.append(this.$timer, this.$speed, this.$status);
-		this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
-		this.$ableDiv.append(this.$playerDiv);
+		if (this.showNowPlaying) {
+			this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+		}
+		else { 
+			this.$playerDiv.append(this.$controllerDiv, this.$statusBarDiv);
+		}
+		if (this.mediaType === 'video') { 
+			// the player controls go after the media & captions 
+			this.$ableDiv.append(this.$playerDiv);
+		}
+		else { 
+			// the player controls go before the media & captions 
+			this.$ableDiv.prepend(this.$playerDiv);
+		}
 	};
 
 	AblePlayer.prototype.injectTextDescriptionArea = function () {
@@ -4237,26 +4242,26 @@ var AblePlayerInstances = [];
 			playbackSupported = false;
 		}
 
-		if (this.mediaType === 'video') {
-			numA11yButtons = 0;
-			if (this.hasCaptions) {
-				numA11yButtons++;
-				if (this.skin === 'legacy') {
-					controlLayout[2].push('captions');
-				}
-				else if (this.skin == '2020') {
-					controlLayout[1].push('captions');
-				}
+		numA11yButtons = 0;
+		if (this.hasCaptions) {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
+				controlLayout[2].push('captions');
 			}
-			if (this.hasSignLanguage) {
-				numA11yButtons++;
-				if (this.skin === 'legacy') {
-					controlLayout[2].push('sign');
-				}
-				else if (this.skin == '2020') {
-					controlLayout[1].push('sign');
-				}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('captions');
 			}
+		}
+		if (this.hasSignLanguage) {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
+				controlLayout[2].push('sign');
+			}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('sign');
+			}
+		}
+		if (this.mediaType === 'video') { 
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
 				numA11yButtons++;
 				if (this.skin === 'legacy') {
@@ -4276,8 +4281,7 @@ var AblePlayerInstances = [];
 				controlLayout[1].push('transcript');
 			}
 		}
-
-		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
+		if (this.hasChapters && this.useChaptersButton) {
 			numA11yButtons++;
 			if (this.skin === 'legacy') {
 				controlLayout[2].push('chapters');
@@ -4370,7 +4374,6 @@ var AblePlayerInstances = [];
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
-
 		// step separately through left and right controls
 		for (i = 0; i < numSections; i++) {
 			controls = controlLayout[i];
@@ -4764,16 +4767,13 @@ var AblePlayerInstances = [];
 			}
 		}
 
-		if (this.mediaType === 'video') {
-
-			if (typeof this.$captionsDiv !== 'undefined') {
-				// stylize captions based on user prefs
-				this.stylizeCaptions(this.$captionsDiv);
-			}
-			if (typeof this.$descDiv !== 'undefined') {
-				// stylize descriptions based on user's caption prefs
-				this.stylizeCaptions(this.$descDiv);
-			}
+		if (typeof this.$captionsDiv !== 'undefined') {
+			// stylize captions based on user prefs
+			this.stylizeCaptions(this.$captionsDiv);
+		}
+		if (typeof this.$descDiv !== 'undefined') {
+			// stylize descriptions based on user's caption prefs
+			this.stylizeCaptions(this.$descDiv);
 		}
 
 		// combine left and right controls arrays for future reference
@@ -5313,7 +5313,6 @@ var AblePlayerInstances = [];
 				var kind = track.kind;
 				var trackLang = track.language;
 				var trackLabel = track.label;
-
 				if (!track.src) {
 					if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
 						// skip all the hullabaloo and go straight to setupCaptions
@@ -5346,8 +5345,7 @@ var AblePlayerInstances = [];
 							 // setupVtsTracks() is in vts.js
 							thisObj.setupVtsTracks(kind, trackLang, trackLabel, trackSrc, trackContents);
 						}
-
-						if (kind === 'captions' || kind === 'subtitles') {
+						if (kind === 'captions' || kind === 'subtitles') {							
 							thisObj.setupCaptions(track, trackLang, trackLabel, cues);
 						}
 						else if (kind === 'descriptions') {
@@ -5451,7 +5449,6 @@ var AblePlayerInstances = [];
 				}
 			});
 		}
-
 		if (captionTracks.length) {
 			// HTML captions or subtitles were found. 
 			// Use those, and sort them alphabetically. 
@@ -5510,6 +5507,11 @@ var AblePlayerInstances = [];
 				// this is neither YouTube nor Vimeo
 				// there just ain't no caption tracks
 				this.hasCaptions = false; 
+				
+				if (this.mediaType === 'audio') {
+					this.$captionsContainer.addClass('captions-off');
+					
+				}
 				deferred.resolve();
 			}
 		}
@@ -5542,49 +5544,47 @@ var AblePlayerInstances = [];
 			this.hasCaptions = false; 
 		}
 
+		if (this.mediaType === 'audio' && !this.captionsOn) {
+			this.$captionsContainer.addClass('captions-off');
+		}
+
 		// Remove 'default' attribute from all <track> elements
 		// This data has already been saved to this.tracks
 		// and some browsers will display the default captions, despite all standard efforts to suppress them
 		this.$media.find('track').removeAttr('default');
 
-		// Currently only showing captions for video, not audio 
-		// TODO: Revisit this to enable captions for audio 
-		if (this.mediaType === 'video') {
-
-			if (!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
-				// create a pair of nested divs for displaying captions
-				// includes aria-hidden="true" because otherwise
-				// captions being added and removed causes sporadic changes to focus in JAWS
-				// (not a problem in NVDA or VoiceOver)
-				if (!this.$captionsDiv) {
-					this.$captionsDiv = $('<div>',{
-						'class': 'able-captions',
-					});
-					this.$captionsWrapper = $('<div>',{
-						'class': 'able-captions-wrapper',
-						'aria-hidden': 'true'
-					}).hide();
-					if (this.prefCaptionsPosition === 'below') {
-						this.$captionsWrapper.addClass('able-captions-below');
-					}
-					else {
-						this.$captionsWrapper.addClass('able-captions-overlay');
-					}
-					this.$captionsWrapper.append(this.$captionsDiv);
-					this.$vidcapContainer.append(this.$captionsWrapper);
-				}
+		if (this.hasCaptions && !this.$captionsDiv && 
+			!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
+			// if not already created, create a pair of nested divs for displaying captions
+			// includes aria-hidden="true" because otherwise
+			// captions being added and removed causes sporadic changes to focus in JAWS
+			// (not a problem in NVDA or VoiceOver)
+			this.$captionsDiv = $('<div>',{
+				'class': 'able-captions',
+			});
+			this.$captionsWrapper = $('<div>',{
+				'class': 'able-captions-wrapper',
+				'aria-hidden': 'true'
+			}).hide();
+			if (this.prefCaptionsPosition === 'below') {
+				this.$captionsWrapper.addClass('able-captions-below');
 			}
-			// Add cues to this.captions for the current language 
-			for (i = 0; i < this.captions.length; i++) { 
-				if (this.captions[i].language === trackLang) { 
-					this.captions[i].cues = cues; 
-				}
+			else {
+				this.$captionsWrapper.addClass('able-captions-overlay');
 			}
-			// Do the same for this.tracks 
-			for (i = 0; i < this.tracks.length; i++) { 
-				if (this.tracks[i].language === trackLang) { 
-					this.tracks[i].cues = cues; 
-				}
+			this.$captionsWrapper.append(this.$captionsDiv);
+			this.$captionsContainer.append(this.$captionsWrapper);
+		}
+		// Add cues to this.captions for the current language 
+		for (i = 0; i < this.captions.length; i++) { 
+			if (this.captions[i].language === trackLang) { 
+				this.captions[i].cues = cues; 
+			}
+		}
+		// Do the same for this.tracks 
+		for (i = 0; i < this.tracks.length; i++) { 
+			if (this.tracks[i].language === trackLang) { 
+				this.tracks[i].cues = cues; 
 			}
 		}
 	};
@@ -8430,7 +8430,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			});
 		}
 		else if (direction == 'in') {
-			// restore vidcapContainer to its original height (needs work)
+			// restore captionsContainer to its original height (needs work)
 			// this.$mediaContainer.removeAttr('style');
 			// fade relatively quickly back to its original position with full opacity
 			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
@@ -9675,12 +9675,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
 		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
-			if (typeof this.$vidcapContainer !== 'undefined') {
+			if (typeof this.$captionsContainer !== 'undefined') {
 				this.$ableWrapper.css({
 					'width': width + 'px',
 					'max-width': ''
 				})
-				this.$vidcapContainer.css({
+				this.$captionsContainer.css({
 					'height': height + 'px',
 					'width': width
 				});
@@ -9707,8 +9707,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					'max-width': width + 'px',
 					'width': ''
 				});
-				if (typeof this.$vidcapContainer !== 'undefined') {
-					this.$vidcapContainer.css({
+				if (typeof this.$captionsContainer !== 'undefined') {
+					this.$captionsContainer.css({
 						'height': '',
 						'width': ''
 					});
@@ -9933,7 +9933,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		// regardless of source...
 		this.transcriptLang = language;
-
 		if (source === 'init' || source === 'captions') {
 			this.captionLang = language;
 			this.selectedCaptions = captions;
@@ -10003,6 +10002,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		var thisObj = this;
 		return function () {
+
 			thisObj.selectedCaptions = track;
 			thisObj.captionLang = track.language;
 			thisObj.currentCaption = -1;
@@ -10065,6 +10065,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// immediately after closing it (used in handleCaptionToggle())
 			thisObj.hidingPopup = true;
 			thisObj.captionsPopup.hide();
+			if (thisObj.mediaType === 'audio') {
+				thisObj.$captionsContainer.removeClass('captions-off');
+			}
 			// Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
 			// e.g., if user triggered button with Enter or mouse click, not spacebar
 			setTimeout(function() {
@@ -10082,8 +10085,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	// Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
 	AblePlayer.prototype.getCaptionOffFunction = function () {
+
 		var thisObj = this;
 		return function () {
+
 			if (thisObj.player == 'youtube') {
 				thisObj.youTubePlayer.unloadModule('captions');
 			}
@@ -10092,6 +10097,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
+
+			if (thisObj.mediaType === 'audio') {
+				thisObj.$captionsContainer.addClass('captions-off');
+			}
+
 			// stopgap to prevent spacebar in Firefox from reopening popup
 			// immediately after closing it (used in handleCaptionToggle())
 			thisObj.hidingPopup = true;
@@ -10447,6 +10457,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		thisObj = this;
 
+		// TODO: Update this so it can change the chapters popup menu 
+		// currently it only works if chapters are in an external container
 		if (!this.$chaptersNav) {
 			return false;
 		}
@@ -10459,7 +10471,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.useChapterTimes = false;
 			}
 		}
-
 		if (this.useChapterTimes) {
 			cues = this.selectedChapters.cues;
 		}
@@ -10819,11 +10830,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.transcriptType = 'popup';
 			}
 		}
-
 		if (this.transcriptType) {
 			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
-				 this.injectTranscriptArea();
-					deferred.resolve();
+				this.injectTranscriptArea();
+				deferred.resolve();
 			}
 			else if (this.transcriptType === 'manual') {
 				this.setupManualTranscript();
@@ -11713,7 +11723,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);
-				}
+				}				
 				thisObj.updateCaption(thisObj.elapsed);
 				thisObj.showDescription(thisObj.elapsed);
 				thisObj.updateChapter(thisObj.elapsed);
@@ -12134,6 +12144,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// and no events are triggered until media begins to play
 		// Able Player gets around this by automatically loading media in some circumstances
 		// (see initialize.js > initPlayer() for details)
+
 		this.$media
 			.on('emptied',function() {
 				// do something

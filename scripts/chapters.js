@@ -43,6 +43,8 @@
 
 		thisObj = this;
 
+		// TODO: Update this so it can change the chapters popup menu 
+		// currently it only works if chapters are in an external container
 		if (!this.$chaptersNav) {
 			return false;
 		}
@@ -55,7 +57,6 @@
 				this.useChapterTimes = false;
 			}
 		}
-
 		if (this.useChapterTimes) {
 			cues = this.selectedChapters.cues;
 		}

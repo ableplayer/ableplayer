@@ -576,12 +576,10 @@
 						if (thisObj.stenoMode && thisObj.$stenoFrame) {
 							thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
 						}
-
 						thisObj.getMediaTimes().then(function(mediaTimes) {
 
 							thisObj.duration = mediaTimes['duration'];
 							thisObj.elapsed = mediaTimes['elapsed'];
-
 							thisObj.setFullscreen(false);
 
 							if (typeof thisObj.volume === 'undefined') {
@@ -590,7 +588,6 @@
 							if (thisObj.volume) {
 								thisObj.setVolume(thisObj.volume);
 							}
-
 							if (thisObj.transcriptType) {
 								thisObj.addTranscriptAreaEvents();
 								thisObj.updateTranscript();

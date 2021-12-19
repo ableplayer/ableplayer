@@ -25,7 +25,7 @@
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);
-				}
+				}				
 				thisObj.updateCaption(thisObj.elapsed);
 				thisObj.showDescription(thisObj.elapsed);
 				thisObj.updateChapter(thisObj.elapsed);
@@ -446,6 +446,7 @@
 		// and no events are triggered until media begins to play
 		// Able Player gets around this by automatically loading media in some circumstances
 		// (see initialize.js > initPlayer() for details)
+
 		this.$media
 			.on('emptied',function() {
 				// do something

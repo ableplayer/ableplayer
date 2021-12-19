@@ -420,7 +420,7 @@
 			});
 		}
 		else if (direction == 'in') {
-			// restore vidcapContainer to its original height (needs work)
+			// restore captionsContainer to its original height (needs work)
 			// this.$mediaContainer.removeAttr('style');
 			// fade relatively quickly back to its original position with full opacity
 			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
@@ -1665,12 +1665,12 @@
 		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
 		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
-			if (typeof this.$vidcapContainer !== 'undefined') {
+			if (typeof this.$captionsContainer !== 'undefined') {
 				this.$ableWrapper.css({
 					'width': width + 'px',
 					'max-width': ''
 				})
-				this.$vidcapContainer.css({
+				this.$captionsContainer.css({
 					'height': height + 'px',
 					'width': width
 				});
@@ -1697,8 +1697,8 @@
 					'max-width': width + 'px',
 					'width': ''
 				});
-				if (typeof this.$vidcapContainer !== 'undefined') {
-					this.$vidcapContainer.css({
+				if (typeof this.$captionsContainer !== 'undefined') {
+					this.$captionsContainer.css({
 						'height': '',
 						'width': ''
 					});
@@ -1923,7 +1923,6 @@
 		}
 		// regardless of source...
 		this.transcriptLang = language;
-
 		if (source === 'init' || source === 'captions') {
 			this.captionLang = language;
 			this.selectedCaptions = captions;

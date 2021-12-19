@@ -40,7 +40,6 @@
 				var kind = track.kind;
 				var trackLang = track.language;
 				var trackLabel = track.label;
-
 				if (!track.src) {
 					if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
 						// skip all the hullabaloo and go straight to setupCaptions
@@ -73,8 +72,7 @@
 							 // setupVtsTracks() is in vts.js
 							thisObj.setupVtsTracks(kind, trackLang, trackLabel, trackSrc, trackContents);
 						}
-
-						if (kind === 'captions' || kind === 'subtitles') {
+						if (kind === 'captions' || kind === 'subtitles') {							
 							thisObj.setupCaptions(track, trackLang, trackLabel, cues);
 						}
 						else if (kind === 'descriptions') {
@@ -178,7 +176,6 @@
 				}
 			});
 		}
-
 		if (captionTracks.length) {
 			// HTML captions or subtitles were found. 
 			// Use those, and sort them alphabetically. 
@@ -237,6 +234,11 @@
 				// this is neither YouTube nor Vimeo
 				// there just ain't no caption tracks
 				this.hasCaptions = false; 
+console.log('there aint no captions');				
+				if (this.mediaType === 'audio') {
+					this.$captionsContainer.addClass('captions-off');
+console.log('$captionsContainer',this.$captionsContainer);					
+				}
 				deferred.resolve();
 			}
 		}
@@ -269,49 +271,47 @@
 			this.hasCaptions = false; 
 		}
 
+		if (this.mediaType === 'audio' && !this.captionsOn) {
+			this.$captionsContainer.addClass('captions-off');
+		}
+
 		// Remove 'default' attribute from all <track> elements
 		// This data has already been saved to this.tracks
 		// and some browsers will display the default captions, despite all standard efforts to suppress them
 		this.$media.find('track').removeAttr('default');
 
-		// Currently only showing captions for video, not audio 
-		// TODO: Revisit this to enable captions for audio 
-		if (this.mediaType === 'video') {
-
-			if (!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
-				// create a pair of nested divs for displaying captions
-				// includes aria-hidden="true" because otherwise
-				// captions being added and removed causes sporadic changes to focus in JAWS
-				// (not a problem in NVDA or VoiceOver)
-				if (!this.$captionsDiv) {
-					this.$captionsDiv = $('<div>',{
-						'class': 'able-captions',
-					});
-					this.$captionsWrapper = $('<div>',{
-						'class': 'able-captions-wrapper',
-						'aria-hidden': 'true'
-					}).hide();
-					if (this.prefCaptionsPosition === 'below') {
-						this.$captionsWrapper.addClass('able-captions-below');
-					}
-					else {
-						this.$captionsWrapper.addClass('able-captions-overlay');
-					}
-					this.$captionsWrapper.append(this.$captionsDiv);
-					this.$vidcapContainer.append(this.$captionsWrapper);
-				}
+		if (this.hasCaptions && !this.$captionsDiv && 
+			!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
+			// if not already created, create a pair of nested divs for displaying captions
+			// includes aria-hidden="true" because otherwise
+			// captions being added and removed causes sporadic changes to focus in JAWS
+			// (not a problem in NVDA or VoiceOver)
+			this.$captionsDiv = $('<div>',{
+				'class': 'able-captions',
+			});
+			this.$captionsWrapper = $('<div>',{
+				'class': 'able-captions-wrapper',
+				'aria-hidden': 'true'
+			}).hide();
+			if (this.prefCaptionsPosition === 'below') {
+				this.$captionsWrapper.addClass('able-captions-below');
 			}
-			// Add cues to this.captions for the current language 
-			for (i = 0; i < this.captions.length; i++) { 
-				if (this.captions[i].language === trackLang) { 
-					this.captions[i].cues = cues; 
-				}
+			else {
+				this.$captionsWrapper.addClass('able-captions-overlay');
 			}
-			// Do the same for this.tracks 
-			for (i = 0; i < this.tracks.length; i++) { 
-				if (this.tracks[i].language === trackLang) { 
-					this.tracks[i].cues = cues; 
-				}
+			this.$captionsWrapper.append(this.$captionsDiv);
+			this.$captionsContainer.append(this.$captionsWrapper);
+		}
+		// Add cues to this.captions for the current language 
+		for (i = 0; i < this.captions.length; i++) { 
+			if (this.captions[i].language === trackLang) { 
+				this.captions[i].cues = cues; 
+			}
+		}
+		// Do the same for this.tracks 
+		for (i = 0; i < this.tracks.length; i++) { 
+			if (this.tracks[i].language === trackLang) { 
+				this.tracks[i].cues = cues; 
 			}
 		}
 	};

@@ -15,10 +15,11 @@
 		//	 This is only a problem in IOS 6 and earlier,
 		//	 & is a known bug, fixed in IOS 7
 
-		var thisObj, vidcapContainer, prefsGroups, i;
+		var thisObj, captionsContainer, prefsGroups, i;
 		thisObj = this;
 
-		// create three wrappers and wrap them around the media element. From inner to outer:
+		// create three wrappers and wrap them around the media element. 
+		// From inner to outer:
 		// $mediaContainer - contains the original media element
 		// $ableDiv - contains the media player and all its objects (e.g., captions, controls, descriptions)
 		// $ableWrapper - contains additional widgets (e.g., transcript window, sign window)
@@ -26,7 +27,7 @@
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 		this.$ableWrapper.addClass('able-skin-' + this.skin);
-
+		
 		// NOTE: Excluding the following from youtube was resulting in a player
 		// that exceeds the width of the YouTube video
 		// Unclear why it was originally excluded; commented out in 3.1.20
@@ -44,16 +45,23 @@
 			if (this.iconType != 'image' && (this.player !== 'youtube' || this.hasPoster)) {
 				this.injectBigPlayButton();
 			}
-
-			// add container that captions or description will be appended to
-			// Note: new Jquery object must be assigned _after_ wrap, hence the temp vidcapContainer variable
-			vidcapContainer = $('<div>',{
-				'class' : 'able-vidcap-container'
-			});
-			this.$vidcapContainer = this.$mediaContainer.wrap(vidcapContainer).parent();
 		}
-		this.injectPlayerControlArea();
-		this.injectTextDescriptionArea();
+
+		// add container that captions or description will be appended to
+		// Note: new Jquery object must be assigned _after_ wrap, hence the temp captionsContainer variable
+		captionsContainer = $('<div>'); 
+		if (this.mediaType === 'video') { 
+			captionsContainer.addClass('able-vidcap-container'); 
+		}
+		else if (this.mediaType === 'audio') { 
+			captionsContainer.addClass('able-audcap-container'); 
+		}
+
+		this.injectPlayerControlArea(); // this may need to be injected after captions??? 
+		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
+		if (this.mediaType === 'video') { 
+			this.injectTextDescriptionArea();
+		}
 		this.injectAlert();
 		this.injectPlaylist();
 	};
@@ -104,14 +112,13 @@
 		});
 		this.$playerDiv.addClass('able-'+this.mediaType);
 
-		// The default skin depends a bit on a Now Playing div
-		// so go ahead and add one
-		// However, it's only populated if this.showNowPlaying = true
-		this.$nowPlayingDiv = $('<div>',{
-			'class' : 'able-now-playing',
-			'aria-live' : 'assertive',
-			'aria-atomic': 'true'
-		});
+		if (this.hasPlaylist && this.showNowPlaying) { 
+			this.$nowPlayingDiv = $('<div>',{
+				'class' : 'able-now-playing',
+				'aria-live' : 'assertive',
+				'aria-atomic': 'true'
+			});
+		}
 
 		this.$controllerDiv = $('<div>',{
 			'class' : 'able-controller'
@@ -145,8 +152,20 @@
 
 		// Put everything together.
 		this.$statusBarDiv.append(this.$timer, this.$speed, this.$status);
-		this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
-		this.$ableDiv.append(this.$playerDiv);
+		if (this.showNowPlaying) {
+			this.$playerDiv.append(this.$nowPlayingDiv, this.$controllerDiv, this.$statusBarDiv);
+		}
+		else { 
+			this.$playerDiv.append(this.$controllerDiv, this.$statusBarDiv);
+		}
+		if (this.mediaType === 'video') { 
+			// the player controls go after the media & captions 
+			this.$ableDiv.append(this.$playerDiv);
+		}
+		else { 
+			// the player controls go before the media & captions 
+			this.$ableDiv.prepend(this.$playerDiv);
+		}
 	};
 
 	AblePlayer.prototype.injectTextDescriptionArea = function () {
@@ -879,26 +898,26 @@
 			playbackSupported = false;
 		}
 
-		if (this.mediaType === 'video') {
-			numA11yButtons = 0;
-			if (this.hasCaptions) {
-				numA11yButtons++;
-				if (this.skin === 'legacy') {
-					controlLayout[2].push('captions');
-				}
-				else if (this.skin == '2020') {
-					controlLayout[1].push('captions');
-				}
+		numA11yButtons = 0;
+		if (this.hasCaptions) {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
+				controlLayout[2].push('captions');
 			}
-			if (this.hasSignLanguage) {
-				numA11yButtons++;
-				if (this.skin === 'legacy') {
-					controlLayout[2].push('sign');
-				}
-				else if (this.skin == '2020') {
-					controlLayout[1].push('sign');
-				}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('captions');
 			}
+		}
+		if (this.hasSignLanguage) {
+			numA11yButtons++;
+			if (this.skin === 'legacy') {
+				controlLayout[2].push('sign');
+			}
+			else if (this.skin == '2020') {
+				controlLayout[1].push('sign');
+			}
+		}
+		if (this.mediaType === 'video') { 
 			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
 				numA11yButtons++;
 				if (this.skin === 'legacy') {
@@ -918,8 +937,7 @@
 				controlLayout[1].push('transcript');
 			}
 		}
-
-		if (this.mediaType === 'video' && this.hasChapters && this.useChaptersButton) {
+		if (this.hasChapters && this.useChaptersButton) {
 			numA11yButtons++;
 			if (this.skin === 'legacy') {
 				controlLayout[2].push('chapters');
@@ -1012,7 +1030,6 @@
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
-
 		// step separately through left and right controls
 		for (i = 0; i < numSections; i++) {
 			controls = controlLayout[i];
@@ -1406,16 +1423,13 @@
 			}
 		}
 
-		if (this.mediaType === 'video') {
-
-			if (typeof this.$captionsDiv !== 'undefined') {
-				// stylize captions based on user prefs
-				this.stylizeCaptions(this.$captionsDiv);
-			}
-			if (typeof this.$descDiv !== 'undefined') {
-				// stylize descriptions based on user's caption prefs
-				this.stylizeCaptions(this.$descDiv);
-			}
+		if (typeof this.$captionsDiv !== 'undefined') {
+			// stylize captions based on user prefs
+			this.stylizeCaptions(this.$captionsDiv);
+		}
+		if (typeof this.$descDiv !== 'undefined') {
+			// stylize descriptions based on user's caption prefs
+			this.stylizeCaptions(this.$descDiv);
 		}
 
 		// combine left and right controls arrays for future reference
