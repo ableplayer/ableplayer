@@ -473,7 +473,7 @@
 			hasDefault = false;
 			for (i = 0; i < tracks.length; i++) {
 				track = tracks[i];
-				if (which === 'captions' && typeof track.cues === 'undefined') {						
+				if (which === 'captions' && this.player === 'html5' && typeof track.cues === 'undefined') {						
 					includeMenuItem = false; 
 				}
 				else { 

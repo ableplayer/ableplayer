@@ -297,45 +297,54 @@
 
 		thisObj = this;
 		
-		if (!this.youTubePlayer.getOption('captions','tracklist')) { 			
+		if (!this.youTubePlayer.getOption('captions','tracklist')) { 
+
 			// no tracks were found, probably because the captions module hasn't loaded  
 			// play video briefly (required in order to load the captions module) 
 			// and after the apiChange event is triggered, try again to retreive tracks
 			this.youTubePlayer.addEventListener('onApiChange',function(x) { 
+
 				if (thisObj.loadingYouTubeCaptions) { 				
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
 					thisObj.youTubePlayer.stopVideo(); 
-					// Step through ytTracks and add them to global tracks array
-					// Note: Unlike YouTube Data API, the IFrame Player API only returns 
-					// tracks that are published, and does NOT include ASR captions 
-					// So, no additional filtering is required 
-					for (i=0; i < ytTracks.length; i++) {
-						trackLang = ytTracks[i].languageCode; 
-						trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
-						isDefaultTrack = false; 
-						if (typeof thisObj.captionLang !== 'undefined') { 
-							if (trackLang === thisObj.captionLang) {
-								isDefaultTrack = true;						
+					if (ytTracks.length) { 
+						// Step through ytTracks and add them to global tracks array
+						// Note: Unlike YouTube Data API, the IFrame Player API only returns 
+						// tracks that are published, and does NOT include ASR captions 
+						// So, no additional filtering is required 
+						for (i=0; i < ytTracks.length; i++) {
+							trackLang = ytTracks[i].languageCode; 
+							trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+							isDefaultTrack = false; 
+							if (typeof thisObj.captionLang !== 'undefined') { 
+								if (trackLang === thisObj.captionLang) {
+									isDefaultTrack = true;						
+								}
 							}
-						}
-						else if (typeof thisObj.lang !== 'undefined') { 
-							if (trackLang === thisObj.lang) {
-								isDefaultTrack = true;						
+							else if (typeof thisObj.lang !== 'undefined') { 
+								if (trackLang === thisObj.lang) {
+									isDefaultTrack = true;						
+								}
 							}
+							thisObj.tracks.push({
+								'kind': 'captions',
+								'language': trackLang,
+								'label': trackLabel,
+								'def': isDefaultTrack
+							});
 						}
-						thisObj.tracks.push({
-							'kind': 'captions',
-							'language': trackLang,
-							'label': trackLabel,
-							'def': isDefaultTrack
-						});
+						thisObj.captions = thisObj.tracks; 
+						thisObj.hasCaptions = true;
+						// setupPopups again with new captions array, replacing original
+						thisObj.setupPopups('captions');				
+						thisObj.loadingYouTubeCaptions = false; 
 					}
-					thisObj.captions = thisObj.tracks; 
-					thisObj.hasCaptions = true;
-					// setupPopups again with new captions array, replacing original
-					thisObj.setupPopups('captions');				
-					thisObj.loadingYouTubeCaptions = false; 
+					else { 
+						// there are no YouTube captions 
+						thisObj.usingYouTubeCaptions = false; 
+						thisObj.hasCaptions = false;
+					}
 				}
 				if (thisObj.captionLangPending) { 
 					// user selected a new caption language prior to playback starting 
@@ -371,28 +380,6 @@
 			url += '&name=' + trackName;
 		}
 		return url;
-	};
-
-
-	AblePlayer.prototype.getYouTubeCaptionCues = function (youTubeId) {
-
-		var deferred, promise, thisObj;
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		thisObj = this;
-
-		this.tracks = [];
-		this.tracks.push({
-			'kind': 'captions',
-			'src': 'some_file.vtt',
-			'language': 'en',
-			'label': 'Fake English captions'
-		});
-
-		deferred.resolve();
-		return promise;
 	};
 
 	AblePlayer.prototype.getYouTubePosterUrl = function (youTubeId, width) {
