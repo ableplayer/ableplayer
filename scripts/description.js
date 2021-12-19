@@ -416,7 +416,8 @@
 		// 'description' - actual description text extracted from WebVTT file
 		// 'sample' - called when user changes a setting in Description Prefs dialog
 
-		var thisObj, speechTimeout, voiceName, i, voice, pitch, rate, volume, utterance;
+		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance, 
+			timeElapsed, secondsElapsed;
 
 		thisObj = this;
 
@@ -495,7 +496,19 @@
 				utterance.lang = this.lang;
 				utterance.onend = function(e) {
 					// do something after speaking
-					console.log('Finished speaking. That took ' + (e.elapsedTime/1000).toFixed(2) + ' seconds.');
+					timeElapsed = e.elapsedTime; 
+					// As of Firefox 95, e.elapsedTime is expressed in seconds 
+					// Other browsers (tested in Chrome & Edge) express this in milliseconds 
+					// Assume no utterance will require over 100 seconds to express... 
+					if (timeElapsed > 100) { 
+						// time is likely expressed in milliseconds 
+						secondsElapsed = (e.elapsedTime/1000).toFixed(2); 
+					}
+					else { 
+						// time is likely already expressed in seconds; just need to round it
+						secondsElapsed = (e.elapsedTime).toFixed(2); 
+					}
+					console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
 					if (context === 'description') {
 						if (thisObj.prefDescPause) {
 							if (thisObj.pausedForDescription && thisObj.exposeTextDescriptions) {

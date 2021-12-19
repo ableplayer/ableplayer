@@ -236,10 +236,8 @@
 				// this is neither YouTube nor Vimeo
 				// there just ain't no caption tracks
 				this.hasCaptions = false; 
-console.log('there aint no captions');				
 				if (this.mediaType === 'audio') {
 					this.$captionsContainer.addClass('captions-off');
-console.log('$captionsContainer',this.$captionsContainer);					
 				}
 				deferred.resolve();
 			}
