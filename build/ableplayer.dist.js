@@ -3747,7 +3747,7 @@ var AblePlayerInstances = [];
 		// 'which' parameter is either 'captions', 'chapters', 'prefs', 'transcript-window' or 'sign-window'
 		// 'tracks', if provided, is a list of tracks to be used as menu items
 
-		var thisObj, $menu, prefCats, i, $menuItem, prefCat, whichPref,
+		var thisObj, $menu, includeMenuItem, prefCats, i, $menuItem, prefCat, whichPref,
 			hasDefault, track, windowOptions, whichPref, whichMenu,
 			$thisItem, $prevItem, $nextItem;
 
@@ -3817,28 +3817,36 @@ var AblePlayerInstances = [];
 			hasDefault = false;
 			for (i = 0; i < tracks.length; i++) {
 				track = tracks[i];
-				$menuItem = $('<li></li>',{
-					'role': 'menuitemradio',
-					'tabindex': '-1',
-					'lang': track.language
-				});
-				if (track.def && this.prefCaptions == 1) {
-					$menuItem.attr('aria-checked','true');
-					hasDefault = true;
+				if (which === 'captions' && typeof track.cues === 'undefined') {						
+					includeMenuItem = false; 
 				}
-				else {
-					$menuItem.attr('aria-checked','false');
+				else { 
+					includeMenuItem = true; 
 				}
-				// Get a label using track data
-				if (which == 'captions') {
-					$menuItem.text(track.label);
-					$menuItem.on('click',this.getCaptionClickFunction(track));
+				if (includeMenuItem) {
+					$menuItem = $('<li></li>',{
+						'role': 'menuitemradio',
+						'tabindex': '-1',
+						'lang': track.language
+					});
+					if (track.def && this.prefCaptions == 1) {
+						$menuItem.attr('aria-checked','true');
+						hasDefault = true;
+					}
+					else {
+						$menuItem.attr('aria-checked','false');
+					}			
+					// Get a label using track data
+					if (which == 'captions') {
+						$menuItem.text(track.label);
+						$menuItem.on('click',this.getCaptionClickFunction(track));
+					}
+					else if (which == 'chapters') {
+						$menuItem.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
+						$menuItem.on('click',this.getChapterClickFunction(track.start));
+					}
+					$menu.append($menuItem);
 				}
-				else if (which == 'chapters') {
-					$menuItem.text(this.flattenCueForCaption(track) + ' - ' + this.formatSecondsAsColonTime(track.start));
-					$menuItem.on('click',this.getChapterClickFunction(track.start));
-				}
-				$menu.append($menuItem);
 			}
 			if (which === 'captions') {
 				// add a 'captions off' menu item
@@ -5328,7 +5336,9 @@ var AblePlayerInstances = [];
 				var trackSrc = track.src;
 
 				loadingPromise = thisObj.loadTextObject(trackSrc); // resolves with src, trackText
-				loadingPromises.push(loadingPromise.catch(function(src) {  }));
+				loadingPromises.push(loadingPromise.catch(function(src) { 
+					 
+				}));
 
 				loadingPromise.then((function (track, kind) {
 
@@ -5337,7 +5347,7 @@ var AblePlayerInstances = [];
 					var trackLabel = track.label;
 
 					return function (trackSrc, trackText) { // these are the two vars returned from loadTextObject
-
+						
 						var trackContents = trackText;
 						var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
 

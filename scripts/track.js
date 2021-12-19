@@ -55,7 +55,9 @@
 				var trackSrc = track.src;
 
 				loadingPromise = thisObj.loadTextObject(trackSrc); // resolves with src, trackText
-				loadingPromises.push(loadingPromise.catch(function(src) { console.warn('Failed to load captions track from ' + src); }));
+				loadingPromises.push(loadingPromise.catch(function(src) { 
+					console.warn('Failed to load captions track from ' + src); 
+				}));
 
 				loadingPromise.then((function (track, kind) {
 
@@ -64,7 +66,7 @@
 					var trackLabel = track.label;
 
 					return function (trackSrc, trackText) { // these are the two vars returned from loadTextObject
-
+						
 						var trackContents = trackText;
 						var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
 
