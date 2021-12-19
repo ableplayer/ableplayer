@@ -96,7 +96,8 @@
 		});
 
 		var thisObj = this;
-		this.$bigPlayButton.click(function () {
+		this.$bigPlayButton.click(function (event) {
+			event.preventDefault();
 			thisObj.handlePlay();
 		});
 
