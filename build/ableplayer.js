@@ -71,6 +71,7 @@ var AblePlayerInstances = [];
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
+
 		if ($(media).length === 0) {
 			this.provideFallback();
 			return;
@@ -395,12 +396,17 @@ var AblePlayerInstances = [];
 		}
 
 		// Fallback
-		// The only supported fallback content as of version 4.0 is:
-		// 1. Content nested within the <audio> or <video> element.
-		// 2. A standard localized message (see buildplayer.js > provideFallback()
 		// The data-test-fallback attribute can be used to test the fallback solution in any browser
 		if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
-			this.testFallback = true;
+			if ($(media).data('test-fallback') == '2') { 
+				this.testFallback = 2; // emulate browser that doesn't support HTML5 media 
+			}
+			else { 
+				this.testFallback = 1; // emulate failure to load Able Player 
+			}
+		}
+		else { 
+			this.testFallback = false; 
 		}
 
 		// Language
@@ -526,7 +532,10 @@ var AblePlayerInstances = [];
 					thisObj.provideFallback();
 				}
 			}
-		);
+		).
+		fail(function() { 
+			thisObj.provideFallback(); 
+		});
 	};
 
 	// Index to increment every time new player is created.
@@ -891,6 +900,7 @@ var AblePlayerInstances = [];
 		// Bootstrap from this.media possibly being an ID or other selector.
 		this.$media = $(this.media).first();
 		this.media = this.$media[0];
+
 		// Set media type to 'audio' or 'video'; this determines some of the behavior of player creation.
 		if (this.$media.is('audio')) {
 			this.mediaType = 'audio';
@@ -4090,114 +4100,103 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.provideFallback = function() {
 
-		// provide ultimate fallback for users who are unable to play the media
-		// If there is HTML content nested within the media element, display that
-		// Otherwise, display standard localized error text
+		// provide fallback in case of a critical error building the player 
+		// to test, set data-test-fallback to either of the following values: 
+		// 1 = emulate failure to build Able Player 
+		// 2 = emulate browser that doesn't support HTML5 media 
 
-		var $fallbackDiv, width, mediaClone, fallback, fallbackText,
-		showBrowserList, browsers, i, b, browserList;
+		var i, $fallback;
 
-		// Could show list of supporting browsers if 99.9% confident the error is truly an outdated browser
-		// Too many sites say "You need to update your browser" when in fact I'm using a current version
-		showBrowserList = false;
-
-		$fallbackDiv = $('<div>',{
-			'class' : 'able-fallback',
-			'role' : 'alert',
-		});
-		// override default width of .able-fallback with player width, if known
-		if (typeof this.playerMaxWidth !== 'undefined') {
-			width = this.playerMaxWidth + 'px';
+		if (this.usingFallback) { 
+			// fallback has already been implemented. 
+			// stopgap to prevent this function from executing twice on the same media element
+			return; 
 		}
-		else if (this.$media.attr('width')) {
-			width = parseInt(this.$media.attr('width'), 10) + 'px';
-		}
-		else {
-			width = '100%';
-		}
-		$fallbackDiv.css('max-width',width);
-
-		// use fallback content that's nested inside the HTML5 media element, if there is any
-		mediaClone = this.$media.clone();
-		$('source, track', mediaClone).remove();
-		fallback = mediaClone.html().trim();
-		if (fallback.length) {
-			$fallbackDiv.html(fallback);
-		}
-		else {
-			// use standard localized error message
-			fallbackText =	this.tt.fallbackError1 + ' ' + this.tt[this.mediaType] + '. ';
-			fallbackText += this.tt.fallbackError2 + ':';
-			fallback = $('<p>').text(fallbackText);
-			$fallbackDiv.html(fallback);
-			showBrowserList = true;
+		else { 
+			this.usingFallback = true; 
 		}
 
-		if (showBrowserList) {
-			browserList = $('<ul>');
-			browsers = this.getSupportingBrowsers();
-			for (i=0; i<browsers.length; i++) {
-				b = $('<li>');
-				b.text(browsers[i].name + ' ' + browsers[i].minVersion + ' ' + this.tt.orHigher);
-				browserList.append(b);
+		if (!this.testFallback) { 
+			// this is not a test. 
+			// an actual error has resulted in this function being called. 
+			// use scenario 1 
+			this.testFallback = 1; 
+		}
+
+		if (typeof this.$media === 'undefined') { 
+			// this function has been called prior to initialize.js > reinitialize() 
+			// before doing anything, need to create the jQuery media object
+			this.$media = $(this.media); 
+		} 
+
+		// get/assign an id for the media element 
+		if (this.$media.attr('id')) { 
+			this.mediaId = this.$media.attr('id'); 
+		}
+		else { 
+			this.mediaId = 'media' + Math.floor(Math.random() * 1000000000).toString();
+		} 
+
+		// check whether element has nested fallback content 
+		this.hasFallback = false; 
+		if (this.$media.children().length) { 
+			i = 0; 
+			while (i < this.$media.children().length && !this.hasFallback) { 
+				if (!(this.$media.children()[i].tagName === 'SOURCE' || 
+					this.$media.children()[i].tagName === 'TRACK')) { 
+					// this element is something other than <source> or <track> 
+					this.hasFallback = true; 
+				}
+				i++; 
 			}
-			$fallbackDiv.append(browserList);
+		}
+		if (!this.hasFallback) { 
+			// the HTML code does not include any nested fallback content 
+			// inject our own 
+			// NOTE: this message is not translated, since fallback may be needed 
+			// due to an error loading the translation file 
+			// This will only be needed on very rare occasions, so English is ok. 
+			$fallback = $('<p>').text('Media player unavailable.'); 
+			this.$media.append($fallback); 
 		}
 
-		// if there's a poster, show that as well
-		this.injectPoster($fallbackDiv, 'fallback');
+		// get height and width attributes, if present 
+		// and add them to a style attribute 
+		if (this.$media.attr('width')) { 
+			this.$media.css('width',this.$media.attr('width') + 'px'); 
+		}
+		if (this.$media.attr('height')) { 
+			this.$media.css('height',this.$media.attr('height') + 'px'); 
+		}
 
-		// inject $fallbackDiv into the DOM and remove broken content
-		if (typeof this.$ableWrapper !== 'undefined') {
-			this.$ableWrapper.before($fallbackDiv);
-			this.$ableWrapper.remove();
+		// Remove data-able-player attribute 
+		this.$media.removeAttr('data-able-player'); 
+
+		// Add controls attribute (so browser will add its own controls)
+		this.$media.prop('controls',true); 
+
+		if (this.testFallback == 2) { 
+
+			// emulate browser failure to support HTML5 media by changing the media tag name 
+			// browsers should display the supported content that's nested inside 
+			$(this.$media).replaceWith($('<foobar id="foobar-' + this.mediaId + '">'));
+			this.$newFallbackElement = $('#foobar-' + this.mediaId); 			
+
+			// append all children from the original media 
+			if (this.$media.children().length) { 
+				i = this.$media.children().length - 1; 
+				while (i >= 0) { 
+					this.$newFallbackElement.prepend($(this.$media.children()[i])); 
+					i--; 
+				}
+			}
+			if (!this.hasFallback) { 
+				// inject our own fallback content, defined above
+				this.$newFallbackElement.append($fallback);
+			}
 		}
-		else if (typeof this.$media !== 'undefined') {
-			this.$media.before($fallbackDiv);
-			this.$media.remove();
-		}
-		else {
-			$('body').prepend($fallbackDiv);
-		}
+		return; 
 	};
-
-	AblePlayer.prototype.getSupportingBrowsers = function() {
-
-		var browsers = [];
-		browsers[0] = {
-			name:'Chrome',
-			minVersion: '31'
-		};
-		browsers[1] = {
-			name:'Firefox',
-			minVersion: '34'
-		};
-		browsers[2] = {
-			name:'Internet Explorer',
-			minVersion: '10'
-		};
-		browsers[3] = {
-			name:'Opera',
-			minVersion: '26'
-		};
-		browsers[4] = {
-			name:'Safari for Mac OS X',
-			minVersion: '7.1'
-		};
-		browsers[5] = {
-			name:'Safari for iOS',
-			minVersion: '7.1'
-		};
-		browsers[6] = {
-			name:'Android Browser',
-			minVersion: '4.1'
-		};
-		browsers[7] = {
-			name:'Chrome for Android',
-			minVersion: '40'
-		};
-		return browsers;
-	}
 
 	AblePlayer.prototype.calculateControlLayout = function () {
 
@@ -14660,9 +14659,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
 		$.getJSON(translationFile, function(data) {
+			// success!
 			thisObj.tt = data; 
 			deferred.resolve(); 
-		}); 
+		})
+		.fail(function() {
+			console.log( "Critical Error: Unable to load translation file:",translationFile);			
+			thisObj.provideFallback();
+			deferred.fail();
+		})
 		return deferred.promise();
 	};
 

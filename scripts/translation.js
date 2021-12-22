@@ -79,9 +79,15 @@
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
 		$.getJSON(translationFile, function(data) {
+			// success!
 			thisObj.tt = data; 
 			deferred.resolve(); 
-		}); 
+		})
+		.fail(function() {
+			console.log( "Critical Error: Unable to load translation file:",translationFile);			
+			thisObj.provideFallback();
+			deferred.fail();
+		})
 		return deferred.promise();
 	};
 

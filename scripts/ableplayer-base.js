@@ -71,6 +71,7 @@ var AblePlayerInstances = [];
 		// Keep track of the last player created for use with global events.
 		AblePlayer.lastCreated = this;
 		this.media = media;
+
 		if ($(media).length === 0) {
 			this.provideFallback();
 			return;
@@ -395,12 +396,17 @@ var AblePlayerInstances = [];
 		}
 
 		// Fallback
-		// The only supported fallback content as of version 4.0 is:
-		// 1. Content nested within the <audio> or <video> element.
-		// 2. A standard localized message (see buildplayer.js > provideFallback()
 		// The data-test-fallback attribute can be used to test the fallback solution in any browser
 		if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
-			this.testFallback = true;
+			if ($(media).data('test-fallback') == '2') { 
+				this.testFallback = 2; // emulate browser that doesn't support HTML5 media 
+			}
+			else { 
+				this.testFallback = 1; // emulate failure to load Able Player 
+			}
+		}
+		else { 
+			this.testFallback = false; 
 		}
 
 		// Language
@@ -526,7 +532,10 @@ var AblePlayerInstances = [];
 					thisObj.provideFallback();
 				}
 			}
-		);
+		).
+		fail(function() { 
+			thisObj.provideFallback(); 
+		});
 	};
 
 	// Index to increment every time new player is created.

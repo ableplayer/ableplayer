@@ -26,8 +26,9 @@ h1 {
   line-height: 1.2em;
   margin-top: 0.75em;
 }
-p {
-  max-width: 60em;
+p, li {
+  width: 60em;
+	max-width: 90%;
 }
 p.goback {
   clear: left;

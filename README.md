@@ -114,7 +114,7 @@ Fallback
 
 All modern browsers have supported HTML5 media elements for many years.
 However, there are still older browsers in use that don’t have this support 
-(e.g., Internet Explorer 9 and earlier). For these, you need to provide fallback content. 
+(e.g., Internet Explorer 9 and earlier). For these, fallback content should be provided. 
  
 Prior to version 4.0, *Able Player* used [JW Player][] as a fallback Flash player 
 for older browsers. However, this solution was built specifically on **JW Player 6** 
@@ -128,9 +128,11 @@ Instead, we recommend providing alternative content as a child of the `<video>` 
 For example, this could be a link to the media file so users can download it 
 and play it on their player of choice. Or it could be a link to a transcript. 
 
-If the browser is unable to play the media file, Able Player will show this alternative content. 
-If no alternative content is provided, Able Player will display a standard message that lists 
-the minimum versions of common web browsers required for playing HTML5 media. 
+If Able Player fails to load, it will fall back to the HTML media element and if the browser supports 
+HTML5 media, the browser will provide its own interface for playing the media. If the browser is unable to play the media file, it will display the alternative content. If no alternative content is provided, 
+Able Player will inject a short error message for the browser to display. 
+
+Fallback content can be tested by adding the **data-test-fallback** attribute to the  `<audio>` or `<video>` element, with a value of either "1" (emulate failure to build Able Player) or "2" (emulate a browser that doesn't support HTML5 media).
 
 Setup Step 1: Use HTML5 Doctype
 -------------------------------
@@ -312,7 +314,9 @@ The following attributes make all this possible:
 
 #### Fallback Player
 
--   **data-test-fallback** - optional; force browsers to display the fallback content that will be shown to users with older browsers that don't support HTML5 media.  
+-   **data-test-fallback** - optional (for testing); force browsers to display fallback content. Set to either of the following values:
+    -  "1" - emulate failure to build Able Player 
+		-  "2" - emulate browser that doesn't support HTML5 media  
 
 The following attributes are supported on the `<video>` element only:
 
