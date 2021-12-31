@@ -27,13 +27,9 @@
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 		this.$ableWrapper.addClass('able-skin-' + this.skin);
-		
-		// NOTE: Excluding the following from youtube was resulting in a player
-		// that exceeds the width of the YouTube video
-		// Unclear why it was originally excluded; commented out in 3.1.20
-		// if (this.player !== 'youtube') {
+				
 		this.$ableWrapper.css({
-			'max-width': this.playerMaxWidth + 'px'
+			'width': this.playerWidth + 'px' 
 		});
 
 		this.injectOffscreenHeading();
@@ -319,45 +315,6 @@
 			// no need to define top, left, or z-index
 		}
 		return position;
-	};
-
-	AblePlayer.prototype.injectPoster = function ($element, context) {
-
-		// get poster attribute from media element and append that as an img to $element
-		// context is either 'youtube' or 'fallback'
-		var poster, width, height;
-
-		if (context === 'youtube') {
-			if (typeof this.ytWidth !== 'undefined') {
-				width = this.ytWidth;
-				height = this.ytHeight;
-			}
-			else if (typeof this.playerMaxWidth !== 'undefined') {
-				width = this.playerMaxWidth;
-				height = this.playerMaxHeight;
-			}
-			else if (typeof this.playerWidth !== 'undefined') {
-				width = this.playerWidth;
-				height = this.playerHeight;
-			}
-		}
-		else if (context === 'fallback') {
-			width = '100%';
-			height = 'auto';
-		}
-
-		if (this.hasPoster) {
-			poster = this.$media.attr('poster');
-			this.$posterImg = $('<img>',{
-				'class': 'able-poster',
-				'src' : poster,
-				'alt' : "",
-				'role': "presentation",
-				'width': width,
-				'height': height
-			});
-			$element.append(this.$posterImg);
-		}
 	};
 
 	AblePlayer.prototype.injectAlert = function () {
@@ -962,7 +919,7 @@
 			controlLayout[1].push('preferences');
 		}
 
-		if (this.mediaType === 'video' && this.allowFullScreen) {
+		if (this.mediaType === 'video' && this.allowFullscreen) {
 			if (this.skin === 'legacy') {
 				controlLayout[3].push('fullscreen');
 			}
@@ -1905,10 +1862,10 @@
 		}
 		else if (control === 'fullscreen') { 
 			if (!this.fullscreen) {
-				return this.tt.enterFullScreen; 
+				return this.tt.enterFullscreen; 
 			}
 			else { 
-				return this.tt.exitFullScreen; 
+				return this.tt.exitFullscreen; 
 			}
 		}
 		else {

@@ -673,35 +673,34 @@
 		}
 
 		if (context === 'fullscreen' || context == 'init'){
-
 			if (this.$fullscreenButton) {
 				if (!this.fullscreen) {
-					this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
+					this.$fullscreenButton.attr('aria-label', this.tt.enterFullscreen);
 					if (this.iconType === 'font') {
 						this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullscreen);
 					}
 					else if (this.iconType === 'svg') {
 						newSvgData = this.getSvgData('fullscreen-expand');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullscreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
 					}
 				}
 				else {
-					this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen);
+					this.$fullscreenButton.attr('aria-label',this.tt.exitFullscreen);
 					if (this.iconType === 'font') {
 						this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullscreen);
 					}
 					else if (this.iconType === 'svg') {
 						newSvgData = this.getSvgData('fullscreen-collapse');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullscreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
@@ -1365,8 +1364,8 @@
 		if (this.nativeFullscreenSupported()) {
 			return (document.fullscreenElement ||
 							document.webkitFullscreenElement ||
-							document.webkitCurrentFullScreenElement ||
-							document.mozFullScreenElement ||
+							document.webkitCurrentFullscreenElement ||
+							document.mozFullscreenElement ||
 							document.msFullscreenElement) ? true : false;
 		}
 		else {
@@ -1389,17 +1388,14 @@
 			if (fullscreen) {
 				// Initialize fullscreen
 
-				// But first, capture current settings so they can be restored later
-				this.preFullScreenWidth = this.$ableWrapper.width();
-				this.preFullScreenHeight = this.$ableWrapper.height();
 				if (el.requestFullscreen) {
 					el.requestFullscreen();
 				}
 				else if (el.webkitRequestFullscreen) {
 					el.webkitRequestFullscreen();
 				}
-				else if (el.mozRequestFullScreen) {
-					el.mozRequestFullScreen();
+				else if (el.mozRequestFullscreen) {
+					el.mozRequestFullscreen();
 				}
 				else if (el.msRequestFullscreen) {
 					el.msRequestFullscreen();
@@ -1408,55 +1404,24 @@
 			}
 			else {
 				// Exit fullscreen
+				this.restoringAfterFullScreen = true; 
 				if (document.exitFullscreen) {
 					document.exitFullscreen();
 				}
 				else if (document.webkitExitFullscreen) {
 					document.webkitExitFullscreen();
 				}
-				else if (document.webkitCancelFullScreen) {
-					document.webkitCancelFullScreen();
+				else if (document.webkitCancelFullscreen) {
+					document.webkitCancelFullscreen();
 				}
-				else if (document.mozCancelFullScreen) {
-					document.mozCancelFullScreen();
+				else if (document.mozCancelFullscreen) {
+					document.mozCancelFullscreen();
 				}
 				else if (document.msExitFullscreen) {
 					document.msExitFullscreen();
 				}
 				this.fullscreen = false;
 			}
-			// add event handlers for changes in full screen mode
-			// currently most changes are made in response to windowResize event
-			// However, that alone is not resulting in a properly restored player size in Opera Mac
-			// More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
-			// this fullscreen event handler added specifically for Opera Mac,
-			// but includes event listeners for all browsers in case its functionality could be expanded
-			// Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
-			$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e) {
-				// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
-				if (!thisObj.fullscreen) {
-					// user has just exited full screen
-					thisObj.restoringAfterFullScreen = true;
-					thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
-				}
-				else if (!thisObj.clickedFullscreenButton) {
-					// user triggered fullscreenchange without clicking (or pressing) fullscreen button
-					// this is only possible if they pressed Escape to exit fullscreen mode
-					thisObj.fullscreen = false;
-					thisObj.restoringAfterFullScreen = true;
-					thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
-				}
-				// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
-				// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
-				// Not sure why, but consequently we need to be sure thisObj.clickedFullScreenButton
-				// continues to be true through both events
-				// Could use a counter variable to control that (reset to false after the 2nd trigger)
-				// However, since I don't know why it's happening, and whether it's 100% reliable
-				// resetting clickedFullScreenButton after a timeout seems to be better approach
-				setTimeout(function() {
-					thisObj.clickedFullscreenButton = false;
-				},1000);
-			});
 		}
 		else {
 			// Non-native fullscreen support through modal dialog.
@@ -1469,7 +1434,7 @@
 				}).text(this.tt.fullscreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
 				$dialogDiv.append($fsDialogAlert);
 				// now render this as a dialog
-				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullScreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
+				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullscreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
 				$('body').append($dialogDiv);
 			}
 
@@ -1494,7 +1459,6 @@
 				if (!this.$descDiv.is(':hidden')) {
 					newHeight -= this.$descDiv.height();
 				}
-				this.resizePlayer($(window).width(), newHeight);
 			}
 			else {
 				this.modalFullscreenActive = false;
@@ -1504,7 +1468,6 @@
 				$el.insertAfter(this.$modalFullscreenPlaceholder);
 				this.$modalFullscreenPlaceholder.remove();
 				this.fullscreenDialog.hide();
-				this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
 			}
 
 			// Resume playback if moving stopped it.
@@ -1512,7 +1475,36 @@
 				this.playMedia();
 			}
 		}
-		this.refreshControls('fullscreen');
+		// add event handlers for changes in fullscreen mode. 
+		// Browsers natively trigger this event with the Escape key,  
+		// in addition to clicking the exit fullscreen button 
+		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e) {
+			// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
+			if (!thisObj.fullscreen) {
+				// user has just exited full screen
+				thisObj.restoringAfterFullScreen = true;
+				thisObj.resizePlayer();
+			}
+			else if (!thisObj.clickedFullscreenButton) {
+				// user triggered fullscreenchange without clicking fullscreen button
+				thisObj.fullscreen = false;
+				thisObj.restoringAfterFullScreen = true;
+				thisObj.resizePlayer();
+			}
+			thisObj.refreshControls('fullscreen');
+
+			// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
+			// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
+			// Not sure why, but consequently we need to be sure thisObj.clickedFullScreenButton
+			// continues to be true through both events
+			// Could use a counter variable to control that (reset to false after the 2nd trigger)
+			// However, since I don't know why it's happening, and whether it's 100% reliable
+			// resetting clickedFullScreenButton after a timeout seems to be better approach
+			setTimeout(function() {
+				thisObj.clickedFullscreenButton = false;
+				thisObj.restoringAfterFullscreen = false; 
+			},1000);
+		});		
 	};
 
 	AblePlayer.prototype.handleFullscreenToggle = function () {
@@ -1550,6 +1542,8 @@
 				}
 			}
 		}
+		// don't resizePlayer yet; that will be called in response to the window resize event 
+		// this.resizePlayer();
 	};
 
 	AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
@@ -1664,57 +1658,133 @@
 
 		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
-		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
-			if (typeof this.$captionsContainer !== 'undefined') {
-				this.$ableWrapper.css({
-					'width': width + 'px',
-					'max-width': ''
-				})
-				this.$captionsContainer.css({
-					'height': height + 'px',
-					'width': width
-				});
-				this.$media.css({
-					'height': height + 'px',
-					'width': width
-				})
-			}
-			if (typeof this.$transcriptArea !== 'undefined') {
-				this.retrieveOffscreenWindow('transcript',width,height);
-			}
-			if (typeof this.$signWindow !== 'undefined') {
-				this.retrieveOffscreenWindow('sign',width,height);
-			}
+		var newWidth, newHeight, $iframe; 
+
+		if (this.mediaType === 'audio') { 
+			return; 
 		}
-		else {
-			// player resized
-			if (this.restoringAfterFullScreen) {
-				// User has just exited fullscreen mode. Restore to previous settings
-				width = this.preFullScreenWidth;
-				height = this.preFullScreenHeight;
-				this.restoringAfterFullScreen = false;
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				if (typeof this.$captionsContainer !== 'undefined') {
-					this.$captionsContainer.css({
-						'height': '',
-						'width': ''
+
+		if (typeof width !== 'undefined' && typeof height !== 'undefined') { 
+			// this is being called the first time a player is initialized 
+			// width and height were collected from the HTML, YouTube, or Vimeo media API
+			// so are reflective of the actual size of the media 
+			// use these values to calculate aspectRatio 
+			this.aspectRatio = height / width;  
+			if (this.playerWidth) { 
+				// default width is already defined via a width or data-width attribute. Use that. 				
+				newWidth = this.playerWidth; 
+				if (this.playerHeight) { 
+					newHeight = this.playerHeight; 
+				}
+				else { 
+					newHeight = Math.round(newWidth * this.aspectRatio); 
+					this.playerHeight = newHeight; 
+				}
+			}
+			else { 
+				// playerWidth was not defined via HTML attributes 
+				if (this.player === 'html5') { 
+					newWidth = $(window).width();
+				}
+				else { 
+					newWidth = this.$ableWrapper.width(); 
+				}
+				newHeight = Math.round(newWidth * this.aspectRatio); 
+			}				
+		}			
+		else if (this.fullscreen) { 
+			newWidth = $(window).width();			
+			newHeight = $(window).height() - this.$playerDiv.outerHeight(); 
+
+			// TODO: Continue working to try to isolate the Safari positioning bug 
+			// haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
+			// Old test results:
+			// Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
+			// Updated results (December 2021): 
+			// Safari is the only browser that requires a 20px adjustment 
+			//  observed in Safari 14.1.2 on Mac OS 10.14.6 (Mojave) and Safari 15.0 on MacOS 11.6 (Big Sur)
+			// (also tested in Firefox, Chrome, & Opera on Mac OS; and Firefox, Chrome, & Edge on Windows 11)
+			if (this.isUserAgent('Safari')) {			
+				newHeight -= 25; 
+			}
+			if (!this.$descDiv.is(':hidden')) {
+				newHeight -= this.$descDiv.height();
+			}			
+			this.positionCaptions('overlay');
+		}
+		else { // not fullscreen, and not first time initializing player 			
+			if (this.player === 'html5') { 
+				if (this.playerWidth) { 
+					newWidth = this.playerWidth; 
+				}
+				else {
+					// use full size of window 
+					// player will be downsized to fit container if CSS requires it 
+					newWidth = $(window).width();
+				}
+			}
+			else { 
+				newWidth = this.$ableWrapper.width(); 
+			}
+			newHeight = Math.round(newWidth * this.aspectRatio); 
+		}
+		if (this.debug) {
+			console.log('resizePlayer to ' + newWidth + 'x' + newHeight); 		
+		}
+		// Now size the player with newWidth and newHeight
+		if (this.player === 'youtube' || this.player === 'vimeo') { 
+			$iframe = this.$ableWrapper.find('iframe'); 
+			if (this.player === 'youtube' && this.youTubePlayer) { 
+				// alternatively, YouTube API offers a method for setting the video size 
+				// this adds width and height attributes to the iframe 
+				// but might have other effects, so best to do it this way 
+				this.youTubePlayer.setSize(newWidth,newHeight); 
+			}
+			else { 
+				// Vimeo API does not have a method for changing size of player 
+				// Therefore, need to change iframe attributes directly 
+				$iframe.attr({
+					'width': newWidth,
+					'height': newHeight
+				}); 
+			}
+			if (this.playerWidth && this.playerHeight) { 
+				if (this.fullscreen) { 
+					// remove constraints 
+					$iframe.css({ 
+						'max-width': '',
+						'max-height': ''
+					});	
+				}
+				else {
+					// use CSS on iframe to enforce explicitly defined size constraints
+					$iframe.css({ 
+						'max-width': this.playerWidth + 'px',
+						'max-height': this.playerHeight + 'px'
 					});
 				}
-				this.$media.css({
-					'width': '100%',
-					'height': 'auto'
-				});
 			}
 		}
-
-		// resize YouTube
-		if (this.player === 'youtube' && this.youTubePlayer) {
-			this.youTubePlayer.setSize(width, height);
+		else if (this.player === 'html5') { 
+			if (this.fullscreen) {
+				this.$media.attr({
+					'width': newWidth,
+					'height': newHeight
+				});
+				this.$ableWrapper.css({
+					'width': newWidth,
+					'height': newHeight
+				});
+			}
+			else { 
+				// No constraints. Let CSS handle the positioning. 
+				this.$media.removeAttr('width height');
+				this.$ableWrapper.css({
+					'width': newWidth,
+					'height': 'auto'
+				});
+			}				
 		}
-
 		// Resize captions
 		if (typeof this.$captionsDiv !== 'undefined') {
 
@@ -1724,7 +1794,7 @@
 			captionSizeOkMin = 400;
 			captionSizeOkMax = 1000;
 			captionSize = parseInt(this.prefCaptionsSize,10);
-
+		
 			// TODO: Need a better formula so that it scales proportionally to viewport
 			if (width > captionSizeOkMax) {
 				newCaptionSize = captionSize * 1.5;
@@ -1739,7 +1809,22 @@
 			this.$captionsDiv.css('font-size',newCaptionSize + '%');
 			this.$captionsWrapper.css('line-height',newLineHeight + '%');
 		}
-		this.refreshControls('captions');
+		/*  fuck - this is redundant; also in setfullscreen()
+		// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
+		// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
+		// Not sure why, but consequently we need to be sure this.clickedFullScreenButton
+		// continues to be true through both events
+		// Could use a counter variable to control that (reset to false after the 2nd trigger)
+		// However, since I don't know why it's happening, and whether it's 100% reliable
+		// resetting clickedFullScreenButton after a timeout seems to be better approach
+		setTimeout(function() {
+			this.clickedFullscreenButton = false;
+			this.restoringAfterFullScreen = false; 
+		},1000);
+		this.refreshControls();
+*/
+
+		this.refreshControls();			
 	};
 
 	AblePlayer.prototype.retrieveOffscreenWindow = function( which, width, height ) {

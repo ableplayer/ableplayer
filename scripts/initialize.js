@@ -329,60 +329,27 @@
 			this.provideFallback();
 		}
 		this.setIconType();
-		this.setDimensions();
 
 		deferred.resolve();
 		return promise;
 	};
 
-	AblePlayer.prototype.setDimensions = function() {
-		// if media element includes width and height attributes,
-		// use these to set the max-width and max-height of the player
-		if (this.$media.attr('width') && this.$media.attr('height')) {
-			this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
-			this.playerMaxHeight = parseInt(this.$media.attr('height'), 10);
-		}
-		else if (this.$media.attr('width')) {
-			// media element includes a width attribute, but not height
-			this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
-		}
-		else {
-			// set width to width of #player
-			// don't set height though; YouTube will automatically set that to match width
-			this.playerMaxWidth = this.$media.parent().width();
-			this.playerMaxHeight = this.getMatchingHeight(this.playerMaxWidth);
-		}
-		// override width and height attributes with in-line CSS to make video responsive
-		this.$media.css({
-			'width': '100%',
-			'height': 'auto'
-		});
-	};
+	AblePlayer.prototype.setPlayerSize = function(width, height) {
 
-	AblePlayer.prototype.getMatchingHeight = function(width) {
+		var mediaId = this.$media.attr('id');
 
-		// returns likely height for a video, given width
-		// These calculations assume 16:9 aspect ratio (the YouTube standard)
-		// Videos recorded in other resolutions will be sized to fit, with black bars on each side
-		// This function is only called if the <video> element does not have width and height attributes
+		// Called again after width and height are known 
 
-		var widths, heights, closestWidth, closestIndex, closestHeight, height;
-
-		widths = [ 3840, 2560, 1920, 1280, 854, 640, 426 ];
-		heights = [ 2160, 1440, 1080, 720, 480, 360, 240 ];
-		closestWidth = null;
-		closestIndex = null;
-
-		$.each(widths, function(index){
-			if (closestWidth == null || Math.abs(this - width) < Math.abs(closestWidth - width)) {
-				closestWidth = this;
-				closestIndex = index;
+		if (this.mediaType === 'audio') { 			
+			if (this.playerWidth) { 
+				this.$ableWrapper.css('width',this.playerWidth + 'px'); 
 			}
-		});
-		closestHeight = heights[closestIndex];
-		this.aspectRatio = closestWidth / closestHeight;
-		height = Math.round(width / this.aspectRatio);
-		return height;
+		}
+		else if (width > 0 && height > 0) { 
+			this.playerWidth = width; 
+			this.playerHeight = height; 
+			this.aspectRatio = height / width; 
+		}
 	};
 
 	AblePlayer.prototype.setIconType = function() {
@@ -558,6 +525,7 @@
 			// only call these functions once
 			this.loadCurrentPreferences();
 			this.injectPlayerCode();
+			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
 		}
 
 		// call all remaining functions each time a new media instance is loaded

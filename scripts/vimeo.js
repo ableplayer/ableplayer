@@ -40,29 +40,38 @@
 			autoplay = 'false';
 		}
 
-		videoDimensions = this.getVimeoDimensions(this.activeVimeoId, containerId);
-		if (videoDimensions) {
-			this.vimeoWidth = videoDimensions[0];
-			this.vimeoHeight = videoDimensions[1];
-			this.aspectRatio = thisObj.ytWidth / thisObj.ytHeight;
+		if (this.playerWidth) {			
+			options = {
+				id: vimeoId,
+				width: this.playerWidth,
+				controls: false
+			}
 		}
-		else {
-			// dimensions are initially unknown
-			// sending null values to Vimeo results in a video that uses the default Vimeo dimensions
-			// these can then be scraped from the iframe and applied to this.$ableWrapper
-			this.vimeoWidth = null;
-			this.vimeoHeight = null;
+		else { 
+			// initialize without width & set width later 
+			options = {
+				id: vimeoId,
+				controls: false
+			}
 		}
-
-		options = {
-			id: vimeoId,
-			width: this.vimeoWidth,
-			controls: false
-		};
 
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
 
 		this.vimeoPlayer.ready().then(function() {
+			// get video's intrinsic size and initiate player dimensions
+			thisObj.vimeoPlayer.getVideoWidth().then(function(width) {						
+				if (width) { 
+					// also get height 
+					thisObj.vimeoPlayer.getVideoHeight().then(function(height) {	
+						if (height) { 								
+							thisObj.resizePlayer(width,height); 								
+						}
+					});														
+				}
+			}).catch(function(error) {
+				// an error occurred getting height or width 
+				// TODO: Test this to see how gracefully it organically recovers 
+			});
 
 			if (!thisObj.hasPlaylist) {
 				// remove the media element, since Vimeo replaces that with its own element in an iframe
@@ -146,37 +155,6 @@
 		});
 		return promise;
 	}
-
-	AblePlayer.prototype.getVimeoDimensions = function (vimeoContainerId) {
-
-		// get dimensions of Vimeo video, return array with width & height
-
-		var d, url, $iframe, width, height;
-
-		d = [];
-
-		if (typeof this.playerMaxWidth !== 'undefined') {
-			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since Vimeo will adjust height to match width
-			if (typeof this.playerMaxHeight !== 'undefined') {
-				d[1] = this.playerMaxHeight;
-			}
-			return d;
-		}
-		else {
-			if (typeof $('#' + vimeoContainerId) !== 'undefined') {
-				$iframe = $('#' + vimeoContainerId);
-				width = $iframe.width();
-				height = $iframe.height();
-				if (width > 0 && height > 0) {
-					d[0] = width;
-					d[1] = height;
-					return d;
-				}
-			}
-		}
-		return false;
-	};
 
 	AblePlayer.prototype.getVimeoCaptionTracks = function () {
 

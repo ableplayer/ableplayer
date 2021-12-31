@@ -339,6 +339,24 @@ var AblePlayerInstances = [];
 			this.skin = 'legacy';
 		}
 
+		// Size 
+		// width of Able Player is determined using the following order of precedence: 
+		// 1. data-width attribute 
+		// 2. width attribute (for video or audio, although it is not valid HTML for audio)
+		// 3. Intrinsic size from video (video only, determined later)
+		if ($(media).data('width') !== undefined) {
+			this.playerWidth = parseInt($(media).data('width'));
+		}
+		else if ($(media)[0].getAttribute('width')) {
+			// NOTE: jQuery attr() returns null for all invalid HTML attributes 
+			// (e.g., width on <audio>)
+			// but it can be acessed via JavaScript getAttribute() 
+			this.playerWidth = parseInt($(media)[0].getAttribute('width'));
+		}
+		else { 
+			this.playerWidth = null; 
+		}
+
 		// Icon type
 		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
 		// Fallback for browsers that don't support SVG is scalable icomoon fonts
@@ -355,11 +373,14 @@ var AblePlayerInstances = [];
 		}
 
 		if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
-			this.allowFullScreen = false;
+			this.allowFullscreen = false;
 		}
 		else {
-			this.allowFullScreen = true;
+			this.allowFullscreen = true;
 		}
+		// Define other variables that are used in fullscreen program flow 
+		this.clickedFullscreenButton = false; 
+		this.restoringAfterFullscreen = false;			
 
 		// Seek interval
 		// Number of seconds to seek forward or back with Rewind & Forward buttons
@@ -923,60 +944,27 @@ var AblePlayerInstances = [];
 			this.provideFallback();
 		}
 		this.setIconType();
-		this.setDimensions();
 
 		deferred.resolve();
 		return promise;
 	};
 
-	AblePlayer.prototype.setDimensions = function() {
-		// if media element includes width and height attributes,
-		// use these to set the max-width and max-height of the player
-		if (this.$media.attr('width') && this.$media.attr('height')) {
-			this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
-			this.playerMaxHeight = parseInt(this.$media.attr('height'), 10);
-		}
-		else if (this.$media.attr('width')) {
-			// media element includes a width attribute, but not height
-			this.playerMaxWidth = parseInt(this.$media.attr('width'), 10);
-		}
-		else {
-			// set width to width of #player
-			// don't set height though; YouTube will automatically set that to match width
-			this.playerMaxWidth = this.$media.parent().width();
-			this.playerMaxHeight = this.getMatchingHeight(this.playerMaxWidth);
-		}
-		// override width and height attributes with in-line CSS to make video responsive
-		this.$media.css({
-			'width': '100%',
-			'height': 'auto'
-		});
-	};
+	AblePlayer.prototype.setPlayerSize = function(width, height) {
 
-	AblePlayer.prototype.getMatchingHeight = function(width) {
+		var mediaId = this.$media.attr('id');
 
-		// returns likely height for a video, given width
-		// These calculations assume 16:9 aspect ratio (the YouTube standard)
-		// Videos recorded in other resolutions will be sized to fit, with black bars on each side
-		// This function is only called if the <video> element does not have width and height attributes
+		// Called again after width and height are known 
 
-		var widths, heights, closestWidth, closestIndex, closestHeight, height;
-
-		widths = [ 3840, 2560, 1920, 1280, 854, 640, 426 ];
-		heights = [ 2160, 1440, 1080, 720, 480, 360, 240 ];
-		closestWidth = null;
-		closestIndex = null;
-
-		$.each(widths, function(index){
-			if (closestWidth == null || Math.abs(this - width) < Math.abs(closestWidth - width)) {
-				closestWidth = this;
-				closestIndex = index;
+		if (this.mediaType === 'audio') { 			
+			if (this.playerWidth) { 
+				this.$ableWrapper.css('width',this.playerWidth + 'px'); 
 			}
-		});
-		closestHeight = heights[closestIndex];
-		this.aspectRatio = closestWidth / closestHeight;
-		height = Math.round(width / this.aspectRatio);
-		return height;
+		}
+		else if (width > 0 && height > 0) { 
+			this.playerWidth = width; 
+			this.playerHeight = height; 
+			this.aspectRatio = height / width; 
+		}
 	};
 
 	AblePlayer.prototype.setIconType = function() {
@@ -1152,6 +1140,7 @@ var AblePlayerInstances = [];
 			// only call these functions once
 			this.loadCurrentPreferences();
 			this.injectPlayerCode();
+			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
 		}
 
 		// call all remaining functions each time a new media instance is loaded
@@ -3381,13 +3370,9 @@ var AblePlayerInstances = [];
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 		this.$ableWrapper.addClass('able-skin-' + this.skin);
-		
-		// NOTE: Excluding the following from youtube was resulting in a player
-		// that exceeds the width of the YouTube video
-		// Unclear why it was originally excluded; commented out in 3.1.20
-		// if (this.player !== 'youtube') {
+				
 		this.$ableWrapper.css({
-			'max-width': this.playerMaxWidth + 'px'
+			'width': this.playerWidth + 'px' 
 		});
 
 		this.injectOffscreenHeading();
@@ -3673,45 +3658,6 @@ var AblePlayerInstances = [];
 			// no need to define top, left, or z-index
 		}
 		return position;
-	};
-
-	AblePlayer.prototype.injectPoster = function ($element, context) {
-
-		// get poster attribute from media element and append that as an img to $element
-		// context is either 'youtube' or 'fallback'
-		var poster, width, height;
-
-		if (context === 'youtube') {
-			if (typeof this.ytWidth !== 'undefined') {
-				width = this.ytWidth;
-				height = this.ytHeight;
-			}
-			else if (typeof this.playerMaxWidth !== 'undefined') {
-				width = this.playerMaxWidth;
-				height = this.playerMaxHeight;
-			}
-			else if (typeof this.playerWidth !== 'undefined') {
-				width = this.playerWidth;
-				height = this.playerHeight;
-			}
-		}
-		else if (context === 'fallback') {
-			width = '100%';
-			height = 'auto';
-		}
-
-		if (this.hasPoster) {
-			poster = this.$media.attr('poster');
-			this.$posterImg = $('<img>',{
-				'class': 'able-poster',
-				'src' : poster,
-				'alt' : "",
-				'role': "presentation",
-				'width': width,
-				'height': height
-			});
-			$element.append(this.$posterImg);
-		}
 	};
 
 	AblePlayer.prototype.injectAlert = function () {
@@ -4316,7 +4262,7 @@ var AblePlayerInstances = [];
 			controlLayout[1].push('preferences');
 		}
 
-		if (this.mediaType === 'video' && this.allowFullScreen) {
+		if (this.mediaType === 'video' && this.allowFullscreen) {
 			if (this.skin === 'legacy') {
 				controlLayout[3].push('fullscreen');
 			}
@@ -5259,10 +5205,10 @@ var AblePlayerInstances = [];
 		}
 		else if (control === 'fullscreen') { 
 			if (!this.fullscreen) {
-				return this.tt.enterFullScreen; 
+				return this.tt.enterFullscreen; 
 			}
 			else { 
-				return this.tt.exitFullScreen; 
+				return this.tt.exitFullscreen; 
 			}
 		}
 		else {
@@ -5702,7 +5648,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.activeYouTubeId = youTubeId;
 		if (AblePlayer.youTubeIframeAPIReady) {
 			// Script already loaded and ready.
-			this.finalizeYoutubeInit().then(function() {
+			thisObj.finalizeYoutubeInit().then(function() {
 				deferred.resolve();
 			});
 		}
@@ -5751,20 +5697,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// fail to load any texttracks (observed in Chrome, not in Firefox) 
 		ccLoadPolicy = 1;
 
-		videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
-		if (videoDimensions) {
-			this.ytWidth = videoDimensions[0];
-			this.ytHeight = videoDimensions[1];
-			this.aspectRatio = thisObj.ytWidth / thisObj.ytHeight;
-		}
-		else {
-			// dimensions are initially unknown
-			// sending null values to YouTube results in a video that uses the default YouTube dimensions
-			// these can then be scraped from the iframe and applied to this.$ableWrapper
-			this.ytWidth = null;
-			this.ytHeight = null;
-		}
-
 		if (this.okToPlay) {
 			autoplay = 1;
 		}
@@ -5782,8 +5714,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
-			width: this.ytWidth,
-			height: this.ytHeight,
 			playerVars: {
 				autoplay: autoplay,
 				enablejsapi: 1,
@@ -5800,7 +5730,15 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			},
 			events: {
 				onReady: function () {
-
+					if (!thisObj.playerWidth || !thisObj.playerHeight) { 
+						thisObj.getYouTubeDimensions();
+					}
+					if (thisObj.playerWidth && thisObj.playerHeight) { 
+						thisObj.youTubePlayer.setSize(thisObj.playerWidth,thisObj.playerHeight);
+						thisObj.$ableWrapper.css({
+							'width': thisObj.playerWidth + 'px'
+						});
+					}
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
@@ -5812,9 +5750,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 					if (thisObj.userClickedPlaylist) {
 						thisObj.userClickedPlaylist = false; // reset
-					}
-					if (typeof thisObj.aspectRatio === 'undefined') {
-						thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
 					}
 					deferred.resolve();
 				},
@@ -5861,101 +5796,28 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				},
 			}
 		});
-
-		this.injectPoster(this.$mediaContainer, 'youtube');
 		if (!this.hasPlaylist) {
 			// remove the media element, since YouTube replaces that with its own element in an iframe
 			// this is handled differently for playlists. See buildplayer.js > cuePlaylistItem()
 			this.$media.remove();
-		}
+		}		
 		return promise;
 	};
 
 	AblePlayer.prototype.getYouTubeDimensions = function (youTubeContainerId) {
 
-		// get dimensions of YouTube video, return array with width & height
-		// Sources, in order of priority:
-		// 1. The width and height attributes on <video>
-		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
+		// The YouTube iframe API does not have a getSize() of equivalent method 
+		// so, need to get dimensions from YouTube's iframe 
 
-		var d, url, $iframe, width, height;
+		var $iframe, width, height; 
 
-		d = [];
-
-		if (typeof this.playerMaxWidth !== 'undefined') {
-			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since YouTube will adjust height to match width
-			if (typeof this.playerMaxHeight !== 'undefined') {
-				d[1] = this.playerMaxHeight;
-			}
-			return d;
-		}
-		else {
-			if (typeof $('#' + youTubeContainerId) !== 'undefined') {
-				$iframe = $('#' + youTubeContainerId);
-				width = $iframe.width();
-				height = $iframe.height();
-				if (width > 0 && height > 0) {
-					d[0] = width;
-					d[1] = height;
-					return d;
-				}
-			}
-		}
-		return false;
-	};
-
-	AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
-
-		// called after player is ready, if youTube dimensions were previously unknown
-		// Now need to get them from the iframe element that YouTube injected
-		// and resize Able Player to match
-		var d, width, height;
-		if (typeof this.aspectRatio !== 'undefined') {
-			// video dimensions have already been collected
-			if (this.restoringAfterFullScreen) {
-				// restore using saved values
-				if (this.youTubePlayer) {
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-				this.restoringAfterFullScreen = false;
-			}
-			else {
-				// recalculate with new wrapper size
-				width = this.$ableWrapper.parent().width();
-				height = Math.round(width / this.aspectRatio);
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				this.youTubePlayer.setSize(width, height);
-				if (this.fullscreen) {
-					this.youTubePlayer.setSize(width, height);
-				}
-				else {
-					// resizing due to a change in window size, not full screen
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-			}
-		}
-		else {
-			d = this.getYouTubeDimensions(youTubeContainerId);
-			if (d) {
-				width = d[0];
-				height = d[1];
-				if (width > 0 && height > 0) {
-					this.aspectRatio = width / height;
-					this.ytWidth = width;
-					this.ytHeight = height;
-					if (width !== this.$ableWrapper.width()) {
-						// now that we've retrieved YouTube's default width,
-						// need to adjust to fit the current player wrapper
-						width = this.$ableWrapper.width();
-						height = Math.round(width / this.aspectRatio);
-						if (this.youTubePlayer) {
-							this.youTubePlayer.setSize(width, height);
-						}
-					}
+		$iframe = this.$ableWrapper.find('iframe'); 
+		if (typeof $iframe !== 'undefined') {
+			if ($iframe.prop('width')) { 
+				width = $iframe.prop('width');			
+				if ($iframe.prop('height')) { 
+					height = $iframe.prop('height');
+					this.resizePlayer(width,height); 
 				}
 			}
 		}
@@ -8010,7 +7872,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		return document.fullscreenEnabled ||
 			document.webkitFullscreenEnabled ||
-			document.mozFullScreenEnabled ||
+			document.mozFullscreenEnabled ||
 			document.msFullscreenEnabled;
 	};
 
@@ -8691,35 +8553,34 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 
 		if (context === 'fullscreen' || context == 'init'){
-
 			if (this.$fullscreenButton) {
 				if (!this.fullscreen) {
-					this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
+					this.$fullscreenButton.attr('aria-label', this.tt.enterFullscreen);
 					if (this.iconType === 'font') {
 						this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-collapse').addClass('icon-fullscreen-expand');
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullscreen);
 					}
 					else if (this.iconType === 'svg') {
 						newSvgData = this.getSvgData('fullscreen-expand');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullscreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenExpandButtonImg);
 					}
 				}
 				else {
-					this.$fullscreenButton.attr('aria-label',this.tt.exitFullScreen);
+					this.$fullscreenButton.attr('aria-label',this.tt.exitFullscreen);
 					if (this.iconType === 'font') {
 						this.$fullscreenButton.find('span').first().removeClass('icon-fullscreen-expand').addClass('icon-fullscreen-collapse');
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullscreen);
 					}
 					else if (this.iconType === 'svg') {
 						newSvgData = this.getSvgData('fullscreen-collapse');
 						this.$fullscreenButton.find('svg').attr('viewBox',newSvgData[0]);
 						this.$fullscreenButton.find('path').attr('d',newSvgData[1]);
-						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullScreen);
+						this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullscreen);
 					}
 					else {
 						this.$fullscreenButton.find('img').attr('src',this.fullscreenCollapseButtonImg);
@@ -9383,8 +9244,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (this.nativeFullscreenSupported()) {
 			return (document.fullscreenElement ||
 							document.webkitFullscreenElement ||
-							document.webkitCurrentFullScreenElement ||
-							document.mozFullScreenElement ||
+							document.webkitCurrentFullscreenElement ||
+							document.mozFullscreenElement ||
 							document.msFullscreenElement) ? true : false;
 		}
 		else {
@@ -9407,17 +9268,14 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (fullscreen) {
 				// Initialize fullscreen
 
-				// But first, capture current settings so they can be restored later
-				this.preFullScreenWidth = this.$ableWrapper.width();
-				this.preFullScreenHeight = this.$ableWrapper.height();
 				if (el.requestFullscreen) {
 					el.requestFullscreen();
 				}
 				else if (el.webkitRequestFullscreen) {
 					el.webkitRequestFullscreen();
 				}
-				else if (el.mozRequestFullScreen) {
-					el.mozRequestFullScreen();
+				else if (el.mozRequestFullscreen) {
+					el.mozRequestFullscreen();
 				}
 				else if (el.msRequestFullscreen) {
 					el.msRequestFullscreen();
@@ -9426,55 +9284,24 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			else {
 				// Exit fullscreen
+				this.restoringAfterFullScreen = true; 
 				if (document.exitFullscreen) {
 					document.exitFullscreen();
 				}
 				else if (document.webkitExitFullscreen) {
 					document.webkitExitFullscreen();
 				}
-				else if (document.webkitCancelFullScreen) {
-					document.webkitCancelFullScreen();
+				else if (document.webkitCancelFullscreen) {
+					document.webkitCancelFullscreen();
 				}
-				else if (document.mozCancelFullScreen) {
-					document.mozCancelFullScreen();
+				else if (document.mozCancelFullscreen) {
+					document.mozCancelFullscreen();
 				}
 				else if (document.msExitFullscreen) {
 					document.msExitFullscreen();
 				}
 				this.fullscreen = false;
 			}
-			// add event handlers for changes in full screen mode
-			// currently most changes are made in response to windowResize event
-			// However, that alone is not resulting in a properly restored player size in Opera Mac
-			// More on the Opera Mac bug: https://github.com/ableplayer/ableplayer/issues/162
-			// this fullscreen event handler added specifically for Opera Mac,
-			// but includes event listeners for all browsers in case its functionality could be expanded
-			// Added functionality in 2.3.45 for handling YouTube return from fullscreen as well
-			$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e) {
-				// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
-				if (!thisObj.fullscreen) {
-					// user has just exited full screen
-					thisObj.restoringAfterFullScreen = true;
-					thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
-				}
-				else if (!thisObj.clickedFullscreenButton) {
-					// user triggered fullscreenchange without clicking (or pressing) fullscreen button
-					// this is only possible if they pressed Escape to exit fullscreen mode
-					thisObj.fullscreen = false;
-					thisObj.restoringAfterFullScreen = true;
-					thisObj.resizePlayer(thisObj.preFullScreenWidth,thisObj.preFullScreenHeight);
-				}
-				// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
-				// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
-				// Not sure why, but consequently we need to be sure thisObj.clickedFullScreenButton
-				// continues to be true through both events
-				// Could use a counter variable to control that (reset to false after the 2nd trigger)
-				// However, since I don't know why it's happening, and whether it's 100% reliable
-				// resetting clickedFullScreenButton after a timeout seems to be better approach
-				setTimeout(function() {
-					thisObj.clickedFullscreenButton = false;
-				},1000);
-			});
 		}
 		else {
 			// Non-native fullscreen support through modal dialog.
@@ -9487,7 +9314,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}).text(this.tt.fullscreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
 				$dialogDiv.append($fsDialogAlert);
 				// now render this as a dialog
-				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullScreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
+				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullscreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
 				$('body').append($dialogDiv);
 			}
 
@@ -9512,7 +9339,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				if (!this.$descDiv.is(':hidden')) {
 					newHeight -= this.$descDiv.height();
 				}
-				this.resizePlayer($(window).width(), newHeight);
 			}
 			else {
 				this.modalFullscreenActive = false;
@@ -9522,7 +9348,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				$el.insertAfter(this.$modalFullscreenPlaceholder);
 				this.$modalFullscreenPlaceholder.remove();
 				this.fullscreenDialog.hide();
-				this.resizePlayer(this.$ableWrapper.width(), this.$ableWrapper.height());
 			}
 
 			// Resume playback if moving stopped it.
@@ -9530,7 +9355,36 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.playMedia();
 			}
 		}
-		this.refreshControls('fullscreen');
+		// add event handlers for changes in fullscreen mode. 
+		// Browsers natively trigger this event with the Escape key,  
+		// in addition to clicking the exit fullscreen button 
+		$(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange MSFullscreenChange', function(e) {
+			// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
+			if (!thisObj.fullscreen) {
+				// user has just exited full screen
+				thisObj.restoringAfterFullScreen = true;
+				thisObj.resizePlayer();
+			}
+			else if (!thisObj.clickedFullscreenButton) {
+				// user triggered fullscreenchange without clicking fullscreen button
+				thisObj.fullscreen = false;
+				thisObj.restoringAfterFullScreen = true;
+				thisObj.resizePlayer();
+			}
+			thisObj.refreshControls('fullscreen');
+
+			// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
+			// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
+			// Not sure why, but consequently we need to be sure thisObj.clickedFullScreenButton
+			// continues to be true through both events
+			// Could use a counter variable to control that (reset to false after the 2nd trigger)
+			// However, since I don't know why it's happening, and whether it's 100% reliable
+			// resetting clickedFullScreenButton after a timeout seems to be better approach
+			setTimeout(function() {
+				thisObj.clickedFullscreenButton = false;
+				thisObj.restoringAfterFullscreen = false; 
+			},1000);
+		});		
 	};
 
 	AblePlayer.prototype.handleFullscreenToggle = function () {
@@ -9568,6 +9422,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 		}
+		// don't resizePlayer yet; that will be called in response to the window resize event 
+		// this.resizePlayer();
 	};
 
 	AblePlayer.prototype.handleTranscriptLockToggle = function (val) {
@@ -9682,57 +9538,133 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
-		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
-			if (typeof this.$captionsContainer !== 'undefined') {
-				this.$ableWrapper.css({
-					'width': width + 'px',
-					'max-width': ''
-				})
-				this.$captionsContainer.css({
-					'height': height + 'px',
-					'width': width
-				});
-				this.$media.css({
-					'height': height + 'px',
-					'width': width
-				})
-			}
-			if (typeof this.$transcriptArea !== 'undefined') {
-				this.retrieveOffscreenWindow('transcript',width,height);
-			}
-			if (typeof this.$signWindow !== 'undefined') {
-				this.retrieveOffscreenWindow('sign',width,height);
-			}
+		var newWidth, newHeight, $iframe; 
+
+		if (this.mediaType === 'audio') { 
+			return; 
 		}
-		else {
-			// player resized
-			if (this.restoringAfterFullScreen) {
-				// User has just exited fullscreen mode. Restore to previous settings
-				width = this.preFullScreenWidth;
-				height = this.preFullScreenHeight;
-				this.restoringAfterFullScreen = false;
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				if (typeof this.$captionsContainer !== 'undefined') {
-					this.$captionsContainer.css({
-						'height': '',
-						'width': ''
+
+		if (typeof width !== 'undefined' && typeof height !== 'undefined') { 
+			// this is being called the first time a player is initialized 
+			// width and height were collected from the HTML, YouTube, or Vimeo media API
+			// so are reflective of the actual size of the media 
+			// use these values to calculate aspectRatio 
+			this.aspectRatio = height / width;  
+			if (this.playerWidth) { 
+				// default width is already defined via a width or data-width attribute. Use that. 				
+				newWidth = this.playerWidth; 
+				if (this.playerHeight) { 
+					newHeight = this.playerHeight; 
+				}
+				else { 
+					newHeight = Math.round(newWidth * this.aspectRatio); 
+					this.playerHeight = newHeight; 
+				}
+			}
+			else { 
+				// playerWidth was not defined via HTML attributes 
+				if (this.player === 'html5') { 
+					newWidth = $(window).width();
+				}
+				else { 
+					newWidth = this.$ableWrapper.width(); 
+				}
+				newHeight = Math.round(newWidth * this.aspectRatio); 
+			}				
+		}			
+		else if (this.fullscreen) { 
+			newWidth = $(window).width();			
+			newHeight = $(window).height() - this.$playerDiv.outerHeight(); 
+
+			// TODO: Continue working to try to isolate the Safari positioning bug 
+			// haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
+			// Old test results:
+			// Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
+			// Updated results (December 2021): 
+			// Safari is the only browser that requires a 20px adjustment 
+			//  observed in Safari 14.1.2 on Mac OS 10.14.6 (Mojave) and Safari 15.0 on MacOS 11.6 (Big Sur)
+			// (also tested in Firefox, Chrome, & Opera on Mac OS; and Firefox, Chrome, & Edge on Windows 11)
+			if (this.isUserAgent('Safari')) {			
+				newHeight -= 25; 
+			}
+			if (!this.$descDiv.is(':hidden')) {
+				newHeight -= this.$descDiv.height();
+			}			
+			this.positionCaptions('overlay');
+		}
+		else { // not fullscreen, and not first time initializing player 			
+			if (this.player === 'html5') { 
+				if (this.playerWidth) { 
+					newWidth = this.playerWidth; 
+				}
+				else {
+					// use full size of window 
+					// player will be downsized to fit container if CSS requires it 
+					newWidth = $(window).width();
+				}
+			}
+			else { 
+				newWidth = this.$ableWrapper.width(); 
+			}
+			newHeight = Math.round(newWidth * this.aspectRatio); 
+		}
+		if (this.debug) {
+			console.log('resizePlayer to ' + newWidth + 'x' + newHeight); 		
+		}
+		// Now size the player with newWidth and newHeight
+		if (this.player === 'youtube' || this.player === 'vimeo') { 
+			$iframe = this.$ableWrapper.find('iframe'); 
+			if (this.player === 'youtube' && this.youTubePlayer) { 
+				// alternatively, YouTube API offers a method for setting the video size 
+				// this adds width and height attributes to the iframe 
+				// but might have other effects, so best to do it this way 
+				this.youTubePlayer.setSize(newWidth,newHeight); 
+			}
+			else { 
+				// Vimeo API does not have a method for changing size of player 
+				// Therefore, need to change iframe attributes directly 
+				$iframe.attr({
+					'width': newWidth,
+					'height': newHeight
+				}); 
+			}
+			if (this.playerWidth && this.playerHeight) { 
+				if (this.fullscreen) { 
+					// remove constraints 
+					$iframe.css({ 
+						'max-width': '',
+						'max-height': ''
+					});	
+				}
+				else {
+					// use CSS on iframe to enforce explicitly defined size constraints
+					$iframe.css({ 
+						'max-width': this.playerWidth + 'px',
+						'max-height': this.playerHeight + 'px'
 					});
 				}
-				this.$media.css({
-					'width': '100%',
-					'height': 'auto'
-				});
 			}
 		}
-
-		// resize YouTube
-		if (this.player === 'youtube' && this.youTubePlayer) {
-			this.youTubePlayer.setSize(width, height);
+		else if (this.player === 'html5') { 
+			if (this.fullscreen) {
+				this.$media.attr({
+					'width': newWidth,
+					'height': newHeight
+				});
+				this.$ableWrapper.css({
+					'width': newWidth,
+					'height': newHeight
+				});
+			}
+			else { 
+				// No constraints. Let CSS handle the positioning. 
+				this.$media.removeAttr('width height');
+				this.$ableWrapper.css({
+					'width': newWidth,
+					'height': 'auto'
+				});
+			}				
 		}
-
 		// Resize captions
 		if (typeof this.$captionsDiv !== 'undefined') {
 
@@ -9742,7 +9674,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			captionSizeOkMin = 400;
 			captionSizeOkMax = 1000;
 			captionSize = parseInt(this.prefCaptionsSize,10);
-
+		
 			// TODO: Need a better formula so that it scales proportionally to viewport
 			if (width > captionSizeOkMax) {
 				newCaptionSize = captionSize * 1.5;
@@ -9757,7 +9689,22 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.$captionsDiv.css('font-size',newCaptionSize + '%');
 			this.$captionsWrapper.css('line-height',newLineHeight + '%');
 		}
-		this.refreshControls('captions');
+		/*  fuck - this is redundant; also in setfullscreen()
+		// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
+		// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
+		// Not sure why, but consequently we need to be sure this.clickedFullScreenButton
+		// continues to be true through both events
+		// Could use a counter variable to control that (reset to false after the 2nd trigger)
+		// However, since I don't know why it's happening, and whether it's 100% reliable
+		// resetting clickedFullScreenButton after a timeout seems to be better approach
+		setTimeout(function() {
+			this.clickedFullscreenButton = false;
+			this.restoringAfterFullScreen = false; 
+		},1000);
+		this.refreshControls();
+*/
+
+		this.refreshControls();			
 	};
 
 	AblePlayer.prototype.retrieveOffscreenWindow = function( which, width, height ) {
@@ -11806,57 +11753,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	// End Media events
 
-	AblePlayer.prototype.onWindowResize = function () {
-
-		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
-
-			var newWidth, newHeight;
-
-			newWidth = $(window).width();
-
-			// haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
-			// Test results:
-			// Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
-			if (this.isUserAgent('Firefox') || this.isUserAgent('Trident') || this.isUserAgent('Edge')) {
-				newHeight = window.innerHeight - this.$playerDiv.outerHeight() - 20;
-			}
-			else if (window.outerHeight >= window.innerHeight) {
-				// Browsers that do NOT require adjustment: Chrome, Safari, Opera, MSIE 10
-				newHeight = window.innerHeight - this.$playerDiv.outerHeight();
-			}
-			else {
-				// Observed in Safari 9.0.1 on Mac OS X: outerHeight is actually less than innerHeight
-				// Maybe a bug, or maybe window.outerHeight is already adjusted for controller height(?)
-				// No longer observed in Safari 9.0.2
-				newHeight = window.outerHeight;
-			}
-			if (!this.$descDiv.is(':hidden')) {
-				newHeight -= this.$descDiv.height();
-			}
-			this.positionCaptions('overlay');
-		}
-		else { // not fullscreen
-			if (this.restoringAfterFullScreen) {
-				newWidth = this.preFullScreenWidth;
-				newHeight = this.preFullScreenHeight;
-			}
-			else {
-				// not restoring after full screen
-				newWidth = this.$ableWrapper.width();
-				if (typeof this.aspectRatio !== 'undefined') {
-					newHeight = Math.round(newWidth / this.aspectRatio);
-				}
-				else {
-					// not likely, since this.aspectRatio is defined during intialization
-					// however, this is a fallback scenario just in case
-					newHeight = this.$ableWrapper.height();
-				}
-				this.positionCaptions(); // reset with this.prefCaptionsPosition
-			}
-		}
-		this.resizePlayer(newWidth, newHeight);
-	};
-
 	AblePlayer.prototype.addSeekbarListeners = function () {
 
 		var thisObj = this;
@@ -12495,8 +12391,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 
 		// Appropriately resize media player for full screen.
-		$(window).resize(function () {
-			thisObj.onWindowResize();
+		$(window).on('resize',function () {
+			thisObj.resizePlayer();
 		});
 
 		// Refresh player if it changes from hidden to visible
@@ -16010,29 +15906,38 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			autoplay = 'false';
 		}
 
-		videoDimensions = this.getVimeoDimensions(this.activeVimeoId, containerId);
-		if (videoDimensions) {
-			this.vimeoWidth = videoDimensions[0];
-			this.vimeoHeight = videoDimensions[1];
-			this.aspectRatio = thisObj.ytWidth / thisObj.ytHeight;
+		if (this.playerWidth) {			
+			options = {
+				id: vimeoId,
+				width: this.playerWidth,
+				controls: false
+			}
 		}
-		else {
-			// dimensions are initially unknown
-			// sending null values to Vimeo results in a video that uses the default Vimeo dimensions
-			// these can then be scraped from the iframe and applied to this.$ableWrapper
-			this.vimeoWidth = null;
-			this.vimeoHeight = null;
+		else { 
+			// initialize without width & set width later 
+			options = {
+				id: vimeoId,
+				controls: false
+			}
 		}
-
-		options = {
-			id: vimeoId,
-			width: this.vimeoWidth,
-			controls: false
-		};
 
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
 
 		this.vimeoPlayer.ready().then(function() {
+			// get video's intrinsic size and initiate player dimensions
+			thisObj.vimeoPlayer.getVideoWidth().then(function(width) {						
+				if (width) { 
+					// also get height 
+					thisObj.vimeoPlayer.getVideoHeight().then(function(height) {	
+						if (height) { 								
+							thisObj.resizePlayer(width,height); 								
+						}
+					});														
+				}
+			}).catch(function(error) {
+				// an error occurred getting height or width 
+				// TODO: Test this to see how gracefully it organically recovers 
+			});
 
 			if (!thisObj.hasPlaylist) {
 				// remove the media element, since Vimeo replaces that with its own element in an iframe
@@ -16116,37 +16021,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		});
 		return promise;
 	}
-
-	AblePlayer.prototype.getVimeoDimensions = function (vimeoContainerId) {
-
-		// get dimensions of Vimeo video, return array with width & height
-
-		var d, url, $iframe, width, height;
-
-		d = [];
-
-		if (typeof this.playerMaxWidth !== 'undefined') {
-			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since Vimeo will adjust height to match width
-			if (typeof this.playerMaxHeight !== 'undefined') {
-				d[1] = this.playerMaxHeight;
-			}
-			return d;
-		}
-		else {
-			if (typeof $('#' + vimeoContainerId) !== 'undefined') {
-				$iframe = $('#' + vimeoContainerId);
-				width = $iframe.width();
-				height = $iframe.height();
-				if (width > 0 && height > 0) {
-					d[0] = width;
-					d[1] = height;
-					return d;
-				}
-			}
-		}
-		return false;
-	};
 
 	AblePlayer.prototype.getVimeoCaptionTracks = function () {
 

@@ -101,57 +101,6 @@
 
 	// End Media events
 
-	AblePlayer.prototype.onWindowResize = function () {
-
-		if (this.fullscreen) { // replace isFullscreen() with a Boolean. see function for explanation
-
-			var newWidth, newHeight;
-
-			newWidth = $(window).width();
-
-			// haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
-			// Test results:
-			// Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
-			if (this.isUserAgent('Firefox') || this.isUserAgent('Trident') || this.isUserAgent('Edge')) {
-				newHeight = window.innerHeight - this.$playerDiv.outerHeight() - 20;
-			}
-			else if (window.outerHeight >= window.innerHeight) {
-				// Browsers that do NOT require adjustment: Chrome, Safari, Opera, MSIE 10
-				newHeight = window.innerHeight - this.$playerDiv.outerHeight();
-			}
-			else {
-				// Observed in Safari 9.0.1 on Mac OS X: outerHeight is actually less than innerHeight
-				// Maybe a bug, or maybe window.outerHeight is already adjusted for controller height(?)
-				// No longer observed in Safari 9.0.2
-				newHeight = window.outerHeight;
-			}
-			if (!this.$descDiv.is(':hidden')) {
-				newHeight -= this.$descDiv.height();
-			}
-			this.positionCaptions('overlay');
-		}
-		else { // not fullscreen
-			if (this.restoringAfterFullScreen) {
-				newWidth = this.preFullScreenWidth;
-				newHeight = this.preFullScreenHeight;
-			}
-			else {
-				// not restoring after full screen
-				newWidth = this.$ableWrapper.width();
-				if (typeof this.aspectRatio !== 'undefined') {
-					newHeight = Math.round(newWidth / this.aspectRatio);
-				}
-				else {
-					// not likely, since this.aspectRatio is defined during intialization
-					// however, this is a fallback scenario just in case
-					newHeight = this.$ableWrapper.height();
-				}
-				this.positionCaptions(); // reset with this.prefCaptionsPosition
-			}
-		}
-		this.resizePlayer(newWidth, newHeight);
-	};
-
 	AblePlayer.prototype.addSeekbarListeners = function () {
 
 		var thisObj = this;
@@ -790,8 +739,8 @@
 		thisObj = this;
 
 		// Appropriately resize media player for full screen.
-		$(window).resize(function () {
-			thisObj.onWindowResize();
+		$(window).on('resize',function () {
+			thisObj.resizePlayer();
 		});
 
 		// Refresh player if it changes from hidden to visible

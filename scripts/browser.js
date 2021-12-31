@@ -155,7 +155,7 @@
 
 		return document.fullscreenEnabled ||
 			document.webkitFullscreenEnabled ||
-			document.mozFullScreenEnabled ||
+			document.mozFullscreenEnabled ||
 			document.msFullscreenEnabled;
 	};
 

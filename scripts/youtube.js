@@ -19,7 +19,7 @@
 		this.activeYouTubeId = youTubeId;
 		if (AblePlayer.youTubeIframeAPIReady) {
 			// Script already loaded and ready.
-			this.finalizeYoutubeInit().then(function() {
+			thisObj.finalizeYoutubeInit().then(function() {
 				deferred.resolve();
 			});
 		}
@@ -68,20 +68,6 @@
 		// fail to load any texttracks (observed in Chrome, not in Firefox) 
 		ccLoadPolicy = 1;
 
-		videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
-		if (videoDimensions) {
-			this.ytWidth = videoDimensions[0];
-			this.ytHeight = videoDimensions[1];
-			this.aspectRatio = thisObj.ytWidth / thisObj.ytHeight;
-		}
-		else {
-			// dimensions are initially unknown
-			// sending null values to YouTube results in a video that uses the default YouTube dimensions
-			// these can then be scraped from the iframe and applied to this.$ableWrapper
-			this.ytWidth = null;
-			this.ytHeight = null;
-		}
-
 		if (this.okToPlay) {
 			autoplay = 1;
 		}
@@ -99,8 +85,6 @@
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
-			width: this.ytWidth,
-			height: this.ytHeight,
 			playerVars: {
 				autoplay: autoplay,
 				enablejsapi: 1,
@@ -117,7 +101,15 @@
 			},
 			events: {
 				onReady: function () {
-
+					if (!thisObj.playerWidth || !thisObj.playerHeight) { 
+						thisObj.getYouTubeDimensions();
+					}
+					if (thisObj.playerWidth && thisObj.playerHeight) { 
+						thisObj.youTubePlayer.setSize(thisObj.playerWidth,thisObj.playerHeight);
+						thisObj.$ableWrapper.css({
+							'width': thisObj.playerWidth + 'px'
+						});
+					}
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
@@ -129,9 +121,6 @@
 					}
 					if (thisObj.userClickedPlaylist) {
 						thisObj.userClickedPlaylist = false; // reset
-					}
-					if (typeof thisObj.aspectRatio === 'undefined') {
-						thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
 					}
 					deferred.resolve();
 				},
@@ -178,101 +167,28 @@
 				},
 			}
 		});
-
-		this.injectPoster(this.$mediaContainer, 'youtube');
 		if (!this.hasPlaylist) {
 			// remove the media element, since YouTube replaces that with its own element in an iframe
 			// this is handled differently for playlists. See buildplayer.js > cuePlaylistItem()
 			this.$media.remove();
-		}
+		}		
 		return promise;
 	};
 
 	AblePlayer.prototype.getYouTubeDimensions = function (youTubeContainerId) {
 
-		// get dimensions of YouTube video, return array with width & height
-		// Sources, in order of priority:
-		// 1. The width and height attributes on <video>
-		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
+		// The YouTube iframe API does not have a getSize() of equivalent method 
+		// so, need to get dimensions from YouTube's iframe 
 
-		var d, url, $iframe, width, height;
+		var $iframe, width, height; 
 
-		d = [];
-
-		if (typeof this.playerMaxWidth !== 'undefined') {
-			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since YouTube will adjust height to match width
-			if (typeof this.playerMaxHeight !== 'undefined') {
-				d[1] = this.playerMaxHeight;
-			}
-			return d;
-		}
-		else {
-			if (typeof $('#' + youTubeContainerId) !== 'undefined') {
-				$iframe = $('#' + youTubeContainerId);
-				width = $iframe.width();
-				height = $iframe.height();
-				if (width > 0 && height > 0) {
-					d[0] = width;
-					d[1] = height;
-					return d;
-				}
-			}
-		}
-		return false;
-	};
-
-	AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
-
-		// called after player is ready, if youTube dimensions were previously unknown
-		// Now need to get them from the iframe element that YouTube injected
-		// and resize Able Player to match
-		var d, width, height;
-		if (typeof this.aspectRatio !== 'undefined') {
-			// video dimensions have already been collected
-			if (this.restoringAfterFullScreen) {
-				// restore using saved values
-				if (this.youTubePlayer) {
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-				this.restoringAfterFullScreen = false;
-			}
-			else {
-				// recalculate with new wrapper size
-				width = this.$ableWrapper.parent().width();
-				height = Math.round(width / this.aspectRatio);
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				this.youTubePlayer.setSize(width, height);
-				if (this.fullscreen) {
-					this.youTubePlayer.setSize(width, height);
-				}
-				else {
-					// resizing due to a change in window size, not full screen
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-			}
-		}
-		else {
-			d = this.getYouTubeDimensions(youTubeContainerId);
-			if (d) {
-				width = d[0];
-				height = d[1];
-				if (width > 0 && height > 0) {
-					this.aspectRatio = width / height;
-					this.ytWidth = width;
-					this.ytHeight = height;
-					if (width !== this.$ableWrapper.width()) {
-						// now that we've retrieved YouTube's default width,
-						// need to adjust to fit the current player wrapper
-						width = this.$ableWrapper.width();
-						height = Math.round(width / this.aspectRatio);
-						if (this.youTubePlayer) {
-							this.youTubePlayer.setSize(width, height);
-						}
-					}
+		$iframe = this.$ableWrapper.find('iframe'); 
+		if (typeof $iframe !== 'undefined') {
+			if ($iframe.prop('width')) { 
+				width = $iframe.prop('width');			
+				if ($iframe.prop('height')) { 
+					height = $iframe.prop('height');
+					this.resizePlayer(width,height); 
 				}
 			}
 		}

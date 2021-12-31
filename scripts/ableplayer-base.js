@@ -339,6 +339,24 @@ var AblePlayerInstances = [];
 			this.skin = 'legacy';
 		}
 
+		// Size 
+		// width of Able Player is determined using the following order of precedence: 
+		// 1. data-width attribute 
+		// 2. width attribute (for video or audio, although it is not valid HTML for audio)
+		// 3. Intrinsic size from video (video only, determined later)
+		if ($(media).data('width') !== undefined) {
+			this.playerWidth = parseInt($(media).data('width'));
+		}
+		else if ($(media)[0].getAttribute('width')) {
+			// NOTE: jQuery attr() returns null for all invalid HTML attributes 
+			// (e.g., width on <audio>)
+			// but it can be acessed via JavaScript getAttribute() 
+			this.playerWidth = parseInt($(media)[0].getAttribute('width'));
+		}
+		else { 
+			this.playerWidth = null; 
+		}
+
 		// Icon type
 		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
 		// Fallback for browsers that don't support SVG is scalable icomoon fonts
@@ -355,11 +373,14 @@ var AblePlayerInstances = [];
 		}
 
 		if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
-			this.allowFullScreen = false;
+			this.allowFullscreen = false;
 		}
 		else {
-			this.allowFullScreen = true;
+			this.allowFullscreen = true;
 		}
+		// Define other variables that are used in fullscreen program flow 
+		this.clickedFullscreenButton = false; 
+		this.restoringAfterFullscreen = false;			
 
 		// Seek interval
 		// Number of seconds to seek forward or back with Rewind & Forward buttons
