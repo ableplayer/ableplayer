@@ -1483,14 +1483,13 @@
 			if (!thisObj.fullscreen) {
 				// user has just exited full screen
 				thisObj.restoringAfterFullScreen = true;
-				thisObj.resizePlayer();
 			}
 			else if (!thisObj.clickedFullscreenButton) {
 				// user triggered fullscreenchange without clicking fullscreen button
 				thisObj.fullscreen = false;
 				thisObj.restoringAfterFullScreen = true;
-				thisObj.resizePlayer();
 			}
+			thisObj.resizePlayer();
 			thisObj.refreshControls('fullscreen');
 
 			// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
@@ -1693,26 +1692,14 @@
 			}				
 		}			
 		else if (this.fullscreen) { 
+			this.$ableWrapper.addClass('fullscreen');  
 			newWidth = $(window).width();			
-			newHeight = $(window).height() - this.$playerDiv.outerHeight(); 
-
-			// TODO: Continue working to try to isolate the Safari positioning bug 
-			// haven't isolated why, but some browsers return an innerHeight that's 20px too tall in fullscreen mode
-			// Old test results:
-			// Browsers that require a 20px adjustment: Firefox, IE11 (Trident), Edge
-			// Updated results (December 2021): 
-			// Safari is the only browser that requires a 20px adjustment 
-			//  observed in Safari 14.1.2 on Mac OS 10.14.6 (Mojave) and Safari 15.0 on MacOS 11.6 (Big Sur)
-			// (also tested in Firefox, Chrome, & Opera on Mac OS; and Firefox, Chrome, & Edge on Windows 11)
-			if (this.isUserAgent('Safari')) {			
-				newHeight -= 25; 
-			}
-			if (!this.$descDiv.is(':hidden')) {
-				newHeight -= this.$descDiv.height();
-			}			
+			// the 5 pixel buffer is arbitrary, but results in a better fit for all browsers
+			newHeight = $(window).height() - this.$playerDiv.outerHeight() - 5; 
 			this.positionCaptions('overlay');
 		}
 		else { // not fullscreen, and not first time initializing player 			
+			this.$ableWrapper.removeClass('fullscreen');
 			if (this.player === 'html5') { 
 				if (this.playerWidth) { 
 					newWidth = this.playerWidth; 
@@ -1809,21 +1796,6 @@
 			this.$captionsDiv.css('font-size',newCaptionSize + '%');
 			this.$captionsWrapper.css('line-height',newLineHeight + '%');
 		}
-		/*  fuck - this is redundant; also in setfullscreen()
-		// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
-		// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
-		// Not sure why, but consequently we need to be sure this.clickedFullScreenButton
-		// continues to be true through both events
-		// Could use a counter variable to control that (reset to false after the 2nd trigger)
-		// However, since I don't know why it's happening, and whether it's 100% reliable
-		// resetting clickedFullScreenButton after a timeout seems to be better approach
-		setTimeout(function() {
-			this.clickedFullscreenButton = false;
-			this.restoringAfterFullScreen = false; 
-		},1000);
-		this.refreshControls();
-*/
-
 		this.refreshControls();			
 	};
 

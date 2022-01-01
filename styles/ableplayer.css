@@ -835,10 +835,16 @@ div.able-chapters-div button::-moz-focus-inner {
   Fullscreen settings
   In v2.2.4b commented out :-webkit-full-screen style
   This was causing the toolbar in fullscreen mode to be positioned slightly offscreen in webkit browsers
-  Safari had an additional problem in window height was being calculated (see event.js > onWindowResize())
+  Safari had an additional problem in window height was being calculated 
   Commenting out this style appears have no adverse effect in any browser
   All other fullscreen styles were already commented out, and left here solely for reference
 */
+div.able-wrapper.fullscreen { 
+	margin: 0 !important; 
+	position: fixed !important; 
+	top: 0 !important;
+	background: none !important;
+}
 /*
 :-webkit-full-screen {
     position: fixed;

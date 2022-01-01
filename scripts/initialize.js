@@ -13,7 +13,6 @@
 		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
 		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
-		this.getUserAgent();
 		this.setIconColor();
 		this.setButtonImages();
 	};
@@ -829,7 +828,10 @@
 		// return 'html5', 'youtube', 'vimeo', or null
 
 		var i, sourceType, $newItem;
-		if (this.youTubeId) {
+		if (this.testFallback) { 
+			return null; 
+		}
+		else if (this.youTubeId) {
 			if (this.mediaType !== 'video') {
 				// attempting to play a YouTube video using an element other than <video>
 				return null;
@@ -847,15 +849,6 @@
 				return 'vimeo';
 			}
 
-		}
-		else if (this.testFallback ||
-						 ((this.isUserAgent('msie 7') || this.isUserAgent('msie 8') || this.isUserAgent('msie 9')) && this.mediaType === 'video') ||
-						 (this.isIOS() && (this.isIOS(4) || this.isIOS(5) || this.isIOS(6)))
-						) {
-			// the user wants to test the fallback player, or
-			// the user is using an older version of IE or IOS,
-			// both of which had buggy implementation of HTML5 video
-			return null;
 		}
 		else if (this.media.canPlayType) {
 			return 'html5';
