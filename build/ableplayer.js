@@ -8358,8 +8358,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						seekbarWidth = $(window).width() - widthUsed;
 					}
 					else {
-						seekbarWidth = this.$ableWrapper.width() - widthUsed;
-					}
+						// seekbar is wide enough to fill the remaining space
+						// include a 5px buffer to account for minor browser differences  
+						seekbarWidth = this.$ableWrapper.width() - widthUsed - 5;
+					}					
 					// Sometimes some minor fluctuations based on browser weirdness, so set a threshold.
 					if (Math.abs(seekbarWidth - this.seekBar.getWidth()) > 5) {
 						this.seekBar.setWidth(seekbarWidth);
