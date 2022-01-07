@@ -9493,6 +9493,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				newWidth = this.$ableWrapper.width(); 
 			}
 			newHeight = Math.round(newWidth * this.aspectRatio); 
+			this.positionCaptions(this.prefCaptionsPosition); 
 		}
 		if (this.debug) {
 			 		
@@ -9554,26 +9555,20 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// Resize captions
 		if (typeof this.$captionsDiv !== 'undefined') {
 
-			// Font-size is too small in full screen view & too large in small-width view
-			// The following vars define a somewhat arbitary zone outside of which
-			// caption size requires adjustment
-			captionSizeOkMin = 400;
-			captionSizeOkMax = 1000;
+			// Font-size is too small in full screen view 
+			// use viewport units (vw) instead
+			// % units work fine if not fullscreen  
+			// prefCaptionSize is expressed as a percentage 
 			captionSize = parseInt(this.prefCaptionsSize,10);
-		
-			// TODO: Need a better formula so that it scales proportionally to viewport
-			if (width > captionSizeOkMax) {
-				newCaptionSize = captionSize * 1.5;
+			if (this.fullscreen) { 
+				captionSize = (captionSize / 100) + 'vw'; 
 			}
-			else if (width < captionSizeOkMin) {
-				newCaptionSize = captionSize / 1.5;
+			else { 
+				captionSize = captionSize + '%'; 
 			}
-			else {
-				newCaptionSize = captionSize;
-			}
-			newLineHeight = newCaptionSize + 25;
-			this.$captionsDiv.css('font-size',newCaptionSize + '%');
-			this.$captionsWrapper.css('line-height',newLineHeight + '%');
+			this.$captionsDiv.css({
+				'font-size': captionSize
+			});
 		}
 		this.refreshControls();			
 	};
@@ -9984,8 +9979,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 		}
-		else {
-			this.$captionsDiv.html('');
+		else {			
+			this.$captionsDiv.html('').css('display','none');
 			this.currentCaption = -1;
 		}
 	};
@@ -10180,8 +10175,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					'opacity': opacity
 				});
 				if ($element === this.$captionsDiv) {
-					if (typeof this.$captionsWrapper !== 'undefined') {
-						this.$captionsWrapper.css({
+// fuck - shouldn't this be changing captionsDiv??? 					
+					if (typeof this.$captionsDiv !== 'undefined') {
+						this.$captionsDiv.css({
 							'font-size': this.prefCaptionsSize
 						});
 					}

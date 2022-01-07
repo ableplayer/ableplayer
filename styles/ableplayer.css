@@ -437,23 +437,23 @@ div.able-captions-wrapper {
   margin: 0;
   padding: 0;
   text-align: center;
-  line-height: 1.35em;
   display: block;
   z-index: 6000;
 }
 div.able-captions {
   display: none;
   padding: 0.15em 0.25em;
+	line-height: 1.35em;
   /* settings that are overridden by user prefs */
   background-color: black;
-  font-size: 1.1em;
+  font-size: 1em;
   color: white;
   opacity: 0.75;
 }
 div.able-vidcap-container div.able-captions-overlay {
   position: absolute;
   margin: 0;
-  bottom: 0;
+  bottom: 0.5em;
 }
 div.able-vidcap-container div.able-captions-below {
   position: relative;

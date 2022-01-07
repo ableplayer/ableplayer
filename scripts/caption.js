@@ -192,8 +192,8 @@
 				}
 			}
 		}
-		else {
-			this.$captionsDiv.html('');
+		else {			
+			this.$captionsDiv.html('').css('display','none');
 			this.currentCaption = -1;
 		}
 	};
@@ -388,8 +388,9 @@
 					'opacity': opacity
 				});
 				if ($element === this.$captionsDiv) {
-					if (typeof this.$captionsWrapper !== 'undefined') {
-						this.$captionsWrapper.css({
+// fuck - shouldn't this be changing captionsDiv??? 					
+					if (typeof this.$captionsDiv !== 'undefined') {
+						this.$captionsDiv.css({
 							'font-size': this.prefCaptionsSize
 						});
 					}
