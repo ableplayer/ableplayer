@@ -388,7 +388,6 @@
 					'opacity': opacity
 				});
 				if ($element === this.$captionsDiv) {
-// fuck - shouldn't this be changing captionsDiv??? 					
 					if (typeof this.$captionsDiv !== 'undefined') {
 						this.$captionsDiv.css({
 							'font-size': this.prefCaptionsSize

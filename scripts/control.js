@@ -1770,7 +1770,7 @@
 				// No constraints. Let CSS handle the positioning. 
 				this.$media.removeAttr('width height');
 				this.$ableWrapper.css({
-					'width': newWidth,
+					'width': newWidth + 'px',
 					'height': 'auto'
 				});
 			}				

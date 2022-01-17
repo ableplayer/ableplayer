@@ -9547,7 +9547,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// No constraints. Let CSS handle the positioning. 
 				this.$media.removeAttr('width height');
 				this.$ableWrapper.css({
-					'width': newWidth,
+					'width': newWidth + 'px',
 					'height': 'auto'
 				});
 			}				
@@ -10175,7 +10175,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					'opacity': opacity
 				});
 				if ($element === this.$captionsDiv) {
-// fuck - shouldn't this be changing captionsDiv??? 					
 					if (typeof this.$captionsDiv !== 'undefined') {
 						this.$captionsDiv.css({
 							'font-size': this.prefCaptionsSize
