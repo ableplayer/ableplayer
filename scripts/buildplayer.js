@@ -871,7 +871,7 @@
 			}
 		}
 		if (this.mediaType === 'video') { 
-			if ((this.hasOpenDesc || this.hasClosedDesc) && (this.useDescriptionsButton)) {
+			if (this.hasOpenDesc || this.hasClosedDesc) {
 				numA11yButtons++;
 				if (this.skin === 'legacy') {
 					controlLayout[2].push('descriptions');
