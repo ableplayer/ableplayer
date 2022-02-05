@@ -1616,7 +1616,7 @@
 		// Determine appropriate player to play this media
 		$newItem = this.$playlist.eq(sourceIndex);
 		if (this.hasAttr($newItem,'data-youtube-id')) {
-			this.youTubeId = $newItem.attr('data-youtube-id');
+			this.youTubeId = this.getYouTubeId($newItem.attr('data-youtube-id'));
 			newPlayer = 'youtube';
 		}
 		else {

@@ -343,11 +343,11 @@ var AblePlayerInstances = [];
 
 		// YouTube
 		if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
-			this.youTubeId = $(media).data('youtube-id');
+			this.youTubeId = this.getYouTubeId($(media).data('youtube-id'));
 		}
 
 		if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {
-			this.youTubeDescId = $(media).data('youtube-desc-id');
+			this.youTubeDescId = this.getYouTubeId($(media).data('youtube-desc-id'));
 		}
 
 		if ($(media).data('youtube-nocookie') !== undefined && $(media).data('youtube-nocookie')) {

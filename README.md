@@ -603,11 +603,16 @@ YouTube Support
 ---------------
 
 To play a YouTube video in *Able Player*, simply include a **data-youtube-id** attribute
-on the `<video>` element. The value of this attribute must be the video's 11-character YouTube ID.
+on the `<video>` element. The value of this attribute can be the video's 11-character YouTube ID, 
+or a YouTube URL in any of the following formats (where xxx is the 11-character ID): 
+-  	https://youtu.be/xxx
+-  	https://www.youtube.com/watch?v=xxx
+-  	https://www.youtube.com/embed/xxx
 
-If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
-of the described version. If users turn on the Description button on their player controller,
-the described version of the video will be loaded instead of the non-described version.
+If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute on the `<video>` element. The value of this attribute can be the 11-character YouTube ID
+of the described version (or a YouTube URL, in any of the above formats). 
+
+If users turn on the Description button on their player controller, the described version of the video will be loaded instead of the non-described version.
 
 ### Important Changes to YouTube Support
 

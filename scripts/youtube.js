@@ -323,4 +323,27 @@
 			 return false;
 	};
 
+	AblePlayer.prototype.getYouTubeId = function (url) {
+
+		// return a YouTube ID, extracted from a full YouTube URL
+		// Supported URL patterns (with http or https): 
+		// https://youtu.be/xxx
+		// https://www.youtube.com/watch?v=xxx
+		// https://www.youtube.com/embed/xxx
+
+		// in all supported patterns, the id is the last 11 characters 
+		var idStartPos, id; 
+
+		if (url.indexOf('youtu') !== -1) { 
+			// this is a full Youtube URL 
+			url = url.trim(); 
+			idStartPos = url.length - 11; 
+			id = url.substr(idStartPos); 
+			return id; 
+		}
+		else { 
+			return url; 
+		}
+};
+
 })(jQuery);

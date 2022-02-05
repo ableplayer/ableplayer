@@ -343,11 +343,11 @@ var AblePlayerInstances = [];
 
 		// YouTube
 		if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
-			this.youTubeId = $(media).data('youtube-id');
+			this.youTubeId = this.getYouTubeId($(media).data('youtube-id'));
 		}
 
 		if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {
-			this.youTubeDescId = $(media).data('youtube-desc-id');
+			this.youTubeDescId = this.getYouTubeId($(media).data('youtube-desc-id'));
 		}
 
 		if ($(media).data('youtube-nocookie') !== undefined && $(media).data('youtube-nocookie')) {
@@ -4989,7 +4989,7 @@ var AblePlayerInstances = [];
 		// Determine appropriate player to play this media
 		$newItem = this.$playlist.eq(sourceIndex);
 		if (this.hasAttr($newItem,'data-youtube-id')) {
-			this.youTubeId = $newItem.attr('data-youtube-id');
+			this.youTubeId = this.getYouTubeId($newItem.attr('data-youtube-id'));
 			newPlayer = 'youtube';
 		}
 		else {
@@ -5988,6 +5988,29 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			 }
 			 return false;
 	};
+
+	AblePlayer.prototype.getYouTubeId = function (url) {
+
+		// return a YouTube ID, extracted from a full YouTube URL
+		// Supported URL patterns (with http or https): 
+		// https://youtu.be/xxx
+		// https://www.youtube.com/watch?v=xxx
+		// https://www.youtube.com/embed/xxx
+
+		// in all supported patterns, the id is the last 11 characters 
+		var idStartPos, id; 
+
+		if (url.indexOf('youtu') !== -1) { 
+			// this is a full Youtube URL 
+			url = url.trim(); 
+			idStartPos = url.length - 11; 
+			id = url.substr(idStartPos); 
+			return id; 
+		}
+		else { 
+			return url; 
+		}
+};
 
 })(jQuery);
 
