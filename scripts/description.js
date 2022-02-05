@@ -9,6 +9,7 @@
 		// In the latter two scendarios, this.refreshingDesc == true via control.js > handleDescriptionToggle()
 
 		// The following variables are applicable to delivery of description:
+		// defaultStateDescriptions == 'on' or 'off', defined by website owner (overridden by prefDesc) 
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefDescVisible == 1 to visibly show text-based description area; else 0
@@ -66,11 +67,20 @@
 
 		// Set the default state of descriptions
 		if (this.descMethod) { 
-			if (this.prefDesc) { 
+			if (this.prefDesc === 1) { 
 				this.descOn = true; 
 			}
-			else { 
+			else if (this.prefDesc === 0) { 
 				this.descOn = false; 
+			}
+			else { 				
+				// user has no prefs. Use default state. 
+				if (this.defaultStateDescriptions === 'on')	{ 			
+					this.descOn = true; 
+				}
+				else { 
+					this.descOn = false; 
+				}
 			}
 		}
 		else { 			

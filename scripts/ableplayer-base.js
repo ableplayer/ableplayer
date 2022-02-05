@@ -166,14 +166,7 @@ var AblePlayerInstances = [];
 		else {
 			this.useChaptersButton = true;
 		}
-
-		if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
-			this.useDescriptionsButton = false;
-		}
-		else {
-			this.useDescriptionsButton = true;
-		}
-
+		
 		// Control whether text descriptions are read aloud 
 		// set to "false" if the sole purpose of the WebVTT descriptions file
 		// is to integrate text description into the transcript
@@ -202,6 +195,22 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.descReader = 'browser';
+		}
+
+		// Default state of captions and descriptions 
+		// This setting is overridden by user preferences, if they exist 
+		// values for data-state-captions and data-state-descriptions are 'on' or 'off' 
+		if ($(media).data('state-captions') == 'off') {
+			this.defaultStateCaptions = 'off';
+		}
+		else {
+			this.defaultStateCaptions = 'on'; // on by default
+		}
+		if ($(media).data('state-descriptions') == 'on') {
+			this.defaultStateDescriptions = 'on';
+		}
+		else {
+			this.defaultStateDescriptions = 'off'; // off by default
 		}
 
 		// Headings

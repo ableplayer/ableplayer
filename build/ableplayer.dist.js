@@ -166,14 +166,7 @@ var AblePlayerInstances = [];
 		else {
 			this.useChaptersButton = true;
 		}
-
-		if ($(media).data('use-descriptions-button') !== undefined && $(media).data('use-descriptions-button') === false) {
-			this.useDescriptionsButton = false;
-		}
-		else {
-			this.useDescriptionsButton = true;
-		}
-
+		
 		// Control whether text descriptions are read aloud 
 		// set to "false" if the sole purpose of the WebVTT descriptions file
 		// is to integrate text description into the transcript
@@ -202,6 +195,22 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.descReader = 'browser';
+		}
+
+		// Default state of captions and descriptions 
+		// This setting is overridden by user preferences, if they exist 
+		// values for data-state-captions and data-state-descriptions are 'on' or 'off' 
+		if ($(media).data('state-captions') == 'off') {
+			this.defaultStateCaptions = 'off';
+		}
+		else {
+			this.defaultStateCaptions = 'on'; // on by default
+		}
+		if ($(media).data('state-descriptions') == 'on') {
+			this.defaultStateDescriptions = 'on';
+		}
+		else {
+			this.defaultStateDescriptions = 'off'; // off by default
 		}
 
 		// Headings
@@ -5497,8 +5506,17 @@ var AblePlayerInstances = [];
 			if (this.prefCaptions === 1) { 
 				this.captionsOn = true; 
 			}
-			else { 
+			else if (this.prefCaptions === 0) { 
 				this.captionsOn = false; 
+			}
+			else { 
+				// user has no prefs. Use default state. 
+				if (this.defaultStateCaptions === 'on')	{ 			
+					this.captionsOn = true; 
+				}
+				else { 
+					this.captionsOn = false; 
+				}
 			}
 		}
 		else { 
@@ -7202,6 +7220,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// In the latter two scendarios, this.refreshingDesc == true via control.js > handleDescriptionToggle()
 
 		// The following variables are applicable to delivery of description:
+		// defaultStateDescriptions == 'on' or 'off', defined by website owner (overridden by prefDesc) 
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefDescVisible == 1 to visibly show text-based description area; else 0
@@ -7259,11 +7278,20 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// Set the default state of descriptions
 		if (this.descMethod) { 
-			if (this.prefDesc) { 
+			if (this.prefDesc === 1) { 
 				this.descOn = true; 
 			}
-			else { 
+			else if (this.prefDesc === 0) { 
 				this.descOn = false; 
+			}
+			else { 				
+				// user has no prefs. Use default state. 
+				if (this.defaultStateDescriptions === 'on')	{ 			
+					this.descOn = true; 
+				}
+				else { 
+					this.descOn = false; 
+				}
 			}
 		}
 		else { 			

@@ -263,8 +263,17 @@
 			if (this.prefCaptions === 1) { 
 				this.captionsOn = true; 
 			}
-			else { 
+			else if (this.prefCaptions === 0) { 
 				this.captionsOn = false; 
+			}
+			else { 
+				// user has no prefs. Use default state. 
+				if (this.defaultStateCaptions === 'on')	{ 			
+					this.captionsOn = true; 
+				}
+				else { 
+					this.captionsOn = false; 
+				}
 			}
 		}
 		else { 

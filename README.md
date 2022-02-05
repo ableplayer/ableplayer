@@ -242,6 +242,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 #### Captions
 
 -   **data-captions-position** - optional; specify default position of captions relative to the video (either "below" or "overlay"; "below" is the default if not specified). Users can override this setting in Captions Preferences.
+-   **data-state-captions** - optional; "on" or "off". Captions are on by default if they're available, but this allows website owners to override that setting. If users enable captions, their preference will be saved in a cookie, and that will override the default setting on future visits.
 
 #### Transcript
 
@@ -383,7 +384,7 @@ available, add a **data-desc-src** attribute to the `<source>` element for
 that video. The value of this attribute is a path pointing to the
 described version of the video. With this method, the described version
 of the video can be played instead of the non-described version, and the
-two versions can be swapped with clicking the "D" button on the
+two versions can be swapped with clicking the "Descriptions" button on the
 controller.
 
 If descriptions are available using either of the above methods, a
@@ -405,6 +406,9 @@ auto-generated transcript, and the WebVTT description text is not intended to be
 by screen readers or browsers  (for example, if the sole video source is a described video).
 In such cases, use **data-descriptions-audible="false"** to prevent browsers and screen readers 
 from announcing the description text. 
+
+If description is available through either of the above methods, it is off by default and users must enable it using the "Descriptions" button on the player control. Website owners can override   
+this setting and change the default state to "on" using **data-state-descriptions="on"**. If users have turned descriptions off on the same website, their preference will be saved in a cookie, and that will override the default setting on future visits.
 
 #### Sign language
 
