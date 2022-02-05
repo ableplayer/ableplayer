@@ -201,16 +201,28 @@ var AblePlayerInstances = [];
 		// This setting is overridden by user preferences, if they exist 
 		// values for data-state-captions and data-state-descriptions are 'on' or 'off' 
 		if ($(media).data('state-captions') == 'off') {
-			this.defaultStateCaptions = 'off';
+			this.defaultStateCaptions = 0; // off 
 		}
 		else {
-			this.defaultStateCaptions = 'on'; // on by default
+			this.defaultStateCaptions = 1; // on by default
 		}
 		if ($(media).data('state-descriptions') == 'on') {
-			this.defaultStateDescriptions = 'on';
+			this.defaultStateDescriptions = 1; // on
 		}
 		else {
-			this.defaultStateDescriptions = 'off'; // off by default
+			this.defaultStateDescriptions = 0; // off by default
+		}
+
+		// Default setting for prefDescPause  
+		// Extended description (i.e., pausing during description) is on by default 
+		// but this settings give website owners control over that 
+		// since they know the nature of their videos, and whether pausing is necessary 
+		// This setting is overridden by user preferences, if they exist 
+		if ($(media).data('desc-pause-default') == 'off') {
+			this.defaultDescPause = 0; // off 
+		}
+		else {
+			this.defaultDescPause = 1; // on by default
 		}
 
 		// Headings

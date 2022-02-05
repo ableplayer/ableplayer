@@ -75,7 +75,7 @@
 			}
 			else { 				
 				// user has no prefs. Use default state. 
-				if (this.defaultStateDescriptions === 'on')	{ 			
+				if (this.defaultStateDescriptions === 1)	{ 			
 					this.descOn = true; 
 				}
 				else { 

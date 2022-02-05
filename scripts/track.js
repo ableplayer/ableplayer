@@ -267,8 +267,8 @@
 				this.captionsOn = false; 
 			}
 			else { 
-				// user has no prefs. Use default state. 
-				if (this.defaultStateCaptions === 'on')	{ 			
+				// user has no prefs. Use default state.
+				if (this.defaultStateCaptions === 1)	{ 			
 					this.captionsOn = true; 
 				}
 				else { 

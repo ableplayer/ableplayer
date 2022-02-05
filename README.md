@@ -408,7 +408,7 @@ In such cases, use **data-descriptions-audible="false"** to prevent browsers and
 from announcing the description text. 
 
 If description is available through either of the above methods, it is off by default and users must enable it using the "Descriptions" button on the player control. Website owners can override   
-this setting and change the default state to "on" using **data-state-descriptions="on"**. If users have turned descriptions off on the same website, their preference will be saved in a cookie, and that will override the default setting on future visits.
+this setting and change the default state to "on" using **data-state-descriptions="on"**. Also, website owners can define the default state of extended descriptions (i.e., pausing the video during audio description) using **data-desc-pause-default**. Supported values are either "off" or "on". Setting this to "off" is useful if all videos have plenty of audio space for description to be read, and pausing is therefore unnecessary. The default setting is "on". If users have changed this setting in the Description Preferences dialog, their preference will be saved in a cookie, and that will override the default setting on future visits. 
 
 #### Sign language
 

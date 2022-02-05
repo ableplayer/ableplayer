@@ -201,16 +201,28 @@ var AblePlayerInstances = [];
 		// This setting is overridden by user preferences, if they exist 
 		// values for data-state-captions and data-state-descriptions are 'on' or 'off' 
 		if ($(media).data('state-captions') == 'off') {
-			this.defaultStateCaptions = 'off';
+			this.defaultStateCaptions = 0; // off 
 		}
 		else {
-			this.defaultStateCaptions = 'on'; // on by default
+			this.defaultStateCaptions = 1; // on by default
 		}
 		if ($(media).data('state-descriptions') == 'on') {
-			this.defaultStateDescriptions = 'on';
+			this.defaultStateDescriptions = 1; // on
 		}
 		else {
-			this.defaultStateDescriptions = 'off'; // off by default
+			this.defaultStateDescriptions = 0; // off by default
+		}
+
+		// Default setting for prefDescPause  
+		// Extended description (i.e., pausing during description) is on by default 
+		// but this settings give website owners control over that 
+		// since they know the nature of their videos, and whether pausing is necessary 
+		// This setting is overridden by user preferences, if they exist 
+		if ($(media).data('desc-pause-default') == 'off') {
+			this.defaultDescPause = 0; // off 
+		}
+		else {
+			this.defaultDescPause = 1; // on by default
 		}
 
 		// Headings
@@ -1666,7 +1678,7 @@ var AblePlayerInstances = [];
 			'name': 'prefCaptions', // closed captions default state
 			'label': null,
 			'group': 'captions',
-			'default': 1
+			'default': this.defaultStateCaptions
 		});
 
 		if (!this.usingYouTubeCaptions) {
@@ -1731,7 +1743,7 @@ var AblePlayerInstances = [];
 				'name': 'prefDesc', // audio description default state
 				'label': null,
 				'group': 'descriptions',
-				'default': 0 // off because users who don't need it might find it distracting
+				'default': this.defaultStateDescriptions
 			});
 			prefs.push({
 				'name': 'prefDescMethod', // audio description default format (if both 'video' and 'text' are available)
@@ -1767,7 +1779,7 @@ var AblePlayerInstances = [];
 				'name': 'prefDescPause', // automatically pause when closed description starts
 				'label': this.tt.prefDescPause,
 				'group': 'descriptions',
-				'default': 1 // on as of 4.3.16, because extended description is frequently necessary
+				'default': this.defaultDescPause
 			});
 			prefs.push({
 				'name': 'prefDescVisible', // visibly show closed description (if avilable and used)
@@ -5510,8 +5522,8 @@ var AblePlayerInstances = [];
 				this.captionsOn = false; 
 			}
 			else { 
-				// user has no prefs. Use default state. 
-				if (this.defaultStateCaptions === 'on')	{ 			
+				// user has no prefs. Use default state.
+				if (this.defaultStateCaptions === 1)	{ 			
 					this.captionsOn = true; 
 				}
 				else { 
@@ -7286,7 +7298,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			else { 				
 				// user has no prefs. Use default state. 
-				if (this.defaultStateDescriptions === 'on')	{ 			
+				if (this.defaultStateDescriptions === 1)	{ 			
 					this.descOn = true; 
 				}
 				else { 

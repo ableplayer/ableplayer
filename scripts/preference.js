@@ -163,7 +163,7 @@
 			'name': 'prefCaptions', // closed captions default state
 			'label': null,
 			'group': 'captions',
-			'default': 1
+			'default': this.defaultStateCaptions
 		});
 
 		if (!this.usingYouTubeCaptions) {
@@ -228,7 +228,7 @@
 				'name': 'prefDesc', // audio description default state
 				'label': null,
 				'group': 'descriptions',
-				'default': 0 // off because users who don't need it might find it distracting
+				'default': this.defaultStateDescriptions
 			});
 			prefs.push({
 				'name': 'prefDescMethod', // audio description default format (if both 'video' and 'text' are available)
@@ -264,7 +264,7 @@
 				'name': 'prefDescPause', // automatically pause when closed description starts
 				'label': this.tt.prefDescPause,
 				'group': 'descriptions',
-				'default': 1 // on as of 4.3.16, because extended description is frequently necessary
+				'default': this.defaultDescPause
 			});
 			prefs.push({
 				'name': 'prefDescVisible', // visibly show closed description (if avilable and used)
