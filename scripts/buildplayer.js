@@ -55,9 +55,6 @@
 
 		this.injectPlayerControlArea(); // this may need to be injected after captions??? 
 		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
-		if (this.mediaType === 'video') { 
-			this.injectTextDescriptionArea();
-		}
 		this.injectAlert();
 		this.injectPlaylist();
 	};
@@ -167,17 +164,18 @@
 
 	AblePlayer.prototype.injectTextDescriptionArea = function () {
 
-		// create a div for exposing description
-		// description will be exposed via role="alert" & announced by screen readers
+		// create a div for writing description text
 		this.$descDiv = $('<div>',{
 			'class': 'able-descriptions'
 		});
-		if (this.exposeTextDescriptions) {
-			this.$descDiv.attr({
-				'aria-live': 'assertive',
-				'aria-atomic': 'true'
-			});
-		}
+		// Add ARIA so description will be announced by screen readers
+		// Later (in description.js > showDescription()), 
+		// if browser supports Web Speech API and this.descMethod === 'browser'
+		// these attributes will be removed 
+		this.$descDiv.attr({
+			'aria-live': 'assertive',
+			'aria-atomic': 'true'
+		});
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
 		this.$descDiv.hide();

@@ -174,18 +174,34 @@ var AblePlayerInstances = [];
 			this.useDescriptionsButton = true;
 		}
 
-		// Silence audio description
-		// set to "false" if the sole purposes of the WebVTT descriptions file
-		// is to display description text visibly and to integrate it into the transcript
+		// Control whether text descriptions are read aloud 
+		// set to "false" if the sole purpose of the WebVTT descriptions file
+		// is to integrate text description into the transcript
+		// set to "true" to write description text to a div 
+		// This variable does *not* control the method by which description is read. 
+		// For that, see below (this.descMethod) 
 		if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
-			this.exposeTextDescriptions = false;
+			this.readDescriptionsAloud = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
 			// support both singular and plural spelling of attribute
-			this.exposeTextDescriptions = false;
+			this.readDescriptionsAloud = false;
 		}
 		else {
-			this.exposeTextDescriptions = true;
+			this.readDescriptionsAloud = true;
+		}
+
+		// Method by which text descriptions are read  
+		// valid values of data-desc-reader are:
+		// 'brower' (default) - text-based audio description is handled by the browser, if supported  
+		// 'screenreader' - text-based audio description is always handled by screen readers 
+		// The latter may be preferable by owners of websites in languages that are not well supported 
+		// by the Web Speech API  
+		if ($(media).data('desc-reader') == 'screenreader') {
+			this.descReader = 'screenreader';
+		}
+		else {
+			this.descReader = 'browser';
 		}
 
 		// Headings

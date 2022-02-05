@@ -364,7 +364,16 @@ the same as a closed caption file, but its contents are description text
 rather than captions. With this method, description text is read aloud by 
 browsers that support the [Web Speech API][]; otherwise it's written to an  
 ARIA live region, so supporting screen readers will automatically announce 
-the new text as soon as it is written to the page.
+the new text as soon as it is written to the page. There are many advantages 
+to having browsers perform this function: It frees screen readers to perform 
+other tasks without disrupting audio description; it makes it possible to 
+pause during audio description then automatically resume playback when description 
+is complete; and it allows users to customize the voice, pitch, rate and volume 
+that are used for reading description (via the Description Prefences dialog). 
+However, in rare instances it might be preferable to have screen readers
+perform this function rather than browsers (e.g., if a language is not well supported
+by the Web Speech API). In such instances, use **data-desc-reader="screenreader"** 
+(otherwise this property will default to "browser"). 
 
 The second method is to produce a separate video with description mixed
 in. If multiple video sources are already provided (e.g., an MP4 and

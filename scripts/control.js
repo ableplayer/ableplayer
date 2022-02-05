@@ -270,7 +270,8 @@
 			}
 		}
 		else if (this.player === 'youtube') {
-			// Youtube supports varying playback rates per video.	 Only expose controls if more than one playback rate is available.
+			// Youtube supports varying playback rates per video.	 
+			// Only expose controls if more than one playback rate is available.
 			if (this.youTubePlayer.getAvailablePlaybackRates().length > 1) {
 				return true;
 			}
@@ -1211,8 +1212,12 @@
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
-		if (!this.$descDiv.is(':hidden')) {
-			this.$descDiv.hide();
+		if (typeof this.$descDiv !== 'undefined') {
+			if (!this.$descDiv.is(':hidden')) {
+				this.$descDiv.hide();
+			}
+			// NOTE: now showing $descDiv here if previously hidden 
+			// that's handled elsewhere, dependent on whether there's text to show
 		}
 		this.refreshingDesc = true;
 		this.initDescription();
@@ -1458,8 +1463,10 @@
 					$el.width('100%');
 				}
 				var newHeight = $(window).height() - this.$playerDiv.height();
-				if (!this.$descDiv.is(':hidden')) {
-					newHeight -= this.$descDiv.height();
+				if (typeof this.$descDiv !== 'undefined') {				
+					if (!this.$descDiv.is(':hidden')) {
+						newHeight -= this.$descDiv.height();
+					}
 				}
 			}
 			else {

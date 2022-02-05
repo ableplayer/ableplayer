@@ -231,7 +231,7 @@
 				'default': 0 // off because users who don't need it might find it distracting
 			});
 			prefs.push({
-				'name': 'prefDescFormat', // audio description default format (if both 'video' and 'text' are available)
+				'name': 'prefDescMethod', // audio description default format (if both 'video' and 'text' are available)
 				'label': null,
 				'group': 'descriptions',
 				'default': 'video' // video (an alternative described version) always wins
@@ -942,12 +942,12 @@
 			if (available[i]['label']) {
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
-				if (prefName == 'prefDescFormat') {
-					// As of v4.0.10, prefDescFormat is no longer a choice
-					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-					this.prefDescFormat = 'video';
-					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
-						cookie.preferences['prefDescFormat'] = this.prefDescFormat;
+				if (prefName == 'prefDescMethod') {
+					// As of v4.0.10, prefDescMethod is no longer a choice
+					// this.prefDescMethod = $('input[name="' + prefName + '"]:checked').val();
+					this.prefDescMethod = 'video';
+					if (this.prefDescMethod !== cookie.preferences['prefDescMethod']) { // user's preference has changed
+						cookie.preferences['prefDescMethod'] = this.prefDescMethod;
 						numChanges++;
 					}
 				}

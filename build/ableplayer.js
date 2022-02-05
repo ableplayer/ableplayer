@@ -174,18 +174,34 @@ var AblePlayerInstances = [];
 			this.useDescriptionsButton = true;
 		}
 
-		// Silence audio description
-		// set to "false" if the sole purposes of the WebVTT descriptions file
-		// is to display description text visibly and to integrate it into the transcript
+		// Control whether text descriptions are read aloud 
+		// set to "false" if the sole purpose of the WebVTT descriptions file
+		// is to integrate text description into the transcript
+		// set to "true" to write description text to a div 
+		// This variable does *not* control the method by which description is read. 
+		// For that, see below (this.descMethod) 
 		if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
-			this.exposeTextDescriptions = false;
+			this.readDescriptionsAloud = false;
 		}
 		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
 			// support both singular and plural spelling of attribute
-			this.exposeTextDescriptions = false;
+			this.readDescriptionsAloud = false;
 		}
 		else {
-			this.exposeTextDescriptions = true;
+			this.readDescriptionsAloud = true;
+		}
+
+		// Method by which text descriptions are read  
+		// valid values of data-desc-reader are:
+		// 'brower' (default) - text-based audio description is handled by the browser, if supported  
+		// 'screenreader' - text-based audio description is always handled by screen readers 
+		// The latter may be preferable by owners of websites in languages that are not well supported 
+		// by the Web Speech API  
+		if ($(media).data('desc-reader') == 'screenreader') {
+			this.descReader = 'screenreader';
+		}
+		else {
+			this.descReader = 'browser';
 		}
 
 		// Headings
@@ -1709,7 +1725,7 @@ var AblePlayerInstances = [];
 				'default': 0 // off because users who don't need it might find it distracting
 			});
 			prefs.push({
-				'name': 'prefDescFormat', // audio description default format (if both 'video' and 'text' are available)
+				'name': 'prefDescMethod', // audio description default format (if both 'video' and 'text' are available)
 				'label': null,
 				'group': 'descriptions',
 				'default': 'video' // video (an alternative described version) always wins
@@ -2420,12 +2436,12 @@ var AblePlayerInstances = [];
 			if (available[i]['label']) {
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
-				if (prefName == 'prefDescFormat') {
-					// As of v4.0.10, prefDescFormat is no longer a choice
-					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-					this.prefDescFormat = 'video';
-					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
-						cookie.preferences['prefDescFormat'] = this.prefDescFormat;
+				if (prefName == 'prefDescMethod') {
+					// As of v4.0.10, prefDescMethod is no longer a choice
+					// this.prefDescMethod = $('input[name="' + prefName + '"]:checked').val();
+					this.prefDescMethod = 'video';
+					if (this.prefDescMethod !== cookie.preferences['prefDescMethod']) { // user's preference has changed
+						cookie.preferences['prefDescMethod'] = this.prefDescMethod;
 						numChanges++;
 					}
 				}
@@ -3391,9 +3407,6 @@ var AblePlayerInstances = [];
 
 		this.injectPlayerControlArea(); // this may need to be injected after captions??? 
 		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
-		if (this.mediaType === 'video') { 
-			this.injectTextDescriptionArea();
-		}
 		this.injectAlert();
 		this.injectPlaylist();
 	};
@@ -3503,17 +3516,18 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.injectTextDescriptionArea = function () {
 
-		// create a div for exposing description
-		// description will be exposed via role="alert" & announced by screen readers
+		// create a div for writing description text
 		this.$descDiv = $('<div>',{
 			'class': 'able-descriptions'
 		});
-		if (this.exposeTextDescriptions) {
-			this.$descDiv.attr({
-				'aria-live': 'assertive',
-				'aria-atomic': 'true'
-			});
-		}
+		// Add ARIA so description will be announced by screen readers
+		// Later (in description.js > showDescription()), 
+		// if browser supports Web Speech API and this.descMethod === 'browser'
+		// these attributes will be removed 
+		this.$descDiv.attr({
+			'aria-live': 'assertive',
+			'aria-atomic': 'true'
+		});
 		// Start off with description hidden.
 		// It will be exposed conditionally within description.js > initDescription()
 		this.$descDiv.hide();
@@ -7189,21 +7203,18 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
-		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
-		// useDescFormat is the format actually used ('video' or 'text'), regardless of user preference 
-		// prevDescFormat is the value of useDescFormat before user toggled off description 
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefDescVisible == 1 to visibly show text-based description area; else 0
+		// prefDescMethod == either 'video' or 'text' (as of v4.0.10, prefDescMethod is always 'video')
+		// descMethod is the format actually used ('video' or 'text'), regardless of user preference 
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
 		// hasClosedDesc == true if a description text track is available
 		// descOn == true if description of either type is on
-		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
+		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
+		// descReader == either 'browser' or 'screenreader'
 
 		var thisObj = this;
-		if (this.refreshingDesc) {
-			this.prevDescFormat = this.useDescFormat;
-		}
-		else {
+		if (!this.refreshingDesc) {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
 			// checks only the first source since if a described version is provided,
@@ -7224,35 +7235,47 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 
-		// Set this.useDescFormat based on media availability & user preferences
-		if (this.prefDesc) {
-			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. User gets their preference. 
-				this.useDescFormat = this.prefDescFormat;
-				this.descOn = true;
+		// Set this.descMethod based on media availability & user preferences
+		if (this.hasOpenDesc && this.hasClosedDesc) {
+			// both formats are available. User gets their preference. 
+			if (this.prefDescMethod) { 
+				this.descMethod = this.prefDescMethod;
 			}
-			else if (this.hasOpenDesc) {
-				this.useDescFormat = 'video';
-				this.descOn = true;
-			}
-			else if (this.hasClosedDesc) {
-				this.useDescFormat = 'text';
-				this.descOn = true;
+			else { 
+				// user has no preference. Video is default. 
+				this.descMethod = 'video'; 
 			}
 		}
+		else if (this.hasOpenDesc) {
+			this.descMethod = 'video';
+		}
+		else if (this.hasClosedDesc) {
+			this.descMethod = 'text';
+		}
 		else { 
-			// prefDesc is not set for this user 
-			this.useDescFormat = null;
+			// no description is available for this video 
+			this.descMethod = null; 
+		}
+
+		// Set the default state of descriptions
+		if (this.descMethod) { 
+			if (this.prefDesc) { 
+				this.descOn = true; 
+			}
+			else { 
+				this.descOn = false; 
+			}
+		}
+		else { 			
 			this.descOn = false;
 		}
 
-		if (this.useDescFormat === 'video') { 
-			// If text descriptions are also available, silence them 
-			this.exposeTextDescriptions = false; 
+		if (typeof this.$descDiv === 'undefined' && this.hasClosedDesc && this.descMethod === 'text') {		
+			this.injectTextDescriptionArea();
 		}
 
 		if (this.descOn) {
-			if (this.useDescFormat === 'video') {
+			if (this.descMethod === 'video') {
 				if (!this.usingDescribedVersion()) {
 					// switched from non-described to described version
 					this.swapDescription();
@@ -7261,13 +7284,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (this.hasClosedDesc) {
 				if (this.prefDescVisible) {
 					// make description text visible
-					// New in v4.0.10: Do this regardless of useDescFormat
-					this.$descDiv.show();
-					this.$descDiv.removeClass('able-clipped');
+					if (typeof this.$descDiv !== 'undefined') {
+						this.$descDiv.show();
+						this.$descDiv.removeClass('able-clipped');
+					}
 				}
 				else {
 					// keep it visible to screen readers, but hide it visibly
-					this.$descDiv.addClass('able-clipped');
+					if (typeof this.$descDiv !== 'undefined') {
+						this.$descDiv.addClass('able-clipped');
+					}
 				}
 				if (!this.swappingSrc) {
 					this.showDescription(this.elapsed);
@@ -7275,16 +7301,18 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else { // description is off.
-			if (this.prevDescFormat === 'video') { // user has turned off described version of video
+			if (this.descMethod === 'video') { // user has turned off described version of video
 				if (this.usingDescribedVersion()) {
 					// user was using the described verion. Swap for non-described version
 					this.swapDescription();
 				}
 			}
-			else if (this.prevDescFormat === 'text') { // user has turned off text description
+			else if (this.descMethod === 'text') { // user has turned off text description
 				// hide description div from everyone, including screen reader users
-				this.$descDiv.hide();
-				this.$descDiv.removeClass('able-clipped');
+				if (typeof this.$descDiv !== 'undefined') {
+					this.$descDiv.hide();
+					this.$descDiv.removeClass('able-clipped');
+				}
 			}
 		}
 		this.refreshingDesc = false;
@@ -7515,10 +7543,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 	AblePlayer.prototype.showDescription = function(now) {
 
-		// there's a lot of redundancy between this function and showCaptions
-		// Trying to combine them ended up in a mess though. Keeping as is for now.
-
-		if (!this.exposeTextDescriptions || this.swappingSrc || !this.descOn) {
+		if (!this.hasClosedDesc || this.swappingSrc || !this.descOn || this.descMethod === 'video') {			
 			return;
 		}
 
@@ -7558,7 +7583,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (window.speechSynthesis) {
+				if (this.descReader === 'screenreader') { 					
+					// load the new description into the container div for screen readers to read
+					this.$descDiv.html(descText);
+				}
+				else if (window.speechSynthesis) {
 					// browser supports speech synthsis
 					this.announceDescriptionText('description',descText);
 					if (this.prefDescVisible) {
@@ -7572,7 +7601,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					// load the new description into the container div for screen readers to read
 					this.$descDiv.html(descText);
 				}
-				if (this.prefDescPause && this.exposeTextDescriptions) {
+				if (this.prefDescPause && this.descMethod === 'text') {
 					this.pauseMedia();
 					this.pausedForDescription = true;
 				}
@@ -7690,7 +7719,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
 					if (context === 'description') {
 						if (thisObj.prefDescPause) {
-							if (thisObj.pausedForDescription && thisObj.exposeTextDescriptions) {
+							if (thisObj.pausedForDescription) {
 								thisObj.playMedia();
 								this.pausedForDescription = false;
 							}
@@ -8047,7 +8076,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else if (this.player === 'youtube') {
-			// Youtube supports varying playback rates per video.	 Only expose controls if more than one playback rate is available.
+			// Youtube supports varying playback rates per video.	 
+			// Only expose controls if more than one playback rate is available.
 			if (this.youTubePlayer.getAvailablePlaybackRates().length > 1) {
 				return true;
 			}
@@ -8988,8 +9018,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
 		this.updateCookie('prefDesc');
-		if (!this.$descDiv.is(':hidden')) {
-			this.$descDiv.hide();
+		if (typeof this.$descDiv !== 'undefined') {
+			if (!this.$descDiv.is(':hidden')) {
+				this.$descDiv.hide();
+			}
+			// NOTE: now showing $descDiv here if previously hidden 
+			// that's handled elsewhere, dependent on whether there's text to show
 		}
 		this.refreshingDesc = true;
 		this.initDescription();
@@ -9235,8 +9269,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					$el.width('100%');
 				}
 				var newHeight = $(window).height() - this.$playerDiv.height();
-				if (!this.$descDiv.is(':hidden')) {
-					newHeight -= this.$descDiv.height();
+				if (typeof this.$descDiv !== 'undefined') {				
+					if (!this.$descDiv.is(':hidden')) {
+						newHeight -= this.$descDiv.height();
+					}
 				}
 			}
 			else {

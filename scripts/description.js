@@ -10,21 +10,18 @@
 
 		// The following variables are applicable to delivery of description:
 		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
-		// prefDescFormat == either 'video' or 'text' (as of v4.0.10, prefDescFormat is always 'video')
-		// useDescFormat is the format actually used ('video' or 'text'), regardless of user preference 
-		// prevDescFormat is the value of useDescFormat before user toggled off description 
 		// prefDescPause == 1 to pause video when description starts; else 0
 		// prefDescVisible == 1 to visibly show text-based description area; else 0
+		// prefDescMethod == either 'video' or 'text' (as of v4.0.10, prefDescMethod is always 'video')
+		// descMethod is the format actually used ('video' or 'text'), regardless of user preference 
 		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
 		// hasClosedDesc == true if a description text track is available
 		// descOn == true if description of either type is on
-		// exposeTextDescriptions == true if text description is to be announced audibly; otherwise false
+		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
+		// descReader == either 'browser' or 'screenreader'
 
 		var thisObj = this;
-		if (this.refreshingDesc) {
-			this.prevDescFormat = this.useDescFormat;
-		}
-		else {
+		if (!this.refreshingDesc) {
 			// this is the initial build
 			// first, check to see if there's an open-described version of this video
 			// checks only the first source since if a described version is provided,
@@ -45,35 +42,47 @@
 			}
 		}
 
-		// Set this.useDescFormat based on media availability & user preferences
-		if (this.prefDesc) {
-			if (this.hasOpenDesc && this.hasClosedDesc) {
-				// both formats are available. User gets their preference. 
-				this.useDescFormat = this.prefDescFormat;
-				this.descOn = true;
+		// Set this.descMethod based on media availability & user preferences
+		if (this.hasOpenDesc && this.hasClosedDesc) {
+			// both formats are available. User gets their preference. 
+			if (this.prefDescMethod) { 
+				this.descMethod = this.prefDescMethod;
 			}
-			else if (this.hasOpenDesc) {
-				this.useDescFormat = 'video';
-				this.descOn = true;
-			}
-			else if (this.hasClosedDesc) {
-				this.useDescFormat = 'text';
-				this.descOn = true;
+			else { 
+				// user has no preference. Video is default. 
+				this.descMethod = 'video'; 
 			}
 		}
+		else if (this.hasOpenDesc) {
+			this.descMethod = 'video';
+		}
+		else if (this.hasClosedDesc) {
+			this.descMethod = 'text';
+		}
 		else { 
-			// prefDesc is not set for this user 
-			this.useDescFormat = null;
+			// no description is available for this video 
+			this.descMethod = null; 
+		}
+
+		// Set the default state of descriptions
+		if (this.descMethod) { 
+			if (this.prefDesc) { 
+				this.descOn = true; 
+			}
+			else { 
+				this.descOn = false; 
+			}
+		}
+		else { 			
 			this.descOn = false;
 		}
 
-		if (this.useDescFormat === 'video') { 
-			// If text descriptions are also available, silence them 
-			this.exposeTextDescriptions = false; 
+		if (typeof this.$descDiv === 'undefined' && this.hasClosedDesc && this.descMethod === 'text') {		
+			this.injectTextDescriptionArea();
 		}
 
 		if (this.descOn) {
-			if (this.useDescFormat === 'video') {
+			if (this.descMethod === 'video') {
 				if (!this.usingDescribedVersion()) {
 					// switched from non-described to described version
 					this.swapDescription();
@@ -82,13 +91,16 @@
 			if (this.hasClosedDesc) {
 				if (this.prefDescVisible) {
 					// make description text visible
-					// New in v4.0.10: Do this regardless of useDescFormat
-					this.$descDiv.show();
-					this.$descDiv.removeClass('able-clipped');
+					if (typeof this.$descDiv !== 'undefined') {
+						this.$descDiv.show();
+						this.$descDiv.removeClass('able-clipped');
+					}
 				}
 				else {
 					// keep it visible to screen readers, but hide it visibly
-					this.$descDiv.addClass('able-clipped');
+					if (typeof this.$descDiv !== 'undefined') {
+						this.$descDiv.addClass('able-clipped');
+					}
 				}
 				if (!this.swappingSrc) {
 					this.showDescription(this.elapsed);
@@ -96,16 +108,18 @@
 			}
 		}
 		else { // description is off.
-			if (this.prevDescFormat === 'video') { // user has turned off described version of video
+			if (this.descMethod === 'video') { // user has turned off described version of video
 				if (this.usingDescribedVersion()) {
 					// user was using the described verion. Swap for non-described version
 					this.swapDescription();
 				}
 			}
-			else if (this.prevDescFormat === 'text') { // user has turned off text description
+			else if (this.descMethod === 'text') { // user has turned off text description
 				// hide description div from everyone, including screen reader users
-				this.$descDiv.hide();
-				this.$descDiv.removeClass('able-clipped');
+				if (typeof this.$descDiv !== 'undefined') {
+					this.$descDiv.hide();
+					this.$descDiv.removeClass('able-clipped');
+				}
 			}
 		}
 		this.refreshingDesc = false;
@@ -336,10 +350,7 @@
 
 	AblePlayer.prototype.showDescription = function(now) {
 
-		// there's a lot of redundancy between this function and showCaptions
-		// Trying to combine them ended up in a mess though. Keeping as is for now.
-
-		if (!this.exposeTextDescriptions || this.swappingSrc || !this.descOn) {
+		if (!this.hasClosedDesc || this.swappingSrc || !this.descOn || this.descMethod === 'video') {			
 			return;
 		}
 
@@ -379,7 +390,11 @@
 				// temporarily remove aria-live from $status in order to prevent description from being interrupted
 				this.$status.removeAttr('aria-live');
 				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (window.speechSynthesis) {
+				if (this.descReader === 'screenreader') { 					
+					// load the new description into the container div for screen readers to read
+					this.$descDiv.html(descText);
+				}
+				else if (window.speechSynthesis) {
 					// browser supports speech synthsis
 					this.announceDescriptionText('description',descText);
 					if (this.prefDescVisible) {
@@ -393,7 +408,7 @@
 					// load the new description into the container div for screen readers to read
 					this.$descDiv.html(descText);
 				}
-				if (this.prefDescPause && this.exposeTextDescriptions) {
+				if (this.prefDescPause && this.descMethod === 'text') {
 					this.pauseMedia();
 					this.pausedForDescription = true;
 				}
@@ -511,7 +526,7 @@
 					console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
 					if (context === 'description') {
 						if (thisObj.prefDescPause) {
-							if (thisObj.pausedForDescription && thisObj.exposeTextDescriptions) {
+							if (thisObj.pausedForDescription) {
 								thisObj.playMedia();
 								this.pausedForDescription = false;
 							}
