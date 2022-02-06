@@ -359,10 +359,10 @@ var AblePlayerInstances = [];
 
 		// Vimeo
 		if ($(media).data('vimeo-id') !== undefined && $(media).data('vimeo-id') !== "") {
-			this.vimeoId = $(media).data('vimeo-id');
+			this.vimeoId = this.getVimeoId($(media).data('vimeo-id'));
 		}
 		if ($(media).data('vimeo-desc-id') !== undefined && $(media).data('vimeo-desc-id') !== "") {
-			this.vimeoDescId = $(media).data('vimeo-desc-id');
+			this.vimeoDescId = this.getVimeoId($(media).data('vimeo-desc-id'));
 		}
 
 		// Skin

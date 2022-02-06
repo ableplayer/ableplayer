@@ -219,4 +219,25 @@
 		return promise;
 	};
 
+	AblePlayer.prototype.getVimeoId = function (url) {
+
+		// return a Vimeo ID, extracted from a full Vimeo URL
+		// Supported URL patterns are anything containing 'vimeo.com'
+		//  and ending with a '/' followed by the ID. 
+		// (Vimeo IDs do not have predicatable lengths)
+	
+		var idStartPos, id; 
+
+		if (url.indexOf('vimeo.com') !== -1) { 
+			// this is a full Vimeo URL 
+			url = url.trim(); 
+			idStartPos = url.lastIndexOf('/') + 1; 
+			id = url.substr(idStartPos); 
+			return id; 
+		}
+		else { 
+			return url; 
+		}
+};	
+
 })(jQuery);

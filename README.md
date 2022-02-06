@@ -626,11 +626,11 @@ Vimeo Support
 ---------------
 
 To play a Vimeo video in *Able Player*, simply include a **data-vimeo-id** attribute
-on the `<video>` element. The value of this attribute must be the video's Vimeo ID (a string of numbers).
+on the `<video>` element. The value of this attribute can be the video's Vimeo ID (a string of numbers or characters), or it can be a full Vimeo URL, such as https://vimeo.com/xxx where xxx is the Vimeo ID.
 
 If a described version of the video is available on Vimeo, include a **data-vimeo-desc-id** attribute
-on the `<video>` element. The value of this attribute must be the Vimeo ID
-of the described version. If users turn on the Description button on their player controller,
+on the `<video>` element. The value of this attribute can be the Vimeo ID or URL of the 
+described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
 Note that Vimeo currently has some limitations:  
