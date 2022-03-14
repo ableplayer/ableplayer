@@ -8,17 +8,28 @@
 		var thisObj = this;
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 			thisObj.duration = mediaTimes['duration'];
+			if (thisObj.descOn) { 
+				thisObj.descDuration = thisObj.duration; 
+			}
 			thisObj.elapsed = mediaTimes['elapsed'];
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
+/*
+				if (this.prevDuration) { 
+					if (thisObj.duration !== thisObj.prevDuration) {
+						// don't swap ahead; videos are different durations 
+						thisObj.swapTime = 0; 
+					}
+				}
+*/				
 				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
 					if (thisObj.playing) {
 						// resume playback
 						thisObj.playMedia();
-						// reset vars
-						thisObj.swappingSrc = false;
 						thisObj.swapTime = null;
 					}
+					thisObj.swappingSrc = false;
+					thisObj.restoreFocus();
 				}
 			}
 			else {
@@ -81,6 +92,10 @@
 			// safe to reset now
 			this.cueingPlaylistItem = false;
 		}
+		if (this.recreatingPlayer) { 
+			// same as above; different bugs 
+			this.recreatingPlayer = false; 
+		}
 		if (this.swappingSrc === true) {
 			// new source file has just been loaded
 			if (this.swapTime > 0) {
@@ -94,12 +109,36 @@
 					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
+				this.restoreFocus(); 
 			}
 		}
 		this.refreshControls('init');
 	};
 
 	// End Media events
+
+	AblePlayer.prototype.restoreFocus = function() { 
+
+		// function called after player has been rebuilt (during media swap)
+		// the original focusedElement no longer exists, 
+		// but this function finds a match in the new player 
+		// and places focus there 
+
+		var classList; 
+
+		if (this.$focusedElement) { 
+			
+			if ((this.$focusedElement).attr('role') === 'button') { 
+				classList = this.$focusedElement.attr("class").split(/\s+/);
+				$.each(classList, function(index, item) {
+					if (item.substr(0,20) === 'able-button-handler-') {
+						$('div.able-controller div.' + item).focus();  
+					}
+				});
+			}
+		}
+
+	};
 
 	AblePlayer.prototype.addSeekbarListeners = function () {
 
@@ -514,7 +553,7 @@
 					// 'pause' was triggered automatically, not initiated by user
 					// this happens in some browsers when swapping source
 					// (e.g., between tracks in a playlist or swapping description)
-					if (thisObj.hasPlaylist || thisObj.swappingSrc) {
+					if (thisObj.hasPlaylist || thisObj.swappingSrc) {						
 						// do NOT set playing to false.
 						// doing so prevents continual playback after new track is loaded
 					}
@@ -535,9 +574,6 @@
 			})
 			.on('volumechange',function() {
 				thisObj.volume = thisObj.getVolume();
-				if (thisObj.debug) {
-					console.log('media volume change to ' + thisObj.volume + ' (' + thisObj.volumeButton + ')');
-				}
 			})
 			.on('error',function() {
 				if (thisObj.debug) {

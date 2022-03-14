@@ -6,7 +6,6 @@
 
 		// called when player is being built, or when a user
 		// toggles the Description button or changes a description-related preference
-		// In the latter two scendarios, this.refreshingDesc == true via control.js > handleDescriptionToggle()
 
 		// The following variables are applicable to delivery of description:
 		// defaultStateDescriptions == 'on' or 'off', defined by website owner (overridden by prefDesc) 
@@ -21,25 +20,32 @@
 		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
 		// descReader == either 'browser' or 'screenreader'
 
-		var thisObj = this;
-		if (!this.refreshingDesc) {
-			// this is the initial build
-			// first, check to see if there's an open-described version of this video
-			// checks only the first source since if a described version is provided,
-			// it must be provided for all sources
-			this.descFile = this.$sources.first().attr('data-desc-src');
-			if (typeof this.descFile !== 'undefined') {
+		var deferred, promise, thisObj;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+		thisObj = this;
+
+		if (this.mediaType === 'audio') { 
+			deferred.resolve(); 
+		}
+
+		// check to see if there's an open-described version of this video
+		// checks only the first source since if a described version is provided,
+		// it must be provided for all sources
+		this.descFile = this.$sources.first().attr('data-desc-src');
+		if (typeof this.descFile !== 'undefined') {
+			this.hasOpenDesc = true;
+		}
+		else {
+			// there's no open-described version via data-desc-src,
+			// but what about data-youtube-desc-src or data-vimeo-desc-src?
+			// if these exist, they would have been defined earlier 
+			if (this.youTubeDescId || this.vimeoDescId) {
 				this.hasOpenDesc = true;
 			}
-			else {
-				// there's no open-described version via data-desc-src,
-				// but what about data-youtube-desc-src or data-vimeo-desc-src?
-				if (this.youTubeDescId || this.vimeoDescId) {
-					this.hasOpenDesc = true;
-				}
-				else { // there are no open-described versions from any source
-					this.hasOpenDesc = false;
-				}
+			else { // there are no open-described versions from any source
+				this.hasOpenDesc = false;
 			}
 		}
 
@@ -86,7 +92,6 @@
 		else { 			
 			this.descOn = false;
 		}
-
 		if (typeof this.$descDiv === 'undefined' && this.hasClosedDesc && this.descMethod === 'text') {		
 			this.injectTextDescriptionArea();
 		}
@@ -132,7 +137,8 @@
 				}
 			}
 		}
-		this.refreshingDesc = false;
+		deferred.resolve();
+		return promise; 
 	};
 
 	AblePlayer.prototype.usingDescribedVersion = function () {
@@ -248,18 +254,30 @@
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
+		// (playerCreated == false)
 		// 2. User is toggling description
+		// (playerCreated == true)
+
 		var thisObj, i, origSrc, descSrc, srcType, newSource;
 
 		thisObj = this;
 
-		// get current time, and start new video at the same time
-		// NOTE: There is some risk in resuming playback at the same start time
-		// since the described version might include extended audio description (with pauses)
-		// and might therefore be longer than the non-described version
-		// The benefits though would seem to outweigh this risk
+		// get element that has focus at the time swap is initiated 
+		// after player is rebuilt, focus will return to that same element 
+		// (if it exists)
+		this.$focusedElement = $(':focus'); 
 
-		this.swapTime = this.elapsed; // video will scrub to this time after loaded (see event.js)
+		// get current time, and start new video at the same time
+		// (unless the videos are different durations, e.g., extended audio description
+		if (!this.hasDescTracks) { 
+			// video will scrub to this time in new video after loaded (see event.js)
+			this.swapTime = this.elapsed; 
+			if (this.duration) { 
+				// compare current video's duration with the duration of the new video after swap
+				// don't swap to the elapsed time if the durations are different 
+				this.prevDuration = this.duration; 
+			}	
+		}
 		if (this.descOn) {
 			// user has requested the described version
 			this.showAlert(this.tt.alertDescribedVersion);
@@ -268,6 +286,7 @@
 			// user has requested the non-described version
 			this.showAlert(this.tt.alertNonDescribedVersion);
 		}
+
 		if (this.player === 'html5') {
 
 			if (this.usingDescribedVersion()) {
@@ -279,14 +298,13 @@
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
 					}
-				}
-				// No need to check for this.initializing
-				// This function is only called during initialization
-				// if swapping from non-described to described
+				}				
 				this.swappingSrc = true;
+				this.paused = true; 
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
+				this.descDuration = this.duration; 
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-desc-src (if one exists)
 					// then store original source in a new data-orig-src attribute
@@ -299,27 +317,39 @@
 					}
 				}
 				this.swappingSrc = true;
+				this.paused = true;
 			}
-
-			// now reload the source file.
-			if (this.player === 'html5') {
-				this.media.load();
+			if (this.recreatingPlayer) { 
+				// stopgap to prevent multiple firings of recreatePlayer()
+				return; 
+			}	
+			if (this.playerCreated) { 
+				// delete old player, then recreate it with new source & tracks 
+				this.deletePlayer('swap-desc-html'); 			
+				this.recreatePlayer().then(function() { 
+					// reload the source file.
+					// swappingSrc and hasDescTracks will be used as needed 
+					// to adjust available tracks, duration, etc. 
+					thisObj.media.load();
+				});
 			}
+			else { 
+				// player is in the process of being created
+				// no need to recreate it 	
+			} 
 		}
 		else if (this.player === 'youtube') {
 
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeYouTubeId = this.youTubeId;
-				this.showAlert(this.tt.alertNonDescribedVersion);
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
 				this.activeYouTubeId = this.youTubeDescId;
-				this.showAlert(this.tt.alertDescribedVersion);
 			}
 			if (typeof this.youTubePlayer !== 'undefined') {
-
+				thisObj.swappingSrc = true; 
 				if (thisObj.playing) {
 					// loadVideoById() loads and immediately plays the new video at swapTime
 					thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
@@ -329,6 +359,19 @@
 					thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
 				}
 			}
+			if (this.playerCreated) { 
+				this.deletePlayer('swap-desc-youtube'); 				
+			}
+			// player needs to be recreated with new source 
+			if (this.recreatingPlayer) { 
+				// stopgap to prevent multiple firings of recreatePlayer()
+				return; 
+			}	
+			this.recreatePlayer().then(function() { 
+				// nothing to do here 
+				// next steps occur when youtube onReady event fires 
+				// see youtube.js > finalizeYoutubeInit() 
+			});				
 		}
 		else if (this.player === 'vimeo') {
 			if (this.usingDescribedVersion()) {
@@ -341,19 +384,28 @@
 				this.activeVimeoId = this.vimeoDescId;
 				this.showAlert(this.tt.alertDescribedVersion);
 			}
-			// load the new video source
-			this.vimeoPlayer.loadVideo(this.activeVimeoId).then(function() {
-
-				if (thisObj.playing) {
-					// video was playing when user requested an alternative version
-					// seek to swapTime and continue playback (playback happens automatically)
-					thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
-				}
-				else {
-					// Vimeo autostarts immediately after video loads
-					// The "Described" button should not trigger playback, so stop this before the user notices.
-					thisObj.vimeoPlayer.pause();
-				}
+			if (this.playerCreated) { 
+				this.deletePlayer('swap-desc-vimeo'); 				
+			}
+			// player needs to be recreated with new source 
+			if (this.recreatingPlayer) { 
+				// stopgap to prevent multiple firings of recreatePlayer()
+				return; 
+			}	
+			this.recreatePlayer().then(function() { 
+				// load the new video source
+				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
+					if (thisObj.playing) {
+						// video was playing when user requested an alternative version
+						// seek to swapTime and continue playback (playback happens automatically)
+						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+					}
+					else {
+						// Vimeo autostarts immediately after video loads
+						// The "Described" button should not trigger playback, so stop this before the user notices.
+						thisObj.vimeoPlayer.pause();
+					}
+				});
 			});
 		}
 	};

@@ -10,6 +10,7 @@
 
 	// YouTube Player API for iframe Embeds
 	https://developers.google.com/youtube/iframe_api_reference
+
 	// YouTube Player Parameters
 	https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
 
@@ -117,6 +118,16 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.hasPoster = false;
+		}
+
+		// get height and width attributes, if present 
+		// and add them to variables 
+		// Not currently used, but might be useful for resizing player  
+		if ($(media).attr('width')) { 
+			this.width = $(media).attr('width'); 
+		}
+		if ($(media).attr('height')) { 
+			this.height = $(media).attr('height');
 		}
 
 		// start-time
@@ -264,6 +275,9 @@ var AblePlayerInstances = [];
 			this.transcriptSrc = $(media).data('transcript-src');
 			if (this.transcriptSrcHasRequiredParts()) {
 				this.transcriptType = 'manual';
+			}
+			else { 
+				console.log('ERROR: Able Player transcript is missing required parts');
 			}
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
@@ -603,6 +617,7 @@ var AblePlayerInstances = [];
 
 		var thisObj = this;
 		this.initializing = true; // will remain true until entire sequence of function calls is complete
+
 		this.reinitialize().then(function () {
 			if (!thisObj.player) {
 				// No player for this media, show last-line fallback.
@@ -611,12 +626,15 @@ var AblePlayerInstances = [];
 			else {
 				thisObj.setupInstance().then(function () {
 					thisObj.setupInstancePlaylist();
-					if (!thisObj.hasPlaylist) {
+					if (thisObj.hasPlaylist) {
 						// for playlists, recreatePlayer() is called from within cuePlaylistItem()
-						thisObj.recreatePlayer();
 					}
-					thisObj.initializing = false;
-					thisObj.playerCreated = true; // remains true until browser is refreshed
+					else {
+						thisObj.recreatePlayer().then(function() { 
+							thisObj.initializing = false;
+							thisObj.playerCreated = true; // remains true until browser is refreshed		
+						});
+					}
 				});
 			}
 		});
@@ -1063,16 +1081,14 @@ var AblePlayerInstances = [];
 					this.iconType = 'image';
 				}
 			}
-			else { // window.getComputedStyle is not supported (IE 8 and earlier)
+			else { 
+				// window.getComputedStyle is not supported (IE 8 and earlier)
 				// No known way to detect computed font
 				// The following retrieves the value from the style sheet, not the computed font
 				// controllerFont = $tempButton.get(0).currentStyle.fontFamily;
 				// It will therefore return "able", even if the user is overriding that with a custom style sheet
 				// To be safe, use images
 				this.iconType = 'image';
-			}
-			if (this.debug) {
-				console.log('Using ' + this.iconType + 's for player controls');
 			}
 			if (typeof $tempButton !== 'undefined') {
 				$tempButton.remove();
@@ -1126,6 +1142,19 @@ var AblePlayerInstances = [];
 					$(this).find('button').prepend($youTubeImg);
 				});
 
+				// check to see if list item has Vimeo as its source
+				// if it does, inject a thumbnail from Vimeo
+				var $vimeoVideos = $(this).find('li[data-vimeo-id]');
+				$vimeoVideos.each(function() {
+					var vimeoId = $(this).attr('data-youtube-id');
+					var vimeoPoster = thisObj.getVimeoPosterUrl(vimeoId,'120');
+					var $vimeoImg = $('<img>',{
+						'src': vimeoPoster,
+						'alt': ''
+					});
+					$(this).find('button').prepend($vimeoImg);
+				});
+
 				// add accessibility to the list markup
 				$(this).find('li span').attr('aria-hidden','true');
 				thisObj.playlistIndex = 0;
@@ -1158,20 +1187,35 @@ var AblePlayerInstances = [];
 			// redefine this.$sources now that media contains one or more <source> elements
 			this.$sources = this.$media.find('source');
 		}
-
 	};
 
 	AblePlayer.prototype.recreatePlayer = function () {
 
 		// Creates the appropriate player for the current source.
-		var thisObj, prefsGroups, i;
-		thisObj = this;
+		// This function is called each time a new media instance is loaded 
+		// e.g., 
+		// User clicks on an item in a playlist 
+		// User swaps to/from described version of video 
+		// Blocks of code that only need to be executed once are controlled 
+		// by this.playerCreated 
 
 		// TODO: Ensure when recreating player that we carry over the mediaId
 		if (!this.player) {
 			console.log("Can't create player; no appropriate player type detected.");
 			return;
 		}
+
+		var deferred, promise, thisObj, prefsGroups, i;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+		thisObj = this;
+
+		this.playerDeleted = false; // reset after deletePlayer() 
+
+		// set temp stopgap to prevent this function from executing again before finished
+		this.recreatingPlayer = true; 
+
 		if (!this.playerCreated) {
 			// only call these functions once
 			this.loadCurrentPreferences();
@@ -1179,90 +1223,99 @@ var AblePlayerInstances = [];
 			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
 		}
 
-		// call all remaining functions each time a new media instance is loaded
-
 		this.initSignLanguage();
 
 		this.initPlayer().then(function() {
 
-			thisObj.setupTracks().then(function() {
+			thisObj.getTracks().then(function() { 
 
-				thisObj.getBrowserVoices();
+				thisObj.initDescription().then(function() {
 
-				thisObj.setupTranscript().then(function() {
+					thisObj.setupTracks().then(function() {
 
-					thisObj.initStenoFrame().then(function() {
-
-						if (thisObj.stenoMode && thisObj.$stenoFrame) {
-							thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+						if (thisObj.hasClosedDesc) { 
+							if (!thisObj.$descDiv || 
+								(thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {
+								// descDiv either doesn't exist, or exists in an orphaned state 
+								// Either way, it needs to be rebuilt...  
+								thisObj.injectTextDescriptionArea();
+							}
 						}
-						thisObj.getMediaTimes().then(function(mediaTimes) {
+						thisObj.getBrowserVoices();
 
-							thisObj.duration = mediaTimes['duration'];
-							thisObj.elapsed = mediaTimes['elapsed'];
-							thisObj.setFullscreen(false);
+						thisObj.setupTranscript().then(function() {
 
-							if (typeof thisObj.volume === 'undefined') {
-								thisObj.volume = thisObj.defaultVolume;
-							}
-							if (thisObj.volume) {
-								thisObj.setVolume(thisObj.volume);
-							}
-							if (thisObj.transcriptType) {
-								thisObj.addTranscriptAreaEvents();
-								thisObj.updateTranscript();
-							}
-							if (thisObj.mediaType === 'video') {
-								thisObj.initDescription();
-							}
-							if (thisObj.captions.length) {
-								thisObj.initDefaultCaption();
-							}
+							thisObj.initStenoFrame().then(function() {
 
-							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-							// This tells browsers to ignore the text tracks so Able Player can handle them
-							// However, timing is critical as browsers - especially Safari - tend to ignore this request
-							// unless it's sent late in the intialization process.
-							// If browsers ignore the request, the result is redundant captions
-							thisObj.setMediaAttributes();
-							thisObj.addControls();
+								if (thisObj.stenoMode && thisObj.$stenoFrame) {
+									thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+								}
+								thisObj.getMediaTimes().then(function(mediaTimes) {
 
-							thisObj.addEventListeners();
+									thisObj.duration = mediaTimes['duration'];
+									thisObj.elapsed = mediaTimes['elapsed'];
+									thisObj.setFullscreen(false);
 
-							// inject each of the hidden forms that will be accessed from the Preferences popup menu
-							prefsGroups = thisObj.getPreferencesGroups();
-							for (i = 0; i < prefsGroups.length; i++) {
-								thisObj.injectPrefsForm(prefsGroups[i]);
-							}
-							thisObj.setupPopups();
-							thisObj.updateCaption();
-							thisObj.injectVTS();
-							if (thisObj.chaptersDivLocation) {
-								thisObj.populateChaptersDiv();
-							}
-							thisObj.showSearchResults();
+									if (typeof thisObj.volume === 'undefined') {
+										thisObj.volume = thisObj.defaultVolume;
+									}
+									if (thisObj.volume) {
+										thisObj.setVolume(thisObj.volume);
+									}
+									if (thisObj.transcriptType) {
+										thisObj.addTranscriptAreaEvents();
+										thisObj.updateTranscript();
+									}
+									if (thisObj.captions.length) {
+										thisObj.initDefaultCaption();
+									}
 
-							// Go ahead and load media, without user requesting it
-							// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-							// However, the media needs to load before the 'loadedmetadata' event is fired
-							// and until that happens we can't get the media's duration
-							if (thisObj.player === 'html5') {
-								thisObj.$media[0].load();
-							}
-							// refreshControls is called twice building/initializing the player
-							// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
-							setTimeout(function() {
-								thisObj.refreshControls('init');
-							},100);
-						}); 
-					}); 
-				});
-			 
-			}); 
+									// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+									// This tells browsers to ignore the text tracks so Able Player can handle them
+									// However, timing is critical as browsers - especially Safari - tend to ignore this request
+									// unless it's sent late in the intialization process.
+									// If browsers ignore the request, the result is redundant captions
+									thisObj.setMediaAttributes();
+									thisObj.addControls();
+									thisObj.addEventListeners();
+
+									// inject each of the hidden forms that will be accessed from the Preferences popup menu
+									prefsGroups = thisObj.getPreferencesGroups();
+									for (i = 0; i < prefsGroups.length; i++) {
+										thisObj.injectPrefsForm(prefsGroups[i]);
+									}
+									thisObj.setupPopups();
+									thisObj.updateCaption();
+									thisObj.injectVTS();
+									if (thisObj.chaptersDivLocation) {
+										thisObj.populateChaptersDiv();
+									}
+									thisObj.showSearchResults();
+
+									// Go ahead and load media, without user requesting it
+									// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+									// However, the media needs to load before the 'loadedmetadata' event is fired
+									// and until that happens we can't get the media's duration
+									if (thisObj.player === 'html5') {
+										thisObj.$media[0].load();
+									}
+									// refreshControls is called twice building/initializing the player
+									// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
+									setTimeout(function() {
+										thisObj.refreshControls('init'); 
+										deferred.resolve(); 
+									},100);								
+								}); 
+							}); 
+						});
+					});
+				});			 
+			});
 		},
 		function() {	 // initPlayer fail
 			thisObj.provideFallback();
 		});
+		return promise; 
 	};
 
 	AblePlayer.prototype.initPlayer = function () {
@@ -2581,7 +2634,6 @@ var AblePlayerInstances = [];
 
 		// Re-initialize caption and description in case relevant settings have changed
 		this.updateCaption();
-		this.refreshingDesc = true;
 		this.initDescription();
 	};
 
@@ -3405,8 +3457,6 @@ var AblePlayerInstances = [];
 			'width': this.playerWidth + 'px' 
 		});
 
-		this.injectOffscreenHeading();
-
 		if (this.mediaType === 'video') {
 			// youtube adds its own big play button
 			// don't show ours *unless* video has a poster attribute
@@ -3424,15 +3474,22 @@ var AblePlayerInstances = [];
 		}
 		else if (this.mediaType === 'audio') { 
 			captionsContainer.addClass('able-audcap-container'); 
+			// hide this by default. It will be shown if captions are available 
+			captionsContainer.addClass('captions-off');
 		}
 
 		this.injectPlayerControlArea(); // this may need to be injected after captions??? 
 		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
 		this.injectAlert();
 		this.injectPlaylist();
+
+		// Do this last, as it should be prepended to the top of this.$ableDiv
+		// after everything else has prepended
+		this.injectOffscreenHeading();
 	};
 
 	AblePlayer.prototype.injectOffscreenHeading = function () {
+
 		// Inject an offscreen heading to the media container.
 		// If heading hasn't already been manually defined via data-heading-level,
 		// automatically assign a level that is one level deeper than the closest parent heading
@@ -3478,7 +3535,6 @@ var AblePlayerInstances = [];
 			'aria-label' : this.mediaType + ' player'
 		});
 		this.$playerDiv.addClass('able-'+this.mediaType);
-
 		if (this.hasPlaylist && this.showNowPlaying) { 
 			this.$nowPlayingDiv = $('<div>',{
 				'class' : 'able-now-playing',
@@ -3486,7 +3542,6 @@ var AblePlayerInstances = [];
 				'aria-atomic': 'true'
 			});
 		}
-
 		this.$controllerDiv = $('<div>',{
 			'class' : 'able-controller'
 		});
@@ -4135,14 +4190,13 @@ var AblePlayerInstances = [];
 		}
 
 		// get height and width attributes, if present 
-		// and add them to a style attribute 
+		// and add them to a style attribute
 		if (this.$media.attr('width')) { 
 			this.$media.css('width',this.$media.attr('width') + 'px'); 
 		}
 		if (this.$media.attr('height')) { 
 			this.$media.css('height',this.$media.attr('height') + 'px'); 
 		}
-
 		// Remove data-able-player attribute 
 		this.$media.removeAttr('data-able-player'); 
 
@@ -4349,14 +4403,14 @@ var AblePlayerInstances = [];
 		}).hide();
 		this.$controllerDiv.append(this.$tooltipDiv);
 
-		if (this.skin == '2020') {
+		if (this.skin == '2020') {			
 			// add a full-width seek bar
 			$sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
-		// step separately through left and right controls
+
 		for (i = 0; i < numSections; i++) {
 			controls = controlLayout[i];
 			if ((i % 2) === 0) { // even keys on the left
@@ -4370,6 +4424,7 @@ var AblePlayerInstances = [];
 				});
 			}
 			this.$controllerDiv.append($controllerSpan);
+
 			for (j=0; j<controls.length; j++) {
 				control = controls[j];
 				if (control === 'seek') {
@@ -4982,7 +5037,7 @@ var AblePlayerInstances = [];
 		else {
 				if (this.playerCreated) {
 				// remove the old
-				this.deletePlayer();
+				this.deletePlayer('playlist');
 			}
 		}
 
@@ -4990,12 +5045,21 @@ var AblePlayerInstances = [];
 		$newItem = this.$playlist.eq(sourceIndex);
 		if (this.hasAttr($newItem,'data-youtube-id')) {
 			this.youTubeId = this.getYouTubeId($newItem.attr('data-youtube-id'));
+			if (this.hasAttr($newItem,'data-youtube-desc-id')) {
+				this.youTubeDescId = this.getYouTubeId($newItem.attr('data-youtube-desc-id'));
+			}
 			newPlayer = 'youtube';
+		}
+		else if (this.hasAttr($newItem,'data-vimeo-id')) {
+			this.vimeoId = this.getVimeoId($newItem.attr('data-vimeo-id'));
+			if (this.hasAttr($newItem,'data-vimeo-desc-id')) {
+				this.vimeoDescId = this.getVimeoId($newItem.attr('data-vimeo-desc-id'));
+			}
+			newPlayer = 'vimeo';
 		}
 		else {
 				newPlayer = 'html5';
 		}
-
 		if (newPlayer === 'youtube') {
 			if (prevPlayer === 'html5') {
 				// pause and hide the previous media
@@ -5018,15 +5082,12 @@ var AblePlayerInstances = [];
 		// set swappingSrc; needs to be true within recreatePlayer(), called below
 		this.swappingSrc = true;
 
+		// remove source and track elements from previous playlist item
+		this.$media.empty();
+
 		// transfer media attributes from playlist to media element
 		if (this.hasAttr($newItem,'data-poster')) {
 			this.$media.attr('poster',$newItem.attr('data-poster'));
-		}
-		if (this.hasAttr($newItem,'data-width')) {
-			this.$media.attr('width',$newItem.attr('data-width'));
-		}
-		if (this.hasAttr($newItem,'data-height')) {
-			this.$media.attr('height',$newItem.attr('data-height'));
 		}
 		if (this.hasAttr($newItem,'data-youtube-desc-id')) {
 			this.$media.attr('data-youtube-desc-id',$newItem.attr('data-youtube-desc-id'));
@@ -5075,6 +5136,9 @@ var AblePlayerInstances = [];
 					if (thisObj.hasAttr($(this),'data-label')) {
 						$newTrack.attr('label',$(this).attr('data-label'));
 					}
+					if (thisObj.hasAttr($(this),'data-desc')) {
+						$newTrack.attr('data-desc',$(this).attr('data-desc'));
+					}
 					thisObj.$media.append($newTrack);
 				}
 			});
@@ -5088,57 +5152,80 @@ var AblePlayerInstances = [];
 		this.$sources = this.$media.find('source');
 
 		// recreate player, informed by new attributes and track elements
-		this.recreatePlayer();
+		if (this.recreatingPlayer) { 
+			// stopgap to prevent multiple firings of recreatePlayer()
+			return; 
+		}
+		this.recreatePlayer().then(function() { 
 
-		// update playlist to indicate which item is playing
-		//$('.able-playlist li').removeClass('able-current');
-		this.$playlist.removeClass('able-current');
-		this.$playlist.eq(sourceIndex).addClass('able-current');
-
-		// update Now Playing div
-		if (this.showNowPlaying === true) {
-			if (typeof this.$nowPlayingDiv !== 'undefined') {
-				nowPlayingSpan = $('<span>');
-				if (typeof itemLang !== 'undefined') {
-					nowPlayingSpan.attr('lang',itemLang);
+			// update playlist to indicate which item is playing
+			thisObj.$playlist.removeClass('able-current').removeAttr('aria-current');
+			thisObj.$playlist.eq(sourceIndex)
+				.addClass('able-current')
+				.attr('aria-current','true'); 
+			
+			// update Now Playing div
+			if (thisObj.showNowPlaying === true) {
+				if (typeof thisObj.$nowPlayingDiv !== 'undefined') {
+					nowPlayingSpan = $('<span>');
+					if (typeof itemLang !== 'undefined') {
+						nowPlayingSpan.attr('lang',itemLang);
+					}
+					nowPlayingSpan.html('<span>' + thisObj.tt.selectedTrack + ':</span>' + itemTitle);
+					thisObj.$nowPlayingDiv.html(nowPlayingSpan);
 				}
-				nowPlayingSpan.html('<span>' + this.tt.selectedTrack + ':</span>' + itemTitle);
-				this.$nowPlayingDiv.html(nowPlayingSpan);
 			}
-		}
 
-		// if this.swappingSrc is true, media will autoplay when ready
-		if (this.initializing) { // this is the first track - user hasn't pressed play yet
-			this.swappingSrc = false;
-		}
-		else {
-			this.swappingSrc = true;
-			if (this.player === 'html5') {
-				this.media.load();
+			// if thisObj.swappingSrc is true, media will autoplay when ready
+			if (thisObj.initializing) { // this is the first track - user hasn't pressed play yet
+				thisObj.swappingSrc = false;
 			}
-			else if (this.player === 'youtube') {
-				this.okToPlay = true;
+			else {
+				if (thisObj.player === 'html5') {
+					thisObj.media.load();
+				}
+				else if (thisObj.player === 'youtube') {
+					thisObj.okToPlay = true; 
+				}
 			}
-		}
+			thisObj.initializing = false;
+			thisObj.playerCreated = true; // remains true until browser is refreshed		
+		});	
 	};
 
-	AblePlayer.prototype.deletePlayer = function() {
+	AblePlayer.prototype.deletePlayer = function(context) {
 
-		// remove previous video's attributes and child elements from media element
-		if (this.player == 'youtube') {
-				var $youTubeIframe = this.$mediaContainer.find('iframe');
-				$youTubeIframe.remove();
+		// remove player components that need to be rebuilt 
+		// after swapping media sources that have different durations 
+		// or explicitly declared data-desc attributes  
+
+		// Context is one of the following: 
+		// playlist - called from cuePlaylistItem() 
+		// swap-desc-html - called from swapDescription with this.player == 'html'
+		// swap-desc-youtube - called from swapDescription with this.player == 'youtube'  
+		// swap-desc-vimeo -  called from swapDescription with this.player == 'vimeo'  
+
+		if (this.player === 'youtube' && this.youTubePlayer) { 
+			this.youTubePlayer.destroy(); 
 		}
+
+		if (this.player === 'vimeo' && this.vimeoPlayer) { 
+			this.vimeoPlayer.destroy(); 
+		}
+
+
+/*	TODO - Investigate: when is this needed? 
+		// remove previous video's attributes and child elements from media element
 		this.$media.removeAttr('poster width height');
 		this.$media.empty();
-
+*/
 		// Empty elements that will be rebuilt
 		this.$controllerDiv.empty();
 		// this.$statusBarDiv.empty();
 		// this.$timer.empty();
 		this.$elapsedTimeContainer.empty().text('0:00'); // span.able-elapsedTime
 		this.$durationContainer.empty(); // span.able-duration
-
+		
 		// Remove popup windows and modal dialogs; these too will be rebuilt
 		if (this.$signWindow) {
 				this.$signWindow.remove();
@@ -5147,12 +5234,27 @@ var AblePlayerInstances = [];
 				this.$transcriptArea.remove();
 		}
 		$('.able-modal-dialog').remove();
-
+		
+		// Remove caption and description wrappers 
+		if (this.$captionsWrapper) {
+			this.$captionsWrapper.remove();
+		}
+		if (this.$descDiv) { 
+			this.$descDiv.remove(); 
+		}
+		
 		// reset key variables
 		this.hasCaptions = false;
 		this.hasChapters = false;
+		this.hasDescTracks = false; 
+		this.hasOpenDesc = false;
+		this.hasClosedDesc = false; 
+
 		this.captionsPopup = null;
 		this.chaptersPopup = null;
+		this.transcriptType = null;
+
+		this.playerDeleted = true; // will reset to false in recreatePlayer() 
 	};
 
 	AblePlayer.prototype.getButtonTitle = function(control) {
@@ -5259,9 +5361,10 @@ var AblePlayerInstances = [];
 	// This will be called whenever the player is recreated.
 	// Added in v2.2.23: Also handles YouTube caption tracks
 
-	AblePlayer.prototype.setupTracks = function() {
+	AblePlayer.prototype.setupTracks = function () {
 
-		var thisObj, deferred, promise, loadingPromises, loadingPromise, i, tracks, track;
+		var thisObj, deferred, promise, loadingPromises, loadingPromise,
+			i, tracks, track;
 
 		thisObj = this;
 
@@ -5270,6 +5373,11 @@ var AblePlayerInstances = [];
 
 		loadingPromises = [];
 
+		// Arrays already populated in getTracks(): 
+		// this.tracks
+		// this.altTracks 
+
+		// Arrays still to be populated: 
 		this.captions = [];
 		this.descriptions = [];
 		this.chapters = [];
@@ -5279,80 +5387,81 @@ var AblePlayerInstances = [];
 			// Page includes a container for a VTS instance
 			this.vtsTracks = [];
 			this.hasVts = true;
-		}
-		else {
+		} else {
 			this.hasVts = false;
 		}
 
-		this.getTracks().then(function() {
+		// Source array for populating the above arrays 
+		// varies, depending on whether there are dedicated description tracks 
+		if (this.hasDescTracks && this.descOn) {
+			tracks = this.altTracks;
+		} else {
+			tracks = this.tracks;
+		}
 
-			tracks = thisObj.tracks;
-			
-			for (i=0; i < tracks.length; i++) {
+		for (i = 0; i < tracks.length; i++) {
 
-				track = tracks[i];
+			track = tracks[i];
+			var kind = track.kind;
 
-				var kind = track.kind;
-				var trackLang = track.language;
-				var trackLabel = track.label;
-				if (!track.src) {
-					if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
-						// skip all the hullabaloo and go straight to setupCaptions
-						thisObj.setupCaptions(track,trackLang,trackLabel);
-					}
-					else {
-						// Nothing to load!
-						// Skip this track; move on to next i
-					}
-					continue;
-				}
+			if (!track.src) {
+				if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
+					// skip all the hullabaloo and go straight to setupCaptions
+					thisObj.setupCaptions(track);
+				} else {
+					// Nothing to load!
+					// Skip this track; move on to next i
+				}				
+				continue;
+			}
+			var trackSrc = track.src;
+			loadingPromise = thisObj.loadTextObject(track.src); // resolves with src, trackText
+			loadingPromises.push(loadingPromise.catch(function (src) {
+				console.warn('Failed to load captions track from ' + src);
+			}));
+
+			loadingPromise.then((function (track, kind) {
 
 				var trackSrc = track.src;
+				var trackLang = track.language;
+				var trackLabel = track.label;
+				var trackDesc = track.desc;
 
-				loadingPromise = thisObj.loadTextObject(trackSrc); // resolves with src, trackText
-				loadingPromises.push(loadingPromise.catch(function(src) { 
-					console.warn('Failed to load captions track from ' + src); 
-				}));
+				return function (trackSrc, trackText) {
+					// these are the two vars returned from loadTextObject
 
-				loadingPromise.then((function (track, kind) {
+					var trackContents = trackText;
+					var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
 
-					var trackSrc = track.src;
-					var trackLang = track.language;
-					var trackLabel = track.label;
+					if (thisObj.hasVts) {
 
-					return function (trackSrc, trackText) { // these are the two vars returned from loadTextObject
-						
-						var trackContents = trackText;
-						var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
-
-						if (thisObj.hasVts) {
-							 // setupVtsTracks() is in vts.js
-							thisObj.setupVtsTracks(kind, trackLang, trackLabel, trackSrc, trackContents);
-						}
-						if (kind === 'captions' || kind === 'subtitles') {							
-							thisObj.setupCaptions(track, trackLang, trackLabel, cues);
-						}
-						else if (kind === 'descriptions') {
-							thisObj.setupDescriptions(track, cues, trackLang);
-						}
-						else if (kind === 'chapters') {
-							thisObj.setupChapters(track, cues, trackLang);
-						}
-						else if (kind === 'metadata') {
-							thisObj.setupMetadata(track, cues);
-						}
+						// setupVtsTracks() is in vts.js
+						thisObj.setupVtsTracks(kind, trackLang, trackDesc, trackLabel, trackSrc, trackContents);
 					}
-				})(track, kind));
-			}
+					if (kind === 'captions' || kind === 'subtitles') {
+						thisObj.setupCaptions(track, cues);
+					} else if (kind === 'descriptions') {
+						thisObj.setupDescriptions(track, cues);
+					} else if (kind === 'chapters') {
+						thisObj.setupChapters(track, cues);
+					} else if (kind === 'metadata') {
+						thisObj.setupMetadata(track, cues);
+					}
+				}
+			})(track, kind));
+		}
+		if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
+			deferred.resolve(); 
+		}
+		else { 			
 			$.when.apply($, loadingPromises).then(function () {
 				deferred.resolve();
 			});
-		});
-
+		}
 		return promise;
 	};
 
-	AblePlayer.prototype.getTracks = function() {
+	AblePlayer.prototype.getTracks = function () {
 
 		// define an array tracks with the following structure:
 		// kind - string, e.g. "captions", "descriptions"
@@ -5361,9 +5470,11 @@ var AblePlayerInstances = [];
 		// label - string to display, e.g., in CC menu
 		// def - Boolean, true if this is the default track
 		// cues - array with startTime, endTime, and payload
+		// desc - Boolean, true if track includes a data-desc attribute
 
-		var thisObj, deferred, promise, captionTracks, trackLang, trackLabel, isDefault, 
-				i, j, capLabel, inserted;
+		var thisObj, deferred, promise, captionTracks, altCaptionTracks,
+			trackLang, trackLabel, isDefault, forDesc,
+			i, j, capLabel, inserted;
 
 		thisObj = this;
 
@@ -5371,40 +5482,38 @@ var AblePlayerInstances = [];
 		promise = deferred.promise();
 
 		this.$tracks = this.$media.find('track');
-		this.tracks = [];
-		captionTracks = []; 
-		this.captions = [];
+		this.tracks = []; // only includes tracks that do NOT have data-desc
+		this.altTracks = []; // only includes tracks that DO have data-desc 
+
+		this.hasDescTracks = false; // will change to true if one or more tracks has data-desc
 
 		if (this.$tracks.length) {
 
+			this.usingYouTubeCaptions = false; 
 			// create object from HTML5 tracks
-			this.$tracks.each(function() {
-
+			this.$tracks.each(function (index, element) {
 				// srcLang should always be included with <track>, but HTML5 spec doesn't require it
 				// if not provided, assume track is the same language as the default player language
 				if ($(this).attr('srclang')) {
 					trackLang = $(this).attr('srclang');
-				}
-				else {
+				} else {
 					trackLang = thisObj.lang;
 				}
+
 				if ($(this).attr('label')) {
 					trackLabel = $(this).attr('label');
-				}
-				else {
+				} else {
 					trackLabel = thisObj.getLanguageName(trackLang);
 				}
 
 				if ($(this).attr('default')) {
 					isDefault = true;
-				}
-				else if (trackLang === thisObj.lang) {
+				} else if (trackLang === thisObj.lang) {
 					// There is no @default attribute,
 					// but this is the user's/browser's default language
 					// so make it the default caption track
 					isDefault = true;
-				}
-				else {
+				} else {
 					isDefault = false;
 				}
 
@@ -5413,174 +5522,167 @@ var AblePlayerInstances = [];
 					thisObj.captionLang = trackLang;
 				}
 
-				thisObj.tracks.push({
-					'kind': $(this).attr('kind'),
-					'src': $(this).attr('src'),
-					'language': trackLang,
-					'label': trackLabel,
-					'def': isDefault
-				});
+				if ($(this).data('desc') !== undefined) {
+					forDesc = true;
+					thisObj.hasDescTracks = true;
+				} else {
+					forDesc = false;
+				}
 
-				if ($(this).attr('kind') === 'captions' || $(this).attr('kind') == 'subtitles') { 
-					// also add this track to a dedicated captions object 
-					captionTracks.push({
+				if (forDesc) {
+					thisObj.altTracks.push({
 						'kind': $(this).attr('kind'),
 						'src': $(this).attr('src'),
 						'language': trackLang,
 						'label': trackLabel,
-						'def': isDefault
+						'def': isDefault,
+						'desc': forDesc
 					});
+				} else {
+					thisObj.tracks.push({
+						'kind': $(this).attr('kind'),
+						'src': $(this).attr('src'),
+						'language': trackLang,
+						'label': trackLabel,
+						'def': isDefault,
+						'desc': forDesc
+					});
+				}
+
+				if (index == thisObj.$tracks.length - 1) {
+					// Remove 'default' attribute from all <track> elements
+					// This data has already been saved to this.tracks
+					// and some browsers will display the default captions, 
+					// despite all standard efforts to suppress them
+					thisObj.$media.find('track').removeAttr('default');
+					deferred.resolve();
 				}
 			});
 		}
-		if (captionTracks.length) {
-			// HTML captions or subtitles were found. 
-			// Use those, and sort them alphabetically. 
-			this.usingYouTubeCaptions = false; 
-			this.usingVimeoCaptions = false; 
-			for (i = 0; i < captionTracks.length; i++) { 
-				if (this.captions.length === 0) { // this is the first
-					this.captions.push({
-						'language': captionTracks[i].language,
-						'label': captionTracks[i].label,
-						'def': captionTracks[i].def
-					});
-				}
-				else { // there are already captions in the array
-					inserted = false;
-					for (j = 0; j < this.captions.length; j++) {
-						capLabel = captionTracks[i].label; 
-						if (capLabel.toLowerCase() < this.captions[j].label.toLowerCase()) {
-							// insert before track j
-							this.captions.splice(j,0,{
-								'language': captionTracks[i].language,
-								'label': captionTracks[i].label,
-								'def': captionTracks[i].def
-							});
-							inserted = true;
-							break;
-						}
-					}
-					if (!inserted) {
-						// just add track to the end
-						this.captions.push({
-							'language': captionTracks[i].language,
-							'label': captionTracks[i].label,
-							'def': captionTracks[i].def
-						});
-					}
-				}
-			}
-			deferred.resolve();
-		}
-		else {
+		else { 
+			// this media has no track elements 
 			// if this is a youtube or vimeo player, check there for captions/subtitles
 			if (this.player === 'youtube') {
 				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
-					thisObj.usingYouTubeCaptions = true; 	
+					if (thisObj.hasCaptions) { 
+						thisObj.usingYouTubeCaptions = true; 
+						if (thisObj.$captionsWrapper) {
+							thisObj.$captionsWrapper.remove();
+						}
+					}
 					deferred.resolve();
 				});
 			}
 			else if (this.player === 'vimeo') {
 				this.getVimeoCaptionTracks().then(function() {
-					thisObj.usingVimeoCaptions = true; 
+					if (thisObj.hasCaptions) { 
+						thisObj.usingVimeoCaptions = true; 
+						if (thisObj.$captionsWrapper) {
+							thisObj.$captionsWrapper.remove();
+						}
+					}
 					deferred.resolve();
 				});
 			}
 			else {
 				// this is neither YouTube nor Vimeo
-				// there just ain't no caption tracks
+				// there just ain't no tracks (captions or otherwise)
 				this.hasCaptions = false; 
-				if (this.mediaType === 'audio') {
-					this.$captionsContainer.addClass('captions-off');
+				if (thisObj.$captionsWrapper) {
+					thisObj.$captionsWrapper.remove();
 				}
 				deferred.resolve();
 			}
 		}
 		return promise;
+
 	};
 
-	AblePlayer.prototype.setupCaptions = function (track, trackLang, trackLabel, cues) {
+	AblePlayer.prototype.setupCaptions = function (track, cues) {
 
-		// Setup player for display of captions 
-		var thisObj, inserted, i, capLabel;
+		// Setup player for display of captions (one track at a time)
+		var thisObj, captions, inserted, i, capLabel;
 
-		thisObj = this;
-
+		// Insert track into captions array 
+		// in its proper alphabetical sequence by label  
 		if (typeof cues === 'undefined') {
 			cues = null;
 		}
-
-		if (this.captions.length) { 
-			// there are captions available 
-			this.hasCaptions = true; 
-			this.currentCaption = -1; // TODO: clarify purpose of this 
-			if (this.prefCaptions === 1) { 
-				this.captionsOn = true; 
-			}
-			else if (this.prefCaptions === 0) { 
-				this.captionsOn = false; 
-			}
-			else { 
-				// user has no prefs. Use default state.
-				if (this.defaultStateCaptions === 1)	{ 			
-					this.captionsOn = true; 
+		if (this.captions.length === 0) { // this is the first	
+			this.captions.push({
+				'language': track.language,
+				'label': track.label,
+				'def': track.def,
+				'cues': cues
+			});
+		} else { // there are already captions in the array
+			inserted = false;
+			for (i = 0; i < this.captions.length; i++) {
+				capLabel = track.label;
+				if (capLabel.toLowerCase() < this.captions[i].label.toLowerCase()) {
+					// insert before track i
+					this.captions.splice(i, 0, {
+						'language': track.language,
+						'label': track.label,
+						'def': track.def,
+						'cues': cues
+					});
+					inserted = true;
+					break;
 				}
-				else { 
-					this.captionsOn = false; 
-				}
+			}
+			if (!inserted) {
+				// just add track to the end
+				this.captions.push({
+					'language': track.language,
+					'label': track.label,
+					'def': track.def,
+					'cues': cues
+				});
 			}
 		}
-		else { 
-			this.hasCaptions = false; 
+
+		// there are captions available 
+		this.hasCaptions = true;
+		this.currentCaption = -1; 
+		if (this.prefCaptions === 1) {
+			this.captionsOn = true;
+		} else if (this.prefCaptions === 0) {
+			this.captionsOn = false;
+		} else {
+			// user has no prefs. Use default state.
+			if (this.defaultStateCaptions === 1) {
+				this.captionsOn = true;
+			} else {
+				this.captionsOn = false;
+			}
+		}
+		if (this.mediaType === 'audio' && this.captionsOn) {
+			this.$captionsContainer.removeClass('captions-off');
 		}
 
-		if (this.mediaType === 'audio' && !this.captionsOn) {
-			this.$captionsContainer.addClass('captions-off');
-		}
-
-		// Remove 'default' attribute from all <track> elements
-		// This data has already been saved to this.tracks
-		// and some browsers will display the default captions, despite all standard efforts to suppress them
-		this.$media.find('track').removeAttr('default');
-
-		if (this.hasCaptions && !this.$captionsDiv && 
-			!(this.usingYouTubeCaptions || this.usingVimeoCaptions)) {
-			// if not already created, create a pair of nested divs for displaying captions
-			// includes aria-hidden="true" because otherwise
-			// captions being added and removed causes sporadic changes to focus in JAWS
-			// (not a problem in NVDA or VoiceOver)
-			this.$captionsDiv = $('<div>',{
+		if (!this.$captionsWrapper || 
+			(this.$captionsWrapper && !($.contains(this.$ableDiv[0], this.$captionsWrapper[0])))) {
+			// captionsWrapper either doesn't exist, or exists in an orphaned state 
+			// Either way, it needs to be rebuilt...  
+			this.$captionsDiv = $('<div>', {
 				'class': 'able-captions',
 			});
-			this.$captionsWrapper = $('<div>',{
+			this.$captionsWrapper = $('<div>', {
 				'class': 'able-captions-wrapper',
 				'aria-hidden': 'true'
 			}).hide();
 			if (this.prefCaptionsPosition === 'below') {
 				this.$captionsWrapper.addClass('able-captions-below');
-			}
-			else {
+			} else {
 				this.$captionsWrapper.addClass('able-captions-overlay');
 			}
 			this.$captionsWrapper.append(this.$captionsDiv);
 			this.$captionsContainer.append(this.$captionsWrapper);
 		}
-		// Add cues to this.captions for the current language 
-		for (i = 0; i < this.captions.length; i++) { 
-			if (this.captions[i].language === trackLang) { 
-				this.captions[i].cues = cues; 
-			}
-		}
-		// Do the same for this.tracks 
-		for (i = 0; i < this.tracks.length; i++) { 
-			if (this.tracks[i].language === trackLang) { 
-				this.tracks[i].cues = cues; 
-			}
-		}
 	};
 
-	AblePlayer.prototype.setupDescriptions = function (track, cues, trackLang) {
+	AblePlayer.prototype.setupDescriptions = function (track, cues) {
 
 		// called via setupTracks() only if there is track with kind="descriptions"
 		// prepares for delivery of text description , in case it's needed
@@ -5590,24 +5692,23 @@ var AblePlayerInstances = [];
 		this.currentDescription = -1;
 		this.descriptions.push({
 			cues: cues,
-			language: trackLang
+			language: track.language
 		});
 	};
 
-	AblePlayer.prototype.setupChapters = function (track, cues, trackLang) {
+	AblePlayer.prototype.setupChapters = function (track, cues) {
 
 		// NOTE: WebVTT supports nested timestamps (to form an outline)
 		// This is not currently supported.
 
 		this.hasChapters = true;
-
 		this.chapters.push({
 			cues: cues,
-			language: trackLang
+			language: track.language
 		});
 	};
 
-	AblePlayer.prototype.setupMetadata = function(track, cues) {
+	AblePlayer.prototype.setupMetadata = function (track, cues, trackDesc) {
 
 		if (this.metaType === 'text') {
 			// Metadata is only supported if data-meta-div is provided
@@ -5620,23 +5721,22 @@ var AblePlayerInstances = [];
 					this.meta = cues;
 				}
 			}
-		}
-		else if (this.metaType === 'selector') {
+		} else if (this.metaType === 'selector') {
 			this.hasMeta = true;
 			this.visibleSelectors = [];
 			this.meta = cues;
 		}
 	};
 
-	AblePlayer.prototype.loadTextObject = function(src) {
+	AblePlayer.prototype.loadTextObject = function (src) {
 
-// TODO: Incorporate the following function, moved from setupTracks()
-// convert XMl/TTML captions file
-/*
-if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
-	trackContents = thisObj.ttml2webvtt(trackText);
-}
-*/
+		// TODO: Incorporate the following function, moved from setupTracks()
+		// convert XMl/TTML captions file
+		/*
+		if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
+			trackContents = thisObj.ttml2webvtt(trackText);
+		}
+		*/
 		var deferred, promise, thisObj, $tempDiv;
 
 		deferred = new $.Deferred();
@@ -5644,17 +5744,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		thisObj = this;
 
 		// create a temp div for holding data
-		$tempDiv = $('<div>',{
+		$tempDiv = $('<div>', {
 			style: 'display:none'
 		});
 		$tempDiv.load(src, function (trackText, status, req) {
 			if (status === 'error') {
 				if (thisObj.debug) {
-					console.log ('error reading file ' + src + ': ' + status);
+					console.log('error reading file ' + src + ': ' + status);
 				}
 				deferred.reject(src);
-			}
-			else {
+			} else {
 				deferred.resolve(src, trackText);
 			}
 			$tempDiv.remove();
@@ -5664,7 +5763,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 })(jQuery);
 
-
 (function ($) {
 	AblePlayer.prototype.initYouTubePlayer = function () {
 
@@ -5673,6 +5771,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		deferred = new $.Deferred();
 		promise = deferred.promise();
+
+		this.youTubePlayerReady = false; 
 
 		// if a described version is available && user prefers desription
 		// init player using the described version
@@ -5767,6 +5867,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			},
 			events: {
 				onReady: function () {
+					thisObj.youTubePlayerReady = true; 
 					if (!thisObj.playerWidth || !thisObj.playerHeight) { 
 						thisObj.getYouTubeDimensions();
 					}
@@ -5779,8 +5880,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
+						thisObj.restoreFocus();
 						thisObj.cueingPlaylistItem = false;
-						if (thisObj.playing) {
+						if (thisObj.playing || thisObj.okToPlay) {
 							// resume playing
 							thisObj.playMedia();
 						}
@@ -5788,14 +5890,16 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					if (thisObj.userClickedPlaylist) {
 						thisObj.userClickedPlaylist = false; // reset
 					}
+					if (thisObj.recreatingPlayer) { 
+						thisObj.recreatingPlayer = false; // reset
+					}
 					deferred.resolve();
 				},
 				onError: function (x) {
 					deferred.fail();
 				},
-				onStateChange: function (x) {					
+				onStateChange: function (x) {				
 					thisObj.getPlayerState().then(function(playerState) {
-
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
 							thisObj.playing = true;
@@ -6880,7 +6984,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 		else if (this.player === 'youtube') {
 			// uses 0 to 100 scale
-			return this.youTubePlayer.getVolume() / 10;
+			if (this.youTubePlayerReady) { 
+				return this.youTubePlayer.getVolume() / 10;
+			}
 		}
 		if (this.player === 'vimeo') {
 			// uses 0 to 1 scale
@@ -7252,7 +7358,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		// called when player is being built, or when a user
 		// toggles the Description button or changes a description-related preference
-		// In the latter two scendarios, this.refreshingDesc == true via control.js > handleDescriptionToggle()
 
 		// The following variables are applicable to delivery of description:
 		// defaultStateDescriptions == 'on' or 'off', defined by website owner (overridden by prefDesc) 
@@ -7267,25 +7372,32 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
 		// descReader == either 'browser' or 'screenreader'
 
-		var thisObj = this;
-		if (!this.refreshingDesc) {
-			// this is the initial build
-			// first, check to see if there's an open-described version of this video
-			// checks only the first source since if a described version is provided,
-			// it must be provided for all sources
-			this.descFile = this.$sources.first().attr('data-desc-src');
-			if (typeof this.descFile !== 'undefined') {
+		var deferred, promise, thisObj;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+		thisObj = this;
+
+		if (this.mediaType === 'audio') { 
+			deferred.resolve(); 
+		}
+
+		// check to see if there's an open-described version of this video
+		// checks only the first source since if a described version is provided,
+		// it must be provided for all sources
+		this.descFile = this.$sources.first().attr('data-desc-src');
+		if (typeof this.descFile !== 'undefined') {
+			this.hasOpenDesc = true;
+		}
+		else {
+			// there's no open-described version via data-desc-src,
+			// but what about data-youtube-desc-src or data-vimeo-desc-src?
+			// if these exist, they would have been defined earlier 
+			if (this.youTubeDescId || this.vimeoDescId) {
 				this.hasOpenDesc = true;
 			}
-			else {
-				// there's no open-described version via data-desc-src,
-				// but what about data-youtube-desc-src or data-vimeo-desc-src?
-				if (this.youTubeDescId || this.vimeoDescId) {
-					this.hasOpenDesc = true;
-				}
-				else { // there are no open-described versions from any source
-					this.hasOpenDesc = false;
-				}
+			else { // there are no open-described versions from any source
+				this.hasOpenDesc = false;
 			}
 		}
 
@@ -7332,7 +7444,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else { 			
 			this.descOn = false;
 		}
-
 		if (typeof this.$descDiv === 'undefined' && this.hasClosedDesc && this.descMethod === 'text') {		
 			this.injectTextDescriptionArea();
 		}
@@ -7378,7 +7489,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 			}
 		}
-		this.refreshingDesc = false;
+		deferred.resolve();
+		return promise; 
 	};
 
 	AblePlayer.prototype.usingDescribedVersion = function () {
@@ -7494,18 +7606,30 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// swap described and non-described source media, depending on which is playing
 		// this function is only called in two circumstances:
 		// 1. Swapping to described version when initializing player (based on user prefs & availability)
+		// (playerCreated == false)
 		// 2. User is toggling description
+		// (playerCreated == true)
+
 		var thisObj, i, origSrc, descSrc, srcType, newSource;
 
 		thisObj = this;
 
-		// get current time, and start new video at the same time
-		// NOTE: There is some risk in resuming playback at the same start time
-		// since the described version might include extended audio description (with pauses)
-		// and might therefore be longer than the non-described version
-		// The benefits though would seem to outweigh this risk
+		// get element that has focus at the time swap is initiated 
+		// after player is rebuilt, focus will return to that same element 
+		// (if it exists)
+		this.$focusedElement = $(':focus'); 
 
-		this.swapTime = this.elapsed; // video will scrub to this time after loaded (see event.js)
+		// get current time, and start new video at the same time
+		// (unless the videos are different durations, e.g., extended audio description
+		if (!this.hasDescTracks) { 
+			// video will scrub to this time in new video after loaded (see event.js)
+			this.swapTime = this.elapsed; 
+			if (this.duration) { 
+				// compare current video's duration with the duration of the new video after swap
+				// don't swap to the elapsed time if the durations are different 
+				this.prevDuration = this.duration; 
+			}	
+		}
 		if (this.descOn) {
 			// user has requested the described version
 			this.showAlert(this.tt.alertDescribedVersion);
@@ -7514,6 +7638,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// user has requested the non-described version
 			this.showAlert(this.tt.alertNonDescribedVersion);
 		}
+
 		if (this.player === 'html5') {
 
 			if (this.usingDescribedVersion()) {
@@ -7525,14 +7650,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
 					}
-				}
-				// No need to check for this.initializing
-				// This function is only called during initialization
-				// if swapping from non-described to described
+				}				
 				this.swappingSrc = true;
+				this.paused = true; 
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
+				this.descDuration = this.duration; 
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-desc-src (if one exists)
 					// then store original source in a new data-orig-src attribute
@@ -7545,27 +7669,39 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					}
 				}
 				this.swappingSrc = true;
+				this.paused = true;
 			}
-
-			// now reload the source file.
-			if (this.player === 'html5') {
-				this.media.load();
+			if (this.recreatingPlayer) { 
+				// stopgap to prevent multiple firings of recreatePlayer()
+				return; 
+			}	
+			if (this.playerCreated) { 
+				// delete old player, then recreate it with new source & tracks 
+				this.deletePlayer('swap-desc-html'); 			
+				this.recreatePlayer().then(function() { 
+					// reload the source file.
+					// swappingSrc and hasDescTracks will be used as needed 
+					// to adjust available tracks, duration, etc. 
+					thisObj.media.load();
+				});
 			}
+			else { 
+				// player is in the process of being created
+				// no need to recreate it 	
+			} 
 		}
 		else if (this.player === 'youtube') {
 
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeYouTubeId = this.youTubeId;
-				this.showAlert(this.tt.alertNonDescribedVersion);
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
 				this.activeYouTubeId = this.youTubeDescId;
-				this.showAlert(this.tt.alertDescribedVersion);
 			}
 			if (typeof this.youTubePlayer !== 'undefined') {
-
+				thisObj.swappingSrc = true; 
 				if (thisObj.playing) {
 					// loadVideoById() loads and immediately plays the new video at swapTime
 					thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
@@ -7575,6 +7711,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
 				}
 			}
+			if (this.playerCreated) { 
+				this.deletePlayer('swap-desc-youtube'); 				
+			}
+			// player needs to be recreated with new source 
+			if (this.recreatingPlayer) { 
+				// stopgap to prevent multiple firings of recreatePlayer()
+				return; 
+			}	
+			this.recreatePlayer().then(function() { 
+				// nothing to do here 
+				// next steps occur when youtube onReady event fires 
+				// see youtube.js > finalizeYoutubeInit() 
+			});				
 		}
 		else if (this.player === 'vimeo') {
 			if (this.usingDescribedVersion()) {
@@ -7587,19 +7736,28 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				this.activeVimeoId = this.vimeoDescId;
 				this.showAlert(this.tt.alertDescribedVersion);
 			}
-			// load the new video source
-			this.vimeoPlayer.loadVideo(this.activeVimeoId).then(function() {
-
-				if (thisObj.playing) {
-					// video was playing when user requested an alternative version
-					// seek to swapTime and continue playback (playback happens automatically)
-					thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
-				}
-				else {
-					// Vimeo autostarts immediately after video loads
-					// The "Described" button should not trigger playback, so stop this before the user notices.
-					thisObj.vimeoPlayer.pause();
-				}
+			if (this.playerCreated) { 
+				this.deletePlayer('swap-desc-vimeo'); 				
+			}
+			// player needs to be recreated with new source 
+			if (this.recreatingPlayer) { 
+				// stopgap to prevent multiple firings of recreatePlayer()
+				return; 
+			}	
+			this.recreatePlayer().then(function() { 
+				// load the new video source
+				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
+					if (thisObj.playing) {
+						// video was playing when user requested an alternative version
+						// seek to swapTime and continue playback (playback happens automatically)
+						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+					}
+					else {
+						// Vimeo autostarts immediately after video loads
+						// The "Described" button should not trigger playback, so stop this before the user notices.
+						thisObj.vimeoPlayer.pause();
+					}
+				});
 			});
 		}
 	};
@@ -7986,7 +8144,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				duration = this.media.duration;
 			}
 			else if (this.player === 'youtube') {
-				if (this.youTubePlayer) {
+				if (this.youTubePlayerReady) {
 					duration = this.youTubePlayer.getDuration();
 				}
 				else { // the YouTube player hasn't initialized yet
@@ -8035,7 +8193,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				elapsed = this.media.currentTime;
 			}
 			else if (this.player === 'youtube') {
-				if (this.youTubePlayer) {
+				if (this.youTubePlayerReady) {
 					elapsed = this.youTubePlayer.getCurrentTime();
 				}
 				else { // the YouTube player hasn't initialized yet
@@ -8064,6 +8222,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		// Commented out the following in 3.2.1 - not sure of its intended purpose
 		// It can be useful to know player state even when swapping src
 		// and the overhead is seemingly minimal
+		// TODO - Investigate this further. Delete if it's not needed
 		/*
 		if (this.swappingSrc) {
 			return;
@@ -8088,7 +8247,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				deferred.resolve('playing');
 			}
 		}
-		else if (this.player === 'youtube' && this.youTubePlayer) {
+		else if (this.player === 'youtube' && this.youTubePlayerReady) {
 			var state = this.youTubePlayer.getPlayerState();
 			if (state === -1 || state === 5) {
 				deferred.resolve('stopped');
@@ -8141,8 +8300,13 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		else if (this.player === 'youtube') {
 			// Youtube supports varying playback rates per video.	 
 			// Only expose controls if more than one playback rate is available.
-			if (this.youTubePlayer.getAvailablePlaybackRates().length > 1) {
-				return true;
+			if (this.youTubePlayerReady) { 
+				if (this.youTubePlayer.getAvailablePlaybackRates().length > 1) {
+					return true;
+				}
+				else { 
+					return false;
+				}
 			}
 			else {
 				return false;
@@ -8179,7 +8343,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			return this.media.playbackRate;
 		}
 		else if (this.player === 'youtube') {
-			return this.youTubePlayer.getPlaybackRate();
+			if (this.youTubePlayerReady) {
+				return this.youTubePlayer.getPlaybackRate();
+			}
 		}
 	};
 
@@ -8237,6 +8403,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 		}
 		else if (this.player === 'youtube') {
+
 			this.youTubePlayer.playVideo();
 			if (typeof this.$posterImg !== 'undefined') {
 				this.$posterImg.hide();
@@ -8487,7 +8654,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 			else if (this.player === 'youtube') {
 				if (this.seekBar) {
-					this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+					if (this.youTubePlayerReady) {
+						this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+					}
 				}
 			}
 			else if (this.player === 'vimeo') {
@@ -8931,17 +9100,19 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
 		}
 		else if (this.player === 'youtube') {
-			rates = this.youTubePlayer.getAvailablePlaybackRates();
-			currentRate = this.getPlaybackRate();
-			index = rates.indexOf(currentRate);
-			if (index === -1) {
-				console.log('ERROR: Youtube returning unknown playback rate ' + currentRate.toString());
-			}
-			else {
-				index += dir;
-				// Can only increase or decrease rate if there's another rate available.
-				if (index < rates.length && index >= 0) {
-					this.setPlaybackRate(rates[index]);
+			if (this.youTubePlayerReady) {
+				rates = this.youTubePlayer.getAvailablePlaybackRates();
+				currentRate = this.getPlaybackRate();
+				index = rates.indexOf(currentRate);
+				if (index === -1) {
+					console.log('ERROR: Youtube returning unknown playback rate ' + currentRate.toString());
+				}
+				else {
+					index += dir;
+					// Can only increase or decrease rate if there's another rate available.
+					if (index < rates.length && index >= 0) {
+						this.setPlaybackRate(rates[index]);
+					}
 				}
 			}
 		}
@@ -9088,7 +9259,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// NOTE: now showing $descDiv here if previously hidden 
 			// that's handled elsewhere, dependent on whether there's text to show
 		}
-		this.refreshingDesc = true;
 		this.initDescription();
 		this.refreshControls('descriptions');
 	};
@@ -9887,7 +10057,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 (function ($) {
 	AblePlayer.prototype.updateCaption = function (time) {
 
-		if (!this.usingYouTubeCaptions && (typeof this.$captionsWrapper !== 'undefined')) {
+		if (!this.usingYouTubeCaptions && !this.usingVimeoCaptions && 
+			(typeof this.$captionsWrapper !== 'undefined')) {
 			if (this.captionsOn) {
 				this.$captionsWrapper.show();
 				if (typeof time !== 'undefined') {
@@ -10048,7 +10219,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 
 		var c, thisCaption, captionText;
 		var cues;
-		if (this.selectedCaptions) {
+		if (this.selectedCaptions.cues.length) {
 			cues = this.selectedCaptions.cues;
 		}
 		else if (this.captions.length >= 1) {
@@ -10417,8 +10588,8 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 						$clickedItem = $(this).closest('li');
 						$chaptersList = $(this).closest('ul').find('li');
 						thisChapterIndex = $chaptersList.index($clickedItem);
-						$chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
-						$clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
+						$chaptersList.removeClass('able-current-chapter').removeAttr('aria-current');
+						$clickedItem.addClass('able-current-chapter').attr('aria-current','true');
 						// Need to updateChapter before seeking to it
 						// Otherwise seekBar is redrawn with wrong chapterDuration and/or chapterTime
 						thisObj.updateChapter(time);
@@ -10445,7 +10616,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				$chapterItem.append($chapterButton);
 				$chaptersList.append($chapterItem);
 				if (this.defaultChapter === cues[thisChapter].id) {
-					$chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+					$chapterButton.attr('aria-current','true').parent('li').addClass('able-current-chapter');
 					this.currentChapter = cues[thisChapter];
 					hasDefault = true;
 				}
@@ -10453,7 +10624,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			if (!hasDefault) {
 				// select the first chapter
 				this.currentChapter = cues[0];
-				$chaptersList.find('button').first().attr('aria-selected','true')
+				$chaptersList.find('button').first().attr('aria-current','true')
 					.parent('li').addClass('able-current-chapter');
 			}
 			this.$chaptersNav.html($chaptersList);
@@ -10502,9 +10673,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 				}
 				if (typeof this.$chaptersDiv !== 'undefined') {
 					// chapters are listed in an external container
-					this.$chaptersDiv.find('ul').find('li').removeClass('able-current-chapter').attr('aria-selected','');
+					this.$chaptersDiv.find('ul').find('li')
+						.removeClass('able-current-chapter')
+						.removeAttr('aria-current');
 					this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
-						.addClass('able-current-chapter').attr('aria-selected','true');
+						.addClass('able-current-chapter')
+						.attr('aria-current','true');
 				}
 			}
 		}
@@ -10740,29 +10914,36 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
 
-		if (!this.transcriptType) {
-			// previously set transcriptType to null since there are no <track> elements
-			// check again to see if captions have been collected from other sources (e.g., YouTube)
-
-			if (this.captions.length && (!(this.usingYouTubeCaptions || this.usingVimeoCaptions))) {
-				// captions are possible! Use the default type (popup)
-				// if other types ('external' and 'manual') were desired, transcriptType would not be null here
-				this.transcriptType = 'popup';
-			}
-		}
-		if (this.transcriptType) {
-			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
-				this.injectTranscriptArea();
-				deferred.resolve();
-			}
-			else if (this.transcriptType === 'manual') {
-				this.setupManualTranscript();
-				deferred.resolve();
-			}
-		}
-		else {
-			// there is no transcript
+		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
+			// a transcript is not possible 
+			this.transcriptType = null; 
 			deferred.resolve();
+		}
+		else { 
+			if (!this.transcriptType) {
+				// previously set transcriptType to null since there are no <track> elements
+				// check again to see if captions have been collected from other sources (e.g., YouTube)
+
+				if (this.captions.length) {
+					// captions are possible! Use the default type (popup)
+					// if other types ('external' and 'manual') were desired, transcriptType would not be null here
+					this.transcriptType = 'popup';
+				}
+			}
+			if (this.transcriptType) {
+				if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
+					this.injectTranscriptArea();
+					deferred.resolve();
+				}
+				else if (this.transcriptType === 'manual') {
+					this.setupManualTranscript();
+					deferred.resolve();
+				}
+			}
+			else {
+				// there is no transcript
+				deferred.resolve();
+			}
 		}
 		return promise;
 	};
@@ -10931,7 +11112,9 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		if (!this.transcriptType) {
 			return;
 		}
-
+		if (this.playerCreated && !this.$transcriptArea) { 
+			return; 
+		}
 		if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
 
 			var chapters, captions, descriptions;
@@ -10989,7 +11172,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			}
 
 			var div = this.generateTranscript(chapters || [], captions || [], descriptions || []);
-
 			this.$transcriptDiv.html(div);
 			// reset transcript selected <option> to this.transcriptLang
 			if (this.$transcriptLanguageSelect) {
@@ -11625,17 +11807,28 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		var thisObj = this;
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 			thisObj.duration = mediaTimes['duration'];
+			if (thisObj.descOn) { 
+				thisObj.descDuration = thisObj.duration; 
+			}
 			thisObj.elapsed = mediaTimes['elapsed'];
 			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
+/*
+				if (this.prevDuration) { 
+					if (thisObj.duration !== thisObj.prevDuration) {
+						// don't swap ahead; videos are different durations 
+						thisObj.swapTime = 0; 
+					}
+				}
+*/				
 				if (thisObj.swapTime === thisObj.elapsed) {
 					// described version been swapped and media has scrubbed to time of previous version
 					if (thisObj.playing) {
 						// resume playback
 						thisObj.playMedia();
-						// reset vars
-						thisObj.swappingSrc = false;
 						thisObj.swapTime = null;
 					}
+					thisObj.swappingSrc = false;
+					thisObj.restoreFocus();
 				}
 			}
 			else {
@@ -11698,6 +11891,10 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			// safe to reset now
 			this.cueingPlaylistItem = false;
 		}
+		if (this.recreatingPlayer) { 
+			// same as above; different bugs 
+			this.recreatingPlayer = false; 
+		}
 		if (this.swappingSrc === true) {
 			// new source file has just been loaded
 			if (this.swapTime > 0) {
@@ -11711,12 +11908,36 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					this.playMedia();
 				}
 				this.swappingSrc = false; // swapping is finished
+				this.restoreFocus(); 
 			}
 		}
 		this.refreshControls('init');
 	};
 
 	// End Media events
+
+	AblePlayer.prototype.restoreFocus = function() { 
+
+		// function called after player has been rebuilt (during media swap)
+		// the original focusedElement no longer exists, 
+		// but this function finds a match in the new player 
+		// and places focus there 
+
+		var classList; 
+
+		if (this.$focusedElement) { 
+			
+			if ((this.$focusedElement).attr('role') === 'button') { 
+				classList = this.$focusedElement.attr("class").split(/\s+/);
+				$.each(classList, function(index, item) {
+					if (item.substr(0,20) === 'able-button-handler-') {
+						$('div.able-controller div.' + item).focus();  
+					}
+				});
+			}
+		}
+
+	};
 
 	AblePlayer.prototype.addSeekbarListeners = function () {
 
@@ -12131,7 +12352,7 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 					// 'pause' was triggered automatically, not initiated by user
 					// this happens in some browsers when swapping source
 					// (e.g., between tracks in a playlist or swapping description)
-					if (thisObj.hasPlaylist || thisObj.swappingSrc) {
+					if (thisObj.hasPlaylist || thisObj.swappingSrc) {						
 						// do NOT set playing to false.
 						// doing so prevents continual playback after new track is loaded
 					}
@@ -12152,9 +12373,6 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 			})
 			.on('volumechange',function() {
 				thisObj.volume = thisObj.getVolume();
-				if (thisObj.debug) {
-					console.log('media volume change to ' + thisObj.volume + ' (' + thisObj.volumeButton + ')');
-				}
 			})
 			.on('error',function() {
 				if (thisObj.debug) {
@@ -14913,10 +15131,12 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		}
 	};
 
-	AblePlayer.prototype.setupVtsTracks = function(kind, lang, label, src, contents) {
+	AblePlayer.prototype.setupVtsTracks = function(kind, lang, trackDesc, label, src, contents) {
+
+		// TODO: Add support for trackDesc 
+		// (to destinguish between tracks for the decribed vs non-described versions)		
 
 		// Called from tracks.js
-
 		var srcFile, vtsCues;
 
 		srcFile = this.getFilenameFromPath(src);
@@ -16050,8 +16270,38 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 		return promise;
 	};
 
-	AblePlayer.prototype.getVimeoId = function (url) {
+	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId, width) {
 
+		// this is a placeholder, copied from getYouTubePosterUrl()
+		// Vimeo doesn't seem to have anything similar, 
+		// nor does it seem to be possible to get the poster via the Vimeo API
+		// Vimeo playlist support (with thumbnail images) may require use of data-poster 
+
+		// return a URL for retrieving a YouTube poster image
+		// supported values of width: 120, 320, 480, 640
+
+		var url = 'https://img.youtube.com/vi/' + youTubeId;
+		if (width == '120') {
+			// default (small) thumbnail, 120 x 90
+			return url + '/default.jpg';
+		}
+		else if (width == '320') {
+			// medium quality thumbnail, 320 x 180
+			return url + '/hqdefault.jpg';
+		}
+		else if (width == '480') {
+			// high quality thumbnail, 480 x 360
+			return url + '/hqdefault.jpg';
+		}
+		else if (width == '640') {
+			// standard definition poster image, 640 x 480
+			return url + '/sddefault.jpg';
+		}
+		return false;
+	};	
+
+	AblePlayer.prototype.getVimeoId = function (url) {
+		
 		// return a Vimeo ID, extracted from a full Vimeo URL
 		// Supported URL patterns are anything containing 'vimeo.com'
 		//  and ending with a '/' followed by the ID. 
@@ -16059,7 +16309,11 @@ if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml
 	
 		var idStartPos, id; 
 
-		if (url.indexOf('vimeo.com') !== -1) { 
+		if (typeof url === 'number') { 
+			// this is likely already a vimeo ID 
+			return url; 
+		}
+		else if (url.indexOf('vimeo.com') !== -1) { 
 			// this is a full Vimeo URL 
 			url = url.trim(); 
 			idStartPos = url.lastIndexOf('/') + 1; 

@@ -176,10 +176,12 @@
 		}
 	};
 
-	AblePlayer.prototype.setupVtsTracks = function(kind, lang, label, src, contents) {
+	AblePlayer.prototype.setupVtsTracks = function(kind, lang, trackDesc, label, src, contents) {
+
+		// TODO: Add support for trackDesc 
+		// (to destinguish between tracks for the decribed vs non-described versions)		
 
 		// Called from tracks.js
-
 		var srcFile, vtsCues;
 
 		srcFile = this.getFilenameFromPath(src);

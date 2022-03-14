@@ -10,6 +10,7 @@
 
 	// YouTube Player API for iframe Embeds
 	https://developers.google.com/youtube/iframe_api_reference
+
 	// YouTube Player Parameters
 	https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
 
@@ -117,6 +118,16 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.hasPoster = false;
+		}
+
+		// get height and width attributes, if present 
+		// and add them to variables 
+		// Not currently used, but might be useful for resizing player  
+		if ($(media).attr('width')) { 
+			this.width = $(media).attr('width'); 
+		}
+		if ($(media).attr('height')) { 
+			this.height = $(media).attr('height');
 		}
 
 		// start-time
@@ -264,6 +275,9 @@ var AblePlayerInstances = [];
 			this.transcriptSrc = $(media).data('transcript-src');
 			if (this.transcriptSrcHasRequiredParts()) {
 				this.transcriptType = 'manual';
+			}
+			else { 
+				console.log('ERROR: Able Player transcript is missing required parts');
 			}
 		}
 		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
@@ -603,6 +617,7 @@ var AblePlayerInstances = [];
 
 		var thisObj = this;
 		this.initializing = true; // will remain true until entire sequence of function calls is complete
+
 		this.reinitialize().then(function () {
 			if (!thisObj.player) {
 				// No player for this media, show last-line fallback.
@@ -611,12 +626,15 @@ var AblePlayerInstances = [];
 			else {
 				thisObj.setupInstance().then(function () {
 					thisObj.setupInstancePlaylist();
-					if (!thisObj.hasPlaylist) {
+					if (thisObj.hasPlaylist) {
 						// for playlists, recreatePlayer() is called from within cuePlaylistItem()
-						thisObj.recreatePlayer();
 					}
-					thisObj.initializing = false;
-					thisObj.playerCreated = true; // remains true until browser is refreshed
+					else {
+						thisObj.recreatePlayer().then(function() { 
+							thisObj.initializing = false;
+							thisObj.playerCreated = true; // remains true until browser is refreshed		
+						});
+					}
 				});
 			}
 		});

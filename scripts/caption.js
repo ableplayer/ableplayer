@@ -1,7 +1,8 @@
 (function ($) {
 	AblePlayer.prototype.updateCaption = function (time) {
 
-		if (!this.usingYouTubeCaptions && (typeof this.$captionsWrapper !== 'undefined')) {
+		if (!this.usingYouTubeCaptions && !this.usingVimeoCaptions && 
+			(typeof this.$captionsWrapper !== 'undefined')) {
 			if (this.captionsOn) {
 				this.$captionsWrapper.show();
 				if (typeof time !== 'undefined') {
@@ -162,7 +163,7 @@
 
 		var c, thisCaption, captionText;
 		var cues;
-		if (this.selectedCaptions) {
+		if (this.selectedCaptions.cues.length) {
 			cues = this.selectedCaptions.cues;
 		}
 		else if (this.captions.length >= 1) {

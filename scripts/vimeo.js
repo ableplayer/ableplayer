@@ -219,8 +219,38 @@
 		return promise;
 	};
 
-	AblePlayer.prototype.getVimeoId = function (url) {
+	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId, width) {
 
+		// this is a placeholder, copied from getYouTubePosterUrl()
+		// Vimeo doesn't seem to have anything similar, 
+		// nor does it seem to be possible to get the poster via the Vimeo API
+		// Vimeo playlist support (with thumbnail images) may require use of data-poster 
+
+		// return a URL for retrieving a YouTube poster image
+		// supported values of width: 120, 320, 480, 640
+
+		var url = 'https://img.youtube.com/vi/' + youTubeId;
+		if (width == '120') {
+			// default (small) thumbnail, 120 x 90
+			return url + '/default.jpg';
+		}
+		else if (width == '320') {
+			// medium quality thumbnail, 320 x 180
+			return url + '/hqdefault.jpg';
+		}
+		else if (width == '480') {
+			// high quality thumbnail, 480 x 360
+			return url + '/hqdefault.jpg';
+		}
+		else if (width == '640') {
+			// standard definition poster image, 640 x 480
+			return url + '/sddefault.jpg';
+		}
+		return false;
+	};	
+
+	AblePlayer.prototype.getVimeoId = function (url) {
+		
 		// return a Vimeo ID, extracted from a full Vimeo URL
 		// Supported URL patterns are anything containing 'vimeo.com'
 		//  and ending with a '/' followed by the ID. 
@@ -228,7 +258,11 @@
 	
 		var idStartPos, id; 
 
-		if (url.indexOf('vimeo.com') !== -1) { 
+		if (typeof url === 'number') { 
+			// this is likely already a vimeo ID 
+			return url; 
+		}
+		else if (url.indexOf('vimeo.com') !== -1) { 
 			// this is a full Vimeo URL 
 			url = url.trim(); 
 			idStartPos = url.lastIndexOf('/') + 1; 

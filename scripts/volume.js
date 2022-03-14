@@ -391,7 +391,9 @@
 		}
 		else if (this.player === 'youtube') {
 			// uses 0 to 100 scale
-			return this.youTubePlayer.getVolume() / 10;
+			if (this.youTubePlayerReady) { 
+				return this.youTubePlayer.getVolume() / 10;
+			}
 		}
 		if (this.player === 'vimeo') {
 			// uses 0 to 1 scale

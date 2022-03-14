@@ -117,7 +117,7 @@
 				duration = this.media.duration;
 			}
 			else if (this.player === 'youtube') {
-				if (this.youTubePlayer) {
+				if (this.youTubePlayerReady) {
 					duration = this.youTubePlayer.getDuration();
 				}
 				else { // the YouTube player hasn't initialized yet
@@ -166,7 +166,7 @@
 				elapsed = this.media.currentTime;
 			}
 			else if (this.player === 'youtube') {
-				if (this.youTubePlayer) {
+				if (this.youTubePlayerReady) {
 					elapsed = this.youTubePlayer.getCurrentTime();
 				}
 				else { // the YouTube player hasn't initialized yet
@@ -195,6 +195,7 @@
 		// Commented out the following in 3.2.1 - not sure of its intended purpose
 		// It can be useful to know player state even when swapping src
 		// and the overhead is seemingly minimal
+		// TODO - Investigate this further. Delete if it's not needed
 		/*
 		if (this.swappingSrc) {
 			return;
@@ -219,7 +220,7 @@
 				deferred.resolve('playing');
 			}
 		}
-		else if (this.player === 'youtube' && this.youTubePlayer) {
+		else if (this.player === 'youtube' && this.youTubePlayerReady) {
 			var state = this.youTubePlayer.getPlayerState();
 			if (state === -1 || state === 5) {
 				deferred.resolve('stopped');
@@ -272,8 +273,13 @@
 		else if (this.player === 'youtube') {
 			// Youtube supports varying playback rates per video.	 
 			// Only expose controls if more than one playback rate is available.
-			if (this.youTubePlayer.getAvailablePlaybackRates().length > 1) {
-				return true;
+			if (this.youTubePlayerReady) { 
+				if (this.youTubePlayer.getAvailablePlaybackRates().length > 1) {
+					return true;
+				}
+				else { 
+					return false;
+				}
 			}
 			else {
 				return false;
@@ -310,7 +316,9 @@
 			return this.media.playbackRate;
 		}
 		else if (this.player === 'youtube') {
-			return this.youTubePlayer.getPlaybackRate();
+			if (this.youTubePlayerReady) {
+				return this.youTubePlayer.getPlaybackRate();
+			}
 		}
 	};
 
@@ -368,6 +376,7 @@
 			}
 		}
 		else if (this.player === 'youtube') {
+
 			this.youTubePlayer.playVideo();
 			if (typeof this.$posterImg !== 'undefined') {
 				this.$posterImg.hide();
@@ -618,7 +627,9 @@
 			}
 			else if (this.player === 'youtube') {
 				if (this.seekBar) {
-					this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+					if (this.youTubePlayerReady) {
+						this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
+					}
 				}
 			}
 			else if (this.player === 'vimeo') {
@@ -1062,17 +1073,19 @@
 			this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
 		}
 		else if (this.player === 'youtube') {
-			rates = this.youTubePlayer.getAvailablePlaybackRates();
-			currentRate = this.getPlaybackRate();
-			index = rates.indexOf(currentRate);
-			if (index === -1) {
-				console.log('ERROR: Youtube returning unknown playback rate ' + currentRate.toString());
-			}
-			else {
-				index += dir;
-				// Can only increase or decrease rate if there's another rate available.
-				if (index < rates.length && index >= 0) {
-					this.setPlaybackRate(rates[index]);
+			if (this.youTubePlayerReady) {
+				rates = this.youTubePlayer.getAvailablePlaybackRates();
+				currentRate = this.getPlaybackRate();
+				index = rates.indexOf(currentRate);
+				if (index === -1) {
+					console.log('ERROR: Youtube returning unknown playback rate ' + currentRate.toString());
+				}
+				else {
+					index += dir;
+					// Can only increase or decrease rate if there's another rate available.
+					if (index < rates.length && index >= 0) {
+						this.setPlaybackRate(rates[index]);
+					}
 				}
 			}
 		}
@@ -1219,7 +1232,6 @@
 			// NOTE: now showing $descDiv here if previously hidden 
 			// that's handled elsewhere, dependent on whether there's text to show
 		}
-		this.refreshingDesc = true;
 		this.initDescription();
 		this.refreshControls('descriptions');
 	};

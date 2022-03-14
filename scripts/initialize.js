@@ -411,16 +411,14 @@
 					this.iconType = 'image';
 				}
 			}
-			else { // window.getComputedStyle is not supported (IE 8 and earlier)
+			else { 
+				// window.getComputedStyle is not supported (IE 8 and earlier)
 				// No known way to detect computed font
 				// The following retrieves the value from the style sheet, not the computed font
 				// controllerFont = $tempButton.get(0).currentStyle.fontFamily;
 				// It will therefore return "able", even if the user is overriding that with a custom style sheet
 				// To be safe, use images
 				this.iconType = 'image';
-			}
-			if (this.debug) {
-				console.log('Using ' + this.iconType + 's for player controls');
 			}
 			if (typeof $tempButton !== 'undefined') {
 				$tempButton.remove();
@@ -474,6 +472,19 @@
 					$(this).find('button').prepend($youTubeImg);
 				});
 
+				// check to see if list item has Vimeo as its source
+				// if it does, inject a thumbnail from Vimeo
+				var $vimeoVideos = $(this).find('li[data-vimeo-id]');
+				$vimeoVideos.each(function() {
+					var vimeoId = $(this).attr('data-youtube-id');
+					var vimeoPoster = thisObj.getVimeoPosterUrl(vimeoId,'120');
+					var $vimeoImg = $('<img>',{
+						'src': vimeoPoster,
+						'alt': ''
+					});
+					$(this).find('button').prepend($vimeoImg);
+				});
+
 				// add accessibility to the list markup
 				$(this).find('li span').attr('aria-hidden','true');
 				thisObj.playlistIndex = 0;
@@ -506,20 +517,35 @@
 			// redefine this.$sources now that media contains one or more <source> elements
 			this.$sources = this.$media.find('source');
 		}
-
 	};
 
 	AblePlayer.prototype.recreatePlayer = function () {
 
 		// Creates the appropriate player for the current source.
-		var thisObj, prefsGroups, i;
-		thisObj = this;
+		// This function is called each time a new media instance is loaded 
+		// e.g., 
+		// User clicks on an item in a playlist 
+		// User swaps to/from described version of video 
+		// Blocks of code that only need to be executed once are controlled 
+		// by this.playerCreated 
 
 		// TODO: Ensure when recreating player that we carry over the mediaId
 		if (!this.player) {
 			console.log("Can't create player; no appropriate player type detected.");
 			return;
 		}
+
+		var deferred, promise, thisObj, prefsGroups, i;
+
+		deferred = new $.Deferred();
+		promise = deferred.promise();
+		thisObj = this;
+
+		this.playerDeleted = false; // reset after deletePlayer() 
+
+		// set temp stopgap to prevent this function from executing again before finished
+		this.recreatingPlayer = true; 
+
 		if (!this.playerCreated) {
 			// only call these functions once
 			this.loadCurrentPreferences();
@@ -527,90 +553,99 @@
 			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
 		}
 
-		// call all remaining functions each time a new media instance is loaded
-
 		this.initSignLanguage();
 
 		this.initPlayer().then(function() {
 
-			thisObj.setupTracks().then(function() {
+			thisObj.getTracks().then(function() { 
 
-				thisObj.getBrowserVoices();
+				thisObj.initDescription().then(function() {
 
-				thisObj.setupTranscript().then(function() {
+					thisObj.setupTracks().then(function() {
 
-					thisObj.initStenoFrame().then(function() {
-
-						if (thisObj.stenoMode && thisObj.$stenoFrame) {
-							thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+						if (thisObj.hasClosedDesc) { 
+							if (!thisObj.$descDiv || 
+								(thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {
+								// descDiv either doesn't exist, or exists in an orphaned state 
+								// Either way, it needs to be rebuilt...  
+								thisObj.injectTextDescriptionArea();
+							}
 						}
-						thisObj.getMediaTimes().then(function(mediaTimes) {
+						thisObj.getBrowserVoices();
 
-							thisObj.duration = mediaTimes['duration'];
-							thisObj.elapsed = mediaTimes['elapsed'];
-							thisObj.setFullscreen(false);
+						thisObj.setupTranscript().then(function() {
 
-							if (typeof thisObj.volume === 'undefined') {
-								thisObj.volume = thisObj.defaultVolume;
-							}
-							if (thisObj.volume) {
-								thisObj.setVolume(thisObj.volume);
-							}
-							if (thisObj.transcriptType) {
-								thisObj.addTranscriptAreaEvents();
-								thisObj.updateTranscript();
-							}
-							if (thisObj.mediaType === 'video') {
-								thisObj.initDescription();
-							}
-							if (thisObj.captions.length) {
-								thisObj.initDefaultCaption();
-							}
+							thisObj.initStenoFrame().then(function() {
 
-							// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
-							// This tells browsers to ignore the text tracks so Able Player can handle them
-							// However, timing is critical as browsers - especially Safari - tend to ignore this request
-							// unless it's sent late in the intialization process.
-							// If browsers ignore the request, the result is redundant captions
-							thisObj.setMediaAttributes();
-							thisObj.addControls();
+								if (thisObj.stenoMode && thisObj.$stenoFrame) {
+									thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
+								}
+								thisObj.getMediaTimes().then(function(mediaTimes) {
 
-							thisObj.addEventListeners();
+									thisObj.duration = mediaTimes['duration'];
+									thisObj.elapsed = mediaTimes['elapsed'];
+									thisObj.setFullscreen(false);
 
-							// inject each of the hidden forms that will be accessed from the Preferences popup menu
-							prefsGroups = thisObj.getPreferencesGroups();
-							for (i = 0; i < prefsGroups.length; i++) {
-								thisObj.injectPrefsForm(prefsGroups[i]);
-							}
-							thisObj.setupPopups();
-							thisObj.updateCaption();
-							thisObj.injectVTS();
-							if (thisObj.chaptersDivLocation) {
-								thisObj.populateChaptersDiv();
-							}
-							thisObj.showSearchResults();
+									if (typeof thisObj.volume === 'undefined') {
+										thisObj.volume = thisObj.defaultVolume;
+									}
+									if (thisObj.volume) {
+										thisObj.setVolume(thisObj.volume);
+									}
+									if (thisObj.transcriptType) {
+										thisObj.addTranscriptAreaEvents();
+										thisObj.updateTranscript();
+									}
+									if (thisObj.captions.length) {
+										thisObj.initDefaultCaption();
+									}
 
-							// Go ahead and load media, without user requesting it
-							// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-							// However, the media needs to load before the 'loadedmetadata' event is fired
-							// and until that happens we can't get the media's duration
-							if (thisObj.player === 'html5') {
-								thisObj.$media[0].load();
-							}
-							// refreshControls is called twice building/initializing the player
-							// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
-							setTimeout(function() {
-								thisObj.refreshControls('init');
-							},100);
-						}); 
-					}); 
-				});
-			 
-			}); 
+									// setMediaAttributes() sets textTrack.mode to 'disabled' for all tracks
+									// This tells browsers to ignore the text tracks so Able Player can handle them
+									// However, timing is critical as browsers - especially Safari - tend to ignore this request
+									// unless it's sent late in the intialization process.
+									// If browsers ignore the request, the result is redundant captions
+									thisObj.setMediaAttributes();
+									thisObj.addControls();
+									thisObj.addEventListeners();
+
+									// inject each of the hidden forms that will be accessed from the Preferences popup menu
+									prefsGroups = thisObj.getPreferencesGroups();
+									for (i = 0; i < prefsGroups.length; i++) {
+										thisObj.injectPrefsForm(prefsGroups[i]);
+									}
+									thisObj.setupPopups();
+									thisObj.updateCaption();
+									thisObj.injectVTS();
+									if (thisObj.chaptersDivLocation) {
+										thisObj.populateChaptersDiv();
+									}
+									thisObj.showSearchResults();
+
+									// Go ahead and load media, without user requesting it
+									// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
+									// However, the media needs to load before the 'loadedmetadata' event is fired
+									// and until that happens we can't get the media's duration
+									if (thisObj.player === 'html5') {
+										thisObj.$media[0].load();
+									}
+									// refreshControls is called twice building/initializing the player
+									// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
+									setTimeout(function() {
+										thisObj.refreshControls('init'); 
+										deferred.resolve(); 
+									},100);								
+								}); 
+							}); 
+						});
+					});
+				});			 
+			});
 		},
 		function() {	 // initPlayer fail
 			thisObj.provideFallback();
 		});
+		return promise; 
 	};
 
 	AblePlayer.prototype.initPlayer = function () {

@@ -1066,7 +1066,6 @@
 
 		// Re-initialize caption and description in case relevant settings have changed
 		this.updateCaption();
-		this.refreshingDesc = true;
 		this.initDescription();
 	};
 

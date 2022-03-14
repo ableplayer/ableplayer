@@ -477,7 +477,6 @@ div.able-descriptions {
 /*
   Now Playing
 */
-
 div.able-now-playing {
 	text-align: center;
 	font-weight: bold;
@@ -491,6 +490,9 @@ div.able-now-playing span {
 }
 div.able-now-playing span span {
 	display: block;
+}
+div.able-video div.able-now-playing { 
+	display: none;
 }
 
 /*
@@ -977,10 +979,14 @@ ul.able-popup {
 .able-transcript-heading {
   font-size: 1.4em;
   font-weight: bold;
+	margin: 1em 0;
+	padding: 0;
 }
 .able-transcript-chapter-heading {
   font-size: 1.2em;
   font-weight: bold;
+	margin: 0;
+	padding: 0;
 }
 .able-transcript div.able-transcript-desc {
 	background-color: #FEE;
@@ -1061,7 +1067,8 @@ ul.able-popup {
 	padding: 0;
   border: 2px solid #AAA;
 	border-radius: 5px;
-	-moz-border-radius: 5px;
+	width: auto;
+	max-width: 100%;
 }
 .able-playlist li button {
 	border: none;

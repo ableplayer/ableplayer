@@ -451,6 +451,9 @@ Playlists
 An *Able Player* playlist is an HTML list of tracks. A playlist can accompany 
 either a video or audio player, but both audio and video cannot be combined 
 within a single playlist. The list can be either ordered (`<ol>`) or unordered (`<ul>`). 
+The size of the media player is controlled via the media player itself 
+(e.g., with **width** and **height** attributes on the `<video>` element). 
+Each item in the playlist is scaled to fit the player. 
 
 The following attributes are supported on the list element:
 
@@ -465,10 +468,6 @@ The following attributes are supported on the list element:
 Within the playlist, each list item can include the following HTML attributes: 
 
 -   **data-poster** - path to an image file. 
--   **width** - width of the video in pixels. 
--   **height** - height of the video in pixels. 
-
-If width and height are omitted, the player will be sized to fit its container. 
 
 The following HTML elements must be nested inside each list item: 
 
@@ -504,7 +503,7 @@ Vimeo videos are not yet supported within playlists.
   
 ```HTML
 <ul class="able-playlist" data-player="my_video_player">
-  <li data-poster="video1.jpg" data-width="480" data-height="360">
+  <li data-poster="video1.jpg">
     <span class="able-source" 
       data-type="video/mp4" 
       data-src="video1.mp4">

@@ -32,8 +32,6 @@
 			'width': this.playerWidth + 'px' 
 		});
 
-		this.injectOffscreenHeading();
-
 		if (this.mediaType === 'video') {
 			// youtube adds its own big play button
 			// don't show ours *unless* video has a poster attribute
@@ -51,15 +49,22 @@
 		}
 		else if (this.mediaType === 'audio') { 
 			captionsContainer.addClass('able-audcap-container'); 
+			// hide this by default. It will be shown if captions are available 
+			captionsContainer.addClass('captions-off');
 		}
 
 		this.injectPlayerControlArea(); // this may need to be injected after captions??? 
 		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
 		this.injectAlert();
 		this.injectPlaylist();
+
+		// Do this last, as it should be prepended to the top of this.$ableDiv
+		// after everything else has prepended
+		this.injectOffscreenHeading();
 	};
 
 	AblePlayer.prototype.injectOffscreenHeading = function () {
+
 		// Inject an offscreen heading to the media container.
 		// If heading hasn't already been manually defined via data-heading-level,
 		// automatically assign a level that is one level deeper than the closest parent heading
@@ -105,7 +110,6 @@
 			'aria-label' : this.mediaType + ' player'
 		});
 		this.$playerDiv.addClass('able-'+this.mediaType);
-
 		if (this.hasPlaylist && this.showNowPlaying) { 
 			this.$nowPlayingDiv = $('<div>',{
 				'class' : 'able-now-playing',
@@ -113,7 +117,6 @@
 				'aria-atomic': 'true'
 			});
 		}
-
 		this.$controllerDiv = $('<div>',{
 			'class' : 'able-controller'
 		});
@@ -762,14 +765,13 @@
 		}
 
 		// get height and width attributes, if present 
-		// and add them to a style attribute 
+		// and add them to a style attribute
 		if (this.$media.attr('width')) { 
 			this.$media.css('width',this.$media.attr('width') + 'px'); 
 		}
 		if (this.$media.attr('height')) { 
 			this.$media.css('height',this.$media.attr('height') + 'px'); 
 		}
-
 		// Remove data-able-player attribute 
 		this.$media.removeAttr('data-able-player'); 
 
@@ -976,14 +978,14 @@
 		}).hide();
 		this.$controllerDiv.append(this.$tooltipDiv);
 
-		if (this.skin == '2020') {
+		if (this.skin == '2020') {			
 			// add a full-width seek bar
 			$sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider(this.mediaType, $sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
-		// step separately through left and right controls
+
 		for (i = 0; i < numSections; i++) {
 			controls = controlLayout[i];
 			if ((i % 2) === 0) { // even keys on the left
@@ -997,6 +999,7 @@
 				});
 			}
 			this.$controllerDiv.append($controllerSpan);
+
 			for (j=0; j<controls.length; j++) {
 				control = controls[j];
 				if (control === 'seek') {
@@ -1609,7 +1612,7 @@
 		else {
 				if (this.playerCreated) {
 				// remove the old
-				this.deletePlayer();
+				this.deletePlayer('playlist');
 			}
 		}
 
@@ -1617,12 +1620,21 @@
 		$newItem = this.$playlist.eq(sourceIndex);
 		if (this.hasAttr($newItem,'data-youtube-id')) {
 			this.youTubeId = this.getYouTubeId($newItem.attr('data-youtube-id'));
+			if (this.hasAttr($newItem,'data-youtube-desc-id')) {
+				this.youTubeDescId = this.getYouTubeId($newItem.attr('data-youtube-desc-id'));
+			}
 			newPlayer = 'youtube';
+		}
+		else if (this.hasAttr($newItem,'data-vimeo-id')) {
+			this.vimeoId = this.getVimeoId($newItem.attr('data-vimeo-id'));
+			if (this.hasAttr($newItem,'data-vimeo-desc-id')) {
+				this.vimeoDescId = this.getVimeoId($newItem.attr('data-vimeo-desc-id'));
+			}
+			newPlayer = 'vimeo';
 		}
 		else {
 				newPlayer = 'html5';
 		}
-
 		if (newPlayer === 'youtube') {
 			if (prevPlayer === 'html5') {
 				// pause and hide the previous media
@@ -1645,15 +1657,12 @@
 		// set swappingSrc; needs to be true within recreatePlayer(), called below
 		this.swappingSrc = true;
 
+		// remove source and track elements from previous playlist item
+		this.$media.empty();
+
 		// transfer media attributes from playlist to media element
 		if (this.hasAttr($newItem,'data-poster')) {
 			this.$media.attr('poster',$newItem.attr('data-poster'));
-		}
-		if (this.hasAttr($newItem,'data-width')) {
-			this.$media.attr('width',$newItem.attr('data-width'));
-		}
-		if (this.hasAttr($newItem,'data-height')) {
-			this.$media.attr('height',$newItem.attr('data-height'));
 		}
 		if (this.hasAttr($newItem,'data-youtube-desc-id')) {
 			this.$media.attr('data-youtube-desc-id',$newItem.attr('data-youtube-desc-id'));
@@ -1702,6 +1711,9 @@
 					if (thisObj.hasAttr($(this),'data-label')) {
 						$newTrack.attr('label',$(this).attr('data-label'));
 					}
+					if (thisObj.hasAttr($(this),'data-desc')) {
+						$newTrack.attr('data-desc',$(this).attr('data-desc'));
+					}
 					thisObj.$media.append($newTrack);
 				}
 			});
@@ -1715,57 +1727,80 @@
 		this.$sources = this.$media.find('source');
 
 		// recreate player, informed by new attributes and track elements
-		this.recreatePlayer();
+		if (this.recreatingPlayer) { 
+			// stopgap to prevent multiple firings of recreatePlayer()
+			return; 
+		}
+		this.recreatePlayer().then(function() { 
 
-		// update playlist to indicate which item is playing
-		//$('.able-playlist li').removeClass('able-current');
-		this.$playlist.removeClass('able-current');
-		this.$playlist.eq(sourceIndex).addClass('able-current');
-
-		// update Now Playing div
-		if (this.showNowPlaying === true) {
-			if (typeof this.$nowPlayingDiv !== 'undefined') {
-				nowPlayingSpan = $('<span>');
-				if (typeof itemLang !== 'undefined') {
-					nowPlayingSpan.attr('lang',itemLang);
+			// update playlist to indicate which item is playing
+			thisObj.$playlist.removeClass('able-current').removeAttr('aria-current');
+			thisObj.$playlist.eq(sourceIndex)
+				.addClass('able-current')
+				.attr('aria-current','true'); 
+			
+			// update Now Playing div
+			if (thisObj.showNowPlaying === true) {
+				if (typeof thisObj.$nowPlayingDiv !== 'undefined') {
+					nowPlayingSpan = $('<span>');
+					if (typeof itemLang !== 'undefined') {
+						nowPlayingSpan.attr('lang',itemLang);
+					}
+					nowPlayingSpan.html('<span>' + thisObj.tt.selectedTrack + ':</span>' + itemTitle);
+					thisObj.$nowPlayingDiv.html(nowPlayingSpan);
 				}
-				nowPlayingSpan.html('<span>' + this.tt.selectedTrack + ':</span>' + itemTitle);
-				this.$nowPlayingDiv.html(nowPlayingSpan);
 			}
-		}
 
-		// if this.swappingSrc is true, media will autoplay when ready
-		if (this.initializing) { // this is the first track - user hasn't pressed play yet
-			this.swappingSrc = false;
-		}
-		else {
-			this.swappingSrc = true;
-			if (this.player === 'html5') {
-				this.media.load();
+			// if thisObj.swappingSrc is true, media will autoplay when ready
+			if (thisObj.initializing) { // this is the first track - user hasn't pressed play yet
+				thisObj.swappingSrc = false;
 			}
-			else if (this.player === 'youtube') {
-				this.okToPlay = true;
+			else {
+				if (thisObj.player === 'html5') {
+					thisObj.media.load();
+				}
+				else if (thisObj.player === 'youtube') {
+					thisObj.okToPlay = true; 
+				}
 			}
-		}
+			thisObj.initializing = false;
+			thisObj.playerCreated = true; // remains true until browser is refreshed		
+		});	
 	};
 
-	AblePlayer.prototype.deletePlayer = function() {
+	AblePlayer.prototype.deletePlayer = function(context) {
 
-		// remove previous video's attributes and child elements from media element
-		if (this.player == 'youtube') {
-				var $youTubeIframe = this.$mediaContainer.find('iframe');
-				$youTubeIframe.remove();
+		// remove player components that need to be rebuilt 
+		// after swapping media sources that have different durations 
+		// or explicitly declared data-desc attributes  
+
+		// Context is one of the following: 
+		// playlist - called from cuePlaylistItem() 
+		// swap-desc-html - called from swapDescription with this.player == 'html'
+		// swap-desc-youtube - called from swapDescription with this.player == 'youtube'  
+		// swap-desc-vimeo -  called from swapDescription with this.player == 'vimeo'  
+
+		if (this.player === 'youtube' && this.youTubePlayer) { 
+			this.youTubePlayer.destroy(); 
 		}
+
+		if (this.player === 'vimeo' && this.vimeoPlayer) { 
+			this.vimeoPlayer.destroy(); 
+		}
+
+
+/*	TODO - Investigate: when is this needed? 
+		// remove previous video's attributes and child elements from media element
 		this.$media.removeAttr('poster width height');
 		this.$media.empty();
-
+*/
 		// Empty elements that will be rebuilt
 		this.$controllerDiv.empty();
 		// this.$statusBarDiv.empty();
 		// this.$timer.empty();
 		this.$elapsedTimeContainer.empty().text('0:00'); // span.able-elapsedTime
 		this.$durationContainer.empty(); // span.able-duration
-
+		
 		// Remove popup windows and modal dialogs; these too will be rebuilt
 		if (this.$signWindow) {
 				this.$signWindow.remove();
@@ -1774,12 +1809,27 @@
 				this.$transcriptArea.remove();
 		}
 		$('.able-modal-dialog').remove();
-
+		
+		// Remove caption and description wrappers 
+		if (this.$captionsWrapper) {
+			this.$captionsWrapper.remove();
+		}
+		if (this.$descDiv) { 
+			this.$descDiv.remove(); 
+		}
+		
 		// reset key variables
 		this.hasCaptions = false;
 		this.hasChapters = false;
+		this.hasDescTracks = false; 
+		this.hasOpenDesc = false;
+		this.hasClosedDesc = false; 
+
 		this.captionsPopup = null;
 		this.chaptersPopup = null;
+		this.transcriptType = null;
+
+		this.playerDeleted = true; // will reset to false in recreatePlayer() 
 	};
 
 	AblePlayer.prototype.getButtonTitle = function(control) {

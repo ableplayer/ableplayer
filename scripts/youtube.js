@@ -8,6 +8,8 @@
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 
+		this.youTubePlayerReady = false; 
+
 		// if a described version is available && user prefers desription
 		// init player using the described version
 		if (this.youTubeDescId && this.prefDesc) {
@@ -101,6 +103,7 @@
 			},
 			events: {
 				onReady: function () {
+					thisObj.youTubePlayerReady = true; 
 					if (!thisObj.playerWidth || !thisObj.playerHeight) { 
 						thisObj.getYouTubeDimensions();
 					}
@@ -113,8 +116,9 @@
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
+						thisObj.restoreFocus();
 						thisObj.cueingPlaylistItem = false;
-						if (thisObj.playing) {
+						if (thisObj.playing || thisObj.okToPlay) {
 							// resume playing
 							thisObj.playMedia();
 						}
@@ -122,14 +126,16 @@
 					if (thisObj.userClickedPlaylist) {
 						thisObj.userClickedPlaylist = false; // reset
 					}
+					if (thisObj.recreatingPlayer) { 
+						thisObj.recreatingPlayer = false; // reset
+					}
 					deferred.resolve();
 				},
 				onError: function (x) {
 					deferred.fail();
 				},
-				onStateChange: function (x) {					
+				onStateChange: function (x) {				
 					thisObj.getPlayerState().then(function(playerState) {
-
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
 							thisObj.playing = true;
