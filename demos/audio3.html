@@ -6,9 +6,8 @@
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="../thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -25,8 +24,8 @@
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
-<audio id="audio1" width="480" preload="auto" data-able-player>
-  <!-- source elements are optional when there's a playlist. -->
+<audio id="audio1" width="480" preload="auto" data-able-player data-skin="2020" loop>
+	<!-- source elements are optional when there's a playlist. -->
 	<!-- If ommitted, they will be constructed from the first playlist item -->
 </audio>
 
@@ -36,21 +35,51 @@
 <!-- Add data-embedded to embed the playlist into the media player -->
 <!-- see documentation for additional details about markup -->
 <ul class="able-playlist" data-player="audio1" data-embedded>
-  <li
-	  data-mp3="../media/paulallen.mp3"
-		data-ogg="../media/paulallen.ogg">The Paul Allen Song</li>
-  <li
-	  data-mp3="../media/php70alpha.mp3"
-		data-ogg="../media/php70alpha.ogg">PHP 7.0 Alpha</li>
-  <li
-	  data-mp3="../media/frenchsong.mp3"
-		data-ogg="../media/frenchsong.ogg" lang="fr">Une Chanson Française</li>
-  <li
-	  data-mp3="../media/smallf.mp3"
-		data-ogg="../media/smallf.ogg">Man With Small F (The Inaccessible PDF Song)</li>
-  <li
-	  data-mp3="../media/everyday.mp3"
-		data-ogg="../media/everyday.ogg">Every Day</li>
+	<li data-poster="something.jpg">
+		<span class="able-source"
+			data-type="audio/mpeg"
+			data-src="../media/paulallen.mp3"></span>
+		<span class="able-source"
+			data-type="audio/ogg"
+			data-src="../media/paulallen.ogg"></span>
+		<button>The Paul Allen Song</button>
+	</li>
+	<li>
+		<span class="able-source"
+			data-type="audio/mpeg"
+			data-src="../media/php70alpha.mp3"></span>
+		<span class="able-source"
+			data-type="audio/ogg"
+			data-src="../media/php70alpha.ogg"></span>
+		<button>PHP 7.0 Alpha</button>
+	</li>
+	<li>
+		<span class="able-source"
+			data-type="audio/mpeg"
+			data-src="../media/frenchsong.mp3"></span>
+		<span class="able-source"
+			data-type="audio/ogg"
+			data-src="../media/frenchsong.ogg"></span>
+		<button lang="fr">Une Chanson Française</button>
+	</li>
+	<li>
+		<span class="able-source"
+			data-type="audio/mpeg"
+			data-src="../media/smallf.mp3"></span>
+		<span class="able-source"
+			data-type="audio/ogg"
+			data-src="../media/smallf.ogg"></span>
+		<button>Man With Small F (The Inaccessible PDF Song)</button>
+	</li>
+	<li>
+		<span class="able-source"
+			data-type="audio/mpeg"
+			data-src="../media/everyday.mp3"></span>
+		<span class="able-source"
+			data-type="audio/ogg"
+			data-src="../media/everyday.ogg"></span>
+		<button>Every Day</button>
+	</li>
 </ul>
 
 </body>

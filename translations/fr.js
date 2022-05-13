@@ -1,4 +1,4 @@
-var fr = {
+{
 
 "audio": "audio",
 
@@ -52,17 +52,17 @@ var fr = {
 
 "language": "Langue",
 
-"sign": "LSF",
+"sign": "Langage gestuel",
 
-"showSign": "Afficher la langue des signes",
+"showSign": "Afficher le langage gestuel",
 
-"hideSign": "Masque la langue des signes",
+"hideSign": "Masque le langage gestuel",
 
-"seekbarLabel": "Barre de lecture",
+"seekbarLabel": "timeline",
 
-"mute": "Activer le son",
+"mute": "Son désactivé",
 
-"unmute": "Couper le son",
+"unmute": "Son activé",
 
 "volume": "Volume",
 
@@ -73,8 +73,6 @@ var fr = {
 "volumeSliderClosed": "Réglage du volume fermé",
 
 "preferences": "Préférences",
-
-"preferencesP": "Choix profils",
 
 "enterFullScreen": "Activer le mode plein écran",
 
@@ -98,11 +96,11 @@ var fr = {
 
 "unknown": "Inconnu",
 
-"statusPlaying": "Lecture",
+"statusPlaying": "Lecture en cours",
 
-"statusPaused": "Pause",
+"statusPaused": "Lecture sur pause",
 
-"statusStopped": "Interrompue",
+"statusStopped": "Lecture interrompue",
 
 "statusWaiting": "Attente",
 
@@ -156,7 +154,7 @@ var fr = {
 
 "prefIntroDescriptionNone": "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.",
 
-"prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores.",
+"prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelle.",
 
 "prefIntroDescription4": "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.",
 
@@ -206,7 +204,25 @@ var fr = {
 
 "prefDescPause": "Mettre la vidéo en pause automatiquement quand la description commence",
 
-"prefVisibleDesc": "Affichez la description",
+"prefDescVisible": "Affichez la description",
+
+"prefDescVoice": "Voix",
+
+"prefDescRate": "Vitesse",
+
+"prefDescPitch": "Volume",
+
+"prefDescPitch1": "Très faible",
+
+"prefDescPitch2": "Faible",
+
+"prefDescPitch3": "Par défaut",
+
+"prefDescPitch4": "Fort",
+
+"prefDescPitch5": "Très fort",
+
+"sampleDescriptionText": "Régler les paramètres afin d'entendre cet extrait de texte",
 
 "prefHighlight": "Surligner la transcription pendant la lecture",
 
@@ -234,23 +250,23 @@ var fr = {
 
 "monospace": "à taille fixe",
 
-"white": "Blanc",
+"white": "blanc",
 
-"yellow": "Jaune",
+"yellow": "jaune",
 
-"green": "Vert",
+"green": "vert",
 
-"cyan": "Cyan",
+"cyan": "cyan",
 
-"blue": "Bleu",
+"blue": "bleu",
 
-"magenta": "Magenta",
+"magenta": "magenta",
 
-"red": "Rouge",
+"red": "rouge",
 
-"black": "Noir",
+"black": "noir",
 
-"transparent": "Transparent",
+"transparent": "transparent",
 
 "solid": "solide",
 
@@ -288,15 +304,15 @@ var fr = {
 
 "windowMove": "Déplacer",
 
-"windowMoveAlert": "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre; appuyez sur « Entrée » pour arrêter.",
+"windowMoveAlert": "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre; appuyez sur « Enter » pour arrêter.",
 
 "windowResize": "Redimensionner",
 
-"windowResizeHeading": "Redimensionner la fenêtre",
-
-"windowResizeHeadingTR": "Redimensionner la fenêtre de transcription",
+"windowResizeHeading": "Redimensionner la fenêtre de l’interprète",
 
 "windowResizeAlert": "La fenêtre a été redimensionnée.",
+
+"windowClose": "Fermer",
 
 "width": "Largeur",
 
@@ -310,197 +326,30 @@ var fr = {
 
 "windowBringTopAlert": "Cette fenêtre est maintenant devant d’autres objets sur la page.",
 
-"back": "Retour",
+"resultsSummary1": "Vos résultats de recherche",
 
-"vplus": "Fort",
+"resultsSummary2": "Trouvé",
 
-"vplusmore": "plus Fort",
+"resultsSummary3": "éléments correspondants.",
 
-"vmoins": "Fort",
+"resultsSummary4": "Cliquez sur le temps associé à n'importe quel élément pour lire la vidéo à partir de ce point.",
 
-"vmoinsmore": "moins Fort",
+"noResultsFound": "Aucun résultat trouvé.",
 
-"speedplus": "Augmenter vitesse",
+"searchButtonLabel": "Lecture à",
 
-"speedmoreplus": "Augmenter encore vitesse",
+"hour": "heure",
 
-"speedmoins": "Diminuer vitesse",
+"minute": "minute",
 
-"speedmoremoins": "Diminuer encore vitesse",
+"second": "seconde",
 
-"changespeed": "Changer vitesse",
+"hours": "heures",
 
-"audiodesc": "Audiodescription",
+"minutes": "minutes",
 
-"vidcontr": "Vidéo contrastée",
+"seconds": "seconds",
 
-"captionsno": "Pas de sous-titres",
+"enableKeyboardShortcuts": "Permettre les raccourcis clavier"
 
-"lsfno": "Ôter la LSF",
-
-"lsfact": "Activer la LSF",
-
-"audiodescno": "Ôter l'audiodescription",
-
-"audiodescact": "Activer l'audiodescription",
-
-"vidcontrno": "Vidéo normale",
-
-"transcrno": "Ôter la transcription",
-
-"transcract": "Activer la transcription",
-
-"showAccMenu": "Afficher menu accessible",
-
-"maskAccMenu": "Masquer menu accessible",
-
-"menu": "Menu",
-
-"act_st": "Activer ST",
-
-"de_act_st": "Désactiver ST",
-
-"act_st_general": "Afficher ST",
-
-"de_act_st_general": "Aucun ST",
-
-"act_st_ml": "Activer ST",
-
-"act_st_fr": "Activer ST FR",
-
-"act_st_en": "Activer ST EN",
-
-"act_st_es": "Activer ST ES",
-
-"act_st_pl": "Activer ST PL",
-
-"de_act_st_ml": "Désactiver ST",
-
-"de_act_st_fr": "Désactiver ST FR",
-
-"de_act_st_en": "Désactiver ST EN",
-
-"de_act_st_es": "Désactiver ST ES",
-
-"de_act_st_pl": "Désactiver ST PL",
-
-"act_st_label_general": "Afficher Sous Titres",
-
-"de_act_st_label_general": "Masquer Sous Titre",
-
-"act_st_label": "Activer Sous Titres",
-
-"de_act_st_label": "Désactiver Sous Titre",
-
-"act_st_fr_label": "Activer Sous Titre Français",
-
-"act_st_ml_label": "Activer Sous Titre Malentendant",
-
-"act_st_en_label": "Activer Sous Titres Anglais",
-
-"act_st_es_label": "Activer Sous Titres Espagnol",
-
-"act_st_pl_label": "Activer Sous Titres Portuguais",
-
-"de_act_st_fr_label": "Désactiver Sous Titres Français",
-
-"de_act_st_ml_label": "Désactiver Sous Titres Malentendant",
-
-"de_act_st_en_label": "Désactiver Sous Titre Anglais",
-
-"de_act_st_es_label": "Désactiver Sous Titres Espagnol",
-
-"de_act_st_pl_label": "Désactiver Sous Titres Portuguais",
-
-"visionPlus": "Vision +",
-
-"sansVisionPlus": "Sans vision +",
-
-"auditionPlus": "Audition +",
-
-"lsfPlus": "LSF",
-
-"defPlus": "Défilement +",
-
-"conPlus": "Concentration +",
-
-"allParams": "Tous les paramètres",
-
-"reglages": "Réglages",
-
-"perception": "Perception sonore",
-
-"morelow": " + Grave ",
-
-"lesslow": " - Grave ",
-
-"moreacute": " + Aigu ",
-
-"lessacute": " - Aigu ",
-
-"defaultPerception": "Réglages par défaut",
-
-"textColor": "Couleur du texte",
-
-"bgColor": "Couleur de l'arrière-plan",
-
-"followColor": "Couleur de suivi de texte",
-
-"fontSize": "Taille du texte",
-
-"outText": "Contours du texte",
-
-"textStyle": "Style de police",
-
-"reglagesSettings": "Paramètres du menu",
-
-"outNo": "Aucun",
-
-"outHigh": "Elevé",
-
-"outEnforce": "Enfoncé",
-
-"outUniform": "Uniforme",
-
-"outShadow": "Ombre portée",
-
-"outNo": "Aucun",
-
-"helvet": "Helvetica Neue",
-
-"consola": "Consola",
-
-"arial": "Arial",
-
-"accessDFA": "Accessible DfA",
-
-"comic": "Comic Sans MS",
-
-"blackwhite": "Texte noir sur fond blanc",
-
-"whiteblack": "Texte blanc sur fond noir",
-
-"yellowblue": "Texte jaune sur fond bleu",
-
-"blueyellow": "Texte bleu sur fond jaune",
-
-"bluewhite": "Texte bleu sur fond blanc",
-
-"whiteblue": "Texte blanc sur fond bleu",
-
-"colordef": "Par defaut",
-
-"profildef": "Standard",
-
-"verticalButton": "Affichage vertical",
-
-"horizontalButton": "Affichage horizontal",
-
-"accmenu": "Choisir son profil d'accessibilité",
-
-
-
-
-
-
-};
+}

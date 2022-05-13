@@ -1,4 +1,4 @@
-var it = {
+{
 
 "audio": "audio",
 
@@ -6,9 +6,9 @@ var it = {
 
 "playerHeading": "Lettore multimediale",
 
-"faster": "Piu' veloce",
+"faster": "Piï¿½ veloce",
 
-"slower": "Piu' lento",
+"slower": "Piï¿½ lento",
 
 "play": "Riproduci",
 
@@ -26,25 +26,25 @@ var it = {
 
 "nextTrack": "Traccia successiva",
 
-"rewind": "In dietro",
+"rewind": "Indietro",
 
 "forward": "Avanti",
 
-"captions": "Didascalie",
+"captions": "Sottotitoli",
 
-"showCaptions": "Mostra didascalie",
+"showCaptions": "Mostra sottotitoli",
 
-"hideCaptions": "Nascondi didascalie",
+"hideCaptions": "Nascondi sottotitoli",
 
-"captionsOff": "Disattiva didascalie",
+"captionsOff": "Disattiva sottotitoli",
 
 "showTranscript": "Mostra trascrizione",
 
 "hideTranscript": "Nascondi trascrizione",
 
-"turnOnDescriptions": "Attiva descrizioni",
+"turnOnDescriptions": "Attiva audiodescrizioni",
 
-"turnOffDescriptions": "Disattiva descrizioni",
+"turnOffDescriptions": "Disattiva audiodescrizioni",
 
 "chapters": "Capitoli",
 
@@ -62,15 +62,15 @@ var it = {
 
 "mute": "Muto",
 
-"unmute": "Riattivare l'audio",
+"unmute": "Riattiva l'audio",
 
 "volume": "Volume",
 
-"volumeHelp": "Clicca per attivare lo slider volume",
+"volumeHelp": "Seleziona per attivare il controllo del volume",
 
-"volumeUpDown": "Volume up down",
+"volumeUpDown": "Incremento e diminuzione volume",
 
-"volumeSliderClosed": "Slider volume chiuso",
+"volumeSliderClosed": "Controllo volume chiuso",
 
 "preferences": "Preferenze",
 
@@ -80,7 +80,7 @@ var it = {
 
 "fullScreen": "Schermo intero",
 
-"speed": "Velocita'",
+"speed": "Velocitï¿½",
 
 "and": "e",
 
@@ -106,13 +106,13 @@ var it = {
 
 "statusBuffering": "Buffering",
 
-"statusUsingDesc": "Sto usando la versione descritta",
+"statusUsingDesc": "Sto usando la versione audiodescritta",
 
-"statusLoadingDesc": "Sto caricandola versione descritta",
+"statusLoadingDesc": "Sto caricandola versione audiodescritta",
 
-"statusUsingNoDesc": "Sto usando la versione non descritta",
+"statusUsingNoDesc": "Sto usando la versione non audiodescritta",
 
-"statusLoadingNoDesc": "Sto caricando la versione non descritta",
+"statusLoadingNoDesc": "Sto caricando la versione non audiodescritta",
 
 "statusLoadingNext": "Carico la traccia successiva",
 
@@ -120,25 +120,25 @@ var it = {
 
 "selectedTrack": "Traccia selezionata",
 
-"alertDescribedVersion": "Sto usando la versione descritta di   questo video",
+"alertDescribedVersion": "Sto usando la versione audiodescritta di questo video",
 
-"alertNonDescribedVersion": "Sto usando la versione non descritta di questo video",
+"alertNonDescribedVersion": "Sto usando la versione non audiodescritta di questo video",
 
-"fallbackError1": "Spiacente il tuo browser non è in grado di riprodurre questo",
+"fallbackError1": "Spiacente il tuo browser non ï¿½ in grado di riprodurre questo",
 
-"fallbackError2": "I browser seguenti supportano questo lettore multimediale",
+"fallbackError2": "I seguenti browser supportano questo lettore multimediale",
 
 "orHigher": "o superiore",
 
-"prefMenuCaptions": "Didascalie",
+"prefMenuCaptions": "Sottotitoli",
 
-"prefMenuDescriptions": "Descrizioni",
+"prefMenuDescriptions": "Audioescrizioni",
 
 "prefMenuKeyboard": "Tastiera",
 
 "prefMenuTranscript": "Trascrizione",
 
-"prefTitleCaptions": "Preferenze didascalie",
+"prefTitleCaptions": "Preferenze sottotitoli",
 
 "prefTitleDescriptions": "Preferenze audiodescrizione",
 
@@ -146,35 +146,35 @@ var it = {
 
 "prefTitleTranscript": "Preferenze trascrizione",
 
-"prefIntroCaptions": "Le opzioni seguenti controllano la visualizzazione delle didascalie.",
+"prefIntroCaptions": "Le opzioni seguenti controllano la visualizzazione dei sottotitoli.",
 
 "prefIntroDescription1": "Questo lettore multimediale supporta le audiodescrizioni in due modi:",
 "prefIntroDescription2": "il video corrente ha ",
 "prefIntroDescriptionNone": "Il video corrente non ha audiodescrizioni.",
 
-"prefIntroDescription3": "Usa il seguente form per impostare le tue preferenze relative all'audiodescrizione.",
+"prefIntroDescription3": "Usa il seguente modulo per impostare le tue preferenze relative all'audiodescrizione testuale.",
 
 "prefIntroDescription4": "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.",
 
-"prefIntroKeyboard1": "Il lettore multimediale può essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",
+"prefIntroKeyboard1": "Il lettore multimediale puï¿½ essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",
 
-"prefIntroKeyboard2": "I tasti modificatori, (Shift, Alt, e Control) possono essere assegnati di seguito.",
+"prefIntroKeyboard2": "I tasti di scelta rapida, (Shift, Alt, e Control) possono essere assegnati di seguito.",
 
 "prefIntroKeyboard3": "NOTA: Alcune combinazioni di tasti possono essere in conflitto con i tasti utilizzati dal tuo browser od altro software. Prova varie combinazioni di tasti per trovarne una che funzioni correttamente.",
 
 "prefIntroTranscript": "Le preferenze seguenti modificano la trascrizione interattiva.",
 
-"prefCookieWarning": "Per salvare le tue preferenze sono richiesti i cookies.",
+"prefCookieWarning": "Per salvare le tue preferenze sono richiesti i cookie.",
 
-"prefHeadingKeyboard1": "Tasti modificatori",
+"prefHeadingKeyboard1": "Tasti di scelta rapida",
 
 "prefHeadingKeyboard2": "Tasti di scelta rapida correnti",
 
-"prefHeadingDescription": "Audio descrizione",
+"prefHeadingDescription": "Audiodescrizione",
 
-"prefHeadingTextDescription": "audio descrizione testuale",
+"prefHeadingTextDescription": "audiodescrizione testuale",
 
-"prefHeadingCaptions": "Didascalie",
+"prefHeadingCaptions": "Sottotitoli",
 
 "prefHeadingTranscript": "Trascrizione interattiva",
 
@@ -190,7 +190,7 @@ var it = {
 
 "prefDescFormat": "Formato preferito",
 
-"prefDescFormatHelp": "Se entrambi i formati sono disponibili, ne verrà usato soltanto uno.",
+"prefDescFormatHelp": "Se entrambi i formati sono disponibili, ne verrï¿½ usato soltanto uno.",
 
 "prefDescFormatOption1": "Versione di descrizione alternativa per il video",
 
@@ -202,7 +202,25 @@ var it = {
 
 "prefDescPause": "Mette automaticamente il video in pausa, quando inizia la descrizione",
 
-"prefVisibleDesc": "Rende la descrizione visibile",
+"prefDescVisible": "Rende la descrizione visibile",
+
+"prefDescVoice": "Voice",
+
+"prefDescRate": "Rate",
+
+"prefDescPitch": "Pitch",
+
+"prefDescPitch1": "Very low",
+
+"prefDescPitch2": "Low",
+
+"prefDescPitch3": "Default",
+
+"prefDescPitch4": "High",
+
+"prefDescPitch5": "Very high",
+
+"sampleDescriptionText": "Adjust settings to hear this sample text.",
 
 "prefHighlight": "Evidenzia la descrizione",
 
@@ -216,7 +234,7 @@ var it = {
 
 "prefCaptionsSize": "Dimensione del carattere",
 
-"prefCaptionsOpacity": "Opacità",
+"prefCaptionsOpacity": "Opacitï¿½",
 
 "prefCaptionsStyle": "Stile",
 
@@ -236,7 +254,7 @@ var it = {
 
 "green": "verde",
 
-"ciano": "cyan",
+"ciano": "ciano",
 
 "blue": "blue",
 
@@ -248,11 +266,11 @@ var it = {
 
 "transparent": "trasparente",
 
-"solid": "solid",
+"solid": "solido",
 
-"captionsStylePopOn": "Pop-on",
+"captionsStylePopOn": "A comparsa",
 
-"captionsStyleRollUp": "Roll-up",
+"captionsStyleRollUp": "A scorrimento",
 
 "prefCaptionsPosition": "Posizione",
 
@@ -260,13 +278,13 @@ var it = {
 
 "captionsPositionBelow": "Sotto al video",
 
-"sampleCaptionText": "Testo di esempio didascalia",
+"sampleCaptionText": "Testo di esempio sottotitoli",
 
 "prefSuccess": "I cambiamenti sono stati salvati.",
 
-"prefNoChange": "Non è stato effettuato alcun cambiamento.",
+"prefNoChange": "Non ï¿½ stato effettuato alcun cambiamento.",
 
-"help": "Help",
+"help": "Aiuto",
 
 "helpTitle": "Guida",
 
@@ -292,16 +310,44 @@ var it = {
 
 "windowResizeAlert": "La finestra e' stata ridimensionata.",
 
+"windowClose": "Chiudi",
+
 "width": "Larghezza",
 
 "height": "Altezza",
 
 "windowSendBack": "Manda in fondo",
 
-"windowSendBackAlert": "Questa finestra è ora dietro agli altri oggetti della pagina.",
+"windowSendBackAlert": "Questa finestra ï¿½ ora dietro agli altri oggetti della pagina.",
 
 "windowBringTop": "Metti in primo piano",
 
-"windowBringTopAlert": "Questa finestra e' ora davanti agli altri oggetti nella pagina."
+"windowBringTopAlert": "Questa finestra e' ora davanti agli altri oggetti nella pagina.",
 
-};
+"resultsSummary1": "You searched for:",
+
+"resultsSummary2": "Found",
+
+"resultsSummary3": "matching items.",
+
+"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+
+"noResultsFound": "No results found.",
+
+"searchButtonLabel": "Play at",
+
+"hour": "hour",
+
+"minute": "minute",
+
+"second": "second",
+
+"hours": "hours",
+
+"minutes": "minutes",
+
+"seconds": "seconds",
+
+"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+
+}

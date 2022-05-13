@@ -6,9 +6,8 @@
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="../thirdparty/modernizr.custom.js"></script>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -18,15 +17,15 @@
 
 <!-- CSS for this example -->
 <style>
-  #meta {
-    clear: both;
-    width: 480px;
-    color: #C00;
-    font-weight: bold;
-    font-size: 1.2em;
-    margin: 1em;
-    display: none;
-  }
+	#meta {
+		clear: both;
+		width: 480px;
+		color: #C00;
+		font-weight: bold;
+		font-size: 1.2em;
+		margin: 1em;
+		display: none;
+	}
 </style>
 </head>
 
@@ -35,19 +34,19 @@
 <h1>Able Player Audio Demo #5:<br/>Audio player with Metadata Track (type = text)</h1>
 
 <p>Time-synced metadata is provided in a WebVTT file with kind="metadata".
-  A <strong>data-meta-type</strong> attribute has value "text", which is one of two types of supported metadata tracks
-  (the other is "selector"). With "text" as the metadata type, the text contained in the WebVTT file is displayed in an
-  external container at the designated times during playback. The ID of the external container is provided in a
-  <strong>data-meta-div</strong> attribute.
+	A <strong>data-meta-type</strong> attribute has value "text", which is one of two types of supported metadata tracks
+	(the other is "selector"). With "text" as the metadata type, the text contained in the WebVTT file is displayed in an
+	external container at the designated times during playback. The ID of the external container is provided in a
+	<strong>data-meta-div</strong> attribute.
 </p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
-<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-meta-type="text" data-meta-div="meta">
-  <source type="audio/mpeg" src="../media/paulallen.mp3"/>
-  <source type="audio/ogg" src="../media/paulallen.ogg"/>
-  <track kind="metadata" src="../media/paulallen_meta.vtt"/>
+<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="2020" data-meta-type="text" data-meta-div="meta">
+	<source type="audio/mpeg" src="../media/paulallen.mp3"/>
+	<source type="audio/ogg" src="../media/paulallen.ogg"/>
+	<track kind="metadata" src="../media/paulallen_meta.vtt"/>
 </audio>
 
 <div id="meta" role="alert"></div>
