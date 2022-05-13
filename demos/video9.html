@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Video Demo #8b</title>
+<title>Able Player Video Demo #9</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -15,165 +16,74 @@
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
-<!-- CSS for hidden blocks on content in this example -->
+<!-- Style for this example only -->
 <style>
-	div#video-and-meta-wrapper {
-		position: relative;
-		/* no width and height, this will be assigned dynamically */
-	}
-	div.meta {
-		position: absolute;
-		z-index: 10000;
-		display: none;
-	}
-	div#info,
-	div#instructions {
-		background-color: #ffc;
-		border: 3px solid #412C84;
-		color: #000;
-		font-size: 1.2em;
-		line-height: 1.25em;
-		padding: 0.5em;
-	}
-	div#info {
-		top: 11.111%; /* 40px */
-		left: 4.167%; /* 20px */
-		width: 41.667%; /* 200px */
-		height: auto;
-	}
-	div#instructions {
-		top: 66.667%; /* 240px */
-		left: 18.75%; /* 90px */
-		width: 41.667%; /* 200px */
-		height: auto;
-	}
-	div#instructions:focus,
-	div#terrill:focus,
-	div#terrill:hover {
-		border: 3px solid #C00;
-	}
-	div#terrill {
-		top: 11.111%; /* 40px */
-		left: 28.333%; /* 136px */
-		width: 25%; /* 120px */
-		height: 38.889%; /* 140px; */
-		background-color: #FFF;
-		border: 3px solid #412C84;
-		opacity: 0.3;
-	}
-	div#terrill:focus {
-		border: 3px solid yellow;
-	}
-	div#response {
-		top: 11.111%; /* 40px */
-		right: 16.667%; /* 80px */
-		width: 31.25%; /* 150px */
-		height: 25%; /* 90px */
-		background-image: url('cartoon-bubble.png');
-		background-size: contain;
-		background-position: center center;
-		background-repeat: no-repeat;
-		font-weight: bold;
-		font-size: 1.2em;
-		padding-top: 5.556%; /* 20px */
-		text-align: center;
-	}
+  main {
+    position: relative;
+    width: 100%;
+    margin: 0;
+  }
+  #player {
+    float: left;
+    width: 480px;
+    margin: 0;
+  }
+  #results-wrapper {
+    height: 500px;
+    margin: 0;
+    padding-left: 510px;
+    padding-top: 1em;
+  }
+  #results-wrapper p {
+    font-size: 1.1em;
+    margin-left: 1em;
+  }
+  #search-term {
+    font-weight: bold;
+    font-style: italic;
+  }
 </style>
 
-<!-- Script for this example -->
-<script>
-	$(document).ready(function() {
-
-		// In order to absolute-position block overlays on video,
-		// a parent of both video & overlays (in this case, div#vide-and-meta-wrapper)
-		// must be positioned with width and height
-		// However, with fixed width and height the video is not responsive using CSS alone
-		// So, we need to use JavaScript to calculate and assign the width and height
-		// *after* the responsive video has been sized with CSS to fit its container
-		// This calculation then must be re-executed if the window is resized
-
-		var videoDefaultWidth, videoDefaultHeight,
-		videoWidth, videoHeight;
-
-		$(window).on('load resize',function(event) {
-
-			if (event.type === 'load') {
-				// initializing for the first time
-				videoWidth = $('#video1').width();
-				videoHeight = $('#video1').height();
-			}
-			if (event.type === 'resize') {
-				// window has been resized.
-				// can't determine videoWidth via method used on load
-				// because video is now has an assigned (unresponsive) width
-				// Remove these attributes temporarily, then recalculate & reassign
-				$('#video-and-meta-wrapper').css({
-					'width': '',
-					'height': ''
-				});
-				videoWidth = $('#video1').width();
-				videoHeight = $('#video1').height();
-			}
-			// asign calculated width and height values to wrapper
-			$('#video-and-meta-wrapper').css({
-				'width': videoWidth + 'px',
-				'height': videoHeight + 'px'
-			});
-		});
-
-		// The rest is the same as Demo #8
-		// Handle clicks on the exposed overlay blocks
-		$('#instructions').on('focus',function() {
-			$('#terrill').attr('tabindex','0');
-		})
-		$('#terrill').on('click',function() {
-			toggleResponse();
-		});
-		$('#terrill').on('keypress',function(e) {
-			if (e.which === 13 || e.which === 32) {
-				toggleResponse();
-			}
-		});
-	});
-	function toggleResponse() {
-		if ($('#response').is(':visible')) {
-			$('#response').hide();
-		}
-		else {
-			// response is an interactive element not included in metadata file
-			// therefore it doesn't disappear automatically
-			$('#response').show().delay(5000).fadeOut();
-		}
-	}
-</script>
 </head>
 
 <body>
 
-<h1>Able Player Video Demo #8b:<br/><em>Responsive</em> video player with Metadata Track (type = selector)</h1>
+<h1>Able Player Video Demo #9:<br/>Video player with search</h1>
 
-<p>This example has the same functionality as <a href="video8.html">Demo #8</a> (time-synced metadata exposing content
-	as an overlay on the video). However, in the former demo the video is positioned with fixed width and height.
-	This is necessary to precisely position overlay content atop the video using pixel values. The current example
-	demonstrates that this can also be accomplished in a responsive design, with overlay content positioned using percentage values.</p>
-</p>
+<p>Search terms are provided to the player using the <em>data-search</em> attribute.
+  In this hypothetical example, we have entered the search term "web mouse" into a search field.
+  On the search results page, the <em>data-search</em> attribute of the &lt;video&gt; element
+  is populated "web mouse" on page. Also the <em>data-search-div</em> attribute is populated with
+  the id of an external &lt;div&gt; in which to display the search results.
+  Finally, <em>data-include-transcript</em> is set to "false", since there isn't room on this page
+  for both search results <em>and</em> a transcript (although the latter is optional).
+  </p>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
-<div id="video-and-meta-wrapper">
-	<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-meta-type="selector" playsinline>
-		<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-		<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-		<!-- Able Player will display tracks alphabetically by label -->
-		<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-		<track kind="metadata" src="../media/wwa_meta.vtt" srclang="en"/>
-	</video>
-	<!-- metadata content -->
-	<div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
-	<div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
-	<div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
-	<div class="meta" id="response" role="alert">Ouch!</div>
-</div>
+<!-- to write transcript to an external div, pass id of an empty div via data-transcript-div -->
+<main role="main">
+  <div id="player">
+    <video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-search="you web" data-search-div="results" data-include-transcript="false" playsinline>
+      <source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+      <source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+      <track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+      <track kind="subtitles" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+      <track kind="subtitles" src="../media/wwa_captions_es.vtt" srclang="es" label="Espanol"/>
+      <track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+      <track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+      <track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+      <track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+      <track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+    </video>
+  </div>
+  <div id="results-wrapper">
+    <h2>Your Search Results</h2>
+    <p>You searched for: <span id="search-term">you web</span></p>
+    <div id="results" class="able-search-results"></div>
+  </div>
+  <div id="transcript"></div>
+</main>
 
 </body>
 </html>

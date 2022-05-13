@@ -6,8 +6,9 @@
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+<script src="../thirdparty/modernizr.custom.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="../thirdparty/js.cookie.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -22,22 +23,22 @@
 <h1>Able Player Audio Demo #4:<br/>Audio player with interactive transcript in "Lyrics Mode"</h1>
 
 <p>The transcript (in this case, song lyrics) is provided in
-	a WebVTT file with kind="captions" and linked using a &lt;track&gt; element, just as with video.
-	The captions are currently rendered as a transcript only, not as captions.
-	Note the two additional optional attributes that are relevant for this example:
+  a WebVTT file with kind="captions" and linked using a &lt;track&gt; element, just as with video.
+  The captions are currently rendered as a transcript only, not as captions.
+  Note the two additional optional attributes that are relevant for this example:
 </p>
 <ul>
-	<li><strong>data-lyrics-mode</strong> - forces a line break between and within captions in the transcript</li>
-	<li><strong>data-transcript-title</strong> - to override default title, which is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present</li>
+  <li><strong>data-lyrics-mode</strong> - forces a line break between and within captions in the transcript</li>
+  <li><strong>data-transcript-title</strong> - to override default title, which is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present</li>
 </ul>
 
 <p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
 
 <!-- use the following markup for each media element -->
-<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="2020" data-lyrics-mode data-transcript-title="Sing along!">
-	<source type="audio/mpeg" src="../media/paulallen.mp3"/>
-	<source type="audio/ogg" src="../media/paulallen.ogg"/>
-	<track kind="captions" src="../media/paulallen_en.vtt" srclang="en" label="English"/>
+<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-lyrics-mode data-transcript-title="Sing along!">
+  <source type="audio/mpeg" src="../media/paulallen.mp3"/>
+  <source type="audio/ogg" src="../media/paulallen.ogg"/>
+  <track kind="captions" src="../media/paulallen_en.vtt" srclang="en" label="English"/>
 </audio>
 
 </body>

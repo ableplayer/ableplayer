@@ -1,4 +1,4 @@
-{
+var nl = {
 
 "audio": "audio",
 
@@ -40,7 +40,7 @@
 
 "showTranscript": "Toon transcript",
 
-"hideTranscript": "Verberg transcript",
+"hideTranscript": "Vergerg transcript",
 
 "turnOnDescriptions": "Beschrijvingen aanzetten",
 
@@ -56,7 +56,7 @@
 
 "showSign": "Toon gebarentaal",
 
-"seekbarLabel": "tijdlijn",
+"seekbarLabel": "timeline",
 
 "hideSign": "Verberg gebarentaal",
 
@@ -66,11 +66,11 @@
 
 "volume": "Volume",
 
-"volumeHelp": "Klik om te volume te regelen",
+"volumeHelp": "Click to access volume slider",
 
 "volumeUpDown": "Volume hoger lager",
 
-"volumeSliderClosed": "Volume slider gesloten",
+"volumeSliderClosed": "Volume slider closed",
 
 "preferences": "Voorkeuren",
 
@@ -122,7 +122,7 @@
 
 "alertDescribedVersion": "Versie met audiobeschrijving wordt gebruikt",
 
-"alertNonDescribedVersion": "Versie zonder audiobeschrijving wordt gebruikt",
+"alertNonDescribedVersion": "Using the non-described version of this video",
 
 "fallbackError1": "Sorry, je browser kan dit mediabestand niet afspelen",
 
@@ -130,47 +130,47 @@
 
 "orHigher": "of hoger",
 
-"prefMenuCaptions": "Ondertitels",
+"prefMenuCaptions": "Captions",
 
-"prefMenuDescriptions": "Beschrijvingen",
+"prefMenuDescriptions": "Descriptions",
 
-"prefMenuKeyboard": "Toetsenbord",
+"prefMenuKeyboard": "Keyboard",
 
 "prefMenuTranscript": "Transcript",
 
-"prefTitleCaptions": "Ondertitels Voorkeuren",
+"prefTitleCaptions": "Captions Preferences",
 
-"prefTitleDescriptions": "Audiobeschrijving Voorkeuren",
+"prefTitleDescriptions": "Audio Description Preferences",
 
-"prefTitleKeyboard": "Toetsenbord Voorkeuren",
+"prefTitleKeyboard": "Keyboard Preferences",
 
-"prefTitleTranscript": "Transcript Voorkeuren",
+"prefTitleTranscript": "Transcript Preferences",
 
-"prefIntroCaptions": "De volgende set voorkeuren regels hoe ondertitels getoond worden.",
+"prefIntroCaptions": "The following preferences control how captions are displayed.",
 
-"prefIntroDescription1": "Deze video speler ondersteund audiobeschrijving op twee manieren: ",
+"prefIntroDescription1": "This media player supports audio description in two ways: ",
 
-"prefIntroDescription2": "De huidige video heeft ",
+"prefIntroDescription2": "The current video has ",
 
-"prefIntroDescriptionNone": "De huidige video heeft in beide formaten geen audiobeschrijving.",
+"prefIntroDescriptionNone": "The current video has no audio description in either format.",
 
-"prefIntroDescription3": "Gebruik het volgende formulier om je voorkeuren gerelateerd aan tekst-gebaseerde audiobeschrijving in te stellen.",
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
 
-"prefIntroDescription4": "Na het opslaan van je instellingen, kan audiobeschrijving aan of uit gezet worden met de Beschrijving knop.",
+"prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
 
-"prefIntroKeyboard1": "De mediaspeler op deze pagina kan vanaf elke plek binnen de pagina bestuurd worden met de toetsenbord sneltoetsen (zie de lijst hieronder).",
+"prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",
 
-"prefIntroKeyboard2": "Mutatie knoppen (Shift, Alt, and Control) kunnen hier onder toegekend worden.",
+"prefIntroKeyboard2": "Modifier keys (Shift, Alt, and Control) can be assigned below.",
 
-"prefIntroKeyboard3": "LET OP: Sommige toetsencombinaties kunnen conflicteren met de toetsen die gebruikt worden door de browser en/of andere software applicaties. Probeer verscheidene combinaties van mutatie knoppen om er een combinatie te vinden die voor jou werkt.",
+"prefIntroKeyboard3": "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.",
 
-"prefIntroTranscript": "De volgende voorkeuren beïnvloeden het interactieve transcript.",
+"prefIntroTranscript": "The following preferences affect the interactive transcript.",
 
-"prefCookieWarning": "Het opslaan van je voorkeuren vereist cookies.",
+"prefCookieWarning": "Saving your preferences requires cookies.",
 
-"prefHeadingKeyboard1": "Mutatie knoppen gebruikt voor sneltoetsen",
+"prefHeadingKeyboard1": "Modifier keys used for shortcuts",
 
-"prefHeadingKeyboard2": "Huidige toetsenbord sneltoetsen",
+"prefHeadingKeyboard2": "Current keyboard shortcuts",
 
 "prefHeadingDescription": "Audiobeschrijving",
 
@@ -178,7 +178,7 @@
 
 "prefHeadingCaptions": "Ondertiteling",
 
-"prefHeadingTranscript": "Interactieve Transcript",
+"prefHeadingTranscript": "Interactive Transcript",
 
 "prefAltKey": "Alt",
 
@@ -188,99 +188,81 @@
 
 "escapeKey": "Escape",
 
-"escapeKeyFunction": "Sluit huidige dialoog of popup menu",
+"escapeKeyFunction": "Close current dialog or popup menu",
 
-"prefDescFormat": "Voorkeurs formaat",
+"prefDescFormat": "Preferred format",
 
-"prefDescFormatHelp": "Als beide formaten beschikbaar zijn zal er slechts een enkele gebruikt worden.",
+"prefDescFormatHelp": "If both formats are avaialable, only one will be used.",
 
-"prefDescFormatOption1": "Alternatieve beschreven versie van de video",
+"prefDescFormatOption1": "alternative described version of video",
 
-"prefDescFormatOption1b": "een alternatief beschreven versie",
+"prefDescFormatOption1b": "an alternative described version",
 
-"prefDescFormatOption2": "op tekst gebaseerde beschrijving, aangekondigd door de screen reader",
+"prefDescFormatOption2": "text-based description, announced by screen reader",
 
-"prefDescFormatOption2b": "op tekst gebaseerde beschrijving",
+"prefDescFormatOption2b": "text-based description",
 
 "prefDescPause": "Pauzeer video automatisch als beschrijving aan wordt gezet",
 
-"prefDescVisible": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
-
-"prefDescVoice": "Voice",
-
-"prefDescRate": "Rate",
-
-"prefDescPitch": "Pitch",
-
-"prefDescPitch1": "Very low",
-
-"prefDescPitch2": "Low",
-
-"prefDescPitch3": "Default",
-
-"prefDescPitch4": "High",
-
-"prefDescPitch5": "Very high",
-
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"prefVisibleDesc": "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar",
 
 "prefHighlight": "Transcript highlighten terwijl media speelt",
 
 "prefTabbable": "Maak transcript bedienbaar met toetsenbord",
 
-"prefCaptionsFont": "Lettertype",
+"prefCaptionsFont": "Font",
 
-"prefCaptionsColor": "Tekst Kleur",
+"prefCaptionsColor": "Text Color",
 
-"prefCaptionsBGColor": "Achtergrond",
+"prefCaptionsBGColor": "Background",
 
-"prefCaptionsSize": "Lettertype Groote",
+"prefCaptionsSize": "Font Size",
 
-"prefCaptionsOpacity": "Doorzichtigheid",
+"prefCaptionsOpacity": "Opacity",
 
-"prefCaptionsStyle": "Stijl",
+"prefCaptionsStyle": "Style",
 
 "serif": "serif",
 
 "sans": "sans-serif",
 
-"cursive": "cursief",
+"cursive": "cursive",
 
 "fantasy": "fantasy",
 
 "monospace": "monospace",
 
-"white": "wit",
+"white": "white",
 
-"yellow": "geel",
+"yellow": "yellow",
 
-"green": "groen",
+"green": "green",
 
-"cyan": "cyaan",
+"cyan": "cyan",
 
-"blue": "blauw",
+"blue": "blue",
 
 "magenta": "magenta",
 
-"red": "rood",
+"red": "red",
 
-"black": "zwart",
+"black": "black",
 
-"transparent": "transparant",
+"transparent": "transparent",
 
-"solid": "solide",
+"solid": "solid",
 
-"captionsStylePopOn": "Verschijn",
+"captionsStylePopOn": "Pop-on",
 
-"captionsStyleRollUp": "Rol omhoog",
+"captionsStyleRollUp": "Roll-up",
 
-"prefCaptionsPosition": "Positie",
+"prefCaptionsPosition": "Position",
 
 "captionsPositionOverlay": "Overlay",
 
-"captionsPositionBelow": "Onder video",
+"captionsPositionBelow": "Below video",
 
-"sampleCaptionText": "Voorbeeld ondertitel tekst",
+"sampleCaptionText": "Sample caption text",
 
 "prefSuccess": "Je wijzigingen zijn opgeslagen.",
 
@@ -312,8 +294,6 @@
 
 "windowResizeAlert": "Het venster is van grootte veranderd.",
 
-"windowClose": "Sluit",
-
 "width": "Breedte",
 
 "height": "Hoogte",
@@ -324,32 +304,6 @@
 
 "windowBringTop": "Verplaats naar voren",
 
-"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina.",
+"windowBringTopAlert": "Het scherm staat nu voor andere objecten op deze pagina."
 
-"resultsSummary1": "You searched for:",
-
-"resultsSummary2": "Found",
-
-"resultsSummary3": "matching items.",
-
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
-
-"noResultsFound": "No results found.",
-
-"searchButtonLabel": "Play at",
-
-"hour": "hour",
-
-"minute": "minute",
-
-"second": "second",
-
-"hours": "hours",
-
-"minutes": "minutes",
-
-"seconds": "seconds",
-
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
-
-}
+};

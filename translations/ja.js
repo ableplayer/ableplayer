@@ -1,4 +1,4 @@
-{
+var ja = {
 
 "audio": "オーディオ",
 
@@ -204,25 +204,7 @@
 
 "prefDescPause": "解説が表示されたら動画を自動的に停止する",
 
-"prefDescVisible": "解説が見えるようにする",
-
-"prefDescVoice": "Voice",
-
-"prefDescRate": "Rate",
-
-"prefDescPitch": "Pitch",
-
-"prefDescPitch1": "Very low",
-
-"prefDescPitch2": "Low",
-
-"prefDescPitch3": "Default",
-
-"prefDescPitch4": "High",
-
-"prefDescPitch5": "Very high",
-
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"prefVisibleDesc": "解説が見えるようにする",
 
 "prefHighlight": "メディアの再生に合わせて字幕をハイライトする",
 
@@ -312,8 +294,6 @@
 
 "windowResizeAlert": "ウィンドウのサイズが変更されました。",
 
-"windowClose": "閉じる",
-
 "width": "幅",
 
 "height": "高さ",
@@ -324,33 +304,6 @@
 
 "windowBringTop": "前面へ移動",
 
-"windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。",
+"windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。"
 
-"resultsSummary1": "You searched for:",
-
-"resultsSummary2": "Found",
-
-"resultsSummary3": "matching items.",
-
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
-
-"noResultsFound": "No results found.",
-
-"searchButtonLabel": "Play at",
-
-"hour": "hour",
-
-"minute": "minute",
-
-"second": "second",
-
-"hours": "hours",
-
-"minutes": "minutes",
-
-"seconds": "seconds",
-
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
-
-
-}
+};

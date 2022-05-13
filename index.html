@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Player Accessible</title>
+
+    <!-- Preconnect to CDNs: remove if not needed -->
+    <link rel="preconnect" href="https://code.jquery.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin="anonymous">
+
+    <!--
+      Neue Helvetica is a trademark of Monotype Imaging Inc. registered in the U.S.
+      Patent and Trademark Office and may be registered in certain other jurisdictions.
+      Copyright © 2014 Monotype Imaging Inc. All rights reserved.
+      Orange Company had buy the right for used Helvetica onto digital applications.
+      If you are not autorized to used it, don't include the orangeHelvetica.css
+      See NOTICE.txt for more informations.
+    -->
+    <!-- <link rel="preload" href="fonts/HelvNeue55_W1G.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="fonts/HelvNeue75_W1G.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/orangeHelvetica.min.css" /> -->
+    <!--
+      Orange Icons
+      Copyright (C) 2016 - 2019 Orange SA All rights reserved
+      See NOTICE.txt for more informations.
+    -->
+    <!-- <link rel="stylesheet" href="css/orangeIcons.min.css" /> -->
+
+
+    <!-- Dependencies -->
+    <script src="thirdparty/modernizr.custom.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="thirdparty/js.cookie.js"></script>
+
+    <!-- Able Player CSS -->
+    <link rel="stylesheet" href="build/ableplayer.min.css" type="text/css"/>
+    <link rel="stylesheet" href="styles/ableplayer.css" type="text/css"/>
+
+    <!-- Boosted CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boosted@4.4.1/dist/css/boosted.min.css"
+          integrity="sha384-OB/gcmnjN4zOvILOKtMqzd/ZUoKc/cgZDpn0c2C5FoQAJqmQdjX4ITe6XSK32JyO" crossorigin="anonymous">
+
+
+    <!-- Able Player JavaScript -->
+    <script src="scripts/accessiblePlayer.js"></script>
+</head>
+<body>
+<header role="banner" id="demo-navbar">
+    <!-- <nav role="navigation" class="navbar navbar-dark navbar-expand-md supra" aria-label="Complementary navigation">
+        <div class="container">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Accessibilité test</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Follow us</a></li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                        <a href="#" class="nav-link nav-icon svg-buy">
+                        <span class="sr-only">basket</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link nav-icon svg-avatar">
+                        <span class="sr-only">my account</span>
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">EN</a>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li><a class="dropdown-item" href="#">FR</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav> -->
+    <nav role="navigation" class="navbar navbar-dark navbar-expand-md" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand" href="#"><img src="button-icons/orange_logo.svg" alt="Back to homepage"
+                                                  title="Back to homepage" width="50" height="50"/></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsing-navbar2"
+                    aria-controls="collapsing-navbar2" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse justify-content-between collapse" id="collapsing-navbar2">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#">Démonstration</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="#">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">My Orange</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Help</a></li> -->
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link nav-icon svg-buy">
+                            <span class="sr-only">open basket</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link nav-icon svg-search">
+                            <span class="sr-only">open search bar</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<div class="discovery-module-one-pop-out bg-yellow py-5 py-lg-3">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-4">
+                <h2 class="display-1">Loreum Ipsum</h2>
+                <p class="lead">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam suscipit, quam eu efficitur faucibus,
+                    eros lorem faucibus tortor, at tempor leo urna vitae nisl.
+                </p>
+                <a href="#" class="btn btn-secondary">
+                    Find out more<span class="sr-only">&nbsp;about the TITLE OF THE INSIGHT</span>
+                </a>
+            </div>
+            <!-- <div class="col-12 col-md-6 col-lg-8"> -->
+            <div class="col">
+                <video id="video1" class="video-accessible" data-show-now-playing="true" preload="auto" lang="fr"
+                       data-lang="fr" data-force-lang="fr" data-able-player="" playsinline="">
+                    <source type="video/webm" src="media/player-dfa-orateur.webm"
+                            data-sign-src="media/player-dfa-lsf-optimized.webm"
+                            data-sign-opt="media/player-dfa-lsf-optimized.webm"></source>
+                    <source type="video/mp4" src="media/player-dfa-orateur.mp4"
+                            data-sign-src="media/player-dfa-lsf-optimized.mp4"
+                            data-sign-opt="media/player-dfa-lsf-optimized.mp4"></source>
+                    <track kind="captions" src="media/player-dfa-sub-fr.vtt" srclang="fr" label="Français">
+                    <track kind="captions" src="media/player-dfa-sub-en.vtt" srclang="en" label="Anglais">
+                    <track kind="captions" src="media/player-dfa-sub-es.vtt" srclang="es" label="Espagnol">
+                    <track kind="captions" src="media/player-dfa-sub-pl.vtt" srclang="pl" label="Portuguais">
+                    <track kind="captions" src="media/player-dfa-sub-ml.vtt" srclang="ml" label="Malentendant">
+                    <track kind="descriptions" src="media/player-dfa-desc.vtt" srclang="fr">
+                </video>
+
+                <!--<video id="video1" class="video-accessible" controls autoplay >
+                    <source type="video/webm" src="media/player-dfa-orateur.webm" ></source>
+                    <source type="video/mp4" src="media/player-dfa-orateur.mp4"></source>
+                    <track kind="captions" src="media/player-dfa-sub-fr.vtt" srclang="fr" label="Français">
+                    <track kind="captions" src="media/player-dfa-sub-en.vtt" srclang="en" label="Anglais">
+                    <track kind="captions" src="media/player-dfa-sub-es.vtt" srclang="es" label="Espagnol">
+                    <track kind="captions" src="media/player-dfa-sub-pl.vtt" srclang="pl" label="Portuguais">
+                    <track kind="captions" src="media/player-dfa-sub-ml.vtt" srclang="ml" label="Malentendant">
+                </video>-->
+
+
+                <ul class="able-playlist" data-player="video1" data-embedded style="display:none">
+                    <!-- <li data-webm="media/player-dfa-orateur"></li>
+                    <li data-webm="media/player-dfa-orateur-optimized.webm"></li> -->
+                    <!--<li data-mp4="/public/videos/MAH00793.MP4">Sans linéarisation</li>
+                    <li data-webm="/public/videos/MAH00793_optimized.webm">Avec linéarisation</li>-->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Boosted JS. -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/jquery.tablesorter.min.js"
+            integrity="sha384-QnFIXbEfAgO7z63b/aNzTSdSNLoNiNX/mk/Ok+NpUNMnvriWLo5cOtB0OUCAdKNu"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.5.0/js/swiper.min.js"
+            integrity="sha384-fOtis9P3S4B2asdoye1/YBpXMaRmuXu925gZhfQA/gnU3dLnftD8zvpk/lhP0YSG"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/boosted@4.4.1/dist/js/boosted.min.js"
+            integrity="sha384-Y/0NjLXRerXrg7jzex/E5ONTjY9VxGnhnsY0dVw12hlg/0XlAJFjh1biCQfdWI1R"
+            crossorigin="anonymous"></script>
+</body>
+</html>

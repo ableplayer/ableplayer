@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://localhost/player2/accessible-player/demo.html -->
+<html lang="fr" style=""
+      class=" js flexbox flexboxlegacy rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>Demo lecteur accessible</title>
+
+    <!-- Dependencies -->
+    <script src="./Demo lecteur accessible_files/modernizr.custom.js.téléchargement"></script>
+    <script src="./Demo lecteur accessible_files/jquery.min.js.téléchargement"></script>
+    <script src="./Demo lecteur accessible_files/jquery-ui.js.téléchargement"></script>
+    <script src="./Demo lecteur accessible_files/js.cookie.js.téléchargement"></script>
+
+    <!-- Able Player CSS -->
+    <link rel="stylesheet" href="./Demo lecteur accessible_files/ableplayer.min.css" type="text/css">
+    <link rel="stylesheet" href="./Demo lecteur accessible_files/ableplayer.css" type="text/css">
+
+
+    <!-- Able Player JavaScript -->
+    <script src="./Demo lecteur accessible_files/ableplayer.js.téléchargement"></script>
+
+</head>
+
+<body>
+
+<div class="able-wrapper" aria-hidden="false" style="max-width: 1324px;">
+    <div class="able" style="width: 100%;"><h1 class="able-offscreen">Lecteur multimédia</h1>
+        <div class="able-vidcap-container">
+            <div class="able-media-container">
+                <video id="video1" data-show-now-playing="true" preload="auto" data-able-player="" playsinline=""
+                       style="width: 100%; height: auto;" tabindex="-1">
+                    <source type="video/webm"
+                            src="http://localhost/player2/accessible-player/media/player-dfa-orateur.webm"
+                            data-sign-src="media/player-dfa-lsf-optimized.webm"
+                            data-sign-opt="media/player-dfa-lsf-optimized.webm">
+                    <track kind="subtitles" src="media/player-dfa-sub-fr.vtt" srclang="fr" label="Français">
+                    <track kind="captions" src="media/player-dfa-sub-en.vtt" srclang="en" label="Anglais">
+                    <track kind="descriptions" src="media/player-dfa-desc.vtt" srclang="fr">
+                </video>
+                <button class="able-big-play-button icon-play" aria-hidden="true" tabindex="-1"
+                        style="width: 1324px; height: 748.75px;"></button>
+            </div>
+            <div class="able-captions-wrapper able-captions-below" aria-hidden="true"
+                 style="line-height: 175%; background-color: rgb(0, 0, 0); opacity: 1;">
+                <div class="able-captions"
+                     style="font-family: &quot;Helvetica Neue&quot;; font-size: 150%; color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 1; display: inline-block;">
+                    Là on peut basculer sur autre chose.
+                </div>
+            </div>
+        </div>
+        <div class="able-player able-video" role="region" aria-label="video player">
+            <div class="able-now-playing" aria-live="assertive" aria-atomic="true"></div>
+            <div class="able-controller able-white-controls" style="display:none">
+                <div id="video1-tooltip" class="able-tooltip" style="display: none;"></div>
+                <div class="able-left-controls">
+                    <button type="button" tabindex="0" aria-label="Lecture" class="able-button-handler-play">
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 16 20">
+                            <path d="M0 18.393v-16.429q0-0.29 0.184-0.402t0.441 0.033l14.821 8.237q0.257 0.145 0.257 0.346t-0.257 0.346l-14.821 8.237q-0.257 0.145-0.441 0.033t-0.184-0.402z"></path>
+                        </svg>
+                        <span class="able-clipped">Lecture</span></button>
+                    <button type="button" tabindex="0" aria-label="Redémarrer" class="able-button-handler-restart">
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                            <path d="M18 8h-6l2.243-2.243c-1.133-1.133-2.64-1.757-4.243-1.757s-3.109 0.624-4.243 1.757c-1.133 1.133-1.757 2.64-1.757 4.243s0.624 3.109 1.757 4.243c1.133 1.133 2.64 1.757 4.243 1.757s3.109-0.624 4.243-1.757c0.095-0.095 0.185-0.192 0.273-0.292l1.505 1.317c-1.466 1.674-3.62 2.732-6.020 2.732-4.418 0-8-3.582-8-8s3.582-8 8-8c2.209 0 4.209 0.896 5.656 2.344l2.344-2.344v6z"></path>
+                        </svg>
+                        <span class="able-clipped">Redémarrer</span></button>
+                    <button type="button" tabindex="0" aria-label="Reculer" class="able-button-handler-rewind">
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                            <path d="M11.25 3.125v6.25l6.25-6.25v13.75l-6.25-6.25v6.25l-6.875-6.875z"></path>
+                        </svg>
+                        <span class="able-clipped">Reculer</span></button>
+                    <button type="button" tabindex="0" aria-label="Avancer" class="able-button-handler-forward">
+                        <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                            <path d="M10 16.875v-6.25l-6.25 6.25v-13.75l6.25 6.25v-6.25l6.875 6.875z"></path>
+                        </svg>
+                        <span class="able-clipped">Avancer</span></button>
+                </div>
+                <div class="able-right-controls">
+                    <div class="able-seekbar-wrapper" style="width: 1284px;">
+                        <div class="able-seekbar"
+                        <="" div="">
+                        <div role="tooltip" class="able-tooltip" style="display: none;"></div>
+                        <div class="able-seekbar-loaded" style="width: 0px;"></div>
+                        <div class="able-seekbar-played" style="width: 0px;"></div>
+                        <div orientation="horizontal" class="able-seekbar-head" tabindex="0" role="slider"
+                             aria-label="video timeline" aria-valuemin="0" aria-valuemax="158.36"
+                             aria-valuetext="0 seconds" aria-valuenow="0" style="left: -3.2px;"></div>
+                    </div>
+                    <span class="able-offscreen" aria-live="polite"></span></div>
+                <button type="button" tabindex="0" aria-label="Volume" class="able-button-handler-volume"
+                        aria-controls="video1-volume-slider" aria-describedby="video1-volume-help">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z"></path>
+                    </svg>
+                    <span class="able-clipped">Volume</span></button>
+                <div id="video1-volume-slider" class="able-volume-slider" aria-hidden="true" style="display: none;">
+                    <div class="able-tooltip" role="tooltip" style="display: none;"></div>
+                    <div class="able-volume-track">
+                        <div class="able-volume-track able-volume-track-on" style="height: 35px; top: 15px;"></div>
+                        <div class="able-volume-head" role="slider" aria-orientation="vertical"
+                             aria-label="Monter baisser le volume" aria-valuemin="0" aria-valuemax="10"
+                             aria-valuenow="7" tabindex="-1" aria-valuetext="70%" style="top: 8px;"></div>
+                    </div>
+                    <div class="able-offscreen" aria-live="assertive" aria-atomic="true">70%</div>
+                    <div id="video1-volume-help" class="able-volume-help">70%, Cliquer pour accéder au réglage du
+                        volume
+                    </div>
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+            <div class="able-left-controls">
+                <button type="button" tabindex="0" aria-label="Plus lentement" class="able-button-handler-slower">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M17.212 3.846c-0.281-0.014-0.549 0.025-0.817 0.144-1.218 0.542-1.662 2.708-2.163 3.942-1.207 2.972-7.090 4.619-11.755 5.216-0.887 0.114-1.749 0.74-2.428 1.466 0.82-0.284 2.126-0.297 2.74 0.144 0.007 0.488-0.376 1.062-0.625 1.37-0.404 0.5-0.398 0.793 0.12 0.793 0.473 0 0.752 0.007 1.635 0 0.393-0.003 0.618-0.16 1.49-1.49 3.592 0.718 5.986-0.264 5.986-0.264s0.407 1.755 1.418 1.755h1.49c0.633 0 0.667-0.331 0.625-0.433-0.448-1.082-0.68-1.873-0.769-2.5-0.263-1.857 0.657-3.836 2.524-5.457 0.585 0.986 2.253 0.845 2.909-0.096s0.446-2.268-0.192-3.221c-0.49-0.732-1.345-1.327-2.188-1.37zM8.221 4.663c-0.722-0.016-1.536 0.111-2.5 0.409-4.211 1.302-4.177 4.951-3.51 5.745 0 0-0.955 0.479-0.409 1.274 0.448 0.652 3.139 0.191 5.409-0.529s4.226-1.793 5.312-2.692c0.948-0.785 0.551-2.106-0.505-1.947-0.494-0.98-1.632-2.212-3.798-2.26zM18.846 5.962c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577z"></path>
+                    </svg>
+                    <span class="able-clipped">Plus lentement</span></button>
+                <button type="button" tabindex="0" aria-label="Plus rapidement" class="able-button-handler-faster">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M10.817 0c-2.248 0-1.586 0.525-1.154 0.505 1.551-0.072 5.199 0.044 6.851 2.428 0 0-1.022-2.933-5.697-2.933zM10.529 0.769c-2.572 0-2.837 0.51-2.837 1.106 0 0.545 1.526 0.836 2.524 0.697 2.778-0.386 4.231-0.12 5.264 0.865-1.010 0.779-0.75 1.401-1.274 1.851-1.093 0.941-2.643-0.673-4.976-0.673-2.496 0-4.712 1.92-4.712 4.76-0.157-0.537-0.769-0.913-1.442-0.913-0.974 0-1.514 0.637-1.514 1.49 0 0.769 1.13 1.791 2.861 0.938 0.499 1.208 2.265 1.364 2.452 1.418 0.538 0.154 1.875 0.098 1.875 0.865 0 0.794-1.034 1.094-1.034 1.707 0 1.070 1.758 0.873 2.284 1.034 1.683 0.517 2.103 1.214 2.788 2.212 0.771 1.122 2.572 1.408 2.572 0.625 0-3.185-4.413-4.126-4.399-4.135 0.608-0.382 2.139-1.397 2.139-3.534 0-1.295-0.703-2.256-1.755-2.861 1.256 0.094 2.572 1.205 2.572 2.74 0 1.877-0.653 2.823-0.769 2.957 1.975-1.158 3.193-3.91 3.029-6.37 0.61 0.401 1.27 0.577 1.971 0.625 0.751 0.052 1.475-0.225 1.635-0.529 0.38-0.723 0.162-2.321-0.12-2.837-0.763-1.392-2.236-1.73-3.606-1.683-1.202-1.671-3.812-2.356-5.529-2.356zM1.37 3.077l-0.553 1.538h3.726c0.521-0.576 1.541-1.207 2.284-1.538h-5.457zM18.846 5.192c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577zM0.553 5.385l-0.553 1.538h3.197c0.26-0.824 0.586-1.328 0.769-1.538h-3.413z"></path>
+                    </svg>
+                    <span class="able-clipped">Plus rapidement</span></button>
+                <button type="button" tabindex="0" aria-label="Sous-titres" class="able-button-handler-captions"
+                        aria-haspopup="true" aria-controls="video1-captions-menu">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z"></path>
+                    </svg>
+                    <span class="able-clipped">Sous-titres</span></button>
+                <button type="button" tabindex="0" aria-label="Afficher la langue des signes"
+                        class="able-button-handler-sign buttonOff">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M10.954 10.307c0.378 0.302 0.569 1.202 0.564 1.193 0.697 0.221 1.136 0.682 1.136 0.682 1.070-0.596 1.094-0.326 1.558-0.682 0.383-0.263 0.366-0.344 0.567-1.048 0.187-0.572-0.476-0.518-1.021-1.558-0.95 0.358-1.463 0.196-1.784 0.167-0.145-0.020-0.12 0.562-1.021 1.247zM14.409 17.196c-0.133 0.182-0.196 0.218-0.363 0.454-0.28 0.361 0.076 0.906 0.253 0.82 0.206-0.076 0.341-0.488 0.567-0.623 0.115-0.061 0.422-0.513 0.709-0.82 0.211-0.238 0.363-0.344 0.564-0.594 0.341-0.422 0.412-0.744 0.709-1.193 0.184-0.236 0.312-0.307 0.481-0.594 0.886-1.679 0.628-2.432 1.475-3.629 0.26-0.353 0.552-0.442 0.964-0.653 0.383-2.793-0.888-4.356-0.879-4.361-1.067 0.623-1.644 0.879-2.751 0.82-0.417-0.005-0.636-0.182-1.048-0.145-0.385 0.015-0.582 0.159-0.964 0.29-0.589 0.182-0.91 0.344-1.529 0.535-0.393 0.11-0.643 0.115-1.050 0.255-0.348 0.147-0.182 0.029-0.427 0.312-0.317 0.348-0.238 0.623-0.535 1.222-0.371 0.785-0.326 0.891-0.115 0.987-0.14 0.402-0.174 0.672-0.14 1.107 0.039 0.331-0.101 0.562 0.255 0.825 0.483 0.361 1.499 1.205 1.757 1.217 0.39-0.012 1.521 0.029 2.096-0.368 0.13-0.081 0.167-0.162 0.056 0.145-0.022 0.037-1.433 1.136-1.585 1.131-1.794 0.056-1.193 0.157-1.303 0.115-0.091 0-0.955-1.055-1.477-0.682-0.196 0.12-0.287 0.236-0.363 0.452 0.066 0.137 0.383 0.358 0.675 0.54 0.422 0.27 0.461 0.552 0.881 0.653 0.513 0.115 1.060 0.039 1.387 0.081 0.125 0.034 1.256-0.297 1.961-0.675 0.65-0.336-0.898 0.648-1.276 1.131-1.141 0.358-0.82 0.373-1.362 0.483-0.503 0.115-0.479 0.086-0.822 0.196-0.356 0.086-0.648 0.572-0.312 0.825 0.201 0.167 0.827-0.066 1.445-0.086 0.275-0.005 1.391-0.518 1.644-0.653 0.633-0.339 1.099-0.81 1.472-1.077 0.518-0.361-0.584 0.991-1.050 1.558zM8.855 9.799c-0.378-0.312-0.569-1.212-0.564-1.217-0.697-0.206-1.136-0.667-1.136-0.653-1.070 0.582-1.099 0.312-1.558 0.653-0.388 0.277-0.366 0.363-0.567 1.045-0.187 0.594 0.471 0.535 1.021 1.561 0.95-0.344 1.463-0.182 1.784-0.142 0.145 0.010 0.12-0.572 1.021-1.247zM5.4 2.911c0.133-0.191 0.196-0.228 0.368-0.454 0.27-0.371-0.081-0.915-0.253-0.849-0.211 0.096-0.346 0.508-0.599 0.653-0.093 0.052-0.4 0.503-0.682 0.82-0.211 0.228-0.363 0.334-0.564 0.599-0.346 0.407-0.412 0.729-0.709 1.161-0.184 0.258-0.317 0.324-0.481 0.621-0.886 1.669-0.631 2.422-1.475 3.6-0.26 0.38-0.552 0.461-0.964 0.682-0.383 2.788 0.883 4.346 0.879 4.336 1.068-0.609 1.639-0.861 2.751-0.825 0.417 0.025 0.636 0.201 1.048 0.174 0.385-0.025 0.582-0.169 0.964-0.285 0.589-0.196 0.91-0.358 1.499-0.54 0.422-0.12 0.672-0.125 1.080-0.285 0.348-0.128 0.182-0.010 0.427-0.282 0.312-0.358 0.238-0.633 0.508-1.217 0.398-0.8 0.353-0.906 0.142-0.991 0.135-0.412 0.174-0.677 0.14-1.107-0.044-0.336 0.101-0.572-0.255-0.82-0.483-0.375-1.499-1.22-1.752-1.222-0.395 0.002-1.526-0.039-2.101 0.339-0.13 0.101-0.167 0.182-0.056-0.11 0.022-0.052 1.433-1.148 1.585-1.163 1.794-0.039 1.193-0.14 1.303-0.088 0.091-0.007 0.955 1.045 1.477 0.682 0.191-0.13 0.287-0.245 0.368-0.452-0.071-0.147-0.388-0.368-0.68-0.537-0.422-0.282-0.464-0.564-0.881-0.655-0.513-0.125-1.065-0.049-1.387-0.11-0.125-0.015-1.256 0.317-1.956 0.68-0.66 0.351 0.893-0.631 1.276-1.136 1.136-0.339 0.81-0.353 1.36-0.479 0.501-0.101 0.476-0.071 0.82-0.172 0.351-0.096 0.648-0.577 0.312-0.849-0.206-0.152-0.827 0.081-1.44 0.086-0.28 0.020-1.396 0.533-1.649 0.677-0.633 0.329-1.099 0.8-1.472 1.048-0.523 0.38 0.584-0.967 1.050-1.529z"></path>
+                    </svg>
+                    <span class="able-clipped">Afficher la langue des signes</span></button>
+                <button type="button" tabindex="0" aria-label="Activer les descriptions"
+                        class="able-button-handler-descriptions buttonOff" title="Activer les descriptions">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M17.623 3.57h-1.555c1.754 1.736 2.763 4.106 2.763 6.572 0 2.191-0.788 4.286-2.189 5.943h1.484c1.247-1.704 1.945-3.792 1.945-5.943-0-2.418-0.886-4.754-2.447-6.572v0zM14.449 3.57h-1.55c1.749 1.736 2.757 4.106 2.757 6.572 0 2.191-0.788 4.286-2.187 5.943h1.476c1.258-1.704 1.951-3.792 1.951-5.943-0-2.418-0.884-4.754-2.447-6.572v0zM11.269 3.57h-1.542c1.752 1.736 2.752 4.106 2.752 6.572 0 2.191-0.791 4.286-2.181 5.943h1.473c1.258-1.704 1.945-3.792 1.945-5.943 0-2.418-0.876-4.754-2.447-6.572v0zM10.24 9.857c0 3.459-2.826 6.265-6.303 6.265v0.011h-3.867v-12.555h3.896c3.477 0 6.274 2.806 6.274 6.279v0zM6.944 9.857c0-1.842-1.492-3.338-3.349-3.338h-0.876v6.686h0.876c1.858 0 3.349-1.498 3.349-3.348v0z"></path>
+                    </svg>
+                    <span class="able-clipped">Activer les descriptions</span></button>
+                <button type="button" tabindex="0" aria-label="Afficher la transcription"
+                        class="able-button-handler-transcript buttonOff" title="Afficher la transcription">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M0 19.107v-17.857q0-0.446 0.313-0.759t0.759-0.313h8.929v6.071q0 0.446 0.313 0.759t0.759 0.313h6.071v11.786q0 0.446-0.313 0.759t-0.759 0.312h-15q-0.446 0-0.759-0.313t-0.313-0.759zM4.286 15.536q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 12.679q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 9.821q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM11.429 5.893v-5.268q0.246 0.156 0.402 0.313l4.554 4.554q0.156 0.156 0.313 0.402h-5.268z"></path>
+                    </svg>
+                    <span class="able-clipped">Afficher la transcription</span></button>
+            </div>
+            <div class="able-right-controls">
+                <button type="button" tabindex="0" aria-label="Préférences" class="able-button-handler-preferences"
+                        aria-controls="video1-prefs-menu">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M18.238 11.919c-1.049-1.817-0.418-4.147 1.409-5.205l-1.965-3.404c-0.562 0.329-1.214 0.518-1.911 0.518-2.1 0-3.803-1.714-3.803-3.828h-3.931c0.005 0.653-0.158 1.314-0.507 1.919-1.049 1.818-3.382 2.436-5.212 1.382l-1.965 3.404c0.566 0.322 1.056 0.793 1.404 1.396 1.048 1.815 0.42 4.139-1.401 5.2l1.965 3.404c0.56-0.326 1.209-0.513 1.902-0.513 2.094 0 3.792 1.703 3.803 3.808h3.931c-0.002-0.646 0.162-1.3 0.507-1.899 1.048-1.815 3.375-2.433 5.203-1.387l1.965-3.404c-0.562-0.322-1.049-0.791-1.395-1.391zM10 14.049c-2.236 0-4.050-1.813-4.050-4.049s1.813-4.049 4.050-4.049 4.049 1.813 4.049 4.049c-0 2.237-1.813 4.049-4.049 4.049z"></path>
+                    </svg>
+                    <span class="able-clipped">Préférences</span></button>
+                <button type="button" tabindex="0" aria-label="Activer le mode plein écran"
+                        class="able-button-handler-fullscreen">
+                    <svg focusable="false" aria-hidden="true" viewBox="0 0 20 20">
+                        <path d="M0 18.036v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502zM8.717 8.393q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257z"></path>
+                    </svg>
+                    <span class="able-clipped">Fullscreen</span></button>
+            </div>
+            <div style="clear:both;"></div>
+            <div id="video1-prefs-menu" class="able-popup able-popup-no-radio" role="menu" style="display: none;">
+                <ul role="presentation">
+                    <li role="menuitem" tabindex="-1">Sous-titres</li>
+                    <li role="menuitem" tabindex="-1">Descriptions</li>
+                    <li role="menuitem" tabindex="-1">Clavier</li>
+                    <li role="menuitem" tabindex="-1">Transcription</li>
+                </ul>
+            </div>
+            <div id="video1-captions-menu" class="able-popup" style="display: none;">
+                <ul>
+                    <li><input type="radio" value="0" name="video1-captions-choice" id="video1-captions-0"
+                               lang="en"><label for="video1-captions-0">Anglais</label></li>
+                    <li><input type="radio" value="1" name="video1-captions-choice" id="video1-captions-1"
+                               lang="fr"><label for="video1-captions-1">Français</label></li>
+                    <li><input type="radio" name="video1-captions-choice" id="video1-captions-off"><label
+                            for="video1-captions-off">Sous-titres désactivés</label></li>
+                </ul>
+            </div>
+        </div>
+        <ul class="able-playlist" data-player="video1" data-embedded="" style="display:none">
+            <li data-webm="media/player-dfa-orateur.webm" tabindex="0"></li>
+            <li data-webm="media/player-dfa-orateur-optimized.webm" tabindex="0"></li>
+            <!--<li data-mp4="/public/videos/MAH00793.MP4">Sans linéarisation</li>
+            <li data-webm="/public/videos/MAH00793_optimized.webm">Avec linéarisation</li>-->
+        </ul>
+        <div class="able-status-bar"><span class="able-timer"><span class="able-elapsedTime">0:00</span><span
+                class="able-duration">2:38</span></span><span class="acc-menu" id="acc-menu-id" role="button"
+                                                              tabindex="0" aria-label="Bouton menu accessibilité"
+                                                              aria-live="polite">Masquer menu accessible</span><span
+                class="able-speed" aria-live="assertive" style="display: none;">Vitesse: 1x</span><span
+                class="able-status" aria-live="polite">Interrompue</span></div>
+        <div class="controller-orange-main" aria-live="assertive" aria-atomic="true" style="display:none"><span
+                id="copy-seek" tabindex="0" class="buttonSeek"><span style="width: 25%" class="able-elapsedTime"
+                                                                     role="timer">0:00</span><div class="able-seekbar"
+                                                                                                  id="able-seekbar-acc"
+                                                                                                  style="width:50%"><div
+                role="tooltip" class="able-tooltip" style="display: none;"></div><div class="able-seekbar-loaded"
+                                                                                      style="width: 7.87667px;"></div><div
+                class="able-seekbar-played" style="width: 0px;"></div><div orientation="horizontal"
+                                                                           class="able-seekbar-head" tabindex="0"
+                                                                           role="slider" aria-label="video timeline"
+                                                                           aria-valuemin="0" aria-valuemax="158.36"
+                                                                           aria-valuetext="0 seconds" aria-valuenow="0"
+                                                                           style="left: -28.52px;"></div></div><input
+                style="width: 50%" id="setTimeOrange" type="text" placeholder="Saisissez un instant précis"><span
+                style="width: 25%" class="able-duration" role="timer">2:38</span></span>
+            <button type="button" id="copy-play" tabindex="0" aria-label="Lecture" aria-live="polite"
+                    class="able-button-handler-play button play colorDef">
+                <svg style="float:left" viewBox="0 0 16 20">
+                    <path d="M0 18.393v-16.429q0-0.29 0.184-0.402t0.441 0.033l14.821 8.237q0.257 0.145 0.257 0.346t-0.257 0.346l-14.821 8.237q-0.257 0.145-0.441 0.033t-0.184-0.402z"
+                    <="" path=""></path></svg>
+                <span id="spanPlay">Lecture</span></button>
+            <button type="button" id="copy-forward" tabindex="0" aria-label="Avancer"
+                    class="able-button-handler-forward button forward colorDef">
+                <svg style="float:left" viewBox="0 0 20 20">
+                    <path d="M10 16.875v-6.25l-6.25 6.25v-13.75l6.25 6.25v-6.25l6.875 6.875z"
+                    <="" path=""></path></svg>
+                <span>Avancer</span></button>
+            <button type="button" id="copy-rewind" tabindex="0" aria-label="Reculer"
+                    class="able-button-handler-rewind button rewind colorDef">
+                <svg style="float:left" viewBox="0 0 20 20">
+                    <path d="M11.25 3.125v6.25l6.25-6.25v13.75l-6.25-6.25v6.25l-6.875-6.875z"
+                    <="" path=""></path></svg>
+                <span>Reculer</span></button>
+            <button type="button" role="menu" id="show-volume" tabindex="0" aria-label="Volume"
+                    class="iconvol button volume colorDef">
+                <svg style="float:left" viewBox="0 0 21 20">
+                    <path d="M17.384 18.009c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.712-1.712 2.654-3.988 2.654-6.408s-0.943-4.696-2.654-6.408c-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.066 2.066 3.204 4.813 3.204 7.734s-1.138 5.668-3.204 7.734c-0.183 0.183-0.423 0.275-0.663 0.275zM14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z"
+                    <="" path=""></path></svg>
+                <span>Volume</span><i class="arrow right colorDef"></i></button>
+            <button type="button" id="fullscreen" tabindex="0" aria-label="Activer le mode plein écran"
+                    class="able-button-handler-play button fullscreen colorDef">
+                <svg style="float:left" viewBox="0 0 20 20">
+                    <path d="M0 18.036v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502zM8.717 8.393q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257z"
+                    <="" path=""></path></svg>
+                <span id="">Plein écran</span></button>
+            <button type="button" id="subtitles" role="menu" tabindex="0" aria-label="Sous-titres"
+                    class="button subtitles colorDef" aria-checked="false">
+                <svg style="float:left" viewBox="0 0 20 20">
+                    <path d="M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z"
+                    <="" path=""></path></svg>
+                <span>Sous-titres</span><i class="arrow right colorDef"></i></button>
+            <button type="button" id="vidcontr2" tabindex="0" aria-label="Vidéo normale"
+                    class="able-button-handler-forward button vidcontr colorDef" aria-checked="false"
+                    style="display: block;"><i class="captions colorDef"></i><span id="">Vidéo normale</span></button>
+            <button type="button" id="speedMain" tabindex="0" aria-label="Vitesse"
+                    class="normalIcon button speed colorDef"><p class="normalIcon"></p><span
+                    id="">Vitesse normale</span></button>
+            <button type="button" id="show-settings" role="menu" tabindex="0" aria-label="Préférences"
+                    class="iconsettings button settings buttonMore colorDef">
+                <svg style="float:left" viewBox="0 0 20 20">
+                    <path d="M18.238 11.919c-1.049-1.817-0.418-4.147 1.409-5.205l-1.965-3.404c-0.562 0.329-1.214 0.518-1.911 0.518-2.1 0-3.803-1.714-3.803-3.828h-3.931c0.005 0.653-0.158 1.314-0.507 1.919-1.049 1.818-3.382 2.436-5.212 1.382l-1.965 3.404c0.566 0.322 1.056 0.793 1.404 1.396 1.048 1.815 0.42 4.139-1.401 5.2l1.965 3.404c0.56-0.326 1.209-0.513 1.902-0.513 2.094 0 3.792 1.703 3.803 3.808h3.931c-0.002-0.646 0.162-1.3 0.507-1.899 1.048-1.815 3.375-2.433 5.203-1.387l1.965-3.404c-0.562-0.322-1.049-0.791-1.395-1.391zM10 14.049c-2.236 0-4.050-1.813-4.050-4.049s1.813-4.049 4.050-4.049 4.049 1.813 4.049 4.049c-0 2.237-1.813 4.049-4.049 4.049z"
+                    <="" path=""></path></svg>
+                <span>Préférences</span><i class="arrow right colorDef"></i></button>
+        </div>
+        <div class="controller-orange-volume" aria-live="assertive" aria-relevant="all" aria-atomic="true"
+             style="display:none">
+            <button type="button" id="hide-volume" tabindex="0" aria-label="Retour"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Volume 70%</span></button>
+            <button type="button" id="sound-up" tabindex="0" aria-label="plus Fort"
+                    class="able-button-handler-play button vplus colorDef">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <path d="M17.384 18.009c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.712-1.712 2.654-3.988 2.654-6.408s-0.943-4.696-2.654-6.408c-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.066 2.066 3.204 4.813 3.204 7.734s-1.138 5.668-3.204 7.734c-0.183 0.183-0.423 0.275-0.663 0.275zM14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z"
+                <="" path=""></path></svg><span id="">+ Fort</span></button>
+            <button type="button" id="sound-down" tabindex="0" aria-label="moins Fort"
+                    class="able-button-handler-forward button vmoins colorDef">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <path d="M14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z"
+                <="" path=""></path></svg><span id="">- Fort</span></button>
+            <button type="button" id="sound-mute" tabindex="0" role="checkbox" aria-label="Couper le son"
+                    class="able-button-handler-forward button vmute colorDef">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <path d="M10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z"
+                <="" path=""></path></svg><span> Couper le son</span></button>
+            <div id="orange-volume" aria-live="assertive" aria-relevant="all"
+                 style="display:block;background-color:transparent;color:transparent" aria-atomic="true"></div>
+        </div>
+        <div class="controller-orange-settings" aria-live="assertive" aria-atomic="true" style="">
+            <button type="button" id="hide-settings" tabindex="1" aria-label="Retour"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Tous les paramètres</span></button>
+            <button type="button" id="speed" tabindex="1" aria-label="Vitesse" class="normalIcon button speed colorDef">
+                <p class="normalIcon"></p><span id="">Vitesse normale</span></button>
+            <button type="button" id="subtitlesParam" tabindex="1" role="menu" aria-label="Sous-titres"
+                    class="button subtitles colorDef" aria-checked="false">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <path d="M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z"
+                <="" path=""></path></svg><span>Sous-titres</span><i class="arrow right colorDef"></i></button>
+            <button type="button" id="lsf" tabindex="1" aria-label="Activer la LSF"
+                    class="able-button-handler-forward button lsf colorDef" aria-checked="false">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <line x1="0" y1="0" x2="200" y2="200" style="display: block;"></line>
+                <path d="M10.954 10.307c0.378 0.302 0.569 1.202 0.564 1.193 0.697 0.221 1.136 0.682 1.136 0.682 1.070-0.596 1.094-0.326 1.558-0.682 0.383-0.263 0.366-0.344 0.567-1.048 0.187-0.572-0.476-0.518-1.021-1.558-0.95 0.358-1.463 0.196-1.784 0.167-0.145-0.020-0.12 0.562-1.021 1.247zM14.409 17.196c-0.133 0.182-0.196 0.218-0.363 0.454-0.28 0.361 0.076 0.906 0.253 0.82 0.206-0.076 0.341-0.488 0.567-0.623 0.115-0.061 0.422-0.513 0.709-0.82 0.211-0.238 0.363-0.344 0.564-0.594 0.341-0.422 0.412-0.744 0.709-1.193 0.184-0.236 0.312-0.307 0.481-0.594 0.886-1.679 0.628-2.432 1.475-3.629 0.26-0.353 0.552-0.442 0.964-0.653 0.383-2.793-0.888-4.356-0.879-4.361-1.067 0.623-1.644 0.879-2.751 0.82-0.417-0.005-0.636-0.182-1.048-0.145-0.385 0.015-0.582 0.159-0.964 0.29-0.589 0.182-0.91 0.344-1.529 0.535-0.393 0.11-0.643 0.115-1.050 0.255-0.348 0.147-0.182 0.029-0.427 0.312-0.317 0.348-0.238 0.623-0.535 1.222-0.371 0.785-0.326 0.891-0.115 0.987-0.14 0.402-0.174 0.672-0.14 1.107 0.039 0.331-0.101 0.562 0.255 0.825 0.483 0.361 1.499 1.205 1.757 1.217 0.39-0.012 1.521 0.029 2.096-0.368 0.13-0.081 0.167-0.162 0.056 0.145-0.022 0.037-1.433 1.136-1.585 1.131-1.794 0.056-1.193 0.157-1.303 0.115-0.091 0-0.955-1.055-1.477-0.682-0.196 0.12-0.287 0.236-0.363 0.452 0.066 0.137 0.383 0.358 0.675 0.54 0.422 0.27 0.461 0.552 0.881 0.653 0.513 0.115 1.060 0.039 1.387 0.081 0.125 0.034 1.256-0.297 1.961-0.675 0.65-0.336-0.898 0.648-1.276 1.131-1.141 0.358-0.82 0.373-1.362 0.483-0.503 0.115-0.479 0.086-0.822 0.196-0.356 0.086-0.648 0.572-0.312 0.825 0.201 0.167 0.827-0.066 1.445-0.086 0.275-0.005 1.391-0.518 1.644-0.653 0.633-0.339 1.099-0.81 1.472-1.077 0.518-0.361-0.584 0.991-1.050 1.558zM8.855 9.799c-0.378-0.312-0.569-1.212-0.564-1.217-0.697-0.206-1.136-0.667-1.136-0.653-1.070 0.582-1.099 0.312-1.558 0.653-0.388 0.277-0.366 0.363-0.567 1.045-0.187 0.594 0.471 0.535 1.021 1.561 0.95-0.344 1.463-0.182 1.784-0.142 0.145 0.010 0.12-0.572 1.021-1.247zM5.4 2.911c0.133-0.191 0.196-0.228 0.368-0.454 0.27-0.371-0.081-0.915-0.253-0.849-0.211 0.096-0.346 0.508-0.599 0.653-0.093 0.052-0.4 0.503-0.682 0.82-0.211 0.228-0.363 0.334-0.564 0.599-0.346 0.407-0.412 0.729-0.709 1.161-0.184 0.258-0.317 0.324-0.481 0.621-0.886 1.669-0.631 2.422-1.475 3.6-0.26 0.38-0.552 0.461-0.964 0.682-0.383 2.788 0.883 4.346 0.879 4.336 1.068-0.609 1.639-0.861 2.751-0.825 0.417 0.025 0.636 0.201 1.048 0.174 0.385-0.025 0.582-0.169 0.964-0.285 0.589-0.196 0.91-0.358 1.499-0.54 0.422-0.12 0.672-0.125 1.080-0.285 0.348-0.128 0.182-0.010 0.427-0.282 0.312-0.358 0.238-0.633 0.508-1.217 0.398-0.8 0.353-0.906 0.142-0.991 0.135-0.412 0.174-0.677 0.14-1.107-0.044-0.336 0.101-0.572-0.255-0.82-0.483-0.375-1.499-1.22-1.752-1.222-0.395 0.002-1.526-0.039-2.101 0.339-0.13 0.101-0.167 0.182-0.056-0.11 0.022-0.052 1.433-1.148 1.585-1.163 1.794-0.039 1.193-0.14 1.303-0.088 0.091-0.007 0.955 1.045 1.477 0.682 0.191-0.13 0.287-0.245 0.368-0.452-0.071-0.147-0.388-0.368-0.68-0.537-0.422-0.282-0.464-0.564-0.881-0.655-0.513-0.125-1.065-0.049-1.387-0.11-0.125-0.015-1.256 0.317-1.956 0.68-0.66 0.351 0.893-0.631 1.276-1.136 1.136-0.339 0.81-0.353 1.36-0.479 0.501-0.101 0.476-0.071 0.82-0.172 0.351-0.096 0.648-0.577 0.312-0.849-0.206-0.152-0.827 0.081-1.44 0.086-0.28 0.020-1.396 0.533-1.649 0.677-0.633 0.329-1.099 0.8-1.472 1.048-0.523 0.38 0.584-0.967 1.050-1.529z"
+                <="" path=""></path></svg><span id="">Activer la LSF</span></button>
+            <button type="button" id="audiodesc" tabindex="1" aria-label="Activer l&#39;audiodescription"
+                    class="able-button-handler-forward button audiodesc colorDef" aria-checked="false">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <line x1="0" y1="0" x2="200" y2="200" style="display: block;"></line>
+                <path d="M17.623 3.57h-1.555c1.754 1.736 2.763 4.106 2.763 6.572 0 2.191-0.788 4.286-2.189 5.943h1.484c1.247-1.704 1.945-3.792 1.945-5.943-0-2.418-0.886-4.754-2.447-6.572v0zM14.449 3.57h-1.55c1.749 1.736 2.757 4.106 2.757 6.572 0 2.191-0.788 4.286-2.187 5.943h1.476c1.258-1.704 1.951-3.792 1.951-5.943-0-2.418-0.884-4.754-2.447-6.572v0zM11.269 3.57h-1.542c1.752 1.736 2.752 4.106 2.752 6.572 0 2.191-0.791 4.286-2.181 5.943h1.473c1.258-1.704 1.945-3.792 1.945-5.943 0-2.418-0.876-4.754-2.447-6.572v0zM10.24 9.857c0 3.459-2.826 6.265-6.303 6.265v0.011h-3.867v-12.555h3.896c3.477 0 6.274 2.806 6.274 6.279v0zM6.944 9.857c0-1.842-1.492-3.338-3.349-3.338h-0.876v6.686h0.876c1.858 0 3.349-1.498 3.349-3.348v0z"
+                <="" path=""></path></svg><span id="">Activer l'audiodescription</span></button>
+            <button type="button" id="transcr" tabindex="1" aria-label="Activer la transcription"
+                    class="able-button-handler-forward button transcr colorDef" aria-checked="false">
+                <svg style="float:left" viewBox="0 0 20 20"
+                <="" svg="">
+                <line x1="0" y1="0" x2="200" y2="200" style="display: block;"></line>
+                <path d="M0 19.107v-17.857q0-0.446 0.313-0.759t0.759-0.313h8.929v6.071q0 0.446 0.313 0.759t0.759 0.313h6.071v11.786q0 0.446-0.313 0.759t-0.759 0.312h-15q-0.446 0-0.759-0.313t-0.313-0.759zM4.286 15.536q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 12.679q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 9.821q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM11.429 5.893v-5.268q0.246 0.156 0.402 0.313l4.554 4.554q0.156 0.156 0.313 0.402h-5.268z"
+                <="" path=""></path></svg><span id="">Activer la transcription</span></button>
+            <button type="button" id="vidcontr" tabindex="1" aria-label="Vidéo normale"
+                    class="able-button-handler-forward button vidcontr colorDef" aria-checked="false"><i
+                    class="captions colorDef"></i><span id="">Vidéo normale</span></button>
+            <button type="button" id="perceptionParam" tabindex="1" role="menu" aria-label="Perception sonore"
+                    class="button normalIcon colorDef" aria-checked="false"><p class="normalIcon"></p><span><span>Perception sonore</span><i
+                    class="arrow right colorDef"></i></span></button>
+            <button type="button" id="reglageParam" tabindex="1" role="menu" aria-label="Réglages"
+                    class="button normalIcon colorDef" aria-checked="false"><p class="normalIcon"></p><span><span>Réglages</span><i
+                    class="arrow right colorDef"></i></span></button>
+        </div>
+        <div class="controller-orange-subtitles" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-subT" tabindex="0" aria-label="Menu"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Menu</span></button>
+            <button type="button" id="subt" tabindex="0" aria-label="Activer Sous Titres"
+                    class="able-button-handler-forward aria-no-checked button subt subtno colorDef" aria-pressed="false"
+                    aria-checked="true"><i class="captions colorDef"></i><span id="">Désactiver ST</span></button>
+            <button type="button" id="subtitlesFR" tabindex="0" aria-label="Activer Sous Titre Français"
+                    aria-pressed="false" class="able-button-handler-forward button colorDef aria-no-checked subtno"
+                    aria-checked="true">Désactiver ST FR
+            </button>
+            <button type="button" id="subtitlesEN" tabindex="0" aria-label="Activer Sous Titres Anglais"
+                    aria-pressed="false" class="able-button-handler-forward button colorDef"><span> Activer ST EN</span>
+            </button>
+            <button type="button" id="subtitlesES" tabindex="0" aria-label="Activer Sous Titres Espagnol"
+                    aria-pressed="false" class="able-button-handler-forward button colorDef"><span> Activer ST ES</span>
+            </button>
+            <button type="button" id="subtitlesPL" tabindex="0" aria-label="Activer Sous Titres Portuguais"
+                    aria-pressed="false" class="able-button-handler-forward button colorDef"><span> Activer ST PL</span>
+            </button>
+        </div>
+        <div class="controller-orange-preferences" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-prefT" tabindex="1" aria-label="Menu"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Menu</span></button>
+            <button type="button" id="visionPlus" tabindex="1" aria-label="mode Vision +" aria-checked="false"
+                    class="able-button-handler-forward button colorDef"><span> Vision +</span></button>
+            <button type="button" id="sansVisionPlus" tabindex="1" aria-label="mode Sans vision +" aria-checked="false"
+                    class="able-button-handler-forward button colorDef"><span> Sans vision +</span></button>
+            <button type="button" id="auditionPlus" tabindex="1" aria-label="mode Audition +" aria-checked="false"
+                    class="able-button-handler-forward button colorDef"><span> Audition +</span></button>
+            <button type="button" id="lsfPlus" tabindex="1" aria-label="mode LSF" aria-checked="false"
+                    class="able-button-handler-forward button aria-no-checked colorDef" aria-pressed="true">
+                <span> LSF</span></button>
+            <button type="button" id="defPlus" tabindex="1" aria-label="mode Défilement +" aria-checked="false"
+                    class="able-button-handler-forward button colorDef"><span> Défilement +</span></button>
+            <button type="button" id="conPlus" tabindex="1" aria-label="mode Concentration +" aria-checked="false"
+                    class="able-button-handler-forward button colorDef"><span> Concentration +</span></button>
+            <button type="button" id="allParams" role="menu" tabindex="1" aria-label="Tous les paramètres"
+                    aria-checked="false" class="button allParams colorDef"><span> Tous les paramètres</span><i
+                    class="arrow right colorDef"></i></button>
+        </div>
+        <div class="controller-orange-perception" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-perception" tabindex="0" role="menu" aria-label="Tous les paramètres"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Tous les paramètres</span></button>
+            <button type="button" id="low" tabindex="0" aria-label="Perception sonore" aria-checked="false"
+                    class="button normalIcon colorDef"><span> Perception sonore</span></button>
+            <button type="button" id="acute" tabindex="0" aria-label="Sons + aigus" aria-checked="false"
+                    class="button normalIcon colorDef"><span> Sons + aigus</span></button>
+        </div>
+        <div class="controller-orange-reglages" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-reglages" tabindex="0" aria-label="Réglages"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Réglages</span></button>
+            <button type="button" id="textColor" tabindex="0" role="menu" aria-label="Couleur du texte"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Couleur du texte</span><i
+                    class="arrow right colorDef"></i></button>
+            <button type="button" id="bgColor" role="menu" tabindex="0" aria-label="Couleur de l&#39;arrière-plan"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Couleur de l'arrière-plan</span><i
+                    class="arrow right colorDef"></i></button>
+            <button type="button" id="followColor" tabindex="0" role="menu" aria-label="Couleur de suivi de texte"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Couleur de suivi de texte</span><i
+                    class="arrow right colorDef"></i></button>
+            <button type="button" id="fontSize" tabindex="0" role="menu" aria-label="Taille du texte"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Taille du texte</span><i
+                    class="arrow right colorDef"></i></button>
+            <button type="button" id="outText" role="menu" tabindex="0" aria-label="Contours du texte"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Contours du texte</span><i
+                    class="arrow right colorDef"></i></button>
+            <button type="button" id="textStyle" tabindex="0" role="menu" aria-label="Style de police"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Style de police</span><i
+                    class="arrow right colorDef"></i></button>
+            <button type="button" id="reglagesSettings" tabindex="0" role="menu" aria-label="Paramètres du menu"
+                    aria-checked="false" class="button normalIcon colorDef"><span> Paramètres du menu</span><i
+                    class="arrow right colorDef"></i></button>
+        </div>
+        <div class="controller-orange-textcolor" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-textColor" tabindex="0" aria-label="Couleur du texte"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Couleur du texte</span></button>
+            <button type="button" id="whiteTextColor" tabindex="0" aria-label="Blanc" aria-pressed="true"
+                    class="button normalIcon aria-no-checked colorDef"><span> Blanc</span></button>
+            <button type="button" id="blackTextColor" tabindex="0" aria-label="Noir" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Noir</span></button>
+            <button type="button" id="redTextColor" tabindex="0" aria-label="Rouge" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Rouge</span></button>
+            <button type="button" id="greenTextColor" tabindex="0" aria-label="Vert" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Vert</span></button>
+            <button type="button" id="blueTextColor" tabindex="0" aria-label="Bleu" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Bleu</span></button>
+            <button type="button" id="yellowTextColor" tabindex="0" aria-label="Jaune" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Jaune</span></button>
+            <button type="button" id="magentaTextColor" tabindex="0" aria-label="Magenta" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Magenta</span></button>
+            <button type="button" id="cyanTextColor" tabindex="0" aria-label="Cyan" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Cyan</span></button>
+        </div>
+        <div class="controller-orange-bgcolor" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-bgColor" tabindex="0" aria-label="Couleur de l&#39;arrière-plan"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Couleur de l'arrière-plan</span></button>
+            <button type="button" id="whiteBGColor" tabindex="0" aria-label="Blanc" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Blanc</span></button>
+            <button type="button" id="blackBGColor" role="button" tabindex="0" aria-label="Noir" aria-pressed="true"
+                    class="button normalIcon aria-no-checked colorDef"><span> Noir</span></button>
+            <button type="button" id="redBGColor" tabindex="0" aria-label="Rouge" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Rouge</span></button>
+            <button type="button" id="greenBGColor" tabindex="0" aria-label="Vert" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Vert</span></button>
+            <button type="button" id="blueBGColor" tabindex="0" aria-label="Bleu" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Bleu</span></button>
+            <button type="button" id="yellowBGColor" tabindex="0" aria-label="Jaune" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Jaune</span></button>
+            <button type="button" id="magentaBGColor" tabindex="0" aria-label="Magenta" aria-checked="false"
+                    class="button normalIcon colorDef"><span> Magenta</span></button>
+            <button type="button" id="cyanBGColor" tabindex="0" aria-label="Cyan" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Cyan</span></button>
+        </div>
+        <div class="controller-orange-followcolor" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-followColor" tabindex="0" aria-label="Couleur de suivi de texte"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Couleur de suivi de texte</span></button>
+            <button type="button" id="whiteFollowColor" tabindex="0" aria-label="Blanc" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Blanc</span></button>
+            <button type="button" id="blackFollowColor" tabindex="0" aria-label="Noir" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Noir</span></button>
+            <button type="button" id="redFollowColor" tabindex="0" aria-label="Rouge" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Rouge</span></button>
+            <button type="button" id="greenFollowColor" tabindex="0" aria-label="Vert" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Vert</span></button>
+            <button type="button" id="blueFollowColor" tabindex="0" aria-label="Bleu" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Bleu</span></button>
+            <button type="button" id="yellowFollowColor" tabindex="0" aria-label="Jaune" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Jaune</span></button>
+            <button type="button" id="magentaFollowColor" tabindex="0" aria-label="Magenta" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Magenta</span></button>
+            <button type="button" id="cyanFollowColor" tabindex="0" aria-label="Cyan" aria-pressed="false"
+                    class="button normalIcon colorDef"><span> Cyan</span></button>
+        </div>
+        <div class="controller-orange-fontsize" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-fontsize" tabindex="1" aria-label="Taille du texte"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Taille du texte</span></button>
+            <button type="button" id="button50" tabindex="1" aria-label="cinquante pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>50%</span></button>
+            <button type="button" id="button75" tabindex="1" aria-label="soixante quinze pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>75%</span></button>
+            <button type="button" id="button100" tabindex="1" aria-label="cent pourcent" aria-pressed="true"
+                    class="button normalIcon aria-no-checked colorDef"><span>100%</span></button>
+            <button type="button" id="button125" tabindex="1" aria-label="cent vingt cinq pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>125%</span></button>
+            <button type="button" id="button150" tabindex="1" aria-label="cent cinquante pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>150%</span></button>
+            <button type="button" id="button175" tabindex="1" aria-label="cent soixante quinze pourcent"
+                    aria-pressed="false" class="button normalIcon colorDef"><span>175%</span></button>
+            <button type="button" id="button200" tabindex="1" aria-label="deux cent pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>200%</span></button>
+            <button type="button" id="button300" tabindex="1" aria-label="trois cent pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>300%</span></button>
+            <button type="button" id="button400" tabindex="1" aria-label="quatre cent pourcent" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>400%</span></button>
+        </div>
+        <div class="controller-orange-outfont" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-out" tabindex="0" aria-label="Contours du texte"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Contours du texte</span></button>
+            <button type="button" id="outNo" tabindex="0" aria-label="Aucun" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Aucun</span></button>
+            <button type="button" id="outHigh" tabindex="0" aria-label="Elevé" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Elevé</span></button>
+            <button type="button" id="outEnforce" tabindex="0" aria-label="Enfoncé" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Enfoncé</span></button>
+            <button type="button" id="outUniform" tabindex="0" aria-label="Uniforme" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Uniforme</span></button>
+            <button type="button" id="outShadow" tabindex="0" aria-label="Ombre portée" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Ombre portée</span></button>
+        </div>
+        <div class="controller-orange-font" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-font" tabindex="0" aria-label="Style de police Retour"
+                    class="able-button-handler-play button title colorDef"><i class="arrow left colorDef"></i><span
+                    id="">Style de police</span></button>
+            <button type="button" id="helvet" tabindex="0" aria-label="Helvetica Neue" aria-pressed="true"
+                    class="button normalIcon aria-no-checked colorDef"><span>Helvetica Neue</span></button>
+            <button type="button" id="consola" tabindex="0" aria-label="Consola" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Consola</span></button>
+            <button type="button" id="accessDFA" tabindex="0" aria-label="Accessible DfA" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Accessible DfA</span></button>
+            <button type="button" id="comic" tabindex="0" aria-label="Comic Sans MS" aria-pressed="false"
+                    class="button normalIcon colorDef"><span>Comic Sans MS</span></button>
+        </div>
+        <div class="controller-orange-butcol" aria-live="assertive" aria-atomic="true" style="display:none">
+            <button type="button" id="hide-butcol" tabindex="1" aria-label="Paramètres du menu Retour"
+                    class="able-button-handler-play button title"><i class="arrow left"></i><span id="">Paramètres du menu</span>
+            </button>
+            <button type="button" id="blackwhite" tabindex="1" aria-label="Texte noir sur fond blanc"
+                    aria-pressed="false" class="button normalIcon blackwhite settingsColor"><span>Texte noir sur fond blanc</span>
+            </button>
+            <button type="button" id="whiteblack" tabindex="1" aria-label="Texte blanc sur fond noir"
+                    aria-pressed="false" class="button normalIcon whiteblack settingsColor"><span>Texte blanc sur fond noir</span>
+            </button>
+            <button type="button" id="blueyellow" tabindex="1" aria-label="Texte bleu sur fond jaune"
+                    aria-pressed="false" class="button normalIcon blueyellow settingsColor"><span>Texte bleu sur fond jaune</span>
+            </button>
+            <button type="button" id="yellowblue" tabindex="1" aria-label="Texte jaune sur fond bleu"
+                    aria-pressed="false" class="button normalIcon yellowblue settingsColor"><span>Texte jaune sur fond bleu</span>
+            </button>
+            <button type="button" id="bluewhite" tabindex="1" aria-label="Texte bleu sur fond blanc"
+                    aria-pressed="false" class="button normalIcon bluewhite settingsColor"><span>Texte bleu sur fond blanc</span>
+            </button>
+            <button type="button" id="whiteblue" tabindex="1" aria-label="Texte blanc sur fond bleu"
+                    aria-pressed="false" class="button normalIcon whiteblue settingsColor"><span>Texte blanc sur fond bleu</span>
+            </button>
+            <button type="button" id="colordef" tabindex="1" aria-label="Par defaut" aria-pressed="false"
+                    class="button normalIcon colordef settingsColor"><span>Par defaut</span></button>
+        </div>
+    </div>
+    <div class="able-descriptions" aria-live="assertive" aria-atomic="true"
+         style="font-family: &quot;Helvetica Neue&quot;; font-size: 100%; color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 1; display: none;"></div>
+    <div role="alert" class="able-alert" style="display: none; top: 16px;"></div>
+    <div role="alert" class="able-screenreader-alert"></div>
+</div>
+<div class="able-transcript-area" role="tab" aria-label="Transcription" tabindex="0"
+     style="position: absolute; width: 66%; z-index: 10000; top: 1px; left: 33%; display: none;">
+    <div class="able-window-toolbar able-white-controls able-draggable"><label for="autoscroll-transcript-checkbox">Défilement
+        automatique: </label><input id="autoscroll-transcript-checkbox" type="checkbox">
+        <div class="transcript-language-select-wrapper"><label for="transcript-language-select">Langue: </label><select
+                id="transcript-language-select">
+            <option value="en" lang="en">Anglais</option>
+            <option value="fr" lang="fr">Français</option>
+        </select></div>
+        <div role="alert" class="able-alert" style="display: none; top: 28.5625px;"></div>
+        <button type="button" tabindex="0" aria-label="Options de fenêtre" class="able-button-handler-preferences"><img
+                src="./Demo lecteur accessible_files/preferences.png" alt="" role="presentation"><span
+                class="able-clipped">Options de fenêtre</span></button>
+        <div class="able-tooltip" id="video1-transcript-window-tooltip" style="display: none;"></div>
+        <div id="video1-transcript-window-menu" class="able-popup able-popup-no-radio" style="display: none;">
+            <ul>
+                <li><input type="radio" value="resize" name="video1-transcript-window-choice"
+                           id="video1-transcript-window-choice-0"><label for="video1-transcript-window-choice-0"
+                                                                         style="cursor:pointer">Redimensionner</label>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="able-transcript">
+        <div class="able-transcript-container" lang="fr"><h2 class="able-transcript-heading" lang="fr">
+            Transcription</h2>
+            <div class="able-transcript-block"><span class="able-transcript-seekpoint able-transcript-caption"
+                                                     style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                                                     data-start="0"
+                                                     data-end="4.02">Là on peut basculer sur autre chose. </span></div>
+            <div class="able-transcript-desc"><span class="able-hidden" lang="fr">Description sonore: </span><span
+                    class="able-transcript-seekpoint"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue" data-start="2"
+                    data-end="8">Denis Chêne parle au micro</span></div>
+            <div class="able-transcript-block"><span class="able-transcript-seekpoint able-transcript-caption"
+                                                     style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                                                     data-start="4.02" data-end="6.51">Forcément utiliser encore de la vision. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="6.51" data-end="8.51">Et donc, dans ce cas là, </span></div>
+
+            <div class="able-transcript-desc"><span class="able-hidden" lang="fr">Description sonore: </span><span
+                    class="able-transcript-seekpoint"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue" data-start="8"
+                    data-end="78">Texte : Séminaire Accessibilité xdlab</span></div>
+            <div class="able-transcript-block"><span class="able-transcript-seekpoint able-transcript-caption"
+                                                     style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                                                     data-start="8.51"
+                                                     data-end="10.51">on fait de la multimodalité... </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="10.51" data-end="12.51">...parallèle... </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="12.51" data-end="15.78">on va compléter avec les autres modalités... </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="15.78" data-end="17.78">pas forcément avec autant d'informations </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="17.78"
+                    data-end="22.3">on va compléter au bon endroit avec les autres modalités </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="22.3" data-end="24.3">donc ça... </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="24.3"
+                    data-end="28.65">on a quand même deux cas qu'il faut bien différencier : </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="28.65" data-end="31.51">- c'est celui de l'équivalence brute. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="31.51" data-end="35.05">C'est écrit «Téléphoner» sur mon bouton, </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="35.05" data-end="38.67">Hé ben on fait une équivalence de base qui est : </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="38.67" data-end="43.09">« je te balance l'information de "Téléphoner" dans la modalité qui va bien. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="43.09" data-end="47.02">Donc juste ça. C'est écrit en visuel. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="47.33"
+                    data-end="50.16">Je te le balance en graphique avec un picto en plus. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="50.16" data-end="51.84">ou en langue des signes. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="51.84" data-end="54.95">ou en audio ou en tactile. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="54.95" data-end="59.18">et en gros l'information qui est transmise </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="59.18" data-end="61.18">c'est téléphoner. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="61.18" data-end="64.39">Mais, ça ne suffit pas toujours. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="64.39" data-end="67.02">parce que si l'utilisateur est débutant </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="67.02"
+                    data-end="71.22">ben téléphoner tout court ça va pas lui dire grand chose. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="71.22" data-end="77.03">c'est à dire que souvent quand on aménage une interface on commence par la vision </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="77.03" data-end="82.82">c'est les interfaces graphiques depuis le début des interfaces homme-machine </span>
+            </div>
+
+
+            <div class="able-transcript-desc"><span class="able-hidden" lang="fr">Description sonore: </span><span
+                    class="able-transcript-seekpoint"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue" data-start="78"
+                    data-end="149">Texte : Montage : Laurent, sous-titrage : RISP, ingénieur du son : Denis, xdlab production</span>
+            </div>
+            <div class="able-transcript-block"><span class="able-transcript-seekpoint able-transcript-caption"
+                                                     style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                                                     data-start="82.82" data-end="87.38">qui sont construites par des gens qui font des dessins :&nbsp;donc c'est visuel. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="87.38" data-end="91.35">et donc si on met que «Téléphoner» dans le bouton </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="91.35"
+                    data-end="93.35">c'est parce qu'on n'a pas la place de mettre autre chose. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="94.04" data-end="96.65">Il ne faudrait pas que l'on se limite à ça, </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="96.65"
+                    data-end="100.32">parce que l'utilisateur quand il n'a que des verbes d'action. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="100.32" data-end="105.61"><span class="able-unspoken"></span></span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="105.61" data-end="108.96">hé ben, ce n'est pas compréhensible, tout court. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="108.96" data-end="111.98">Donc il faut plus d'information que cela. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="111.98" data-end="115.4">Il y a certains utilisateurs qui vont avoir besoin de plus d'informations, </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="115.4"
+                    data-end="119.7">comme "pour téléphoner, c'est à dire joindre un correspondant" </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="119.7" data-end="124">ou bien un système de téléphonie, bref plus d'explication sur la fonction. </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="124" data-end="127.46">Donc on a deux niveaux d'alternative : </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="127.49" data-end="131.46">- on a l'alternative qui est brève </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="131.46" data-end="135.36">un petit peu pour la personne qui a déjà pris en main l'interface </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="135.36" data-end="138.82">- on a celle qui est plus longue </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="138.82" data-end="142.92">alors je ne fais pas le parallèle tout de suite avec les Long Description </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="142.92" data-end="149.43">qu'on a au niveau du WAI </span><span
+                    class="able-transcript-seekpoint able-transcript-caption"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="149.43" data-end="152.34">au niveau des règles du web technique
+ </span></div>
+
+
+            <div class="able-transcript-desc"><span class="able-hidden" lang="fr">Description sonore: </span><span
+                    class="able-transcript-seekpoint"
+                    style="color:black;background-color:white;font-size:100%;font-family:Helvetica Neue"
+                    data-start="155" data-end="159">Fin de la vidéo de démonstration</span></div>
+        </div>
+    </div>
+    <div class="able-resizable" style="z-index: 7100;"></div>
+</div>
+<div class="able-sign-window" role="tab" aria-label="LSF" tabindex="0"
+     style="position: absolute; width: 66%; z-index: 9000; top: 0px; left: 33%; margin: 0px; display: none;">
+    <div class="able-window-toolbar able-white-controls able-draggable">
+        <div role="alert" class="able-alert" style="display: none; top: 44.5625px;"></div>
+        <button type="button" tabindex="0" aria-label="Options de fenêtre" class="able-button-handler-preferences"><img
+                src="./Demo lecteur accessible_files/preferences.png" alt="" role="presentation"><span
+                class="able-clipped">Options de fenêtre</span></button>
+        <div class="able-tooltip" id="video1-sign-window-tooltip" style="display: none;"></div>
+        <div id="video1-sign-window-menu" class="able-popup able-popup-no-radio" style="display: none;">
+            <ul>
+                <li><input type="radio" value="resize" name="video1-sign-window-choice"
+                           id="video1-sign-window-choice-0"><label for="video1-sign-window-choice-0"
+                                                                   style="cursor:pointer">Redimensionner</label></li>
+            </ul>
+        </div>
+    </div>
+    <video id="video1-sign" tabindex="-1">
+        <source src="media/player-dfa-lsf-optimized.webm" type="video/webm">
+    </video>
+    <div class="able-resizable" style="z-index: 8100;"></div>
+</div>
+</div>
+
+
+<!--<video id="video1" data-show-now-playing="true" preload="auto" poster="media/play.png" data-able-player="" playsinline="">
+  <source type="video/webm" src="https://usher.djanah.com:444/public/videos/video_dmam_optimized.webm" data-sign-src="https://usher.djanah.com:444/public/videos/MAH00793_optimized.webm"></source>
+  <track kind="subtitles" src="https://usher.djanah.com:444/public/videos/video_dmam_sub.vtt" srclang="fr" label="Français">
+  <track kind="descriptions" src="https://usher.djanah.com:444/public/videos/video_dmam_desc.vtt" srclang="fr">
+</video> -->
+
+
+<div class="able-resize-form able-modal-dialog" aria-labelledby="modalTitle-318798225"
+     aria-describedby="modalDesc-318798225" aria-hidden="true" role="alert" style="width: 20em; top: 5%;">
+    <button class="modalCloseButton" title="Fermer le dialogue" aria-label="Fermer le dialogue" style="display: none;">
+        X
+    </button>
+    <h1 id="modalTitle-318798225" style="text-align: center;">Redimensionner la fenêtre de transcription</h1>
+    <div style="text-align:center" id="modalDesc-318798225">
+        <div class="resizeWidthDiv"><img id="horizontalLogo" src="./Demo lecteur accessible_files/horizontal.png"
+                                         style="height: auto;">
+            <button id="horizontalButton" class="horizontalButton button">Affichage horizontal</button>
+            <label class="resizeWidthLabelOld" for="video1-resize-transcript-width">Largeur</label><input
+                    class="resizeWidthInputOld" type="text" id="video1-resize-transcript-width" value="66"></div>
+        <div style="display:inline-flex"><img id="verticalLogo" src="./Demo lecteur accessible_files/vertical.png"
+                                              style="height: auto;">
+            <button id="verticalButton" class="verticalButton button">Affichage vertical</button>
+            <label for="video1-resize-transcript-height" class="resizeHeightLabel">Hauteur</label><input type="text"
+                                                                                                         id="video1-resize-transcript-height"
+                                                                                                         class="resizeHeightInput"
+                                                                                                         value="400">
+        </div>
+    </div>
+    <hr>
+    <button class="modal-button saveButton" id="saveButton">Enregistrer</button>
+    <button class="modal-button cancelButton" id="cancelButton">Annuler</button>
+</div>
+<div class="able-resize-form able-modal-dialog" aria-labelledby="modalTitle-369711215"
+     aria-describedby="modalDesc-369711215" aria-hidden="true" role="alert" style="width: 20em; top: 5%;">
+    <button class="modalCloseButton" title="Fermer le dialogue" aria-label="Fermer le dialogue" style="display: none;">
+        X
+    </button>
+    <h1 id="modalTitle-369711215" style="text-align: center;">Redimensionner la fenêtre</h1>
+    <div style="text-align:center" id="modalDesc-369711215">
+        <div class="resizeWidthDiv"><label class="resizeWidthLabelOld"
+                                           for="video1-resize-sign-width">Largeur</label><input
+                class="resizeWidthInputOld" type="text" id="video1-resize-sign-width" value="66">
+            <button id="bMoins">-</button>
+            <input type="number" id="video1-resize-sign-width" value="66" class="inputWidth resizeWidthInput" max="100"
+                   min="0" aria-live="assertive"><label class="resizeWidthLabel" for="video1-resize-sign-width"
+                                                        style="font-size:22px">%</label>
+            <button id="bPlus">+</button>
+        </div>
+        <div style="display:inline-flex"><label for="video1-resize-sign-height"
+                                                class="resizeHeightLabel">Hauteur</label><input type="text"
+                                                                                                id="video1-resize-sign-height"
+                                                                                                class="resizeHeightInput"
+                                                                                                value="190" readonly="">
+        </div>
+    </div>
+    <hr>
+    <button class="modal-button saveButton" id="saveButton">Enregistrer</button>
+    <button class="modal-button" id="saveButtonOrange">Enregistrer</button>
+    <button class="modal-button cancelButton" id="cancelButton">Annuler</button>
+</div>
+<div class="able-prefs-form able-prefs-form-captions able-modal-dialog" aria-labelledby="modalTitle-989831836"
+     aria-describedby="modalDesc-989831836" aria-hidden="true" role="dialog" style="width: 32em; top: 5%;">
+    <button class="modalCloseButton" title="Fermer le dialogue" aria-label="Fermer le dialogue">X</button>
+    <h1 id="modalTitle-989831836" style="text-align: center;">Préférences liées au sous-titrage</h1>
+    <p id="modalDesc-989831836">Les préférences contrôlent la façon dont les sous-titres sont affichés.</p>
+    <fieldset class="able-prefs-captions" id="video1-prefs-captions">
+        <div class="able-prefCaptionsPosition"><label for="video1_prefCaptionsPosition"> Position</label><select
+                name="prefCaptionsPosition" id="video1_prefCaptionsPosition">
+            <option value="overlay">Superposés</option>
+            <option value="below">Sous la vidéo</option>
+        </select></div>
+        <div class="able-prefCaptionsFont"><label for="video1_prefCaptionsFont"> Police de caractères</label><select
+                name="prefCaptionsFont" id="video1_prefCaptionsFont">
+            <option value="avec empattement">avec empattement</option>
+            <option value="sans empattement">sans empattement</option>
+            <option value="à taille fixe">à taille fixe</option>
+            <option value="écriture cursive">écriture cursive</option>
+            <option value="écriture de fantaisie">écriture de fantaisie</option>
+        </select></div>
+        <div class="able-prefCaptionsSize"><label for="video1_prefCaptionsSize"> Taille de la police</label><select
+                name="prefCaptionsSize" id="video1_prefCaptionsSize">
+            <option value="75%">75%</option>
+            <option value="100%">100%</option>
+            <option value="125%">125%</option>
+            <option value="150%">150%</option>
+            <option value="200%">200%</option>
+        </select></div>
+        <div class="able-prefCaptionsColor"><label for="video1_prefCaptionsColor"> Couleur du texte</label><select
+                name="prefCaptionsColor" id="video1_prefCaptionsColor">
+            <option value="white">Blanc</option>
+            <option value="yellow">Jaune</option>
+            <option value="green">Vert</option>
+            <option value="cyan">Cyan</option>
+            <option value="blue">Bleu</option>
+            <option value="magenta">Magenta</option>
+            <option value="red">Rouge</option>
+            <option value="black">Noir</option>
+        </select></div>
+        <div class="able-prefCaptionsBGColor"><label for="video1_prefCaptionsBGColor"> Arrière-plan</label><select
+                name="prefCaptionsBGColor" id="video1_prefCaptionsBGColor">
+            <option value="white">Blanc</option>
+            <option value="yellow">Jaune</option>
+            <option value="green">Vert</option>
+            <option value="cyan">Cyan</option>
+            <option value="blue">Bleu</option>
+            <option value="magenta">Magenta</option>
+            <option value="red">Rouge</option>
+            <option value="black">Noir</option>
+        </select></div>
+        <div class="able-prefCaptionsOpacity"><label for="video1_prefCaptionsOpacity"> Opacité</label><select
+                name="prefCaptionsOpacity" id="video1_prefCaptionsOpacity">
+            <option value="0%">0% (Transparent)</option>
+            <option value="25%">25%</option>
+            <option value="50%">50%</option>
+            <option value="75%">75%</option>
+            <option value="100%">100% (solide)</option>
+        </select></div>
+    </fieldset>
+    <div class="able-captions-sample"
+         style="font-family: &quot;Helvetica Neue&quot;; font-size: 100%; color: rgb(255, 255, 255); background-color: rgb(0, 0, 0); opacity: 1;">
+        Échantillon de sous-titre
+    </div>
+    <hr>
+    <button class="modal-button">Enregistrer</button>
+    <button class="modal-button">Annuler</button>
+</div>
+<div class="able-prefs-form able-prefs-form-descriptions able-modal-dialog" aria-labelledby="modalTitle-633497259"
+     aria-describedby="modalDesc-633497259" aria-hidden="true" role="dialog" style="width: 32em; top: 5%;">
+    <button class="modalCloseButton" title="Fermer le dialogue" aria-label="Fermer le dialogue">X</button>
+    <h1 id="modalTitle-633497259" style="text-align: center;">Préférences liées aux descriptions sonores</h1>
+    <p id="modalDesc-633497259">Ce lecteur multimédia permet d’entendre les descriptions sonores de deux façons:</p>
+    <ul>
+        <li>autre version de la vidéo avec description</li>
+        <li>description textuelle, lue à l’aide d’un lecteur d’écran</li>
+    </ul>
+    <p>Il y a une version <strong>description textuelle</strong>.</p>
+    <p>Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores. Après avoir
+        enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton
+        Description.</p>
+    <fieldset class="able-prefs-descriptions1" id="video1-prefs-descriptions1">
+        <legend>Format privilégié</legend>
+        <div><input type="radio" name="prefDescFormat" id="video1_prefDescFormat_1" value="video"><label
+                for="video1_prefDescFormat_1">Autre version de la vidéo avec description</label></div>
+        <div><input type="radio" name="prefDescFormat" id="video1_prefDescFormat_2" value="text"><label
+                for="video1_prefDescFormat_2">Description textuelle, lue à l’aide d’un lecteur d’écran</label></div>
+    </fieldset>
+    <fieldset class="able-prefs-descriptions2" id="video1-prefs-descriptions2">
+        <legend>Description sonore textuelle</legend>
+        <div class="able-prefDescPause"><input type="checkbox" name="prefDescPause" id="video1_prefDescPause"
+                                               value="true"><label for="video1_prefDescPause"> Mettre la vidéo en pause
+            automatiquement quand la description commence</label></div>
+        <div class="able-prefVisibleDesc"><input type="checkbox" name="prefVisibleDesc" id="video1_prefVisibleDesc"
+                                                 value="true"><label for="video1_prefVisibleDesc"> Affichez la
+            description</label></div>
+    </fieldset>
+    <hr>
+    <button class="modal-button">Enregistrer</button>
+    <button class="modal-button">Annuler</button>
+</div>
+<div class="able-prefs-form able-prefs-form-keyboard able-modal-dialog" aria-labelledby="modalTitle-604527597"
+     aria-describedby="modalDesc-604527597" aria-hidden="true" role="dialog" style="width: 32em; top: 5%;">
+    <button class="modalCloseButton" title="Fermer le dialogue" aria-label="Fermer le dialogue">X</button>
+    <h1 id="modalTitle-604527597" style="text-align: center;">Préférences liées au clavier</h1>
+    <p id="modalDesc-604527597">Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel
+        endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous). Des rôles peuvent être assignés
+        aux touches de modification (Shift, Alt, Ctrl) ci-dessous. Certaines combinaisons de touches pourraient entrer
+        en conflit avec les touches utilisées par votre navigateur ou autres applications logicielles. Essayez diverses
+        combinaisons de touches de modification pour en trouver qui fonctionnent pour vous.</p>
+    <fieldset class="able-prefs-keyboard" id="video1-prefs-keyboard">
+        <legend>Touches de modification utilisées pour des raccourcis</legend>
+        <div class="able-prefAltKey"><input type="checkbox" name="prefAltKey" id="video1_prefAltKey" value="true"><label
+                for="video1_prefAltKey"> Alt</label></div>
+        <div class="able-prefCtrlKey"><input type="checkbox" name="prefCtrlKey" id="video1_prefCtrlKey"
+                                             value="true"><label for="video1_prefCtrlKey"> Ctrl</label></div>
+        <div class="able-prefShiftKey"><input type="checkbox" name="prefShiftKey" id="video1_prefShiftKey" value="true"><label
+                for="video1_prefShiftKey"> Shift</label></div>
+    </fieldset>
+    <h2>Raccourcis du clavier assignés actuellement</h2>
+    <ul>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">p</span> <em>ou</em> <span
+                class="able-help-modifiers"> barre d’espacement</span> = Lecture/Pause
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">s</span> = Redémarrer
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">r</span> = Reculer
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">f</span> = Avancer
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">v</span> <em>ou</em> <span
+                class="able-modkey">1-9</span> = Volume
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">m</span> = Activer le son/Couper le son
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">c</span> = Sous-titres
+        </li>
+        <li><span class="able-modkey-alt">Alt + </span><span class="able-modkey-ctrl">Ctrl + </span><span
+                class="able-modkey-shift"></span><span class="able-modkey">d</span> = Activer les descriptions
+        </li>
+        <li><span class="able-modkey">Esc</span> = Fermer la fenêtre de dialogue ou le menu contextuel</li>
+    </ul>
+    <hr>
+    <button class="modal-button">Enregistrer</button>
+    <button class="modal-button">Annuler</button>
+</div>
+<div class="able-prefs-form able-prefs-form-transcript able-modal-dialog" aria-labelledby="modalTitle-425838539"
+     aria-describedby="modalDesc-425838539" aria-hidden="true" role="dialog" style="width: 32em; top: 5%;">
+    <button class="modalCloseButton" title="Fermer le dialogue" aria-label="Fermer le dialogue">X</button>
+    <h1 id="modalTitle-425838539" style="text-align: center;">Préférence liées à la transcription</h1>
+    <p id="modalDesc-425838539">Les préférences suivantes ont un effet sur la transcription interactive.</p>
+    <fieldset class="able-prefs-transcript" id="video1-prefs-transcript">
+        <div class="able-prefHighlight"><input type="checkbox" name="prefHighlight" id="video1_prefHighlight"
+                                               value="true"><label for="video1_prefHighlight"> Surligner la
+            transcription pendant la lecture</label></div>
+        <div class="able-prefTabbable"><input type="checkbox" name="prefTabbable" id="video1_prefTabbable" value="true"><label
+                for="video1_prefTabbable"> Transcription activée par clavier</label></div>
+    </fieldset>
+    <hr>
+    <button class="modal-button">Enregistrer</button>
+    <button class="modal-button">Annuler</button>
+</div>
+</body>
+</html>
