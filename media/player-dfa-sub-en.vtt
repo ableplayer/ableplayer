@@ -1,0 +1,22 @@
+WEBVTT
+
+
+
+00:00:00.000 --> 00:00:20.000 color:red
+<c.music >Hi, my name is Fred</c>
+
+00:00:02.500 --> 00:00:22.500 region:bill align:right
+<c.voiceOff>Hi, I’m Bill
+
+00:00:05.000 --> 00:00:25.000 region:fred align:left
+<c.translateLg><v Bill>Would you like to get a coffee?</v></c>
+
+00:00:07.500 --> 00:00:27.500 region:bill align:right
+<v Bill>Sure! I’ve only had one today.
+
+00:00:10.000 --> 00:00:30.000 region:fred align:left
+<v Fred>This is my fourth!
+
+00:00:12.500 --> 00:00:32.500 region:fred align:left
+<v Fred>OK, let’s go.
+

@@ -1,4 +1,4 @@
-{
+var ca = {
 
 "audio": "audio",
 
@@ -154,9 +154,9 @@
 
 "prefIntroDescriptionNone": "L\'actual vídeo no disposa d\'audiodescripció en cap format.",
 
-"prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l\'audiodescripció textual.",
+"prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l\'audiodescripció.",
 
-"prefIntroDescription4": "Desprès de desar la configuració, podeu commutar l\'ús de l\'audiodescripció amb el mateix botó.",
+"prefIntroDescription4": "Desprès de desar la configuració, podeu commutar l\'ús de l\'audiodescripció amb el mateix botó.";
 
 "prefIntroKeyboard1": "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).",
 
@@ -204,25 +204,7 @@
 
 "prefDescPause": "Pausa automàticament el vídeo en el moment que comenci una audiodescripció",
 
-"prefDescVisible": "Fes visible la audiodescripció textual si es troba activada",
-
-"prefDescVoice": "Voice",
-
-"prefDescRate": "Rate",
-
-"prefDescPitch": "Pitch",
-
-"prefDescPitch1": "Very low",
-
-"prefDescPitch2": "Low",
-
-"prefDescPitch3": "Default",
-
-"prefDescPitch4": "High",
-
-"prefDescPitch5": "Very high",
-
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"prefVisibleDesc": "Fes visible la audiodescripció textual si es troba activada",
 
 "prefHighlight": "Ressalta la transcripció a mesura que avança el contingut",
 
@@ -312,8 +294,6 @@
 
 "windowResizeAlert": "S\'ha redimensionat la finestra.",
 
-"windowClose": "Tanca",
-
 "width": "Amplada",
 
 "height": "Alçada",
@@ -326,30 +306,39 @@
 
 "windowBringTopAlert": "Aquesta finestra es troba davant de la resta d\'objectes de la pàgina.",
 
-"resultsSummary1": "You searched for:",
+"back": "Retorn",
 
-"resultsSummary2": "Found",
+"vplus": "Fort",
 
-"resultsSummary3": "matching items.",
+"vmoins": "Fort",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"speedplus": "Augmenta la velocitat",
 
-"noResultsFound": "No results found.",
+"speedmoreplus": "Augmenta la velocitat de nou",
 
-"searchButtonLabel": "Play at",
+"speedmoins": "Disminueix la velocitat",
 
-"hour": "hour",
+"speedmoremoins": "Redueix la velocitat encara",
 
-"minute": "minute",
+"changespeed": "Canvia la velocitat",
 
-"second": "second",
+"audiodesc": "audiodescripció",
 
-"hours": "hours",
+"vidcontr": "Vídeo de contrast",
 
-"minutes": "minutes",
+"captionsno": "Sense subtítols",
 
-"seconds": "seconds",
+"lsfno": "Sense LSF",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"audiodescno": "Sense audiodescripció",
 
-}
+"vidcontrno": "Vídeo normal",
+
+"transcrno": "Sense transcripció",
+
+"showAccMenu": "Afficher menu accessible",
+
+"maskAccMenu": "Masquer menu accessible",
+
+
+};

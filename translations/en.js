@@ -1,4 +1,4 @@
-{
+var en = {
 
 "audio": "audio",
 
@@ -154,7 +154,7 @@
 
 "prefIntroDescriptionNone": "The current video has no audio description in either format.",
 
-"prefIntroDescription3": "Use the following form to set your preferences related to text-based audio description.",
+"prefIntroDescription3": "Use the following form to set your preferences related to audio description.",
 
 "prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
 
@@ -204,25 +204,7 @@
 
 "prefDescPause": "Automatically pause video when description starts",
 
-"prefDescVisible": "Make description visible",
-
-"prefDescVoice": "Voice",
-
-"prefDescRate": "Rate",
-
-"prefDescPitch": "Pitch",
-
-"prefDescPitch1": "Very low",
-
-"prefDescPitch2": "Low",
-
-"prefDescPitch3": "Default",
-
-"prefDescPitch4": "High",
-
-"prefDescPitch5": "Very high",
-
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"prefVisibleDesc": "Make description visible",
 
 "prefHighlight": "Highlight transcript as media plays",
 
@@ -310,9 +292,9 @@
 
 "windowResizeHeading": "Resize Window",
 
-"windowResizeAlert": "The window has been resized.",
+"windowResizeHeadingTR": "Resize Window transcription",
 
-"windowClose": "Close",
+"windowResizeAlert": "The window has been resized.",
 
 "width": "Width",
 
@@ -326,30 +308,170 @@
 
 "windowBringTopAlert": "This window is now in front of other objects on the page.",
 
-"resultsSummary1": "You searched for:",
+"back": "back",
 
-"resultsSummary2": "Found",
+"vplus": "Stronger",
 
-"resultsSummary3": "matching items.",
+"vplusmore": "more Stronger",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"vmoins": "Stronger",
 
-"noResultsFound": "No results found.",
+"vmoinsmore": "less Stronger",
 
-"searchButtonLabel": "Play at",
+"speedplus": "Speed up",
 
-"hour": "hour",
+"speedmoreplus": "more speed up",
 
-"minute": "minute",
+"speedmoins": "Sped down",
 
-"second": "second",
+"speedmoremoins": "more speed down",
 
-"hours": "hours",
+"changespeed": "Change speed",
 
-"minutes": "minutes",
+"audiodesc": "Audiodescription",
 
-"seconds": "seconds",
+"vidcontr": "Contrasting video",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"captionsno": "No subtitles",
 
-}
+"lsfno": "Deactivate LSF",
+
+"lsfact": "Activate LSF",
+
+"audiodescno": "Deactivate audiodescription",
+
+"audiodescact": "Activate audiodescription",
+
+"transcrno": "Deactivate ranscription",
+
+"transcract": "Activate transcription",
+
+"vidcontrno": "Normal video",
+
+"transcrno": "No Transcription",
+
+"showAccMenu": "Afficher menu accessible",
+
+"maskAccMenu": "Masquer menu accessible",
+
+"menu": "Menu",
+
+"act_st": "Activate ST",
+
+"de_act_st": "De-activate ST",
+
+"act_st_fr": "Activate ST FR",
+
+"act_st_en": "Activate ST EN",
+
+"act_st_es": "Activate ST ES",
+
+"act_st_pl": "Activate ST PL",
+
+"de_act_st_fr": "De-activate ST FR",
+
+"de_act_st_en": "De-activate ST EN",
+
+"de_act_st_es": "De-activate ST ES",
+
+"de_act_st_pl": "De-activate ST PL",
+
+"act_st_label": "Activate Subtitles",
+
+"de_act_st_label": "De-Activate Subtitles",
+
+"act_st_fr_label": "Activate Subtitles French",
+
+"act_st_en_label": "Activate Subtitles English",
+
+"act_st_es_label": "Activate Subtitles Spanish",
+
+"act_st_pl_label": "Activate Subtitles Portuguais",
+
+"de_act_st_fr_label": "De-Activate Subtitles French",
+
+"de_act_st_en_label": "De-Activate Subtitles English",
+
+"de_act_st_es_label": "De-Activate Subtitles Spanish",
+
+"de_act_st_pl_label": "De-Activate Subtitles Portuguais",
+
+"visionPlus": "Vision +",
+
+"sansVisionPlus": "Sans vision +",
+
+"auditionPlus": "Audition +",
+
+"lsfPlus": "LSF",
+
+"defPlus": "Défilement +",
+
+"conPlus": "Concentration +",
+
+"allParams": "All parameters",
+
+"reglages": "Settings",
+
+"perception": "Perception sound",
+
+"morelow": " + Low ",
+
+"lesslow": " - Low ",
+
+"moreacute": " + High ",
+
+"lessacute": " - High ",
+
+"textColor": "Text color",
+
+"bgColor": "Background color",
+
+"followColor": "Following color",
+
+"fontSize": "Font size",
+
+"outText": "Outlines text",
+
+"textStyle": "Text style",
+
+"reglagesSettings": "Menu settings",
+
+"outNo": "None",
+
+"outHigh": "High",
+
+"outEnforce": "Broken",
+
+"outUniform": "Uniform",
+
+"outShadow": "Drop shadow",
+
+"helvet": "Helvetica Neue",
+
+"consola": "Consola",
+
+"accessDFA": "Accessible DfA",
+
+"comic": "Comic Sans MS",
+
+"blackwhite": "Black text on white background",
+
+"whiteblack": "White text on black background",
+
+"yellowblue": "Yellow text on blue background",
+
+"blueyellow": "Blue text on yellow background",
+
+"bluewhite": "Blue text on white background",
+
+"whiteblue": "White text on blue background",
+
+"colordef": "By default",
+
+"profildef": "Standard",
+
+"verticalButton": "Vertical",
+
+"horizontalButton": "Horizontal",
+
+};

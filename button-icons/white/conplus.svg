@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 22.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   id="Calque_1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 512 512"
+   style="enable-background:new 0 0 512 512;"
+   xml:space="preserve"
+   sodipodi:docname="ic_profiles_novice.svg"
+   inkscape:export-filename="C:\Den\Accessibilité\SP4_Société déficiente et IHM Innovantes\Tél mobile Universel\TelMultiprofils\Design graphique\Pictos\all_icons\ic_profiles\ic_profiles_novice.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"><metadata
+   id="metadata21"><rdf:RDF><cc:Work
+       rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
+         rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
+   id="defs19" /><sodipodi:namedview
+   pagecolor="#ffffff"
+   bordercolor="#666666"
+   borderopacity="1"
+   objecttolerance="10"
+   gridtolerance="10"
+   guidetolerance="10"
+   inkscape:pageopacity="0"
+   inkscape:pageshadow="2"
+   inkscape:window-width="756"
+   inkscape:window-height="480"
+   id="namedview17"
+   showgrid="false"
+   inkscape:zoom="0.4609375"
+   inkscape:cx="256"
+   inkscape:cy="256"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="Calque_1" />
+<title
+   id="title2">ic_profiles_motor_novice</title>
+<g
+   id="g14">
+	<path
+   d="M256,343.5c-50.3,0-100.5-19.1-138.8-57.4c-4-4-4-10.5,0-14.5c4-4,10.5-4,14.5,0c68.4,68.5,179.8,68.6,248.3,0.2l0.1-0.1   c4-4,10.5-4,14.5-0.1c4,4,4.1,10.4,0.1,14.4l-0.1,0.1c0,0-0.1,0.1-0.1,0.1C356.4,324.4,306.2,343.5,256,343.5z"
+   id="path4" />
+	<g
+   id="g10">
+		<path
+   d="M89.6,224.3c-2.9,0-5.8-1.1-8-3.3c-4.5-4.4-4.6-11.6-0.2-16.1c0,0,0.1-0.1,0.1-0.1c40-40,105-39.9,145,0    c4.4,4.5,4.4,11.7,0,16.1c-4.5,4.4-11.7,4.4-16.1,0c-31.1-31.1-81.6-31.1-112.7-0.1c0,0,0,0,0,0C95.5,223.2,92.5,224.3,89.6,224.3    z"
+   id="path6" />
+		<path
+   d="M293.5,224.3c-2.9,0-5.7-1.1-8-3.2c-4.5-4.4-4.6-11.6-0.2-16.1c0,0,0.1-0.1,0.2-0.2l0,0c40-39.9,105-39.9,144.9,0.1    c4.4,4.5,4.4,11.7,0,16.1c-4.5,4.4-11.7,4.4-16.1,0c-31.1-31.1-81.6-31.1-112.7-0.1c0,0,0,0,0,0    C299.4,223.1,296.4,224.3,293.5,224.3z"
+   id="path8" />
+	</g>
+	<path
+   d="M256,33.3c123,0,222.8,99.8,222.7,222.8c0,89.5-53.6,170.3-136,205.2c-113.4,47.9-244.1-5.2-291.9-118.6   s5.2-244.1,118.6-292C196.7,39.2,226.2,33.2,256,33.3 M256,0C114.6,0,0,114.7,0,256s114.6,256,256,256s256-114.6,256-256   S397.4,0,256,0z"
+   id="path12" />
+</g>
+</svg>
