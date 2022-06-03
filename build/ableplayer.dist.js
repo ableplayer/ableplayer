@@ -5994,7 +5994,7 @@ var AblePlayerInstances = [];
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
 					thisObj.youTubePlayer.stopVideo(); 
-					if (ytTracks.length) { 
+					if (ytTracks && ytTracks.length) { 
 						// Step through ytTracks and add them to global tracks array
 						// Note: Unlike YouTube Data API, the IFrame Player API only returns 
 						// tracks that are published, and does NOT include ASR captions 
@@ -6024,13 +6024,13 @@ var AblePlayerInstances = [];
 						thisObj.hasCaptions = true;
 						// setupPopups again with new captions array, replacing original
 						thisObj.setupPopups('captions');				
-						thisObj.loadingYouTubeCaptions = false; 
 					}
 					else { 
 						// there are no YouTube captions 
 						thisObj.usingYouTubeCaptions = false; 
 						thisObj.hasCaptions = false;
 					}
+					thisObj.loadingYouTubeCaptions = false; 
 				}
 				if (thisObj.captionLangPending) { 
 					// user selected a new caption language prior to playback starting 
