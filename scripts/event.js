@@ -331,6 +331,7 @@
 			if (which === 27) { // escape
 				this.closePopups();
 				this.$tooltipDiv.hide();
+				this.seekBar.hideSliderTooltips();
 			}
 			else if (which === 32) { // spacebar = play/pause
 				// disable spacebar support for play/pause toggle as of 4.2.10

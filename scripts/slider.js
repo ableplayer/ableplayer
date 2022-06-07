@@ -424,6 +424,12 @@
 		}
 	};
 
+	AccessibleSlider.prototype.hideSliderTooltips = function () {
+		this.overHead = false;
+		this.overBody = false;
+		this.refreshTooltip();
+	};
+
 	AccessibleSlider.prototype.setTooltipPosition = function (x) {
 		this.timeTooltip.css({
 			left: x - (this.timeTooltip.width() / 2) - 10,

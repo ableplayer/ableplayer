@@ -6544,6 +6544,12 @@ var AblePlayerInstances = [];
 		}
 	};
 
+	AccessibleSlider.prototype.hideSliderTooltips = function () {
+		this.overHead = false;
+		this.overBody = false;
+		this.refreshTooltip();
+	};
+
 	AccessibleSlider.prototype.setTooltipPosition = function (x) {
 		this.timeTooltip.css({
 			left: x - (this.timeTooltip.width() / 2) - 10,
@@ -12130,6 +12136,7 @@ var AblePlayerInstances = [];
 			if (which === 27) { // escape
 				this.closePopups();
 				this.$tooltipDiv.hide();
+				this.seekBar.hideSliderTooltips();
 			}
 			else if (which === 32) { // spacebar = play/pause
 				// disable spacebar support for play/pause toggle as of 4.2.10
