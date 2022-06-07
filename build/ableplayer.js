@@ -12105,7 +12105,7 @@ var AblePlayerInstances = [];
 		$thisElement = $(document.activeElement);
 
 		if (which === 27) { // escape
-			if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
 				// This element is part of transcript area.
 				this.handleTranscriptToggle();
 				return false;
@@ -12129,6 +12129,7 @@ var AblePlayerInstances = [];
 		)){
 			if (which === 27) { // escape
 				this.closePopups();
+				this.$tooltipDiv.hide();
 			}
 			else if (which === 32) { // spacebar = play/pause
 				// disable spacebar support for play/pause toggle as of 4.2.10
