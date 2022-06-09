@@ -4384,7 +4384,7 @@ var AblePlayerInstances = [];
 		svgData, svgPath, control,
 		$buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
 		buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
-		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip, tooltipTimerId,
 		captionLabel, popupMenuId;
 
 		thisObj = this;
@@ -4659,6 +4659,11 @@ var AblePlayerInstances = [];
 					$newButton.append($buttonLabel);
 					// add an event listener that displays a tooltip on mouseenter or focus
 					$newButton.on('mouseenter focus',function(e) {
+
+						// when entering a new tooltip, we can forget about hiding the previous tooltip.
+						// since the same tooltip div is used, it's location just changes.
+						clearTimeout(tooltipTimerId);
+
 						var buttonText = $(this).attr('aria-label');
 						// get position of this button
 						var position = $(this).position();
@@ -4708,7 +4713,22 @@ var AblePlayerInstances = [];
 						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
-							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							// clear existing timeout before reassigning variable
+							clearTimeout(tooltipTimerId);
+							tooltipTimerId = setTimeout(function() {
+								// give the user a half second to move cursor to tooltip before removing
+								// see https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus#hoverable
+								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							}, 500);
+
+							thisObj.$tooltipDiv.on('mouseenter focus', function() {
+								clearTimeout(tooltipTimerId);
+							});
+
+							thisObj.$tooltipDiv.on('mouseleave blur', function() {
+								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							});
+
 						})
 					});
 
