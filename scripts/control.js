@@ -1578,10 +1578,10 @@
 	AblePlayer.prototype.showTooltip = function($tooltip) {
 
 		if (($tooltip).is(':animated')) {
-			$tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
+			$tooltip.stop(true,true).show();
 		}
 		else {
-			$tooltip.stop().show().delay(4000).fadeOut(1000);
+			$tooltip.stop().show();
 		}
 	};
 
