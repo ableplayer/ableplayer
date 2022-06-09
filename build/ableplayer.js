@@ -6202,11 +6202,21 @@ var AblePlayerInstances = [];
 			'aria-valuemax': max
 		});
 
+		this.timeTooltipTimeoutId = null;
+		this.overTooltip = false;
 		this.timeTooltip = $('<div>');
 		this.bodyDiv.append(this.timeTooltip);
 
 		this.timeTooltip.attr('role', 'tooltip');
 		this.timeTooltip.addClass('able-tooltip');
+		this.timeTooltip.on('mouseenter focus', function(){
+			thisObj.overTooltip = true;
+			clearInterval(thisObj.timeTooltipTimeoutId);
+		});
+		this.timeTooltip.on('mouseleave blur', function(){
+			thisObj.overTooltip = false;
+			$(this).hide();
+		});
 		this.timeTooltip.hide();
 
 		this.bodyDiv.append(this.loadedDiv);
@@ -6282,6 +6292,10 @@ var AblePlayerInstances = [];
 
 			if (e.type === 'mouseenter') {
 				thisObj.overBody = true;
+				thisObj.overBodyMousePos = {
+					x: coords.x,
+					y: coords.y
+				};
 			}
 			else if (e.type === 'mouseleave') {
 				thisObj.overBody = false;
@@ -6350,7 +6364,7 @@ var AblePlayerInstances = [];
 					e.preventDefault();
 				}
 			}
-			if (e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
+			if (!thisObj.overTooltip && e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
 				thisObj.refreshTooltip();
 			}
 		});
@@ -6441,7 +6455,9 @@ var AblePlayerInstances = [];
 	AccessibleSlider.prototype.setPosition = function (position, updateLive) {
 		this.position = position;
 		this.resetHeadLocation();
-		this.refreshTooltip();
+		if (this.overHead) {
+			this.refreshTooltip();
+		}
 		this.resizeDivs();
 		this.updateAriaValues(position, updateLive);
 	}
@@ -6560,14 +6576,20 @@ var AblePlayerInstances = [];
 			this.setTooltipPosition(this.overBodyMousePos.x - this.bodyDiv.offset().left);
 		}
 		else {
-			this.timeTooltip.hide();
+
+			clearTimeout(this.timeTooltipTimeoutId);
+			var _this = this;
+			this.timeTooltipTimeoutId = setTimeout(function() {
+				// give user a half second move cursor over tooltip
+				_this.timeTooltip.hide();
+			}, 500);
 		}
 	};
 
 	AccessibleSlider.prototype.hideSliderTooltips = function () {
 		this.overHead = false;
 		this.overBody = false;
-		this.refreshTooltip();
+		this.timeTooltip.hide();
 	};
 
 	AccessibleSlider.prototype.setTooltipPosition = function (x) {
