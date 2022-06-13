@@ -88,9 +88,13 @@
 	AblePlayer.prototype.injectBigPlayButton = function () {
 
 		this.$bigPlayButton = $('<button>', {
-			'class': 'able-big-play-button icon-play',
+			'class': 'able-big-play-button',
 			'aria-hidden': true,
-			'tabindex': -1
+			'tabindex': 0
+		});
+
+		this.$bigPlayIcon = $('<span>', {
+			'class': 'icon-play',
 		});
 
 		var thisObj = this;
@@ -98,7 +102,8 @@
 			event.preventDefault();
 			thisObj.handlePlay();
 		});
-
+		
+		this.$bigPlayButton.append(this.$bigPlayIcon);
 		this.$mediaContainer.append(this.$bigPlayButton);
 	};
 
