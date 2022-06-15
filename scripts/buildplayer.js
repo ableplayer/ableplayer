@@ -603,16 +603,17 @@
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
-			this.$ccButton.removeAttr('aria-expanded').focus();
+			this.$ccButton.attr('aria-expanded', 'false');
+			this.waitThenFocus(this.$ccButton);
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
 			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded', 'false');
 			if (!this.showingPrefsDialog) {
-				this.$prefsButton.focus();
+				this.waitThenFocus(thisObj.$prefsButton);
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
@@ -622,7 +623,7 @@
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeAlert.text(this.tt.volumeSliderClosed);
-			this.$volumeButton.removeAttr('aria-expanded').focus();
+			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
 			this.$transcriptPopup.hide();
@@ -1085,7 +1086,7 @@
 						'class': 'able-button-handler-' + control
 					});
 
-					if (control === 'volume' || control === 'preferences') {
+					if (control === 'volume' || control === 'preferences' || control === 'captions') {
 						if (control == 'preferences') {
 							this.prefCats = this.getPreferencesGroups();
 							if (this.prefCats.length > 1) {
@@ -1093,8 +1094,9 @@
 								popupMenuId = this.mediaId + '-prefs-menu';
 								$newButton.attr({
 									'aria-controls': popupMenuId,
-									'aria-haspopup': 'menu'
-								});
+									'aria-haspopup': 'menu',
+									'aria-expanded': 'false'
+							});
 							}
 							else if (this.prefCats.length === 1) {
 								// Prefs button will trigger a dialog
@@ -1111,6 +1113,10 @@
 								'aria-controls': popupMenuId,
 								'aria-expanded': 'false'
 							});
+						} else if (control === 'captions') {
+							if (this.captions && this.captions.length > 1) {
+								$newButton.attr('aria-expanded', 'false')
+							}
 						}
 					}
 					if (this.iconType === 'font') {

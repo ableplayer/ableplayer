@@ -4028,16 +4028,17 @@ var AblePlayerInstances = [];
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
-			this.$ccButton.removeAttr('aria-expanded').focus();
+			this.$ccButton.attr('aria-expanded', 'false');
+			this.waitThenFocus(this.$ccButton);
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
 			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded', 'false');
 			if (!this.showingPrefsDialog) {
-				this.$prefsButton.focus();
+				this.waitThenFocus(thisObj.$prefsButton);
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
@@ -4047,7 +4048,7 @@ var AblePlayerInstances = [];
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeAlert.text(this.tt.volumeSliderClosed);
-			this.$volumeButton.removeAttr('aria-expanded').focus();
+			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
 			this.$transcriptPopup.hide();
@@ -4510,7 +4511,7 @@ var AblePlayerInstances = [];
 						'class': 'able-button-handler-' + control
 					});
 
-					if (control === 'volume' || control === 'preferences') {
+					if (control === 'volume' || control === 'preferences' || control === 'captions') {
 						if (control == 'preferences') {
 							this.prefCats = this.getPreferencesGroups();
 							if (this.prefCats.length > 1) {
@@ -4518,8 +4519,9 @@ var AblePlayerInstances = [];
 								popupMenuId = this.mediaId + '-prefs-menu';
 								$newButton.attr({
 									'aria-controls': popupMenuId,
-									'aria-haspopup': 'menu'
-								});
+									'aria-haspopup': 'menu',
+									'aria-expanded': 'false'
+							});
 							}
 							else if (this.prefCats.length === 1) {
 								// Prefs button will trigger a dialog
@@ -4536,6 +4538,10 @@ var AblePlayerInstances = [];
 								'aria-controls': popupMenuId,
 								'aria-expanded': 'false'
 							});
+						} else if (control === 'captions') {
+							if (this.captions && this.captions.length > 1) {
+								$newButton.attr('aria-expanded', 'false')
+							}
 						}
 					}
 					if (this.iconType === 'font') {
@@ -6934,7 +6940,8 @@ var AblePlayerInstances = [];
 		this.$tooltipDiv.hide();
 		this.$volumeSlider.show().attr('aria-hidden','false');
 		this.$volumeButton.attr('aria-expanded','true');
-		this.$volumeSliderHead.attr('tabindex','0').focus();
+		this.$volumeButton.focus(); // for screen reader expanded state to be read
+		this.waitThenFocus(this.$volumeSliderHead.attr('tabindex','0'));
 	};
 
 	AblePlayer.prototype.hideVolumePopup = function() {
@@ -9196,6 +9203,7 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.handleCaptionToggle = function() {
 
+		var thisObj = this;
 		var captions;
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
@@ -9252,22 +9260,44 @@ var AblePlayerInstances = [];
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
 				this.hidingPopup = false;
-				this.$ccButton.removeAttr('aria-expanded').focus();
+				this.$ccButton.attr('aria-expanded', 'false')
+				this.waitThenFocus(this.$ccButton);
 			}
 			else {
 				this.closePopups();
 				if (this.captionsPopup) {
 					this.captionsPopup.show();
 					this.$ccButton.attr('aria-expanded','true');
-					this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
-					this.captionsPopup.css('left', this.$ccButton.position().left)
-					// Place focus on the first button (even if another button is checked)
-					this.captionsPopup.find('li').removeClass('able-focus');
-					this.captionsPopup.find('li').first().focus().addClass('able-focus');
+					this.$ccButton.focus();
+					// Gives time to focus on expanded ccButton
+					setTimeout(function() {
+						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
+						// Place focus on the first button (even if another button is checked)
+						thisObj.captionsPopup.find('li').removeClass('able-focus');
+						thisObj.captionsPopup.find('li').first().focus().addClass('able-focus');
+					}, 50);
 				}
 			}
 		}
 	};
+
+	/**
+	 * Gives enough time for DOM changes to take effect before adjusting focus.
+	 * Helpful for allowing screen reading of elements whose state is intermittently changed.
+	 * 
+	 * @param {*} $el element to focus on
+	 * @param {*} timeout optional wait time in milliseconds before focus
+	 */
+	AblePlayer.prototype.waitThenFocus = function($el, timeout) {
+
+		// Default wait time of 50 ms
+		var _timeout = (timeout === undefined || timeout === null) ? 50 : timeout;
+		
+		setTimeout(function() {
+			$el.focus();
+		}, _timeout);
+	}
 
 	AblePlayer.prototype.handleChapters = function () {
 		if (this.hidingPopup) {
@@ -9345,7 +9375,7 @@ var AblePlayerInstances = [];
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded','false');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			if (!this.showingPrefsDialog) {
@@ -9360,15 +9390,18 @@ var AblePlayerInstances = [];
 			this.closePopups();
 			this.prefsPopup.show();
 			this.$prefsButton.attr('aria-expanded','true');
-			prefsButtonPosition = this.$prefsButton.position();
-			prefsMenuRight = this.$ableDiv.width() - 5;
-			prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
-			this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
-			this.prefsPopup.css('left', prefsMenuLeft);
-			// remove prior focus and set focus on first item; also change tabindex from -1 to 0
-			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
-			this.prefsPopup.find('li').first().focus().addClass('able-focus');
-
+			this.$prefsButton.focus(); // focus first on prefs button to announce expanded state
+			// give time for focus on button then adjust popup settings and focus
+			setTimeout(function() {
+				prefsButtonPosition = thisObj.$prefsButton.position();
+				prefsMenuRight = thisObj.$ableDiv.width() - 5;
+				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
+				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+				thisObj.prefsPopup.css('left', prefsMenuLeft);
+				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
+				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
+				thisObj.prefsPopup.find('li').first().focus().addClass('able-focus');
+			}, 50);
 		}
 	};
 
