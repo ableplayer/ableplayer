@@ -273,7 +273,7 @@
 		var languageStack = [];
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if (nextLine.indexOf('-->') !== -1 || /^\s*$/.test(nextLine)) {
+			if (nextLine.indexOf('-->') !== -1 || /^\s+$/.test(nextLine)) {
 				break; // Handle empty cues
 			}
 			// Have to separately detect double-lines ending cue due to our non-standard parsing.
