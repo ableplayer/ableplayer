@@ -728,6 +728,8 @@
 				if (this.paused && !this.seekBar.tracking) {
 					if (!this.hideBigPlayButton) {
 						this.$bigPlayButton.show();
+						this.$bigPlayButton.attr('aria-hidden', 'false');
+
 					}
 					if (this.fullscreen) {
 						this.$bigPlayButton.width($(window).width());
@@ -740,6 +742,7 @@
 				}
 				else {
 					this.$bigPlayButton.hide();
+					this.$bigPlayButton.attr('aria-hidden', 'true');
 				}
 			}
 		}

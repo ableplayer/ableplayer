@@ -3514,7 +3514,7 @@ var AblePlayerInstances = [];
 
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',
-			'aria-hidden': true,
+			'aria-hidden': false,
 			'tabindex': 0
 		});
 
@@ -8817,6 +8817,8 @@ var AblePlayerInstances = [];
 				if (this.paused && !this.seekBar.tracking) {
 					if (!this.hideBigPlayButton) {
 						this.$bigPlayButton.show();
+						this.$bigPlayButton.attr('aria-hidden', 'false');
+
 					}
 					if (this.fullscreen) {
 						this.$bigPlayButton.width($(window).width());
@@ -8829,6 +8831,7 @@ var AblePlayerInstances = [];
 				}
 				else {
 					this.$bigPlayButton.hide();
+					this.$bigPlayButton.attr('aria-hidden', 'true');
 				}
 			}
 		}

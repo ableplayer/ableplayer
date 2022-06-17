@@ -89,7 +89,7 @@
 
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',
-			'aria-hidden': true,
+			'aria-hidden': false,
 			'tabindex': 0
 		});
 
