@@ -1113,9 +1113,11 @@
 								'aria-controls': popupMenuId,
 								'aria-expanded': 'false'
 							});
-						} else if (control === 'captions') {
-							if (this.captions && this.captions.length > 1) {
+						} else if (control === 'captions' && this.captions) {
+							if (this.captions.length > 1) {
 								$newButton.attr('aria-expanded', 'false')
+							} else {
+								$newButton.attr('aria-pressed', 'false')
 							}
 						}
 					}

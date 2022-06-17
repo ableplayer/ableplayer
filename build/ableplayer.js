@@ -4538,9 +4538,11 @@ var AblePlayerInstances = [];
 								'aria-controls': popupMenuId,
 								'aria-expanded': 'false'
 							});
-						} else if (control === 'captions') {
-							if (this.captions && this.captions.length > 1) {
+						} else if (control === 'captions' && this.captions) {
+							if (this.captions.length > 1) {
 								$newButton.attr('aria-expanded', 'false')
+							} else {
+								$newButton.attr('aria-pressed', 'false')
 							}
 						}
 					}
@@ -9223,6 +9225,7 @@ var AblePlayerInstances = [];
 				// turn them off
 				this.captionsOn = false;
 				this.prefCaptions = 0;
+				this.$ccButton.attr('aria-pressed', 'false');
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
@@ -9235,6 +9238,7 @@ var AblePlayerInstances = [];
 				// captions are off. Turn them on.
 				this.captionsOn = true;
 				this.prefCaptions = 1;
+				this.$ccButton.attr('aria-pressed', 'true');
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
