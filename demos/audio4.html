@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Audio Demo #4</title>
+<title>Audio in "Lyrics Mode" | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
@@ -18,24 +18,33 @@
 </head>
 
 <body>
-
-<h1>Able Player Audio Demo #4:<br/>Audio player with captions, chapters, and a transcript in "Lyrics Mode"</h1>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Audio in "Lyrics Mode"</h1>
 
 <p>All tracks are supported in Able Player for both video and audio, with the exception of 
 	descriptions. This example includes captions, subtitles, and chapters tracks.
 </p>
 <p>The transcript (in this case, song lyrics) is provided in a captions file (in French) 
-	and a subtitles file (in English). The following optional attributes affect the transcript:</p>
+	and a subtitles file (in English). Since the song is in French, the French subtitles 
+	are set as the default track with the <strong>default</strong> attribute. 
+	The following optional attributes affect the transcript:
 </p>
 <ul>
 	<li><strong>data-lyrics-mode</strong> - forces a line break between and within captions in the transcript</li>
 	<li><strong>data-transcript-title</strong> - to override default title, which is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present</li>
 </ul>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
 <!-- use the following markup for each media element -->
-<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="legacy" data-lyrics-mode data-transcript-title="Sing along!">
+<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="2020" data-lyrics-mode data-transcript-title="Sing along!">
 	<source type="audio/mpeg" src="../media/frenchsong.mp3"/>
 	<source type="audio/ogg" src="../media/frenchsong.ogg"/>
 	<track kind="captions" src="../media/frenchsong_captions_fr.vtt" srclang="fr" label="Français" default/>
@@ -44,5 +53,6 @@
 	<track kind="chapters" src="../media/frenchsong_chapters_en.vtt" srclang="en" label="English"/>
 </audio>
 
+</main>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple YouTube Example 2</title>
+<title>YouTube player (all tracks hosted locally) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
@@ -38,41 +38,43 @@
 </head>
 
 <body>
-
-	<div id="intro">
-
-		<h1>Able Player for YouTube<br/>
-		Example 2, All Tracks Hosted Locally</h1>
-
-		<p>This page features an example of Able Player being used to play a YouTube video. 
-		Its features include:</p>
-
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
 		<ul>
-			<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
-			<li>Captions, subtitles, and chapters, <strong>all hosted locally</strong>.</li>
-			<li>An interactive transcript built from the chapters, captions and subtitle files.</li>
-			<li>A full set of options in the Captions Preferences dialog.</li>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
 		</ul>
+	</nav>
+	<main>
 
-		<h2>Additional examples:</h2>
-		<ul>
-			<li><a href="youtube1.html">YouTube Demo 1 (Captions hosted on YouTube)</a></li>
-			<li><a href="youtube3.html">YouTube Demo 3 (Complex Example)</a></li>
-			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
-		</ul>
+		<h1>YouTube player (all tracks hosted locally)</h1>
 
-	</div>
+		<div id="intro">
+			<p>This page features an example of Able Player being used to play a YouTube video. 
+			Its features include:</p>
 
-<div class="wrapper">
-	<video id="video1" data-able-player 
-		data-skin="2020" preload="auto" 
-		data-youtube-id="dhwpLACAls8" data-youtube-desc-id="Ck2TdVMhWcU">
-		<track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
-		<track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Español"/>
-		<track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-cn" label="中文(中华人民共和国)"/>
-		<track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en"/>
-	</video>
-</div>
+			<ul>
+				<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
+				<li>Captions, subtitles, and chapters, <strong>all hosted locally</strong>.</li>
+				<li>An interactive transcript built from the chapters, captions and subtitle files.</li>
+				<li>A full set of options in the Captions Preferences dialog.</li>
+			</ul>
 
+		</div>
+
+		<div class="wrapper">
+			<video id="video1" data-able-player 
+				data-skin="2020" preload="auto" 
+				data-youtube-id="dhwpLACAls8" data-youtube-desc-id="Ck2TdVMhWcU">
+				<track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
+				<track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Español"/>
+				<track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-cn" label="中文(中华人民共和国)"/>
+				<track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en"/>
+			</video>
+		</div>
+
+	</main>
 </body>
 </html>

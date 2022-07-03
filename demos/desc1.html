@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Audio description via VTT track, read by browsers | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Audio description via VTT track, read by browsers</h1>
+
+		<p>This demo uses WebVTT files to deliver text-based audio description. WebVTT description tracks are available in multiple languages, which correspond with the subtitle languages. If the user switches the subtitle language via the Captions button, the description language will change as well.</p>
+		<p>If Description is toggled on, supporting browsers will read the description text aloud using the Web Speech API. Speech output settings &mdash; voice, pitch, rate, and volume &mdash; can be configured by the user within the Preferences dialog.</p>
+		<p>Also in Preferences, users can toggle a checkbox labeled "Automatically pause video when description starts".</p>
+		<p>The text from the description file is incorporated into the machine-generated interactive transcript.</p>
+		<p>For browsers that do not support the Web Speech API, description text will be written to an ARIA live region on the web page, and will be read aloud by screen readers.</p>
+
+		<!-- use the following markup for each media element -->
+		<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm"/>
+			<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+			<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+			<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+			<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+			<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+			<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+			<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+			<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+			<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+			<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+			<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+			<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+		</video>
+
+	</main>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Multiple audio players (each with its own playlist) | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- style for this page only -->
+<style>
+	.column {
+		float: left;
+		width: 40%;
+		padding-right: 20px;
+	}
+	.column h2 {
+		font-size: 1.2em;
+		text-align: center;
+	}
+	#playlist {
+		border: medium solid #DDD;
+		padding: 0.25em;
+	}
+</style>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Multiple audio players (each with its own playlist)</h1>
+
+		<p>The first player has an embedded playlist; the second player has an external playlist.
+			Both can be customized with CSS, but the external player is more flexible in terms of positioning.
+		</p>
+
+		<div class="column">
+
+			<h2>Player with Embedded Playlist</h2>
+			<audio id="audio1" class="ump-media" preload="auto" data-able-player>
+				<!-- source elements are optional when there's a playlist. -->
+				<!-- If ommitted, they will be constructed from the first playlist item -->
+			</audio>
+
+			<!-- first playlist (embedded) -->
+			<ul class="able-playlist" data-player="audio1" data-skin="2020" data-embedded>
+				<li>
+					<span class="able-source"
+						data-type="audio/mpeg"
+						data-src="../media/everyday.mp3"></span>
+					<span class="able-source"
+						data-type="audio/ogg"
+						data-src="../media/everyday.ogg"></span>
+					<button>Every Day</button>
+				</li>
+				<li>
+					<span class="able-source"
+						data-type="audio/mpeg"
+						data-src="../media/php70alpha.mp3"></span>
+					<span class="able-source"
+						data-type="audio/ogg"
+						data-src="../media/php70alpha.ogg"></span>
+					<button>PHP 7.0 Alpha</button>
+				</li>
+			</ul>
+
+		</div>
+
+		<div class="column">
+
+			<h2>Player with External Playlist</h2>
+			<audio id="audio2" class="ump-media" preload="auto" data-able-player>
+				<!-- source elements are optional when there's a playlist. -->
+				<!-- If ommitted, they will be constructed from the first playlist item -->
+			</audio>
+
+			<!-- second playlist (external) -->
+			<div id="playlist">
+				<ul class="able-playlist" data-player="audio2">
+						<li>
+						<span class="able-source"
+								data-type="audio/mpeg"
+							data-src="../media/frenchsong.mp3">
+						</span>
+						<span class="able-source"
+								data-type="audio/ogg"
+							data-src="../media/frenchsong.ogg">
+						</span>
+						<button lang="fr">Une Chanson Française</button>
+					</li>
+					<li>
+							<span class="able-source"
+							data-type="audio/mpeg"
+							data-src="../media/paulallen.mp3">
+						</span>
+						<span class="able-source"
+								data-type="audio/ogg"
+							data-src="../media/paulallen.ogg">
+						</span>
+						<button>The Paul Allen Song</button>
+					</li>
+					<li>
+							<span class="able-source"
+							data-type="audio/mpeg"
+							data-src="../media/smallf.mp3">
+						</span>
+						<span class="able-source"
+								data-type="audio/ogg"
+							data-src="../media/smallf.ogg">
+						</span>
+						<button>Man With Small F (The Inaccessible PDF Song)</button>
+					</li>
+				</ul>
+			</div>
+
+		</div>
+
+	</main>
+</body>
+</html>

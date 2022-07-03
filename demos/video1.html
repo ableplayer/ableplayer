@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Video Demo #1</title>
+<title>Video with closed captions in one language | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
@@ -18,18 +18,26 @@
 </head>
 
 <body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Video with closed captions in one language</h1>
 
-<h1>Able Player Video Demo #1:<br/>Video player with closed captions</h1>
+		<!-- use the following markup for each media element -->
+		<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
+		</video>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
-<!-- use the following markup for each media element -->
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
-	<source type="video/mp4" src="../media/wwa.mp4"/>
-	<source type="video/webm" src="../media/wwa.webm"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
-</video>
-
+	</main>
 </body>
 </html>
 

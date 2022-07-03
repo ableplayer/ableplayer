@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Audio description via video swap | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Audio description via video swap</h1>
+
+		<p>This demo uses a separate video to deliver audio description. If Description is toggled on,
+			the user gets the described version; otherwise they get the non-described version.
+		</p>
+		<p>One limitation of this method, as opposed to 
+			<a href="desc1.html">using a WebVTT file for audio description</a>, is that the description text 
+			is not included in the interactive transcript.
+			This limitation can be overcome by adding a transcript of the description content 
+			in a WebVTT descriptions track.
+		</p>
+
+		<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
+			<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+		</video>
+
+	</main>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Extended audio description via video swap | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Extended audio description via video swap</h1>
+
+		<p>This demo uses a separate video to deliver audio description. If Description is toggled on,
+			the user gets the described version; otherwise they get the non-described version.
+			Unlike <a href="desc3.html">Audio Description Demo #3</a>, the described version uses 
+			<strong>extended audio description</strong> (i.e., the video is paused during description). 
+			This results in a described version and non-described version that have different durations.
+			Therefore, any track elements (in this case, captions and chapters) that are intended for 
+			the described version must include the <strong>data-desc</strong> attribute.  
+		</p>
+
+		<p>For this example:</p>
+		<ul>
+			<li>The non-described version has English captions and chapters, plus Spanish subtitles.</li>
+			<li>The described version only has English captions and chapters, not Spanish subtitles.</li>
+		</ul>
+
+		<video id="video1" preload="auto" poster="../media/itaccess.jpg" width="1280" height="720" data-able-player data-skin="2020" playsinline>
+			<source type="video/mp4" src="../media/itaccess-excerpt.mp4" data-desc-src="../media/itaccess-excerpt-described.mp4"/>
+			<!-- captions and chapters for the non-described version -->
+			<track kind="captions" src="../media/itaccess-excerpt-captions_en.vtt" srclang="en" label="English"/>
+			<track kind="subtitles" src="../media/itaccess-excerpt-subtitles_es.vtt" srclang="es" label="Español"/>
+			<track kind="chapters" src="../media/itaccess-excerpt-chapters_en.vtt" srclang="en"/>
+			<!-- captions and chapters for the version with extended description -->
+			<track data-desc kind="captions" src="../media/itaccess-excerpt-described-captions_en.vtt" srclang="en" label="English"/>
+			<track data-desc kind="chapters" src="../media/itaccess-excerpt-described-chapters_en.vtt" srclang="en"/>
+		</video>
+
+	</main>
+</body>
+</html>

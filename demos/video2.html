@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Video Demo #2</title>
+<title>Video with <em>default</em> closed captions | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
@@ -18,23 +18,31 @@
 </head>
 
 <body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Video with <em>default</em> closed captions</h1>
 
-<h1>Able Player Video Demo #2:<br/>Video player with <em>default</em> closed captions</h1>
+		<p>This test page was designed for testing a bug in which certain browsers display captions even if no <em>controls</em> attribute is present. They only do this if a &lt;track&gt; element has a <em>default</em> attribute. For additional details see <a href="https://github.com/ableplayer/ableplayer/issues/5">Able Player Issue 5</a>.</p>
 
-<p>This test page was designed for testing a bug in which certain browsers display captions even if no <em>controls</em> attribute is present. They only do this if a &lt;track&gt; element has a <em>default</em> attribute. For additional details see <a href="https://github.com/ableplayer/ableplayer/issues/5">Able Player Issue 5</a>.</p>
+		<!-- use the following markup for each media element -->
+		<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm"/>
+			<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+			<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+			<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+			<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+		</video>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
-<!-- use the following markup for each media element -->
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
-	<source type="video/mp4" src="../media/wwa.mp4"/>
-	<source type="video/webm" src="../media/wwa.webm"/>
-	<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-	<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-	<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-	<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-</video>
-
+	</main>
 </body>
 </html>

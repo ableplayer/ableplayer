@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Sample Steno Form</title>
+	<style>
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+			color: black;
+			font-size: 1em;
+			line-height: 1.5em;
+		}
+		#form div {
+			margin: 1em;
+		}
+		#form label, #form input {
+			display: block;
+			margin-bottom: 0.5em;
+			font-size: 1em;
+		}
+		#form label {
+			font-weight: bold;
+		}
+		#form textarea {
+			width: 95%;
+			max-width: 70em;
+			height: 10em;
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 1em;
+		}
+	</style>
+</head>
+<body>
+
+<div id="form">
+	<div>
+		<label for="transcriber">Name of transcriber:</label>
+		<input type="text" id="transcriber">
+	</div>
+	<div>
+		<label for="transcript">Transcript:</label>
+		<textarea id="transcript"></textarea>
+	</div>
+	<div>
+		<input type="reset" id="reset">
+	</div>
+</div>
+
+<script>
+	var resetButton = document.getElementById('reset');
+	resetButton.addEventListener('click', function() {
+		document.getElementById('transcriber').value = '';
+		document.getElementById('transcript').value = '';
+	});
+</script>
+</body>
+</html>

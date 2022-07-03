@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Audio player with Metadata track (type = text) | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- CSS for this example -->
+<style>
+	#meta {
+		clear: both;
+		width: 480px;
+		color: #C00;
+		font-weight: bold;
+		font-size: 1.2em;
+		margin: 1em;
+		display: none;
+	}
+</style>
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Audio player with Metadata track (type = text)</h1>
+
+		<p>Time-synced metadata is provided in a WebVTT file with kind="metadata".
+			A <strong>data-meta-type</strong> attribute has value "text", 
+			 which is one of two types of supported metadata tracks
+			(the other is "selector"). With "text" as the metadata type, 
+			the text contained in the WebVTT file is displayed in an
+			external container at the designated times during playback. 
+			The ID of the external container is provided in a
+			<strong>data-meta-div</strong> attribute.
+		</p>
+
+		<audio id="audio1" width="480" class="ump-media" preload="auto" data-able-player data-skin="2020" data-meta-type="text" data-meta-div="meta">
+			<source type="audio/mpeg" src="../media/paulallen.mp3"/>
+			<source type="audio/ogg" src="../media/paulallen.ogg"/>
+			<track kind="metadata" src="../media/paulallen_meta.vtt"/>
+		</audio>
+
+		<div id="meta" role="alert"></div>
+
+	</main>
+</body>
+</html>

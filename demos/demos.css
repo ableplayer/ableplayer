@@ -7,32 +7,80 @@ html {
 }
 body {
 	min-height: 100%;
-	margin: 2em;
+	margin: 0; 
+	padding: 0; 
 	font-family: Arial, Helvetica, sans-serif;
 	color: black;
-	background: white;
+	background-color: white;
 	font-size: 1em;
 	line-height: 1.5em;
 }
 header {
   min-height: 100px; /* same as logo */
-  margin-bottom: 1.5em;
+	padding: 0; 
 }
 header img {
   float: left;
 }
-h1 {
-  font-size: 2em;
+header .title { 
+	padding: 1em 0.5em 1em;
+	font-size: 3em;
+	font-weight: bold;
+	color: white; 
+	background-color: #340449; 
+}
+main { 		
+	margin: 2em 2em 5em;
+}
+nav { 
+	margin: 0;
+}
+nav ul { 
+	list-style-type: none; 
+	margin: 1em;
+	padding: 0;
+}
+nav li { 
+	display: inline;
+	margin: 0 0.35em;
+	font-size: 1.2em; 
+}
+h1, h2, h3 {
   line-height: 1.2em;
   margin-top: 0.75em;
 }
+h1.title { 
+	margin: 0;
+}
+h1 { 
+	font-size: 2em;
+}
+h2 { 
+	font-size: 1.5em;
+}
+h3 { 
+	font-size: 1.1em;
+	margin: 1em 0.75em 0;
+}
 p, li {
-  width: 60em;
+  width: 45em;
 	max-width: 90%;
 }
 p.goback {
   clear: left;
   margin: 3em 0 1em;
+}
+ul.longerText li { 
+	margin-bottom: 1.25em;
+}
+a {
+	color: #4b2e83;
+	text-decoration: none;
+	border-bottom: 1px solid #340449;
+}
+body#index main ul a { 
+	text-decoration: underline;
+	border-bottom: none;
 }
 #content {
 	margin: 0 1em;
@@ -60,7 +108,8 @@ a:hover, a:focus, a:active {
 	outline-color: #cc0000; /* red */
   outline-style: solid;
   outline-width: thick;
-  text-decoration: none;
+  text-decoration: none !important;
+	border: none !important;
 }
 /*
  * Class example from WebVTT caption file

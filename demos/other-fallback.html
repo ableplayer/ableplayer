@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fallback Test | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- Example CSS for fallback content -->
+<style>
+	.fallback {
+		margin: 1em; 
+		padding: 1em;
+		border: 3px solid #340449; 
+		width: 640px;
+		max-width: 90%;
+		font-weight: bold;
+		background-color: #FFC;
+		color: #000; 
+	}
+</style>
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Able Player Fallback Test</h1>
+
+		<p>This page includes several examples of media elements with fallback content:</p>
+		<ul>
+			<li>If there is an error building Able Player, 
+				the browser's native media player should appear 
+				(emulated here with <strong>data-test-fallback="1"</strong>).
+			</li>
+			<li>If the browser doesn't support HTML media, 
+				the browser should display fallback content that's nested within the 
+				&lt;audio&gt; or &lt;video&gt; elements
+				(emulated here with <strong>data-test-fallback="2"</strong>). 
+			</li>
+		</ul>
+
+		<p><strong>NOTE:</strong> On this example page, the fallback content 
+			has been stylized using CSS. If no fallback content is provided, Able Player will display 
+				a short error message in Engish (see Video Example 4). This content is not stylized;   
+				it's better to provide your own fallback than to rely on ours. 
+		</p>
+
+		<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+
+		<section aria-labelledby="audio1-heading">
+			<h2 id="audio1-heading">Audio Example 1</h2>
+			<ul>
+				<li><strong>Issue emulated:</strong> Error building player</li>
+				<li><strong>HTML fallback nested in code:</strong> Yes</li>
+			</ul>
+			<audio id="audio1" width="480" preload="auto" data-able-player data-test-fallback="1">
+				<source type="audio/mpeg" src="../media/smallf.mp3"/>
+				<source type="audio/ogg" src="../media/smallf.ogg"/>
+				<p class="fallback">This is example fallback content, nested within the &lt;audio&gt; element.
+					It could provide alternative content, such as a link for downloading the audio file
+					or a link to a transcript.</p>
+			</audio>
+		</section>
+
+		<section aria-labelledby="audio2-heading">
+			<h2 id="audio2-heading">Audio Example 2</h2>
+			<ul>
+				<li><strong>Issue emulated:</strong> Browser does not support HTML media</li>
+				<li><strong>HTML fallback nested in code:</strong> Yes</li>
+			</ul>
+			<audio id="audio2" width="480" preload="auto" data-able-player data-test-fallback="2">
+				<source type="audio/mpeg" src="../media/smallf.mp3"/>
+				<source type="audio/ogg" src="../media/smallf.ogg"/>
+				<p class="fallback">This is example fallback content, nested within the &lt;audio&gt; element.
+					It could provide alternative content, such as a link for downloading the audio file
+					or a link to a transcript.</p>
+			</audio>
+		</section>
+
+		<section aria-labelledby="video1-heading">
+			<h2 id="video1-heading">Video Example 1</h2>
+			<ul>
+				<li><strong>Issue emulated:</strong> Error building player</li>
+				<li><strong>HTML fallback nested in code:</strong> Yes</li>
+			</ul>
+			<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-test-fallback="1">
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+				<p class="fallback">This is example fallback content, nested within the &lt;video&gt; element.
+					It could provide alternative content, such as a link for downloading the video file (with open or embedded captions)
+					or a link to a transcript.</p>
+			</video>
+		</section>
+
+			<section aria-labelledby="video2-heading">
+				<h2 id="video2-heading">Video Example 2</h2>
+				<ul>
+				<li><strong>Issue emulated:</strong> Browser does not support HTML media</li>
+				<li><strong>HTML fallback nested in code:</strong> Yes</li>
+			</ul>
+			<video id="video2" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-test-fallback="2">
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+				<p class="fallback">This is example fallback content, nested within the &lt;video&gt; element.
+					It could provide alternative content, such as a link for downloading the video file (with open or embedded captions)
+					or a link to a transcript.</p>
+			</video>
+		</section>
+
+		<section aria-labelledby="video3-heading">
+			<h2 id="video3-heading">Video Example 3</h2>
+			<ul>
+				<li><strong>Issue emulated:</strong> Error building player</li>
+				<li><strong>HTML fallback nested in code:</strong> No</li>
+			</ul>
+			<video id="video3" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-test-fallback="1">
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			</video>
+		</section>
+
+		<section aria-labelledby="video4-heading">
+			<h2 id="video4-heading">Video Example 4</h2>
+			<ul>
+				<li><strong>Issue emulated:</strong> Browser does not support HTML media</li>
+				<li><strong>HTML fallback nested in code:</strong> No</li>
+			</ul>
+			<video id="video4" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-test-fallback="2">
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			</video>
+		</section>
+
+	</main>
+</body>
+</html>
