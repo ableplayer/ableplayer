@@ -1,7 +1,7 @@
 {
   "name": "ableplayer",
-  "version": "4.4.22",
-  "description": "fully accessible HTML5 media player",
+  "version": "4.4.23",
+  "description": "Accessible HTML5 media player",
   "homepage": "http://ableplayer.github.io/ableplayer",
   "bugs": "https://github.com/ableplayer/ableplayer/issues",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
-    "grunt-contrib-jshint": "^2.1.0",
+    "grunt-contrib-jshint": "^3.2.0",
     "grunt-contrib-uglify": "^4.0.1",
     "grunt-remove-logging": ">=0.2.0"
   }

@@ -41,17 +41,35 @@
 		}
 
 		if (this.playerWidth) {			
-			options = {
-				id: vimeoId,
-				width: this.playerWidth,
-				controls: false
+			if (this.vimeoUrlHasParams) { 
+				// use url param, not id 
+				options = {
+					url: vimeoId,
+					width: this.playerWidth,
+					controls: false
+				}
+			}
+			else { 
+				options = {
+					id: vimeoId,
+					width: this.playerWidth,
+					controls: false
+				}
 			}
 		}
 		else { 
 			// initialize without width & set width later 
-			options = {
-				id: vimeoId,
-				controls: false
+			if (this.vimeoUrlHasParams) { 
+				options = {
+					url: vimeoId,
+					controls: false
+				}
+			}
+			else { 
+				options = {
+					id: vimeoId,
+					controls: false
+				}
 			}
 		}
 
@@ -255,6 +273,11 @@
 		// Supported URL patterns are anything containing 'vimeo.com'
 		//  and ending with a '/' followed by the ID. 
 		// (Vimeo IDs do not have predicatable lengths)
+		
+		// Update: If URL contains parameters, return the full url 
+		// This will need to be passed to the Vimeo Player API 
+		// as a url parameter, not as an id parameter		 
+		this.vimeoUrlHasParams = false; 
 	
 		var idStartPos, id; 
 
@@ -264,10 +287,17 @@
 		}
 		else if (url.indexOf('vimeo.com') !== -1) { 
 			// this is a full Vimeo URL 
-			url = url.trim(); 
-			idStartPos = url.lastIndexOf('/') + 1; 
-			id = url.substr(idStartPos); 
-			return id; 
+			if (url.indexOf('?') !== -1) { 
+				// URL contains parameters 
+				this.vimeoUrlHasParams = true; 
+				return url; 
+			}
+			else { 			
+				url = url.trim(); 
+				idStartPos = url.lastIndexOf('/') + 1; 
+				id = url.substr(idStartPos); 
+				return id; 
+			}
 		}
 		else { 
 			return url; 
