@@ -728,6 +728,8 @@
 				if (this.paused && !this.seekBar.tracking) {
 					if (!this.hideBigPlayButton) {
 						this.$bigPlayButton.show();
+						this.$bigPlayButton.attr('aria-hidden', 'false');
+
 					}
 					if (this.fullscreen) {
 						this.$bigPlayButton.width($(window).width());
@@ -740,6 +742,7 @@
 				}
 				else {
 					this.$bigPlayButton.hide();
+					this.$bigPlayButton.attr('aria-hidden', 'true');
 				}
 			}
 		}
@@ -1116,6 +1119,7 @@
 
 	AblePlayer.prototype.handleCaptionToggle = function() {
 
+		var thisObj = this;
 		var captions;
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
@@ -1135,6 +1139,7 @@
 				// turn them off
 				this.captionsOn = false;
 				this.prefCaptions = 0;
+				this.$ccButton.attr('aria-pressed', 'false');
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
@@ -1150,6 +1155,7 @@
 				// captions are off. Turn them on.
 				this.captionsOn = true;
 				this.prefCaptions = 1;
+				this.$ccButton.attr('aria-pressed', 'true');
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
@@ -1197,22 +1203,44 @@
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
 				this.hidingPopup = false;
-				this.$ccButton.removeAttr('aria-expanded').focus();
+				this.$ccButton.attr('aria-expanded', 'false')
+				this.waitThenFocus(this.$ccButton);
 			}
 			else {
 				this.closePopups();
 				if (this.captionsPopup) {
 					this.captionsPopup.show();
 					this.$ccButton.attr('aria-expanded','true');
-					this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
-					this.captionsPopup.css('left', this.$ccButton.position().left)
-					// Place focus on the first button (even if another button is checked)
-					this.captionsPopup.find('li').removeClass('able-focus');
-					this.captionsPopup.find('li').first().focus().addClass('able-focus');
+					this.$ccButton.focus();
+					// Gives time to focus on expanded ccButton
+					setTimeout(function() {
+						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
+						// Place focus on the first button (even if another button is checked)
+						thisObj.captionsPopup.find('li').removeClass('able-focus');
+						thisObj.captionsPopup.find('li').first().focus().addClass('able-focus');
+					}, 50);
 				}
 			}
 		}
 	};
+
+	/**
+	 * Gives enough time for DOM changes to take effect before adjusting focus.
+	 * Helpful for allowing screen reading of elements whose state is intermittently changed.
+	 * 
+	 * @param {*} $el element to focus on
+	 * @param {*} timeout optional wait time in milliseconds before focus
+	 */
+	AblePlayer.prototype.waitThenFocus = function($el, timeout) {
+
+		// Default wait time of 50 ms
+		var _timeout = (timeout === undefined || timeout === null) ? 50 : timeout;
+		
+		setTimeout(function() {
+			$el.focus();
+		}, _timeout);
+	}
 
 	AblePlayer.prototype.handleChapters = function () {
 		if (this.hidingPopup) {
@@ -1290,7 +1318,7 @@
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded','false');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			if (!this.showingPrefsDialog) {
@@ -1305,15 +1333,18 @@
 			this.closePopups();
 			this.prefsPopup.show();
 			this.$prefsButton.attr('aria-expanded','true');
-			prefsButtonPosition = this.$prefsButton.position();
-			prefsMenuRight = this.$ableDiv.width() - 5;
-			prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
-			this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
-			this.prefsPopup.css('left', prefsMenuLeft);
-			// remove prior focus and set focus on first item; also change tabindex from -1 to 0
-			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
-			this.prefsPopup.find('li').first().focus().addClass('able-focus');
-
+			this.$prefsButton.focus(); // focus first on prefs button to announce expanded state
+			// give time for focus on button then adjust popup settings and focus
+			setTimeout(function() {
+				prefsButtonPosition = thisObj.$prefsButton.position();
+				prefsMenuRight = thisObj.$ableDiv.width() - 5;
+				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
+				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+				thisObj.prefsPopup.css('left', prefsMenuLeft);
+				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
+				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
+				thisObj.prefsPopup.find('li').first().focus().addClass('able-focus');
+			}, 50);
 		}
 	};
 
@@ -1603,10 +1634,10 @@
 	AblePlayer.prototype.showTooltip = function($tooltip) {
 
 		if (($tooltip).is(':animated')) {
-			$tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
+			$tooltip.stop(true,true).show();
 		}
 		else {
-			$tooltip.stop().show().delay(4000).fadeOut(1000);
+			$tooltip.stop().show();
 		}
 	};
 

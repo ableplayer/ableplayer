@@ -3513,9 +3513,14 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.injectBigPlayButton = function () {
 
 		this.$bigPlayButton = $('<button>', {
-			'class': 'able-big-play-button icon-play',
-			'aria-hidden': true,
-			'tabindex': -1
+			'class': 'able-big-play-button',
+			'aria-hidden': false,
+			'aria-label': this.tt.play,
+			'tabindex': 0
+		});
+
+		this.$bigPlayIcon = $('<span>', {
+			'class': 'icon-play',
 		});
 
 		var thisObj = this;
@@ -3523,7 +3528,8 @@ var AblePlayerInstances = [];
 			event.preventDefault();
 			thisObj.handlePlay();
 		});
-
+		
+		this.$bigPlayButton.append(this.$bigPlayIcon);
 		this.$mediaContainer.append(this.$bigPlayButton);
 	};
 
@@ -4023,16 +4029,17 @@ var AblePlayerInstances = [];
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
-			this.$ccButton.removeAttr('aria-expanded').focus();
+			this.$ccButton.attr('aria-expanded', 'false');
+			this.waitThenFocus(this.$ccButton);
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
 			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded', 'false');
 			if (!this.showingPrefsDialog) {
-				this.$prefsButton.focus();
+				this.waitThenFocus(thisObj.$prefsButton);
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
@@ -4042,7 +4049,7 @@ var AblePlayerInstances = [];
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeAlert.text(this.tt.volumeSliderClosed);
-			this.$volumeButton.removeAttr('aria-expanded').focus();
+			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
 			this.$transcriptPopup.hide();
@@ -4384,7 +4391,7 @@ var AblePlayerInstances = [];
 		svgData, svgPath, control,
 		$buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
 		buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
-		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip, tooltipTimerId,
 		captionLabel, popupMenuId;
 
 		thisObj = this;
@@ -4505,7 +4512,7 @@ var AblePlayerInstances = [];
 						'class': 'able-button-handler-' + control
 					});
 
-					if (control === 'volume' || control === 'preferences') {
+					if (control === 'volume' || control === 'preferences' || control === 'captions') {
 						if (control == 'preferences') {
 							this.prefCats = this.getPreferencesGroups();
 							if (this.prefCats.length > 1) {
@@ -4513,8 +4520,9 @@ var AblePlayerInstances = [];
 								popupMenuId = this.mediaId + '-prefs-menu';
 								$newButton.attr({
 									'aria-controls': popupMenuId,
-									'aria-haspopup': 'menu'
-								});
+									'aria-haspopup': 'menu',
+									'aria-expanded': 'false'
+							});
 							}
 							else if (this.prefCats.length === 1) {
 								// Prefs button will trigger a dialog
@@ -4531,6 +4539,12 @@ var AblePlayerInstances = [];
 								'aria-controls': popupMenuId,
 								'aria-expanded': 'false'
 							});
+						} else if (control === 'captions' && this.captions) {
+							if (this.captions.length > 1) {
+								$newButton.attr('aria-expanded', 'false')
+							} else {
+								$newButton.attr('aria-pressed', 'false')
+							}
 						}
 					}
 					if (this.iconType === 'font') {
@@ -4659,6 +4673,11 @@ var AblePlayerInstances = [];
 					$newButton.append($buttonLabel);
 					// add an event listener that displays a tooltip on mouseenter or focus
 					$newButton.on('mouseenter focus',function(e) {
+
+						// when entering a new tooltip, we can forget about hiding the previous tooltip.
+						// since the same tooltip div is used, it's location just changes.
+						clearTimeout(tooltipTimerId);
+
 						var buttonText = $(this).attr('aria-label');
 						// get position of this button
 						var position = $(this).position();
@@ -4708,7 +4727,22 @@ var AblePlayerInstances = [];
 						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
-							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							// clear existing timeout before reassigning variable
+							clearTimeout(tooltipTimerId);
+							tooltipTimerId = setTimeout(function() {
+								// give the user a half second to move cursor to tooltip before removing
+								// see https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus#hoverable
+								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							}, 500);
+
+							thisObj.$tooltipDiv.on('mouseenter focus', function() {
+								clearTimeout(tooltipTimerId);
+							});
+
+							thisObj.$tooltipDiv.on('mouseleave blur', function() {
+								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							});
+
 						})
 					});
 
@@ -5994,7 +6028,7 @@ var AblePlayerInstances = [];
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
 					thisObj.youTubePlayer.stopVideo(); 
-					if (ytTracks.length) { 
+					if (ytTracks && ytTracks.length) { 
 						// Step through ytTracks and add them to global tracks array
 						// Note: Unlike YouTube Data API, the IFrame Player API only returns 
 						// tracks that are published, and does NOT include ASR captions 
@@ -6024,13 +6058,13 @@ var AblePlayerInstances = [];
 						thisObj.hasCaptions = true;
 						// setupPopups again with new captions array, replacing original
 						thisObj.setupPopups('captions');				
-						thisObj.loadingYouTubeCaptions = false; 
 					}
 					else { 
 						// there are no YouTube captions 
 						thisObj.usingYouTubeCaptions = false; 
 						thisObj.hasCaptions = false;
 					}
+					thisObj.loadingYouTubeCaptions = false; 
 				}
 				if (thisObj.captionLangPending) { 
 					// user selected a new caption language prior to playback starting 
@@ -6182,11 +6216,21 @@ var AblePlayerInstances = [];
 			'aria-valuemax': max
 		});
 
+		this.timeTooltipTimeoutId = null;
+		this.overTooltip = false;
 		this.timeTooltip = $('<div>');
 		this.bodyDiv.append(this.timeTooltip);
 
 		this.timeTooltip.attr('role', 'tooltip');
 		this.timeTooltip.addClass('able-tooltip');
+		this.timeTooltip.on('mouseenter focus', function(){
+			thisObj.overTooltip = true;
+			clearInterval(thisObj.timeTooltipTimeoutId);
+		});
+		this.timeTooltip.on('mouseleave blur', function(){
+			thisObj.overTooltip = false;
+			$(this).hide();
+		});
 		this.timeTooltip.hide();
 
 		this.bodyDiv.append(this.loadedDiv);
@@ -6262,6 +6306,10 @@ var AblePlayerInstances = [];
 
 			if (e.type === 'mouseenter') {
 				thisObj.overBody = true;
+				thisObj.overBodyMousePos = {
+					x: coords.x,
+					y: coords.y
+				};
 			}
 			else if (e.type === 'mouseleave') {
 				thisObj.overBody = false;
@@ -6330,7 +6378,7 @@ var AblePlayerInstances = [];
 					e.preventDefault();
 				}
 			}
-			if (e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
+			if (!thisObj.overTooltip && e.type !== 'mouseup' && e.type !== 'keydown' && e.type !== 'keydown') {
 				thisObj.refreshTooltip();
 			}
 		});
@@ -6421,7 +6469,9 @@ var AblePlayerInstances = [];
 	AccessibleSlider.prototype.setPosition = function (position, updateLive) {
 		this.position = position;
 		this.resetHeadLocation();
-		this.refreshTooltip();
+		if (this.overHead) {
+			this.refreshTooltip();
+		}
 		this.resizeDivs();
 		this.updateAriaValues(position, updateLive);
 	}
@@ -6540,8 +6590,20 @@ var AblePlayerInstances = [];
 			this.setTooltipPosition(this.overBodyMousePos.x - this.bodyDiv.offset().left);
 		}
 		else {
-			this.timeTooltip.hide();
+
+			clearTimeout(this.timeTooltipTimeoutId);
+			var _this = this;
+			this.timeTooltipTimeoutId = setTimeout(function() {
+				// give user a half second move cursor over tooltip
+				_this.timeTooltip.hide();
+			}, 500);
 		}
+	};
+
+	AccessibleSlider.prototype.hideSliderTooltips = function () {
+		this.overHead = false;
+		this.overBody = false;
+		this.timeTooltip.hide();
 	};
 
 	AccessibleSlider.prototype.setTooltipPosition = function (x) {
@@ -6881,7 +6943,8 @@ var AblePlayerInstances = [];
 		this.$tooltipDiv.hide();
 		this.$volumeSlider.show().attr('aria-hidden','false');
 		this.$volumeButton.attr('aria-expanded','true');
-		this.$volumeSliderHead.attr('tabindex','0').focus();
+		this.$volumeButton.focus(); // for screen reader expanded state to be read
+		this.waitThenFocus(this.$volumeSliderHead.attr('tabindex','0'));
 	};
 
 	AblePlayer.prototype.hideVolumePopup = function() {
@@ -8755,6 +8818,8 @@ var AblePlayerInstances = [];
 				if (this.paused && !this.seekBar.tracking) {
 					if (!this.hideBigPlayButton) {
 						this.$bigPlayButton.show();
+						this.$bigPlayButton.attr('aria-hidden', 'false');
+
 					}
 					if (this.fullscreen) {
 						this.$bigPlayButton.width($(window).width());
@@ -8767,6 +8832,7 @@ var AblePlayerInstances = [];
 				}
 				else {
 					this.$bigPlayButton.hide();
+					this.$bigPlayButton.attr('aria-hidden', 'true');
 				}
 			}
 		}
@@ -9143,6 +9209,7 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.handleCaptionToggle = function() {
 
+		var thisObj = this;
 		var captions;
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
@@ -9162,6 +9229,7 @@ var AblePlayerInstances = [];
 				// turn them off
 				this.captionsOn = false;
 				this.prefCaptions = 0;
+				this.$ccButton.attr('aria-pressed', 'false');
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
@@ -9177,6 +9245,7 @@ var AblePlayerInstances = [];
 				// captions are off. Turn them on.
 				this.captionsOn = true;
 				this.prefCaptions = 1;
+				this.$ccButton.attr('aria-pressed', 'true');
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
@@ -9224,22 +9293,44 @@ var AblePlayerInstances = [];
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
 				this.hidingPopup = false;
-				this.$ccButton.removeAttr('aria-expanded').focus();
+				this.$ccButton.attr('aria-expanded', 'false')
+				this.waitThenFocus(this.$ccButton);
 			}
 			else {
 				this.closePopups();
 				if (this.captionsPopup) {
 					this.captionsPopup.show();
 					this.$ccButton.attr('aria-expanded','true');
-					this.captionsPopup.css('top', this.$ccButton.position().top - this.captionsPopup.outerHeight());
-					this.captionsPopup.css('left', this.$ccButton.position().left)
-					// Place focus on the first button (even if another button is checked)
-					this.captionsPopup.find('li').removeClass('able-focus');
-					this.captionsPopup.find('li').first().focus().addClass('able-focus');
+					this.$ccButton.focus();
+					// Gives time to focus on expanded ccButton
+					setTimeout(function() {
+						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
+						// Place focus on the first button (even if another button is checked)
+						thisObj.captionsPopup.find('li').removeClass('able-focus');
+						thisObj.captionsPopup.find('li').first().focus().addClass('able-focus');
+					}, 50);
 				}
 			}
 		}
 	};
+
+	/**
+	 * Gives enough time for DOM changes to take effect before adjusting focus.
+	 * Helpful for allowing screen reading of elements whose state is intermittently changed.
+	 * 
+	 * @param {*} $el element to focus on
+	 * @param {*} timeout optional wait time in milliseconds before focus
+	 */
+	AblePlayer.prototype.waitThenFocus = function($el, timeout) {
+
+		// Default wait time of 50 ms
+		var _timeout = (timeout === undefined || timeout === null) ? 50 : timeout;
+		
+		setTimeout(function() {
+			$el.focus();
+		}, _timeout);
+	}
 
 	AblePlayer.prototype.handleChapters = function () {
 		if (this.hidingPopup) {
@@ -9317,7 +9408,7 @@ var AblePlayerInstances = [];
 		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded','false');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			if (!this.showingPrefsDialog) {
@@ -9332,15 +9423,18 @@ var AblePlayerInstances = [];
 			this.closePopups();
 			this.prefsPopup.show();
 			this.$prefsButton.attr('aria-expanded','true');
-			prefsButtonPosition = this.$prefsButton.position();
-			prefsMenuRight = this.$ableDiv.width() - 5;
-			prefsMenuLeft = prefsMenuRight - this.prefsPopup.width();
-			this.prefsPopup.css('top', prefsButtonPosition.top - this.prefsPopup.outerHeight());
-			this.prefsPopup.css('left', prefsMenuLeft);
-			// remove prior focus and set focus on first item; also change tabindex from -1 to 0
-			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
-			this.prefsPopup.find('li').first().focus().addClass('able-focus');
-
+			this.$prefsButton.focus(); // focus first on prefs button to announce expanded state
+			// give time for focus on button then adjust popup settings and focus
+			setTimeout(function() {
+				prefsButtonPosition = thisObj.$prefsButton.position();
+				prefsMenuRight = thisObj.$ableDiv.width() - 5;
+				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
+				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+				thisObj.prefsPopup.css('left', prefsMenuLeft);
+				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
+				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
+				thisObj.prefsPopup.find('li').first().focus().addClass('able-focus');
+			}, 50);
 		}
 	};
 
@@ -9630,10 +9724,10 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.showTooltip = function($tooltip) {
 
 		if (($tooltip).is(':animated')) {
-			$tooltip.stop(true,true).show().delay(4000).fadeOut(1000);
+			$tooltip.stop(true,true).show();
 		}
 		else {
-			$tooltip.stop().show().delay(4000).fadeOut(1000);
+			$tooltip.stop().show();
 		}
 	};
 
@@ -12130,7 +12224,7 @@ var AblePlayerInstances = [];
 		$thisElement = $(document.activeElement);
 
 		if (which === 27) { // escape
-			if ($.contains(this.$transcriptArea[0],$thisElement[0])) {
+			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
 				// This element is part of transcript area.
 				this.handleTranscriptToggle();
 				return false;
@@ -12154,6 +12248,8 @@ var AblePlayerInstances = [];
 		)){
 			if (which === 27) { // escape
 				this.closePopups();
+				this.$tooltipDiv.hide();
+				this.seekBar.hideSliderTooltips();
 			}
 			else if (which === 32) { // spacebar = play/pause
 				// disable spacebar support for play/pause toggle as of 4.2.10
@@ -16152,6 +16248,9 @@ var AblePlayerInstances = [];
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
 
 		this.vimeoPlayer.ready().then(function() {
+			// add tabindex -1 on iframe so vimeo frame cannot be focused on
+			$('#'+containerId).children('iframe').attr('tabindex', -1);
+
 			// get video's intrinsic size and initiate player dimensions
 			thisObj.vimeoPlayer.getVideoWidth().then(function(width) {						
 				if (width) { 

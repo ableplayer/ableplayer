@@ -123,8 +123,6 @@
 .able-big-play-button {
     position: absolute;
     font-size: 8em;
-    opacity: 0.5;
-    filter:alpha(opacity=50); /* for IE */
     color: #fdfdfd;
     background-color: transparent;
     border: none;
@@ -134,9 +132,20 @@
     padding: 0;
     z-index: 6500;
 }
-.able-big-play-button:hover {
-    opacity: 100;
-    filter:alpha(opacity=100); /* for IE */
+
+.able-big-play-button .icon-play {
+  background-color: black;
+  padding: 1rem 2rem;
+}
+.able-big-play-button:hover .icon-play {
+  outline-style: solid;
+  outline-width: medium;
+  outline-color: #8AB839 !important; /* green */
+}
+.able-big-play-button:focus .icon-play {
+  outline-style: solid;
+  outline-width: medium;
+	outline-color: #ffbb37 !important; /* yellow */
 }
 .able-left-controls, .able-right-controls {
     overflow: visible;
