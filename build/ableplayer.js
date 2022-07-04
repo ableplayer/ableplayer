@@ -2929,7 +2929,7 @@ var AblePlayerInstances = [];
 		var languageStack = [];
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if (nextLine.indexOf('-->') !== -1 || /^\s*$/.test(nextLine)) {
+			if (nextLine.indexOf('-->') !== -1 || /^\s+$/.test(nextLine)) {
 				break; // Handle empty cues
 			}
 			// Have to separately detect double-lines ending cue due to our non-standard parsing.
@@ -12469,7 +12469,7 @@ var AblePlayerInstances = [];
 				thisObj.onMediaUpdateTime(); // includes a call to refreshControls()
 			})
 			.on('pause',function() {
-				if (!thisObj.clickedPlay) {
+				if (!thisObj.clickedPlay) {					
 					// 'pause' was triggered automatically, not initiated by user
 					// this happens in some browsers when swapping source
 					// (e.g., between tracks in a playlist or swapping description)
@@ -12748,11 +12748,16 @@ var AblePlayerInstances = [];
 
 			if (e.button !== 0) { // not a left click
 				return false;
-			}
+			}			
 			if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
 				// at least one popup is visible
 				thisObj.closePopups();
 			}
+			if (e.target.tagName === 'VIDEO') { 
+				// user clicked the video (not an element that sits on top of the video)
+				// handle this as a play/pause toggle click 
+				thisObj.clickedPlay = true; 
+			}			
 		});
 
 		// handle mouse movement over player; make controls visible again if hidden
