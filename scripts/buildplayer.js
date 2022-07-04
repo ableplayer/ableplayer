@@ -88,9 +88,14 @@
 	AblePlayer.prototype.injectBigPlayButton = function () {
 
 		this.$bigPlayButton = $('<button>', {
-			'class': 'able-big-play-button icon-play',
-			'aria-hidden': true,
-			'tabindex': -1
+			'class': 'able-big-play-button',
+			'aria-hidden': false,
+			'aria-label': this.tt.play,
+			'tabindex': 0
+		});
+
+		this.$bigPlayIcon = $('<span>', {
+			'class': 'icon-play',
 		});
 
 		var thisObj = this;
@@ -98,7 +103,8 @@
 			event.preventDefault();
 			thisObj.handlePlay();
 		});
-
+		
+		this.$bigPlayButton.append(this.$bigPlayIcon);
 		this.$mediaContainer.append(this.$bigPlayButton);
 	};
 
@@ -598,16 +604,17 @@
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
-			this.$ccButton.removeAttr('aria-expanded').focus();
+			this.$ccButton.attr('aria-expanded', 'false');
+			this.waitThenFocus(this.$ccButton);
 		}
 		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
 			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$prefsButton.removeAttr('aria-expanded');
+			this.$prefsButton.attr('aria-expanded', 'false');
 			if (!this.showingPrefsDialog) {
-				this.$prefsButton.focus();
+				this.waitThenFocus(thisObj.$prefsButton);
 			}
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
@@ -617,7 +624,7 @@
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeAlert.text(this.tt.volumeSliderClosed);
-			this.$volumeButton.removeAttr('aria-expanded').focus();
+			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
 			this.$transcriptPopup.hide();
@@ -959,7 +966,7 @@
 		svgData, svgPath, control,
 		$buttonLabel, $buttonImg, buttonImgSrc, buttonTitle, $newButton, iconClass, buttonIcon,
 		buttonUse, buttonText, position, buttonHeight, buttonWidth, buttonSide, controllerWidth,
-		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip,
+		tooltipId, tooltipY, tooltipX, tooltipWidth, tooltipStyle, tooltip, tooltipTimerId,
 		captionLabel, popupMenuId;
 
 		thisObj = this;
@@ -1080,7 +1087,7 @@
 						'class': 'able-button-handler-' + control
 					});
 
-					if (control === 'volume' || control === 'preferences') {
+					if (control === 'volume' || control === 'preferences' || control === 'captions') {
 						if (control == 'preferences') {
 							this.prefCats = this.getPreferencesGroups();
 							if (this.prefCats.length > 1) {
@@ -1088,8 +1095,9 @@
 								popupMenuId = this.mediaId + '-prefs-menu';
 								$newButton.attr({
 									'aria-controls': popupMenuId,
-									'aria-haspopup': 'menu'
-								});
+									'aria-haspopup': 'menu',
+									'aria-expanded': 'false'
+							});
 							}
 							else if (this.prefCats.length === 1) {
 								// Prefs button will trigger a dialog
@@ -1106,6 +1114,12 @@
 								'aria-controls': popupMenuId,
 								'aria-expanded': 'false'
 							});
+						} else if (control === 'captions' && this.captions) {
+							if (this.captions.length > 1) {
+								$newButton.attr('aria-expanded', 'false')
+							} else {
+								$newButton.attr('aria-pressed', 'false')
+							}
 						}
 					}
 					if (this.iconType === 'font') {
@@ -1234,6 +1248,11 @@
 					$newButton.append($buttonLabel);
 					// add an event listener that displays a tooltip on mouseenter or focus
 					$newButton.on('mouseenter focus',function(e) {
+
+						// when entering a new tooltip, we can forget about hiding the previous tooltip.
+						// since the same tooltip div is used, it's location just changes.
+						clearTimeout(tooltipTimerId);
+
 						var buttonText = $(this).attr('aria-label');
 						// get position of this button
 						var position = $(this).position();
@@ -1283,7 +1302,22 @@
 						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
-							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							// clear existing timeout before reassigning variable
+							clearTimeout(tooltipTimerId);
+							tooltipTimerId = setTimeout(function() {
+								// give the user a half second to move cursor to tooltip before removing
+								// see https://www.w3.org/WAI/WCAG21/Understanding/content-on-hover-or-focus#hoverable
+								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							}, 500);
+
+							thisObj.$tooltipDiv.on('mouseenter focus', function() {
+								clearTimeout(tooltipTimerId);
+							});
+
+							thisObj.$tooltipDiv.on('mouseleave blur', function() {
+								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							});
+
 						})
 					});
 

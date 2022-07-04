@@ -288,7 +288,8 @@
 		this.$tooltipDiv.hide();
 		this.$volumeSlider.show().attr('aria-hidden','false');
 		this.$volumeButton.attr('aria-expanded','true');
-		this.$volumeSliderHead.attr('tabindex','0').focus();
+		this.$volumeButton.focus(); // for screen reader expanded state to be read
+		this.waitThenFocus(this.$volumeSliderHead.attr('tabindex','0'));
 	};
 
 	AblePlayer.prototype.hideVolumePopup = function() {
