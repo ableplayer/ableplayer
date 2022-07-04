@@ -1139,6 +1139,9 @@
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
 				}
+				else if (this.usingVimeoCaptions) { 
+					this.vimeoPlayer.disableTextTrack(); 
+				}
 				else {
 					this.$captionsWrapper.hide();
 				}
@@ -1150,6 +1153,28 @@
 				this.updateCookie('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
+				}
+				else if (this.usingVimeoCaptions) { 
+					this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
+						// track.language = the iso code for the language
+						// track.kind = 'captions' or 'subtitles'
+						// track.label = the human-readable label
+					}).catch(function(error) {
+						switch (error.name) {
+							case 'InvalidTrackLanguageError':
+								// no track was available with the specified language
+								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								break;
+							case 'InvalidTrackError':
+								// no track was available with the specified language and kind
+								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								break;
+							default:
+								// some other error occurred
+								console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+								break;
+							}
+					});	
 				}
 				else {
 					this.$captionsWrapper.show();
