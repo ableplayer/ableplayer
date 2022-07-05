@@ -74,11 +74,11 @@
 
 "preferences": "Preferences",
 
-"enterFullScreen": "Enter full screen",
+"enterFullscreen": "Enter full screen",
 
-"exitFullScreen": "Exit full screen",
+"exitFullscreen": "Exit full screen",
 
-"fullScreen": "Full screen",
+"fullscreen": "Full screen",
 
 "speed": "Speed",
 

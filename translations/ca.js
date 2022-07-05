@@ -74,11 +74,11 @@
 
 "preferences": "Preferències",
 
-"enterFullScreen": "Entra en el mode de pantalla completa",
+"enterFullscreen": "Entra en el mode de pantalla completa",
 
-"exitFullScreen": "Surt del mode de pantalla completa",
+"exitFullscreen": "Surt del mode de pantalla completa",
 
-"fullScreen": "Pantalla completa",
+"fullscreen": "Pantalla completa",
 
 "speed": "Velocitat",
 

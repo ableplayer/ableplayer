@@ -1479,7 +1479,7 @@
 			}
 			else {
 				// Exit fullscreen
-				this.restoringAfterFullScreen = true; 
+				this.restoringAfterFullscreen = true; 
 				if (document.exitFullscreen) {
 					document.exitFullscreen();
 				}
@@ -1559,23 +1559,23 @@
 			// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
 			if (!thisObj.fullscreen) {
 				// user has just exited full screen
-				thisObj.restoringAfterFullScreen = true;
+				thisObj.restoringAfterFullscreen = true;
 			}
 			else if (!thisObj.clickedFullscreenButton) {
 				// user triggered fullscreenchange without clicking fullscreen button
 				thisObj.fullscreen = false;
-				thisObj.restoringAfterFullScreen = true;
+				thisObj.restoringAfterFullscreen = true;
 			}
 			thisObj.resizePlayer();
 			thisObj.refreshControls('fullscreen');
 
 			// NOTE: The fullscreenchange (or browser-equivalent) event is triggered twice
 			// when exiting fullscreen via the "Exit fullscreen" button (only once if using Escape)
-			// Not sure why, but consequently we need to be sure thisObj.clickedFullScreenButton
+			// Not sure why, but consequently we need to be sure thisObj.clickedFullscreenButton
 			// continues to be true through both events
 			// Could use a counter variable to control that (reset to false after the 2nd trigger)
 			// However, since I don't know why it's happening, and whether it's 100% reliable
-			// resetting clickedFullScreenButton after a timeout seems to be better approach
+			// resetting clickedFullscreenButton after a timeout seems to be better approach
 			setTimeout(function() {
 				thisObj.clickedFullscreenButton = false;
 				thisObj.restoringAfterFullscreen = false; 

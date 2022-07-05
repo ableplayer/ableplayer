@@ -74,11 +74,11 @@
 
 "preferences": "偏好設定",
 
-"enterFullScreen": "進入全螢幕模式",
+"enterFullscreen": "進入全螢幕模式",
 
-"exitFullScreen": "離開全螢幕模式",
+"exitFullscreen": "離開全螢幕模式",
 
-"fullScreen": "全螢幕",
+"fullscreen": "全螢幕",
 
 "speed": "播放速度",
 

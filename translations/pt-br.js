@@ -74,11 +74,11 @@
 
 "preferences": "Preferências",
 
-"enterFullScreen": "Entrar em tela cheia",
+"enterFullscreen": "Entrar em tela cheia",
 
-"exitFullScreen": "Sair da tela cheia",
+"exitFullscreen": "Sair da tela cheia",
 
-"fullScreen": "Tela cheia",
+"fullscreen": "Tela cheia",
 
 "speed": "Velocidade",
 
