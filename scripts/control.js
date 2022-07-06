@@ -662,6 +662,7 @@
 				// Otherwise, it is just always "Captions"
 				if (!this.captionsOn) {
 					this.$ccButton.addClass('buttonOff');
+					this.$ccButton.attr('aria-pressed', 'false')
 					if (captionsCount === 1) {
 						this.$ccButton.attr('aria-label',this.tt.showCaptions);
 						this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
@@ -669,6 +670,7 @@
 				}
 				else {
 					this.$ccButton.removeClass('buttonOff');
+					this.$ccButton.attr('aria-pressed', 'true')
 					if (captionsCount === 1) {
 						this.$ccButton.attr('aria-label',this.tt.hideCaptions);
 						this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
@@ -1211,8 +1213,8 @@
 				if (this.captionsPopup) {
 					this.captionsPopup.show();
 					this.$ccButton.attr('aria-expanded','true');
-					this.$ccButton.focus();
-					// Gives time to focus on expanded ccButton
+
+					// Gives time to "register" expanded ccButton
 					setTimeout(function() {
 						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
 						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
