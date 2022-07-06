@@ -1331,6 +1331,7 @@
 								captionLabel = this.tt.showCaptions;
 							}
 							$newButton.addClass('buttonOff').attr('title',captionLabel);
+							$newButton.attr('aria-pressed', 'false');
 						}
 					}
 					else if (control === 'descriptions') {

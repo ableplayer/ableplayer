@@ -4756,6 +4756,7 @@ var AblePlayerInstances = [];
 								captionLabel = this.tt.showCaptions;
 							}
 							$newButton.addClass('buttonOff').attr('title',captionLabel);
+							$newButton.attr('aria-pressed', 'false');
 						}
 					}
 					else if (control === 'descriptions') {
@@ -8752,6 +8753,7 @@ var AblePlayerInstances = [];
 				// Otherwise, it is just always "Captions"
 				if (!this.captionsOn) {
 					this.$ccButton.addClass('buttonOff');
+					this.$ccButton.attr('aria-pressed', 'false');
 					if (captionsCount === 1) {
 						this.$ccButton.attr('aria-label',this.tt.showCaptions);
 						this.$ccButton.find('span.able-clipped').text(this.tt.showCaptions);
@@ -8759,6 +8761,7 @@ var AblePlayerInstances = [];
 				}
 				else {
 					this.$ccButton.removeClass('buttonOff');
+					this.$ccButton.attr('aria-pressed', 'true');
 					if (captionsCount === 1) {
 						this.$ccButton.attr('aria-label',this.tt.hideCaptions);
 						this.$ccButton.find('span.able-clipped').text(this.tt.hideCaptions);
