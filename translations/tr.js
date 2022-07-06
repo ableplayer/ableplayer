@@ -74,11 +74,11 @@
 
 "preferences": "Seçenekler",
 
-"enterFullScreen": "Tam Ekranı Etkinleştir",
+"enterFullscreen": "Tam Ekranı Etkinleştir",
 
-"exitFullScreen": "Tam Ekranı Kapa",
+"exitFullscreen": "Tam Ekranı Kapa",
 
-"fullScreen": "Tam Ekran",
+"fullscreen": "Tam Ekran",
 
 "speed": "Hız",
 

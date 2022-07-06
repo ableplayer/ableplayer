@@ -74,11 +74,11 @@
 
     "preferences": "Předvolby",
 
-    "enterFullScreen": "Zobrazit na celou obrazovku",
+    "enterFullscreen": "Zobrazit na celou obrazovku",
 
-    "exitFullScreen": "Ukončit celou obrazovku",
+    "exitFullscreen": "Ukončit celou obrazovku",
 
-    "fullScreen": "Celá obrazovka",
+    "fullscreen": "Celá obrazovka",
 
     "speed": "Rychlost",
 

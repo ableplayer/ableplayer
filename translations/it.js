@@ -74,11 +74,11 @@
 
 "preferences": "Preferenze",
 
-"enterFullScreen": "Attiva schermo intero",
+"enterFullscreen": "Attiva schermo intero",
 
-"exitFullScreen": "Disattiva schermo intero",
+"exitFullscreen": "Disattiva schermo intero",
 
-"fullScreen": "Schermo intero",
+"fullscreen": "Schermo intero",
 
 "speed": "Velocit�",
 
