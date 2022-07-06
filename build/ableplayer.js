@@ -3511,7 +3511,7 @@ var AblePlayerInstances = [];
 	};
 
 	AblePlayer.prototype.injectBigPlayButton = function () {
-console.log('injectBigPlayButton');
+
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',
 			'aria-hidden': false,
