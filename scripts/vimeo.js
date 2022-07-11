@@ -77,7 +77,10 @@
 
 		this.vimeoPlayer.ready().then(function() {
 			// add tabindex -1 on iframe so vimeo frame cannot be focused on
-			$('#'+containerId).children('iframe').attr('tabindex', -1);
+			$('#'+containerId).children('iframe').attr({
+				'tabindex': '-1',
+				'aria-hidden': true
+			});
 
 			// get video's intrinsic size and initiate player dimensions
 			thisObj.vimeoPlayer.getVideoWidth().then(function(width) {						
