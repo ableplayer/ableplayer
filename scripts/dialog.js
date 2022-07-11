@@ -4,7 +4,6 @@
 	// Based on the incredible accessible modal dialog.
 	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, isModal, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
 
-		console.log('creating the ' + title + ' ' + dialogRole + ' dialog, modal is ' + isModal); 
 		this.title = title;
 		this.closeButtonLabel = closeButtonLabel;
 		this.focusedElementBeforeModal = $returnElement;
@@ -37,6 +36,7 @@
 			titleH1.attr('id', 'modalTitle-' + this.baseId);
 			titleH1.css('text-align', 'center');
 			titleH1.text(title);
+			this.titleH1 = titleH1; 
 
 			modal.attr({
 				'aria-labelledby': 'modalTitle-' + this.baseId,

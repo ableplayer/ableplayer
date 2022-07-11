@@ -1884,7 +1884,7 @@ var AblePlayerInstances = [];
 			$prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
-			$descFieldset, $descLegend, $legend,
+			$descFieldset, $descLegend, $legend, legendId,
 			thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
 			$div1,id1,$radio1,$label1,
 			$div2,id2,$radio2,$label2,
@@ -1904,17 +1904,10 @@ var AblePlayerInstances = [];
 		var customClass = 'able-prefs-form-' + form;
 		$prefsDiv.addClass(customClass);
 
-		// add intro
-		if (form == 'captions') {
+		// add titles and intros 
+		if (form == 'captions') {			
 			formTitle = this.tt.prefTitleCaptions;
-			introText = this.tt.prefIntroCaptions;
-			// Uncomment the following line to include a cookie warning
-			// Not included for now in order to cut down on unnecessary verbiage
-			// introText += ' ' + this.tt.prefCookieWarning;
-			$prefsIntro = $('<p>',{
-				text: introText
-			});
-			$prefsDiv.append($prefsIntro);
+			// Intro text removed in 4.4.32 to cut down on unnecessary verbiage 
 		}
 		else if (form == 'descriptions') {
 			formTitle = this.tt.prefTitleDescriptions;
@@ -1972,26 +1965,24 @@ var AblePlayerInstances = [];
 		}
 		else if (form == 'transcript') {
 			formTitle = this.tt.prefTitleTranscript;
-			introText = this.tt.prefIntroTranscript;
-			// Uncomment the following line to include a cookie warning
-			// Not included for now in order to cut down on unnecessary verbiage
-			// introText += ' ' + this.tt.prefCookieWarning;
-			$prefsIntro = $('<p>',{
-				text: introText
-			});
-			$prefsDiv.append($prefsIntro);
+			// Intro text removed in 4.4.32 to cut down on unnecessary verbiage 
 		}
 
-		$fieldset = $('<fieldset>');
+		$fieldset = $('<div>').attr('role','group');	
 		fieldsetClass = 'able-prefs-' + form;
 		fieldsetId = this.mediaId + '-prefs-' + form;
+		legendId = fieldsetId + '-legend';
 		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
 		if (form === 'keyboard') {
-			$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$legend = $('<h2>' + this.tt.prefHeadingKeyboard1 + '</h2>');
+			$legend.attr('id',legendId);
+			$fieldset.attr('aria-labelledby',legendId);
 			$fieldset.append($legend);
 		}
 		else if (form === 'descriptions') {
-			$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+			$legend = $('<h2>' + this.tt.prefHeadingTextDescription + '</h2>');
+			$legend.attr('id',legendId);
+			$fieldset.attr('aria-labelledby',legendId);
 			$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
@@ -2344,6 +2335,12 @@ var AblePlayerInstances = [];
 
 		$prefsDiv.append(saveButton);
 		$prefsDiv.append(cancelButton);
+
+		// Associate the dialog's H1 as aria-labelledby for groups of fields
+		// (alternative to fieldset and legend) 
+		if (form === 'captions' || form === 'transcript') { 
+			$fieldset.attr('aria-labelledby',dialog.titleH1.attr('id')); 
+		}
 
 		// add global reference for future control
 		if (form === 'captions') {
@@ -7088,7 +7085,6 @@ var AblePlayerInstances = [];
 	// Based on the incredible accessible modal dialog.
 	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, isModal, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
 
-		 
 		this.title = title;
 		this.closeButtonLabel = closeButtonLabel;
 		this.focusedElementBeforeModal = $returnElement;
@@ -7121,6 +7117,7 @@ var AblePlayerInstances = [];
 			titleH1.attr('id', 'modalTitle-' + this.baseId);
 			titleH1.css('text-align', 'center');
 			titleH1.text(title);
+			this.titleH1 = titleH1; 
 
 			modal.attr({
 				'aria-labelledby': 'modalTitle-' + this.baseId,
