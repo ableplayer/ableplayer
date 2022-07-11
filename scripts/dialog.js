@@ -2,8 +2,9 @@
 	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 	// Based on the incredible accessible modal dialog.
-	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, isModal, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
 
+		console.log('creating the ' + title + ' ' + dialogRole + ' dialog, modal is ' + isModal); 
 		this.title = title;
 		this.closeButtonLabel = closeButtonLabel;
 		this.focusedElementBeforeModal = $returnElement;
@@ -37,11 +38,8 @@
 			titleH1.css('text-align', 'center');
 			titleH1.text(title);
 
-			$descDiv.attr('id', 'modalDesc-' + this.baseId);
-
 			modal.attr({
 				'aria-labelledby': 'modalTitle-' + this.baseId,
-				'aria-describedby': 'modalDesc-' + this.baseId
 			});
 			modal.prepend(titleH1);
 			modal.prepend(closeButton);
@@ -49,8 +47,11 @@
 
 		modal.attr({
 			'aria-hidden': 'true',
-			'role': dialogRole
+			'role': dialogRole,
 		});
+		if (isModal) { 
+			modal.attr('modal','true');
+		}
 
 		modal.keydown(function (e) {
 			// Escape

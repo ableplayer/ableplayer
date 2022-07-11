@@ -2327,7 +2327,7 @@ var AblePlayerInstances = [];
 		// that will include an ancestor of the dialog,
 		// which will render the dialog unreadable by screen readers
 		$('body').append($prefsDiv);
-		dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, '32em');
+		dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', true, formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, '32em');
 
 		// Add save and cancel buttons.
 		$prefsDiv.append('<hr>');
@@ -7086,8 +7086,9 @@ var AblePlayerInstances = [];
 	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 	// Based on the incredible accessible modal dialog.
-	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, isModal, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
 
+		 
 		this.title = title;
 		this.closeButtonLabel = closeButtonLabel;
 		this.focusedElementBeforeModal = $returnElement;
@@ -7121,11 +7122,8 @@ var AblePlayerInstances = [];
 			titleH1.css('text-align', 'center');
 			titleH1.text(title);
 
-			$descDiv.attr('id', 'modalDesc-' + this.baseId);
-
 			modal.attr({
 				'aria-labelledby': 'modalTitle-' + this.baseId,
-				'aria-describedby': 'modalDesc-' + this.baseId
 			});
 			modal.prepend(titleH1);
 			modal.prepend(closeButton);
@@ -7133,8 +7131,11 @@ var AblePlayerInstances = [];
 
 		modal.attr({
 			'aria-hidden': 'true',
-			'role': dialogRole
+			'role': dialogRole,
 		});
+		if (isModal) { 
+			modal.attr('modal','true');
+		}
 
 		modal.keydown(function (e) {
 			// Escape
@@ -9601,7 +9602,7 @@ var AblePlayerInstances = [];
 				}).text(this.tt.fullscreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
 				$dialogDiv.append($fsDialogAlert);
 				// now render this as a dialog
-				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullscreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
+				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', true, 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullscreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
 				$('body').append($dialogDiv);
 			}
 
@@ -13194,7 +13195,7 @@ var AblePlayerInstances = [];
 		// that will include an ancestor of the dialog,
 		// which will render the dialog unreadable by screen readers
 		$('body').append($resizeForm);
-		resizeDialog = new AccessibleDialog($resizeForm, $windowButton, 'alert', this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+		resizeDialog = new AccessibleDialog($resizeForm, $windowButton, 'dialog', true, this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
 		if (which === 'transcript') {
 			this.transcriptResizeDialog = resizeDialog;
 		}
