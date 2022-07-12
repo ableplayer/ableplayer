@@ -592,39 +592,35 @@ div.able-modal-dialog h1 {
   Preferences Form
 */
 
-.able-prefs-form fieldset {
-  margin-left: 0;
-  padding-left: 0;
+.able-prefs-form div[role="group"] {
+  margin: 1em 0;
+  padding: 0;
 	border: none;
 }
-.able-prefs-form legend {
+.able-prefs-form h2 {
 	color: black;
 	font-weight: bold;
 	font-size: 1.1em;
 }
-.able-prefs-form fieldset div {
+.able-prefs-form div[role="group"] > div {
   display: table;
   margin-left: 1em;
 }
-.able-prefs-form fieldset div input {
+.able-prefs-form div[role="group"] > div > input {
   display: table-cell;
 	width: 1em;
 	vertical-align: middle;
 }
-.able-prefs-form fieldset div label {
+.able-prefs-form div[role="group"] > div > label {
   display: table-cell;
 	padding-left: 0.5em;
 }
-fieldset.able-prefs-keys div {
-  float: left;
-  margin-right: 1em;
-}
-div.able-desc-pref-prompt {
+.able-desc-pref-prompt {
   font-weight: bold;
   font-style: italic;
   margin-left: 1em !important;
 }
-div.able-prefDescFormat > div {
+.able-prefDescFormat > div {
   margin-left: 1.5em;
 }
 .able-prefs-captions label,
@@ -633,27 +629,27 @@ div.able-prefDescFormat > div {
   float: left;
   margin-bottom: 0.25em;
 }
-fieldset.able-prefs-captions label {
+.able-prefs-captions label {
   width: 6em;
   text-align: right;
   padding-right: 1em;
 }
-fieldset.able-prefs-captions select {
+.able-prefs-captions select {
   width: 10em;
   font-size: 0.9em;
   border-radius: none;
 }
-fieldset.able-prefs-descriptions >  div.able-prefs-select { 
+.able-prefs-descriptions >  div.able-prefs-select { 
 	margin: 0.5em 1em;
 }
-fieldset.able-prefs-descriptions >  div.able-prefs-select > label,
-fieldset.able-prefs-descriptions >  div.able-prefs-slider > label {
+.able-prefs-descriptions >  div.able-prefs-select > label,
+.able-prefs-descriptions >  div.able-prefs-slider > label {
   width: 6em;
   text-align: right;
   padding-right: 1em;
 }
-fieldset.able-prefs-descriptions > div.able-prefs-select > select,
-fieldset.able-prefs-descriptions > div.able-prefs-slider > select {
+.able-prefs-descriptions > div.able-prefs-select > select,
+.able-prefs-descriptions > div.able-prefs-slider > select {
   width: 10em;
   font-size: 0.9em;
   border-radius: none;
