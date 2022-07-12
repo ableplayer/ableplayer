@@ -7137,7 +7137,7 @@ var AblePlayerInstances = [];
 			'role': dialogRole,
 		});
 		if (isModal) { 
-			modal.attr('modal','true');
+			modal.attr('aria-modal','true');
 		}
 
 		modal.keydown(function (e) {
