@@ -587,6 +587,7 @@
 			else if (e.which === 27) {	// Escape
 				$thisItem.removeClass('able-focus');
 				thisObj.closePopups();
+				e.stopPropagation;
 			}
 			e.preventDefault();
 		});
@@ -627,10 +628,15 @@
 			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
+			this.hidingPopup = true; 
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$transcriptPopupButton.removeAttr('aria-expanded').focus();
+			// wait briefly, then reset hidingPopup
+			setTimeout(function() {
+				thisObj.hidingPopup = false;
+			},100);
 		}
 		if (this.$signPopup && this.$signPopup.is(':visible')) {
 			this.$signPopup.hide();

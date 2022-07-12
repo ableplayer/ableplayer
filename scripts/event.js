@@ -306,7 +306,7 @@
 		$thisElement = $(document.activeElement);
 
 		if (which === 27) { // escape
-			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
+			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0]) && !this.hidingPopup) {
 				// This element is part of transcript area.
 				this.handleTranscriptToggle();
 				return false;
