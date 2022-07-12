@@ -601,7 +601,7 @@
 
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
-			this.$chaptersButton.removeAttr('aria-expanded').focus();
+			this.$chaptersButton.attr('aria-expanded','false').focus();
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
@@ -632,7 +632,7 @@
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$transcriptPopupButton.removeAttr('aria-expanded').focus();
+			this.$transcriptPopupButton.attr('aria-expanded','false').focus();			
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
 				thisObj.hidingPopup = false;
@@ -642,7 +642,7 @@
 			this.$signPopup.hide();
 			// restore menu items to their original state
 			this.$signPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$signPopupButton.removeAttr('aria-expanded').focus();
+			this.$signPopupButton.attr('aria-expanded','false').focus();
 		}
 	};
 

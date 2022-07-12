@@ -4023,7 +4023,7 @@ var AblePlayerInstances = [];
 
 		if (this.chaptersPopup && this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
-			this.$chaptersButton.removeAttr('aria-expanded').focus();
+			this.$chaptersButton.attr('aria-expanded','false').focus();
 		}
 		if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 			this.captionsPopup.hide();
@@ -4054,7 +4054,7 @@ var AblePlayerInstances = [];
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$transcriptPopupButton.removeAttr('aria-expanded').focus();
+			this.$transcriptPopupButton.attr('aria-expanded','false').focus();			
 			// wait briefly, then reset hidingPopup
 			setTimeout(function() {
 				thisObj.hidingPopup = false;
@@ -4064,7 +4064,7 @@ var AblePlayerInstances = [];
 			this.$signPopup.hide();
 			// restore menu items to their original state
 			this.$signPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			this.$signPopupButton.removeAttr('aria-expanded').focus();
+			this.$signPopupButton.attr('aria-expanded','false').focus();
 		}
 	};
 
@@ -9348,7 +9348,7 @@ var AblePlayerInstances = [];
 		if (this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.hidingPopup = false;
-			this.$chaptersButton.removeAttr('aria-expanded').focus();
+			this.$chaptersButton.attr('aria-expanded','false').focus();
 		}
 		else {
 			this.closePopups();
@@ -13011,6 +13011,7 @@ var AblePlayerInstances = [];
 			'aria-label': this.tt.windowButtonLabel,
 			'aria-haspopup': 'true',
 			'aria-controls': menuId,
+			'aria-expanded': 'false',
 			'class': 'able-button-handler-preferences'
 		});
 		if (this.iconType === 'font') {
@@ -13315,6 +13316,7 @@ var AblePlayerInstances = [];
 					thisObj.windowMenuClickRegistered = false;
 					// also restore menu items to their original state
 					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+					$windowButton.attr('aria-expanded','false');
 					// also return focus to window options button
 					$windowButton.focus();
 				});
@@ -13335,6 +13337,7 @@ var AblePlayerInstances = [];
 			thisObj.windowMenuClickRegistered = false;
 			// also restore menu items to their original state
 			$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			$windowButton.attr('aria-expanded','false');
 		});
 		if (choice !== 'close') {
 			$windowButton.focus();

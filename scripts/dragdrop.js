@@ -128,6 +128,7 @@
 			'aria-label': this.tt.windowButtonLabel,
 			'aria-haspopup': 'true',
 			'aria-controls': menuId,
+			'aria-expanded': 'false',
 			'class': 'able-button-handler-preferences'
 		});
 		if (this.iconType === 'font') {
@@ -432,6 +433,7 @@
 					thisObj.windowMenuClickRegistered = false;
 					// also restore menu items to their original state
 					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+					$windowButton.attr('aria-expanded','false');
 					// also return focus to window options button
 					$windowButton.focus();
 				});
@@ -452,6 +454,7 @@
 			thisObj.windowMenuClickRegistered = false;
 			// also restore menu items to their original state
 			$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+			$windowButton.attr('aria-expanded','false');
 		});
 		if (choice !== 'close') {
 			$windowButton.focus();

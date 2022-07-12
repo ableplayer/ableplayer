@@ -1254,7 +1254,7 @@
 		if (this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
 			this.hidingPopup = false;
-			this.$chaptersButton.removeAttr('aria-expanded').focus();
+			this.$chaptersButton.attr('aria-expanded','false').focus();
 		}
 		else {
 			this.closePopups();
