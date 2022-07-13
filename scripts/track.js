@@ -116,10 +116,11 @@
 		// desc - Boolean, true if track includes a data-desc attribute
 
 		var thisObj, deferred, promise, captionTracks, altCaptionTracks,
-			trackLang, trackLabel, isDefault, forDesc,
-			i, j, capLabel, inserted;
+			trackLang, trackLabel, isDefault, forDesc, hasDefault, hasTrackInDefLang,
+			trackFound, i, j, capLabel, inserted;
 
 		thisObj = this;
+		hasDefault = false; 
 
 		deferred = new $.Deferred();
 		promise = deferred.promise();
@@ -135,31 +136,36 @@
 			this.usingYouTubeCaptions = false; 
 			// create object from HTML5 tracks
 			this.$tracks.each(function (index, element) {
+
 				// srcLang should always be included with <track>, but HTML5 spec doesn't require it
 				// if not provided, assume track is the same language as the default player language
 				if ($(this).attr('srclang')) {
 					trackLang = $(this).attr('srclang');
-				} else {
+				} 
+				else {
 					trackLang = thisObj.lang;
 				}
-
 				if ($(this).attr('label')) {
 					trackLabel = $(this).attr('label');
-				} else {
+				} 
+				else {
 					trackLabel = thisObj.getLanguageName(trackLang);
 				}
 
-				if ($(this).attr('default')) {
+				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {
 					isDefault = true;
-				} else if (trackLang === thisObj.lang) {
-					// There is no @default attribute,
-					// but this is the user's/browser's default language
-					// so make it the default caption track
-					isDefault = true;
-				} else {
+					hasDefault = true; 
+				} 
+				else if (trackLang === thisObj.lang) {
+					// this track is in the default lang of the player 
+					// save this for later 
+					// if there is no other default track specified 
+					// this will be the default 
+					hasTrackInDefLang = true; 
+				}
+				else {
 					isDefault = false;
 				}
-
 				if (isDefault) {
 					// this.captionLang will also be the default language for non-caption tracks
 					thisObj.captionLang = trackLang;
@@ -168,7 +174,8 @@
 				if ($(this).data('desc') !== undefined) {
 					forDesc = true;
 					thisObj.hasDescTracks = true;
-				} else {
+				} 
+				else {
 					forDesc = false;
 				}
 
@@ -193,11 +200,31 @@
 				}
 
 				if (index == thisObj.$tracks.length - 1) {
+					// This is the last track. 
+					if (!hasDefault) { 
+						if (hasTrackInDefLang) { 
+							thisObj.captionLang = thisObj.lang; 
+							trackFound = false; 									
+							i = 0; 
+							while (i < thisObj.tracks.length && !trackFound) { 
+								if (thisObj.tracks[i]['language'] === thisObj.lang) { 
+									thisObj.tracks[i]['def'] = true; 
+									trackFound = true; 
+								}
+								i++; 
+							}
+						}
+						else { 
+							// use the first track 
+							thisObj.tracks[0]['def'] = true; 
+							thisObj.captionLang = thisObj.tracks[0]['language']; 
+						}
+					}
 					// Remove 'default' attribute from all <track> elements
 					// This data has already been saved to this.tracks
 					// and some browsers will display the default captions, 
 					// despite all standard efforts to suppress them
-					thisObj.$media.find('track').removeAttr('default');
+					thisObj.$media.find('track').removeAttr('default'); 
 					deferred.resolve();
 				}
 			});
