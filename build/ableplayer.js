@@ -14832,7 +14832,8 @@ var AblePlayerInstances = [];
 
 		// determine language, then get labels and prompts from corresponding translation var
 
-		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang;
+		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang, i, 
+			similarLangFound;
 		deferred = $.Deferred();
 		thisObj = this;
 
@@ -14856,8 +14857,21 @@ var AblePlayerInstances = [];
 				}
 				else {
 					// this is not a localized language.
-					// since it's not supported, we're unable to use it.
-					this.lang = null;
+					// but maybe there's a similar localized language supported  
+					// that has the same parent?  
+					similarLangFound = false; 
+					i = 0; 
+					while (i < supportedLangs.length) { 
+						if (supportedLangs[i].substring(0,2) == this.lang) { 
+							this.lang = supportedLangs[i]; 				
+							similarLangFound = true; 
+						}
+						i++; 
+					}
+					if (!similarLangFound) { 
+						// language requested via data-lang is not supported
+						this.lang = null;
+					}
 				}
 			}
 		}
