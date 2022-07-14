@@ -50,7 +50,7 @@
 
 "newChapter": "Novo capítulo",
 
-"language": "Linguagem",
+"language": "Idioma",
 
 "sign": "Linguagem gestual",
 
@@ -166,7 +166,7 @@
 
 "prefIntroTranscript": "As seguintes preferências afetam a transcrição interativa.",
 
-"prefCookieWarning": "Guardar as tuas preferências requer cookies.",
+"prefCookieWarning": "É necessário aceitar cookies de forma a guardar as tuas preferências.",
 
 "prefHeadingKeyboard1": "Teclas modificadoras usadas para atalhos",
 
