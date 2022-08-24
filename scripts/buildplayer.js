@@ -87,6 +87,10 @@
 
 	AblePlayer.prototype.injectBigPlayButton = function () {
 
+		var thisObj, svgData, buttonIcon, svgPath;
+
+		thisObj = this; 
+
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',
 			'aria-hidden': false,
@@ -94,17 +98,34 @@
 			'tabindex': 0
 		});
 
-		this.$bigPlayIcon = $('<span>', {
-			'class': 'icon-play',
-		});
+		if (this.iconType == 'svg') { 
+			svgData = this.getSvgData('play');
+			buttonIcon = $('<svg>',{
+				'focusable': 'false',
+				'aria-hidden': 'true',
+				'viewBox': svgData[0]
+			});
+			svgPath = $('<path>',{
+				'd': svgData[1]
+			});
+			buttonIcon.append(svgPath);
+			this.$bigPlayButton.html(buttonIcon);
 
-		var thisObj = this;
+			// Final step: Need to refresh the DOM in order for browser to process & display the SVG
+			this.$bigPlayButton.html(this.$bigPlayButton.html());
+		}
+		else { // use icon font 
+			this.$bigPlayIcon = $('<span>', {
+				'class': 'icon-play',
+			});
+			this.$bigPlayButton.append(this.$bigPlayIcon);
+		}
+
 		this.$bigPlayButton.click(function (event) {
 			event.preventDefault();
 			thisObj.handlePlay();
 		});
 		
-		this.$bigPlayButton.append(this.$bigPlayIcon);
 		this.$mediaContainer.append(this.$bigPlayButton);
 	};
 

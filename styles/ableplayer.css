@@ -144,16 +144,19 @@
   filter:alpha(opacity=100); /* for IE */
 }
 
-.able-big-play-button .icon-play {
+.able-big-play-button .icon-play, 
+.able-big-play-button svg {
   background-color: black;
   padding: 1rem 2rem;
 }
-.able-big-play-button:hover .icon-play {
+.able-big-play-button:hover .icon-play, 
+.able-big-play-button:hover svg {
   outline-style: solid;
   outline-width: medium;
   outline-color: #8AB839 !important; /* green */
 }
-.able-big-play-button:focus .icon-play {
+.able-big-play-button:focus .icon-play,
+.able-big-play-button:focus svg {
   outline-style: solid;
   outline-width: medium;
 	outline-color: #ffbb37 !important; /* yellow */
