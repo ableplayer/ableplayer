@@ -13,7 +13,8 @@
 		// There are nevertheless lessons to be learned from Drag & Drop about accessibility:
 		// http://dev.opera.com/articles/accessible-drag-and-drop/
 
-		var thisObj, $window, $toolbar, windowName, $resizeHandle, resizeZIndex;
+		var thisObj, $window, $toolbar, windowName, $resizeHandle, $resizeSvg, 
+			i, x1, y1, x2, y2, $resizeLine, resizeZIndex;
 
 		thisObj = this;
 
@@ -35,10 +36,51 @@
 		$resizeHandle = $('<div>',{
 			'class': 'able-resizable'
 		});
+
+		// fill it with three parallel diagonal lines 
+		$resizeSvg = $('<svg>').attr({
+			'width': '100%',
+			'height': '100%',
+			'viewBox': '0 0 100 100',
+			'preserveAspectRatio': 'none'
+		});
+		for (i=1; i<=3; i++) { 
+			if (i === 1) { 
+				x1 = '100'; 
+				y1 = '0'; 
+				x2 = '0'; 
+				y2 = '100'; 
+			}
+			else if (i === 2) { 
+				x1 = '33'; 
+				y1 = '100'; 
+				x2 = '100'; 
+				y2 = '33'; 
+			}
+			else if (i === 3) { 
+				x1 = '67'; 
+				y1 = '100'; 
+				x2 = '100'; 
+				y2 = '67'; 
+			}
+			$resizeLine = $('<line>').attr({ 
+				'x1': x1,
+				'y1': y1,
+				'x2': x2,
+				'y2': y2,
+				'vector-effect': 'non-scaling-stroke'				
+			})
+			$resizeSvg.append($resizeLine); 
+		}
+		$resizeHandle.html($resizeSvg); 
+
 		// assign z-index that's slightly higher than parent window
 		resizeZIndex = parseInt($window.css('z-index')) + 100;
 		$resizeHandle.css('z-index',resizeZIndex);
 		$window.append($resizeHandle);
+
+		// Final step: Need to refresh the DOM in order for browser to process & display the SVG
+		$resizeHandle.html($resizeHandle.html());
 
 		// add event listener to toolbar to start and end drag
 		// other event listeners will be added when drag starts

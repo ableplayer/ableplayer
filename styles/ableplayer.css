@@ -778,13 +778,16 @@ span.able-modkey {
 }
 .able-resizable {
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 5px 2px;
   bottom: 0;
   right: 0;
   cursor: nwse-resize;
-  background: transparent url('../images/wingrip.png') no-repeat;
+}
+.able-resizable svg line {
+  stroke: #595959; 
+  stroke-width: 2px;
 }
 
 /*
