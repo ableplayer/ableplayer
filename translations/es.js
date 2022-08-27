@@ -166,7 +166,7 @@
 
 "prefIntroTranscript": "Las siguientes preferencias afectan a la transcripción interactiva.",
 
-"prefCookieWarning": "Gurdar sus preferencias requiere el uso de cookies.",
+"prefCookieWarning": "Para guardar sus preferencias se requiere el uso de cookies.",
 
 "prefHeadingKeyboard1": "Teclas modificadoras utilizadas para atajos de teclado",
 
@@ -192,7 +192,7 @@
 
 "prefDescFormat": "Formato preferido",
 
-"prefDescFormatHelp": "Si ambos formatos están disponibles, se usará sólo uno de ello.",
+"prefDescFormatHelp": "Si ambos formatos están disponibles, se usará sólo uno de ellos.",
 
 "prefDescFormatOption1": "versión alternativa del vídeo, descrito",
 
@@ -206,25 +206,25 @@
 
 "prefDescVisible": "Hacer visibles las descripciones en texto si se están usando",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Voz",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Velocidad",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Tono",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Muy grave",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Grave",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "Normal",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Aguda",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Muy aguda",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Ajuste la configuración para escuchar este texto de muestra",
 
-"prefHighlight": "Resaltar la transcripción según avanza el contenido",
+"prefHighlight": "Resalte la transcripción a medida que avance el contenido",
 
 "prefTabbable": "Transcripción manejable por teclado",
 
