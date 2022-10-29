@@ -213,7 +213,10 @@
 			this.okToPlay = false; 	
 		}
 		this.refreshControls('init');
-		this.restoreFocus(); 
+		if (this.$focusedElement) { 		
+			this.restoreFocus(); 
+			this.$focusedElement = null; 
+		}
 	};
 
 	AblePlayer.prototype.durationsAreCloseEnough = function(d1,d2) { 
