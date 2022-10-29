@@ -88,14 +88,14 @@ var AblePlayerInstances = [];
 
 		// autoplay (Boolean; if present always resolves to true, regardless of value)
 		if ($(media).attr('autoplay') !== undefined) {
-			this.autoplay = true; // this value remains constant
+			this.autoplay = true; // this value remains constant 
 			this.okToPlay = true; // this value can change dynamically
 		}
 		else {
 			this.autoplay = false;
 			this.okToPlay = false;
 		}
-
+		
 		// loop (Boolean; if present always resolves to true, regardless of value)
 		if ($(media).attr('loop') !== undefined) {
 			this.loop = true;
@@ -680,7 +680,6 @@ var AblePlayerInstances = [];
 		this.swappingSrc = false; // will change to true temporarily while media source is being swapped
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
-		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
 		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
 		this.setIconColor();
@@ -1294,10 +1293,12 @@ var AblePlayerInstances = [];
 
 									// Go ahead and load media, without user requesting it
 									// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-									// However, the media needs to load before the 'loadedmetadata' event is fired
-									// and until that happens we can't get the media's duration
+									// However, the media needs to load for us to get the media's duration
 									if (thisObj.player === 'html5') {
-										thisObj.$media[0].load();
+										if (!thisObj.loadingMedia) { 
+											thisObj.$media[0].load();
+											thisObj.loadingMedia = true; 
+										}
 									}
 									// refreshControls is called twice building/initializing the player
 									// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
@@ -5141,6 +5142,15 @@ var AblePlayerInstances = [];
 		// set swappingSrc; needs to be true within recreatePlayer(), called below
 		this.swappingSrc = true;
 
+		// if a new playlist item is being requested, and playback has already started,  
+		// it should be ok to play automatically, regardless of how it was requested 
+		if (this.startedPlaying) { 
+			this.okToPlay = true; 
+		}
+		else { 
+			this.okToPlay = false; 
+		}
+
 		// remove source and track elements from previous playlist item
 		this.$media.empty();
 
@@ -5241,7 +5251,10 @@ var AblePlayerInstances = [];
 			}
 			else {
 				if (thisObj.player === 'html5') {
-					thisObj.media.load();
+					if (!thisObj.loadingMedia) { 
+						thisObj.media.load();
+						thisObj.loadingMedia = true; 
+					}
 				}
 				else if (thisObj.player === 'youtube') {
 					thisObj.okToPlay = true; 
@@ -6078,7 +6091,9 @@ var AblePlayerInstances = [];
 				if (thisObj.loadingYouTubeCaptions) { 				
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
-					thisObj.youTubePlayer.stopVideo(); 
+					if (!thisObj.okToPlay) { 
+						thisObj.youTubePlayer.stopVideo(); 
+					}
 					if (ytTracks && ytTracks.length) { 
 						// Step through ytTracks and add them to global tracks array
 						// Note: Unlike YouTube Data API, the IFrame Player API only returns 
@@ -6116,6 +6131,9 @@ var AblePlayerInstances = [];
 						thisObj.hasCaptions = false;
 					}
 					thisObj.loadingYouTubeCaptions = false; 
+					if (thisObj.okToPlay) { 
+						thisObj.youTubePlayer.playVideo();
+					}
 				}
 				if (thisObj.captionLangPending) { 
 					// user selected a new caption language prior to playback starting 
@@ -7734,17 +7752,24 @@ var AblePlayerInstances = [];
 		// (if it exists)
 		this.$focusedElement = $(':focus'); 
 
-		// get current time, and start new video at the same time
-		// (unless the videos are different durations, e.g., extended audio description
-		if (!this.hasDescTracks) { 
-			// video will scrub to this time in new video after loaded (see event.js)
+		// get current time of current source, and attempt to start new video at the same time
+		// whether this is possible will be determined after the new media source has loaded 
+		// see onMediaNewSourceLoad() 
+		if (this.elapsed > 0) { 
 			this.swapTime = this.elapsed; 
-			if (this.duration) { 
-				// compare current video's duration with the duration of the new video after swap
-				// don't swap to the elapsed time if the durations are different 
-				this.prevDuration = this.duration; 
-			}	
 		}
+		else { 
+			this.swapTime = 0; 
+		}
+		if (this.duration > 0) { 
+			this.prevDuration = this.duration; 										
+		}
+
+		// Capture current playback state, so media can resume after source is swapped 
+		if (!this.okToPlay) { 
+			this.okToPlay = this.playing; 
+		}
+
 		if (this.descOn) {
 			// user has requested the described version
 			this.showAlert(this.tt.alertDescribedVersion);
@@ -7771,7 +7796,6 @@ var AblePlayerInstances = [];
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
-				this.descDuration = this.duration; 
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-desc-src (if one exists)
 					// then store original source in a new data-orig-src attribute
@@ -7794,10 +7818,10 @@ var AblePlayerInstances = [];
 				// delete old player, then recreate it with new source & tracks 
 				this.deletePlayer('swap-desc-html'); 			
 				this.recreatePlayer().then(function() { 
-					// reload the source file.
-					// swappingSrc and hasDescTracks will be used as needed 
-					// to adjust available tracks, duration, etc. 
-					thisObj.media.load();
+					if (!thisObj.loadingMedia) { 
+						thisObj.media.load();
+						thisObj.loadingMedia = true; 
+					}
 				});
 			}
 			else { 
@@ -8162,7 +8186,8 @@ var AblePlayerInstances = [];
 				// ok to seek to startTime
 				// canplaythrough will be triggered when seeking is complete
 				// this.seeking will be set to false at that point
-				this.media.currentTime = this.startTime;
+				this.media.currentTime = this.startTime; // fuck = need to set a var to declare this complete??? 
+				this.seekStatus = 'complete'; 
 				if (this.hasSignLanguage && this.signVideo) {
 					// keep sign languge video in sync
 					this.signVideo.currentTime = this.startTime;
@@ -8231,7 +8256,6 @@ var AblePlayerInstances = [];
 
 		// returns duration of the current media, expressed in seconds
 		// function is called by getMediaTimes, and return value is sanitized there
-
 		var deferred, promise, thisObj;
 
 		deferred = new $.Deferred();
@@ -8256,7 +8280,7 @@ var AblePlayerInstances = [];
 		else {
 			var duration;
 			if (this.player === 'html5') {
-				duration = this.media.duration;
+				duration = this.media.duration;			
 			}
 			else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
@@ -9107,9 +9131,13 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.handlePlay = function(e) {
 
 		if (this.paused) {
+			// user clicked play 
+			this.okToPlay = true; 
 			this.playMedia();
 		}
 		else {
+			// user clicked pause
+			this.okToPlay = false; 
 			this.pauseMedia();
 		}
 	};
@@ -11976,37 +12004,15 @@ var AblePlayerInstances = [];
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {
 
+
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 		var thisObj = this;
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 			thisObj.duration = mediaTimes['duration'];
-			if (thisObj.descOn) { 
-				thisObj.descDuration = thisObj.duration; 
-			}
 			thisObj.elapsed = mediaTimes['elapsed'];
-			if (thisObj.swappingSrc && (typeof thisObj.swapTime !== 'undefined')) {
-/*
-				if (this.prevDuration) { 
-					if (thisObj.duration !== thisObj.prevDuration) {
-						// don't swap ahead; videos are different durations 
-						thisObj.swapTime = 0; 
-					}
-				}
-*/				
-				if (thisObj.swapTime === thisObj.elapsed) {
-					// described version been swapped and media has scrubbed to time of previous version
-					if (thisObj.playing) {
-						// resume playback
-						thisObj.playMedia();
-						thisObj.swapTime = null;
-					}
-					thisObj.swappingSrc = false;
-					thisObj.restoreFocus();
-				}
-			}
-			else {
+			if (thisObj.duration > 0) { 
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);
@@ -12015,8 +12021,8 @@ var AblePlayerInstances = [];
 				thisObj.showDescription(thisObj.elapsed);
 				thisObj.updateChapter(thisObj.elapsed);
 				thisObj.updateMeta(thisObj.elapsed);
-				thisObj.refreshControls('timeline', thisObj.duration, thisObj.elapsed);
-			}
+				thisObj.refreshControls('timeline', thisObj.duration, thisObj.elapsed); 
+			}	
 		});
 	};
 
@@ -12061,6 +12067,8 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.onMediaNewSourceLoad = function () {
 
+		var swapSrcIsComplete = false; 
+
 		if (this.cueingPlaylistItem) {
 			// this variable was set in order to address bugs caused by multiple firings of media 'end' event
 			// safe to reset now
@@ -12070,26 +12078,165 @@ var AblePlayerInstances = [];
 			// same as above; different bugs 
 			this.recreatingPlayer = false; 
 		}
-		if (this.swappingSrc === true) {
-			// new source file has just been loaded
-			if (this.swapTime > 0) {
-				// this.swappingSrc will be set to false after seek is complete
-				// see onMediaUpdateTime()
-				this.seekTo(this.swapTime);
+		if (this.playbackRate) {
+			// user has set playbackRate on a previous src or track
+			// use that setting on the new src or track too
+			this.setPlaybackRate(this.playbackRate);
+		}
+		if (this.userClickedPlaylist) {
+			if (!this.startedPlaying || this.okToPlay) {
+				// start playing; no further user action is required
+				this.playMedia();
+				swapSrcIsComplete = true; 
+			 }
+		}
+		else if (this.seekTrigger == 'restart' ||
+				this.seekTrigger == 'chapter' ||
+				this.seekTrigger == 'transcript' ||
+				this.seekTrigger == 'search'
+				) {
+			// by clicking on any of these elements, user is likely intending to play
+			// Not included: elements where user might click multiple times in succession
+			// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
+			this.playMedia();
+			swapSrcIsComplete = true; 
+		}
+		else if (!this.startedPlaying) {
+			if (this.startTime > 0) {
+				if (this.seeking) {
+					// a seek has already been initiated
+					// since canplaythrough has been triggered, the seek is complete
+					this.seeking = false;
+					if (this.okToPlay) {
+						this.playMedia();
+					}
+					swapSrcIsComplete = true; 
+				}
+				else {
+					// haven't started seeking yet
+					this.seekTo(this.startTime);
+				}
+			}
+			else if (this.defaultChapter && typeof this.selectedChapters !== 'undefined') {
+				this.seekToChapter(this.defaultChapter);
 			}
 			else {
-				if (this.playing) {
-					// should be able to resume playback
+				// there is no startTime, therefore no seeking required
+				if (this.okToPlay) {
 					this.playMedia();
 				}
-				this.swappingSrc = false; // swapping is finished
-				this.restoreFocus(); 
+				swapSrcIsComplete = true; 				
 			}
 		}
+		else if (this.swappingSrc) {
+			// new source file has just been loaded
+			if (this.hasPlaylist) {
+				// a new source file from the playlist has just been loaded
+				if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
+					// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
+					this.playMedia();
+					swapSrcIsComplete = true; 
+				}
+			}
+			else if (this.swapTime > 0) {
+				if (this.seekStatus === 'complete') { 
+					if (this.okToPlay) {
+						// should be able to resume playback
+						this.playMedia();					
+					}
+					swapSrcIsComplete = true; 
+				}
+				else if (this.seekStatus === 'seeking') { 
+					// do nothing. Just be patient. Waiting for seek to finish. 
+				}
+				else if (!this.seekStatus) { 
+					if (this.swapTime === this.elapsed) { 
+						// seek is finished! 
+						if (this.okToPlay) {
+							// should be able to resume playback
+							this.playMedia();					
+						}
+						swapSrcIsComplete = true; 
+					}
+					else { 
+						// seeking hasn't started yet 
+						// first, determine whether it's possible 
+						if (this.hasDescTracks) { 
+							// do nothing. Unable to seek ahead if there are descTracks
+							swapSrcIsComplete = true; 
+						}
+						else if (this.durationsAreCloseEnough(this.duration,this.prevDuration)) {
+							// durations of two sources are close enough to making seek ahead in new source ok
+							this.seekStatus = 'seeking'; 
+							this.seekTo(this.swapTime);
+						}
+						else { 							
+							// durations of two sources are too dissimilar to support seeking ahead to swapTime.  						
+							swapSrcIsComplete = true; 
+						}
+					}
+				}
+			}
+			else {				
+				// swapTime is 0. No seeking required. 
+				if (this.playing) { 
+					this.playMedia(); 
+					// swap is complete. Reset vars. 
+					swapSrcIsComplete = true; 					
+				}
+			}
+		}
+		else if (this.hasPlaylist) { 
+			// new source media is part of a playlist, but user didn't click on it 
+			// (and somehow, swappingSrc is false)
+			// this may happen when the previous track ends and next track loads 
+			// this same code is called above when swappingSrc is true 
+			if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
+				// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
+				this.playMedia();
+				swapSrcIsComplete = true; 
+			}
+		}
+		else { 
+			// None of the above. 
+			// Not sure how this function gets called with none of the above scenarios 
+			// but if that happens, we could do something here. 
+		}
+
+		if (swapSrcIsComplete) { 
+			// reset vars 
+			this.loadingMedia = false; 
+			this.swappingSrc = false; 
+			this.seekStatus = null; 
+			this.swapTime = 0; 
+			this.seekTrigger = null;
+			this.seekingFromTranscript = false;		
+			this.userClickedPlaylist = false;
+			this.okToPlay = false; 	
+		}
 		this.refreshControls('init');
+		this.restoreFocus(); 
 	};
 
-	// End Media events
+	AblePlayer.prototype.durationsAreCloseEnough = function(d1,d2) { 
+
+		// Compare the durations of two media sources to determine whether it's ok to seek ahead after swapping src 
+		// The durations may not be exact, but they might be "close enough" 
+		// returns true if "close enough", otherwise false 
+
+		var tolerance, diff; 
+		
+		tolerance = 1;  // number of seconds between rounded durations that is considered "close enough" 
+		
+		diff = Math.abs(Math.round(d1) - Math.round(d2)); 
+		
+		if (diff <= tolerance) {
+			return true;  
+		}
+		else { 
+			return false; 
+		}
+	};
 
 	AblePlayer.prototype.restoreFocus = function() { 
 
@@ -12161,12 +12308,14 @@ var AblePlayerInstances = [];
 		}
 		else if (whichButton === 'previous') {
 			this.userClickedPlaylist = true;
+			this.okToPlay = true; 
 			this.seekTrigger = 'previous';
 			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
 			this.userClickedPlaylist = true;
+			this.okToPlay = true; 
 			this.seekTrigger = 'next';
 			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
@@ -12417,8 +12566,10 @@ var AblePlayerInstances = [];
 			})
 			.on('loadedmetadata',function() {
 				// should be able to get duration now
-				thisObj.duration = thisObj.media.duration;
-				thisObj.onMediaNewSourceLoad();
+				thisObj.duration = thisObj.media.duration;				
+				var x = 50.5; 
+				var y = 51.9; 
+				var diff = Math.abs(Math.round(x)-Math.round(y)); 
 			})
 			.on('canplay',function() {
 				// previously handled seeking to startTime here
@@ -12426,74 +12577,11 @@ var AblePlayerInstances = [];
 				// so we know player can seek ahead to anything
 			})
 			.on('canplaythrough',function() {
-				if (thisObj.playbackRate) {
-					// user has set playbackRate on a previous src or track
-					// use that setting on the new src or track too
-					thisObj.setPlaybackRate(thisObj.playbackRate);
-				}
-				if (thisObj.userClickedPlaylist) {
-					if (!thisObj.startedPlaying) {
-						// start playing; no further user action is required
-						thisObj.playMedia();
-				 	}
-					thisObj.userClickedPlaylist = false; // reset
-				}
-				if (thisObj.seekTrigger == 'restart' ||
-						thisObj.seekTrigger == 'chapter' ||
-						thisObj.seekTrigger == 'transcript' ||
-						thisObj.seekTrigger == 'search'
-						) {
-					// by clicking on any of these elements, user is likely intending to play
-					// Not included: elements where user might click multiple times in succession
-					// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
-					thisObj.playMedia();
-				}
-				else if (!thisObj.startedPlaying) {
-					if (thisObj.startTime > 0) {
-						if (thisObj.seeking) {
-							// a seek has already been initiated
-							// since canplaythrough has been triggered, the seek is complete
-							thisObj.seeking = false;
-							if (thisObj.autoplay || thisObj.okToPlay) {
-								thisObj.playMedia();
-							}
-						}
-						else {
-							// haven't started seeking yet
-							thisObj.seekTo(thisObj.startTime);
-						}
-					}
-					else if (thisObj.defaultChapter && typeof thisObj.selectedChapters !== 'undefined') {
-						thisObj.seekToChapter(thisObj.defaultChapter);
-					}
-					else {
-						// there is no startTime, therefore no seeking required
-						if (thisObj.autoplay || thisObj.okToPlay) {
-							thisObj.playMedia();
-						}
-					}
-				}
-				else if (thisObj.hasPlaylist) {
-					if ((thisObj.playlistIndex !== thisObj.$playlist.length) || thisObj.loop) {
-						// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
-						thisObj.playMedia();
-					}
-				}
-				else {
-					// already started playing
-					// we're here because a new media source has been loaded and is ready to resume playback
-					thisObj.getPlayerState().then(function(currentState) {
-						if (thisObj.swappingSrc && (currentState === 'stopped' || currentState === 'paused')) {
-							thisObj.startedPlaying = false;
-							if (thisObj.swapTime > 0) {
-								thisObj.seekTo(thisObj.swapTime);
-							}
-							else {
-								thisObj.playMedia();
-							}
-						}
-					});
-				}
+				// previously onMediaNewSourceLoad() was called on 'loadedmetadata' 
+				// but that proved to be too soon for some of this functionality. 
+				// TODO: Monitor this. If moving it here causes performance issues, 
+				// consider moving some or all of this functionality to 'canplay' 
+				thisObj.onMediaNewSourceLoad(); 								
 			})
 			.on('play',function() {
 				// both 'play' and 'playing' seem to be fired in all browsers (including IE11)
@@ -12503,6 +12591,7 @@ var AblePlayerInstances = [];
 			.on('playing',function() {
 				thisObj.playing = true;
 				thisObj.paused = false;
+				thisObj.swappingSrc = false; 
 				thisObj.refreshControls('playpause');
 			})
 			.on('ended',function() {
@@ -12595,7 +12684,7 @@ var AblePlayerInstances = [];
 							// a seek has already been initiated
 							// since canplaythrough has been triggered, the seek is complete
 							thisObj.seeking = false;
-							if (thisObj.autoplay || thisObj.okToPlay) {
+							if (thisObj.okToPlay) {
 								thisObj.playMedia();
 							}
 						}
@@ -12609,7 +12698,7 @@ var AblePlayerInstances = [];
 					}
 					else {
 						// there is no startTime, therefore no seeking required
-						if (thisObj.autoplay || thisObj.okToPlay) {
+						if (thisObj.okToPlay) {
 							thisObj.playMedia();
 						}
 					}
@@ -16325,7 +16414,7 @@ var AblePlayerInstances = [];
 		//  - It automatically loops (but this can be overridden by initializing the player with loop:false)
 		//  - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
-		if (this.autoplay && this.okToPlay) {
+		if (this.okToPlay) {
 			autoplay = 'true';
 		}
 		else {

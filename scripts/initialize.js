@@ -10,7 +10,6 @@
 		this.swappingSrc = false; // will change to true temporarily while media source is being swapped
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
-		this.okToPlay = false; // will change to true if conditions are acceptible for automatic playback after media loads
 		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
 
 		this.setIconColor();
@@ -624,10 +623,12 @@
 
 									// Go ahead and load media, without user requesting it
 									// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
-									// However, the media needs to load before the 'loadedmetadata' event is fired
-									// and until that happens we can't get the media's duration
+									// However, the media needs to load for us to get the media's duration
 									if (thisObj.player === 'html5') {
-										thisObj.$media[0].load();
+										if (!thisObj.loadingMedia) { 
+											thisObj.$media[0].load();
+											thisObj.loadingMedia = true; 
+										}
 									}
 									// refreshControls is called twice building/initializing the player
 									// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete

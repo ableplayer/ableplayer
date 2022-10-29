@@ -88,14 +88,14 @@ var AblePlayerInstances = [];
 
 		// autoplay (Boolean; if present always resolves to true, regardless of value)
 		if ($(media).attr('autoplay') !== undefined) {
-			this.autoplay = true; // this value remains constant
+			this.autoplay = true; // this value remains constant 
 			this.okToPlay = true; // this value can change dynamically
 		}
 		else {
 			this.autoplay = false;
 			this.okToPlay = false;
 		}
-
+		
 		// loop (Boolean; if present always resolves to true, regardless of value)
 		if ($(media).attr('loop') !== undefined) {
 			this.loop = true;

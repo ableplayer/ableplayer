@@ -228,7 +228,9 @@
 				if (thisObj.loadingYouTubeCaptions) { 				
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
-					thisObj.youTubePlayer.stopVideo(); 
+					if (!thisObj.okToPlay) { 
+						thisObj.youTubePlayer.stopVideo(); 
+					}
 					if (ytTracks && ytTracks.length) { 
 						// Step through ytTracks and add them to global tracks array
 						// Note: Unlike YouTube Data API, the IFrame Player API only returns 
@@ -266,6 +268,9 @@
 						thisObj.hasCaptions = false;
 					}
 					thisObj.loadingYouTubeCaptions = false; 
+					if (thisObj.okToPlay) { 
+						thisObj.youTubePlayer.playVideo();
+					}
 				}
 				if (thisObj.captionLangPending) { 
 					// user selected a new caption language prior to playback starting 

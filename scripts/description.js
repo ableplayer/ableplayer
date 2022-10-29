@@ -267,17 +267,24 @@
 		// (if it exists)
 		this.$focusedElement = $(':focus'); 
 
-		// get current time, and start new video at the same time
-		// (unless the videos are different durations, e.g., extended audio description
-		if (!this.hasDescTracks) { 
-			// video will scrub to this time in new video after loaded (see event.js)
+		// get current time of current source, and attempt to start new video at the same time
+		// whether this is possible will be determined after the new media source has loaded 
+		// see onMediaNewSourceLoad() 
+		if (this.elapsed > 0) { 
 			this.swapTime = this.elapsed; 
-			if (this.duration) { 
-				// compare current video's duration with the duration of the new video after swap
-				// don't swap to the elapsed time if the durations are different 
-				this.prevDuration = this.duration; 
-			}	
 		}
+		else { 
+			this.swapTime = 0; 
+		}
+		if (this.duration > 0) { 
+			this.prevDuration = this.duration; 										
+		}
+
+		// Capture current playback state, so media can resume after source is swapped 
+		if (!this.okToPlay) { 
+			this.okToPlay = this.playing; 
+		}
+
 		if (this.descOn) {
 			// user has requested the described version
 			this.showAlert(this.tt.alertDescribedVersion);
@@ -304,7 +311,6 @@
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
-				this.descDuration = this.duration; 
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-desc-src (if one exists)
 					// then store original source in a new data-orig-src attribute
@@ -327,10 +333,10 @@
 				// delete old player, then recreate it with new source & tracks 
 				this.deletePlayer('swap-desc-html'); 			
 				this.recreatePlayer().then(function() { 
-					// reload the source file.
-					// swappingSrc and hasDescTracks will be used as needed 
-					// to adjust available tracks, duration, etc. 
-					thisObj.media.load();
+					if (!thisObj.loadingMedia) { 
+						thisObj.media.load();
+						thisObj.loadingMedia = true; 
+					}
 				});
 			}
 			else { 

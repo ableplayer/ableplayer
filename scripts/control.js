@@ -20,7 +20,8 @@
 				// ok to seek to startTime
 				// canplaythrough will be triggered when seeking is complete
 				// this.seeking will be set to false at that point
-				this.media.currentTime = this.startTime;
+				this.media.currentTime = this.startTime; // fuck = need to set a var to declare this complete??? 
+				this.seekStatus = 'complete'; 
 				if (this.hasSignLanguage && this.signVideo) {
 					// keep sign languge video in sync
 					this.signVideo.currentTime = this.startTime;
@@ -89,7 +90,6 @@
 
 		// returns duration of the current media, expressed in seconds
 		// function is called by getMediaTimes, and return value is sanitized there
-
 		var deferred, promise, thisObj;
 
 		deferred = new $.Deferred();
@@ -114,7 +114,7 @@
 		else {
 			var duration;
 			if (this.player === 'html5') {
-				duration = this.media.duration;
+				duration = this.media.duration;			
 			}
 			else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
@@ -965,9 +965,13 @@
 	AblePlayer.prototype.handlePlay = function(e) {
 
 		if (this.paused) {
+			// user clicked play 
+			this.okToPlay = true; 
 			this.playMedia();
 		}
 		else {
+			// user clicked pause
+			this.okToPlay = false; 
 			this.pauseMedia();
 		}
 	};

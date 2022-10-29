@@ -1719,6 +1719,15 @@
 		// set swappingSrc; needs to be true within recreatePlayer(), called below
 		this.swappingSrc = true;
 
+		// if a new playlist item is being requested, and playback has already started,  
+		// it should be ok to play automatically, regardless of how it was requested 
+		if (this.startedPlaying) { 
+			this.okToPlay = true; 
+		}
+		else { 
+			this.okToPlay = false; 
+		}
+
 		// remove source and track elements from previous playlist item
 		this.$media.empty();
 
@@ -1819,7 +1828,10 @@
 			}
 			else {
 				if (thisObj.player === 'html5') {
-					thisObj.media.load();
+					if (!thisObj.loadingMedia) { 
+						thisObj.media.load();
+						thisObj.loadingMedia = true; 
+					}
 				}
 				else if (thisObj.player === 'youtube') {
 					thisObj.okToPlay = true; 

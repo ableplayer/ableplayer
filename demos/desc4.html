@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <title>Extended audio description via video swap | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
+<style>
+	#demoWrapper { 
+		width: 800px; 
+		max-width: 95%;
+	}
+</style>
 
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
@@ -46,6 +52,7 @@
 			<li>The described version only has English captions and chapters, not Spanish subtitles.</li>
 		</ul>
 
+		<div id="demoWrapper">
 		<video id="video1" preload="auto" poster="../media/itaccess.jpg" width="1280" height="720" data-able-player data-skin="2020" playsinline>
 			<source type="video/mp4" src="../media/itaccess-excerpt.mp4" data-desc-src="../media/itaccess-excerpt-described.mp4"/>
 			<!-- captions and chapters for the non-described version -->
@@ -56,7 +63,7 @@
 			<track data-desc kind="captions" src="../media/itaccess-excerpt-described-captions_en.vtt" srclang="en" label="English"/>
 			<track data-desc kind="chapters" src="../media/itaccess-excerpt-described-chapters_en.vtt" srclang="en"/>
 		</video>
-
+		</div>
 	</main>
 </body>
 </html>

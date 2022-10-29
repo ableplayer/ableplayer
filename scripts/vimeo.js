@@ -33,7 +33,7 @@
 		//  - It automatically loops (but this can be overridden by initializing the player with loop:false)
 		//  - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
-		if (this.autoplay && this.okToPlay) {
+		if (this.okToPlay) {
 			autoplay = 'true';
 		}
 		else {
