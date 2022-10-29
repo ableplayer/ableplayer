@@ -359,9 +359,10 @@
 			top = '-10';
 		}
 		else {
-			// position just below the vertical center of the mediaContainer
-			// hopefully above captions, but not too far from the controller bar
-			top = Math.round(this.$mediaContainer.height() / 3) * 2;
+			// position just below top of video by default 
+			// but this will change after video player is fully sized 
+			// see control.js > resizePlayer() 
+			top = '10'; 
 		}
 		this.$alertBox.css({
 			top: top + 'px'

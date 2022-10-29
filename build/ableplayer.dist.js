@@ -3782,9 +3782,10 @@ var AblePlayerInstances = [];
 			top = '-10';
 		}
 		else {
-			// position just below the vertical center of the mediaContainer
-			// hopefully above captions, but not too far from the controller bar
-			top = Math.round(this.$mediaContainer.height() / 3) * 2;
+			// position just below top of video by default 
+			// but this will change after video player is fully sized 
+			// see control.js > resizePlayer() 
+			top = '10'; 
 		}
 		this.$alertBox.css({
 			top: top + 'px'
@@ -8186,7 +8187,7 @@ var AblePlayerInstances = [];
 				// ok to seek to startTime
 				// canplaythrough will be triggered when seeking is complete
 				// this.seeking will be set to false at that point
-				this.media.currentTime = this.startTime; // fuck = need to set a var to declare this complete??? 
+				this.media.currentTime = this.startTime; 
 				this.seekStatus = 'complete'; 
 				if (this.hasSignLanguage && this.signVideo) {
 					// keep sign languge video in sync
@@ -9906,7 +9907,7 @@ var AblePlayerInstances = [];
 
 		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
-		var newWidth, newHeight, $iframe; 
+		var newWidth, newHeight, $iframe, alertTop; 
 
 		if (this.mediaType === 'audio') { 
 			return; 
@@ -10040,6 +10041,17 @@ var AblePlayerInstances = [];
 				'font-size': captionSize
 			});
 		}
+
+		// Reposition alert message (video player only)
+		// just below the vertical center of the mediaContainer
+		// hopefully above captions, but not too far from the controller bar		
+		if (this.mediaType === 'video') { 
+			alertTop = Math.round(this.$mediaContainer.height() / 3) * 2;			
+			this.$alertBox.css({
+				top: alertTop + 'px'
+			});
+		}
+
 		this.refreshControls();			
 	};
 

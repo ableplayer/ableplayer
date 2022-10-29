@@ -20,7 +20,7 @@
 				// ok to seek to startTime
 				// canplaythrough will be triggered when seeking is complete
 				// this.seeking will be set to false at that point
-				this.media.currentTime = this.startTime; // fuck = need to set a var to declare this complete??? 
+				this.media.currentTime = this.startTime; 
 				this.seekStatus = 'complete'; 
 				if (this.hasSignLanguage && this.signVideo) {
 					// keep sign languge video in sync
@@ -1740,7 +1740,7 @@
 
 		var captionSizeOkMin, captionSizeOkMax, captionSize, newCaptionSize, newLineHeight;
 
-		var newWidth, newHeight, $iframe; 
+		var newWidth, newHeight, $iframe, alertTop; 
 
 		if (this.mediaType === 'audio') { 
 			return; 
@@ -1874,6 +1874,17 @@
 				'font-size': captionSize
 			});
 		}
+
+		// Reposition alert message (video player only)
+		// just below the vertical center of the mediaContainer
+		// hopefully above captions, but not too far from the controller bar		
+		if (this.mediaType === 'video') { 
+			alertTop = Math.round(this.$mediaContainer.height() / 3) * 2;			
+			this.$alertBox.css({
+				top: alertTop + 'px'
+			});
+		}
+
 		this.refreshControls();			
 	};
 
