@@ -17,7 +17,7 @@
 	};
 
 	AblePlayer.prototype.updateCaptionsMenu = function (lang) {
-
+		
 		// uncheck all previous menu items
 		this.captionsPopup.find('li').attr('aria-checked','false');
 		if (typeof lang === 'undefined') {

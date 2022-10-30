@@ -5554,7 +5554,7 @@ var AblePlayerInstances = [];
 	};
 
 	AblePlayer.prototype.getTracks = function () {
-
+		
 		// define an array tracks with the following structure:
 		// kind - string, e.g. "captions", "descriptions"
 		// src - string, URL of WebVTT source file
@@ -5601,7 +5601,7 @@ var AblePlayerInstances = [];
 					trackLabel = thisObj.getLanguageName(trackLang);
 				}
 
-				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {
+				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {	
 					isDefault = true;
 					hasDefault = true; 
 				} 
@@ -5611,6 +5611,7 @@ var AblePlayerInstances = [];
 					// if there is no other default track specified 
 					// this will be the default 
 					hasTrackInDefLang = true; 
+					isDefault = false; // for now; this could change if there's no default attribute					
 				}
 				else {
 					isDefault = false;
@@ -10305,7 +10306,7 @@ var AblePlayerInstances = [];
 	};
 
 	AblePlayer.prototype.updateCaptionsMenu = function (lang) {
-
+		
 		// uncheck all previous menu items
 		this.captionsPopup.find('li').attr('aria-checked','false');
 		if (typeof lang === 'undefined') {

@@ -105,7 +105,7 @@
 	};
 
 	AblePlayer.prototype.getTracks = function () {
-
+		
 		// define an array tracks with the following structure:
 		// kind - string, e.g. "captions", "descriptions"
 		// src - string, URL of WebVTT source file
@@ -152,7 +152,7 @@
 					trackLabel = thisObj.getLanguageName(trackLang);
 				}
 
-				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {
+				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {	
 					isDefault = true;
 					hasDefault = true; 
 				} 
@@ -162,6 +162,7 @@
 					// if there is no other default track specified 
 					// this will be the default 
 					hasTrackInDefLang = true; 
+					isDefault = false; // for now; this could change if there's no default attribute					
 				}
 				else {
 					isDefault = false;
