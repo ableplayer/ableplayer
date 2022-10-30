@@ -68,6 +68,21 @@
 		padding: 0 0.5em;
 		text-align: center;
 	}
+	#chapters nav li { 
+		border: 3px solid transparent; 
+	}
+	#chapters nav li:hover { 
+		border: 3px solid #C00;
+	}
+	#chapters nav li:hover button { 
+		color: black !important;
+	}
+	#chapters nav li:hover button[aria-current="true"], 
+	#chapters nav li.able-focus button { 
+		color: white !important;
+	}	
+}
+
 </style>
 </head>
 

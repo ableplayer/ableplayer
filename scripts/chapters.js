@@ -83,8 +83,10 @@
 						$clickedItem = $(this).closest('li');
 						$chaptersList = $(this).closest('ul').find('li');
 						thisChapterIndex = $chaptersList.index($clickedItem);
-						$chaptersList.removeClass('able-current-chapter').removeAttr('aria-current');
-						$clickedItem.addClass('able-current-chapter').attr('aria-current','true');
+						$chaptersList.removeClass('able-current-chapter')
+							.children('button').removeAttr('aria-current');
+						$clickedItem.addClass('able-current-chapter')
+							.children('button').attr('aria-current','true');
 						// Need to updateChapter before seeking to it
 						// Otherwise seekBar is redrawn with wrong chapterDuration and/or chapterTime
 						thisObj.updateChapter(time);
@@ -170,10 +172,10 @@
 					// chapters are listed in an external container
 					this.$chaptersDiv.find('ul').find('li')
 						.removeClass('able-current-chapter')
-						.removeAttr('aria-current');
+						.children('button').removeAttr('aria-current');
 					this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
 						.addClass('able-current-chapter')
-						.attr('aria-current','true');
+						.children('button').attr('aria-current','true');
 				}
 			}
 		}
