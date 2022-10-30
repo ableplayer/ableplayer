@@ -1290,7 +1290,14 @@
 						// add right (of button) too, for convenience
 						var controllerWidth = thisObj.$controllerDiv.width();
 						position.right = controllerWidth - position.left - buttonWidth;
-						var tooltipY = position.top - buttonHeight - 15;
+
+						// The following formula positions tooltip above the button  
+						// var tooltipY = position.top - buttonHeight - 15;
+
+						// The following formula positions tooltip below the button 
+						// which allows the tooltip to be hoverable as per WCAG 2.x SC 1.4.13
+						// without obstructing the seekbar 
+						var tooltipY = position.top + buttonHeight + 5; 
 
 						if ($(this).parent().hasClass('able-right-controls')) {
 							// this control is on the right side
@@ -1332,18 +1339,16 @@
 						$(this).on('mouseleave blur',function() {
 
 							// hide tooltip  (original line of code)
-							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+							// AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
 
-							// The above line had been replaced with the following block 
+							// The above line was replaced with the following block 
 							// in order to meet WCAG 2.x SC 1.4.13 
 							// (keep the tooltip visible if user hovers over it)
-							// However, the tooltip obstructs the seekbar, so this blocks mouse users 
-							// from being able to move from a button to the seekbar 
+							// This causes unwanted side effects if tooltips are positioned above the buttons 
+							// as the persistent tooltip obstructs the seekbar, 
+							// blocking users from being able to move a pointer from a button to the seekbar 
+							// This limitation was addressed in 4.4.49 by moving the tooltip below the buttons 
 
-							// Restored original functionality in 4.4.48, but preserved here 
-							// for reference for anyone who wants to creaate a solution 
-							// that doesn't have this side effect 
-							/*
 							// clear existing timeout before reassigning variable
 							clearTimeout(tooltipTimerId);
 							tooltipTimerId = setTimeout(function() {
@@ -1359,8 +1364,7 @@
 							thisObj.$tooltipDiv.on('mouseleave blur', function() {
 								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
 							});
-							*/
-
+							
 						}); 
 					});
 
