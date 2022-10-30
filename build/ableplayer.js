@@ -4753,6 +4753,20 @@ var AblePlayerInstances = [];
 						var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(buttonText).css(tooltipStyle);
 						thisObj.showTooltip(tooltip);
 						$(this).on('mouseleave blur',function() {
+
+							// hide tooltip  (original line of code)
+							AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
+
+							// The above line had been replaced with the following block 
+							// in order to meet WCAG 2.x SC 1.4.13 
+							// (keep the tooltip visible if user hovers over it)
+							// However, the tooltip obstructs the seekbar, so this blocks mouse users 
+							// from being able to move from a button to the seekbar 
+
+							// Restored original functionality in 4.4.48, but preserved here 
+							// for reference for anyone who wants to creaate a solution 
+							// that doesn't have this side effect 
+							/*
 							// clear existing timeout before reassigning variable
 							clearTimeout(tooltipTimerId);
 							tooltipTimerId = setTimeout(function() {
@@ -4768,8 +4782,9 @@ var AblePlayerInstances = [];
 							thisObj.$tooltipDiv.on('mouseleave blur', function() {
 								AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
 							});
+							*/
 
-						})
+						}); 
 					});
 
 					if (control === 'captions') {
