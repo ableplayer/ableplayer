@@ -10726,8 +10726,12 @@ var AblePlayerInstances = [];
 			$chaptersList;
 
 		if ($('#' + this.chaptersDivLocation)) {
+
 			this.$chaptersDiv = $('#' + this.chaptersDivLocation);
 			this.$chaptersDiv.addClass('able-chapters-div');
+
+			// empty content from previous build before starting fresh
+			this.$chaptersDiv.empty(); 
 
 			// add optional header
 			if (this.chaptersTitle) {
