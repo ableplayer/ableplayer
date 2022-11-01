@@ -39,7 +39,7 @@
 var AblePlayerInstances = [];
 
 (function ($) {
-	$(document).ready(function () {
+	$(function () {
 
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {
@@ -693,7 +693,7 @@ var AblePlayerInstances = [];
 		scripts= document.getElementsByTagName('script');
 		for (i=0; i < scripts.length; i++) {
 			scriptSrc = scripts[i].src;
-			scriptFile = scriptSrc.substr(scriptSrc.lastIndexOf('/'));
+			scriptFile = scriptSrc.substring(scriptSrc.lastIndexOf('/'));
 			if (scriptFile.indexOf('ableplayer') !== -1) {
 				// this is the ableplayerscript
 				fullPath = scriptSrc.split('?')[0]; // remove any ? params
@@ -3962,7 +3962,7 @@ var AblePlayerInstances = [];
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 						thisObj.windowMenuClickRegistered = true;
-						thisObj.handleMenuChoice(which.substr(0, which.indexOf('-')), $(this).attr('data-choice'), e);
+						thisObj.handleMenuChoice(which.substring(0, which.indexOf('-')), $(this).attr('data-choice'), e);
 					}
 				});
 				$menu.append($menuItem);
@@ -6232,7 +6232,7 @@ var AblePlayerInstances = [];
 			// this is a full Youtube URL 
 			url = url.trim(); 
 			idStartPos = url.length - 11; 
-			id = url.substr(idStartPos); 
+			id = url.substring(idStartPos); 
 			return id; 
 		}
 		else { 
@@ -7683,8 +7683,8 @@ var AblePlayerInstances = [];
 					// match only the first 2 characters of the lang code
 					// include any language for which there is a matching description track
 					// as well as the overall player lang
-					voiceLang = voices[i].lang.substr(0,2).toLowerCase();
-					playerLang = this.lang.substr(0,2).toLowerCase();
+					voiceLang = voices[i].lang.substring(0,2).toLowerCase();
+					playerLang = this.lang.substring(0,2).toLowerCase();
 					if (voiceLang === playerLang || (descLangs.indexOf(voiceLang) !== -1)) {
 						// this is a match. Add to the final array
 						this.descVoices.push(voices[i]);
@@ -7709,7 +7709,7 @@ var AblePlayerInstances = [];
 		if (this.tracks) {
 			for (var i=0; i < this.tracks.length; i++) {
 				if (this.tracks[i].kind === 'descriptions') {
-					descLangs.push(this.tracks[i].language.substr(0,2).toLowerCase());
+					descLangs.push(this.tracks[i].language.substring(0,2).toLowerCase());
 				}
 			}
 		}
@@ -7741,7 +7741,7 @@ var AblePlayerInstances = [];
 				// available languages are identified with local suffixes (e.g., en-US)
 				for (var i=0; i<voices.length; i++) {
 					// select the first language that matches the first 2 characters of the lang code
-					if (voices[i].lang.substr(0,2).toLowerCase() === descVoice.substr(0,2).toLowerCase()) {
+					if (voices[i].lang.substring(0,2).toLowerCase() === descVoice.substring(0,2).toLowerCase()) {
 						// make this the user's current preferred voice
 						this.prefDescVoice = voices[i].name;
 						// select this voice in the Description Prefs dialog
@@ -12293,7 +12293,7 @@ var AblePlayerInstances = [];
 			if ((this.$focusedElement).attr('role') === 'button') { 
 				classList = this.$focusedElement.attr("class").split(/\s+/);
 				$.each(classList, function(index, item) {
-					if (item.substr(0,20) === 'able-button-handler-') {
+					if (item.substring(0,20) === 'able-button-handler-') {
 						$('div.able-controller div.' + item).focus();  
 					}
 				});
@@ -12335,10 +12335,10 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 
-		// TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
-
 		var whichButton, prefsPopup;
-		whichButton = $(el).attr('class').split(' ')[0].substr(20);
+
+		whichButton = this.getButtonNameFromClass($(el).attr('class')); 
+
 		if (whichButton === 'play') {
 			this.clickedPlay = true;
 			this.handlePlay();
@@ -12431,6 +12431,22 @@ var AblePlayerInstances = [];
 			this.handleFullscreenToggle();
 		}
 	};
+
+	AblePlayer.prototype.getButtonNameFromClass = function (classString) { 
+
+		// player control buttons all have class="able-button-handler-x"  where x is the identifier 
+		// buttons might also have other classes assigned though
+
+		var classes, i; 
+
+		classes = classString.split(' '); 
+		for (i = 0; i < classes.length; i++) { 
+			if (classes[i].substring(0,20) === 'able-button-handler-') { 
+				return classes[i].substring(20); 
+			}
+		}		
+		return classString; 
+	}
 
 	AblePlayer.prototype.okToHandleKeyPress = function () {
 
@@ -14997,8 +15013,8 @@ var AblePlayerInstances = [];
 			}
 		}
 		else if (key.includes('-')) {
-			code = key.substr(0,2);
-			subTag = key.substr(3);  
+			code = key.substring(0,2);
+			subTag = key.substring(3);  
 			lang = isoLangs[code.toLowerCase()]; 
 			if (lang) { 
 				if (whichName === 'local') { 
@@ -15445,13 +15461,13 @@ var AblePlayerInstances = [];
 							if ($.inArray(editedContent,kindOptions) === -1) {
 								// whatever user typed is not a valid kind
 								// assume they correctly typed the first character
-								if (editedContent.substr(0,1) === 's') {
+								if (editedContent.substring(0,1) === 's') {
 									$(this).text('subtitles');
 								}
-								else if (editedContent.substr(0,1) === 'd') {
+								else if (editedContent.substring(0,1) === 'd') {
 									$(this).text('descriptions');
 								}
-								else if (editedContent.substr(0,2) === 'ch') {
+								else if (editedContent.substring(0,2) === 'ch') {
 									$(this).text('chapters');
 								}
 								else {
@@ -15532,7 +15548,7 @@ var AblePlayerInstances = [];
 			return path;
 		}
 		else {
-			return path.substr(lastSlash+1);
+			return path.substring(lastSlash+1);
 		}
 	};
 
@@ -15615,8 +15631,8 @@ var AblePlayerInstances = [];
 
 		var firstPart, lastPart;
 
-		var firstPart = timestamp.substr(0,timestamp.lastIndexOf('.')+1);
-		var lastPart = timestamp.substr(timestamp.lastIndexOf('.')+1);
+		firstPart = timestamp.substring(0,timestamp.lastIndexOf('.')+1);
+		lastPart = timestamp.substring(timestamp.lastIndexOf('.')+1);
 
 		// TODO: Be sure each component within firstPart has only exactly two digits
 		// Probably can't justify doing this automatically
@@ -15626,7 +15642,7 @@ var AblePlayerInstances = [];
 		// Be sure lastPart has exactly three digits
 		if (lastPart.length > 3) {
 			// chop off any extra digits
-			lastPart = lastPart.substr(0,3);
+			lastPart = lastPart.substring(0,3);
 		}
 		else if (lastPart.length < 3) {
 			// add trailing zeros
@@ -16328,20 +16344,20 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.getKindFromClass = function(myclass) {
 
 		// This function is called when a class with prefix "kind-" is found in the class attribute
-		// TODO: Rewrite this using regular expressions
-		var kindStart, kindEnd, kindLength, kind;
+
+		var kindStart, kindEnd;
 
 		kindStart = myclass.indexOf('kind-')+5;
 		kindEnd = myclass.indexOf(' ',kindStart);
 		if (kindEnd == -1) {
 			// no spaces found, "kind-" must be the only myclass
-			kindLength = myclass.length - kindStart;
+			return myclass.substring(kindStart);
 		}
 		else {
-			kindLength = kindEnd - kindStart;
+			// kind-* is one of multiple classes 
+			// the following will find it regardless of position of "kind-*" within the class string
+			return myclass.substring(kindStart,kindEnd);
 		}
-		kind = myclass.substr(kindStart,kindLength);
-		return kind;
 	};
 
 	AblePlayer.prototype.showVtsAlert = function(message) {
@@ -16723,7 +16739,7 @@ var AblePlayerInstances = [];
 			else { 			
 				url = url.trim(); 
 				idStartPos = url.lastIndexOf('/') + 1; 
-				id = url.substr(idStartPos); 
+				id = url.substring(idStartPos); 
 				return id; 
 			}
 		}

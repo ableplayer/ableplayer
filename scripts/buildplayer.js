@@ -539,7 +539,7 @@
 					}
 					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
 						thisObj.windowMenuClickRegistered = true;
-						thisObj.handleMenuChoice(which.substr(0, which.indexOf('-')), $(this).attr('data-choice'), e);
+						thisObj.handleMenuChoice(which.substring(0, which.indexOf('-')), $(this).attr('data-choice'), e);
 					}
 				});
 				$menu.append($menuItem);

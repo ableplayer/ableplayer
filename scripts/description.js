@@ -177,8 +177,8 @@
 					// match only the first 2 characters of the lang code
 					// include any language for which there is a matching description track
 					// as well as the overall player lang
-					voiceLang = voices[i].lang.substr(0,2).toLowerCase();
-					playerLang = this.lang.substr(0,2).toLowerCase();
+					voiceLang = voices[i].lang.substring(0,2).toLowerCase();
+					playerLang = this.lang.substring(0,2).toLowerCase();
 					if (voiceLang === playerLang || (descLangs.indexOf(voiceLang) !== -1)) {
 						// this is a match. Add to the final array
 						this.descVoices.push(voices[i]);
@@ -203,7 +203,7 @@
 		if (this.tracks) {
 			for (var i=0; i < this.tracks.length; i++) {
 				if (this.tracks[i].kind === 'descriptions') {
-					descLangs.push(this.tracks[i].language.substr(0,2).toLowerCase());
+					descLangs.push(this.tracks[i].language.substring(0,2).toLowerCase());
 				}
 			}
 		}
@@ -235,7 +235,7 @@
 				// available languages are identified with local suffixes (e.g., en-US)
 				for (var i=0; i<voices.length; i++) {
 					// select the first language that matches the first 2 characters of the lang code
-					if (voices[i].lang.substr(0,2).toLowerCase() === descVoice.substr(0,2).toLowerCase()) {
+					if (voices[i].lang.substring(0,2).toLowerCase() === descVoice.substring(0,2).toLowerCase()) {
 						// make this the user's current preferred voice
 						this.prefDescVoice = voices[i].name;
 						// select this voice in the Description Prefs dialog

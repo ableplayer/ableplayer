@@ -301,7 +301,7 @@
 			else { 			
 				url = url.trim(); 
 				idStartPos = url.lastIndexOf('/') + 1; 
-				id = url.substr(idStartPos); 
+				id = url.substring(idStartPos); 
 				return id; 
 			}
 		}

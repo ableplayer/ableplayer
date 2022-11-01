@@ -39,7 +39,7 @@
 var AblePlayerInstances = [];
 
 (function ($) {
-	$(document).ready(function () {
+	$(function () {
 
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {

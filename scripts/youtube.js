@@ -348,7 +348,7 @@
 			// this is a full Youtube URL 
 			url = url.trim(); 
 			idStartPos = url.length - 11; 
-			id = url.substr(idStartPos); 
+			id = url.substring(idStartPos); 
 			return id; 
 		}
 		else { 

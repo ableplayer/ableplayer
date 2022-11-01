@@ -253,7 +253,7 @@
 			if ((this.$focusedElement).attr('role') === 'button') { 
 				classList = this.$focusedElement.attr("class").split(/\s+/);
 				$.each(classList, function(index, item) {
-					if (item.substr(0,20) === 'able-button-handler-') {
+					if (item.substring(0,20) === 'able-button-handler-') {
 						$('div.able-controller div.' + item).focus();  
 					}
 				});
@@ -295,10 +295,10 @@
 
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 
-		// TODO: This is super-fragile since we need to know the length of the class name to split off; update this to other way of dispatching?
-
 		var whichButton, prefsPopup;
-		whichButton = $(el).attr('class').split(' ')[0].substr(20);
+
+		whichButton = this.getButtonNameFromClass($(el).attr('class')); 
+
 		if (whichButton === 'play') {
 			this.clickedPlay = true;
 			this.handlePlay();
@@ -391,6 +391,22 @@
 			this.handleFullscreenToggle();
 		}
 	};
+
+	AblePlayer.prototype.getButtonNameFromClass = function (classString) { 
+
+		// player control buttons all have class="able-button-handler-x"  where x is the identifier 
+		// buttons might also have other classes assigned though
+
+		var classes, i; 
+
+		classes = classString.split(' '); 
+		for (i = 0; i < classes.length; i++) { 
+			if (classes[i].substring(0,20) === 'able-button-handler-') { 
+				return classes[i].substring(20); 
+			}
+		}		
+		return classString; 
+	}
 
 	AblePlayer.prototype.okToHandleKeyPress = function () {
 

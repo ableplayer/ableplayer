@@ -23,7 +23,7 @@
 		scripts= document.getElementsByTagName('script');
 		for (i=0; i < scripts.length; i++) {
 			scriptSrc = scripts[i].src;
-			scriptFile = scriptSrc.substr(scriptSrc.lastIndexOf('/'));
+			scriptFile = scriptSrc.substring(scriptSrc.lastIndexOf('/'));
 			if (scriptFile.indexOf('ableplayer') !== -1) {
 				// this is the ableplayerscript
 				fullPath = scriptSrc.split('?')[0]; // remove any ? params
