@@ -303,8 +303,14 @@
 	};
 
 	AblePlayer.prototype.setPlaybackRate = function (rate) {
-
+		
 		rate = Math.max(0.5, rate);
+
+		if (this.hasClosedDesc && this.descMethod === 'text') { 
+			// keep speech rate in sync with playback rate even if descOn is false 
+			this.syncSpeechToPlaybackRate(rate); 
+		}
+
 		if (this.player === 'html5') {
 			this.media.playbackRate = rate;
 		}
@@ -319,7 +325,7 @@
 		}
 		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
-	};
+	};	
 
 	AblePlayer.prototype.getPlaybackRate = function () {
 

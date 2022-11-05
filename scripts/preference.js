@@ -847,9 +847,9 @@
 		 }
 		 else if (pref === 'prefDescRate') {
 			 // default in the API is 0.1 to 10, where 1 is normal speaking voice
-			 // our custom range offers severa rates close to 1
+			 // our custom range offers several rates close to 1
 			 // plus a couple of crazy fast ones for sport
-			 // Our options (1-10) or mapped here to 0.5 to 0.14
+			 // Our more readable options (1-10) or mapped here to API values 
 			 if (value === 0.7) {
 				 return 1;
 			 }

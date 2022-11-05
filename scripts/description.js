@@ -488,6 +488,43 @@
 		}
 	};
 
+	AblePlayer.prototype.syncSpeechToPlaybackRate = function(rate) { 
+
+		// called when user changed playback rate 
+		// adjust rate of audio description to match 
+
+		var speechRate; 
+
+		if (rate === 0.5) { 
+			speechRate = 0.7; // option 1 in prefs menu 
+		}
+		else if (rate === 0.75) { 
+			speechRate =  0.8; // option 2 in prefs menu 
+		}
+		else if (rate === 1.0) { 		
+			speechRate =  1; // option 4 in prefs menu (normal speech, default)
+		}
+		else if (rate === 1.25) { 
+			speechRate =  1.1; // option 5 in prefs menu
+		}
+		else if (rate === 1.5) { 
+			speechRate =  1.2; // option 6 in prefs menu 
+		}
+		else if (rate === 1.75) { 
+			speechRate =  1.5; // option 7 in prefs menu 
+		}
+		else if (rate === 2.0) { 
+			speechRate =  2; // option 8 in prefs menu (fast)
+		}
+		else if (rate === 2.25) { 
+			speechRate =  2.5; // option 9 in prefs menu (very fast)
+		}
+		else if (rate >= 2.5) { 
+			speechRate =  3; // option 10 in prefs menu (super fast) 
+		}
+		this.prefDescRate = speechRate; 
+	}; 
+
 	AblePlayer.prototype.announceDescriptionText = function(context, text) {
 
 		// this function announces description text using speech synthesis

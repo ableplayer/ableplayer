@@ -2416,9 +2416,9 @@ var AblePlayerInstances = [];
 		 }
 		 else if (pref === 'prefDescRate') {
 			 // default in the API is 0.1 to 10, where 1 is normal speaking voice
-			 // our custom range offers severa rates close to 1
+			 // our custom range offers several rates close to 1
 			 // plus a couple of crazy fast ones for sport
-			 // Our options (1-10) or mapped here to 0.5 to 0.14
+			 // Our more readable options (1-10) or mapped here to API values 
 			 if (value === 0.7) {
 				 return 1;
 			 }
@@ -8010,6 +8010,43 @@ var AblePlayerInstances = [];
 		}
 	};
 
+	AblePlayer.prototype.syncSpeechToPlaybackRate = function(rate) { 
+
+		// called when user changed playback rate 
+		// adjust rate of audio description to match 
+
+		var speechRate; 
+
+		if (rate === 0.5) { 
+			speechRate = 0.7; // option 1 in prefs menu 
+		}
+		else if (rate === 0.75) { 
+			speechRate =  0.8; // option 2 in prefs menu 
+		}
+		else if (rate === 1.0) { 		
+			speechRate =  1; // option 4 in prefs menu (normal speech, default)
+		}
+		else if (rate === 1.25) { 
+			speechRate =  1.1; // option 5 in prefs menu
+		}
+		else if (rate === 1.5) { 
+			speechRate =  1.2; // option 6 in prefs menu 
+		}
+		else if (rate === 1.75) { 
+			speechRate =  1.5; // option 7 in prefs menu 
+		}
+		else if (rate === 2.0) { 
+			speechRate =  2; // option 8 in prefs menu (fast)
+		}
+		else if (rate === 2.25) { 
+			speechRate =  2.5; // option 9 in prefs menu (very fast)
+		}
+		else if (rate >= 2.5) { 
+			speechRate =  3; // option 10 in prefs menu (super fast) 
+		}
+		this.prefDescRate = speechRate; 
+	}; 
+
 	AblePlayer.prototype.announceDescriptionText = function(context, text) {
 
 		// this function announces description text using speech synthesis
@@ -8509,8 +8546,14 @@ var AblePlayerInstances = [];
 	};
 
 	AblePlayer.prototype.setPlaybackRate = function (rate) {
-
+		
 		rate = Math.max(0.5, rate);
+
+		if (this.hasClosedDesc && this.descMethod === 'text') { 
+			// keep speech rate in sync with playback rate even if descOn is false 
+			this.syncSpeechToPlaybackRate(rate); 
+		}
+
 		if (this.player === 'html5') {
 			this.media.playbackRate = rate;
 		}
@@ -8525,7 +8568,7 @@ var AblePlayerInstances = [];
 		}
 		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
-	};
+	};	
 
 	AblePlayer.prototype.getPlaybackRate = function () {
 
