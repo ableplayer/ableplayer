@@ -630,7 +630,7 @@
 			.on('timeupdate',function() {
 				thisObj.onMediaUpdateTime(); // includes a call to refreshControls()
 			})
-			.on('pause',function() {
+			.on('pause',function() {				
 				if (!thisObj.clickedPlay) {					
 					// 'pause' was triggered automatically, not initiated by user
 					// this happens in some browsers when swapping source

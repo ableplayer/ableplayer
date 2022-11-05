@@ -10,6 +10,11 @@
 
 		this.seeking = true;
 		this.liveUpdatePending = true;
+
+		if (this.speakingDescription) { 			
+			this.synth.cancel(); 
+		}
+
 		if (this.player === 'html5') {
 			var seekable;
 
@@ -974,16 +979,30 @@
 			// user clicked play 
 			this.okToPlay = true; 
 			this.playMedia();
+			if (this.synth.paused) { 
+				// media was paused while description was speaking 
+				// resume utterance 
+				this.synth.resume(); 
+			}
 		}
 		else {
 			// user clicked pause
 			this.okToPlay = false; 
 			this.pauseMedia();
+			if (this.speakingDescription) { 
+				// pause the current utterance 
+				// it will resume when the user presses play 
+				this.synth.pause();				
+			}
 		}
 	};
 
 	AblePlayer.prototype.handleRestart = function() {
 
+		if (this.speakingDescription) { 
+			// cancel audio description 
+			this.synth.cancel();				
+		}			
 		this.seekTo(0);
 	};
 

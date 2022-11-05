@@ -8018,7 +8018,7 @@ var AblePlayerInstances = [];
 		// 'description' - actual description text extracted from WebVTT file
 		// 'sample' - called when user changes a setting in Description Prefs dialog
 
-		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance, 
+		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance,
 			timeElapsed, secondsElapsed;
 
 		thisObj = this;
@@ -8097,7 +8097,7 @@ var AblePlayerInstances = [];
 				// If there's a mismatch between any of these, the description will likely be unintelligible
 				utterance.lang = this.lang;
 				utterance.onend = function(e) {
-					// do something after speaking
+					this.speakingDescription = false; 
 					timeElapsed = e.elapsedTime; 
 					// As of Firefox 95, e.elapsedTime is expressed in seconds 
 					// Other browsers (tested in Chrome & Edge) express this in milliseconds 
@@ -8110,7 +8110,9 @@ var AblePlayerInstances = [];
 						// time is likely already expressed in seconds; just need to round it
 						secondsElapsed = (e.elapsedTime).toFixed(2); 
 					}
-					console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
+					if (this.debug) { 
+						console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
+					}
 					if (context === 'description') {
 						if (thisObj.prefDescPause) {
 							if (thisObj.pausedForDescription) {
@@ -8124,7 +8126,11 @@ var AblePlayerInstances = [];
 					// handle error
 					console.log('Web Speech API error',e);
 				}
+				if (this.synth.paused) { 
+					this.synth.resume();					
+				}
 				this.synth.speak(utterance);
+				this.speakingDescription = true; 
 			}
 		}
 	};
@@ -8210,6 +8216,11 @@ var AblePlayerInstances = [];
 
 		this.seeking = true;
 		this.liveUpdatePending = true;
+
+		if (this.speakingDescription) { 			
+			this.synth.cancel(); 
+		}
+
 		if (this.player === 'html5') {
 			var seekable;
 
@@ -9174,16 +9185,30 @@ var AblePlayerInstances = [];
 			// user clicked play 
 			this.okToPlay = true; 
 			this.playMedia();
+			if (this.synth.paused) { 
+				// media was paused while description was speaking 
+				// resume utterance 
+				this.synth.resume(); 
+			}
 		}
 		else {
 			// user clicked pause
 			this.okToPlay = false; 
 			this.pauseMedia();
+			if (this.speakingDescription) { 
+				// pause the current utterance 
+				// it will resume when the user presses play 
+				this.synth.pause();				
+			}
 		}
 	};
 
 	AblePlayer.prototype.handleRestart = function() {
 
+		if (this.speakingDescription) { 
+			// cancel audio description 
+			this.synth.cancel();				
+		}			
 		this.seekTo(0);
 	};
 
@@ -12689,7 +12714,7 @@ var AblePlayerInstances = [];
 			.on('timeupdate',function() {
 				thisObj.onMediaUpdateTime(); // includes a call to refreshControls()
 			})
-			.on('pause',function() {
+			.on('pause',function() {				
 				if (!thisObj.clickedPlay) {					
 					// 'pause' was triggered automatically, not initiated by user
 					// this happens in some browsers when swapping source

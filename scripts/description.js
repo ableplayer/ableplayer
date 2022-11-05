@@ -499,7 +499,7 @@
 		// 'description' - actual description text extracted from WebVTT file
 		// 'sample' - called when user changes a setting in Description Prefs dialog
 
-		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance, 
+		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance,
 			timeElapsed, secondsElapsed;
 
 		thisObj = this;
@@ -578,7 +578,7 @@
 				// If there's a mismatch between any of these, the description will likely be unintelligible
 				utterance.lang = this.lang;
 				utterance.onend = function(e) {
-					// do something after speaking
+					this.speakingDescription = false; 
 					timeElapsed = e.elapsedTime; 
 					// As of Firefox 95, e.elapsedTime is expressed in seconds 
 					// Other browsers (tested in Chrome & Edge) express this in milliseconds 
@@ -591,7 +591,9 @@
 						// time is likely already expressed in seconds; just need to round it
 						secondsElapsed = (e.elapsedTime).toFixed(2); 
 					}
-					console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
+					if (this.debug) { 
+						console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
+					}
 					if (context === 'description') {
 						if (thisObj.prefDescPause) {
 							if (thisObj.pausedForDescription) {
@@ -605,7 +607,11 @@
 					// handle error
 					console.log('Web Speech API error',e);
 				}
+				if (this.synth.paused) { 
+					this.synth.resume();					
+				}
 				this.synth.speak(utterance);
+				this.speakingDescription = true; 
 			}
 		}
 	};
