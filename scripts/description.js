@@ -117,9 +117,6 @@
 						this.$descDiv.addClass('able-clipped');
 					}
 				}
-				if (!this.swappingSrc) {
-					this.showDescription(this.elapsed);
-				}
 			}
 		}
 		else { // description is off.
