@@ -259,6 +259,11 @@
 
 		thisObj = this;
 
+		// We are no longer loading the previous media source 
+		// Only now, as a new source is requested, is it safe to reset this var 
+		// It will be reset to true when media.load() is called 
+		this.loadingMedia = false; 
+
 		// get element that has focus at the time swap is initiated 
 		// after player is rebuilt, focus will return to that same element 
 		// (if it exists)
@@ -293,6 +298,9 @@
 
 		if (this.player === 'html5') {
 
+			this.swappingSrc = true;
+			this.paused = true; 
+
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				for (i=0; i < this.$sources.length; i++) {
@@ -302,9 +310,7 @@
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
 					}
-				}				
-				this.swappingSrc = true;
-				this.paused = true; 
+				}						
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
@@ -319,9 +325,8 @@
 						this.$sources[i].setAttribute('data-orig-src',origSrc);
 					}
 				}
-				this.swappingSrc = true;
-				this.paused = true;
 			}
+
 			if (this.recreatingPlayer) { 
 				// stopgap to prevent multiple firings of recreatePlayer()
 				return; 

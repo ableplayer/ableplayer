@@ -1698,6 +1698,23 @@
 			}
 		}
 
+		// set swappingSrc; needs to be true within recreatePlayer(), called below
+		this.swappingSrc = true;
+
+		// if a new playlist item is being requested, and playback has already started,  
+		// it should be ok to play automatically, regardless of how it was requested 
+		if (this.startedPlaying) { 
+			this.okToPlay = true; 
+		}
+		else { 
+			this.okToPlay = false; 
+		}
+
+		// We are no longer loading the previous media source 
+		// Only now, as a new source is requested, is it safe to reset this var 
+		// It will be reset to true when media.load() is called 
+		this.loadingMedia = false; 
+
 		// Determine appropriate player to play this media
 		$newItem = this.$playlist.eq(sourceIndex);
 		if (this.hasAttr($newItem,'data-youtube-id')) {
@@ -1735,18 +1752,6 @@
 			}
 		}
 		this.player = newPlayer;
-
-		// set swappingSrc; needs to be true within recreatePlayer(), called below
-		this.swappingSrc = true;
-
-		// if a new playlist item is being requested, and playback has already started,  
-		// it should be ok to play automatically, regardless of how it was requested 
-		if (this.startedPlaying) { 
-			this.okToPlay = true; 
-		}
-		else { 
-			this.okToPlay = false; 
-		}
 
 		// remove source and track elements from previous playlist item
 		this.$media.empty();

@@ -5121,6 +5121,23 @@ var AblePlayerInstances = [];
 			}
 		}
 
+		// set swappingSrc; needs to be true within recreatePlayer(), called below
+		this.swappingSrc = true;
+
+		// if a new playlist item is being requested, and playback has already started,  
+		// it should be ok to play automatically, regardless of how it was requested 
+		if (this.startedPlaying) { 
+			this.okToPlay = true; 
+		}
+		else { 
+			this.okToPlay = false; 
+		}
+
+		// We are no longer loading the previous media source 
+		// Only now, as a new source is requested, is it safe to reset this var 
+		// It will be reset to true when media.load() is called 
+		this.loadingMedia = false; 
+
 		// Determine appropriate player to play this media
 		$newItem = this.$playlist.eq(sourceIndex);
 		if (this.hasAttr($newItem,'data-youtube-id')) {
@@ -5158,18 +5175,6 @@ var AblePlayerInstances = [];
 			}
 		}
 		this.player = newPlayer;
-
-		// set swappingSrc; needs to be true within recreatePlayer(), called below
-		this.swappingSrc = true;
-
-		// if a new playlist item is being requested, and playback has already started,  
-		// it should be ok to play automatically, regardless of how it was requested 
-		if (this.startedPlaying) { 
-			this.okToPlay = true; 
-		}
-		else { 
-			this.okToPlay = false; 
-		}
 
 		// remove source and track elements from previous playlist item
 		this.$media.empty();
@@ -7784,6 +7789,11 @@ var AblePlayerInstances = [];
 
 		thisObj = this;
 
+		// We are no longer loading the previous media source 
+		// Only now, as a new source is requested, is it safe to reset this var 
+		// It will be reset to true when media.load() is called 
+		this.loadingMedia = false; 
+
 		// get element that has focus at the time swap is initiated 
 		// after player is rebuilt, focus will return to that same element 
 		// (if it exists)
@@ -7818,6 +7828,9 @@ var AblePlayerInstances = [];
 
 		if (this.player === 'html5') {
 
+			this.swappingSrc = true;
+			this.paused = true; 
+
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				for (i=0; i < this.$sources.length; i++) {
@@ -7827,9 +7840,7 @@ var AblePlayerInstances = [];
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
 					}
-				}				
-				this.swappingSrc = true;
-				this.paused = true; 
+				}						
 			}
 			else {
 				// the non-described version is currently playing. Swap to described.
@@ -7844,9 +7855,8 @@ var AblePlayerInstances = [];
 						this.$sources[i].setAttribute('data-orig-src',origSrc);
 					}
 				}
-				this.swappingSrc = true;
-				this.paused = true;
 			}
+
 			if (this.recreatingPlayer) { 
 				// stopgap to prevent multiple firings of recreatePlayer()
 				return; 
@@ -12195,7 +12205,7 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.onMediaNewSourceLoad = function () {
 
-		var swapSrcIsComplete = false; 
+		var loadIsComplete = false; 
 
 		if (this.cueingPlaylistItem) {
 			// this variable was set in order to address bugs caused by multiple firings of media 'end' event
@@ -12215,7 +12225,7 @@ var AblePlayerInstances = [];
 			if (!this.startedPlaying || this.okToPlay) {
 				// start playing; no further user action is required
 				this.playMedia();
-				swapSrcIsComplete = true; 
+				loadIsComplete = true; 
 			 }
 		}
 		else if (this.seekTrigger == 'restart' ||
@@ -12227,7 +12237,65 @@ var AblePlayerInstances = [];
 			// Not included: elements where user might click multiple times in succession
 			// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
 			this.playMedia();
-			swapSrcIsComplete = true; 
+			loadIsComplete = true; 
+		}
+		else if (this.swappingSrc) {
+			// new source file has just been loaded
+			if (this.hasPlaylist) {
+				// a new source file from the playlist has just been loaded
+				if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
+					// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
+					this.playMedia();
+					loadIsComplete = true; 
+				}
+			}
+			else if (this.swapTime > 0) {
+				if (this.seekStatus === 'complete') { 
+					if (this.okToPlay) {
+						// should be able to resume playback
+						this.playMedia();					
+					}
+					loadIsComplete = true; 
+				}
+				else if (this.seekStatus === 'seeking') { 
+				}
+				else { 
+					if (this.swapTime === this.elapsed) { 
+						// seek is finished! 
+						this.seekStatus = 'complete'; 
+						if (this.okToPlay) {
+							// should be able to resume playback
+							this.playMedia();					
+						}
+						loadIsComplete = true; 
+					}
+					else { 
+						// seeking hasn't started yet 
+						// first, determine whether it's possible 
+						if (this.hasDescTracks) { 
+							// do nothing. Unable to seek ahead if there are descTracks
+							loadIsComplete = true; 
+						}
+						else if (this.durationsAreCloseEnough(this.duration,this.prevDuration)) {
+							// durations of two sources are close enough to making seek ahead in new source ok
+							this.seekStatus = 'seeking'; 
+							this.seekTo(this.swapTime);
+						}
+						else { 							
+							// durations of two sources are too dissimilar to support seeking ahead to swapTime.  						
+							loadIsComplete = true; 
+						}
+					}
+				}
+			}
+			else {				
+				// swapTime is 0. No seeking required. 
+				if (this.playing) { 
+					this.playMedia(); 
+					// swap is complete. Reset vars. 
+					loadIsComplete = true; 					
+				}
+			}
 		}
 		else if (!this.startedPlaying) {
 			if (this.startTime > 0) {
@@ -12238,7 +12306,7 @@ var AblePlayerInstances = [];
 					if (this.okToPlay) {
 						this.playMedia();
 					}
-					swapSrcIsComplete = true; 
+					loadIsComplete = true; 
 				}
 				else {
 					// haven't started seeking yet
@@ -12253,65 +12321,7 @@ var AblePlayerInstances = [];
 				if (this.okToPlay) {
 					this.playMedia();
 				}
-				swapSrcIsComplete = true; 				
-			}
-		}
-		else if (this.swappingSrc) {
-			// new source file has just been loaded
-			if (this.hasPlaylist) {
-				// a new source file from the playlist has just been loaded
-				if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
-					// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
-					this.playMedia();
-					swapSrcIsComplete = true; 
-				}
-			}
-			else if (this.swapTime > 0) {
-				if (this.seekStatus === 'complete') { 
-					if (this.okToPlay) {
-						// should be able to resume playback
-						this.playMedia();					
-					}
-					swapSrcIsComplete = true; 
-				}
-				else if (this.seekStatus === 'seeking') { 
-					// do nothing. Just be patient. Waiting for seek to finish. 
-				}
-				else if (!this.seekStatus) { 
-					if (this.swapTime === this.elapsed) { 
-						// seek is finished! 
-						if (this.okToPlay) {
-							// should be able to resume playback
-							this.playMedia();					
-						}
-						swapSrcIsComplete = true; 
-					}
-					else { 
-						// seeking hasn't started yet 
-						// first, determine whether it's possible 
-						if (this.hasDescTracks) { 
-							// do nothing. Unable to seek ahead if there are descTracks
-							swapSrcIsComplete = true; 
-						}
-						else if (this.durationsAreCloseEnough(this.duration,this.prevDuration)) {
-							// durations of two sources are close enough to making seek ahead in new source ok
-							this.seekStatus = 'seeking'; 
-							this.seekTo(this.swapTime);
-						}
-						else { 							
-							// durations of two sources are too dissimilar to support seeking ahead to swapTime.  						
-							swapSrcIsComplete = true; 
-						}
-					}
-				}
-			}
-			else {				
-				// swapTime is 0. No seeking required. 
-				if (this.playing) { 
-					this.playMedia(); 
-					// swap is complete. Reset vars. 
-					swapSrcIsComplete = true; 					
-				}
+				loadIsComplete = true; 				
 			}
 		}
 		else if (this.hasPlaylist) { 
@@ -12322,19 +12332,18 @@ var AblePlayerInstances = [];
 			if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
 				// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
 				this.playMedia();
-				swapSrcIsComplete = true; 
+				loadIsComplete = true; 
 			}
 		}
 		else { 
 			// None of the above. 
-			// Not sure how this function gets called with none of the above scenarios 
-			// but if that happens, we could do something here. 
+			// User is likely seeking to a new time, but not loading a new media source
+			// need to reset vars 
+			loadIsComplete = true; 
 		}
-
-		if (swapSrcIsComplete) { 
+		if (loadIsComplete) { 
 			// reset vars 
-			this.loadingMedia = false; 
-			this.swappingSrc = false; 
+			this.swappingSrc = false; 			
 			this.seekStatus = null; 
 			this.swapTime = 0; 
 			this.seekTrigger = null;
@@ -12728,7 +12737,7 @@ var AblePlayerInstances = [];
 				// but that proved to be too soon for some of this functionality. 
 				// TODO: Monitor this. If moving it here causes performance issues, 
 				// consider moving some or all of this functionality to 'canplay' 
-				thisObj.onMediaNewSourceLoad(); 								
+					thisObj.onMediaNewSourceLoad(); 								
 			})
 			.on('play',function() {
 				// both 'play' and 'playing' seem to be fired in all browsers (including IE11)
