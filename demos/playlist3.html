@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Video Player with a playlist (Local Sources) | Able Player Demos</title>
+<title>Video Player with a playlist (Mixed Sources) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
@@ -50,11 +50,11 @@
 		</ul>
 	</nav>
 	<main>
-		<h1>Video player with a playlist (Local Sources)</h1>
+		<h1>Video player with a playlist (Mixed Sources)</h1>
 
-		<p>This page includes a playlist of three videos, all stored locally. 
-			They each have a variety of different assets to test how gracefully the player can adapt 
-			to these changes as new media sources are loaded.
+		<p>This page includes a playlist of four videos, <strong>three of which are stored locally and one on YouTube</strong>.
+			The width of the player is defined with a <strong>width</strong> attribute on the &lt;video&gt; element. 
+			All videos in the playlist are sized to fit that container.
 			</p>
 
 		<div id="player">
@@ -175,6 +175,20 @@
 						IT Accessibility (with extended description)
 					</button>
 				</li>
+				<!-- YouTube video -->
+				<li data-youtube-id="WxFfn5Reg2g" data-youtube-desc-id="5n8wNEd3wjQ">
+					<button type="button"><!-- thumbnail will be retrieved from YouTube -->
+						Making Videos Accessible (YouTube)
+					</button>
+				</li>
+				<!-- Vimeo video -->
+				<!--
+				<li data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
+					<button type="button">
+						Blocks for All (Vimeo)
+					</button>
+				</li>
+			-->
 				<!-- The Deadline (HTML) -->
 				<li data-poster="../media/deadline.jpg" data-width="800" data-height="450">
 					<span class="able-source"
