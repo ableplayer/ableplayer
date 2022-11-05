@@ -60,15 +60,20 @@
 					large number of languages, which makes it perfect for testing 
 					presentation and usability of such a long captions menu.
 				</li>
-				<li>Since YouTube does not support text-based audio description, 
-					the description track must be hosted locally.</li>
+				<li>Descriptions and chapters are hosted locally as WebVTT files. This is necessary 
+					for text-based audio description since YouTube does not yet support this feature.</li>
 			</ul>
 
 		</div>
 
 		<div class="wrapper">
-			<video id="video1" data-able-player data-skin="2020" preload="auto" data-youtube-id="EcFzdNEkqok">
+			<video id="video1" preload="auto" 
+				data-able-player 
+				data-skin="2020" 
+				data-state-descriptions="on" 
+				data-youtube-id="EcFzdNEkqok" >
 				<track kind="descriptions" src="../media/k_descriptions_en.vtt" srclang="en" label="English"/>
+				<track kind="chapters" src="../media/k_chapters_en.vtt" srclang="en" label="English"/>
 			</video>
 		</div>
 
