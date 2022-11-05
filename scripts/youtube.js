@@ -225,6 +225,10 @@
 			// and after the apiChange event is triggered, try again to retreive tracks
 			this.youTubePlayer.addEventListener('onApiChange',function(x) { 
 
+				// getDuration() also requires video to play briefly 
+				// so, let's set that while we're here 				
+				thisObj.duration = thisObj.youTubePlayer.getDuration();				
+
 				if (thisObj.loadingYouTubeCaptions) { 				
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
@@ -286,7 +290,7 @@
 				deferred.resolve();
 			});
 			// Trigger the above event listener by briefly playing the video 		
-			this.loadingYouTubeCaptions = true; 			
+			this.loadingYouTubeCaptions = true; 	
 			this.youTubePlayer.playVideo();		
 		}
 		return promise;

@@ -6118,6 +6118,10 @@ var AblePlayerInstances = [];
 			// and after the apiChange event is triggered, try again to retreive tracks
 			this.youTubePlayer.addEventListener('onApiChange',function(x) { 
 
+				// getDuration() also requires video to play briefly 
+				// so, let's set that while we're here 				
+				thisObj.duration = thisObj.youTubePlayer.getDuration();				
+
 				if (thisObj.loadingYouTubeCaptions) { 				
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
@@ -6179,7 +6183,7 @@ var AblePlayerInstances = [];
 				deferred.resolve();
 			});
 			// Trigger the above event listener by briefly playing the video 		
-			this.loadingYouTubeCaptions = true; 			
+			this.loadingYouTubeCaptions = true; 	
 			this.youTubePlayer.playVideo();		
 		}
 		return promise;
@@ -8314,7 +8318,13 @@ var AblePlayerInstances = [];
 			}
 			else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
-					duration = this.youTubePlayer.getDuration();
+					if (this.duration > 0) { 
+						// duration was already retrieved while checking for captions
+						duration = this.duration; 
+					}
+					else { 
+						duration = this.youTubePlayer.getDuration();
+					}
 				}
 				else { // the YouTube player hasn't initialized yet
 					duration = 0;

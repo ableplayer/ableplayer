@@ -118,7 +118,13 @@
 			}
 			else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
-					duration = this.youTubePlayer.getDuration();
+					if (this.duration > 0) { 
+						// duration was already retrieved while checking for captions
+						duration = this.duration; 
+					}
+					else { 
+						duration = this.youTubePlayer.getDuration();
+					}
 				}
 				else { // the YouTube player hasn't initialized yet
 					duration = 0;
