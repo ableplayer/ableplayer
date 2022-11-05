@@ -233,7 +233,10 @@
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
 					if (!thisObj.okToPlay) { 
-						thisObj.youTubePlayer.stopVideo(); 
+						// Don't stopVideo() - that cancels loading 
+						// Just pause 
+						// No need to seekTo(0) - so little time has passed it isn't noticeable to the user 
+						thisObj.youTubePlayer.pauseVideo(); 
 					}
 					if (ytTracks && ytTracks.length) { 
 						// Step through ytTracks and add them to global tracks array
