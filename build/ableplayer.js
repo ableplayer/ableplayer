@@ -5456,7 +5456,7 @@ var AblePlayerInstances = [];
 	AblePlayer.prototype.setupTracks = function () {
 
 		var thisObj, deferred, promise, loadingPromises, loadingPromise,
-			i, tracks, track;
+			i, tracks, track, kind;
 
 		thisObj = this;
 
@@ -5494,7 +5494,7 @@ var AblePlayerInstances = [];
 		for (i = 0; i < tracks.length; i++) {
 
 			track = tracks[i];
-			var kind = track.kind;
+			kind = track.kind;
 
 			if (!track.src) {
 				if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
@@ -5507,7 +5507,7 @@ var AblePlayerInstances = [];
 				continue;
 			}
 			var trackSrc = track.src;
-			loadingPromise = thisObj.loadTextObject(track.src); // resolves with src, trackText
+			loadingPromise = this.loadTextObject(track.src); // resolves with src, trackText
 			loadingPromises.push(loadingPromise.catch(function (src) {
 				console.warn('Failed to load captions track from ' + src);
 			}));
@@ -5542,6 +5542,7 @@ var AblePlayerInstances = [];
 				}
 			})(track, kind));
 		}
+
 		if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
 			deferred.resolve(); 
 		}
@@ -5578,13 +5579,18 @@ var AblePlayerInstances = [];
 		this.tracks = []; // only includes tracks that do NOT have data-desc
 		this.altTracks = []; // only includes tracks that DO have data-desc 
 
+		this.hasCaptionsTrack = false; // will change to true if one or more tracks has kind="captions"
 		this.hasDescTracks = false; // will change to true if one or more tracks has data-desc
 
-		if (this.$tracks.length) {
+		if (this.$tracks.length) {			
 
 			this.usingYouTubeCaptions = false; 
 			// create object from HTML5 tracks
 			this.$tracks.each(function (index, element) {
+
+				if ($(this).attr('kind') === 'captions') {
+					thisObj.hasCaptionsTrack = true; 
+				}
 
 				// srcLang should always be included with <track>, but HTML5 spec doesn't require it
 				// if not provided, assume track is the same language as the default player language
@@ -5628,7 +5634,6 @@ var AblePlayerInstances = [];
 				else {
 					forDesc = false;
 				}
-
 				if (forDesc) {
 					thisObj.altTracks.push({
 						'kind': $(this).attr('kind'),
@@ -5675,11 +5680,10 @@ var AblePlayerInstances = [];
 					// and some browsers will display the default captions, 
 					// despite all standard efforts to suppress them
 					thisObj.$media.find('track').removeAttr('default'); 
-					deferred.resolve();
 				}
 			});
 		}
-		else { 
+		if (!this.$tracks.length || !this.hasCaptionsTrack) { 
 			// this media has no track elements 
 			// if this is a youtube or vimeo player, check there for captions/subtitles
 			if (this.player === 'youtube') {
@@ -5689,7 +5693,7 @@ var AblePlayerInstances = [];
 						if (thisObj.$captionsWrapper) {
 							thisObj.$captionsWrapper.remove();
 						}
-					}
+					}					
 					deferred.resolve();
 				});
 			}
@@ -5713,6 +5717,11 @@ var AblePlayerInstances = [];
 				}
 				deferred.resolve();
 			}
+		}
+		else { 
+			// there is at least one track with kind="captions" 
+			deferred.resolve(); 
+
 		}
 		return promise;
 
