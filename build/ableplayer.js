@@ -5470,16 +5470,6 @@ var AblePlayerInstances = [];
 
 		loadingPromises = [];
 
-		// Arrays already populated in getTracks(): 
-		// this.tracks
-		// this.altTracks 
-
-		// Arrays still to be populated: 
-		this.captions = [];
-		this.descriptions = [];
-		this.chapters = [];
-		this.meta = [];
-
 		if ($('#able-vts').length) {
 			// Page includes a container for a VTS instance
 			this.vtsTracks = [];
@@ -5583,6 +5573,12 @@ var AblePlayerInstances = [];
 		this.$tracks = this.$media.find('track');
 		this.tracks = []; // only includes tracks that do NOT have data-desc
 		this.altTracks = []; // only includes tracks that DO have data-desc 
+
+		// Arrays for each kind, to be populated later  
+		this.captions = [];
+		this.descriptions = [];
+		this.chapters = [];
+		this.meta = [];
 
 		this.hasCaptionsTrack = false; // will change to true if one or more tracks has kind="captions"
 		this.hasDescTracks = false; // will change to true if one or more tracks has data-desc
@@ -6164,8 +6160,13 @@ var AblePlayerInstances = [];
 								'label': trackLabel,
 								'def': isDefaultTrack
 							});
+							thisObj.captions.push({
+								'language': trackLang,
+								'label': trackLabel,
+								'def': isDefaultTrack,
+								'cues': null
+							});							
 						}
-						thisObj.captions = thisObj.tracks; 
 						thisObj.hasCaptions = true;
 						// setupPopups again with new captions array, replacing original
 						thisObj.setupPopups('captions');				
@@ -16761,7 +16762,7 @@ var AblePlayerInstances = [];
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
-						});
+						});						
 					}
 					thisObj.captions = thisObj.tracks; 
 					thisObj.hasCaptions = true;

@@ -16,16 +16,6 @@
 
 		loadingPromises = [];
 
-		// Arrays already populated in getTracks(): 
-		// this.tracks
-		// this.altTracks 
-
-		// Arrays still to be populated: 
-		this.captions = [];
-		this.descriptions = [];
-		this.chapters = [];
-		this.meta = [];
-
 		if ($('#able-vts').length) {
 			// Page includes a container for a VTS instance
 			this.vtsTracks = [];
@@ -129,6 +119,12 @@
 		this.$tracks = this.$media.find('track');
 		this.tracks = []; // only includes tracks that do NOT have data-desc
 		this.altTracks = []; // only includes tracks that DO have data-desc 
+
+		// Arrays for each kind, to be populated later  
+		this.captions = [];
+		this.descriptions = [];
+		this.chapters = [];
+		this.meta = [];
 
 		this.hasCaptionsTrack = false; // will change to true if one or more tracks has kind="captions"
 		this.hasDescTracks = false; // will change to true if one or more tracks has data-desc

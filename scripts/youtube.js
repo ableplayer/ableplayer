@@ -263,8 +263,13 @@
 								'label': trackLabel,
 								'def': isDefaultTrack
 							});
+							thisObj.captions.push({
+								'language': trackLang,
+								'label': trackLabel,
+								'def': isDefaultTrack,
+								'cues': null
+							});							
 						}
-						thisObj.captions = thisObj.tracks; 
 						thisObj.hasCaptions = true;
 						// setupPopups again with new captions array, replacing original
 						thisObj.setupPopups('captions');				

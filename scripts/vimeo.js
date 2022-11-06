@@ -224,7 +224,7 @@
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
-						});
+						});						
 					}
 					thisObj.captions = thisObj.tracks; 
 					thisObj.hasCaptions = true;
