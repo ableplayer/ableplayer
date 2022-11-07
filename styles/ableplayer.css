@@ -289,137 +289,63 @@
 */
 .able-volume-slider {
   width: 34px;
-  height: 50px;
+  height: 80px; 
   background-color: #464646; /* same as .able-controller */
-  padding: 10px 0;
+  margin: 0;
+  padding: 5px 0;
   position: absolute;
   right: 0px;
-  top: -74px;
+  bottom: 60px; 
   display: block;
   z-index: 9100;
-}
-.able-volume-track {
-  display: block;
-  position: relative;
-  height: 100%; /* = 50px after padding */
-  width: 7px;
-  margin: 0 auto;
-  background-color: #000;
-}
-.able-volume-track.able-volume-track-on {
-  background-color: #dadada;
-  position: absolute;
-  height: 20px; /* change dynamically; 5px per volume tick */
-  top: 30px;  /* change dynamically; 50px - height */
-}
-.able-volume-slider > .able-volume-track {
-  /* add border only to the outer track */
-  border: 1px solid #FFF;
-}
-.able-volume-head {
-  display: inline-block;
-  background-color: #fdfdfd;
-  outline: 1px solid #333;
-  position: absolute;
-  height: 7px;
-  width: 15px;
-  left: -5px;
-  top: 23px; /* change dynamically; .able-volume-track-on top - 7 */
-  z-index: 9175;
-}
-.able-volume-head:hover,
-.able-volume-head:focus {
-	background-color: #ffbb37 !important; /* yellow */
 }
 .able-volume-help { /* not visible; used in aria-describedby */
   display: none;
 }
 
-/*
-input[type=range]:focus {
-  outline: none;
+.able-volume-slider input[type="range"] { 
+  appearance: slider-vertical;
+  writing-mode: bt-rl;
+  /* -webkit-appearance: none; */ /* Hides the slider so that custom slider can be made */
+  width: 28px; 
+  height: 100%; 
+  background: transparent; /* Otherwise white in Chrome */
 }
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8.4px;
+/* 
+  Style slider in Firefox 
+*/ 
+.able-volume-slider input[type=range]::-moz-range-track {
+  border: 1px solid white;
+  width: 7px;
   cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
-}
-input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -14px;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #367ebd;
-}
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
+  background: #000; 
 }
 input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
+  background-color: #fdfdfd;
+  outline: 1px solid #333;
+  height: 16px;
+  width: 24px;
+  z-index: 9175;
 }
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: transparent;
-  border-color: transparent;
-  border-width: 16px 0;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #2a6495;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
-input[type=range]::-ms-fill-upper {
-  background: #3071a9;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
-input[type=range]::-ms-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #3071a9;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #367ebd;
-}
-*/
+
+/* 
+  TODO: Style the slider in webkit to match the one in Mozilla 
+  First attempt at this was unsuccessful; it's quite fussy 
+  Placeholder selectors are provided below 
+  Also, will need to uncomment -webkit-appearance: none in slider rule above 
+*/ 
+.able-volume-slider input[type=range]::-webkit-slider-runnable-track {}
+.able-volume-slider input[type=range]::-webkit-slider-thumb {}
+
+/* 
+  TODO: Style the slider for IE (not a high priority) 
+*/   
+input[type=range]::-ms-track {}
+input[type=range]::-ms-fill-lower {}
+input[type=range]::-ms-fill-upper {}
+input[type=range]::-ms-thumb {}
+input[type=range]:focus::-ms-fill-lower {}
+input[type=range]:focus::-ms-fill-upper {}
 
 /*
   Status Bar

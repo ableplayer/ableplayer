@@ -332,7 +332,7 @@
 			this.handleMute();
 		}
 		else if (whichButton === 'volume') {
-			this.handleVolume();
+			this.handleVolumeButtonClick();
 		}
 		else if (whichButton === 'faster') {
 			this.handleRateIncrease();
@@ -503,13 +503,13 @@
 			else if (which === 118) { // v = volume
 				if (this.usingModifierKeys(e)) {
 					e.preventDefault();
-					this.handleVolume();
+					this.handleVolumeButtonClick();
 				}
 			}
 			else if (which >= 49 && which <= 57) { // set volume 1-9
 				if (this.usingModifierKeys(e)) {
 					e.preventDefault();
-					this.handleVolume(which);
+					this.handleVolumeKeystroke(which);
 				}
 			}
 			else if (which === 99) { // c = caption toggle

@@ -645,8 +645,7 @@
 			},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
-			this.$volumeSlider.hide().attr('aria-hidden','true');
-			this.$volumeAlert.text(this.tt.volumeSliderClosed);
+			this.$volumeSlider.hide().attr('aria-hidden','true');			
 			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {

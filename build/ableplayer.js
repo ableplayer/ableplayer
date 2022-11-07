@@ -4068,8 +4068,7 @@ var AblePlayerInstances = [];
 			},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
-			this.$volumeSlider.hide().attr('aria-hidden','true');
-			this.$volumeAlert.text(this.tt.volumeSliderClosed);
+			this.$volumeSlider.hide().attr('aria-hidden','true');			
 			this.$volumeButton.attr('aria-expanded', 'false').focus();
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
@@ -6772,21 +6771,19 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.addVolumeSlider = function($div) {
 
-		// input type="range" requires IE10 and later
-		// and still isn't supported by Opera Mini as of v8
-		// Also, vertical orientation of slider requires CSS hacks
-		// and causes problems in some screen readers
-		// Therefore, building a custom vertical volume slider
-		var thisObj, volumeSliderId, volumeHelpId, x, y, volumePct;
+		// Prior to v4.4.64, we were using a custom-build vertical volunme slider 
+		// Changed to input type="range" because it's standard and gaining more widespread support 
+		// including screen reader support  
+		// TODO: Improve presentation of vertical slider. That requires some CSS finesse.  
+
+		var thisObj, volumeSliderId, volumeHelpId, volumePct, tickLabelsId, $tickLabels, i, $tickOption, tickLabel;
 
 		thisObj = this;
 
 		// define a few variables
 		volumeSliderId = this.mediaId + '-volume-slider';
 		volumeHelpId = this.mediaId + '-volume-help';
-		this.volumeTrackHeight = 50; // must match CSS height for .able-volume-slider
-		this.volumeHeadHeight = 7; // must match CSS height for .able-volume-head
-		this.volumeTickHeight = this.volumeTrackHeight / 10;
+		tickLabelsId = this.mediaId + '-volume-tick-labels';
 
 		this.$volumeSlider = $('<div>',{
 			'id': volumeSliderId,
@@ -6797,78 +6794,62 @@ var AblePlayerInstances = [];
 			'class': 'able-tooltip',
 			'role': 'tooltip'
 		}).hide();
-		this.$volumeSliderTrack = $('<div>',{
-			'class': 'able-volume-track'
-		});
-		this.$volumeSliderTrackOn = $('<div>',{
-			'class': 'able-volume-track able-volume-track-on'
-		});
-		this.$volumeSliderHead = $('<div>',{
-			'class': 'able-volume-head',
-			'role': 'slider',
-			'aria-orientation': 'vertical',
+		this.$volumeRange = $('<input>',{ 
+			'type': 'range',
+			'min': '0',
+			'max': '10',
+			'step': '1',
+			'orient': 'vertical', // non-standard, but required for Firefox 
 			'aria-label': this.tt.volumeUpDown,
-			'aria-valuemin': 0,
-			'aria-valuemax': 10,
-			'aria-valuenow': this.volume,
-			'tabindex': -1
-		});
-		this.$volumeSliderTrack.append(this.$volumeSliderTrackOn,this.$volumeSliderHead);
-		this.$volumeAlert = $('<div>',{
-			'class': 'able-offscreen',
-			'aria-live': 'assertive',
-			'aria-atomic': 'true'
+			'value': this.volume
+			// 'list': tickLabelsId // Uncomment this to use tickLabels (see note below)
 		});
 		volumePct = parseInt(thisObj.volume) / 10 * 100;
 		this.$volumeHelp = $('<div>',{
 			'id': volumeHelpId,
-			'class': 'able-volume-help'
-		}).text(volumePct + '%, ' + this.tt.volumeHelp);
+			'class': 'able-volume-help',
+			'aria-live': 'polite'
+		}).text(volumePct + '%');
 		this.$volumeButton.attr({
 			'aria-describedby': volumeHelpId
 		});
-		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeSliderTrack,this.$volumeAlert,this.$volumeHelp)
+		$tickLabels = $('<datalist>',{
+			'id': tickLabelsId
+		}); 
+		for (i = 0; i <= 10; i++) { 
+			if (i === 0) { 
+				tickLabel = this.tt.mute; 
+			}
+			else { 
+				tickLabel = (i * 10) + '%'; 
+			}
+			$tickOption = $('<option>',{ 
+				'value': i, 
+				'label': tickLabel
+			})
+			$tickLabels.append($tickOption); 
+		}		
+		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeRange,this.$volumeHelp);
+		// To add $tickLabels, use the following line of code to replace the one above 
+		// and uncommnet the 'list' property in the definition of this.$volumeRange above 
+		// As of Nov 2022, this feature is not supported by any screen reader 
+		// this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeRange,this.$volumeHelp,$tickLabels);
+
 		$div.append(this.$volumeSlider);
-		this.refreshVolumeSlider(this.volume);
 
 		// add event listeners
-		this.$volumeSliderHead.on('mousedown',function (e) {
-			e.preventDefault(); // prevent text selection (implications?)
-			thisObj.draggingVolume = true;
-			thisObj.volumeHeadPositionTop = $(this).offset().top;
+		this.$volumeRange.on('change',function (e) {
+			thisObj.handleVolumeChange($(this).val());
 		});
 
-		// prevent dragging after mouseup as mouseup not detected over iframe (YouTube)
-		this.$mediaContainer.on('mouseover',function (e) {
-			if(thisObj.player == 'youtube'){
-				thisObj.draggingVolume = false;
-			}
+		this.$volumeRange.on('input',function (e) {
+			thisObj.handleVolumeChange($(this).val());
 		});
+			
+		this.$volumeRange.on('keydown',function (e) {
 
-		$(document).on('mouseup',function (e) {
-			thisObj.draggingVolume = false;
-		});
-
-		$(document).on('mousemove',function (e) {
-			if (thisObj.draggingVolume) {
-				x = e.pageX;
-				y = e.pageY;
-				thisObj.moveVolumeHead(y);
-			}
-		});
-
-		this.$volumeSliderHead.on('keydown',function (e) {
-
-			// Left arrow or down arrow
-			if (e.which === 37 || e.which === 40) {
-				thisObj.handleVolume('down');
-			}
-			// Right arrow or up arrow
-			else if (e.which === 39 || e.which === 38) {
-				thisObj.handleVolume('up');
-			}
 			// Escape key or Enter key or Tab key
-			else if (e.which === 27 || e.which === 13 || e.which === 9) {
+			if (e.which === 27 || e.which === 13 || e.which === 9) {
 				// close popup
 				if (thisObj.$volumeSlider.is(':visible')) {
 					thisObj.closingVolume = true; // stopgap
@@ -6883,40 +6864,24 @@ var AblePlayerInstances = [];
 			else {
 				return;
 			}
-			e.preventDefault();
 		});
 	};
 
-	AblePlayer.prototype.refreshVolumeSlider = function(volume) {
+	AblePlayer.prototype.refreshVolumeHelp = function(volume) {
 
-		// adjust slider position based on current volume
-		var volumePct, volumePctText;
+		// make adjustments based on current volume
+		var volumePct;
 		volumePct = (volume/10) * 100;
-		volumePctText = volumePct + '%';
 
-		var trackOnHeight, trackOnTop, headTop;
-		trackOnHeight = volume * this.volumeTickHeight;
-		trackOnTop = this.volumeTrackHeight - trackOnHeight;
-		headTop = trackOnTop - this.volumeHeadHeight;
+		// Update help text 
+		if (this.$volumeHelp) { 
+			this.$volumeHelp.text(volumePct + '%'); 
+		}
 
-		if (this.$volumeSliderTrackOn) {
-			this.$volumeSliderTrackOn.css({
-				'height': trackOnHeight + 'px',
-				'top': trackOnTop + 'px'
-			});
-		}
-		if (this.$volumeSliderHead) {
-			this.$volumeSliderHead.attr({
-				'aria-valuenow': volume,
-				'aria-valuetext': volumePctText
-			});
-			this.$volumeSliderHead.css({
-				'top': headTop + 'px'
-			});
-		}
-		if (this.$volumeAlert) {
-			this.$volumeAlert.text(volumePct + '%');
-		}
+		// Update the default value of the volume slider input field 
+		// This doesn't seem to be necessary; browsers remember the previous setting during a session 
+		// but this is a fallback in case they don't 
+		this.$volumeRange.attr('value',volume);   
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
@@ -6946,87 +6911,28 @@ var AblePlayerInstances = [];
 		}
 	};
 
-	AblePlayer.prototype.moveVolumeHead = function(y) {
+	AblePlayer.prototype.handleVolumeButtonClick = function() {
 
-		// y is current position after mousemove
-		var diff, direction, ticksDiff, newVolume, maxedOut;
-
-		var diff = this.volumeHeadPositionTop - y;
-
-		// only move the volume head if user had dragged at least one tick
-		// this is more efficient, plus creates a "snapping' effect
-		if (Math.abs(diff) > this.volumeTickHeight) {
-			if (diff > 0) {
-				direction = 'up';
-			}
-			else {
-				direction = 'down';
-			}
-			if (direction == 'up' && this.volume == 10) {
-				// can't go any higher
-				return;
-			}
-			else if (direction == 'down' && this.volume == 0) {
-				// can't go any lower
-				return;
-			}
-			else {
-				ticksDiff = Math.round(Math.abs(diff) / this.volumeTickHeight);
-				if (direction == 'up') {
-					newVolume = this.volume + ticksDiff;
-					if (newVolume > 10) {
-						newVolume = 10;
-					}
-				}
-				else { // direction is down
-					newVolume = this.volume - ticksDiff;
-					if (newVolume < 0) {
-						newVolume = 0;
-					}
-				}
-				this.setVolume(newVolume); // this.volume will be updated after volumechange event fires (event.js)
-				this.refreshVolumeSlider(newVolume);
-				this.refreshVolumeButton(newVolume);
-				this.volumeHeadPositionTop = y;
-			}
-		}
-	};
-
-	AblePlayer.prototype.handleVolume = function(direction) {
-
-		// 'direction is either 'up','down', or an ASCII key code 49-57 (numeric keys 1-9)
-		// Action: calculate and change the volume
-		// Don't change this.volume and this.volumeButton yet - wait for 'volumechange' event to fire (event.js)
-
-		// If NO direction is provided, user has just clicked on the Volume button
-		// Action: show slider
-		var volume;
-
-		if (typeof direction === 'undefined') {
-			if (this.$volumeSlider.is(':visible')) {
-				this.hideVolumePopup();
-			}
-			else {
-				if (!this.closingVolume) {
-					this.showVolumePopup();
-				}
-			}
-			return;
-		}
-
-		if (direction >= 49 && direction <= 57) {
-			volume = direction - 48;
+		if (this.$volumeSlider.is(':visible')) {
+			this.hideVolumePopup();			
 		}
 		else {
+			this.showVolumePopup();
+		}
+	}; 
 
-			volume = this.getVolume();
+	AblePlayer.prototype.handleVolumeKeystroke = function(keycode) {
 
-			if (direction === 'up' && volume < 10) {
-				volume += 1;
-			}
-			else if (direction === 'down' && volume > 0) {
-				volume -= 1;
-			}
+		// keycode is an ASCII key code 49-57 (numeric keys 1-9), 
+		// keyboard shortcuts for changing volume 
+
+		var volume; 
+
+		if (keycode >= 49 && keycode <= 57) {
+			volume = keycode - 48;
+		}
+		else { 
+			return false; 
 		}
 
 		if (this.isMuted() && volume > 0) {
@@ -7037,7 +6943,25 @@ var AblePlayerInstances = [];
 		}
 		else {
 			this.setVolume(volume); // this.volume will be updated after volumechange event fires (event.js)
-			this.refreshVolumeSlider(volume);
+			this.refreshVolumeHelp(volume);
+			this.refreshVolumeButton(volume);
+		}
+	}; 
+
+
+	AblePlayer.prototype.handleVolumeChange = function(volume) {
+
+		// handle volume change using the volume input slider  
+
+		if (this.isMuted() && volume > 0) {
+			this.setMute(false);
+		}
+		else if (volume === 0) {
+			this.setMute(true);
+		}
+		else {
+			this.setVolume(volume); // this.volume will be updated after volumechange event fires (event.js)
+			this.refreshVolumeHelp(volume);
 			this.refreshVolumeButton(volume);
 		}
 	};
@@ -7059,7 +6983,7 @@ var AblePlayerInstances = [];
 		this.$volumeSlider.show().attr('aria-hidden','false');
 		this.$volumeButton.attr('aria-expanded','true');
 		this.$volumeButton.focus(); // for screen reader expanded state to be read
-		this.waitThenFocus(this.$volumeSliderHead.attr('tabindex','0'));
+		this.waitThenFocus(this.$volumeRange);
 	};
 
 	AblePlayer.prototype.hideVolumePopup = function() {
@@ -7067,7 +6991,6 @@ var AblePlayerInstances = [];
 		var thisObj = this;
 
 		this.$volumeSlider.hide().attr('aria-hidden','true');
-		this.$volumeSliderHead.attr('tabindex','-1');
 		this.$volumeButton.attr('aria-expanded','false').focus();
 		// wait a second before resetting stopgap var
 		// otherwise the keypress used to close volume popup will trigger the volume button
@@ -7117,7 +7040,8 @@ var AblePlayerInstances = [];
 				this.youTubePlayer.unMute();
 			}
 		}
-		this.refreshVolumeSlider(this.volume);
+		this.setVolume(this.volume); 
+		this.refreshVolumeHelp(this.volume);
 		this.refreshVolumeButton(this.volume);
 	};
 
@@ -7126,21 +7050,27 @@ var AblePlayerInstances = [];
 		// volume is 1 to 10
 		// convert as needed depending on player
 
+		var newVolume; 
+
 		if (this.player === 'html5') {
 			// volume is 0 to 1
-			this.media.volume = volume / 10;
+			newVolume = volume / 10; 
+			this.media.volume = newVolume;
+			
 			if (this.hasSignLanguage && this.signVideo) {
 				this.signVideo.volume = 0; // always mute
 			}
 		}
 		else if (this.player === 'youtube') {
 			// volume is 0 to 100
-			this.youTubePlayer.setVolume(volume * 10);
+			newVolume = volume * 10; 
+			this.youTubePlayer.setVolume(newVolume);
 			this.volume = volume;
 		}
 		else if (this.player === 'vimeo') {
 			// volume is 0 to 1
-			this.vimeoPlayer.setVolume(volume / 10).then(function() {
+			newVolume = volume / 10; 
+			this.vimeoPlayer.setVolume(newVolume).then(function() {
 				// setVolume finished.
 				// could do something here
 				// successful completion also fires a 'volumechange' event (see event.js)
@@ -8222,27 +8152,30 @@ var AblePlayerInstances = [];
 
 	AblePlayer.prototype.browserSupportsVolume = function() {
 
-		// ideally we could test for volume support
-		// However, that doesn't seem to be reliable
-		// http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
+		// To test whether the browser supports changing the volume, 
+			// create a new audio element and try setting the volume to something other than 1. 
+			// Then, retrieve the current setting to see if it preserved it. 
 
-		var userAgent, noVolume;
+			// Unfortunately, this doesn't work in iOS. In 2022, our tests yield the same results as reported here:  
+			// https://stackoverflow.com/questions/72861253/how-do-i-detect-if-a-browser-does-not-support-changing-html-audio-volume
 
-		userAgent = navigator.userAgent.toLowerCase();
-		noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
-		if (noVolume) {
-			if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
-				// Firefox on android DOES support changing the volume:
-				return true;
+			// So, unfortunately we have to resort to sniffing for iOS  
+			// before testing for support in other browsers 
+			var audio, testVolume; 
+ 
+			if (this.isIOS()) { 
+				return false; 
 			}
-			else {
-				return false;
+
+			testVolume = 0.9;  // any value between 0.1 and 0.9 
+			audio = new Audio();
+      audio.volume = testVolume;
+			if (audio.volume === testVolume) { 
+				return true; 
+			} 
+			else { 
+				return false; 
 			}
-		}
-		else {
-			// as far as we know, this userAgent supports volume control
-			return true;
-		}
 	};
 
 	AblePlayer.prototype.nativeFullscreenSupported = function () {
@@ -12473,7 +12406,7 @@ var AblePlayerInstances = [];
 			this.handleMute();
 		}
 		else if (whichButton === 'volume') {
-			this.handleVolume();
+			this.handleVolumeButtonClick();
 		}
 		else if (whichButton === 'faster') {
 			this.handleRateIncrease();
@@ -12644,13 +12577,13 @@ var AblePlayerInstances = [];
 			else if (which === 118) { // v = volume
 				if (this.usingModifierKeys(e)) {
 					e.preventDefault();
-					this.handleVolume();
+					this.handleVolumeButtonClick();
 				}
 			}
 			else if (which >= 49 && which <= 57) { // set volume 1-9
 				if (this.usingModifierKeys(e)) {
 					e.preventDefault();
-					this.handleVolume(which);
+					this.handleVolumeKeystroke(which);
 				}
 			}
 			else if (which === 99) { // c = caption toggle

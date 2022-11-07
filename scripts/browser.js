@@ -32,27 +32,30 @@
 
 	AblePlayer.prototype.browserSupportsVolume = function() {
 
-		// ideally we could test for volume support
-		// However, that doesn't seem to be reliable
-		// http://stackoverflow.com/questions/12301435/html5-video-tag-volume-support
+		// To test whether the browser supports changing the volume, 
+			// create a new audio element and try setting the volume to something other than 1. 
+			// Then, retrieve the current setting to see if it preserved it. 
 
-		var userAgent, noVolume;
+			// Unfortunately, this doesn't work in iOS. In 2022, our tests yield the same results as reported here:  
+			// https://stackoverflow.com/questions/72861253/how-do-i-detect-if-a-browser-does-not-support-changing-html-audio-volume
 
-		userAgent = navigator.userAgent.toLowerCase();
-		noVolume = /ipad|iphone|ipod|android|blackberry|windows ce|windows phone|webos|playbook/.exec(userAgent);
-		if (noVolume) {
-			if (noVolume[0] === 'android' && /firefox/.test(userAgent)) {
-				// Firefox on android DOES support changing the volume:
-				return true;
+			// So, unfortunately we have to resort to sniffing for iOS  
+			// before testing for support in other browsers 
+			var audio, testVolume; 
+ 
+			if (this.isIOS()) { 
+				return false; 
 			}
-			else {
-				return false;
+
+			testVolume = 0.9;  // any value between 0.1 and 0.9 
+			audio = new Audio();
+      audio.volume = testVolume;
+			if (audio.volume === testVolume) { 
+				return true; 
+			} 
+			else { 
+				return false; 
 			}
-		}
-		else {
-			// as far as we know, this userAgent supports volume control
-			return true;
-		}
 	};
 
 	AblePlayer.prototype.nativeFullscreenSupported = function () {
