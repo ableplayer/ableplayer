@@ -561,7 +561,6 @@
 				thisObj.initDescription().then(function() {
 
 					thisObj.setupTracks().then(function() {
-
 						if (thisObj.hasClosedDesc) { 
 							if (!thisObj.$descDiv || 
 								(thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {

@@ -31,7 +31,6 @@
 		} else {
 			tracks = this.tracks;
 		}
-
 		for (i = 0; i < tracks.length; i++) {
 
 			track = tracks[i];
@@ -52,9 +51,7 @@
 			loadingPromises.push(loadingPromise.catch(function (src) {
 				console.warn('Failed to load captions track from ' + src);
 			}));
-
 			loadingPromise.then((function (track, kind) {
-
 				var trackSrc = track.src;
 				var trackLang = track.language;
 				var trackLabel = track.label;
@@ -65,7 +62,6 @@
 
 					var trackContents = trackText;
 					var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
-
 					if (thisObj.hasVts) {
 
 						// setupVtsTracks() is in vts.js
@@ -83,7 +79,6 @@
 				}
 			})(track, kind));
 		}
-
 		if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
 			deferred.resolve(); 
 		}
@@ -287,37 +282,48 @@
 		if (typeof cues === 'undefined') {
 			cues = null;
 		}
-		if (this.captions.length === 0) { // this is the first	
-			this.captions.push({
-				'language': track.language,
-				'label': track.label,
-				'def': track.def,
-				'cues': cues
-			});
-		} else { // there are already captions in the array
-			inserted = false;
-			for (i = 0; i < this.captions.length; i++) {
-				capLabel = track.label;
-				if (capLabel.toLowerCase() < this.captions[i].label.toLowerCase()) {
-					// insert before track i
-					this.captions.splice(i, 0, {
-						'language': track.language,
-						'label': track.label,
-						'def': track.def,
-						'cues': cues
-					});
-					inserted = true;
-					break;
-				}
-			}
-			if (!inserted) {
-				// just add track to the end
+
+		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
+			// this.captions has already been populated 
+			// For YouTube, this happens in youtube.js > getYouTubeCaptionTracks()
+			// For VImeo, this happens in vimeo.js > getVimeoCaptionTracks() 
+			// So, nothing to do here... 
+		}
+		else { 
+
+			if (this.captions.length === 0) { // this is the first	
 				this.captions.push({
 					'language': track.language,
 					'label': track.label,
 					'def': track.def,
 					'cues': cues
 				});
+			} 
+			else { // there are already captions in the array			
+				inserted = false;
+				for (i = 0; i < this.captions.length; i++) {
+					capLabel = track.label;
+					if (capLabel.toLowerCase() < this.captions[i].label.toLowerCase()) {
+						// insert before track i
+						this.captions.splice(i, 0, {
+							'language': track.language,
+							'label': track.label,
+							'def': track.def,
+							'cues': cues
+						});
+						inserted = true;
+						break;
+					}
+				}
+				if (!inserted) {
+					// just add track to the end
+					this.captions.push({
+						'language': track.language,
+						'label': track.label,
+						'def': track.def,
+						'cues': cues
+					});
+				}	
 			}
 		}
 
