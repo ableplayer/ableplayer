@@ -11,6 +11,7 @@
 		this.initializing = false; // will change to true temporarily while initPlayer() is processing
 		this.cueingPlaylistItems = false; // will change to true temporarily while cueing next playlist item
 		this.buttonWithFocus = null; // will change to 'previous' or 'next' if user clicks either of those buttons
+		this.speechEnabled = null; // will change either to 'true' in initSpeech(), or false if not supported
 
 		this.setIconColor();
 		this.setButtonImages();
@@ -569,7 +570,7 @@
 								thisObj.injectTextDescriptionArea();
 							}
 						}
-						thisObj.getBrowserVoices();
+						thisObj.initSpeech('init');
 
 						thisObj.setupTranscript().then(function() {
 

@@ -803,11 +803,14 @@
 
 	AblePlayer.prototype.rebuildDescPrefsForm = function () {
 
-		// Called if getBrowserVoices() succeeded after an earlier failure
+		// Called if this.descVoices changes, which may happen if: 
+		//  getBrowserVoices() succeeds after an earlier failure 
+		//  user changes language of captions/subtitles and descVoices changes to match the new language 
 
 		var i, optionValue, optionText, $thisOption;
 
 		this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
+		this.$voiceSelectField.empty();
 		for (i=0; i < this.descVoices.length; i++) {
 			optionValue = this.descVoices[i].name;
 			optionText = optionValue + ' (' + this.descVoices[i].lang + ')';

@@ -1001,6 +1001,9 @@
 				this.synth.pause();				
 			}
 		}
+		if (this.speechEnabled === null) { 			
+			this.initSpeech('play'); 
+		}
 	};
 
 	AblePlayer.prototype.handleRestart = function() {
@@ -1336,17 +1339,14 @@
 		// because the Web Speech API failed to getVoices()
 		// now is a good time to try again
 		// so the Description dialog can be rebuilt before the user requests it
-		if (!this.descVoices) {
-			this.getBrowserVoices();
-			if (this.descVoices) {
-				this.rebuildDescPrefsForm();
-			}
-		}
 
 		var thisObj, prefsButtonPosition, prefsMenuRight, prefsMenuLeft;
 
 		thisObj = this;
 
+		if (this.speechEnabled === null) { 			
+			this.initSpeech('prefs'); 
+		}
 		if (this.hidingPopup) {
 			// stopgap to prevent spacebar in Firefox from reopening popup
 			// immediately after closing it
@@ -2072,7 +2072,7 @@
 		// This was a group decision based on the belief that users may want a transcript
 		// that is in a different language than the captions
 
-		var i, captions, descriptions, chapters, meta;
+		var i, captions, descriptions, chapters, meta, langHasChanged;
 
 		// Captions
 		for (i = 0; i < this.captions.length; i++) {
@@ -2121,10 +2121,8 @@
 			this.transcriptDescriptions = descriptions;
 		}
 		if (this.selectedDescriptions) {
-			if (this.selectedDescriptions.language !== this.lang) {
-				// updating description voice to match new description language
-				this.updateDescriptionVoice();
-			}
+			// updating description voice to match new description language
+			this.updateDescriptionVoice();
 		}
 		this.updateTranscript();
 	};

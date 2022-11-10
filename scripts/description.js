@@ -153,39 +153,126 @@
 		}
 	};
 
-	AblePlayer.prototype.getBrowserVoices = function () {
+	AblePlayer.prototype.initSpeech = function (context) { 
 
-		// define this.descVoices
-		// NOTE: Some browsers (e.g., Chrome) require a user-initiated click before
-		// this.synth.getVoices() will work
+		// Some browsers &/or operating systems require a user-initiated click 
+		// before this.synth.getVoices() will work. As of Nov 2022: 
+		// Chrome requires a click before synth.getVoices() will work
+		// iOS requires a click before synth.speak() will work 
+		// A hack to address this: Listen for ANY click, then play an inaudible utterance 
+		// to intitiate speech synthesis 		
+		// https://stackoverflow.com/questions/32193704/js-speech-synthesis-issue-on-ios
+		// This function does that, and sets this.speechEnabled
+		// It's called with either of these contexts: 
+		// 'init' - player is being initialized 
+		// 'play' - user has clicked play 
+		// 'prefs' - user has clicked prefs button
+		// 'desc' - it's time to announce a description!  
 
-		var voices, descLangs, voiceLang, playerLang;
+		var thisObj = this; 
+		
+		if (this.speechEnabled === null) {  
 
-		// if browser supports Web Speech API
-		// define this.descvoices (an array of available voices in this browser)
-		if (window.speechSynthesis) {
-			this.synth = window.speechSynthesis;
-			voices = this.synth.getVoices();
-			descLangs = this.getDescriptionLangs();
-			if (voices.length > 0) {
-				this.descVoices = [];
-				// available languages are identified with local suffixes (e.g., en-US)
-				for (var i=0; i<voices.length; i++) {
-					// match only the first 2 characters of the lang code
-					// include any language for which there is a matching description track
-					// as well as the overall player lang
-					voiceLang = voices[i].lang.substring(0,2).toLowerCase();
-					playerLang = this.lang.substring(0,2).toLowerCase();
-					if (voiceLang === playerLang || (descLangs.indexOf(voiceLang) !== -1)) {
-						// this is a match. Add to the final array
-						this.descVoices.push(voices[i]);
+			if (typeof this.synth !== 'undefined') { 
+				// cancel any previous synth instance and reinitialize  
+				this.synth.cancel(); 
+			}	
+
+			if (window.speechSynthesis) {
+
+				// browser supports speech synthesis 
+
+				this.synth = window.speechSynthesis;
+
+				if (context === 'init') { 
+					// handle a click on anything, in case the user 
+					// clicks something before they click 'play' or 'prefs' buttons
+					// that would allow us to init speech before it's needed 
+					$(document).on('click',function() { 			
+						var greeting = new SpeechSynthesisUtterance('Hi!');
+						greeting.volume = 0; // silent 
+						greeting.rate = 10; // fastest speed supported by the API  
+						thisObj.synth.speak(greeting);
+						greeting.onstart = function(e) { 						
+							// utterance has started 
+							$(document).off('click'); // unbind the click event listener 		
+						}
+						greeting.onend = function(e) {
+							// should now be able to get browser voices 
+							// in browsers that require a click 
+							thisObj.getBrowserVoices(); 
+							if (thisObj.descVoices.length) { 
+								thisObj.speechEnabled = true; 
+							}
+						};
+					}); 
+									
+					// go ahead and call get browser voices in case it might work, 
+					// for browsers that don't require a click 
+					this.getBrowserVoices(); 
+					if (this.descVoices.length) { 
+						this.speechEnabled = true; 
 					}
 				}
-				if (!this.descVoices.length) {
-					// no voices available in the default language(s)
-					// just use all voices, regardless of language
-					this.descVoices = voices;
+				else {  // context is either 'play' or 'prefs' 
+					var greeting = new SpeechSynthesisUtterance('Hi!');
+					greeting.volume = 0; // silent 
+					greeting.rate = 10; // fastest speed supported by the API  
+					thisObj.synth.speak(greeting);
+					greeting.onstart = function(e) { 						
+						// utterance has started 
+						$(document).off('click'); // unbind the click event listener 			
+					};
+					greeting.onend = function(e) {
+						// should now be able to get browser voices 
+						// in browsers that require a click 
+						thisObj.getBrowserVoices(); 
+						if (thisObj.descVoices.length) { 
+							thisObj.speechEnabled = true; 
+						}
+					};							
 				}
+			}
+			else { 
+				// browser does not support speech synthesis
+				this.speechEnabled = false; 
+			}
+		}
+	}; 
+
+	AblePlayer.prototype.getBrowserVoices = function () {
+		
+		// define this.descVoices array 
+		// includes only languages that match the language of the captions or player 
+
+		var voices, descLangs, voiceLang, preferredLang;
+
+		if (this.captionLang) { 
+			preferredLang = this.captionLang.substring(0,2).toLowerCase();
+		}
+		else { 
+			preferredLang = this.lang.substring(0,2).toLowerCase();
+		}
+		this.descVoices = []; 
+		voices = this.synth.getVoices();
+		descLangs = this.getDescriptionLangs();
+		if (voices.length > 0) {
+			this.descVoices = [];
+			// available languages are identified with local suffixes (e.g., en-US)
+			for (var i=0; i<voices.length; i++) {
+				// match only the first 2 characters of the lang code
+				voiceLang = voices[i].lang.substring(0,2).toLowerCase();
+				if (voiceLang === preferredLang && (descLangs.indexOf(voiceLang) !== -1)) {
+					// this voice matches preferredLang 
+					// AND there's a matching description track in this language
+					// Add this voice to final array 
+					this.descVoices.push(voices[i]);
+				}
+			}
+			if (!this.descVoices.length) {
+				// no voices available in the default language(s)
+				// just use all voices, regardless of language
+				this.descVoices = voices;
 			}
 		}
 		return false;
@@ -209,20 +296,12 @@
 
 	AblePlayer.prototype.updateDescriptionVoice = function () {
 
-		// Called if user chooses a subtitle language for which there is a matching
-		// description track, and the subtitle language is different than the player language
+		// Called if user chooses a subtitle language for which there is a matching description track
 		// This ensures the description is read in a proper voice for the selected language
 
 		var voices, descVoice;
-		if (!this.descVoices) {
-			this.getBrowserVoices();
-			if (this.descVoices) {
-				this.rebuildDescPrefsForm();
-			}
-		}
-		else if (!this.$voiceSelectField) {
-			this.rebuildDescPrefsForm();
-		}
+		this.getBrowserVoices();
+		this.rebuildDescPrefsForm();
 
 		descVoice = this.selectedDescriptions.language;
 
@@ -464,8 +543,8 @@
 					// load the new description into the container div for screen readers to read
 					this.$descDiv.html(descText);
 				}
-				else if (window.speechSynthesis) {
-					// browser supports speech synthsis
+				else if (this.speechEnabled) { 
+					// use browser's built-in speech synthesis
 					this.announceDescriptionText('description',descText);
 					if (this.prefDescVisible) {
 						// write description to the screen for sighted users
@@ -562,9 +641,9 @@
 		// 	unless the voice select field is also removed from the Prefs dialog
 		var useFirstVoice = false;
 
-		if (!this.descVoices) {
+		if (!this.speechEnabled) {
 			// voices array failed to load the first time. Try again
-			this.getBrowserVoices();
+			this.initSpeech('desc');
 		}
 
 		if (context === 'sample') {
@@ -602,7 +681,6 @@
 					// use the first voice in the array
 					voice = this.descVoices[0];
 				}
-
 				utterance = new SpeechSynthesisUtterance();
 				utterance.voice = voice;
 				utterance.voiceURI = 'native';
@@ -616,7 +694,14 @@
 				// language of the user's chosen voice?
 				// If there's a mismatch between any of these, the description will likely be unintelligible
 				utterance.lang = this.lang;
+				utterance.onstart = function(e) { 
+					// utterance has started 
+				};
+				utterance.onpause = function(e) { 
+					// utterance has paused 
+				};
 				utterance.onend = function(e) {
+					// utterance has ended 
 					this.speakingDescription = false; 
 					timeElapsed = e.elapsedTime; 
 					// As of Firefox 95, e.elapsedTime is expressed in seconds 
@@ -645,7 +730,7 @@
 				utterance.onerror = function(e) {
 					// handle error
 					console.log('Web Speech API error',e);
-				}
+				};
 				if (this.synth.paused) { 
 					this.synth.resume();					
 				}
