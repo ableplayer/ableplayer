@@ -1,8 +1,8 @@
 {
 
-"audio": "audio",
+"audio": "Audio",
 
-"video": "video",
+"video": "Video",
 
 "playerHeading": "Media Player",
 
@@ -24,21 +24,21 @@
 
 "prevChapter": "Vorheriges Kapitel",
 
-"nextChapter": "Nächste Kapitel",
+"nextChapter": "Nächstes Kapitel",
 
-"prevTrack": "Vorheriges track",
+"prevTrack": "Vorheriger Titel",
 
-"nextTrack": "Nächste Titel",
+"nextTrack": "Nächster Titel",
 
-"rewind": "Zurück springen",
+"rewind": "Zurück",
 
-"forward": "Vorwärts springen",
+"forward": "Vorwärts",
 
 "captions": "Untertitel",
 
 "showCaptions": "Untertitel anzeigen",
 
-"hideCaptions": "Untertitel verstecken",
+"hideCaptions": "Untertitel ausblenden",
 
 "captionsOff": "Untertitel ausschalten",
 
@@ -46,9 +46,9 @@
 
 "hideTranscript": "Transkription entfernen",
 
-"turnOnDescriptions": "Audiodeskription einschalten",
+"turnOnDescriptions": "Audiobeschreibung einschalten",
 
-"turnOffDescriptions": "Audiodeskription ausschalten",
+"turnOffDescriptions": "Audiobeschreibung ausschalten",
 
 "language": "Sprache",
 
@@ -56,13 +56,13 @@
 
 "showSign": "Gebärdensprache anzeigen",
 
-"hideSign": "Gebärdensprache verstecken",
+"hideSign": "Gebärdensprache ausblenden",
 
-"seekbarLabel": "timeline",
+"seekbarLabel": "Suchleiste",
 
-"mute": "Ton ausschalten",
+"mute": "Ton aus",
 
-"unmute": "Ton einschalten",
+"unmute": "Ton an",
 
 "volume": "Lautstärke",
 
@@ -74,11 +74,11 @@
 
 "preferences": "Einstellungen",
 
-"enterFullScreen": "Vollbildmodus einschalten",
+"enterFullscreen": "Vollbildmodus einschalten",
 
-"exitFullScreen": "Vollbildmodus verlassen",
+"exitFullscreen": "Vollbildmodus verlassen",
 
-"fullScreen": "Vollbildmodus",
+"fullscreen": "Vollbildmodus",
 
 "speed": "Geschwindigkeit",
 
@@ -106,13 +106,13 @@
 
 "statusBuffering": "Daten werden empfangen...",
 
-"statusUsingDesc": "Video mit Audiodeskription wird verwendet",
+"statusUsingDesc": "Video mit Audiobeschreibung wird verwendet",
 
-"statusLoadingDesc": "Video mit Audiodeskription wird geladen",
+"statusLoadingDesc": "Video mit Audiobeschreibung wird geladen",
 
-"statusUsingNoDesc": "Video ohne Audiodeskription wird verwendet",
+"statusUsingNoDesc": "Video ohne Audiobeschreibung wird verwendet",
 
-"statusLoadingNoDesc": "Video ohne Audiodeskription wird geladen",
+"statusLoadingNoDesc": "Video ohne Audiobeschreibung wird geladen",
 
 "statusLoadingNext": "Der nächste Titel wird geladen",
 
@@ -120,9 +120,9 @@
 
 "selectedTrack": "Ausgewählter Titel",
 
-"alertDescribedVersion": "Das Video wird mit Audiodeskription abgespielt",
+"alertDescribedVersion": "Das Video wird mit Audiobeschreibung abgespielt",
 
-"alertNonDescribedVersion": "Das Video wird ohne Audiodeskription abgespielt",
+"alertNonDescribedVersion": "Das Video wird ohne Audiobeschreibung abgespielt",
 
 "fallbackError1": "Abspielen ist mit diesem Browser nicht möglich",
 
@@ -132,7 +132,7 @@
 
 "prefMenuCaptions": "Untertitel",
 
-"prefMenuDescriptions": "Audiodeskriptionen",
+"prefMenuDescriptions": "Audiobeschreibungen",
 
 "prefMenuKeyboard": "Tastatur",
 
@@ -140,7 +140,7 @@
 
 "prefTitleCaptions": "Untertitel Einstellungen",
 
-"prefTitleDescriptions": "Audiodeskription Einstellungen",
+"prefTitleDescriptions": "Audiobeschreibung Einstellungen",
 
 "prefTitleKeyboard": "Tastatur Einstellungen",
 
@@ -152,17 +152,17 @@
 
 "prefIntroDescription2": "Das aktuelle Video hat ",
 
-"prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiodeskription.",
+"prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiobeschreibung.",
 
-"prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierte Audiodeskription.",
+"prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.",
 
-"prefIntroDescription4": "Wenn die Audiodeskription aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.",
+"prefIntroDescription4": "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.",
 
 "prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).",
 
 "prefIntroKeyboard2": "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.",
 
-"prefIntroKeyboard3": "Beachte: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.",
+"prefIntroKeyboard3": "Achtung: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.",
 
 "prefIntroTranscript": "Diese Einstellungen beeinflussen die interaktiven Transkriptionen.",
 
@@ -172,9 +172,9 @@
 
 "prefHeadingKeyboard2": "Aktuell eingestellte Tastenkürzel",
 
-"prefHeadingDescription": "Audiodeskription",
+"prefHeadingDescription": "Audiobeschreibung",
 
-"prefHeadingTextDescription": "Textbasierte Audiodeskription",
+"prefHeadingTextDescription": "Textbasierte Audiobeschreibung",
 
 "prefHeadingCaptions": "Untertitel",
 
@@ -194,35 +194,35 @@
 
 "prefDescFormatHelp": "Wenn beide Formate vorhanden sind, wird nur eines verwendet.",
 
-"prefDescFormatOption1": "Version des Videos, die eine Audiodeskription enthält",
+"prefDescFormatOption1": "Version des Videos, die eine Audiobeschreibung enthält",
 
-"prefDescFormatOption1b": "eine alternative Version der Audiodeskription",
+"prefDescFormatOption1b": "eine alternative Version der Audiobeschreibung",
 
-"prefDescFormatOption2": "Textbasierte Audiodeskription, die vom Screen-Reader vorgelesen wird",
+"prefDescFormatOption2": "Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird",
 
-"prefDescFormatOption2b": "eine textbasierte Audiodeskription",
+"prefDescFormatOption2b": "eine textbasierte Audiobeschreibung",
 
 "prefDescPause": "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden",
 
 "prefDescVisible": "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Stimme",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Frequenz",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Tonlage",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Sehr tief",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Tief",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "Mittel",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Hoch",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Sehr hoch",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Einstellungen bearbeiten um diesen Text vorzulesen.",
 
 "prefHighlight": "Transkription hervorheben, während das Medium abgespielt wird",
 
@@ -234,7 +234,7 @@
 
 "prefCaptionsBGColor": "Hintergrund",
 
-"prefCaptionsSize": "Schriftgrad",
+"prefCaptionsSize": "Schriftgöße",
 
 "prefCaptionsOpacity": "Deckkraft",
 
@@ -300,7 +300,7 @@
 
 "closeButtonLabel": "Schließen",
 
-"windowButtonLabel": "Fenster Manipulationen",
+"windowButtonLabel": "Fenstereinstellungen",
 
 "windowMove": "Verschieben",
 
@@ -326,30 +326,30 @@
 
 "windowBringTopAlert": "Dieses Fenster ist jetzt im Vordergrund.",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "Suche nach:",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "Gefunden",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "Treffer.",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "Auf den Zeitindex klicken, um das Video vom Zeitpunkt des jeweiligen Suchergebnisses abzuspielen.",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "Keine Treffer.",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "Abspielen von",
 
-"hour": "hour",
+"hour": "Stunde",
 
-"minute": "minute",
+"minute": "Minute",
 
-"second": "second",
+"second": "Sekunde",
 
-"hours": "hours",
+"hours": "Stunden",
 
-"minutes": "minutes",
+"minutes": "Minuten",
 
-"seconds": "seconds",
+"seconds": "Sekunden",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "Tastaturkürzel aktivieren"
 
 }

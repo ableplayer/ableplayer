@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Player created dynamically | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- CSS and JavaScript specifically for this example -->
+<style>
+	div#alert { 
+		display: none; 
+		margin: 1em;		
+		background-color: #FFC; 
+		padding: 1em;
+		border: 2px solid #340449; 
+		font-weight: bold; 
+		width: 20em;
+		text-align: center;
+	}
+	section ul { 
+		list-style-type: none;
+		margin: 0; 
+		padding: 0;
+	}
+	section ul li { 
+		display: inline;
+	}
+	section ul li button { 
+		color: black;
+		background-color: #E9E9ED;
+		margin: 0.25em;
+		font-size: 1.1em;
+		font-weight: bold; 		
+		padding: 0.75em;
+		outline-style: solid;
+		outline-width: thick;
+		outline-color: transparent;
+	}
+	section ul li button:focus, 
+	section ul li button:hover, 
+	section ul li button:active { 
+		outline-color: #cc0000; 
+  	text-decoration: none !important;
+		border-color: trasparent;
+	}
+	section ul li button[aria-disabled="true"] { 
+		color: #707070; 
+		background-color: #F4F4F6;
+	}
+	div.player-wrapper { 
+		margin: 0 0 2em;
+		display: none;
+	}
+</style>
+<script>
+	$(document).ready(function() {
+
+		$('#addAudio').on('click',function(){
+
+			// Add an audio element dynamically 
+			// NOTE: It does not need a data-able-player attribute when added this way 
+			var $audio1 = $('<audio>').attr({
+				'id': 'audio1',
+				'width': '480',
+				'preload': 'auto',
+				'data-able-player': 'true'
+			}); 
+			var $source1 = $('<source>').attr({ 
+				'type': 'audio/mpeg',
+				'src': '../media/smallf.mp3'
+			}); 
+			$audio1.append($source1); 
+			$('#audio1').html($audio1).show(); 
+
+			// Create a new Able Player instance from the new audio element 
+			// and add it to the global AblePlayerInstances array
+			AblePlayerInstances.push(new AblePlayer($audio1)); 
+
+			// Update the alert and button in this demo
+			$('#alert').text('One audio player added. See below.').show(); 
+			$(this).attr('aria-disabled',true); 
+	}); 
+
+	$('#addVideo').on('click',function(){
+
+		// Add a video element dynamically 
+		// NOTE: It does not need a data-able-player attribute when added this way 
+
+		var $video1 = $('<video>').attr({
+			'id': 'video1',
+			'preload': 'auto',
+			'width': '480',
+			'height': '360',
+			'poster': '../media/wwa.jpg',
+			'data-skin': '2020'
+		});
+		var $source1 = $('<source>').attr({ 
+			'type': 'video/mp4', 
+			'src': '../media/wwa.mp4',
+			'data-desc-src': '../media/wwa_described.mp4'
+		}); 
+		var $track1 = $('<track>').attr({ 
+			'kind': 'captions',
+			'src': '../media/wwa_captions_en.vtt',
+			'srclang': 'en',
+			'label': 'English'
+		}); 
+		var $track2 = $('<track>').attr({ 
+			'kind': 'subtitles',
+			'src': '../media/wwa_captions_es.vtt',
+			'srclang': 'es',
+			'label': 'Español'
+		}); 
+		var $track3 = $('<track>').attr({ 
+			'kind': 'subtitles',
+			'src': '../media/wwa_captions_fr.vtt',
+			'srclang': 'fr',
+			'label': 'Français'
+		}); 
+		var $track4 = $('<track>').attr({ 
+			'kind': 'chapters',
+			'src': '../media/wwa_chapters_en.vtt',
+			'srclang': 'en'
+		}); 
+		$video1.append($source1,$track1,$track2,$track3,$track4); 
+		$('#video1').html($video1).show(); 
+
+		// Create a new Able Player instance from the new video element 
+		// and add it to the global AblePlayerInstances array
+		AblePlayerInstances.push(new AblePlayer($video1)); 
+
+		// Update the alert and button in this demo
+		$('#alert').text('One video player added. See below.').show(); 
+		$(this).attr('aria-disabled',true); 
+
+		});
+		$('#reset').on('click',function() { 
+			$('#audio1').empty().hide(); 
+			$('#video1').empty().hide(); 
+			$('#alert').text('All players have been removed.').show(); 
+			$('#addAudio').removeAttr('aria-disabled'); 
+			$('#addVideo').removeAttr('aria-disabled'); 
+		}); 
+	});
+</script>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Player created dynamically</h1>
+
+		<p>This page has no &lt;audio&gt; or &lt;video&gt; elements, but they can be added dynamically 
+			by clicking the following buttons.</p>
+
+		<div id="alert" aria-live="assertive"></div>
+
+		<section aria-label="Action buttons">
+			<ul>
+				<li><button id="addAudio">Add audio player</button></li>
+				<li><button id="addVideo">Add video player</button></li>
+				<li><button id="reset">Remove all players</button></li>
+			</ul>
+		</section>
+
+		<div class="player-wrapper" id="audio1"></div>
+
+		<div class="player-wrapper" id="video1"></div>
+
+
+	</main>
+</body>
+</html>

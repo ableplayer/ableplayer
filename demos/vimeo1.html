@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Vimeo Demo 1</title>
+<title>Vimeo player (captions hosted on Vimeo) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -40,36 +40,35 @@
 </head>
 
 <body>
-
-	<div id="intro">
-
-		<h1>Able Player for Vimeo<br/>
-		Example 1, Captions and Subtitles hosted on Vimeo
-		</h1>
-
-		<p>This page features an example of Able Player being used to play a Vimeo video.
-	The video featured is hosted in a Vimeo Pro account, 
-	required for hiding the controller and for being able to 
-	control playback rate with faster/slower buttons. 
-	Captions and subtitles in this demo are stored solely on Vimeo, 
-	therefore Able Player is unable to auto-generate an interactive transcript, 
-	and users have no control of the appearance of captions.</p>
-
-		<p>For more information about the limitations of hosting captions on 
-		Vimeo and YouTube, see the 
-		<a href="https://ableplayer.github.io/ableplayer">Able Player documentation</a>.</p>
-
-		<h2>Additional examples:</h2>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
 		<ul>
-			<li><a href="vimeo2.html">Vimeo Demo 2: Captions via local VTT files</a></li>
-			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
 		</ul>
-	</div>
+	</nav>
+	<main>
+		<h1>Vimeo player (captions hosted on Vimeo)</h1>
 
-<div class="wrapper">
-	<video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
-	</video>
-</div>
+		<div id="intro">
 
+			<p>This page features an example of Able Player being used to play a Vimeo video.
+				The video featured is hosted in a Vimeo Pro account, 
+				required for hiding the controller and for being able to 
+				control playback rate with faster/slower buttons. 
+				Captions and subtitles in this demo are stored solely on Vimeo, 
+				therefore Able Player is unable to auto-generate an interactive transcript, 
+				and users have no control of the appearance of captions.</p>
+
+		</div>
+
+		<div class="wrapper">
+			<video id="video1" data-able-player data-skin="2020" preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442">
+			</video>
+		</div>
+
+	</main>
 </body>
 </html>

@@ -6,8 +6,12 @@
 			$chaptersList;
 
 		if ($('#' + this.chaptersDivLocation)) {
+
 			this.$chaptersDiv = $('#' + this.chaptersDivLocation);
 			this.$chaptersDiv.addClass('able-chapters-div');
+
+			// empty content from previous build before starting fresh
+			this.$chaptersDiv.empty(); 
 
 			// add optional header
 			if (this.chaptersTitle) {
@@ -43,6 +47,8 @@
 
 		thisObj = this;
 
+		// TODO: Update this so it can change the chapters popup menu 
+		// currently it only works if chapters are in an external container
 		if (!this.$chaptersNav) {
 			return false;
 		}
@@ -55,7 +61,6 @@
 				this.useChapterTimes = false;
 			}
 		}
-
 		if (this.useChapterTimes) {
 			cues = this.selectedChapters.cues;
 		}
@@ -82,8 +87,10 @@
 						$clickedItem = $(this).closest('li');
 						$chaptersList = $(this).closest('ul').find('li');
 						thisChapterIndex = $chaptersList.index($clickedItem);
-						$chaptersList.removeClass('able-current-chapter').attr('aria-selected','');
-						$clickedItem.addClass('able-current-chapter').attr('aria-selected','true');
+						$chaptersList.removeClass('able-current-chapter')
+							.children('button').removeAttr('aria-current');
+						$clickedItem.addClass('able-current-chapter')
+							.children('button').attr('aria-current','true');
 						// Need to updateChapter before seeking to it
 						// Otherwise seekBar is redrawn with wrong chapterDuration and/or chapterTime
 						thisObj.updateChapter(time);
@@ -110,7 +117,7 @@
 				$chapterItem.append($chapterButton);
 				$chaptersList.append($chapterItem);
 				if (this.defaultChapter === cues[thisChapter].id) {
-					$chapterButton.attr('aria-selected','true').parent('li').addClass('able-current-chapter');
+					$chapterButton.attr('aria-current','true').parent('li').addClass('able-current-chapter');
 					this.currentChapter = cues[thisChapter];
 					hasDefault = true;
 				}
@@ -118,7 +125,7 @@
 			if (!hasDefault) {
 				// select the first chapter
 				this.currentChapter = cues[0];
-				$chaptersList.find('button').first().attr('aria-selected','true')
+				$chaptersList.find('button').first().attr('aria-current','true')
 					.parent('li').addClass('able-current-chapter');
 			}
 			this.$chaptersNav.html($chaptersList);
@@ -167,9 +174,12 @@
 				}
 				if (typeof this.$chaptersDiv !== 'undefined') {
 					// chapters are listed in an external container
-					this.$chaptersDiv.find('ul').find('li').removeClass('able-current-chapter').attr('aria-selected','');
+					this.$chaptersDiv.find('ul').find('li')
+						.removeClass('able-current-chapter')
+						.children('button').removeAttr('aria-current');
 					this.$chaptersDiv.find('ul').find('li').eq(thisChapterIndex)
-						.addClass('able-current-chapter').attr('aria-selected','true');
+						.addClass('able-current-chapter')
+						.children('button').attr('aria-current','true');
 				}
 			}
 		}

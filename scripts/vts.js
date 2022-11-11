@@ -119,13 +119,13 @@
 							if ($.inArray(editedContent,kindOptions) === -1) {
 								// whatever user typed is not a valid kind
 								// assume they correctly typed the first character
-								if (editedContent.substr(0,1) === 's') {
+								if (editedContent.substring(0,1) === 's') {
 									$(this).text('subtitles');
 								}
-								else if (editedContent.substr(0,1) === 'd') {
+								else if (editedContent.substring(0,1) === 'd') {
 									$(this).text('descriptions');
 								}
-								else if (editedContent.substr(0,2) === 'ch') {
+								else if (editedContent.substring(0,2) === 'ch') {
 									$(this).text('chapters');
 								}
 								else {
@@ -176,10 +176,12 @@
 		}
 	};
 
-	AblePlayer.prototype.setupVtsTracks = function(kind, lang, label, src, contents) {
+	AblePlayer.prototype.setupVtsTracks = function(kind, lang, trackDesc, label, src, contents) {
+
+		// TODO: Add support for trackDesc 
+		// (to destinguish between tracks for the decribed vs non-described versions)		
 
 		// Called from tracks.js
-
 		var srcFile, vtsCues;
 
 		srcFile = this.getFilenameFromPath(src);
@@ -204,7 +206,7 @@
 			return path;
 		}
 		else {
-			return path.substr(lastSlash+1);
+			return path.substring(lastSlash+1);
 		}
 	};
 
@@ -287,8 +289,8 @@
 
 		var firstPart, lastPart;
 
-		var firstPart = timestamp.substr(0,timestamp.lastIndexOf('.')+1);
-		var lastPart = timestamp.substr(timestamp.lastIndexOf('.')+1);
+		firstPart = timestamp.substring(0,timestamp.lastIndexOf('.')+1);
+		lastPart = timestamp.substring(timestamp.lastIndexOf('.')+1);
 
 		// TODO: Be sure each component within firstPart has only exactly two digits
 		// Probably can't justify doing this automatically
@@ -298,7 +300,7 @@
 		// Be sure lastPart has exactly three digits
 		if (lastPart.length > 3) {
 			// chop off any extra digits
-			lastPart = lastPart.substr(0,3);
+			lastPart = lastPart.substring(0,3);
 		}
 		else if (lastPart.length < 3) {
 			// add trailing zeros
@@ -1000,20 +1002,20 @@
 	AblePlayer.prototype.getKindFromClass = function(myclass) {
 
 		// This function is called when a class with prefix "kind-" is found in the class attribute
-		// TODO: Rewrite this using regular expressions
-		var kindStart, kindEnd, kindLength, kind;
+
+		var kindStart, kindEnd;
 
 		kindStart = myclass.indexOf('kind-')+5;
 		kindEnd = myclass.indexOf(' ',kindStart);
 		if (kindEnd == -1) {
 			// no spaces found, "kind-" must be the only myclass
-			kindLength = myclass.length - kindStart;
+			return myclass.substring(kindStart);
 		}
 		else {
-			kindLength = kindEnd - kindStart;
+			// kind-* is one of multiple classes 
+			// the following will find it regardless of position of "kind-*" within the class string
+			return myclass.substring(kindStart,kindEnd);
 		}
-		kind = myclass.substr(kindStart,kindLength);
-		return kind;
 	};
 
 	AblePlayer.prototype.showVtsAlert = function(message) {

@@ -32,6 +32,8 @@ Able Player has been translated into the following languages. To add another lan
 
 -   Catalan
 -   Chinese, Traditional (Taiwan)
+-   Czech
+-   Danish
 -   Dutch
 -   English
 -   French
@@ -40,6 +42,8 @@ Able Player has been translated into the following languages. To add another lan
 -   Indonesian
 -   Italian
 -   Japanese
+-   Portuguese 
+-   Portuguese - Brazil 
 -   Norwegian
 -   Spanish
 -   Swedish
@@ -84,11 +88,11 @@ Dependencies
 
 *Able Player* has the following third party dependencies: 
 
--   *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
+- *Able Player* uses [jQuery][]. Version 3.2.1 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
--   *Able Player* uses [js-cookie][] to store and retrieve user
-    preferences in cookies. This script is distributed with *Able
-    Player*. Prior to version 2.3, Able Player used [jquery.cookie][]
+- *Able Player* uses [js-cookie][] to store and retrieve user
+    preferences in cookies. The example code below uses CDN’s hosted libraries; 
+    no download required. Prior to version 2.3, Able Player used [jquery.cookie][]
     for this same purpose.
     
 To install Able Player, copy the following files from the Able Player repo into a folder on your web server:
@@ -96,7 +100,6 @@ To install Able Player, copy the following files from the Able Player repo into 
 -		button-icons/*
 - 		images/*
 -		styles/* (optional, see note below)
--		thirdparty/* (includes js-cookie, as mentioned above)
 -		translations/* 
 -		LICENSE 
 
@@ -111,7 +114,7 @@ Fallback
 
 All modern browsers have supported HTML5 media elements for many years.
 However, there are still older browsers in use that don’t have this support 
-(e.g., Internet Explorer 9 and earlier). For these, you need to provide fallback content. 
+(e.g., Internet Explorer 9 and earlier). For these, fallback content should be provided. 
  
 Prior to version 4.0, *Able Player* used [JW Player][] as a fallback Flash player 
 for older browsers. However, this solution was built specifically on **JW Player 6** 
@@ -125,9 +128,11 @@ Instead, we recommend providing alternative content as a child of the `<video>` 
 For example, this could be a link to the media file so users can download it 
 and play it on their player of choice. Or it could be a link to a transcript. 
 
-If the browser is unable to play the media file, Able Player will show this alternative content. 
-If no alternative content is provided, Able Player will display a standard message that lists 
-the minimum versions of common web browsers required for playing HTML5 media. 
+If Able Player fails to load, it will fall back to the HTML media element and if the browser supports 
+HTML5 media, the browser will provide its own interface for playing the media. If the browser is unable to play the media file, it will display the alternative content. If no alternative content is provided, 
+Able Player will inject a short error message for the browser to display. 
+
+Fallback content can be tested by adding the **data-test-fallback** attribute to the  `<audio>` or `<video>` element, with a value of either "1" (emulate failure to build Able Player) or "2" (emulate a browser that doesn't support HTML5 media).
 
 Setup Step 1: Use HTML5 Doctype
 -------------------------------
@@ -148,7 +153,7 @@ to all use cases, both audio and video.
 ```HTML
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- CSS -->
 <link rel="stylesheet" href="build/ableplayer.min.css" type="text/css"/>
@@ -215,7 +220,8 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
     download as much of the media as possible. If the media is not a
     central focus, downloading the entire media resource can consume
     valuable bandwidth, so preload="metadata" would be a better option.
--   **width** - width of the media player in pixels. For video, this value should reflect the target width of the media itself. If not provided the player will be sized to fit its container.
+-   **width** - width of the video player in pixels. This value should reflect the target width of the media itself. If not provided the player will be sized to fit its container. This value is supported for audio as well, but this is not valid HTML so **data-width** should be used instead. 
+-   **data-width** - width of the media player in pixels (can be used for either audio or video). If neither **width** nor **data-width** are provided, the player will be sized to fit its container.
 -   **data-root-path** - define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server
 -   **data-heading-level** - optional; Able Player injects an off-screen HTML heading "Media Player" (or localized equivalent) at the top of the player so screen reader users can easily find the player. It automatically assigns a heading level that is one level deeper than the closest parent heading. This attribute can be used to manually set the heading level, rather than relying on Able Player to assign it automatically. Valid values are 1 through 6. A value of 0 is also supported, and instructs Able Player to not inject a heading at all. The latter should be used only if the web page already includes a heading immediately prior to the media player.
 -   **data-hide-controls** - optional; set to "true" to hide controls during playback. Controls are visibly hidden but still accessible to assistive technologies. Controls reappear if user presses any key or moves the mouse over the video player region.
@@ -236,6 +242,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 #### Captions
 
 -   **data-captions-position** - optional; specify default position of captions relative to the video (either "below" or "overlay"; "below" is the default if not specified). Users can override this setting in Captions Preferences.
+-   **data-state-captions** - optional; "on" or "off". Captions are on by default if they're available, but this allows website owners to override that setting. If users enable captions, their preference will be saved in a cookie, and that will override the default setting on future visits.
 
 #### Transcript
 
@@ -309,7 +316,9 @@ The following attributes make all this possible:
 
 #### Fallback Player
 
--   **data-test-fallback** - optional; force browsers to display the fallback content that will be shown to users with older browsers that don't support HTML5 media.  
+-   **data-test-fallback** - optional (for testing); force browsers to display fallback content. Set to either of the following values:
+    -  "1" - emulate failure to build Able Player 
+		-  "2" - emulate browser that doesn't support HTML5 media  
 
 The following attributes are supported on the `<video>` element only:
 
@@ -356,7 +365,16 @@ the same as a closed caption file, but its contents are description text
 rather than captions. With this method, description text is read aloud by 
 browsers that support the [Web Speech API][]; otherwise it's written to an  
 ARIA live region, so supporting screen readers will automatically announce 
-the new text as soon as it is written to the page.
+the new text as soon as it is written to the page. There are many advantages 
+to having browsers perform this function: It frees screen readers to perform 
+other tasks without disrupting audio description; it makes it possible to 
+pause during audio description then automatically resume playback when description 
+is complete; and it allows users to customize the voice, pitch, rate and volume 
+that are used for reading description (via the Description Prefences dialog). 
+However, in rare instances it might be preferable to have screen readers
+perform this function rather than browsers (e.g., if a language is not well supported
+by the Web Speech API). In such instances, use **data-desc-reader="screenreader"** 
+(otherwise this property will default to "browser"). 
 
 The second method is to produce a separate video with description mixed
 in. If multiple video sources are already provided (e.g., an MP4 and
@@ -366,7 +384,7 @@ available, add a **data-desc-src** attribute to the `<source>` element for
 that video. The value of this attribute is a path pointing to the
 described version of the video. With this method, the described version
 of the video can be played instead of the non-described version, and the
-two versions can be swapped with clicking the "D" button on the
+two versions can be swapped with clicking the "Descriptions" button on the
 controller.
 
 If descriptions are available using either of the above methods, a
@@ -382,18 +400,15 @@ auto-generated interactive transcript. Therefore, it is important for the
 WebVTT description file to be accurately synchronized with the separate 
 described version of the video.  
 
-In some applications, text-based descriptions might be a required
-part of the interface (e.g., if video pauses so users can interact with
-HTML overlays; text-based description could be used in this context to provide
-additional instructions for screen reader users). In such cases the Descriptions
-button can be eliminated from the controller with **data-use-descriptions-button="false"**.
-
-In other applications, a WebVTT descriptions file might be used solely for the purposes 
+In some applications, a WebVTT descriptions file might be used solely for the purposes 
 of displaying visible description text or incorporating description text into the 
 auto-generated transcript, and the WebVTT description text is not intended to be read aloud 
 by screen readers or browsers  (for example, if the sole video source is a described video).
 In such cases, use **data-descriptions-audible="false"** to prevent browsers and screen readers 
-from announcing changes to the description text. 
+from announcing the description text. 
+
+If description is available through either of the above methods, it is off by default and users must enable it using the "Descriptions" button on the player control. Website owners can override   
+this setting and change the default state to "on" using **data-state-descriptions="on"**. Also, website owners can define the default state of extended descriptions (i.e., pausing the video during audio description) using **data-desc-pause-default**. Supported values are either "off" or "on". Setting this to "off" is useful if all videos have plenty of audio space for description to be read, and pausing is therefore unnecessary. The default setting is "on". If users have changed this setting in the Description Preferences dialog, their preference will be saved in a cookie, and that will override the default setting on future visits. 
 
 #### Sign language
 
@@ -436,6 +451,9 @@ Playlists
 An *Able Player* playlist is an HTML list of tracks. A playlist can accompany 
 either a video or audio player, but both audio and video cannot be combined 
 within a single playlist. The list can be either ordered (`<ol>`) or unordered (`<ul>`). 
+The size of the media player is controlled via the media player itself 
+(e.g., with **width** and **height** attributes on the `<video>` element). 
+Each item in the playlist is scaled to fit the player. 
 
 The following attributes are supported on the list element:
 
@@ -450,10 +468,6 @@ The following attributes are supported on the list element:
 Within the playlist, each list item can include the following HTML attributes: 
 
 -   **data-poster** - path to an image file. 
--   **width** - width of the video in pixels. 
--   **height** - height of the video in pixels. 
-
-If width and height are omitted, the player will be sized to fit its container. 
 
 The following HTML elements must be nested inside each list item: 
 
@@ -489,7 +503,7 @@ Vimeo videos are not yet supported within playlists.
   
 ```HTML
 <ul class="able-playlist" data-player="my_video_player">
-  <li data-poster="video1.jpg" data-width="480" data-height="360">
+  <li data-poster="video1.jpg">
     <span class="able-source" 
       data-type="video/mp4" 
       data-src="video1.mp4">
@@ -588,11 +602,16 @@ YouTube Support
 ---------------
 
 To play a YouTube video in *Able Player*, simply include a **data-youtube-id** attribute
-on the `<video>` element. The value of this attribute must be the video's 11-character YouTube ID.
+on the `<video>` element. The value of this attribute can be the video's 11-character YouTube ID, 
+or a YouTube URL in any of the following formats (where xxx is the 11-character ID): 
+-  	https://youtu.be/xxx
+-  	https://www.youtube.com/watch?v=xxx
+-  	https://www.youtube.com/embed/xxx
 
-If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute on the `<video>` element. The value of this attribute must be the 11-character YouTube ID
-of the described version. If users turn on the Description button on their player controller,
-the described version of the video will be loaded instead of the non-described version.
+If a described version of the video is available on YouTube, include a **data-youtube-desc-id** attribute on the `<video>` element. The value of this attribute can be the 11-character YouTube ID
+of the described version (or a YouTube URL, in any of the above formats). 
+
+If users turn on the Description button on their player controller, the described version of the video will be loaded instead of the non-described version.
 
 ### Important Changes to YouTube Support
 
@@ -606,11 +625,11 @@ Vimeo Support
 ---------------
 
 To play a Vimeo video in *Able Player*, simply include a **data-vimeo-id** attribute
-on the `<video>` element. The value of this attribute must be the video's Vimeo ID (a string of numbers).
+on the `<video>` element. The value of this attribute can be the video's Vimeo ID (a string of numbers or characters), or it can be a full Vimeo URL, such as https://vimeo.com/xxx where xxx is the Vimeo ID.
 
 If a described version of the video is available on Vimeo, include a **data-vimeo-desc-id** attribute
-on the `<video>` element. The value of this attribute must be the Vimeo ID
-of the described version. If users turn on the Description button on their player controller,
+on the `<video>` element. The value of this attribute can be the Vimeo ID or URL of the 
+described version. If users turn on the Description button on their player controller,
 the described version of the video will be loaded instead of the non-described version.
 
 Note that Vimeo currently has some limitations:  

@@ -992,8 +992,8 @@
 			}
 		}
 		else if (key.includes('-')) {
-			code = key.substr(0,2);
-			subTag = key.substr(3);  
+			code = key.substring(0,2);
+			subTag = key.substring(3);  
 			lang = isoLangs[code.toLowerCase()]; 
 			if (lang) { 
 				if (whichName === 'local') { 

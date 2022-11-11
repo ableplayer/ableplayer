@@ -74,11 +74,11 @@
 
 "preferences": "Préférences",
 
-"enterFullScreen": "Activer le mode plein écran",
+"enterFullscreen": "Activer le mode plein écran",
 
-"exitFullScreen": "Quitter le mode plein écran",
+"exitFullscreen": "Quitter le mode plein écran",
 
-"fullScreen": "Plein écran",
+"fullscreen": "Plein écran",
 
 "speed": "Vitesse",
 

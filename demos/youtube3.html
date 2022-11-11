@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Complex YouTube Example</title>
+<title>YouTube player (captions on YouTube, descriptions hosted locally) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -17,107 +17,73 @@
 
 <!-- styles for this example page -->
 <style>
-	body { 
-		display: flex; 		
-		flex-wrap: wrap; 
-		justify-content: flex-start;
-		width: 1160px; 
+	div#intro { 
+		width: 80em;
 		max-width: 100%;
-		margin-top: 0;
 	}
-	section#intro { 
-		width: 100%;
-		margin-bottom: 2%;	
+	div#intro h2 { 
+		font-size: 1.2em;
+		margin-bottom: 0.25em;
 	}
-	section#intro p, 
-	section#intro ul { 
-		width: 80em; 	
-		max-width: 95%;	
+	div#intro ul { 
+		margin-top: 0.5em;
+		margin-bottom: 2em;
 	}
-	section#intro a { 
-		color: #512a69;
-	}
-	section#player, 
-	section#transcript-wrapper { 
-		width: 860px; 
-		max-width: 70%;
-	}
-	section#speakers { 
-		background-color: #e8ddf0;
-		border: 1px solid #340449;
-		width: 270px;
-		max-width: 24%;
-		margin-left: 2%;
-	}
-	section#speakers h2 {
-		margin: 0.25em;
-		text-align: center;
-	}
-	section#speakers p {
-		margin: 1em;
-		text-align: center;
+	.wrapper {
+		width: 800px;
+		max-width: 100%;
 	}
 </style>
+
 </head>
 
 <body>
-
-	<section id="intro" aria-label="Intro">
-
-		<h1>Able Player for YouTube (Complex Example)</h1>
-
-		<p>This page features a relatively <strong>complex</strong> example of Able Player being used to play a YouTube video. Its features include:</p>
-
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
 		<ul>
-			<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
-			<li>Captions, subtitles, and chapters, all hosted in local WebVTT files, and referenced within &lt;track&gt; elements.</li>
-			<li>An interactive transcript that combines all of the above text tracks.</li>
-			<li>External containers to which Able Player adds chapters and the interactive transcript.</li>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
 		</ul>
+	</nav>
+	<main>
 
-		<h2>Additional examples:</h2>
-		<ul>
-			<li><a href="youtube1.html">YouTube Demo 1 (Captions hosted on YouTube)</a></li>
-			<li><a href="youtube2.html">YouTube Demo 2 (All tracks hosted locally)</a></li>
-			<li><a href="index.html">Index of all <em>Able Player</em> Examples</a></li>
-		</ul>
-	</section>
+		<h1>YouTube player (captions on YouTube, descriptions hosted locally)</h1>
 
-	<section id="player" aria-label="Video player">
-		<video data-able-player
-			data-skin="2020"
-			id="video1"
-			width="854"
-			height="480"
-			preload="auto"
-			data-youtube-id="dhwpLACAls8"
-			data-youtube-desc-id="Ck2TdVMhWcU"
-			data-transcript-div="transcript"
-			data-transcript-title=""
-			data-chapters-div="chapters"
-			data-chapters-title="" 
-			data-use-chapters-button="false"
-			data-include-transcript="false"
-			playsinline
-		>
-			<track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
-			<track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Español"/>
-			<track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-cn" label="中文(中华人民共和国)"/>
-			<track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
-		</video>
-	</section>
+		<div id="intro">
+			<p>This page features an example of Able Player being used to play a YouTube video. 
+			Its features include:</p>
 
-	<section id="speakers" aria-labelledby="speakers-heading">
-		<h2 id="speakers-heading">Speakers</h2>	
-		<p>Click the name of a speaker to jump to their section 
-			of the video.
-		</p>
-		<div id="chapters"></div>
-	</section>
-	
-	<section id="transcript-wrapper" aria-label="Transcript">
-		<div id="transcript"></div>
-	</section>
-	
+			<ul>
+				<li>Captions and subtitles are hosted on YouTube. This video has been translated into a 
+					large number of languages, which makes it perfect for testing 
+					presentation and usability of such a long captions menu.
+				</li>
+				<li>Descriptions and chapters are hosted locally as WebVTT files. This is necessary 
+					for text-based audio description since YouTube does not yet support this feature.</li>
+				<li>Description is turned on by default using <strong>data-state-descriptions="on"</strong>.</li>
+				<li><em>Extended</em> description (i.e., automatically pausing while description plays) 
+					is turned off by default using <strong>data-desc-pause-default="off"</strong>.
+					This is because the description for this video was carefully scripted to avoid 
+					conflicts with speakers in the program audio.  
+					</li>
+			</ul>
+
+		</div>
+
+		<div class="wrapper">
+			<video id="video1" preload="auto" playsinline
+				data-able-player 
+				data-skin="2020" 
+				data-state-descriptions="on" 
+				data-desc-pause-default="off"
+				data-youtube-id="EcFzdNEkqok" >
+				<track kind="descriptions" src="../media/k_descriptions_en.vtt" srclang="en" label="English"/>
+				<track kind="chapters" src="../media/k_chapters_en.vtt" srclang="en" label="English"/>
+			</video>
+		</div>
+
+	</main>
 </body>
 </html>

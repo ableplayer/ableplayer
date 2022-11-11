@@ -74,11 +74,11 @@
 
 "preferences": "Preferenser",
 
-"enterFullScreen": "Visa i fullskärmsläge",
+"enterFullscreen": "Visa i fullskärmsläge",
 
-"exitFullScreen": "Gå ur fullskärmsläge",
+"exitFullscreen": "Gå ur fullskärmsläge",
 
-"fullScreen": "Fullskärmsläge",
+"fullscreen": "Fullskärmsläge",
 
 "speed": "Hastighet",
 

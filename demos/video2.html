@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Video Demo #2</title>
+<title>Video with default closed captions | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -18,23 +18,51 @@
 </head>
 
 <body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Video with <em>default</em> closed captions</h1>
 
-<h1>Able Player Video Demo #2:<br/>Video player with <em>default</em> closed captions</h1>
+		<p>This page was designed for testing the assignment of a default caption track.
+			The following is the order of precedence: 
+		</p>
+		<ol>
+			<li>The first caption track that has a <em>default</em> attribute</li>
+			<li>The caption track that matches the language of the player</li>
+			<li>The first caption track</li>
+		</ol>
+		<p>In the current example, the language of the player is English, but there's a 
+			<em>default</em> attribute on the French track, so French is the default language 
+			for the captions and transcript.</p>
+		<p>If the user has turned captions off on the current website, 
+			they will remain off, but the default caption language will be honored 
+			in the transcript.</p>
+		<p>Another purpose of this page is to test for an early bug in some browsers 
+			that resulted in browsers' native controls being displayed, 
+			even if no <em>controls</em> attribute was present, 
+			when one of the tracks had a <em>default</em> attribute. 
+			For additional details about this bug see 
+			<a href="https://github.com/ableplayer/ableplayer/issues/5">Able Player Issue 5</a>.
+		</p>
 
-<p>This test page was designed for testing a bug in which certain browsers display captions even if no <em>controls</em> attribute is present. They only do this if a &lt;track&gt; element has a <em>default</em> attribute. For additional details see <a href="https://github.com/ableplayer/ableplayer/issues/5">Able Player Issue 5</a>.</p>
+		<!-- use the following markup for each media element -->
+		<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
+			<source type="video/mp4" src="../media/wwa.mp4"/>
+			<source type="video/webm" src="../media/wwa.webm"/>
+			<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+			<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" />
+			<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+			<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français" default/>
+			<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+		</video>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
-<!-- use the following markup for each media element -->
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
-	<source type="video/mp4" src="../media/wwa.mp4"/>
-	<source type="video/webm" src="../media/wwa.webm"/>
-	<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-	<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-	<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-	<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-</video>
-
+	</main>
 </body>
 </html>

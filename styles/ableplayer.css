@@ -35,16 +35,17 @@
 */
 .able-wrapper {
   position: relative;
-  margin: 0;
+  margin: 1em 0;
   padding: 0;
-  width: 100%;
+  max-width: 100%;
   height: auto;
   box-sizing: content-box !important;
   text-align: left;
 }
 .able {
   position: relative;
-  margin: 1em 0;
+  margin: 0;
+	padding: 0; 
   width: 100%; /* will be changed dynamically as player is contructed */
   background-color: #000;
   box-shadow: 0px 0px 16px #262626;
@@ -64,9 +65,18 @@
   position: relative;
   top: 0;
 }
+.able .able-audcap-container { 
+  background-color: black;
+  position: relative;
+  margin: 0;
+	padding: 1.5em 0.25em;
+}
 .able-player {
 	font-family: Arial, Helvetica, sans-serif;
 	background-color: #262626; /* background color of player (appears on top & bottom) */
+}
+.able-audio { 
+	padding-top: 1em;
 }
 .able-offscreen {
 	position: absolute;
@@ -78,11 +88,6 @@
 }
 .able-media-container audio {
   display: none !important;
-}
-.able-video {
-}
-.able-video .able-now-playing {
-	display: none; /* not currently used for video */
 }
 .able-controller {
 	position: relative;
@@ -99,7 +104,17 @@
   height: auto !important;
 }
 .able .able-vidcap-container {
-  overflow: hidden;
+  overflow: visible;
+}
+.able .able-vidcap-container video { 
+	max-width: 100%; 
+}
+
+/*
+  YouTube and Vimeo 
+*/
+.able-media-container iframe { 
+	max-width: 100%;
 }
 
 /*
@@ -108,8 +123,6 @@
 .able-big-play-button {
     position: absolute;
     font-size: 8em;
-    opacity: 0.5;
-    filter:alpha(opacity=50); /* for IE */
     color: #fdfdfd;
     background-color: transparent;
     border: none;
@@ -118,10 +131,35 @@
     top: 0;
     padding: 0;
     z-index: 6500;
+    /* 
+      Opacity value chosen to achieve a 
+      contrast ratio of 5.63 in the worst case.
+    */
+    opacity: 0.75;
+    filter:alpha(opacity=75); /* for IE */
 }
-.able-big-play-button:hover {
-    opacity: 100;
-    filter:alpha(opacity=100); /* for IE */
+
+.able-big-play-button:hover, .able-big-play-button:focus {
+  opacity: 100;
+  filter:alpha(opacity=100); /* for IE */
+}
+
+.able-big-play-button .icon-play, 
+.able-big-play-button svg {
+  background-color: black;
+  padding: 1rem 2rem;
+}
+.able-big-play-button:hover .icon-play, 
+.able-big-play-button:hover svg {
+  outline-style: solid;
+  outline-width: medium;
+  outline-color: #8AB839 !important; /* green */
+}
+.able-big-play-button:focus .icon-play,
+.able-big-play-button:focus svg {
+  outline-style: solid;
+  outline-width: medium;
+	outline-color: #ffbb37 !important; /* yellow */
 }
 .able-left-controls, .able-right-controls {
     overflow: visible;
@@ -237,7 +275,7 @@
   display: inline-block;
   position: relative;
   left: 0;
-  top: -0.45em;
+  top: -0.4em;
   background-color: #FDFDFD;
   width: 0.8em;
   height: 0.8em;
@@ -251,137 +289,63 @@
 */
 .able-volume-slider {
   width: 34px;
-  height: 50px;
+  height: 80px; 
   background-color: #464646; /* same as .able-controller */
-  padding: 10px 0;
+  margin: 0;
+  padding: 5px 0;
   position: absolute;
   right: 0px;
-  top: -74px;
+  bottom: 60px; 
   display: block;
   z-index: 9100;
-}
-.able-volume-track {
-  display: block;
-  position: relative;
-  height: 100%; /* = 50px after padding */
-  width: 7px;
-  margin: 0 auto;
-  background-color: #000;
-}
-.able-volume-track.able-volume-track-on {
-  background-color: #dadada;
-  position: absolute;
-  height: 20px; /* change dynamically; 5px per volume tick */
-  top: 30px;  /* change dynamically; 50px - height */
-}
-.able-volume-slider > .able-volume-track {
-  /* add border only to the outer track */
-  border: 1px solid #FFF;
-}
-.able-volume-head {
-  display: inline-block;
-  background-color: #fdfdfd;
-  outline: 1px solid #333;
-  position: absolute;
-  height: 7px;
-  width: 15px;
-  left: -5px;
-  top: 23px; /* change dynamically; .able-volume-track-on top - 7 */
-  z-index: 9175;
-}
-.able-volume-head:hover,
-.able-volume-head:focus {
-	background-color: #ffbb37 !important; /* yellow */
 }
 .able-volume-help { /* not visible; used in aria-describedby */
   display: none;
 }
 
-/*
-input[type=range]:focus {
-  outline: none;
+.able-volume-slider input[type="range"] { 
+  appearance: slider-vertical;
+  writing-mode: bt-rl;
+  /* -webkit-appearance: none; */ /* Hides the slider so that custom slider can be made */
+  width: 28px; 
+  height: 100%; 
+  background: transparent; /* Otherwise white in Chrome */
 }
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 8.4px;
+/* 
+  Style slider in Firefox 
+*/ 
+.able-volume-slider input[type=range]::-moz-range-track {
+  border: 1px solid white;
+  width: 7px;
   cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
-}
-input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -14px;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #367ebd;
-}
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  background: #3071a9;
-  border-radius: 1.3px;
-  border: 0.2px solid #010101;
+  background: #000; 
 }
 input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
+  background-color: #fdfdfd;
+  outline: 1px solid #333;
+  height: 16px;
+  width: 24px;
+  z-index: 9175;
 }
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 8.4px;
-  cursor: pointer;
-  animate: 0.2s;
-  background: transparent;
-  border-color: transparent;
-  border-width: 16px 0;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #2a6495;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
-input[type=range]::-ms-fill-upper {
-  background: #3071a9;
-  border: 0.2px solid #010101;
-  border-radius: 2.6px;
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-}
-input[type=range]::-ms-thumb {
-  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
-  border: 1px solid #000000;
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
-  background: #ffffff;
-  cursor: pointer;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #3071a9;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #367ebd;
-}
-*/
+
+/* 
+  TODO: Style the slider in webkit to match the one in Mozilla 
+  First attempt at this was unsuccessful; it's quite fussy 
+  Placeholder selectors are provided below 
+  Also, will need to uncomment -webkit-appearance: none in slider rule above 
+*/ 
+.able-volume-slider input[type=range]::-webkit-slider-runnable-track {}
+.able-volume-slider input[type=range]::-webkit-slider-thumb {}
+
+/* 
+  TODO: Style the slider for IE (not a high priority) 
+*/   
+input[type=range]::-ms-track {}
+input[type=range]::-ms-fill-lower {}
+input[type=range]::-ms-fill-upper {}
+input[type=range]::-ms-thumb {}
+input[type=range]:focus::-ms-fill-lower {}
+input[type=range]:focus::-ms-fill-upper {}
 
 /*
   Status Bar
@@ -422,27 +386,30 @@ div.able-captions-wrapper {
   margin: 0;
   padding: 0;
   text-align: center;
-  line-height: 1.35em;
   display: block;
   z-index: 6000;
 }
 div.able-captions {
   display: none;
   padding: 0.15em 0.25em;
+	line-height: 1.35em;
   /* settings that are overridden by user prefs */
   background-color: black;
-  font-size: 1.1em;
+  font-size: 1em;
   color: white;
   opacity: 0.75;
 }
-div.able-captions-overlay {
+div.able-vidcap-container div.able-captions-overlay {
   position: absolute;
   margin: 0;
-  bottom: 0;
+  bottom: 0.5em;
 }
-div.able-captions-below {
+div.able-vidcap-container div.able-captions-below {
   position: relative;
   min-height: 3.2em;
+}
+div.able-audcap-container.captions-off { 
+	display: none;
 }
 div.able-descriptions {
   position: relative;
@@ -459,7 +426,6 @@ div.able-descriptions {
 /*
   Now Playing
 */
-
 div.able-now-playing {
 	text-align: center;
 	font-weight: bold;
@@ -473,6 +439,9 @@ div.able-now-playing span {
 }
 div.able-now-playing span span {
 	display: block;
+}
+div.able-video div.able-now-playing { 
+	display: none;
 }
 
 /*
@@ -493,6 +462,8 @@ div.able-modal-dialog {
   background-color: #FAFAFA;
   box-sizing: content-box !important;
   z-index: 10000;
+	max-height: 90%; 
+	overflow: scroll; 
 }
 @supports (transform: translate(-50%,-50%)) {
 	div.able-modal-dialog {
@@ -561,39 +532,35 @@ div.able-modal-dialog h1 {
   Preferences Form
 */
 
-.able-prefs-form fieldset {
-  margin-left: 0;
-  padding-left: 0;
+.able-prefs-form div[role="group"] {
+  margin: 1em 0;
+  padding: 0;
 	border: none;
 }
-.able-prefs-form legend {
+.able-prefs-form h2 {
 	color: black;
 	font-weight: bold;
 	font-size: 1.1em;
 }
-.able-prefs-form fieldset div {
+.able-prefs-form div[role="group"] > div {
   display: table;
   margin-left: 1em;
 }
-.able-prefs-form fieldset div input {
+.able-prefs-form div[role="group"] > div > input {
   display: table-cell;
 	width: 1em;
 	vertical-align: middle;
 }
-.able-prefs-form fieldset div label {
+.able-prefs-form div[role="group"] > div > label {
   display: table-cell;
 	padding-left: 0.5em;
 }
-fieldset.able-prefs-keys div {
-  float: left;
-  margin-right: 1em;
-}
-div.able-desc-pref-prompt {
+.able-desc-pref-prompt {
   font-weight: bold;
   font-style: italic;
   margin-left: 1em !important;
 }
-div.able-prefDescFormat > div {
+.able-prefDescFormat > div {
   margin-left: 1.5em;
 }
 .able-prefs-captions label,
@@ -602,27 +569,27 @@ div.able-prefDescFormat > div {
   float: left;
   margin-bottom: 0.25em;
 }
-fieldset.able-prefs-captions label {
+.able-prefs-captions label {
   width: 6em;
   text-align: right;
   padding-right: 1em;
 }
-fieldset.able-prefs-captions select {
+.able-prefs-captions select {
   width: 10em;
   font-size: 0.9em;
   border-radius: none;
 }
-fieldset.able-prefs-descriptions >  div.able-prefs-select { 
+.able-prefs-descriptions >  div.able-prefs-select { 
 	margin: 0.5em 1em;
 }
-fieldset.able-prefs-descriptions >  div.able-prefs-select > label,
-fieldset.able-prefs-descriptions >  div.able-prefs-slider > label {
+.able-prefs-descriptions >  div.able-prefs-select > label,
+.able-prefs-descriptions >  div.able-prefs-slider > label {
   width: 6em;
   text-align: right;
   padding-right: 1em;
 }
-fieldset.able-prefs-descriptions > div.able-prefs-select > select,
-fieldset.able-prefs-descriptions > div.able-prefs-slider > select {
+.able-prefs-descriptions > div.able-prefs-select > select,
+.able-prefs-descriptions > div.able-prefs-slider > select {
   width: 10em;
   font-size: 0.9em;
   border-radius: none;
@@ -737,13 +704,16 @@ span.able-modkey {
 }
 .able-resizable {
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 5px 2px;
   bottom: 0;
   right: 0;
   cursor: nwse-resize;
-  background: transparent url('../images/wingrip.png') no-repeat;
+}
+.able-resizable svg line {
+  stroke: #595959; 
+  stroke-width: 2px;
 }
 
 /*
@@ -815,10 +785,16 @@ div.able-chapters-div button::-moz-focus-inner {
   Fullscreen settings
   In v2.2.4b commented out :-webkit-full-screen style
   This was causing the toolbar in fullscreen mode to be positioned slightly offscreen in webkit browsers
-  Safari had an additional problem in window height was being calculated (see event.js > onWindowResize())
+  Safari had an additional problem in window height was being calculated 
   Commenting out this style appears have no adverse effect in any browser
   All other fullscreen styles were already commented out, and left here solely for reference
 */
+div.able-wrapper.fullscreen { 
+	margin: 0 !important; 
+	position: fixed !important; 
+	top: 0 !important;
+	background: none !important;
+}
 /*
 :-webkit-full-screen {
     position: fixed;
@@ -906,6 +882,7 @@ ul.able-popup {
 .able-popup li {
   padding: 0.25em 1em 0.25em 0.25em;
   margin: 1px;
+	width: auto;
   color: #FFF;
 }
 .able-popup li.able-focus {
@@ -950,10 +927,14 @@ ul.able-popup {
 .able-transcript-heading {
   font-size: 1.4em;
   font-weight: bold;
+	margin: 1em 0;
+	padding: 0;
 }
 .able-transcript-chapter-heading {
   font-size: 1.2em;
   font-weight: bold;
+	margin: 0;
+	padding: 0;
 }
 .able-transcript div.able-transcript-desc {
 	background-color: #FEE;
@@ -969,8 +950,15 @@ ul.able-popup {
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
 }
-.able-highlight {
-	background: #FF6; /* light yellow */
+.able-highlight, 
+.able-highlight span:hover,
+.able-highlight span:focus,
+.able-highlight span:active {
+  background-color: #000 !important; 
+	color: #FFF !important; 
+  padding: 0.25em 0.10em;
+  border: none;
+  outline: none;
 }
 .able-previous {
 	background: black !important;
@@ -979,10 +967,15 @@ ul.able-popup {
 .able-transcript span:hover,
 .able-transcript span:focus,
 .able-transcript span:active {
-	background: #CF6; /* light green */
+	background: #FFC; /* light yellow */
+  color: #000; 
+  border: none; 
+  outline: none;
+  border-bottom: 1px solid #000 ; 
 	cursor: pointer;
 }
 .able-window-toolbar label {
+  display: inline;
   margin-right: 10px;
   color: #FFF;
 }
@@ -1034,7 +1027,8 @@ ul.able-popup {
 	padding: 0;
   border: 2px solid #AAA;
 	border-radius: 5px;
-	-moz-border-radius: 5px;
+	width: auto;
+	max-width: 100%;
 }
 .able-playlist li button {
 	border: none;
@@ -1283,8 +1277,8 @@ button#able-vts-save:focus {
   Styles for 2020 Skin
 */
 div.able-skin-2020 div.able-seekbar-wrapper {
-  width: 96%;
-  margin: 10px 2%;
+  width: 99%;
+  margin: 10px 3px;
 }
 
 /*

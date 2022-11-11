@@ -5,30 +5,36 @@
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
 
-		if (!this.transcriptType) {
-			// previously set transcriptType to null since there are no <track> elements
-			// check again to see if captions have been collected from other sources (e.g., YouTube)
-
-			if (this.captions.length && (!(this.usingYouTubeCaptions || this.usingVimeoCaptions))) {
-				// captions are possible! Use the default type (popup)
-				// if other types ('external' and 'manual') were desired, transcriptType would not be null here
-				this.transcriptType = 'popup';
-			}
+		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
+			// a transcript is not possible 
+			this.transcriptType = null; 
+			deferred.resolve();
 		}
+		else { 
+			if (!this.transcriptType) {
+				// previously set transcriptType to null since there are no <track> elements
+				// check again to see if captions have been collected from other sources (e.g., YouTube)
 
-		if (this.transcriptType) {
-			if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
-				 this.injectTranscriptArea();
-					deferred.resolve();
+				if (this.captions.length) {
+					// captions are possible! Use the default type (popup)
+					// if other types ('external' and 'manual') were desired, transcriptType would not be null here
+					this.transcriptType = 'popup';
+				}
 			}
-			else if (this.transcriptType === 'manual') {
-				this.setupManualTranscript();
+			if (this.transcriptType) {
+				if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
+					this.injectTranscriptArea();
+					deferred.resolve();
+				}
+				else if (this.transcriptType === 'manual') {
+					this.setupManualTranscript();
+					deferred.resolve();
+				}
+			}
+			else {
+				// there is no transcript
 				deferred.resolve();
 			}
-		}
-		else {
-			// there is no transcript
-			deferred.resolve();
 		}
 		return promise;
 	};
@@ -197,7 +203,9 @@
 		if (!this.transcriptType) {
 			return;
 		}
-
+		if (this.playerCreated && !this.$transcriptArea) { 
+			return; 
+		}
 		if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
 
 			var chapters, captions, descriptions;
@@ -255,7 +263,6 @@
 			}
 
 			var div = this.generateTranscript(chapters || [], captions || [], descriptions || []);
-
 			this.$transcriptDiv.html(div);
 			// reset transcript selected <option> to this.transcriptLang
 			if (this.$transcriptLanguageSelect) {
@@ -359,7 +366,7 @@
 			transcriptTitle = this.tt.transcriptTitle;
 		}
 
-		if (typeof this.transcriptDivLocation === 'undefined') {
+		if (!this.transcriptDivLocation) {
 			// only add an HTML heading to internal transcript
 			// external transcript is expected to have its own heading
 			var headingNumber = this.playerHeadingLevel;
@@ -372,7 +379,6 @@
 			else {
 				var transcriptHeading = 'div';
 			}
-			// var transcriptHeadingTag = '<' + transcriptHeading + ' class="able-transcript-heading">';
 			var $transcriptHeadingTag = $('<' + transcriptHeading + '>');
 			$transcriptHeadingTag.addClass('able-transcript-heading');
 			if (headingNumber > 6) {

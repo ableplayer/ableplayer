@@ -74,11 +74,11 @@
 
 "preferences": "Preferensi",
 
-"enterFullScreen": "Masuk ke mode layar penuh",
+"enterFullscreen": "Masuk ke mode layar penuh",
 
-"exitFullScreen": "Keluar dari mode layar penuh",
+"exitFullscreen": "Keluar dari mode layar penuh",
 
-"fullScreen": "Layar penuh",
+"fullscreen": "Layar penuh",
 
 "speed": "Kecepatan",
 

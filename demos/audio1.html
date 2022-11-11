@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Audio Demo #1</title>
+<title>Audio with One Track | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -18,15 +18,22 @@
 </head>
 
 <body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Audio with One Track</h1>
 
-<h1>Able Player Audio Demo #1:<br/>Audio player with one track</h1>
-
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
-
-<audio id="audio1" width="480" preload="auto" data-able-player data-skin="2020">
-	<source type="audio/mpeg" src="../media/smallf.mp3"/>
-	<source type="audio/ogg" src="../media/smallf.ogg"/>
-</audio>
-
+		<audio id="audio1" width="480" preload="auto" data-able-player data-skin="2020">
+			<source type="audio/mpeg" src="../media/smallf.mp3"/>
+			<source type="audio/ogg" src="../media/smallf.ogg"/>
+		</audio>
+	</main>
 </body>
 </html>

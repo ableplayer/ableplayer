@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Able Player Video Demo #5</title>
+<title>Able Player Video Demo #10</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
 
 <!-- Dependencies -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="../thirdparty/js.cookie.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- Able Player CSS -->
 <link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
@@ -15,32 +15,53 @@
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.js"></script>
 
+<!-- CSS for this example -->
+<style>
+	#video-wrapper {
+		width: 500px;
+	}
+</style>
 </head>
 
 <body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Video with sign language</h1>
 
-<h1>Able Player Video Demo #5:<br/>Video player with interactive transcript, subtitles, and chapters</h1>
+		<p>An accompanying sign language video is provided for each &lt;source&gt; element using the
+			<em>data-sign-src</em> attribute. This results in a sign language video being played in a pop-up window
+			in sync with the program video. Unfortunately, this does not currently work in IOS.
+		</p>
 
-<p>For additional demos see the <a href="index.html">Index of <em>Able Player</em> Examples</a>.</p>
+		<div id="video-wrapper">
+			<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline>
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-sign-src="../media/wwa_sign.mp4"/>
+				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm" data-sign-src="../media/wwa_sign.webm"/>
+				<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+				<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+				<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+				<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+				<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+				<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+				<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+				<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+				<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+			</video>
+		</div>
 
-<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" playsinline data-hide-controls>
-	<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4">
-	<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm">
-	<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-	<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-	<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-	<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-	<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-	<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-	<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-	<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-	<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-	<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-	<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-	<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-	<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-	<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
-</video>
-
+	</main>
 </body>
 </html>

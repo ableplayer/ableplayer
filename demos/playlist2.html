@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Video Player with a playlist (Local Sources) | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- CSS for this example page -->
+<style>
+	main {
+		position: relative;
+		width: 100%;
+	}
+	#player {
+		float: left;
+		width: 640px;
+		max-width: 95%;
+		margin: 0;
+	}
+	#playlist {
+		float: left;
+		border: 1px solid #DDD;
+		margin: 20px;
+	}
+	#playlist h2 {
+		text-align: center;
+	}
+</style>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Video player with a playlist (Local Sources)</h1>
+
+		<p>This page includes a playlist of three videos, all stored locally. 
+			They each have a variety of different assets to test how gracefully the player can adapt 
+			to these changes as new media sources are loaded.
+			</p>
+
+		<div id="player">
+			<!-- video source and track elements will be populated from playlist -->
+			<video id="video1" width="640" height="480" preload="auto" data-able-player data-skin="2020" playsinline loop></video>
+		</div>
+		<div id="playlist">
+			<h2>Playlist</h2>
+			<!-- an AblePlayer playlist is any <ul> with class="able-playlist" -->
+			<!-- The value of data-player must match the id of the media element -->
+			<!-- see documentation for additional details -->
+			<ul class="able-playlist" data-player="video1">
+				<!-- World Wide Access -->
+				<li data-poster="../media/wwa.jpg" data-width="480" data-height="360">
+					<span class="able-source"
+						data-type="video/mp4"
+						data-src="../media/wwa.mp4"
+						data-desc0-src="../media/wwa_described.mp4"
+						data-sign-src="../media/wwa_sign.mp4"></span>
+					<span class="able-source"
+						data-type="video/webm"
+						data-src="../media/wwa.webm"
+						data-desc0-src="../media/wwa_described.webm"
+						data-sign-src="../media/wwa_sign.webm"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/wwa_captions_en.vtt"
+						data-srclang="en"
+						data-label="English"></span>
+					<span class="able-track"
+						data-kind="subtitles"
+						data-src="../media/wwa_captions_de.vtt"
+						data-srclang="de"
+						data-label="Deutsche"></span>
+					<span class="able-track"
+						data-kind="subtitles"
+						data-src="../media/wwa_captions_es.vtt"
+						data-srclang="es"
+						data-label="Espanol"></span>
+					<span class="able-track"
+						data-kind="subtitles"
+						data-src="../media/wwa_captions_ja.vtt"
+						data-srclang="ja"
+						data-label="日本語"></span>
+					<span class="able-track"
+						data-kind="descriptions"
+						data-src="../media/wwa_description_en.vtt"
+						data-srclang="en"
+						data-label="English"></span>
+					<span class="able-track"
+						data-kind="descriptions"
+						data-src="../media/wwa_description_de.vtt"
+						data-srclang="de"
+						data-label="Deutsche"></span>
+					<span class="able-track"
+						data-kind="descriptions"
+						data-src="../media/wwa_description_es.vtt"
+						data-srclang="es"
+						data-label="Espanol"></span>
+					<span class="able-track"
+						data-kind="descriptions"
+						data-src="../media/wwa_description_ja.vtt"
+						data-srclang="ja"
+						data-label="日本語"></span>
+					<span class="able-track"
+						data-kind="chapters"
+						data-src="../media/wwa_chapters_en.vtt"
+						data-srclang="en"
+						data-label="English"></span>
+					<span class="able-track"
+						data-kind="chapters"
+						data-src="../media/wwa_chapters_de.vtt"
+						data-srclang="de"
+						data-label="Deutsche"></span>
+					<span class="able-track"
+						data-kind="chapters"
+						data-src="../media/wwa_chapters_es.vtt"
+						data-srclang="es"
+						data-label="Espanol"></span>
+					<button type="button">
+						<img src="../media/wwa_mq_thumbnail.jpg" alt="">
+						World Wide Access
+					</button>
+				</li>
+				<!-- IT Accessibility (with extended description) -->
+				<li data-poster="../media/itaccess.jpg">
+					<span class="able-source"
+						data-type="video/mp4"
+						data-src="../media/itaccess-excerpt.mp4"
+						data-desc-src="../media/itaccess-excerpt-described.mp4"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/itaccess-excerpt-captions_en.vtt"
+						data-srclang="en"
+						data-label="English"></span>
+					<span class="able-track"
+						data-kind="subtitles"
+						data-src="../media/itaccess-excerpt-subtitles_es.vtt"
+						data-srclang="es"
+						data-label="Español"></span>
+					<span class="able-track"
+						data-kind="chapters"
+						data-src="../media/itaccess-excerpt-chapters_en.vtt"
+						data-srclang="en"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/itaccess-excerpt-described-captions_en.vtt"
+						data-srclang="en"
+						data-label="English"
+						data-desc></span>
+					<span class="able-track"
+						data-kind="chapters"
+						data-src="../media/itaccess-excerpt-described-chapters_en.vtt"
+						data-srclang="en"
+						data-desc></span>
+					<button type="button">
+						<img src="../media/itaccess.jpg" alt="">
+						IT Accessibility (with extended description)
+					</button>
+				</li>
+				<!-- The Deadline (HTML) -->
+				<li data-poster="../media/deadline.jpg" data-width="800" data-height="450">
+					<span class="able-source"
+						data-type="video/mp4"
+						data-src="../media/deadline.mp4"
+						data-desc-src="../media/deadline_desc.mp4"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/deadline_captions_en.vtt"
+						data-srclang="en"
+						data-label="English"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/deadline_captions_ar.vtt"
+						data-srclang="ar"
+						data-label="Arabic"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/deadline_captions_es.vtt"
+						data-srclang="es"
+						data-label="Spanish"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/deadline_captions_hi.vtt"
+						data-srclang="hi"
+						data-label="Hindi"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/deadline_captions_it.vtt"
+						data-srclang="it"
+						data-label="Italian"></span>
+					<span class="able-track"
+						data-kind="captions"
+						data-src="../media/deadline_captions_pt-br.vtt"
+						data-srclang="pt-bre"
+						data-label="Portuguese, Brazilian"></span>
+					<span class="able-track"
+						data-kind="descriptions"
+						data-src="../media/deadline_descriptions_en.vtt"
+						data-srclang="en"
+						data-label="English descriptions"></span>
+					<button type="button">
+						<img src="../media/deadline_mq_thumbnail.jpg" alt="">
+						The Deadline
+					</button>
+				</li>
+			</ul>
+		</div>
+	</main>
+</body>
+</html>

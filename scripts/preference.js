@@ -1,7 +1,7 @@
 (function ($) {
 	AblePlayer.prototype.setCookie = function(cookieValue) {
 
-		Cookies.set('Able-Player', cookieValue, {
+		Cookies.set('Able-Player', JSON.stringify(cookieValue), {
 			expires: 90,
 			sameSite: 'strict'
 		});
@@ -12,16 +12,17 @@
 		var defaultCookie = {
 			preferences: {},
 			sign: {},
-			transcript: {}
+			transcript: {},
+			voices: []
 		};
 
 		var cookie;
 		try {
-			cookie = Cookies.getJSON('Able-Player');
+			cookie = JSON.parse(Cookies.get('Able-Player'));
 		}
 		catch (err) {
 			// Original cookie can't be parsed; update to default
-			Cookies.getJSON(defaultCookie);
+			this.setCookie(defaultCookie);
 			cookie = defaultCookie;
 		}
 		if (cookie) {
@@ -39,9 +40,8 @@
 		// e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
 		// setting is any supported preference name (e.g., "prefCaptions")
 		// OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
-		var cookie, $window, windowPos, available, i, prefName;
+		var cookie, $window, windowPos, available, i, prefName, voiceLangFound, newVoice;
 		cookie = this.getCookie();
-
 		if (setting === 'transcript' || setting === 'sign') {
 			if (setting === 'transcript') {
 				$window = this.$transcriptArea;
@@ -70,6 +70,25 @@
 				cookie.sign['height'] = $window.height();
 			}
 		}
+		else if (setting === 'voice') { 
+			if (typeof cookie.voices === 'undefined') {
+				cookie.voices = [];
+			}
+			// replace preferred voice for this lang in cookie.voices array, if one exists 
+			// otherwise, add it to the array 
+			voiceLangFound = false; 
+			for (var v=0; v < cookie.voices.length; v++) { 						
+				if (cookie.voices[v].lang === this.prefDescVoiceLang) { 
+					voiceLangFound = true; 
+					cookie.voices[v].name = this.prefDescVoice; 
+				}
+			}
+			if (!voiceLangFound) { 
+				// no voice has been saved yet for this language. Add it to array. 
+				newVoice = {'name':this.prefDescVoice, 'lang':this.prefDescVoiceLang};
+				cookie.voices.push(newVoice); 
+			}								
+		}
 		else {
 			available = this.getAvailablePreferences();
 			// Rebuild cookie with current cookie values,
@@ -91,28 +110,18 @@
 		// return array of groups in the order in which they will appear
 		// in the Preferences popup menu
 		// Human-readable label for each group is defined in translation table
-		if (this.mediaType === 'video') {
-			if (this.usingYouTubeCaptions) {
-				// no transcript is possible 
-				return ['captions','descriptions','keyboard']; 
-			}
-			else if (this.usingVimeoCaptions) { 
-				// users cannot control caption appearance
-				// and no transcript is possible
-				return ['descriptions','keyboard']; 
-			}
-			else { 
-				return ['captions','descriptions','keyboard','transcript']; 
-			} 
+		if (this.usingYouTubeCaptions) {
+			// no transcript is possible 
+			return ['captions','descriptions','keyboard']; 
 		}
-		else if (this.mediaType === 'audio') {
-			var groups = [];
-			groups.push('keyboard');
-			if (this.lyricsMode) {
-				groups.push('transcript');
-			}
-			return groups;
+		else if (this.usingVimeoCaptions) { 
+			// users cannot control caption appearance
+			// and no transcript is possible
+			return ['descriptions','keyboard']; 
 		}
+		else { 
+			return ['captions','descriptions','keyboard','transcript']; 
+		} 
 	}
 
 	AblePlayer.prototype.getAvailablePreferences = function() {
@@ -167,81 +176,81 @@
 			'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
 		});
 
-		if (this.mediaType === 'video') {
+		// Caption preferences
 
-			// Caption preferences
+		prefs.push({
+			'name': 'prefCaptions', // closed captions default state
+			'label': null,
+			'group': 'captions',
+			'default': this.defaultStateCaptions
+		});
 
+		if (!this.usingYouTubeCaptions) {
+
+			/* // not supported yet
 			prefs.push({
-				'name': 'prefCaptions', // closed captions default state
-				'label': null,
+				'name': 'prefCaptionsStyle',
+				'label': this.tt.prefCaptionsStyle,
 				'group': 'captions',
-				'default': 1
+				'default': this.tt.captionsStylePopOn
 			});
-
-			if (!this.usingYouTubeCaptions) {
-
-				/* // not supported yet
-				prefs.push({
-					'name': 'prefCaptionsStyle',
-					'label': this.tt.prefCaptionsStyle,
-					'group': 'captions',
-					'default': this.tt.captionsStylePopOn
-				});
-				*/
+			*/
+			// captions are always positioned above the player for audio 
+			if (this.mediaType === 'video') {
 				prefs.push({
 					'name': 'prefCaptionsPosition',
 					'label': this.tt.prefCaptionsPosition,
 					'group': 'captions',
 					'default': this.defaultCaptionsPosition
 				});
-
-				prefs.push({
-					'name': 'prefCaptionsFont',
-					'label': this.tt.prefCaptionsFont,
-					'group': 'captions',
-					'default': 'sans-serif'
-				});
-			}
-
-			// This is the one option that is supported by YouTube IFrame API
+			}	
 			prefs.push({
-				'name': 'prefCaptionsSize',
-				'label': this.tt.prefCaptionsSize,
+				'name': 'prefCaptionsFont',
+				'label': this.tt.prefCaptionsFont,
+				'group': 'captions',
+				'default': 'sans-serif'
+			});
+		}
+		// This is the one option that is supported by YouTube IFrame API
+		prefs.push({
+			'name': 'prefCaptionsSize',
+			'label': this.tt.prefCaptionsSize,
+			'group': 'captions',
+			'default': '100%'
+		});
+
+		if (!this.usingYouTubeCaptions) {
+
+			prefs.push({
+				'name': 'prefCaptionsColor',
+				'label': this.tt.prefCaptionsColor,
+				'group': 'captions',
+				'default': 'white'
+			});
+			prefs.push({
+				'name': 'prefCaptionsBGColor',
+				'label': this.tt.prefCaptionsBGColor,
+				'group': 'captions',
+				'default': 'black'
+			});
+			prefs.push({
+				'name': 'prefCaptionsOpacity',
+				'label': this.tt.prefCaptionsOpacity,
 				'group': 'captions',
 				'default': '100%'
 			});
+		}
 
-			if (!this.usingYouTubeCaptions) {
-
-				prefs.push({
-					'name': 'prefCaptionsColor',
-					'label': this.tt.prefCaptionsColor,
-					'group': 'captions',
-					'default': 'white'
-				});
-				prefs.push({
-					'name': 'prefCaptionsBGColor',
-					'label': this.tt.prefCaptionsBGColor,
-					'group': 'captions',
-					'default': 'black'
-				});
-				prefs.push({
-					'name': 'prefCaptionsOpacity',
-					'label': this.tt.prefCaptionsOpacity,
-					'group': 'captions',
-					'default': '100%'
-				});
-			}
-
+		if (this.mediaType === 'video') { 
 			// Description preferences
 			prefs.push({
 				'name': 'prefDesc', // audio description default state
 				'label': null,
 				'group': 'descriptions',
-				'default': 0 // off because users who don't need it might find it distracting
+				'default': this.defaultStateDescriptions
 			});
 			prefs.push({
-				'name': 'prefDescFormat', // audio description default format (if both 'video' and 'text' are available)
+				'name': 'prefDescMethod', // audio description default format (if both 'video' and 'text' are available)
 				'label': null,
 				'group': 'descriptions',
 				'default': 'video' // video (an alternative described version) always wins
@@ -274,7 +283,7 @@
 				'name': 'prefDescPause', // automatically pause when closed description starts
 				'label': this.tt.prefDescPause,
 				'group': 'descriptions',
-				'default': 1 // on as of 4.3.16, because extended description is frequently necessary
+				'default': this.defaultDescPause
 			});
 			prefs.push({
 				'name': 'prefDescVisible', // visibly show closed description (if avilable and used)
@@ -282,16 +291,15 @@
 				'group': 'descriptions',
 				'default': 0 // off as of 4.3.16, to avoid overloading the player with visible features
 			});
-
-			// Video preferences without a category (not shown in Preferences dialogs)
-			prefs.push({
-				'name': 'prefSign', // open sign language window by default if avilable
-				'label': null,
-				'group': null,
-				'default': 0 // off because clicking an icon to see the sign window has a powerful impact
-			});
-
 		}
+		// Preferences without a category (not shown in Preferences dialogs)
+		prefs.push({
+			'name': 'prefSign', // open sign language window by default if avilable
+			'label': null,
+			'group': null,
+			'default': 0 // off because clicking an icon to see the sign window has a powerful impact
+		});
+
 		return prefs;
 	};
 
@@ -314,7 +322,11 @@
 			}
 		}
 
-		// Save since we may have added default values.
+		// Also load array of preferred voices from cookie 
+		if (typeof cookie.voices !== 'undefined') { 
+			this.prefVoices = cookie.voices;  
+		}			
+
 		this.setCookie(cookie);
 	};
 
@@ -327,13 +339,13 @@
 			$prefsDiv, formTitle, introText,
 			$prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId,
-			$descFieldset, $descLegend, $legend,
+			$descFieldset, $descLegend, $legend, legendId,
 			thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
 			$div1,id1,$radio1,$label1,
 			$div2,id2,$radio2,$label2,
-			options,$thisOption,optionValue,optionText,sampleCapsDiv,
+			options,$thisOption,optionValue,optionLang,optionText,sampleCapsDiv,
 			changedPref,changedSpan,changedText,
-			currentDescState,
+			currentDescState, prefDescVoice, 
 			$kbHeading,$kbList,kbLabels,keys,kbListText,$kbListItem,
 			dialog,saveButton,cancelButton;
 
@@ -347,17 +359,10 @@
 		var customClass = 'able-prefs-form-' + form;
 		$prefsDiv.addClass(customClass);
 
-		// add intro
-		if (form == 'captions') {
+		// add titles and intros 
+		if (form == 'captions') {			
 			formTitle = this.tt.prefTitleCaptions;
-			introText = this.tt.prefIntroCaptions;
-			// Uncomment the following line to include a cookie warning
-			// Not included for now in order to cut down on unnecessary verbiage
-			// introText += ' ' + this.tt.prefCookieWarning;
-			$prefsIntro = $('<p>',{
-				text: introText
-			});
-			$prefsDiv.append($prefsIntro);
+			// Intro text removed in 4.4.32 to cut down on unnecessary verbiage 
 		}
 		else if (form == 'descriptions') {
 			formTitle = this.tt.prefTitleDescriptions;
@@ -415,26 +420,24 @@
 		}
 		else if (form == 'transcript') {
 			formTitle = this.tt.prefTitleTranscript;
-			introText = this.tt.prefIntroTranscript;
-			// Uncomment the following line to include a cookie warning
-			// Not included for now in order to cut down on unnecessary verbiage
-			// introText += ' ' + this.tt.prefCookieWarning;
-			$prefsIntro = $('<p>',{
-				text: introText
-			});
-			$prefsDiv.append($prefsIntro);
+			// Intro text removed in 4.4.32 to cut down on unnecessary verbiage 
 		}
 
-		$fieldset = $('<fieldset>');
+		$fieldset = $('<div>').attr('role','group');	
 		fieldsetClass = 'able-prefs-' + form;
 		fieldsetId = this.mediaId + '-prefs-' + form;
+		legendId = fieldsetId + '-legend';
 		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
 		if (form === 'keyboard') {
-			$legend = $('<legend>' + this.tt.prefHeadingKeyboard1 + '</legend>');
+			$legend = $('<h2>' + this.tt.prefHeadingKeyboard1 + '</h2>');
+			$legend.attr('id',legendId);
+			$fieldset.attr('aria-labelledby',legendId);
 			$fieldset.append($legend);
 		}
 		else if (form === 'descriptions') {
-			$legend = $('<legend>' + this.tt.prefHeadingTextDescription + '</legend>');
+			$legend = $('<h2>' + this.tt.prefHeadingTextDescription + '</h2>');
+			$legend.attr('id',legendId);
+			$fieldset.attr('aria-labelledby',legendId);
 			$fieldset.append($legend);
 		}
 		for (i=0; i<available.length; i++) {
@@ -526,19 +529,22 @@
 							id: thisId,
 						});
 						if (thisPref === 'prefDescVoice' && this.descVoices) {
+							prefDescVoice = this.getPrefDescVoice(); 				
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
+								optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase(); 
 								optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
 								$thisOption = $('<option>',{
-									value: optionValue,
+									'value': optionValue,
+									'data-lang': optionLang,
 									text: optionText
 								});
-								if (this[thisPref] == optionValue) {
+								if (prefDescVoice === optionValue) {
 									$thisOption.prop('selected',true);
 								}
 								$thisField.append($thisOption);
-								this.$voiceSelectField = $thisField;
 							}
+							this.$voiceSelectField = $thisField;
 						}
 						else {
 							if (thisPref == 'prefDescPitch') { // 0 to 2
@@ -584,7 +590,7 @@
 						}
 						// add a change handler that announces the sample description text
 						$thisField.on('change',function() {
-							thisObj.announceDescriptionText('sample',thisObj.tt.sampleDescriptionText);
+							thisObj.announceDescriptionText('sample',thisObj.currentSampleText);
 						});
 						$thisDiv.append($thisLabel,$thisField);
 					}
@@ -635,7 +641,7 @@
 		if (form === 'captions') {
 			// add a sample closed caption div to prefs dialog
 			// do not show this for YouTube captions, since it's not an accurate reflection
-			if (this.mediaType === 'video' && !this.usingYouTubeCaptions) {
+			if (!this.usingYouTubeCaptions) {
 				this.$sampleCapsDiv = $('<div>',{
 					'class': 'able-captions-sample'
 				}).text(this.tt.sampleCaptionText);
@@ -650,6 +656,7 @@
 					'class': 'able-desc-sample'
 				}).text(this.tt.sampleDescriptionText);
 				$prefsDiv.append(this.$sampleDescDiv);
+				this.currentSampleText = this.tt.sampleDescriptionText; 
 			}
 		}
 		else if (form === 'keyboard') {
@@ -770,7 +777,7 @@
 		// that will include an ancestor of the dialog,
 		// which will render the dialog unreadable by screen readers
 		$('body').append($prefsDiv);
-		dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, '32em');
+		dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', true, formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, '32em');
 
 		// Add save and cancel buttons.
 		$prefsDiv.append('<hr>');
@@ -787,6 +794,12 @@
 
 		$prefsDiv.append(saveButton);
 		$prefsDiv.append(cancelButton);
+
+		// Associate the dialog's H1 as aria-labelledby for groups of fields
+		// (alternative to fieldset and legend) 
+		if (form === 'captions' || form === 'transcript') { 
+			$fieldset.attr('aria-labelledby',dialog.titleH1.attr('id')); 
+		}
 
 		// add global reference for future control
 		if (form === 'captions') {
@@ -815,18 +828,47 @@
 		});
 	};
 
+	AblePlayer.prototype.getPrefDescVoice = function () {
+
+		// return user's preferred voice for the current language from cookie.voices 
+		var lang, cookie, i; 
+
+		if (this.selectedDescriptions) { 
+			lang = this.selectedDescriptions.language; 
+		}
+		else if (this.captionLang) { 
+			lang = this.captionLang; 
+		}
+		else { 
+			lang = this.lang; 
+		}
+		cookie = this.getCookie(); 
+		if (cookie.voices) { 
+			for (i=0; i < cookie.voices.length; i++) { 
+				if (cookie.voices[i].lang === lang) { 					
+					return cookie.voices[i].name; 
+				}
+			}
+		}
+		return null; // user has no saved preference
+	}
+
 	AblePlayer.prototype.rebuildDescPrefsForm = function () {
 
-		// Called if getBrowserVoices() succeeded after an earlier failure
+		// Called if this.descVoices changes, which may happen if: 
+		//  getBrowserVoices() succeeds after an earlier failure 
+		//  user changes language of captions/subtitles and descVoices changes to match the new language 
 
 		var i, optionValue, optionText, $thisOption;
 
 		this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
+		this.$voiceSelectField.empty();
 		for (i=0; i < this.descVoices.length; i++) {
 			optionValue = this.descVoices[i].name;
 			optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
 			$thisOption = $('<option>',{
-				value: optionValue,
+				'value': optionValue,
+				'data-lang': this.descVoices[i].lang.substring(0,2).toLowerCase(),
 				text: optionText
 			});
 			if (this.prefDescVoice == optionValue) {
@@ -861,9 +903,9 @@
 		 }
 		 else if (pref === 'prefDescRate') {
 			 // default in the API is 0.1 to 10, where 1 is normal speaking voice
-			 // our custom range offers severa rates close to 1
+			 // our custom range offers several rates close to 1
 			 // plus a couple of crazy fast ones for sport
-			 // Our options (1-10) or mapped here to 0.5 to 0.14
+			 // Our more readable options (1-10) or mapped here to API values 
 			 if (value === 0.7) {
 				 return 1;
 			 }
@@ -940,7 +982,8 @@
 		// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
 		// update cookie with new value
-		var cookie, available, prefName, prefId, numChanges,
+		var cookie, available, prefName, prefId, 
+			voiceSelectId, newVoice, newVoiceLang, numChanges, voiceLangFound, 
 			numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
@@ -953,12 +996,35 @@
 			if (available[i]['label']) {
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
-				if (prefName == 'prefDescFormat') {
-					// As of v4.0.10, prefDescFormat is no longer a choice
-					// this.prefDescFormat = $('input[name="' + prefName + '"]:checked').val();
-					this.prefDescFormat = 'video';
-					if (this.prefDescFormat !== cookie.preferences['prefDescFormat']) { // user's preference has changed
-						cookie.preferences['prefDescFormat'] = this.prefDescFormat;
+				if (prefName === 'prefDescVoice') { 
+					if (typeof cookie.voices === 'undefined') {
+						cookie.voices = [];
+					}
+					voiceSelectId = this.mediaId + '_prefDescVoice';
+					this.prefDescVoice = $('select#' + voiceSelectId).find(':selected').val();
+					this.prefDescVoiceLang = $('select#' + voiceSelectId).find(':selected').attr('data-lang');
+					// replace preferred voice for this lang in cookie.voices array, if one exists 
+					// otherwise, add it to the array 
+					voiceLangFound = false; 
+					for (var v=0; v < cookie.voices.length; v++) { 						
+						if (cookie.voices[v].lang === this.prefDescVoiceLang) { 
+							voiceLangFound = true; 
+							cookie.voices[v].name = this.prefDescVoice; 
+						}
+					}
+					if (!voiceLangFound) { 
+						// no voice has been saved yet for this language. Add it to array. 
+						newVoice = {'name':this.prefDescVoice, 'lang':this.prefDescVoiceLang};
+						cookie.voices.push(newVoice); 
+					}					
+					numChanges++; 
+				}
+				else if (prefName == 'prefDescMethod') {
+					// As of v4.0.10, prefDescMethod is no longer a choice
+					// this.prefDescMethod = $('input[name="' + prefName + '"]:checked').val();
+					this.prefDescMethod = 'video';
+					if (this.prefDescMethod !== cookie.preferences['prefDescMethod']) { // user's preference has changed
+						cookie.preferences['prefDescMethod'] = this.prefDescMethod;
 						numChanges++;
 					}
 				}
@@ -1077,7 +1143,6 @@
 
 		// Re-initialize caption and description in case relevant settings have changed
 		this.updateCaption();
-		this.refreshingDesc = true;
 		this.initDescription();
 	};
 

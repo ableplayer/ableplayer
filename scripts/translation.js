@@ -1,7 +1,7 @@
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
-		var langs = ['ca','cs','de','en','es','fr','he','id','it','ja','nb','nl','pt-br','sv','tr','zh-tw'];
+		var langs = ['ca','cs','da','de','en','es','fr','he','id','it','ja','nb','nl','pt','pt-br','sv','tr','zh-tw'];
 		return langs;
 	};
 
@@ -9,7 +9,8 @@
 
 		// determine language, then get labels and prompts from corresponding translation var
 
-		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang;
+		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang, i, 
+			similarLangFound;
 		deferred = $.Deferred();
 		thisObj = this;
 
@@ -33,8 +34,21 @@
 				}
 				else {
 					// this is not a localized language.
-					// since it's not supported, we're unable to use it.
-					this.lang = null;
+					// but maybe there's a similar localized language supported  
+					// that has the same parent?  
+					similarLangFound = false; 
+					i = 0; 
+					while (i < supportedLangs.length) { 
+						if (supportedLangs[i].substring(0,2) == this.lang) { 
+							this.lang = supportedLangs[i]; 				
+							similarLangFound = true; 
+						}
+						i++; 
+					}
+					if (!similarLangFound) { 
+						// language requested via data-lang is not supported
+						this.lang = null;
+					}
 				}
 			}
 		}
@@ -74,15 +88,47 @@
 			// Fallback to English
 			this.lang = 'en';
 		}
+
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
 		$.getJSON(translationFile, function(data) {
+			// success!
 			thisObj.tt = data; 
 			deferred.resolve(); 
-		}); 
+		})
+		.fail(function() {
+			console.log( "Critical Error: Unable to load translation file:",translationFile);			
+			thisObj.provideFallback();
+			deferred.fail();
+		})
 		return deferred.promise();
+	};
+
+	AblePlayer.prototype.getSampleDescriptionText = function() {
+
+		// Create an array of sample description text in all languages 
+		// This needs to be readily available for testing different voices 
+		// in the Description Preferences dialog 
+		var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation; 
+		
+		supportedLangs = this.getSupportedLangs(); 
+
+		thisObj = this; 
+
+		this.sampleText = []; 
+		for (i=0; i < supportedLangs.length; i++) { 
+			translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.js';
+			$.getJSON(translationFile, thisLang, (function(thisLang) {
+					return function(data) { 
+						thisText = data.sampleDescriptionText; 
+						translation = {'lang':thisLang, 'text': thisText}; 
+						thisObj.sampleText.push(translation); 						
+					};
+			}(supportedLangs[i])) // pass lang to callback function 
+			); 				 
+		}
 	};
 
 })(jQuery);

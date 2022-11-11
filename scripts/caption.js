@@ -1,7 +1,8 @@
 (function ($) {
 	AblePlayer.prototype.updateCaption = function (time) {
 
-		if (!this.usingYouTubeCaptions && (typeof this.$captionsWrapper !== 'undefined')) {
+		if (!this.usingYouTubeCaptions && !this.usingVimeoCaptions && 
+			(typeof this.$captionsWrapper !== 'undefined')) {
 			if (this.captionsOn) {
 				this.$captionsWrapper.show();
 				if (typeof time !== 'undefined') {
@@ -16,7 +17,7 @@
 	};
 
 	AblePlayer.prototype.updateCaptionsMenu = function (lang) {
-
+		
 		// uncheck all previous menu items
 		this.captionsPopup.find('li').attr('aria-checked','false');
 		if (typeof lang === 'undefined') {
@@ -36,6 +37,7 @@
 
 		var thisObj = this;
 		return function () {
+
 			thisObj.selectedCaptions = track;
 			thisObj.captionLang = track.language;
 			thisObj.currentCaption = -1;
@@ -98,13 +100,17 @@
 			// immediately after closing it (used in handleCaptionToggle())
 			thisObj.hidingPopup = true;
 			thisObj.captionsPopup.hide();
+			thisObj.$ccButton.attr('aria-expanded', 'false');
+			if (thisObj.mediaType === 'audio') {
+				thisObj.$captionsContainer.removeClass('captions-off');
+			}
 			// Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
 			// e.g., if user triggered button with Enter or mouse click, not spacebar
 			setTimeout(function() {
 				thisObj.hidingPopup = false;
 			}, 100);
 			thisObj.updateCaptionsMenu(thisObj.captionLang);
-			thisObj.$ccButton.focus();
+			thisObj.waitThenFocus(thisObj.$ccButton);
 
 			// save preference to cookie
 			thisObj.prefCaptions = 1;
@@ -115,8 +121,10 @@
 
 	// Returns the function used when the "Captions Off" button is clicked in the captions tooltip.
 	AblePlayer.prototype.getCaptionOffFunction = function () {
+
 		var thisObj = this;
 		return function () {
+
 			if (thisObj.player == 'youtube') {
 				thisObj.youTubePlayer.unloadModule('captions');
 			}
@@ -125,17 +133,23 @@
 			}
 			thisObj.captionsOn = false;
 			thisObj.currentCaption = -1;
+
+			if (thisObj.mediaType === 'audio') {
+				thisObj.$captionsContainer.addClass('captions-off');
+			}
+
 			// stopgap to prevent spacebar in Firefox from reopening popup
 			// immediately after closing it (used in handleCaptionToggle())
 			thisObj.hidingPopup = true;
 			thisObj.captionsPopup.hide();
+			thisObj.$ccButton.attr('aria-expanded', 'false');
 			// Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
 			// e.g., if user triggered button with Enter or mouse click, not spacebar
 			setTimeout(function() {
 				thisObj.hidingPopup = false;
 			}, 100);
 			thisObj.updateCaptionsMenu();
-			thisObj.$ccButton.focus();
+			thisObj.waitThenFocus(thisObj.$ccButton);
 
 			// save preference to cookie
 			thisObj.prefCaptions = 0;
@@ -151,7 +165,7 @@
 
 		var c, thisCaption, captionText;
 		var cues;
-		if (this.selectedCaptions) {
+		if (this.selectedCaptions.cues.length) {
 			cues = this.selectedCaptions.cues;
 		}
 		else if (this.captions.length >= 1) {
@@ -181,8 +195,8 @@
 				}
 			}
 		}
-		else {
-			this.$captionsDiv.html('');
+		else {			
+			this.$captionsDiv.html('').css('display','none');
 			this.currentCaption = -1;
 		}
 	};
@@ -377,8 +391,8 @@
 					'opacity': opacity
 				});
 				if ($element === this.$captionsDiv) {
-					if (typeof this.$captionsWrapper !== 'undefined') {
-						this.$captionsWrapper.css({
+					if (typeof this.$captionsDiv !== 'undefined') {
+						this.$captionsDiv.css({
 							'font-size': this.prefCaptionsSize
 						});
 					}

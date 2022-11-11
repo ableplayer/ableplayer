@@ -58,7 +58,7 @@
 
 "hideSign": "手話を非表示",
 
-"seekbarLabel": "timeline",
+"seekbarLabel": "タイムライン",
 
 "mute": "消音",
 
@@ -74,11 +74,11 @@
 
 "preferences": "設定",
 
-"enterFullScreen": "全画面表示",
+"enterFullscreen": "全画面表示",
 
-"exitFullScreen": "全画面表示の終了",
+"exitFullscreen": "全画面表示の終了",
 
-"fullScreen": "全画面表示",
+"fullscreen": "全画面表示",
 
 "speed": "再生速度",
 
@@ -186,7 +186,7 @@
 
 "prefShiftKey": "Shift",
 
-"escapeKey": "Escape",
+"escapeKey": "エスケープ",
 
 "escapeKeyFunction": "現在のダイアログやポップアップメニューを閉じる",
 
@@ -206,23 +206,23 @@
 
 "prefDescVisible": "解説が見えるようにする",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "音",
 
-"prefDescRate": "Rate",
+"prefDescRate": "レート",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "ピッチ",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "非常に低い",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "低い",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "標準",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "高い",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "非常に高い",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "このサンプル・テキストを聞くために設定を合わせます。",
 
 "prefHighlight": "メディアの再生に合わせて字幕をハイライトする",
 
@@ -240,9 +240,9 @@
 
 "prefCaptionsStyle": "書式",
 
-"serif": "serif",
+"serif": "セリフ",
 
-"sans": "sans-serif",
+"sans": "サンセリフ",
 
 "cursive": "cursive",
 
@@ -326,31 +326,31 @@
 
 "windowBringTopAlert": "このウィンドウはこのページの他のオブジェクトより前面になりました。",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "次を検索:",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "見つかりました",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "個の検索結果",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "アイテムに関連付けられている時間をクリックして、その時点からビデオを再生します。",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "見つかりませんでした。",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "次から再生",
 
-"hour": "hour",
+"hour": "時間",
 
-"minute": "minute",
+"minute": "分",
 
-"second": "second",
+"second": "秒",
 
-"hours": "hours",
+"hours": "時間",
 
-"minutes": "minutes",
+"minutes": "分",
 
-"seconds": "seconds",
+"seconds": "秒",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "キーボード・ショートカットを有効にする"
 
 
 }

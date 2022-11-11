@@ -1,6 +1,6 @@
 {
 
-"audio": "audio",
+"audio": "lyd",
 
 "video": "video",
 
@@ -30,21 +30,21 @@
 
 "forward": "Spol fremover",
 
-"captions": "Teksting",
+"captions": "Undertekster",
 
-"showCaptions": "Vis teksting",
+"showCaptions": "Vis undertekster",
 
-"hideCaptions": "Skjul teksting",
+"hideCaptions": "Skjul undertekster",
 
-"captionsOff": "Teksting av",
+"captionsOff": "Slå av undertekster",
 
 "showTranscript": "Vis transkripsjon",
 
 "hideTranscript": "Skjul transkripsjon",
 
-"turnOnDescriptions": "Slå på beskrivelser",
+"turnOnDescriptions": "Slå på synstolking",
 
-"turnOffDescriptions": "Slå av beskrivelser",
+"turnOffDescriptions": "Slå av synstolking",
 
 "chapters": "Kapitler",
 
@@ -74,11 +74,11 @@
 
 "preferences": "Innstillinger",
 
-"enterFullScreen": "Vis fullskjerm",
+"enterFullscreen": "Vis fullskjerm",
 
-"exitFullScreen": "Avslutt fullskjerm",
+"exitFullscreen": "Avslutt fullskjerm",
 
-"fullScreen": "Fullskjerm",
+"fullscreen": "Fullskjerm",
 
 "speed": "Hastighet",
 
@@ -106,23 +106,23 @@
 
 "statusBuffering": "Mottar data",
 
-"statusUsingDesc": "Bruker lydbeskrevet versjon",
+"statusUsingDesc": "Bruker synstolket versjon",
 
-"statusLoadingDesc": "Laster lydbeskrevet versjon",
+"statusLoadingDesc": "Henter synstolket versjon",
 
-"statusUsingNoDesc": "Bruker versjon uten lydbeskrivelse",
+"statusUsingNoDesc": "Bruker versjon uten synstolking",
 
-"statusLoadingNoDesc": "Laster versjon uten lydbeskrivelse",
+"statusLoadingNoDesc": "Henter versjon uten synstolking",
 
-"statusLoadingNext": "Laster neste spor",
+"statusLoadingNext": "Henter neste spor",
 
 "statusEnd": "Slutt på sporet",
 
 "selectedTrack": "Valgt spor",
 
-"alertDescribedVersion": "Video spilles med lydbeskrivelse",
+"alertDescribedVersion": "Bruker videoversjon med synstolking",
 
-"alertNonDescribedVersion": "Video spilles uten lydbeskrivelse",
+"alertNonDescribedVersion": "Bruker videoversjon uten synstolking",
 
 "fallbackError1": "Beklager, avspilling i denne nettleseren er ikke mulig",
 
@@ -130,53 +130,53 @@
 
 "orHigher": "eller høyere",
 
-"prefMenuCaptions": "Teksting",
+"prefMenuCaptions": "Undertekster",
 
-"prefMenuDescriptions": "Lydbeskrivelser",
+"prefMenuDescriptions": "Synstolking",
 
 "prefMenuKeyboard": "Tastatur",
 
 "prefMenuTranscript": "Transkripsjon",
 
-"prefTitleCaptions": "Tekstinnstillinger",
+"prefTitleCaptions": "Undertekstinnstillinger",
 
-"prefTitleDescriptions": "Lydbeskrivelsesinnstillinger",
+"prefTitleDescriptions": "Synstolkingsinnstillinger",
 
 "prefTitleKeyboard": "Tastaturinnstillinger",
 
 "prefTitleTranscript": "Transkripsjonsinnstillinger",
 
-"prefIntroCaptions": "Disse innstillingene styrer hvordan teksting vises.",
+"prefIntroCaptions": "Disse innstillingene styrer hvordan undertekster vises.",
 
 "prefIntroDescription1": "Denne mediespilleren støtter lydbeskrivelse på to måter: ",
 
 "prefIntroDescription2": " Denne videoen har ",
 
-"prefIntroDescriptionNone": "Denne videoen har ikke lydbeskrivelse i noen av formatene.",
+"prefIntroDescriptionNone": "Denne videoen har ikke synstolking i noen av formatene.",
 
-"prefIntroDescription3": "Bruk følgende innstillinger for å gjøre dine valg angående tekstbasert lydbeskrivelse.",
+"prefIntroDescription3": "Bruk følgende skjema for å gjøre dine valg angående tekstbasert synstolking.",
 
-"prefIntroDescription4": "Etter at du har lagret dine valg kan lydbeskrivelse slås av og på i panelet.",
+"prefIntroDescription4": "Etter at du har lagret dine valg kan synstolking slås av og på med synstolkingsknappen.",
 
 "prefIntroKeyboard1": "Mediespilleren på denne nettsiden kan styres fra hvor som helst på siden ved hjelp av tastatursnarveier (se liste nedenfor).",
 
-"prefIntroKeyboard2": "Kontrolltaster (Shift, Alt, og Control) kan legges til nedenfor.",
+"prefIntroKeyboard2": "Metataster (Shift, Alt, og Control) kan legges til nedenfor.",
 
-"prefIntroKeyboard3": "NB! Noen tastekombinasjoner kan komme i konflikt med taster som brukes av nettleseren din og/eller andre programmer. Prøv forskjellige kombinasjoner av kontrolltaster for å finne en som fungerer for deg.",
+"prefIntroKeyboard3": "NB! Noen tastekombinasjoner kan komme i konflikt med taster som brukes av nettleseren din og/eller andre programmer. Prøv forskjellige tastekombinasjoner for å finne de som fungerer for deg.",
 
 "prefIntroTranscript": "Disse innstillingene styrer interaktiv transkripsjon.",
 
-"prefCookieWarning": "Informasjonskapsler (cookies) benyttes for å lagre dine innstillinger.",
+"prefCookieWarning": "For å lagre dine innstillinger må informasjonskapsler (cookies) benyttes.",
 
-"prefHeadingKeyboard1": "Kontrolltaster som brukes til tastekombinasjoner",
+"prefHeadingKeyboard1": "Metataster som brukes til tastekombinasjoner",
 
 "prefHeadingKeyboard2": "Nåværende tastekombinasjoner",
 
-"prefHeadingDescription": "Lydbeskrivelse",
+"prefHeadingDescription": "Synstolking",
 
-"prefHeadingTextDescription": "Tekstbasert lydbeskrivelse",
+"prefHeadingTextDescription": "Tekstbasert synstolking",
 
-"prefHeadingCaptions": "Teksting",
+"prefHeadingCaptions": "Undertekster",
 
 "prefHeadingTranscript": "Interaktiv transkripsjon",
 
@@ -194,39 +194,39 @@
 
 "prefDescFormatHelp": "Hvis begge formatene er tilgjengelige blir bare ett benyttet.",
 
-"prefDescFormatOption1": "Videoversjon med lydbeskrivelse",
+"prefDescFormatOption1": "alternativ synstolket versjon av video",
 
-"prefDescFormatOption1b": "alternativ versjon med lydbeskrivelse",
+"prefDescFormatOption1b": "en alternativ synstolket versjon",
 
-"prefDescFormatOption2": "tekstbasert lydbeskrivelse lest av skjermleser",
+"prefDescFormatOption2": "tekstbasert synstolket versjon opplest av skjermleser",
 
-"prefDescFormatOption2b": "tekstbasert lydbeskrivelse",
+"prefDescFormatOption2b": "tekstbasert synstolking",
 
-"prefDescPause": "Sett video automatisk på pause når lydbeskrivelse starter",
+"prefDescPause": "Sett video automatisk på pause når synstolking starter",
 
-"prefDescVisible": "Gjør lydbeskrivelsen synlig",
+"prefDescVisible": "Vis synstolking",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Stemme",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Hastighet",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Toneleie",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Meget lavt",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Lavt",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "Normalt",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Høyt",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Meget høyt",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Juster innstillingene for å høre denne eksempelteksten.",
 
-"prefHighlight": "Fremhev transkripsjon når media spilles av",
+"prefHighlight": "Marker det som leses i transkripsjon ved avspilling",
 
-"prefTabbable": "Slå transkripsjon av og på ved hjelp av tastatur",
+"prefTabbable": "Tastaturaktivert transkripsjon",
 
 "prefCaptionsFont": "Skrifttype",
 
@@ -270,21 +270,21 @@
 
 "solid": "ugjennomsiktig",
 
-"captionsStylePopOn": "Pop-on",
+"captionsStylePopOn": "Dukker opp",
 
-"captionsStyleRollUp": "Roll-up",
+"captionsStyleRollUp": "Ruller opp",
 
 "prefCaptionsPosition": "Posisjon",
 
-"captionsPositionOverlay": "Legg oppå",
+"captionsPositionOverlay": "Legg oppå video",
 
-"captionsPositionBelow": "Legg under",
+"captionsPositionBelow": "Legg under video",
 
-"sampleCaptionText": "Teksteksempel",
+"sampleCaptionText": "Eksempel på undertekst",
 
-"prefSuccess": "Endringene er lagret",
+"prefSuccess": "Dine endringer er lagret.",
 
-"prefNoChange": "Ingen endringer foretatt",
+"prefNoChange": "Du gjorde ingen endringer.",
 
 "help": "Hjelp",
 
@@ -300,7 +300,7 @@
 
 "closeButtonLabel": "Lukk dialog",
 
-"windowButtonLabel": "Endre vindu",
+"windowButtonLabel": "Vindusinnstillinger",
 
 "windowMove": "Flytt",
 
@@ -318,38 +318,38 @@
 
 "height": "Høyde",
 
-"windowSendBack": "Legg i bakgrunnen",
+"windowSendBack": "Legg bakerst",
 
-"windowSendBackAlert": "Dette vinduet ligger nå bak andre vinduer.",
+"windowSendBackAlert": "Dette vinduet ligger nå bak andre objekter på siden.",
 
-"windowBringTop": "Legg i forgrunnen",
+"windowBringTop": "Legg fremst",
 
-"windowBringTopAlert": "Dette vinduet ligger nå foran andre vinduer.",
+"windowBringTopAlert": "Dette vinduet ligger nå foran andre objekter på siden.",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "Du søkte etter:",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "Funnet",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "passende treff.",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "Klikk tidspunkt på aktuelt treff for å avspille video derfra.",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "Ingen treff funnet.",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "Spill av fra",
 
-"hour": "hour",
+"hour": "time",
 
-"minute": "minute",
+"minute": "minutt",
 
-"second": "second",
+"second": "sekund",
 
-"hours": "hours",
+"hours": "timer",
 
-"minutes": "minutes",
+"minutes": "minutter",
 
-"seconds": "seconds",
+"seconds": "sekunder",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "Aktiver tastatursnarveier"
 
 }

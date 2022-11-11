@@ -8,6 +8,8 @@
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 
+		this.youTubePlayerReady = false; 
+
 		// if a described version is available && user prefers desription
 		// init player using the described version
 		if (this.youTubeDescId && this.prefDesc) {
@@ -19,7 +21,7 @@
 		this.activeYouTubeId = youTubeId;
 		if (AblePlayer.youTubeIframeAPIReady) {
 			// Script already loaded and ready.
-			this.finalizeYoutubeInit().then(function() {
+			thisObj.finalizeYoutubeInit().then(function() {
 				deferred.resolve();
 			});
 		}
@@ -68,20 +70,6 @@
 		// fail to load any texttracks (observed in Chrome, not in Firefox) 
 		ccLoadPolicy = 1;
 
-		videoDimensions = this.getYouTubeDimensions(this.activeYouTubeId, containerId);
-		if (videoDimensions) {
-			this.ytWidth = videoDimensions[0];
-			this.ytHeight = videoDimensions[1];
-			this.aspectRatio = thisObj.ytWidth / thisObj.ytHeight;
-		}
-		else {
-			// dimensions are initially unknown
-			// sending null values to YouTube results in a video that uses the default YouTube dimensions
-			// these can then be scraped from the iframe and applied to this.$ableWrapper
-			this.ytWidth = null;
-			this.ytHeight = null;
-		}
-
 		if (this.okToPlay) {
 			autoplay = 1;
 		}
@@ -95,12 +83,9 @@
 			// init using the default player lang
 			this.captionLang = this.lang; 
 		}
-
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
-			width: this.ytWidth,
-			height: this.ytHeight,
 			playerVars: {
 				autoplay: autoplay,
 				enablejsapi: 1,
@@ -117,12 +102,22 @@
 			},
 			events: {
 				onReady: function () {
-
+					thisObj.youTubePlayerReady = true; 
+					if (!thisObj.playerWidth || !thisObj.playerHeight) { 
+						thisObj.getYouTubeDimensions();
+					}
+					if (thisObj.playerWidth && thisObj.playerHeight) { 
+						thisObj.youTubePlayer.setSize(thisObj.playerWidth,thisObj.playerHeight);
+						thisObj.$ableWrapper.css({
+							'width': thisObj.playerWidth + 'px'
+						});
+					}
 					if (thisObj.swappingSrc) {
 						// swap is now complete
 						thisObj.swappingSrc = false;
+						thisObj.restoreFocus();
 						thisObj.cueingPlaylistItem = false;
-						if (thisObj.playing) {
+						if (thisObj.playing || thisObj.okToPlay) {
 							// resume playing
 							thisObj.playMedia();
 						}
@@ -130,17 +125,16 @@
 					if (thisObj.userClickedPlaylist) {
 						thisObj.userClickedPlaylist = false; // reset
 					}
-					if (typeof thisObj.aspectRatio === 'undefined') {
-						thisObj.resizeYouTubePlayer(thisObj.activeYouTubeId, containerId);
+					if (thisObj.recreatingPlayer) { 
+						thisObj.recreatingPlayer = false; // reset
 					}
 					deferred.resolve();
 				},
 				onError: function (x) {
 					deferred.fail();
 				},
-				onStateChange: function (x) {					
+				onStateChange: function (x) {				
 					thisObj.getPlayerState().then(function(playerState) {
-
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
 							thisObj.playing = true;
@@ -178,101 +172,28 @@
 				},
 			}
 		});
-
-		this.injectPoster(this.$mediaContainer, 'youtube');
 		if (!this.hasPlaylist) {
 			// remove the media element, since YouTube replaces that with its own element in an iframe
 			// this is handled differently for playlists. See buildplayer.js > cuePlaylistItem()
 			this.$media.remove();
-		}
+		}		
 		return promise;
 	};
 
 	AblePlayer.prototype.getYouTubeDimensions = function (youTubeContainerId) {
 
-		// get dimensions of YouTube video, return array with width & height
-		// Sources, in order of priority:
-		// 1. The width and height attributes on <video>
-		// 2. YouTube (not yet supported; can't seem to get this data via YouTube Data API without OAuth!)
+		// The YouTube iframe API does not have a getSize() of equivalent method 
+		// so, need to get dimensions from YouTube's iframe 
 
-		var d, url, $iframe, width, height;
+		var $iframe, width, height; 
 
-		d = [];
-
-		if (typeof this.playerMaxWidth !== 'undefined') {
-			d[0] = this.playerMaxWidth;
-			// optional: set height as well; not required though since YouTube will adjust height to match width
-			if (typeof this.playerMaxHeight !== 'undefined') {
-				d[1] = this.playerMaxHeight;
-			}
-			return d;
-		}
-		else {
-			if (typeof $('#' + youTubeContainerId) !== 'undefined') {
-				$iframe = $('#' + youTubeContainerId);
-				width = $iframe.width();
-				height = $iframe.height();
-				if (width > 0 && height > 0) {
-					d[0] = width;
-					d[1] = height;
-					return d;
-				}
-			}
-		}
-		return false;
-	};
-
-	AblePlayer.prototype.resizeYouTubePlayer = function(youTubeId, youTubeContainerId) {
-
-		// called after player is ready, if youTube dimensions were previously unknown
-		// Now need to get them from the iframe element that YouTube injected
-		// and resize Able Player to match
-		var d, width, height;
-		if (typeof this.aspectRatio !== 'undefined') {
-			// video dimensions have already been collected
-			if (this.restoringAfterFullScreen) {
-				// restore using saved values
-				if (this.youTubePlayer) {
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-				this.restoringAfterFullScreen = false;
-			}
-			else {
-				// recalculate with new wrapper size
-				width = this.$ableWrapper.parent().width();
-				height = Math.round(width / this.aspectRatio);
-				this.$ableWrapper.css({
-					'max-width': width + 'px',
-					'width': ''
-				});
-				this.youTubePlayer.setSize(width, height);
-				if (this.fullscreen) {
-					this.youTubePlayer.setSize(width, height);
-				}
-				else {
-					// resizing due to a change in window size, not full screen
-					this.youTubePlayer.setSize(this.ytWidth, this.ytHeight);
-				}
-			}
-		}
-		else {
-			d = this.getYouTubeDimensions(youTubeContainerId);
-			if (d) {
-				width = d[0];
-				height = d[1];
-				if (width > 0 && height > 0) {
-					this.aspectRatio = width / height;
-					this.ytWidth = width;
-					this.ytHeight = height;
-					if (width !== this.$ableWrapper.width()) {
-						// now that we've retrieved YouTube's default width,
-						// need to adjust to fit the current player wrapper
-						width = this.$ableWrapper.width();
-						height = Math.round(width / this.aspectRatio);
-						if (this.youTubePlayer) {
-							this.youTubePlayer.setSize(width, height);
-						}
-					}
+		$iframe = this.$ableWrapper.find('iframe'); 
+		if (typeof $iframe !== 'undefined') {
+			if ($iframe.prop('width')) { 
+				width = $iframe.prop('width');			
+				if ($iframe.prop('height')) { 
+					height = $iframe.prop('height');
+					this.resizePlayer(width,height); 
 				}
 			}
 		}
@@ -297,45 +218,71 @@
 
 		thisObj = this;
 		
-		if (!this.youTubePlayer.getOption('captions','tracklist')) { 			
+		if (!this.youTubePlayer.getOption('captions','tracklist')) { 
+
 			// no tracks were found, probably because the captions module hasn't loaded  
 			// play video briefly (required in order to load the captions module) 
 			// and after the apiChange event is triggered, try again to retreive tracks
 			this.youTubePlayer.addEventListener('onApiChange',function(x) { 
+
+				// getDuration() also requires video to play briefly 
+				// so, let's set that while we're here 				
+				thisObj.duration = thisObj.youTubePlayer.getDuration();				
+
 				if (thisObj.loadingYouTubeCaptions) { 				
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once 
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');					
-					thisObj.youTubePlayer.stopVideo(); 
-					// Step through ytTracks and add them to global tracks array
-					// Note: Unlike YouTube Data API, the IFrame Player API only returns 
-					// tracks that are published, and does NOT include ASR captions 
-					// So, no additional filtering is required 
-					for (i=0; i < ytTracks.length; i++) {
-						trackLang = ytTracks[i].languageCode; 
-						trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
-						isDefaultTrack = false; 
-						if (typeof thisObj.captionLang !== 'undefined') { 
-							if (trackLang === thisObj.captionLang) {
-								isDefaultTrack = true;						
-							}
-						}
-						else if (typeof thisObj.lang !== 'undefined') { 
-							if (trackLang === thisObj.lang) {
-								isDefaultTrack = true;						
-							}
-						}
-						thisObj.tracks.push({
-							'kind': 'captions',
-							'language': trackLang,
-							'label': trackLabel,
-							'def': isDefaultTrack
-						});
+					if (!thisObj.okToPlay) { 
+						// Don't stopVideo() - that cancels loading 
+						// Just pause 
+						// No need to seekTo(0) - so little time has passed it isn't noticeable to the user 
+						thisObj.youTubePlayer.pauseVideo(); 
 					}
-					thisObj.captions = thisObj.tracks; 
-					thisObj.hasCaptions = true;
-					// setupPopups again with new captions array, replacing original
-					thisObj.setupPopups('captions');				
+					if (ytTracks && ytTracks.length) { 
+						// Step through ytTracks and add them to global tracks array
+						// Note: Unlike YouTube Data API, the IFrame Player API only returns 
+						// tracks that are published, and does NOT include ASR captions 
+						// So, no additional filtering is required 
+						for (i=0; i < ytTracks.length; i++) {
+							trackLang = ytTracks[i].languageCode; 
+							trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+							isDefaultTrack = false; 
+							if (typeof thisObj.captionLang !== 'undefined') { 
+								if (trackLang === thisObj.captionLang) {
+									isDefaultTrack = true;						
+								}
+							}
+							else if (typeof thisObj.lang !== 'undefined') { 
+								if (trackLang === thisObj.lang) {
+									isDefaultTrack = true;						
+								}
+							}
+							thisObj.tracks.push({
+								'kind': 'captions',
+								'language': trackLang,
+								'label': trackLabel,
+								'def': isDefaultTrack
+							});
+							thisObj.captions.push({
+								'language': trackLang,
+								'label': trackLabel,
+								'def': isDefaultTrack,
+								'cues': null
+							});							
+						}
+						thisObj.hasCaptions = true;
+						// setupPopups again with new captions array, replacing original
+						thisObj.setupPopups('captions');				
+					}
+					else { 
+						// there are no YouTube captions 
+						thisObj.usingYouTubeCaptions = false; 
+						thisObj.hasCaptions = false;
+					}
 					thisObj.loadingYouTubeCaptions = false; 
+					if (thisObj.okToPlay) { 
+						thisObj.youTubePlayer.playVideo();
+					}
 				}
 				if (thisObj.captionLangPending) { 
 					// user selected a new caption language prior to playback starting 
@@ -351,7 +298,7 @@
 				deferred.resolve();
 			});
 			// Trigger the above event listener by briefly playing the video 		
-			this.loadingYouTubeCaptions = true; 			
+			this.loadingYouTubeCaptions = true; 	
 			this.youTubePlayer.playVideo();		
 		}
 		return promise;
@@ -371,28 +318,6 @@
 			url += '&name=' + trackName;
 		}
 		return url;
-	};
-
-
-	AblePlayer.prototype.getYouTubeCaptionCues = function (youTubeId) {
-
-		var deferred, promise, thisObj;
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		thisObj = this;
-
-		this.tracks = [];
-		this.tracks.push({
-			'kind': 'captions',
-			'src': 'some_file.vtt',
-			'language': 'en',
-			'label': 'Fake English captions'
-		});
-
-		deferred.resolve();
-		return promise;
 	};
 
 	AblePlayer.prototype.getYouTubePosterUrl = function (youTubeId, width) {
@@ -419,5 +344,28 @@
 			 }
 			 return false;
 	};
+
+	AblePlayer.prototype.getYouTubeId = function (url) {
+
+		// return a YouTube ID, extracted from a full YouTube URL
+		// Supported URL patterns (with http or https): 
+		// https://youtu.be/xxx
+		// https://www.youtube.com/watch?v=xxx
+		// https://www.youtube.com/embed/xxx
+
+		// in all supported patterns, the id is the last 11 characters 
+		var idStartPos, id; 
+
+		if (url.indexOf('youtu') !== -1) { 
+			// this is a full Youtube URL 
+			url = url.trim(); 
+			idStartPos = url.length - 11; 
+			id = url.substring(idStartPos); 
+			return id; 
+		}
+		else { 
+			return url; 
+		}
+};
 
 })(jQuery);

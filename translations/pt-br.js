@@ -74,11 +74,11 @@
 
 "preferences": "Preferências",
 
-"enterFullScreen": "Entrar em tela cheia",
+"enterFullscreen": "Entrar em tela cheia",
 
-"exitFullScreen": "Sair da tela cheia",
+"exitFullscreen": "Sair da tela cheia",
 
-"fullScreen": "Tela cheia",
+"fullscreen": "Tela cheia",
 
 "speed": "Velocidade",
 
@@ -206,23 +206,23 @@
 
 "prefDescVisible": "Fazer com que a descrição esteja visível",
 
-"prefDescVoice": "Voice",
+"prefDescVoice": "Voz",
 
-"prefDescRate": "Rate",
+"prefDescRate": "Taxa",
 
-"prefDescPitch": "Pitch",
+"prefDescPitch": "Tom",
 
-"prefDescPitch1": "Very low",
+"prefDescPitch1": "Muito baixo",
 
-"prefDescPitch2": "Low",
+"prefDescPitch2": "Baixo",
 
-"prefDescPitch3": "Default",
+"prefDescPitch3": "Padrão",
 
-"prefDescPitch4": "High",
+"prefDescPitch4": "Alto",
 
-"prefDescPitch5": "Very high",
+"prefDescPitch5": "Muito alto",
 
-"sampleDescriptionText": "Adjust settings to hear this sample text.",
+"sampleDescriptionText": "Ajuste as configurações para ouvir este exemplo de texto.",
 
 "prefHighlight": "Destacar a descrição conforme a mídia for reproduzida",
 

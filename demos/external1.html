@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Transcript in an external container</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- Style for this example only -->
+<style>
+	div#wrapper {
+		display: flex; 
+		flex-direction: row; 
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		width: 1280px;
+		max-width: 98%;
+	}
+	#player {
+		width: 480px;
+		margin: 0 20px;
+	}
+	#transcript {
+		height: 700px;
+		width: 500px;
+		margin: 1em;
+	}
+	#transcript div.able-desc {
+		width: 90%;
+	}
+</style>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Transcript in an external container</h1>
+
+		<p>This demo includes an empty &lt;div&gt; element, and a 
+			<strong>data-transcript-div</strong> attribute on the &lt;video&gt; tag 
+			which identifies the <em>id</em> of the empty container. 
+			Able Player generates an automated interactive transcript 
+			from the chapters, captions, and description tracks, 
+			and writes it to the external container rather than to a popup.</p>
+
+		<div id="wrapper">
+
+			<div id="player">
+				<video id="video1" preload="auto" width="480" height="360" poster="../media/wwa.jpg" data-able-player data-skin="2020" data-transcript-div="transcript" playsinline>
+					<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+					<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+					<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+					<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+					<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+					<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+					<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+					<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+					<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+					<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+					<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+					<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+					<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+					<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+					<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+				</video>
+			</div>
+			<div id="transcript"></div>
+		</div>
+	</main>
+
+</main>
+</body>
+</html>
