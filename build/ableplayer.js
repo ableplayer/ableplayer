@@ -381,13 +381,13 @@ var AblePlayerInstances = [];
 
 		// Skin
 		// valid values of data-skin are:
-		// 'legacy' (default), two rows of controls; seekbar positioned in available space within top row
-		// '2020', all buttons in one row beneath a full-width seekbar
-		if ($(media).data('skin') == '2020') {
-			this.skin = '2020';
+		// '2020' (default as of 5.0), all buttons in one row beneath a full-width seekbar
+		// 'legacy', two rows of controls; seekbar positioned in available space within top row
+		if ($(media).data('skin') == 'legacy') {
+			this.skin = 'legacy';
 		}
 		else {
-			this.skin = 'legacy';
+			this.skin = '2020';
 		}
 
 		// Size 
