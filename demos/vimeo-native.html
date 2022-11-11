@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Vimeo Native Player</title>
+		<link rel="stylesheet" href="demos.css" type="text/css">
+
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+		<script src="https://player.vimeo.com/api/player.js"></script>
+	
+	<style>
+		#wrapper { 
+			width: 1000px;
+			max-width: 100%;
+			border: 1px solid #340449;
+		}
+		#vimeo_id, 
+		iframe { 
+			max-width: 100%;
+		}
+	</style>
+	<script>
+		var aspectRatio, playerWidth, playerHeight; 
+
+		$(document).ready(function() { 
+console.log('document is ready');
+			// Initialize Vimeo API 
+			const options = {
+        id: 328769500,
+        loop: false
+    	};
+
+	    const player = new Vimeo.Player('vimeo_id', options);
+
+  	  player.setVolume(0);
+
+			player.ready().then(function() {
+				console.log('player is ready');
+				player.getVideoWidth().then(function(width) {
+					player.getVideoHeight().then(function(height) {
+console.log('video intrinsic size is ' + width + 'x' + height); 
+						playerWidth = width; 
+						playerHeight = height; 
+						aspectRatio = height / width; 
+						$('iframe').data('aspectRatio',aspectRatio);
+						$('iframe').removeAttr('width'); 
+						$('iframe').removeAttr('height'); 
+console.log('iframe',$('iframe'));						
+					});
+				});
+			});
+
+			$(window).resize(function() { 
+console.log('the window resized');
+				var width = $('#wrapper').width();
+console.log('wrapper width',width );				
+				$('iframe').width(width); 
+				$('iframe').height(width * aspectRatio); 
+			});
+
+			$(window).resize();
+		});
+	</script>
+
+	<body>
+		<div id="wrapper">
+			<div id="vimeo_id"></div>
+		</div>		
+	</body>
+</html>
