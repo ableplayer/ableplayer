@@ -2098,7 +2098,7 @@ var AblePlayerInstances = [];
 							id: thisId,
 						});
 						if (thisPref === 'prefDescVoice' && this.descVoices) {
-							prefDescVoice = this.getPrefDescVoice(); 
+							prefDescVoice = this.getPrefDescVoice(); 				
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
 								optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase(); 
@@ -2112,8 +2112,8 @@ var AblePlayerInstances = [];
 									$thisOption.prop('selected',true);
 								}
 								$thisField.append($thisOption);
-								this.$voiceSelectField = $thisField;
 							}
+							this.$voiceSelectField = $thisField;
 						}
 						else {
 							if (thisPref == 'prefDescPitch') { // 0 to 2
@@ -2401,11 +2401,19 @@ var AblePlayerInstances = [];
 		// return user's preferred voice for the current language from cookie.voices 
 		var lang, cookie, i; 
 
-		lang = this.selectedDescriptions.lang; 
+		if (this.selectedDescriptions) { 
+			lang = this.selectedDescriptions.language; 
+		}
+		else if (this.captionLang) { 
+			lang = this.captionLang; 
+		}
+		else { 
+			lang = this.lang; 
+		}
 		cookie = this.getCookie(); 
 		if (cookie.voices) { 
 			for (i=0; i < cookie.voices.length; i++) { 
-				if (cookie.voices[i].lang === lang) { 
+				if (cookie.voices[i].lang === lang) { 					
 					return cookie.voices[i].name; 
 				}
 			}
@@ -7752,7 +7760,7 @@ var AblePlayerInstances = [];
 						this.speechEnabled = true; 
 					}
 				}
-				else {  // context is either 'play' or 'prefs' 
+				else {  // context is either 'play' or 'prefs' or 'desc'
 					var greeting = new SpeechSynthesisUtterance('Hi!');
 					greeting.volume = 0; // silent 
 					greeting.rate = 10; // fastest speed supported by the API  
@@ -7841,17 +7849,25 @@ var AblePlayerInstances = [];
 
 		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
 		cookie = this.getCookie(); 
-		if (typeof cookie.voices !== 'undefined') { 
+		if (typeof cookie.voices !== 'undefined') { 			
 			prefDescVoice = this.getPrefDescVoice(); 
 		}
 		else { 
 			prefDescVoice = null; 
 		}
-
+	
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
 
-		descLang = this.selectedDescriptions.language;
+		if (this.selectedDescriptions) { 
+			descLang = this.selectedDescriptions.language;
+		}
+		else if (this.captionLang) { 
+			descLang = this.captionLang; 
+		}
+		else { 
+			descLang = this.lang; 
+		}
 
 		if (this.synth) {
 			voices = this.synth.getVoices();
@@ -7865,6 +7881,7 @@ var AblePlayerInstances = [];
 							if (voices[i].name === prefDescVoice) { 
 								descVoice = voices[i].name; 
 								prefVoiceFound = true; 
+								break;
 							}
 						}
 					}
@@ -7874,14 +7891,16 @@ var AblePlayerInstances = [];
 					for (var i=0; i<voices.length; i++) {
 						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
 							descVoice = voices[i].name;
+							break;
 						}
 					}
 				}
 				// make this the user's current preferred voice
 				this.prefDescVoice = descVoice;
-				this.prefDescLang = descLang;
+				this.prefDescVoiceLang = descLang;
 				// select this voice in the Description Prefs dialog
 				if (this.$voiceSelectField) {
+					var selectedOption = this.$voiceSelectField.find('option[value="' + this.prefDescVoice + '"]');
 					this.$voiceSelectField.val(this.prefDescVoice);
 				}
 				this.updateCookie('voice'); 
@@ -8204,7 +8223,7 @@ var AblePlayerInstances = [];
 		//	This is for testing only; not recommended for production
 		// 	unless the voice select field is also removed from the Prefs dialog
 		var useFirstVoice = false;
-
+	
 		if (!this.speechEnabled) {
 			// voices array failed to load the first time. Try again
 			this.initSpeech('desc');
@@ -10499,7 +10518,7 @@ var AblePlayerInstances = [];
 			this.transcriptDescriptions = descriptions;
 		}
 		if (this.selectedDescriptions) {
-			// updating description voice to match new description language
+			// updating description voice to match new description language			
 			this.setDescriptionVoice();
 		}
 		this.updateTranscript();
@@ -15270,6 +15289,7 @@ var AblePlayerInstances = [];
 			// Fallback to English
 			this.lang = 'en';
 		}
+
 		if (!this.searchLang) {
 			this.searchLang = this.lang;
 		}

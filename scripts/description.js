@@ -214,7 +214,7 @@
 						this.speechEnabled = true; 
 					}
 				}
-				else {  // context is either 'play' or 'prefs' 
+				else {  // context is either 'play' or 'prefs' or 'desc'
 					var greeting = new SpeechSynthesisUtterance('Hi!');
 					greeting.volume = 0; // silent 
 					greeting.rate = 10; // fastest speed supported by the API  
@@ -303,17 +303,25 @@
 
 		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
 		cookie = this.getCookie(); 
-		if (typeof cookie.voices !== 'undefined') { 
+		if (typeof cookie.voices !== 'undefined') { 			
 			prefDescVoice = this.getPrefDescVoice(); 
 		}
 		else { 
 			prefDescVoice = null; 
 		}
-
+	
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
 
-		descLang = this.selectedDescriptions.language;
+		if (this.selectedDescriptions) { 
+			descLang = this.selectedDescriptions.language;
+		}
+		else if (this.captionLang) { 
+			descLang = this.captionLang; 
+		}
+		else { 
+			descLang = this.lang; 
+		}
 
 		if (this.synth) {
 			voices = this.synth.getVoices();
@@ -327,6 +335,7 @@
 							if (voices[i].name === prefDescVoice) { 
 								descVoice = voices[i].name; 
 								prefVoiceFound = true; 
+								break;
 							}
 						}
 					}
@@ -336,14 +345,16 @@
 					for (var i=0; i<voices.length; i++) {
 						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
 							descVoice = voices[i].name;
+							break;
 						}
 					}
 				}
 				// make this the user's current preferred voice
 				this.prefDescVoice = descVoice;
-				this.prefDescLang = descLang;
+				this.prefDescVoiceLang = descLang;
 				// select this voice in the Description Prefs dialog
 				if (this.$voiceSelectField) {
+					var selectedOption = this.$voiceSelectField.find('option[value="' + this.prefDescVoice + '"]');
 					this.$voiceSelectField.val(this.prefDescVoice);
 				}
 				this.updateCookie('voice'); 
@@ -666,7 +677,7 @@
 		//	This is for testing only; not recommended for production
 		// 	unless the voice select field is also removed from the Prefs dialog
 		var useFirstVoice = false;
-
+	
 		if (!this.speechEnabled) {
 			// voices array failed to load the first time. Try again
 			this.initSpeech('desc');

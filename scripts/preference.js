@@ -529,7 +529,7 @@
 							id: thisId,
 						});
 						if (thisPref === 'prefDescVoice' && this.descVoices) {
-							prefDescVoice = this.getPrefDescVoice(); 
+							prefDescVoice = this.getPrefDescVoice(); 				
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
 								optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase(); 
@@ -543,8 +543,8 @@
 									$thisOption.prop('selected',true);
 								}
 								$thisField.append($thisOption);
-								this.$voiceSelectField = $thisField;
 							}
+							this.$voiceSelectField = $thisField;
 						}
 						else {
 							if (thisPref == 'prefDescPitch') { // 0 to 2
@@ -832,11 +832,19 @@
 		// return user's preferred voice for the current language from cookie.voices 
 		var lang, cookie, i; 
 
-		lang = this.selectedDescriptions.lang; 
+		if (this.selectedDescriptions) { 
+			lang = this.selectedDescriptions.language; 
+		}
+		else if (this.captionLang) { 
+			lang = this.captionLang; 
+		}
+		else { 
+			lang = this.lang; 
+		}
 		cookie = this.getCookie(); 
 		if (cookie.voices) { 
 			for (i=0; i < cookie.voices.length; i++) { 
-				if (cookie.voices[i].lang === lang) { 
+				if (cookie.voices[i].lang === lang) { 					
 					return cookie.voices[i].name; 
 				}
 			}

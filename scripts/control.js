@@ -2121,7 +2121,7 @@
 			this.transcriptDescriptions = descriptions;
 		}
 		if (this.selectedDescriptions) {
-			// updating description voice to match new description language
+			// updating description voice to match new description language			
 			this.setDescriptionVoice();
 		}
 		this.updateTranscript();
