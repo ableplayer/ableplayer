@@ -553,6 +553,8 @@
 			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
 		}
 
+		this.getSampleDescriptionText(); 
+
 		this.initSignLanguage();
 
 		this.initPlayer().then(function() {

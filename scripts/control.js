@@ -2122,7 +2122,17 @@
 		}
 		if (this.selectedDescriptions) {
 			// updating description voice to match new description language			
-			this.setDescriptionVoice();
+			this.setDescriptionVoice();			
+			if (this.$sampleDescDiv) { 
+				if (this.sampleText) { 
+					for (i = 0; i < this.sampleText.length; i++) { 
+						if (this.sampleText[i].lang === this.selectedDescriptions.language) { 
+							this.currentSampleText = this.sampleText[i]['text']; 
+							this.$sampleDescDiv.html(this.currentSampleText); 
+						}
+					}
+				}
+			}
 		}
 		this.updateTranscript();
 	};

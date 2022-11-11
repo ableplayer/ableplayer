@@ -106,4 +106,29 @@
 		return deferred.promise();
 	};
 
+	AblePlayer.prototype.getSampleDescriptionText = function() {
+
+		// Create an array of sample description text in all languages 
+		// This needs to be readily available for testing different voices 
+		// in the Description Preferences dialog 
+		var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation; 
+		
+		supportedLangs = this.getSupportedLangs(); 
+
+		thisObj = this; 
+
+		this.sampleText = []; 
+		for (i=0; i < supportedLangs.length; i++) { 
+			translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.js';
+			$.getJSON(translationFile, thisLang, (function(thisLang) {
+					return function(data) { 
+						thisText = data.sampleDescriptionText; 
+						translation = {'lang':thisLang, 'text': thisText}; 
+						thisObj.sampleText.push(translation); 						
+					};
+			}(supportedLangs[i])) // pass lang to callback function 
+			); 				 
+		}
+	};
+
 })(jQuery);

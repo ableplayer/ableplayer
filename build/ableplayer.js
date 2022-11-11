@@ -1223,6 +1223,8 @@ var AblePlayerInstances = [];
 			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
 		}
 
+		this.getSampleDescriptionText(); 
+
 		this.initSignLanguage();
 
 		this.initPlayer().then(function() {
@@ -2159,7 +2161,7 @@ var AblePlayerInstances = [];
 						}
 						// add a change handler that announces the sample description text
 						$thisField.on('change',function() {
-							thisObj.announceDescriptionText('sample',thisObj.tt.sampleDescriptionText);
+							thisObj.announceDescriptionText('sample',thisObj.currentSampleText);
 						});
 						$thisDiv.append($thisLabel,$thisField);
 					}
@@ -2225,6 +2227,7 @@ var AblePlayerInstances = [];
 					'class': 'able-desc-sample'
 				}).text(this.tt.sampleDescriptionText);
 				$prefsDiv.append(this.$sampleDescDiv);
+				this.currentSampleText = this.tt.sampleDescriptionText; 
 			}
 		}
 		else if (form === 'keyboard') {
@@ -10519,7 +10522,17 @@ var AblePlayerInstances = [];
 		}
 		if (this.selectedDescriptions) {
 			// updating description voice to match new description language			
-			this.setDescriptionVoice();
+			this.setDescriptionVoice();			
+			if (this.$sampleDescDiv) { 
+				if (this.sampleText) { 
+					for (i = 0; i < this.sampleText.length; i++) { 
+						if (this.sampleText[i].lang === this.selectedDescriptions.language) { 
+							this.currentSampleText = this.sampleText[i]['text']; 
+							this.$sampleDescDiv.html(this.currentSampleText); 
+						}
+					}
+				}
+			}
 		}
 		this.updateTranscript();
 	};
@@ -15305,6 +15318,31 @@ var AblePlayerInstances = [];
 			deferred.fail();
 		})
 		return deferred.promise();
+	};
+
+	AblePlayer.prototype.getSampleDescriptionText = function() {
+
+		// Create an array of sample description text in all languages 
+		// This needs to be readily available for testing different voices 
+		// in the Description Preferences dialog 
+		var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation; 
+		
+		supportedLangs = this.getSupportedLangs(); 
+
+		thisObj = this; 
+
+		this.sampleText = []; 
+		for (i=0; i < supportedLangs.length; i++) { 
+			translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.js';
+			$.getJSON(translationFile, thisLang, (function(thisLang) {
+					return function(data) { 
+						thisText = data.sampleDescriptionText; 
+						translation = {'lang':thisLang, 'text': thisText}; 
+						thisObj.sampleText.push(translation); 						
+					};
+			}(supportedLangs[i])) // pass lang to callback function 
+			); 				 
+		}
 	};
 
 })(jQuery);

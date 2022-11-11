@@ -590,7 +590,7 @@
 						}
 						// add a change handler that announces the sample description text
 						$thisField.on('change',function() {
-							thisObj.announceDescriptionText('sample',thisObj.tt.sampleDescriptionText);
+							thisObj.announceDescriptionText('sample',thisObj.currentSampleText);
 						});
 						$thisDiv.append($thisLabel,$thisField);
 					}
@@ -656,6 +656,7 @@
 					'class': 'able-desc-sample'
 				}).text(this.tt.sampleDescriptionText);
 				$prefsDiv.append(this.$sampleDescDiv);
+				this.currentSampleText = this.tt.sampleDescriptionText; 
 			}
 		}
 		else if (form === 'keyboard') {
