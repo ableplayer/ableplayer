@@ -235,9 +235,6 @@
 		if (this.player === 'html5') {
 			return this.media.muted;
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			return this.jwPlayer.getMute();
-		}
 		else if (this.player === 'youtube') {
 			return this.youTubePlayer.isMuted();
 		}
@@ -259,9 +256,6 @@
 
 		if (this.player === 'html5') {
 			this.media.muted = mute;
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			this.jwPlayer.setMute(mute);
 		}
 		else if (this.player === 'youtube') {
 			if (mute) {
@@ -307,10 +301,6 @@
 				// successful completion also fires a 'volumechange' event (see event.js)
 			});
 		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// volume is 0 to 100
-			this.jwPlayer.setVolume(volume * 10);
-		}
 		this.lastVolume = volume;
 	};
 
@@ -332,10 +322,6 @@
 			// this.vimeoPlayer.getVolume() takes too long to resolve with a value
 			// Just use variable that's already been defined (should be the same value anyway)
 			return this.volume;
-		}
-		else if (this.player === 'jw' && this.jwPlayer) {
-			// uses 0 to 100 scale
-			return this.jwPlayer.getVolume() / 10;
 		}
 	};
 
