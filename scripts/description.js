@@ -294,33 +294,59 @@
 		return descLangs;
 	};
 
-	AblePlayer.prototype.updateDescriptionVoice = function () {
+	AblePlayer.prototype.setDescriptionVoice = function () {
 
-		// Called if user chooses a subtitle language for which there is a matching description track
-		// This ensures the description is read in a proper voice for the selected language
+		// set description voice on player init, or when user changes caption language 
+		// Voice is determined in the following order of precedence: 
+		// 1. User's preferred voice for this language, saved in a cookie
+		// 2. The first available voice in the array of available voices for this browser in this language
 
-		var voices, descVoice;
+		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
+		cookie = this.getCookie(); 
+		if (typeof cookie.voices !== 'undefined') { 
+			prefDescVoice = this.getPrefDescVoice(); 
+		}
+		else { 
+			prefDescVoice = null; 
+		}
+
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
 
-		descVoice = this.selectedDescriptions.language;
+		descLang = this.selectedDescriptions.language;
 
 		if (this.synth) {
 			voices = this.synth.getVoices();
 			if (voices.length > 0) {
-				// available languages are identified with local suffixes (e.g., en-US)
-				for (var i=0; i<voices.length; i++) {
-					// select the first language that matches the first 2 characters of the lang code
-					if (voices[i].lang.substring(0,2).toLowerCase() === descVoice.substring(0,2).toLowerCase()) {
-						// make this the user's current preferred voice
-						this.prefDescVoice = voices[i].name;
-						// select this voice in the Description Prefs dialog
-						if (this.$voiceSelectField) {
-							this.$voiceSelectField.val(this.prefDescVoice);
+				if (prefDescVoice) { 
+					// select the language that matches prefDescVoice, if it's available 
+					prefVoiceFound = false; 
+					for (var i=0; i<voices.length; i++) {
+						// first, be sure voice is the correct language
+						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
+							if (voices[i].name === prefDescVoice) { 
+								descVoice = voices[i].name; 
+								prefVoiceFound = true; 
+							}
 						}
-						break;
 					}
 				}
+				if (!prefVoiceFound) { 
+					// select the first language that matches the first 2 characters of the lang code
+					for (var i=0; i<voices.length; i++) {
+						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
+							descVoice = voices[i].name;
+						}
+					}
+				}
+				// make this the user's current preferred voice
+				this.prefDescVoice = descVoice;
+				this.prefDescLang = descLang;
+				// select this voice in the Description Prefs dialog
+				if (this.$voiceSelectField) {
+					this.$voiceSelectField.val(this.prefDescVoice);
+				}
+				this.updateCookie('voice'); 
 			}
 		}
 	};
@@ -606,7 +632,7 @@
 		else if (rate >= 2.5) { 
 			speechRate =  3; // option 10 in prefs menu (super fast) 
 		}
-		this.prefDescRate = speechRate; 
+		this.prefDescRate = speechRate;
 	}; 
 
 	AblePlayer.prototype.announceDescriptionText = function(context, text) {

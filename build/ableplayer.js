@@ -1581,7 +1581,8 @@ var AblePlayerInstances = [];
 		var defaultCookie = {
 			preferences: {},
 			sign: {},
-			transcript: {}
+			transcript: {},
+			voices: []
 		};
 
 		var cookie;
@@ -1608,9 +1609,8 @@ var AblePlayerInstances = [];
 		// e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
 		// setting is any supported preference name (e.g., "prefCaptions")
 		// OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
-		var cookie, $window, windowPos, available, i, prefName;
+		var cookie, $window, windowPos, available, i, prefName, voiceLangFound, newVoice;
 		cookie = this.getCookie();
-
 		if (setting === 'transcript' || setting === 'sign') {
 			if (setting === 'transcript') {
 				$window = this.$transcriptArea;
@@ -1638,6 +1638,25 @@ var AblePlayerInstances = [];
 				cookie.sign['width'] = $window.width();
 				cookie.sign['height'] = $window.height();
 			}
+		}
+		else if (setting === 'voice') { 
+			if (typeof cookie.voices === 'undefined') {
+				cookie.voices = [];
+			}
+			// replace preferred voice for this lang in cookie.voices array, if one exists 
+			// otherwise, add it to the array 
+			voiceLangFound = false; 
+			for (var v=0; v < cookie.voices.length; v++) { 						
+				if (cookie.voices[v].lang === this.prefDescVoiceLang) { 
+					voiceLangFound = true; 
+					cookie.voices[v].name = this.prefDescVoice; 
+				}
+			}
+			if (!voiceLangFound) { 
+				// no voice has been saved yet for this language. Add it to array. 
+				newVoice = {'name':this.prefDescVoice, 'lang':this.prefDescVoiceLang};
+				cookie.voices.push(newVoice); 
+			}								
 		}
 		else {
 			available = this.getAvailablePreferences();
@@ -1872,7 +1891,11 @@ var AblePlayerInstances = [];
 			}
 		}
 
-		// Save since we may have added default values.
+		// Also load array of preferred voices from cookie 
+		if (typeof cookie.voices !== 'undefined') { 
+			this.prefVoices = cookie.voices;  
+		}			
+
 		this.setCookie(cookie);
 	};
 
@@ -1889,9 +1912,9 @@ var AblePlayerInstances = [];
 			thisPref, $thisDiv, thisClass, thisId, $thisLabel, $thisField,
 			$div1,id1,$radio1,$label1,
 			$div2,id2,$radio2,$label2,
-			options,$thisOption,optionValue,optionText,sampleCapsDiv,
+			options,$thisOption,optionValue,optionLang,optionText,sampleCapsDiv,
 			changedPref,changedSpan,changedText,
-			currentDescState,
+			currentDescState, prefDescVoice, 
 			$kbHeading,$kbList,kbLabels,keys,kbListText,$kbListItem,
 			dialog,saveButton,cancelButton;
 
@@ -2075,14 +2098,17 @@ var AblePlayerInstances = [];
 							id: thisId,
 						});
 						if (thisPref === 'prefDescVoice' && this.descVoices) {
+							prefDescVoice = this.getPrefDescVoice(); 
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
+								optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase(); 
 								optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
 								$thisOption = $('<option>',{
-									value: optionValue,
+									'value': optionValue,
+									'data-lang': optionLang,
 									text: optionText
 								});
-								if (this[thisPref] == optionValue) {
+								if (prefDescVoice === optionValue) {
 									$thisOption.prop('selected',true);
 								}
 								$thisField.append($thisOption);
@@ -2370,6 +2396,23 @@ var AblePlayerInstances = [];
 		});
 	};
 
+	AblePlayer.prototype.getPrefDescVoice = function () {
+
+		// return user's preferred voice for the current language from cookie.voices 
+		var lang, cookie, i; 
+
+		lang = this.selectedDescriptions.lang; 
+		cookie = this.getCookie(); 
+		if (cookie.voices) { 
+			for (i=0; i < cookie.voices.length; i++) { 
+				if (cookie.voices[i].lang === lang) { 
+					return cookie.voices[i].name; 
+				}
+			}
+		}
+		return null; // user has no saved preference
+	}
+
 	AblePlayer.prototype.rebuildDescPrefsForm = function () {
 
 		// Called if this.descVoices changes, which may happen if: 
@@ -2384,7 +2427,8 @@ var AblePlayerInstances = [];
 			optionValue = this.descVoices[i].name;
 			optionText = optionValue + ' (' + this.descVoices[i].lang + ')';
 			$thisOption = $('<option>',{
-				value: optionValue,
+				'value': optionValue,
+				'data-lang': this.descVoices[i].lang.substring(0,2).toLowerCase(),
 				text: optionText
 			});
 			if (this.prefDescVoice == optionValue) {
@@ -2498,7 +2542,8 @@ var AblePlayerInstances = [];
 		// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
 		// update cookie with new value
-		var cookie, available, prefName, prefId, numChanges,
+		var cookie, available, prefName, prefId, 
+			voiceSelectId, newVoice, newVoiceLang, numChanges, voiceLangFound, 
 			numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
@@ -2511,7 +2556,30 @@ var AblePlayerInstances = [];
 			if (available[i]['label']) {
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
-				if (prefName == 'prefDescMethod') {
+				if (prefName === 'prefDescVoice') { 
+					if (typeof cookie.voices === 'undefined') {
+						cookie.voices = [];
+					}
+					voiceSelectId = this.mediaId + '_prefDescVoice';
+					this.prefDescVoice = $('select#' + voiceSelectId).find(':selected').val();
+					this.prefDescVoiceLang = $('select#' + voiceSelectId).find(':selected').attr('data-lang');
+					// replace preferred voice for this lang in cookie.voices array, if one exists 
+					// otherwise, add it to the array 
+					voiceLangFound = false; 
+					for (var v=0; v < cookie.voices.length; v++) { 						
+						if (cookie.voices[v].lang === this.prefDescVoiceLang) { 
+							voiceLangFound = true; 
+							cookie.voices[v].name = this.prefDescVoice; 
+						}
+					}
+					if (!voiceLangFound) { 
+						// no voice has been saved yet for this language. Add it to array. 
+						newVoice = {'name':this.prefDescVoice, 'lang':this.prefDescVoiceLang};
+						cookie.voices.push(newVoice); 
+					}					
+					numChanges++; 
+				}
+				else if (prefName == 'prefDescMethod') {
 					// As of v4.0.10, prefDescMethod is no longer a choice
 					// this.prefDescMethod = $('input[name="' + prefName + '"]:checked').val();
 					this.prefDescMethod = 'video';
@@ -7764,33 +7832,59 @@ var AblePlayerInstances = [];
 		return descLangs;
 	};
 
-	AblePlayer.prototype.updateDescriptionVoice = function () {
+	AblePlayer.prototype.setDescriptionVoice = function () {
 
-		// Called if user chooses a subtitle language for which there is a matching description track
-		// This ensures the description is read in a proper voice for the selected language
+		// set description voice on player init, or when user changes caption language 
+		// Voice is determined in the following order of precedence: 
+		// 1. User's preferred voice for this language, saved in a cookie
+		// 2. The first available voice in the array of available voices for this browser in this language
 
-		var voices, descVoice;
+		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
+		cookie = this.getCookie(); 
+		if (typeof cookie.voices !== 'undefined') { 
+			prefDescVoice = this.getPrefDescVoice(); 
+		}
+		else { 
+			prefDescVoice = null; 
+		}
+
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
 
-		descVoice = this.selectedDescriptions.language;
+		descLang = this.selectedDescriptions.language;
 
 		if (this.synth) {
 			voices = this.synth.getVoices();
 			if (voices.length > 0) {
-				// available languages are identified with local suffixes (e.g., en-US)
-				for (var i=0; i<voices.length; i++) {
-					// select the first language that matches the first 2 characters of the lang code
-					if (voices[i].lang.substring(0,2).toLowerCase() === descVoice.substring(0,2).toLowerCase()) {
-						// make this the user's current preferred voice
-						this.prefDescVoice = voices[i].name;
-						// select this voice in the Description Prefs dialog
-						if (this.$voiceSelectField) {
-							this.$voiceSelectField.val(this.prefDescVoice);
+				if (prefDescVoice) { 
+					// select the language that matches prefDescVoice, if it's available 
+					prefVoiceFound = false; 
+					for (var i=0; i<voices.length; i++) {
+						// first, be sure voice is the correct language
+						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
+							if (voices[i].name === prefDescVoice) { 
+								descVoice = voices[i].name; 
+								prefVoiceFound = true; 
+							}
 						}
-						break;
 					}
 				}
+				if (!prefVoiceFound) { 
+					// select the first language that matches the first 2 characters of the lang code
+					for (var i=0; i<voices.length; i++) {
+						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
+							descVoice = voices[i].name;
+						}
+					}
+				}
+				// make this the user's current preferred voice
+				this.prefDescVoice = descVoice;
+				this.prefDescLang = descLang;
+				// select this voice in the Description Prefs dialog
+				if (this.$voiceSelectField) {
+					this.$voiceSelectField.val(this.prefDescVoice);
+				}
+				this.updateCookie('voice'); 
 			}
 		}
 	};
@@ -8076,7 +8170,7 @@ var AblePlayerInstances = [];
 		else if (rate >= 2.5) { 
 			speechRate =  3; // option 10 in prefs menu (super fast) 
 		}
-		this.prefDescRate = speechRate; 
+		this.prefDescRate = speechRate;
 	}; 
 
 	AblePlayer.prototype.announceDescriptionText = function(context, text) {
@@ -10406,7 +10500,7 @@ var AblePlayerInstances = [];
 		}
 		if (this.selectedDescriptions) {
 			// updating description voice to match new description language
-			this.updateDescriptionVoice();
+			this.setDescriptionVoice();
 		}
 		this.updateTranscript();
 	};

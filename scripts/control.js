@@ -2122,7 +2122,7 @@
 		}
 		if (this.selectedDescriptions) {
 			// updating description voice to match new description language
-			this.updateDescriptionVoice();
+			this.setDescriptionVoice();
 		}
 		this.updateTranscript();
 	};
