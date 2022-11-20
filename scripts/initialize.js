@@ -337,17 +337,17 @@
 
 		var mediaId = this.$media.attr('id');
 
-		// Called again after width and height are known 
+		// Called again after width and height are known
 
-		if (this.mediaType === 'audio') { 			
-			if (this.playerWidth) { 
-				this.$ableWrapper.css('width',this.playerWidth + 'px'); 
+		if (this.mediaType === 'audio') {
+			if (this.playerWidth) {
+				this.$ableWrapper.css('width',this.playerWidth + 'px');
 			}
 		}
-		else if (width > 0 && height > 0) { 
-			this.playerWidth = width; 
-			this.playerHeight = height; 
-			this.aspectRatio = height / width; 
+		else if (width > 0 && height > 0) {
+			this.playerWidth = width;
+			this.playerHeight = height;
+			this.aspectRatio = height / width;
 		}
 	};
 
@@ -411,7 +411,7 @@
 					this.iconType = 'image';
 				}
 			}
-			else { 
+			else {
 				// window.getComputedStyle is not supported (IE 8 and earlier)
 				// No known way to detect computed font
 				// The following retrieves the value from the style sheet, not the computed font
@@ -522,12 +522,12 @@
 	AblePlayer.prototype.recreatePlayer = function () {
 
 		// Creates the appropriate player for the current source.
-		// This function is called each time a new media instance is loaded 
-		// e.g., 
-		// User clicks on an item in a playlist 
-		// User swaps to/from described version of video 
-		// Blocks of code that only need to be executed once are controlled 
-		// by this.playerCreated 
+		// This function is called each time a new media instance is loaded
+		// e.g.,
+		// User clicks on an item in a playlist
+		// User swaps to/from described version of video
+		// Blocks of code that only need to be executed once are controlled
+		// by this.playerCreated
 
 		// TODO: Ensure when recreating player that we carry over the mediaId
 		if (!this.player) {
@@ -541,34 +541,34 @@
 		promise = deferred.promise();
 		thisObj = this;
 
-		this.playerDeleted = false; // reset after deletePlayer() 
+		this.playerDeleted = false; // reset after deletePlayer()
 
 		// set temp stopgap to prevent this function from executing again before finished
-		this.recreatingPlayer = true; 
+		this.recreatingPlayer = true;
 
 		if (!this.playerCreated) {
 			// only call these functions once
 			this.loadCurrentPreferences();
 			this.injectPlayerCode();
-			this.resizePlayer(this.media.videoWidth,this.media.videoHeight); 
+			this.resizePlayer(this.media.videoWidth,this.media.videoHeight);
 		}
 
-		this.getSampleDescriptionText(); 
+		this.getSampleDescriptionText();
 
 		this.initSignLanguage();
 
 		this.initPlayer().then(function() {
 
-			thisObj.getTracks().then(function() { 
+			thisObj.getTracks().then(function() {
 
 				thisObj.initDescription().then(function() {
 
 					thisObj.setupTracks().then(function() {
-						if (thisObj.hasClosedDesc) { 
-							if (!thisObj.$descDiv || 
+						if (thisObj.hasClosedDesc) {
+							if (!thisObj.$descDiv ||
 								(thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {
-								// descDiv either doesn't exist, or exists in an orphaned state 
-								// Either way, it needs to be rebuilt...  
+								// descDiv either doesn't exist, or exists in an orphaned state
+								// Either way, it needs to be rebuilt...
 								thisObj.injectTextDescriptionArea();
 							}
 						}
@@ -627,28 +627,28 @@
 									// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
 									// However, the media needs to load for us to get the media's duration
 									if (thisObj.player === 'html5') {
-										if (!thisObj.loadingMedia) { 
+										if (!thisObj.loadingMedia) {
 											thisObj.$media[0].load();
-											thisObj.loadingMedia = true; 
+											thisObj.loadingMedia = true;
 										}
 									}
 									// refreshControls is called twice building/initializing the player
 									// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
 									setTimeout(function() {
-										thisObj.refreshControls('init'); 
-										deferred.resolve(); 
-									},100);								
-								}); 
-							}); 
+										thisObj.refreshControls('init');
+										deferred.resolve();
+									},100);
+								});
+							});
 						});
 					});
-				});			 
+				});
 			});
 		},
 		function() {	 // initPlayer fail
 			thisObj.provideFallback();
 		});
-		return promise; 
+		return promise;
 	};
 
 	AblePlayer.prototype.initPlayer = function () {
@@ -866,8 +866,8 @@
 		// return 'html5', 'youtube', 'vimeo', or null
 
 		var i, sourceType, $newItem;
-		if (this.testFallback) { 
-			return null; 
+		if (this.testFallback) {
+			return null;
 		}
 		else if (this.youTubeId) {
 			if (this.mediaType !== 'video') {

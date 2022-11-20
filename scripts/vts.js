@@ -84,7 +84,7 @@
 					$label = $('<label>', {
 						'for': radioId
 						// Two options for label:
-						// getLanguageName() - with second parameter "local" would return native name, otherwise returns English; 
+						// getLanguageName() - with second parameter "local" would return native name, otherwise returns English;
 						// TODO: if using this be sure to add lang attr to <div> (see above)
 					}).text(this.getLanguageName(this.langs[i]));
 					$radioDiv.append($radio,$label);
@@ -178,8 +178,8 @@
 
 	AblePlayer.prototype.setupVtsTracks = function(kind, lang, trackDesc, label, src, contents) {
 
-		// TODO: Add support for trackDesc 
-		// (to destinguish between tracks for the decribed vs non-described versions)		
+		// TODO: Add support for trackDesc
+		// (to destinguish between tracks for the decribed vs non-described versions)
 
 		// Called from tracks.js
 		var srcFile, vtsCues;
@@ -1012,7 +1012,7 @@
 			return myclass.substring(kindStart);
 		}
 		else {
-			// kind-* is one of multiple classes 
+			// kind-* is one of multiple classes
 			// the following will find it regardless of position of "kind-*" within the class string
 			return myclass.substring(kindStart,kindEnd);
 		}
