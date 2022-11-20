@@ -306,7 +306,7 @@
   /* -webkit-appearance: none; */ /* Hides the slider so that custom slider can be made */
   width: 28px;
   height: 100%;
-  background: transparent; /* Otherwise #fff in Chrome */
+  background: transparent; /* Otherwise white in Chrome */
 }
 /*
   Style slider in Firefox
@@ -341,7 +341,7 @@ input[type=range]::-moz-range-thumb {
 .able-status-bar {
   height: 1.5em;
   min-height: 1.5em;
-  color: #ccc  ;
+  color: #ccc;
   font-size: 0.9em;
   background-color: transparent;
   padding: 0.5em 0.5em 0.25em;
@@ -508,7 +508,7 @@ div.able-modal-dialog h1 {
 .able-help-div,
 .able-resize-form {
   background-color: #f5f5f5;
-  border: medium solid #ccc  ;
+  border: medium solid #ccc;
   padding: 0.5em 1em;
   margin: 0 0 0 1em;
   width: 25em;
@@ -826,7 +826,7 @@ div.able-wrapper.fullscreen {
   border-color: #000;
   border-width: 1px;
   color: #000 !important;
-  background-color: #ccc  ;
+  background-color: #ccc;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
@@ -873,7 +873,7 @@ ul.able-popup {
   color: #fff;
 }
 .able-popup li.able-focus {
-  background-color: #ccc  ;
+  background-color: #ccc;
   color: #000;
 }
 .able-popup-captions li {
@@ -957,7 +957,7 @@ ul.able-popup {
   color: #000;
   border: none;
   outline: none;
-  border-bottom: 1px solid #000 ;
+  border-bottom: 1px solid #000;
   cursor: pointer;
 }
 .able-window-toolbar label {
