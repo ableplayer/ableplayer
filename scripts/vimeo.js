@@ -1,5 +1,5 @@
-
 (function ($) {
+
 	AblePlayer.prototype.initVimeoPlayer = function () {
 
 		var thisObj, deferred, promise, containerId, vimeoId, autoplay, videoDimensions, options;
@@ -28,10 +28,10 @@
 		// setting the "controls" option to "false" will hide the default controls, without hiding captions.
 		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
 		// but that had unwanted side effects:
-		//  - In addition to hiding the controls, it also hides captions
-		//  - It automatically autoplays (initializing the player with autoplay:false does not override this)
-		//  - It automatically loops (but this can be overridden by initializing the player with loop:false)
-		//  - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
+		// - In addition to hiding the controls, it also hides captions
+		// - It automatically autoplays (initializing the player with autoplay:false does not override this)
+		// - It automatically loops (but this can be overridden by initializing the player with loop:false)
+		// - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
 		if (this.okToPlay) {
 			autoplay = 'true';
@@ -277,7 +277,7 @@
 		
 		// return a Vimeo ID, extracted from a full Vimeo URL
 		// Supported URL patterns are anything containing 'vimeo.com'
-		//  and ending with a '/' followed by the ID. 
+		// and ending with a '/' followed by the ID. 
 		// (Vimeo IDs do not have predicatable lengths)
 		
 		// Update: If URL contains parameters, return the full url 
@@ -308,6 +308,6 @@
 		else { 
 			return url; 
 		}
-};	
+	};	
 
 })(jQuery);
