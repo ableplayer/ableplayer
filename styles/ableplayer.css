@@ -136,12 +136,10 @@
       contrast ratio of 5.63 in the worst case.
     */
     opacity: 0.75;
-    filter:alpha(opacity=75); /* for IE */
 }
 
 .able-big-play-button:hover, .able-big-play-button:focus {
   opacity: 100;
-  filter:alpha(opacity=100); /* for IE */
 }
 
 .able-big-play-button .icon-play,
@@ -212,7 +210,6 @@
 }
 .able-controller .buttonOff {
   opacity: 0.5;
-  filter:alpha(opacity=50); /* for IE */
   z-index: 6800;
 }
 .able-controller .able-seekbar {
@@ -937,7 +934,6 @@ ul.able-popup {
 }
 .able-transcript .able-hidden {
   position: absolute !important;
-  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
   clip: rect(1px, 1px, 1px, 1px);
 }
 .able-highlight,
@@ -1205,7 +1201,6 @@ button#able-vts-save:focus {
 .able-clipped, .able-screenreader-alert {
   /* hide from sighted users, but not screen reader users */
   position: absolute !important;
-  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
   clip: rect(1px, 1px, 1px, 1px);
   /* additional rules are needed to ensure clipped buttons are truly invisible in Safari on Mac OS X */
   width: 1px !important;
