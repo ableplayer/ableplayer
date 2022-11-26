@@ -49,7 +49,7 @@
 
 			testVolume = 0.9;  // any value between 0.1 and 0.9
 			audio = new Audio();
-      audio.volume = testVolume;
+			audio.volume = testVolume;
 			if (audio.volume === testVolume) {
 				return true;
 			}

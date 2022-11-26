@@ -878,104 +878,104 @@
 		}
 	};
 
-	 AblePlayer.prototype.makePrefsValueReadable = function(pref,value) {
+	AblePlayer.prototype.makePrefsValueReadable = function(pref,value) {
 
-		 // The values for pitch, rate, and volume (web speech API)
-		 // are strange and inconsistent between variables
-		 // this function returns text that is more readable than the values themselves
+		// The values for pitch, rate, and volume (web speech API)
+		// are strange and inconsistent between variables
+		// this function returns text that is more readable than the values themselves
 
-		 if (pref === 'prefDescPitch') {
-			 if (value === 0) {
-				 return this.tt.prefDescPitch1;
-			 }
-			 else if (value === 0.5) {
-				 return this.tt.prefDescPitch2;
-			 }
-			 else if (value === 1) {
-				 return this.tt.prefDescPitch3;
-			 }
-			 else if (value === 1.5) {
-				 return this.tt.prefDescPitch4;
-			 }
-			 else if (value === 2) {
-				 return this.tt.prefDescPitch5;
-			 }
-		 }
-		 else if (pref === 'prefDescRate') {
-			 // default in the API is 0.1 to 10, where 1 is normal speaking voice
-			 // our custom range offers several rates close to 1
-			 // plus a couple of crazy fast ones for sport
-			 // Our more readable options (1-10) or mapped here to API values
-			 if (value === 0.7) {
-				 return 1;
-			 }
-			 else if (value === 0.8) {
-				 return 2;
-			 }
-			 else if (value === 0.9) {
-				 return 3;
-			 }
-			 else if (value === 1) {
-				 return 4;
-			 }
-			 else if (value === 1.1) {
-				 return 5;
-			 }
-			 else if (value === 1.2) {
-				 return 6;
-			 }
-			 else if (value === 1.5) {
-				 return 7;
-			 }
-			 else if (value === 2) {
-				 return 8;
-			 }
-			 else if (value === 2.5) {
-				 return 9;
-			 }
-			 else if (value === 3) {
-				 return 10;
-			 }
-		 }
-		 else if (pref === 'prefDescVolume') {
-			 // values range from 0.1 to 1.0
-			 return value * 10;
-		 }
-		 return value;
-	 };
+		if (pref === 'prefDescPitch') {
+			if (value === 0) {
+				return this.tt.prefDescPitch1;
+			}
+			else if (value === 0.5) {
+				return this.tt.prefDescPitch2;
+			}
+			else if (value === 1) {
+				return this.tt.prefDescPitch3;
+			}
+			else if (value === 1.5) {
+				return this.tt.prefDescPitch4;
+			}
+			else if (value === 2) {
+				return this.tt.prefDescPitch5;
+			}
+		}
+		else if (pref === 'prefDescRate') {
+			// default in the API is 0.1 to 10, where 1 is normal speaking voice
+			// our custom range offers several rates close to 1
+			// plus a couple of crazy fast ones for sport
+			// Our more readable options (1-10) or mapped here to API values
+			if (value === 0.7) {
+				return 1;
+			}
+			else if (value === 0.8) {
+				return 2;
+			}
+			else if (value === 0.9) {
+				return 3;
+			}
+			else if (value === 1) {
+				return 4;
+			}
+			else if (value === 1.1) {
+				return 5;
+			}
+			else if (value === 1.2) {
+				return 6;
+			}
+			else if (value === 1.5) {
+				return 7;
+			}
+			else if (value === 2) {
+				return 8;
+			}
+			else if (value === 2.5) {
+				return 9;
+			}
+			else if (value === 3) {
+				return 10;
+			}
+		}
+		else if (pref === 'prefDescVolume') {
+			// values range from 0.1 to 1.0
+			return value * 10;
+		}
+		return value;
+	};
 
-	 AblePlayer.prototype.resetPrefsForm = function () {
+	AblePlayer.prototype.resetPrefsForm = function () {
 
-		 // Reset preferences form with default values from cookie
-		 // Called when:
-		 // User clicks cancel or close button in Prefs Dialog
-		 // User presses Escape to close Prefs dialog
-		 // User clicks Save in Prefs dialog, & there's more than one player on page
+		// Reset preferences form with default values from cookie
+		// Called when:
+		// User clicks cancel or close button in Prefs Dialog
+		// User presses Escape to close Prefs dialog
+		// User clicks Save in Prefs dialog, & there's more than one player on page
 
-		 var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
+		var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
 
-		 thisObj = this;
-		 cookie = this.getCookie();
-		 available = this.getAvailablePreferences();
-		 for (i=0; i<available.length; i++) {
-			 prefName = available[i]['name'];
-			 prefId = this.mediaId + '_' + prefName;
-			 if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
-				 // this is a caption-related select box
-				 $('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
-			 }
-			 else { // all others are checkboxes
-				 if (this[prefName] === 1) {
-					 $('input[name="' + prefName + '"]').prop('checked',true);
-					}
-					else {
-						$('input[name="' + prefName + '"]').prop('checked',false);
-					}
+		thisObj = this;
+		cookie = this.getCookie();
+		available = this.getAvailablePreferences();
+		for (i=0; i<available.length; i++) {
+			prefName = available[i]['name'];
+			prefId = this.mediaId + '_' + prefName;
+			if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+				// this is a caption-related select box
+				$('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
+			}
+			else { // all others are checkboxes
+				if (this[prefName] === 1) {
+					$('input[name="' + prefName + '"]').prop('checked',true);
+				}
+				else {
+					$('input[name="' + prefName + '"]').prop('checked',false);
 				}
 			}
-			// also restore style of sample caption div
-			this.stylizeCaptions(this.$sampleCapsDiv);
-	 };
+		}
+		// also restore style of sample caption div
+		this.stylizeCaptions(this.$sampleCapsDiv);
+	};
 
 	AblePlayer.prototype.savePrefsFromForm = function () {
 

@@ -714,11 +714,11 @@
 			// Triggered as the video is loaded.
 			 // Reports back the amount of the video that has been buffered (NOT the amount played)
 			 // Data has keys duration, percent, and seconds
-	 	});
+		});
 		this.vimeoPlayer.on('seeking', function(data) {
 		 	// Triggered when the player starts seeking to a specific time.
 			 // A timeupdate event will also be fired at the same time.
-	 	});
+		});
 		this.vimeoPlayer.on('seeked', function(data) {
 			// Triggered when the player seeks to a specific time.
 			// A timeupdate event will also be fired at the same time.

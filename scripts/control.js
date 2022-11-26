@@ -342,7 +342,7 @@
 
 	AblePlayer.prototype.isPaused = function () {
 
-		 // Note there are three player states that count as paused in this sense,
+		// Note there are three player states that count as paused in this sense,
 		// and one of them is named 'paused'.
 		// A better name would be 'isCurrentlyNotPlayingOrBuffering'
 
