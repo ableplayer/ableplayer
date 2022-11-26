@@ -571,14 +571,12 @@
 
 	AblePlayer.prototype.getIconCredit = function() {
 
-		var credit;
-		credit = '<div id="able-vts-icon-credit">'
-			+ 'Action buttons made by <a href="https://www.flaticon.com/authors/elegant-themes">Elegant Themes</a> '
-			+ 'from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> '
-			+ 'are licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" '
-			+ 'target="_blank">CC 3.0 BY</a>'
-			+ '</div>';
-			return credit;
+		var credit
+			= 'Action buttons made by <a target="_blank" rel="noreferrer" href="https://www.elegantthemes.com">Elegant Themes</a>'
+			+ ' from <a target="_blank" rel="noreferrer" href="https://www.flaticon.com">flaticon</a>'
+			+ ' are licensed by <a target="_blank" rel="noreferrer" href="https://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC 3.0 BY</a>'
+		;
+		return '<div id="able-vts-icon-credit">' + credit + '</div>';
 	};
 
 	AblePlayer.prototype.getAllLangs = function(tracks) {
