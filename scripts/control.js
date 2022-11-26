@@ -198,11 +198,11 @@
 	AblePlayer.prototype.getPlayerState = function () {
 
 		// Returns one of the following states:
-		//	'stopped' - Not yet played for the first time, or otherwise reset to unplayed.
-		//	'ended' - Finished playing.
-		//	'paused' - Not playing, but not stopped or ended.
-		//	'buffering' - Momentarily paused to load, but will resume once data is loaded.
-		//	'playing' - Currently playing.
+		// - 'stopped' - Not yet played for the first time, or otherwise reset to unplayed.
+		// - 'ended' - Finished playing.
+		// - 'paused' - Not playing, but not stopped or ended.
+		// - 'buffering' - Momentarily paused to load, but will resume once data is loaded.
+		// - 'playing' - Currently playing.
 
 		// Commented out the following in 3.2.1 - not sure of its intended purpose
 		// It can be useful to know player state even when swapping src
@@ -551,7 +551,7 @@
 					// Only update the aria live region if we have an update pending
 					// (from a seek button control) or if the seekBar has focus.
 					// We use document.activeElement instead of $(':focus') due to a strange bug:
-					// 	When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
+					// When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
 					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
 					this.liveUpdatePending = false;
 					if (this.useChapterTimes) {

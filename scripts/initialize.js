@@ -281,7 +281,7 @@
 	};
 
 	// Initialize player based on data on page.
-	// This sets some variables, but does not modify anything.	Safe to call multiple times.
+	// This sets some variables, but does not modify anything. Safe to call multiple times.
 	// Can call again after updating this.media so long as new media element has the same ID.
 	AblePlayer.prototype.reinitialize = function () {
 

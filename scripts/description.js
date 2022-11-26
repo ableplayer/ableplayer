@@ -674,8 +674,8 @@
 		//  and typically requires a computer reboot to make right again.
 		//  This has been observed frequently in macOS Big Sur, but also in Windows 10
 		//  To ignore user's voice preferences and always use the first voice, set the following var to true
-		//	This is for testing only; not recommended for production
-		// 	unless the voice select field is also removed from the Prefs dialog
+		//  This is for testing only; not recommended for production
+		//  unless the voice select field is also removed from the Prefs dialog
 		var useFirstVoice = false;
 
 		if (!this.speechEnabled) {
