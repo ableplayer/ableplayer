@@ -592,7 +592,7 @@ perfect synchronization between all timed text files, Able Player (in version 3.
 a Video Transcript Sorter (VTS). The VTS displays all timed text content from all sources 
 in a table, and provides several features that enable users to rearrange content and 
 modify start and end times. Users can also insert new content into the table, which can be useful 
-for authoring low frequency content such as chapters and description. Too use VTS, 
+for authoring low frequency content such as chapters and description. To use VTS, 
 add the following HTML to the desired location within any web page that includes an 
 Able Player instance: 
 
