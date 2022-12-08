@@ -5,12 +5,12 @@
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
 
-		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
-			// a transcript is not possible 
-			this.transcriptType = null; 
+		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) {
+			// a transcript is not possible
+			this.transcriptType = null;
 			deferred.resolve();
 		}
-		else { 
+		else {
 			if (!this.transcriptType) {
 				// previously set transcriptType to null since there are no <track> elements
 				// check again to see if captions have been collected from other sources (e.g., YouTube)
@@ -203,8 +203,8 @@
 		if (!this.transcriptType) {
 			return;
 		}
-		if (this.playerCreated && !this.$transcriptArea) { 
-			return; 
+		if (this.playerCreated && !this.$transcriptArea) {
+			return;
 		}
 		if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
 

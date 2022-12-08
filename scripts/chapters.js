@@ -11,7 +11,7 @@
 			this.$chaptersDiv.addClass('able-chapters-div');
 
 			// empty content from previous build before starting fresh
-			this.$chaptersDiv.empty(); 
+			this.$chaptersDiv.empty();
 
 			// add optional header
 			if (this.chaptersTitle) {
@@ -47,7 +47,7 @@
 
 		thisObj = this;
 
-		// TODO: Update this so it can change the chapters popup menu 
+		// TODO: Update this so it can change the chapters popup menu
 		// currently it only works if chapters are in an external container
 		if (!this.$chaptersNav) {
 			return false;

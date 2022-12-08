@@ -84,7 +84,7 @@
 					$label = $('<label>', {
 						'for': radioId
 						// Two options for label:
-						// getLanguageName() - with second parameter "local" would return native name, otherwise returns English; 
+						// getLanguageName() - with second parameter "local" would return native name, otherwise returns English;
 						// TODO: if using this be sure to add lang attr to <div> (see above)
 					}).text(this.getLanguageName(this.langs[i]));
 					$radioDiv.append($radio,$label);
@@ -178,8 +178,8 @@
 
 	AblePlayer.prototype.setupVtsTracks = function(kind, lang, trackDesc, label, src, contents) {
 
-		// TODO: Add support for trackDesc 
-		// (to destinguish between tracks for the decribed vs non-described versions)		
+		// TODO: Add support for trackDesc
+		// (to destinguish between tracks for the decribed vs non-described versions)
 
 		// Called from tracks.js
 		var srcFile, vtsCues;
@@ -571,14 +571,12 @@
 
 	AblePlayer.prototype.getIconCredit = function() {
 
-		var credit;
-		credit = '<div id="able-vts-icon-credit">'
-			+ 'Action buttons made by <a href="https://www.flaticon.com/authors/elegant-themes">Elegant Themes</a> '
-			+ 'from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> '
-			+ 'are licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" '
-			+ 'target="_blank">CC 3.0 BY</a>'
-			+ '</div>';
-			return credit;
+		var credit
+			= 'Action buttons made by <a target="_blank" rel="noreferrer" href="https://www.elegantthemes.com">Elegant Themes</a>'
+			+ ' from <a target="_blank" rel="noreferrer" href="https://www.flaticon.com">flaticon</a>'
+			+ ' are licensed by <a target="_blank" rel="noreferrer" href="https://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC 3.0 BY</a>'
+		;
+		return '<div id="able-vts-icon-credit">' + credit + '</div>';
 	};
 
 	AblePlayer.prototype.getAllLangs = function(tracks) {
@@ -1012,7 +1010,7 @@
 			return myclass.substring(kindStart);
 		}
 		else {
-			// kind-* is one of multiple classes 
+			// kind-* is one of multiple classes
 			// the following will find it regardless of position of "kind-*" within the class string
 			return myclass.substring(kindStart,kindEnd);
 		}
