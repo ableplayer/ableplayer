@@ -476,7 +476,7 @@
 				// if it does, inject a thumbnail from Vimeo
 				var $vimeoVideos = $(this).find('li[data-vimeo-id]');
 				$vimeoVideos.each(function() {
-					var vimeoId = $(this).attr('data-youtube-id');
+					var vimeoId = $(this).attr('data-vimeo-id');
 					var vimeoPoster = thisObj.getVimeoPosterUrl(vimeoId,'120');
 					var $vimeoImg = $('<img>',{
 						'src': vimeoPoster,
