@@ -10,17 +10,17 @@
 		this.getMediaTimes(duration,elapsed).then(function(mediaTimes) {
 			thisObj.duration = mediaTimes['duration'];
 			thisObj.elapsed = mediaTimes['elapsed'];
-			if (thisObj.duration > 0) { 
+			if (thisObj.duration > 0) {
 				// do all the usual time-sync stuff during playback
 				if (thisObj.prefHighlight === 1) {
 					thisObj.highlightTranscript(thisObj.elapsed);
-				}				
+				}
 				thisObj.updateCaption(thisObj.elapsed);
 				thisObj.showDescription(thisObj.elapsed);
 				thisObj.updateChapter(thisObj.elapsed);
 				thisObj.updateMeta(thisObj.elapsed);
-				thisObj.refreshControls('timeline', thisObj.duration, thisObj.elapsed); 
-			}	
+				thisObj.refreshControls('timeline', thisObj.duration, thisObj.elapsed);
+			}
 		});
 	};
 
@@ -65,16 +65,16 @@
 
 	AblePlayer.prototype.onMediaNewSourceLoad = function () {
 
-		var loadIsComplete = false; 
+		var loadIsComplete = false;
 
 		if (this.cueingPlaylistItem) {
 			// this variable was set in order to address bugs caused by multiple firings of media 'end' event
 			// safe to reset now
 			this.cueingPlaylistItem = false;
 		}
-		if (this.recreatingPlayer) { 
-			// same as above; different bugs 
-			this.recreatingPlayer = false; 
+		if (this.recreatingPlayer) {
+			// same as above; different bugs
+			this.recreatingPlayer = false;
 		}
 		if (this.playbackRate) {
 			// user has set playbackRate on a previous src or track
@@ -85,7 +85,7 @@
 			if (!this.startedPlaying || this.okToPlay) {
 				// start playing; no further user action is required
 				this.playMedia();
-				loadIsComplete = true; 
+				loadIsComplete = true;
 			 }
 		}
 		else if (this.seekTrigger == 'restart' ||
@@ -97,7 +97,7 @@
 			// Not included: elements where user might click multiple times in succession
 			// (i.e., 'rewind', 'forward', or seekbar); for these, video remains paused until user initiates play
 			this.playMedia();
-			loadIsComplete = true; 
+			loadIsComplete = true;
 		}
 		else if (this.swappingSrc) {
 			// new source file has just been loaded
@@ -106,54 +106,54 @@
 				if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
 					// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
 					this.playMedia();
-					loadIsComplete = true; 
+					loadIsComplete = true;
 				}
 			}
 			else if (this.swapTime > 0) {
-				if (this.seekStatus === 'complete') { 
+				if (this.seekStatus === 'complete') {
 					if (this.okToPlay) {
 						// should be able to resume playback
-						this.playMedia();					
+						this.playMedia();
 					}
-					loadIsComplete = true; 
+					loadIsComplete = true;
 				}
-				else if (this.seekStatus === 'seeking') { 
+				else if (this.seekStatus === 'seeking') {
 				}
-				else { 
-					if (this.swapTime === this.elapsed) { 
-						// seek is finished! 
-						this.seekStatus = 'complete'; 
+				else {
+					if (this.swapTime === this.elapsed) {
+						// seek is finished!
+						this.seekStatus = 'complete';
 						if (this.okToPlay) {
 							// should be able to resume playback
-							this.playMedia();					
+							this.playMedia();
 						}
-						loadIsComplete = true; 
+						loadIsComplete = true;
 					}
-					else { 
-						// seeking hasn't started yet 
-						// first, determine whether it's possible 
-						if (this.hasDescTracks) { 
+					else {
+						// seeking hasn't started yet
+						// first, determine whether it's possible
+						if (this.hasDescTracks) {
 							// do nothing. Unable to seek ahead if there are descTracks
-							loadIsComplete = true; 
+							loadIsComplete = true;
 						}
 						else if (this.durationsAreCloseEnough(this.duration,this.prevDuration)) {
 							// durations of two sources are close enough to making seek ahead in new source ok
-							this.seekStatus = 'seeking'; 
+							this.seekStatus = 'seeking';
 							this.seekTo(this.swapTime);
 						}
-						else { 							
-							// durations of two sources are too dissimilar to support seeking ahead to swapTime.  						
-							loadIsComplete = true; 
+						else {
+							// durations of two sources are too dissimilar to support seeking ahead to swapTime.
+							loadIsComplete = true;
 						}
 					}
 				}
 			}
-			else {				
-				// swapTime is 0. No seeking required. 
-				if (this.playing) { 
-					this.playMedia(); 
-					// swap is complete. Reset vars. 
-					loadIsComplete = true; 					
+			else {
+				// swapTime is 0. No seeking required.
+				if (this.playing) {
+					this.playMedia();
+					// swap is complete. Reset vars.
+					loadIsComplete = true;
 				}
 			}
 		}
@@ -166,7 +166,7 @@
 					if (this.okToPlay) {
 						this.playMedia();
 					}
-					loadIsComplete = true; 
+					loadIsComplete = true;
 				}
 				else {
 					// haven't started seeking yet
@@ -181,79 +181,79 @@
 				if (this.okToPlay) {
 					this.playMedia();
 				}
-				loadIsComplete = true; 				
+				loadIsComplete = true;
 			}
 		}
-		else if (this.hasPlaylist) { 
-			// new source media is part of a playlist, but user didn't click on it 
+		else if (this.hasPlaylist) {
+			// new source media is part of a playlist, but user didn't click on it
 			// (and somehow, swappingSrc is false)
-			// this may happen when the previous track ends and next track loads 
-			// this same code is called above when swappingSrc is true 
+			// this may happen when the previous track ends and next track loads
+			// this same code is called above when swappingSrc is true
 			if ((this.playlistIndex !== this.$playlist.length) || this.loop) {
 				// this is not the last track in the playlist (OR playlist is looping so it doesn't matter)
 				this.playMedia();
-				loadIsComplete = true; 
+				loadIsComplete = true;
 			}
 		}
-		else { 
-			// None of the above. 
+		else {
+			// None of the above.
 			// User is likely seeking to a new time, but not loading a new media source
-			// need to reset vars 
-			loadIsComplete = true; 
+			// need to reset vars
+			loadIsComplete = true;
 		}
-		if (loadIsComplete) { 
-			// reset vars 
-			this.swappingSrc = false; 			
-			this.seekStatus = null; 
-			this.swapTime = 0; 
+		if (loadIsComplete) {
+			// reset vars
+			this.swappingSrc = false;
+			this.seekStatus = null;
+			this.swapTime = 0;
 			this.seekTrigger = null;
-			this.seekingFromTranscript = false;		
+			this.seekingFromTranscript = false;
 			this.userClickedPlaylist = false;
-			this.okToPlay = false; 	
+			this.okToPlay = false;
 		}
 		this.refreshControls('init');
-		if (this.$focusedElement) { 		
-			this.restoreFocus(); 
-			this.$focusedElement = null; 
+		if (this.$focusedElement) {
+			this.restoreFocus();
+			this.$focusedElement = null;
 		}
 	};
 
-	AblePlayer.prototype.durationsAreCloseEnough = function(d1,d2) { 
+	AblePlayer.prototype.durationsAreCloseEnough = function(d1,d2) {
 
-		// Compare the durations of two media sources to determine whether it's ok to seek ahead after swapping src 
-		// The durations may not be exact, but they might be "close enough" 
-		// returns true if "close enough", otherwise false 
+		// Compare the durations of two media sources to determine whether it's ok to seek ahead after swapping src
+		// The durations may not be exact, but they might be "close enough"
+		// returns true if "close enough", otherwise false
 
-		var tolerance, diff; 
-		
-		tolerance = 1;  // number of seconds between rounded durations that is considered "close enough" 
-		
-		diff = Math.abs(Math.round(d1) - Math.round(d2)); 
-		
+		var tolerance, diff;
+
+		tolerance = 1;  // number of seconds between rounded durations that is considered "close enough"
+
+		diff = Math.abs(Math.round(d1) - Math.round(d2));
+
 		if (diff <= tolerance) {
-			return true;  
+			return true;
 		}
-		else { 
-			return false; 
+		else {
+			return false;
 		}
 	};
 
-	AblePlayer.prototype.restoreFocus = function() { 
+	AblePlayer.prototype.restoreFocus = function() {
 
 		// function called after player has been rebuilt (during media swap)
-		// the original focusedElement no longer exists, 
-		// but this function finds a match in the new player 
-		// and places focus there 
+		// the original focusedElement no longer exists,
+		// but this function finds a match in the new player
+		// and places focus there
 
-		var classList; 
+		var classList;
 
-		if (this.$focusedElement) { 
-			
-			if ((this.$focusedElement).attr('role') === 'button') { 
+		if (this.$focusedElement) {
+
+			if ((this.$focusedElement).attr('role') === 'button') {
 				classList = this.$focusedElement.attr("class").split(/\s+/);
 				$.each(classList, function(index, item) {
 					if (item.substring(0,20) === 'able-button-handler-') {
-						$('div.able-controller div.' + item).focus();  
+						$('div.able-controller div.' + item).focus();
 					}
 				});
 			}
@@ -296,7 +296,7 @@
 
 		var whichButton, prefsPopup;
 
-		whichButton = this.getButtonNameFromClass($(el).attr('class')); 
+		whichButton = this.getButtonNameFromClass($(el).attr('class'));
 
 		if (whichButton === 'play') {
 			this.clickedPlay = true;
@@ -308,14 +308,14 @@
 		}
 		else if (whichButton === 'previous') {
 			this.userClickedPlaylist = true;
-			this.okToPlay = true; 
+			this.okToPlay = true;
 			this.seekTrigger = 'previous';
 			this.buttonWithFocus = 'previous';
 			this.handlePrevTrack();
 		}
 		else if (whichButton === 'next') {
 			this.userClickedPlaylist = true;
-			this.okToPlay = true; 
+			this.okToPlay = true;
 			this.seekTrigger = 'next';
 			this.buttonWithFocus = 'next';
 			this.handleNextTrack();
@@ -391,20 +391,20 @@
 		}
 	};
 
-	AblePlayer.prototype.getButtonNameFromClass = function (classString) { 
+	AblePlayer.prototype.getButtonNameFromClass = function (classString) {
 
-		// player control buttons all have class="able-button-handler-x"  where x is the identifier 
+		// player control buttons all have class="able-button-handler-x"  where x is the identifier
 		// buttons might also have other classes assigned though
 
-		var classes, i; 
+		var classes, i;
 
-		classes = classString.split(' '); 
-		for (i = 0; i < classes.length; i++) { 
-			if (classes[i].substring(0,20) === 'able-button-handler-') { 
-				return classes[i].substring(20); 
+		classes = classString.split(' ');
+		for (i = 0; i < classes.length; i++) {
+			if (classes[i].substring(0,20) === 'able-button-handler-') {
+				return classes[i].substring(20);
 			}
-		}		
-		return classString; 
+		}
+		return classString;
 	}
 
 	AblePlayer.prototype.okToHandleKeyPress = function () {
@@ -582,10 +582,10 @@
 			})
 			.on('loadedmetadata',function() {
 				// should be able to get duration now
-				thisObj.duration = thisObj.media.duration;				
-				var x = 50.5; 
-				var y = 51.9; 
-				var diff = Math.abs(Math.round(x)-Math.round(y)); 
+				thisObj.duration = thisObj.media.duration;
+				var x = 50.5;
+				var y = 51.9;
+				var diff = Math.abs(Math.round(x)-Math.round(y));
 			})
 			.on('canplay',function() {
 				// previously handled seeking to startTime here
@@ -593,11 +593,11 @@
 				// so we know player can seek ahead to anything
 			})
 			.on('canplaythrough',function() {
-				// previously onMediaNewSourceLoad() was called on 'loadedmetadata' 
-				// but that proved to be too soon for some of this functionality. 
-				// TODO: Monitor this. If moving it here causes performance issues, 
-				// consider moving some or all of this functionality to 'canplay' 
-					thisObj.onMediaNewSourceLoad(); 								
+				// previously onMediaNewSourceLoad() was called on 'loadedmetadata'
+				// but that proved to be too soon for some of this functionality.
+				// TODO: Monitor this. If moving it here causes performance issues,
+				// consider moving some or all of this functionality to 'canplay'
+					thisObj.onMediaNewSourceLoad();
 			})
 			.on('play',function() {
 				// both 'play' and 'playing' seem to be fired in all browsers (including IE11)
@@ -607,7 +607,7 @@
 			.on('playing',function() {
 				thisObj.playing = true;
 				thisObj.paused = false;
-				thisObj.swappingSrc = false; 
+				thisObj.swappingSrc = false;
 				thisObj.refreshControls('playpause');
 			})
 			.on('ended',function() {
@@ -629,12 +629,12 @@
 			.on('timeupdate',function() {
 				thisObj.onMediaUpdateTime(); // includes a call to refreshControls()
 			})
-			.on('pause',function() {				
-				if (!thisObj.clickedPlay) {					
+			.on('pause',function() {
+				if (!thisObj.clickedPlay) {
 					// 'pause' was triggered automatically, not initiated by user
 					// this happens in some browsers when swapping source
 					// (e.g., between tracks in a playlist or swapping description)
-					if (thisObj.hasPlaylist || thisObj.swappingSrc) {						
+					if (thisObj.hasPlaylist || thisObj.swappingSrc) {
 						// do NOT set playing to false.
 						// doing so prevents continual playback after new track is loaded
 					}
@@ -714,11 +714,11 @@
 			// Triggered as the video is loaded.
 			 // Reports back the amount of the video that has been buffered (NOT the amount played)
 			 // Data has keys duration, percent, and seconds
-	 	});
+		});
 		this.vimeoPlayer.on('seeking', function(data) {
 		 	// Triggered when the player starts seeking to a specific time.
 			 // A timeupdate event will also be fired at the same time.
-	 	});
+		});
 		this.vimeoPlayer.on('seeked', function(data) {
 			// Triggered when the player seeks to a specific time.
 			// A timeupdate event will also be fired at the same time.
@@ -840,16 +840,16 @@
 
 			if (e.button !== 0) { // not a left click
 				return false;
-			}			
+			}
 			if ($('.able-popup:visible').length || $('.able-volume-popup:visible')) {
 				// at least one popup is visible
 				thisObj.closePopups();
 			}
-			if (e.target.tagName === 'VIDEO') { 
+			if (e.target.tagName === 'VIDEO') {
 				// user clicked the video (not an element that sits on top of the video)
-				// handle this as a play/pause toggle click 
-				thisObj.clickedPlay = true; 
-			}			
+				// handle this as a play/pause toggle click
+				thisObj.clickedPlay = true;
+			}
 		});
 
 		// handle mouse movement over player; make controls visible again if hidden

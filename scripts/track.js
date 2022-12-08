@@ -24,8 +24,8 @@
 			this.hasVts = false;
 		}
 
-		// Source array for populating the above arrays 
-		// varies, depending on whether there are dedicated description tracks 
+		// Source array for populating the above arrays
+		// varies, depending on whether there are dedicated description tracks
 		if (this.hasDescTracks && this.descOn) {
 			tracks = this.altTracks;
 		} else {
@@ -43,7 +43,7 @@
 				} else {
 					// Nothing to load!
 					// Skip this track; move on to next i
-				}				
+				}
 				continue;
 			}
 			var trackSrc = track.src;
@@ -80,9 +80,9 @@
 			})(track, kind));
 		}
 		if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
-			deferred.resolve(); 
+			deferred.resolve();
 		}
-		else { 			
+		else {
 			$.when.apply($, loadingPromises).then(function () {
 				deferred.resolve();
 			});
@@ -91,7 +91,7 @@
 	};
 
 	AblePlayer.prototype.getTracks = function () {
-		
+
 		// define an array tracks with the following structure:
 		// kind - string, e.g. "captions", "descriptions"
 		// src - string, URL of WebVTT source file
@@ -106,16 +106,16 @@
 			trackFound, i, j, capLabel, inserted;
 
 		thisObj = this;
-		hasDefault = false; 
+		hasDefault = false;
 
 		deferred = new $.Deferred();
 		promise = deferred.promise();
 
 		this.$tracks = this.$media.find('track');
 		this.tracks = []; // only includes tracks that do NOT have data-desc
-		this.altTracks = []; // only includes tracks that DO have data-desc 
+		this.altTracks = []; // only includes tracks that DO have data-desc
 
-		// Arrays for each kind, to be populated later  
+		// Arrays for each kind, to be populated later
 		this.captions = [];
 		this.descriptions = [];
 		this.chapters = [];
@@ -124,45 +124,45 @@
 		this.hasCaptionsTrack = false; // will change to true if one or more tracks has kind="captions"
 		this.hasDescTracks = false; // will change to true if one or more tracks has data-desc
 
-		if (this.$tracks.length) {			
+		if (this.$tracks.length) {
 
-			this.usingYouTubeCaptions = false; 
+			this.usingYouTubeCaptions = false;
 			// create object from HTML5 tracks
 			this.$tracks.each(function (index, element) {
 
 				if ($(this).attr('kind') === 'captions') {
-					thisObj.hasCaptionsTrack = true; 
+					thisObj.hasCaptionsTrack = true;
 				}
 				else if ($(this).attr('kind') === 'descriptions') {
-					thisObj.hasClosedDesc = true; 
+					thisObj.hasClosedDesc = true;
 				}
 
 				// srcLang should always be included with <track>, but HTML5 spec doesn't require it
 				// if not provided, assume track is the same language as the default player language
 				if ($(this).attr('srclang')) {
 					trackLang = $(this).attr('srclang');
-				} 
+				}
 				else {
 					trackLang = thisObj.lang;
 				}
 				if ($(this).attr('label')) {
 					trackLabel = $(this).attr('label');
-				} 
+				}
 				else {
 					trackLabel = thisObj.getLanguageName(trackLang);
 				}
 
-				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {	
+				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {
 					isDefault = true;
-					hasDefault = true; 
-				} 
+					hasDefault = true;
+				}
 				else if (trackLang === thisObj.lang) {
-					// this track is in the default lang of the player 
-					// save this for later 
-					// if there is no other default track specified 
-					// this will be the default 
-					hasTrackInDefLang = true; 
-					isDefault = false; // for now; this could change if there's no default attribute					
+					// this track is in the default lang of the player
+					// save this for later
+					// if there is no other default track specified
+					// this will be the default
+					hasTrackInDefLang = true;
+					isDefault = false; // for now; this could change if there's no default attribute
 				}
 				else {
 					isDefault = false;
@@ -175,7 +175,7 @@
 				if ($(this).data('desc') !== undefined) {
 					forDesc = true;
 					thisObj.hasDescTracks = true;
-				} 
+				}
 				else {
 					forDesc = false;
 				}
@@ -200,52 +200,52 @@
 				}
 
 				if (index == thisObj.$tracks.length - 1) {
-					// This is the last track. 
-					if (!hasDefault) { 
-						if (hasTrackInDefLang) { 
-							thisObj.captionLang = thisObj.lang; 
-							trackFound = false; 									
-							i = 0; 
-							while (i < thisObj.tracks.length && !trackFound) { 
-								if (thisObj.tracks[i]['language'] === thisObj.lang) { 
-									thisObj.tracks[i]['def'] = true; 
-									trackFound = true; 
+					// This is the last track.
+					if (!hasDefault) {
+						if (hasTrackInDefLang) {
+							thisObj.captionLang = thisObj.lang;
+							trackFound = false;
+							i = 0;
+							while (i < thisObj.tracks.length && !trackFound) {
+								if (thisObj.tracks[i]['language'] === thisObj.lang) {
+									thisObj.tracks[i]['def'] = true;
+									trackFound = true;
 								}
-								i++; 
+								i++;
 							}
 						}
-						else { 
-							// use the first track 
-							thisObj.tracks[0]['def'] = true; 
-							thisObj.captionLang = thisObj.tracks[0]['language']; 
+						else {
+							// use the first track
+							thisObj.tracks[0]['def'] = true;
+							thisObj.captionLang = thisObj.tracks[0]['language'];
 						}
 					}
 					// Remove 'default' attribute from all <track> elements
 					// This data has already been saved to this.tracks
-					// and some browsers will display the default captions, 
+					// and some browsers will display the default captions,
 					// despite all standard efforts to suppress them
-					thisObj.$media.find('track').removeAttr('default'); 
+					thisObj.$media.find('track').removeAttr('default');
 				}
 			});
 		}
-		if (!this.$tracks.length || !this.hasCaptionsTrack) { 
-			// this media has no track elements 
+		if (!this.$tracks.length || !this.hasCaptionsTrack) {
+			// this media has no track elements
 			// if this is a youtube or vimeo player, check there for captions/subtitles
 			if (this.player === 'youtube') {
 				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
-					if (thisObj.hasCaptions) { 
-						thisObj.usingYouTubeCaptions = true; 
+					if (thisObj.hasCaptions) {
+						thisObj.usingYouTubeCaptions = true;
 						if (thisObj.$captionsWrapper) {
 							thisObj.$captionsWrapper.remove();
 						}
-					}					
+					}
 					deferred.resolve();
 				});
 			}
 			else if (this.player === 'vimeo') {
 				this.getVimeoCaptionTracks().then(function() {
-					if (thisObj.hasCaptions) { 
-						thisObj.usingVimeoCaptions = true; 
+					if (thisObj.hasCaptions) {
+						thisObj.usingVimeoCaptions = true;
 						if (thisObj.$captionsWrapper) {
 							thisObj.$captionsWrapper.remove();
 						}
@@ -256,16 +256,16 @@
 			else {
 				// this is neither YouTube nor Vimeo
 				// there just ain't no tracks (captions or otherwise)
-				this.hasCaptions = false; 
+				this.hasCaptions = false;
 				if (thisObj.$captionsWrapper) {
 					thisObj.$captionsWrapper.remove();
 				}
 				deferred.resolve();
 			}
 		}
-		else { 
-			// there is at least one track with kind="captions" 
-			deferred.resolve(); 
+		else {
+			// there is at least one track with kind="captions"
+			deferred.resolve();
 
 		}
 		return promise;
@@ -277,29 +277,29 @@
 		// Setup player for display of captions (one track at a time)
 		var thisObj, captions, inserted, i, capLabel;
 
-		// Insert track into captions array 
-		// in its proper alphabetical sequence by label  
+		// Insert track into captions array
+		// in its proper alphabetical sequence by label
 		if (typeof cues === 'undefined') {
 			cues = null;
 		}
 
-		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
-			// this.captions has already been populated 
+		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) {
+			// this.captions has already been populated
 			// For YouTube, this happens in youtube.js > getYouTubeCaptionTracks()
-			// For VImeo, this happens in vimeo.js > getVimeoCaptionTracks() 
-			// So, nothing to do here... 
+			// For VImeo, this happens in vimeo.js > getVimeoCaptionTracks()
+			// So, nothing to do here...
 		}
-		else { 
+		else {
 
-			if (this.captions.length === 0) { // this is the first	
+			if (this.captions.length === 0) { // this is the first
 				this.captions.push({
 					'language': track.language,
 					'label': track.label,
 					'def': track.def,
 					'cues': cues
 				});
-			} 
-			else { // there are already captions in the array			
+			}
+			else { // there are already captions in the array
 				inserted = false;
 				for (i = 0; i < this.captions.length; i++) {
 					capLabel = track.label;
@@ -323,13 +323,13 @@
 						'def': track.def,
 						'cues': cues
 					});
-				}	
+				}
 			}
 		}
 
-		// there are captions available 
+		// there are captions available
 		this.hasCaptions = true;
-		this.currentCaption = -1; 
+		this.currentCaption = -1;
 		if (this.prefCaptions === 1) {
 			this.captionsOn = true;
 		} else if (this.prefCaptions === 0) {
@@ -346,10 +346,10 @@
 			this.$captionsContainer.removeClass('captions-off');
 		}
 
-		if (!this.$captionsWrapper || 
+		if (!this.$captionsWrapper ||
 			(this.$captionsWrapper && !($.contains(this.$ableDiv[0], this.$captionsWrapper[0])))) {
-			// captionsWrapper either doesn't exist, or exists in an orphaned state 
-			// Either way, it needs to be rebuilt...  
+			// captionsWrapper either doesn't exist, or exists in an orphaned state
+			// Either way, it needs to be rebuilt...
 			this.$captionsDiv = $('<div>', {
 				'class': 'able-captions',
 			});

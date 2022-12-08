@@ -36,7 +36,7 @@
 			titleH1.attr('id', 'modalTitle-' + this.baseId);
 			titleH1.css('text-align', 'center');
 			titleH1.text(title);
-			this.titleH1 = titleH1; 
+			this.titleH1 = titleH1;
 
 			modal.attr({
 				'aria-labelledby': 'modalTitle-' + this.baseId,
@@ -49,7 +49,7 @@
 			'aria-hidden': 'true',
 			'role': dialogRole,
 		});
-		if (isModal) { 
+		if (isModal) {
 			modal.attr('aria-modal','true');
 		}
 
