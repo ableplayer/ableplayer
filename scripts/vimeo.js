@@ -1,5 +1,5 @@
-
 (function ($) {
+
 	AblePlayer.prototype.initVimeoPlayer = function () {
 
 		var thisObj, deferred, promise, containerId, vimeoId, autoplay, videoDimensions, options;
@@ -28,10 +28,10 @@
 		// setting the "controls" option to "false" will hide the default controls, without hiding captions.
 		// This is a new option from Vimeo; previously used "background:true" to hide the controller,
 		// but that had unwanted side effects:
-		//  - In addition to hiding the controls, it also hides captions
-		//  - It automatically autoplays (initializing the player with autoplay:false does not override this)
-		//  - It automatically loops (but this can be overridden by initializing the player with loop:false)
-		//  - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
+		// - In addition to hiding the controls, it also hides captions
+		// - It automatically autoplays (initializing the player with autoplay:false does not override this)
+		// - It automatically loops (but this can be overridden by initializing the player with loop:false)
+		// - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
 		if (this.okToPlay) {
 			autoplay = 'true';
@@ -40,16 +40,16 @@
 			autoplay = 'false';
 		}
 
-		if (this.playerWidth) {			
-			if (this.vimeoUrlHasParams) { 
-				// use url param, not id 
+		if (this.playerWidth) {
+			if (this.vimeoUrlHasParams) {
+				// use url param, not id
 				options = {
 					url: vimeoId,
 					width: this.playerWidth,
 					controls: false
 				}
 			}
-			else { 
+			else {
 				options = {
 					id: vimeoId,
 					width: this.playerWidth,
@@ -57,15 +57,15 @@
 				}
 			}
 		}
-		else { 
-			// initialize without width & set width later 
-			if (this.vimeoUrlHasParams) { 
+		else {
+			// initialize without width & set width later
+			if (this.vimeoUrlHasParams) {
 				options = {
 					url: vimeoId,
 					controls: false
 				}
 			}
-			else { 
+			else {
 				options = {
 					id: vimeoId,
 					controls: false
@@ -83,18 +83,18 @@
 			});
 
 			// get video's intrinsic size and initiate player dimensions
-			thisObj.vimeoPlayer.getVideoWidth().then(function(width) {						
-				if (width) { 
-					// also get height 
-					thisObj.vimeoPlayer.getVideoHeight().then(function(height) {	
-						if (height) { 								
-							thisObj.resizePlayer(width,height); 								
+			thisObj.vimeoPlayer.getVideoWidth().then(function(width) {
+				if (width) {
+					// also get height
+					thisObj.vimeoPlayer.getVideoHeight().then(function(height) {
+						if (height) {
+							thisObj.resizePlayer(width,height);
 						}
-					});														
+					});
 				}
 			}).catch(function(error) {
-				// an error occurred getting height or width 
-				// TODO: Test this to see how gracefully it organically recovers 
+				// an error occurred getting height or width
+				// TODO: Test this to see how gracefully it organically recovers
 			});
 
 			if (!thisObj.hasPlaylist) {
@@ -224,9 +224,9 @@
 							'language': tracks[i]['language'],
 							'label': tracks[i]['label'],
 							'def': isDefaultTrack
-						});						
+						});
 					}
-					thisObj.captions = thisObj.tracks; 
+					thisObj.captions = thisObj.tracks;
 					thisObj.hasCaptions = true;
 
 					// setupPopups again with new captions array, replacing original
@@ -235,7 +235,7 @@
 			 	}
 			 	else {
 					thisObj.hasCaptions = false;
-					thisObj.usingVimeoCaptions = false; 
+					thisObj.usingVimeoCaptions = false;
 					deferred.resolve();
 				}
 			});
@@ -246,9 +246,9 @@
 	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId, width) {
 
 		// this is a placeholder, copied from getYouTubePosterUrl()
-		// Vimeo doesn't seem to have anything similar, 
+		// Vimeo doesn't seem to have anything similar,
 		// nor does it seem to be possible to get the poster via the Vimeo API
-		// Vimeo playlist support (with thumbnail images) may require use of data-poster 
+		// Vimeo playlist support (with thumbnail images) may require use of data-poster
 
 		// return a URL for retrieving a YouTube poster image
 		// supported values of width: 120, 320, 480, 640
@@ -271,43 +271,43 @@
 			return url + '/sddefault.jpg';
 		}
 		return false;
-	};	
+	};
 
 	AblePlayer.prototype.getVimeoId = function (url) {
-		
+
 		// return a Vimeo ID, extracted from a full Vimeo URL
 		// Supported URL patterns are anything containing 'vimeo.com'
-		//  and ending with a '/' followed by the ID. 
+		// and ending with a '/' followed by the ID.
 		// (Vimeo IDs do not have predicatable lengths)
-		
-		// Update: If URL contains parameters, return the full url 
-		// This will need to be passed to the Vimeo Player API 
-		// as a url parameter, not as an id parameter		 
-		this.vimeoUrlHasParams = false; 
-	
-		var idStartPos, id; 
 
-		if (typeof url === 'number') { 
-			// this is likely already a vimeo ID 
-			return url; 
+		// Update: If URL contains parameters, return the full url
+		// This will need to be passed to the Vimeo Player API
+		// as a url parameter, not as an id parameter
+		this.vimeoUrlHasParams = false;
+
+		var idStartPos, id;
+
+		if (typeof url === 'number') {
+			// this is likely already a vimeo ID
+			return url;
 		}
-		else if (url.indexOf('vimeo.com') !== -1) { 
-			// this is a full Vimeo URL 
-			if (url.indexOf('?') !== -1) { 
-				// URL contains parameters 
-				this.vimeoUrlHasParams = true; 
-				return url; 
+		else if (url.indexOf('vimeo.com') !== -1) {
+			// this is a full Vimeo URL
+			if (url.indexOf('?') !== -1) {
+				// URL contains parameters
+				this.vimeoUrlHasParams = true;
+				return url;
 			}
-			else { 			
-				url = url.trim(); 
-				idStartPos = url.lastIndexOf('/') + 1; 
-				id = url.substring(idStartPos); 
-				return id; 
+			else {
+				url = url.trim();
+				idStartPos = url.lastIndexOf('/') + 1;
+				id = url.substring(idStartPos);
+				return id;
 			}
 		}
-		else { 
-			return url; 
+		else {
+			return url;
 		}
-};	
+	};
 
 })(jQuery);

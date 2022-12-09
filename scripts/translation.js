@@ -9,7 +9,7 @@
 
 		// determine language, then get labels and prompts from corresponding translation var
 
-		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang, i, 
+		var deferred, thisObj, supportedLangs, docLang, msg, translationFile, collapsedLang, i,
 			similarLangFound;
 		deferred = $.Deferred();
 		thisObj = this;
@@ -34,18 +34,18 @@
 				}
 				else {
 					// this is not a localized language.
-					// but maybe there's a similar localized language supported  
-					// that has the same parent?  
-					similarLangFound = false; 
-					i = 0; 
-					while (i < supportedLangs.length) { 
-						if (supportedLangs[i].substring(0,2) == this.lang) { 
-							this.lang = supportedLangs[i]; 				
-							similarLangFound = true; 
+					// but maybe there's a similar localized language supported
+					// that has the same parent?
+					similarLangFound = false;
+					i = 0;
+					while (i < supportedLangs.length) {
+						if (supportedLangs[i].substring(0,2) == this.lang) {
+							this.lang = supportedLangs[i];
+							similarLangFound = true;
 						}
-						i++; 
+						i++;
 					}
-					if (!similarLangFound) { 
+					if (!similarLangFound) {
 						// language requested via data-lang is not supported
 						this.lang = null;
 					}
@@ -95,11 +95,11 @@
 		translationFile = this.rootPath + 'translations/' + this.lang + '.js';
 		$.getJSON(translationFile, function(data) {
 			// success!
-			thisObj.tt = data; 
-			deferred.resolve(); 
+			thisObj.tt = data;
+			deferred.resolve();
 		})
 		.fail(function() {
-			console.log( "Critical Error: Unable to load translation file:",translationFile);			
+			console.log( "Critical Error: Unable to load translation file:",translationFile);
 			thisObj.provideFallback();
 			deferred.fail();
 		})
@@ -108,26 +108,26 @@
 
 	AblePlayer.prototype.getSampleDescriptionText = function() {
 
-		// Create an array of sample description text in all languages 
-		// This needs to be readily available for testing different voices 
-		// in the Description Preferences dialog 
-		var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation; 
-		
-		supportedLangs = this.getSupportedLangs(); 
+		// Create an array of sample description text in all languages
+		// This needs to be readily available for testing different voices
+		// in the Description Preferences dialog
+		var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation;
 
-		thisObj = this; 
+		supportedLangs = this.getSupportedLangs();
 
-		this.sampleText = []; 
-		for (i=0; i < supportedLangs.length; i++) { 
+		thisObj = this;
+
+		this.sampleText = [];
+		for (i=0; i < supportedLangs.length; i++) {
 			translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.js';
 			$.getJSON(translationFile, thisLang, (function(thisLang) {
-					return function(data) { 
-						thisText = data.sampleDescriptionText; 
-						translation = {'lang':thisLang, 'text': thisText}; 
-						thisObj.sampleText.push(translation); 						
+					return function(data) {
+						thisText = data.sampleDescriptionText;
+						translation = {'lang':thisLang, 'text': thisText};
+						thisObj.sampleText.push(translation);
 					};
-			}(supportedLangs[i])) // pass lang to callback function 
-			); 				 
+			}(supportedLangs[i])) // pass lang to callback function
+			);
 		}
 	};
 

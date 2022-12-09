@@ -981,30 +981,30 @@
 		// return language name associated with lang code "key"
 		// whichName is either "English" or "local" (i.e., native name)
 
-		var lang, code, subTag; 
+		var lang, code, subTag;
 		lang = isoLangs[key.toLowerCase()];
-		if (lang) { 
-			if (whichName === 'local') { 
-				return lang.nativeName; 
+		if (lang) {
+			if (whichName === 'local') {
+				return lang.nativeName;
 			}
-			else { 
-				return lang.name; 
+			else {
+				return lang.name;
 			}
 		}
 		else if (key.includes('-')) {
 			code = key.substring(0,2);
-			subTag = key.substring(3);  
-			lang = isoLangs[code.toLowerCase()]; 
-			if (lang) { 
-				if (whichName === 'local') { 
-					return lang.nativeName + ' (' + subTag + ')'; 
+			subTag = key.substring(3);
+			lang = isoLangs[code.toLowerCase()];
+			if (lang) {
+				if (whichName === 'local') {
+					return lang.nativeName + ' (' + subTag + ')';
 				}
-				else { 
-					return lang.name + ' (' + subTag + ')'; 
+				else {
+					return lang.name + ' (' + subTag + ')';
 				}
 			}
 		}
-		// if all else has failed, use the key as the label 
+		// if all else has failed, use the key as the label
 		return key;
 	};
 

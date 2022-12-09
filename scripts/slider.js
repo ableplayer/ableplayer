@@ -2,9 +2,9 @@
 
 
 	// Events:
-	//	 startTracking(event, position)
-	//	 tracking(event, position)
-	//	 stopTracking(event, position)
+	// - startTracking(event, position)
+	// - tracking(event, position)
+	// - stopTracking(event, position)
 
 	window. AccessibleSlider = function(mediaType, div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
 
@@ -322,7 +322,7 @@
 		this.updateAriaValues(position, updateLive);
 	}
 
-	// TODO: Native HTML5 can have several buffered segments, and this actually happens quite often.	Change this to display them all.
+	// TODO: Native HTML5 can have several buffered segments, and this actually happens quite often. Change this to display them all.
 	AccessibleSlider.prototype.setBuffered = function (ratio) {
 		if (!isNaN(ratio)) {
 			this.buffered = ratio;

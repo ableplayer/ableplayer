@@ -50,7 +50,7 @@
 
 		// Takes seconds and converts to string of form hh:mm:ss
 		// If showFullTime is true, shows 00 for hours if time is less than an hour
-		//	 and show milliseconds	(e.g., 00:00:04.123 as in Video Track Sorter)
+		// and show milliseconds (e.g., 00:00:04.123 as in Video Track Sorter)
 		// Otherwise, omits empty hours and milliseconds (e.g., 00:04 as in timer on controller)
 
 		var dHours, dMinutes, dSeconds,
@@ -155,7 +155,7 @@
 		var attr = object.attr(attribute);
 
 		// For some browsers, `attr` is undefined; for others,
-		// `attr` is false.	 Check for both.
+		// `attr` is false. Check for both.
 		if (typeof attr !== typeof undefined && attr !== false) {
 			return true;
 		}

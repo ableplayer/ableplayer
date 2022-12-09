@@ -1,7 +1,8 @@
 (function ($) {
+
 	AblePlayer.prototype.updateCaption = function (time) {
 
-		if (!this.usingYouTubeCaptions && !this.usingVimeoCaptions && 
+		if (!this.usingYouTubeCaptions && !this.usingVimeoCaptions &&
 			(typeof this.$captionsWrapper !== 'undefined')) {
 			if (this.captionsOn) {
 				this.$captionsWrapper.show();
@@ -17,7 +18,7 @@
 	};
 
 	AblePlayer.prototype.updateCaptionsMenu = function (lang) {
-		
+
 		// uncheck all previous menu items
 		this.captionsPopup.find('li').attr('aria-checked','false');
 		if (typeof lang === 'undefined') {
@@ -43,26 +44,26 @@
 			thisObj.currentCaption = -1;
 			if (thisObj.usingYouTubeCaptions) {
 				if (thisObj.captionsOn) {
-					// Two things must be true in order for setOption() to work: 
-					// The YouTube caption module must be loaded 
-					// and the video must have started playing 
-					if (thisObj.youTubePlayer.getOptions('captions') && thisObj.startedPlaying) {						
+					// Two things must be true in order for setOption() to work:
+					// The YouTube caption module must be loaded
+					// and the video must have started playing
+					if (thisObj.youTubePlayer.getOptions('captions') && thisObj.startedPlaying) {
 						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLang});
 					}
 					else {
-						// the two conditions were not met 
-						// try again to set the language after onApiChange event is triggered 
+						// the two conditions were not met
+						// try again to set the language after onApiChange event is triggered
 						// meanwhile, the following variable will hold the value
 						thisObj.captionLangPending = thisObj.captionLang;
 					}
 				}
 				else {
-					if (thisObj.youTubePlayer.getOptions('captions')) { 
+					if (thisObj.youTubePlayer.getOptions('captions')) {
 						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLang});
-					}					
-					else { 
+					}
+					else {
 						thisObj.youTubePlayer.loadModule('captions');
-						thisObj.captionLangPending = thisObj.captionLang; 
+						thisObj.captionLangPending = thisObj.captionLang;
 					}
 				}
 			}
@@ -195,7 +196,7 @@
 				}
 			}
 		}
-		else {			
+		else {
 			this.$captionsDiv.html('').css('display','none');
 			this.currentCaption = -1;
 		}
