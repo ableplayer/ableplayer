@@ -1413,7 +1413,9 @@
 			this.$transcriptArea.show();
 			// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
 			// need to re-hide the popup menu
-			this.$transcriptPopup.hide();
+			if (this.$transcriptPopup) {
+				this.$transcriptPopup.hide();
+			}
 			this.$transcriptButton.removeClass('buttonOff').attr('aria-label',this.tt.hideTranscript);
 			this.$transcriptButton.find('span.able-clipped').text(this.tt.hideTranscript);
 			this.prefTranscript = 1;
