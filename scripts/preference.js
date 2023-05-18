@@ -527,8 +527,8 @@
 						$thisField = $('<select>',{
 							name: thisPref,
 							id: thisId,
-						});
-						if (thisPref === 'prefDescVoice' && this.descVoices) {
+						});						
+						if (thisPref === 'prefDescVoice' && this.descVoices.length) {
 							prefDescVoice = this.getPrefDescVoice();
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
@@ -633,7 +633,13 @@
 					}
 					$thisDiv.append($thisField,$thisLabel);
 				}
-				$fieldset.append($thisDiv);
+				if (thisPref === 'prefDescVoice' && !this.descVoices.length) { 
+					// No voices are available (e.g., in Safari 15.4 on Mac OS)
+					// Do not add a Voice select field 
+				}
+				else { 
+					$fieldset.append($thisDiv);
+				}
 			}
 		}
 		$prefsDiv.append($fieldset);

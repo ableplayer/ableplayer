@@ -2097,8 +2097,8 @@ var AblePlayerInstances = [];
 						$thisField = $('<select>',{
 							name: thisPref,
 							id: thisId,
-						});
-						if (thisPref === 'prefDescVoice' && this.descVoices) {
+						});						
+						if (thisPref === 'prefDescVoice' && this.descVoices.length) {
 							prefDescVoice = this.getPrefDescVoice();
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
@@ -2203,7 +2203,13 @@ var AblePlayerInstances = [];
 					}
 					$thisDiv.append($thisField,$thisLabel);
 				}
-				$fieldset.append($thisDiv);
+				if (thisPref === 'prefDescVoice' && !this.descVoices.length) { 
+					// No voices are available (e.g., in Safari 15.4 on Mac OS)
+					// Do not add a Voice select field 
+				}
+				else { 
+					$fieldset.append($thisDiv);
+				}
 			}
 		}
 		$prefsDiv.append($fieldset);
@@ -7722,9 +7728,8 @@ var AblePlayerInstances = [];
 			if (window.speechSynthesis) {
 
 				// browser supports speech synthesis
-
 				this.synth = window.speechSynthesis;
-
+				this.synth.cancel();
 				if (context === 'init') {
 					// handle a click on anything, in case the user
 					// clicks something before they click 'play' or 'prefs' buttons
@@ -7749,7 +7754,7 @@ var AblePlayerInstances = [];
 					});
 
 					// go ahead and call get browser voices in case it might work,
-					// for browsers that don't require a click
+					// for browsers that don't require a click				
 					this.getBrowserVoices();
 					if (this.descVoices.length) {
 						this.speechEnabled = true;
@@ -7757,7 +7762,7 @@ var AblePlayerInstances = [];
 				}
 				else {  // context is either 'play' or 'prefs' or 'desc'
 					var greeting = new SpeechSynthesisUtterance('Hi!');
-					greeting.volume = 0; // silent
+					greeting.volume = 10; // silent
 					greeting.rate = 10; // fastest speed supported by the API
 					thisObj.synth.speak(greeting);
 					greeting.onstart = function(e) {
@@ -7768,9 +7773,16 @@ var AblePlayerInstances = [];
 						// should now be able to get browser voices
 						// in browsers that require a click
 						thisObj.getBrowserVoices();
+						/*  
+						// Safari 15.4 on MacOS has a bug: No voice array is returned
+						// The browser speaks, but we have no control over voices. 
+						// Therefore, speechEnabled cannot be dependent on descVoices 
+						// as long as Safari 15.4 is still supported
 						if (thisObj.descVoices.length) {
 							thisObj.speechEnabled = true;
 						}
+						*/
+						thisObj.speechEnabled = true; 
 					};
 				}
 			}
@@ -8259,63 +8271,68 @@ var AblePlayerInstances = [];
 					// use the first voice in the array
 					voice = this.descVoices[0];
 				}
-				utterance = new SpeechSynthesisUtterance();
-				utterance.voice = voice;
-				utterance.voiceURI = 'native';
-				utterance.volume = volume;
-				utterance.rate = rate;
-				utterance.pitch = pitch;
-				utterance.text = text;
-				// TODO: Consider the best language for the utterance:
-				// language of the web page? (this.lang)
-				// language of the WebVTT description track?
-				// language of the user's chosen voice?
-				// If there's a mismatch between any of these, the description will likely be unintelligible
-				utterance.lang = this.lang;
-				utterance.onstart = function(e) {
-					// utterance has started
-				};
-				utterance.onpause = function(e) {
-					// utterance has paused
-				};
-				utterance.onend = function(e) {
-					// utterance has ended
-					this.speakingDescription = false;
-					timeElapsed = e.elapsedTime;
-					// As of Firefox 95, e.elapsedTime is expressed in seconds
-					// Other browsers (tested in Chrome & Edge) express this in milliseconds
-					// Assume no utterance will require over 100 seconds to express...
-					if (timeElapsed > 100) {
-						// time is likely expressed in milliseconds
-						secondsElapsed = (e.elapsedTime/1000).toFixed(2);
-					}
-					else {
-						// time is likely already expressed in seconds; just need to round it
-						secondsElapsed = (e.elapsedTime).toFixed(2);
-					}
-					if (this.debug) {
-						console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
-					}
-					if (context === 'description') {
-						if (thisObj.prefDescPause) {
-							if (thisObj.pausedForDescription) {
-								thisObj.playMedia();
-								this.pausedForDescription = false;
-							}
-						}
-					}
-				};
-				utterance.onerror = function(e) {
-					// handle error
-					console.log('Web Speech API error',e);
-				};
-				if (this.synth.paused) {
-					this.synth.resume();
-				}
-				this.synth.speak(utterance);
-				this.speakingDescription = true;
 			}
 		}
+		else { 
+			voice = null; 
+		}
+		utterance = new SpeechSynthesisUtterance();
+		if (voice) { 
+			utterance.voice = voice;
+		}
+		utterance.voiceURI = 'native';
+		utterance.volume = volume;
+		utterance.rate = rate;
+		utterance.pitch = pitch;
+		utterance.text = text;
+		// TODO: Consider the best language for the utterance:
+		// language of the web page? (this.lang)
+		// language of the WebVTT description track?
+		// language of the user's chosen voice?
+		// If there's a mismatch between any of these, the description will likely be unintelligible
+		utterance.lang = this.lang;
+		utterance.onstart = function(e) {
+			// utterance has started
+		};
+		utterance.onpause = function(e) {
+			// utterance has paused
+		};
+		utterance.onend = function(e) {
+			// utterance has ended
+			this.speakingDescription = false;
+			timeElapsed = e.elapsedTime;
+			// As of Firefox 95, e.elapsedTime is expressed in seconds
+			// Other browsers (tested in Chrome & Edge) express this in milliseconds
+			// Assume no utterance will require over 100 seconds to express...
+			if (timeElapsed > 100) {
+				// time is likely expressed in milliseconds
+				secondsElapsed = (e.elapsedTime/1000).toFixed(2);
+			}
+			else {
+				// time is likely already expressed in seconds; just need to round it
+				secondsElapsed = (e.elapsedTime).toFixed(2);
+			}
+			if (this.debug) {
+				console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
+			}
+			if (context === 'description') {
+				if (thisObj.prefDescPause) {
+					if (thisObj.pausedForDescription) {
+						thisObj.playMedia();
+						this.pausedForDescription = false;
+					}
+				}
+			}
+		};
+		utterance.onerror = function(e) {
+			// handle error
+			console.log('Web Speech API error',e);
+		};
+		if (this.synth.paused) {
+			this.synth.resume();
+		}
+		this.synth.speak(utterance);
+		this.speakingDescription = true;
 	};
 
 })(jQuery);
