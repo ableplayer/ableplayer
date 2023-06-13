@@ -1,5 +1,6 @@
 Able Player
 ==========
+![image](https://user-images.githubusercontent.com/55474996/227562765-7a17103c-4c93-4a17-82b4-fc1e401972b0.png)
 
 *Able Player* is a fully accessible cross-browser HTML5 media player. 
 
