@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>YouTube player (no captions) | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+<!-- styles for this example page -->
+<style>
+	div#intro { 
+		width: 80em;
+		max-width: 100%;
+	}
+	div#intro ul { 
+		margin-top: 0.5em;
+		margin-bottom: 2em;
+	}
+	.wrapper {
+		width: 500px;
+		max-width: 100%;
+	}
+</style>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>YouTube player (no captions)</h1>
+
+		<div id="intro">
+
+			<p>This page features an example of Able Player being used to play a YouTube video. 
+			This video does not have captions, and is used solely to test Able Player's ability to handle uncaptioned videos. However, all videos <em>should</em> be captioned.</p>
+				
+		</div>
+
+		<!-- Example YouTube IDs for testing: 
+		Video with machine-generated captions: r13a8d5YGFY
+		Video with no captions at all: zaonYTmFaBU
+		-->
+		<div class="wrapper">
+			<video id="video1" data-able-player preload="auto" data-youtube-id="zaonYTmFaBU" playsinline>
+			</video>
+		</div>
+
+	</main>
+</body>
+</html>
