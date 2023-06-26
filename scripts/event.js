@@ -836,7 +836,7 @@
 		});
 
 		// handle clicks (left only) anywhere on the page. If any popups are open, close them.
-		$(document).on('click',function(e) {
+		$('body').on('click',function(e) {
 
 			if (e.button !== 0) { // not a left click
 				return false;
