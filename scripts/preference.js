@@ -1103,7 +1103,7 @@
 			// update prefs for ALL of them
 			for (var i=0; i<AblePlayerInstances.length; i++) {
 				AblePlayerInstances[i].updatePrefs();
-				AblePlayerInstances[i].geteferences();
+				AblePlayerInstances[i].loadCurrentPreferences();
 				AblePlayerInstances[i].resetPrefsForm();
 				if (numCapChanges > 0) {
 					AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
