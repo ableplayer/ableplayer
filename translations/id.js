@@ -451,7 +451,7 @@
 "closeButtonLabel": "Tutup dialog",
 
 // "windowButtonLabel": "Window options",
-"windowButtonLabel": "Opsi bingkai",
+"windowButtonLabel": "Opsi jendela",
 
 // "windowMove": "Move",
 "windowMove": "Geser",
@@ -490,7 +490,11 @@
 "windowBringTopAlert": "Jendela ini sekarang berada di depan objek lain pada halaman.",
 
 // // "resultsSummary1": "You searched for:",
+<<<<<<< HEAD
 "resultsSummary1": "You searched for:",
+=======
+"resultsSummary1": "Anda mencari:",
+>>>>>>> cbcf394 (edit translation to better represent the contexts)
 
 // "resultsSummary2": "Found",
 "resultsSummary2": "Ditemukan",
