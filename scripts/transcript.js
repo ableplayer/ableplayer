@@ -594,7 +594,7 @@
 						}
 					}
 					if (comp.type === 'b' || comp.type == 'i') {
-						result.push($tag,' ');
+						result.push($tag);
 					}
 				}
 				else {
@@ -606,13 +606,21 @@
 			};
 
 			for (var i = 0; i < cap.components.children.length; i++) {
+				var next_child_tagname;
+				if (i < cap.components.children.length - 1) next_child_tagname = cap.components.children[i + 1].tagName;
+
 				var results = flattenComponentForCaption(cap.components.children[i]);
 				for (var jj = 0; jj < results.length; jj++) {
 					var result = results[jj];
 					if (typeof result === 'string') {
 						if (thisObj.lyricsMode) {
-							// add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
-							result = result.replace('\n','<br>') + '<br>';
+							// add <br> WITHIN each caption (if payload includes "\n")
+							result = result.replace('\n','<br>');
+
+							// add <br> BETWEEN each caption, but do not consider sibling style tags within this caption as the next caption!
+							if(!next_child_tagname || (next_child_tagname !== 'i' && next_child_tagname !== 'b')) {
+								result += '<br>';
+							}
 						}
 						else {
 							// just add a space between captions
