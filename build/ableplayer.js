@@ -7735,9 +7735,7 @@ var AblePlayerInstances = [];
 					// clicks something before they click 'play' or 'prefs' buttons
 					// that would allow us to init speech before it's needed
 					$(document).on('click',function() {
-						var greeting = new SpeechSynthesisUtterance('Hi!');
-						greeting.volume = 0; // silent
-						greeting.rate = 10; // fastest speed supported by the API
+						var greeting = new SpeechSynthesisUtterance('\x20');
 						thisObj.synth.speak(greeting);
 						greeting.onstart = function(e) {
 							// utterance has started
@@ -7761,9 +7759,7 @@ var AblePlayerInstances = [];
 					}
 				}
 				else {  // context is either 'play' or 'prefs' or 'desc'
-					var greeting = new SpeechSynthesisUtterance('Hi!');
-					greeting.volume = 10; // silent
-					greeting.rate = 10; // fastest speed supported by the API
+					var greeting = new SpeechSynthesisUtterance('\x20');
 					thisObj.synth.speak(greeting);
 					greeting.onstart = function(e) {
 						// utterance has started
