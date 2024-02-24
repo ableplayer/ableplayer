@@ -6126,6 +6126,10 @@ var AblePlayerInstances = [];
 					thisObj.getPlayerState().then(function(playerState) {
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
+							if (thisObj.hasSignLanguage && thisObj.signVideo) {
+								thisObj.signVideo.play(true);
+							}
+
 							thisObj.playing = true;
 							thisObj.startedPlaying = true;
 							thisObj.paused = false;
@@ -6137,7 +6141,11 @@ var AblePlayerInstances = [];
 							thisObj.playing = false;
 							thisObj.paused = true;
 						}
-						if (thisObj.stoppingYouTube && playerState === 'paused') {
+						if (playerState === 'paused') {
+							if (thisObj.hasSignLanguage && thisObj.signVideo) {
+								thisObj.signVideo.pause(true);
+							}
+
 							if (typeof thisObj.$posterImg !== 'undefined') {
 								thisObj.$posterImg.show();
 							}
@@ -7143,7 +7151,6 @@ var AblePlayerInstances = [];
 			// volume is 0 to 1
 			newVolume = volume / 10;
 			this.media.volume = newVolume;
-
 			if (this.hasSignLanguage && this.signVideo) {
 				this.signVideo.volume = 0; // always mute
 			}
@@ -8414,6 +8421,10 @@ var AblePlayerInstances = [];
 			this.synth.cancel();
 		}
 
+		if (this.hasSignLanguage && this.signVideo) {
+			// keep sign languge video in sync
+			this.signVideo.currentTime = this.startTime;
+		}
 		if (this.player === 'html5') {
 			var seekable;
 
@@ -8710,6 +8721,10 @@ var AblePlayerInstances = [];
 			this.syncSpeechToPlaybackRate(rate);
 		}
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.playbackRate = rate;
+		}
+
 		if (this.player === 'html5') {
 			this.media.playbackRate = rate;
 		}
@@ -8718,9 +8733,6 @@ var AblePlayerInstances = [];
 		}
 		else if (this.player === 'vimeo') {
 			this.vimeoPlayer.setPlaybackRate(rate);
-		}
-		if (this.hasSignLanguage && this.signVideo) {
-			this.signVideo.playbackRate = rate;
 		}
 		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
@@ -8767,11 +8779,12 @@ var AblePlayerInstances = [];
 
 		var thisObj = this;
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.pause(true);
+		}
+
 		if (this.player === 'html5') {
 			this.media.pause(true);
-			if (this.hasSignLanguage && this.signVideo) {
-				this.signVideo.pause(true);
-			}
 		}
 		else if (this.player === 'youtube') {
 			this.youTubePlayer.pauseVideo();
@@ -8785,11 +8798,12 @@ var AblePlayerInstances = [];
 
 		var thisObj = this;
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.play(true);
+		}
+
 		if (this.player === 'html5') {
 			this.media.play(true);
-			if (this.hasSignLanguage && this.signVideo) {
-				this.signVideo.play(true);
-			}
 		}
 		else if (this.player === 'youtube') {
 
@@ -14107,6 +14121,12 @@ var AblePlayerInstances = [];
 (function ($) {
 	AblePlayer.prototype.initSignLanguage = function() {
 
+		if (!this.isIOS() && this.$media.data('sign-src') !== undefined && this.$media.data('sign-src') !== "") {
+			this.hasSignLanguage = true;
+			this.injectSignPlayerCode();
+			return;
+		}
+
 		// Sign language is only currently supported in HTML5 player, not YouTube or Vimeo
 		if (this.player === 'html5') {
 			// check to see if there's a sign language video accompanying this video
@@ -14152,25 +14172,37 @@ var AblePlayerInstances = [];
 		signVideoId = this.mediaId + '-sign';
 		this.$signVideo = $('<video>',{
 			'id' : signVideoId,
+			'muted' : true,
 			'tabindex' : '-1'
 		});
 		this.signVideo = this.$signVideo[0];
-		// for each original <source>, add a <source> to the sign <video>
-		for (i=0; i < this.$sources.length; i++) {
-			signSrc = this.$sources[i].getAttribute('data-sign-src');
-			srcType = this.$sources[i].getAttribute('type');
-			if (signSrc) {
-				$signSource = $('<source>',{
-					'src' : signSrc,
-					'type' : srcType
-				});
-				this.$signVideo.append($signSource);
-			}
-			else {
-				// source is missing a sign language version
-				// can't include sign language
-				this.hasSignLanguage = false;
-				break;
+
+		if(this.$media.data('sign-src'))
+		{
+			$signSource = $('<source>',{
+				'src' : this.$media.data('sign-src'),
+				'type' : 'video/' + this.$media.data('sign-src').substr(-3)
+			});
+			this.$signVideo.append($signSource);
+		}
+		else {
+			// for each original <source>, add a <source> to the sign <video>
+			for (i=0; i < this.$sources.length; i++) {
+				signSrc = this.$sources[i].getAttribute('data-sign-src');
+				srcType = this.$sources[i].getAttribute('type');
+				if (signSrc) {
+					$signSource = $('<source>',{
+						'src' : signSrc,
+						'type' : srcType
+					});
+					this.$signVideo.append($signSource);
+				}
+				else {
+					// source is missing a sign language version
+					// can't include sign language
+					this.hasSignLanguage = false;
+					return;
+				}
 			}
 		}
 

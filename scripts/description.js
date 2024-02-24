@@ -205,7 +205,7 @@
 					});
 
 					// go ahead and call get browser voices in case it might work,
-					// for browsers that don't require a click				
+					// for browsers that don't require a click
 					this.getBrowserVoices();
 					if (this.descVoices.length) {
 						this.speechEnabled = true;
@@ -222,16 +222,16 @@
 						// should now be able to get browser voices
 						// in browsers that require a click
 						thisObj.getBrowserVoices();
-						/*  
+						/*
 						// Safari 15.4 on MacOS has a bug: No voice array is returned
-						// The browser speaks, but we have no control over voices. 
-						// Therefore, speechEnabled cannot be dependent on descVoices 
+						// The browser speaks, but we have no control over voices.
+						// Therefore, speechEnabled cannot be dependent on descVoices
 						// as long as Safari 15.4 is still supported
 						if (thisObj.descVoices.length) {
 							thisObj.speechEnabled = true;
 						}
 						*/
-						thisObj.speechEnabled = true; 
+						thisObj.speechEnabled = true;
 					};
 				}
 			}
@@ -722,11 +722,11 @@
 				}
 			}
 		}
-		else { 
-			voice = null; 
+		else {
+			voice = null;
 		}
 		utterance = new SpeechSynthesisUtterance();
-		if (voice) { 
+		if (voice) {
 			utterance.voice = voice;
 		}
 		utterance.voiceURI = 'native';
