@@ -240,7 +240,7 @@
 
 "prefCaptionsStyle": "Styl",
 
-"serif": "szryfowa",
+"serif": "szeryfowa",
 
 "sans": "bezszeryfowa",
 
@@ -266,7 +266,7 @@
 
 "black": "czarny",
 
-"transparent": "transparente",
+"transparent": "transparentne",
 
 "solid": "solidne",
 
@@ -296,7 +296,7 @@
 
 "ok": "Ok",
 
-"done": "Zrobone",
+"done": "Zrobione",
 
 "closeButtonLabel": "Zamknij okno",
 
