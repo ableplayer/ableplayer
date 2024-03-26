@@ -120,7 +120,7 @@
 
 "selectedTrack": "Wybrana ścieżka",
 
-"alertDescribedVersion": "Użyj wersji filmu z opisem audi",
+"alertDescribedVersion": "Użyj wersji filmu z opisem audio",
 
 "alertNonDescribedVersion": "Użyj wersji filmu bez opisu audio",
 
