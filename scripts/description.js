@@ -147,57 +147,65 @@
     }
   };
 
+  /**
+   * Initializes speech synthesis capabilities for the player.
+   * This method addresses browser and OS limitations that require user interaction
+   * before speech synthesis functions become available. It handles different contexts
+   * like initialization, playing media, accessing preferences, or announcing descriptions.
+   * @param {string} context - The context in which the function is called ('init', 'play', 'prefs', 'desc').
+   */
   AblePlayer.prototype.initSpeech = function (context) {
     var thisObj = this;
 
+    // Function to handle the initial click and enable speech synthesis
+    function handleInitialClick() {
+      var greeting = new SpeechSynthesisUtterance("\x20");
+      thisObj.synth.speak(greeting);
+      greeting.onstart = function () {
+        // Once the utterance starts, remove this specific click event listener
+        // Ensures the event handler only runs once and cleans up after itself
+        $(document).off("click", handleInitialClick);
+      };
+      greeting.onend = function () {
+        // Attempt to fetch browser voices and enable speech if successful
+        thisObj.getBrowserVoices();
+        thisObj.speechEnabled = true;
+      };
+    }
+
     if (this.speechEnabled === null) {
       if (typeof this.synth !== "undefined") {
-        // cancel any previous synth instance and reinitialize
+        // Cancel any previous synth instance and reinitialize
         this.synth.cancel();
       }
 
       if (window.speechSynthesis) {
-        // browser supports speech synthesis
+        // Browser supports speech synthesis
         this.synth = window.speechSynthesis;
         this.synth.cancel();
+
         if (context === "init") {
-          // Only add the click listener if context is 'init'
-          var initSpeechSynthesis = function () {
-            var greeting = new SpeechSynthesisUtterance("\x20");
-            thisObj.synth.speak(greeting);
-            greeting.onend = function (e) {
-              // should now be able to get browser voices
-              // in browsers that require a click
-              thisObj.getBrowserVoices();
-              if (thisObj.descVoices.length) {
-                thisObj.speechEnabled = true;
-              }
-              // Remove the click event listener after the first invocation
-              $(document).off("click", initSpeechSynthesis);
-            };
-          };
-          // Bind the click event listener
-          $(document).on("click", initSpeechSynthesis);
+          // Bind the click event listener using a named function to ensure it can be specifically unbound later within the handleInitialClick function
+          $(document).on("click", handleInitialClick);
+
+          // Call getBrowserVoices in case it works without a click, for browsers that don't require a click
+          this.getBrowserVoices();
+          if (this.descVoices.length) {
+            this.speechEnabled = true;
+          }
         } else {
-          // context is either 'play', 'prefs', or 'desc'
-          // This part remains unchanged, as it's outside the 'init' context scope
+          // Context is either 'play', 'prefs', or 'desc'
+          // Directly attempt to enable speech synthesis without additional user action
           var greeting = new SpeechSynthesisUtterance("\x20");
           thisObj.synth.speak(greeting);
-          greeting.onstart = function (e) {
-            // utterance has started
-          };
-          greeting.onend = function (e) {
+          greeting.onend = function () {
+            // Attempt to fetch browser voices and enable speech if successful
             thisObj.getBrowserVoices();
             thisObj.speechEnabled = true;
           };
         }
-        // Attempt to get browser voices immediately, for browsers that don't require a click
-        this.getBrowserVoices();
-        if (this.descVoices.length) {
-          this.speechEnabled = true;
-        }
       } else {
-        // browser does not support speech synthesis
+        // Browser does not support speech synthesis
         this.speechEnabled = false;
       }
     }
