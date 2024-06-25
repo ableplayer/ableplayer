@@ -157,52 +157,39 @@
   AblePlayer.prototype.initSpeech = function (context) {
     var thisObj = this;
 
-    // Function to handle the initial click and enable speech synthesis
-    function handleInitialClick() {
+    // Function to attempt enabling speech synthesis
+    function attemptEnableSpeech() {
       var greeting = new SpeechSynthesisUtterance("\x20");
       thisObj.synth.speak(greeting);
-      greeting.onstart = function () {
-        // Once the utterance starts, remove this specific click event listener
-        // Ensures the event handler only runs once and cleans up after itself
-        $(document).off("click", handleInitialClick);
-      };
       greeting.onend = function () {
-        // Attempt to fetch browser voices and enable speech if successful
         thisObj.getBrowserVoices();
-        thisObj.speechEnabled = true;
+        if (thisObj.descVoices.length || context !== "init") {
+          thisObj.speechEnabled = true;
+        }
       };
     }
 
-    if (this.speechEnabled === null) {
-      if (typeof this.synth !== "undefined") {
-        // Cancel any previous synth instance and reinitialize
-        this.synth.cancel();
-      }
+    // Function to handle the initial click and enable speech synthesis
+    function handleInitialClick() {
+      attemptEnableSpeech();
+      // Once the utterance starts, remove this specific click event listener
+      // Ensures the event handler only runs once and cleans up after itself
+      $(document).off("click", handleInitialClick);
+    }
 
+    if (this.speechEnabled === null) {
       if (window.speechSynthesis) {
         // Browser supports speech synthesis
         this.synth = window.speechSynthesis;
-        this.synth.cancel();
+        this.synth.cancel(); // Cancel any ongoing speech synthesis
 
         if (context === "init") {
-          // Bind the click event listener using a named function to ensure it can be specifically unbound later within the handleInitialClick function
+          // For initial setup, require a user click to enable speech synthesis
+          // Scoping to a particular handler to avoid conflicts with other click events
           $(document).on("click", handleInitialClick);
-
-          // Call getBrowserVoices in case it works without a click, for browsers that don't require a click
-          this.getBrowserVoices();
-          if (this.descVoices.length) {
-            this.speechEnabled = true;
-          }
         } else {
-          // Context is either 'play', 'prefs', or 'desc'
-          // Directly attempt to enable speech synthesis without additional user action
-          var greeting = new SpeechSynthesisUtterance("\x20");
-          thisObj.synth.speak(greeting);
-          greeting.onend = function () {
-            // Attempt to fetch browser voices and enable speech if successful
-            thisObj.getBrowserVoices();
-            thisObj.speechEnabled = true;
-          };
+          // For other contexts, attempt to enable speech synthesis directly
+          attemptEnableSpeech();
         }
       } else {
         // Browser does not support speech synthesis
