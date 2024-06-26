@@ -163,7 +163,10 @@
       thisObj.synth.speak(greeting);
       greeting.onend = function () {
         thisObj.getBrowserVoices();
-        if (thisObj.descVoices.length || context !== "init") {
+        if (
+          (Array.isArray(thisObj.descVoices) && thisObj.descVoices.length) ||
+          context !== "init"
+        ) {
           thisObj.speechEnabled = true;
         }
       };
@@ -184,6 +187,8 @@
         this.synth.cancel(); // Cancel any ongoing speech synthesis
 
         if (context === "init") {
+          // Attempt to enable speech synthesis directly for browsers that don't require a click
+          attemptEnableSpeech();
           // For initial setup, require a user click to enable speech synthesis
           // Scoping to a particular handler to avoid conflicts with other click events
           $(document).on("click", handleInitialClick);
