@@ -160,7 +160,6 @@
     // Function to attempt enabling speech synthesis
     function attemptEnableSpeech() {
       var greeting = new SpeechSynthesisUtterance("\x20");
-      thisObj.synth.speak(greeting);
       greeting.onend = function () {
         thisObj.getBrowserVoices();
         if (
@@ -170,6 +169,7 @@
           thisObj.speechEnabled = true;
         }
       };
+      thisObj.synth.speak(greeting);
     }
 
     // Function to handle the initial click and enable speech synthesis
