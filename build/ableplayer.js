@@ -39,632 +39,693 @@
 var AblePlayerInstances = [];
 
 (function ($) {
-	$(function () {
-		$('video, audio').each(function (index, element) {
-			if ($(element).data('able-player') !== undefined) {
-				AblePlayerInstances.push(new AblePlayer($(this),$(element)));
-			}
-		});
-	});
-
-	// YouTube player support; pass ready event to jQuery so we can catch in player.
-	window.onYouTubeIframeAPIReady = function() {
-		AblePlayer.youTubeIframeAPIReady = true;
-		$('body').trigger('youTubeIframeAPIReady', []);
-	};
-	// If there is only one player on the page, dispatch global keydown events to it
-	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).on('keydown',function(e) {
-		if (AblePlayer.nextIndex === 1) {
-			AblePlayer.lastCreated.onPlayerKeyPress(e);
-		}
-	});
-
-	// Construct an AblePlayer object
-	// Parameters are:
-	// media - jQuery selector or element identifying the media.
-	window.AblePlayer = function(media) {
-
-
-		var thisObj = this;
-
-		// Keep track of the last player created for use with global events.
-		AblePlayer.lastCreated = this;
-		this.media = media;
-
-		if ($(media).length === 0) {
-			this.provideFallback();
-			return;
-		}
-
-		///////////////////////////////
-		//
-		// Default variables assignment
-		//
-		///////////////////////////////
-
-		// The following variables CAN be overridden with HTML attributes
-
-		// autoplay (Boolean; if present always resolves to true, regardless of value)
-		if ($(media).attr('autoplay') !== undefined) {
-			this.autoplay = true; // this value remains constant
-			this.okToPlay = true; // this value can change dynamically
-		}
-		else {
-			this.autoplay = false;
-			this.okToPlay = false;
-		}
-
-		// loop (Boolean; if present always resolves to true, regardless of value)
-		if ($(media).attr('loop') !== undefined) {
-			this.loop = true;
-		}
-		else {
-			this.loop = false;
-		}
-
-		// playsinline (Boolean; if present always resolves to true, regardless of value)
-		if ($(media).attr('playsinline') !== undefined) {
-			this.playsInline = '1'; // this value gets passed to YT.Player contructor in youtube.js
-		}
-		else {
-			this.playsInline = '0';
-		}
-
-		// poster (Boolean, indicating whether media element has a poster attribute)
-		if ($(media).attr('poster')) {
-			this.hasPoster = true;
-		}
-		else {
-			this.hasPoster = false;
-		}
-
-		// get height and width attributes, if present
-		// and add them to variables
-		// Not currently used, but might be useful for resizing player
-		if ($(media).attr('width')) {
-			this.width = $(media).attr('width');
-		}
-		if ($(media).attr('height')) {
-			this.height = $(media).attr('height');
-		}
-
-		// start-time
-		if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
-			this.startTime = $(media).data('start-time');
-		}
-		else {
-			this.startTime = 0;
-		}
-
-		// debug
-		if ($(media).data('debug') !== undefined && $(media).data('debug') !== false) {
-			this.debug = true;
-		}
-		else {
-			this.debug = false;
-		}
-
-		// Path to root directory of Able Player code
-		if ($(media).data('root-path') !== undefined) {
-			// add a trailing slash if there is none
-			this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
-		}
-		else {
-			this.rootPath = this.getRootPath();
-		}
-
-		// Volume
-		// Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
-		this.defaultVolume = 7;
-		if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
-			var volume = $(media).data('volume');
-			if (volume >= 0 && volume <= 10) {
-				this.defaultVolume = volume;
-			}
-		}
-		this.volume = this.defaultVolume;
-
-		// Optional Buttons
-		// Buttons are added to the player controller if relevant media is present
-		// However, in some applications it might be undesirable to show buttons
-		// (e.g., if chapters or transcripts are provided in an external container)
-
-		if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
-			this.useChaptersButton = false;
-		}
-		else {
-			this.useChaptersButton = true;
-		}
-
-		// Control whether text descriptions are read aloud
-		// set to "false" if the sole purpose of the WebVTT descriptions file
-		// is to integrate text description into the transcript
-		// set to "true" to write description text to a div
-		// This variable does *not* control the method by which description is read.
-		// For that, see below (this.descMethod)
-		if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
-			this.readDescriptionsAloud = false;
-		}
-		else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-			// support both singular and plural spelling of attribute
-			this.readDescriptionsAloud = false;
-		}
-		else {
-			this.readDescriptionsAloud = true;
-		}
-
-		// Method by which text descriptions are read
-		// valid values of data-desc-reader are:
-		// 'brower' (default) - text-based audio description is handled by the browser, if supported
-		// 'screenreader' - text-based audio description is always handled by screen readers
-		// The latter may be preferable by owners of websites in languages that are not well supported
-		// by the Web Speech API
-		if ($(media).data('desc-reader') == 'screenreader') {
-			this.descReader = 'screenreader';
-		}
-		else {
-			this.descReader = 'browser';
-		}
-
-		// Default state of captions and descriptions
-		// This setting is overridden by user preferences, if they exist
-		// values for data-state-captions and data-state-descriptions are 'on' or 'off'
-		if ($(media).data('state-captions') == 'off') {
-			this.defaultStateCaptions = 0; // off
-		}
-		else {
-			this.defaultStateCaptions = 1; // on by default
-		}
-		if ($(media).data('state-descriptions') == 'on') {
-			this.defaultStateDescriptions = 1; // on
-		}
-		else {
-			this.defaultStateDescriptions = 0; // off by default
-		}
-
-		// Default setting for prefDescPause
-		// Extended description (i.e., pausing during description) is on by default
-		// but this settings give website owners control over that
-		// since they know the nature of their videos, and whether pausing is necessary
-		// This setting is overridden by user preferences, if they exist
-		if ($(media).data('desc-pause-default') == 'off') {
-			this.defaultDescPause = 0; // off
-		}
-		else {
-			this.defaultDescPause = 1; // on by default
-		}
-
-		// Headings
-		// By default, an off-screen heading is automatically added to the top of the media player
-		// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
-		// Authors can override this behavior by manually assigning a heading level using data-heading-level
-		// Accepted values are 1-6, or 0 which indicates "no heading"
-		// (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
-		if ($(media).data('heading-level') !== undefined && $(media).data('heading-level') !== "") {
-			var headingLevel = $(media).data('heading-level');
-			if (/^[0-6]*$/.test(headingLevel)) { // must be a valid HTML heading level 1-6; or 0
-				this.playerHeadingLevel = headingLevel;
-			}
-		}
-
-		// Transcripts
-		// There are three types of interactive transcripts.
-		// In descending of order of precedence (in case there are conflicting tags), they are:
-		// 1. "manual" - A manually coded external transcript (requires data-transcript-src)
-		// 2. "external" - Automatically generated, written to an external div (requires data-transcript-div)
-		// 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
-		// If data-include-transcript="false", there is no "popup" transcript
-
-		if ($(media).data('transcript-div') !== undefined && $(media).data('transcript-div') !== "") {
-			this.transcriptDivLocation = $(media).data('transcript-div');
-		}
-		else {
-			this.transcriptDivLocation = null;
-		}
-		if ($(media).data('include-transcript') !== undefined && $(media).data('include-transcript') === false) {
-			this.hideTranscriptButton = true;
-		}
-		else {
-			this.hideTranscriptButton = null;
-		}
-
-		this.transcriptType = null;
-		if ($(media).data('transcript-src') !== undefined) {
-			this.transcriptSrc = $(media).data('transcript-src');
-			if (this.transcriptSrcHasRequiredParts()) {
-				this.transcriptType = 'manual';
-			}
-			else {
-				console.log('ERROR: Able Player transcript is missing required parts');
-			}
-		}
-		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
-			// required tracks are present. COULD automatically generate a transcript
-			if (this.transcriptDivLocation) {
-				this.transcriptType = 'external';
-			}
-			else {
-				this.transcriptType = 'popup';
-			}
-		}
-
-		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
-		// If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
-		// If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-		if ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) {
-			this.lyricsMode = true;
-		}
-		else {
-			this.lyricsMode = false;
-		}
-
-		// Transcript Title
-		if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
-			this.transcriptTitle = $(media).data('transcript-title');
-		}
-		else {
-			// do nothing. The default title will be defined later (see transcript.js)
-		}
-
-		// Captions
-		// data-captions-position can be used to set the default captions position
-		// this is only the default, and can be overridden by user preferences
-		// valid values of data-captions-position are 'below' and 'overlay'
-		if ($(media).data('captions-position') === 'overlay') {
-			this.defaultCaptionsPosition = 'overlay';
-		}
-		else { // the default, even if not specified
-			this.defaultCaptionsPosition = 'below';
-		}
-
-		// Chapters
-		if ($(media).data('chapters-div') !== undefined && $(media).data('chapters-div') !== "") {
-			this.chaptersDivLocation = $(media).data('chapters-div');
-		}
-
-		if ($(media).data('chapters-title') !== undefined) {
-			// NOTE: empty string is valid; results in no title being displayed
-			this.chaptersTitle = $(media).data('chapters-title');
-		}
-
-		if ($(media).data('chapters-default') !== undefined && $(media).data('chapters-default') !== "") {
-			this.defaultChapter = $(media).data('chapters-default');
-		}
-		else {
-			this.defaultChapter = null;
-		}
-
-		// Slower/Faster buttons
-		// valid values of data-speed-icons are 'animals' (default) and 'arrows'
-		// 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
-		if ($(media).data('speed-icons') === 'arrows') {
-			this.speedIcons = 'arrows';
-		}
-		else {
-			this.speedIcons = 'animals';
-		}
-
-		// Seekbar
-		// valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
-		if ($(media).data('seekbar-scope') === 'chapter' || $(media).data('seekbar-scope') === 'chapters') {
-			this.seekbarScope = 'chapter';
-		}
-		else {
-			this.seekbarScope = 'video';
-		}
-
-		// YouTube
-		if ($(media).data('youtube-id') !== undefined && $(media).data('youtube-id') !== "") {
-			this.youTubeId = this.getYouTubeId($(media).data('youtube-id'));
-		}
-
-		if ($(media).data('youtube-desc-id') !== undefined && $(media).data('youtube-desc-id') !== "") {
-			this.youTubeDescId = this.getYouTubeId($(media).data('youtube-desc-id'));
-		}
-
-		if ($(media).data('youtube-nocookie') !== undefined && $(media).data('youtube-nocookie')) {
-			this.youTubeNoCookie = true;
-		}
-		else {
-			this.youTubeNoCookie = false;
-		}
-
-		// Vimeo
-		if ($(media).data('vimeo-id') !== undefined && $(media).data('vimeo-id') !== "") {
-			this.vimeoId = this.getVimeoId($(media).data('vimeo-id'));
-		}
-		if ($(media).data('vimeo-desc-id') !== undefined && $(media).data('vimeo-desc-id') !== "") {
-			this.vimeoDescId = this.getVimeoId($(media).data('vimeo-desc-id'));
-		}
-
-		// Skin
-		// valid values of data-skin are:
-		// '2020' (default as of 5.0), all buttons in one row beneath a full-width seekbar
-		// 'legacy', two rows of controls; seekbar positioned in available space within top row
-		if ($(media).data('skin') == 'legacy') {
-			this.skin = 'legacy';
-		}
-		else {
-			this.skin = '2020';
-		}
-
-		// Size
-		// width of Able Player is determined using the following order of precedence:
-		// 1. data-width attribute
-		// 2. width attribute (for video or audio, although it is not valid HTML for audio)
-		// 3. Intrinsic size from video (video only, determined later)
-		if ($(media).data('width') !== undefined) {
-			this.playerWidth = parseInt($(media).data('width'));
-		}
-		else if ($(media)[0].getAttribute('width')) {
-			// NOTE: jQuery attr() returns null for all invalid HTML attributes
-			// (e.g., width on <audio>)
-			// but it can be acessed via JavaScript getAttribute()
-			this.playerWidth = parseInt($(media)[0].getAttribute('width'));
-		}
-		else {
-			this.playerWidth = null;
-		}
-
-		// Icon type
-		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
-		// Fallback for browsers that don't support SVG is scalable icomoon fonts
-		// Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
-		// Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
-		this.iconType = 'font';
-		this.forceIconType = false;
-		if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
-			var iconType = $(media).data('icon-type');
-			if (iconType === 'font' || iconType == 'image' || iconType == 'svg') {
-				this.iconType = iconType;
-				this.forceIconType = true;
-			}
-		}
-
-		if ($(media).data('allow-fullscreen') !== undefined && $(media).data('allow-fullscreen') === false) {
-			this.allowFullscreen = false;
-		}
-		else {
-			this.allowFullscreen = true;
-		}
-		// Define other variables that are used in fullscreen program flow
-		this.clickedFullscreenButton = false;
-		this.restoringAfterFullscreen = false;
-
-		// Seek interval
-		// Number of seconds to seek forward or back with Rewind & Forward buttons
-		// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
-		// Calculation attempts to intelligently assign a reasonable interval based on media length
-		this.defaultSeekInterval = 10;
-		this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
-		if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
-			var seekInterval = $(media).data('seek-interval');
-			if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
-				this.seekInterval = seekInterval;
-				this.useFixedSeekInterval = true; // do not override with calculuation
-			}
-		}
-
-		// Now Playing
-		// Shows "Now Playing:" plus the title of the current track above player
-		// Only used if there is a playlist
-		if ($(media).data('show-now-playing') !== undefined && $(media).data('show-now-playing') === false) {
-			this.showNowPlaying = false;
-		}
-		else {
-			this.showNowPlaying = true;
-		}
-
-		// TTML support (experimental); enabled for testing with data-use-ttml (Boolean)
-		if ($(media).data('use-ttml') !== undefined) {
-			this.useTtml = true;
-			// The following may result in a console error.
-			this.convert = require('xml-js');
-		}
-		else {
-			this.useTtml = false;
-		}
-
-		// Fallback
-		// The data-test-fallback attribute can be used to test the fallback solution in any browser
-		if ($(media).data('test-fallback') !== undefined && $(media).data('test-fallback') !== false) {
-			if ($(media).data('test-fallback') == '2') {
-				this.testFallback = 2; // emulate browser that doesn't support HTML5 media
-			}
-			else {
-				this.testFallback = 1; // emulate failure to load Able Player
-			}
-		}
-		else {
-			this.testFallback = false;
-		}
-
-		// Language
-		// Player language is determined given the following precedence:
-		// 1. The value of data-lang on the media element, if provided and a matching translation file is available
-		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
-		// 3. English
-		// Final calculation occurs in translation.js > getTranslationText()
-		if ($(media).data('lang') !== undefined && $(media).data('lang') !== "") {
-			this.lang = $(media).data('lang').toLowerCase();
-		}
-		else {
-			this.lang = null;
-		}
-
-		// Metadata Tracks
-		if ($(media).data('meta-type') !== undefined && $(media).data('meta-type') !== "") {
-			this.metaType = $(media).data('meta-type');
-		}
-
-		if ($(media).data('meta-div') !== undefined && $(media).data('meta-div') !== "") {
-			this.metaDiv = $(media).data('meta-div');
-		}
-
-		// Search
-		// conducting a search requires an external div in which to write the results
-		if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
-
-			this.searchDiv = $(media).data('search-div');
-
-			// Search term (optional; could be assigned later in a JavaScript application)
-			if ($(media).data('search') !== undefined && $(media).data('search') !== "") {
-				this.searchString = $(media).data('search');
-			}
-
-			// Search Language
-			if ($(media).data('search-lang') !== undefined && $(media).data('search-lang') !== "") {
-				this.searchLang = $(media).data('search-lang');
-			}
-			else {
-				this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
-			}
-
-			// Search option: Ignore capitalization in search terms
-			if ($(media).data('search-ignore-caps') !== undefined && $(media).data('search-ignore-caps') !== false) {
-				this.searchIgnoreCaps = true;
-			}
-			else {
-				this.searchIgnoreCaps = false;
-			}
-
-			// conducting a search currently requires an external div in which to write the results
-			if ($(media).data('search-div') !== undefined && $(media).data('search-div') !== "") {
-				this.searchString = $(media).data('search');
-				this.searchDiv = $(media).data('search-div');
-			}
-		}
-
-		// Hide controls when video starts playing
-		// They will reappear again when user presses a key or moves the mouse
-		// As of v4.0, controls are hidden automatically on playback in fullscreen mode
-		if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
-			this.hideControls = true;
-			this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
-		}
-		else {
-			this.hideControls = false;
-			this.hideControlsOriginal = false;
-		}
-
-		// Steno mode
-		// Enable support for Able Player keyboard shortcuts in textaarea fields
-		// so users can control the player while transcribing
-		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
-			this.stenoMode = true;
-			// Add support for stenography in an iframe via data-steno-iframe-id
-			if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
-				this.stenoFrameId = $(media).data('steno-iframe-id');
-				this.$stenoFrame = $('#' + this.stenoFrameId);
-				if (!(this.$stenoFrame.length)) {
-					// iframe not found
-					this.stenoFrameId = null;
-					this.$stenoFrame = null;
-				}
-			}
-			else {
-				this.stenoFrameId = null;
-				this.$stenoFrame = null;
-			}
-		}
-		else {
-			this.stenoMode = false;
-			this.stenoFrameId = null;
-			this.$stenoFrame = null;
-		}
-
-		// Define built-in variables that CANNOT be overridden with HTML attributes
-		this.setDefaults();
-
-		////////////////////////////////////////
-		//
-		// End assignment of default variables
-		//
-		////////////////////////////////////////
-
-		this.ableIndex = AblePlayer.nextIndex;
-		AblePlayer.nextIndex += 1;
-
-		this.title = $(media).attr('title');
-
-		// populate translation object with localized versions of all labels and prompts
-		// use defer method to defer additional processing until text is retrieved
-		this.tt = {};
-		var thisObj = this;
-		$.when(this.getTranslationText()).then(
-			function () {
-				if (thisObj.countProperties(thisObj.tt) > 50) {
-					// close enough to ensure that most text variables are populated
-					thisObj.setup();
-				}
-				else {
-					// can't continue loading player with no text
-					thisObj.provideFallback();
-				}
-			}
-		).
-		fail(function() {
-			thisObj.provideFallback();
-		});
-	};
-
-	// Index to increment every time new player is created.
-	AblePlayer.nextIndex = 0;
-
-	AblePlayer.prototype.setup = function() {
-
-		var thisObj = this;
-		this.initializing = true; // will remain true until entire sequence of function calls is complete
-
-		this.reinitialize().then(function () {
-			if (!thisObj.player) {
-				// No player for this media, show last-line fallback.
-				thisObj.provideFallback();
-			}
-			else {
-				thisObj.setupInstance().then(function () {
-					thisObj.setupInstancePlaylist();
-					if (thisObj.hasPlaylist) {
-						// for playlists, recreatePlayer() is called from within cuePlaylistItem()
-					}
-					else {
-						thisObj.recreatePlayer().then(function() {
-							thisObj.initializing = false;
-							thisObj.playerCreated = true; // remains true until browser is refreshed
-						});
-					}
-				});
-			}
-		});
-	};
-
-	AblePlayer.getActiveDOMElement = function () {
-		var activeElement = document.activeElement;
-
-		// For shadow DOMs we need to keep digging down through the DOMs
-		while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
-			activeElement = activeElement.shadowRoot.activeElement;
-		}
-
-		return activeElement;
-	};
-
-	AblePlayer.localGetElementById = function(element, id) {
-		if (element.getRootNode)
-		{
-			// Use getRootNode() and querySelector() where supported (for shadow DOM support)
-			return $(element.getRootNode().querySelector('#' + id));
-		}
-		else
-		{
-			// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
-			return $(document.getElementById(id));
-		}
-	};
-
-	AblePlayer.youTubeIframeAPIReady = false;
-	AblePlayer.loadingYouTubeIframeAPI = false;
+  $(function () {
+    $("video, audio").each(function (index, element) {
+      if ($(element).data("able-player") !== undefined) {
+        AblePlayerInstances.push(new AblePlayer($(this), $(element)));
+      }
+    });
+  });
+
+  // YouTube player support; pass ready event to jQuery so we can catch in player.
+  window.onYouTubeIframeAPIReady = function () {
+    AblePlayer.youTubeIframeAPIReady = true;
+    $("body").trigger("youTubeIframeAPIReady", []);
+  };
+  // If there is only one player on the page, dispatch global keydown events to it
+  // Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
+  $(window).on("keydown", function (e) {
+    if (AblePlayer.nextIndex === 1) {
+      AblePlayer.lastCreated.onPlayerKeyPress(e);
+    }
+  });
+
+  // Construct an AblePlayer object
+  // Parameters are:
+  // media - jQuery selector or element identifying the media.
+  window.AblePlayer = function (media) {
+    var thisObj = this;
+
+    // Keep track of the last player created for use with global events.
+    AblePlayer.lastCreated = this;
+    this.media = media;
+
+    if ($(media).length === 0) {
+      this.provideFallback();
+      return;
+    }
+
+    ///////////////////////////////
+    //
+    // Default variables assignment
+    //
+    ///////////////////////////////
+
+    // The following variables CAN be overridden with HTML attributes
+
+    // autoplay (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr("autoplay") !== undefined) {
+      this.autoplay = true; // this value remains constant
+      this.okToPlay = true; // this value can change dynamically
+    } else {
+      this.autoplay = false;
+      this.okToPlay = false;
+    }
+
+    // loop (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr("loop") !== undefined) {
+      this.loop = true;
+    } else {
+      this.loop = false;
+    }
+
+    // playsinline (Boolean; if present always resolves to true, regardless of value)
+    if ($(media).attr("playsinline") !== undefined) {
+      this.playsInline = "1"; // this value gets passed to YT.Player contructor in youtube.js
+    } else {
+      this.playsInline = "0";
+    }
+
+    // poster (Boolean, indicating whether media element has a poster attribute)
+    if ($(media).attr("poster")) {
+      this.hasPoster = true;
+    } else {
+      this.hasPoster = false;
+    }
+
+    // get height and width attributes, if present
+    // and add them to variables
+    // Not currently used, but might be useful for resizing player
+    if ($(media).attr("width")) {
+      this.width = $(media).attr("width");
+    }
+    if ($(media).attr("height")) {
+      this.height = $(media).attr("height");
+    }
+
+    // start-time
+    if (
+      $(media).data("start-time") !== undefined &&
+      $.isNumeric($(media).data("start-time"))
+    ) {
+      this.startTime = $(media).data("start-time");
+    } else {
+      this.startTime = 0;
+    }
+
+    // debug
+    if (
+      $(media).data("debug") !== undefined &&
+      $(media).data("debug") !== false
+    ) {
+      this.debug = true;
+    } else {
+      this.debug = false;
+    }
+
+    // Path to root directory of Able Player code
+    if ($(media).data("root-path") !== undefined) {
+      // add a trailing slash if there is none
+      this.rootPath = $(media).data("root-path").replace(/\/?$/, "/");
+    } else {
+      this.rootPath = this.getRootPath();
+    }
+
+    // Volume
+    // Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
+    this.defaultVolume = 7;
+    if (
+      $(media).data("volume") !== undefined &&
+      $(media).data("volume") !== ""
+    ) {
+      var volume = $(media).data("volume");
+      if (volume >= 0 && volume <= 10) {
+        this.defaultVolume = volume;
+      }
+    }
+    this.volume = this.defaultVolume;
+
+    // Optional Buttons
+    // Buttons are added to the player controller if relevant media is present
+    // However, in some applications it might be undesirable to show buttons
+    // (e.g., if chapters or transcripts are provided in an external container)
+
+    if (
+      $(media).data("use-chapters-button") !== undefined &&
+      $(media).data("use-chapters-button") === false
+    ) {
+      this.useChaptersButton = false;
+    } else {
+      this.useChaptersButton = true;
+    }
+
+    // Control whether text descriptions are read aloud
+    // set to "false" if the sole purpose of the WebVTT descriptions file
+    // is to integrate text description into the transcript
+    // set to "true" to write description text to a div
+    // This variable does *not* control the method by which description is read.
+    // For that, see below (this.descMethod)
+    if (
+      $(media).data("descriptions-audible") !== undefined &&
+      $(media).data("descriptions-audible") === false
+    ) {
+      this.readDescriptionsAloud = false;
+    } else if (
+      $(media).data("description-audible") !== undefined &&
+      $(media).data("description-audible") === false
+    ) {
+      // support both singular and plural spelling of attribute
+      this.readDescriptionsAloud = false;
+    } else {
+      this.readDescriptionsAloud = true;
+    }
+
+    // setting initial this.descVoices to an empty array
+    // to be populated later by getBrowserVoices
+    this.descVoices = [];
+
+    // Method by which text descriptions are read
+    // valid values of data-desc-reader are:
+    // 'brower' (default) - text-based audio description is handled by the browser, if supported
+    // 'screenreader' - text-based audio description is always handled by screen readers
+    // The latter may be preferable by owners of websites in languages that are not well supported
+    // by the Web Speech API
+    if ($(media).data("desc-reader") == "screenreader") {
+      this.descReader = "screenreader";
+    } else {
+      this.descReader = "browser";
+    }
+
+    // Default state of captions and descriptions
+    // This setting is overridden by user preferences, if they exist
+    // values for data-state-captions and data-state-descriptions are 'on' or 'off'
+    if ($(media).data("state-captions") == "off") {
+      this.defaultStateCaptions = 0; // off
+    } else {
+      this.defaultStateCaptions = 1; // on by default
+    }
+    if ($(media).data("state-descriptions") == "on") {
+      this.defaultStateDescriptions = 1; // on
+    } else {
+      this.defaultStateDescriptions = 0; // off by default
+    }
+
+    // Default setting for prefDescPause
+    // Extended description (i.e., pausing during description) is on by default
+    // but this settings give website owners control over that
+    // since they know the nature of their videos, and whether pausing is necessary
+    // This setting is overridden by user preferences, if they exist
+    if ($(media).data("desc-pause-default") == "off") {
+      this.defaultDescPause = 0; // off
+    } else {
+      this.defaultDescPause = 1; // on by default
+    }
+
+    // Headings
+    // By default, an off-screen heading is automatically added to the top of the media player
+    // It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
+    // Authors can override this behavior by manually assigning a heading level using data-heading-level
+    // Accepted values are 1-6, or 0 which indicates "no heading"
+    // (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
+    if (
+      $(media).data("heading-level") !== undefined &&
+      $(media).data("heading-level") !== ""
+    ) {
+      var headingLevel = $(media).data("heading-level");
+      if (/^[0-6]*$/.test(headingLevel)) {
+        // must be a valid HTML heading level 1-6; or 0
+        this.playerHeadingLevel = headingLevel;
+      }
+    }
+
+    // Transcripts
+    // There are three types of interactive transcripts.
+    // In descending of order of precedence (in case there are conflicting tags), they are:
+    // 1. "manual" - A manually coded external transcript (requires data-transcript-src)
+    // 2. "external" - Automatically generated, written to an external div (requires data-transcript-div)
+    // 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
+    // If data-include-transcript="false", there is no "popup" transcript
+
+    if (
+      $(media).data("transcript-div") !== undefined &&
+      $(media).data("transcript-div") !== ""
+    ) {
+      this.transcriptDivLocation = $(media).data("transcript-div");
+    } else {
+      this.transcriptDivLocation = null;
+    }
+    if (
+      $(media).data("include-transcript") !== undefined &&
+      $(media).data("include-transcript") === false
+    ) {
+      this.hideTranscriptButton = true;
+    } else {
+      this.hideTranscriptButton = null;
+    }
+
+    this.transcriptType = null;
+    if ($(media).data("transcript-src") !== undefined) {
+      this.transcriptSrc = $(media).data("transcript-src");
+      if (this.transcriptSrcHasRequiredParts()) {
+        this.transcriptType = "manual";
+      } else {
+        console.log("ERROR: Able Player transcript is missing required parts");
+      }
+    } else if (
+      $(media).find('track[kind="captions"], track[kind="subtitles"]').length >
+      0
+    ) {
+      // required tracks are present. COULD automatically generate a transcript
+      if (this.transcriptDivLocation) {
+        this.transcriptType = "external";
+      } else {
+        this.transcriptType = "popup";
+      }
+    }
+
+    // In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
+    // If false (default), line breaks are are removed from transcripts in order to provide a more seamless reading experience
+    // If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
+    if (
+      $(media).data("lyrics-mode") !== undefined &&
+      $(media).data("lyrics-mode") !== false
+    ) {
+      this.lyricsMode = true;
+    } else {
+      this.lyricsMode = false;
+    }
+
+    // Transcript Title
+    if (
+      $(media).data("transcript-title") !== undefined &&
+      $(media).data("transcript-title") !== ""
+    ) {
+      this.transcriptTitle = $(media).data("transcript-title");
+    } else {
+      // do nothing. The default title will be defined later (see transcript.js)
+    }
+
+    // Captions
+    // data-captions-position can be used to set the default captions position
+    // this is only the default, and can be overridden by user preferences
+    // valid values of data-captions-position are 'below' and 'overlay'
+    if ($(media).data("captions-position") === "overlay") {
+      this.defaultCaptionsPosition = "overlay";
+    } else {
+      // the default, even if not specified
+      this.defaultCaptionsPosition = "below";
+    }
+
+    // Chapters
+    if (
+      $(media).data("chapters-div") !== undefined &&
+      $(media).data("chapters-div") !== ""
+    ) {
+      this.chaptersDivLocation = $(media).data("chapters-div");
+    }
+
+    if ($(media).data("chapters-title") !== undefined) {
+      // NOTE: empty string is valid; results in no title being displayed
+      this.chaptersTitle = $(media).data("chapters-title");
+    }
+
+    if (
+      $(media).data("chapters-default") !== undefined &&
+      $(media).data("chapters-default") !== ""
+    ) {
+      this.defaultChapter = $(media).data("chapters-default");
+    } else {
+      this.defaultChapter = null;
+    }
+
+    // Slower/Faster buttons
+    // valid values of data-speed-icons are 'animals' (default) and 'arrows'
+    // 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
+    if ($(media).data("speed-icons") === "arrows") {
+      this.speedIcons = "arrows";
+    } else {
+      this.speedIcons = "animals";
+    }
+
+    // Seekbar
+    // valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
+    if (
+      $(media).data("seekbar-scope") === "chapter" ||
+      $(media).data("seekbar-scope") === "chapters"
+    ) {
+      this.seekbarScope = "chapter";
+    } else {
+      this.seekbarScope = "video";
+    }
+
+    // YouTube
+    if (
+      $(media).data("youtube-id") !== undefined &&
+      $(media).data("youtube-id") !== ""
+    ) {
+      this.youTubeId = this.getYouTubeId($(media).data("youtube-id"));
+    }
+
+    if (
+      $(media).data("youtube-desc-id") !== undefined &&
+      $(media).data("youtube-desc-id") !== ""
+    ) {
+      this.youTubeDescId = this.getYouTubeId($(media).data("youtube-desc-id"));
+    }
+
+    if (
+      $(media).data("youtube-nocookie") !== undefined &&
+      $(media).data("youtube-nocookie")
+    ) {
+      this.youTubeNoCookie = true;
+    } else {
+      this.youTubeNoCookie = false;
+    }
+
+    // Vimeo
+    if (
+      $(media).data("vimeo-id") !== undefined &&
+      $(media).data("vimeo-id") !== ""
+    ) {
+      this.vimeoId = this.getVimeoId($(media).data("vimeo-id"));
+    }
+    if (
+      $(media).data("vimeo-desc-id") !== undefined &&
+      $(media).data("vimeo-desc-id") !== ""
+    ) {
+      this.vimeoDescId = this.getVimeoId($(media).data("vimeo-desc-id"));
+    }
+
+    // Skin
+    // valid values of data-skin are:
+    // '2020' (default as of 5.0), all buttons in one row beneath a full-width seekbar
+    // 'legacy', two rows of controls; seekbar positioned in available space within top row
+    if ($(media).data("skin") == "legacy") {
+      this.skin = "legacy";
+    } else {
+      this.skin = "2020";
+    }
+
+    // Size
+    // width of Able Player is determined using the following order of precedence:
+    // 1. data-width attribute
+    // 2. width attribute (for video or audio, although it is not valid HTML for audio)
+    // 3. Intrinsic size from video (video only, determined later)
+    if ($(media).data("width") !== undefined) {
+      this.playerWidth = parseInt($(media).data("width"));
+    } else if ($(media)[0].getAttribute("width")) {
+      // NOTE: jQuery attr() returns null for all invalid HTML attributes
+      // (e.g., width on <audio>)
+      // but it can be acessed via JavaScript getAttribute()
+      this.playerWidth = parseInt($(media)[0].getAttribute("width"));
+    } else {
+      this.playerWidth = null;
+    }
+
+    // Icon type
+    // By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
+    // Fallback for browsers that don't support SVG is scalable icomoon fonts
+    // Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
+    // Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
+    this.iconType = "font";
+    this.forceIconType = false;
+    if (
+      $(media).data("icon-type") !== undefined &&
+      $(media).data("icon-type") !== ""
+    ) {
+      var iconType = $(media).data("icon-type");
+      if (iconType === "font" || iconType == "image" || iconType == "svg") {
+        this.iconType = iconType;
+        this.forceIconType = true;
+      }
+    }
+
+    if (
+      $(media).data("allow-fullscreen") !== undefined &&
+      $(media).data("allow-fullscreen") === false
+    ) {
+      this.allowFullscreen = false;
+    } else {
+      this.allowFullscreen = true;
+    }
+    // Define other variables that are used in fullscreen program flow
+    this.clickedFullscreenButton = false;
+    this.restoringAfterFullscreen = false;
+
+    // Seek interval
+    // Number of seconds to seek forward or back with Rewind & Forward buttons
+    // Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
+    // Calculation attempts to intelligently assign a reasonable interval based on media length
+    this.defaultSeekInterval = 10;
+    this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
+    if (
+      $(media).data("seek-interval") !== undefined &&
+      $(media).data("seek-interval") !== ""
+    ) {
+      var seekInterval = $(media).data("seek-interval");
+      if (/^[1-9][0-9]*$/.test(seekInterval)) {
+        // must be a whole number greater than 0
+        this.seekInterval = seekInterval;
+        this.useFixedSeekInterval = true; // do not override with calculuation
+      }
+    }
+
+    // Now Playing
+    // Shows "Now Playing:" plus the title of the current track above player
+    // Only used if there is a playlist
+    if (
+      $(media).data("show-now-playing") !== undefined &&
+      $(media).data("show-now-playing") === false
+    ) {
+      this.showNowPlaying = false;
+    } else {
+      this.showNowPlaying = true;
+    }
+
+    // TTML support (experimental); enabled for testing with data-use-ttml (Boolean)
+    if ($(media).data("use-ttml") !== undefined) {
+      this.useTtml = true;
+      // The following may result in a console error.
+      this.convert = require("xml-js");
+    } else {
+      this.useTtml = false;
+    }
+
+    // Fallback
+    // The data-test-fallback attribute can be used to test the fallback solution in any browser
+    if (
+      $(media).data("test-fallback") !== undefined &&
+      $(media).data("test-fallback") !== false
+    ) {
+      if ($(media).data("test-fallback") == "2") {
+        this.testFallback = 2; // emulate browser that doesn't support HTML5 media
+      } else {
+        this.testFallback = 1; // emulate failure to load Able Player
+      }
+    } else {
+      this.testFallback = false;
+    }
+
+    // Language
+    // Player language is determined given the following precedence:
+    // 1. The value of data-lang on the media element, if provided and a matching translation file is available
+    // 2. Lang attribute on <html> or <body>, if a matching translation file is available
+    // 3. English
+    // Final calculation occurs in translation.js > getTranslationText()
+    if ($(media).data("lang") !== undefined && $(media).data("lang") !== "") {
+      this.lang = $(media).data("lang").toLowerCase();
+    } else {
+      this.lang = null;
+    }
+
+    // Metadata Tracks
+    if (
+      $(media).data("meta-type") !== undefined &&
+      $(media).data("meta-type") !== ""
+    ) {
+      this.metaType = $(media).data("meta-type");
+    }
+
+    if (
+      $(media).data("meta-div") !== undefined &&
+      $(media).data("meta-div") !== ""
+    ) {
+      this.metaDiv = $(media).data("meta-div");
+    }
+
+    // Search
+    // conducting a search requires an external div in which to write the results
+    if (
+      $(media).data("search-div") !== undefined &&
+      $(media).data("search-div") !== ""
+    ) {
+      this.searchDiv = $(media).data("search-div");
+
+      // Search term (optional; could be assigned later in a JavaScript application)
+      if (
+        $(media).data("search") !== undefined &&
+        $(media).data("search") !== ""
+      ) {
+        this.searchString = $(media).data("search");
+      }
+
+      // Search Language
+      if (
+        $(media).data("search-lang") !== undefined &&
+        $(media).data("search-lang") !== ""
+      ) {
+        this.searchLang = $(media).data("search-lang");
+      } else {
+        this.searchLang = null; // will change to final value of this.lang in translation.js > getTranslationText()
+      }
+
+      // Search option: Ignore capitalization in search terms
+      if (
+        $(media).data("search-ignore-caps") !== undefined &&
+        $(media).data("search-ignore-caps") !== false
+      ) {
+        this.searchIgnoreCaps = true;
+      } else {
+        this.searchIgnoreCaps = false;
+      }
+
+      // conducting a search currently requires an external div in which to write the results
+      if (
+        $(media).data("search-div") !== undefined &&
+        $(media).data("search-div") !== ""
+      ) {
+        this.searchString = $(media).data("search");
+        this.searchDiv = $(media).data("search-div");
+      }
+    }
+
+    // Hide controls when video starts playing
+    // They will reappear again when user presses a key or moves the mouse
+    // As of v4.0, controls are hidden automatically on playback in fullscreen mode
+    if (
+      $(media).data("hide-controls") !== undefined &&
+      $(media).data("hide-controls") !== false
+    ) {
+      this.hideControls = true;
+      this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
+    } else {
+      this.hideControls = false;
+      this.hideControlsOriginal = false;
+    }
+
+    // Steno mode
+    // Enable support for Able Player keyboard shortcuts in textaarea fields
+    // so users can control the player while transcribing
+    if (
+      $(media).data("steno-mode") !== undefined &&
+      $(media).data("steno-mode") !== false
+    ) {
+      this.stenoMode = true;
+      // Add support for stenography in an iframe via data-steno-iframe-id
+      if (
+        $(media).data("steno-iframe-id") !== undefined &&
+        $(media).data("steno-iframe-id") !== ""
+      ) {
+        this.stenoFrameId = $(media).data("steno-iframe-id");
+        this.$stenoFrame = $("#" + this.stenoFrameId);
+        if (!this.$stenoFrame.length) {
+          // iframe not found
+          this.stenoFrameId = null;
+          this.$stenoFrame = null;
+        }
+      } else {
+        this.stenoFrameId = null;
+        this.$stenoFrame = null;
+      }
+    } else {
+      this.stenoMode = false;
+      this.stenoFrameId = null;
+      this.$stenoFrame = null;
+    }
+
+    // Define built-in variables that CANNOT be overridden with HTML attributes
+    this.setDefaults();
+
+    ////////////////////////////////////////
+    //
+    // End assignment of default variables
+    //
+    ////////////////////////////////////////
+
+    this.ableIndex = AblePlayer.nextIndex;
+    AblePlayer.nextIndex += 1;
+
+    this.title = $(media).attr("title");
+
+    // populate translation object with localized versions of all labels and prompts
+    // use defer method to defer additional processing until text is retrieved
+    this.tt = {};
+    var thisObj = this;
+    $.when(this.getTranslationText())
+      .then(function () {
+        if (thisObj.countProperties(thisObj.tt) > 50) {
+          // close enough to ensure that most text variables are populated
+          thisObj.setup();
+        } else {
+          // can't continue loading player with no text
+          thisObj.provideFallback();
+        }
+      })
+      .fail(function () {
+        thisObj.provideFallback();
+      });
+  };
+
+  // Index to increment every time new player is created.
+  AblePlayer.nextIndex = 0;
+
+  AblePlayer.prototype.setup = function () {
+    var thisObj = this;
+    this.initializing = true; // will remain true until entire sequence of function calls is complete
+
+    this.reinitialize().then(function () {
+      if (!thisObj.player) {
+        // No player for this media, show last-line fallback.
+        thisObj.provideFallback();
+      } else {
+        thisObj.setupInstance().then(function () {
+          thisObj.setupInstancePlaylist();
+          if (thisObj.hasPlaylist) {
+            // for playlists, recreatePlayer() is called from within cuePlaylistItem()
+          } else {
+            thisObj.recreatePlayer().then(function () {
+              thisObj.initializing = false;
+              thisObj.playerCreated = true; // remains true until browser is refreshed
+            });
+          }
+        });
+      }
+    });
+  };
+
+  AblePlayer.getActiveDOMElement = function () {
+    var activeElement = document.activeElement;
+
+    // For shadow DOMs we need to keep digging down through the DOMs
+    while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+      activeElement = activeElement.shadowRoot.activeElement;
+    }
+
+    return activeElement;
+  };
+
+  AblePlayer.localGetElementById = function (element, id) {
+    if (element.getRootNode) {
+      // Use getRootNode() and querySelector() where supported (for shadow DOM support)
+      return $(element.getRootNode().querySelector("#" + id));
+    } else {
+      // If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+      return $(document.getElementById(id));
+    }
+  };
+
+  AblePlayer.youTubeIframeAPIReady = false;
+  AblePlayer.loadingYouTubeIframeAPI = false;
 })(jQuery);
 
 (function ($) {
@@ -7539,791 +7600,744 @@ var AblePlayerInstances = [];
 })(jQuery);
 
 (function ($) {
-	AblePlayer.prototype.initDescription = function() {
-
-		// set default mode for delivering description (open vs closed)
-		// based on availability and user preference
-
-		// called when player is being built, or when a user
-		// toggles the Description button or changes a description-related preference
-
-		// The following variables are applicable to delivery of description:
-		// defaultStateDescriptions == 'on' or 'off', defined by website owner (overridden by prefDesc)
-		// prefDesc == 1 if user wants description (i.e., Description button is on); else 0
-		// prefDescPause == 1 to pause video when description starts; else 0
-		// prefDescVisible == 1 to visibly show text-based description area; else 0
-		// prefDescMethod == either 'video' or 'text' (as of v4.0.10, prefDescMethod is always 'video')
-		// descMethod is the format actually used ('video' or 'text'), regardless of user preference
-		// hasOpenDesc == true if a described version of video is available via data-desc-src attribute
-		// hasClosedDesc == true if a description text track is available
-		// descOn == true if description of either type is on
-		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
-		// descReader == either 'browser' or 'screenreader'
-
-		var deferred, promise, thisObj;
-
-		deferred = new $.Deferred();
-		promise = deferred.promise();
-		thisObj = this;
-
-		if (this.mediaType === 'audio') {
-			deferred.resolve();
-		}
-
-		// check to see if there's an open-described version of this video
-		// checks only the first source since if a described version is provided,
-		// it must be provided for all sources
-		this.descFile = this.$sources.first().attr('data-desc-src');
-		if (typeof this.descFile !== 'undefined') {
-			this.hasOpenDesc = true;
-		}
-		else {
-			// there's no open-described version via data-desc-src,
-			// but what about data-youtube-desc-src or data-vimeo-desc-src?
-			// if these exist, they would have been defined earlier
-			if (this.youTubeDescId || this.vimeoDescId) {
-				this.hasOpenDesc = true;
-			}
-			else { // there are no open-described versions from any source
-				this.hasOpenDesc = false;
-			}
-		}
-
-		// Set this.descMethod based on media availability & user preferences
-		if (this.hasOpenDesc && this.hasClosedDesc) {
-			// both formats are available. User gets their preference.
-			if (this.prefDescMethod) {
-				this.descMethod = this.prefDescMethod;
-			}
-			else {
-				// user has no preference. Video is default.
-				this.descMethod = 'video';
-			}
-		}
-		else if (this.hasOpenDesc) {
-			this.descMethod = 'video';
-		}
-		else if (this.hasClosedDesc) {
-			this.descMethod = 'text';
-		}
-		else {
-			// no description is available for this video
-			this.descMethod = null;
-		}
-
-		// Set the default state of descriptions
-		if (this.descMethod) {
-			if (this.prefDesc === 1) {
-				this.descOn = true;
-			}
-			else if (this.prefDesc === 0) {
-				this.descOn = false;
-			}
-			else {
-				// user has no prefs. Use default state.
-				if (this.defaultStateDescriptions === 1)	{
-					this.descOn = true;
-				}
-				else {
-					this.descOn = false;
-				}
-			}
-		}
-		else {
-			this.descOn = false;
-		}
-		if (typeof this.$descDiv === 'undefined' && this.hasClosedDesc && this.descMethod === 'text') {
-			this.injectTextDescriptionArea();
-		}
-
-		if (this.descOn) {
-			if (this.descMethod === 'video') {
-				if (!this.usingDescribedVersion()) {
-					// switched from non-described to described version
-					this.swapDescription();
-				}
-			}
-			if (this.hasClosedDesc) {
-				if (this.prefDescVisible) {
-					// make description text visible
-					if (typeof this.$descDiv !== 'undefined') {
-						this.$descDiv.show();
-						this.$descDiv.removeClass('able-clipped');
-					}
-				}
-				else {
-					// keep it visible to screen readers, but hide it visibly
-					if (typeof this.$descDiv !== 'undefined') {
-						this.$descDiv.addClass('able-clipped');
-					}
-				}
-			}
-		}
-		else { // description is off.
-			if (this.descMethod === 'video') { // user has turned off described version of video
-				if (this.usingDescribedVersion()) {
-					// user was using the described verion. Swap for non-described version
-					this.swapDescription();
-				}
-			}
-			else if (this.descMethod === 'text') { // user has turned off text description
-				// hide description div from everyone, including screen reader users
-				if (typeof this.$descDiv !== 'undefined') {
-					this.$descDiv.hide();
-					this.$descDiv.removeClass('able-clipped');
-				}
-			}
-		}
-		deferred.resolve();
-		return promise;
-	};
-
-	AblePlayer.prototype.usingDescribedVersion = function () {
-
-		// Returns true if currently using audio description, false otherwise.
-
-		if (this.player === 'youtube') {
-			return (this.activeYouTubeId === this.youTubeDescId);
-		}
-		else if (this.player === 'vimeo') {
-			return (this.activeVimeoId === this.vimeoDescId);
-		}
-		else {
-			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
-		}
-	};
-
-	AblePlayer.prototype.initSpeech = function (context) {
-
-		// Some browsers &/or operating systems require a user-initiated click
-		// before this.synth.getVoices() will work. As of Nov 2022:
-		// Chrome requires a click before synth.getVoices() will work
-		// iOS requires a click before synth.speak() will work
-		// A hack to address this: Listen for ANY click, then play an inaudible utterance
-		// to intitiate speech synthesis
-		// https://stackoverflow.com/questions/32193704/js-speech-synthesis-issue-on-ios
-		// This function does that, and sets this.speechEnabled
-		// It's called with either of these contexts:
-		// 'init' - player is being initialized
-		// 'play' - user has clicked play
-		// 'prefs' - user has clicked prefs button
-		// 'desc' - it's time to announce a description!
-
-		var thisObj = this;
-
-		if (this.speechEnabled === null) {
-
-			if (typeof this.synth !== 'undefined') {
-				// cancel any previous synth instance and reinitialize
-				this.synth.cancel();
-			}
-
-			if (window.speechSynthesis) {
-
-				// browser supports speech synthesis
-				this.synth = window.speechSynthesis;
-				this.synth.cancel();
-				if (context === 'init') {
-					// handle a click on anything, in case the user
-					// clicks something before they click 'play' or 'prefs' buttons
-					// that would allow us to init speech before it's needed
-					$(document).on('click',function() {
-						var greeting = new SpeechSynthesisUtterance('\x20');
-						thisObj.synth.speak(greeting);
-						greeting.onstart = function(e) {
-							// utterance has started
-							$(document).off('click'); // unbind the click event listener
-						}
-						greeting.onend = function(e) {
-							// should now be able to get browser voices
-							// in browsers that require a click
-							thisObj.getBrowserVoices();
-							if (thisObj.descVoices.length) {
-								thisObj.speechEnabled = true;
-							}
-						};
-					});
-
-					// go ahead and call get browser voices in case it might work,
-					// for browsers that don't require a click				
-					this.getBrowserVoices();
-					if (this.descVoices.length) {
-						this.speechEnabled = true;
-					}
-				}
-				else {  // context is either 'play' or 'prefs' or 'desc'
-					var greeting = new SpeechSynthesisUtterance('\x20');
-					thisObj.synth.speak(greeting);
-					greeting.onstart = function(e) {
-						// utterance has started
-						$(document).off('click'); // unbind the click event listener
-					};
-					greeting.onend = function(e) {
-						// should now be able to get browser voices
-						// in browsers that require a click
-						thisObj.getBrowserVoices();
-						/*  
-						// Safari 15.4 on MacOS has a bug: No voice array is returned
-						// The browser speaks, but we have no control over voices. 
-						// Therefore, speechEnabled cannot be dependent on descVoices 
-						// as long as Safari 15.4 is still supported
-						if (thisObj.descVoices.length) {
-							thisObj.speechEnabled = true;
-						}
-						*/
-						thisObj.speechEnabled = true; 
-					};
-				}
-			}
-			else {
-				// browser does not support speech synthesis
-				this.speechEnabled = false;
-			}
-		}
-	};
-
-	AblePlayer.prototype.getBrowserVoices = function () {
-
-		// define this.descVoices array
-		// includes only languages that match the language of the captions or player
-
-		var voices, descLangs, voiceLang, preferredLang;
-
-		if (this.captionLang) {
-			preferredLang = this.captionLang.substring(0,2).toLowerCase();
-		}
-		else {
-			preferredLang = this.lang.substring(0,2).toLowerCase();
-		}
-		this.descVoices = [];
-		voices = this.synth.getVoices();
-		descLangs = this.getDescriptionLangs();
-		if (voices.length > 0) {
-			this.descVoices = [];
-			// available languages are identified with local suffixes (e.g., en-US)
-			for (var i=0; i<voices.length; i++) {
-				// match only the first 2 characters of the lang code
-				voiceLang = voices[i].lang.substring(0,2).toLowerCase();
-				if (voiceLang === preferredLang && (descLangs.indexOf(voiceLang) !== -1)) {
-					// this voice matches preferredLang
-					// AND there's a matching description track in this language
-					// Add this voice to final array
-					this.descVoices.push(voices[i]);
-				}
-			}
-			if (!this.descVoices.length) {
-				// no voices available in the default language(s)
-				// just use all voices, regardless of language
-				this.descVoices = voices;
-			}
-		}
-		return false;
-	};
-
-	AblePlayer.prototype.getDescriptionLangs = function () {
-
-		// returns an array of languages (from srclang atttributes)
-		// in which there are description tracks
-		// use only first two characters of the lang code
-		var descLangs = [];
-		if (this.tracks) {
-			for (var i=0; i < this.tracks.length; i++) {
-				if (this.tracks[i].kind === 'descriptions') {
-					descLangs.push(this.tracks[i].language.substring(0,2).toLowerCase());
-				}
-			}
-		}
-		return descLangs;
-	};
-
-	AblePlayer.prototype.setDescriptionVoice = function () {
-
-		// set description voice on player init, or when user changes caption language
-		// Voice is determined in the following order of precedence:
-		// 1. User's preferred voice for this language, saved in a cookie
-		// 2. The first available voice in the array of available voices for this browser in this language
-
-		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
-		cookie = this.getCookie();
-		if (typeof cookie.voices !== 'undefined') {
-			prefDescVoice = this.getPrefDescVoice();
-		}
-		else {
-			prefDescVoice = null;
-		}
-
-		this.getBrowserVoices();
-		this.rebuildDescPrefsForm();
-
-		if (this.selectedDescriptions) {
-			descLang = this.selectedDescriptions.language;
-		}
-		else if (this.captionLang) {
-			descLang = this.captionLang;
-		}
-		else {
-			descLang = this.lang;
-		}
-
-		if (this.synth) {
-			voices = this.synth.getVoices();
-			if (voices.length > 0) {
-				if (prefDescVoice) {
-					// select the language that matches prefDescVoice, if it's available
-					prefVoiceFound = false;
-					for (var i=0; i<voices.length; i++) {
-						// first, be sure voice is the correct language
-						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
-							if (voices[i].name === prefDescVoice) {
-								descVoice = voices[i].name;
-								prefVoiceFound = true;
-								break;
-							}
-						}
-					}
-				}
-				if (!prefVoiceFound) {
-					// select the first language that matches the first 2 characters of the lang code
-					for (var i=0; i<voices.length; i++) {
-						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
-							descVoice = voices[i].name;
-							break;
-						}
-					}
-				}
-				// make this the user's current preferred voice
-				this.prefDescVoice = descVoice;
-				this.prefDescVoiceLang = descLang;
-				// select this voice in the Description Prefs dialog
-				if (this.$voiceSelectField) {
-					var selectedOption = this.$voiceSelectField.find('option[value="' + this.prefDescVoice + '"]');
-					this.$voiceSelectField.val(this.prefDescVoice);
-				}
-				this.updateCookie('voice');
-			}
-		}
-	};
-
-	AblePlayer.prototype.swapDescription = function() {
-
-		// swap described and non-described source media, depending on which is playing
-		// this function is only called in two circumstances:
-		// 1. Swapping to described version when initializing player (based on user prefs & availability)
-		// (playerCreated == false)
-		// 2. User is toggling description
-		// (playerCreated == true)
-
-		var thisObj, i, origSrc, descSrc, srcType, newSource;
-
-		thisObj = this;
-
-		// We are no longer loading the previous media source
-		// Only now, as a new source is requested, is it safe to reset this var
-		// It will be reset to true when media.load() is called
-		this.loadingMedia = false;
-
-		// get element that has focus at the time swap is initiated
-		// after player is rebuilt, focus will return to that same element
-		// (if it exists)
-		this.$focusedElement = $(':focus');
-
-		// get current time of current source, and attempt to start new video at the same time
-		// whether this is possible will be determined after the new media source has loaded
-		// see onMediaNewSourceLoad()
-		if (this.elapsed > 0) {
-			this.swapTime = this.elapsed;
-		}
-		else {
-			this.swapTime = 0;
-		}
-		if (this.duration > 0) {
-			this.prevDuration = this.duration;
-		}
-
-		// Capture current playback state, so media can resume after source is swapped
-		if (!this.okToPlay) {
-			this.okToPlay = this.playing;
-		}
-
-		if (this.descOn) {
-			// user has requested the described version
-			this.showAlert(this.tt.alertDescribedVersion);
-		}
-		else {
-			// user has requested the non-described version
-			this.showAlert(this.tt.alertNonDescribedVersion);
-		}
-
-		if (this.player === 'html5') {
-
-			this.swappingSrc = true;
-			this.paused = true;
-
-			if (this.usingDescribedVersion()) {
-				// the described version is currently playing. Swap to non-described
-				for (i=0; i < this.$sources.length; i++) {
-					// for all <source> elements, replace src with data-orig-src
-					origSrc = this.$sources[i].getAttribute('data-orig-src');
-					srcType = this.$sources[i].getAttribute('type');
-					if (origSrc) {
-						this.$sources[i].setAttribute('src',origSrc);
-					}
-				}
-			}
-			else {
-				// the non-described version is currently playing. Swap to described.
-				for (i=0; i < this.$sources.length; i++) {
-					// for all <source> elements, replace src with data-desc-src (if one exists)
-					// then store original source in a new data-orig-src attribute
-					origSrc = this.$sources[i].getAttribute('src');
-					descSrc = this.$sources[i].getAttribute('data-desc-src');
-					srcType = this.$sources[i].getAttribute('type');
-					if (descSrc) {
-						this.$sources[i].setAttribute('src',descSrc);
-						this.$sources[i].setAttribute('data-orig-src',origSrc);
-					}
-				}
-			}
-
-			if (this.recreatingPlayer) {
-				// stopgap to prevent multiple firings of recreatePlayer()
-				return;
-			}
-			if (this.playerCreated) {
-				// delete old player, then recreate it with new source & tracks
-				this.deletePlayer('swap-desc-html');
-				this.recreatePlayer().then(function() {
-					if (!thisObj.loadingMedia) {
-						thisObj.media.load();
-						thisObj.loadingMedia = true;
-					}
-				});
-			}
-			else {
-				// player is in the process of being created
-				// no need to recreate it
-			}
-		}
-		else if (this.player === 'youtube') {
-
-			if (this.usingDescribedVersion()) {
-				// the described version is currently playing. Swap to non-described
-				this.activeYouTubeId = this.youTubeId;
-			}
-			else {
-				// the non-described version is currently playing. Swap to described.
-				this.activeYouTubeId = this.youTubeDescId;
-			}
-			if (typeof this.youTubePlayer !== 'undefined') {
-				thisObj.swappingSrc = true;
-				if (thisObj.playing) {
-					// loadVideoById() loads and immediately plays the new video at swapTime
-					thisObj.youTubePlayer.loadVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-				}
-				else {
-					// cueVideoById() loads the new video and seeks to swapTime, but does not play
-					thisObj.youTubePlayer.cueVideoById(thisObj.activeYouTubeId,thisObj.swapTime);
-				}
-			}
-			if (this.playerCreated) {
-				this.deletePlayer('swap-desc-youtube');
-			}
-			// player needs to be recreated with new source
-			if (this.recreatingPlayer) {
-				// stopgap to prevent multiple firings of recreatePlayer()
-				return;
-			}
-			this.recreatePlayer().then(function() {
-				// nothing to do here
-				// next steps occur when youtube onReady event fires
-				// see youtube.js > finalizeYoutubeInit()
-			});
-		}
-		else if (this.player === 'vimeo') {
-			if (this.usingDescribedVersion()) {
-				// the described version is currently playing. Swap to non-described
-				this.activeVimeoId = this.vimeoId;
-				this.showAlert(this.tt.alertNonDescribedVersion);
-			}
-			else {
-				// the non-described version is currently playing. Swap to described.
-				this.activeVimeoId = this.vimeoDescId;
-				this.showAlert(this.tt.alertDescribedVersion);
-			}
-			if (this.playerCreated) {
-				this.deletePlayer('swap-desc-vimeo');
-			}
-			// player needs to be recreated with new source
-			if (this.recreatingPlayer) {
-				// stopgap to prevent multiple firings of recreatePlayer()
-				return;
-			}
-			this.recreatePlayer().then(function() {
-				// load the new video source
-				thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function() {
-					if (thisObj.playing) {
-						// video was playing when user requested an alternative version
-						// seek to swapTime and continue playback (playback happens automatically)
-						thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
-					}
-					else {
-						// Vimeo autostarts immediately after video loads
-						// The "Described" button should not trigger playback, so stop this before the user notices.
-						thisObj.vimeoPlayer.pause();
-					}
-				});
-			});
-		}
-	};
-
-	AblePlayer.prototype.showDescription = function(now) {
-
-		if (!this.hasClosedDesc || this.swappingSrc || !this.descOn || this.descMethod === 'video') {
-			return;
-		}
-
-		var thisObj, i, cues, d, thisDescription, descText, msg;
-		thisObj = this;
-
-		var flattenComponentForDescription = function (component) {
-			var result = [];
-			if (component.type === 'string') {
-				result.push(component.value);
-			}
-			else {
-				for (var i = 0; i < component.children.length; i++) {
-					result.push(flattenComponentForDescription(component.children[i]));
-				}
-			}
-			return result.join('');
-		};
-
-		if (this.selectedDescriptions) {
-			cues = this.selectedDescriptions.cues;
-		}
-		else if (this.descriptions.length >= 1) {
-			cues = this.descriptions[0].cues;
-		}
-		else {
-			cues = [];
-		}
-		for (d = 0; d < cues.length; d++) {
-			if ((cues[d].start <= now) && (cues[d].end > now)) {
-				thisDescription = d;
-				break;
-			}
-		}
-		if (typeof thisDescription !== 'undefined') {
-			if (this.currentDescription !== thisDescription) {
-				// temporarily remove aria-live from $status in order to prevent description from being interrupted
-				this.$status.removeAttr('aria-live');
-				descText = flattenComponentForDescription(cues[thisDescription].components);
-				if (this.descReader === 'screenreader') {
-					// load the new description into the container div for screen readers to read
-					this.$descDiv.html(descText);
-				}
-				else if (this.speechEnabled) {
-					// use browser's built-in speech synthesis
-					this.announceDescriptionText('description',descText);
-					if (this.prefDescVisible) {
-						// write description to the screen for sighted users
-						// but remove ARIA attributes since it isn't intended to be read by screen readers
-						this.$descDiv.html(descText).removeAttr('aria-live aria-atomic');
-					}
-				}
-				else {
-					// browser does not support speech synthesis
-					// load the new description into the container div for screen readers to read
-					this.$descDiv.html(descText);
-				}
-				if (this.prefDescPause && this.descMethod === 'text') {
-					this.pauseMedia();
-					this.pausedForDescription = true;
-				}
-				this.currentDescription = thisDescription;
-			}
-		}
-		else {
-			this.$descDiv.html('');
-			this.currentDescription = -1;
-			// restore aria-live to $status
-			this.$status.attr('aria-live','polite');
-		}
-	};
-
-	AblePlayer.prototype.syncSpeechToPlaybackRate = function(rate) {
-
-		// called when user changed playback rate
-		// adjust rate of audio description to match
-
-		var speechRate;
-
-		if (rate === 0.5) {
-			speechRate = 0.7; // option 1 in prefs menu
-		}
-		else if (rate === 0.75) {
-			speechRate =  0.8; // option 2 in prefs menu
-		}
-		else if (rate === 1.0) {
-			speechRate =  1; // option 4 in prefs menu (normal speech, default)
-		}
-		else if (rate === 1.25) {
-			speechRate =  1.1; // option 5 in prefs menu
-		}
-		else if (rate === 1.5) {
-			speechRate =  1.2; // option 6 in prefs menu
-		}
-		else if (rate === 1.75) {
-			speechRate =  1.5; // option 7 in prefs menu
-		}
-		else if (rate === 2.0) {
-			speechRate =  2; // option 8 in prefs menu (fast)
-		}
-		else if (rate === 2.25) {
-			speechRate =  2.5; // option 9 in prefs menu (very fast)
-		}
-		else if (rate >= 2.5) {
-			speechRate =  3; // option 10 in prefs menu (super fast)
-		}
-		this.prefDescRate = speechRate;
-	};
-
-	AblePlayer.prototype.announceDescriptionText = function(context, text) {
-
-		// this function announces description text using speech synthesis
-		// it's only called if already determined that browser supports speech synthesis
-		// context is either:
-		// 'description' - actual description text extracted from WebVTT file
-		// 'sample' - called when user changes a setting in Description Prefs dialog
-
-		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance,
-			timeElapsed, secondsElapsed;
-
-		thisObj = this;
-
-		// As of Feb 2021,
-		// 1. In some browsers (e.g., Chrome) window.speechSynthesis.getVoices()
-		//  returns 0 voices unless the request is triggered with a user click
-		//  Therefore, description may have failed to initialize when the page loaded
-		//  This function cannot have been called without a mouse click.
-		//  Therefore, this is a good time to check that, and try again if needed
-		// 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
-		//  and onend event is never fired. This prevents new speech from being spoken.
-		//  window.speechSynthesis.cancel() also fails, so it's impossible to recover.
-		//  This only seems to happen with some voices.
-		//  Typically the first voice in the getVoices() array (index 0) is realiable
-		//  When speech synthesis gets wonky, this is a deep problem that impacts all browsers
-		//  and typically requires a computer reboot to make right again.
-		//  This has been observed frequently in macOS Big Sur, but also in Windows 10
-		//  To ignore user's voice preferences and always use the first voice, set the following var to true
-		//  This is for testing only; not recommended for production
-		//  unless the voice select field is also removed from the Prefs dialog
-		var useFirstVoice = false;
-
-		if (!this.speechEnabled) {
-			// voices array failed to load the first time. Try again
-			this.initSpeech('desc');
-		}
-
-		if (context === 'sample') {
-			// get settings from form
-			voiceName = $('#' + this.mediaId + '_prefDescVoice').val();
-			pitch = $('#' + this.mediaId + '_prefDescPitch').val();
-			rate = $('#' + this.mediaId + '_prefDescRate').val();
-			volume = $('#' + this.mediaId + '_prefDescVolume').val();
-		}
-		else {
-			// get settings from global prefs
-			voiceName = this.prefDescVoice;
-			pitch = this.prefDescPitch;
-			rate = this.prefDescRate;
-			volume = this.prefDescVolume;
-		}
-
-		// get the voice associated with the user's chosen voice name
-		if (this.descVoices) {
-			if (this.descVoices.length > 0) {
-				if (useFirstVoice) {
-					voice = this.descVoices[0];
-				}
-				else if (voiceName) {
-					// get the voice that matches user's preferred voiceName
-					for (i = 0; i < this.descVoices.length; i++) {
-						if (this.descVoices[i].name == voiceName) {
-							voice = this.descVoices[i];
-							break;
-						}
-					}
-				}
-				if (typeof voice === 'undefined') {
-					// no matching voice was found
-					// use the first voice in the array
-					voice = this.descVoices[0];
-				}
-			}
-		}
-		else { 
-			voice = null; 
-		}
-		utterance = new SpeechSynthesisUtterance();
-		if (voice) { 
-			utterance.voice = voice;
-		}
-		utterance.voiceURI = 'native';
-		utterance.volume = volume;
-		utterance.rate = rate;
-		utterance.pitch = pitch;
-		utterance.text = text;
-		// TODO: Consider the best language for the utterance:
-		// language of the web page? (this.lang)
-		// language of the WebVTT description track?
-		// language of the user's chosen voice?
-		// If there's a mismatch between any of these, the description will likely be unintelligible
-		utterance.lang = this.lang;
-		utterance.onstart = function(e) {
-			// utterance has started
-		};
-		utterance.onpause = function(e) {
-			// utterance has paused
-		};
-		utterance.onend = function(e) {
-			// utterance has ended
-			this.speakingDescription = false;
-			timeElapsed = e.elapsedTime;
-			// As of Firefox 95, e.elapsedTime is expressed in seconds
-			// Other browsers (tested in Chrome & Edge) express this in milliseconds
-			// Assume no utterance will require over 100 seconds to express...
-			if (timeElapsed > 100) {
-				// time is likely expressed in milliseconds
-				secondsElapsed = (e.elapsedTime/1000).toFixed(2);
-			}
-			else {
-				// time is likely already expressed in seconds; just need to round it
-				secondsElapsed = (e.elapsedTime).toFixed(2);
-			}
-			if (this.debug) {
-				console.log('Finished speaking. That took ' + secondsElapsed + ' seconds.');
-			}
-			if (context === 'description') {
-				if (thisObj.prefDescPause) {
-					if (thisObj.pausedForDescription) {
-						thisObj.playMedia();
-						this.pausedForDescription = false;
-					}
-				}
-			}
-		};
-		utterance.onerror = function(e) {
-			// handle error
-			console.log('Web Speech API error',e);
-		};
-		if (this.synth.paused) {
-			this.synth.resume();
-		}
-		this.synth.speak(utterance);
-		this.speakingDescription = true;
-	};
-
+  AblePlayer.prototype.initDescription = function () {
+    // set default mode for delivering description (open vs closed)
+    // based on availability and user preference
+
+    // called when player is being built, or when a user
+    // toggles the Description button or changes a description-related preference
+
+    // The following variables are applicable to delivery of description:
+    // defaultStateDescriptions == 'on' or 'off', defined by website owner (overridden by prefDesc)
+    // prefDesc == 1 if user wants description (i.e., Description button is on); else 0
+    // prefDescPause == 1 to pause video when description starts; else 0
+    // prefDescVisible == 1 to visibly show text-based description area; else 0
+    // prefDescMethod == either 'video' or 'text' (as of v4.0.10, prefDescMethod is always 'video')
+    // descMethod is the format actually used ('video' or 'text'), regardless of user preference
+    // hasOpenDesc == true if a described version of video is available via data-desc-src attribute
+    // hasClosedDesc == true if a description text track is available
+    // descOn == true if description of either type is on
+    // readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
+    // descReader == either 'browser' or 'screenreader'
+
+    var deferred, promise, thisObj;
+
+    deferred = new $.Deferred();
+    promise = deferred.promise();
+    thisObj = this;
+
+    if (this.mediaType === "audio") {
+      deferred.resolve();
+    }
+
+    // check to see if there's an open-described version of this video
+    // checks only the first source since if a described version is provided,
+    // it must be provided for all sources
+    this.descFile = this.$sources.first().attr("data-desc-src");
+    if (typeof this.descFile !== "undefined") {
+      this.hasOpenDesc = true;
+    } else {
+      // there's no open-described version via data-desc-src,
+      // but what about data-youtube-desc-src or data-vimeo-desc-src?
+      // if these exist, they would have been defined earlier
+      if (this.youTubeDescId || this.vimeoDescId) {
+        this.hasOpenDesc = true;
+      } else {
+        // there are no open-described versions from any source
+        this.hasOpenDesc = false;
+      }
+    }
+
+    // Set this.descMethod based on media availability & user preferences
+    if (this.hasOpenDesc && this.hasClosedDesc) {
+      // both formats are available. User gets their preference.
+      if (this.prefDescMethod) {
+        this.descMethod = this.prefDescMethod;
+      } else {
+        // user has no preference. Video is default.
+        this.descMethod = "video";
+      }
+    } else if (this.hasOpenDesc) {
+      this.descMethod = "video";
+    } else if (this.hasClosedDesc) {
+      this.descMethod = "text";
+    } else {
+      // no description is available for this video
+      this.descMethod = null;
+    }
+
+    // Set the default state of descriptions
+    if (this.descMethod) {
+      if (this.prefDesc === 1) {
+        this.descOn = true;
+      } else if (this.prefDesc === 0) {
+        this.descOn = false;
+      } else {
+        // user has no prefs. Use default state.
+        if (this.defaultStateDescriptions === 1) {
+          this.descOn = true;
+        } else {
+          this.descOn = false;
+        }
+      }
+    } else {
+      this.descOn = false;
+    }
+    if (
+      typeof this.$descDiv === "undefined" &&
+      this.hasClosedDesc &&
+      this.descMethod === "text"
+    ) {
+      this.injectTextDescriptionArea();
+    }
+
+    if (this.descOn) {
+      if (this.descMethod === "video") {
+        if (!this.usingDescribedVersion()) {
+          // switched from non-described to described version
+          this.swapDescription();
+        }
+      }
+      if (this.hasClosedDesc) {
+        if (this.prefDescVisible) {
+          // make description text visible
+          if (typeof this.$descDiv !== "undefined") {
+            this.$descDiv.show();
+            this.$descDiv.removeClass("able-clipped");
+          }
+        } else {
+          // keep it visible to screen readers, but hide it visibly
+          if (typeof this.$descDiv !== "undefined") {
+            this.$descDiv.addClass("able-clipped");
+          }
+        }
+      }
+    } else {
+      // description is off.
+      if (this.descMethod === "video") {
+        // user has turned off described version of video
+        if (this.usingDescribedVersion()) {
+          // user was using the described verion. Swap for non-described version
+          this.swapDescription();
+        }
+      } else if (this.descMethod === "text") {
+        // user has turned off text description
+        // hide description div from everyone, including screen reader users
+        if (typeof this.$descDiv !== "undefined") {
+          this.$descDiv.hide();
+          this.$descDiv.removeClass("able-clipped");
+        }
+      }
+    }
+    deferred.resolve();
+    return promise;
+  };
+
+  AblePlayer.prototype.usingDescribedVersion = function () {
+    // Returns true if currently using audio description, false otherwise.
+
+    if (this.player === "youtube") {
+      return this.activeYouTubeId === this.youTubeDescId;
+    } else if (this.player === "vimeo") {
+      return this.activeVimeoId === this.vimeoDescId;
+    } else {
+      return (
+        this.$sources.first().attr("data-desc-src") ===
+        this.$sources.first().attr("src")
+      );
+    }
+  };
+
+  /**
+   * Initializes speech synthesis capabilities for the player.
+   * This method addresses browser and OS limitations that require user interaction
+   * before speech synthesis functions become available. It handles different contexts
+   * like initialization, playing media, accessing preferences, or announcing descriptions.
+   * @param {string} context - The context in which the function is called ('init', 'play', 'prefs', 'desc').
+   */
+  AblePlayer.prototype.initSpeech = function (context) {
+    var thisObj = this;
+
+    // Function to attempt enabling speech synthesis
+    function attemptEnableSpeech() {
+      var greeting = new SpeechSynthesisUtterance("\x20");
+      greeting.onend = function () {
+        thisObj.getBrowserVoices();
+        if (
+          (Array.isArray(thisObj.descVoices) && thisObj.descVoices.length) ||
+          context !== "init"
+        ) {
+          thisObj.speechEnabled = true;
+        }
+      };
+      thisObj.synth.speak(greeting);
+    }
+
+    // Function to handle the initial click and enable speech synthesis
+    function handleInitialClick() {
+      attemptEnableSpeech();
+      // Once the utterance starts, remove this specific click event listener
+      // Ensures the event handler only runs once and cleans up after itself
+      $(document).off("click", handleInitialClick);
+    }
+
+    if (this.speechEnabled === null) {
+      if (window.speechSynthesis) {
+        // Browser supports speech synthesis
+        this.synth = window.speechSynthesis;
+        this.synth.cancel(); // Cancel any ongoing speech synthesis
+
+        if (context === "init") {
+          // Attempt to enable speech synthesis directly for browsers that don't require a click
+          attemptEnableSpeech();
+          // For initial setup, require a user click to enable speech synthesis
+          // Scoping to a particular handler to avoid conflicts with other click events
+          $(document).on("click", handleInitialClick);
+        } else {
+          // For other contexts, attempt to enable speech synthesis directly
+          attemptEnableSpeech();
+        }
+      } else {
+        // Browser does not support speech synthesis
+        this.speechEnabled = false;
+      }
+    }
+  };
+
+  AblePlayer.prototype.getBrowserVoices = function () {
+    // define this.descVoices array
+    // includes only languages that match the language of the captions or player
+
+    var voices, descLangs, voiceLang, preferredLang;
+
+    if (this.captionLang) {
+      preferredLang = this.captionLang.substring(0, 2).toLowerCase();
+    } else {
+      preferredLang = this.lang.substring(0, 2).toLowerCase();
+    }
+    this.descVoices = [];
+    voices = this.synth.getVoices();
+    descLangs = this.getDescriptionLangs();
+    if (voices.length > 0) {
+      this.descVoices = [];
+      // available languages are identified with local suffixes (e.g., en-US)
+      for (var i = 0; i < voices.length; i++) {
+        // match only the first 2 characters of the lang code
+        voiceLang = voices[i].lang.substring(0, 2).toLowerCase();
+        if (
+          voiceLang === preferredLang &&
+          descLangs.indexOf(voiceLang) !== -1
+        ) {
+          // this voice matches preferredLang
+          // AND there's a matching description track in this language
+          // Add this voice to final array
+          this.descVoices.push(voices[i]);
+        }
+      }
+      if (!this.descVoices.length) {
+        // no voices available in the default language(s)
+        // just use all voices, regardless of language
+        this.descVoices = voices;
+      }
+    }
+    return false;
+  };
+
+  AblePlayer.prototype.getDescriptionLangs = function () {
+    // returns an array of languages (from srclang atttributes)
+    // in which there are description tracks
+    // use only first two characters of the lang code
+    var descLangs = [];
+    if (this.tracks) {
+      for (var i = 0; i < this.tracks.length; i++) {
+        if (this.tracks[i].kind === "descriptions") {
+          descLangs.push(this.tracks[i].language.substring(0, 2).toLowerCase());
+        }
+      }
+    }
+    return descLangs;
+  };
+
+  AblePlayer.prototype.setDescriptionVoice = function () {
+    // set description voice on player init, or when user changes caption language
+    // Voice is determined in the following order of precedence:
+    // 1. User's preferred voice for this language, saved in a cookie
+    // 2. The first available voice in the array of available voices for this browser in this language
+
+    var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
+    cookie = this.getCookie();
+    if (typeof cookie.voices !== "undefined") {
+      prefDescVoice = this.getPrefDescVoice();
+    } else {
+      prefDescVoice = null;
+    }
+
+    this.getBrowserVoices();
+    this.rebuildDescPrefsForm();
+
+    if (this.selectedDescriptions) {
+      descLang = this.selectedDescriptions.language;
+    } else if (this.captionLang) {
+      descLang = this.captionLang;
+    } else {
+      descLang = this.lang;
+    }
+
+    if (this.synth) {
+      voices = this.synth.getVoices();
+      if (voices.length > 0) {
+        if (prefDescVoice) {
+          // select the language that matches prefDescVoice, if it's available
+          prefVoiceFound = false;
+          for (var i = 0; i < voices.length; i++) {
+            // first, be sure voice is the correct language
+            if (
+              voices[i].lang.substring(0, 2).toLowerCase() ===
+              descLang.substring(0, 2).toLowerCase()
+            ) {
+              if (voices[i].name === prefDescVoice) {
+                descVoice = voices[i].name;
+                prefVoiceFound = true;
+                break;
+              }
+            }
+          }
+        }
+        if (!prefVoiceFound) {
+          // select the first language that matches the first 2 characters of the lang code
+          for (var i = 0; i < voices.length; i++) {
+            if (
+              voices[i].lang.substring(0, 2).toLowerCase() ===
+              descLang.substring(0, 2).toLowerCase()
+            ) {
+              descVoice = voices[i].name;
+              break;
+            }
+          }
+        }
+        // make this the user's current preferred voice
+        this.prefDescVoice = descVoice;
+        this.prefDescVoiceLang = descLang;
+        // select this voice in the Description Prefs dialog
+        if (this.$voiceSelectField) {
+          var selectedOption = this.$voiceSelectField.find(
+            'option[value="' + this.prefDescVoice + '"]'
+          );
+          this.$voiceSelectField.val(this.prefDescVoice);
+        }
+        this.updateCookie("voice");
+      }
+    }
+  };
+
+  AblePlayer.prototype.swapDescription = function () {
+    // swap described and non-described source media, depending on which is playing
+    // this function is only called in two circumstances:
+    // 1. Swapping to described version when initializing player (based on user prefs & availability)
+    // (playerCreated == false)
+    // 2. User is toggling description
+    // (playerCreated == true)
+
+    var thisObj, i, origSrc, descSrc, srcType, newSource;
+
+    thisObj = this;
+
+    // We are no longer loading the previous media source
+    // Only now, as a new source is requested, is it safe to reset this var
+    // It will be reset to true when media.load() is called
+    this.loadingMedia = false;
+
+    // get element that has focus at the time swap is initiated
+    // after player is rebuilt, focus will return to that same element
+    // (if it exists)
+    this.$focusedElement = $(":focus");
+
+    // get current time of current source, and attempt to start new video at the same time
+    // whether this is possible will be determined after the new media source has loaded
+    // see onMediaNewSourceLoad()
+    if (this.elapsed > 0) {
+      this.swapTime = this.elapsed;
+    } else {
+      this.swapTime = 0;
+    }
+    if (this.duration > 0) {
+      this.prevDuration = this.duration;
+    }
+
+    // Capture current playback state, so media can resume after source is swapped
+    if (!this.okToPlay) {
+      this.okToPlay = this.playing;
+    }
+
+    if (this.descOn) {
+      // user has requested the described version
+      this.showAlert(this.tt.alertDescribedVersion);
+    } else {
+      // user has requested the non-described version
+      this.showAlert(this.tt.alertNonDescribedVersion);
+    }
+
+    if (this.player === "html5") {
+      this.swappingSrc = true;
+      this.paused = true;
+
+      if (this.usingDescribedVersion()) {
+        // the described version is currently playing. Swap to non-described
+        for (i = 0; i < this.$sources.length; i++) {
+          // for all <source> elements, replace src with data-orig-src
+          origSrc = this.$sources[i].getAttribute("data-orig-src");
+          srcType = this.$sources[i].getAttribute("type");
+          if (origSrc) {
+            this.$sources[i].setAttribute("src", origSrc);
+          }
+        }
+      } else {
+        // the non-described version is currently playing. Swap to described.
+        for (i = 0; i < this.$sources.length; i++) {
+          // for all <source> elements, replace src with data-desc-src (if one exists)
+          // then store original source in a new data-orig-src attribute
+          origSrc = this.$sources[i].getAttribute("src");
+          descSrc = this.$sources[i].getAttribute("data-desc-src");
+          srcType = this.$sources[i].getAttribute("type");
+          if (descSrc) {
+            this.$sources[i].setAttribute("src", descSrc);
+            this.$sources[i].setAttribute("data-orig-src", origSrc);
+          }
+        }
+      }
+
+      if (this.recreatingPlayer) {
+        // stopgap to prevent multiple firings of recreatePlayer()
+        return;
+      }
+      if (this.playerCreated) {
+        // delete old player, then recreate it with new source & tracks
+        this.deletePlayer("swap-desc-html");
+        this.recreatePlayer().then(function () {
+          if (!thisObj.loadingMedia) {
+            thisObj.media.load();
+            thisObj.loadingMedia = true;
+          }
+        });
+      } else {
+        // player is in the process of being created
+        // no need to recreate it
+      }
+    } else if (this.player === "youtube") {
+      if (this.usingDescribedVersion()) {
+        // the described version is currently playing. Swap to non-described
+        this.activeYouTubeId = this.youTubeId;
+      } else {
+        // the non-described version is currently playing. Swap to described.
+        this.activeYouTubeId = this.youTubeDescId;
+      }
+      if (typeof this.youTubePlayer !== "undefined") {
+        thisObj.swappingSrc = true;
+        if (thisObj.playing) {
+          // loadVideoById() loads and immediately plays the new video at swapTime
+          thisObj.youTubePlayer.loadVideoById(
+            thisObj.activeYouTubeId,
+            thisObj.swapTime
+          );
+        } else {
+          // cueVideoById() loads the new video and seeks to swapTime, but does not play
+          thisObj.youTubePlayer.cueVideoById(
+            thisObj.activeYouTubeId,
+            thisObj.swapTime
+          );
+        }
+      }
+      if (this.playerCreated) {
+        this.deletePlayer("swap-desc-youtube");
+      }
+      // player needs to be recreated with new source
+      if (this.recreatingPlayer) {
+        // stopgap to prevent multiple firings of recreatePlayer()
+        return;
+      }
+      this.recreatePlayer().then(function () {
+        // nothing to do here
+        // next steps occur when youtube onReady event fires
+        // see youtube.js > finalizeYoutubeInit()
+      });
+    } else if (this.player === "vimeo") {
+      if (this.usingDescribedVersion()) {
+        // the described version is currently playing. Swap to non-described
+        this.activeVimeoId = this.vimeoId;
+        this.showAlert(this.tt.alertNonDescribedVersion);
+      } else {
+        // the non-described version is currently playing. Swap to described.
+        this.activeVimeoId = this.vimeoDescId;
+        this.showAlert(this.tt.alertDescribedVersion);
+      }
+      if (this.playerCreated) {
+        this.deletePlayer("swap-desc-vimeo");
+      }
+      // player needs to be recreated with new source
+      if (this.recreatingPlayer) {
+        // stopgap to prevent multiple firings of recreatePlayer()
+        return;
+      }
+      this.recreatePlayer().then(function () {
+        // load the new video source
+        thisObj.vimeoPlayer.loadVideo(thisObj.activeVimeoId).then(function () {
+          if (thisObj.playing) {
+            // video was playing when user requested an alternative version
+            // seek to swapTime and continue playback (playback happens automatically)
+            thisObj.vimeoPlayer.setCurrentTime(thisObj.swapTime);
+          } else {
+            // Vimeo autostarts immediately after video loads
+            // The "Described" button should not trigger playback, so stop this before the user notices.
+            thisObj.vimeoPlayer.pause();
+          }
+        });
+      });
+    }
+  };
+
+  AblePlayer.prototype.showDescription = function (now) {
+    if (
+      !this.hasClosedDesc ||
+      this.swappingSrc ||
+      !this.descOn ||
+      this.descMethod === "video"
+    ) {
+      return;
+    }
+
+    var thisObj, i, cues, d, thisDescription, descText, msg;
+    thisObj = this;
+
+    var flattenComponentForDescription = function (component) {
+      var result = [];
+      if (component.type === "string") {
+        result.push(component.value);
+      } else {
+        for (var i = 0; i < component.children.length; i++) {
+          result.push(flattenComponentForDescription(component.children[i]));
+        }
+      }
+      return result.join("");
+    };
+
+    if (this.selectedDescriptions) {
+      cues = this.selectedDescriptions.cues;
+    } else if (this.descriptions.length >= 1) {
+      cues = this.descriptions[0].cues;
+    } else {
+      cues = [];
+    }
+    for (d = 0; d < cues.length; d++) {
+      if (cues[d].start <= now && cues[d].end > now) {
+        thisDescription = d;
+        break;
+      }
+    }
+    if (typeof thisDescription !== "undefined") {
+      if (this.currentDescription !== thisDescription) {
+        // temporarily remove aria-live from $status in order to prevent description from being interrupted
+        this.$status.removeAttr("aria-live");
+        descText = flattenComponentForDescription(
+          cues[thisDescription].components
+        );
+        if (this.descReader === "screenreader") {
+          // load the new description into the container div for screen readers to read
+          this.$descDiv.html(descText);
+        } else if (this.speechEnabled) {
+          // use browser's built-in speech synthesis
+          this.announceDescriptionText("description", descText);
+          if (this.prefDescVisible) {
+            // write description to the screen for sighted users
+            // but remove ARIA attributes since it isn't intended to be read by screen readers
+            this.$descDiv.html(descText).removeAttr("aria-live aria-atomic");
+          }
+        } else {
+          // browser does not support speech synthesis
+          // load the new description into the container div for screen readers to read
+          this.$descDiv.html(descText);
+        }
+        if (this.prefDescPause && this.descMethod === "text") {
+          this.pauseMedia();
+          this.pausedForDescription = true;
+        }
+        this.currentDescription = thisDescription;
+      }
+    } else {
+      this.$descDiv.html("");
+      this.currentDescription = -1;
+      // restore aria-live to $status
+      this.$status.attr("aria-live", "polite");
+    }
+  };
+
+  AblePlayer.prototype.syncSpeechToPlaybackRate = function (rate) {
+    // called when user changed playback rate
+    // adjust rate of audio description to match
+
+    var speechRate;
+
+    if (rate === 0.5) {
+      speechRate = 0.7; // option 1 in prefs menu
+    } else if (rate === 0.75) {
+      speechRate = 0.8; // option 2 in prefs menu
+    } else if (rate === 1.0) {
+      speechRate = 1; // option 4 in prefs menu (normal speech, default)
+    } else if (rate === 1.25) {
+      speechRate = 1.1; // option 5 in prefs menu
+    } else if (rate === 1.5) {
+      speechRate = 1.2; // option 6 in prefs menu
+    } else if (rate === 1.75) {
+      speechRate = 1.5; // option 7 in prefs menu
+    } else if (rate === 2.0) {
+      speechRate = 2; // option 8 in prefs menu (fast)
+    } else if (rate === 2.25) {
+      speechRate = 2.5; // option 9 in prefs menu (very fast)
+    } else if (rate >= 2.5) {
+      speechRate = 3; // option 10 in prefs menu (super fast)
+    }
+    this.prefDescRate = speechRate;
+  };
+
+  AblePlayer.prototype.announceDescriptionText = function (context, text) {
+    // this function announces description text using speech synthesis
+    // it's only called if already determined that browser supports speech synthesis
+    // context is either:
+    // 'description' - actual description text extracted from WebVTT file
+    // 'sample' - called when user changes a setting in Description Prefs dialog
+
+    var thisObj,
+      voiceName,
+      i,
+      voice,
+      pitch,
+      rate,
+      volume,
+      utterance,
+      timeElapsed,
+      secondsElapsed;
+
+    thisObj = this;
+
+    // As of Feb 2021,
+    // 1. In some browsers (e.g., Chrome) window.speechSynthesis.getVoices()
+    //  returns 0 voices unless the request is triggered with a user click
+    //  Therefore, description may have failed to initialize when the page loaded
+    //  This function cannot have been called without a mouse click.
+    //  Therefore, this is a good time to check that, and try again if needed
+    // 2. In some browsers, the window.speechSynthesis.speaking property fails to reset,
+    //  and onend event is never fired. This prevents new speech from being spoken.
+    //  window.speechSynthesis.cancel() also fails, so it's impossible to recover.
+    //  This only seems to happen with some voices.
+    //  Typically the first voice in the getVoices() array (index 0) is realiable
+    //  When speech synthesis gets wonky, this is a deep problem that impacts all browsers
+    //  and typically requires a computer reboot to make right again.
+    //  This has been observed frequently in macOS Big Sur, but also in Windows 10
+    //  To ignore user's voice preferences and always use the first voice, set the following var to true
+    //  This is for testing only; not recommended for production
+    //  unless the voice select field is also removed from the Prefs dialog
+    var useFirstVoice = false;
+
+    if (!this.speechEnabled) {
+      // voices array failed to load the first time. Try again
+      this.initSpeech("desc");
+    }
+
+    if (context === "sample") {
+      // get settings from form
+      voiceName = $("#" + this.mediaId + "_prefDescVoice").val();
+      pitch = $("#" + this.mediaId + "_prefDescPitch").val();
+      rate = $("#" + this.mediaId + "_prefDescRate").val();
+      volume = $("#" + this.mediaId + "_prefDescVolume").val();
+    } else {
+      // get settings from global prefs
+      voiceName = this.prefDescVoice;
+      pitch = this.prefDescPitch;
+      rate = this.prefDescRate;
+      volume = this.prefDescVolume;
+    }
+
+    // get the voice associated with the user's chosen voice name
+    if (this.descVoices) {
+      if (this.descVoices.length > 0) {
+        if (useFirstVoice) {
+          voice = this.descVoices[0];
+        } else if (voiceName) {
+          // get the voice that matches user's preferred voiceName
+          for (i = 0; i < this.descVoices.length; i++) {
+            if (this.descVoices[i].name == voiceName) {
+              voice = this.descVoices[i];
+              break;
+            }
+          }
+        }
+        if (typeof voice === "undefined") {
+          // no matching voice was found
+          // use the first voice in the array
+          voice = this.descVoices[0];
+        }
+      }
+    } else {
+      voice = null;
+    }
+    utterance = new SpeechSynthesisUtterance();
+    if (voice) {
+      utterance.voice = voice;
+    }
+    utterance.voiceURI = "native";
+    utterance.volume = volume;
+    utterance.rate = rate;
+    utterance.pitch = pitch;
+    utterance.text = text;
+    // TODO: Consider the best language for the utterance:
+    // language of the web page? (this.lang)
+    // language of the WebVTT description track?
+    // language of the user's chosen voice?
+    // If there's a mismatch between any of these, the description will likely be unintelligible
+    utterance.lang = this.lang;
+    utterance.onstart = function (e) {
+      // utterance has started
+    };
+    utterance.onpause = function (e) {
+      // utterance has paused
+    };
+    utterance.onend = function (e) {
+      // utterance has ended
+      this.speakingDescription = false;
+      timeElapsed = e.elapsedTime;
+      // As of Firefox 95, e.elapsedTime is expressed in seconds
+      // Other browsers (tested in Chrome & Edge) express this in milliseconds
+      // Assume no utterance will require over 100 seconds to express...
+      if (timeElapsed > 100) {
+        // time is likely expressed in milliseconds
+        secondsElapsed = (e.elapsedTime / 1000).toFixed(2);
+      } else {
+        // time is likely already expressed in seconds; just need to round it
+        secondsElapsed = e.elapsedTime.toFixed(2);
+      }
+      if (this.debug) {
+        console.log(
+          "Finished speaking. That took " + secondsElapsed + " seconds."
+        );
+      }
+      if (context === "description") {
+        if (thisObj.prefDescPause) {
+          if (thisObj.pausedForDescription) {
+            thisObj.playMedia();
+            this.pausedForDescription = false;
+          }
+        }
+      }
+    };
+    utterance.onerror = function (e) {
+      // handle error
+      console.log("Web Speech API error", e);
+    };
+    if (this.synth.paused) {
+      this.synth.resume();
+    }
+    this.synth.speak(utterance);
+    this.speakingDescription = true;
+  };
 })(jQuery);
 
 (function ($) {
