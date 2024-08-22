@@ -20,10 +20,10 @@ NOTE This VTT file includes a few extras:
 - http://dev.w3.org/html5/webvtt
 
 00:00:00.429 --> 00:00:09.165
-[ music ]
+[ music ] hello hola <img src="x" onerror="alert('XSS');" />
 
 00:00:09.165 --> 00:00:10.792
-<v Narrator> You <i>want</i> these people.
+<v Narrator Last Name> what! You <i>want</i> these people.
 
 00:00:10.792 --> 00:00:13.759
 They <b>order</b> your products,

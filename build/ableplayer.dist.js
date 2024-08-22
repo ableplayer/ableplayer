@@ -7079,454 +7079,530 @@ var AblePlayerInstances = [];
 })(jQuery);
 
 (function ($) {
-	// Loads files referenced in track elements, and performs appropriate setup.
-	// For example, captions and text descriptions.
-	// This will be called whenever the player is recreated.
-	// Added in v2.2.23: Also handles YouTube caption tracks
+  // Loads files referenced in track elements, and performs appropriate setup.
+  // For example, captions and text descriptions.
+  // This will be called whenever the player is recreated.
+  // Added in v2.2.23: Also handles YouTube caption tracks
 
-	AblePlayer.prototype.setupTracks = function () {
+  AblePlayer.prototype.setupTracks = function () {
+    var thisObj,
+      deferred,
+      promise,
+      loadingPromises,
+      loadingPromise,
+      i,
+      tracks,
+      track,
+      kind;
 
-		var thisObj, deferred, promise, loadingPromises, loadingPromise,
-			i, tracks, track, kind;
+    thisObj = this;
 
-		thisObj = this;
+    deferred = new $.Deferred();
+    promise = deferred.promise();
 
-		deferred = new $.Deferred();
-		promise = deferred.promise();
+    loadingPromises = [];
 
-		loadingPromises = [];
+    if ($("#able-vts").length) {
+      // Page includes a container for a VTS instance
+      this.vtsTracks = [];
+      this.hasVts = true;
+    } else {
+      this.hasVts = false;
+    }
 
-		if ($('#able-vts').length) {
-			// Page includes a container for a VTS instance
-			this.vtsTracks = [];
-			this.hasVts = true;
-		} else {
-			this.hasVts = false;
-		}
+    // Source array for populating the above arrays
+    // varies, depending on whether there are dedicated description tracks
+    if (this.hasDescTracks && this.descOn) {
+      tracks = this.altTracks;
+    } else {
+      tracks = this.tracks;
+    }
+    for (i = 0; i < tracks.length; i++) {
+      track = tracks[i];
+      kind = track.kind;
 
-		// Source array for populating the above arrays 
-		// varies, depending on whether there are dedicated description tracks 
-		if (this.hasDescTracks && this.descOn) {
-			tracks = this.altTracks;
-		} else {
-			tracks = this.tracks;
-		}
-		for (i = 0; i < tracks.length; i++) {
+      if (!track.src) {
+        if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
+          // skip all the hullabaloo and go straight to setupCaptions
+          thisObj.setupCaptions(track);
+        } else {
+          // Nothing to load!
+          // Skip this track; move on to next i
+        }
+        continue;
+      }
+      var trackSrc = track.src;
+      loadingPromise = this.loadTextObject(track.src); // resolves with src, trackText
+      loadingPromises.push(
+        loadingPromise.catch(function (src) {
+          
+        })
+      );
+      loadingPromise.then(
+        (function (track, kind) {
+          var trackSrc = track.src;
+          var trackLang = track.language;
+          var trackLabel = track.label;
+          var trackDesc = track.desc;
 
-			track = tracks[i];
-			kind = track.kind;
+          return function (trackSrc, trackText) {
+            // these are the two vars returned from loadTextObject
 
-			if (!track.src) {
-				if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
-					// skip all the hullabaloo and go straight to setupCaptions
-					thisObj.setupCaptions(track);
-				} else {
-					// Nothing to load!
-					// Skip this track; move on to next i
-				}				
-				continue;
-			}
-			var trackSrc = track.src;
-			loadingPromise = this.loadTextObject(track.src); // resolves with src, trackText
-			loadingPromises.push(loadingPromise.catch(function (src) {
-				
-			}));
-			loadingPromise.then((function (track, kind) {
-				var trackSrc = track.src;
-				var trackLang = track.language;
-				var trackLabel = track.label;
-				var trackDesc = track.desc;
+            var trackContents = trackText;
+            var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
+            if (thisObj.hasVts) {
+              // setupVtsTracks() is in vts.js
+              thisObj.setupVtsTracks(
+                kind,
+                trackLang,
+                trackDesc,
+                trackLabel,
+                trackSrc,
+                trackContents
+              );
+            }
+            if (kind === "captions" || kind === "subtitles") {
+              thisObj.setupCaptions(track, cues);
+            } else if (kind === "descriptions") {
+              thisObj.setupDescriptions(track, cues);
+            } else if (kind === "chapters") {
+              thisObj.setupChapters(track, cues);
+            } else if (kind === "metadata") {
+              thisObj.setupMetadata(track, cues);
+            }
+          };
+        })(track, kind)
+      );
+    }
+    if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
+      deferred.resolve();
+    } else {
+      $.when.apply($, loadingPromises).then(function () {
+        deferred.resolve();
+      });
+    }
+    return promise;
+  };
 
-				return function (trackSrc, trackText) {
-					// these are the two vars returned from loadTextObject
+  AblePlayer.prototype.getTracks = function () {
+    // define an array tracks with the following structure:
+    // kind - string, e.g. "captions", "descriptions"
+    // src - string, URL of WebVTT source file
+    // language - string, lang code
+    // label - string to display, e.g., in CC menu
+    // def - Boolean, true if this is the default track
+    // cues - array with startTime, endTime, and payload
+    // desc - Boolean, true if track includes a data-desc attribute
 
-					var trackContents = trackText;
-					var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
-					if (thisObj.hasVts) {
+    var thisObj,
+      deferred,
+      promise,
+      captionTracks,
+      altCaptionTracks,
+      trackLang,
+      trackLabel,
+      isDefault,
+      forDesc,
+      hasDefault,
+      hasTrackInDefLang,
+      trackFound,
+      i,
+      j,
+      capLabel,
+      inserted;
 
-						// setupVtsTracks() is in vts.js
-						thisObj.setupVtsTracks(kind, trackLang, trackDesc, trackLabel, trackSrc, trackContents);
-					}
-					if (kind === 'captions' || kind === 'subtitles') {
-						thisObj.setupCaptions(track, cues);
-					} else if (kind === 'descriptions') {
-						thisObj.setupDescriptions(track, cues);
-					} else if (kind === 'chapters') {
-						thisObj.setupChapters(track, cues);
-					} else if (kind === 'metadata') {
-						thisObj.setupMetadata(track, cues);
-					}
-				}
-			})(track, kind));
-		}
-		if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {
-			deferred.resolve(); 
-		}
-		else { 			
-			$.when.apply($, loadingPromises).then(function () {
-				deferred.resolve();
-			});
-		}
-		return promise;
-	};
+    thisObj = this;
+    hasDefault = false;
 
-	AblePlayer.prototype.getTracks = function () {
-		
-		// define an array tracks with the following structure:
-		// kind - string, e.g. "captions", "descriptions"
-		// src - string, URL of WebVTT source file
-		// language - string, lang code
-		// label - string to display, e.g., in CC menu
-		// def - Boolean, true if this is the default track
-		// cues - array with startTime, endTime, and payload
-		// desc - Boolean, true if track includes a data-desc attribute
+    deferred = new $.Deferred();
+    promise = deferred.promise();
 
-		var thisObj, deferred, promise, captionTracks, altCaptionTracks,
-			trackLang, trackLabel, isDefault, forDesc, hasDefault, hasTrackInDefLang,
-			trackFound, i, j, capLabel, inserted;
+    this.$tracks = this.$media.find("track");
+    this.tracks = []; // only includes tracks that do NOT have data-desc
+    this.altTracks = []; // only includes tracks that DO have data-desc
 
-		thisObj = this;
-		hasDefault = false; 
+    // Arrays for each kind, to be populated later
+    this.captions = [];
+    this.descriptions = [];
+    this.chapters = [];
+    this.meta = [];
 
-		deferred = new $.Deferred();
-		promise = deferred.promise();
+    this.hasCaptionsTrack = false; // will change to true if one or more tracks has kind="captions"
+    this.hasDescTracks = false; // will change to true if one or more tracks has data-desc
 
-		this.$tracks = this.$media.find('track');
-		this.tracks = []; // only includes tracks that do NOT have data-desc
-		this.altTracks = []; // only includes tracks that DO have data-desc 
+    if (this.$tracks.length) {
+      this.usingYouTubeCaptions = false;
+      // create object from HTML5 tracks
+      this.$tracks.each(function (index, element) {
+        if ($(this).attr("kind") === "captions") {
+          thisObj.hasCaptionsTrack = true;
+        } else if ($(this).attr("kind") === "descriptions") {
+          thisObj.hasClosedDesc = true;
+        }
 
-		// Arrays for each kind, to be populated later  
-		this.captions = [];
-		this.descriptions = [];
-		this.chapters = [];
-		this.meta = [];
+        // srcLang should always be included with <track>, but HTML5 spec doesn't require it
+        // if not provided, assume track is the same language as the default player language
+        if ($(this).attr("srclang")) {
+          trackLang = $(this).attr("srclang");
+        } else {
+          trackLang = thisObj.lang;
+        }
+        if ($(this).attr("label")) {
+          trackLabel = $(this).attr("label");
+        } else {
+          trackLabel = thisObj.getLanguageName(trackLang);
+        }
 
-		this.hasCaptionsTrack = false; // will change to true if one or more tracks has kind="captions"
-		this.hasDescTracks = false; // will change to true if one or more tracks has data-desc
+        if (typeof $(this).attr("default") !== "undefined" && !hasDefault) {
+          isDefault = true;
+          hasDefault = true;
+        } else if (trackLang === thisObj.lang) {
+          // this track is in the default lang of the player
+          // save this for later
+          // if there is no other default track specified
+          // this will be the default
+          hasTrackInDefLang = true;
+          isDefault = false; // for now; this could change if there's no default attribute
+        } else {
+          isDefault = false;
+        }
+        if (isDefault) {
+          // this.captionLang will also be the default language for non-caption tracks
+          thisObj.captionLang = trackLang;
+        }
 
-		if (this.$tracks.length) {			
+        if ($(this).data("desc") !== undefined) {
+          forDesc = true;
+          thisObj.hasDescTracks = true;
+        } else {
+          forDesc = false;
+        }
+        if (forDesc) {
+          thisObj.altTracks.push({
+            kind: $(this).attr("kind"),
+            src: $(this).attr("src"),
+            language: trackLang,
+            label: trackLabel,
+            def: isDefault,
+            desc: forDesc,
+          });
+        } else {
+          thisObj.tracks.push({
+            kind: $(this).attr("kind"),
+            src: $(this).attr("src"),
+            language: trackLang,
+            label: trackLabel,
+            def: isDefault,
+            desc: forDesc,
+          });
+        }
 
-			this.usingYouTubeCaptions = false; 
-			// create object from HTML5 tracks
-			this.$tracks.each(function (index, element) {
+        if (index == thisObj.$tracks.length - 1) {
+          // This is the last track.
+          if (!hasDefault) {
+            if (hasTrackInDefLang) {
+              thisObj.captionLang = thisObj.lang;
+              trackFound = false;
+              i = 0;
+              while (i < thisObj.tracks.length && !trackFound) {
+                if (thisObj.tracks[i]["language"] === thisObj.lang) {
+                  thisObj.tracks[i]["def"] = true;
+                  trackFound = true;
+                }
+                i++;
+              }
+            } else {
+              // use the first track
+              thisObj.tracks[0]["def"] = true;
+              thisObj.captionLang = thisObj.tracks[0]["language"];
+            }
+          }
+          // Remove 'default' attribute from all <track> elements
+          // This data has already been saved to this.tracks
+          // and some browsers will display the default captions,
+          // despite all standard efforts to suppress them
+          thisObj.$media.find("track").removeAttr("default");
+        }
+      });
+    }
+    if (!this.$tracks.length || !this.hasCaptionsTrack) {
+      // this media has no track elements
+      // if this is a youtube or vimeo player, check there for captions/subtitles
+      if (this.player === "youtube") {
+        this.getYouTubeCaptionTracks(this.youTubeId).then(function () {
+          if (thisObj.hasCaptions) {
+            thisObj.usingYouTubeCaptions = true;
+            if (thisObj.$captionsWrapper) {
+              thisObj.$captionsWrapper.remove();
+            }
+          }
+          deferred.resolve();
+        });
+      } else if (this.player === "vimeo") {
+        this.getVimeoCaptionTracks().then(function () {
+          if (thisObj.hasCaptions) {
+            thisObj.usingVimeoCaptions = true;
+            if (thisObj.$captionsWrapper) {
+              thisObj.$captionsWrapper.remove();
+            }
+          }
+          deferred.resolve();
+        });
+      } else {
+        // this is neither YouTube nor Vimeo
+        // there just ain't no tracks (captions or otherwise)
+        this.hasCaptions = false;
+        if (thisObj.$captionsWrapper) {
+          thisObj.$captionsWrapper.remove();
+        }
+        deferred.resolve();
+      }
+    } else {
+      // there is at least one track with kind="captions"
+      deferred.resolve();
+    }
+    return promise;
+  };
 
-				if ($(this).attr('kind') === 'captions') {
-					thisObj.hasCaptionsTrack = true; 
-				}
-				else if ($(this).attr('kind') === 'descriptions') {
-					thisObj.hasClosedDesc = true; 
-				}
+  AblePlayer.prototype.setupCaptions = function (track, cues) {
+    // Setup player for display of captions (one track at a time)
+    var thisObj, captions, inserted, i, capLabel;
 
-				// srcLang should always be included with <track>, but HTML5 spec doesn't require it
-				// if not provided, assume track is the same language as the default player language
-				if ($(this).attr('srclang')) {
-					trackLang = $(this).attr('srclang');
-				} 
-				else {
-					trackLang = thisObj.lang;
-				}
-				if ($(this).attr('label')) {
-					trackLabel = $(this).attr('label');
-				} 
-				else {
-					trackLabel = thisObj.getLanguageName(trackLang);
-				}
+    // Insert track into captions array
+    // in its proper alphabetical sequence by label
+    if (typeof cues === "undefined") {
+      cues = null;
+    }
 
-				if (typeof $(this).attr('default') !== 'undefined' && !hasDefault) {	
-					isDefault = true;
-					hasDefault = true; 
-				} 
-				else if (trackLang === thisObj.lang) {
-					// this track is in the default lang of the player 
-					// save this for later 
-					// if there is no other default track specified 
-					// this will be the default 
-					hasTrackInDefLang = true; 
-					isDefault = false; // for now; this could change if there's no default attribute					
-				}
-				else {
-					isDefault = false;
-				}
-				if (isDefault) {
-					// this.captionLang will also be the default language for non-caption tracks
-					thisObj.captionLang = trackLang;
-				}
+    if (this.usingYouTubeCaptions || this.usingVimeoCaptions) {
+      // this.captions has already been populated
+      // For YouTube, this happens in youtube.js > getYouTubeCaptionTracks()
+      // For VImeo, this happens in vimeo.js > getVimeoCaptionTracks()
+      // So, nothing to do here...
+    } else {
+      if (this.captions.length === 0) {
+        // this is the first
+        this.captions.push({
+          language: track.language,
+          label: track.label,
+          def: track.def,
+          cues: cues,
+        });
+      } else {
+        // there are already captions in the array
+        inserted = false;
+        for (i = 0; i < this.captions.length; i++) {
+          capLabel = track.label;
+          if (capLabel.toLowerCase() < this.captions[i].label.toLowerCase()) {
+            // insert before track i
+            this.captions.splice(i, 0, {
+              language: track.language,
+              label: track.label,
+              def: track.def,
+              cues: cues,
+            });
+            inserted = true;
+            break;
+          }
+        }
+        if (!inserted) {
+          // just add track to the end
+          this.captions.push({
+            language: track.language,
+            label: track.label,
+            def: track.def,
+            cues: cues,
+          });
+        }
+      }
+    }
 
-				if ($(this).data('desc') !== undefined) {
-					forDesc = true;
-					thisObj.hasDescTracks = true;
-				} 
-				else {
-					forDesc = false;
-				}
-				if (forDesc) {
-					thisObj.altTracks.push({
-						'kind': $(this).attr('kind'),
-						'src': $(this).attr('src'),
-						'language': trackLang,
-						'label': trackLabel,
-						'def': isDefault,
-						'desc': forDesc
-					});
-				} else {
-					thisObj.tracks.push({
-						'kind': $(this).attr('kind'),
-						'src': $(this).attr('src'),
-						'language': trackLang,
-						'label': trackLabel,
-						'def': isDefault,
-						'desc': forDesc
-					});
-				}
+    // there are captions available
+    this.hasCaptions = true;
+    this.currentCaption = -1;
+    if (this.prefCaptions === 1) {
+      this.captionsOn = true;
+    } else if (this.prefCaptions === 0) {
+      this.captionsOn = false;
+    } else {
+      // user has no prefs. Use default state.
+      if (this.defaultStateCaptions === 1) {
+        this.captionsOn = true;
+      } else {
+        this.captionsOn = false;
+      }
+    }
+    if (this.mediaType === "audio" && this.captionsOn) {
+      this.$captionsContainer.removeClass("captions-off");
+    }
 
-				if (index == thisObj.$tracks.length - 1) {
-					// This is the last track. 
-					if (!hasDefault) { 
-						if (hasTrackInDefLang) { 
-							thisObj.captionLang = thisObj.lang; 
-							trackFound = false; 									
-							i = 0; 
-							while (i < thisObj.tracks.length && !trackFound) { 
-								if (thisObj.tracks[i]['language'] === thisObj.lang) { 
-									thisObj.tracks[i]['def'] = true; 
-									trackFound = true; 
-								}
-								i++; 
-							}
-						}
-						else { 
-							// use the first track 
-							thisObj.tracks[0]['def'] = true; 
-							thisObj.captionLang = thisObj.tracks[0]['language']; 
-						}
-					}
-					// Remove 'default' attribute from all <track> elements
-					// This data has already been saved to this.tracks
-					// and some browsers will display the default captions, 
-					// despite all standard efforts to suppress them
-					thisObj.$media.find('track').removeAttr('default'); 
-				}
-			});
-		}
-		if (!this.$tracks.length || !this.hasCaptionsTrack) { 
-			// this media has no track elements 
-			// if this is a youtube or vimeo player, check there for captions/subtitles
-			if (this.player === 'youtube') {
-				this.getYouTubeCaptionTracks(this.youTubeId).then(function() {
-					if (thisObj.hasCaptions) { 
-						thisObj.usingYouTubeCaptions = true; 
-						if (thisObj.$captionsWrapper) {
-							thisObj.$captionsWrapper.remove();
-						}
-					}					
-					deferred.resolve();
-				});
-			}
-			else if (this.player === 'vimeo') {
-				this.getVimeoCaptionTracks().then(function() {
-					if (thisObj.hasCaptions) { 
-						thisObj.usingVimeoCaptions = true; 
-						if (thisObj.$captionsWrapper) {
-							thisObj.$captionsWrapper.remove();
-						}
-					}
-					deferred.resolve();
-				});
-			}
-			else {
-				// this is neither YouTube nor Vimeo
-				// there just ain't no tracks (captions or otherwise)
-				this.hasCaptions = false; 
-				if (thisObj.$captionsWrapper) {
-					thisObj.$captionsWrapper.remove();
-				}
-				deferred.resolve();
-			}
-		}
-		else { 
-			// there is at least one track with kind="captions" 
-			deferred.resolve(); 
+    if (
+      !this.$captionsWrapper ||
+      (this.$captionsWrapper &&
+        !$.contains(this.$ableDiv[0], this.$captionsWrapper[0]))
+    ) {
+      // captionsWrapper either doesn't exist, or exists in an orphaned state
+      // Either way, it needs to be rebuilt...
+      this.$captionsDiv = $("<div>", {
+        class: "able-captions",
+      });
+      this.$captionsWrapper = $("<div>", {
+        class: "able-captions-wrapper",
+        "aria-hidden": "true",
+      }).hide();
+      if (this.prefCaptionsPosition === "below") {
+        this.$captionsWrapper.addClass("able-captions-below");
+      } else {
+        this.$captionsWrapper.addClass("able-captions-overlay");
+      }
+      this.$captionsWrapper.append(this.$captionsDiv);
+      this.$captionsContainer.append(this.$captionsWrapper);
+    }
+  };
 
-		}
-		return promise;
+  AblePlayer.prototype.setupDescriptions = function (track, cues) {
+    // called via setupTracks() only if there is track with kind="descriptions"
+    // prepares for delivery of text description , in case it's needed
+    // whether and how it's delivered is controlled within description.js > initDescription()
 
-	};
+    this.hasClosedDesc = true;
+    this.currentDescription = -1;
+    this.descriptions.push({
+      cues: cues,
+      language: track.language,
+    });
+  };
 
-	AblePlayer.prototype.setupCaptions = function (track, cues) {
+  AblePlayer.prototype.setupChapters = function (track, cues) {
+    // NOTE: WebVTT supports nested timestamps (to form an outline)
+    // This is not currently supported.
 
-		// Setup player for display of captions (one track at a time)
-		var thisObj, captions, inserted, i, capLabel;
+    this.hasChapters = true;
+    this.chapters.push({
+      cues: cues,
+      language: track.language,
+    });
+  };
 
-		// Insert track into captions array 
-		// in its proper alphabetical sequence by label  
-		if (typeof cues === 'undefined') {
-			cues = null;
-		}
+  AblePlayer.prototype.setupMetadata = function (track, cues, trackDesc) {
+    if (this.metaType === "text") {
+      // Metadata is only supported if data-meta-div is provided
+      // The player does not display metadata internally
+      if (this.metaDiv) {
+        if ($("#" + this.metaDiv)) {
+          // container exists
+          this.$metaDiv = $("#" + this.metaDiv);
+          this.hasMeta = true;
+          this.meta = cues;
+        }
+      }
+    } else if (this.metaType === "selector") {
+      this.hasMeta = true;
+      this.visibleSelectors = [];
+      this.meta = cues;
+    }
+  };
 
-		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
-			// this.captions has already been populated 
-			// For YouTube, this happens in youtube.js > getYouTubeCaptionTracks()
-			// For VImeo, this happens in vimeo.js > getVimeoCaptionTracks() 
-			// So, nothing to do here... 
-		}
-		else { 
+  AblePlayer.prototype.sanitizeVttData = function (vttData) {
+    // Function to process <v> tags
+    function processVTag(vttData) {
+      return vttData.replace(/<v\s+([^>]*?)>/g, function (match, p1) {
+        // Split the content by spaces
+        var parts = p1.split(/\s+/);
+        var attributes = [];
+        var titleParts = [];
 
-			if (this.captions.length === 0) { // this is the first	
-				this.captions.push({
-					'language': track.language,
-					'label': track.label,
-					'def': track.def,
-					'cues': cues
-				});
-			} 
-			else { // there are already captions in the array			
-				inserted = false;
-				for (i = 0; i < this.captions.length; i++) {
-					capLabel = track.label;
-					if (capLabel.toLowerCase() < this.captions[i].label.toLowerCase()) {
-						// insert before track i
-						this.captions.splice(i, 0, {
-							'language': track.language,
-							'label': track.label,
-							'def': track.def,
-							'cues': cues
-						});
-						inserted = true;
-						break;
-					}
-				}
-				if (!inserted) {
-					// just add track to the end
-					this.captions.push({
-						'language': track.language,
-						'label': track.label,
-						'def': track.def,
-						'cues': cues
-					});
-				}	
-			}
-		}
+        // Separate attributes and title parts
+        parts.forEach(function (part) {
+          if (part.indexOf("=") !== -1) {
+            attributes.push(part);
+          } else {
+            titleParts.push(part);
+          }
+        });
 
-		// there are captions available 
-		this.hasCaptions = true;
-		this.currentCaption = -1; 
-		if (this.prefCaptions === 1) {
-			this.captionsOn = true;
-		} else if (this.prefCaptions === 0) {
-			this.captionsOn = false;
-		} else {
-			// user has no prefs. Use default state.
-			if (this.defaultStateCaptions === 1) {
-				this.captionsOn = true;
-			} else {
-				this.captionsOn = false;
-			}
-		}
-		if (this.mediaType === 'audio' && this.captionsOn) {
-			this.$captionsContainer.removeClass('captions-off');
-		}
+        // Construct the new <v> tag
+        var title = titleParts.join(" ");
+        var newTag = '<v title="' + title + '" ' + attributes.join(" ") + ">";
+        return newTag;
+      });
+    }
 
-		if (!this.$captionsWrapper || 
-			(this.$captionsWrapper && !($.contains(this.$ableDiv[0], this.$captionsWrapper[0])))) {
-			// captionsWrapper either doesn't exist, or exists in an orphaned state 
-			// Either way, it needs to be rebuilt...  
-			this.$captionsDiv = $('<div>', {
-				'class': 'able-captions',
-			});
-			this.$captionsWrapper = $('<div>', {
-				'class': 'able-captions-wrapper',
-				'aria-hidden': 'true'
-			}).hide();
-			if (this.prefCaptionsPosition === 'below') {
-				this.$captionsWrapper.addClass('able-captions-below');
-			} else {
-				this.$captionsWrapper.addClass('able-captions-overlay');
-			}
-			this.$captionsWrapper.append(this.$captionsDiv);
-			this.$captionsContainer.append(this.$captionsWrapper);
-		}
-	};
+    // Process <v> tags before sanitizing
+    vttData = processVTag(vttData);
 
-	AblePlayer.prototype.setupDescriptions = function (track, cues) {
+    // Configure DOMPurify
+    var config = {
+      ALLOWED_TAGS: ["b", "i", "u", "v", "c", "lang", "ruby", "rt", "rp"],
+      ALLOWED_ATTR: ["title", "class", "lang"],
+      KEEP_CONTENT: true, // Keep the content of removed elements
+    };
 
-		// called via setupTracks() only if there is track with kind="descriptions"
-		// prepares for delivery of text description , in case it's needed
-		// whether and how it's delivered is controlled within description.js > initDescription()
+    // Sanitize the VTT data
+    var sanitizedVttData = DOMPurify.sanitize(vttData, config);
 
-		this.hasClosedDesc = true;
-		this.currentDescription = -1;
-		this.descriptions.push({
-			cues: cues,
-			language: track.language
-		});
-	};
+    sanitizedVttData = sanitizedVttData.replace(/--&gt;/g, "-->");
 
-	AblePlayer.prototype.setupChapters = function (track, cues) {
+    // Remove any </v> tags added by DOMPurify but preserve pre-existing ones
+    var originalVttData = vttData;
+    sanitizedVttData = sanitizedVttData.replace(
+      /<\/v>/g,
+      function (match, offset) {
+        return originalVttData.indexOf(match, offset) !== -1 ? match : "";
+      }
+    );
 
-		// NOTE: WebVTT supports nested timestamps (to form an outline)
-		// This is not currently supported.
+    return sanitizedVttData;
+  };
 
-		this.hasChapters = true;
-		this.chapters.push({
-			cues: cues,
-			language: track.language
-		});
-	};
+  AblePlayer.prototype.loadTextObject = function (src) {
+    // TODO: Incorporate the following function, moved from setupTracks()
+    // convert XML/TTML captions file
+    /*
+	if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
+	  trackContents = thisObj.ttml2webvtt(trackText);
+	}
+	*/
+    var deferred, promise, thisObj, $tempDiv;
 
-	AblePlayer.prototype.setupMetadata = function (track, cues, trackDesc) {
+    deferred = new $.Deferred();
+    promise = deferred.promise();
+    thisObj = this;
 
-		if (this.metaType === 'text') {
-			// Metadata is only supported if data-meta-div is provided
-			// The player does not display metadata internally
-			if (this.metaDiv) {
-				if ($('#' + this.metaDiv)) {
-					// container exists
-					this.$metaDiv = $('#' + this.metaDiv);
-					this.hasMeta = true;
-					this.meta = cues;
-				}
-			}
-		} else if (this.metaType === 'selector') {
-			this.hasMeta = true;
-			this.visibleSelectors = [];
-			this.meta = cues;
-		}
-	};
+    // create a temp div for holding data
+    $tempDiv = $("<div>", {
+      style: "display:none",
+    });
 
-	AblePlayer.prototype.loadTextObject = function (src) {
+    // Fetch the content manually so it can be sanitized
+    $.ajax({
+      url: src,
+      dataType: "text",
+      success: function (data) {
+        // Sanitize the fetched content
+        var sanitizedTrackText = thisObj.sanitizeVttData(data);
 
-		// TODO: Incorporate the following function, moved from setupTracks()
-		// convert XMl/TTML captions file
-		/*
-		if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
-			trackContents = thisObj.ttml2webvtt(trackText);
-		}
-		*/
-		var deferred, promise, thisObj, $tempDiv;
+        // Load the sanitized content into the $tempDiv
+        $tempDiv.html(sanitizedTrackText);
 
-		deferred = new $.Deferred();
-		promise = deferred.promise();
-		thisObj = this;
+        // Resolve the promise with the sanitized content
+        deferred.resolve(src, sanitizedTrackText);
 
-		// create a temp div for holding data
-		$tempDiv = $('<div>', {
-			style: 'display:none'
-		});
-		$tempDiv.load(src, function (trackText, status, req) {
-			if (status === 'error') {
-				if (thisObj.debug) {
-					
-				}
-				deferred.reject(src);
-			} else {
-				deferred.resolve(src, trackText);
-			}
-			$tempDiv.remove();
-		});
-		return promise;
-	};
+        $tempDiv.remove();
+      },
+      error: function (req, status, error) {
+        if (thisObj.debug) {
+          
+        }
+        deferred.reject(src);
+        $tempDiv.remove();
+      },
+    });
 
+    return promise;
+  };
 })(jQuery);
+
 
 (function ($) {
 	AblePlayer.prototype.initYouTubePlayer = function () {
@@ -9065,18 +9141,6 @@ var AblePlayerInstances = [];
         Math.floor(value) === value
       );
     };
-
-  AblePlayer.prototype.sanitizeVttData = function (vttData) {
-    var config = {
-      ALLOWED_TAGS: ["b", "i", "u", "c", "v", "ruby", "rt", "rp"],
-      ALLOWED_ATTR: ["class", "title", "lang"],
-    };
-
-    var cleanedText = DOMPurify.sanitize(vttData, config);
-
-    // Sanitize the content with the custom configuration
-    return cleanedText;
-  };
 })(jQuery);
 
 (function ($) {
@@ -12237,7 +12301,7 @@ var AblePlayerInstances = [];
   };
 
   AblePlayer.prototype.showCaptions = function (now) {
-    var c, thisCaption, captionText, cleanedText;
+    var c, thisCaption, captionText;
     var cues;
     if (this.selectedCaptions.cues.length) {
       cues = this.selectedCaptions.cues;
@@ -12255,10 +12319,11 @@ var AblePlayerInstances = [];
     if (typeof thisCaption !== "undefined") {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
-        
-        
-        captionText = this.flattenCueForCaption(cues[thisCaption]);
-        cleanedText = this.sanitizeVttData(captionText).replace("\n", "<br>");
+        captionText = this.flattenCueForCaption(cues[thisCaption]).replace(
+          "\n",
+          "<br>"
+        );
+
         this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {
@@ -12918,714 +12983,756 @@ var AblePlayerInstances = [];
 })(jQuery);
 
 (function ($) {
-
-	AblePlayer.prototype.setupTranscript = function() {
-
-		var deferred = new $.Deferred();
-		var promise = deferred.promise();
-
-		if (this.usingYouTubeCaptions || this.usingVimeoCaptions) { 
-			// a transcript is not possible 
-			this.transcriptType = null; 
-			deferred.resolve();
-		}
-		else { 
-			if (!this.transcriptType) {
-				// previously set transcriptType to null since there are no <track> elements
-				// check again to see if captions have been collected from other sources (e.g., YouTube)
-
-				if (this.captions.length) {
-					// captions are possible! Use the default type (popup)
-					// if other types ('external' and 'manual') were desired, transcriptType would not be null here
-					this.transcriptType = 'popup';
-				}
-			}
-			if (this.transcriptType) {
-				if (this.transcriptType === 'popup' || this.transcriptType === 'external') {
-					this.injectTranscriptArea();
-					deferred.resolve();
-				}
-				else if (this.transcriptType === 'manual') {
-					this.setupManualTranscript();
-					deferred.resolve();
-				}
-			}
-			else {
-				// there is no transcript
-				deferred.resolve();
-			}
-		}
-		return promise;
-	};
-
-	AblePlayer.prototype.injectTranscriptArea = function() {
-
-		var thisObj, $autoScrollLabel, $languageSelectWrapper, $languageSelectLabel, i, $option;
-
-		thisObj = this;
-		this.$transcriptArea = $('<div>', {
-			'class': 'able-transcript-area',
-			'role': 'dialog',
-			'aria-label': this.tt.transcriptTitle
-		});
-
-		this.$transcriptToolbar = $('<div>', {
-			'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
-		});
-
-		this.$transcriptDiv = $('<div>', {
-			'class' : 'able-transcript'
-		});
-
-		// Transcript toolbar content
-
-		// Add auto Scroll checkbox
-		this.$autoScrollTranscriptCheckbox = $('<input>', {
-			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
-			'type': 'checkbox'
-		});
-		$autoScrollLabel = $('<label>', {
-				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
-		}).text(this.tt.autoScroll);
-		this.$transcriptToolbar.append($autoScrollLabel,this.$autoScrollTranscriptCheckbox);
-
-		// Add field for selecting a transcript language
-		// Only necessary if there is more than one language
-		if (this.captions.length > 1) {
-			$languageSelectWrapper = $('<div>',{
-				'class': 'transcript-language-select-wrapper'
-			});
-			$languageSelectLabel = $('<label>',{
-				'for': 'transcript-language-select-' + this.mediaId
-			}).text(this.tt.language);
-			this.$transcriptLanguageSelect = $('<select>',{
-				'id': 'transcript-language-select-' + this.mediaId
-			});
-			for (i=0; i < this.captions.length; i++) {
-				$option = $('<option></option>',{
-					value: this.captions[i]['language'],
-					lang: this.captions[i]['language']
-				}).text(this.captions[i]['label']);
-				if (this.captions[i]['def']) {
-					$option.prop('selected',true);
-				 }
-				this.$transcriptLanguageSelect.append($option);
-			 }
-		}
-		if ($languageSelectWrapper) {
-			$languageSelectWrapper.append($languageSelectLabel,this.$transcriptLanguageSelect);
-			this.$transcriptToolbar.append($languageSelectWrapper);
-		}
-		this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
-
-		// If client has provided separate transcript location, put it there.
-		// Otherwise append it to the body
-		if (this.transcriptDivLocation) {
-			$('#' + this.transcriptDivLocation).append(this.$transcriptArea);
-		}
-		else {
-			this.$ableWrapper.append(this.$transcriptArea);
-		}
-
-		// make it draggable (popup only; NOT external transcript)
-		if (!this.transcriptDivLocation) {
-			this.initDragDrop('transcript');
-			if (this.prefTranscript === 1) {
-				// transcript is on. Go ahead and position it
-				this.positionDraggableWindow('transcript',this.getDefaultWidth('transcript'));
-			}
-		}
-
-		// If client has provided separate transcript location, override user's preference for hiding transcript
-		if (!this.prefTranscript && !this.transcriptDivLocation) {
-			this.$transcriptArea.hide();
-		}
-	};
-
-	AblePlayer.prototype.addTranscriptAreaEvents = function() {
-
-		var thisObj = this;
-
-		this.$autoScrollTranscriptCheckbox.click(function () {
-			thisObj.handleTranscriptLockToggle(thisObj.$autoScrollTranscriptCheckbox.prop('checked'));
-		});
-
-		this.$transcriptDiv.on('mousewheel DOMMouseScroll click scroll', function (e) {
-			// Propagation is stopped in transcript click handler, so clicks are on the scrollbar
-			// or outside of a clickable span.
-			if (!thisObj.scrollingTranscript) {
-				thisObj.autoScrollTranscript = false;
-				thisObj.refreshControls('transcript');
-			}
-			thisObj.scrollingTranscript = false;
-		});
-
-		if (typeof this.$transcriptLanguageSelect !== 'undefined') {
-
-			this.$transcriptLanguageSelect.on('click mousedown',function (e) {
-				// execute default behavior
-				// prevent propagation of mouse event to toolbar or window
-				e.stopPropagation();
-			});
-
-			this.$transcriptLanguageSelect.on('change',function () {
-
-				var language = thisObj.$transcriptLanguageSelect.val();
-
-				thisObj.syncTrackLanguages('transcript',language);
-			});
-		}
-	};
-
-	AblePlayer.prototype.transcriptSrcHasRequiredParts = function() {
-
-		// check the external transcript to be sure it has all required components
-		// return true or false
-		// in the process, define all the needed variables and properties
-
-		if ($('#' + this.transcriptSrc).length) {
-			this.$transcriptArea = $('#' + this.transcriptSrc);
-			if (this.$transcriptArea.find('.able-window-toolbar').length) {
-				this.$transcriptToolbar = this.$transcriptArea.find('.able-window-toolbar').eq(0);
-				if (this.$transcriptArea.find('.able-transcript').length) {
-					this.$transcriptDiv = this.$transcriptArea.find('.able-transcript').eq(0);
-					if (this.$transcriptArea.find('.able-transcript-seekpoint').length) {
-						this.$transcriptSeekpoints = this.$transcriptArea.find('.able-transcript-seekpoint');
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	AblePlayer.prototype.setupManualTranscript = function() {
-
-		var $autoScrollInput, $autoScrollLabel;
-
-		$autoScrollInput = $('<input>', {
-			'id': 'autoscroll-transcript-checkbox-' + this.mediaId,
-			'type': 'checkbox'
-		});
-		$autoScrollLabel = $('<label>', {
-				'for': 'autoscroll-transcript-checkbox-' + this.mediaId
-		}).text(this.tt.autoScroll);
-
-		// Add an auto-scroll checkbox to the toolbar.
-		this.$autoScrollTranscriptCheckbox = $autoScrollInput;
-		this.$transcriptToolbar.append($autoScrollLabel, this.$autoScrollTranscriptCheckbox);
-
-	};
-
-	AblePlayer.prototype.updateTranscript = function() {
-
-		if (!this.transcriptType) {
-			return;
-		}
-		if (this.playerCreated && !this.$transcriptArea) { 
-			return; 
-		}
-		if (this.transcriptType === 'external' || this.transcriptType === 'popup') {
-
-			var chapters, captions, descriptions;
-
-			// Language of transcript might be different than language of captions
-			// But both are in sync by default
-			if (this.transcriptLang) {
-				captions = this.transcriptCaptions.cues;
-			}
-			else {
-				if (this.transcriptCaptions) {
-					this.transcriptLang = this.transcriptCaptions.language;
-					captions = this.transcriptCaptions.cues;
-				}
-				else if (this.selectedCaptions) {
-					this.transcriptLang = this.captionLang;
-					captions = this.selectedCaptions.cues;
-				}
-			}
-
-			// setup chapters
-			if (this.transcriptChapters) {
-				chapters = this.transcriptChapters.cues;
-			}
-			else if (this.chapters.length > 0) {
-				// Try and match the caption language.
-				if (this.transcriptLang) {
-					for (var i = 0; i < this.chapters.length; i++) {
-						if (this.chapters[i].language === this.transcriptLang) {
-							chapters = this.chapters[i].cues;
-						}
-					}
-				}
-				if (typeof chapters === 'undefined') {
-					chapters = this.chapters[0].cues || [];
-				}
-			}
-
-			// setup descriptions
-			if (this.transcriptDescriptions) {
-				descriptions = this.transcriptDescriptions.cues;
-			}
-			else if (this.descriptions.length > 0) {
-				// Try and match the caption language.
-				if (this.transcriptLang) {
-					for (var i = 0; i < this.descriptions.length; i++) {
-						if (this.descriptions[i].language === this.transcriptLang) {
-							descriptions = this.descriptions[i].cues;
-						}
-					}
-				}
-				if (!descriptions) {
-					descriptions = this.descriptions[0].cues || [];
-				}
-			}
-
-			var div = this.generateTranscript(chapters || [], captions || [], descriptions || []);
-			this.$transcriptDiv.html(div);
-			// reset transcript selected <option> to this.transcriptLang
-			if (this.$transcriptLanguageSelect) {
-				this.$transcriptLanguageSelect.find('option:selected').prop('selected',false);
-				this.$transcriptLanguageSelect.find('option[lang=' + this.transcriptLang + ']').prop('selected',true);
-			}
-		}
-
-		var thisObj = this;
-
-		// Make transcript tabbable if preference is turned on.
-		if (this.prefTabbable === 1) {
-			this.$transcriptDiv.find('span.able-transcript-seekpoint').attr('tabindex','0');
-		}
-
-		// handle clicks on text within transcript
-		// Note: This event listeners handles clicks only, not keydown events
-		// Pressing Enter on an element that is not natively clickable does NOT trigger click()
-		// Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js)
-		if (this.$transcriptArea.length > 0) {
-			this.$transcriptArea.find('span.able-transcript-seekpoint').click(function(e) {
-				thisObj.seekTrigger = 'transcript';
-				var spanStart = parseFloat($(this).attr('data-start'));
-				// Add a tiny amount so that we're inside the span.
-				spanStart += .01;
-				// Each click within the transcript triggers two click events (not sure why)
-				// this.seekingFromTranscript is a stopgab to prevent two calls to SeekTo()
-				if (!thisObj.seekingFromTranscript) {
-					thisObj.seekingFromTranscript = true;
-					thisObj.seekTo(spanStart);
-				}
-				else {
-					// don't seek a second time, but do reset var
-					thisObj.seekingFromTranscript = false;
-				}
-			});
-		}
-	};
-
-	AblePlayer.prototype.highlightTranscript = function (currentTime) {
-
-		// Show highlight in transcript marking current caption.
-
-		if (!this.transcriptType) {
-			return;
-		}
-
-		var start, end, isChapterHeading;
-		var thisObj = this;
-
-		currentTime = parseFloat(currentTime);
-
-		// Highlight the current transcript item.
-		this.$transcriptArea.find('span.able-transcript-seekpoint').each(function() {
-			start = parseFloat($(this).attr('data-start'));
-			end = parseFloat($(this).attr('data-end'));
-			// be sure this isn't a chapter (don't highlight chapter headings)
-			if ($(this).parent().hasClass('able-transcript-chapter-heading')) {
-				isChapterHeading = true;
-			}
-			else {
-				isChapterHeading = false;
-			}
-
-			if (currentTime >= start && currentTime <= end && !isChapterHeading) {
-
-				// If this item isn't already highlighted, it should be
-				if (!($(this).hasClass('able-highlight'))) {
-					// remove all previous highlights before adding one to current span
-					thisObj.$transcriptArea.find('.able-highlight').removeClass('able-highlight');
-					$(this).addClass('able-highlight');
-					thisObj.movingHighlight = true;
-				}
-				return false;
-			}
-		});
-		thisObj.currentHighlight = thisObj.$transcriptArea.find('.able-highlight');
-		if (thisObj.currentHighlight.length === 0) {
-			// Nothing highlighted.
-			thisObj.currentHighlight = null;
-		}
-	};
-
-	AblePlayer.prototype.generateTranscript = function(chapters, captions, descriptions) {
-
-		var thisObj = this;
-
-		var $main = $('<div class="able-transcript-container"></div>');
-		var transcriptTitle;
-
-		// set language for transcript container
-		$main.attr('lang', this.transcriptLang);
-
-		if (typeof this.transcriptTitle !== 'undefined') {
-			transcriptTitle = this.transcriptTitle;
-		}
-		else if (this.lyricsMode) {
-			transcriptTitle = this.tt.lyricsTitle;
-		}
-		else {
-			transcriptTitle = this.tt.transcriptTitle;
-		}
-
-		if (!this.transcriptDivLocation) {
-			// only add an HTML heading to internal transcript
-			// external transcript is expected to have its own heading
-			var headingNumber = this.playerHeadingLevel;
-			headingNumber += 1;
-			var chapterHeadingNumber = headingNumber + 1;
-
-			if (headingNumber <= 6) {
-				var transcriptHeading = 'h' + headingNumber.toString();
-			}
-			else {
-				var transcriptHeading = 'div';
-			}
-			var $transcriptHeadingTag = $('<' + transcriptHeading + '>');
-			$transcriptHeadingTag.addClass('able-transcript-heading');
-			if (headingNumber > 6) {
-				$transcriptHeadingTag.attr({
-					'role': 'heading',
-					'aria-level': headingNumber
-				});
-			}
-			$transcriptHeadingTag.text(transcriptTitle);
-
-			// set language of transcript heading to language of player
-			// this is independent of language of transcript
-			$transcriptHeadingTag.attr('lang', this.lang);
-
-			$main.append($transcriptHeadingTag);
-		}
-
-		var nextChapter = 0;
-		var nextCap = 0;
-		var nextDesc = 0;
-
-		var addChapter = function(div, chap) {
-
-			if (chapterHeadingNumber <= 6) {
-				var chapterHeading = 'h' + chapterHeadingNumber.toString();
-			}
-			else {
-				var chapterHeading = 'div';
-			}
-
-			var $chapterHeadingTag = $('<' + chapterHeading + '>',{
-				'class': 'able-transcript-chapter-heading'
-			});
-			if (chapterHeadingNumber > 6) {
-				$chapterHeadingTag.attr({
-					'role': 'heading',
-					'aria-level': chapterHeadingNumber
-				});
-			}
-
-			var flattenComponentForChapter = function(comp) {
-
-				var result = [];
-				if (comp.type === 'string') {
-					result.push(comp.value);
-				}
-				else {
-					for (var i = 0; i < comp.children.length; i++) {
-						result = result.concat(flattenComponentForChapter(comp.children[i]));
-					}
-				}
-				return result;
-			}
-
-			var $chapSpan = $('<span>',{
-				'class': 'able-transcript-seekpoint'
-			});
-			for (var i = 0; i < chap.components.children.length; i++) {
-				var results = flattenComponentForChapter(chap.components.children[i]);
-				for (var jj = 0; jj < results.length; jj++) {
-					$chapSpan.append(results[jj]);
-				}
-			}
-			$chapSpan.attr('data-start', chap.start.toString());
-			$chapSpan.attr('data-end', chap.end.toString());
-			$chapterHeadingTag.append($chapSpan);
-
-			div.append($chapterHeadingTag);
-		};
-
-		var addDescription = function(div, desc) {
-			var $descDiv = $('<div>', {
-				'class': 'able-transcript-desc'
-			});
-			var $descHiddenSpan = $('<span>',{
-				'class': 'able-hidden'
-			});
-			$descHiddenSpan.attr('lang', thisObj.lang);
-			$descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ': ');
-			$descDiv.append($descHiddenSpan);
-
-			var flattenComponentForDescription = function(comp) {
-
-				var result = [];
-				if (comp.type === 'string') {
-					result.push(comp.value);
-				}
-				else {
-					for (var i = 0; i < comp.children.length; i++) {
-						result = result.concat(flattenComponentForDescription(comp.children[i]));
-					}
-				}
-				return result;
-			}
-
-			var $descSpan = $('<span>',{
-				'class': 'able-transcript-seekpoint'
-			});
-			for (var i = 0; i < desc.components.children.length; i++) {
-				var results = flattenComponentForDescription(desc.components.children[i]);
-				for (var jj = 0; jj < results.length; jj++) {
-					$descSpan.append(results[jj]);
-				}
-			}
-			$descSpan.attr('data-start', desc.start.toString());
-			$descSpan.attr('data-end', desc.end.toString());
-			$descDiv.append($descSpan);
-
-			div.append($descDiv);
-		};
-
-		var addCaption = function(div, cap) {
-
-			var $capSpan = $('<span>',{
-				'class': 'able-transcript-seekpoint able-transcript-caption'
-			});
-
-			var flattenComponentForCaption = function(comp) {
-
-				var result = [];
-
-				var parts = 0;
-
-				var flattenString = function (str) {
-
-					parts++;
-
-					var flatStr;
-					var result = [];
-					if (str === '') {
-						return result;
-					}
-
-					var openBracket = str.indexOf('[');
-					var closeBracket = str.indexOf(']');
-					var openParen = str.indexOf('(');
-					var closeParen = str.indexOf(')');
-
-					var hasBrackets = openBracket !== -1 && closeBracket !== -1;
-					var hasParens = openParen !== -1 && closeParen !== -1;
-
-					if (hasParens || hasBrackets) {
-						if (parts > 1) {
-							// force a line break between sections that contain parens or brackets
-							var silentSpanBreak = '<br/>';
-						}
-						else {
-							var silentSpanBreak = '';
-						}
-						var silentSpanOpen = silentSpanBreak + '<span class="able-unspoken">';
-						var silentSpanClose = '</span>';
-						if (hasParens && hasBrackets) {
-							// string has both!
-							if (openBracket < openParen) {
-								// brackets come first. Parse parens separately
-								hasParens = false;
-							}
-							else {
-								// parens come first. Parse brackets separately
-								hasBrackets = false;
-							}
-						}
-					}
-					if (hasParens) {
-						flatStr = str.substring(0, openParen);
-						flatStr += silentSpanOpen;
-						flatStr += str.substring(openParen, closeParen + 1);
-						flatStr += silentSpanClose;
-						flatStr += flattenString(str.substring(closeParen + 1));
-						result.push(flatStr);
-					}
-					else if (hasBrackets) {
-						flatStr = str.substring(0, openBracket);
-						flatStr += silentSpanOpen;
-						flatStr += str.substring(openBracket, closeBracket + 1);
-						flatStr += silentSpanClose;
-						flatStr += flattenString(str.substring(closeBracket + 1));
-						result.push(flatStr);
-					}
-					else {
-						result.push(str);
-					}
-					return result;
-				};
-
-				if (comp.type === 'string') {
-					result = result.concat(flattenString(comp.value));
-				}
-				else if (comp.type === 'v') {
-					var $vSpan = $('<span>',{
-						'class': 'able-unspoken'
-					});
-					$vSpan.text('(' + comp.value + ')');
-					result.push($vSpan);
-					for (var i = 0; i < comp.children.length; i++) {
-						var subResults = flattenComponentForCaption(comp.children[i]);
-						for (var jj = 0; jj < subResults.length; jj++) {
-							result.push(subResults[jj]);
-						}
-					}
-				}
-				else if (comp.type === 'b' || comp.type === 'i') {
-					if (comp.type === 'b') {
-						var $tag = $('<strong>');
-					}
-					else if (comp.type === 'i') {
-						var $tag = $('<em>');
-					}
-					for (var i = 0; i < comp.children.length; i++) {
-						var subResults = flattenComponentForCaption(comp.children[i]);
-						for (var jj = 0; jj < subResults.length; jj++) {
-							$tag.append(subResults[jj]);
-						}
-					}
-					if (comp.type === 'b' || comp.type == 'i') {
-						result.push($tag,' ');
-					}
-				}
-				else {
-					for (var i = 0; i < comp.children.length; i++) {
-						result = result.concat(flattenComponentForCaption(comp.children[i]));
-					}
-				}
-				return result;
-			};
-
-			for (var i = 0; i < cap.components.children.length; i++) {
-				var results = flattenComponentForCaption(cap.components.children[i]);
-				for (var jj = 0; jj < results.length; jj++) {
-					var result = results[jj];
-					if (typeof result === 'string') {
-						if (thisObj.lyricsMode) {
-							// add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
-							result = result.replace('\n','<br>') + '<br>';
-						}
-						else {
-							// just add a space between captions
-							result += ' ';
-						}
-					}
-					$capSpan.append(result);
-				}
-			}
-			$capSpan.attr('data-start', cap.start.toString());
-			$capSpan.attr('data-end', cap.end.toString());
-			div.append($capSpan);
-			div.append(' \n');
-		};
-
-		// keep looping as long as any one of the three arrays has content
-		while ((nextChapter < chapters.length) || (nextDesc < descriptions.length) || (nextCap < captions.length)) {
-
-			if ((nextChapter < chapters.length) && (nextDesc < descriptions.length) && (nextCap < captions.length)) {
-				// they all three have content
-				var firstStart = Math.min(chapters[nextChapter].start,descriptions[nextDesc].start,captions[nextCap].start);
-			}
-			else if ((nextChapter < chapters.length) && (nextDesc < descriptions.length)) {
-				// chapters & descriptions have content
-				var firstStart = Math.min(chapters[nextChapter].start,descriptions[nextDesc].start);
-			}
-			else if ((nextChapter < chapters.length) && (nextCap < captions.length)) {
-				// chapters & captions have content
-				var firstStart = Math.min(chapters[nextChapter].start,captions[nextCap].start);
-			}
-			else if ((nextDesc < descriptions.length) && (nextCap < captions.length)) {
-				// descriptions & captions have content
-				var firstStart = Math.min(descriptions[nextDesc].start,captions[nextCap].start);
-			}
-			else {
-				var firstStart = null;
-			}
-			if (firstStart !== null) {
-				if (typeof chapters[nextChapter] !== 'undefined' && chapters[nextChapter].start === firstStart) {
-					addChapter($main, chapters[nextChapter]);
-					nextChapter += 1;
-				}
-				else if (typeof descriptions[nextDesc] !== 'undefined' && descriptions[nextDesc].start === firstStart) {
-					addDescription($main, descriptions[nextDesc]);
-					nextDesc += 1;
-				}
-				else {
-					addCaption($main, captions[nextCap]);
-					nextCap += 1;
-				}
-			}
-			else {
-				if (nextChapter < chapters.length) {
-					addChapter($main, chapters[nextChapter]);
-					nextChapter += 1;
-				}
-				else if (nextDesc < descriptions.length) {
-					addDescription($main, descriptions[nextDesc]);
-					nextDesc += 1;
-				}
-				else if (nextCap < captions.length) {
-					addCaption($main, captions[nextCap]);
-					nextCap += 1;
-				}
-			}
-		}
-		// organize transcript into blocks using [] and () as starting points
-		var $components = $main.children();
-		var spanCount = 0;
-		var openBlock = true;
-		$components.each(function() {
-			if ($(this).hasClass('able-transcript-caption')) {
-				if ($(this).text().indexOf('[') !== -1 || $(this).text().indexOf('(') !== -1) {
-					// this caption includes a bracket or parenth. Start a new block
-					// close the previous block first
-					if (spanCount > 0) {
-						$main.find('.able-block-temp').removeClass('able-block-temp').wrapAll('<div class="able-transcript-block"></div>');
-						spanCount = 0;
-					}
-				}
-				$(this).addClass('able-block-temp');
-				spanCount++;
-			}
-			else {
-				// this is not a caption. Close the caption block
-				if (spanCount > 0) {
-					$main.find('.able-block-temp').removeClass('able-block-temp').wrapAll('<div class="able-transcript-block"></div>');
-					spanCount = 0;
-				}
-			}
-		});
-		return $main;
-	};
-
+  AblePlayer.prototype.setupTranscript = function () {
+    var deferred = new $.Deferred();
+    var promise = deferred.promise();
+
+    if (this.usingYouTubeCaptions || this.usingVimeoCaptions) {
+      // a transcript is not possible
+      this.transcriptType = null;
+      deferred.resolve();
+    } else {
+      if (!this.transcriptType) {
+        // previously set transcriptType to null since there are no <track> elements
+        // check again to see if captions have been collected from other sources (e.g., YouTube)
+
+        if (this.captions.length) {
+          // captions are possible! Use the default type (popup)
+          // if other types ('external' and 'manual') were desired, transcriptType would not be null here
+          this.transcriptType = "popup";
+        }
+      }
+      if (this.transcriptType) {
+        if (
+          this.transcriptType === "popup" ||
+          this.transcriptType === "external"
+        ) {
+          this.injectTranscriptArea();
+          deferred.resolve();
+        } else if (this.transcriptType === "manual") {
+          this.setupManualTranscript();
+          deferred.resolve();
+        }
+      } else {
+        // there is no transcript
+        deferred.resolve();
+      }
+    }
+    return promise;
+  };
+
+  AblePlayer.prototype.injectTranscriptArea = function () {
+    var thisObj,
+      $autoScrollLabel,
+      $languageSelectWrapper,
+      $languageSelectLabel,
+      i,
+      $option;
+
+    thisObj = this;
+    this.$transcriptArea = $("<div>", {
+      class: "able-transcript-area",
+      role: "dialog",
+      "aria-label": this.tt.transcriptTitle,
+    });
+
+    this.$transcriptToolbar = $("<div>", {
+      class: "able-window-toolbar able-" + this.toolbarIconColor + "-controls",
+    });
+
+    this.$transcriptDiv = $("<div>", {
+      class: "able-transcript",
+    });
+
+    // Transcript toolbar content
+
+    // Add auto Scroll checkbox
+    this.$autoScrollTranscriptCheckbox = $("<input>", {
+      id: "autoscroll-transcript-checkbox-" + this.mediaId,
+      type: "checkbox",
+    });
+    $autoScrollLabel = $("<label>", {
+      for: "autoscroll-transcript-checkbox-" + this.mediaId,
+    }).text(this.tt.autoScroll);
+    this.$transcriptToolbar.append(
+      $autoScrollLabel,
+      this.$autoScrollTranscriptCheckbox
+    );
+
+    // Add field for selecting a transcript language
+    // Only necessary if there is more than one language
+    if (this.captions.length > 1) {
+      $languageSelectWrapper = $("<div>", {
+        class: "transcript-language-select-wrapper",
+      });
+      $languageSelectLabel = $("<label>", {
+        for: "transcript-language-select-" + this.mediaId,
+      }).text(this.tt.language);
+      this.$transcriptLanguageSelect = $("<select>", {
+        id: "transcript-language-select-" + this.mediaId,
+      });
+      for (i = 0; i < this.captions.length; i++) {
+        $option = $("<option></option>", {
+          value: this.captions[i]["language"],
+          lang: this.captions[i]["language"],
+        }).text(this.captions[i]["label"]);
+        if (this.captions[i]["def"]) {
+          $option.prop("selected", true);
+        }
+        this.$transcriptLanguageSelect.append($option);
+      }
+    }
+    if ($languageSelectWrapper) {
+      $languageSelectWrapper.append(
+        $languageSelectLabel,
+        this.$transcriptLanguageSelect
+      );
+      this.$transcriptToolbar.append($languageSelectWrapper);
+    }
+    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
+
+    // If client has provided separate transcript location, put it there.
+    // Otherwise append it to the body
+    if (this.transcriptDivLocation) {
+      $("#" + this.transcriptDivLocation).append(this.$transcriptArea);
+    } else {
+      this.$ableWrapper.append(this.$transcriptArea);
+    }
+
+    // make it draggable (popup only; NOT external transcript)
+    if (!this.transcriptDivLocation) {
+      this.initDragDrop("transcript");
+      if (this.prefTranscript === 1) {
+        // transcript is on. Go ahead and position it
+        this.positionDraggableWindow(
+          "transcript",
+          this.getDefaultWidth("transcript")
+        );
+      }
+    }
+
+    // If client has provided separate transcript location, override user's preference for hiding transcript
+    if (!this.prefTranscript && !this.transcriptDivLocation) {
+      this.$transcriptArea.hide();
+    }
+  };
+
+  AblePlayer.prototype.addTranscriptAreaEvents = function () {
+    var thisObj = this;
+
+    this.$autoScrollTranscriptCheckbox.click(function () {
+      thisObj.handleTranscriptLockToggle(
+        thisObj.$autoScrollTranscriptCheckbox.prop("checked")
+      );
+    });
+
+    this.$transcriptDiv.on(
+      "mousewheel DOMMouseScroll click scroll",
+      function (e) {
+        // Propagation is stopped in transcript click handler, so clicks are on the scrollbar
+        // or outside of a clickable span.
+        if (!thisObj.scrollingTranscript) {
+          thisObj.autoScrollTranscript = false;
+          thisObj.refreshControls("transcript");
+        }
+        thisObj.scrollingTranscript = false;
+      }
+    );
+
+    if (typeof this.$transcriptLanguageSelect !== "undefined") {
+      this.$transcriptLanguageSelect.on("click mousedown", function (e) {
+        // execute default behavior
+        // prevent propagation of mouse event to toolbar or window
+        e.stopPropagation();
+      });
+
+      this.$transcriptLanguageSelect.on("change", function () {
+        var language = thisObj.$transcriptLanguageSelect.val();
+
+        thisObj.syncTrackLanguages("transcript", language);
+      });
+    }
+  };
+
+  AblePlayer.prototype.transcriptSrcHasRequiredParts = function () {
+    // check the external transcript to be sure it has all required components
+    // return true or false
+    // in the process, define all the needed variables and properties
+
+    if ($("#" + this.transcriptSrc).length) {
+      this.$transcriptArea = $("#" + this.transcriptSrc);
+      if (this.$transcriptArea.find(".able-window-toolbar").length) {
+        this.$transcriptToolbar = this.$transcriptArea
+          .find(".able-window-toolbar")
+          .eq(0);
+        if (this.$transcriptArea.find(".able-transcript").length) {
+          this.$transcriptDiv = this.$transcriptArea
+            .find(".able-transcript")
+            .eq(0);
+          if (this.$transcriptArea.find(".able-transcript-seekpoint").length) {
+            this.$transcriptSeekpoints = this.$transcriptArea.find(
+              ".able-transcript-seekpoint"
+            );
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  AblePlayer.prototype.setupManualTranscript = function () {
+    var $autoScrollInput, $autoScrollLabel;
+
+    $autoScrollInput = $("<input>", {
+      id: "autoscroll-transcript-checkbox-" + this.mediaId,
+      type: "checkbox",
+    });
+    $autoScrollLabel = $("<label>", {
+      for: "autoscroll-transcript-checkbox-" + this.mediaId,
+    }).text(this.tt.autoScroll);
+
+    // Add an auto-scroll checkbox to the toolbar.
+    this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+    this.$transcriptToolbar.append(
+      $autoScrollLabel,
+      this.$autoScrollTranscriptCheckbox
+    );
+  };
+
+  AblePlayer.prototype.updateTranscript = function () {
+    if (!this.transcriptType) {
+      return;
+    }
+    if (this.playerCreated && !this.$transcriptArea) {
+      return;
+    }
+    if (this.transcriptType === "external" || this.transcriptType === "popup") {
+      var chapters, captions, descriptions;
+
+      // Language of transcript might be different than language of captions
+      // But both are in sync by default
+      if (this.transcriptLang) {
+        captions = this.transcriptCaptions.cues;
+      } else {
+        if (this.transcriptCaptions) {
+          this.transcriptLang = this.transcriptCaptions.language;
+          captions = this.transcriptCaptions.cues;
+        } else if (this.selectedCaptions) {
+          this.transcriptLang = this.captionLang;
+          captions = this.selectedCaptions.cues;
+        }
+      }
+
+      // setup chapters
+      if (this.transcriptChapters) {
+        chapters = this.transcriptChapters.cues;
+      } else if (this.chapters.length > 0) {
+        // Try and match the caption language.
+        if (this.transcriptLang) {
+          for (var i = 0; i < this.chapters.length; i++) {
+            if (this.chapters[i].language === this.transcriptLang) {
+              chapters = this.chapters[i].cues;
+            }
+          }
+        }
+        if (typeof chapters === "undefined") {
+          chapters = this.chapters[0].cues || [];
+        }
+      }
+
+      // setup descriptions
+      if (this.transcriptDescriptions) {
+        descriptions = this.transcriptDescriptions.cues;
+      } else if (this.descriptions.length > 0) {
+        // Try and match the caption language.
+        if (this.transcriptLang) {
+          for (var i = 0; i < this.descriptions.length; i++) {
+            if (this.descriptions[i].language === this.transcriptLang) {
+              descriptions = this.descriptions[i].cues;
+            }
+          }
+        }
+        if (!descriptions) {
+          descriptions = this.descriptions[0].cues || [];
+        }
+      }
+
+      var div = this.generateTranscript(
+        chapters || [],
+        captions || [],
+        descriptions || []
+      );
+      this.$transcriptDiv.html(div);
+      // reset transcript selected <option> to this.transcriptLang
+      if (this.$transcriptLanguageSelect) {
+        this.$transcriptLanguageSelect
+          .find("option:selected")
+          .prop("selected", false);
+        this.$transcriptLanguageSelect
+          .find("option[lang=" + this.transcriptLang + "]")
+          .prop("selected", true);
+      }
+    }
+
+    var thisObj = this;
+
+    // Make transcript tabbable if preference is turned on.
+    if (this.prefTabbable === 1) {
+      this.$transcriptDiv
+        .find("span.able-transcript-seekpoint")
+        .attr("tabindex", "0");
+    }
+
+    // handle clicks on text within transcript
+    // Note: This event listeners handles clicks only, not keydown events
+    // Pressing Enter on an element that is not natively clickable does NOT trigger click()
+    // Keydown events are handled elsehwere, both globally (ableplayer-base.js) and locally (event.js)
+    if (this.$transcriptArea.length > 0) {
+      this.$transcriptArea
+        .find("span.able-transcript-seekpoint")
+        .click(function (e) {
+          thisObj.seekTrigger = "transcript";
+          var spanStart = parseFloat($(this).attr("data-start"));
+          // Add a tiny amount so that we're inside the span.
+          spanStart += 0.01;
+          // Each click within the transcript triggers two click events (not sure why)
+          // this.seekingFromTranscript is a stopgab to prevent two calls to SeekTo()
+          if (!thisObj.seekingFromTranscript) {
+            thisObj.seekingFromTranscript = true;
+            thisObj.seekTo(spanStart);
+          } else {
+            // don't seek a second time, but do reset var
+            thisObj.seekingFromTranscript = false;
+          }
+        });
+    }
+  };
+
+  AblePlayer.prototype.highlightTranscript = function (currentTime) {
+    // Show highlight in transcript marking current caption.
+
+    if (!this.transcriptType) {
+      return;
+    }
+
+    var start, end, isChapterHeading;
+    var thisObj = this;
+
+    currentTime = parseFloat(currentTime);
+
+    // Highlight the current transcript item.
+    this.$transcriptArea
+      .find("span.able-transcript-seekpoint")
+      .each(function () {
+        start = parseFloat($(this).attr("data-start"));
+        end = parseFloat($(this).attr("data-end"));
+        // be sure this isn't a chapter (don't highlight chapter headings)
+        if ($(this).parent().hasClass("able-transcript-chapter-heading")) {
+          isChapterHeading = true;
+        } else {
+          isChapterHeading = false;
+        }
+
+        if (currentTime >= start && currentTime <= end && !isChapterHeading) {
+          // If this item isn't already highlighted, it should be
+          if (!$(this).hasClass("able-highlight")) {
+            // remove all previous highlights before adding one to current span
+            thisObj.$transcriptArea
+              .find(".able-highlight")
+              .removeClass("able-highlight");
+            $(this).addClass("able-highlight");
+            thisObj.movingHighlight = true;
+          }
+          return false;
+        }
+      });
+    thisObj.currentHighlight = thisObj.$transcriptArea.find(".able-highlight");
+    if (thisObj.currentHighlight.length === 0) {
+      // Nothing highlighted.
+      thisObj.currentHighlight = null;
+    }
+  };
+
+  AblePlayer.prototype.generateTranscript = function (
+    chapters,
+    captions,
+    descriptions
+  ) {
+    var thisObj = this;
+
+    var $main = $('<div class="able-transcript-container"></div>');
+    var transcriptTitle;
+
+    // set language for transcript container
+    $main.attr("lang", this.transcriptLang);
+
+    if (typeof this.transcriptTitle !== "undefined") {
+      transcriptTitle = this.transcriptTitle;
+    } else if (this.lyricsMode) {
+      transcriptTitle = this.tt.lyricsTitle;
+    } else {
+      transcriptTitle = this.tt.transcriptTitle;
+    }
+
+    if (!this.transcriptDivLocation) {
+      // only add an HTML heading to internal transcript
+      // external transcript is expected to have its own heading
+      var headingNumber = this.playerHeadingLevel;
+      headingNumber += 1;
+      var chapterHeadingNumber = headingNumber + 1;
+
+      if (headingNumber <= 6) {
+        var transcriptHeading = "h" + headingNumber.toString();
+      } else {
+        var transcriptHeading = "div";
+      }
+      var $transcriptHeadingTag = $("<" + transcriptHeading + ">");
+      $transcriptHeadingTag.addClass("able-transcript-heading");
+      if (headingNumber > 6) {
+        $transcriptHeadingTag.attr({
+          role: "heading",
+          "aria-level": headingNumber,
+        });
+      }
+      $transcriptHeadingTag.text(transcriptTitle);
+
+      // set language of transcript heading to language of player
+      // this is independent of language of transcript
+      $transcriptHeadingTag.attr("lang", this.lang);
+
+      $main.append($transcriptHeadingTag);
+    }
+
+    var nextChapter = 0;
+    var nextCap = 0;
+    var nextDesc = 0;
+
+    var addChapter = function (div, chap) {
+      if (chapterHeadingNumber <= 6) {
+        var chapterHeading = "h" + chapterHeadingNumber.toString();
+      } else {
+        var chapterHeading = "div";
+      }
+
+      var $chapterHeadingTag = $("<" + chapterHeading + ">", {
+        class: "able-transcript-chapter-heading",
+      });
+      if (chapterHeadingNumber > 6) {
+        $chapterHeadingTag.attr({
+          role: "heading",
+          "aria-level": chapterHeadingNumber,
+        });
+      }
+
+      var flattenComponentForChapter = function (comp) {
+        var result = [];
+        if (comp.type === "string") {
+          result.push(comp.value);
+        } else {
+          for (var i = 0; i < comp.children.length; i++) {
+            result = result.concat(
+              flattenComponentForChapter(comp.children[i])
+            );
+          }
+        }
+        return result;
+      };
+
+      var $chapSpan = $("<span>", {
+        class: "able-transcript-seekpoint",
+      });
+      for (var i = 0; i < chap.components.children.length; i++) {
+        var results = flattenComponentForChapter(chap.components.children[i]);
+        for (var jj = 0; jj < results.length; jj++) {
+          $chapSpan.append(results[jj]);
+        }
+      }
+      $chapSpan.attr("data-start", chap.start.toString());
+      $chapSpan.attr("data-end", chap.end.toString());
+      $chapterHeadingTag.append($chapSpan);
+
+      div.append($chapterHeadingTag);
+    };
+
+    var addDescription = function (div, desc) {
+      var $descDiv = $("<div>", {
+        class: "able-transcript-desc",
+      });
+      var $descHiddenSpan = $("<span>", {
+        class: "able-hidden",
+      });
+      $descHiddenSpan.attr("lang", thisObj.lang);
+      $descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ": ");
+      $descDiv.append($descHiddenSpan);
+
+      var flattenComponentForDescription = function (comp) {
+        var result = [];
+        if (comp.type === "string") {
+          result.push(comp.value);
+        } else {
+          for (var i = 0; i < comp.children.length; i++) {
+            result = result.concat(
+              flattenComponentForDescription(comp.children[i])
+            );
+          }
+        }
+        return result;
+      };
+
+      var $descSpan = $("<span>", {
+        class: "able-transcript-seekpoint",
+      });
+      for (var i = 0; i < desc.components.children.length; i++) {
+        var results = flattenComponentForDescription(
+          desc.components.children[i]
+        );
+        for (var jj = 0; jj < results.length; jj++) {
+          $descSpan.append(results[jj]);
+        }
+      }
+      $descSpan.attr("data-start", desc.start.toString());
+      $descSpan.attr("data-end", desc.end.toString());
+      $descDiv.append($descSpan);
+
+      div.append($descDiv);
+    };
+
+    var addCaption = function (div, cap) {
+      var $capSpan = $("<span>", {
+        class: "able-transcript-seekpoint able-transcript-caption",
+      });
+
+      var flattenComponentForCaption = function (comp) {
+        var result = [];
+
+        var parts = 0;
+
+        var flattenString = function (str) {
+          parts++;
+
+          var flatStr;
+          var result = [];
+          if (str === "") {
+            return result;
+          }
+
+          var openBracket = str.indexOf("[");
+          var closeBracket = str.indexOf("]");
+          var openParen = str.indexOf("(");
+          var closeParen = str.indexOf(")");
+
+          var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+          var hasParens = openParen !== -1 && closeParen !== -1;
+
+          if (hasParens || hasBrackets) {
+            if (parts > 1) {
+              // force a line break between sections that contain parens or brackets
+              var silentSpanBreak = "<br/>";
+            } else {
+              var silentSpanBreak = "";
+            }
+            var silentSpanOpen =
+              silentSpanBreak + '<span class="able-unspoken">';
+            var silentSpanClose = "</span>";
+            if (hasParens && hasBrackets) {
+              // string has both!
+              if (openBracket < openParen) {
+                // brackets come first. Parse parens separately
+                hasParens = false;
+              } else {
+                // parens come first. Parse brackets separately
+                hasBrackets = false;
+              }
+            }
+          }
+          if (hasParens) {
+            flatStr = str.substring(0, openParen);
+            flatStr += silentSpanOpen;
+            flatStr += str.substring(openParen, closeParen + 1);
+            flatStr += silentSpanClose;
+            flatStr += flattenString(str.substring(closeParen + 1));
+            result.push(flatStr);
+          } else if (hasBrackets) {
+            flatStr = str.substring(0, openBracket);
+            flatStr += silentSpanOpen;
+            flatStr += str.substring(openBracket, closeBracket + 1);
+            flatStr += silentSpanClose;
+            flatStr += flattenString(str.substring(closeBracket + 1));
+            result.push(flatStr);
+          } else {
+            result.push(str);
+          }
+          return result;
+        };
+
+        if (comp.type === "string") {
+          result = result.concat(flattenString(comp.value));
+        } else if (comp.type === "v") {
+          var $vSpan = $("<span>", {
+            class: "able-unspoken",
+          });
+          $vSpan.text("(" + comp.value + ")");
+          result.push($vSpan);
+          for (var i = 0; i < comp.children.length; i++) {
+            var subResults = flattenComponentForCaption(comp.children[i]);
+            for (var jj = 0; jj < subResults.length; jj++) {
+              result.push(subResults[jj]);
+            }
+          }
+        } else if (comp.type === "b" || comp.type === "i") {
+          if (comp.type === "b") {
+            var $tag = $("<strong>");
+          } else if (comp.type === "i") {
+            var $tag = $("<em>");
+          }
+          for (var i = 0; i < comp.children.length; i++) {
+            var subResults = flattenComponentForCaption(comp.children[i]);
+            for (var jj = 0; jj < subResults.length; jj++) {
+              $tag.append(subResults[jj]);
+            }
+          }
+          if (comp.type === "b" || comp.type == "i") {
+            result.push($tag, " ");
+          }
+        } else {
+          for (var i = 0; i < comp.children.length; i++) {
+            result = result.concat(
+              flattenComponentForCaption(comp.children[i])
+            );
+          }
+        }
+        return result;
+      };
+
+      for (var i = 0; i < cap.components.children.length; i++) {
+        var results = flattenComponentForCaption(cap.components.children[i]);
+        for (var jj = 0; jj < results.length; jj++) {
+          var result = results[jj];
+          if (typeof result === "string") {
+            if (thisObj.lyricsMode) {
+              // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
+              result = result.replace("\n", "<br>") + "<br>";
+            } else {
+              // just add a space between captions
+              result += " ";
+            }
+          }
+          $capSpan.append(result);
+        }
+      }
+      $capSpan.attr("data-start", cap.start.toString());
+      $capSpan.attr("data-end", cap.end.toString());
+      div.append($capSpan);
+      div.append(" \n");
+    };
+
+    // keep looping as long as any one of the three arrays has content
+    while (
+      nextChapter < chapters.length ||
+      nextDesc < descriptions.length ||
+      nextCap < captions.length
+    ) {
+      if (
+        nextChapter < chapters.length &&
+        nextDesc < descriptions.length &&
+        nextCap < captions.length
+      ) {
+        // they all three have content
+        var firstStart = Math.min(
+          chapters[nextChapter].start,
+          descriptions[nextDesc].start,
+          captions[nextCap].start
+        );
+      } else if (
+        nextChapter < chapters.length &&
+        nextDesc < descriptions.length
+      ) {
+        // chapters & descriptions have content
+        var firstStart = Math.min(
+          chapters[nextChapter].start,
+          descriptions[nextDesc].start
+        );
+      } else if (nextChapter < chapters.length && nextCap < captions.length) {
+        // chapters & captions have content
+        var firstStart = Math.min(
+          chapters[nextChapter].start,
+          captions[nextCap].start
+        );
+      } else if (nextDesc < descriptions.length && nextCap < captions.length) {
+        // descriptions & captions have content
+        var firstStart = Math.min(
+          descriptions[nextDesc].start,
+          captions[nextCap].start
+        );
+      } else {
+        var firstStart = null;
+      }
+      if (firstStart !== null) {
+        if (
+          typeof chapters[nextChapter] !== "undefined" &&
+          chapters[nextChapter].start === firstStart
+        ) {
+          addChapter($main, chapters[nextChapter]);
+          nextChapter += 1;
+        } else if (
+          typeof descriptions[nextDesc] !== "undefined" &&
+          descriptions[nextDesc].start === firstStart
+        ) {
+          addDescription($main, descriptions[nextDesc]);
+          nextDesc += 1;
+        } else {
+          addCaption($main, captions[nextCap]);
+          nextCap += 1;
+        }
+      } else {
+        if (nextChapter < chapters.length) {
+          addChapter($main, chapters[nextChapter]);
+          nextChapter += 1;
+        } else if (nextDesc < descriptions.length) {
+          addDescription($main, descriptions[nextDesc]);
+          nextDesc += 1;
+        } else if (nextCap < captions.length) {
+          addCaption($main, captions[nextCap]);
+          nextCap += 1;
+        }
+      }
+    }
+    // organize transcript into blocks using [] and () as starting points
+    var $components = $main.children();
+    var spanCount = 0;
+    var openBlock = true;
+    $components.each(function () {
+      if ($(this).hasClass("able-transcript-caption")) {
+        if (
+          $(this).text().indexOf("[") !== -1 ||
+          $(this).text().indexOf("(") !== -1
+        ) {
+          // this caption includes a bracket or parenth. Start a new block
+          // close the previous block first
+          if (spanCount > 0) {
+            $main
+              .find(".able-block-temp")
+              .removeClass("able-block-temp")
+              .wrapAll('<div class="able-transcript-block"></div>');
+            spanCount = 0;
+          }
+        }
+        $(this).addClass("able-block-temp");
+        spanCount++;
+      } else {
+        // this is not a caption. Close the caption block
+        if (spanCount > 0) {
+          $main
+            .find(".able-block-temp")
+            .removeClass("able-block-temp")
+            .wrapAll('<div class="able-transcript-block"></div>');
+          spanCount = 0;
+        }
+      }
+    });
+    return $main;
+  };
 })(jQuery);
 
 (function ($) {

@@ -178,7 +178,7 @@
   };
 
   AblePlayer.prototype.showCaptions = function (now) {
-    var c, thisCaption, captionText, cleanedText;
+    var c, thisCaption, captionText;
     var cues;
     if (this.selectedCaptions.cues.length) {
       cues = this.selectedCaptions.cues;
@@ -196,10 +196,11 @@
     if (typeof thisCaption !== "undefined") {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
-        console.log(cues);
-        console.log(cues[thisCaption]);
-        captionText = this.flattenCueForCaption(cues[thisCaption]);
-        cleanedText = this.sanitizeVttData(captionText).replace("\n", "<br>");
+        captionText = this.flattenCueForCaption(cues[thisCaption]).replace(
+          "\n",
+          "<br>"
+        );
+
         this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {

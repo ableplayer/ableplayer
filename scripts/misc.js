@@ -160,16 +160,4 @@
         Math.floor(value) === value
       );
     };
-
-  AblePlayer.prototype.sanitizeVttData = function (vttData) {
-    var config = {
-      ALLOWED_TAGS: ["b", "i", "u", "c", "v", "ruby", "rt", "rp"],
-      ALLOWED_ATTR: ["class", "title", "lang"],
-    };
-
-    var cleanedText = DOMPurify.sanitize(vttData, config);
-
-    // Sanitize the content with the custom configuration
-    return cleanedText;
-  };
 })(jQuery);
