@@ -588,6 +588,8 @@
           var $vSpan = $("<span>", {
             class: "able-unspoken",
           });
+          // don't display "title=" when rendering the voice tag title in the transcript
+          comp.value = comp.value.replace(/^title="|\"$/g, "");
           $vSpan.text("(" + comp.value + ")");
           result.push($vSpan);
           for (var i = 0; i < comp.children.length; i++) {

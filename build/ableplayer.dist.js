@@ -7504,6 +7504,23 @@ var AblePlayerInstances = [];
   };
 
   AblePlayer.prototype.sanitizeVttData = function (vttData) {
+    // Function to preprocess <c> tags
+    function preprocessCTag(vttData) {
+      return vttData.replace(/<c\.([\w.]+)>/g, function (match, classNames) {
+        var classes = classNames.split(".").join(" ");
+        return '<c class="' + classes + '">';
+      });
+    }
+    // Function to postprocess <c> tags
+    function postprocessCTag(vttData) {
+      return vttData.replace(
+        /<c class="([\w\s]+)">/g,
+        function (match, classNames) {
+          var classes = classNames.split(" ").join(".");
+          return "<c." + classes + ">";
+        }
+      );
+    }
     // Function to process <v> tags
     function processVTag(vttData) {
       return vttData.replace(/<v\s+([^>]*?)>/g, function (match, p1) {
@@ -7527,7 +7544,8 @@ var AblePlayerInstances = [];
         return newTag;
       });
     }
-
+    // Preprocess <c> tags before sanitizing
+    vttData = preprocessCTag(vttData);
     // Process <v> tags before sanitizing
     vttData = processVTag(vttData);
 
@@ -7540,6 +7558,9 @@ var AblePlayerInstances = [];
 
     // Sanitize the VTT data
     var sanitizedVttData = DOMPurify.sanitize(vttData, config);
+
+    // Postprocessing after sanitizing
+    sanitizedVttData = postprocessCTag(sanitizedVttData);
 
     sanitizedVttData = sanitizedVttData.replace(/--&gt;/g, "-->");
 
@@ -13572,6 +13593,8 @@ var AblePlayerInstances = [];
           var $vSpan = $("<span>", {
             class: "able-unspoken",
           });
+          // don't display "title=" when rendering the voice tag title in the transcript
+          comp.value = comp.value.replace(/^title="|\"$/g, "");
           $vSpan.text("(" + comp.value + ")");
           result.push($vSpan);
           for (var i = 0; i < comp.children.length; i++) {
