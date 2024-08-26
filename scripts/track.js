@@ -424,13 +424,60 @@
   };
 
   AblePlayer.prototype.sanitizeVttData = function (vttData) {
-    // Function to preprocess <c> tags
-    function preprocessCTag(vttData) {
-      return vttData.replace(/<c\.([\w.]+)>/g, function (match, classNames) {
-        var classes = classNames.split(".").join(" ");
-        return '<c class="' + classes + '">';
-      });
+    // Combined function to process <v> tags and preprocess <v.word.word> and <c.word.word> tags
+    // Combined function to process <v> tags and preprocess <v.word.word> and <c.word.word> tags
+    function processAndPreprocessTags(html) {
+      // First, preprocess <v.word.word> and <c.word.word> tags
+      var preprocessedHtml = html.replace(
+        /<(v|c)\.([\w\.]+)([^>]*)>/g,
+        function (match, tag, words, otherAttrs) {
+          var classAttr = words.split(".").join(" ");
+          return "<" + tag + ' class="' + classAttr + '"' + otherAttrs + ">";
+        }
+      );
+
+      // Then, process <v> tags to add title attribute and handle class attribute correctly
+      var processedHtml = preprocessedHtml.replace(
+        /<v\s+([^>]*?)>/g,
+        function (match, p1) {
+          // Extract class attribute if present
+          var classMatch = p1.match(/class="([^"]*)"/);
+          var classAttr = classMatch ? classMatch[0] : "";
+
+          // Remove class attribute from p1 to process the title
+          var p1WithoutClass = p1.replace(/class="[^"]*"/, "").trim();
+
+          // Split the remaining content by spaces
+          var parts = p1WithoutClass.split(/\s+/);
+          var attributes = [];
+          var titleParts = [];
+
+          // Separate attributes and title parts
+          parts.forEach(function (part) {
+            if (part.indexOf("=") !== -1) {
+              attributes.push(part);
+            } else {
+              titleParts.push(part);
+            }
+          });
+
+          // Construct the new <v> tag
+          var title = titleParts.join(" ");
+          var newTag =
+            '<v title="' +
+            title +
+            '" ' +
+            attributes.join(" ") +
+            " " +
+            classAttr +
+            ">";
+          return newTag;
+        }
+      );
+
+      return processedHtml;
     }
+
     // Function to postprocess <c> tags
     function postprocessCTag(vttData) {
       return vttData.replace(
@@ -441,33 +488,20 @@
         }
       );
     }
-    // Function to process <v> tags
-    function processVTag(vttData) {
-      return vttData.replace(/<v\s+([^>]*?)>/g, function (match, p1) {
-        // Split the content by spaces
-        var parts = p1.split(/\s+/);
-        var attributes = [];
-        var titleParts = [];
 
-        // Separate attributes and title parts
-        parts.forEach(function (part) {
-          if (part.indexOf("=") !== -1) {
-            attributes.push(part);
-          } else {
-            titleParts.push(part);
-          }
-        });
-
-        // Construct the new <v> tag
-        var title = titleParts.join(" ");
-        var newTag = '<v title="' + title + '" ' + attributes.join(" ") + ">";
-        return newTag;
-      });
+    // Function to postprocess <v> tags
+    function postprocessVTag(vttData) {
+      return vttData.replace(
+        /<v class="([\w\s]+)"([^>]*)>/g,
+        function (match, classNames, otherAttrs) {
+          var classes = classNames.split(" ").join(".");
+          return "<v." + classes + otherAttrs + ">";
+        }
+      );
     }
-    // Preprocess <c> tags before sanitizing
-    vttData = preprocessCTag(vttData);
-    // Process <v> tags before sanitizing
-    vttData = processVTag(vttData);
+
+    // Process <v> and <c> attribute processing
+    vttData = processAndPreprocessTags(vttData);
 
     // Configure DOMPurify
     var config = {
@@ -481,6 +515,7 @@
 
     // Postprocessing after sanitizing
     sanitizedVttData = postprocessCTag(sanitizedVttData);
+    sanitizedVttData = postprocessVTag(sanitizedVttData);
 
     sanitizedVttData = sanitizedVttData.replace(/--&gt;/g, "-->");
 
