@@ -425,14 +425,21 @@
 
   AblePlayer.prototype.sanitizeVttData = function (vttData) {
     // Combined function to process <v> tags and preprocess <v.word.word> and <c.word.word> tags
-    // Combined function to process <v> tags and preprocess <v.word.word> and <c.word.word> tags
     function processAndPreprocessTags(html) {
       // First, preprocess <v.word.word> and <c.word.word> tags
       var preprocessedHtml = html.replace(
-        /<(v|c)\.([\w\.]+)([^>]*)>/g,
+        /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
         function (match, tag, words, otherAttrs) {
           var classAttr = words.split(".").join(" ");
           return "<" + tag + ' class="' + classAttr + '"' + otherAttrs + ">";
+        }
+      );
+
+      // Preprocess <lang> tags to replace language code with lang attribute
+      preprocessedHtml = preprocessedHtml.replace(
+        /<lang\s+([\w-]+)([^>]*)>/g,
+        function (match, langCode, otherAttrs) {
+          return '<lang lang="' + langCode + '"' + otherAttrs + ">";
         }
       );
 
@@ -500,6 +507,16 @@
       );
     }
 
+    // Function to postprocess <lang> tags
+    function postprocessLangTag(vttData) {
+      return vttData.replace(
+        /<lang lang="([\w-]+)"([^>]*)>/g,
+        function (match, langCode, otherAttrs) {
+          return "<lang " + langCode + otherAttrs + ">";
+        }
+      );
+    }
+
     // Process <v> and <c> attribute processing
     vttData = processAndPreprocessTags(vttData);
 
@@ -516,6 +533,7 @@
     // Postprocessing after sanitizing
     sanitizedVttData = postprocessCTag(sanitizedVttData);
     sanitizedVttData = postprocessVTag(sanitizedVttData);
+    sanitizedVttData = postprocessLangTag(sanitizedVttData);
 
     sanitizedVttData = sanitizedVttData.replace(/--&gt;/g, "-->");
 
