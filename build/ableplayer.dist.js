@@ -7078,6 +7078,99 @@ var AblePlayerInstances = [];
 
 })(jQuery);
 
+var validate = {
+  processAndPreprocessTags: function (html) {
+    var preprocessedHtml = html.replace(
+      /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
+      function (match, tag, words, otherAttrs) {
+        var classAttr = words.split(".").join(" ");
+        return "<" + tag + ' class="' + classAttr + '"' + otherAttrs + ">";
+      }
+    );
+
+    preprocessedHtml = preprocessedHtml.replace(
+      /<lang\s+([\w-]+)([^>]*)>/g,
+      function (match, langCode, otherAttrs) {
+        return '<lang lang="' + langCode + '"' + otherAttrs + ">";
+      }
+    );
+
+    var processedHtml = preprocessedHtml.replace(
+      /<v\s+([^>]*?)>/g,
+      function (match, p1) {
+        var classMatch = p1.match(/class="([^"]*)"/);
+        var classAttr = classMatch ? classMatch[0] : "";
+        var p1WithoutClass = p1.replace(/class="[^"]*"/, "").trim();
+        var parts = p1WithoutClass.split(/\s+/);
+        var attributes = [];
+        var titleParts = [];
+
+        parts.forEach(function (part) {
+          if (part.indexOf("=") !== -1) {
+            attributes.push(part);
+          } else {
+            titleParts.push(part);
+          }
+        });
+
+        var title = titleParts.join(" ");
+        var newTag = "<v";
+
+        if (title) {
+          newTag += ' title="' + title + '"';
+        }
+
+        if (attributes.length > 0) {
+          newTag += " " + attributes.join(" ");
+        }
+
+        if (classAttr) {
+          newTag += " " + classAttr;
+        }
+
+        newTag += ">";
+        return newTag;
+      }
+    );
+
+    return processedHtml;
+  },
+
+  postprocessCTag: function (vttData) {
+    return vttData.replace(
+      /<c class="([\w\s]+)">/g,
+      function (match, classNames) {
+        var classes = classNames.split(" ").join(".");
+        return "<c." + classes + ">";
+      }
+    );
+  },
+
+  postprocessVTag: function (vttData) {
+    return vttData.replace(
+      /<v class="([\w\s]+)"([^>]*)>/g,
+      function (match, classNames, otherAttrs) {
+        var classes = classNames.split(" ").join(".");
+        return "<v." + classes + otherAttrs + ">";
+      }
+    );
+  },
+
+  postprocessLangTag: function (vttData) {
+    return vttData.replace(
+      /<lang lang="([\w-]+)"([^>]*)>/g,
+      function (match, langCode, otherAttrs) {
+        return "<lang " + langCode + otherAttrs + ">";
+      }
+    );
+  },
+};
+
+// Export the object for use in other files
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = validate;
+}
+
 (function ($) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
@@ -7503,121 +7596,150 @@ var AblePlayerInstances = [];
     }
   };
 
+  // AblePlayer.prototype.sanitizeVttData = function (vttData) {
+  //   // Combined function to process <v> tags and preprocess <v.word.word> and <c.word.word> tags
+  //   function processAndPreprocessTags(html) {
+  //     // First, preprocess <v.word.word> and <c.word.word> tags
+  //     var preprocessedHtml = html.replace(
+  //       /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
+  //       function (match, tag, words, otherAttrs) {
+  //         var classAttr = words.split(".").join(" ");
+  //         return "<" + tag + ' class="' + classAttr + '"' + otherAttrs + ">";
+  //       }
+  //     );
+
+  //     // Preprocess <lang> tags to replace language code with lang attribute
+  //     preprocessedHtml = preprocessedHtml.replace(
+  //       /<lang\s+([\w-]+)([^>]*)>/g,
+  //       function (match, langCode, otherAttrs) {
+  //         return '<lang lang="' + langCode + '"' + otherAttrs + ">";
+  //       }
+  //     );
+
+  //     // Then, process <v> tags to add title attribute and handle class attribute correctly
+  //     var processedHtml = preprocessedHtml.replace(
+  //       /<v\s+([^>]*?)>/g,
+  //       function (match, p1) {
+  //         // Extract class attribute if present
+  //         var classMatch = p1.match(/class="([^"]*)"/);
+  //         var classAttr = classMatch ? classMatch[0] : "";
+
+  //         // Remove class attribute from p1 to process the title
+  //         var p1WithoutClass = p1.replace(/class="[^"]*"/, "").trim();
+
+  //         // Split the remaining content by spaces
+  //         var parts = p1WithoutClass.split(/\s+/);
+  //         var attributes = [];
+  //         var titleParts = [];
+
+  //         // Separate attributes and title parts
+  //         parts.forEach(function (part) {
+  //           if (part.indexOf("=") !== -1) {
+  //             attributes.push(part);
+  //           } else {
+  //             titleParts.push(part);
+  //           }
+  //         });
+
+  //         // Construct the new <v> tag
+  //         var title = titleParts.join(" ");
+  //         var newTag =
+  //           '<v title="' +
+  //           title +
+  //           '" ' +
+  //           attributes.join(" ") +
+  //           " " +
+  //           classAttr +
+  //           ">";
+  //         return newTag;
+  //       }
+  //     );
+
+  //     return processedHtml;
+  //   }
+
+  //   // Function to postprocess <c> tags
+  //   function postprocessCTag(vttData) {
+  //     return vttData.replace(
+  //       /<c class="([\w\s]+)">/g,
+  //       function (match, classNames) {
+  //         var classes = classNames.split(" ").join(".");
+  //         return "<c." + classes + ">";
+  //       }
+  //     );
+  //   }
+
+  //   // Function to postprocess <v> tags
+  //   function postprocessVTag(vttData) {
+  //     return vttData.replace(
+  //       /<v class="([\w\s]+)"([^>]*)>/g,
+  //       function (match, classNames, otherAttrs) {
+  //         var classes = classNames.split(" ").join(".");
+  //         return "<v." + classes + otherAttrs + ">";
+  //       }
+  //     );
+  //   }
+
+  //   // Function to postprocess <lang> tags
+  //   function postprocessLangTag(vttData) {
+  //     return vttData.replace(
+  //       /<lang lang="([\w-]+)"([^>]*)>/g,
+  //       function (match, langCode, otherAttrs) {
+  //         return "<lang " + langCode + otherAttrs + ">";
+  //       }
+  //     );
+  //   }
+
+  //   // Process <v> and <c> attribute processing
+  //   vttData = processAndPreprocessTags(vttData);
+
+  //   // Configure DOMPurify
+  //   var config = {
+  //     ALLOWED_TAGS: ["b", "i", "u", "v", "c", "lang", "ruby", "rt", "rp"],
+  //     ALLOWED_ATTR: ["title", "class", "lang"],
+  //     KEEP_CONTENT: true, // Keep the content of removed elements
+  //   };
+
+  //   // Sanitize the VTT data
+  //   var sanitizedVttData = DOMPurify.sanitize(vttData, config);
+
+  //   // Postprocessing after sanitizing
+  //   sanitizedVttData = postprocessCTag(sanitizedVttData);
+  //   sanitizedVttData = postprocessVTag(sanitizedVttData);
+  //   sanitizedVttData = postprocessLangTag(sanitizedVttData);
+
+  //   sanitizedVttData = sanitizedVttData.replace(/--&gt;/g, "-->");
+
+  //   // Remove any </v> tags added by DOMPurify but preserve pre-existing ones
+  //   var originalVttData = vttData;
+  //   sanitizedVttData = sanitizedVttData.replace(
+  //     /<\/v>/g,
+  //     function (match, offset) {
+  //       return originalVttData.indexOf(match, offset) !== -1 ? match : "";
+  //     }
+  //   );
+
+  //   return sanitizedVttData;
+  // };
+
+  // Main function
   AblePlayer.prototype.sanitizeVttData = function (vttData) {
-    // Combined function to process <v> tags and preprocess <v.word.word> and <c.word.word> tags
-    function processAndPreprocessTags(html) {
-      // First, preprocess <v.word.word> and <c.word.word> tags
-      var preprocessedHtml = html.replace(
-        /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
-        function (match, tag, words, otherAttrs) {
-          var classAttr = words.split(".").join(" ");
-          return "<" + tag + ' class="' + classAttr + '"' + otherAttrs + ">";
-        }
-      );
+    vttData = validate.processAndPreprocessTags(vttData);
 
-      // Preprocess <lang> tags to replace language code with lang attribute
-      preprocessedHtml = preprocessedHtml.replace(
-        /<lang\s+([\w-]+)([^>]*)>/g,
-        function (match, langCode, otherAttrs) {
-          return '<lang lang="' + langCode + '"' + otherAttrs + ">";
-        }
-      );
-
-      // Then, process <v> tags to add title attribute and handle class attribute correctly
-      var processedHtml = preprocessedHtml.replace(
-        /<v\s+([^>]*?)>/g,
-        function (match, p1) {
-          // Extract class attribute if present
-          var classMatch = p1.match(/class="([^"]*)"/);
-          var classAttr = classMatch ? classMatch[0] : "";
-
-          // Remove class attribute from p1 to process the title
-          var p1WithoutClass = p1.replace(/class="[^"]*"/, "").trim();
-
-          // Split the remaining content by spaces
-          var parts = p1WithoutClass.split(/\s+/);
-          var attributes = [];
-          var titleParts = [];
-
-          // Separate attributes and title parts
-          parts.forEach(function (part) {
-            if (part.indexOf("=") !== -1) {
-              attributes.push(part);
-            } else {
-              titleParts.push(part);
-            }
-          });
-
-          // Construct the new <v> tag
-          var title = titleParts.join(" ");
-          var newTag =
-            '<v title="' +
-            title +
-            '" ' +
-            attributes.join(" ") +
-            " " +
-            classAttr +
-            ">";
-          return newTag;
-        }
-      );
-
-      return processedHtml;
-    }
-
-    // Function to postprocess <c> tags
-    function postprocessCTag(vttData) {
-      return vttData.replace(
-        /<c class="([\w\s]+)">/g,
-        function (match, classNames) {
-          var classes = classNames.split(" ").join(".");
-          return "<c." + classes + ">";
-        }
-      );
-    }
-
-    // Function to postprocess <v> tags
-    function postprocessVTag(vttData) {
-      return vttData.replace(
-        /<v class="([\w\s]+)"([^>]*)>/g,
-        function (match, classNames, otherAttrs) {
-          var classes = classNames.split(" ").join(".");
-          return "<v." + classes + otherAttrs + ">";
-        }
-      );
-    }
-
-    // Function to postprocess <lang> tags
-    function postprocessLangTag(vttData) {
-      return vttData.replace(
-        /<lang lang="([\w-]+)"([^>]*)>/g,
-        function (match, langCode, otherAttrs) {
-          return "<lang " + langCode + otherAttrs + ">";
-        }
-      );
-    }
-
-    // Process <v> and <c> attribute processing
-    vttData = processAndPreprocessTags(vttData);
-
-    // Configure DOMPurify
     var config = {
       ALLOWED_TAGS: ["b", "i", "u", "v", "c", "lang", "ruby", "rt", "rp"],
       ALLOWED_ATTR: ["title", "class", "lang"],
-      KEEP_CONTENT: true, // Keep the content of removed elements
+      KEEP_CONTENT: true,
     };
 
-    // Sanitize the VTT data
     var sanitizedVttData = DOMPurify.sanitize(vttData, config);
 
-    // Postprocessing after sanitizing
-    sanitizedVttData = postprocessCTag(sanitizedVttData);
-    sanitizedVttData = postprocessVTag(sanitizedVttData);
-    sanitizedVttData = postprocessLangTag(sanitizedVttData);
+    sanitizedVttData = validate.postprocessCTag(sanitizedVttData);
+    sanitizedVttData = validate.postprocessVTag(sanitizedVttData);
+    sanitizedVttData = validate.postprocessLangTag(sanitizedVttData);
 
     sanitizedVttData = sanitizedVttData.replace(/--&gt;/g, "-->");
 
-    // Remove any </v> tags added by DOMPurify but preserve pre-existing ones
     var originalVttData = vttData;
     sanitizedVttData = sanitizedVttData.replace(
       /<\/v>/g,

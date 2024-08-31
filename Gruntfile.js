@@ -21,6 +21,7 @@ module.exports = function (grunt) {
           "scripts/preference.js",
           "scripts/webvtt.js",
           "scripts/buildplayer.js",
+          "scripts/validate.js",
           "scripts/track.js",
           "scripts/youtube.js",
           "scripts/slider.js",
