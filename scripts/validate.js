@@ -2,7 +2,7 @@ var validate = {
   processAndPreprocessTags: function (html) {
     var preprocessedHtml = html.replace(
       /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
-      function (match, tag, words, otherAttrs) {
+      function (_, tag, words, otherAttrs) {
         var classAttr = words.split(".").join(" ");
         return "<" + tag + ' class="' + classAttr + '"' + otherAttrs + ">";
       }
@@ -10,14 +10,14 @@ var validate = {
 
     preprocessedHtml = preprocessedHtml.replace(
       /<lang\s+([\w-]+)([^>]*)>/g,
-      function (match, langCode, otherAttrs) {
+      function (_, langCode, otherAttrs) {
         return '<lang lang="' + langCode + '"' + otherAttrs + ">";
       }
     );
 
     var processedHtml = preprocessedHtml.replace(
       /<v\s+([^>]*?)>/g,
-      function (match, p1) {
+      function (_, p1) {
         var classMatch = p1.match(/class="([^"]*)"/);
         var classAttr = classMatch ? classMatch[0] : "";
         var p1WithoutClass = p1.replace(/class="[^"]*"/, "").trim();
@@ -57,19 +57,16 @@ var validate = {
   },
 
   postprocessCTag: function (vttData) {
-    return vttData.replace(
-      /<c class="([\w\s]+)">/g,
-      function (match, classNames) {
-        var classes = classNames.split(" ").join(".");
-        return "<c." + classes + ">";
-      }
-    );
+    return vttData.replace(/<c class="([\w\s]+)">/g, function (_, classNames) {
+      var classes = classNames.split(" ").join(".");
+      return "<c." + classes + ">";
+    });
   },
 
   postprocessVTag: function (vttData) {
     return vttData.replace(
       /<v class="([\w\s]+)"([^>]*)>/g,
-      function (match, classNames, otherAttrs) {
+      function (_, classNames, otherAttrs) {
         var classes = classNames.split(" ").join(".");
         return "<v." + classes + otherAttrs + ">";
       }
@@ -79,7 +76,7 @@ var validate = {
   postprocessLangTag: function (vttData) {
     return vttData.replace(
       /<lang lang="([\w-]+)"([^>]*)>/g,
-      function (match, langCode, otherAttrs) {
+      function (_, langCode, otherAttrs) {
         return "<lang " + langCode + otherAttrs + ">";
       }
     );
