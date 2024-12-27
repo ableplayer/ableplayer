@@ -130,7 +130,7 @@ var AblePlayerInstances = [];
 		}
 
 		// start-time
-		if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
+		if ($(media).data('start-time') !== undefined && $(media).data('start-time').isNumeric()) {
 			this.startTime = $(media).data('start-time');
 		}
 		else {
@@ -2929,10 +2929,10 @@ var AblePlayerInstances = [];
 			if (nextLine.indexOf('NOTE') === 0 && ((nextLine.length === 4) || (nextLine[4] === ' ') || (nextLine[4] === '\t'))) {
 				actList(state, [eatComment, eatEmptyLines]);
 			}
-			else if ($.trim(nextLine).length === 0 && state.text.length > 0) {
+			else if (nextLine.trim().length === 0 && state.text.length > 0) {
 				act(state, eatEmptyLines);
 			}
-			else if ($.trim(nextLine).length > 0) {
+			else if (nextLine.trim().length > 0) {
 				act(state, parseCue);
 			}
 			else {
@@ -3290,14 +3290,14 @@ var AblePlayerInstances = [];
 			else if (tokenState === 'startTagAnnotation') {
 				if (c === '>') {
 					cut(state, 1);
-					buffer = $.trim(buffer).replace(/ +/, ' ');
+					buffer = buffer.trim().replace(/ +/, ' ');
 					token.type = 'startTag';
 					token.tagName = result.join('');
 					token.annotation = buffer;
 					return token;
 				}
 				else if (c === '\u0004') {
-					buffer = $.trim(buffer).replace(/ +/, ' ');
+					buffer = buffer.trim().replace(/ +/, ' ');
 					token.type = 'startTag';
 					token.tagName = result.join('');
 					token.annotation = buffer;
@@ -3356,7 +3356,7 @@ var AblePlayerInstances = [];
 		}
 		while (true) {
 			var nextLine = peekLine(state);
-			if ($.trim(nextLine).length === 0) {
+			if (nextLine.trim().length === 0) {
 				// End of comment.
 				return;
 			}
@@ -3436,7 +3436,7 @@ var AblePlayerInstances = [];
 	function eatEmptyLines(state) {
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if ($.trim(nextLine).length === 0) {
+			if (nextLine.trim().length === 0) {
 				cutLine(state);
 			}
 			else {
@@ -3450,7 +3450,7 @@ var AblePlayerInstances = [];
 		var linesEaten = 0;
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if ($.trim(nextLine).length === 0) {
+			if (nextLine.trim().length === 0) {
 				cutLine(state);
 				linesEaten += 1;
 			}
@@ -11306,7 +11306,7 @@ var AblePlayerInstances = [];
 					cueText = this.flattenCueForMeta(cues[thisMeta]);
 					cueLines = cueText.split('\n');
 					for (i=0; i<cueLines.length; i++) {
-						line = $.trim(cueLines[i]);
+						line = cueLines[i].trim();
 						if (line.toLowerCase().trim() === 'pause') {
 							// don't show big play button when pausing via metadata
 							this.hideBigPlayButton = true;
