@@ -197,7 +197,7 @@
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace(
-          "\n",
+          /\n/,
           "<br>"
         );
 
