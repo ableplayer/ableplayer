@@ -630,7 +630,7 @@
           if (typeof result === "string") {
             if (thisObj.lyricsMode) {
               // add <br> BETWEEN each caption and WITHIN each caption (if payload includes "\n")
-              result = result.replace(/\n/, "<br>") + "<br>";
+              result = result.replace(/\n/g, "<br>") + "<br>";
             } else {
               // just add a space between captions
               result += " ";

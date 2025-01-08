@@ -39,7 +39,7 @@
         if (this.metaType === "text") {
           // it's time to load the new metadata cue into the container div
           this.$metaDiv.html(
-            this.flattenCueForMeta(cues[thisMeta]).replace(/\n/, "<br>")
+            this.flattenCueForMeta(cues[thisMeta]).replace(/\n/g, "<br>")
           );
         } else if (this.metaType === "selector") {
           // it's time to show content referenced by the designated selector(s)
