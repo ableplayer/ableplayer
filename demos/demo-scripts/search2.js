@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /**
    * Makes the search results visible.
    */
-  function showSearchResults() {
+  function displaySearchResults() {
     document.querySelector("#results-wrapper").style.display = "block";
   }
 
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     player.searchLang = getSearchLang();
 
     player.showSearchResults();
-    showSearchResults();
+    displaySearchResults();
   }
 
   /**
