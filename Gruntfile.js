@@ -1,11 +1,11 @@
 module.exports = function (grunt) {
-  grunt.loadNpmTasks("grunt-contrib-uglify");
   grunt.loadNpmTasks("grunt-contrib-concat");
   grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-remove-logging");
   grunt.loadNpmTasks("grunt-contrib-jshint");
+  grunt.loadNpmTasks("grunt-terser");
 
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
@@ -48,6 +48,13 @@ module.exports = function (grunt) {
         ],
         dest: "build/<%= pkg.name %>.js",
       },
+      banner: {
+        options: {
+          banner: "/*! <%= pkg.name %> V<%= pkg.version %> */\n",
+        },
+        src: "build/<%= pkg.name %>.min.js",
+        dest: "build/<%= pkg.name %>.min.js",
+      },
     },
     removelogging: {
       dist: {
@@ -58,17 +65,18 @@ module.exports = function (grunt) {
         // Remove all console output (see https://www.npmjs.com/package/grunt-remove-logging)
       },
     },
-    uglify: {
+    terser: {
       min: {
-        src: ["build/<%= pkg.name %>.dist.js"],
-        dest: "build/<%= pkg.name %>.min.js",
-      },
-      options: {
-        // Add a banner with the package name and version
-        //  (no date, otherwise a new build is different even if the code didn't change!)
-        banner: "/*! <%= pkg.name %> V<%= pkg.version %> */\n",
-        // Preserve comments that start with a bang (like the file header)
-        preserveComments: "some",
+        files: {
+          "build/<%= pkg.name %>.min.js": ["build/<%= pkg.name %>.dist.js"],
+        },
+        options: {
+          ecma: 2015, // Specify ECMAScript version to support ES6+
+          keep_fnames: true,
+          output: {
+            comments: /^!/,
+          },
+        },
       },
     },
     cssmin: {
@@ -102,7 +110,7 @@ module.exports = function (grunt) {
   grunt.registerTask("default", [
     "concat",
     "removelogging",
-    "uglify",
+    "terser",
     "cssmin",
   ]);
   grunt.registerTask("test", ["jshint"]);
