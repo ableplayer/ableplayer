@@ -1,115 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Video player with search (client-side) | Able Player Demos</title>
-<link rel="stylesheet" href="demos.css" type="text/css">
+	<meta charset="UTF-8">
+	<title>Video player with search (client-side) | Able Player Demos</title>
+	<link rel="stylesheet" href="demos.css" type="text/css">
 
-<!-- Dependencies -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+	<!-- Dependencies -->
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+	<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
-<!-- Able Player CSS -->
-<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+	<!-- Able Player CSS -->
+	<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css" />
 
-<!-- Able Player JavaScript -->
-<script src="../build/ableplayer.js"></script>
+	<!-- Able Player JavaScript -->
+	<script src="../build/ableplayer.js"></script>
 
-<!-- Style for this example only -->
-<style>
-	#search {
-		border: 2px solid #340449;
-		padding: 0.5em;
-		background-color: #FFC;
-		max-width: 60em;
-		margin-bottom: 1em;
-	}
-	#search div {
-		display: inline-block;
-		padding: 0.25em;
-	}
-	#search div label {
-		font-weight: bold;
-	}
-	#search input,
-	#search select,
-	#search button {
-		font-size: 1em;
-	}
-	div#wrapper {
-		display: flex; 
-		flex-direction: row; 
-		flex-wrap: wrap;
-		justify-content: flex-start;
-		width: 1280px;
-		max-width: 98%;
-	}
-	#player {
-		width: 45%;
-		max-width: 500px;
-		margin: 0 0.5em 0 0;
-	}
-	#results-wrapper {
-		height: 700px;
-		width: 45%;
-		margin: 0;
-	}
-	#results-wrapper h2 { 
-		margin-left: 0.55em;
-	}
-	#results-wrapper p {
-		font-size: 1.1em;
-		margin-left: 1em;
-	}
-	@media (max-width: 800px) {
-		#player, #results-wrapper {
-			width: 90%;
+	<!-- Style for this example only -->
+	<style>
+		#search {
+			border: 2px solid #340449;
+			padding: 0.5em;
+			background-color: #FFC;
+			max-width: 60em;
+			margin-bottom: 1em;
+		}
+
+		#search div {
+			display: inline-block;
+			padding: 0.25em;
+		}
+
+		#search div label {
+			font-weight: bold;
+		}
+
+		#search input,
+		#search select,
+		#search button {
+			font-size: 1em;
+		}
+
+		div#wrapper {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			justify-content: flex-start;
+			width: 1280px;
+			max-width: 98%;
+		}
+
+		#player {
+			width: 45%;
+			max-width: 500px;
+			margin: 0 0.5em 0 0;
+		}
+
+		#results-wrapper {
+			height: 700px;
+			width: 45%;
 			margin: 0;
 		}
-	}
-</style>
 
-<!-- JavaScript for this example -->
-<script>
-$(document).ready(function() {
+		#results-wrapper h2 {
+			margin-left: 0.55em;
+		}
 
-	var player = new AblePlayer($('#video1'));
+		#results-wrapper p {
+			font-size: 1.1em;
+			margin-left: 1em;
+		}
 
-	// handle click on 'Go' button
-	$('#go').on('click',function() {
+		@media (max-width: 800px) {
 
-		// get user's search string from input field
-		var rawSearch = $('#terms').val();
+			#player,
+			#results-wrapper {
+				width: 90%;
+				margin: 0;
+			}
+		}
+	</style>
 
-		// Strip HTML from search string to reduce possibility of nefarious submissions
-		var cleanSearch = $('<div>').html(rawSearch).text();
-
-		// Strip punctation
-		var punctuation = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~';
-		var searchLetters = cleanSearch.split('');
-		var cleanLetters = searchLetters.filter(function(letter) {
-			return punctuation.indexOf(letter) === -1;
-		});
-
-		// Assign finalSearch to player.searchText
-		// In a server-side application, this is the variable that would
-		// be passed to the player via the data-search attribute
-		player.searchString = cleanLetters.join('');
-
-		player.searchIgnoreCaps = $("#ignorecaps").prop("checked");
-
-		// Assign user's selected language to player.searchLang
-		player.searchLang = $('#lang option:selected').val();
-
-		// Conduct the search and show the results
-		player.showSearchResults();
-
-		// make the results visible
-		$('#results-wrapper').show();
-
-	});
-})
-</script>
+	<!-- JavaScript for this example -->
+	<script src="demo-scripts/search2.js"></script>
 </head>
 
 <body>
@@ -125,28 +98,29 @@ $(document).ready(function() {
 	<main>
 		<h1>Video player with search (client-side)</h1>
 
-		<p>Able Player can search a video's caption or subtitle files, 
-			with variables defined in <strong>data-search-div</strong>, 
-			<strong>data-search</strong>, and <strong>data-search-lang</strong> 
-			attributes on the media element. See the <a href="search1.html">server-side search demo</a> 
-			for more details about each of these attributes.</p>
+		<p>Able Player can search a video's caption or subtitle files,
+			with variables defined in <strong>data-search-div</strong>,
+			<strong>data-search</strong>, and <strong>data-search-lang</strong>
+			attributes on the media element. See the <a href="search1.html">server-side search demo</a>
+			for more details about each of these attributes.
+		</p>
 
-		<p>The current demo shows how this same functionality can be implemented 
-			in a client-side application using JQuery. In this context, 
-			the only required attribute of the above three is <strong>data-search-div</strong>, 
-			which specifies the id of a container element in which to write the search results. 
-			Otherwise, Able Player is initiated as a variable, which enables us to assign values 
-			directly to Able Player's search-related variables based on user input, 
-			then call  Able Player's showSearchResults() function to display the results. 
+		<p>The current demo shows how this same functionality can be implemented
+			in a client-side application using JavaScript. In this context,
+			the only required attribute of the above three is <strong>data-search-div</strong>,
+			which specifies the id of a container element in which to write the search results.
+			Otherwise, Able Player is initiated as a variable, which enables us to assign values
+			directly to Able Player's search-related variables based on user input,
+			then call Able Player's showSearchResults() function to display the results.
 			See the source code for details.</p>
 
-		<p>Also, in this example, <strong>data-include-transcript</strong> is set to "false", 
+		<p>Also, in this example, <strong>data-include-transcript</strong> is set to "false",
 			since there isn't room on this page
-			for both search results and a transcript. 
+			for both search results and a transcript.
 			A better design would accommodate both features.
 		</p>
 
-		<p>Enter a search term below. (hint: "web mouse" is a good choice in English; 
+		<p>Enter a search term below. (hint: "web mouse" is a good choice in English;
 			or "<span lang="es">web clicladores idénticos</em>" in <span lang="es">Español</span>).</p>
 
 		<div id="search">
@@ -201,4 +175,5 @@ $(document).ready(function() {
 
 	</main>
 </body>
+
 </html>

@@ -1,6 +1,6 @@
 {
   "name": "ableplayer",
-  "version": "4.5.3",
+  "version": "4.5.1",
   "description": "Accessible HTML5 media player",
   "homepage": "http://ableplayer.github.io/ableplayer",
   "bugs": "https://github.com/ableplayer/ableplayer/issues",
@@ -11,9 +11,11 @@
   },
   "main": "build/ableplayer.min.js",
   "scripts": {
-    "build": "grunt"
+    "build": "grunt",
+    "test": "jest"
   },
   "dependencies": {
+    "dompurify": "^3.2.4",
     "dotenv": "^10.0.0",
     "jquery": "^3.5.0",
     "js-cookie": "^3.0.0",
@@ -26,7 +28,13 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-contrib-jshint": "^3.2.0",
-    "grunt-contrib-uglify": "^4.0.1",
-    "grunt-remove-logging": ">=0.2.0"
+    "grunt-remove-logging": ">=0.2.0",
+    "grunt-terser": "^2.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-puppeteer": "^10.1.0",
+    "jsdoc": "^4.0.4",
+    "jsdom": "^25.0.1",
+    "puppeteer": "^23.2.2"
   }
 }

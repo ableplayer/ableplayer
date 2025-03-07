@@ -7,3 +7,5 @@ npm-debug.log
 translations/???.js
 .idea
 .htaccess
+docs
+jsdoc.json
