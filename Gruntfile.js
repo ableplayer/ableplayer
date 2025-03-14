@@ -22,9 +22,6 @@ module.exports = function (grunt) {
       },
       build: {
         src: [
-          // Ultimately this should be just 'scripts/*.js',
-          //  but for now we're maintaining the order which was
-          //  specified in the previous 'compile.sh' script
           "node_modules/dompurify/dist/purify.js",
           "scripts/ableplayer-base.js",
           "scripts/initialize.js",
@@ -58,11 +55,52 @@ module.exports = function (grunt) {
         ],
         dest: "build/<%= pkg.name %>.js",
       },
+      build_separate_dompurify: {
+        options: {
+          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - In this file, DOMPurify is not bundled in with AblePlayer, but is a required dependency that can be added to the project via a local copy or a CDN */\n",
+        },
+        src: [
+          "scripts/ableplayer-base.js",
+          "scripts/initialize.js",
+          "scripts/preference.js",
+          "scripts/webvtt.js",
+          "scripts/buildplayer.js",
+          "scripts/validate.js",
+          "scripts/track.js",
+          "scripts/youtube.js",
+          "scripts/slider.js",
+          "scripts/volume.js",
+          "scripts/dialog.js",
+          "scripts/misc.js",
+          "scripts/description.js",
+          "scripts/browser.js",
+          "scripts/control.js",
+          "scripts/caption.js",
+          "scripts/chapters.js",
+          "scripts/metadata.js",
+          "scripts/transcript.js",
+          "scripts/search.js",
+          "scripts/event.js",
+          "scripts/dragdrop.js",
+          "scripts/sign.js",
+          "scripts/langs.js",
+          "scripts/translation.js",
+          "scripts/ttml2webvtt.js",
+          "scripts/JQuery.doWhen.js",
+          "scripts/vts.js",
+          "scripts/vimeo.js",
+        ],
+        dest: "build/separate-dompurify/<%= pkg.name %>.js",
+      },
     },
     removelogging: {
       dist: {
         src: ["build/<%= pkg.name %>.js"],
         dest: "build/<%= pkg.name %>.dist.js",
+      },
+      dist_separate_dompurify: {
+        src: ["build/separate-dompurify/<%= pkg.name %>.js"],
+        dest: "build/separate-dompurify/<%= pkg.name %>.dist.js",
       },
       options: {
         // Remove all console output (see https://www.npmjs.com/package/grunt-remove-logging)
@@ -72,6 +110,19 @@ module.exports = function (grunt) {
       min: {
         files: {
           "build/<%= pkg.name %>.min.js": ["build/<%= pkg.name %>.dist.js"],
+        },
+        options: {
+          ecma: 2015, // Specify ECMAScript version to support ES6+
+          keep_fnames: true,
+          output: {
+            comments: /^!/,
+          },
+        },
+      },
+      min_separate_dompurify: {
+        files: {
+          "build/separate-dompurify/<%= pkg.name %>.min.js": ["build/separate-dompurify/<%= pkg.name %>.dist.js"],
+          "build/separate-dompurify/purify.min.js": ["node_modules/dompurify/dist/purify.js"],
         },
         options: {
           ecma: 2015, // Specify ECMAScript version to support ES6+
@@ -111,10 +162,15 @@ module.exports = function (grunt) {
   });
 
   grunt.registerTask("default", [
-    "concat",
-    "removelogging",
-    "terser",
+    "concat:build",
+    "removelogging:dist",
+    "terser:min",
     "cssmin",
+  ]);
+  grunt.registerTask("build_separate_dompurify", [
+    "concat:build_separate_dompurify",
+    "removelogging:dist_separate_dompurify",
+    "terser:min_separate_dompurify",
   ]);
   grunt.registerTask("test", ["jshint"]);
 };
