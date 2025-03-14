@@ -10,6 +10,16 @@ module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
     concat: {
+      options: {
+        banner: "/*! <%= pkg.name %> V<%= pkg.version %> with DOMPurify included */\n",
+        process: function(src, filepath) {
+          // Remove the source map reference line only from the dompurify file
+          if (filepath.includes('dompurify')) {
+            return src.replace(/\/\/# sourceMappingURL=.*\.map/g, '');
+          }
+          return src;
+        }
+      },
       build: {
         src: [
           // Ultimately this should be just 'scripts/*.js',
@@ -47,13 +57,6 @@ module.exports = function (grunt) {
           "scripts/vimeo.js",
         ],
         dest: "build/<%= pkg.name %>.js",
-      },
-      banner: {
-        options: {
-          banner: "/*! <%= pkg.name %> V<%= pkg.version %> */\n",
-        },
-        src: "build/<%= pkg.name %>.min.js",
-        dest: "build/<%= pkg.name %>.min.js",
       },
     },
     removelogging: {
