@@ -46,7 +46,7 @@
           cueText = this.flattenCueForMeta(cues[thisMeta]);
           cueLines = cueText.split("\n");
           for (i = 0; i < cueLines.length; i++) {
-            line = $.trim(cueLines[i]);
+            line = cueLines[i].trim();
             if (line.toLowerCase().trim() === "pause") {
               // don't show big play button when pausing via metadata
               this.hideBigPlayButton = true;
