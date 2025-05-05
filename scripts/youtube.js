@@ -133,10 +133,13 @@
 				onError: function (x) {
 					deferred.fail();
 				},
-				onStateChange: function (x) {				
+				onStateChange: function (x) {
 					thisObj.getPlayerState().then(function(playerState) {
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
+							if (thisObj.hasSignLanguage && thisObj.signVideo) {
+								thisObj.signVideo.play(true);
+							}
 							thisObj.playing = true;
 							thisObj.startedPlaying = true;
 							thisObj.paused = false;
@@ -149,6 +152,9 @@
 							thisObj.paused = true;
 						}
 						if (thisObj.stoppingYouTube && playerState === 'paused') {
+							if (thisObj.hasSignLanguage && thisObj.signVideo) {
+								thisObj.signVideo.pause(true);
+							}
 							if (typeof thisObj.$posterImg !== 'undefined') {
 								thisObj.$posterImg.show();
 							}
@@ -161,11 +167,11 @@
 					// If caption tracks are hosted locally, but are also available on YouTube,
 					// we need to turn them off on YouTube or there will be redundant captions 
 					// This is the most reliable event on which to unload the caption module 
-					if (thisObj.player === 'youtube' && !thisObj.usingYouTubeCaptions) { 						
-						if (thisObj.youTubePlayer.getOptions('captions')) { 							
+					if (thisObj.player === 'youtube' && !thisObj.usingYouTubeCaptions) {
+						if (thisObj.youTubePlayer.getOptions('captions')) {
 							thisObj.youTubePlayer.unloadModule('captions');
 						}
-					}			 			
+					}
 				},
 				onPlaybackQualityChange: function () {
 					// do something

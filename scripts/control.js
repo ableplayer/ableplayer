@@ -11,8 +11,13 @@
 		this.seeking = true;
 		this.liveUpdatePending = true;
 
-		if (this.speakingDescription) { 			
+		if (this.speakingDescription) {
 			this.synth.cancel(); 
+		}
+
+		if (this.hasSignLanguage && this.signVideo) {
+			// keep sign languge video in sync
+			this.signVideo.currentTime = this.startTime;
 		}
 
 		if (this.player === 'html5') {
@@ -39,6 +44,10 @@
 				if (typeof this.$posterImg !== 'undefined') {
 					this.$posterImg.hide();
 				}
+			}
+			if (this.hasSignLanguage && this.signVideo) {
+				// keep sign languge video in sync
+				this.signVideo.currentTime = newTime;
 			}
 		}
 		else if (this.player === 'vimeo') {
@@ -311,6 +320,10 @@
 			this.syncSpeechToPlaybackRate(rate); 
 		}
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.playbackRate = rate;
+		}
+
 		if (this.player === 'html5') {
 			this.media.playbackRate = rate;
 		}
@@ -320,9 +333,7 @@
 		else if (this.player === 'vimeo') {
 			this.vimeoPlayer.setPlaybackRate(rate);
 		}
-		if (this.hasSignLanguage && this.signVideo) {
-			this.signVideo.playbackRate = rate;
-		}
+
 		this.playbackRate = rate;
 		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
 	};	
@@ -368,11 +379,12 @@
 
 		var thisObj = this;
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.pause(true);
+		}
+
 		if (this.player === 'html5') {
 			this.media.pause(true);
-			if (this.hasSignLanguage && this.signVideo) {
-				this.signVideo.pause(true);
-			}
 		}
 		else if (this.player === 'youtube') {
 			this.youTubePlayer.pauseVideo();
@@ -386,11 +398,12 @@
 
 		var thisObj = this;
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.play(true);
+		}
+
 		if (this.player === 'html5') {
 			this.media.play(true);
-			if (this.hasSignLanguage && this.signVideo) {
-				this.signVideo.play(true);
-			}
 		}
 		else if (this.player === 'youtube') {
 
@@ -998,10 +1011,10 @@
 			if (this.speakingDescription) { 
 				// pause the current utterance 
 				// it will resume when the user presses play 
-				this.synth.pause();				
+				this.synth.pause();
 			}
 		}
-		if (this.speechEnabled === null) { 			
+		if (this.speechEnabled === null) {
 			this.initSpeech('play'); 
 		}
 	};
@@ -1010,8 +1023,8 @@
 
 		if (this.speakingDescription) { 
 			// cancel audio description 
-			this.synth.cancel();				
-		}			
+			this.synth.cancel();
+		}
 		this.seekTo(0);
 	};
 
