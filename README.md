@@ -97,6 +97,9 @@ Dependencies
     preferences in cookies. The example code below uses CDN’s hosted libraries; 
     no download required. Prior to version 2.3, Able Player used [jquery.cookie][]
     for this same purpose.
+- *AblePlayer*, as of 4.5.1, requires the use of the DOMPurify sanitizing library. 
+  - The default files in the root of the `/build` directory have DOMPurify bundled in. 
+  - Alternatively, the `build/separate-dompurify` directory houses copies of the AblePlayer files with AblePlayer code only and a stand-alone copy of the current version of DOMPurify that the project is currently using. These files are available for those who want to load DOMPurify via a separate file or want to use a CDN hosted version.
     
 To install Able Player, copy the following files from the Able Player repo into a folder on your web server:
 - 		build/* 

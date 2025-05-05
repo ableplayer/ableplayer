@@ -42,9 +42,9 @@
 
 "hideTranscript": "Oculta la transcripció",
 
-"turnOnDescriptions": "Activa l\'audiodescripció",
+"turnOnDescriptions": "Activa l'audiodescripció",
 
-"turnOffDescriptions": "Desactiva l\'audiodescripció",
+"turnOffDescriptions": "Desactiva l'audiodescripció",
 
 "chapters": "Capítols",
 
@@ -96,33 +96,33 @@
 
 "unknown": "Desconegut",
 
-"statusPlaying": "S\'està reproduint",
+"statusPlaying": "S'està reproduint",
 
 "statusPaused": "En pausa",
 
 "statusStopped": "Aturat",
 
-"statusWaiting": "S\'està esperant",
+"statusWaiting": "S'està esperant",
 
 "statusBuffering": "Emmagatzemant",
 
-"statusUsingDesc": "S\'està utilitzant la versió amb audiodescripció",
+"statusUsingDesc": "S'està utilitzant la versió amb audiodescripció",
 
-"statusLoadingDesc": "S\'està carregant la versió amb audiodescripció",
+"statusLoadingDesc": "S'està carregant la versió amb audiodescripció",
 
-"statusUsingNoDesc": "S\'està utilitzant la versió sense audiodescripció",
+"statusUsingNoDesc": "S'està utilitzant la versió sense audiodescripció",
 
-"statusLoadingNoDesc": "S\'està carregant la versió sense audiodescripció",
+"statusLoadingNoDesc": "S'està carregant la versió sense audiodescripció",
 
-"statusLoadingNext": "S\'està carregant la pista següent",
+"statusLoadingNext": "S'està carregant la pista següent",
 
 "statusEnd": "Fi de pista",
 
 "selectedTrack": "Pista seleccionada",
 
-"alertDescribedVersion": "S\'està utilitzant la versió amb audiodescripció del vídeo",
+"alertDescribedVersion": "S'està utilitzant la versió amb audiodescripció del vídeo",
 
-"alertNonDescribedVersion": "S\'està utilitzant la versió sense audiodescripció del vídeo",
+"alertNonDescribedVersion": "S'està utilitzant la versió sense audiodescripció del vídeo",
 
 "fallbackError1": "El vostre navegador no és compatible",
 
@@ -148,25 +148,25 @@
 
 "prefIntroCaptions": "Les preferències següents controlen com es mostren els subtítols.",
 
-"prefIntroDescription1": "Aquest reproductor suporta l\'audiodescripció de dues maneres: ",
+"prefIntroDescription1": "Aquest reproductor suporta l'audiodescripció de dues maneres: ",
 
-"prefIntroDescription2": "L\'actual vídeo té ",
+"prefIntroDescription2": "L'actual vídeo té ",
 
-"prefIntroDescriptionNone": "L\'actual vídeo no disposa d\'audiodescripció en cap format.",
+"prefIntroDescriptionNone": "L'actual vídeo no disposa d'audiodescripció en cap format.",
 
-"prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l\'audiodescripció textual.",
+"prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.",
 
-"prefIntroDescription4": "Desprès de desar la configuració, podeu commutar l\'ús de l\'audiodescripció amb el mateix botó.",
+"prefIntroDescription4": "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.",
 
 "prefIntroKeyboard1": "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).",
 
-"prefIntroKeyboard2": "A continuació, podeu asignar les tecles modificadores (Majúscules, Alt, i la tecla d\'inserció).",
+"prefIntroKeyboard2": "A continuació, podeu asignar les tecles modificadores (Majúscules, Alt, i la tecla d'inserció).",
 
 "prefIntroKeyboard3": "NOTA: algunes combinacions de tecles poden entrar en conflicte amb les utilitzades pel navegador i/o altres aplicacions. Proveu diferents combinacions o tecles modificadores fins a trobar les adequades en cada cas.",
 
 "prefIntroTranscript": "Les preferències següents afecten a la transcripció interactiva.",
 
-"prefCookieWarning": "Per desar les preferències es requereix l\'us de galetes.",
+"prefCookieWarning": "Per desar les preferències es requereix l'us de galetes.",
 
 "prefHeadingKeyboard1": "Tecles modificadores emprades com a dreceres de teclat",
 
@@ -192,7 +192,7 @@
 
 "prefDescFormat": "Format preferit",
 
-"prefDescFormatHelp": "Si els dos formats es troben disponibles, només s'utilitzarà un d\'ells.",
+"prefDescFormatHelp": "Si els dos formats es troben disponibles, només s'utilitzarà un d'ells.",
 
 "prefDescFormatOption1": "Vídeo alternatiu amb audiodescripció incrustada",
 
@@ -282,9 +282,9 @@
 
 "sampleCaptionText": "Text de mostra dels subtítols",
 
-"prefSuccess": "S\'han desat els canvis.",
+"prefSuccess": "S'han desat els canvis.",
 
-"prefNoChange": "No s\'ha fet cap canvi.",
+"prefNoChange": "No s'ha fet cap canvi.",
 
 "help": "Ajuda",
 
@@ -294,7 +294,7 @@
 
 "cancel": "Cancel·la",
 
-"ok": "D\'acord",
+"ok": "D'acord",
 
 "done": "Fet",
 
@@ -308,9 +308,9 @@
 
 "windowResize": "Redimensiona",
 
-"windowResizeHeading": "Redimensiona la finestra amb l\'intèrpret",
+"windowResizeHeading": "Redimensiona la finestra amb l'intèrpret",
 
-"windowResizeAlert": "S\'ha redimensionat la finestra.",
+"windowResizeAlert": "S'ha redimensionat la finestra.",
 
 "windowClose": "Tanca",
 
@@ -324,7 +324,7 @@
 
 "windowBringTop": "Porta al davant",
 
-"windowBringTopAlert": "Aquesta finestra es troba davant de la resta d\'objectes de la pàgina.",
+"windowBringTopAlert": "Aquesta finestra es troba davant de la resta d'objectes de la pàgina.",
 
 "resultsSummary1": "You searched for:",
 
