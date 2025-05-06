@@ -188,10 +188,10 @@
 			if (nextLine.indexOf('NOTE') === 0 && ((nextLine.length === 4) || (nextLine[4] === ' ') || (nextLine[4] === '\t'))) {
 				actList(state, [eatComment, eatEmptyLines]);
 			}
-			else if ($.trim(nextLine).length === 0 && state.text.length > 0) {
+			else if (nextLine.trim().length === 0 && state.text.length > 0) {
 				act(state, eatEmptyLines);
 			}
-			else if ($.trim(nextLine).length > 0) {
+			else if (nextLine.trim().length > 0) {
 				act(state, parseCue);
 			}
 			else {
@@ -549,14 +549,14 @@
 			else if (tokenState === 'startTagAnnotation') {
 				if (c === '>') {
 					cut(state, 1);
-					buffer = $.trim(buffer).replace(/ +/, ' ');
+					buffer = buffer.trim().replace(/ +/, ' ');
 					token.type = 'startTag';
 					token.tagName = result.join('');
 					token.annotation = buffer;
 					return token;
 				}
 				else if (c === '\u0004') {
-					buffer = $.trim(buffer).replace(/ +/, ' ');
+					buffer = buffer.trim().replace(/ +/, ' ');
 					token.type = 'startTag';
 					token.tagName = result.join('');
 					token.annotation = buffer;
@@ -615,7 +615,7 @@
 		}
 		while (true) {
 			var nextLine = peekLine(state);
-			if ($.trim(nextLine).length === 0) {
+			if (nextLine.trim().length === 0) {
 				// End of comment.
 				return;
 			}
@@ -695,7 +695,7 @@
 	function eatEmptyLines(state) {
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if ($.trim(nextLine).length === 0) {
+			if (nextLine.trim().length === 0) {
 				cutLine(state);
 			}
 			else {
@@ -709,7 +709,7 @@
 		var linesEaten = 0;
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if ($.trim(nextLine).length === 0) {
+			if (nextLine.trim().length === 0) {
 				cutLine(state);
 				linesEaten += 1;
 			}

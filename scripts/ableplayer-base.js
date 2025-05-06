@@ -130,7 +130,7 @@ var AblePlayerInstances = [];
 		}
 
 		// start-time
-		if ($(media).data('start-time') !== undefined && $.isNumeric($(media).data('start-time'))) {
+		if ($(media).data('start-time') !== undefined && $(media).data('start-time').isNumeric()) {
 			this.startTime = $(media).data('start-time');
 		}
 		else {
