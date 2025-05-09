@@ -7723,14 +7723,14 @@ var AblePlayerInstances = [];
 					// handle a click on anything, in case the user 
 					// clicks something before they click 'play' or 'prefs' buttons
 					// that would allow us to init speech before it's needed 
-					$(document).on('click',function() { 			
+					$(document).one('click.ableInitSpeech', function () { 			
 						var greeting = new SpeechSynthesisUtterance('Hi!');
 						greeting.volume = 0; // silent 
 						greeting.rate = 10; // fastest speed supported by the API  
 						thisObj.synth.speak(greeting);
 						greeting.onstart = function(e) { 						
 							// utterance has started 
-							$(document).off('click'); // unbind the click event listener 		
+							$(document).off('click.ableInitSpeech'); // unbind the click event listener 		
 						}
 						greeting.onend = function(e) {
 							// should now be able to get browser voices 
@@ -7756,7 +7756,7 @@ var AblePlayerInstances = [];
 					thisObj.synth.speak(greeting);
 					greeting.onstart = function(e) { 						
 						// utterance has started 
-						$(document).off('click'); // unbind the click event listener 			
+						$(document).off('click.ableInitSpeech'); // unbind the click event listener 			
 					};
 					greeting.onend = function(e) {
 						// should now be able to get browser voices 
