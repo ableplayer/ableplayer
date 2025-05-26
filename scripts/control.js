@@ -16,6 +16,11 @@
 			this.synth.cancel();
 		}
 
+		if (this.hasSignLanguage && this.signVideo) {
+			// keep sign languge video in sync
+			this.signVideo.currentTime = this.startTime;
+		}
+
 		if (this.player === 'html5') {
 			var seekable;
 
@@ -40,6 +45,10 @@
 				if (typeof this.$posterImg !== 'undefined') {
 					this.$posterImg.hide();
 				}
+			}
+			if (this.hasSignLanguage && this.signVideo) {
+				// keep sign languge video in sync
+				this.signVideo.currentTime = newTime;
 			}
 		}
 		else if (this.player === 'vimeo') {
@@ -312,6 +321,10 @@
 			this.syncSpeechToPlaybackRate(rate);
 		}
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.playbackRate = rate;
+		}
+
 		if (this.player === 'html5') {
 			this.media.playbackRate = rate;
 		}
@@ -369,6 +382,10 @@
 
 		var thisObj = this;
 
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.pause(true);
+		}
+
 		if (this.player === 'html5') {
 			this.media.pause(true);
 			if (this.hasSignLanguage && this.signVideo) {
@@ -386,6 +403,10 @@
 	AblePlayer.prototype.playMedia = function () {
 
 		var thisObj = this;
+
+		if (this.hasSignLanguage && this.signVideo) {
+			this.signVideo.play(true);
+		}
 
 		if (this.player === 'html5') {
 			this.media.play(true);

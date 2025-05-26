@@ -137,6 +137,9 @@
 					thisObj.getPlayerState().then(function(playerState) {
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
+							if (thisObj.hasSignLanguage && thisObj.signVideo) {
+								thisObj.signVideo.play(true);
+							}
 							thisObj.playing = true;
 							thisObj.startedPlaying = true;
 							thisObj.paused = false;
@@ -149,6 +152,9 @@
 							thisObj.paused = true;
 						}
 						if (thisObj.stoppingYouTube && playerState === 'paused') {
+							if (thisObj.hasSignLanguage && thisObj.signVideo) {
+								thisObj.signVideo.pause(true);
+							}
 							if (typeof thisObj.$posterImg !== 'undefined') {
 								thisObj.$posterImg.show();
 							}

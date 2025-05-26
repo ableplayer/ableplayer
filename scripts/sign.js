@@ -1,7 +1,12 @@
 (function ($) {
 	AblePlayer.prototype.initSignLanguage = function() {
 
-		// Sign language is only currently supported in HTML5 player, not YouTube or Vimeo
+		// Sign language is only currently supported in HTML5 player and YouTube.
+		if ( ! this.isIOS() && this.$media.data('sign-src') !== undefined && this.$media.data('sign-src') !== "" ) {
+			this.hasSignLanguage = true;
+			this.injectSignPlayerCode();
+			return;
+		}
 		if (this.player === 'html5') {
 			// check to see if there's a sign language video accompanying this video
 			// check only the first source
@@ -46,25 +51,36 @@
 		signVideoId = this.mediaId + '-sign';
 		this.$signVideo = $('<video>',{
 			'id' : signVideoId,
-			'tabindex' : '-1'
+			'tabindex' : '-1',
+			'muted' : true,
 		});
 		this.signVideo = this.$signVideo[0];
-		// for each original <source>, add a <source> to the sign <video>
-		for (i=0; i < this.$sources.length; i++) {
-			signSrc = this.$sources[i].getAttribute('data-sign-src');
-			srcType = this.$sources[i].getAttribute('type');
-			if (signSrc) {
-				$signSource = $('<source>',{
-					'src' : signSrc,
-					'type' : srcType
-				});
-				this.$signVideo.append($signSource);
-			}
-			else {
-				// source is missing a sign language version
-				// can't include sign language
-				this.hasSignLanguage = false;
-				break;
+
+		if(this.$media.data('sign-src')) {
+			$signSource = $('<source>',{
+				'src' : this.$media.data('sign-src'),
+				'type' : 'video/' + this.$media.data('sign-src').substr(-3)
+			});
+			this.$signVideo.append($signSource);
+		}
+		else {
+			// for each original <source>, add a <source> to the sign <video>
+			for (i=0; i < this.$sources.length; i++) {
+				signSrc = this.$sources[i].getAttribute('data-sign-src');
+				srcType = this.$sources[i].getAttribute('type');
+				if (signSrc) {
+					$signSource = $('<source>',{
+						'src' : signSrc,
+						'type' : srcType
+					});
+					this.$signVideo.append($signSource);
+				}
+				else {
+					// source is missing a sign language version
+					// can't include sign language
+					this.hasSignLanguage = false;
+					return;
+				}
 			}
 		}
 
