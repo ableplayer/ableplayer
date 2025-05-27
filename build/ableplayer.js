@@ -7723,7 +7723,7 @@ var AblePlayerInstances = [];
 					// handle a click on anything, in case the user 
 					// clicks something before they click 'play' or 'prefs' buttons
 					// that would allow us to init speech before it's needed 
-					$(document).one('click.ableInitSpeech', function () { 			
+					$(document).on('click.ableInitSpeech', function () { 			
 						var greeting = new SpeechSynthesisUtterance('Hi!');
 						greeting.volume = 0; // silent 
 						greeting.rate = 10; // fastest speed supported by the API  
