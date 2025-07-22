@@ -1043,18 +1043,14 @@
 				else if (control === 'pipe') {
 					$pipe = $('<span>', {
 						'tabindex': '-1',
-						'aria-hidden': 'true'
+						'aria-hidden': 'true',
+						'class': 'able-pipe',
 					});
 					if (this.iconType === 'font') {
 						$pipe.addClass('icon-pipe');
 					}
 					else {
-						$pipeImg = $('<img>', {
-							src: this.rootPath + 'button-icons/' + this.iconColor + '/pipe.png',
-							alt: '',
-							role: 'presentation'
-						});
-						$pipe.append($pipeImg);
+						$pipe.append('|');
 					}
 					$controllerSpan.append($pipe);
 				}

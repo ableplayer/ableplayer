@@ -30,7 +30,7 @@
     }
     for (i = 0; i < tracks.length; i++) {
       track = tracks[i];
-      kind = track.kind;
+      kind = ( track.kind ) ? track.kind : 'subtitles';
 
       if (!track.src) {
         if (thisObj.usingYouTubeCaptions || thisObj.usingVimeoCaptions) {

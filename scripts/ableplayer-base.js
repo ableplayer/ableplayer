@@ -283,7 +283,7 @@ var AblePlayerInstances = [];
 				console.log('ERROR: Able Player transcript is missing required parts');
 			}
 		}
-		else if ($(media).find('track[kind="captions"], track[kind="subtitles"]').length > 0) {
+		else if ($(media).find('track[kind="captions"], track[kind="subtitles"],track:not([kind])').length > 0) {
 			// required tracks are present. COULD automatically generate a transcript
 			if (this.transcriptDivLocation) {
 				this.transcriptType = 'external';
@@ -384,7 +384,7 @@ var AblePlayerInstances = [];
 
 		// Skin
 		// valid values of data-skin are:
-		// '2020' (default as of 5.0), all buttons in one row beneath a full-width seekbar
+		// '2020' (default as of 4.6), all buttons in one row beneath a full-width seekbar
 		// 'legacy', two rows of controls; seekbar positioned in available space within top row
 		if ($(media).data('skin') == 'legacy') {
 			this.skin = 'legacy';

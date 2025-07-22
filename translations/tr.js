@@ -326,30 +326,30 @@
 
 "windowBringTopAlert": "Bu pencere artık saydadaki diğer objenin önünde.",
 
-"resultsSummary1": "You searched for:",
+"resultsSummary1": "Şunu aradınız:",
 
-"resultsSummary2": "Found",
+"resultsSummary2": "Bulundu",
 
-"resultsSummary3": "matching items.",
+"resultsSummary3": "eşleşen öğe.",
 
-"resultsSummary4": "Click the time associated with any item to play the video from that point.",
+"resultsSummary4": "Herhangi bir öğeyle ilişkilendirilmiş zamana tıklayarak videoyu o noktadan oynatabilirsiniz.",
 
-"noResultsFound": "No results found.",
+"noResultsFound": "Sonuç bulunamadı.",
 
-"searchButtonLabel": "Play at",
+"searchButtonLabel": "Şurada oynat",
 
-"hour": "hour",
+"hour": "saat",
 
-"minute": "minute",
+"minute": "dakika",
 
-"second": "second",
+"second": "saniye",
 
-"hours": "hours",
+"hours": "saat",
 
-"minutes": "minutes",
+"minutes": "dakika",
 
-"seconds": "seconds",
+"seconds": "saniye",
 
-"enableKeyboardShortcuts": "Enable keyboard shortcuts"
+"enableKeyboardShortcuts": "Klavye kısayollarını etkinleştir"
 
 }
