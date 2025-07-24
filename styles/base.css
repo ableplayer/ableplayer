@@ -799,6 +799,7 @@ div.able-wrapper.fullscreen {
 /*
 	Popup Menus
 */
+ul.able-popup,
 .able ul.able-popup {
 	position: absolute;
 	margin: 0;
@@ -816,6 +817,7 @@ div.able-wrapper.fullscreen {
 	width: auto;
 }
 
+ul.able-popup li,
 .able ul.able-popup li {
 	padding: 4px 16px;
 	margin: 0;
@@ -823,14 +825,17 @@ div.able-wrapper.fullscreen {
 	color: #fff;
 }
 
+ul.able-popup li:first-of-type,
 .able ul.able-popup li:first-of-type {
 	border-radius: 5px 5px 0 0;
 }
 
+ul.able-popup li:last-of-type,
 .able ul.able-popup li:last-of-type {
 	border-radius: 0 0 5px 5px;
 }
 
+ul.able-popup li.able-focus,
 .able ul.able-popup li.able-focus {
 	background-color: #ccc;
 	color: #000;
