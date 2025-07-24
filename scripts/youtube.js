@@ -219,9 +219,10 @@
 		var deferred = new $.Deferred();
 		var promise = deferred.promise();
 
-		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack;
+		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack, apiTriggered;
 
 		thisObj = this;
+		apiTriggered = false;
 
 		if (!this.youTubePlayer.getOption('captions','tracklist') ) {
 
@@ -229,7 +230,7 @@
 			// play video briefly (required in order to load the captions module)
 			// and after the apiChange event is triggered, try again to retrieve tracks
 			this.youTubePlayer.addEventListener('onApiChange',function(x) {
-
+				apiTriggered = true;
 				// getDuration() also requires video to play briefly
 				// so, let's set that while we're here
 				thisObj.duration = thisObj.youTubePlayer.getDuration();
@@ -305,6 +306,15 @@
 			// Trigger the above event listener by briefly playing the video
 			this.loadingYouTubeCaptions = true;
 			this.youTubePlayer.playVideo();
+			setTimeout( () => {
+				if ( promise.state() === 'pending' && ! apiTriggered ){
+					setTimeout( () => {
+						// Code to be executed after a delay
+						thisObj.youTubePlayer.pauseVideo();
+						deferred.resolve();
+					}, 500 );
+				}
+			}, 500 );
 		}
 		return promise;
 	};
