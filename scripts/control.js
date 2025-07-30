@@ -1635,9 +1635,14 @@
 			}, 50);
 			// Position popup.
 			var position = isElementOutOfParentBounds( $popup, this.$ableWrapper );
+			var leftPosition = $button.position().left;
+			if ( position ) {
+				position = -1 * position;
+				var leftPosition = leftPosition - position - 8;
+			}
 			console.log( position );
 			$popup.css('top', $button.position().top - $popup.outerHeight());
-			$popup.css('left', $button.position().left );
+			$popup.css('left', leftPosition );
 		} else {
 			$popup.hide();
 			$button.attr('aria-expanded', 'false');
@@ -1646,14 +1651,17 @@
 
 		function isElementOutOfParentBounds($child, $parent) {
 			let childElement = $child.get(0);
-			let parentClement = $parent.get(0);
+			let parentElement = $parent.get(0);
 			const childRect = childElement.getBoundingClientRect();
 			const parentRect = parentElement.getBoundingClientRect();
 		
-			if ( childRect.left > parentRect.left ) {
-				return ( childRect.left - parentRect.left ) * -1;
+			// Is outside container to the left.
+			if ( childRect.left < parentRect.left ) {
+				// I'm not sure there's a case where this would happen.
+				return ( childRect.left - parentRect.left );
 			}
-			if ( childRect.right < parentRect.right ) {
+			// Is outside container to the right.
+			if ( childRect.right > parentRect.right ) {
 				return parentRect.right - childRect.right;
 			} 
 
