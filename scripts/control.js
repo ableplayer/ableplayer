@@ -1211,29 +1211,15 @@
 			this.refreshControls('captions');
 		}
 		else {
+			this.togglePopup(this.captionsPopup, this.$ccButton, !this.captionsPopup.is(':visible'));
 			// there is more than one caption track.
 			// clicking on a track is handled via caption.js > getCaptionClickFunction()
-			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
-				this.captionsPopup.hide();
-				this.hidingPopup = false;
-				this.$ccButton.attr('aria-expanded', 'false')
-				this.waitThenFocus(this.$ccButton);
-			}
-			else {
-				this.closePopups();
-				if (this.captionsPopup) {
-					this.captionsPopup.show();
-					this.$ccButton.attr('aria-expanded','true');
-
-					// Gives time to "register" expanded ccButton
-					setTimeout(function() {
-						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
-						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
-						// Place focus on the first button (even if another button is checked)
-						thisObj.captionsPopup.find('li').removeClass('able-focus');
-						thisObj.captionsPopup.find('li').first().trigger('focus').addClass('able-focus');
-					}, 50);
-				}
+			if ( this.captionsPopup.is(':visible') ) {
+				// Gives time to "register" expanded ccButton
+				setTimeout(function() {
+					// Position popup & remove existing able-focus classes.
+					thisObj.captionsPopup.find('li').removeClass('able-focus');
+				}, 50);
 			}
 		}
 	};
@@ -1262,18 +1248,8 @@
 			this.hidingPopup = false;
 			return false;
 		}
-		if (this.chaptersPopup.is(':visible')) {
-			this.chaptersPopup.hide();
-			this.hidingPopup = false;
-			this.$chaptersButton.attr('aria-expanded','false').trigger('focus');
-		}
-		else {
-			this.closePopups();
-			this.chaptersPopup.show();
-			this.$chaptersButton.attr('aria-expanded','true');
-			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
-			this.chaptersPopup.css('left', this.$chaptersButton.position().left)
-
+		this.togglePopup( this.chaptersPopup, this.$chaptersButton, !this.chaptersPopup.is(':visible') );
+		if ( this.chaptersPopup.is(':visible') ) {
 			// Highlight the current chapter, if any chapters are checked
 			// Otherwise, place focus on the first chapter
 			this.chaptersPopup.find('li').removeClass('able-focus');
@@ -1326,9 +1302,8 @@
 			this.hidingPopup = false;
 			return false;
 		}
+		this.togglePopup(this.prefsPopup, this.$prefsButton, !this.prefsPopup.is(':visible') );
 		if (this.prefsPopup.is(':visible')) {
-			this.prefsPopup.hide();
-			this.$prefsButton.attr('aria-expanded','false');
 			// restore each menu item to original hidden state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			if (!this.showingPrefsDialog) {
@@ -1340,17 +1315,9 @@
 			},100);
 		}
 		else {
-			this.closePopups();
-			this.prefsPopup.show();
-			this.$prefsButton.attr('aria-expanded','true');
 			this.$prefsButton.trigger('focus'); // focus first on prefs button to announce expanded state
 			// give time for focus on button then adjust popup settings and focus
 			setTimeout(function() {
-				prefsButtonPosition = thisObj.$prefsButton.position();
-				prefsMenuRight = thisObj.$ableDiv.width() - 5;
-				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
-				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
-				thisObj.prefsPopup.css('left', prefsMenuLeft);
 				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
 				thisObj.prefsPopup.find('li').first().trigger('focus').addClass('able-focus');
@@ -1655,6 +1622,42 @@
 			if ( ariaExpanded ) {
 				$button.attr( 'aria-expanded', 'false' );
 			}
+		}
+	};
+
+	AblePlayer.prototype.togglePopup = function($popup, $button, show, focusSelector = 'li:first') {
+		if (show) {
+			this.closePopups();
+			$popup.show();
+			$button.attr('aria-expanded', 'true');
+			setTimeout(() => {
+				$popup.find(focusSelector).trigger('focus').addClass('able-focus');
+			}, 50);
+			// Position popup.
+			var position = isElementOutOfParentBounds( $popup, this.$ableWrapper );
+			console.log( position );
+			$popup.css('top', $button.position().top - $popup.outerHeight());
+			$popup.css('left', $button.position().left );
+		} else {
+			$popup.hide();
+			$button.attr('aria-expanded', 'false');
+			this.waitThenFocus( $button );
+		}
+
+		function isElementOutOfParentBounds($child, $parent) {
+			let childElement = $child.get(0);
+			let parentClement = $parent.get(0);
+			const childRect = childElement.getBoundingClientRect();
+			const parentRect = parentElement.getBoundingClientRect();
+		
+			if ( childRect.left > parentRect.left ) {
+				return ( childRect.left - parentRect.left ) * -1;
+			}
+			if ( childRect.right < parentRect.right ) {
+				return parentRect.right - childRect.right;
+			} 
+
+			return false;
 		}
 	};
 
