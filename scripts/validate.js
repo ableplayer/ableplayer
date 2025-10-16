@@ -185,8 +185,9 @@ var validate = {
     var processedLangTags = postProcessing.postprocessLangTag(processedVTags);
 
     var arrowReplaced = processedLangTags.replace(/--&gt;/g, "-->");
+    var timestampTagReplaced = arrowReplaced.replace(/&lt;([\d:.]+)&gt;/g, '<$1>');
 
-    var finalContent = arrowReplaced.replace(
+    var finalContent = timestampTagReplaced.replace(
       /<\/v>/g,
       function (match, offset) {
         return originalVttContent.indexOf(match, offset) !== -1 ? match : "";
