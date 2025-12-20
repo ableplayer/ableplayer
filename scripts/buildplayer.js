@@ -355,7 +355,7 @@
 		// 'tracks', if provided, is a list of tracks to be used as menu items
 
 		var thisObj, $menu, includeMenuItem, i, $menuItem, prefCat, whichPref, hasDefault, track,
-		windowOptions, $thisItem, $prevItem, $nextItem;
+		windowOptions, $thisItem, $prevItem, $nextItem, hasDescription, hasTranscript;
 
 		thisObj = this;
 
@@ -373,11 +373,19 @@
 		if (which === 'prefs') {
 			if (this.prefCats.length > 1) {
 				for (i = 0; i < this.prefCats.length; i++) {
+					console.log( thisObj );
+					prefCat = this.prefCats[i];
+					hasDescription = ( thisObj.hasDescTracks || thisObj.hasOpenDesc || thisObj.hasClosedDesc ) ? true : false;
+					hasTranscript  = ( thisObj.transcriptType === null ) ? false : true;
+
+					// If this player does not have descriptions or transcripts, do not output that option preferences.
+					if ( prefCat === 'descriptions' && ! hasDescription || prefCat === 'transcript' && ! hasTranscript ) {
+						continue;
+					}
 					$menuItem = $('<li></li>',{
 						'role': 'menuitem',
 						'tabindex': '-1'
 					});
-					prefCat = this.prefCats[i];
 					if (prefCat === 'captions') {
 						$menuItem.text(this.tt.prefMenuCaptions);
 					} else if (prefCat === 'descriptions') {
