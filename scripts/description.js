@@ -449,7 +449,7 @@
 	};
 
 	AblePlayer.prototype.showDescription = function(now) {
-		if (!this.hasClosedDesc || this.swappingSrc || !this.descOn || ( this.descMethod === 'video' && !this.prefDescVisible ) ) {
+		if (!this.playing || !this.hasClosedDesc || this.swappingSrc || !this.descOn || ( this.descMethod === 'video' && !this.prefDescVisible ) ) {
 			return;
 		}
 
