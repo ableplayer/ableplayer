@@ -373,7 +373,6 @@
 		if (which === 'prefs') {
 			if (this.prefCats.length > 1) {
 				for (i = 0; i < this.prefCats.length; i++) {
-					console.log( thisObj );
 					prefCat = this.prefCats[i];
 					hasDescription = ( thisObj.hasDescTracks || thisObj.hasOpenDesc || thisObj.hasClosedDesc ) ? true : false;
 					hasTranscript  = ( thisObj.transcriptType === null ) ? false : true;
