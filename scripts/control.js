@@ -1411,12 +1411,18 @@
 
 	AblePlayer.prototype.getIcon = function( $button, id, forceImg = false ) {
 		// Remove existing HTML before generating.
-		$button.find('svg, img, span:not(.able-clipped)').remove();
 		// iconData: [0 = svg viewbox, 1 = svg path, 2 = icon font class, 3 = image file]
-		var iconData = this.getIconData( id );
 		var iconType = this.iconType;
+		var iconData = this.getIconData( id );
 		iconType = ( null === iconData[3] ) ? 'svg' : iconType;
-		iconType =  ( forceImg === true ) ? 'image' : iconType;
+		iconType =  ( forceImg === true ) ? 'img' : iconType;
+
+		var existingIcon = $button.find( iconType + '#ableplayer-' + id );
+		// Avoid repainting icon if there's no change.
+		if ( existingIcon.length > 0 ) {
+			return;
+		}
+		$button.find('svg, img, span:not(.able-clipped)').remove();
 
 		if (iconType === 'font') {
 			var $buttonIcon = $('<span>', {
@@ -1438,6 +1444,7 @@
 			icon.setAttribute( 'focusable', 'false' );
 			icon.setAttribute( 'aria-hidden', 'true');
 			icon.setAttribute( 'viewBox', iconData[0] );
+			icon.setAttribute( 'id', 'ableplayer-' + id );
 			let path = getNode( 'path', { d: iconData[1] } );
 			icon.appendChild( path );
 
