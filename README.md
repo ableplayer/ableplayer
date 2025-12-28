@@ -384,6 +384,10 @@ If a sign language version is available, a sign language button will be added to
 
 Unfortunately this feature is not supported on iOS.
 
+#### Load Sign Language in a fixed location
+
+By default, the sign language window is launched in a movable dialog. To set it in a fixed location on the page, add `data-sign-div` with the ID of a container on the page. The sign language window will be inserted into that container, and will not be movable.
+
 ### Playlists
 
 An *Able Player* playlist is an HTML list of tracks. A playlist can accompany either a video or audio player, but both audio and video cannot be combined within a single playlist. The list can be either ordered (`<ol>`) or unordered (`<ul>`).

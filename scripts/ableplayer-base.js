@@ -205,6 +205,15 @@ var AblePlayerInstances = [];
 			this.transcriptTitle = $(media).data('transcript-title');
 		}
 
+		// Sign Language
+		// sign language can be a modal (default) or assigned to a div on the page.
+		var signDivLocation = $(media).data('sign-div');
+		if ( signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById( signDivLocation ) ) {
+			this.$signDivLocation = $( '#' + signDivLocation );
+		} else {
+			this.$signDivLocation = null;
+		}
+
 		// Captions
 		// data-captions-position can be used to set the default captions position
 		// this is only the default, and can be overridden by user preferences

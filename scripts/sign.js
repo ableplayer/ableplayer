@@ -46,16 +46,21 @@
 		signVideoId = this.mediaId + '-sign';
 
 		if ( this.signFile || this.signYoutubeId ) {
-			this.$signWindow = $('<div>',{
-				'class' : 'able-sign-window',
-				'role': 'dialog',
-				'aria-label': this.translate( 'sign', 'Sign language' )
-			});
-			this.$signToolbar = $('<div>',{
-				'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
-			});
+			if ( null !== this.$signDivLocation ) {
+				this.$signDivLocation.addClass( 'able-sign-window able-fixed' );
+				this.$signWindow = this.$signDivLocation;
+			} else {
+				this.$signWindow = $('<div>',{
+					'class' : 'able-sign-window',
+					'role': 'dialog',
+					'aria-label': this.translate( 'sign', 'Sign language' )
+				});
+				this.$signToolbar = $('<div>',{
+					'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
+				});
+				this.$signWindow.append(this.$signToolbar);
+			}
 
-			this.$signWindow.append(this.$signToolbar);
 			this.$ableWrapper.append(this.$signWindow);
 		}
 
@@ -98,11 +103,15 @@
 		}
 
 		// make it draggable
-		this.initDragDrop('sign');
+		if ( null === this.$signDivLocation ) {
+			this.initDragDrop('sign');
+		}
 
 		if (this.prefSign === 1) {
 			// sign window is on. Go ahead and position it and show it
-			this.positionDraggableWindow('sign',this.getDefaultWidth('sign'));
+			if ( null === this.$signDivLocation ) {
+				this.positionDraggableWindow('sign',this.getDefaultWidth('sign'));
+			}
 		} else {
 			this.$signWindow.hide();
 		}

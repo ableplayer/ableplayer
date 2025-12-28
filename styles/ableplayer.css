@@ -822,6 +822,11 @@ span.able-modkey {
 	margin-bottom: 1rem;
 }
 
+.able-sign-window.able-fixed video {
+	margin: 0;
+	display: block;
+}
+
 .able-sign-window:focus {
 	outline: none;
 }
