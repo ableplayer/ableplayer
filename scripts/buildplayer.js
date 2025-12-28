@@ -47,11 +47,23 @@
 		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
 		this.injectAlert(this.$ableDiv);
 		this.injectPlaylist();
-
+		this.injectAudioPoster();
 		// Do this last, as it should be prepended to the top of this.$ableDiv
 		// after everything else has prepended
 		this.injectOffscreenHeading();
 	};
+
+	AblePlayer.prototype.injectAudioPoster = function() {
+		if ( this.mediaType === 'audio' && this.hasPoster ) {
+			audioPoster = DOMPurify.sanitize(this.audioPoster);
+			audioPosterAlt = DOMPurify.sanitize(this.audioPosterAlt);
+			let audioPosterImg = document.createElement( 'img' );
+			audioPosterImg.setAttribute( 'src', audioPoster );
+			audioPosterImg.setAttribute( 'alt', audioPosterAlt );
+			this.$audioWrapper = this.$playerDiv.wrap( '<div class="able-audio-wrapper">' ).parent();
+			this.$audioWrapper.prepend( audioPosterImg );
+		}
+	}
 
 	AblePlayer.prototype.injectOffscreenHeading = function () {
 

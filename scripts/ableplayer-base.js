@@ -97,7 +97,10 @@ var AblePlayerInstances = [];
 		this.playsInline = ($(media).attr('playsinline') !== undefined) ? '1' : '0';
 
 		// poster (Boolean, indicating whether media element has a poster attribute)
-		this.hasPoster = ($(media).attr('poster')) ? true : false;
+		this.hasPoster = ( $(media).attr('poster') || $(media).data('poster') ) ? true : false;
+
+		this.audioPoster = $(media).data('poster');
+		this.audioPosterAlt = $(media).data('poster-alt' );
 
 		// get height and width attributes, if present
 		// and add them to variables

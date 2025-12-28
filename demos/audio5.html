@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Audio with One Track and a Poster Image | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.dist.js"></script>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Audio with One Track and a Poster Image</h1>
+
+		<div id="wrapper">
+			<audio id="audio1" preload="auto" data-able-player data-poster="../media/flavors_cover.jpg" data-poster-alt="Flow Theory Flavors (Cover art)">
+				<source type="audio/mpeg" src="../media/smallf.mp3"/>
+				<source type="audio/ogg" src="../media/smallf.ogg"/>
+			</audio>
+		</div>
+	</main>
+</body>
+</html>

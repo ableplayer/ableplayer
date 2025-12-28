@@ -278,6 +278,22 @@
 	height: 100%;
 }
 
+.able-audio-wrapper {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	padding: 4px;
+	background: var(--able-control-background);
+}
+
+.able-audio-wrapper img {
+	max-width: 120px;
+}
+
+.able-audio-wrapper .able-audio {
+	flex: 1;
+}
+
 .able-wrapper .able button.able-big-play-button:hover,
 .able-wrapper .able button.able-big-play-button:focus {
 	opacity: 100;

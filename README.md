@@ -195,6 +195,13 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 - **id** - required; any unique ID
 - **data-able-player** - required
 
+### Audio Poster
+
+Video poster images are supported using the `poster` attribute on the video element. The audio element does not support a poster image, but you can add an image to your player using:
+
+- **data-poster** - A URL to an image.
+- **data-poster-alt** - The alternative text for the image.
+
 ### Optional; General-Purpose
 
 - **data-debug** - optional; if present will write messages to the developer console
