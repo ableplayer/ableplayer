@@ -499,7 +499,7 @@ div.able-captions-wrapper {
 }
 
 div.able-captions-wrapper:not(.able-captions-overlay) {
-	padding: 0 0 8px;
+	padding: 0;
 }
 
 div.able-captions {
@@ -522,6 +522,9 @@ div.able-vidcap-container div.able-captions-overlay {
 div.able-vidcap-container div.able-captions-below {
 	position: relative;
 	min-height: 4rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 div.able-audcap-container.captions-off {
