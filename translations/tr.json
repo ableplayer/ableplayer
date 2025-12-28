@@ -2,6 +2,8 @@
   "audio": "ses",
   "video": "video",
   "playerHeading": "Medya Oynatıcı",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Hızlandır",
   "slower": "Yavaşlat",
   "play": "Oynat",

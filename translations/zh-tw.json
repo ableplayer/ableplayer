@@ -2,6 +2,8 @@
   "audio": "音訊",
   "video": "視訊",
   "playerHeading": "媒體播放器",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "加快",
   "slower": "減慢",
   "play": "播放",

@@ -2,6 +2,8 @@
   "audio": "áudio",
   "video": "vídeo",
   "playerHeading": "Reprodutor de mídias",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Rápido",
   "slower": "Lento",
   "play": "Reproduzir",

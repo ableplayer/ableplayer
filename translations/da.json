@@ -2,6 +2,8 @@
   "audio": "lyd",
   "video": "video",
   "playerHeading": "Medieafspiller",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Hurtigere",
   "slower": "Langsommere",
   "play": "Afspil",

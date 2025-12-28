@@ -2,6 +2,8 @@
   "audio": "audio",
   "video": "video",
   "playerHeading": "Přehrávač médií",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Rychleji",
   "slower": "Pomaleji",
   "play": "Spustit",

@@ -2,6 +2,8 @@
   "audio": "lyd",
   "video": "video",
   "playerHeading": "Mediespiller",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Raskere",
   "slower": "Saktere",
   "play": "Spill av",

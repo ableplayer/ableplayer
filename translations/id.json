@@ -2,6 +2,8 @@
   "audio": "audio",
   "video": "video",
   "playerHeading": "Pemutar media",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Percepat",
   "slower": "Perlambat",
   "play": "Mulai",

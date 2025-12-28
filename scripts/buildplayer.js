@@ -102,9 +102,9 @@
 		this.$playerDiv = $('<div>', {
 			'class' : 'able-player',
 			'role' : 'region',
-			'aria-label' : this.mediaType + ' player'
+			'aria-label' : ( 'audio' === this.mediaType ) ? this.translate( 'audioPlayer', 'audio player' ) : this.translate( 'videoPlayer', 'video player' )
 		});
-		this.$playerDiv.addClass('able-'+this.mediaType);
+		this.$playerDiv.addClass('able-' + this.mediaType);
 		if (this.hasPlaylist && this.showNowPlaying) {
 			this.$nowPlayingDiv = $('<div>',{
 				'class' : 'able-now-playing',

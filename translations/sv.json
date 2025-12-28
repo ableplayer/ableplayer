@@ -2,6 +2,8 @@
   "audio": "ljud",
   "video": "video",
   "playerHeading": "Mediaspelare",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "Snabbare",
   "slower": "Långsammare",
   "play": "Spela upp",

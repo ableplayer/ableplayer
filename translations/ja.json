@@ -2,6 +2,8 @@
   "audio": "オーディオ",
   "video": "ビデオ",
   "playerHeading": "メディアプレイヤー",
+  "audioPlayer": "Audio player",
+  "videoPlayer": "Video player",
   "faster": "はやく",
   "slower": "おそく",
   "play": "再生",
