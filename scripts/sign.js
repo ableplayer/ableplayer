@@ -49,7 +49,7 @@
 			this.$signWindow = $('<div>',{
 				'class' : 'able-sign-window',
 				'role': 'dialog',
-				'aria-label': this.tt.sign
+				'aria-label': this.translate( 'sign', 'Sign language' )
 			});
 			this.$signToolbar = $('<div>',{
 				'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'

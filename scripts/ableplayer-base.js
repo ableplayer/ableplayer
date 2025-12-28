@@ -471,13 +471,7 @@ var AblePlayerInstances = [];
 		var thisObj = this;
 		$.when(this.getTranslationText()).then(
 			function () {
-				if (thisObj.countProperties(thisObj.tt) > 50) {
-					// close enough to ensure that most text variables are populated
-					thisObj.setup();
-				} else {
-					// can't continue loading player with no text
-					thisObj.provideFallback();
-				}
+				thisObj.setup();
 			}
 		).
 		fail(function() {

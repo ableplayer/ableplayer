@@ -331,11 +331,9 @@
 		}
 
 		if (this.descOn) {
-			// user has requested the described version
-			this.showAlert(this.tt.alertDescribedVersion);
+			this.showAlert( this.translate( 'alertDescribedVersion', 'Using the audio described version of this video' ) );
 		} else {
-			// user has requested the non-described version
-			this.showAlert(this.tt.alertNonDescribedVersion);
+			this.showAlert( this.translate( 'alertNonDescribedVersion', 'Using the non-described version of this video' ) );
 		}
 
 		if (this.player === 'html5') {
@@ -417,11 +415,11 @@
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeVimeoId = this.vimeoId;
-				this.showAlert(this.tt.alertNonDescribedVersion);
+				this.showAlert( this.translate( 'alertNonDescribedVersion', 'Using the non-described version of this video' ) );
 			} else {
 				// the non-described version is currently playing. Swap to described.
 				this.activeVimeoId = this.vimeoDescId;
-				this.showAlert(this.tt.alertDescribedVersion);
+				this.showAlert( this.translate( 'alertDescribedVersion', 'Using the audio described version of this video' ) );
 			}
 			if (this.playerCreated) {
 				this.deletePlayer('swap-desc-vimeo');

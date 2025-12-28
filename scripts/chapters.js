@@ -28,9 +28,9 @@
 
 			this.$chaptersNav = $('<nav>');
 			if (this.chaptersTitle) {
-				this.$chaptersNav.attr('aria-labelledby',headingId);
+				this.$chaptersNav.attr( 'aria-labelledby', headingId );
 			} else {
-				this.$chaptersNav.attr('aria-label',this.tt.chapters);
+				this.$chaptersNav.attr( 'aria-label', this.translate( 'chapters', 'Chapters' ) );
 			}
 			this.$chaptersDiv.append(this.$chaptersNav);
 

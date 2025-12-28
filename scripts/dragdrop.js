@@ -21,12 +21,12 @@
 			$window = this.$transcriptArea;
 			windowName = 'transcript-window';
 			$toolbar = this.$transcriptToolbar;
-			$toolbar.attr( 'aria-label', this.tt.transcriptControls );
+			$toolbar.attr( 'aria-label', this.translate( 'transcriptControls', 'Transcript Window Controls' ) );
 		} else if (which === 'sign') {
 			$window = this.$signWindow;
 			windowName = 'sign-window';
 			$toolbar = this.$signToolbar;
-			$toolbar.attr( 'aria-label', this.tt.signControls );
+			$toolbar.attr( 'aria-label', this.translate( 'signControls', 'Sign Language Window Controls' ) );
 		}
 
 		// add class to trigger change in cursor on hover
@@ -157,7 +157,7 @@
 			'class': 'able-button-handler-preferences'
 		});
 		this.getIcon( $newButton, 'preferences' );
-		this.setText( $newButton, this.tt.windowButtonLabel );
+		this.setText( $newButton, this.translate( 'windowButtonLabel', 'Window options' ) );
 
 		// add a tooltip that displays aria-label on mouseenter or focus
 		tooltipId = this.mediaId + '-' + windowName + '-tooltip';
@@ -256,7 +256,7 @@
 		});
 		$resizeWidthLabel = $('<label>',{
 			'for': widthId
-		}).text(this.tt.width);
+		}).text( this.translate( 'width', 'Width' ) );
 
 		// height field
 		$resizeHeightDiv = $('<div></div>');
@@ -268,11 +268,11 @@
 		});
 		$resizeHeightLabel = $('<label>',{
 			'for': heightId
-		}).text(this.tt.height);
+		}).text( this.translate( 'height', 'Height' ) );
 
 		// Add save and cancel buttons.
-		$saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
-		$cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+		$saveButton = $('<button class="modal-button">' + this.translate( 'save', 'Save' ) + '</button>');
+		$cancelButton = $('<button class="modal-button">' + this.translate( 'cancel', 'Cancel' ) + '</button>');
 		$saveButton.on('click',function () {
 			newWidth = $('#' + widthId).val();
 			newHeight = $('#' + heightId).val();
@@ -301,7 +301,16 @@
 		// that will include an ancestor of the dialog,
 		// which will render the dialog unreadable by screen readers
 		$('body').append($resizeForm);
-		resizeDialog = new AccessibleDialog($resizeForm, $windowButton, 'dialog', true, this.tt.windowResizeHeading, $resizeWrapper, this.tt.closeButtonLabel, '20em');
+		resizeDialog = new AccessibleDialog(
+			$resizeForm,
+			$windowButton,
+			'dialog',
+			true,
+			this.translate( 'windowResizeHeading', 'Resize Window' ),
+			$resizeWrapper,
+			this.translate( 'closeButtonLabel', 'Close' ),
+			'20em'
+		);
 		if (which === 'transcript') {
 			this.transcriptResizeDialog = resizeDialog;
 		} else if (which === 'sign') {
@@ -454,7 +463,7 @@
 			this.$activeWindow.attr('role','application');
 
 			if (!this.showedAlert(which)) {
-				this.showAlert(this.tt.windowMoveAlert,which);
+				this.showAlert( this.translate( 'windowMoveAlert', 'Drag or use arrow keys to move the window; Enter to stop' ),which);
 				if (which === 'transcript') {
 					this.showedTranscriptAlert = true;
 				} else if (which === 'sign') {
@@ -580,23 +589,23 @@
 		switch (key) {
 			case 'ArrowLeft':	// left
 				 this.dragKeyX -= keySpeed;
-				 this.$srAlertBox.text( this.tt.windowMoveLeft );
+				 this.$srAlertBox.text( this.translate( 'windowMoveLeft', 'Window moved left' ) );
 				break;
 			case 'ArrowUp':	// up
 				this.dragKeyY -= keySpeed;
-				this.$srAlertBox.text( this.tt.windowMoveUp );
+				this.$srAlertBox.text( this.translate( 'windowMoveUp', 'Window moved up' ) );
 				break;
 			case 'ArrowRight':	// right
 				this.dragKeyX += keySpeed;
-				this.$srAlertBox.text( this.tt.windowMoveRight );
+				this.$srAlertBox.text( this.translate( 'windowMoveRight', 'Window moved right' ) );
 				break;
 			case 'ArrowDown':	// down
 				this.dragKeyY += keySpeed;
-				this.$srAlertBox.text( this.tt.windowMoveDown );
+				this.$srAlertBox.text( this.translate( 'windowMoveDown', 'Window moved down' ) );
 				break;
 			case 'Enter': 	// enter
 			case 'Escape': 	// escape
-				this.$srAlertBox.text( this.tt.windowMoveStopped );
+				this.$srAlertBox.text( this.translate( 'windowMoveStopped', 'Window move stopped' ) );
 				this.endDrag(which);
 				return false;
 			default:

@@ -74,7 +74,7 @@
 			this.$headingDiv = $('<' + headingType + '>');
 			this.$ableDiv.prepend(this.$headingDiv);
 			this.$headingDiv.addClass('able-offscreen');
-			this.$headingDiv.text(this.tt.playerHeading);
+			this.$headingDiv.text( this.translate( 'playerHeading', 'Media player' ) );
 		}
 	};
 
@@ -87,7 +87,7 @@
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',
 			'aria-hidden': false,
-			'aria-label': this.tt.play,
+			'aria-label': this.translate( 'play', 'Play' ),
 			'type': 'button',
 			'tabindex': 0
 		});
@@ -140,7 +140,7 @@
 			'class' : 'able-speed',
 			'aria-live' : 'assertive',
 			'aria-atomic' : 'true'
-		}).text(this.tt.speed + ': 1x');
+		}).text(this.translate( 'speed', 'Speed' ) + ': 1x');
 
 		this.$status = $('<span>',{
 			'class' : 'able-status',
@@ -320,7 +320,7 @@
 		$alertText.appendTo(this.$alertBox);
 
 		var $alertDismiss = $('<button type="button"></button>' );
-		$alertDismiss.attr( 'aria-label', this.tt.dismissButton );
+		$alertDismiss.attr( 'aria-label', this.translate( 'dismissButton', 'Dismiss' ) );
 		$alertDismiss.text( '×' );
 		$alertDismiss.appendTo(this.$alertBox);
 
@@ -386,13 +386,13 @@
 						'tabindex': '-1'
 					});
 					if (prefCat === 'captions') {
-						$menuItem.text(this.tt.prefMenuCaptions);
+						$menuItem.text( this.translate( 'prefMenuCaptions', 'Captions' ) );
 					} else if (prefCat === 'descriptions') {
-						$menuItem.text(this.tt.prefMenuDescriptions);
+						$menuItem.text( this.translate( 'prefMenuDescriptions', 'Descriptions' ) );
 					} else if (prefCat === 'keyboard') {
-						$menuItem.text(this.tt.prefMenuKeyboard);
+						$menuItem.text( this.translate( 'prefMenuKeyboard', 'Keyboard' ) );
 					} else if (prefCat === 'transcript') {
-						$menuItem.text(this.tt.prefMenuTranscript);
+						$menuItem.text( this.translate( 'prefMenuTranscript', 'Transcript' ) );
 					}
 					$menuItem.on('click',function() {
 						whichPref = $(this).text();
@@ -455,7 +455,7 @@
 				$menuItem = $('<li></li>',{
 					'role': 'menuitemradio',
 					'tabindex': '-1',
-				}).text(this.tt.captionsOff);
+				}).text( this.translate( 'captionsOff', 'Captions off' ) );
 				if (this.prefCaptions === 0) {
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
@@ -469,15 +469,15 @@
 			windowOptions = [];
 			windowOptions.push({
 				'name': 'move',
-				'label': this.tt.windowMove
+				'label': this.translate( 'windowMove', 'Move' )
 			});
 			windowOptions.push({
 				'name': 'resize',
-				'label': this.tt.windowResize
+				'label': this.translate( 'windowResize', 'Resize' )
 			});
 			windowOptions.push({
 				'name': 'close',
-				'label': this.tt.windowClose
+				'label': this.translate( 'windowClose', 'Close' )
 			});
 			for (i = 0; i < windowOptions.length; i++) {
 				$menuItem = $('<li></li>',{
@@ -934,7 +934,7 @@
 		if (this.skin == '2020') {
 			// add a full-width seek bar
 			$sliderDiv = $('<div class="able-seekbar"></div>');
-			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+			sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider($sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
@@ -960,7 +960,7 @@
 				control = controls[j];
 				if (control === 'seek') {
 					$sliderDiv = $('<div class="able-seekbar"></div>');
-					sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+					sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
@@ -1137,9 +1137,9 @@
 						if (!this.prefCaptions || this.prefCaptions !== 1) {
 							// captions are available, but user has them turned off
 							if (this.captions.length > 1) {
-								captionLabel = this.tt.captions;
+								captionLabel = this.translate( 'captions', 'Captions' );
 							} else {
-								captionLabel = this.tt.showCaptions;
+								captionLabel = this.translate( 'showCaptions', 'Show captions' );
 							}
 							$newButton.addClass('buttonOff').attr('title',captionLabel);
 							$newButton.attr('aria-pressed', 'false');
@@ -1149,7 +1149,7 @@
 							// user prefer non-audio described version
 							// Therefore, load media without description
 							// Description can be toggled on later with this button
-							$newButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);
+							$newButton.addClass('buttonOff').attr( 'title', this.translate( 'turnOnDescriptions', 'Turn on descriptions' ) );
 						}
 					}
 
@@ -1191,7 +1191,7 @@
 						this.$transcriptButton = $newButton;
 						// gray out transcript button if transcript is not active
 						if (!(this.$transcriptDiv.is(':visible'))) {
-							this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+							this.$transcriptButton.addClass('buttonOff').attr( 'title', this.translate( 'showTranscript', 'Show transcript' ) );
 						}
 					} else if (control === 'fullscreen') {
 						this.$fullscreenButton = $newButton;
@@ -1508,47 +1508,47 @@
 	AblePlayer.prototype.getButtonTitle = function(control) {
 
 		if (control === 'playpause') {
-			return this.tt.play;
+			return this.translate( 'play', 'Play' );
 		} else if (control === 'play') {
-			return this.tt.play;
+			return this.translate( 'play', 'Play' );
 		} else if (control === 'pause') {
-			return this.tt.pause;
+			return this.translate( 'pause', 'Pause' );
 		} else if (control === 'restart') {
-			return this.tt.restart;
+			return this.translate( 'restart', 'Restart' );
 		} else if (control === 'previous') {
-			return this.tt.prevTrack;
+			return this.translate( 'prevTrack', 'Previous track' );
 		} else if (control === 'next') {
-			return this.tt.nextTrack;
+			return this.translate( 'nextTrack', 'Next track' );
 		} else if (control === 'rewind') {
-			return this.tt.rewind;
+			return this.translate( 'rewind', 'Rewind' );
 		} else if (control === 'forward') {
-			return this.tt.forward;
+			return this.translate( 'forward', 'Forward' );
 		} else if (control === 'captions') {
 			if (this.captions.length > 1) {
-				return this.tt.captions;
+				return this.translate( 'captions', 'Captions' );
 			} else {
-				return (this.captionsOn) ? this.tt.hideCaptions : this.tt.showCaptions;
+				return (this.captionsOn) ? this.translate( 'hideCaptions', 'Hide captions' ) : this.translate( 'showCaptions', 'Show captions' );
 			}
 		} else if (control === 'descriptions') {
-			return (this.descOn) ? this.tt.turnOffDescriptions : this.tt.turnOnDescriptions;
+			return (this.descOn) ? this.translate( 'turnOffDescriptions', 'Turn off descriptions' ) : this.translate( 'turnOnDescriptions', 'Turn on descriptions' );
 		} else if (control === 'transcript') {
-			return (this.$transcriptDiv.is(':visible')) ? this.tt.hideTranscript : this.tt.showTranscript;
+			return (this.$transcriptDiv.is(':visible')) ? this.translate( 'hideTranscript', 'Hide transcript' ) : this.translate( 'showTranscript', 'Show transcript' );
 		} else if (control === 'chapters') {
-			return this.tt.chapters;
+			return this.translate( 'chapters', 'Chapters' );
 		} else if (control === 'sign') {
-			return this.tt.sign;
+			return this.translate( 'sign', 'Sign language' );
 		} else if (control === 'volume') {
-			return this.tt.volume;
+			return this.translate( 'volume', 'Volume' );
 		} else if (control === 'faster') {
-			return this.tt.faster;
+			return this.translate( 'faster', 'Faster' );
 		} else if (control === 'slower') {
-			return this.tt.slower;
+			return this.translate( 'slower', 'Slower' );
 		} else if (control === 'preferences') {
-			return this.tt.preferences;
+			return this.translate( 'preferences', 'Preferences' );
 		} else if (control === 'help') {
-			// return this.tt.help;
+			// return this.translate( 'help', 'Help' );
 		} else if (control === 'fullscreen') {
-			return (!this.fullscreen) ? this.tt.enterFullScreen : this.tt.exitFullScreen;
+			return ( !this.fullscreen ) ? this.translate( 'enterFullScreen', 'Enter full screen' ) : this.translate( 'exitFullScreen', 'Exit full screen' );
 		} else {
 			// there should be no other controls, but just in case:
 			// return the name of the control with first letter in upper case

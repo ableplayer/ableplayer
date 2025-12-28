@@ -274,7 +274,7 @@
 		}
 		this.syncSignVideo( { 'rate' : rate } );
 		this.playbackRate = rate;
-		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
+		this.$speed.text( this.translate( 'speed', 'Speed' ) + ': ' + rate.toFixed(2).toString() + 'x');
 	};
 
 	AblePlayer.prototype.getPlaybackRate = function () {
@@ -592,8 +592,8 @@
 				this.toggleButtonState(
 					this.$descButton,
 					this.descOn,
-					this.tt.turnOffDescriptions,
-					this.tt.turnOnDescriptions,
+					this.translate( 'turnOffDescriptions', 'Turn off descriptions' ),
+					this.translate( 'turnOnDescriptions', 'Turn on descriptions' ),
 				);
 			}
 		}
@@ -609,8 +609,8 @@
 						'aria-controls': this.mediaId + '-captions-menu'
 					});
 				}
-				var ariaLabelOn = ( captionsCount > 1 ) ? this.tt.captions : this.tt.showCaptions;
-				var ariaLabelOff = ( captionsCount > 1 ) ? this.tt.captions : this.tt.hideCaptions;
+				var ariaLabelOn = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'showCaptions', 'Show captions' );
+				var ariaLabelOff = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'hideCaptions', 'Hide captions' );
 				var ariaPressed = ( captionsCount > 1 ) ? true : false;
 
 				this.toggleButtonState(
@@ -626,13 +626,13 @@
 		if (context === 'fullscreen' || context == 'init'){
 			if (this.$fullscreenButton) {
 				if (!this.fullscreen) {
-					this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
+					this.$fullscreenButton.attr( 'aria-label', this.translate( 'enterFullScreen', 'Enter full screen' ) );
 					this.getIcon( this.$fullscreenButton, 'fullscreen-expand' );
-					this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
+					this.$fullscreenButton.find('span.able-clipped').text( this.translate( 'enterFullScreen', 'Enter full screen' ) );
 				} else {
-					this.$fullscreenButton.attr('aria-label',this.tt.exitFullscreen);
+					this.$fullscreenButton.attr('aria-label', this.translate( 'exitFullScreen', 'Exit full screen' ) );
 					this.getIcon( this.$fullscreenButton, 'fullscreen-collapse' );
-					this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullscreen);
+					this.$fullscreenButton.find('span.able-clipped').text( this.translate( 'exitFullScreen', 'Exit full screen' ) );
 				}
 			}
 		}
@@ -687,7 +687,7 @@
 
 			if (this.$chaptersButton) {
 				this.$chaptersButton.attr({
-					'aria-label': this.tt.chapters,
+					'aria-label': this.translate( 'chapters', 'Chapters' ),
 					'aria-haspopup': 'true',
 					'aria-controls': this.mediaId + '-chapters-menu'
 				});
@@ -698,22 +698,22 @@
 
 			// update status
 			textByState = {
-				'stopped': this.tt.statusStopped,
-				'paused': this.tt.statusPaused,
-				'playing': this.tt.statusPlaying,
-				'buffering': this.tt.statusBuffering,
-				'ended': this.tt.statusEnd
+				'stopped': this.translate( 'statusStopped', 'Stopped' ),
+				'paused': this.translate( 'statusPaused', 'Paused' ),
+				'playing': this.translate( 'statusPlaying', 'Playing' ),
+				'buffering': this.translate( 'statusBuffering', 'Buffering' ),
+				'ended': this.translate( 'statusEnd', 'End of track' )
 			};
 
 			if (this.stoppingYouTube) {
 				// stoppingYouTube is true temporarily while video is paused and seeking to 0
 				// See notes in handleRestart()
 				// this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
-				if (this.$status.text() !== this.tt.statusStopped) {
-					this.$status.text(this.tt.statusStopped);
+				if (this.$status.text() !== this.translate( 'statusStopped', 'Stopped' ) ) {
+					this.$status.text( this.translate( 'statusStopped', 'Stopped' ) );
 				}
 				this.getIcon( this.$playpauseButton, 'play' );
-				this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
+				this.$playpauseButton.find('span.able-clipped').text( this.translate( 'play', 'Play' ) );
 			} else if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
 				// Update the text only if it's changed since it has role="alert";
 				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
@@ -1024,8 +1024,8 @@
 				}
 			}
 		}
-		var ariaLabelOn = ( captions.length > 1 ) ? this.tt.captions : this.tt.showCaptions;
-		var ariaLabelOff = ( captions.length > 1 ) ? this.tt.captions : this.tt.hideCaptions;
+		var ariaLabelOn = ( captions.length > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'showCaptions', 'Show captions' );
+		var ariaLabelOff = ( captions.length > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'hideCaptions', 'Hide captions' );
 
 		this.toggleButtonState(
 			this.$ccButton,
@@ -1163,7 +1163,7 @@
 		var visible = this.$transcriptDiv.is(':visible');
 		if ( visible ) {
 			this.$transcriptArea.hide();
-			this.toggleButtonState( this.$transcriptButton, ! visible, this.tt.hideTranscript, this.tt.showTranscript );
+			this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 			this.prefTranscript = 0;
 			if ( this.transcriptType === 'popup' ) {
 				this.$transcriptButton.trigger('focus').addClass('able-focus');
@@ -1182,7 +1182,7 @@
 				// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
 				// need to re-hide the popup menu
 				this.$transcriptPopup.hide();
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.tt.hideTranscript, this.tt.showTranscript );
+				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 				this.prefTranscript = 1;
 				// move focus to first focusable element (window options button)
 				this.focusNotClick = true;
@@ -1192,7 +1192,7 @@
 					thisObj.focusNotClick = false;
 				}, 100);
 			} else {
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.tt.hideTranscript, this.tt.showTranscript );
+				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 				this.$transcriptArea.show();
 			}
 		}
@@ -1205,7 +1205,7 @@
 		var visible = this.$signWindow.is(':visible');
 		if ( visible ) {
 			this.$signWindow.hide();
-			this.toggleButtonState( this.$signButton, ! visible, this.tt.hideSign, this.tt.showSign );
+			this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
 			this.prefSign = 0;
 			this.$signButton.trigger('focus').addClass('able-focus');
 			// wait briefly before resetting stopgap var
@@ -1219,7 +1219,7 @@
 			// showing signWindow has a cascading effect of showing all content *within* signWindow
 			// need to re-hide the popup menu
 			this.$signPopup.hide();
-			this.toggleButtonState( this.$signButton, ! visible, this.tt.hideSign, this.tt.showSign );
+			this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
 			this.prefSign = 1;
 			this.focusNotClick = true;
 			this.$signWindow.find('button').first().trigger('focus');
@@ -1295,10 +1295,23 @@
 				// create a hidden alert, communicated to screen readers via aria-describedby
 				var $fsDialogAlert = $('<p>',{
 					'class': 'able-screenreader-alert'
-				}).text(this.tt.fullScreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
+				}).text( this.translate( 'fullScreen', 'Full screen' ) ); // TODO: Add alert text that is more descriptive
 				$dialogDiv.append($fsDialogAlert);
 				// now render this as a dialog
-				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', true, 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullscreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
+				this.fullscreenDialog = new AccessibleDialog(
+					$dialogDiv,
+					this.$fullscreenButton,
+					'dialog',
+					true,
+					this.translate( 'fullScreenTitle', 'Full screen video player' ),
+					$fsDialogAlert,
+					this.translate( 'exitFullscreen', 'Exit full screen' ),
+					'100%',
+					true,
+					function () {
+						thisObj.handleFullscreenToggle()
+					}
+				);
 				$('body').append($dialogDiv);
 			}
 

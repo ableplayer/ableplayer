@@ -5,6 +5,14 @@
 		return langs;
 	};
 
+	AblePlayer.prototype.translate = function( key, fallback ) {
+		if ( this.tt[ key ] ) {
+			return this.tt[ key ];
+		} else {
+			return fallback;
+		}
+	}
+
 	AblePlayer.prototype.getTranslationText = function() {
 
 		// determine language, then get labels and prompts from corresponding translation var
@@ -83,47 +91,55 @@
 		$.getJSON(translationFile, function(data) {
 			// success!
 			thisObj.tt = data;
+			thisObj.translationFiles = true;
 			deferred.resolve();
 		})
 		.fail(function() {
-			console.log( "Error: Translation files need to be updated to JSON.",translationFile);
+			console.log( "Error: Translation files should be updated to JSON.",translationFile);
 			translationFile = thisObj.rootPath + 'translations/' + thisObj.lang + '.js';
 			$.getJSON(translationFile, function(data) {
 				// success!
 				thisObj.tt = data;
+				thisObj.translationFiles = true;
 				deferred.resolve();
 			})
 			.fail( function() {
-				console.log( "Critical Error: Unable to load translation file:",translationFile);
-				thisObj.provideFallback();
-				deferred.fail();
+				console.log( "Error: Unable to load translation file:", translationFile);
+				thisObj.tt = {};
+				thisObj.translationFiles = false;
+				deferred.resolve();
 			});
 		})
 		return deferred.promise();
 	};
 
 	AblePlayer.prototype.getSampleDescriptionText = function() {
+		if ( ! this.translationFiles ) {
+			this.sampleText = [];
+			let translation = { 'lang':'en', 'text': this.translate( 'sampleDescriptionText', 'Adjust settings to hear this sample text.' ) };
+			this.sampleText.push(translation);
+		} else {
+			// Create an array of sample description text in all languages
+			// This needs to be readily available for testing different voices
+			// in the Description Preferences dialog
+			var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation;
 
-		// Create an array of sample description text in all languages
-		// This needs to be readily available for testing different voices
-		// in the Description Preferences dialog
-		var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation;
+			supportedLangs = this.getSupportedLangs();
 
-		supportedLangs = this.getSupportedLangs();
+			thisObj = this;
 
-		thisObj = this;
-
-		this.sampleText = [];
-		for (i=0; i < supportedLangs.length; i++) {
-			translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.json';
-			$.getJSON(translationFile, thisLang, (function(thisLang) {
-					return function(data) {
-						thisText = data.sampleDescriptionText;
-						translation = {'lang':thisLang, 'text': thisText};
-						thisObj.sampleText.push(translation);
-					};
-				}(supportedLangs[i])) // pass lang to callback function
-			);
+			this.sampleText = [];
+			for (i=0; i < supportedLangs.length; i++) {
+				translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.json';
+				$.getJSON(translationFile, thisLang, (function(thisLang) {
+						return function(data) {
+							thisText = data.sampleDescriptionText;
+							translation = {'lang':thisLang, 'text': thisText};
+							thisObj.sampleText.push(translation);
+						};
+					}(supportedLangs[i])) // pass lang to callback function
+				);
+			}
 		}
 	};
 
