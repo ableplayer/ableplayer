@@ -1,7 +1,29 @@
 (function ($) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
-		var langs = ['ca','cs','da','de','en','es','fr','he','id','it','ja','ms','nb','nl','pl','pt','pt-br','sv','tr','zh-tw'];
+		var langs = {
+			'ca'    : 'Catalan',
+			'cs'    : 'Czech',
+			'da'    : 'Danish',
+			'de'    : 'German',
+			'en'    : 'English',
+			'es'    : 'Spanish',
+			'fr'    : 'French',
+			'he'    : 'Hebrew',
+			'id'    : 'Indonesian',
+			'it'    : 'Italian',
+			'ja'    : 'Japanese',
+			'ms'    : 'Malay',
+			'nb'    : 'Norwegian Bokmål',
+			'nl'    : 'Dutch',
+			'pl'    : 'Polish',
+			'pt'    : 'Portuguese',
+			'pt-br' : 'Brazilian Portuguese',
+			'sv'    : 'Swedish',
+			'tr'    : 'Turkish',
+			'zh-tw' : 'Chinese (Taiwan)'
+		};
+
 		return langs;
 	};
 
@@ -23,27 +45,25 @@
 		supportedLangs = this.getSupportedLangs(); // returns an array
 
 		if (this.lang) { // a data-lang attribute is included on the media element
-			if ($.inArray(this.lang,supportedLangs) === -1) {
+			if ( Object.hasOwn( supportedLangs,this.lang ) ) {
 				// the specified language is not supported
-				if (this.lang.indexOf('-') == 2) {
+				if ( this.lang.indexOf('-') == 2 ) {
 					// this is a localized lang attribute (e.g., fr-CA)
 					// try the parent language, given the first two characters
 					// if parent lang is supported. Use that, else null.
-					this.lang = ($.inArray(this.lang.substring(0,2),supportedLangs) !== -1) ? this.lang.substring(0,2) : null;
+					this.lang = ( Object.hasOwn(supportedLangs,this.lang.substring(0,2)) !== -1 ) ? this.lang.substring(0,2) : null;
 				} else {
 					// this is not a localized language.
 					// but maybe there's a similar localized language supported
 					// that has the same parent?
 					similarLangFound = false;
-					i = 0;
-					while (i < supportedLangs.length) {
-						if (supportedLangs[i].substring(0,2) == this.lang) {
+					for ( const [key,value] of Object.entries(supportedLangs) ) {
+						if ( key.substring(0,2) == this.lang ) {
 							this.lang = supportedLangs[i];
 							similarLangFound = true;
 						}
-						i++;
 					}
-					if (!similarLangFound) {
+					if ( !similarLangFound ) {
 						// language requested via data-lang is not supported
 						this.lang = null;
 					}
@@ -61,7 +81,7 @@
 				docLang = null;
 			}
 			if (docLang) {
-				if ($.inArray(docLang,supportedLangs) !== -1) {
+				if ( Object.hasOwn( supportedLangs,docLang ) ) {
 					// the document language is supported
 					this.lang = docLang;
 				} else {
@@ -69,7 +89,7 @@
 					if (docLang.indexOf('-') == 2) {
 						// this is a localized lang attribute (e.g., fr-CA)
 						// try the parent language, given the first two characters
-						if ($.inArray(docLang.substring(0,2),supportedLangs) !== -1) {
+						if ( Object.hasOwn(supportedLangs,docLang.substring(0,2)) ) {
 							// the parent language is supported. use that.
 							this.lang = docLang.substring(0,2);
 						}
@@ -125,19 +145,18 @@
 			var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation;
 
 			supportedLangs = this.getSupportedLangs();
-
 			thisObj = this;
 
 			this.sampleText = [];
-			for (i=0; i < supportedLangs.length; i++) {
-				translationFile = this.rootPath + 'translations/' + supportedLangs[i] + '.json';
+			for ( const [key,value] of Object.entries(supportedLangs) ) {
+				translationFile = this.rootPath + 'translations/' + key + '.json';
 				$.getJSON(translationFile, thisLang, (function(thisLang) {
 						return function(data) {
 							thisText = data.sampleDescriptionText;
 							translation = {'lang':thisLang, 'text': thisText};
 							thisObj.sampleText.push(translation);
 						};
-					}(supportedLangs[i])) // pass lang to callback function
+					}(key)) // pass lang to callback function
 				);
 			}
 		}
