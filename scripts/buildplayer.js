@@ -23,10 +23,6 @@
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 		this.$ableWrapper.addClass('able-skin-' + this.skin);
 
-		this.$ableWrapper.css({
-			'width': this.playerWidth + 'px'
-		});
-
 		if (this.mediaType === 'video') {
 			// youtube adds its own big play button
 			// don't show ours *unless* video has a poster attribute

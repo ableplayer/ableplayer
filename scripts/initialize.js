@@ -365,12 +365,7 @@
 	AblePlayer.prototype.setPlayerSize = function(width, height) {
 
 		// Called again after width and height are known
-
-		if (this.mediaType === 'audio') {
-			if (this.playerWidth) {
-				this.$ableWrapper.css('width',this.playerWidth + 'px');
-			}
-		} else if (width > 0 && height > 0) {
+		if (this.mediaType !== 'audio' && width > 0 && height > 0) {
 			this.playerWidth = width;
 			this.playerHeight = height;
 			this.aspectRatio = height / width;

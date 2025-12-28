@@ -88,9 +88,6 @@
 					}
 					if (thisObj.playerWidth && thisObj.playerHeight) {
 						thisObj.youTubePlayer.setSize(thisObj.playerWidth,thisObj.playerHeight);
-						thisObj.$ableWrapper.css({
-							'width': thisObj.playerWidth + 'px'
-						});
 					}
 					if (thisObj.swappingSrc) {
 						// swap is now complete
