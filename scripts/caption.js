@@ -133,7 +133,7 @@
 
       // save preference to cookie
       thisObj.prefCaptions = 1;
-      thisObj.updateCookie("prefCaptions");
+      thisObj.updatePreferences("prefCaptions");
       thisObj.refreshControls("captions");
     };
   };
@@ -169,7 +169,7 @@
 
       // save preference to cookie
       thisObj.prefCaptions = 0;
-      thisObj.updateCookie("prefCaptions");
+      thisObj.updatePreferences("prefCaptions");
       if (!this.swappingSrc) {
         thisObj.refreshControls("captions");
         thisObj.updateCaption();

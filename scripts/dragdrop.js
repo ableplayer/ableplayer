@@ -277,7 +277,7 @@
 			newWidth = $('#' + widthId).val();
 			newHeight = $('#' + heightId).val();
 			thisObj.resizeObject(which,newWidth,newHeight);
-			thisObj.updateCookie(which);
+			thisObj.updatePreferences(which);
 
 			resizeDialog.hide();
 			$windowPopup.hide();
@@ -673,7 +673,7 @@
 		this.dragging = false;
 
 		// save final position of dragged element
-		this.updateCookie(which);
+		this.updatePreferences(which);
 
 		// reset starting mouse positions
 		this.startMouseX = undefined;
@@ -745,7 +745,7 @@
 		this.$activeWindow.removeClass('able-resize');
 
 		// save final width and height of dragged element
-		this.updateCookie(which);
+		this.updatePreferences(which);
 
 		// Booleans for preventing stray events
 		this.windowMenuClickRegistered = false;

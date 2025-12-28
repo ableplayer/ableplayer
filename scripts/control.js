@@ -949,7 +949,7 @@
 				this.captionsOn = false;
 				this.prefCaptions = 0;
 				ariaPressed = false;
-				this.updateCookie('prefCaptions');
+				this.updatePreferences('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
 				} else if (this.usingVimeoCaptions) {
@@ -962,7 +962,7 @@
 				this.captionsOn = true;
 				this.prefCaptions = 1;
 				ariaPressed = true;
-				this.updateCookie('prefCaptions');
+				this.updatePreferences('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
 				} else if (this.usingVimeoCaptions) {
@@ -1086,7 +1086,7 @@
 
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
-		this.updateCookie('prefDesc');
+		this.updatePreferences('prefDesc');
 		if (typeof this.$descDiv !== 'undefined') {
 			if (!this.$descDiv.is(':hidden')) {
 				this.$descDiv.hide();
@@ -1196,7 +1196,7 @@
 				this.$transcriptArea.show();
 			}
 		}
-		this.updateCookie('prefTranscript');
+		this.updatePreferences('prefTranscript');
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
@@ -1229,7 +1229,7 @@
 				thisObj.focusNotClick = false;
 			}, 100);
 		}
-		this.updateCookie('prefSign');
+		this.updatePreferences('prefSign');
 	};
 
 	AblePlayer.prototype.isFullscreen = function () {
@@ -1418,7 +1418,7 @@
 
 		this.autoScrollTranscript = val; // val is boolean
 		this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
-		this.updateCookie('prefAutoScrollTranscript');
+		this.updatePreferences('prefAutoScrollTranscript');
 		this.refreshControls('transcript');
 	};
 

@@ -92,9 +92,10 @@ Since the release of version 4.4, we are no longer supporting Internet Explorer.
 
 - *Able Player* uses [jQuery][]. Version 3.5.0 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
-- *Able Player* uses [js-cookie][] to store and retrieve user
-    preferences in cookies. The example code below uses CDN’s hosted libraries;
-    no download required. All Able Player cookies are functional cookies.
+- *Able Player* optionally can use [js-cookie][] to store and retrieve user
+    preferences in cookies. By default, preferences are stored in localStorage.
+	 The example code below uses CDN’s hosted libraries; no download required.
+	 All Able Player cookies are functional cookies.
 - *AblePlayer*, as of 4.5.1, requires the use of the DOMPurify sanitizing library.
   - The default files in the root of the `/build` directory have DOMPurify bundled in.
   - Alternatively, the `build/separate-dompurify` directory houses copies of the AblePlayer files with AblePlayer code only and a stand-alone copy of the current version of DOMPurify that the project is currently using. These files are available for those who want to load DOMPurify via a separate file or want to use a CDN hosted version.
@@ -138,6 +139,8 @@ Copy and paste the following code into your web page. This code applies to all u
 ```HTML
 <!-- Dependencies -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<!-- Optional Dependency -->
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- CSS -->
@@ -226,7 +229,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 ### Captions
 
 - **data-captions-position** - optional; specify default position of captions relative to the video (either "below" or "overlay"; "below" is the default if not specified). Users can override this setting in Captions Preferences.
-- **data-state-captions** - optional; "on" or "off". Captions are on by default if they're available, but this allows website owners to override that setting. If users enable captions, their preference will be saved in a cookie, and that will override the default setting on future visits.
+- **data-state-captions** - optional; "on" or "off". Captions are on by default if they're available, but this allows website owners to override that setting. If users enable captions, their preference will be saved, and that will override the default setting on future visits.
 
 ### Transcript
 
@@ -356,7 +359,7 @@ In such cases, use `data-descriptions-audible="false"` to prevent browsers and s
 
 If description is available through either of the above methods, it is off by default and users must enable it using the "Descriptions" button on the player control. Website owners can override this setting and change the default state to "on" using `data-state-descriptions="on"`. Also, website owners can define the default state of extended descriptions (i.e., pausing the video during audio description) using `data-desc-pause-default`. Supported values are either "off" or "on".
 
-Setting this to "off" is useful if all videos have plenty of audio space for description to be read, and pausing is therefore unnecessary. The default setting is "on". If users have changed this setting in the Description Preferences dialog, their preference will be saved in a cookie, and that will override the default setting on future visits.
+Setting this to "off" is useful if all videos have plenty of audio space for description to be read, and pausing is therefore unnecessary. The default setting is "on". If users have changed this setting in the Description Preferences dialog, their preference will be saved, and that will override the default setting on future visits.
 
 ### Sign language
 
@@ -593,7 +596,7 @@ By default, keyboard shortcuts must be accompanied by Alt + Control.
 
 ## User Preferences
 
-One of *Able Player’s* accessibility features is that the player is highly customizable by users. The controller includes a Preferences button that allows users to change default preferences and settings. Their changes are stored in a browser cookie and in most cases should therefore be preserved the next time they visit the site. Specifically, users can control the following:
+One of *Able Player’s* accessibility features is that the player is highly customizable by users. The controller includes a Preferences button that allows users to change default preferences and settings. Their changes are stored in their browser, and in most cases should be preserved the next time they visit the site. Users can control the following:
 
 - Modifier keys: Add *Alt*, *Ctrl*, or *Shift* to the Able Player keyboard
     shortcuts to avoid conflicts with other applications.

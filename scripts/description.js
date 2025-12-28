@@ -237,7 +237,7 @@
 		// 2. The first available voice in the array of available voices for this browser in this language
 
 		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
-		cookie = this.getCookie();
+		cookie = this.getPref();
 		prefDescVoice = (typeof cookie.voices !== 'undefined') ? this.getPrefDescVoice() : null;
 
 		this.getBrowserVoices();
@@ -284,7 +284,7 @@
 				if (this.$voiceSelectField) {
 					this.$voiceSelectField.val(this.prefDescVoice);
 				}
-				this.updateCookie('voice');
+				this.updatePreferences('voice');
 			}
 		}
 	};

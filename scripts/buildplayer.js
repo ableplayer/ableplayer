@@ -154,6 +154,7 @@
 		} else {
 			this.$playerDiv.append(this.$controllerDiv, this.$statusBarDiv);
 		}
+
 		if (this.mediaType === 'video') {
 			// the player controls go after the media & captions
 			this.$ableDiv.append(this.$playerDiv);
@@ -200,7 +201,7 @@
 		// which is either 'transcript' or 'sign'
 		var cookie, cookiePos, $window, windowPos;
 
-		cookie = this.getCookie();
+		cookie = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
 		if (which === 'transcript') {
 			if (typeof cookie.transcript !== 'undefined') {
