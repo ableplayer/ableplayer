@@ -263,6 +263,7 @@
 	position: absolute;
 	color: var(--able-control-color);
 	background-color: var(--able-big-play-background);
+	background: var(--able-big-play-background);
 	border: none;
 	outline: none;
 	left: 0;
