@@ -618,8 +618,8 @@ One of *Able Player’s* accessibility features is that the player is highly cus
 
 ## Acknowledgements
 
-- Able Player development is supported in part by the [AccessComputing][] project at the University of Washington, with financial support from the National Science Foundation (grants #CNS-0540615, CNS-0837508, and CNS-1042260).
-- Additional support has been provided by the [Committee on Institutional Cooperation][] (CIC).
+- Until 2025, Able Player development was supported in part by the [AccessComputing][] project at the University of Washington, with financial support from the National Science Foundation (grants #CNS-0540615, CNS-0837508, and CNS-1042260).
+- Additional support was provided by the [Committee on Institutional Cooperation][] (CIC).
 - Turtle and rabbit icons (available as optional alternatives for the speed buttons) are provided courtesy of [Icons8][].
 - Sample video tracks are provided courtesy of [The DO-IT Center][] at the University of Washington. Additional videos are available on the [DO-IT Video][] website, which uses Able Player.
 - Sample audio tracks feature songs by Terrill Thompson, Able Player's creator and original lead developer. Check out [Terrill's music site] for more listening, and to support his work.
