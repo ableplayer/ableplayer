@@ -628,11 +628,9 @@
 				if (!this.fullscreen) {
 					this.$fullscreenButton.attr( 'aria-label', this.translate( 'enterFullScreen', 'Enter full screen' ) );
 					this.getIcon( this.$fullscreenButton, 'fullscreen-expand' );
-					this.$fullscreenButton.find('span.able-clipped').text( this.translate( 'enterFullScreen', 'Enter full screen' ) );
 				} else {
 					this.$fullscreenButton.attr('aria-label', this.translate( 'exitFullScreen', 'Exit full screen' ) );
 					this.getIcon( this.$fullscreenButton, 'fullscreen-collapse' );
-					this.$fullscreenButton.find('span.able-clipped').text( this.translate( 'exitFullScreen', 'Exit full screen' ) );
 				}
 			}
 		}
@@ -713,7 +711,6 @@
 					this.$status.text( this.translate( 'statusStopped', 'Stopped' ) );
 				}
 				this.getIcon( this.$playpauseButton, 'play' );
-				this.$playpauseButton.find('span.able-clipped').text( this.translate( 'play', 'Play' ) );
 			} else if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
 				// Update the text only if it's changed since it has role="alert";
 				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
@@ -758,11 +755,9 @@
 						if (currentState === 'paused' || currentState === 'stopped' || currentState === 'ended') {
 							thisObj.$playpauseButton.attr('aria-label',thisObj.tt.play);
 							thisObj.getIcon( thisObj.$playpauseButton, 'play' );
-							thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.play);
 						} else {
 							thisObj.$playpauseButton.attr('aria-label',thisObj.tt.pause);
 							thisObj.getIcon( thisObj.$playpauseButton, 'pause' );
-							thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.pause);
 						}
 					}
 				});
@@ -1435,7 +1430,7 @@
 		if ( existingIcon.length > 0 ) {
 			return;
 		}
-		$button.find('svg, img, span:not(.able-clipped)').remove();
+		$button.find('svg, img, span').remove();
 
 		if (iconType === 'font') {
 			var $buttonIcon = $('<span>', {
@@ -1477,9 +1472,6 @@
 
 	AblePlayer.prototype.setText = function( $button, text ) {
 		$button.attr( 'aria-label', text );
-		// add the visibly-hidden label for screen readers that don't support aria-label on the button
-		$buttonLabel = $('<span>',{ 'class': 'able-clipped' }).text( text );
-		$button.append($buttonLabel);
 	};
 
 	AblePlayer.prototype.toggleButtonState = function($button, isOn, onLabel, offLabel, ariaPressed = false, ariaExpanded = false) {
@@ -1491,7 +1483,6 @@
 		}
 		if (! isOn) {
 			$button.addClass('buttonOff').attr('aria-label', offLabel);
-			$button.find('span.able-clipped').text(offLabel);
 			if ( ariaPressed ) {
 				$button.attr('aria-pressed', 'false');
 			}
@@ -1500,7 +1491,6 @@
 			}
 		} else {
 			$button.removeClass('buttonOff').attr('aria-label', onLabel);
-			$button.find('span.able-clipped').text(onLabel);
 			if ( ariaPressed ) {
 				$button.attr('aria-pressed', 'true');
 			}

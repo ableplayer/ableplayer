@@ -83,12 +83,12 @@
 					// make description text visible
 					if (typeof this.$descDiv !== 'undefined') {
 						this.$descDiv.show();
-						this.$descDiv.removeClass('able-clipped');
+						this.$descDiv.removeClass('able-offscreen');
 					}
 				} else {
 					// keep it visible to screen readers, but hide it visibly
 					if (typeof this.$descDiv !== 'undefined') {
-						this.$descDiv.addClass('able-clipped');
+						this.$descDiv.addClass('able-offscreen');
 					}
 				}
 			}
@@ -102,7 +102,7 @@
 				// hide description div from everyone, including screen reader users
 				if (typeof this.$descDiv !== 'undefined') {
 					this.$descDiv.hide();
-					this.$descDiv.removeClass('able-clipped');
+					this.$descDiv.removeClass('able-offscreen');
 				}
 			}
 		}

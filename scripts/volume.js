@@ -101,7 +101,6 @@
 
 		this.getIcon( this.$volumeButton, 'volume-' + volumeName );
 		this.$volumeButton.attr( 'aria-label', volumeLabel );
-		this.$volumeButton.find('span.able-clipped').text(volumeLabel);
 	};
 
 	AblePlayer.prototype.handleVolumeButtonClick = function() {

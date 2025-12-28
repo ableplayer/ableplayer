@@ -204,7 +204,7 @@
 
 /* Screen reader hidden text classes */
 .able-transcript .able-hidden,
-.able-clipped, .able-screenreader-alert, .able-offscreen {
+.able-screenreader-alert, .able-offscreen {
 	border: 0;
 	clip-path: inset(50%);
 	height: 1px;
