@@ -207,37 +207,37 @@
 	AblePlayer.prototype.positionDraggableWindow = function (which, width) {
 
 		// which is either 'transcript' or 'sign'
-		var cookie, cookiePos, $window, windowPos;
+		var preferences, preferencePos, $window, windowPos;
 
-		cookie = this.getPref();
+		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
 		if (which === 'transcript') {
-			if (typeof cookie.transcript !== 'undefined') {
-				cookiePos = cookie.transcript;
+			if (typeof preferences.transcript !== 'undefined') {
+				preferencePos = preferences.transcript;
 			}
 		} else if (which === 'sign') {
-			if (typeof cookie.sign !== 'undefined') {
-				cookiePos = cookie.sign;
+			if (typeof preferences.sign !== 'undefined') {
+				preferencePos = preferences.sign;
 			}
 		}
-		if (typeof cookiePos !== 'undefined' && !($.isEmptyObject(cookiePos))) {
-			// position window using stored values from cookie
+		if (typeof preferencePos !== 'undefined' && !($.isEmptyObject(preferencePos))) {
+			// position window using stored values from preferences
 			$window.css({
-				'position': cookiePos['position'],
-				'width': cookiePos['width'],
-				'z-index': cookiePos['zindex']
+				'position': preferencePos['position'],
+				'width': preferencePos['width'],
+				'z-index': preferencePos['zindex']
 			});
-			if (cookiePos['position'] === 'absolute') {
+			if (preferencePos['position'] === 'absolute') {
 				$window.css({
-					'top': cookiePos['top'],
-					'left': cookiePos['left']
+					'top': preferencePos['top'],
+					'left': preferencePos['left']
 				});
 				// Check whether the window is above the top of the viewport.
 				topPosition = $window.offset().top;
 				if ( topPosition < 0 ) {
 					$window.css({
-						'top': cookiePos['top'] - topPosition,
-						'left': cookiePos['left']
+						'top': preferencePos['top'] - topPosition,
+						'left': preferencePos['left']
 					});
 				}
 			}
