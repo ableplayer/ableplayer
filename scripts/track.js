@@ -416,29 +416,26 @@
     });
 
     // Fetch the content manually so it can be sanitized
-    $.ajax({
-      url: src,
-      dataType: 'text',
-      success: function (data) {
-        // Sanitize the fetched content
-        var sanitizedTrackText = validate.sanitizeVttContent(data);
+	fetch(src)
+		.then( response => {
 
-        // Load the sanitized content into the $tempDiv
-        $tempDiv.html(sanitizedTrackText);
-
-        // Resolve the promise with the sanitized content
-        deferred.resolve(src, sanitizedTrackText);
-
-        $tempDiv.remove();
-      },
-      error: function (req, status, error) {
-        if (thisObj.debug) {
-          console.log("error reading file " + src + ": " + status);
-        }
-        deferred.reject(src);
-        $tempDiv.remove();
-      },
-    });
+			return response.text();
+  		})
+		.then( vtt => {
+			var sanitizedTrackText = validate.sanitizeVttContent( vtt );
+			// Load the sanitized content into the $tempDiv
+			$tempDiv.html(sanitizedTrackText);
+			// Resolve the promise with the sanitized content
+			deferred.resolve(src, sanitizedTrackText);
+			$tempDiv.remove();
+		})
+		.catch(error => {
+			if (thisObj.debug) {
+				console.log( "error reading file " + src + ": " + error );
+			}
+			deferred.reject(src);
+			$tempDiv.remove();
+		});
 
     return promise;
   };
