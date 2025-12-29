@@ -207,7 +207,7 @@
 	AblePlayer.prototype.positionDraggableWindow = function (which, width) {
 
 		// which is either 'transcript' or 'sign'
-		var preferences, preferencePos, $window, windowPos;
+		var preferences, preferencePos, $window, windowPos, viewportWidth, windowWidth;
 
 		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
@@ -234,14 +234,28 @@
 				});
 				// Check whether the window is above the top of the viewport.
 				topPosition = $window.offset().top;
+				leftPosition = $window.offset().left;
+				viewportWidth = window.innerWidth;
+				windowWidth = $window.width();
 				if ( topPosition < 0 ) {
 					$window.css({
-						'top': preferencePos['top'] - topPosition,
-						'left': preferencePos['left']
+						'top': preferencePos['top'] - topPosition
+					});
+				}
+				// If draggable window is off screen to the left.
+				if ( leftPosition < 0 ) {
+					$window.css({
+						'left': preferencePos['left'] - leftPosition
+					});
+				}
+				// If draggable window is off screen to the right.
+				if ( viewportWidth - leftPosition < 30 ) {
+					$window.css({
+						'left': viewportWidth - windowWidth
 					});
 				}
 			}
-			// since cookie is not page-specific, z-index needs may vary across different pages
+			// since preferences are not page-specific, z-index needs may vary across different pages
 			this.updateZIndex(which);
 		} else {
 			// position window using default values
