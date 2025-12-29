@@ -403,23 +403,15 @@
 			playerHeight = this.$playerDiv.height();
 			newMediaHeight = mediaHeight + playerHeight;
 
-			// fade slowly to transparency
-			this.$playerDiv.fadeTo(2000,0,function() {
-				/*
-				// when finished, position playerDiv offscreen
-				// thisObj.$playerDiv.addClass('able-offscreen');
-				// Expand the height of mediaContainer to fill the void (needs work)
-				thisObj.$mediaContainer.animate({
-					height: newMediaHeight
-				},500);
-				*/
-			});
+			// fade slowly to transparency in CSS
+			this.$playerDiv.addClass( 'fade-out' );
+			// then move off screen?
 		} else if (direction == 'in') {
 			// restore captionsContainer to its original height (needs work)
 			// this.$mediaContainer.removeAttr('style');
 			// fade relatively quickly back to its original position with full opacity
 			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
-			this.$playerDiv.fadeTo(100,1);
+			this.$playerDiv.addClass( 'fade-in' );
 		}
 	};
 
@@ -1502,11 +1494,7 @@
 
 	AblePlayer.prototype.showTooltip = function($tooltip) {
 
-		if (($tooltip).is(':animated')) {
-			$tooltip.stop(true,true).show();
-		} else {
-			$tooltip.stop().show();
-		}
+		$tooltip.show();
 	};
 
 	AblePlayer.prototype.showAlert = function( msg, location = 'main' ) {
@@ -1534,7 +1522,7 @@
 
 		if (location !== 'screenreader') {
 			setTimeout( function () {
-				$alertBox.fadeOut(300);
+				$alertBox.hide();
 			}, 30000 );
 		}
 	};

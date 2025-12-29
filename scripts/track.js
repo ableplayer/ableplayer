@@ -429,7 +429,7 @@
 			deferred.resolve(src, sanitizedTrackText);
 			$tempDiv.remove();
 		})
-		.catch(error => {
+		.catch( error => {
 			if (thisObj.debug) {
 				console.log( "error reading file " + src + ": " + error );
 			}

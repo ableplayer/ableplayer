@@ -947,7 +947,11 @@
 		// because it's positioning needs are unique
 		// For now, alertDiv is fixed at top left of screen
 		// but could ultimately be modified to appear near the point of action in the VTS table
-		this.$vtsAlert.text(message).show().delay(3000).fadeOut('slow');
+		const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+		this.$vtsAlert.text(message).show();
+		delay(3000).then(() => {
+			this.$vtsAlert.text(message).hide()
+		});
 	};
 
 	AblePlayer.prototype.parseVtsOutput = function($table) {
