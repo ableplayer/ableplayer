@@ -233,12 +233,12 @@
 
 		// set description voice on player init, or when user changes caption language
 		// Voice is determined in the following order of precedence:
-		// 1. User's preferred voice for this language, saved in a cookie
+		// 1. User's preferred voice for this language, saved in preferences
 		// 2. The first available voice in the array of available voices for this browser in this language
 
-		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
-		cookie = this.getPref();
-		prefDescVoice = (typeof cookie.voices !== 'undefined') ? this.getPrefDescVoice() : null;
+		var preferences, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
+		preferences = this.getPref();
+		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefDescVoice() : null;
 
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
