@@ -383,16 +383,11 @@
 	AblePlayer.prototype.fadeControls = function(direction) {
 
 		// Visibly fade controls without hiding them from screen reader users
-
 		// direction is either 'out' or 'in'
 
-		// TODO: This still needs work.
 		// After the player fades, it's replaced by an empty space
 		// Would be better if the video and captions expanded to fill the void
-		// Attempted to fade out to 0 opacity, then move the playerDiv offscreen
-		// and expand the mediaContainer to fill the vacated space
-		// However, my attempts to do this have been choppy and buggy
-		// Code is preserved below and commented out
+		// replace JS animation with CSS animation in 12/2025.
 
 		var thisObj, mediaHeight, playerHeight, newMediaHeight;
 		thisObj = this;
@@ -404,14 +399,14 @@
 			newMediaHeight = mediaHeight + playerHeight;
 
 			// fade slowly to transparency in CSS
-			this.$playerDiv.addClass( 'fade-out' );
+			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
 			// then move off screen?
 		} else if (direction == 'in') {
 			// restore captionsContainer to its original height (needs work)
 			// this.$mediaContainer.removeAttr('style');
 			// fade relatively quickly back to its original position with full opacity
 			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
-			this.$playerDiv.addClass( 'fade-in' );
+			this.$playerDiv.addClass( 'fade-in' ).removeClass( 'fade-out' );
 		}
 	};
 
