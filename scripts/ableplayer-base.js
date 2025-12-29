@@ -448,14 +448,15 @@ var AblePlayerInstances = [];
 		// use defer method to defer additional processing until text is retrieved
 		this.tt = {};
 		var thisObj = this;
-		$.when(this.getTranslationText()).then(
-			function () {
+		async function fetchTranslations(thisObj) {
+			try {
+				await thisObj.getTranslationText();
 				thisObj.setup();
+			} catch {
+				thisObj.provideFallback();
 			}
-		).
-		fail(function() {
-			thisObj.provideFallback();
-		});
+		}
+		fetchTranslations(thisObj);
 	};
 
 	// Index to increment every time new player is created.
