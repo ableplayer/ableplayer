@@ -397,15 +397,8 @@
 			mediaHeight = this.$mediaContainer.height();
 			playerHeight = this.$playerDiv.height();
 			newMediaHeight = mediaHeight + playerHeight;
-
-			// fade slowly to transparency in CSS
 			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
-			// then move off screen?
 		} else if (direction == 'in') {
-			// restore captionsContainer to its original height (needs work)
-			// this.$mediaContainer.removeAttr('style');
-			// fade relatively quickly back to its original position with full opacity
-			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
 			this.$playerDiv.addClass( 'fade-in' ).removeClass( 'fade-out' );
 		}
 	};
