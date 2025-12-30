@@ -193,7 +193,7 @@
 					deferred.reject();
 				},
 				onStateChange: function (x) {
-					thisObj.getPlayerState().then(function(playerState) {
+					thisObj.getPlayerState().then(function() {
 						// no actions
 					});
 				},
