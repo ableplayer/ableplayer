@@ -693,7 +693,7 @@
 
 	AblePlayer.prototype.startResize = function(which, $element) {
 
-		var thisObj, $windowPopup, startPos, newWidth, newHeight;
+		var thisObj, $windowPopup, newWidth, newHeight;
 
 		thisObj = this;
 		this.$activeWindow = $element;
