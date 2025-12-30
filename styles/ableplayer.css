@@ -767,13 +767,17 @@ span.able-modkey {
 }
 
 .able-window-toolbar .able-drag-handle svg {
-	width: 60px;
-	height: auto;
+	height: 12px;
+	width: auto;
 	margin: 0 auto;
 }
 
 .able-window-toolbar .able-drag-handle path {
-	fill: #fff6;
+	fill: var(--able-medium-light-gray);
+}
+
+.able-draggable:hover .able-drag-handle path {
+	fill: var(--able-very-light-gray);
 }
 
 .able-window-toolbar > div {
@@ -825,8 +829,8 @@ span.able-modkey {
 
 .able-resizable {
 	position: absolute;
-	width: 20px;
-	height: 20px;
+	width: 28px;
+	height: 28px;
 	bottom: 0;
 	right: 0;
 	padding: 1px;
@@ -870,7 +874,16 @@ span.able-modkey {
 
 .able-sign-window video {
 	width: 100%;
-	margin-bottom: 1rem;
+	display: block;
+}
+
+.able-sign-window .able-resizable {
+	background: #00000033;
+	border-top-left-radius: 20px;
+}
+
+.able-sign-window:hover .able-resizable {
+	background: var(--able-very-light-gray);
 }
 
 .able-sign-window.able-fixed video {
