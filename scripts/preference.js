@@ -878,14 +878,13 @@
 		// User presses Escape to close Prefs dialog
 		// User clicks Save in Prefs dialog, & there's more than one player on page
 
-		var thisObj, preferences, available, i, prefName, prefId, thisDiv, thisId;
+		var thisObj, preferences, available, i, prefName;
 
 		thisObj = this;
 		preferences = this.getPref();
 		available = this.getAvailablePreferences();
 		for (i=0; i<available.length; i++) {
 			prefName = available[i]['name'];
-			prefId = this.mediaId + '_' + prefName;
 			if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				// this is a caption-related select box
 				$('select[name="' + prefName + '"]').val(preferences.preferences[prefName]);

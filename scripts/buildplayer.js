@@ -931,7 +931,7 @@
 
 		var thisObj, baseSliderWidth, controlLayout, numSections,
 		i, j, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, control,
-		$buttonLabel, buttonTitle, $newButton, buttonText, position, buttonHeight,
+		buttonTitle, $newButton, buttonText, position, buttonHeight,
 		buttonWidth, buttonSide, controllerWidth, tooltipId, tooltipY, tooltipX,
 		tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, captionLabel, popupMenuId;
 
@@ -1258,7 +1258,7 @@
 		// NOTE: Swapping source for audio description is handled elsewhere;
 		// see description.js > swapDescription()
 
-		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, $newSource, nowPlayingSpan;
+		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, nowPlayingSpan;
 
 		var thisObj = this;
 

@@ -356,8 +356,6 @@
 
 	AblePlayer.prototype.playMedia = function () {
 
-		var thisObj = this;
-
 		this.syncSignVideo( { 'play' : true } );
 
 		if (this.player === 'html5') {
@@ -389,14 +387,10 @@
 		// Would be better if the video and captions expanded to fill the void
 		// replace JS animation with CSS animation in 12/2025.
 
-		var thisObj, mediaHeight, playerHeight, newMediaHeight;
-		thisObj = this;
+		var thisObj = this;
 
 		if (direction == 'out') {
 			// get the original height of two key components:
-			mediaHeight = this.$mediaContainer.height();
-			playerHeight = this.$playerDiv.height();
-			newMediaHeight = mediaHeight + playerHeight;
 			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
 		} else if (direction == 'in') {
 			this.$playerDiv.addClass( 'fade-in' ).removeClass( 'fade-out' );

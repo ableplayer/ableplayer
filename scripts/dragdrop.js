@@ -223,7 +223,8 @@
 
 		var thisObj, $windowPopup, $windowButton, widthId, heightId,
 			$resizeForm, $resizeWrapper, $resizeWidthDiv, $resizeWidthInput, $resizeWidthLabel,
-			$resizeHeightDiv, $resizeHeightInput, $resizeHeightLabel, $saveButton, $cancelButton, newWidth, newHeight, resizeDialog;
+			$resizeHeightDiv, $resizeHeightInput, $resizeHeightLabel, $saveButton, $cancelButton,
+			newWidth, newHeight, resizeDialog;
 
 		thisObj = this;
 
@@ -574,8 +575,6 @@
 	AblePlayer.prototype.dragKeys = function(which, e) {
 
 		var key, keySpeed;
-
-		var thisObj = this;
 
 		// stopgap to prevent firing on initial Enter or space
 		// that selected "Move" from menu

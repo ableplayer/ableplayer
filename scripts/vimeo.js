@@ -2,7 +2,7 @@
 
 	AblePlayer.prototype.initVimeoPlayer = function () {
 
-		var thisObj, deferred, promise, containerId, vimeoId, autoplay, options;
+		var thisObj, deferred, promise, containerId, vimeoId, options;
 		thisObj = this;
 
 		deferred = new this.defer();
@@ -142,9 +142,7 @@
 
 	AblePlayer.prototype.getVimeoState = function () {
 
-		var thisObj, deferred, promise, promises, gettingPausedPromise, gettingEndedPromise;
-
-		thisObj = this;
+		var deferred, promise, promises, gettingPausedPromise, gettingEndedPromise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
@@ -176,7 +174,7 @@
 		var deferred = new this.defer();
 		var promise = deferred.promise();
 
-		var thisObj, i, trackId, isDefaultTrack;
+		var thisObj, i, isDefaultTrack;
 
 		thisObj = this;
 

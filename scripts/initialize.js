@@ -641,8 +641,7 @@
 
 	AblePlayer.prototype.initStenoFrame = function() {
 
-		var thisObj, deferred, promise;
-		thisObj = this;
+		var deferred, promise;
 		deferred = new this.defer();
 		promise = deferred.promise();
 

@@ -298,7 +298,7 @@
 		// 2. User is toggling description
 		// (playerCreated == true)
 
-		var thisObj, i, origSrc, descSrc, srcType;
+		var thisObj, i, origSrc, descSrc;
 
 		thisObj = this;
 
@@ -451,7 +451,7 @@
 			return;
 		}
 
-		var thisObj, i, cues, d, thisDescription, descText;
+		var thisObj, cues, d, thisDescription, descText;
 		thisObj = this;
 
 		var flattenComponentForDescription = function (component) {

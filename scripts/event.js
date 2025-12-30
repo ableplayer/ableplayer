@@ -720,7 +720,7 @@
 	};
 
 	AblePlayer.prototype.addEventListeners = function () {
-		// Save the current object context in thisObj for use with inner functions.
+
 		var thisObj = this;
 
 		// Appropriately resize media player for full screen.
