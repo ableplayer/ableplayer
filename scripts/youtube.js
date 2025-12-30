@@ -183,7 +183,7 @@
 		}
 	};
 
-	AblePlayer.prototype.getYouTubeCaptionTracks = function (youTubeId) {
+	AblePlayer.prototype.getYouTubeCaptionTracks = function () {
 
 		// get data via YouTube IFrame Player API, and push data to this.tracks & this.captions
 		// NOTE: Caption tracks are not available through the IFrame Player API

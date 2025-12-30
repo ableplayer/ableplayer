@@ -220,7 +220,7 @@
       // this media has no track elements
       // if this is a youtube or vimeo player, check there for captions/subtitles
       if (this.player === 'youtube') {
-        this.getYouTubeCaptionTracks(this.youTubeId).then(function () {
+        this.getYouTubeCaptionTracks().then(function () {
           if (thisObj.hasCaptions) {
             thisObj.usingYouTubeCaptions = true;
             if (thisObj.$captionsWrapper) {
