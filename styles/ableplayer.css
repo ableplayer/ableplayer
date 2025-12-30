@@ -760,6 +760,10 @@ span.able-modkey {
 	text-wrap: nowrap;
 }
 
+.able-window-toolbar .transcript-language-select-wrapper {
+	order: 4;
+}
+
 .able-window-toolbar .able-drag-handle {
 	order: 2;
 	width: 100%;
@@ -829,8 +833,8 @@ span.able-modkey {
 
 .able-resizable {
 	position: absolute;
-	width: 28px;
-	height: 28px;
+	width: 24px;
+	height: 24px;
 	bottom: 0;
 	right: 0;
 	padding: 1px;
@@ -879,11 +883,14 @@ span.able-modkey {
 
 .able-sign-window .able-resizable {
 	background: #00000033;
+	background: linear-gradient(to bottom right, transparent 0%, transparent 51%, #fff3 51%, #fff3 100%);
 	border-top-left-radius: 20px;
 }
 
 .able-sign-window:hover .able-resizable {
 	background: var(--able-very-light-gray);
+	background: linear-gradient(to bottom right, transparent 0%, transparent 51%, #fffe 51%, #fffe 100%);
+
 }
 
 .able-sign-window.able-fixed video {
