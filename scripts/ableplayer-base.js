@@ -248,6 +248,11 @@ var AblePlayerInstances = [];
 		var youTubeId = $(media).data('youtube-id');
 		if ( youTubeId !== undefined && youTubeId !== "") {
 			this.youTubeId = this.getYouTubeId(youTubeId);
+			if ( ! this.hasPoster ) {
+				let poster = this.getYouTubePosterUrl(this.youTubeId,'1200');
+				$(media).attr( 'poster', poster );
+				this.hasPoster = true;
+			}
 		}
 
 		var youTubeDescId = $(media).data('youtube-desc-id');
@@ -267,6 +272,11 @@ var AblePlayerInstances = [];
 		var vimeoId = $(media).data('vimeo-id');
 		if ( vimeoId !== undefined && vimeoId !== "") {
 			this.vimeoId = this.getVimeoId(vimeoId);
+			if ( ! this.hasPoster ) {
+				let poster = thisObj.getVimeoPosterUrl(this.vimeoId,'1200');
+				$(media).attr( 'poster', poster );
+				this.hasPoster = true;
+			}
 		}
 		var vimeoDescId = $(media).data('vimeo-desc-id');
 		if ( vimeoDescId !== undefined && vimeoDescId !== "") {
