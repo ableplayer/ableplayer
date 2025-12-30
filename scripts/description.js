@@ -22,7 +22,7 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 

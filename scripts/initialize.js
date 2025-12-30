@@ -326,7 +326,7 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -347,7 +347,7 @@
 		} else {
 			// Able Player was initialized with some element other than <video> or <audio>
 			this.provideFallback();
-			deferred.fail();
+			deferred.reject();
 			return promise;
 		}
 
@@ -390,7 +390,7 @@
 	// Perform one-time setup for this instance of player; called after player is first initialized.
 	AblePlayer.prototype.setupInstance = function () {
 
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 
 		if (this.$media.attr('id')) {
@@ -492,7 +492,7 @@
 
 		var deferred, promise, thisObj, prefsGroups, i;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -616,9 +616,9 @@
 			playerPromise = this.initVimeoPlayer();
 		}
 		// After player specific initialization is done, run remaining general initialization.
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
-		playerPromise.done(
+		playerPromise.then(
 			function () { // done/resolved
 				if (thisObj.useFixedSeekInterval) {
 					// if fixed seekInterval was not already assigned (using value of data-seek-interval)
@@ -631,7 +631,7 @@
 				}
 				deferred.resolve();
 			}
-		).fail(function () { // failed
+		).finally(function () { // failed
 			deferred.reject();
 			}
 		);
@@ -643,7 +643,7 @@
 
 		var thisObj, deferred, promise;
 		thisObj = this;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		if (this.stenoMode && this.$stenoFrame) {
@@ -769,7 +769,7 @@
 
 	AblePlayer.prototype.initHtml5Player = function () {
 		// Nothing special to do!
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 		deferred.resolve();
 		return promise;

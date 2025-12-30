@@ -39,7 +39,7 @@
 
 		// determine language, then get labels and prompts from corresponding translation var
 		var deferred, thisObj, supportedLangs, docLang, translationFile, i,	similarLangFound;
-		deferred = $.Deferred();
+		deferred = new this.defer();
 		thisObj = this;
 
 		supportedLangs = this.getSupportedLangs(); // returns an array

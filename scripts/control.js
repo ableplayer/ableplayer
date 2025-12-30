@@ -70,7 +70,7 @@
 		var deferred, promise, thisObj, mediaTimes;
 		mediaTimes = {};
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		if (typeof duration !== 'undefined' && typeof elapsed !== 'undefined') {
@@ -95,7 +95,7 @@
 		// function is called by getMediaTimes, and return value is sanitized there
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -143,7 +143,7 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -189,7 +189,7 @@
 		// - 'playing' - Currently playing.
 
 		var deferred, promise, thisObj;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 

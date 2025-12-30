@@ -122,7 +122,7 @@
 
 		var thisObj, deferred, promise;
 		thisObj = this;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.youTubeSignPlayerReady = false;
@@ -155,7 +155,7 @@
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		containerId = this.mediaId + '_youtube_sign';
