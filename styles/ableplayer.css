@@ -750,6 +750,32 @@ span.able-modkey {
 	gap: 12px;
 }
 
+.able-window-toolbar button {
+	order: 1;
+}
+
+.able-window-toolbar .autoscroll-transcript {
+	order: 3;
+	width: fit-content;
+	text-wrap: nowrap;
+}
+
+.able-window-toolbar .able-drag-handle {
+	order: 2;
+	width: 100%;
+	height: 100%;
+}
+
+.able-window-toolbar .able-drag-handle svg {
+	width: 60px;
+	height: auto;
+	margin: 0 auto;
+}
+
+.able-window-toolbar .able-drag-handle path {
+	fill: #fff6;
+}
+
 .able-window-toolbar > div {
 	display: flex;
 }
@@ -765,7 +791,7 @@ span.able-modkey {
 	width: 1rem;
 }
 
-.able-draggable:hover {
+.able-draggable .able-drag-handle:hover {
 	cursor: move;
 }
 

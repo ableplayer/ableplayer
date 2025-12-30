@@ -33,6 +33,11 @@
 		$toolbar.addClass('able-draggable');
 		$toolbar.attr( 'role', 'application' );
 
+		$dragHandle = $('<div>',{
+			'class': 'able-drag-handle'
+		});
+
+		$dragHandle.html('<svg version="1.1" viewBox="262.48 487.5 675.03 225" xmlns="http://www.w3.org/2000/svg"><path d="m900 562.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path>  <path d="m900 712.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path></svg>');
 		// add resize handle selector to bottom right corner
 		$resizeHandle = $('<div>',{
 			'class': 'able-resizable'
@@ -77,13 +82,14 @@
 		resizeZIndex = parseInt($window.css('z-index')) + 100;
 		$resizeHandle.css('z-index',resizeZIndex);
 		$window.append($resizeHandle);
+		$toolbar.append($dragHandle);
 
 		// Final step: Need to refresh the DOM in order for browser to process & display the SVG
 		$resizeHandle.html($resizeHandle.html());
 
 		// add event listener to toolbar to start and end drag
 		// other event listeners will be added when drag starts
-		$toolbar.on('mousedown mouseup touchstart touchend', function(e) {
+		$dragHandle.on('mousedown mouseup touchstart touchend', function(e) {
 			e.stopPropagation();
 			if (e.type === 'mousedown' || e.type === 'touchstart' ) {
 				if (!thisObj.windowMenuClickRegistered) {
@@ -127,7 +133,6 @@
 			}
 			thisObj.finishingDrag = false;
 		});
-
 		this.addWindowMenu(which,$window,windowName);
 	};
 
@@ -199,7 +204,7 @@
 		}
 
 		// handle button click
-		$newButton.on('click mousedown keydown',function(e) {
+		$newButton.on('click keydown',function(e) {
 
 			if (thisObj.focusNotClick) {
 				return false;
@@ -210,6 +215,7 @@
 			}
 			e.stopPropagation();
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+				console.log( 'firing' );
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
 			}
@@ -324,7 +330,6 @@
 		var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
 
 		thisObj = this;
-
 		if (this.focusNotClick) {
 			// transcript or sign window has just opened,
 			// and focus moved to the window button
@@ -341,7 +346,6 @@
 			$windowButton = this.$signPopupButton;
 			$toolbar = this.$signToolbar;
 		}
-
 		if (e.type === 'keydown') {
 			// user pressed a key
 			if (e.key === ' ' || e.key === 'Enter') {
@@ -349,14 +353,13 @@
 			} else if (e.key === 'Escape') {
 				if ($windowPopup.is(':visible')) {
 					// close the popup menu
-					$windowPopup.hide('fast', function() {
-						// also reset the Boolean
-						thisObj.windowMenuClickRegistered = false;
-						// also restore menu items to their original state
-						$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-						// also return focus to window options button
-						$windowButton.trigger('focus');
-					});
+					$windowPopup.hide();
+					// also reset the Boolean
+					thisObj.windowMenuClickRegistered = false;
+					// also restore menu items to their original state
+					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+					// also return focus to window options button
+					$windowButton.trigger('focus');
 				} else {
 					// popup isn't open. Close the window
 					if (which === 'sign') {
@@ -373,10 +376,9 @@
 			this.windowMenuClickRegistered = true;
 		}
 
-		if ($windowPopup.is(':visible')) {
-			$windowPopup.hide(200,'',function() {
-				thisObj.windowMenuClickRegistered = false; // reset
-			});
+		if ( $windowPopup.is(':visible') ) {
+			$windowPopup.hide();
+			thisObj.windowMenuClickRegistered = false; // reset
 			$windowPopup.find('li').removeClass('able-focus');
 			$windowButton.attr('aria-expanded','false').trigger('focus');
 		} else {
@@ -384,11 +386,10 @@
 			this.updateZIndex(which);
 			popupTop = $toolbar.outerHeight() - 1;
 			$windowPopup.css('top', popupTop);
-			$windowPopup.show(200,'',function() {
-				$windowButton.attr('aria-expanded','true');
-				$(this).find('li').first().trigger('focus').addClass('able-focus');
-				thisObj.windowMenuClickRegistered = false; // reset
-			});
+			$windowPopup.show();
+			$windowButton.attr('aria-expanded','true');
+			$(this).find('li').first().trigger('focus').addClass('able-focus');
+			thisObj.windowMenuClickRegistered = false; // reset
 		}
 	};
 
@@ -428,15 +429,15 @@
 		if (e.type === 'keydown') {
 			if (e.key === 'Escape') { // escape
 				// hide the popup menu
-				$windowPopup.hide('fast', function() {
-					// also reset the Boolean
-					thisObj.windowMenuClickRegistered = false;
-					// also restore menu items to their original state
-					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-					$windowButton.attr('aria-expanded','false');
-					// also return focus to window options button
-					$windowButton.trigger('focus');
-				});
+				$windowPopup.hide();
+				// also reset the Boolean
+				thisObj.windowMenuClickRegistered = false;
+				// also restore menu items to their original state
+				$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+				$windowButton.attr('aria-expanded','false');
+				// also return focus to window options button
+				$windowButton.trigger('focus');
+
 				return false;
 			} else {
 				// all other keys will be handled by upstream functions
@@ -448,13 +449,13 @@
 		}
 
 		// hide the popup menu
-		$windowPopup.hide('fast', function() {
-			// also reset the boolean
-			thisObj.windowMenuClickRegistered = false;
-			// also restore menu items to their original state
-			$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			$windowButton.attr('aria-expanded','false');
-		});
+		$windowPopup.hide();
+		// also reset the boolean
+		thisObj.windowMenuClickRegistered = false;
+		// also restore menu items to their original state
+		$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+		$windowButton.attr('aria-expanded','false');
+
 		if (choice !== 'close') {
 			$windowButton.trigger('focus');
 		}

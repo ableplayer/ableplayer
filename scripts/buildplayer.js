@@ -502,7 +502,7 @@
 					'data-choice': windowOptions[i].name
 				});
 				$menuItem.text(windowOptions[i].label);
-				$menuItem.on('click mousedown',function(e) {
+				$menuItem.on('click',function(e) {
 					e.stopPropagation();
 					if (typeof e.button !== 'undefined' && e.button !== 0) {
 						// this was a mouse click (if click is triggered by keyboard, e.button is undefined)

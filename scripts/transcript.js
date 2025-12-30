@@ -159,7 +159,7 @@
     );
 
     if (typeof this.$transcriptLanguageSelect !== "undefined") {
-      this.$transcriptLanguageSelect.on("click mousedown", function (e) {
+      this.$transcriptLanguageSelect.on('click', function (e) {
         // execute default behavior
         // prevent propagation of mouse event to toolbar or window
         e.stopPropagation();
