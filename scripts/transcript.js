@@ -1,6 +1,6 @@
 (function ($) {
   AblePlayer.prototype.setupTranscript = function () {
-    var deferred = new $.Deferred();
+    var deferred = new this.defer();
     var promise = deferred.promise();
 
     if (this.usingYouTubeCaptions || this.usingVimeoCaptions || this.hideTranscriptButton ) {

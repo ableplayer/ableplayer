@@ -70,7 +70,7 @@
 		var deferred, promise, thisObj, mediaTimes;
 		mediaTimes = {};
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		if (typeof duration !== 'undefined' && typeof elapsed !== 'undefined') {
@@ -95,7 +95,7 @@
 		// function is called by getMediaTimes, and return value is sanitized there
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -143,7 +143,7 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -189,7 +189,7 @@
 		// - 'playing' - Currently playing.
 
 		var deferred, promise, thisObj;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -383,16 +383,11 @@
 	AblePlayer.prototype.fadeControls = function(direction) {
 
 		// Visibly fade controls without hiding them from screen reader users
-
 		// direction is either 'out' or 'in'
 
-		// TODO: This still needs work.
 		// After the player fades, it's replaced by an empty space
 		// Would be better if the video and captions expanded to fill the void
-		// Attempted to fade out to 0 opacity, then move the playerDiv offscreen
-		// and expand the mediaContainer to fill the vacated space
-		// However, my attempts to do this have been choppy and buggy
-		// Code is preserved below and commented out
+		// replace JS animation with CSS animation in 12/2025.
 
 		var thisObj, mediaHeight, playerHeight, newMediaHeight;
 		thisObj = this;
@@ -402,24 +397,9 @@
 			mediaHeight = this.$mediaContainer.height();
 			playerHeight = this.$playerDiv.height();
 			newMediaHeight = mediaHeight + playerHeight;
-
-			// fade slowly to transparency
-			this.$playerDiv.fadeTo(2000,0,function() {
-				/*
-				// when finished, position playerDiv offscreen
-				// thisObj.$playerDiv.addClass('able-offscreen');
-				// Expand the height of mediaContainer to fill the void (needs work)
-				thisObj.$mediaContainer.animate({
-					height: newMediaHeight
-				},500);
-				*/
-			});
+			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
 		} else if (direction == 'in') {
-			// restore captionsContainer to its original height (needs work)
-			// this.$mediaContainer.removeAttr('style');
-			// fade relatively quickly back to its original position with full opacity
-			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
-			this.$playerDiv.fadeTo(100,1);
+			this.$playerDiv.addClass( 'fade-in' ).removeClass( 'fade-out' );
 		}
 	};
 
@@ -1502,11 +1482,7 @@
 
 	AblePlayer.prototype.showTooltip = function($tooltip) {
 
-		if (($tooltip).is(':animated')) {
-			$tooltip.stop(true,true).show();
-		} else {
-			$tooltip.stop().show();
-		}
+		$tooltip.show();
 	};
 
 	AblePlayer.prototype.showAlert = function( msg, location = 'main' ) {
@@ -1534,7 +1510,7 @@
 
 		if (location !== 'screenreader') {
 			setTimeout( function () {
-				$alertBox.fadeOut(300);
+				$alertBox.hide();
 			}, 30000 );
 		}
 	};

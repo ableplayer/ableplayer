@@ -5,7 +5,7 @@
 		var thisObj, deferred, promise, containerId, vimeoId, autoplay, options;
 		thisObj = this;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		containerId = this.mediaId + '_vimeo';
@@ -115,7 +115,7 @@
 	AblePlayer.prototype.getVimeoPaused = function () {
 
 		var deferred, promise;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.vimeoPlayer.getPaused().then(function (paused) {
@@ -129,7 +129,7 @@
 	AblePlayer.prototype.getVimeoEnded = function () {
 
 		var deferred, promise;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.vimeoPlayer.getEnded().then(function (ended) {
@@ -146,7 +146,7 @@
 
 		thisObj = this;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		promises = [];
 
@@ -173,7 +173,7 @@
 		// get data via Vimeo Player API, and push data to this.captions
 		// Note: Vimeo doesn't expose the caption cues themselves
 		// so this.captions will only include metadata about caption tracks; not cues
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 
 		var thisObj, i, trackId, isDefaultTrack;

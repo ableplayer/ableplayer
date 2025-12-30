@@ -820,6 +820,28 @@ span.able-modkey {
 	border: 1px solid var(--able-sign-border);
 }
 
+.fade-out {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0s 2s, opacity 2s linear;
+}
+
+.fade-in {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity 1s linear;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .able-sign-window video {
 	width: 100%;
 	margin-bottom: 1rem;

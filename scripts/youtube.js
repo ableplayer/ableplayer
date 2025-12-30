@@ -4,7 +4,7 @@
 
 		var thisObj, deferred, promise, youTubeId;
 		thisObj = this;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.youTubePlayerReady = false;
@@ -23,7 +23,7 @@
 			// Has another player already started loading the script? If so, abort...
 			if (!AblePlayer.loadingYouTubeIframeAPI) {
 				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
-					deferred.fail();
+					deferred.reject();
 				});
 			}
 
@@ -42,7 +42,7 @@
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		containerId = this.mediaId + '_youtube';
@@ -108,7 +108,7 @@
 					deferred.resolve();
 				},
 				onError: function (x) {
-					deferred.fail();
+					deferred.reject();
 				},
 				onStateChange: function (x) {
 					thisObj.getPlayerState().then(function(playerState) {
@@ -195,7 +195,7 @@
 		// but this required authors to have a Google API key,
 		// which would complicate Able Player installation
 
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack;
 

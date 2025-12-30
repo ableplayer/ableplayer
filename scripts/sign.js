@@ -122,7 +122,7 @@
 
 		var thisObj, deferred, promise;
 		thisObj = this;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.youTubeSignPlayerReady = false;
@@ -136,7 +136,7 @@
 			// Has another player already started loading the script? If so, abort...
 			if (!AblePlayer.loadingYouTubeIframeAPI) {
 				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
-					deferred.fail();
+					deferred.reject();
 				});
 			}
 
@@ -155,7 +155,7 @@
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		containerId = this.mediaId + '_youtube_sign';
@@ -190,10 +190,10 @@
 					deferred.resolve();
 				},
 				onError: function (x) {
-					deferred.fail();
+					deferred.reject();
 				},
 				onStateChange: function (x) {
-					thisObj.getPlayerState().then(function(playerState) {
+					thisObj.getPlayerState().then(function() {
 						// no actions
 					});
 				},

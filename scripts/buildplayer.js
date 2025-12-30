@@ -10,8 +10,7 @@
 		//   Therefore, AblePlayer is not loaded & all functionality is disabled
 		//   (this all determined. If this is iOS && video, this function is never called)
 
-		var thisObj, captionsContainer, i;
-		thisObj = this;
+		var captionsContainer;
 
 		// create three wrappers and wrap them around the media element.
 		// From inner to outer:
@@ -88,9 +87,7 @@
 
 	AblePlayer.prototype.injectBigPlayButton = function () {
 
-		var thisObj;
-
-		thisObj = this;
+		var thisObj = this;
 
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',

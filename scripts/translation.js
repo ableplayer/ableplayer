@@ -39,7 +39,7 @@
 
 		// determine language, then get labels and prompts from corresponding translation var
 		var deferred, thisObj, supportedLangs, docLang, translationFile, i,	similarLangFound;
-		deferred = $.Deferred();
+		deferred = new this.defer();
 		thisObj = this;
 
 		supportedLangs = this.getSupportedLangs(); // returns an array
@@ -108,28 +108,34 @@
 			this.searchLang = this.lang;
 		}
 		translationFile = this.rootPath + 'translations/' + this.lang + '.json';
-		$.getJSON(translationFile, function(data) {
-			// success!
-			thisObj.tt = data;
-			thisObj.translationFiles = true;
-			deferred.resolve();
-		})
-		.fail(function() {
-			console.log( "Error: Translation files should be updated to JSON.",translationFile);
-			translationFile = thisObj.rootPath + 'translations/' + thisObj.lang + '.js';
-			$.getJSON(translationFile, function(data) {
-				// success!
+		fetch(translationFile)
+			.then( response => {
+				return response.json();
+			})
+			.then( data => {
 				thisObj.tt = data;
 				thisObj.translationFiles = true;
 				deferred.resolve();
 			})
-			.fail( function() {
-				console.log( "Error: Unable to load translation file:", translationFile);
-				thisObj.tt = {};
-				thisObj.translationFiles = false;
-				deferred.resolve();
+			.catch( error => {
+				console.log( "Error: Translation files should be updated to JSON." + error,translationFile);
+				translationFile = thisObj.rootPath + 'translations/' + thisObj.lang + '.js';
+				fetch(translationFile)
+					.then( response => {
+						return response.json();
+					})
+					.then( data => {
+						thisObj.tt = data;
+						thisObj.translationFiles = true;
+						deferred.resolve();
+					})
+					.catch( error => {
+						console.log( "Error: Unable to load translation file:", translationFile);
+						thisObj.tt = {};
+						thisObj.translationFiles = false;
+						deferred.resolve();
+					});
 			});
-		})
 		return deferred.promise();
 	};
 
@@ -142,7 +148,7 @@
 			// Create an array of sample description text in all languages
 			// This needs to be readily available for testing different voices
 			// in the Description Preferences dialog
-			var thisObj, supportedLangs, i, thisLang, translationFile, thisText, translation;
+			var thisObj, supportedLangs, thisLang, translationFile, thisText, translation;
 
 			supportedLangs = this.getSupportedLangs();
 			thisObj = this;
@@ -150,14 +156,15 @@
 			this.sampleText = [];
 			for ( const [key,value] of Object.entries(supportedLangs) ) {
 				translationFile = this.rootPath + 'translations/' + key + '.json';
-				$.getJSON(translationFile, thisLang, (function(thisLang) {
-						return function(data) {
-							thisText = data.sampleDescriptionText;
-							translation = {'lang':thisLang, 'text': thisText};
-							thisObj.sampleText.push(translation);
-						};
-					}(key)) // pass lang to callback function
-				);
+				fetch(translationFile)
+					.then( response => {
+						return response.json();
+					})
+					.then( data => {
+						thisText = data.sampleDescriptionText;
+						translation = {'lang':thisLang, 'text': thisText};
+						thisObj.sampleText.push(translation);
+					});
 			}
 		}
 	};

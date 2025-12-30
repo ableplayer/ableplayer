@@ -136,9 +136,15 @@ Fallback content can be tested by adding the **data-test-fallback** attribute to
 
 Copy and paste the following code into your web page. This code applies to all use cases, both audio and video.
 
+Able Player works with either jQuery or with the slim build of jQuery, which is about 6 KB smaller gzipped.
+
+Able Player does not require cookies, but you can add the js-cookie package to save preferences as cookies. Otherwise, preferences are saved in localStorage.
+
 ```HTML
 <!-- Dependencies -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+or
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
 
 <!-- Optional Dependency -->
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>

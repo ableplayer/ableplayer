@@ -8,7 +8,7 @@
 
     thisObj = this;
 
-    deferred = new $.Deferred();
+    deferred = new this.defer();
     promise = deferred.promise();
 
     loadingPromises = [];
@@ -53,11 +53,9 @@
           var trackLabel = track.label;
           var trackDesc = track.desc;
 
-          return function (trackSrc, trackText) {
+          return function (data) {
             // these are the two vars returned from loadTextObject
-
-            var trackContents = trackText;
-            var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
+            var cues = thisObj.parseWebVTT(data).cues;
             if (thisObj.hasVts) {
               // setupVtsTracks() is in vts.js
               thisObj.setupVtsTracks(
@@ -66,7 +64,7 @@
                 trackDesc,
                 trackLabel,
                 trackSrc,
-                trackContents
+                trackText
               );
             }
             if (kind === 'captions' || kind === 'subtitles') {
@@ -108,7 +106,7 @@
     thisObj = this;
     hasDefault = false;
 
-    deferred = new $.Deferred();
+    deferred = new this.defer();
     promise = deferred.promise();
 
     this.$tracks = this.$media.find('track');
@@ -406,7 +404,7 @@
 	*/
     var deferred, promise, thisObj, $tempDiv;
 
-    deferred = new $.Deferred();
+    deferred = new this.defer();
     promise = deferred.promise();
     thisObj = this;
 
@@ -426,10 +424,11 @@
 			// Load the sanitized content into the $tempDiv
 			$tempDiv.html(sanitizedTrackText);
 			// Resolve the promise with the sanitized content
-			deferred.resolve(src, sanitizedTrackText);
+			let data = { 'src': src, 'text': sanitizedTrackText };
+			deferred.resolve(data);
 			$tempDiv.remove();
 		})
-		.catch(error => {
+		.catch( error => {
 			if (thisObj.debug) {
 				console.log( "error reading file " + src + ": " + error );
 			}
