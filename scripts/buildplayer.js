@@ -3,17 +3,13 @@
 	AblePlayer.prototype.injectPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
-		// If iOS:
-		//  If video:
-		//   iOS does not support any of the player's functionality
-		//   - everything plays in its own player
-		//   Therefore, AblePlayer is not loaded & all functionality is disabled
-		//   (this all determined. If this is iOS && video, this function is never called)
+		// If iOS & video:
+		// iOS does not support any of the player's functionality - everything plays in its own player
+		// Therefore, AblePlayer is not loaded & all functionality is disabled
+		// (this all determined. If this is iOS && video, this function is never called)
 
 		var captionsContainer;
-
-		// create three wrappers and wrap them around the media element.
-		// From inner to outer:
+		// Wrappers, from inner to outer:
 		// $mediaContainer - contains the original media element
 		// $ableDiv - contains the media player and all its objects (e.g., captions, controls, descriptions)
 		// $ableWrapper - contains additional widgets (e.g., transcript window, sign window)
