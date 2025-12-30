@@ -136,7 +136,7 @@
 			// Has another player already started loading the script? If so, abort...
 			if (!AblePlayer.loadingYouTubeIframeAPI) {
 				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
-					deferred.fail();
+					deferred.reject();
 				});
 			}
 
@@ -190,7 +190,7 @@
 					deferred.resolve();
 				},
 				onError: function (x) {
-					deferred.fail();
+					deferred.reject();
 				},
 				onStateChange: function (x) {
 					thisObj.getPlayerState().then(function(playerState) {
