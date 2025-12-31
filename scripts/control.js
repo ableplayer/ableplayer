@@ -1122,11 +1122,6 @@
 		}
 	};
 
-	AblePlayer.prototype.handleHelpClick = function() {
-		this.setFullscreen(false);
-		this.helpDialog.show();
-	};
-
 	AblePlayer.prototype.handleTranscriptToggle = function () {
 		var thisObj = this;
 		var visible = this.$transcriptDiv.is(':visible');

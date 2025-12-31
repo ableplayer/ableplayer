@@ -348,9 +348,6 @@
 					this.showingPrefsDialog = false;
 				}
 				break;
-			case 'help':
-				this.handleHelpClick();
-				break;
 			case 'transcript':
 				if ( !this.closingTranscript ) {
 					this.handleTranscriptToggle();
@@ -364,10 +361,8 @@
 	};
 
 	AblePlayer.prototype.getButtonNameFromClass = function (classString) {
-
 		// player control buttons all have class="able-button-handler-x"  where x is the identifier
 		// buttons might also have other classes assigned though
-
 		var classes, i;
 
 		classes = classString.split(' ');
@@ -393,11 +388,11 @@
 		// handle keystrokes (using DHTML Style Guide recommended key combinations)
 		// https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
 		// Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
-		// NOTE #1: Style guide only supports Play/Pause, Stop, Mute, Captions, & Volume Up & Down
+		// - Style guide only supports Play/Pause, Stop, Mute, Captions, & Volume Up & Down
 		// The rest are reasonable best choices
-		// NOTE #2: If there are multiple players on a single page, keystroke handlers
+		// - If there are multiple players on a single page, keystroke handlers
 		// are only bound to the FIRST player
-		// NOTE #3: The DHTML Style Guide is now the W3C WAI-ARIA Authoring Guide and has undergone many revisions
+		// - The DHTML Style Guide is now the W3C WAI-ARIA Authoring Guide and has undergone many revisions
 		// including removal of the "media player" design pattern. There's an issue about that:
 		// https://github.com/w3c/aria-practices/issues/27
 
@@ -837,7 +832,7 @@
 		});
 
 		// handle local keydown events if this isn't the only player on the page;
-		// otherwise these are dispatched by global handler (see ableplayer-base,js)
+		// otherwise these are dispatched by global handler (see ableplayer-base.js)
 		this.$ableDiv.on( 'keydown', function (e) {
 			if (AblePlayer.nextIndex > 1) {
 				thisObj.onPlayerKeyPress(e);

@@ -1561,8 +1561,6 @@
 			return this.translate( 'slower', 'Slower' );
 		} else if (control === 'preferences') {
 			return this.translate( 'preferences', 'Preferences' );
-		} else if (control === 'help') {
-			// return this.translate( 'help', 'Help' );
 		} else if (control === 'fullscreen') {
 			return ( !this.fullscreen ) ? this.translate( 'enterFullScreen', 'Enter full screen' ) : this.translate( 'exitFullScreen', 'Exit full screen' );
 		} else {

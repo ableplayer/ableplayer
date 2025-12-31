@@ -681,9 +681,6 @@
 				} else if (this.controls[i] === 'prefs') {
 					kbLabels.push(this.translate( 'preferences', 'Preferences' ));
 					keys.push('e');
-				} else if (this.controls[i] === 'help') {
-					kbLabels.push(this.translate( 'help', 'Help' ));
-					keys.push('h');
 				}
 			}
 			for (i=0; i<keys.length; i++) {
