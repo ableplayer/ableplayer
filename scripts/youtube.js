@@ -206,7 +206,7 @@
 			// no tracks were found, probably because the captions module hasn't loaded
 			// play video briefly (required to load the captions module)
 			// and after the apiChange event is triggered, try again to retrieve tracks
-			this.youTubePlayer.addEventListener('onApiChange',function(x) {
+			this.youTubePlayer.addEventListener('onApiChange',function() {
 
 				// getDuration() also requires video to play briefly
 				// so, let's set that while we're here
@@ -215,10 +215,9 @@
 				if (thisObj.loadingYouTubeCaptions) {
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
-					if (!thisObj.okToPlay) {
-						// Don't stopVideo() - that cancels loading
-						// Just pause
-						// No need to seekTo(0) - so little time has passed it isn't noticeable to the user
+					if ( ! thisObj.okToPlay ) {
+						// Don't stopVideo() - that cancels loading, just pause.
+						// No need to seekTo(0) - the time passed isn't noticeable to the user
 						thisObj.youTubePlayer.pauseVideo();
 					}
 					if (ytTracks && ytTracks.length) {
