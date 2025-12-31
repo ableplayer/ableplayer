@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Control",
   "prefShiftKey": "Mayúsculas",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Escape",
   "escapeKeyFunction": "Cerrar el cuadro de diálogo o menú contextual",
   "prefDescFormat": "Formato preferido",

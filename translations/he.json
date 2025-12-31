@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Control",
   "prefShiftKey": "Shift",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Escape",
   "escapeKeyFunction": "סגור את תיבת הדו שיח הנוכחית או תפריט קופץ",
   "prefDescFormat": "פורמט מועדף",

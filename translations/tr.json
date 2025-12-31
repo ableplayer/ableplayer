@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Control",
   "prefShiftKey": "Shift",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Escape",
   "escapeKeyFunction": "Şu anki diyalogu veya açılır menüyü kapa",
   "prefDescFormat": "Tecih edilen format",

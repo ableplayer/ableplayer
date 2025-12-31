@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Control",
   "prefShiftKey": "Shift",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Escape",
   "escapeKeyFunction": "Sluit huidige dialoog of popup menu",
   "prefDescFormat": "Voorkeurs formaat",

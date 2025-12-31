@@ -375,12 +375,15 @@
 	}
 
 	AblePlayer.prototype.okToHandleKeyPress = function () {
-
-		// returns true unless user's focus is on a UI element
+		let defaultReturn = true;
+		if ( this.prefNoKeyShortcuts === 1 ) {
+			defaultReturn = false;
+		}
+		// returns true unless user's focus is on a UI element or user has disabled keyboard shortcuts.
 		// that is likely to need supported keystrokes, including space
 		var activeElement = AblePlayer.getActiveDOMElement();
 
-		return ($(activeElement).prop('tagName') === 'INPUT') ? false : true;
+		return ($(activeElement).prop('tagName') === 'INPUT') ? false : defaultReturn;
 	};
 
 	AblePlayer.prototype.onPlayerKeyPress = function (e) {

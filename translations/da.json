@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Ctrl",
   "prefShiftKey": "Shift",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Escape",
   "escapeKeyFunction": "Luk nuværinde dialog eller popup-menu",
   "prefDescFormat": "Foretrukne format",

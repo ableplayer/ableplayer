@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Strg",
   "prefShiftKey": "Umschalttaste",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "ESC Taste",
   "escapeKeyFunction": "Dialogfenster schließen",
   "prefDescFormat": "Bevorzugtes Format",

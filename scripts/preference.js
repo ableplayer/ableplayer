@@ -144,6 +144,12 @@
 			'group': 'keyboard',
 			'default': 0
 		});
+		prefs.push({
+			'name': 'prefNoKeyShortcuts',
+			'label': this.translate( 'prefNoKeyShortcuts', 'Disable Keyboard Shortcuts' ),
+			'group': 'keyboard',
+			'default': 0
+		});
 
 		// Transcript preferences
 		prefs.push({
@@ -586,10 +592,18 @@
 								changedSpan = '.able-modkey-shift';
 								changedText = thisObj.tt.prefShiftKey + ' + ';
 							}
-							if ($(this).is(':checked')) {
-								$(changedSpan).text(changedText);
+							if ( changedPref !== 'prefNoKeyShortcuts' ) {
+								if ($(this).is(':checked')) {
+									$(changedSpan).text(changedText);
+								} else {
+									$(changedSpan).text('');
+								}
 							} else {
-								$(changedSpan).text('');
+								if ($(this).is(':checked')) {
+									$('.able-modkey-item').addClass('hidden');
+								} else {
+									$('.able-modkey-item').removeClass('hidden');
+								}
 							}
 						});
 					}
@@ -624,6 +638,8 @@
 				this.currentSampleText = this.translate( 'sampleDescriptionText', 'Adjust settings to hear this sample text.' );
 			}
 		} else if (form === 'keyboard') {
+			let shortcutClass = (this.prefNoKeyShortcuts === 1 ) ? 'able-modkey-item hidden' : 'able-modkey-item';
+
 			// add a current list of keyboard shortcuts
 			$kbHeading = $('<h2>',{
 				text: this.translate( 'prefHeadingKeyboard2', 'Current keyboard shortcuts' )
@@ -705,7 +721,8 @@
 				kbListText += '<span class="able-modkey">' + keys[i] + '</span>';
 				kbListText += ' = ' + kbLabels[i];
 				$kbListItem = $('<li>',{
-					html: kbListText
+					'class': shortcutClass,
+					html: kbListText,
 				});
 				$kbList.append($kbListItem);
 			}

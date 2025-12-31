@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Ctrl",
   "prefShiftKey": "Shift",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Esc",
   "escapeKeyFunction": "Fermer la fenêtre de dialogue ou le menu contextuel",
   "prefDescFormat": "Format privilégié",

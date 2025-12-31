@@ -611,6 +611,10 @@ div.able-modal-overlay {
 	margin-top: 1rem;
 }
 
+.able-modkey-item.hidden {
+	display: none;
+}
+
 .able-modal-header {
 	display: flex;
 	justify-content: space-between;

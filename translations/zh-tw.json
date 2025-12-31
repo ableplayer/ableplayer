@@ -95,6 +95,7 @@
   "prefAltKey": "Alt",
   "prefCtrlKey": "Ctrl",
   "prefShiftKey": "Shift",
+  "prefNoKeyShortcuts": "Disable keyboard shortcuts",
   "escapeKey": "Esc",
   "escapeKeyFunction": "關閉目前的對話視窗或彈出式選單",
   "prefDescFormat": "偏好格式",
