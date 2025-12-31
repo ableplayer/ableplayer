@@ -249,7 +249,7 @@ var AblePlayerInstances = [];
 		if ( youTubeId !== undefined && youTubeId !== "") {
 			this.youTubeId = this.getYouTubeId(youTubeId);
 			if ( ! this.hasPoster ) {
-				let poster = this.getYouTubePosterUrl(this.youTubeId,'1280');
+				let poster = this.getYouTubePosterUrl(this.youTubeId,'640');
 				$(media).attr( 'poster', poster );
 				this.hasPoster = true;
 			}
