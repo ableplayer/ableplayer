@@ -935,6 +935,7 @@ div.able-chapters-div button {
 	font-size: 1rem;
 	text-align: start;
 	padding: 8px;
+	box-sizing: border-box;
 }
 
 div.able-chapters-div li.able-current-chapter button {
