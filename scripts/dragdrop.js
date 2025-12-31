@@ -311,12 +311,8 @@
 		resizeDialog = new AccessibleDialog(
 			$resizeForm,
 			$windowButton,
-			'dialog',
-			true,
 			this.translate( 'windowResizeHeading', 'Resize Window' ),
-			$resizeWrapper,
 			this.translate( 'closeButtonLabel', 'Close' ),
-			'20em'
 		);
 		if (which === 'transcript') {
 			this.transcriptResizeDialog = resizeDialog;

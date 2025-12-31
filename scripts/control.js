@@ -1196,28 +1196,9 @@
 		this.updatePreferences('prefSign');
 	};
 
-	AblePlayer.prototype.isFullscreen = function () {
-
-		// NOTE: This has been largely replaced as of 3.2.5 with a Boolean this.fullscreen,
-		// which is defined in setFullscreen()
-		// This function returns true if *any* element is fullscreen
-		// but doesn't tell us whether a particular element is in fullscreen
-		// (e.g., if there are multiple players on the page)
-		// The Boolean this.fullscreen is defined separately for each player instance
-
-		if (this.nativeFullscreenSupported()) {
-			return (document.fullscreenElement ||
-					document.webkitFullscreenElement ||
-					document.webkitCurrentFullscreenElement ) ? true : false;
-		} else {
-			return this.modalFullscreenActive ? true : false;
-		}
-	}
-
 	AblePlayer.prototype.setFullscreen = function (fullscreen) {
 
 		if (this.fullscreen == fullscreen) {
-			// replace isFullscreen() with a Boolean. see function for explanation
 			return;
 		}
 		var thisObj = this;
@@ -1252,61 +1233,9 @@
 				this.fullscreen = false;
 			}
 		} else {
-			// Non-native fullscreen support through modal dialog.
-			// Create dialog on first run through.
-			if (!this.fullscreenDialog) {
-				var $dialogDiv = $('<div>');
-				// create a hidden alert, communicated to screen readers via aria-describedby
-				var $fsDialogAlert = $('<p>',{
-					'class': 'able-screenreader-alert'
-				}).text( this.translate( 'fullScreen', 'Full screen' ) ); // TODO: Add alert text that is more descriptive
-				$dialogDiv.append($fsDialogAlert);
-				// now render this as a dialog
-				this.fullscreenDialog = new AccessibleDialog(
-					$dialogDiv,
-					this.$fullscreenButton,
-					'dialog',
-					true,
-					this.translate( 'fullScreenTitle', 'Full screen video player' ),
-					$fsDialogAlert,
-					this.translate( 'exitFullscreen', 'Exit full screen' ),
-					'100%',
-					true,
-					function () {
-						thisObj.handleFullscreenToggle()
-					}
-				);
-				$('body').append($dialogDiv);
-			}
-
-			// Track whether paused/playing before moving element; moving the element can stop playback.
-			var wasPaused = this.paused;
-
-			if (fullscreen) {
-				this.modalFullscreenActive = true;
-				this.fullscreenDialog.show();
-
-				// Move player element into fullscreen dialog, then show.
-				// Put a placeholder element where player was.
-				this.$modalFullscreenPlaceholder = $('<div class="placeholder">');
-				this.$modalFullscreenPlaceholder.insertAfter($el);
-				$el.appendTo(this.fullscreenDialog.modal);
-
-				var newHeight = $(window).height() - this.$playerDiv.height();
-				if (typeof this.$descDiv !== 'undefined' && (!this.$descDiv.is(':hidden')) ) {
-					newHeight -= this.$descDiv.height();
-				}
-			} else {
-				this.modalFullscreenActive = false;
-				$el.insertAfter(this.$modalFullscreenPlaceholder);
-				this.$modalFullscreenPlaceholder.remove();
-				this.fullscreenDialog.hide();
-			}
-
-			// Resume playback if moving stopped it.
-			if (!wasPaused && this.paused) {
-				this.playMedia();
-			}
+			// Removed non-native fullscreen mode in 4.8, which only supported iOS.
+			// Native fullscreen is on iOS 18+ devices behind a feature flag
+			// The polyfill hasn't worked for years.
 		}
 		// add event handlers for changes in fullscreen mode.
 		// Browsers natively trigger this event with the Escape key,

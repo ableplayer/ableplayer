@@ -739,7 +739,12 @@
 
 		// $prefsDiv (dialog) must be appended to the BODY!
 		$('body').append($prefsDiv);
-		dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', true, formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, false);
+		dialog = new AccessibleDialog(
+			$prefsDiv,
+			this.$prefsButton,
+			formTitle,
+			thisObj.tt.closeButtonLabel
+		);
 
 		// Add save and cancel buttons.
 		$buttonContainer = $( '<div class="able-prefs-buttons"></div>' );

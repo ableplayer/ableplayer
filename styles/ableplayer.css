@@ -574,10 +574,16 @@ div.able-modal-dialog {
 	color: var(--able-modal-color);
 	background-color: var(--able-modal-background);
 	border: var(--able-modal-border);
-	width: 50rem;
+	width: fit-content;
 	max-width: 95%;
 	padding: 1rem;
 	box-sizing: border-box;
+}
+
+@media screen and ( width < 800px ) {
+	div.able-modal-dialog {
+		min-width: 95%;
+	}
 }
 
 body.able-modal-active {
@@ -618,6 +624,7 @@ div.able-modal-overlay {
 .able-modal-header {
 	display: flex;
 	justify-content: space-between;
+	gap: 8px;
 }
 
 .able-modal-dialog .modalCloseButton {

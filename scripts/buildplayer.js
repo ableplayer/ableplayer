@@ -895,7 +895,7 @@
 			controlLayout[1].push('preferences');
 		}
 
-		if (this.mediaType === 'video' && this.allowFullscreen) {
+		if (this.mediaType === 'video' && this.allowFullscreen && this.nativeFullscreenSupported() ) {
 			if (this.skin === 'legacy') {
 				controlLayout[3].push('fullscreen');
 			} else {
