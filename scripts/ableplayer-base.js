@@ -251,7 +251,6 @@ var AblePlayerInstances = [];
 			if ( ! this.hasPoster ) {
 				let poster = this.getYouTubePosterUrl(this.youTubeId,'640');
 				$(media).attr( 'poster', poster );
-				this.hasPoster = true;
 			}
 		}
 
@@ -275,7 +274,6 @@ var AblePlayerInstances = [];
 			if ( ! this.hasPoster ) {
 				let poster = thisObj.getVimeoPosterUrl(this.vimeoId,'1200');
 				$(media).attr( 'poster', poster );
-				this.hasPoster = true;
 			}
 		}
 		var vimeoDescId = $(media).data('vimeo-desc-id');

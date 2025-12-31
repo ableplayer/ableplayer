@@ -99,11 +99,6 @@
 			thisObj.handlePlay();
 		});
 
-		if ( this.youTubeId && this.hasPoster ) {
-			let poster = this.$media.attr( 'poster' );
-			this.$bigPlayButton.css( { 'background-image' : 'url("' + poster + '")' });
-		}
-
 		this.$mediaContainer.append(this.$bigPlayButton);
 	};
 
