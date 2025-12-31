@@ -539,7 +539,6 @@
 
 									thisObj.duration = mediaTimes['duration'];
 									thisObj.elapsed = mediaTimes['elapsed'];
-									thisObj.setFullscreen(false);
 
 									if (typeof thisObj.volume === 'undefined') {
 										thisObj.volume = thisObj.defaultVolume;
