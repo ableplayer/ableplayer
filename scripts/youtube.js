@@ -197,17 +197,15 @@
 
 		var deferred = new this.defer();
 		var promise = deferred.promise();
-		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack;
+		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack, apiTriggered = false;
 
 		thisObj = this;
-
 		if (!this.youTubePlayer.getOption('captions','tracklist') ) {
-
 			// no tracks were found, probably because the captions module hasn't loaded
 			// play video briefly (required to load the captions module)
 			// and after the apiChange event is triggered, try again to retrieve tracks
 			this.youTubePlayer.addEventListener('onApiChange',function() {
-
+				apiTriggered = true;
 				// getDuration() also requires video to play briefly
 				// so, let's set that while we're here
 				thisObj.duration = thisObj.youTubePlayer.getDuration();
@@ -278,6 +276,16 @@
 			// Trigger the above event listener by briefly playing the video
 			this.loadingYouTubeCaptions = true;
 			this.youTubePlayer.playVideo();
+			// If onApiChange has not been triggered, the captions module is not loading.
+			setTimeout(() => {
+				if ( ! apiTriggered ) {
+					setTimeout(() => {
+						// If a second passes without loading captions, assume there are none.
+						thisObj.youTubePlayer.pauseVideo();
+						deferred.resolve();
+					}, 500);
+				}
+			},500);
 		}
 		return promise;
 	};
