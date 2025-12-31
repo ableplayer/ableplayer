@@ -197,6 +197,36 @@
 		}
 	};
 
+	/**
+	 * Reposition draggable windows when switched into fullscreen.
+	 *
+	 * @param {string} which 'transcript' or 'sign'.
+	 */
+	AblePlayer.prototype.rePositionDraggableWindow = function (which) {
+
+		let preferences, $window;
+		preferences = this.getPref();
+		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
+		if ( which === 'transcript' ) {
+			if (typeof preferences.transcript !== 'undefined') {
+				this.prevTranscriptPosition = preferences.transcript;
+			}
+			$window.css({
+				'top': 0,
+				'left': 0
+			});
+		} else {
+			if (typeof preferences.sign !== 'undefined') {
+				this.prevSignPosition = preferences.sign;
+			}
+			$window.css({
+				'top': 0,
+				'right': 0,
+				'left': 'auto'
+			});
+		}
+	}
+
 	AblePlayer.prototype.positionDraggableWindow = function (which, width) {
 
 		// which is either 'transcript' or 'sign'
@@ -208,9 +238,17 @@
 			if (typeof preferences.transcript !== 'undefined') {
 				preferencePos = preferences.transcript;
 			}
+			if ( this.prevTranscriptPosition ) {
+				preferencePos = this.prevTranscriptPosition;
+				this.prevTranscriptPosition = false;
+			}
 		} else if (which === 'sign') {
 			if (typeof preferences.sign !== 'undefined') {
 				preferencePos = preferences.sign;
+			}
+			if ( this.prevSignPosition ) {
+				preferencePos = this.prevSignPosition;
+				this.prevSignPosition = false;
 			}
 		}
 		if (typeof preferencePos !== 'undefined' && !($.isEmptyObject(preferencePos))) {
@@ -236,7 +274,8 @@
 					});
 				}
 				// If draggable window is off screen to the left.
-				if ( leftPosition < 0 ) {
+				if ( leftPosition < 0 && ! this.restoringAfterFullscreen ) {
+					console.log( leftPosition );
 					$window.css({
 						'left': preferencePos['left'] - leftPosition
 					});

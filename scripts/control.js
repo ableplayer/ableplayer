@@ -1212,6 +1212,14 @@
 					x: window.pageXOffset || 0,
 					y: window.pageYOffset || 0
 				}
+				if (this.prefTranscript === 1) {
+					// transcript is on. Go ahead and reposition it
+					this.rePositionDraggableWindow("transcript");
+				}
+				if (this.prefSign === 1) {
+					// sign is on. Go ahead and reposition it
+					this.rePositionDraggableWindow("sign");
+				}
 				this.scrollPosition = scroll;
 				// Initialize fullscreen
 				if (el.requestFullscreen) {
@@ -1229,6 +1237,14 @@
 					document.webkitExitFullscreen();
 				} else if (document.webkitCancelFullscreen) {
 					document.webkitCancelFullscreen();
+				}
+				if (this.prefTranscript === 1) {
+					// transcript is on. Go ahead and reposition it
+					this.positionDraggableWindow("transcript");
+				}
+				if (this.prefSign === 1) {
+					// sign is on. Go ahead and reposition it
+					this.positionDraggableWindow("sign");
 				}
 				this.fullscreen = false;
 			}
@@ -1535,7 +1551,7 @@
 					'height': newHeight
 				});
 			} else {
-				// No constraints. Let CSS handle the positioning.
+					// No constraints. Let CSS handle the positioning.
 				this.$media.removeAttr('width height');
 				this.$ableWrapper.removeAttr( 'style' );
 			}
@@ -1564,7 +1580,6 @@
 				'font-size': captionSize
 			});
 		}
-
 		this.refreshControls();
 	};
 
