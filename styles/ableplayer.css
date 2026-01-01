@@ -1135,6 +1135,10 @@ ul.able-popup li.able-focus,
 	color: var(--able-control-label-color);
 }
 
+.able-window-toolbar .autoscroll-transcript label {
+	margin-right: 0;
+}
+
 div.able-modal-dialog input,
 div.able-modal-dialog button,
 .able-window-toolbar .able-button-handler-preferences,
