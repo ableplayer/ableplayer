@@ -949,7 +949,7 @@
 		// but could ultimately be modified to appear near the point of action in the VTS table
 		const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 		this.$vtsAlert.text(message).show();
-		delay(3000).then(() => {
+		delay(10000).then(() => {
 			this.$vtsAlert.text(message).hide()
 		});
 	};
