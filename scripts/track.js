@@ -433,7 +433,6 @@
 			$tempDiv.html(lines);
 			// Resolve the promise with the sanitized content
 			let data = { 'src': src, 'text': lines };
-			console.log( data );
 			deferred.resolve(data);
 			$tempDiv.remove();
 		})
