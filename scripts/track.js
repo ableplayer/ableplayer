@@ -420,11 +420,20 @@
 			return response.text();
   		})
 		.then( vtt => {
-			var sanitizedTrackText = validate.sanitizeVttContent( vtt );
+			// Split the input on double line breaks to handle each cue individually.
+			var preParsed = vtt.split(/\r?\n\s*\r?\n/);
+			var lines = '', line;
+
+			preParsed.forEach((l) => {
+				// Sanitize each line.
+				line   = validate.sanitizeVttContent(l);
+				lines += line + "\n\n";
+			});
 			// Load the sanitized content into the $tempDiv
-			$tempDiv.html(sanitizedTrackText);
+			$tempDiv.html(lines);
 			// Resolve the promise with the sanitized content
-			let data = { 'src': src, 'text': sanitizedTrackText };
+			let data = { 'src': src, 'text': lines };
+			console.log( data );
 			deferred.resolve(data);
 			$tempDiv.remove();
 		})

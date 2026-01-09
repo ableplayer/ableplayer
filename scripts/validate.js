@@ -15,6 +15,11 @@ var preProcessing = {
    * @returns {string} - The VTT content with processed tags.
    */
   transformCSSClasses: function (vttContent) {
+	// This function should only be passed one cue at a time.
+	// Throw an error if the string checked is more than 1000 characters.
+	if ( vttContent > 1000 ) {
+		throw new Error( "Input too long" );
+	}
     return vttContent.replace(
       /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
       function (_, tag, cssClasses, otherAttrs) {
