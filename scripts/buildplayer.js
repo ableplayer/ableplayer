@@ -207,7 +207,8 @@
 		let preferences, $window;
 		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
-		if ( which === 'transcript' ) {
+		console.log( $window );
+		if ( which === 'transcript' && $window ) {
 			if (typeof preferences.transcript !== 'undefined') {
 				this.prevTranscriptPosition = preferences.transcript;
 			}
@@ -215,7 +216,7 @@
 				'top': 0,
 				'left': 0
 			});
-		} else {
+		} else if ( 'sign' === which && $window ) {
 			if (typeof preferences.sign !== 'undefined') {
 				this.prevSignPosition = preferences.sign;
 			}
@@ -234,6 +235,9 @@
 
 		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
+		if ( ! $window ) {
+			return;
+		}
 		if (which === 'transcript') {
 			if (typeof preferences.transcript !== 'undefined') {
 				preferencePos = preferences.transcript;
