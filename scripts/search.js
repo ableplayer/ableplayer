@@ -26,11 +26,8 @@
           var $resultsSummary = $("<p>", {
             class: "able-search-results-summary",
           });
-          var resultsSummaryText = this.translate( 'resultsSummary2', 'Found' );
-          resultsSummaryText +=
-            ' <strong>' + resultsArray.length + '</strong> ';
-          resultsSummaryText += this.translate( 'resultsSummary3', 'matching items.' ) + ' ';
-          resultsSummaryText += this.translate( 'resultsSummary4', 'Click the time associated with any item to play the video from that point.' );
+          var resultsSummaryText = this.translate( 'resultsSummary2', 'Found %1 matching items.', [ '<strong>' + resultsArray.length + '</strong>' ] );
+          resultsSummaryText += ' ' + this.translate( 'resultsSummary3', 'Click the time associated with any item to play the video from that point.' );
           $resultsSummary.html( resultsSummaryText );
           var $resultsList = $("<ul>");
           for (var i = 0; i < resultsArray.length; i++) {
@@ -38,7 +35,7 @@
             var $resultsItem = $("<li>", {});
             var itemStartTime = this.secondsToTime(resultsArray[i]["start"]);
             var itemLabel =
-              this.translate( 'searchButtonLabel', 'Play at' ) + ' ' + itemStartTime["title"];
+              this.translate( 'searchButtonLabel', 'Play at %1', [ itemStartTime["title"] ] );
             var itemStartSpan = $("<button>", {
               class: "able-search-results-time",
               "data-start": resultsArray[i]["start"],

@@ -27,12 +27,29 @@
 		return langs;
 	};
 
-	AblePlayer.prototype.translate = function( key, fallback ) {
+	/**
+	 * Fetch a translated string if it exists.
+	 *
+	 * @param {string} key JSON key to locate translated string.
+	 * @param {string} fallback Default language if no translation found.
+	 * @param {Array} args Ordered array of arguments to replace in string.
+	 * @returns
+	 */
+	AblePlayer.prototype.translate = function( key, fallback, args = Array() ) {
+		let translation = '';
 		if ( this.tt[ key ] ) {
-			return this.tt[ key ];
+			translation = this.tt[ key ];
 		} else {
-			return fallback;
+			translation = fallback;
 		}
+		if ( args.length > 0 ) {
+			args.forEach( ( val, index ) => {
+				let ref = index + 1;
+				translation = translation.replace( '%' + ref, val );
+			});
+		}
+
+		return translation;
 	}
 
 	AblePlayer.prototype.getTranslationText = function() {
