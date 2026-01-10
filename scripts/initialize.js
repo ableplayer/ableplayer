@@ -324,7 +324,7 @@
 		thisObj = this;
 
 		this.startedPlaying = false;
-		// TODO: Move this setting to cookie.
+		// TODO: Move this setting to preferences.
 		this.autoScrollTranscript = true;
 		//this.autoScrollTranscript = this.getPref(autoScrollTranscript); // (doesn't work)
 
