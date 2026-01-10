@@ -40,7 +40,7 @@
         continue;
       }
 	  var trackSrc = track.src;
-      loadingPromise = this.loadTextObject(trackSrc); // resolves with src, trackText
+      loadingPromise = this.loadTextObject(trackSrc);
       loadingPromises.push(
         loadingPromise.catch(function (src) {
           console.warn("Failed to load captions track from " + src);
