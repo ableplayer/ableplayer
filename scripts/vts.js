@@ -299,7 +299,8 @@
 		$table = $('<table>',{
 			'lang': lang
 		});
-		$thead = $('<thead>');
+		$thead = $( '<thead>' );
+		$tr = $( '<tr>' );
 		headers = [
 			this.translate( 'vtsRow', 'Row' ),
 			this.translate( 'vtsKind', 'Kind' ),
