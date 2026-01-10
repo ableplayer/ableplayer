@@ -24,7 +24,8 @@
 				this.vtsLang = this.lang;
 
 				// Inject a heading
-				$heading = $('<h2>').text('Video Transcript Sorter'); // TODO: Localize; intelligently assign proper heading level
+				let heading = this.translate( 'vtsHeading', 'Video Transcript Sorter' );
+				$heading = $('<h2>').text( heading ); // TODO: intelligently assign proper heading level
 				$('#able-vts').append($heading);
 
 				// Inject an empty div for writing messages
@@ -39,19 +40,19 @@
 				$instructions = $('<div>',{
 					'id': 'able-vts-instructions'
 				});
-				$p1 = $('<p>').text('Use the Video Transcript Sorter to modify text tracks:');
+				$p1 = $('<p>').text( this.translate( 'vtsInstructions1', 'Use the Video Transcript Sorter to modify text tracks:' ) );
 				$ul = $('<ul>');
-				$li1 = $('<li>').text('Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player\'s auto-generated transcript.');
-				$li2 = $('<li>').text('Modify content or start/end times (all are directly editable within the table).');
-				$li3 = $('<li>').text('Add new content, such as chapters or descriptions.');
-				$p2 = $('<p>').text('After editing, click the "Save Changes" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.');
+				$li1 = $('<li>').text( this.translate( 'vtsInstructions2', 'Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player\'s auto-generated transcript.' ) );
+				$li2 = $('<li>').text( this.translate( 'vtsInstructions3', 'Modify content or start/end times (all are directly editable within the table).' ) );
+				$li3 = $('<li>').text( this.translate( 'vtsInstructions4', 'Add new content, such as chapters or descriptions.' ) );
+				$p2 = $('<p>').text( this.translate( 'vtsInstructions5', 'After editing, click the "Save Changes" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.' ) );
 				$ul.append($li1,$li2,$li3);
 				$instructions.append($p1,$ul,$p2);
 				$('#able-vts').append($instructions);
 
 				// Inject a fieldset with radio buttons for each language
 				$fieldset = $('<fieldset>');
-				$legend = $('<legend>').text('Select a language'); // TODO: Localize this
+				$legend = $('<legend>').text( this.translate( 'vtsSelectLanguage', 'Select a language' ) );
 				$fieldset.append($legend);
 				$fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
 				for (i in this.langs) {
@@ -86,12 +87,12 @@
 				$fieldset.append( $fieldWrapper );
 				$('#able-vts').append($fieldset);
 
-				// Inject a 'Save Changes' button
+				// Inject a button to generate new files.
 				$saveButton = $('<button>',{
 					'type': 'button',
 					'id': 'able-vts-save',
 					'value': 'save'
-				}).text('Save Changes'); // TODO: Localize this
+				}).text( this.translate( 'vtsSave', 'Generate new .vtt files' ) );
 				$('#able-vts').append($saveButton);
 
 				// Inject a table with one row for each cue in the default language
@@ -140,7 +141,7 @@
 					e.stopPropagation();
 					if ($(this).attr('value') == 'save') {
 						// replace table with WebVTT output in textarea fields (for copying/pasting)
-						$(this).attr('value','cancel').text('Return to Editor'); // TODO: Localize this
+						$(this).attr('value','cancel').text( this.translate( 'vtsReturn', 'Return to Editor' ) );
 						$savedTable = $('#able-vts table');
 						$('#able-vts-instructions').hide();
 						$('#able-vts > fieldset').hide();
@@ -149,13 +150,13 @@
 						thisObj.parseVtsOutput($savedTable);
 					} else {
 						// cancel saving, and restore the table using edited content
-						$(this).attr('value','save').text('Save Changes'); // TODO: Localize this
+						$(this).attr('value','save').text(this.translate( 'vtsSave', 'Generate new .vtt files' ) );
 						$('#able-vts-output').remove();
 						$('#able-vts-instructions').show();
 						$('#able-vts > fieldset').show();
 						$('#able-vts').append($savedTable);
 						$('#able-vts').append(thisObj.getIconCredit());
-						thisObj.showVtsAlert('Cancelling saving. Any edits you made have been restored in the VTS table.'); // TODO: Localize this
+						thisObj.showVtsAlert( this.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
 					}
 				});
 			}
@@ -299,10 +300,14 @@
 			'lang': lang
 		});
 		$thead = $('<thead>');
-		$tr = $('<tr>',{
-			'lang': 'en' // TEMP, until header row is localized
-		});
-		headers = ['Row','Kind','Start','End','Content','Actions']; // TODO: Localize this
+		headers = [
+			this.translate( 'vtsRow', 'Row' ),
+			this.translate( 'vtsKind', 'Kind' ),
+			this.translate( 'vtsStart', 'Start' ),
+			this.translate( 'vtsEnd', 'End' ),
+			this.translate( 'vtsContent', 'Content' ),
+			this.translate( 'vtsActions', 'Actions' )
+		];
 		for (i=0; i < headers.length; i++) {
 			$th = $('<th>', {
 				'scope': 'col'
@@ -702,7 +707,8 @@
 		this.adjustTimes(newRowNum);
 
 		// Announce the insertion
-		this.showVtsAlert('A new row ' + newRowNum + ' has been inserted'); // TODO: Localize this
+		let newAlert = this.translate( 'vtsNewRow', 'A new row %1 has been inserted.', [ newRowNum ] );
+		this.showVtsAlert( newAlert );
 
 		// Place focus in new select field
 		$select.trigger('focus');
@@ -728,7 +734,8 @@
 		}
 
 		// Announce the deletion
-		this.showVtsAlert('Row ' + rowNum + ' has been deleted'); // TODO: Localize this
+		let newAlert = this.translate( 'vtsDeletedRow', 'Row %1 has been deleted.', [ rowNum ] );
+		this.showVtsAlert( newAlert );
 
 	};
 
@@ -759,9 +766,8 @@
 		// auto-adjust times
 		this.adjustTimes(otherRowNum);
 
-		// Announce the move (TODO: Localize this)
-		msg = 'Row ' + rowNum + ' has been moved ' + direction;
-		msg += ' and is now Row ' + otherRowNum;
+		// Announce the move
+		msg = this.translate( 'vtsMovedRow', 'Row %1 has been moved %2 and is now Row %3.', [ rowNum, direction, otherRowNum ] );
 		this.showVtsAlert(msg);
 	};
 
