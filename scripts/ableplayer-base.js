@@ -1,36 +1,3 @@
-/*
-	// JavaScript for Able Player
-
-	// HTML5 Media API:
-	http://www.w3.org/TR/html5/embedded-content-0.html#htmlmediaelement
-	http://dev.w3.org/html5/spec-author-view/video.html
-
-	// W3C API Test Page:
-	http://www.w3.org/2010/05/video/mediaevents.html
-
-	// YouTube Player API for iframe Embeds
-	https://developers.google.com/youtube/iframe_api_reference
-
-	// YouTube Player Parameters
-	https://developers.google.com/youtube/player_parameters?playerVersion=HTML5
-
-	// YouTube Data API
-	https://developers.google.com/youtube/v3
-
-	// Vimeo Player API
-	https://github.com/vimeo/player.js
-
-	// Google API Client Library for JavaScript
-	https://developers.google.com/api-client-library/javascript/dev/dev_jscript
-
-	// Google API Explorer: YouTube services and methods
-	https://developers.google.com/apis-explorer/#s/youtube/v3/
-
-	// Web Speech API (Speech Synthesis)
-	https://w3c.github.io/speech-api/#tts-section
-	https://developer.mozilla.org/en-US/docs/Web/API/Window/speechSynthesis
-*/
-
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 /*global $, jQuery */
 "use strict";
@@ -97,7 +64,10 @@ var AblePlayerInstances = [];
 		this.playsInline = ($(media).attr('playsinline') !== undefined) ? '1' : '0';
 
 		// poster (Boolean, indicating whether media element has a poster attribute)
-		this.hasPoster = ($(media).attr('poster')) ? true : false;
+		this.hasPoster = ( $(media).attr('poster') || $(media).data('poster') ) ? true : false;
+
+		this.audioPoster = $(media).data('poster');
+		this.audioPosterAlt = $(media).data('poster-alt' );
 
 		// get height and width attributes, if present
 		// and add them to variables
@@ -235,6 +205,15 @@ var AblePlayerInstances = [];
 			this.transcriptTitle = $(media).data('transcript-title');
 		}
 
+		// Sign Language
+		// sign language can be a modal (default) or assigned to a div on the page.
+		var signDivLocation = $(media).data('sign-div');
+		if ( signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById( signDivLocation ) ) {
+			this.$signDivLocation = $( '#' + signDivLocation );
+		} else {
+			this.$signDivLocation = null;
+		}
+
 		// Captions
 		// data-captions-position can be used to set the default captions position
 		// this is only the default, and can be overridden by user preferences
@@ -269,6 +248,10 @@ var AblePlayerInstances = [];
 		var youTubeId = $(media).data('youtube-id');
 		if ( youTubeId !== undefined && youTubeId !== "") {
 			this.youTubeId = this.getYouTubeId(youTubeId);
+			if ( ! this.hasPoster ) {
+				let poster = this.getYouTubePosterUrl(this.youTubeId,'640');
+				$(media).attr( 'poster', poster );
+			}
 		}
 
 		var youTubeDescId = $(media).data('youtube-desc-id');
@@ -288,6 +271,10 @@ var AblePlayerInstances = [];
 		var vimeoId = $(media).data('vimeo-id');
 		if ( vimeoId !== undefined && vimeoId !== "") {
 			this.vimeoId = this.getVimeoId(vimeoId);
+			if ( ! this.hasPoster ) {
+				let poster = thisObj.getVimeoPosterUrl(this.vimeoId,'1200');
+				$(media).attr( 'poster', poster );
+			}
 		}
 		var vimeoDescId = $(media).data('vimeo-desc-id');
 		if ( vimeoDescId !== undefined && vimeoDescId !== "") {
@@ -469,20 +456,15 @@ var AblePlayerInstances = [];
 		// use defer method to defer additional processing until text is retrieved
 		this.tt = {};
 		var thisObj = this;
-		$.when(this.getTranslationText()).then(
-			function () {
-				if (thisObj.countProperties(thisObj.tt) > 50) {
-					// close enough to ensure that most text variables are populated
-					thisObj.setup();
-				} else {
-					// can't continue loading player with no text
-					thisObj.provideFallback();
-				}
+		async function fetchTranslations(thisObj) {
+			try {
+				await thisObj.getTranslationText();
+				thisObj.setup();
+			} catch {
+				thisObj.provideFallback();
 			}
-		).
-		fail(function() {
-			thisObj.provideFallback();
-		});
+		}
+		fetchTranslations(thisObj);
 	};
 
 	// Index to increment every time new player is created.

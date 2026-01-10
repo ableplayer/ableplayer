@@ -92,9 +92,10 @@ Since the release of version 4.4, we are no longer supporting Internet Explorer.
 
 - *Able Player* uses [jQuery][]. Version 3.5.0 or higher is recommended.
     The example code below uses Google’s hosted libraries; no download required.
-- *Able Player* uses [js-cookie][] to store and retrieve user
-    preferences in cookies. The example code below uses CDN’s hosted libraries;
-    no download required. All Able Player cookies are functional cookies.
+- *Able Player* optionally can use [js-cookie][] to store and retrieve user
+    preferences in cookies. By default, preferences are stored in localStorage.
+	 The example code below uses CDN’s hosted libraries; no download required.
+	 All Able Player cookies are functional cookies.
 - *AblePlayer*, as of 4.5.1, requires the use of the DOMPurify sanitizing library.
   - The default files in the root of the `/build` directory have DOMPurify bundled in.
   - Alternatively, the `build/separate-dompurify` directory houses copies of the AblePlayer files with AblePlayer code only and a stand-alone copy of the current version of DOMPurify that the project is currently using. These files are available for those who want to load DOMPurify via a separate file or want to use a CDN hosted version.
@@ -135,9 +136,17 @@ Fallback content can be tested by adding the **data-test-fallback** attribute to
 
 Copy and paste the following code into your web page. This code applies to all use cases, both audio and video.
 
+Able Player works with either jQuery or with the slim build of jQuery, which is about 6 KB smaller gzipped.
+
+Able Player does not require cookies, but you can add the js-cookie package to save preferences as cookies. Otherwise, preferences are saved in localStorage.
+
 ```HTML
 <!-- Dependencies -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+or
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"></script>
+
+<!-- Optional Dependency -->
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
 
 <!-- CSS -->
@@ -192,6 +201,13 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 - **id** - required; any unique ID
 - **data-able-player** - required
 
+### Audio Poster
+
+Video poster images are supported using the `poster` attribute on the video element. The audio element does not support a poster image, but you can add an image to your player using:
+
+- **data-poster** - A URL to an image.
+- **data-poster-alt** - The alternative text for the image.
+
 ### Optional; General-Purpose
 
 - **data-debug** - optional; if present will write messages to the developer console
@@ -226,7 +242,7 @@ The following attributes are supported on both the `<audio>` and `<video>` eleme
 ### Captions
 
 - **data-captions-position** - optional; specify default position of captions relative to the video (either "below" or "overlay"; "below" is the default if not specified). Users can override this setting in Captions Preferences.
-- **data-state-captions** - optional; "on" or "off". Captions are on by default if they're available, but this allows website owners to override that setting. If users enable captions, their preference will be saved in a cookie, and that will override the default setting on future visits.
+- **data-state-captions** - optional; "on" or "off". Captions are on by default if they're available, but this allows website owners to override that setting. If users enable captions, their preference will be saved, and that will override the default setting on future visits.
 
 ### Transcript
 
@@ -356,7 +372,7 @@ In such cases, use `data-descriptions-audible="false"` to prevent browsers and s
 
 If description is available through either of the above methods, it is off by default and users must enable it using the "Descriptions" button on the player control. Website owners can override this setting and change the default state to "on" using `data-state-descriptions="on"`. Also, website owners can define the default state of extended descriptions (i.e., pausing the video during audio description) using `data-desc-pause-default`. Supported values are either "off" or "on".
 
-Setting this to "off" is useful if all videos have plenty of audio space for description to be read, and pausing is therefore unnecessary. The default setting is "on". If users have changed this setting in the Description Preferences dialog, their preference will be saved in a cookie, and that will override the default setting on future visits.
+Setting this to "off" is useful if all videos have plenty of audio space for description to be read, and pausing is therefore unnecessary. The default setting is "on". If users have changed this setting in the Description Preferences dialog, their preference will be saved, and that will override the default setting on future visits.
 
 ### Sign language
 
@@ -373,6 +389,10 @@ You can also load your sign language source video from YouTube. If you're using 
 If a sign language version is available, a sign language button will be added to the media controller. This button will toggle the display of a pop-up window in which the sign language video will appear. Users can move or resize the pop-up window with either mouse or keyboard.
 
 Unfortunately this feature is not supported on iOS.
+
+#### Load Sign Language in a fixed location
+
+By default, the sign language window is launched in a movable dialog. To set it in a fixed location on the page, add `data-sign-div` with the ID of a container on the page. The sign language window will be inserted into that container, and will not be movable.
 
 ### Playlists
 
@@ -593,7 +613,7 @@ By default, keyboard shortcuts must be accompanied by Alt + Control.
 
 ## User Preferences
 
-One of *Able Player’s* accessibility features is that the player is highly customizable by users. The controller includes a Preferences button that allows users to change default preferences and settings. Their changes are stored in a browser cookie and in most cases should therefore be preserved the next time they visit the site. Specifically, users can control the following:
+One of *Able Player’s* accessibility features is that the player is highly customizable by users. The controller includes a Preferences button that allows users to change default preferences and settings. Their changes are stored in their browser, and in most cases should be preserved the next time they visit the site. Users can control the following:
 
 - Modifier keys: Add *Alt*, *Ctrl*, or *Shift* to the Able Player keyboard
     shortcuts to avoid conflicts with other applications.
@@ -608,8 +628,8 @@ One of *Able Player’s* accessibility features is that the player is highly cus
 
 ## Acknowledgements
 
-- Able Player development is supported in part by the [AccessComputing][] project at the University of Washington, with financial support from the National Science Foundation (grants #CNS-0540615, CNS-0837508, and CNS-1042260).
-- Additional support has been provided by the [Committee on Institutional Cooperation][] (CIC).
+- Until 2025, Able Player development was supported in part by the [AccessComputing][] project at the University of Washington, with financial support from the National Science Foundation (grants #CNS-0540615, CNS-0837508, and CNS-1042260).
+- Additional support was provided by the [Committee on Institutional Cooperation][] (CIC).
 - Turtle and rabbit icons (available as optional alternatives for the speed buttons) are provided courtesy of [Icons8][].
 - Sample video tracks are provided courtesy of [The DO-IT Center][] at the University of Washington. Additional videos are available on the [DO-IT Video][] website, which uses Able Player.
 - Sample audio tracks feature songs by Terrill Thompson, Able Player's creator and original lead developer. Check out [Terrill's music site] for more listening, and to support his work.

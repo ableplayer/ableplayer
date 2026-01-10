@@ -30,7 +30,7 @@
 			'max': '10',
 			'step': '1',
 			'orient': 'vertical', // non-standard, but required for Firefox
-			'aria-label': this.tt.volumeUpDown,
+			'aria-label': this.translate( 'volumeUpDown', 'Volume up down' ),
 			'value': this.volume
 		});
 		volumePct = parseInt(thisObj.volume) / 10 * 100;
@@ -97,11 +97,10 @@
 
 		volumeName = this.getVolumeName(volume);
 		volumePct = (volume/10) * 100;
-		volumeLabel = this.tt.volume + ' ' + volumePct + '%';
+		volumeLabel = this.translate( 'volume', 'Volume' ) + ' ' + volumePct + '%';
 
 		this.getIcon( this.$volumeButton, 'volume-' + volumeName );
 		this.$volumeButton.attr( 'aria-label', volumeLabel );
-		this.$volumeButton.find('span.able-clipped').text(volumeLabel);
 	};
 
 	AblePlayer.prototype.handleVolumeButtonClick = function() {

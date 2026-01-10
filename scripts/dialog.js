@@ -2,69 +2,56 @@
 	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 	// Based on the incredible accessible modal dialog.
-	window.AccessibleDialog = function(modalDiv, $returnElement, dialogRole, isModal, title, $descDiv, closeButtonLabel, width, fullscreen, escapeHook) {
+	window.AccessibleDialog = function( modalDiv, $returnElement, title, closeButtonLabel) {
 
 		this.title = title;
 		this.closeButtonLabel = closeButtonLabel;
 		this.focusedElementBeforeModal = $returnElement;
-		this.escapeHook = escapeHook;
 		this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
 		var thisObj = this;
 		var modal = modalDiv;
 		this.modal = modal;
-		if ( width ) {
-			modal.css({
-				'width': width
-			});
-		}
+
 		modal.addClass('able-modal-dialog');
 
-		if (!fullscreen) {
-			var closeButton = $('<button>',{
-				 'class': 'modalCloseButton',
-				 'title': thisObj.closeButtonLabel,
-				 'aria-label': thisObj.closeButtonLabel
-			}).text('×');
-			closeButton.on( 'keydown', function (e) {
-				if (e.key === ' ') {
-					thisObj.hide();
-				}
-			}).on( 'click', function () {
+		var closeButton = $('<button>',{
+				'class': 'modalCloseButton',
+				'title': thisObj.closeButtonLabel,
+				'aria-label': thisObj.closeButtonLabel
+		}).text('×');
+		closeButton.on( 'keydown', function (e) {
+			if (e.key === ' ') {
 				thisObj.hide();
-			});
+			}
+		}).on( 'click', function () {
+			thisObj.hide();
+		});
 
-			var titleH1 = $('<h1></h1>');
-			titleH1.attr('id', 'modalTitle-' + this.baseId);
-			titleH1.text(title);
-			this.titleH1 = titleH1;
+		var titleH1 = $('<h1></h1>');
+		titleH1.attr('id', 'modalTitle-' + this.baseId);
+		titleH1.text(title);
+		this.titleH1 = titleH1;
 
-			modal.attr({
-				'aria-labelledby': 'modalTitle-' + this.baseId,
-			});
-			var modalHeader = $( '<div>', {
-				'class': 'able-modal-header'
-			});
-			modalHeader.prepend(titleH1);
-			modalHeader.prepend(closeButton);
-			modal.prepend(modalHeader);
-		}
+		modal.attr({
+			'aria-labelledby': 'modalTitle-' + this.baseId,
+		});
+		var modalHeader = $( '<div>', {
+			'class': 'able-modal-header'
+		});
+		modalHeader.prepend(titleH1);
+		modalHeader.prepend(closeButton);
+		modal.prepend(modalHeader);
 
 		modal.attr({
 			'aria-hidden': 'true',
-			'role': dialogRole,
+			'role': 'dialog',
+			'aria-modal': 'true'
 		});
-		if (isModal) {
-			modal.attr('aria-modal','true');
-		}
 
 		modal.on( 'keydown', function (e) {
 			if (e.key === 'Escape') {
-				if (thisObj.escapeHook) {
-					thisObj.escapeHook(e, this);
-				} else {
-					thisObj.hide();
-					e.preventDefault();
-				}
+				thisObj.hide();
+				e.preventDefault();
 			} else if (e.key === 'Tab') {
 				// Manually loop tab navigation inside the modal.
 				var parts = modal.find('*');

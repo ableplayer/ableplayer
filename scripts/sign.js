@@ -46,16 +46,21 @@
 		signVideoId = this.mediaId + '-sign';
 
 		if ( this.signFile || this.signYoutubeId ) {
-			this.$signWindow = $('<div>',{
-				'class' : 'able-sign-window',
-				'role': 'dialog',
-				'aria-label': this.tt.sign
-			});
-			this.$signToolbar = $('<div>',{
-				'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
-			});
+			if ( null !== this.$signDivLocation ) {
+				this.$signDivLocation.addClass( 'able-sign-window able-fixed' );
+				this.$signWindow = this.$signDivLocation;
+			} else {
+				this.$signWindow = $('<div>',{
+					'class' : 'able-sign-window',
+					'role': 'dialog',
+					'aria-label': this.translate( 'sign', 'Sign language' )
+				});
+				this.$signToolbar = $('<div>',{
+					'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
+				});
+				this.$signWindow.append(this.$signToolbar);
+			}
 
-			this.$signWindow.append(this.$signToolbar);
 			this.$ableWrapper.append(this.$signWindow);
 		}
 
@@ -98,11 +103,15 @@
 		}
 
 		// make it draggable
-		this.initDragDrop('sign');
+		if ( null === this.$signDivLocation ) {
+			this.initDragDrop('sign');
+		}
 
 		if (this.prefSign === 1) {
 			// sign window is on. Go ahead and position it and show it
-			this.positionDraggableWindow('sign',this.getDefaultWidth('sign'));
+			if ( null === this.$signDivLocation ) {
+				this.positionDraggableWindow('sign',this.getDefaultWidth('sign'));
+			}
 		} else {
 			this.$signWindow.hide();
 		}
@@ -113,7 +122,7 @@
 
 		var thisObj, deferred, promise;
 		thisObj = this;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.youTubeSignPlayerReady = false;
@@ -125,9 +134,9 @@
 			});
 		} else {
 			// Has another player already started loading the script? If so, abort...
-			if (!AblePlayer.loadingYouTubeIframeAPI) {
-				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
-					deferred.fail();
+			if ( ! AblePlayer.loadingYouTubeIframeAPI ) {
+				thisObj.getScript('https://www.youtube.com/iframe_api', function () {
+					console.log( 'YouTube API loaded' );
 				});
 			}
 
@@ -146,7 +155,7 @@
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		containerId = this.mediaId + '_youtube_sign';
@@ -181,10 +190,10 @@
 					deferred.resolve();
 				},
 				onError: function (x) {
-					deferred.fail();
+					deferred.reject();
 				},
 				onStateChange: function (x) {
-					thisObj.getPlayerState().then(function(playerState) {
+					thisObj.getPlayerState().then(function() {
 						// no actions
 					});
 				},

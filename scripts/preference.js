@@ -1,100 +1,105 @@
 (function ($) {
-	AblePlayer.prototype.setCookie = function(cookieValue) {
-
-		Cookies.set('Able-Player', JSON.stringify(cookieValue), {
-			expires: 90,
-			sameSite: 'strict'
-		});
+	AblePlayer.prototype.setPrefs = function(preferences) {
+		if ( typeof Cookies !== 'undefined' ) {
+			Cookies.set('Able-Player', JSON.stringify(preferences), {
+				expires: 90,
+				sameSite: 'strict'
+			});
+		} else {
+			localStorage.setItem( 'Able-Player', JSON.stringify( preferences ) );
+		}
 	};
 
-	AblePlayer.prototype.getCookie = function() {
+	AblePlayer.prototype.getPref = function() {
 
-		var defaultCookie = {
+		var defaultPrefs = {
 			preferences: {},
 			sign: {},
 			transcript: {},
 			voices: []
 		};
 
-		var cookie;
+		var preferences;
 		try {
-			cookie = JSON.parse(Cookies.get('Able-Player'));
+			if ( typeof Cookies !== 'undefined' ) {
+				preferences = JSON.parse( Cookies.get('Able-Player') );
+			} else {
+				preferences = JSON.parse( localStorage.getItem('Able-Player') );
+			}
 		}
 		catch (err) {
-			// Original cookie can't be parsed; update to default
-			this.setCookie(defaultCookie);
-			cookie = defaultCookie;
+			// Original preferences can't be parsed; update to default
+			this.setPrefs( defaultPrefs );
+			preferences = defaultPrefs;
 		}
-		return (cookie) ? cookie : defaultCookie;
+		return (preferences) ? preferences : defaultPrefs;
 	};
 
-	AblePlayer.prototype.updateCookie = function( setting ) {
-
-		// called when a particular setting had been updated
-		// useful for settings updated indepedently of Preferences dialog
+	AblePlayer.prototype.updatePreferences = function( setting ) {
+		// useful for settings updated independently of Preferences dialog
 		// e.g., prefAutoScrollTranscript, which is updated in control.js > handleTranscriptLockToggle()
 		// setting is any supported preference name (e.g., "prefCaptions")
 		// OR 'transcript' or 'sign' (not user-defined preferences, used to save position of draggable windows)
-		var cookie, $window, windowPos, available, i, prefName, voiceLangFound, newVoice;
-		cookie = this.getCookie();
+		var preferences, $window, windowPos, available, i, prefName, voiceLangFound, newVoice;
+		preferences = this.getPref();
 		if (setting === 'transcript' || setting === 'sign') {
 			if (setting === 'transcript') {
 				$window = this.$transcriptArea;
 				windowPos = $window.position();
-				if (typeof cookie.transcript === 'undefined') {
-					cookie.transcript = {};
+				if (typeof preferences.transcript === 'undefined') {
+					preferences.transcript = {};
 				}
-				cookie.transcript['position'] = $window.css('position'); // either 'relative' or 'absolute'
-				cookie.transcript['zindex'] = $window.css('z-index');
-				cookie.transcript['top'] = windowPos.top;
-				cookie.transcript['left'] = windowPos.left;
-				cookie.transcript['width'] = $window.width();
-				cookie.transcript['height'] = $window.height();
+				preferences.transcript['position'] = $window.css('position'); // either 'relative' or 'absolute'
+				preferences.transcript['zindex'] = $window.css('z-index');
+				preferences.transcript['top'] = windowPos.top;
+				preferences.transcript['left'] = windowPos.left;
+				preferences.transcript['width'] = $window.width();
+				preferences.transcript['height'] = $window.height();
 			} else if (setting === 'sign') {
 				$window = this.$signWindow;
 				windowPos = $window.position();
-				if (typeof cookie.sign === 'undefined') {
-					cookie.sign = {};
+				if (typeof preferences.sign === 'undefined') {
+					preferences.sign = {};
 				}
-				cookie.sign['position'] = $window.css('position'); // either 'relative' or 'absolute'
-				cookie.sign['zindex'] = $window.css('z-index');
-				cookie.sign['top'] = windowPos.top;
-				cookie.sign['left'] = windowPos.left;
-				cookie.sign['width'] = $window.width();
-				cookie.sign['height'] = $window.height();
+				preferences.sign['position'] = $window.css('position'); // either 'relative' or 'absolute'
+				preferences.sign['zindex'] = $window.css('z-index');
+				preferences.sign['top'] = windowPos.top;
+				preferences.sign['left'] = windowPos.left;
+				preferences.sign['width'] = $window.width();
+				preferences.sign['height'] = $window.height();
 			}
 		} else if (setting === 'voice') {
-			if (typeof cookie.voices === 'undefined') {
-				cookie.voices = [];
+			if (typeof preferences.voices === 'undefined') {
+				preferences.voices = [];
 			}
-			// replace preferred voice for this lang in cookie.voices array, if one exists
+			// replace preferred voice for this lang in preferences.voices array, if one exists
 			// otherwise, add it to the array
 			voiceLangFound = false;
-			for (var v=0; v < cookie.voices.length; v++) {
-				if (cookie.voices[v].lang === this.prefDescVoiceLang) {
+			for (var v=0; v < preferences.voices.length; v++) {
+				if (preferences.voices[v].lang === this.prefDescVoiceLang) {
 					voiceLangFound = true;
-					cookie.voices[v].name = this.prefDescVoice;
+					preferences.voices[v].name = this.prefDescVoice;
 				}
 			}
 			if (!voiceLangFound) {
 				// no voice has been saved yet for this language. Add it to array.
 				newVoice = {'name':this.prefDescVoice, 'lang':this.prefDescVoiceLang};
-				cookie.voices.push(newVoice);
+				preferences.voices.push(newVoice);
 			}
 		} else {
 			available = this.getAvailablePreferences();
-			// Rebuild cookie with current cookie values,
+			// Rebuild preferences with current preferences values,
 			// replacing the one value that's been changed
 			for (i = 0; i < available.length; i++) {
 				prefName = available[i]['name'];
 				if (prefName == setting) {
 					// this is the one that requires an update
-					cookie.preferences[prefName] = this[prefName];
+					preferences.preferences[prefName] = this[prefName];
 				}
 			}
 		}
-		// Save updated cookie
-		this.setCookie(cookie);
+		// Save updated preferences
+		this.setPrefs(preferences);
 	};
 
 	AblePlayer.prototype.getPreferencesGroups = function() {
@@ -123,19 +128,25 @@
 		// Modifier keys preferences
 		prefs.push({
 			'name': 'prefAltKey', // use alt key with shortcuts
-			'label': this.tt.prefAltKey,
+			'label': this.translate( 'prefAltKey', 'Alt' ),
 			'group': 'keyboard',
 			'default': 1
 		});
 		prefs.push({
 			'name': 'prefCtrlKey', // use ctrl key with shortcuts
-			'label': this.tt.prefCtrlKey,
+			'label': this.translate( 'prefCtrlKey', 'Control' ),
 			'group': 'keyboard',
 			'default': 1
 		});
 		prefs.push({
 			'name': 'prefShiftKey',
-			'label': this.tt.prefShiftKey,
+			'label': this.translate( 'prefShiftKey', 'Shift' ),
+			'group': 'keyboard',
+			'default': 0
+		});
+		prefs.push({
+			'name': 'prefNoKeyShortcuts',
+			'label': this.translate( 'prefNoKeyShortcuts', 'Disable Keyboard Shortcuts' ),
 			'group': 'keyboard',
 			'default': 0
 		});
@@ -149,7 +160,7 @@
 		});
 		prefs.push({
 			'name': 'prefHighlight', // highlight transcript as media plays
-			'label': this.tt.prefHighlight,
+			'label': this.translate( 'prefHighlight', 'Highlight transcript as media plays' ),
 			'group': 'transcript',
 			'default': 1 // on because many users can benefit
 		});
@@ -161,13 +172,12 @@
 		});
 		prefs.push({
 			'name': 'prefTabbable', // tab-enable transcript
-			'label': this.tt.prefTabbable,
+			'label': this.translate( 'prefTabbable', 'Keyboard-enable transcript' ),
 			'group': 'transcript',
 			'default': 0 // off because if users don't need it, it impedes tabbing elsewhere on the page
 		});
 
 		// Caption preferences
-
 		prefs.push({
 			'name': 'prefCaptions', // closed captions default state
 			'label': null,
@@ -180,23 +190,23 @@
 			/* // not supported yet
 			prefs.push({
 				'name': 'prefCaptionsStyle',
-				'label': this.tt.prefCaptionsStyle,
+				'label': this.translate( 'prefCaptionsStyle', 'Style' ),
 				'group': 'captions',
-				'default': this.tt.captionsStylePopOn
+				'default': this.translate( 'captionsStylePopOn', 'Pop-on' )
 			});
 			*/
 			// captions are always positioned above the player for audio
 			if (this.mediaType === 'video') {
 				prefs.push({
 					'name': 'prefCaptionsPosition',
-					'label': this.tt.prefCaptionsPosition,
+					'label': this.translate( 'prefCaptionsPosition', 'Position' ),
 					'group': 'captions',
 					'default': this.defaultCaptionsPosition
 				});
 			}
 			prefs.push({
 				'name': 'prefCaptionsFont',
-				'label': this.tt.prefCaptionsFont,
+				'label': this.translate( 'prefCaptionsFont', 'Font' ),
 				'group': 'captions',
 				'default': 'sans-serif'
 			});
@@ -204,7 +214,7 @@
 		// This is the one option that is supported by YouTube IFrame API
 		prefs.push({
 			'name': 'prefCaptionsSize',
-			'label': this.tt.prefCaptionsSize,
+			'label': this.translate( 'prefCaptionsSize', 'Font size' ),
 			'group': 'captions',
 			'default': '100%'
 		});
@@ -213,19 +223,19 @@
 
 			prefs.push({
 				'name': 'prefCaptionsColor',
-				'label': this.tt.prefCaptionsColor,
+				'label': this.translate( 'prefCaptionsColor', 'Text Color' ),
 				'group': 'captions',
 				'default': 'white'
 			});
 			prefs.push({
 				'name': 'prefCaptionsBGColor',
-				'label': this.tt.prefCaptionsBGColor,
+				'label': this.translate( 'prefCaptionsBGColor', 'Background' ),
 				'group': 'captions',
 				'default': 'black'
 			});
 			prefs.push({
 				'name': 'prefCaptionsOpacity',
-				'label': this.tt.prefCaptionsOpacity,
+				'label': this.translate( 'prefCaptionsOpacity', 'Opacity' ),
 				'group': 'captions',
 				'default': '100%'
 			});
@@ -247,25 +257,25 @@
 			});
 			prefs.push({
 				'name': 'prefDescVoice',
-				'label': this.tt.prefDescVoice,
+				'label': this.translate( 'prefDescVoice', 'Voice' ),
 				'group': 'descriptions',
 				'default': null // will be set later, in injectPrefsForm()
 			});
 			prefs.push({
 				'name': 'prefDescPitch',
-				'label': this.tt.prefDescPitch,
+				'label': this.translate( 'prefDescPitch', 'Pitch' ),
 				'group': 'descriptions',
 				'default': 1 // 0 to 2
 			});
 			prefs.push({
 				'name': 'prefDescRate',
-				'label': this.tt.prefDescRate,
+				'label': this.translate( 'prefDescRate', 'Rate' ),
 				'group': 'descriptions',
 				'default': 1 // 0.1 to 10 (1 is normal speech; 2 is fast but decipherable; >2 is super fast)
 			});
 			prefs.push({
 				'name': 'prefDescVolume',
-				'label': this.tt.volume,
+				'label': this.translate( 'volume', 'Volume' ),
 				'group': 'descriptions',
 				'default': 1 // 0 to 1
 			});
@@ -273,14 +283,14 @@
 			if ( this.descMethod !== 'video' ) {
 				prefs.push({
 					'name': 'prefDescPause', // automatically pause when closed description starts
-					'label': this.tt.prefDescPause,
+					'label': this.translate( 'prefDescPause', 'Automatically pause video when description starts' ),
 					'group': 'descriptions',
 					'default': this.defaultDescPause
 				});
 			}
 			prefs.push({
 				'name': 'prefDescVisible', // visibly show closed description (if avilable and used)
-				'label': this.tt.prefDescVisible,
+				'label': this.translate( 'prefDescVisible', 'Make description visible' ),
 				'group': 'descriptions',
 				'default': 0 // off as of 4.3.16, to avoid overloading the player with visible features
 			});
@@ -298,28 +308,28 @@
 
 	AblePlayer.prototype.loadCurrentPreferences = function () {
 
-		// Load current/default preferences from cookie into the AblePlayer object.
+		// Load current/default preferences into the AblePlayer object.
 
 		var available = this.getAvailablePreferences();
-		var cookie = this.getCookie();
-		// Copy current cookie values into this object, and fill in any default values.
+		var preferences = this.getPref();
+		// Copy current preferences values into this object, and fill in any default values.
 		for (var ii = 0; ii < available.length; ii++) {
 			var prefName = available[ii]['name'];
 			var defaultValue = available[ii]['default'];
-			if (cookie.preferences[prefName] !== undefined) {
-				this[prefName] = cookie.preferences[prefName];
+			if (preferences.preferences[prefName] !== undefined) {
+				this[prefName] = preferences.preferences[prefName];
 			} else {
-				cookie.preferences[prefName] = defaultValue;
+				preferences.preferences[prefName] = defaultValue;
 				this[prefName] = defaultValue;
 			}
 		}
 
-		// Also load array of preferred voices from cookie
-		if (typeof cookie.voices !== 'undefined') {
-			this.prefVoices = cookie.voices;
+		// Also load array of preferred voices from preferences
+		if (typeof preferences.voices !== 'undefined') {
+			this.prefVoices = preferences.voices;
 		}
 
-		this.setCookie(cookie);
+		this.setPrefs(preferences);
 	};
 
 	AblePlayer.prototype.injectPrefsForm = function (form) {
@@ -346,60 +356,58 @@
 
 		// add titles and intros
 		if (form == 'captions') {
-			formTitle = this.tt.prefTitleCaptions;
-			// Intro text removed in 4.4.32 to cut down on unnecessary verbiage
+			formTitle = this.translate( 'prefTitleCaptions', 'Captions Preferences' );
 		} else if (form == 'descriptions') {
-			formTitle = this.tt.prefTitleDescriptions;
+			formTitle = this.translate( 'prefTitleDescriptions', 'Audio Description Preferences' );
 			var $prefsIntro = $('<p>',{
-				text: this.tt.prefIntroDescription1
+				text: this.translate( 'prefIntroDescription1', 'This media player supports audio description in two ways: ' )
 			});
 			var $prefsIntroUL = $('<ul>');
 			var $prefsIntroLI1 = $('<li>',{
-				text: this.tt.prefDescFormatOption1
+				text: this.translate( 'prefDescFormatOption1', 'alternative described version of video' )
 			});
 			var $prefsIntroLI2 = $('<li>',{
-				text: this.tt.prefDescFormatOption2
+				text: this.translate( 'prefDescFormatOption2', 'text-based description, announced by screen reader' )
 			});
 
 			$prefsIntroUL.append($prefsIntroLI1,$prefsIntroLI2);
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				currentDescState = this.tt.prefIntroDescription2 + ' ';
-				currentDescState += '<strong>' + this.tt.prefDescFormatOption1b + '</strong>';
-				currentDescState += ' <em>' + this.tt.and + '</em> <strong>' + this.tt.prefDescFormatOption2b + '</strong>.';
+				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' ) + ' ';
+				currentDescState += '<strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>';
+				currentDescState += ' <em>' + this.translate( 'and', 'and' ) + '</em> <strong>' + this.translate( 'prefDescFormatOption2b', 'text-based description, announced by screen reader' ) + '</strong>.';
 			} else if (this.hasOpenDesc) {
-				currentDescState = this.tt.prefIntroDescription2;
-				currentDescState += ' <strong>' + this.tt.prefDescFormatOption1b + '</strong>.';
+				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' );
+				currentDescState += ' <strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>.';
 			} else if (this.hasClosedDesc) {
-				currentDescState = this.tt.prefIntroDescription2;
-				currentDescState += ' <strong>' + this.tt.prefDescFormatOption2b + '</strong>.';
+				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' );
+				currentDescState += ' <strong>' + this.translate( 'prefDescFormatOption2b', 'text-based description, announced by screen reader' ) + '</strong>.';
 			} else {
-				currentDescState = this.tt.prefIntroDescriptionNone;
+				currentDescState = this.translate( 'prefIntroDescriptionNone', 'The current video has no audio description in either format.' );
 			}
 			$prefsIntroP2 = $('<p>',{
 				html: currentDescState
 			});
 
-			p3Text = this.tt.prefIntroDescription3;
+			p3Text = this.translate( 'prefIntroDescription3', 'Use the following form to set your preferences related to text-based audio description.' );
 			if (this.hasOpenDesc || this.hasClosedDesc) {
-				p3Text += ' ' + this.tt.prefIntroDescription4;
+				p3Text += ' ' + this.translate( 'prefIntroDescription4', 'After you save your settings, audio description can be toggled on/off using the Description button.' );
 			}
 			$prefsIntroP3 = $('<p>',{
 				text: p3Text
 			});
 
-			$prefsDiv.append($prefsIntro,$prefsIntroUL,$prefsIntroP2,$prefsIntroP3);
+			$prefsDiv.append( $prefsIntro, $prefsIntroUL, $prefsIntroP2, $prefsIntroP3 );
 		} else if (form == 'keyboard') {
-			formTitle = this.tt.prefTitleKeyboard;
-			introText = this.tt.prefIntroKeyboard1;
-			introText += ' ' + this.tt.prefIntroKeyboard2;
-			introText += ' ' + this.tt.prefIntroKeyboard3;
+			formTitle = this.translate( 'prefTitleKeyboard', 'Keyboard Preferences' );
+			introText = this.translate( 'prefIntroKeyboard1', 'The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).' );
+			introText += ' ' + this.translate( 'prefIntroKeyboard2', 'Modifier keys (Shift, Alt, and Control) can be assigned below.' );
+			introText += ' ' + this.translate( 'prefIntroKeyboard3', 'NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.' );
 			$prefsIntro = $('<p>',{
 				text: introText
 			});
 			$prefsDiv.append($prefsIntro);
 		} else if (form == 'transcript') {
-			formTitle = this.tt.prefTitleTranscript;
-			// Intro text removed in 4.4.32 to cut down on unnecessary verbiage
+			formTitle = this.translate( 'prefTitleTranscript', 'Transcript Preferences' );
 		}
 
 		$fieldset = $('<div>').attr('role','group');
@@ -408,12 +416,12 @@
 		legendId = fieldsetId + '-legend';
 		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
 		if (form === 'keyboard') {
-			$legend = $('<h2>' + this.tt.prefHeadingKeyboard1 + '</h2>');
+			$legend = $('<h2>' + this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' ) + '</h2>');
 			$legend.attr('id',legendId);
 			$fieldset.attr('aria-labelledby',legendId);
 			$fieldset.append($legend);
 		} else if (form === 'descriptions') {
-			$legend = $('<h2>' + this.tt.prefHeadingTextDescription + '</h2>');
+			$legend = $('<h2>' + this.translate( 'prefHeadingTextDescription', 'Text-based audio description' ) + '</h2>');
 			$legend.attr('id',legendId);
 			$fieldset.attr('aria-labelledby',legendId);
 			$fieldset.append($legend);
@@ -446,10 +454,10 @@
 						if (thisPref === 'prefCaptionsPosition') {
 							optionValue = options[j];
 							if (optionValue === 'overlay') {
-								optionText = this.tt.captionsPositionOverlay;
+								optionText = this.translate( 'captionsPositionOverlay', 'Overlay' );
 							} else if (optionValue === 'below') {
 								optionValue = options[j];
-								optionText = this.tt.captionsPositionBelow;
+								optionText = this.translate( 'captionsPositionBelow', 'Below video' );
 							}
 						} else if (thisPref === 'prefCaptionsFont' || thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
 							optionValue = options[j][0];
@@ -457,7 +465,7 @@
 						} else if (thisPref === 'prefCaptionsOpacity') {
 							optionValue = options[j];
 							optionText = options[j];
-							optionText += (optionValue === '0%') ? ' (' + this.tt.transparent + ')' : ' (' + this.tt.solid + ')';
+							optionText += (optionValue === '0%') ? ' (' + this.translate( 'transparent', 'transparent' ) + ')' : ' (' + this.translate( 'solid', 'solid' ) + ')';
 						} else {
 							optionValue = options[j];
 							optionText = options[j];
@@ -584,10 +592,18 @@
 								changedSpan = '.able-modkey-shift';
 								changedText = thisObj.tt.prefShiftKey + ' + ';
 							}
-							if ($(this).is(':checked')) {
-								$(changedSpan).text(changedText);
+							if ( changedPref !== 'prefNoKeyShortcuts' ) {
+								if ($(this).is(':checked')) {
+									$(changedSpan).text(changedText);
+								} else {
+									$(changedSpan).text('');
+								}
 							} else {
-								$(changedSpan).text('');
+								if ($(this).is(':checked')) {
+									$('.able-modkey-item').addClass('hidden');
+								} else {
+									$('.able-modkey-item').removeClass('hidden');
+								}
 							}
 						});
 					}
@@ -608,7 +624,7 @@
 			if (!this.usingYouTubeCaptions) {
 				this.$sampleCapsDiv = $('<div>',{
 					'class': 'able-captions-sample'
-				}).text(this.tt.sampleCaptionText);
+				}).text( this.translate( 'sampleCaptionText', 'Sample caption text' ) );
 				$prefsDiv.append(this.$sampleCapsDiv);
 				this.stylizeCaptions(this.$sampleCapsDiv);
 			}
@@ -617,14 +633,16 @@
 				// add a div with sample audio description text
 				this.$sampleDescDiv = $('<div>',{
 					'class': 'able-desc-sample'
-				}).text(this.tt.sampleDescriptionText);
+				}).text( this.translate( 'sampleDescriptionText', 'Adjust settings to hear this sample text.' ) );
 				$prefsDiv.append(this.$sampleDescDiv);
-				this.currentSampleText = this.tt.sampleDescriptionText;
+				this.currentSampleText = this.translate( 'sampleDescriptionText', 'Adjust settings to hear this sample text.' );
 			}
 		} else if (form === 'keyboard') {
+			let shortcutClass = (this.prefNoKeyShortcuts === 1 ) ? 'able-modkey-item hidden' : 'able-modkey-item';
+
 			// add a current list of keyboard shortcuts
 			$kbHeading = $('<h2>',{
-				text: this.tt.prefHeadingKeyboard2
+				text: this.translate( 'prefHeadingKeyboard2', 'Current keyboard shortcuts' )
 			});
 			$kbList = $('<ul>');
 			// create arrays of kbLabels and keys
@@ -632,87 +650,85 @@
 			keys = [];
 			for (i=0; i<this.controls.length; i++) {
 				if (this.controls[i] === 'play') {
-					kbLabels.push(this.tt.play + '/' + this.tt.pause);
-					keys.push('p</span> <em>' + this.tt.or + '</em> <span class="able-help-modifiers"> ' + this.tt.spacebar);
+					kbLabels.push( this.translate( 'play', 'Play' ) + '/' + this.translate( 'pause', 'Pause' ) );
+					keys.push('p</span> <em>' + this.translate( 'or', 'or' ) + '</em> <span class="able-help-modifiers"> ' + this.translate( 'spacebar', 'spacebar' ));
 				} else if (this.controls[i] === 'restart') {
-					kbLabels.push(this.tt.restart);
+					kbLabels.push(this.translate( 'restart', 'Restart' ));
 					keys.push('s');
 				} else if (this.controls[i] === 'previous') {
-					kbLabels.push(this.tt.prevTrack);
+					kbLabels.push( this.translate( 'prevTrack', 'Previous track' ) );
 					keys.push('b'); // b = back
 				} else if (this.controls[i] === 'next') {
-					kbLabels.push(this.tt.nextTrack);
+					kbLabels.push( this.translate( 'nextTrack', 'Next track' ) );
 					keys.push('n');
 				} else if (this.controls[i] === 'rewind') {
-					kbLabels.push(this.tt.rewind);
+					kbLabels.push(this.translate( 'rewind', 'Rewind' ));
 					keys.push('r');
 				} else if (this.controls[i] === 'forward') {
-					kbLabels.push(this.tt.forward);
+					kbLabels.push(this.translate( 'forward', 'Forward' ));
 					keys.push('f');
 				} else if (this.controls[i] === 'volume') {
-					kbLabels.push(this.tt.volume);
-					keys.push('v</span> <em>' + this.tt.or + '</em> <span class="able-modkey">1-9');
+					kbLabels.push(this.translate( 'volume', 'Volume' ));
+					keys.push('v</span> <em>' + this.translate( 'or', 'or' ) + '</em> <span class="able-modkey">1-9');
 					// mute toggle
-					kbLabels.push(this.tt.mute + '/' + this.tt.unmute);
+					kbLabels.push(this.translate( 'mute', 'Mute' ) + '/' + this.translate( 'unmute', 'Unmute' ));
 					keys.push('m');
 				} else if (this.controls[i] === 'captions') {
 					if (this.captions.length > 1) {
 						// caption button launches a Captions popup menu
-						kbLabels.push(this.tt.captions);
+						kbLabels.push(this.translate( 'captions', 'Captions' ));
 					} else {
 						// there is only one caption track
 						// therefore caption button is a toggle
 						if (this.captionsOn) {
-							kbLabels.push(this.tt.hideCaptions);
+							kbLabels.push(this.translate( 'hideCaptions', 'Hide captions' ));
 						} else {
-							kbLabels.push(this.tt.showCaptions);
+							kbLabels.push(this.translate( 'showCaptions', 'Show captions' ));
 						}
 					}
 					keys.push('c');
 				} else if (this.controls[i] === 'descriptions') {
 					if (this.descOn) {
-						kbLabels.push(this.tt.turnOffDescriptions);
+						kbLabels.push(this.translate( 'turnOffDescriptions', 'Turn off descriptions' ));
 					} else {
-						kbLabels.push(this.tt.turnOnDescriptions);
+						kbLabels.push(this.translate( 'turnOnDescriptions', 'Turn on descriptions' ));
 					}
 					keys.push('d');
 				} else if (this.controls[i] === 'prefs') {
-					kbLabels.push(this.tt.preferences);
+					kbLabels.push(this.translate( 'preferences', 'Preferences' ));
 					keys.push('e');
-				} else if (this.controls[i] === 'help') {
-					kbLabels.push(this.tt.help);
-					keys.push('h');
 				}
 			}
 			for (i=0; i<keys.length; i++) {
 				// alt
 				kbListText = '<span class="able-modkey-alt">';
 				if (this.prefAltKey === 1) {
-					kbListText += this.tt.prefAltKey + ' + ';
+					kbListText += this.translate( 'prefAltKey', 'Alt' ) + ' + ';
 				}
 				kbListText += '</span>';
 				// ctrl
 				kbListText += '<span class="able-modkey-ctrl">';
 				if (this.prefCtrlKey === 1) {
-					kbListText += this.tt.prefCtrlKey + ' + ';
+					kbListText += this.translate( 'prefCtrlKey', 'Control' ) + ' + ';
 				}
 				kbListText += '</span>';
 				// shift
 				kbListText += '<span class="able-modkey-shift">';
 				if (this.prefShiftKey === 1) {
-					kbListText += this.tt.prefShiftKey + ' + ';
+					kbListText += this.translate( 'prefShiftKey', 'Shift' ) + ' + ';
 				}
 				kbListText += '</span>';
 				kbListText += '<span class="able-modkey">' + keys[i] + '</span>';
 				kbListText += ' = ' + kbLabels[i];
 				$kbListItem = $('<li>',{
-					html: kbListText
+					'class': shortcutClass,
+					html: kbListText,
 				});
 				$kbList.append($kbListItem);
 			}
 			// add Escape key
-			kbListText = '<span class="able-modkey">' + this.tt.escapeKey + '</span>';
-			kbListText += ' = ' + this.tt.escapeKeyFunction;
+			kbListText = '<span class="able-modkey">' + this.translate( 'escapeKey', 'Escape' ) + '</span>';
+			kbListText += ' = ' + this.translate( 'escapeKeyFunction', 'Close current dialog or popup menu' );
 			$kbListItem = $('<li>',{
 				html: kbListText
 			});
@@ -723,12 +739,17 @@
 
 		// $prefsDiv (dialog) must be appended to the BODY!
 		$('body').append($prefsDiv);
-		dialog = new AccessibleDialog($prefsDiv, this.$prefsButton, 'dialog', true, formTitle, $prefsIntro, thisObj.tt.closeButtonLabel, false);
+		dialog = new AccessibleDialog(
+			$prefsDiv,
+			this.$prefsButton,
+			formTitle,
+			thisObj.tt.closeButtonLabel
+		);
 
 		// Add save and cancel buttons.
 		$buttonContainer = $( '<div class="able-prefs-buttons"></div>' );
-		$saveButton = $('<button class="modal-button">' + this.tt.save + '</button>');
-		$cancelButton = $('<button class="modal-button">' + this.tt.cancel + '</button>');
+		$saveButton = $('<button class="modal-button">' + this.translate( 'save', 'Save' ) + '</button>');
+		$cancelButton = $('<button class="modal-button">' + this.translate( 'cancel', 'Cancel' ) + '</button>');
 		$saveButton.on( 'click', function () {
 			dialog.hide();
 			thisObj.savePrefsFromForm();
@@ -771,8 +792,8 @@
 
 	AblePlayer.prototype.getPrefDescVoice = function () {
 
-		// return user's preferred voice for the current language from cookie.voices
-		var lang, cookie, i;
+		// return user's preferred voice for the current language from preferences.voices
+		var lang, preferences, i;
 
 		if (this.selectedDescriptions) {
 			lang = this.selectedDescriptions.language;
@@ -781,11 +802,11 @@
 		} else {
 			lang = this.lang;
 		}
-		cookie = this.getCookie();
-		if (cookie.voices) {
-			for (i=0; i < cookie.voices.length; i++) {
-				if (cookie.voices[i].lang === lang) {
-					return cookie.voices[i].name;
+		preferences = this.getPref();
+		if (preferences.voices) {
+			for (i=0; i < preferences.voices.length; i++) {
+				if (preferences.voices[i].lang === lang) {
+					return preferences.voices[i].name;
 				}
 			}
 		}
@@ -825,15 +846,15 @@
 
 		if (pref === 'prefDescPitch') {
 			if (value === 0) {
-				return this.tt.prefDescPitch1;
+				return this.translate( 'prefDescPitch1', 'Very low' );
 			} else if (value === 0.5) {
-				return this.tt.prefDescPitch2;
+				return this.translate( 'prefDescPitch2', 'Low' );
 			} else if (value === 1) {
-				return this.tt.prefDescPitch3;
+				return this.translate( 'prefDescPitch3', 'Default' );
 			} else if (value === 1.5) {
-				return this.tt.prefDescPitch4;
+				return this.translate( 'prefDescPitch4', 'High' );
 			} else if (value === 2) {
-				return this.tt.prefDescPitch5;
+				return this.translate( 'prefDescPitch5', 'Very high' );
 			}
 		} else if (pref === 'prefDescRate') {
 			// default in the API is 0.1 to 10, where 1 is normal speaking voice
@@ -870,23 +891,22 @@
 
 	AblePlayer.prototype.resetPrefsForm = function () {
 
-		// Reset preferences form with default values from cookie
+		// Reset preferences form with default values from preferences
 		// Called when:
 		// User clicks cancel or close button in Prefs Dialog
 		// User presses Escape to close Prefs dialog
 		// User clicks Save in Prefs dialog, & there's more than one player on page
 
-		var thisObj, cookie, available, i, prefName, prefId, thisDiv, thisId;
+		var thisObj, preferences, available, i, prefName;
 
 		thisObj = this;
-		cookie = this.getCookie();
+		preferences = this.getPref();
 		available = this.getAvailablePreferences();
 		for (i=0; i<available.length; i++) {
 			prefName = available[i]['name'];
-			prefId = this.mediaId + '_' + prefName;
 			if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				// this is a caption-related select box
-				$('select[name="' + prefName + '"]').val(cookie.preferences[prefName]);
+				$('select[name="' + prefName + '"]').val(preferences.preferences[prefName]);
 			} else { // all others are checkboxes
 				if (this[prefName] === 1) {
 					$('input[name="' + prefName + '"]').prop('checked',true);
@@ -903,15 +923,15 @@
 
 		// Return a prefs object constructed from the form.
 		// called when user saves the Preferences form
-		// update cookie with new value
-		var cookie, available, prefName, prefId,
+		// update preferences with new value
+		var preferences, available, prefName, prefId,
 			voiceSelectId, newVoice, newVoiceLang, numChanges, voiceLangFound,
 			numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
 		numCapChanges = 0; // changes to caption-style-related preferences
 		capSizeChanged = false;
-		cookie = this.getCookie();
+		preferences = this.getPref();
 		available = this.getAvailablePreferences();
 		for (var i=0; i < available.length; i++) {
 			// only prefs with labels are used in the Prefs form
@@ -919,40 +939,40 @@
 				prefName = available[i]['name'];
 				prefId = this.mediaId + '_' + prefName;
 				if (prefName === 'prefDescVoice') {
-					if (typeof cookie.voices === 'undefined') {
-						cookie.voices = [];
+					if (typeof preferences.voices === 'undefined') {
+						preferences.voices = [];
 					}
 					voiceSelectId = this.mediaId + '_prefDescVoice';
 					this.prefDescVoice = $('select#' + voiceSelectId).find(':selected').val();
 					this.prefDescVoiceLang = $('select#' + voiceSelectId).find(':selected').attr('data-lang');
-					// replace preferred voice for this lang in cookie.voices array, if one exists
+					// replace preferred voice for this lang in preferences.voices array, if one exists
 					// otherwise, add it to the array
 					voiceLangFound = false;
-					for (var v=0; v < cookie.voices.length; v++) {
-						if (cookie.voices[v].lang === this.prefDescVoiceLang) {
+					for (var v=0; v < preferences.voices.length; v++) {
+						if (preferences.voices[v].lang === this.prefDescVoiceLang) {
 							voiceLangFound = true;
-							cookie.voices[v].name = this.prefDescVoice;
+							preferences.voices[v].name = this.prefDescVoice;
 						}
 					}
 					if (!voiceLangFound) {
 						// no voice has been saved yet for this language. Add it to array.
 						newVoice = {'name':this.prefDescVoice, 'lang':this.prefDescVoiceLang};
-						cookie.voices.push(newVoice);
+						preferences.voices.push(newVoice);
 					}
 					numChanges++;
 				} else if (prefName == 'prefDescMethod') {
 					// As of v4.0.10, prefDescMethod is no longer a choice
 					// this.prefDescMethod = $('input[name="' + prefName + '"]:checked').val();
 					this.prefDescMethod = 'video';
-					if (this.prefDescMethod !== cookie.preferences['prefDescMethod']) { // user's preference has changed
-						cookie.preferences['prefDescMethod'] = this.prefDescMethod;
+					if (this.prefDescMethod !== preferences.preferences['prefDescMethod']) { // user's preference has changed
+						preferences.preferences['prefDescMethod'] = this.prefDescMethod;
 						numChanges++;
 					}
 				} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
 					newValue = $('select[id="' + prefId + '"]').val();
-					if (cookie.preferences[prefName] !== newValue) { // user changed setting
-						cookie.preferences[prefName] = newValue;
+					if (preferences.preferences[prefName] !== newValue) { // user changed setting
+						preferences.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
 						this[prefName] = newValue;
 						numChanges++;
@@ -965,15 +985,15 @@
 				} else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
 					// this is one of the description-related select fields
 					newValue = $('select[id="' + prefId + '"]').val();
-					if (cookie.preferences[prefName] !== newValue) { // user changed setting
-						cookie.preferences[prefName] = newValue;
+					if (preferences.preferences[prefName] !== newValue) { // user changed setting
+						preferences.preferences[prefName] = newValue;
 						// also update global var for this pref
 						this[prefName] = newValue;
 						numChanges++;
 					}
 				} else { // all other fields are checkboxes
 					if ($('input[id="' + prefId + '"]').is(':checked')) {
-						cookie.preferences[prefName] = 1;
+						preferences.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed
 						} else {
@@ -982,7 +1002,7 @@
 							numChanges++;
 						}
 					} else { // thisPref is not checked
-						cookie.preferences[prefName] = 0;
+						preferences.preferences[prefName] = 0;
 						if (this[prefName] === 1) {
 							// user has just turned this pref off
 							this[prefName] = 0;
@@ -995,10 +1015,10 @@
 			}
 		}
 		if (numChanges > 0) {
-			this.setCookie(cookie);
-			this.showAlert(this.tt.prefSuccess);
+			this.setPrefs(preferences);
+			this.showAlert( this.translate( 'prefSuccess', 'Your changes have been saved.' ) );
 		} else {
-			this.showAlert(this.tt.prefNoChange);
+			this.showAlert( this.translate( 'prefNoChange', "You didn't make any changes" ) );
 		}
 		if (this.player === 'youtube' &&
 			(typeof this.usingYouTubeCaptions !== 'undefined' && this.usingYouTubeCaptions) &&
@@ -1010,7 +1030,7 @@
 			// there are multiple players on this page.
 			// update prefs for ALL of them
 			for (var i=0; i<AblePlayerInstances.length; i++) {
-				AblePlayerInstances[i].updatePrefs();
+				AblePlayerInstances[i].updatePlayerPrefs();
 				AblePlayerInstances[i].loadCurrentPreferences();
 				AblePlayerInstances[i].resetPrefsForm();
 				if (numCapChanges > 0) {
@@ -1023,7 +1043,7 @@
 			}
 		} else {
 			// there is only one player
-			this.updatePrefs();
+			this.updatePlayerPrefs();
 			if (numCapChanges > 0) {
 				this.stylizeCaptions(this.$captionsDiv);
 				// also apply same changes to descriptions, if present
@@ -1034,10 +1054,9 @@
 		}
 	}
 
-	AblePlayer.prototype.updatePrefs = function () {
+	AblePlayer.prototype.updatePlayerPrefs = function () {
 
 		// Update player based on current prefs. Safe to call multiple times.
-
 		if (this.$transcriptDiv) {
 			// tabbable transcript
 			if (this.prefTabbable === 1) {

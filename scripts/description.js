@@ -22,7 +22,7 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -83,12 +83,12 @@
 					// make description text visible
 					if (typeof this.$descDiv !== 'undefined') {
 						this.$descDiv.show();
-						this.$descDiv.removeClass('able-clipped');
+						this.$descDiv.removeClass('able-offscreen');
 					}
 				} else {
 					// keep it visible to screen readers, but hide it visibly
 					if (typeof this.$descDiv !== 'undefined') {
-						this.$descDiv.addClass('able-clipped');
+						this.$descDiv.addClass('able-offscreen');
 					}
 				}
 			}
@@ -102,7 +102,7 @@
 				// hide description div from everyone, including screen reader users
 				if (typeof this.$descDiv !== 'undefined') {
 					this.$descDiv.hide();
-					this.$descDiv.removeClass('able-clipped');
+					this.$descDiv.removeClass('able-offscreen');
 				}
 			}
 		}
@@ -233,12 +233,12 @@
 
 		// set description voice on player init, or when user changes caption language
 		// Voice is determined in the following order of precedence:
-		// 1. User's preferred voice for this language, saved in a cookie
+		// 1. User's preferred voice for this language, saved in preferences
 		// 2. The first available voice in the array of available voices for this browser in this language
 
-		var cookie, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
-		cookie = this.getCookie();
-		prefDescVoice = (typeof cookie.voices !== 'undefined') ? this.getPrefDescVoice() : null;
+		var preferences, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
+		preferences = this.getPref();
+		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefDescVoice() : null;
 
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
@@ -284,7 +284,7 @@
 				if (this.$voiceSelectField) {
 					this.$voiceSelectField.val(this.prefDescVoice);
 				}
-				this.updateCookie('voice');
+				this.updatePreferences('voice');
 			}
 		}
 	};
@@ -298,7 +298,7 @@
 		// 2. User is toggling description
 		// (playerCreated == true)
 
-		var thisObj, i, origSrc, descSrc, srcType;
+		var thisObj, i, origSrc, descSrc;
 
 		thisObj = this;
 
@@ -331,11 +331,9 @@
 		}
 
 		if (this.descOn) {
-			// user has requested the described version
-			this.showAlert(this.tt.alertDescribedVersion);
+			this.showAlert( this.translate( 'alertDescribedVersion', 'Using the audio described version of this video' ) );
 		} else {
-			// user has requested the non-described version
-			this.showAlert(this.tt.alertNonDescribedVersion);
+			this.showAlert( this.translate( 'alertNonDescribedVersion', 'Using the non-described version of this video' ) );
 		}
 
 		if (this.player === 'html5') {
@@ -417,11 +415,11 @@
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
 				this.activeVimeoId = this.vimeoId;
-				this.showAlert(this.tt.alertNonDescribedVersion);
+				this.showAlert( this.translate( 'alertNonDescribedVersion', 'Using the non-described version of this video' ) );
 			} else {
 				// the non-described version is currently playing. Swap to described.
 				this.activeVimeoId = this.vimeoDescId;
-				this.showAlert(this.tt.alertDescribedVersion);
+				this.showAlert( this.translate( 'alertDescribedVersion', 'Using the audio described version of this video' ) );
 			}
 			if (this.playerCreated) {
 				this.deletePlayer('swap-desc-vimeo');
@@ -449,11 +447,11 @@
 	};
 
 	AblePlayer.prototype.showDescription = function(now) {
-		if (!this.hasClosedDesc || this.swappingSrc || !this.descOn || ( this.descMethod === 'video' && !this.prefDescVisible ) ) {
+		if (!this.playing || !this.hasClosedDesc || this.swappingSrc || !this.descOn || ( this.descMethod === 'video' && !this.prefDescVisible ) ) {
 			return;
 		}
 
-		var thisObj, i, cues, d, thisDescription, descText;
+		var thisObj, cues, d, thisDescription, descText;
 		thisObj = this;
 
 		var flattenComponentForDescription = function (component) {

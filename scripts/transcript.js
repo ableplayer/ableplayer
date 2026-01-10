@@ -1,6 +1,6 @@
 (function ($) {
   AblePlayer.prototype.setupTranscript = function () {
-    var deferred = new $.Deferred();
+    var deferred = new this.defer();
     var promise = deferred.promise();
 
     if (this.usingYouTubeCaptions || this.usingVimeoCaptions || this.hideTranscriptButton ) {
@@ -46,7 +46,7 @@
     this.$transcriptArea = $("<div>", {
       class: "able-transcript-area",
       role: "dialog",
-      "aria-label": this.tt.transcriptTitle,
+      "aria-label": this.translate( 'transcriptTitle', 'Transcript' ),
     });
 
     this.$transcriptToolbar = $("<div>", {
@@ -66,7 +66,7 @@
     });
     $autoScrollLabel = $("<label>", {
       for: "autoscroll-transcript-checkbox-" + this.mediaId,
-    }).text(this.tt.autoScroll);
+    }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
 	$autoScrollContainer = $( '<div>', {
 		'class': 'autoscroll-transcript'
 	});
@@ -84,7 +84,7 @@
       });
       $languageSelectLabel = $("<label>", {
         for: "transcript-language-select-" + this.mediaId,
-      }).text(this.tt.language);
+      }).text( this.translate( 'language', 'Language' ) );
       this.$transcriptLanguageSelect = $("<select>", {
         id: "transcript-language-select-" + this.mediaId,
       });
@@ -159,7 +159,7 @@
     );
 
     if (typeof this.$transcriptLanguageSelect !== "undefined") {
-      this.$transcriptLanguageSelect.on("click mousedown", function (e) {
+      this.$transcriptLanguageSelect.on('click', function (e) {
         // execute default behavior
         // prevent propagation of mouse event to toolbar or window
         e.stopPropagation();
@@ -209,7 +209,7 @@
     });
     $autoScrollLabel = $("<label>", {
       for: "autoscroll-transcript-checkbox-" + this.mediaId,
-    }).text(this.tt.autoScroll);
+    }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
 
     // Add an auto-scroll checkbox to the toolbar.
     this.$autoScrollTranscriptCheckbox = $autoScrollInput;
@@ -389,9 +389,9 @@
     if (typeof this.transcriptTitle !== "undefined") {
       transcriptTitle = this.transcriptTitle;
     } else if (this.lyricsMode) {
-      transcriptTitle = this.tt.lyricsTitle;
+      transcriptTitle = this.translate( 'lyricsTitle', 'Lyrics' );
     } else {
-      transcriptTitle = this.tt.transcriptTitle;
+      transcriptTitle = this.translate( 'transcriptTitle', 'Transcript' );
     }
 
     if (!this.transcriptDivLocation) {

@@ -133,7 +133,7 @@
 
       // save preference to cookie
       thisObj.prefCaptions = 1;
-      thisObj.updateCookie("prefCaptions");
+      thisObj.updatePreferences("prefCaptions");
       thisObj.refreshControls("captions");
     };
   };
@@ -169,7 +169,7 @@
 
       // save preference to cookie
       thisObj.prefCaptions = 0;
-      thisObj.updateCookie("prefCaptions");
+      thisObj.updatePreferences("prefCaptions");
       if (!this.swappingSrc) {
         thisObj.refreshControls("captions");
         thisObj.updateCaption();
@@ -278,24 +278,24 @@
 
     switch (pref) {
       case "prefCaptionsFont":
-        options[0] = ["serif", this.tt.serif];
-        options[1] = ["sans-serif", this.tt.sans];
-        options[2] = ["cursive", this.tt.cursive];
-        options[3] = ["fantasy", this.tt.fantasy];
-        options[4] = ["monospace", this.tt.monospace];
+        options[0] = ["serif", this.translate( 'serif', 'serif' )];
+        options[1] = ["sans-serif", this.translate( 'sans', 'sans-serif' )];
+        options[2] = ["cursive", this.translate( 'cursive', 'cursive' )];
+        options[3] = ["fantasy", this.translate( 'fantasy', 'fantasy' )];
+        options[4] = ["monospace", this.translate( 'monospace', 'monospace' )];
         break;
 
       case "prefCaptionsColor":
       case "prefCaptionsBGColor":
         // HTML color values must be in English
-        options[0] = ["white", this.tt.white];
-        options[1] = ["yellow", this.tt.yellow];
-        options[2] = ["green", this.tt.green];
-        options[3] = ["cyan", this.tt.cyan];
-        options[4] = ["blue", this.tt.blue];
-        options[5] = ["magenta", this.tt.magenta];
-        options[6] = ["red", this.tt.red];
-        options[7] = ["black", this.tt.black];
+        options[0] = ["white", this.translate( 'white', 'white' )];
+        options[1] = ["yellow", this.translate( 'yellow', 'yellow' )];
+        options[2] = ["green", this.translate( 'green', 'green' )];
+        options[3] = ["cyan", this.translate( 'cyan', 'cyan' )];
+        options[4] = ["blue", this.translate( 'blue', 'blue' )];
+        options[5] = ["magenta", this.translate( 'magenta', 'magenta' )];
+        options[6] = ["red", this.translate( 'red', 'red' )];
+        options[7] = ["black", this.translate( 'black', 'black' )];
         break;
 
       case "prefCaptionsSize":
@@ -315,8 +315,8 @@
         break;
 
       case "prefCaptionsStyle":
-        options[0] = this.tt.captionsStylePopOn;
-        options[1] = this.tt.captionsStyleRollUp;
+        options[0] = this.translate( 'captionsStylePopOn', 'Pop-on' );
+        options[1] = this.translate( 'captionsStyleRollUp', 'Roll-up' );
         break;
 
       case "prefCaptionsPosition":

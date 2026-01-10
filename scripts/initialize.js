@@ -119,6 +119,8 @@
 		// returns array of values for creating <svg> tag for specified button
 		// 0 = <svg> viewBox attribute
 		// 1 = <path> d (description) attribute
+		// 2 = icon class for font icons
+		// 3 = img URL for images.
 		var svg = Array();
 
 		switch (button) {
@@ -305,13 +307,6 @@
 				svg[2] = 'icon-fullscreen-collapse';
 				svg[3] = this.fullscreenCollapseButtonImg;
 				break;
-
-			case 'help':
-				svg[0] = '0 0 11 20';
-				svg[1] = 'M0.577 6.317q-0.028-0.167 0.061-0.313 1.786-2.969 5.179-2.969 0.893 0 1.797 0.346t1.629 0.926 1.183 1.423 0.458 1.769q0 0.603-0.173 1.127t-0.391 0.854-0.614 0.664-0.642 0.485-0.681 0.396q-0.458 0.257-0.765 0.725t-0.307 0.748q0 0.19-0.134 0.363t-0.313 0.173h-2.679q-0.167 0-0.285-0.206t-0.117-0.419v-0.502q0-0.926 0.725-1.747t1.596-1.211q0.658-0.301 0.938-0.625t0.279-0.848q0-0.469-0.519-0.826t-1.2-0.357q-0.725 0-1.205 0.324-0.391 0.279-1.194 1.283-0.145 0.179-0.346 0.179-0.134 0-0.279-0.089l-1.83-1.395q-0.145-0.112-0.173-0.279zM3.786 16.875v-2.679q0-0.179 0.134-0.313t0.313-0.134h2.679q0.179 0 0.313 0.134t0.134 0.313v2.679q0 0.179-0.134 0.313t-0.313 0.134h-2.679q-0.179 0-0.313-0.134t-0.134-0.313z';
-				svg[2] = 'icon-help';
-				svg[3] = this.helpButtonImg;
-				break;
 		}
 
 		return svg;
@@ -324,14 +319,14 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
 		this.startedPlaying = false;
-		// TODO: Move this setting to cookie.
+		// TODO: Move this setting to preferences.
 		this.autoScrollTranscript = true;
-		//this.autoScrollTranscript = this.getCookie(autoScrollTranscript); // (doesn't work)
+		//this.autoScrollTranscript = this.getPref(autoScrollTranscript); // (doesn't work)
 
 		// Bootstrap from this.media possibly being an ID or other selector.
 		this.$media = $(this.media).first();
@@ -345,7 +340,7 @@
 		} else {
 			// Able Player was initialized with some element other than <video> or <audio>
 			this.provideFallback();
-			deferred.fail();
+			deferred.reject();
 			return promise;
 		}
 
@@ -365,12 +360,7 @@
 	AblePlayer.prototype.setPlayerSize = function(width, height) {
 
 		// Called again after width and height are known
-
-		if (this.mediaType === 'audio') {
-			if (this.playerWidth) {
-				this.$ableWrapper.css('width',this.playerWidth + 'px');
-			}
-		} else if (width > 0 && height > 0) {
+		if (this.mediaType !== 'audio' && width > 0 && height > 0) {
 			this.playerWidth = width;
 			this.playerHeight = height;
 			this.aspectRatio = height / width;
@@ -393,7 +383,7 @@
 	// Perform one-time setup for this instance of player; called after player is first initialized.
 	AblePlayer.prototype.setupInstance = function () {
 
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 
 		if (this.$media.attr('id')) {
@@ -495,7 +485,7 @@
 
 		var deferred, promise, thisObj, prefsGroups, i;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -542,7 +532,6 @@
 
 									thisObj.duration = mediaTimes['duration'];
 									thisObj.elapsed = mediaTimes['elapsed'];
-									thisObj.setFullscreen(false);
 
 									if (typeof thisObj.volume === 'undefined') {
 										thisObj.volume = thisObj.defaultVolume;
@@ -619,9 +608,9 @@
 			playerPromise = this.initVimeoPlayer();
 		}
 		// After player specific initialization is done, run remaining general initialization.
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
-		playerPromise.done(
+		playerPromise.then(
 			function () { // done/resolved
 				if (thisObj.useFixedSeekInterval) {
 					// if fixed seekInterval was not already assigned (using value of data-seek-interval)
@@ -634,7 +623,7 @@
 				}
 				deferred.resolve();
 			}
-		).fail(function () { // failed
+		).finally(function () { // failed
 			deferred.reject();
 			}
 		);
@@ -644,9 +633,8 @@
 
 	AblePlayer.prototype.initStenoFrame = function() {
 
-		var thisObj, deferred, promise;
-		thisObj = this;
-		deferred = new $.Deferred();
+		var deferred, promise;
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		if (this.stenoMode && this.$stenoFrame) {
@@ -772,7 +760,7 @@
 
 	AblePlayer.prototype.initHtml5Player = function () {
 		// Nothing special to do!
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 		deferred.resolve();
 		return promise;
