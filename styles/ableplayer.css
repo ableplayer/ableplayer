@@ -1407,12 +1407,12 @@ div#able-vts-icon-credit {
 div#able-vts-alert {
 	display: none;
 	position: fixed;
-	top: 5px;
-	left: 5px;
+	top: 16px;
+	left: 16px;
 	border: 2px solid #666;
-	background-color: #ffc;
+	background-color: var(--able-alert-background);
+	color: var(--able-black);
 	padding: 1rem;
-	font-weight: bold;
 	z-index: 9400;
 }
 
