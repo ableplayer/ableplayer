@@ -1,5 +1,64 @@
 # AblePlayer Changelog
 
+## 4.8.0 January 31st, 2026
+
+### Features
+
+- New preference to allow users to disable keyboard shortcuts.
+- Make Cookies.js an optional dependency. If not present, uses localStorage for user preferences.
+- Add support for a fixed location for sign videos defined by `data-sign-div`.
+- Add support for an audio poster image defined by `data-poster` for the image URL and `data-poster-alt` for the alternative text.
+- Added new demo to view player in translation at https://ableplayer.github.io/ableplayer/demos/translations.html
+- Hide transcript and description preferences if not applicable to the current player.
+
+### Styling
+
+- Set border-box on chapter buttons to prevent overflow.
+- Removed border-radius on big player button.
+- Apply both background and background-color styles on big player button, to limit bleed from outside styles.
+- Set both color and background on VTS alerts.
+- Remove right margin on checkbox labels in draggable windows.
+- Use CSS transitions in place of JS animations.
+- New styles to support Audio Poster image positioning.
+
+### Bug fixes
+
+- Added a timeout to resolve promise looking for YouTube captions if they don't load, so player doesn't fail on YouTube videos with no captions.
+- Remove setFullscreen(false) when rebuilding player, which prevented the fullscreen button from reacting to changes.
+- Improvements to draggable window positioning calculations.
+- Check button status before redrawing controls to prevent unnecessary repaints
+- Fix broken internal timestamp tags due to sanitization.
+
+### Internationalization
+
+- Add new translation method `this.translate( 'key', 'Default %1 String', [ args ] )`.
+-- supports arguments so strings with arguments can be handled as a single string.
+-- ensures that if translations don't load, the player will still render.
+-- ensure that default strings are available in the code at the point of editing, for easier comprehension.
+- Added missing strings to translatable strings; mostly in the Transcript Sorter.
+
+### Responsiveness
+
+- Update positioning of transcript or sign windows when a user goes full screen to ensure that they are still onscreen and visible.
+- Restore positioning of transcript or sign windows after existing full screen.
+- Remove fullscreen polyfill intended to support browser without support for the FullScreen API
+
+### Accessibility
+
+- Added a visible drag handle in draggle windows (Sign language and Transcript.)
+- Only the visible drag handle is a draggable surface, to prevent unexpected changes.
+- Removed duplicate screen reader text from player controls.
+
+### Code clean-up and modernization
+
+- Removed references and code for helpDialog.
+- Remove Fullscreen polyfill
+- Miscellaneous removals of unused variables and arguments.
+- Reduced the jQuery dependency to jQuery Slim
+-- Uses native promises
+-- Uses native AJAX queries
+-- Eliminates JS animations
+
 ## 4.7.0 September 28th, 2025
 
 ### Styling
