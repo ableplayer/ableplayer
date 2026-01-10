@@ -6,8 +6,6 @@
 (function ($) {
 	AblePlayer.prototype.injectVTS = function() {
 
-		// To add a transcript sorter to a web page: <div id="able-vts"></div>
-
 		var thisObj, $heading, $instructions, $p1, $p2, $ul, $li1, $li2, $li3,
 		$fieldset, $legend, i, $radioDiv, radioId, $label, $radio, $saveButton, $savedTable;
 
@@ -86,13 +84,13 @@
 				}
 				$fieldset.append( $fieldWrapper );
 				$('#able-vts').append($fieldset);
-
+				let vtsSave = this.translate( 'vtsSave', 'Generate new .vtt content' );
 				// Inject a button to generate new files.
 				$saveButton = $('<button>',{
 					'type': 'button',
 					'id': 'able-vts-save',
 					'value': 'save'
-				}).text( this.translate( 'vtsSave', 'Generate new .vtt files' ) );
+				}).text( vtsSave );
 				$('#able-vts').append($saveButton);
 
 				// Inject a table with one row for each cue in the default language
@@ -150,7 +148,7 @@
 						thisObj.parseVtsOutput($savedTable);
 					} else {
 						// cancel saving, and restore the table using edited content
-						$(this).attr('value','save').text(this.translate( 'vtsSave', 'Generate new .vtt files' ) );
+						$(this).attr('value','save').text( vtsSave );
 						$('#able-vts-output').remove();
 						$('#able-vts-instructions').show();
 						$('#able-vts > fieldset').show();
@@ -167,8 +165,6 @@
 
 		// TODO: Add support for trackDesc
 		// (to destinguish between tracks for the decribed vs non-described versions)
-
-		// Called from tracks.js
 		var srcFile, vtsCues;
 
 		srcFile = this.getFilenameFromPath(src);

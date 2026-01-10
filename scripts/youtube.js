@@ -183,17 +183,13 @@
 		}
 	};
 
+	/**
+	 * Get data from the YouTube iFrame API. Pushes data into `this.tracks` and `this.captions`.
+	 * Initiates play to trigger loading the captions module, then stops and collects data.
+	 *
+	 * @returns {Promise} promise
+	 */
 	AblePlayer.prototype.getYouTubeCaptionTracks = function () {
-
-		// get data via YouTube IFrame Player API, and push data to this.tracks & this.captions
-		// NOTE: Caption tracks are not available through the IFrame Player API
-		// until AFTER the video has started playing.
-		// Therefore, this function plays the video briefly to load the captions module
-		// then stops the video and collects the data needed to build the cc menu
-		// This is stupid, but seemingly unavoidable.
-		// Caption tracks could be obtained through the YouTube Data API
-		// but this required authors to have a Google API key,
-		// which would complicate Able Player installation
 
 		var deferred = new this.defer();
 		var promise = deferred.promise();
@@ -320,10 +316,10 @@
 	AblePlayer.prototype.getYouTubeId = function (url) {
 
 		// return a YouTube ID, extracted from a full YouTube URL
-		// Supported URL patterns (with http or https):
-		// https://youtu.be/xxx
-		// https://www.youtube.com/watch?v=xxx
-		// https://www.youtube.com/embed/xxx
+		// Supported URL patterns:
+		// http|s://youtu.be/xxx
+		// http|s://www.youtube.com/watch?v=xxx
+		// http|s://www.youtube.com/embed/xxx
 
 		// in all supported patterns, the id is the last 11 characters
 		var idStartPos, id;
