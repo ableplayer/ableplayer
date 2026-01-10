@@ -54,17 +54,15 @@
           var trackDesc = track.desc;
 
           return function (data) {
-            // these are the two vars returned from loadTextObject
             var cues = thisObj.parseWebVTT(data).cues;
             if (thisObj.hasVts) {
-              // setupVtsTracks() is in vts.js
               thisObj.setupVtsTracks(
                 kind,
                 trackLang,
                 trackDesc,
                 trackLabel,
                 trackSrc,
-                trackText
+                data.text
               );
             }
             if (kind === 'captions' || kind === 'subtitles') {
