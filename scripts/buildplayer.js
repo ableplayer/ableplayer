@@ -3,18 +3,13 @@
 	AblePlayer.prototype.injectPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
-		// If iOS:
-		//  If video:
-		//   iOS does not support any of the player's functionality
-		//   - everything plays in its own player
-		//   Therefore, AblePlayer is not loaded & all functionality is disabled
-		//   (this all determined. If this is iOS && video, this function is never called)
+		// If iOS & video:
+		// iOS does not support any of the player's functionality - everything plays in its own player
+		// Therefore, AblePlayer is not loaded & all functionality is disabled
+		// (this all determined. If this is iOS && video, this function is never called)
 
-		var thisObj, captionsContainer, i;
-		thisObj = this;
-
-		// create three wrappers and wrap them around the media element.
-		// From inner to outer:
+		var captionsContainer;
+		// Wrappers, from inner to outer:
 		// $mediaContainer - contains the original media element
 		// $ableDiv - contains the media player and all its objects (e.g., captions, controls, descriptions)
 		// $ableWrapper - contains additional widgets (e.g., transcript window, sign window)
@@ -22,10 +17,6 @@
 		this.$ableDiv = this.$mediaContainer.wrap('<div class="able"></div>').parent();
 		this.$ableWrapper = this.$ableDiv.wrap('<div class="able-wrapper"></div>').parent();
 		this.$ableWrapper.addClass('able-skin-' + this.skin);
-
-		this.$ableWrapper.css({
-			'width': this.playerWidth + 'px'
-		});
 
 		if (this.mediaType === 'video') {
 			// youtube adds its own big play button
@@ -51,11 +42,23 @@
 		this.$captionsContainer = this.$mediaContainer.wrap(captionsContainer).parent();
 		this.injectAlert(this.$ableDiv);
 		this.injectPlaylist();
-
+		this.injectAudioPoster();
 		// Do this last, as it should be prepended to the top of this.$ableDiv
 		// after everything else has prepended
 		this.injectOffscreenHeading();
 	};
+
+	AblePlayer.prototype.injectAudioPoster = function() {
+		if ( this.mediaType === 'audio' && this.hasPoster ) {
+			audioPoster = DOMPurify.sanitize(this.audioPoster);
+			audioPosterAlt = DOMPurify.sanitize(this.audioPosterAlt);
+			let audioPosterImg = document.createElement( 'img' );
+			audioPosterImg.setAttribute( 'src', audioPoster );
+			audioPosterImg.setAttribute( 'alt', audioPosterAlt );
+			this.$audioWrapper = this.$playerDiv.wrap( '<div class="able-audio-wrapper">' ).parent();
+			this.$audioWrapper.prepend( audioPosterImg );
+		}
+	}
 
 	AblePlayer.prototype.injectOffscreenHeading = function () {
 
@@ -74,20 +77,18 @@
 			this.$headingDiv = $('<' + headingType + '>');
 			this.$ableDiv.prepend(this.$headingDiv);
 			this.$headingDiv.addClass('able-offscreen');
-			this.$headingDiv.text(this.tt.playerHeading);
+			this.$headingDiv.text( this.translate( 'playerHeading', 'Media player' ) );
 		}
 	};
 
 	AblePlayer.prototype.injectBigPlayButton = function () {
 
-		var thisObj;
-
-		thisObj = this;
+		var thisObj = this;
 
 		this.$bigPlayButton = $('<button>', {
 			'class': 'able-big-play-button',
 			'aria-hidden': false,
-			'aria-label': this.tt.play,
+			'aria-label': this.translate( 'play', 'Play' ),
 			'type': 'button',
 			'tabindex': 0
 		});
@@ -106,9 +107,9 @@
 		this.$playerDiv = $('<div>', {
 			'class' : 'able-player',
 			'role' : 'region',
-			'aria-label' : this.mediaType + ' player'
+			'aria-label' : ( 'audio' === this.mediaType ) ? this.translate( 'audioPlayer', 'audio player' ) : this.translate( 'videoPlayer', 'video player' )
 		});
-		this.$playerDiv.addClass('able-'+this.mediaType);
+		this.$playerDiv.addClass('able-' + this.mediaType);
 		if (this.hasPlaylist && this.showNowPlaying) {
 			this.$nowPlayingDiv = $('<div>',{
 				'class' : 'able-now-playing',
@@ -140,7 +141,7 @@
 			'class' : 'able-speed',
 			'aria-live' : 'assertive',
 			'aria-atomic' : 'true'
-		}).text(this.tt.speed + ': 1x');
+		}).text(this.translate( 'speed', 'Speed' ) + ': 1x');
 
 		this.$status = $('<span>',{
 			'class' : 'able-status',
@@ -154,6 +155,7 @@
 		} else {
 			this.$playerDiv.append(this.$controllerDiv, this.$statusBarDiv);
 		}
+
 		if (this.mediaType === 'video') {
 			// the player controls go after the media & captions
 			this.$ableDiv.append(this.$playerDiv);
@@ -195,44 +197,101 @@
 		}
 	};
 
+	/**
+	 * Reposition draggable windows when switched into fullscreen.
+	 *
+	 * @param {string} which 'transcript' or 'sign'.
+	 */
+	AblePlayer.prototype.rePositionDraggableWindow = function (which) {
+
+		let preferences, $window;
+		preferences = this.getPref();
+		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
+		console.log( $window );
+		if ( which === 'transcript' && $window ) {
+			if (typeof preferences.transcript !== 'undefined') {
+				this.prevTranscriptPosition = preferences.transcript;
+			}
+			$window.css({
+				'top': 0,
+				'left': 0
+			});
+		} else if ( 'sign' === which && $window ) {
+			if (typeof preferences.sign !== 'undefined') {
+				this.prevSignPosition = preferences.sign;
+			}
+			$window.css({
+				'top': 0,
+				'right': 0,
+				'left': 'auto'
+			});
+		}
+	}
+
 	AblePlayer.prototype.positionDraggableWindow = function (which, width) {
 
 		// which is either 'transcript' or 'sign'
-		var cookie, cookiePos, $window, windowPos;
+		var preferences, preferencePos, $window, windowPos, viewportWidth, windowWidth;
 
-		cookie = this.getCookie();
+		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
+		if ( ! $window ) {
+			return;
+		}
 		if (which === 'transcript') {
-			if (typeof cookie.transcript !== 'undefined') {
-				cookiePos = cookie.transcript;
+			if (typeof preferences.transcript !== 'undefined') {
+				preferencePos = preferences.transcript;
+			}
+			if ( this.prevTranscriptPosition ) {
+				preferencePos = this.prevTranscriptPosition;
+				this.prevTranscriptPosition = false;
 			}
 		} else if (which === 'sign') {
-			if (typeof cookie.sign !== 'undefined') {
-				cookiePos = cookie.sign;
+			if (typeof preferences.sign !== 'undefined') {
+				preferencePos = preferences.sign;
+			}
+			if ( this.prevSignPosition ) {
+				preferencePos = this.prevSignPosition;
+				this.prevSignPosition = false;
 			}
 		}
-		if (typeof cookiePos !== 'undefined' && !($.isEmptyObject(cookiePos))) {
-			// position window using stored values from cookie
+		if (typeof preferencePos !== 'undefined' && !($.isEmptyObject(preferencePos))) {
+			// position window using stored values from preferences
 			$window.css({
-				'position': cookiePos['position'],
-				'width': cookiePos['width'],
-				'z-index': cookiePos['zindex']
+				'position': preferencePos['position'],
+				'width': preferencePos['width'],
+				'z-index': preferencePos['zindex']
 			});
-			if (cookiePos['position'] === 'absolute') {
+			if (preferencePos['position'] === 'absolute') {
 				$window.css({
-					'top': cookiePos['top'],
-					'left': cookiePos['left']
+					'top': preferencePos['top'],
+					'left': preferencePos['left']
 				});
 				// Check whether the window is above the top of the viewport.
 				topPosition = $window.offset().top;
+				leftPosition = $window.offset().left;
+				viewportWidth = window.innerWidth;
+				windowWidth = $window.width();
 				if ( topPosition < 0 ) {
 					$window.css({
-						'top': cookiePos['top'] - topPosition,
-						'left': cookiePos['left']
+						'top': preferencePos['top'] - topPosition
+					});
+				}
+				// If draggable window is off screen to the left.
+				if ( leftPosition < 0 && ! this.restoringAfterFullscreen ) {
+					console.log( leftPosition );
+					$window.css({
+						'left': preferencePos['left'] - leftPosition
+					});
+				}
+				// If draggable window is off screen to the right.
+				if ( viewportWidth - leftPosition < 30 ) {
+					$window.css({
+						'left': viewportWidth - windowWidth
 					});
 				}
 			}
-			// since cookie is not page-specific, z-index needs may vary across different pages
+			// since preferences are not page-specific, z-index needs may vary across different pages
 			this.updateZIndex(which);
 		} else {
 			// position window using default values
@@ -320,7 +379,7 @@
 		$alertText.appendTo(this.$alertBox);
 
 		var $alertDismiss = $('<button type="button"></button>' );
-		$alertDismiss.attr( 'aria-label', this.tt.dismissButton );
+		$alertDismiss.attr( 'aria-label', this.translate( 'dismissButton', 'Dismiss' ) );
 		$alertDismiss.text( '×' );
 		$alertDismiss.appendTo(this.$alertBox);
 
@@ -355,7 +414,7 @@
 		// 'tracks', if provided, is a list of tracks to be used as menu items
 
 		var thisObj, $menu, includeMenuItem, i, $menuItem, prefCat, whichPref, hasDefault, track,
-		windowOptions, $thisItem, $prevItem, $nextItem;
+		windowOptions, $thisItem, $prevItem, $nextItem, hasDescription, hasTranscript;
 
 		thisObj = this;
 
@@ -373,19 +432,26 @@
 		if (which === 'prefs') {
 			if (this.prefCats.length > 1) {
 				for (i = 0; i < this.prefCats.length; i++) {
+					prefCat = this.prefCats[i];
+					hasDescription = ( thisObj.hasDescTracks || thisObj.hasOpenDesc || thisObj.hasClosedDesc ) ? true : false;
+					hasTranscript  = ( thisObj.transcriptType === null ) ? false : true;
+
+					// If this player does not have descriptions or transcripts, do not output that option preferences.
+					if ( prefCat === 'descriptions' && ! hasDescription || prefCat === 'transcript' && ! hasTranscript ) {
+						continue;
+					}
 					$menuItem = $('<li></li>',{
 						'role': 'menuitem',
 						'tabindex': '-1'
 					});
-					prefCat = this.prefCats[i];
 					if (prefCat === 'captions') {
-						$menuItem.text(this.tt.prefMenuCaptions);
+						$menuItem.text( this.translate( 'prefMenuCaptions', 'Captions' ) );
 					} else if (prefCat === 'descriptions') {
-						$menuItem.text(this.tt.prefMenuDescriptions);
+						$menuItem.text( this.translate( 'prefMenuDescriptions', 'Descriptions' ) );
 					} else if (prefCat === 'keyboard') {
-						$menuItem.text(this.tt.prefMenuKeyboard);
+						$menuItem.text( this.translate( 'prefMenuKeyboard', 'Keyboard' ) );
 					} else if (prefCat === 'transcript') {
-						$menuItem.text(this.tt.prefMenuTranscript);
+						$menuItem.text( this.translate( 'prefMenuTranscript', 'Transcript' ) );
 					}
 					$menuItem.on('click',function() {
 						whichPref = $(this).text();
@@ -448,7 +514,7 @@
 				$menuItem = $('<li></li>',{
 					'role': 'menuitemradio',
 					'tabindex': '-1',
-				}).text(this.tt.captionsOff);
+				}).text( this.translate( 'captionsOff', 'Captions off' ) );
 				if (this.prefCaptions === 0) {
 					$menuItem.attr('aria-checked','true');
 					hasDefault = true;
@@ -462,15 +528,15 @@
 			windowOptions = [];
 			windowOptions.push({
 				'name': 'move',
-				'label': this.tt.windowMove
+				'label': this.translate( 'windowMove', 'Move' )
 			});
 			windowOptions.push({
 				'name': 'resize',
-				'label': this.tt.windowResize
+				'label': this.translate( 'windowResize', 'Resize' )
 			});
 			windowOptions.push({
 				'name': 'close',
-				'label': this.tt.windowClose
+				'label': this.translate( 'windowClose', 'Close' )
 			});
 			for (i = 0; i < windowOptions.length; i++) {
 				$menuItem = $('<li></li>',{
@@ -479,7 +545,7 @@
 					'data-choice': windowOptions[i].name
 				});
 				$menuItem.text(windowOptions[i].label);
-				$menuItem.on('click mousedown',function(e) {
+				$menuItem.on('click',function(e) {
 					e.stopPropagation();
 					if (typeof e.button !== 'undefined' && e.button !== 0) {
 						// this was a mouse click (if click is triggered by keyboard, e.button is undefined)
@@ -872,7 +938,7 @@
 			controlLayout[1].push('preferences');
 		}
 
-		if (this.mediaType === 'video' && this.allowFullscreen) {
+		if (this.mediaType === 'video' && this.allowFullscreen && this.nativeFullscreenSupported() ) {
 			if (this.skin === 'legacy') {
 				controlLayout[3].push('fullscreen');
 			} else {
@@ -904,7 +970,7 @@
 
 		var thisObj, baseSliderWidth, controlLayout, numSections,
 		i, j, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, control,
-		$buttonLabel, buttonTitle, $newButton, buttonText, position, buttonHeight,
+		buttonTitle, $newButton, buttonText, position, buttonHeight,
 		buttonWidth, buttonSide, controllerWidth, tooltipId, tooltipY, tooltipX,
 		tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, captionLabel, popupMenuId;
 
@@ -927,7 +993,7 @@
 		if (this.skin == '2020') {
 			// add a full-width seek bar
 			$sliderDiv = $('<div class="able-seekbar"></div>');
-			sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+			sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider($sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 		}
@@ -953,7 +1019,7 @@
 				control = controls[j];
 				if (control === 'seek') {
 					$sliderDiv = $('<div class="able-seekbar"></div>');
-					sliderLabel = this.mediaType + ' ' + this.tt.seekbarLabel;
+					sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
@@ -1130,9 +1196,9 @@
 						if (!this.prefCaptions || this.prefCaptions !== 1) {
 							// captions are available, but user has them turned off
 							if (this.captions.length > 1) {
-								captionLabel = this.tt.captions;
+								captionLabel = this.translate( 'captions', 'Captions' );
 							} else {
-								captionLabel = this.tt.showCaptions;
+								captionLabel = this.translate( 'showCaptions', 'Show captions' );
 							}
 							$newButton.addClass('buttonOff').attr('title',captionLabel);
 							$newButton.attr('aria-pressed', 'false');
@@ -1142,7 +1208,7 @@
 							// user prefer non-audio described version
 							// Therefore, load media without description
 							// Description can be toggled on later with this button
-							$newButton.addClass('buttonOff').attr('title',this.tt.turnOnDescriptions);
+							$newButton.addClass('buttonOff').attr( 'title', this.translate( 'turnOnDescriptions', 'Turn on descriptions' ) );
 						}
 					}
 
@@ -1184,7 +1250,7 @@
 						this.$transcriptButton = $newButton;
 						// gray out transcript button if transcript is not active
 						if (!(this.$transcriptDiv.is(':visible'))) {
-							this.$transcriptButton.addClass('buttonOff').attr('title',this.tt.showTranscript);
+							this.$transcriptButton.addClass('buttonOff').attr( 'title', this.translate( 'showTranscript', 'Show transcript' ) );
 						}
 					} else if (control === 'fullscreen') {
 						this.$fullscreenButton = $newButton;
@@ -1231,7 +1297,7 @@
 		// NOTE: Swapping source for audio description is handled elsewhere;
 		// see description.js > swapDescription()
 
-		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, $newSource, nowPlayingSpan;
+		var $newItem, prevPlayer, newPlayer, itemTitle, itemLang, nowPlayingSpan;
 
 		var thisObj = this;
 
@@ -1501,47 +1567,45 @@
 	AblePlayer.prototype.getButtonTitle = function(control) {
 
 		if (control === 'playpause') {
-			return this.tt.play;
+			return this.translate( 'play', 'Play' );
 		} else if (control === 'play') {
-			return this.tt.play;
+			return this.translate( 'play', 'Play' );
 		} else if (control === 'pause') {
-			return this.tt.pause;
+			return this.translate( 'pause', 'Pause' );
 		} else if (control === 'restart') {
-			return this.tt.restart;
+			return this.translate( 'restart', 'Restart' );
 		} else if (control === 'previous') {
-			return this.tt.prevTrack;
+			return this.translate( 'prevTrack', 'Previous track' );
 		} else if (control === 'next') {
-			return this.tt.nextTrack;
+			return this.translate( 'nextTrack', 'Next track' );
 		} else if (control === 'rewind') {
-			return this.tt.rewind;
+			return this.translate( 'rewind', 'Rewind' );
 		} else if (control === 'forward') {
-			return this.tt.forward;
+			return this.translate( 'forward', 'Forward' );
 		} else if (control === 'captions') {
 			if (this.captions.length > 1) {
-				return this.tt.captions;
+				return this.translate( 'captions', 'Captions' );
 			} else {
-				return (this.captionsOn) ? this.tt.hideCaptions : this.tt.showCaptions;
+				return (this.captionsOn) ? this.translate( 'hideCaptions', 'Hide captions' ) : this.translate( 'showCaptions', 'Show captions' );
 			}
 		} else if (control === 'descriptions') {
-			return (this.descOn) ? this.tt.turnOffDescriptions : this.tt.turnOnDescriptions;
+			return (this.descOn) ? this.translate( 'turnOffDescriptions', 'Turn off descriptions' ) : this.translate( 'turnOnDescriptions', 'Turn on descriptions' );
 		} else if (control === 'transcript') {
-			return (this.$transcriptDiv.is(':visible')) ? this.tt.hideTranscript : this.tt.showTranscript;
+			return (this.$transcriptDiv.is(':visible')) ? this.translate( 'hideTranscript', 'Hide transcript' ) : this.translate( 'showTranscript', 'Show transcript' );
 		} else if (control === 'chapters') {
-			return this.tt.chapters;
+			return this.translate( 'chapters', 'Chapters' );
 		} else if (control === 'sign') {
-			return this.tt.sign;
+			return this.translate( 'sign', 'Sign language' );
 		} else if (control === 'volume') {
-			return this.tt.volume;
+			return this.translate( 'volume', 'Volume' );
 		} else if (control === 'faster') {
-			return this.tt.faster;
+			return this.translate( 'faster', 'Faster' );
 		} else if (control === 'slower') {
-			return this.tt.slower;
+			return this.translate( 'slower', 'Slower' );
 		} else if (control === 'preferences') {
-			return this.tt.preferences;
-		} else if (control === 'help') {
-			// return this.tt.help;
+			return this.translate( 'preferences', 'Preferences' );
 		} else if (control === 'fullscreen') {
-			return (!this.fullscreen) ? this.tt.enterFullScreen : this.tt.exitFullScreen;
+			return ( !this.fullscreen ) ? this.translate( 'enterFullScreen', 'Enter full screen' ) : this.translate( 'exitFullScreen', 'Exit full screen' );
 		} else {
 			// there should be no other controls, but just in case:
 			// return the name of the control with first letter in upper case

@@ -14,7 +14,7 @@
       // sanitize search string
       var cleanSearchString = DOMPurify.sanitize(this.searchString);
       if ($("#" + this.SearchDiv)) {
-        var searchStringHtml = "<p>" + this.tt.resultsSummary1 + " ";
+        var searchStringHtml = "<p>" + this.translate( 'resultsSummary1', 'You searched for:') + ' ';
         searchStringHtml +=
           '<span id="able-search-term-echo">' + cleanSearchString + "</span>";
         searchStringHtml += "</p>";
@@ -26,19 +26,16 @@
           var $resultsSummary = $("<p>", {
             class: "able-search-results-summary",
           });
-          var resultsSummaryText = this.tt.resultsSummary2;
-          resultsSummaryText +=
-            " <strong>" + resultsArray.length + "</strong> ";
-          resultsSummaryText += this.tt.resultsSummary3 + " ";
-          resultsSummaryText += this.tt.resultsSummary4;
-          $resultsSummary.html(resultsSummaryText);
+          var resultsSummaryText = this.translate( 'resultsSummary2', 'Found %1 matching items.', [ '<strong>' + resultsArray.length + '</strong>' ] );
+          resultsSummaryText += ' ' + this.translate( 'resultsSummary3', 'Click the time associated with any item to play the video from that point.' );
+          $resultsSummary.html( resultsSummaryText );
           var $resultsList = $("<ul>");
           for (var i = 0; i < resultsArray.length; i++) {
             var resultId = "aria-search-result-" + i;
             var $resultsItem = $("<li>", {});
             var itemStartTime = this.secondsToTime(resultsArray[i]["start"]);
             var itemLabel =
-              this.tt.searchButtonLabel + " " + itemStartTime["title"];
+              this.translate( 'searchButtonLabel', 'Play at %1', [ itemStartTime["title"] ] );
             var itemStartSpan = $("<button>", {
               class: "able-search-results-time",
               "data-start": resultsArray[i]["start"],
@@ -61,16 +58,16 @@
               class: "able-search-result-text",
               id: resultId,
             });
-            itemText.html("..." + resultsArray[i]["caption"] + "...");
+            itemText.html('...' + resultsArray[i]["caption"] + '...');
             $resultsItem.append(itemStartSpan, itemText);
             $resultsList.append($resultsItem);
           }
-          $("#" + this.searchDiv)
+          $('#' + this.searchDiv)
             .html(searchStringHtml)
             .append($resultsSummary, $resultsList);
         } else {
-          var noResults = $("<p>").text(this.tt.noResultsFound);
-          $("#" + this.searchDiv)
+          var noResults = $('<p>').text( this.translate( 'noResultsFound', 'No results found.' ) );
+          $('#' + this.searchDiv)
             .html(searchStringHtml)
             .append(noResults);
         }
@@ -164,36 +161,36 @@
     if (hours > 0) {
       value += hours + ":";
       if (hours == 1) {
-        title += "1 " + this.tt.hour + " ";
+        title += "1 " + this.translate( 'hour', 'hour' ) + " ";
       } else {
-        title += hours + " " + this.tt.hours + " ";
+        title += hours + " " + this.translate( 'hours', 'hours' ) + " ";
       }
     }
     if (minutes < 10) {
       value += "0" + minutes + ":";
       if (minutes > 0) {
         if (minutes == 1) {
-          title += "1 " + this.tt.minute + " ";
+          title += "1 " + this.translate( 'minute', 'minute' ) + " ";
         } else {
-          title += minutes + " " + this.tt.minutes + " ";
+          title += minutes + " " + this.translate( 'minutes', 'minutes' ) + " ";
         }
       }
     } else {
       value += minutes + ":";
-      title += minutes + " " + this.tt.minutes + " ";
+      title += minutes + " " + this.translate( 'minutes', 'minutes' ) + " ";
     }
     if (seconds < 10) {
       value += "0" + seconds;
       if (seconds > 0) {
         if (seconds == 1) {
-          title += "1 " + this.tt.second + " ";
+          title += "1 " + this.translate( 'second', 'second' ) + " ";
         } else {
-          title += seconds + " " + this.tt.seconds + " ";
+          title += seconds + " " + this.translate( 'seconds', 'seconds' ) + " ";
         }
       }
     } else {
       value += seconds;
-      title += seconds + " " + this.tt.seconds + " ";
+      title += seconds + " " + this.translate( 'seconds', 'seconds' ) + " ";
     }
     var time = [];
     time["value"] = value;

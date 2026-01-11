@@ -65,7 +65,11 @@
                   typeof showDuration !== "undefined" &&
                   !isNaN(showDuration)
                 ) {
-                  $(line).show().delay(showDuration).fadeOut();
+					$(line).show();
+					const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+					delay(showDuration).then(() => {
+						$(line).hide();
+					});
                 } else {
                   // no duration specified. Just show the element until end time specified in VTT file
                   $(line).show();

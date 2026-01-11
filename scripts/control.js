@@ -70,7 +70,7 @@
 		var deferred, promise, thisObj, mediaTimes;
 		mediaTimes = {};
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		if (typeof duration !== 'undefined' && typeof elapsed !== 'undefined') {
@@ -95,7 +95,7 @@
 		// function is called by getMediaTimes, and return value is sanitized there
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -143,7 +143,7 @@
 
 		var deferred, promise, thisObj;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -189,7 +189,7 @@
 		// - 'playing' - Currently playing.
 
 		var deferred, promise, thisObj;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 
@@ -274,7 +274,7 @@
 		}
 		this.syncSignVideo( { 'rate' : rate } );
 		this.playbackRate = rate;
-		this.$speed.text(this.tt.speed + ': ' + rate.toFixed(2).toString() + 'x');
+		this.$speed.text( this.translate( 'speed', 'Speed' ) + ': ' + rate.toFixed(2).toString() + 'x');
 	};
 
 	AblePlayer.prototype.getPlaybackRate = function () {
@@ -356,8 +356,6 @@
 
 	AblePlayer.prototype.playMedia = function () {
 
-		var thisObj = this;
-
 		this.syncSignVideo( { 'play' : true } );
 
 		if (this.player === 'html5') {
@@ -383,43 +381,19 @@
 	AblePlayer.prototype.fadeControls = function(direction) {
 
 		// Visibly fade controls without hiding them from screen reader users
-
 		// direction is either 'out' or 'in'
 
-		// TODO: This still needs work.
 		// After the player fades, it's replaced by an empty space
 		// Would be better if the video and captions expanded to fill the void
-		// Attempted to fade out to 0 opacity, then move the playerDiv offscreen
-		// and expand the mediaContainer to fill the vacated space
-		// However, my attempts to do this have been choppy and buggy
-		// Code is preserved below and commented out
+		// replace JS animation with CSS animation in 12/2025.
 
-		var thisObj, mediaHeight, playerHeight, newMediaHeight;
-		thisObj = this;
+		var thisObj = this;
 
 		if (direction == 'out') {
 			// get the original height of two key components:
-			mediaHeight = this.$mediaContainer.height();
-			playerHeight = this.$playerDiv.height();
-			newMediaHeight = mediaHeight + playerHeight;
-
-			// fade slowly to transparency
-			this.$playerDiv.fadeTo(2000,0,function() {
-				/*
-				// when finished, position playerDiv offscreen
-				// thisObj.$playerDiv.addClass('able-offscreen');
-				// Expand the height of mediaContainer to fill the void (needs work)
-				thisObj.$mediaContainer.animate({
-					height: newMediaHeight
-				},500);
-				*/
-			});
+			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
 		} else if (direction == 'in') {
-			// restore captionsContainer to its original height (needs work)
-			// this.$mediaContainer.removeAttr('style');
-			// fade relatively quickly back to its original position with full opacity
-			// this.$playerDiv.removeClass('able-offscreen').fadeTo(100,1);
-			this.$playerDiv.fadeTo(100,1);
+			this.$playerDiv.addClass( 'fade-in' ).removeClass( 'fade-out' );
 		}
 	};
 
@@ -592,8 +566,8 @@
 				this.toggleButtonState(
 					this.$descButton,
 					this.descOn,
-					this.tt.turnOffDescriptions,
-					this.tt.turnOnDescriptions,
+					this.translate( 'turnOffDescriptions', 'Turn off descriptions' ),
+					this.translate( 'turnOnDescriptions', 'Turn on descriptions' ),
 				);
 			}
 		}
@@ -609,8 +583,8 @@
 						'aria-controls': this.mediaId + '-captions-menu'
 					});
 				}
-				var ariaLabelOn = ( captionsCount > 1 ) ? this.tt.captions : this.tt.showCaptions;
-				var ariaLabelOff = ( captionsCount > 1 ) ? this.tt.captions : this.tt.hideCaptions;
+				var ariaLabelOn = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'showCaptions', 'Show captions' );
+				var ariaLabelOff = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'hideCaptions', 'Hide captions' );
 				var ariaPressed = ( captionsCount > 1 ) ? true : false;
 
 				this.toggleButtonState(
@@ -626,13 +600,11 @@
 		if (context === 'fullscreen' || context == 'init'){
 			if (this.$fullscreenButton) {
 				if (!this.fullscreen) {
-					this.$fullscreenButton.attr('aria-label', this.tt.enterFullScreen);
+					this.$fullscreenButton.attr( 'aria-label', this.translate( 'enterFullScreen', 'Enter full screen' ) );
 					this.getIcon( this.$fullscreenButton, 'fullscreen-expand' );
-					this.$fullscreenButton.find('span.able-clipped').text(this.tt.enterFullScreen);
 				} else {
-					this.$fullscreenButton.attr('aria-label',this.tt.exitFullscreen);
+					this.$fullscreenButton.attr('aria-label', this.translate( 'exitFullScreen', 'Exit full screen' ) );
 					this.getIcon( this.$fullscreenButton, 'fullscreen-collapse' );
-					this.$fullscreenButton.find('span.able-clipped').text(this.tt.exitFullscreen);
 				}
 			}
 		}
@@ -687,7 +659,7 @@
 
 			if (this.$chaptersButton) {
 				this.$chaptersButton.attr({
-					'aria-label': this.tt.chapters,
+					'aria-label': this.translate( 'chapters', 'Chapters' ),
 					'aria-haspopup': 'true',
 					'aria-controls': this.mediaId + '-chapters-menu'
 				});
@@ -698,22 +670,21 @@
 
 			// update status
 			textByState = {
-				'stopped': this.tt.statusStopped,
-				'paused': this.tt.statusPaused,
-				'playing': this.tt.statusPlaying,
-				'buffering': this.tt.statusBuffering,
-				'ended': this.tt.statusEnd
+				'stopped': this.translate( 'statusStopped', 'Stopped' ),
+				'paused': this.translate( 'statusPaused', 'Paused' ),
+				'playing': this.translate( 'statusPlaying', 'Playing' ),
+				'buffering': this.translate( 'statusBuffering', 'Buffering' ),
+				'ended': this.translate( 'statusEnd', 'End of track' )
 			};
 
 			if (this.stoppingYouTube) {
 				// stoppingYouTube is true temporarily while video is paused and seeking to 0
 				// See notes in handleRestart()
 				// this.stoppingYouTube will be reset when seek to 0 is finished (in event.js > onMediaUpdateTime())
-				if (this.$status.text() !== this.tt.statusStopped) {
-					this.$status.text(this.tt.statusStopped);
+				if (this.$status.text() !== this.translate( 'statusStopped', 'Stopped' ) ) {
+					this.$status.text( this.translate( 'statusStopped', 'Stopped' ) );
 				}
 				this.getIcon( this.$playpauseButton, 'play' );
-				this.$playpauseButton.find('span.able-clipped').text(this.tt.play);
 			} else if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
 				// Update the text only if it's changed since it has role="alert";
 				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
@@ -758,11 +729,9 @@
 						if (currentState === 'paused' || currentState === 'stopped' || currentState === 'ended') {
 							thisObj.$playpauseButton.attr('aria-label',thisObj.tt.play);
 							thisObj.getIcon( thisObj.$playpauseButton, 'play' );
-							thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.play);
 						} else {
 							thisObj.$playpauseButton.attr('aria-label',thisObj.tt.pause);
 							thisObj.getIcon( thisObj.$playpauseButton, 'pause' );
-							thisObj.$playpauseButton.find('span.able-clipped').text(thisObj.tt.pause);
 						}
 					}
 				});
@@ -949,7 +918,7 @@
 				this.captionsOn = false;
 				this.prefCaptions = 0;
 				ariaPressed = false;
-				this.updateCookie('prefCaptions');
+				this.updatePreferences('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
 				} else if (this.usingVimeoCaptions) {
@@ -962,7 +931,7 @@
 				this.captionsOn = true;
 				this.prefCaptions = 1;
 				ariaPressed = true;
-				this.updateCookie('prefCaptions');
+				this.updatePreferences('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
 				} else if (this.usingVimeoCaptions) {
@@ -1024,8 +993,8 @@
 				}
 			}
 		}
-		var ariaLabelOn = ( captions.length > 1 ) ? this.tt.captions : this.tt.showCaptions;
-		var ariaLabelOff = ( captions.length > 1 ) ? this.tt.captions : this.tt.hideCaptions;
+		var ariaLabelOn = ( captions.length > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'showCaptions', 'Show captions' );
+		var ariaLabelOff = ( captions.length > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'hideCaptions', 'Hide captions' );
 
 		this.toggleButtonState(
 			this.$ccButton,
@@ -1086,7 +1055,7 @@
 
 		this.descOn = !this.descOn;
 		this.prefDesc = + this.descOn; // convert boolean to integer
-		this.updateCookie('prefDesc');
+		this.updatePreferences('prefDesc');
 		if (typeof this.$descDiv !== 'undefined') {
 			if (!this.$descDiv.is(':hidden')) {
 				this.$descDiv.hide();
@@ -1153,17 +1122,12 @@
 		}
 	};
 
-	AblePlayer.prototype.handleHelpClick = function() {
-		this.setFullscreen(false);
-		this.helpDialog.show();
-	};
-
 	AblePlayer.prototype.handleTranscriptToggle = function () {
 		var thisObj = this;
 		var visible = this.$transcriptDiv.is(':visible');
 		if ( visible ) {
 			this.$transcriptArea.hide();
-			this.toggleButtonState( this.$transcriptButton, ! visible, this.tt.hideTranscript, this.tt.showTranscript );
+			this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 			this.prefTranscript = 0;
 			if ( this.transcriptType === 'popup' ) {
 				this.$transcriptButton.trigger('focus').addClass('able-focus');
@@ -1182,7 +1146,7 @@
 				// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
 				// need to re-hide the popup menu
 				this.$transcriptPopup.hide();
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.tt.hideTranscript, this.tt.showTranscript );
+				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 				this.prefTranscript = 1;
 				// move focus to first focusable element (window options button)
 				this.focusNotClick = true;
@@ -1192,11 +1156,11 @@
 					thisObj.focusNotClick = false;
 				}, 100);
 			} else {
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.tt.hideTranscript, this.tt.showTranscript );
+				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 				this.$transcriptArea.show();
 			}
 		}
-		this.updateCookie('prefTranscript');
+		this.updatePreferences('prefTranscript');
 	};
 
 	AblePlayer.prototype.handleSignToggle = function () {
@@ -1205,7 +1169,7 @@
 		var visible = this.$signWindow.is(':visible');
 		if ( visible ) {
 			this.$signWindow.hide();
-			this.toggleButtonState( this.$signButton, ! visible, this.tt.hideSign, this.tt.showSign );
+			this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
 			this.prefSign = 0;
 			this.$signButton.trigger('focus').addClass('able-focus');
 			// wait briefly before resetting stopgap var
@@ -1219,7 +1183,7 @@
 			// showing signWindow has a cascading effect of showing all content *within* signWindow
 			// need to re-hide the popup menu
 			this.$signPopup.hide();
-			this.toggleButtonState( this.$signButton, ! visible, this.tt.hideSign, this.tt.showSign );
+			this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
 			this.prefSign = 1;
 			this.focusNotClick = true;
 			this.$signWindow.find('button').first().trigger('focus');
@@ -1229,31 +1193,12 @@
 				thisObj.focusNotClick = false;
 			}, 100);
 		}
-		this.updateCookie('prefSign');
+		this.updatePreferences('prefSign');
 	};
-
-	AblePlayer.prototype.isFullscreen = function () {
-
-		// NOTE: This has been largely replaced as of 3.2.5 with a Boolean this.fullscreen,
-		// which is defined in setFullscreen()
-		// This function returns true if *any* element is fullscreen
-		// but doesn't tell us whether a particular element is in fullscreen
-		// (e.g., if there are multiple players on the page)
-		// The Boolean this.fullscreen is defined separately for each player instance
-
-		if (this.nativeFullscreenSupported()) {
-			return (document.fullscreenElement ||
-					document.webkitFullscreenElement ||
-					document.webkitCurrentFullscreenElement ) ? true : false;
-		} else {
-			return this.modalFullscreenActive ? true : false;
-		}
-	}
 
 	AblePlayer.prototype.setFullscreen = function (fullscreen) {
 
 		if (this.fullscreen == fullscreen) {
-			// replace isFullscreen() with a Boolean. see function for explanation
 			return;
 		}
 		var thisObj = this;
@@ -1266,6 +1211,14 @@
 				var scroll = {
 					x: window.pageXOffset || 0,
 					y: window.pageYOffset || 0
+				}
+				if (this.prefTranscript === 1) {
+					// transcript is on. Go ahead and reposition it
+					this.rePositionDraggableWindow("transcript");
+				}
+				if (this.prefSign === 1) {
+					// sign is on. Go ahead and reposition it
+					this.rePositionDraggableWindow("sign");
 				}
 				this.scrollPosition = scroll;
 				// Initialize fullscreen
@@ -1285,51 +1238,20 @@
 				} else if (document.webkitCancelFullscreen) {
 					document.webkitCancelFullscreen();
 				}
+				if (this.prefTranscript === 1) {
+					// transcript is on. Go ahead and reposition it
+					this.positionDraggableWindow("transcript");
+				}
+				if (this.prefSign === 1) {
+					// sign is on. Go ahead and reposition it
+					this.positionDraggableWindow("sign");
+				}
 				this.fullscreen = false;
 			}
 		} else {
-			// Non-native fullscreen support through modal dialog.
-			// Create dialog on first run through.
-			if (!this.fullscreenDialog) {
-				var $dialogDiv = $('<div>');
-				// create a hidden alert, communicated to screen readers via aria-describedby
-				var $fsDialogAlert = $('<p>',{
-					'class': 'able-screenreader-alert'
-				}).text(this.tt.fullScreen); // In English: "Full screen"; TODO: Add alert text that is more descriptive
-				$dialogDiv.append($fsDialogAlert);
-				// now render this as a dialog
-				this.fullscreenDialog = new AccessibleDialog($dialogDiv, this.$fullscreenButton, 'dialog', true, 'Fullscreen video player', $fsDialogAlert, this.tt.exitFullscreen, '100%', true, function () { thisObj.handleFullscreenToggle() });
-				$('body').append($dialogDiv);
-			}
-
-			// Track whether paused/playing before moving element; moving the element can stop playback.
-			var wasPaused = this.paused;
-
-			if (fullscreen) {
-				this.modalFullscreenActive = true;
-				this.fullscreenDialog.show();
-
-				// Move player element into fullscreen dialog, then show.
-				// Put a placeholder element where player was.
-				this.$modalFullscreenPlaceholder = $('<div class="placeholder">');
-				this.$modalFullscreenPlaceholder.insertAfter($el);
-				$el.appendTo(this.fullscreenDialog.modal);
-
-				var newHeight = $(window).height() - this.$playerDiv.height();
-				if (typeof this.$descDiv !== 'undefined' && (!this.$descDiv.is(':hidden')) ) {
-					newHeight -= this.$descDiv.height();
-				}
-			} else {
-				this.modalFullscreenActive = false;
-				$el.insertAfter(this.$modalFullscreenPlaceholder);
-				this.$modalFullscreenPlaceholder.remove();
-				this.fullscreenDialog.hide();
-			}
-
-			// Resume playback if moving stopped it.
-			if (!wasPaused && this.paused) {
-				this.playMedia();
-			}
+			// Removed non-native fullscreen mode in 4.8, which only supported iOS.
+			// Native fullscreen is on iOS 18+ devices behind a feature flag
+			// The polyfill hasn't worked for years.
 		}
 		// add event handlers for changes in fullscreen mode.
 		// Browsers natively trigger this event with the Escape key,
@@ -1405,18 +1327,24 @@
 
 		this.autoScrollTranscript = val; // val is boolean
 		this.prefAutoScrollTranscript = +val; // convert boolean to numeric 1 or 0 for cookie
-		this.updateCookie('prefAutoScrollTranscript');
+		this.updatePreferences('prefAutoScrollTranscript');
 		this.refreshControls('transcript');
 	};
 
 	AblePlayer.prototype.getIcon = function( $button, id, forceImg = false ) {
 		// Remove existing HTML before generating.
-		$button.find('svg, img, span:not(.able-clipped)').remove();
 		// iconData: [0 = svg viewbox, 1 = svg path, 2 = icon font class, 3 = image file]
-		var iconData = this.getIconData( id );
 		var iconType = this.iconType;
+		var iconData = this.getIconData( id );
 		iconType = ( null === iconData[3] ) ? 'svg' : iconType;
-		iconType =  ( forceImg === true ) ? 'image' : iconType;
+		iconType =  ( forceImg === true ) ? 'img' : iconType;
+
+		var existingIcon = $button.find( iconType + '#ableplayer-' + id );
+		// Avoid repainting icon if there's no change.
+		if ( existingIcon.length > 0 ) {
+			return;
+		}
+		$button.find('svg, img, span').remove();
 
 		if (iconType === 'font') {
 			var $buttonIcon = $('<span>', {
@@ -1438,6 +1366,7 @@
 			icon.setAttribute( 'focusable', 'false' );
 			icon.setAttribute( 'aria-hidden', 'true');
 			icon.setAttribute( 'viewBox', iconData[0] );
+			icon.setAttribute( 'id', 'ableplayer-' + id );
 			let path = getNode( 'path', { d: iconData[1] } );
 			icon.appendChild( path );
 
@@ -1457,9 +1386,6 @@
 
 	AblePlayer.prototype.setText = function( $button, text ) {
 		$button.attr( 'aria-label', text );
-		// add the visibly-hidden label for screen readers that don't support aria-label on the button
-		$buttonLabel = $('<span>',{ 'class': 'able-clipped' }).text( text );
-		$button.append($buttonLabel);
 	};
 
 	AblePlayer.prototype.toggleButtonState = function($button, isOn, onLabel, offLabel, ariaPressed = false, ariaExpanded = false) {
@@ -1471,7 +1397,6 @@
 		}
 		if (! isOn) {
 			$button.addClass('buttonOff').attr('aria-label', offLabel);
-			$button.find('span.able-clipped').text(offLabel);
 			if ( ariaPressed ) {
 				$button.attr('aria-pressed', 'false');
 			}
@@ -1480,7 +1405,6 @@
 			}
 		} else {
 			$button.removeClass('buttonOff').attr('aria-label', onLabel);
-			$button.find('span.able-clipped').text(onLabel);
 			if ( ariaPressed ) {
 				$button.attr('aria-pressed', 'true');
 			}
@@ -1492,11 +1416,7 @@
 
 	AblePlayer.prototype.showTooltip = function($tooltip) {
 
-		if (($tooltip).is(':animated')) {
-			$tooltip.stop(true,true).show();
-		} else {
-			$tooltip.stop().show();
-		}
+		$tooltip.show();
 	};
 
 	AblePlayer.prototype.showAlert = function( msg, location = 'main' ) {
@@ -1524,7 +1444,7 @@
 
 		if (location !== 'screenreader') {
 			setTimeout( function () {
-				$alertBox.fadeOut(300);
+				$alertBox.hide();
 			}, 30000 );
 		}
 	};
@@ -1631,12 +1551,9 @@
 					'height': newHeight
 				});
 			} else {
-				// No constraints. Let CSS handle the positioning.
+					// No constraints. Let CSS handle the positioning.
 				this.$media.removeAttr('width height');
-				this.$ableWrapper.css({
-					'width': newWidth + 'px',
-					'height': 'auto'
-				});
+				this.$ableWrapper.removeAttr( 'style' );
 			}
 		}
 		// Resize captions
@@ -1663,7 +1580,6 @@
 				'font-size': captionSize
 			});
 		}
-
 		this.refreshControls();
 	};
 

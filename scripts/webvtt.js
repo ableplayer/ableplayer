@@ -1,7 +1,9 @@
 (function ($) {
 	// See section 4.1 of dev.w3.org/html5/webvtt for format details.
-	AblePlayer.prototype.parseWebVTT = function(srcFile,text) {
+	AblePlayer.prototype.parseWebVTT = function(data) {
 
+		let srcFile = data.src;
+		let text    = data.text;
 		// Normalize line ends to \n.
 		text = text.replace(/(\r\n|\n|\r)/g,'\n');
 

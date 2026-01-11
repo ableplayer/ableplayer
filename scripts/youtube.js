@@ -4,7 +4,7 @@
 
 		var thisObj, deferred, promise, youTubeId;
 		thisObj = this;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.youTubePlayerReady = false;
@@ -22,8 +22,8 @@
 		} else {
 			// Has another player already started loading the script? If so, abort...
 			if (!AblePlayer.loadingYouTubeIframeAPI) {
-				$.getScript('https://www.youtube.com/iframe_api').fail(function () {
-					deferred.fail();
+				thisObj.getScript('https://www.youtube.com/iframe_api', function () {
+					console.log( 'YouTube API loaded' );
 				});
 			}
 
@@ -42,7 +42,7 @@
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
 		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		containerId = this.mediaId + '_youtube';
@@ -88,9 +88,6 @@
 					}
 					if (thisObj.playerWidth && thisObj.playerHeight) {
 						thisObj.youTubePlayer.setSize(thisObj.playerWidth,thisObj.playerHeight);
-						thisObj.$ableWrapper.css({
-							'width': thisObj.playerWidth + 'px'
-						});
 					}
 					if (thisObj.swappingSrc) {
 						// swap is now complete
@@ -111,7 +108,7 @@
 					deferred.resolve();
 				},
 				onError: function (x) {
-					deferred.fail();
+					deferred.reject();
 				},
 				onStateChange: function (x) {
 					thisObj.getPlayerState().then(function(playerState) {
@@ -186,31 +183,25 @@
 		}
 	};
 
-	AblePlayer.prototype.getYouTubeCaptionTracks = function (youTubeId) {
+	/**
+	 * Get data from the YouTube iFrame API. Pushes data into `this.tracks` and `this.captions`.
+	 * Initiates play to trigger loading the captions module, then stops and collects data.
+	 *
+	 * @returns {Promise} promise
+	 */
+	AblePlayer.prototype.getYouTubeCaptionTracks = function () {
 
-		// get data via YouTube IFrame Player API, and push data to this.tracks & this.captions
-		// NOTE: Caption tracks are not available through the IFrame Player API
-		// until AFTER the video has started playing.
-		// Therefore, this function plays the video briefly to load the captions module
-		// then stops the video and collects the data needed to build the cc menu
-		// This is stupid, but seemingly unavoidable.
-		// Caption tracks could be obtained through the YouTube Data API
-		// but this required authors to have a Google API key,
-		// which would complicate Able Player installation
-
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
-		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack;
+		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack, apiTriggered = false;
 
 		thisObj = this;
-
 		if (!this.youTubePlayer.getOption('captions','tracklist') ) {
-
 			// no tracks were found, probably because the captions module hasn't loaded
 			// play video briefly (required to load the captions module)
 			// and after the apiChange event is triggered, try again to retrieve tracks
-			this.youTubePlayer.addEventListener('onApiChange',function(x) {
-
+			this.youTubePlayer.addEventListener('onApiChange',function() {
+				apiTriggered = true;
 				// getDuration() also requires video to play briefly
 				// so, let's set that while we're here
 				thisObj.duration = thisObj.youTubePlayer.getDuration();
@@ -218,10 +209,9 @@
 				if (thisObj.loadingYouTubeCaptions) {
 					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once
 					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
-					if (!thisObj.okToPlay) {
-						// Don't stopVideo() - that cancels loading
-						// Just pause
-						// No need to seekTo(0) - so little time has passed it isn't noticeable to the user
+					if ( ! thisObj.okToPlay ) {
+						// Don't stopVideo() - that cancels loading, just pause.
+						// No need to seekTo(0) - the time passed isn't noticeable to the user
 						thisObj.youTubePlayer.pauseVideo();
 					}
 					if (ytTracks && ytTracks.length) {
@@ -282,6 +272,16 @@
 			// Trigger the above event listener by briefly playing the video
 			this.loadingYouTubeCaptions = true;
 			this.youTubePlayer.playVideo();
+			// If onApiChange has not been triggered, the captions module is not loading.
+			setTimeout(() => {
+				if ( ! apiTriggered ) {
+					setTimeout(() => {
+						// If a second passes without loading captions, assume there are none.
+						thisObj.youTubePlayer.pauseVideo();
+						deferred.resolve();
+					}, 500);
+				}
+			},500);
 		}
 		return promise;
 	};
@@ -316,10 +316,10 @@
 	AblePlayer.prototype.getYouTubeId = function (url) {
 
 		// return a YouTube ID, extracted from a full YouTube URL
-		// Supported URL patterns (with http or https):
-		// https://youtu.be/xxx
-		// https://www.youtube.com/watch?v=xxx
-		// https://www.youtube.com/embed/xxx
+		// Supported URL patterns:
+		// http|s://youtu.be/xxx
+		// http|s://www.youtube.com/watch?v=xxx
+		// http|s://www.youtube.com/embed/xxx
 
 		// in all supported patterns, the id is the last 11 characters
 		var idStartPos, id;

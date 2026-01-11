@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>View translations | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.dist.js"></script>
+
+<!-- CSS for this example -->
+<style>
+	#video-wrapper {
+		width: 500px;
+	}
+	.flex {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: end;
+		margin-bottom: 1.5rem;
+		gap: 4px;
+	}
+	.flex p {
+		margin: 0;
+		padding: 0;
+	}
+	.flex select, .flex button {
+		padding: .33rem;
+	}
+	.notification p {
+		background: #ffc;
+		padding: .5rem;
+	}
+</style>
+<script>
+	$(document).ready(function() {
+		let player = new AblePlayer('#video1');
+		let media  = document.querySelector( '#video1' );
+		let header = document.querySelector( 'header' );
+		let nav    = document.querySelector( 'nav' );
+		let content = document.querySelector( '.content' );
+		let button = document.querySelector( '#select_lang' );
+		let translations = player.getSupportedLangs();
+		let select = document.querySelector( '#lang_selector' );
+		let html = document.querySelector( 'html' );
+		let notification = document.querySelector( '.notification' );
+		for(  const [key,value] of Object.entries(translations) ) {
+			let option = document.createElement( 'option' );
+				option.setAttribute( 'value', key );
+				option.innerText = value;
+			select.insertAdjacentElement( 'beforeend', option );
+		};
+		button.addEventListener( 'click', function() {
+			let value = select.value;
+			let langName = select.options[select.selectedIndex].text;
+			if ( value === '' ) {
+				html.setAttribute( 'lang', 'en' );
+				header.removeAttribute( 'lang' );
+				nav.removeAttribute( 'lang' );
+				content.removeAttribute( 'lang' );
+				let wrapper = media.closest( '.able-wrapper' );
+				wrapper.replaceWith( player.media );
+				player = new AblePlayer( '#video1' );
+			} else {
+				html.setAttribute( 'lang', value );
+				header.setAttribute( 'lang', 'en' );
+				nav.setAttribute( 'lang', 'en' );
+				content.setAttribute( 'lang', 'en' );
+				let wrapper = media.closest( '.able-wrapper' );
+				wrapper.replaceWith( player.media );
+				player = new AblePlayer( '#video1' );
+			}
+			notification.innerHTML = '<p>Player refreshed in your selected language: <strong>' + langName + '</strong>.</p>';
+		})
+	});
+</script>
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<div class="content">
+			<h1>View translations</h1>
+
+			<p>Use this view to check translations of Able Player.</p>
+			<div class="flex">
+				<p>
+					<label for="lang_selector">Select language</label><br />
+					<select id="lang_selector">
+						<option value="">Default Language</option>
+					</select>
+				</p>
+				<button type="button" id="select_lang">Switch Language</button>
+			</div>
+			<div class="notification" role="alert">
+
+			</div>
+		</div>
+		<div id="video-wrapper">
+			<video id="video1" preload="auto" poster="../media/wwa.jpg" playsinline>
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-youtube-sign-src="https://youtu.be/bf6214F7srY"/>
+				<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+				<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+				<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+				<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+				<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+				<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+				<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+				<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+				<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+			</video>
+		</div>
+
+	</main>
+</body>
+</html>

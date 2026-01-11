@@ -132,6 +132,35 @@
     return Number(Math.floor(value + "e" + decimals) + "e-" + decimals);
   };
 
+  AblePlayer.prototype.defer = function() {
+	const self = this;
+	const promise = new Promise((resolve, reject) => {
+		self.resolve = resolve;
+		self.reject = reject;
+		self.promise = () => promise;
+	});
+  }
+
+  AblePlayer.prototype.getScript = function( source, callback ) {
+	var script   = document.createElement('script');
+	var prior    = document.getElementsByTagName('script')[0];
+	script.async = 1;
+
+	script.onload = script.onreadystatechange = function( _, isAbort ) {
+		if ( isAbort || !script.readyState || /loaded|complete/.test(script.readyState) ) {
+			script.onload = script.onreadystatechange = null;
+			script        = undefined;
+
+			if ( !isAbort && callback ) {
+				setTimeout(callback, 0);
+			}
+		}
+	};
+
+	script.src = source;
+	prior.parentNode.insertBefore(script, prior);
+  }
+
   AblePlayer.prototype.hasAttr = function (object, attribute) {
     // surprisingly, there is no hasAttr() function in Jquery as of 3.2.1
     // return true if object has attribute; otherwise false

@@ -2,10 +2,10 @@
 
 	AblePlayer.prototype.initVimeoPlayer = function () {
 
-		var thisObj, deferred, promise, containerId, vimeoId, autoplay, options;
+		var thisObj, deferred, promise, containerId, vimeoId, options;
 		thisObj = this;
 
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		containerId = this.mediaId + '_vimeo';
@@ -115,7 +115,7 @@
 	AblePlayer.prototype.getVimeoPaused = function () {
 
 		var deferred, promise;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.vimeoPlayer.getPaused().then(function (paused) {
@@ -129,7 +129,7 @@
 	AblePlayer.prototype.getVimeoEnded = function () {
 
 		var deferred, promise;
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 
 		this.vimeoPlayer.getEnded().then(function (ended) {
@@ -142,11 +142,9 @@
 
 	AblePlayer.prototype.getVimeoState = function () {
 
-		var thisObj, deferred, promise, promises, gettingPausedPromise, gettingEndedPromise;
+		var deferred, promise, promises, gettingPausedPromise, gettingEndedPromise;
 
-		thisObj = this;
-
-		deferred = new $.Deferred();
+		deferred = new this.defer();
 		promise = deferred.promise();
 		promises = [];
 
@@ -173,10 +171,10 @@
 		// get data via Vimeo Player API, and push data to this.captions
 		// Note: Vimeo doesn't expose the caption cues themselves
 		// so this.captions will only include metadata about caption tracks; not cues
-		var deferred = new $.Deferred();
+		var deferred = new this.defer();
 		var promise = deferred.promise();
 
-		var thisObj, i, trackId, isDefaultTrack;
+		var thisObj, i, isDefaultTrack;
 
 		thisObj = this;
 
@@ -230,29 +228,23 @@
 
 	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId, width) {
 
-		// this is a placeholder, copied from getYouTubePosterUrl()
-		// Vimeo doesn't seem to have anything similar,
-		// Vimeo API for images: https://vimeo.com/api/v2/video/328769500.json
-		// will require an unauthenticated API query.
+		// Vimeo Oembed only returns a 640px width image. Hope at some point there's an alternative.
+		var url = 'http://vimeo.com/api/oembed.json?url=https://vimeo.com/' + vimeoId, imageUrl = '';
+		console.log( url );
+		fetch( url ).then( response => {
 
-		// return a URL for retrieving a YouTube poster image
-		// supported values of width: 120, 320, 480, 640
+			return response.json();
+  		})
+		.then( json => {
+			imageUrl = json.thumbnail_url;
+		})
+		.catch( error => {
+			if (thisObj.debug) {
+				console.log( 'Vimeo API query: ' + error );
+			}
+		});
 
-		var url = 'https://img.youtube.com/vi/' + youTubeId;
-		if (width == '120') {
-			// default (small) thumbnail, 120 x 90
-			return url + '/default.jpg';
-		} else if (width == '320') {
-			// medium quality thumbnail, 320 x 180
-			return url + '/hqdefault.jpg';
-		} else if (width == '480') {
-			// high quality thumbnail, 480 x 360
-			return url + '/hqdefault.jpg';
-		} else if (width == '640') {
-			// standard definition poster image, 640 x 480
-			return url + '/sddefault.jpg';
-		}
-		return false;
+		return imageUrl;
 	};
 
 	AblePlayer.prototype.getVimeoId = function (url) {

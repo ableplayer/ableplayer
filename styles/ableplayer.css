@@ -204,7 +204,7 @@
 
 /* Screen reader hidden text classes */
 .able-transcript .able-hidden,
-.able-clipped, .able-screenreader-alert, .able-offscreen {
+.able-screenreader-alert, .able-offscreen {
 	border: 0;
 	clip-path: inset(50%);
 	height: 1px;
@@ -248,6 +248,7 @@
 
 .able .able-vidcap-container video {
 	max-width: 100%;
+	width: 100%;
 	display: block; /* Prevents excess height after element */
 }
 
@@ -263,6 +264,7 @@
 	position: absolute;
 	color: var(--able-control-color);
 	background-color: var(--able-big-play-background);
+	background: var(--able-big-play-background);
 	border: none;
 	outline: none;
 	left: 0;
@@ -273,9 +275,24 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 5px;
 	width: 100%;
 	height: 100%;
+}
+
+.able-audio-wrapper {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	padding: 4px;
+	background: var(--able-control-background);
+}
+
+.able-audio-wrapper img {
+	max-width: 120px;
+}
+
+.able-audio-wrapper .able-audio {
+	flex: 1;
 }
 
 .able-wrapper .able button.able-big-play-button:hover,
@@ -483,7 +500,7 @@ div.able-captions-wrapper {
 }
 
 div.able-captions-wrapper:not(.able-captions-overlay) {
-	padding: 0 0 8px;
+	padding: 0;
 }
 
 div.able-captions {
@@ -506,6 +523,9 @@ div.able-vidcap-container div.able-captions-overlay {
 div.able-vidcap-container div.able-captions-below {
 	position: relative;
 	min-height: 4rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 div.able-audcap-container.captions-off {
@@ -555,10 +575,16 @@ div.able-modal-dialog {
 	color: var(--able-modal-color);
 	background-color: var(--able-modal-background);
 	border: var(--able-modal-border);
-	width: 50rem;
+	width: fit-content;
 	max-width: 95%;
 	padding: 1rem;
 	box-sizing: border-box;
+}
+
+@media screen and ( width < 800px ) {
+	div.able-modal-dialog {
+		min-width: 95%;
+	}
 }
 
 body.able-modal-active {
@@ -592,9 +618,14 @@ div.able-modal-overlay {
 	margin-top: 1rem;
 }
 
+.able-modkey-item.hidden {
+	display: none;
+}
+
 .able-modal-header {
 	display: flex;
 	justify-content: space-between;
+	gap: 8px;
 }
 
 .able-modal-dialog .modalCloseButton {
@@ -731,6 +762,40 @@ span.able-modkey {
 	gap: 12px;
 }
 
+.able-window-toolbar button {
+	order: 1;
+}
+
+.able-window-toolbar .autoscroll-transcript {
+	order: 3;
+	width: fit-content;
+	text-wrap: nowrap;
+}
+
+.able-window-toolbar .transcript-language-select-wrapper {
+	order: 4;
+}
+
+.able-window-toolbar .able-drag-handle {
+	order: 2;
+	width: 100%;
+	height: 100%;
+}
+
+.able-window-toolbar .able-drag-handle svg {
+	height: 12px;
+	width: auto;
+	margin: 0 auto;
+}
+
+.able-window-toolbar .able-drag-handle path {
+	fill: var(--able-medium-light-gray);
+}
+
+.able-draggable:hover .able-drag-handle path {
+	fill: var(--able-very-light-gray);
+}
+
 .able-window-toolbar > div {
 	display: flex;
 }
@@ -746,7 +811,7 @@ span.able-modkey {
 	width: 1rem;
 }
 
-.able-draggable:hover {
+.able-draggable .able-drag-handle:hover {
 	cursor: move;
 }
 
@@ -780,8 +845,8 @@ span.able-modkey {
 
 .able-resizable {
 	position: absolute;
-	width: 20px;
-	height: 20px;
+	width: 24px;
+	height: 24px;
 	bottom: 0;
 	right: 0;
 	padding: 1px;
@@ -801,9 +866,48 @@ span.able-modkey {
 	border: 1px solid var(--able-sign-border);
 }
 
+.fade-out {
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0s 2s, opacity 2s linear;
+}
+
+.fade-in {
+	visibility: visible;
+	opacity: 1;
+	transition: opacity 1s linear;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .able-sign-window video {
 	width: 100%;
-	margin-bottom: 1rem;
+	display: block;
+}
+
+.able-sign-window .able-resizable {
+	background: #00000033;
+	background: linear-gradient(to bottom right, transparent 0%, transparent 51%, #fff3 51%, #fff3 100%);
+	border-top-left-radius: 20px;
+}
+
+.able-sign-window:hover .able-resizable {
+	background: var(--able-very-light-gray);
+	background: linear-gradient(to bottom right, transparent 0%, transparent 51%, #fffe 51%, #fffe 100%);
+
+}
+
+.able-sign-window.able-fixed video {
+	margin: 0;
+	display: block;
 }
 
 .able-sign-window:focus {
@@ -839,6 +943,7 @@ div.able-chapters-div button {
 	font-size: 1rem;
 	text-align: start;
 	padding: 8px;
+	box-sizing: border-box;
 }
 
 div.able-chapters-div li.able-current-chapter button {
@@ -1029,6 +1134,10 @@ ul.able-popup li.able-focus,
 	font-size: .875rem;
 	margin-right: .333rem;
 	color: var(--able-control-label-color);
+}
+
+.able-window-toolbar .autoscroll-transcript label {
+	margin-right: 0;
 }
 
 div.able-modal-dialog input,
@@ -1299,12 +1408,12 @@ div#able-vts-icon-credit {
 div#able-vts-alert {
 	display: none;
 	position: fixed;
-	top: 5px;
-	left: 5px;
+	top: 16px;
+	left: 16px;
 	border: 2px solid #666;
-	background-color: #ffc;
+	background-color: var(--able-alert-background);
+	color: var(--able-black);
 	padding: 1rem;
-	font-weight: bold;
 	z-index: 9400;
 }
 

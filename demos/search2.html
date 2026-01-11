@@ -8,8 +8,7 @@
 	<link rel="stylesheet" href="demos.css" type="text/css">
 
 	<!-- Dependencies -->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-	<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
 	<!-- Able Player CSS -->
 	<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css" />
@@ -22,8 +21,7 @@
 		#search {
 			border: 2px solid #340449;
 			padding: 0.5em;
-			background-color: #FFC;
-			max-width: 60em;
+			background-color: #ffc;
 			margin-bottom: 1em;
 		}
 
@@ -34,6 +32,11 @@
 
 		#search div label {
 			font-weight: bold;
+		}
+
+		#search div:nth-of-type(1) label,
+		#search div:nth-of-type(2) label {
+			display: block;
 		}
 
 		#search input,
@@ -47,16 +50,13 @@
 			flex-direction: row;
 			flex-wrap: wrap;
 			justify-content: flex-start;
-			width: 1280px;
+			max-width: 1280px;
 			gap: 20px;
 			padding: 1rem;
 		}
-
 		#player {
-			width: 45%;
 			max-width: 500px;
 		}
-
 		#results-wrapper {
 			height: 700px;
 			width: 45%;
@@ -116,11 +116,11 @@
 
 		<div id="search">
 			<div>
-				<label for="terms">Search:</label>
+				<label for="terms">Search Term</label>
 				<input type="text" id="terms">
 			</div>
 			<div>
-				<label for="lang">Language:</label>
+				<label for="lang">Language</label>
 				<select id="lang">
 					<option value="en">English</option>
 					<option lang="de" value="de">Deutsche</option>
@@ -129,11 +129,11 @@
 				</select>
 			</div>
 			<div>
-				<label for="ignorecaps">Ignore Capitalization:</label>
+				<label for="ignorecaps">Ignore Capitalization</label>
 				<input type="checkbox" id="ignorecaps">
 			</div>
 			<div>
-				<button type="button" id="go">Go</button>
+				<button type="button" id="go">Search</button>
 			</div>
 		</div>
 

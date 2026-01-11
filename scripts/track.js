@@ -8,7 +8,7 @@
 
     thisObj = this;
 
-    deferred = new $.Deferred();
+    deferred = new this.defer();
     promise = deferred.promise();
 
     loadingPromises = [];
@@ -40,7 +40,7 @@
         continue;
       }
 	  var trackSrc = track.src;
-      loadingPromise = this.loadTextObject(trackSrc); // resolves with src, trackText
+      loadingPromise = this.loadTextObject(trackSrc);
       loadingPromises.push(
         loadingPromise.catch(function (src) {
           console.warn("Failed to load captions track from " + src);
@@ -53,20 +53,16 @@
           var trackLabel = track.label;
           var trackDesc = track.desc;
 
-          return function (trackSrc, trackText) {
-            // these are the two vars returned from loadTextObject
-
-            var trackContents = trackText;
-            var cues = thisObj.parseWebVTT(trackSrc, trackContents).cues;
+          return function (data) {
+            var cues = thisObj.parseWebVTT(data).cues;
             if (thisObj.hasVts) {
-              // setupVtsTracks() is in vts.js
               thisObj.setupVtsTracks(
                 kind,
                 trackLang,
                 trackDesc,
                 trackLabel,
                 trackSrc,
-                trackContents
+                data.text
               );
             }
             if (kind === 'captions' || kind === 'subtitles') {
@@ -108,7 +104,7 @@
     thisObj = this;
     hasDefault = false;
 
-    deferred = new $.Deferred();
+    deferred = new this.defer();
     promise = deferred.promise();
 
     this.$tracks = this.$media.find('track');
@@ -222,7 +218,7 @@
       // this media has no track elements
       // if this is a youtube or vimeo player, check there for captions/subtitles
       if (this.player === 'youtube') {
-        this.getYouTubeCaptionTracks(this.youTubeId).then(function () {
+        this.getYouTubeCaptionTracks().then(function () {
           if (thisObj.hasCaptions) {
             thisObj.usingYouTubeCaptions = true;
             if (thisObj.$captionsWrapper) {
@@ -259,7 +255,7 @@
 
   AblePlayer.prototype.setupCaptions = function (track, cues) {
     // Setup player for display of captions (one track at a time)
-    var thisObj, inserted, i, capLabel;
+    var inserted, i, capLabel;
 
     // Insert track into captions array
     // in its proper alphabetical sequence by label
@@ -406,7 +402,7 @@
 	*/
     var deferred, promise, thisObj, $tempDiv;
 
-    deferred = new $.Deferred();
+    deferred = new this.defer();
     promise = deferred.promise();
     thisObj = this;
 
@@ -416,29 +412,35 @@
     });
 
     // Fetch the content manually so it can be sanitized
-    $.ajax({
-      url: src,
-      dataType: 'text',
-      success: function (data) {
-        // Sanitize the fetched content
-        var sanitizedTrackText = validate.sanitizeVttContent(data);
+	fetch(src)
+		.then( response => {
 
-        // Load the sanitized content into the $tempDiv
-        $tempDiv.html(sanitizedTrackText);
+			return response.text();
+  		})
+		.then( vtt => {
+			// Split the input on double line breaks to handle each cue individually.
+			var preParsed = vtt.split(/\r?\n\s*\r?\n/);
+			var lines = '', line;
 
-        // Resolve the promise with the sanitized content
-        deferred.resolve(src, sanitizedTrackText);
-
-        $tempDiv.remove();
-      },
-      error: function (req, status, error) {
-        if (thisObj.debug) {
-          console.log("error reading file " + src + ": " + status);
-        }
-        deferred.reject(src);
-        $tempDiv.remove();
-      },
-    });
+			preParsed.forEach((l) => {
+				// Sanitize each line.
+				line   = validate.sanitizeVttContent(l);
+				lines += line + "\n\n";
+			});
+			// Load the sanitized content into the $tempDiv
+			$tempDiv.html(lines);
+			// Resolve the promise with the sanitized content
+			let data = { 'src': src, 'text': lines };
+			deferred.resolve(data);
+			$tempDiv.remove();
+		})
+		.catch( error => {
+			if (thisObj.debug) {
+				console.log( "error reading file " + src + ": " + error );
+			}
+			deferred.reject(src);
+			$tempDiv.remove();
+		});
 
     return promise;
   };
