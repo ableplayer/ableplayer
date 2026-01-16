@@ -977,7 +977,7 @@
 				if ($.inArray(kind,kinds) !== -1) {
 					start = $rows.eq(i).find('td').eq(2).text();
 					end = $rows.eq(i).find('td').eq(3).text();
-					content = $rows.eq(i).find('td').eq(4).text();
+					content = $rows.eq(i).find('td').eq(4)[0].innerText;
 					if (start !== undefined && end !== undefined) {
 						vtt[kind] += start + ' --> ' + end + "\n";
 						if (content !== 'undefined') {
