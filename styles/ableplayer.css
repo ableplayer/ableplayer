@@ -248,6 +248,7 @@
 
 .able .able-vidcap-container video {
 	max-width: 100%;
+	width: 100%;
 	display: block; /* Prevents excess height after element */
 }
 
