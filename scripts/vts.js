@@ -139,7 +139,7 @@
 					e.stopPropagation();
 					if ($(this).attr('value') == 'save') {
 						// replace table with WebVTT output in textarea fields (for copying/pasting)
-						$(this).attr('value','cancel').text( this.translate( 'vtsReturn', 'Return to Editor' ) );
+						$(this).attr('value','cancel').text( thisObj.translate( 'vtsReturn', 'Return to Editor' ) );
 						$savedTable = $('#able-vts table');
 						$('#able-vts-instructions').hide();
 						$('#able-vts > fieldset').hide();
@@ -154,7 +154,7 @@
 						$('#able-vts > fieldset').show();
 						$('#able-vts').append($savedTable);
 						$('#able-vts').append(thisObj.getIconCredit());
-						thisObj.showVtsAlert( this.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
+						thisObj.showVtsAlert( thisObj.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
 					}
 				});
 			}
@@ -977,7 +977,7 @@
 				if ($.inArray(kind,kinds) !== -1) {
 					start = $rows.eq(i).find('td').eq(2).text();
 					end = $rows.eq(i).find('td').eq(3).text();
-					content = $rows.eq(i).find('td').eq(4).text();
+					content = $rows.eq(i).find('td').eq(4)[0].innerText;
 					if (start !== undefined && end !== undefined) {
 						vtt[kind] += start + ' --> ' + end + "\n";
 						if (content !== 'undefined') {
