@@ -1,4 +1,4 @@
-/*! ableplayer V4.7.0 with DOMPurify included */
+/*! ableplayer V4.8.0 with DOMPurify included */
 /*! @license DOMPurify 3.3.1 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.3.1/LICENSE */
 
 (function (global, factory) {
@@ -5070,7 +5070,7 @@ var AblePlayerInstances = [];
 
 var preProcessing = {
   transformCSSClasses: function (vttContent) {
-	if ( vttContent > 1000 ) {
+	if ( vttContent.length > 1000 ) {
 		throw new Error( "Input too long" );
 	}
     return vttContent.replace(
@@ -13321,7 +13321,7 @@ if (typeof module !== "undefined" && module.exports) {
 				$('#able-vts-save').on('click',function(e) {
 					e.stopPropagation();
 					if ($(this).attr('value') == 'save') {
-						$(this).attr('value','cancel').text( this.translate( 'vtsReturn', 'Return to Editor' ) );
+						$(this).attr('value','cancel').text( thisObj.translate( 'vtsReturn', 'Return to Editor' ) );
 						$savedTable = $('#able-vts table');
 						$('#able-vts-instructions').hide();
 						$('#able-vts > fieldset').hide();
@@ -13335,7 +13335,7 @@ if (typeof module !== "undefined" && module.exports) {
 						$('#able-vts > fieldset').show();
 						$('#able-vts').append($savedTable);
 						$('#able-vts').append(thisObj.getIconCredit());
-						thisObj.showVtsAlert( this.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
+						thisObj.showVtsAlert( thisObj.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
 					}
 				});
 			}
@@ -14022,7 +14022,7 @@ if (typeof module !== "undefined" && module.exports) {
 				if ($.inArray(kind,kinds) !== -1) {
 					start = $rows.eq(i).find('td').eq(2).text();
 					end = $rows.eq(i).find('td').eq(3).text();
-					content = $rows.eq(i).find('td').eq(4).text();
+					content = $rows.eq(i).find('td').eq(4)[0].innerText;
 					if (start !== undefined && end !== undefined) {
 						vtt[kind] += start + ' --> ' + end + "\n";
 						if (content !== 'undefined') {
