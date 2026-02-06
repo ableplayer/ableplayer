@@ -24,7 +24,9 @@ We particularly appreciate help with any issues in the Issues queue that have be
 
 If you are multilingual, please consider translating Able Player into another language! All labels, prompts, messages, and help text for each language maintained in a single file, contained in the */translations* directory.
 
-Copy the `en.js` source file, then replace the English version of the text with your translation.
+Copy the `en.json` source file, then replace the English version of the text with your translation. If a string doesn't need to be changed for your language, it can be omitted from the file.
+
+[Existing translations][]
 
 ## Building the Able Player source
 
@@ -65,3 +67,4 @@ All contributors to Able Player are expected to follow our [published Code of Co
   [npm]: https://www.npmjs.com/
   [develop]: https://github.com/ableplayer/ableplayer/tree/develop
   [donate]: https://www.joedolson.com/donate/
+  [Existing translations]: https://github.com/ableplayer/ableplayer/blob/develop/translations/
