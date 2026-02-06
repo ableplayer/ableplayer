@@ -1,6 +1,6 @@
 # AblePlayer Changelog
 
-## 4.8.0 January 31st, 2026
+## 4.8.0 February 6th, 2026
 
 ### Features
 
