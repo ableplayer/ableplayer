@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addTranslationFunctions(AblePlayer) {
 	AblePlayer.prototype.getSupportedLangs = function() {
 		// returns an array of languages for which AblePlayer has translation tables
 		var langs = {
@@ -186,4 +188,6 @@
 		}
 	};
 
-})(jQuery);
+}
+
+export default addTranslationFunctions;

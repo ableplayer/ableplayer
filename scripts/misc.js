@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addMiscFunctions(AblePlayer) {
   AblePlayer.prototype.getNextHeadingLevel = function ($element) {
     // Finds the nearest heading in the ancestor tree
     // Loops over each parent of the current element until a heading is found
@@ -178,4 +180,6 @@
     }
   };
 
-})(jQuery);
+}
+
+export default addMiscFunctions;

@@ -2,6 +2,7 @@
  * @file validate.js
  * @description This file contains the code to validate the VTT data.
  */
+import DOMPurify from 'dompurify';
 
 /** PRE-SANITIZED FUNCTIONS
  * Some of the VTT attributes need to be transformed before being sanitized by DOMPurify.
@@ -240,8 +241,6 @@ var validate = {
   },
 };
 
-// Export the object for use in other files
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = validate;
-}
 // End of validate.js
+
+export default validate;

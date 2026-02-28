@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addEventFunctions(AblePlayer) {
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {
 
@@ -888,4 +890,6 @@
 			}, 300);
 		}
 	};
-})(jQuery);
+}
+
+export default addEventFunctions;

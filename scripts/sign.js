@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+function addSignFunctions(AblePlayer) {
 	AblePlayer.prototype.initSignLanguage = function() {
 		this.hasSignLanguage = false;
 		// Sign language is only currently supported in HTML5 player and YouTube.
@@ -209,4 +212,6 @@
 		return promise;
 	};
 
-})(jQuery);
+}
+
+export default addSignFunctions;

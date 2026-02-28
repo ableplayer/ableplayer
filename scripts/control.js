@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addControlFunctions(AblePlayer) {
 
 	AblePlayer.prototype.seekTo = function (newTime) {
 
@@ -1770,4 +1772,6 @@
 		this.updateTranscript();
 	};
 
-})(jQuery);
+}
+
+export default addControlFunctions;

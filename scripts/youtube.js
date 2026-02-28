@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addYoutubeFunctions(AblePlayer) {
 
 	AblePlayer.prototype.initYouTubePlayer = function () {
 
@@ -335,4 +337,6 @@
 		}
 };
 
-})(jQuery);
+}
+
+export default addYoutubeFunctions;

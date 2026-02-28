@@ -1,5 +1,9 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+import validate from './validate';
+import AccessibleSlider from './slider';
 
+function addBuildplayerFunctions(AblePlayer) {
 	AblePlayer.prototype.injectPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
@@ -1616,4 +1620,6 @@
 			return this.capitalizeFirstLetter( control );
 		}
 	};
-})(jQuery);
+}
+
+export default addBuildplayerFunctions;

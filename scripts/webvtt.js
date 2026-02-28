@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+ function addWebvttFunctions(AblePlayer) {
 	// See section 4.1 of dev.w3.org/html5/webvtt for format details.
 	AblePlayer.prototype.parseWebVTT = function(data) {
 
@@ -684,4 +686,6 @@
 
 		return time;
 	}
-})(jQuery);
+ }
+
+ export default addWebvttFunctions;

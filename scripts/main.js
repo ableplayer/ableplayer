@@ -1,0 +1,53 @@
+import AblePlayer from "./ableplayer-base";
+import addBrowserFunctions from "./browser";
+import addBuildplayerFunctions from "./buildplayer";
+import addCaptionFunctions from "./caption";
+import addChaptersFunctions from "./chapters";
+import addControlFunctions from "./control";
+import addDescriptionFunctions from "./description";
+import addDragdropFunctions from "./dragdrop";
+import addEventFunctions from "./event";
+import addInitializeFunctions from "./initialize";
+import addLangsFunctions from "./langs";
+import addMetadataFunctions from "./metadata";
+import addMiscFunctions from "./misc";
+import addPreferenceFunctions from "./preference";
+import addSearchFunctions from "./search";
+import addSignFunctions from "./sign";
+import addTrackFunctions from "./track";
+import addTranscriptFunctions from "./transcript";
+import addTranslationFunctions from "./translation";
+import addVimeoFunctions from "./vimeo";
+import addVolumeFunctions from "./volume";
+import addVtsFunctions from "./vts";
+import addWebvttFunctions from "./webvtt";
+import addYoutubeFunctions from "./youtube";
+
+// Order copied over from 2026-02-27 Gruntfile.js, in case it matters
+addInitializeFunctions(AblePlayer);
+addPreferenceFunctions(AblePlayer);
+addWebvttFunctions(AblePlayer);
+addBuildplayerFunctions(AblePlayer);
+addTrackFunctions(AblePlayer);
+addYoutubeFunctions(AblePlayer);
+addVolumeFunctions(AblePlayer);
+addMiscFunctions(AblePlayer);
+addDescriptionFunctions(AblePlayer);
+addBrowserFunctions(AblePlayer);
+addControlFunctions(AblePlayer);
+addCaptionFunctions(AblePlayer);
+addChaptersFunctions(AblePlayer);
+addMetadataFunctions(AblePlayer);
+addTranscriptFunctions(AblePlayer);
+addSearchFunctions(AblePlayer);
+addEventFunctions(AblePlayer);
+addDragdropFunctions(AblePlayer);
+addSignFunctions(AblePlayer);
+addLangsFunctions(AblePlayer);
+addTranslationFunctions(AblePlayer);
+addVtsFunctions(AblePlayer);
+addVimeoFunctions(AblePlayer);
+
+AblePlayer.ablePlayerInitializeGlobals();
+
+export default AblePlayer;

@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addVimeoFunctions(AblePlayer) {
 
 	AblePlayer.prototype.initVimeoPlayer = function () {
 
@@ -283,4 +285,6 @@
 		}
 	};
 
-})(jQuery);
+}
+
+export default addVimeoFunctions;

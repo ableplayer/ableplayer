@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import validate from './validate';
+
+function addTrackFunctions(AblePlayer) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
@@ -444,4 +447,6 @@
 
     return promise;
   };
-})(jQuery);
+}
+
+export default addTrackFunctions;

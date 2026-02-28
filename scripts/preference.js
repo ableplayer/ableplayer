@@ -1,4 +1,9 @@
-(function ($) {
+ import $ from 'jquery';
+ import AccessibleDialog from './dialog';
+
+ function addPreferenceFunctions(AblePlayer) {
+	const AblePlayerInstances = AblePlayer.ablePlayerInstances;
+
 	AblePlayer.prototype.setPrefs = function(preferences) {
 		if ( typeof Cookies !== 'undefined' ) {
 			Cookies.set('Able-Player', JSON.stringify(preferences), {
@@ -1091,5 +1096,6 @@
 		}
 		return true;
 	};
+}
 
-})(jQuery);
+export default addPreferenceFunctions;

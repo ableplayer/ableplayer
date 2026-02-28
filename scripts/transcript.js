@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addTranscriptFunctions(AblePlayer) {
   AblePlayer.prototype.setupTranscript = function () {
     var deferred = new this.defer();
     var promise = deferred.promise();
@@ -767,4 +769,6 @@
 
 	return $main;
   }
-})(jQuery);
+}
+
+export default addTranscriptFunctions;

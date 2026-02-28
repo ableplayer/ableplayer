@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import AccessibleDialog from './dialog';
+
+function addDragdropFunctions(AblePlayer) {
 	AblePlayer.prototype.initDragDrop = function ( which ) {
 
 		// supported values of which: 'sign', 'transcript'
@@ -755,4 +758,6 @@
 			this.finishingDrag = false;
 		}, 100);
 	};
-})(jQuery);
+}
+
+export default addDragdropFunctions;

@@ -1,4 +1,6 @@
-(function($) {
+ import $ from 'jquery';
+
+ function addTtml2webvttFunctions(AblePlayer) {
 	AblePlayer.prototype.computeEndTime = function(startTime, durationTime) {
 		var SECONDS = 0;
 		var MINUTES = 1;
@@ -84,4 +86,6 @@
 
 		return vttCaptions;
 	};
-})(jQuery);
+}
+
+export default addTtml2webvttFunctions;

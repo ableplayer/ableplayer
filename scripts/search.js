@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+function addSearchFunctions(AblePlayer) {
   AblePlayer.prototype.showSearchResults = function () {
     // search VTT file for all instances of searchTerms
     // Currently just supports search terms separated with one or more spaces
@@ -197,4 +200,6 @@
     time["title"] = title;
     return time;
   };
-})(jQuery);
+}
+
+export default addSearchFunctions;

@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+function addDescriptionFunctions(AblePlayer) {
 	AblePlayer.prototype.initDescription = function() {
 
 		// set default mode for delivering description (open vs closed)
@@ -671,4 +674,6 @@
 		this.speakingDescription = true;
 	};
 
-})(jQuery);
+}
+
+export default addDescriptionFunctions;

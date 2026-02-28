@@ -1,4 +1,7 @@
-(function ($) {
+ import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+ function addInitializeFunctions(AblePlayer) {
 	// Set default variable values.
 	AblePlayer.prototype.setDefaults = function () {
 
@@ -806,4 +809,6 @@
 			return null;
 		}
 	};
-})(jQuery);
+ }
+
+ export default addInitializeFunctions;

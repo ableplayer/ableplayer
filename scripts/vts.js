@@ -3,7 +3,9 @@
  * so they appear in the proper sequence within an auto-generated interactive transcript
 */
 
-(function ($) {
+import $ from 'jquery';
+
+function addVtsFunctions(AblePlayer) {
 	AblePlayer.prototype.injectVTS = function() {
 
 		var thisObj, $heading, $instructions, $p1, $p2, $ul, $li1, $li2, $li3,
@@ -1021,4 +1023,6 @@
 		$('#able-vts-output').append($heading,$p,$textarea);
 	};
 
-})(jQuery);
+}
+
+export default addVtsFunctions;

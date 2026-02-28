@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addCaptionFunctions(AblePlayer) {
   AblePlayer.prototype.updateCaption = function (time) {
     if (
       !this.usingYouTubeCaptions &&
@@ -444,4 +446,6 @@
       }
     }
   };
-})(jQuery);
+}
+
+export default addCaptionFunctions;

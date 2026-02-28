@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addChaptersFunctions(AblePlayer) {
 
 	AblePlayer.prototype.populateChaptersDiv = function() {
 
@@ -257,4 +259,6 @@
 		}
 	};
 
-})(jQuery);
+}
+
+export default addChaptersFunctions;

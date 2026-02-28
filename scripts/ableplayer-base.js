@@ -6,24 +6,26 @@ import $ from 'jquery';
 const ablePlayerInstances = [];
 
 function ablePlayerInitializeGlobals() {
-	$('video, audio').each(function (index, element) {
-		if ($(element).data('able-player') !== undefined) {
-			ablePlayerInstances.push(new AblePlayer($(this),$(element)));
-		}
-	});
+	$(function () {
+		$('video, audio').each(function (index, element) {
+			if ($(element).data('able-player') !== undefined) {
+				ablePlayerInstances.push(new AblePlayer($(this),$(element)));
+			}
+		});
 
-	// YouTube player support; pass ready event to jQuery so we can catch in player.
-	window.onYouTubeIframeAPIReady = function() {
-		AblePlayer.youTubeIframeAPIReady = true;
-		$('body').trigger('youTubeIframeAPIReady', []);
-	};
+		// YouTube player support; pass ready event to jQuery so we can catch in player.
+		window.onYouTubeIframeAPIReady = function() {
+			AblePlayer.youTubeIframeAPIReady = true;
+			$('body').trigger('youTubeIframeAPIReady', []);
+		};
 
-	// If there is only one player on the page, dispatch global keydown events to it
-	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
-	$(window).on('keydown',function(e) {
-		if (AblePlayer.nextIndex === 1) {
-			AblePlayer.lastCreated.onPlayerKeyPress(e);
-		}
+		// If there is only one player on the page, dispatch global keydown events to it
+		// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
+		$(window).on('keydown',function(e) {
+			if (AblePlayer.nextIndex === 1) {
+				AblePlayer.lastCreated.onPlayerKeyPress(e);
+			}
+		});
 	});
 }
 
@@ -515,6 +517,8 @@ AblePlayer.localGetElementById = function(element, id) {
 		return $(document.getElementById(id));
 	}
 };
+
+AblePlayer.ablePlayerInitializeGlobals = ablePlayerInitializeGlobals;
 
 AblePlayer.youTubeIframeAPIReady = false;
 AblePlayer.loadingYouTubeIframeAPI = false;
