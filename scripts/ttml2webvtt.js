@@ -1,10 +1,7 @@
- import $ from 'jquery';
-
  function addTtml2webvttFunctions(AblePlayer) {
 	AblePlayer.prototype.computeEndTime = function(startTime, durationTime) {
 		var SECONDS = 0;
 		var MINUTES = 1;
-		var HOURS = 2;
 
 		var startParts = startTime
 			.split(':')
