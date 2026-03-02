@@ -11,7 +11,7 @@ export default [
             format: 'umd',
             sourcemap: true,
             globals: {
-                jquery: '$'
+                jquery: '$',
             }
         },
         plugins: [nodeResolve(), commonjs()],

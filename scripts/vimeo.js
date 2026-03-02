@@ -31,8 +31,6 @@ function addVimeoFunctions(AblePlayer) {
 		// - It automatically loops (but this can be overridden by initializing the player with loop:false)
 		// - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
 
-		autoplay = (this.okToPlay) ? 'true' : 'false';
-
 		if (this.playerWidth) {
 			if (this.vimeoUrlHasParams) {
 				// use url param, not id
@@ -63,6 +61,8 @@ function addVimeoFunctions(AblePlayer) {
 			}
 		}
 
+		// Vimeo must be loaded by now
+		// eslint-disable-next-line no-undef
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
 
 		this.vimeoPlayer.ready().then(function() {
@@ -228,7 +228,8 @@ function addVimeoFunctions(AblePlayer) {
 		return promise;
 	};
 
-	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId, width) {
+	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId) {
+		const thisObj = this;
 
 		// Vimeo Oembed only returns a 640px width image. Hope at some point there's an alternative.
 		var url = 'http://vimeo.com/api/oembed.json?url=https://vimeo.com/' + vimeoId, imageUrl = '';
@@ -261,6 +262,7 @@ function addVimeoFunctions(AblePlayer) {
 		// as a url parameter, not as an id parameter
 		this.vimeoUrlHasParams = false;
 
+		let urlObject;
 		if (typeof url === 'number') {
 			// this is likely already a vimeo ID
 			return url;
