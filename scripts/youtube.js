@@ -65,6 +65,8 @@ function addYoutubeFunctions(AblePlayer) {
 			// init using the default player lang
 			this.captionLang = this.lang;
 		}
+		// We know YT will be ready by this point
+		// eslint-disable-next-line no-undef
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
@@ -109,10 +111,10 @@ function addYoutubeFunctions(AblePlayer) {
 					}
 					deferred.resolve();
 				},
-				onError: function (x) {
+				onError: function () {
 					deferred.reject();
 				},
-				onStateChange: function (x) {
+				onStateChange: function () {
 					thisObj.getPlayerState().then(function(playerState) {
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
@@ -167,7 +169,7 @@ function addYoutubeFunctions(AblePlayer) {
 		return promise;
 	};
 
-	AblePlayer.prototype.getYouTubeDimensions = function (youTubeContainerId) {
+	AblePlayer.prototype.getYouTubeDimensions = function () {
 
 		// The YouTube iframe API does not have a getSize() of equivalent method
 		// so, need to get dimensions from YouTube's iframe
