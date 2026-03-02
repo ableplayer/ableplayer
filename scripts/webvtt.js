@@ -71,7 +71,7 @@ import $ from 'jquery';
 		return returnText;
 	}
 
-	function cutLine(state, length) {
+	function cutLine(state) {
 		var nextEOL = state.text.indexOf('\n');
 		var returnText;
 		if (nextEOL === -1) {
@@ -336,7 +336,8 @@ import $ from 'jquery';
 						current.push(token);
 					}
 				}
-				catch (err) {
+				catch (_) {
+					// Errors are suppressed here, not sure why - VP 2026-03-02
 				}
 			}
 		}
@@ -577,14 +578,6 @@ import $ from 'jquery';
 			state.error = 'Missing -->';
 		} else {
 			cut(state, 3);
-		}
-	}
-
-	function eatSingleSpaceOrTab(state) {
-		if (state.text[0] === '\t' || state.text[0] === ' ') {
-			cut(state, 1);
-		} else {
-			state.error = 'Missing space.';
 		}
 	}
 
