@@ -57,7 +57,7 @@ function addTranslationFunctions(AblePlayer) {
 	AblePlayer.prototype.getTranslationText = function() {
 
 		// determine language, then get labels and prompts from corresponding translation var
-		var deferred, thisObj, supportedLangs, docLang, translationFile, i,	similarLangFound;
+		var deferred, thisObj, supportedLangs, docLang, translationFile, similarLangFound;
 		deferred = new this.defer();
 		thisObj = this;
 
@@ -78,7 +78,7 @@ function addTranslationFunctions(AblePlayer) {
 					similarLangFound = false;
 					for ( const [key,value] of Object.entries(supportedLangs) ) {
 						if ( key.substring(0,2) == this.lang ) {
-							this.lang = supportedLangs[i];
+							this.lang = value;
 							similarLangFound = true;
 						}
 					}
@@ -167,7 +167,7 @@ function addTranslationFunctions(AblePlayer) {
 			// Create an array of sample description text in all languages
 			// This needs to be readily available for testing different voices
 			// in the Description Preferences dialog
-			var thisObj, supportedLangs, thisLang, translationFile, thisText, translation;
+			var thisObj, supportedLangs, translationFile, thisText, translation;
 
 			supportedLangs = this.getSupportedLangs();
 			thisObj = this;
@@ -181,7 +181,7 @@ function addTranslationFunctions(AblePlayer) {
 					})
 					.then( data => {
 						thisText = data.sampleDescriptionText;
-						translation = {'lang':thisLang, 'text': thisText};
+						translation = {'lang':value, 'text': thisText};
 						thisObj.sampleText.push(translation);
 					});
 			}
