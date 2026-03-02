@@ -10,7 +10,11 @@ export default [
             file: pkg.browser,
             format: 'umd',
             sourcemap: true,
+            globals: {
+                jquery: '$'
+            }
         },
-        plugins: [nodeResolve(), commonjs()]
+        plugins: [nodeResolve(), commonjs()],
+        external: ['jquery']
     }
 ]
