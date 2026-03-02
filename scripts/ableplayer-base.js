@@ -79,7 +79,7 @@ function AblePlayer(media) {
 
 	// start-time
 	var startTime = $(media).data('start-time');
-	var isNumeric = ( typeof startTime === 'number' || ( typeof startTime === 'string' && value.trim() !== '' && ! isNaN(value) && isFinite( Number(value) ) ) ) ? true : false;
+	var isNumeric = ( typeof startTime === 'number' || ( typeof startTime === 'string' && startTime.trim() !== '' && ! isNaN(startTime) && isFinite( Number(startTime) ) ) ) ? true : false;
 	this.startTime =  ( startTime !== undefined && isNumeric ) ? startTime : 0;
 
 	// debug
@@ -351,6 +351,7 @@ function AblePlayer(media) {
 	if ($(media).data('use-ttml') !== undefined) {
 		this.useTtml = true;
 		// The following may result in a console error.
+		// eslint-disable-next-line no-undef
 		this.convert = require('xml-js');
 	} else {
 		this.useTtml = false;
@@ -457,7 +458,7 @@ function AblePlayer(media) {
 	// populate translation object with localized versions of all labels and prompts
 	// use defer method to defer additional processing until text is retrieved
 	this.tt = {};
-	var thisObj = this;
+	thisObj = this;
 	async function fetchTranslations(thisObj) {
 		try {
 			await thisObj.getTranslationText();
