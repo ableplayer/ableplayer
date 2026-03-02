@@ -54,8 +54,8 @@ function addBuildplayerFunctions(AblePlayer) {
 
 	AblePlayer.prototype.injectAudioPoster = function() {
 		if ( this.mediaType === 'audio' && this.hasPoster ) {
-			audioPoster = DOMPurify.sanitize(this.audioPoster);
-			audioPosterAlt = DOMPurify.sanitize(this.audioPosterAlt);
+			const audioPoster = DOMPurify.sanitize(this.audioPoster);
+			const audioPosterAlt = DOMPurify.sanitize(this.audioPosterAlt);
 			let audioPosterImg = document.createElement( 'img' );
 			audioPosterImg.setAttribute( 'src', audioPoster );
 			audioPosterImg.setAttribute( 'alt', audioPosterAlt );
@@ -272,8 +272,8 @@ function addBuildplayerFunctions(AblePlayer) {
 					'left': preferencePos['left']
 				});
 				// Check whether the window is above the top of the viewport.
-				topPosition = $window.offset().top;
-				leftPosition = $window.offset().left;
+				let topPosition = $window.offset().top;
+				let leftPosition = $window.offset().left;
 				viewportWidth = window.innerWidth;
 				windowWidth = $window.width();
 				if ( topPosition < 0 ) {
@@ -682,7 +682,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		// parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
 		// If which is undefined, automatically setup 'captions', 'chapters', and 'prefs' popups
 		// However, only setup 'transcript-window' and 'sign-window' popups if passed as value of which
-		var popups, thisObj, i,	tracks;
+		var popups, i, tracks;
 
 		popups = [];
 		if (typeof which === 'undefined') {
@@ -706,8 +706,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			popups.push('sign-window');
 		}
 		if (popups.length > 0) {
-			thisObj = this;
-			for (var i=0; i<popups.length; i++) {
+			for (i=0; i<popups.length; i++) {
 				var popup = popups[i];
 				if (popup == 'prefs') {
 					this.prefsPopup = this.createPopup('prefs');
@@ -1287,7 +1286,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		// combine left and right controls arrays for future reference
 		this.controls = [];
-		for (var sec in controlLayout) if (controlLayout.hasOwnProperty(sec)) {
+		for (var sec in controlLayout) if (Object.hasOwn(controlLayout, sec)) {
 			this.controls = this.controls.concat(controlLayout[sec]);
 		}
 
