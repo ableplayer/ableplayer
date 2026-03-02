@@ -11,7 +11,7 @@ export default defineConfig([
     rules: {
       'no-unused-vars': ['error', {
         // Suppressed errors
-        caughtErrorsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: 'e',
         // Event handlers
         argsIgnorePattern: 'e',
       }]

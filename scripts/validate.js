@@ -22,7 +22,7 @@ var preProcessing = {
 		throw new Error( "Input too long" );
 	}
     return vttContent.replace(
-      /<(v|c|b|i|u|lang|ruby)\.([\w\.]+)([^>]*)>/g,
+      /<(v|c|b|i|u|lang|ruby)\.([\w.]+)([^>]*)>/g,
       function (_, tag, cssClasses, otherAttrs) {
         var classAttr = cssClasses.replace(/\./g, " ");
         return `<${tag} class="${classAttr}"${otherAttrs}>`;

@@ -336,7 +336,7 @@ import $ from 'jquery';
 						current.push(token);
 					}
 				}
-				catch (_) {
+				catch (e) {
 					// Errors are suppressed here, not sure why - VP 2026-03-02
 				}
 			}
