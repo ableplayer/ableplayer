@@ -10,7 +10,10 @@ export default defineConfig([
     languageOptions: { globals: globals.browser },
     rules: {
       'no-unused-vars': ['error', {
-        caughtErrorsIgnorePattern: '^_'
+        // Suppressed errors
+        caughtErrorsIgnorePattern: '^_',
+        // Event handlers
+        argsIgnorePattern: 'e',
       }]
     }
   },

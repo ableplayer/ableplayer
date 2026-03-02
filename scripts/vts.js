@@ -54,7 +54,7 @@ function addVtsFunctions(AblePlayer) {
 				$fieldset = $('<fieldset>');
 				$legend = $('<legend>').text( this.translate( 'vtsSelectLanguage', 'Select a language' ) );
 				$fieldset.append($legend);
-				$fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
+				let $fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
 				for (i in this.langs) {
 					radioId = 'vts-lang-radio-' + this.langs[i];
 					$radioDiv = $('<div>',{
@@ -100,7 +100,7 @@ function addVtsFunctions(AblePlayer) {
 
 				// TODO: Add drag/drop functionality for mousers
 				// Add event listeners for contenteditable cells
-				var kindOptions, beforeEditing, editedCell, editedContent, i;
+				var kindOptions, beforeEditing, editedCell, editedContent;
 				kindOptions = ['captions','chapters','descriptions','subtitles'];
 				$('td[contenteditable="true"]').on('focus',function() {
 					beforeEditing = $(this).text();
@@ -558,7 +558,7 @@ function addVtsFunctions(AblePlayer) {
 		// update this.langs with any unique languages found in tracks
 		var i;
 		for (i in tracks) {
-			if (tracks[i].hasOwnProperty('language')) {
+			if (Object.hasOwn(tracks[i], 'language')) {
 				if ($.inArray(tracks[i].language,this.langs) === -1) {
 					// this language is not already in the langs array. Add it.
 					this.langs[this.langs.length] = tracks[i].language;
@@ -741,9 +741,8 @@ function addVtsFunctions(AblePlayer) {
 	AblePlayer.prototype.moveRow = function(rowNum,direction) {
 
 		// swap two rows
-		var $rows, $thisRow, otherRowNum, $otherRow, msg;
+		var $thisRow, otherRowNum, $otherRow, msg;
 
-		$rows = $('#able-vts table').find('tr');
 		$thisRow = $('#able-vts table').find('tr').eq(rowNum);
 		if (direction == 'up') {
 			otherRowNum = parseInt(rowNum) - 1;
@@ -822,7 +821,6 @@ function addVtsFunctions(AblePlayer) {
 			prevEnd = this.getSecondsFromColonTime($prevRow.find('td').eq(3).text());
 		} else {
 			// this is the first row
-			prevRowNum = null;
 			$prevRow = null;
 			prevKind = null;
 			prevStart = null;
@@ -841,7 +839,6 @@ function addVtsFunctions(AblePlayer) {
 			nextEnd = this.getSecondsFromColonTime($nextRow.find('td').eq(3).text());
 		} else {
 			// this is the last row
-			nextRowNum = null;
 			$nextRow = null;
 			nextKind = null;
 			nextStart = null;
@@ -866,7 +863,7 @@ function addVtsFunctions(AblePlayer) {
 				// start the new row immediately after the chapter start (not end)
 				start = (parseFloat(prevStart) + .001).toFixed(3);
 				// end the new row immediately before the next row starts
-				end = (nextStart) ? (parseFloat(nextStart) - .001).toFixed(3) : (parseFloat(start) + minDurartion[kind]).toFixed(3);
+				end = (nextStart) ? (parseFloat(nextStart) - .001).toFixed(3) : (parseFloat(start) + minDuration[kind]).toFixed(3);
 			} else if (prevKind === 'descriptions') {
 				// start the new row minDuration['descriptions'] after the description starts
 				// this will theoretically allow at least a small cushion for the description to be read
