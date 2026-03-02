@@ -9,7 +9,7 @@ export default [
             name: 'AblePlayer',
             file: pkg.browser,
             format: 'umd',
-            sourcemap: 'inline',
+            sourcemap: 'inline'
         },
         plugins: [nodeResolve(), commonjs()]
     }

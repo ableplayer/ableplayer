@@ -15,7 +15,8 @@
   "browser": "build/ableplayer.umd.js",
   "scripts": {
     "build": "grunt && grunt build_separate_dompurify",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint"
   },
   "dependencies": {
     "dompurify": "^3.2.6",
@@ -25,8 +26,11 @@
     "xml-js": "1.6.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "eslint": "^10.0.2",
+    "globals": "^17.3.0",
     "grunt": "^1.3.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-concat": "^1.0.1",
@@ -41,6 +45,7 @@
     "jest-puppeteer": "^10.1.0",
     "jsdoc": "^4.0.4",
     "jsdom": "^25.0.1",
-    "puppeteer": "^23.2.2"
+    "puppeteer": "^23.2.2",
+    "rollup": "^4.59.0"
   }
 }

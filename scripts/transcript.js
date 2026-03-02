@@ -39,6 +39,7 @@ function addTranscriptFunctions(AblePlayer) {
   AblePlayer.prototype.injectTranscriptArea = function () {
     var thisObj,
       $autoScrollLabel,
+      $autoScrollContainer,
       $languageSelectWrapper,
       $languageSelectLabel,
       i,

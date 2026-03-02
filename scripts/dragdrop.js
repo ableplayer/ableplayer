@@ -15,7 +15,7 @@ function addDragdropFunctions(AblePlayer) {
 		// There are nevertheless lessons to be learned from Drag & Drop about accessibility:
 		// http://dev.opera.com/articles/accessible-drag-and-drop/
 
-		var thisObj, $window, $toolbar, windowName, $resizeHandle, $resizeSvg,
+		var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, $resizeSvg,
 			i, x1, y1, x2, y2, $resizeLine, resizeZIndex;
 
 		thisObj = this;
@@ -231,7 +231,7 @@ function addDragdropFunctions(AblePlayer) {
 	AblePlayer.prototype.addResizeDialog = function (which, $window) {
 
 		var thisObj, $windowPopup, $windowButton, widthId, heightId,
-			$resizeForm, $resizeWrapper, $resizeWidthDiv, $resizeWidthInput, $resizeWidthLabel,
+			$resizeForm, $resizeWrapper, $resizeControls, $resizeWidthDiv, $resizeWidthInput, $resizeWidthLabel,
 			$resizeHeightDiv, $resizeHeightInput, $resizeHeightLabel, $saveButton, $cancelButton,
 			newWidth, newHeight, resizeDialog;
 
