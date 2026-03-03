@@ -43,9 +43,8 @@ function addSignFunctions(AblePlayer) {
 	AblePlayer.prototype.injectSignPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
-		var thisObj, signVideoId, i, signSrc, srcType, $signSource;
+		var signVideoId, i, signSrc, srcType, $signSource;
 
-		thisObj = this;
 		signVideoId = this.mediaId + '-sign';
 
 		if ( this.signFile || this.signYoutubeId ) {
@@ -156,7 +155,7 @@ function addSignFunctions(AblePlayer) {
 	AblePlayer.prototype.finalizeYoutubeSignInit = function () {
 
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
-		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
+		var deferred, promise, thisObj, containerId, autoplay;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
@@ -167,6 +166,8 @@ function addSignFunctions(AblePlayer) {
 		autoplay = (this.okToPlay) ? 1 : 0;
 
 		// Documentation https://developers.google.com/youtube/player_parameters
+		// YouTube's API at YT is guaranteed to be loaded by now
+		// eslint-disable-next-line no-undef
 		this.youTubeSignPlayer = new YT.Player(containerId, {
 			videoId: this.getYouTubeId(this.signYoutubeId),
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
@@ -192,10 +193,10 @@ function addSignFunctions(AblePlayer) {
 
 					deferred.resolve();
 				},
-				onError: function (x) {
+				onError: function (e) {
 					deferred.reject();
 				},
-				onStateChange: function (x) {
+				onStateChange: function (e) {
 					thisObj.getPlayerState().then(function() {
 						// no actions
 					});
