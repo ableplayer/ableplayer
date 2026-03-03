@@ -148,13 +148,13 @@ function addSearchFunctions(AblePlayer) {
     return resultString;
   };
 
-  AblePlayer.prototype.secondsToTime = function (totalSeconds) {
+  AblePlayer.prototype.secondsToTime = function (totalSecondsFloat) {
     // return an array of totalSeconds converted into two formats
     // time['value'] = HH:MM:SS with hours dropped if there are none
     // time['title'] = a speakable rendering, so speech rec users can easily speak the link
 
     // first, round down to nearest second
-    var totalSeconds = Math.floor(totalSeconds);
+    var totalSeconds = Math.floor(totalSecondsFloat);
 
     var hours = parseInt(totalSeconds / 3600, 10) % 24;
     var minutes = parseInt(totalSeconds / 60, 10) % 60;
