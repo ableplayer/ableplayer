@@ -1,3 +1,4 @@
+/* global Vimeo */
 import $ from 'jquery';
 
 function addVimeoFunctions(AblePlayer) {
@@ -61,8 +62,6 @@ function addVimeoFunctions(AblePlayer) {
 			}
 		}
 
-		// Vimeo must be loaded by now
-		// eslint-disable-next-line no-undef
 		this.vimeoPlayer = new Vimeo.Player(containerId, options);
 
 		this.vimeoPlayer.ready().then(function() {

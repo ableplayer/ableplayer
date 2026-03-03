@@ -1,3 +1,4 @@
+/* global YT */
 import $ from 'jquery';
 
 function addYoutubeFunctions(AblePlayer) {
@@ -65,8 +66,6 @@ function addYoutubeFunctions(AblePlayer) {
 			// init using the default player lang
 			this.captionLang = this.lang;
 		}
-		// We know YT will be ready by this point
-		// eslint-disable-next-line no-undef
 		this.youTubePlayer = new YT.Player(containerId, {
 			videoId: this.activeYouTubeId,
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',

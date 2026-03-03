@@ -1,3 +1,4 @@
+ /*  global Cookies */
  import $ from 'jquery';
  import AccessibleDialog from './dialog';
 

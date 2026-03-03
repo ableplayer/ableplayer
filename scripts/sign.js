@@ -1,3 +1,4 @@
+/* global YT */
 import $ from 'jquery';
 import DOMPurify from 'dompurify';
 
@@ -166,8 +167,6 @@ function addSignFunctions(AblePlayer) {
 		autoplay = (this.okToPlay) ? 1 : 0;
 
 		// Documentation https://developers.google.com/youtube/player_parameters
-		// YouTube's API at YT is guaranteed to be loaded by now
-		// eslint-disable-next-line no-undef
 		this.youTubeSignPlayer = new YT.Player(containerId, {
 			videoId: this.getYouTubeId(this.signYoutubeId),
 			host: this.youTubeNoCookie ? 'https://www.youtube-nocookie.com' : 'https://www.youtube.com',
