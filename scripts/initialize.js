@@ -320,11 +320,10 @@ import DOMPurify from 'dompurify';
 	// Can call again after updating this.media so long as new media element has the same ID.
 	AblePlayer.prototype.reinitialize = function () {
 
-		var deferred, promise, thisObj;
+		var deferred, promise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
-		thisObj = this;
 
 		this.startedPlaying = false;
 		// TODO: Move this setting to preferences.
@@ -663,8 +662,7 @@ import DOMPurify from 'dompurify';
 		// this function is only called if this.useFixedSeekInterval is false
 		// if this.useChapterTimes, this is called as each new chapter is loaded
 		// otherwise, it's called once, as the player is initialized
-		var thisObj, duration;
-		thisObj = this;
+		var duration;
 		this.seekInterval = this.defaultSeekInterval;
 		duration = (this.useChapterTimes) ? this.chapterDuration : this.duration;
 
@@ -727,25 +725,20 @@ import DOMPurify from 'dompurify';
 			}
 			if (this.player === 'vimeo') {
 				if (this.usingVimeoCaptions && this.prefCaptions == 1) {
-						// initialize Vimeo captions to the default language
-						this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
-							// track.language = the iso code for the language
-							// track.kind = 'captions' or 'subtitles'
-							// track.label = the human-readable label
-						}
-					).catch(function(error) {
+					// initialize Vimeo captions to the default language
+					this.vimeoPlayer.enableTextTrack(this.captionLang).catch(function(error) {
 						switch (error.name) {
 							case 'InvalidTrackLanguageError':
-								// no track was available with the specified language
-								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								// There is no text track for the specified language
+								console.log(`No Vimeo text track is available in the specified language (${this.captionLang})`);
 								break;
 							case 'InvalidTrackError':
-								// no track was available with the specified language and kind
-								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								// There is no such text track
+								console.log('No Vimeo text track is available');
 								break;
 							default:
 								// some other error occurred
-								console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+								console.log('Error enabling Vimeo text track');
 								break;
 						}
 					});
