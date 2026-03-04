@@ -16,5 +16,20 @@ export default [
         },
         plugins: [nodeResolve(), commonjs()],
         external: ['jquery']
-    }
+    },
+    {
+        input: 'scripts/main.js',
+        output: {
+            name: 'AblePlayer',
+            file: 'build/ableplayer-separate-dompurify.umd.js',
+            format: 'umd',
+            sourcemap: true,
+            globals: {
+                jquery: 'jQuery',
+                dompurify: 'DOMPurify',
+            }
+        },
+        plugins: [nodeResolve(), commonjs()],
+        external: ['jquery', 'dompurify']
+    },
 ]

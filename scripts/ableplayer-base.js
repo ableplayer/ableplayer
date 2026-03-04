@@ -1,12 +1,17 @@
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
 
 import $ from 'jquery';
+import DOMPurify from 'dompurify';
 
 // maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
 const ablePlayerInstances = [];
 
 function ablePlayerInitializeGlobals() {
 	$(function () {
+		if (typeof DOMPurify === 'undefined') {
+			console.warn('Required dependency DOMPurify not available. Please use the full Able Player bundle which has DOMPurify built in. Or, keep using this bundle, and include DOMPurify separately.')
+		}
+
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {
 				ablePlayerInstances.push(new AblePlayer($(this),$(element)));
