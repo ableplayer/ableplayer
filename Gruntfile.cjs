@@ -7,6 +7,10 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-decomment");
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-terser");
+  grunt.loadNpmTasks("grunt-rollup");
+
+  const nodeResolve = require('@rollup/plugin-node-resolve');
+  const commonjs = require('@rollup/plugin-commonjs');
 
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
@@ -90,6 +94,45 @@ module.exports = function (grunt) {
         dest: "build/separate-dompurify/<%= pkg.name %>.js",
       },
     },
+    rollup: {
+      options: {
+        name: 'AblePlayer',
+        format: 'umd',
+        sourcemap: true,
+        plugins: function () {
+          return [
+            nodeResolve(),
+            commonjs(),
+          ]
+        }
+      },
+      full: {
+        options: {
+          banner: "/*! <%= pkg.name %> V<%= pkg.version %> with DOMPurify included */\n",
+          globals: {
+            jquery: 'jQuery',
+          },
+          external: ['jquery']
+        },
+        files: {
+          'build/<%= pkg.name %>.umd.js': ['scripts/main.js'],
+        }
+      },
+      separate_dompurify: {
+        options: {
+          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - In this file, DOMPurify is not bundled in with AblePlayer, but is a required dependency that can be added to the project via a local copy or a CDN */\n",
+          sourcemapFile: 'build/separate-dompurify/<%= pkg.name %>-separate-dompurify.umd.js.map',
+          globals: {
+            jquery: 'jQuery',
+            dompurify: 'DOMPurify',
+          },
+          external: ['jquery', 'dompurify'],
+        },
+        files: {
+          'build/separate-dompurify/<%= pkg.name %>.umd.js': ['scripts/main.js'],
+        }
+      }
+    },
     removelogging: {
       dist: {
         src: ["build/<%= pkg.name %>.js"],
@@ -115,16 +158,16 @@ module.exports = function (grunt) {
       }
     },
     terser: {
+      options: {
+        ecma: 2015,
+        keep_fnames: true,
+        output: {
+          comments: /^!/,
+        }
+      },
       min: {
         files: {
           "build/<%= pkg.name %>.min.js": ["build/<%= pkg.name %>.dist.js"],
-        },
-        options: {
-          ecma: 2015, // Specify ECMAScript version to support ES6+
-          keep_fnames: true,
-          output: {
-            comments: /^!/,
-          },
         },
       },
       min_separate_dompurify: {
@@ -132,13 +175,26 @@ module.exports = function (grunt) {
           "build/separate-dompurify/<%= pkg.name %>.min.js": ["build/separate-dompurify/<%= pkg.name %>.dist.js"],
           "build/separate-dompurify/purify.min.js": ["node_modules/dompurify/dist/purify.js"],
         },
+      },
+      umd: {
         options: {
-          ecma: 2015, // Specify ECMAScript version to support ES6+
-          keep_fnames: true,
-          output: {
-            comments: /^!/,
-          },
+          compress: {
+            'drop_console': ['log']
+          }
         },
+        files: {
+          "build/<%= pkg.name %>.umd.min.js": ["build/<%= pkg.name %>.umd.js"]
+        }
+      },
+      umd_separate_dompurify: {
+        options: {
+          compress: {
+            'drop_console': ['log']
+          }
+        },
+        files: {
+          "build/separate-dompurify/<%= pkg.name %>.umd.min.js": ["build/separate-dompurify/<%= pkg.name %>.umd.js"]
+        }
       },
     },
     cssmin: {
@@ -182,4 +238,13 @@ module.exports = function (grunt) {
     "terser:min_separate_dompurify",
   ]);
   grunt.registerTask("test", ["jshint"]);
+  grunt.registerTask("umd", [
+    "rollup:full",
+    "terser:umd",
+    "cssmin",
+  ]);
+  grunt.registerTask("umd_separate_dompurify", [
+    "rollup:separate_dompurify",
+    "terser:umd_separate_dompurify",
+  ]);
 };
