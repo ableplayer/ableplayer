@@ -45,7 +45,7 @@ function addChaptersFunctions(AblePlayer) {
 
 		var thisObj, cues, $chaptersList, c, thisChapter,
 			$chapterItem, $chapterButton, hasDefault,
-			getClickFunction, $clickedItem, $chaptersList;
+			getClickFunction, $clickedItem;
 
 		thisObj = this;
 
