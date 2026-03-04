@@ -95,11 +95,10 @@ function addControlFunctions(AblePlayer) {
 
 		// returns duration of the current media, expressed in seconds
 		// function is called by getMediaTimes, and return value is sanitized there
-		var deferred, promise, thisObj;
+		var deferred, promise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
-		thisObj = this;
 
 		if (this.player === 'vimeo') {
 			if (this.vimeoPlayer) {
@@ -143,11 +142,10 @@ function addControlFunctions(AblePlayer) {
 		// returns elapsed time of the current media, expressed in seconds
 		// function is called by getMediaTimes, and return value is sanitized there
 
-		var deferred, promise, thisObj;
+		var deferred, promise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
-		thisObj = this;
 
 		if (this.player === 'vimeo') {
 			if (this.vimeoPlayer) {
@@ -389,8 +387,6 @@ function addControlFunctions(AblePlayer) {
 		// Would be better if the video and captions expanded to fill the void
 		// replace JS animation with CSS animation in 12/2025.
 
-		var thisObj = this;
-
 		if (direction == 'out') {
 			// get the original height of two key components:
 			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
@@ -434,7 +430,7 @@ function addControlFunctions(AblePlayer) {
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 
-		var thisObj, duration,  textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
+		var thisObj, textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
 
 		thisObj = this;
 		// wait until new source has loaded before refreshing controls
@@ -937,25 +933,21 @@ function addControlFunctions(AblePlayer) {
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
 				} else if (this.usingVimeoCaptions) {
-					this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
-						// track.language = the iso code for the language
-						// track.kind = 'captions' or 'subtitles'
-						// track.label = the human-readable label
-					}).catch(function(error) {
+					this.vimeoPlayer.enableTextTrack(this.captionLang).catch(function(error) {
 						switch (error.name) {
 							case 'InvalidTrackLanguageError':
-								// no track was available with the specified language
-								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								// There is no text track for the specified language
+								console.log(`No Vimeo text track is available in the specified language (${this.captionLang})`);
 								break;
 							case 'InvalidTrackError':
-								// no track was available with the specified language and kind
-								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								// There is no such text track
+								console.log('No Vimeo text track is available');
 								break;
 							default:
 								// some other error occurred
-								console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+								console.log('Error enabling Vimeo text track');
 								break;
-							}
+						}
 					});
 				} else {
 					this.$captionsWrapper.show();
