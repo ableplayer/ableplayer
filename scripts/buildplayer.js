@@ -1286,7 +1286,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		// combine left and right controls arrays for future reference
 		this.controls = [];
-		for (var sec in controlLayout) if (Object.hasOwn(controlLayout, sec)) {
+		for (var sec in controlLayout) if (Object.hasOwnProperty(controlLayout, sec)) {
 			this.controls = this.controls.concat(controlLayout[sec]);
 		}
 
