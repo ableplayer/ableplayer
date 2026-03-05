@@ -1,4 +1,5 @@
 module.exports = function (grunt) {
+  grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-clean");
   grunt.loadNpmTasks("grunt-terser");
@@ -29,6 +30,13 @@ module.exports = function (grunt) {
         args: ['exec', 'jest', '--', '--colors']
       }
     },
+    copy: {
+      dompurify: {
+        files: {
+          'build/separate-dompurify/purify.min.js': ['/node_modules/dompurify/dist/purify.min.js'],
+        }
+      }
+    },
     eslint: {
       target: ['scripts/*.js'],
     },
@@ -39,6 +47,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask("default", [
     "run:rollup",
+    "copy:dompurify",
     "cssmin",
   ]);
   grunt.registerTask("test", ["eslint"]);
