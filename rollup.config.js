@@ -21,9 +21,10 @@ export default [
         input: 'scripts/main.js',
         output: {
             name: 'AblePlayer',
-            file: 'build/ableplayer-separate-dompurify.umd.js',
+            file: 'build/separate-dompurify/ableplayer.umd.js',
             format: 'umd',
             sourcemap: true,
+            sourcemapFile: 'build/separate-dompurify/ableplayer-separate-dompurify.umd.js.map',
             globals: {
                 jquery: 'jQuery',
                 dompurify: 'DOMPurify',

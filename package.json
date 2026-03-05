@@ -10,7 +10,7 @@
     "url": "https://github.com/ableplayer/ableplayer.git"
   },
   "type": "module",
-  "main": "build/ableplayer.cjs.js",
+  "main": "build/ableplayer.cjs",
   "module": "build/ableplayer.esm.js",
   "browser": "build/ableplayer.umd.js",
   "scripts": {

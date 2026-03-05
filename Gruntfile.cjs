@@ -133,6 +133,28 @@ module.exports = function (grunt) {
           'build/separate-dompurify/<%= pkg.name %>.umd.js': ['scripts/main.js'],
         }
       },
+      esm: {
+        options: {
+          format: 'esm',
+          sourcemap: false,
+          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - ECMAScript module suitable for use in other bundlers */\n",
+          external: [/node_modules/],
+        },
+        files: {
+          'build/<%= pkg.name %>.esm.js': ['scripts/main.js'],
+        }
+      },
+      cjs: {
+        options: {
+          format: 'cjs',
+          sourcemap: false,
+          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - CommonJS module suitable for use in other bundlers */\n",
+          external: [/node_modules/],
+        },
+        files: {
+          'build/<%= pkg.name %>.cjs': ['scripts/main.js'],
+        }
+      },
       test_validate: {
         options: {
           name: 'validate',
@@ -159,6 +181,22 @@ module.exports = function (grunt) {
       options: {
         // Remove all console output (see https://www.npmjs.com/package/grunt-remove-logging)
       },
+      esm: {
+        options: {
+          methods: ['log'],
+          files: {
+            "build/<%= pkg.name %>.esm.js": ["build/<%= pkg.name %>.esm.js"],
+          }
+        }
+      },
+      cjs: {
+        options: {
+          methods: ['log'],
+          files: {
+            "build/<%= pkg.name %>.cjs": ["build/<%= pkg.name %>.cjs"],
+          }
+        }
+      },
     },
     decomment: {
       any: {
@@ -175,7 +213,7 @@ module.exports = function (grunt) {
       options: {
         ecma: 2015,
         keep_fnames: true,
-        output: {
+        format: {
           comments: /^!/,
         }
       },
@@ -267,5 +305,13 @@ module.exports = function (grunt) {
   grunt.registerTask("umd_separate_dompurify", [
     "rollup:separate_dompurify",
     "terser:umd_separate_dompurify",
+  ]);
+  grunt.registerTask("esm", [
+    "rollup:esm",
+    "removelogging:esm",
+  ]);
+  grunt.registerTask("cjs", [
+    "rollup:cjs",
+    "removelogging:cjs",
   ]);
 };
