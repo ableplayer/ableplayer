@@ -558,7 +558,7 @@ function addVtsFunctions(AblePlayer) {
 		// update this.langs with any unique languages found in tracks
 		var i;
 		for (i in tracks) {
-			if (Object.hasOwnProperty(tracks[i], 'language')) {
+			if (Object.prototype.hasOwnProperty.call(tracks[i], 'language')) {
 				if ($.inArray(tracks[i].language,this.langs) === -1) {
 					// this language is not already in the langs array. Add it.
 					this.langs[this.langs.length] = tracks[i].language;
