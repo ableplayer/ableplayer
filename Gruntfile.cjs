@@ -1,168 +1,12 @@
 module.exports = function (grunt) {
-  grunt.loadNpmTasks("grunt-contrib-concat");
-  grunt.loadNpmTasks("grunt-contrib-copy");
   grunt.loadNpmTasks("grunt-contrib-cssmin");
   grunt.loadNpmTasks("grunt-contrib-clean");
-  grunt.loadNpmTasks("grunt-remove-logging");
-  grunt.loadNpmTasks("grunt-decomment");
-  grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-terser");
   grunt.loadNpmTasks('grunt-run');
+  grunt.loadNpmTasks('grunt-eslint');
 
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
-    concat: {
-      options: {
-        banner: "/*! <%= pkg.name %> V<%= pkg.version %> with DOMPurify included */\n",
-        process: function(src, filepath) {
-          // Remove the source map reference line only from the dompurify file
-          if (filepath.includes('dompurify')) {
-            return src.replace(/\/\/# sourceMappingURL=.*\.map/g, '');
-          }
-          return src;
-        }
-      },
-      build: {
-        src: [
-          "node_modules/dompurify/dist/purify.js",
-          "scripts/ableplayer-base.js",
-          "scripts/initialize.js",
-          "scripts/preference.js",
-          "scripts/webvtt.js",
-          "scripts/buildplayer.js",
-          "scripts/validate.js",
-          "scripts/track.js",
-          "scripts/youtube.js",
-          "scripts/slider.js",
-          "scripts/volume.js",
-          "scripts/dialog.js",
-          "scripts/misc.js",
-          "scripts/description.js",
-          "scripts/browser.js",
-          "scripts/control.js",
-          "scripts/caption.js",
-          "scripts/chapters.js",
-          "scripts/metadata.js",
-          "scripts/transcript.js",
-          "scripts/search.js",
-          "scripts/event.js",
-          "scripts/dragdrop.js",
-          "scripts/sign.js",
-          "scripts/langs.js",
-          "scripts/translation.js",
-          "scripts/vts.js",
-          "scripts/vimeo.js",
-        ],
-        dest: "build/<%= pkg.name %>.js",
-      },
-      build_separate_dompurify: {
-        options: {
-          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - In this file, DOMPurify is not bundled in with AblePlayer, but is a required dependency that can be added to the project via a local copy or a CDN */\n",
-        },
-        src: [
-          "scripts/ableplayer-base.js",
-          "scripts/initialize.js",
-          "scripts/preference.js",
-          "scripts/webvtt.js",
-          "scripts/buildplayer.js",
-          "scripts/validate.js",
-          "scripts/track.js",
-          "scripts/youtube.js",
-          "scripts/slider.js",
-          "scripts/volume.js",
-          "scripts/dialog.js",
-          "scripts/misc.js",
-          "scripts/description.js",
-          "scripts/browser.js",
-          "scripts/control.js",
-          "scripts/caption.js",
-          "scripts/chapters.js",
-          "scripts/metadata.js",
-          "scripts/transcript.js",
-          "scripts/search.js",
-          "scripts/event.js",
-          "scripts/dragdrop.js",
-          "scripts/sign.js",
-          "scripts/langs.js",
-          "scripts/translation.js",
-          "scripts/vts.js",
-          "scripts/vimeo.js",
-        ],
-        dest: "build/separate-dompurify/<%= pkg.name %>.js",
-      },
-    },
-    removelogging: {
-      dist: {
-        src: ["build/<%= pkg.name %>.js"],
-        dest: "build/<%= pkg.name %>.dist.js",
-      },
-      dist_separate_dompurify: {
-        src: ["build/separate-dompurify/<%= pkg.name %>.js"],
-        dest: "build/separate-dompurify/<%= pkg.name %>.dist.js",
-      },
-      options: {
-        // Remove all console output (see https://www.npmjs.com/package/grunt-remove-logging)
-      },
-      esm: {
-        options: {
-          methods: ['log'],
-          files: {
-            "build/<%= pkg.name %>.esm.js": ["build/<%= pkg.name %>.esm.js"],
-          }
-        }
-      },
-    },
-    decomment: {
-      any: {
-		options: {
-			safe: true,
-		},
-		files: {
-			"build/<%= pkg.name %>.dist.js": "build/<%= pkg.name %>.dist.js",
-		},
-
-      }
-    },
-    terser: {
-      options: {
-        ecma: 2015,
-        keep_fnames: true,
-        format: {
-          comments: /^!/,
-        }
-      },
-      min: {
-        files: {
-          "build/<%= pkg.name %>.min.js": ["build/<%= pkg.name %>.dist.js"],
-        },
-      },
-      min_separate_dompurify: {
-        files: {
-          "build/separate-dompurify/<%= pkg.name %>.min.js": ["build/separate-dompurify/<%= pkg.name %>.dist.js"],
-          "build/separate-dompurify/purify.min.js": ["node_modules/dompurify/dist/purify.js"],
-        },
-      },
-      umd: {
-        options: {
-          compress: {
-            'drop_console': ['log']
-          }
-        },
-        files: {
-          "build/<%= pkg.name %>.umd.min.js": ["build/<%= pkg.name %>.umd.js"]
-        }
-      },
-      umd_separate_dompurify: {
-        options: {
-          compress: {
-            'drop_console': ['log']
-          }
-        },
-        files: {
-          "build/separate-dompurify/<%= pkg.name %>.umd.min.js": ["build/separate-dompurify/<%= pkg.name %>.umd.js"]
-        }
-      },
-    },
     cssmin: {
       min: {
         src: ["styles/ableplayer.css"],
@@ -175,17 +19,6 @@ module.exports = function (grunt) {
         banner: "/*! <%= pkg.name %> V<%= pkg.version %> */",
       },
     },
-    jshint: {
-      files: ["Gruntfile.js", "scripts/**/*.js"],
-      options: {
-        // options here to override JSHint defaults
-        globals: {
-          browser: true,
-          jquery: true,
-          devel: true,
-        },
-      },
-    },
     run: {
       rollup: {
         cmd: 'npm',
@@ -196,27 +29,18 @@ module.exports = function (grunt) {
         args: ['exec', 'jest', '--', '--colors']
       }
     },
+    eslint: {
+      target: ['scripts/*.js'],
+    },
     clean: {
       build: ["build"],
     },
   });
 
   grunt.registerTask("default", [
-    "concat:build",
-    "removelogging:dist",
-	"decomment",
-    "terser:min",
-    "cssmin",
-  ]);
-  grunt.registerTask("build_separate_dompurify", [
-    "concat:build_separate_dompurify",
-    "removelogging:dist_separate_dompurify",
-    "terser:min_separate_dompurify",
-  ]);
-  grunt.registerTask("test", ["jshint"]);
-  grunt.registerTask("jest", ["run:rollup", "run:jest"]);
-  grunt.registerTask("umd", [
     "run:rollup",
     "cssmin",
   ]);
+  grunt.registerTask("test", ["eslint"]);
+  grunt.registerTask("jest", ["run:rollup", "run:jest"]);
 };

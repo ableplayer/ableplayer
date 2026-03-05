@@ -27,7 +27,7 @@ export default [
         output: [
             {
                 name: 'AblePlayer',
-                file: 'build/ableplayer.umd.debug.js',
+                file: 'build/ableplayer.js',
                 format: 'umd',
                 banner: `/*! ${nameVersion} - with DOMPurify included. Console logs enabled, for development */\n`,
                 sourcemap: true,
@@ -55,7 +55,7 @@ export default [
         output: [
             {
                 name: 'AblePlayer',
-                file: 'build/separate-dompurify/ableplayer.umd.debug.js',
+                file: 'build/separate-dompurify/ableplayer.js',
                 format: 'umd',
                 banner: `/*! ${nameVersion} - needs DOMPurify provided separately. Console logs enabled, for development */\n`,
                 sourcemap: true,
@@ -66,7 +66,7 @@ export default [
             },
             {
                 name: 'AblePlayer',
-                file: 'build/separate-dompurify/ableplayer.umd.min.js',
+                file: 'build/separate-dompurify/ableplayer.min.js',
                 format: 'umd',
                 banner: `/*! ${nameVersion} - needs DOMPurify provided separately. Minified production bundle. */\n`,
                 sourcemap: true,
@@ -80,6 +80,8 @@ export default [
 
     },
     {
+        // We still need to bundle a single ES module, to remove logs
+        // If we make the logging situation decide at runtime instead, we could simply expose the entry point directly
         input: 'scripts/main.js',
         plugins: [
             nodeResolve(),
@@ -90,8 +92,6 @@ export default [
         ],
         external: [/node_modules/],
         output: {
-            // We still need to bundle a single ES module, so we can have Grunt do removelogging
-            // If we make the logging situation decide at runtime instead, we could simply expose the entry point directly
             file: pkg.module,
             banner: `/*! ${nameVersion} - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */\n`,
             format: 'esm',
