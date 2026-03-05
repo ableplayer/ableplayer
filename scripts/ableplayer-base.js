@@ -357,9 +357,8 @@ function ablePlayerInitializeGlobals() {
 		if ($(media).data('use-ttml') !== undefined) {
 			this.useTtml = true;
 			// The following may result in a console error.
-			this.convert = import('xml-js').then(module => {
-				this.convert = module;
-			});
+			// eslint-disable-next-line no-undef
+			this.convert = require('xml-js');
 		} else {
 			this.useTtml = false;
 		}
