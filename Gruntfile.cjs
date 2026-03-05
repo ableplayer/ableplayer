@@ -7,11 +7,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-decomment");
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-terser");
-  grunt.loadNpmTasks("grunt-rollup");
   grunt.loadNpmTasks('grunt-run');
-
-  const nodeResolve = require('@rollup/plugin-node-resolve');
-  const commonjs = require('@rollup/plugin-commonjs');
 
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
@@ -95,80 +91,6 @@ module.exports = function (grunt) {
         dest: "build/separate-dompurify/<%= pkg.name %>.js",
       },
     },
-    rollup: {
-      options: {
-        name: 'AblePlayer',
-        format: 'umd',
-        sourcemap: true,
-        plugins: function () {
-          return [
-            nodeResolve(),
-            commonjs(),
-          ]
-        }
-      },
-      full: {
-        options: {
-          banner: "/*! <%= pkg.name %> V<%= pkg.version %> with DOMPurify included */\n",
-          globals: {
-            jquery: 'jQuery',
-          },
-          external: ['jquery']
-        },
-        files: {
-          'build/<%= pkg.name %>.umd.js': ['scripts/main.js'],
-        }
-      },
-      separate_dompurify: {
-        options: {
-          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - In this file, DOMPurify is not bundled in with AblePlayer, but is a required dependency that can be added to the project via a local copy or a CDN */\n",
-          sourcemapFile: 'build/separate-dompurify/<%= pkg.name %>-separate-dompurify.umd.js.map',
-          globals: {
-            jquery: 'jQuery',
-            dompurify: 'DOMPurify',
-          },
-          external: ['jquery', 'dompurify'],
-        },
-        files: {
-          'build/separate-dompurify/<%= pkg.name %>.umd.js': ['scripts/main.js'],
-        }
-      },
-      esm: {
-        options: {
-          format: 'esm',
-          sourcemap: false,
-          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - ECMAScript module suitable for use in other bundlers */\n",
-          external: [/node_modules/],
-        },
-        files: {
-          'build/<%= pkg.name %>.esm.js': ['scripts/main.js'],
-        }
-      },
-      cjs: {
-        options: {
-          format: 'cjs',
-          sourcemap: false,
-          banner: "/*! <%= pkg.name %> V<%= pkg.version %> - CommonJS module suitable for use in other bundlers */\n",
-          external: [/node_modules/],
-        },
-        files: {
-          'build/<%= pkg.name %>.cjs': ['scripts/main.js'],
-        }
-      },
-      test_validate: {
-        options: {
-          name: 'validate',
-          banner: "/*! Only used for testing */\n",
-          globals: {
-            dompurify: 'DOMPurify',
-          },
-          external: ['dompurify'],
-        },
-        files: {
-          'build/test/validate.umd.js': ['scripts/validate.js'],
-        }
-      }
-    },
     removelogging: {
       dist: {
         src: ["build/<%= pkg.name %>.js"],
@@ -186,14 +108,6 @@ module.exports = function (grunt) {
           methods: ['log'],
           files: {
             "build/<%= pkg.name %>.esm.js": ["build/<%= pkg.name %>.esm.js"],
-          }
-        }
-      },
-      cjs: {
-        options: {
-          methods: ['log'],
-          files: {
-            "build/<%= pkg.name %>.cjs": ["build/<%= pkg.name %>.cjs"],
           }
         }
       },
@@ -273,6 +187,10 @@ module.exports = function (grunt) {
       },
     },
     run: {
+      rollup: {
+        cmd: 'npm',
+        args: ['exec', 'rollup', '--', '-c'],
+      },
       jest: {
         cmd: 'npm',
         args: ['exec', 'jest', '--', '--colors']
@@ -296,22 +214,9 @@ module.exports = function (grunt) {
     "terser:min_separate_dompurify",
   ]);
   grunt.registerTask("test", ["jshint"]);
-  grunt.registerTask("jest", ["rollup:test_validate", "run:jest"]);
+  grunt.registerTask("jest", ["run:rollup", "run:jest"]);
   grunt.registerTask("umd", [
-    "rollup:full",
-    "terser:umd",
+    "run:rollup",
     "cssmin",
-  ]);
-  grunt.registerTask("umd_separate_dompurify", [
-    "rollup:separate_dompurify",
-    "terser:umd_separate_dompurify",
-  ]);
-  grunt.registerTask("esm", [
-    "rollup:esm",
-    "removelogging:esm",
-  ]);
-  grunt.registerTask("cjs", [
-    "rollup:cjs",
-    "removelogging:cjs",
   ]);
 };
