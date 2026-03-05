@@ -95,7 +95,7 @@ export default [
             file: pkg.module,
             banner: `/*! ${nameVersion} - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */\n`,
             format: 'esm',
-            sourcemap: false,
+            sourcemap: true,
         }
     },
     {
