@@ -110,10 +110,10 @@ function addYoutubeFunctions(AblePlayer) {
 					}
 					deferred.resolve();
 				},
-				onError: function () {
+				onError: function (e) {
 					deferred.reject();
 				},
-				onStateChange: function () {
+				onStateChange: function (e) {
 					thisObj.getPlayerState().then(function(playerState) {
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
