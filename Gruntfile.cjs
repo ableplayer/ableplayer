@@ -8,6 +8,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks("grunt-contrib-jshint");
   grunt.loadNpmTasks("grunt-terser");
   grunt.loadNpmTasks("grunt-rollup");
+  grunt.loadNpmTasks('grunt-run');
 
   const nodeResolve = require('@rollup/plugin-node-resolve');
   const commonjs = require('@rollup/plugin-commonjs');
@@ -131,6 +132,19 @@ module.exports = function (grunt) {
         files: {
           'build/separate-dompurify/<%= pkg.name %>.umd.js': ['scripts/main.js'],
         }
+      },
+      test_validate: {
+        options: {
+          name: 'validate',
+          banner: "/*! Only used for testing */\n",
+          globals: {
+            dompurify: 'DOMPurify',
+          },
+          external: ['dompurify'],
+        },
+        files: {
+          'build/test/validate.umd.js': ['scripts/validate.js'],
+        }
       }
     },
     removelogging: {
@@ -220,6 +234,12 @@ module.exports = function (grunt) {
         },
       },
     },
+    run: {
+      jest: {
+        cmd: 'npm',
+        args: ['exec', 'jest', '--', '--colors']
+      }
+    },
     clean: {
       build: ["build"],
     },
@@ -238,6 +258,7 @@ module.exports = function (grunt) {
     "terser:min_separate_dompurify",
   ]);
   grunt.registerTask("test", ["jshint"]);
+  grunt.registerTask("jest", ["rollup:test_validate", "run:jest"]);
   grunt.registerTask("umd", [
     "rollup:full",
     "terser:umd",
