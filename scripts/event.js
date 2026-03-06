@@ -839,7 +839,7 @@ function addEventFunctions(AblePlayer) {
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base.js)
 		this.$ableDiv.on( 'keydown', function (e) {
-			if (AblePlayer.nextIndex > 1) {
+			if (!AblePlayer.hasSingleInstance()) {
 				thisObj.onPlayerKeyPress(e);
 			}
 		});
@@ -855,7 +855,7 @@ function addEventFunctions(AblePlayer) {
 		// therefore, must be added separately
 		if (this.$transcriptArea) {
 			this.$transcriptArea.on('keydown',function (e) {
-				if (AblePlayer.nextIndex > 1) {
+				if (!AblePlayer.hasSingleInstance()) {
 					thisObj.onPlayerKeyPress(e);
 				}
 			});

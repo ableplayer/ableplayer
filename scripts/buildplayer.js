@@ -827,8 +827,9 @@ function addBuildplayerFunctions(AblePlayer) {
 				// inject our own fallback content, defined above
 				this.$newFallbackElement.append($fallback);
 			}
+		} else {
+			console.warn("Able Player encountered a problem, falling back to browser's HTML5 player.");
 		}
-		console.warn("Able Player encountered a problem, falling back to browser's HTML5 player.");
 		return;
 	};
 

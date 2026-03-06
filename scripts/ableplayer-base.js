@@ -4,7 +4,8 @@ import $ from 'jquery';
 import DOMPurify from 'dompurify';
 
 // maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
-const ablePlayerInstances = [];
+// 4.9.0: this is now a Set to make it easier to create and destroy players
+const ablePlayerInstances = new Set();
 
 function ablePlayerInitializeGlobals() {
 	$(function () {
@@ -28,8 +29,9 @@ function ablePlayerInitializeGlobals() {
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
 	$(window).on('keydown',function(e) {
-		if (AblePlayer.nextIndex === 1) {
-			AblePlayer.lastCreated.onPlayerKeyPress(e);
+		if (AblePlayer.hasSingleInstance()) {
+			const singleInstance = AblePlayer.getSingleInstance();
+			singleInstance.onPlayerKeyPress(e);
 		}
 	});
 }
@@ -44,8 +46,6 @@ function ablePlayerInitializeGlobals() {
 
 		var thisObj = this;
 
-		// Keep track of the last player created for use with global events.
-		AblePlayer.lastCreated = this;
 		this.media = media;
 
 		if ($(media).length === 0) {
@@ -448,11 +448,11 @@ function ablePlayerInitializeGlobals() {
 			this.provideFallback();
 		}
 
-
-		ablePlayerInstances.push(this);
+		ablePlayerInstances.add(this);
 	};
 
 	// Index to increment every time new player is created.
+	// 4.9.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
 	AblePlayer.nextIndex = 0;
 
 	AblePlayer.prototype.setup = function() {
@@ -507,5 +507,14 @@ function ablePlayerInitializeGlobals() {
 	AblePlayer.loadingYouTubeIframeAPI = false;
 
 	AblePlayer.ablePlayerInstances = ablePlayerInstances;
+
+	AblePlayer.hasSingleInstance = () => AblePlayer.ablePlayerInstances.size === 1;
+
+	AblePlayer.getSingleInstance = () => {
+		// If there are actually more instances, this returns the first one
+		for (const instance of AblePlayer.ablePlayerInstances) {
+			return instance;
+		}
+	}
 
 export default AblePlayer;

@@ -3,8 +3,6 @@
  import AccessibleDialog from './dialog';
 
  function addPreferenceFunctions(AblePlayer) {
-	const AblePlayerInstances = AblePlayer.ablePlayerInstances;
-
 	AblePlayer.prototype.setPrefs = function(preferences) {
 		if ( typeof Cookies !== 'undefined' ) {
 			Cookies.set('Able-Player', JSON.stringify(preferences), {
@@ -1031,18 +1029,18 @@
 				// update font size of YouTube captions
 				this.youTubePlayer.setOption('captions','fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
-		if (AblePlayerInstances.length > 1) {
+		if (!AblePlayer.hasSingleInstance()) {
 			// there are multiple players on this page.
 			// update prefs for ALL of them
-			for (i=0; i<AblePlayerInstances.length; i++) {
-				AblePlayerInstances[i].updatePlayerPrefs();
-				AblePlayerInstances[i].loadCurrentPreferences();
-				AblePlayerInstances[i].resetPrefsForm();
+			for (const instance of AblePlayer.ablePlayerInstances) {
+				instance.updatePlayerPrefs();
+				instance.loadCurrentPreferences();
+				instance.resetPrefsForm();
 				if (numCapChanges > 0) {
-					AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
+					instance.stylizeCaptions(instance.$captionsDiv);
 					// also apply same changes to descriptions, if present
-					if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
-						AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
+					if (typeof instance.$descDiv !== 'undefined') {
+						instance.stylizeCaptions(instance.$descDiv);
 					}
 				}
 			}
