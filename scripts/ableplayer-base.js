@@ -91,14 +91,6 @@ function ablePlayerInitializeGlobals() {
 		// debug
 		this.debug = ($(media).data('debug') !== undefined && $(media).data('debug') !== false) ? true : false;
 
-		// Path to root directory of Able Player code
-		if ($(media).data('root-path') !== undefined) {
-			// add a trailing slash if there is none
-			this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
-		} else {
-			this.rootPath = this.getRootPath();
-		}
-
 		// Volume
 		// Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
 		this.defaultVolume = 7;
@@ -447,18 +439,15 @@ function ablePlayerInitializeGlobals() {
 		this.title = $(media).attr('title');
 
 		// populate translation object with localized versions of all labels and prompts
-		// use defer method to defer additional processing until text is retrieved
 		this.tt = {};
-		thisObj = this;
-		async function fetchTranslations(thisObj) {
-			try {
-				await thisObj.getTranslationText();
-				thisObj.setup();
-			} catch {
-				thisObj.provideFallback();
-			}
+		try {
+			this.getTranslationText();
+			this.setup();
+		} catch (e) {
+			console.warn('Error setting up translations:', e);
+			this.provideFallback();
 		}
-		fetchTranslations(thisObj);
+
 
 		ablePlayerInstances.push(this);
 	};

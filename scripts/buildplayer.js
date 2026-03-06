@@ -828,6 +828,7 @@ function addBuildplayerFunctions(AblePlayer) {
 				this.$newFallbackElement.append($fallback);
 			}
 		}
+		console.warn("Able Player encountered a problem, falling back to browser's HTML5 player.");
 		return;
 	};
 

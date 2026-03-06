@@ -19,26 +19,6 @@ import DOMPurify from 'dompurify';
 		this.setIconColor();
 	};
 
-	AblePlayer.prototype.getRootPath = function() {
-
-		// returns Able Player root path (assumes ableplayer.js is in /build, one directory removed from root)
-		var scripts, i, scriptSrc, scriptFile, fullPath, ablePath, parentFolderIndex, rootPath;
-		scripts= document.getElementsByTagName('script');
-		for (i=0; i < scripts.length; i++) {
-			scriptSrc = scripts[i].src;
-			scriptFile = scriptSrc.substring(scriptSrc.lastIndexOf('/'));
-			if (scriptFile.indexOf('ableplayer') !== -1) {
-				// this is the ableplayerscript
-				fullPath = scriptSrc.split('?')[0]; // remove any ? params
-				break;
-			}
-		}
-		ablePath= fullPath.split('/').slice(0, -1).join('/'); // remove last filename part of path
-		parentFolderIndex = ablePath.lastIndexOf('/');
-		rootPath = ablePath.substring(0, parentFolderIndex) + '/';
-		return rootPath;
-	}
-
 	AblePlayer.prototype.setIconColor = function() {
 
 		// determine the best color choice (white or black) for icons,

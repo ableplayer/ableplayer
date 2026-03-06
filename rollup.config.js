@@ -3,6 +3,11 @@ import commonjs from '@rollup/plugin-commonjs';
 import terser from '@rollup/plugin-terser';
 import strip from '@rollup/plugin-strip';
 import pkg from './package.json' with { type: 'json' };
+import json from '@rollup/plugin-json';
+
+const getDefaultPlugins = () => {
+    return [nodeResolve(), commonjs(), json()];
+}
 
 const getTerserWithConfig = () => {
     return terser({
@@ -22,7 +27,7 @@ const nameVersion = `${pkg.name} V${pkg.version}`;
 export default [
     {
         input: 'scripts/main.js',
-        plugins: [nodeResolve(), commonjs()],
+        plugins: getDefaultPlugins(),
         external: ['jquery'],
         output: [
             {
@@ -50,7 +55,7 @@ export default [
     },
     {
         input: 'scripts/main.js',
-        plugins: [nodeResolve(), commonjs()],
+        plugins: getDefaultPlugins(),
         external: ['jquery', 'dompurify'],
         output: [
             {
@@ -84,8 +89,7 @@ export default [
         // If we make the logging situation decide at runtime instead, we could simply expose the entry point directly
         input: 'scripts/main.js',
         plugins: [
-            nodeResolve(),
-            commonjs(),
+            ...getDefaultPlugins(),
             strip({
                 functions: ['console.log'],
             }),
