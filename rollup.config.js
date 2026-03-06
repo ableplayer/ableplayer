@@ -22,6 +22,12 @@ const getTerserWithConfig = () => {
     });
 };
 
+const getStripWithConfig = () => {
+    return strip({
+        functions: ['console.log'],
+    });
+}
+
 const nameVersion = `${pkg.name} V${pkg.version}`;
 
 export default [
@@ -55,6 +61,23 @@ export default [
     },
     {
         input: 'scripts/main.js',
+        plugins: [...getDefaultPlugins(), getStripWithConfig()],
+        external: ['jquery'],
+        output: [
+            {
+                name: 'AblePlayer',
+                file: 'build/ableplayer.dist.js',
+                format: 'umd',
+                banner: `/*! ${nameVersion} - with DOMPurify included. Console logs disabled, but not minified, for demos. */\n`,
+                sourcemap: true,
+                globals: {
+                    jquery: 'jQuery',
+                },
+            },
+        ],
+    },
+    {
+        input: 'scripts/main.js',
         plugins: getDefaultPlugins(),
         external: ['jquery', 'dompurify'],
         output: [
@@ -82,7 +105,24 @@ export default [
                 plugins: [getTerserWithConfig()],
             },
         ]
-
+    },
+    {
+        input: 'scripts/main.js',
+        plugins: [...getDefaultPlugins(), getStripWithConfig()],
+        external: ['jquery', 'dompurify'],
+        output: [
+            {
+                name: 'AblePlayer',
+                file: 'build/separate-dompurify/ableplayer.dist.js',
+                format: 'umd',
+                banner: `/*! ${nameVersion} - needs DOMPurify provided separately. Console logs disabled, but not minified, for demos. */\n`,
+                sourcemap: true,
+                globals: {
+                    jquery: 'jQuery',
+                    dompurify: 'DOMPurify',
+                },
+            },
+        ]
     },
     {
         // We still need to bundle a single ES module, to remove logs
@@ -90,9 +130,7 @@ export default [
         input: 'scripts/main.js',
         plugins: [
             ...getDefaultPlugins(),
-            strip({
-                functions: ['console.log'],
-            }),
+            getStripWithConfig(),
         ],
         external: [/node_modules/],
         output: {
