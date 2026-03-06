@@ -14,7 +14,7 @@ function ablePlayerInitializeGlobals() {
 
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {
-				ablePlayerInstances.push(new AblePlayer($(this),$(element)));
+				new AblePlayer($(this),$(element));
 			}
 		});
 	});
@@ -474,6 +474,8 @@ function ablePlayerInitializeGlobals() {
 			}
 		}
 		fetchTranslations(thisObj);
+
+		ablePlayerInstances.push(this);
 	};
 
 	// Index to increment every time new player is created.

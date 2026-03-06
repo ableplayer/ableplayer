@@ -28,7 +28,11 @@ module.exports = function (grunt) {
       jest: {
         cmd: 'npm',
         args: ['exec', 'jest', '--', '--colors']
-      }
+      },
+      types: {
+        cmd: 'npx',
+        args: ['tsc']
+      },
     },
     copy: {
       dompurify: {
@@ -47,6 +51,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask("default", [
     "run:rollup",
+    "run:types",
     "copy:dompurify",
     "cssmin",
   ]);

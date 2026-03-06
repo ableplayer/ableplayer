@@ -37,7 +37,7 @@ export default [
             },
             {
                 name: 'AblePlayer',
-                file: pkg.browser,
+                file: 'build/ableplayer.min.js',
                 format: 'umd',
                 banner: `/*! ${nameVersion} - with DOMPurify included. Minified production bundle. */\n`,
                 sourcemap: true,
@@ -92,7 +92,7 @@ export default [
         ],
         external: [/node_modules/],
         output: {
-            file: pkg.module,
+            file: pkg.main,
             banner: `/*! ${nameVersion} - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */\n`,
             format: 'esm',
             sourcemap: true,
