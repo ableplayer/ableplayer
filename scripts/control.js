@@ -1325,57 +1325,40 @@ function addControlFunctions(AblePlayer) {
 		this.refreshControls('transcript');
 	};
 
-	AblePlayer.prototype.getIcon = function( $button, id, forceImg = false ) {
+	AblePlayer.prototype.getIcon = function( $button, id) {
 		// Remove existing HTML before generating.
-		// iconData: [0 = svg viewbox, 1 = svg path, 2 = icon font class, 3 = image file]
-		var iconType = this.iconType;
+		// iconData: [0 = svg viewbox, 1 = svg path]
+		// Font and image icon functionality was removed in 4.9.0 in favor of SVG.
 		var iconData = this.getIconData( id );
-		iconType = ( null === iconData[3] ) ? 'svg' : iconType;
-		iconType =  ( forceImg === true ) ? 'img' : iconType;
 
-		var existingIcon = $button.find( iconType + '#ableplayer-' + id );
+		var existingIcon = $button.find( 'svg#ableplayer-' + id );
 		// Avoid repainting icon if there's no change.
 		if ( existingIcon.length > 0 ) {
 			return;
 		}
 		$button.find('svg, img, span').remove();
 
-		if (iconType === 'font') {
-			var $buttonIcon = $('<span>', {
-				'class': iconData[2],
-			});
-			$button.append( $buttonIcon );
-		} else if (iconType === 'svg') {
-			// Function to create SVG nodes.
-			function getNode(n, v) {
-				n = document.createElementNS("http://www.w3.org/2000/svg", n);
-				for (var p in v) {
-					n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
-						return "-" + m.toLowerCase();
-					}), v[p]);
-				}
-				return n;
+		// Function to create SVG nodes.
+		function getNode(n, v) {
+			n = document.createElementNS("http://www.w3.org/2000/svg", n);
+			for (var p in v) {
+				n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
+					return "-" + m.toLowerCase();
+				}), v[p]);
 			}
-			var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-			icon.setAttribute( 'focusable', 'false' );
-			icon.setAttribute( 'aria-hidden', 'true');
-			icon.setAttribute( 'viewBox', iconData[0] );
-			icon.setAttribute( 'id', 'ableplayer-' + id );
-			let path = getNode( 'path', { d: iconData[1] } );
-			icon.appendChild( path );
-
-			$button.append( icon );
-			// Refresh the DOM.
-			$button.html($button.html());
-		} else {
-			var $buttonImg = $('<img>',{
-				'src': iconData[3],
-				'alt': '',
-				'role': 'presentation'
-			});
-			$button.append($buttonImg);
-			$button.find('img').attr('src',iconData[3]);
+			return n;
 		}
+		var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+		icon.setAttribute( 'focusable', 'false' );
+		icon.setAttribute( 'aria-hidden', 'true');
+		icon.setAttribute( 'viewBox', iconData[0] );
+		icon.setAttribute( 'id', 'ableplayer-' + id );
+		let path = getNode( 'path', { d: iconData[1] } );
+		icon.appendChild( path );
+
+		$button.append( icon );
+		// Refresh the DOM.
+		$button.html($button.html());
 	};
 
 	AblePlayer.prototype.setText = function( $button, text ) {

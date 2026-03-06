@@ -26,7 +26,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			// youtube adds its own big play button
 			// don't show ours *unless* video has a poster attribute
 			// (which obstructs the YouTube poster & big play button)
-			if (this.iconType != 'image' && (this.player !== 'youtube' || this.hasPoster)) {
+			if (this.player !== 'youtube' || this.hasPoster) {
 				this.injectBigPlayButton();
 			}
 		}
@@ -1048,13 +1048,14 @@ function addBuildplayerFunctions(AblePlayer) {
 					// 2. span that contains the icon font (in our case, buttonIcon)
 					// 3. span that contains a visually hidden label for screen readers (buttonLabel)
 					// In addition, we are adding aria-label to the button (but not title)
-					// And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
 					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
 					// because <button> elements are rendered poorly in high contrast mode
 					// in some OS/browser/plugin combinations
+
+					// In 4.9.0, icons are always SVG, so some of the font & image icon edge cases are removed.
 					$newButton = $('<div>',{
 						'role': 'button',
 						'tabindex': '0',

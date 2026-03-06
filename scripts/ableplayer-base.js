@@ -311,21 +311,6 @@ function ablePlayerInitializeGlobals() {
 			this.playerWidth = null;
 		}
 
-		// Icon type
-		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
-		// Fallback for browsers that don't support SVG is scalable icomoon fonts
-		// Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
-		// Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
-		this.iconType = 'font';
-		this.forceIconType = false;
-		if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
-			var iconType = $(media).data('icon-type');
-			if (iconType === 'font' || iconType === 'image' || iconType === 'svg') {
-				this.iconType = iconType;
-				this.forceIconType = true;
-			}
-		}
-
 		var allowFullScreen = $(media).data('allow-fullscreen');
 		this.allowFullscreen = (allowFullScreen !== undefined && allowFullScreen === false) ? false : true;
 
