@@ -480,6 +480,17 @@ function ablePlayerInitializeGlobals() {
 		});
 	};
 
+	/**
+	 * Removes this player from the global instance list.
+	 *
+	 * You probably want to call this during/after removing a player from the
+	 * DOM. This avoids memory leaks, and allows the event handling to have the
+	 * correct count of how many players are actually on the page.
+	 */
+	AblePlayer.prototype.dispose = function () {
+		AblePlayer.ablePlayerInstances.delete(this);
+	}
+
 	AblePlayer.getActiveDOMElement = function () {
 		var activeElement = document.activeElement;
 
