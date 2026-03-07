@@ -14,7 +14,8 @@
   "scripts": {
     "build": "grunt",
     "test": "grunt jest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "watch": "rollup -c --watch"
   },
   "dependencies": {
     "dompurify": "^3.2.6",
