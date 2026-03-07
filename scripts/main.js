@@ -48,6 +48,6 @@ addTranslationFunctions(AblePlayer);
 addVtsFunctions(AblePlayer);
 addVimeoFunctions(AblePlayer);
 
-AblePlayer.ablePlayerInitializeGlobals();
+AblePlayer.ablePlayerSetupWindow();
 
 export default AblePlayer;

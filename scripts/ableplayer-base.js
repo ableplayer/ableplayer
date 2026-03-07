@@ -7,7 +7,16 @@ import DOMPurify from 'dompurify';
 // 4.9.0: this is now a Set to make it easier to create and destroy players
 const ablePlayerInstances = new Set();
 
-function ablePlayerInitializeGlobals() {
+/**
+ * Performs one-time setup on `window`.
+ *
+ * Does nothing if `window` is not available, for example in SSR.
+ */
+function ablePlayerSetupWindow() {
+	if (typeof window === 'undefined') {
+		console.log("`window` is undefined. Skipping one-time Able Player `window` setup.");
+		return;
+	}
 	$(function () {
 		if (typeof DOMPurify === 'undefined') {
 			console.warn('Required dependency DOMPurify not available. Please use the full Able Player bundle which has DOMPurify built in. Or, keep using this bundle, and include DOMPurify separately.')
@@ -40,9 +49,17 @@ function ablePlayerInitializeGlobals() {
 	/**
 	 * Construct the AblePlayer object.
 	 *
+	 * Able Player needs `window` to instantiate, so, skip the constructor if
+	 * you are running outside the browser (for example, SSR).
+	 *
 	 * @param object media jQuery selector or element identifying the media.
 	 */
 	function AblePlayer(media) {
+
+		if (typeof window === 'undefined') {
+			console.warn("`window` is undefined. Able Player needs `window` to instantiate. Skip constructing Able Player if you are running outside a browser (for example, SSR).");
+			return;
+		}
 
 		var thisObj = this;
 
@@ -512,7 +529,7 @@ function ablePlayerInitializeGlobals() {
 		}
 	};
 
-	AblePlayer.ablePlayerInitializeGlobals = ablePlayerInitializeGlobals;
+	AblePlayer.ablePlayerSetupWindow = ablePlayerSetupWindow;
 
 	AblePlayer.youTubeIframeAPIReady = false;
 	AblePlayer.loadingYouTubeIframeAPI = false;
