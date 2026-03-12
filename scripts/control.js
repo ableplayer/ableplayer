@@ -1338,27 +1338,28 @@ function addControlFunctions(AblePlayer) {
 		}
 		$button.find('svg, img, span').remove();
 
-		// Function to create SVG nodes.
-		function getNode(n, v) {
-			n = document.createElementNS("http://www.w3.org/2000/svg", n);
-			for (var p in v) {
-				n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
-					return "-" + m.toLowerCase();
-				}), v[p]);
+		// Outdented for simpler diff
+			// Function to create SVG nodes.
+			function getNode(n, v) {
+				n = document.createElementNS("http://www.w3.org/2000/svg", n);
+				for (var p in v) {
+					n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
+						return "-" + m.toLowerCase();
+					}), v[p]);
+				}
+				return n;
 			}
-			return n;
-		}
-		var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-		icon.setAttribute( 'focusable', 'false' );
-		icon.setAttribute( 'aria-hidden', 'true');
-		icon.setAttribute( 'viewBox', iconData[0] );
-		icon.setAttribute( 'id', 'ableplayer-' + id );
-		let path = getNode( 'path', { d: iconData[1] } );
-		icon.appendChild( path );
+			var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+			icon.setAttribute( 'focusable', 'false' );
+			icon.setAttribute( 'aria-hidden', 'true');
+			icon.setAttribute( 'viewBox', iconData[0] );
+			icon.setAttribute( 'id', 'ableplayer-' + id );
+			let path = getNode( 'path', { d: iconData[1] } );
+			icon.appendChild( path );
 
-		$button.append( icon );
-		// Refresh the DOM.
-		$button.html($button.html());
+			$button.append( icon );
+			// Refresh the DOM.
+			$button.html($button.html());
 	};
 
 	AblePlayer.prototype.setText = function( $button, text ) {
