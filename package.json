@@ -39,7 +39,6 @@
     "grunt-contrib-cssmin": "^3.0.0",
     "grunt-eslint": "^26.0.0",
     "grunt-run": "^0.8.1",
-    "grunt-terser": "^2.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jest-puppeteer": "^10.1.0",
