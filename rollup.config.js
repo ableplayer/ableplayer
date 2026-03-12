@@ -141,7 +141,7 @@ export default [
         }
     },
     {
-        // This one is just for testing
+        // This one is just for jest testing
         input: 'scripts/validate.js',
         plugins: [nodeResolve(), commonjs()],
         external: ['dompurify'],
