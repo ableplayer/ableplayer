@@ -37,7 +37,7 @@ function addMiscFunctions(AblePlayer) {
     var count, prop;
     count = 0;
     for (prop in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+      if (Object.hasOwn(obj, prop)) {
         ++count;
       }
     }

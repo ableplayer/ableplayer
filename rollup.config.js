@@ -11,7 +11,7 @@ const getDefaultPlugins = () => {
 
 const getTerserWithConfig = () => {
     return terser({
-        ecma: 2015,
+        ecma: 2022,
         keep_fnames: true,
         format: {
             comments: /^!/,
