@@ -1328,7 +1328,7 @@ function addControlFunctions(AblePlayer) {
 	AblePlayer.prototype.getIcon = function( $button, id) {
 		// Remove existing HTML before generating.
 		// iconData: [0 = svg viewbox, 1 = svg path]
-		// Font and image icon functionality was removed in 4.9.0 in favor of SVG.
+		// Font and image icon functionality was removed in 5.0.0 in favor of SVG.
 		var iconData = this.getIconData( id );
 
 		var existingIcon = $button.find( 'svg#ableplayer-' + id );

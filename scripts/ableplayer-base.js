@@ -4,7 +4,7 @@ import $ from 'jquery';
 import DOMPurify from 'dompurify';
 
 // maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
-// 4.9.0: this is now a Set to make it easier to create and destroy players
+// 5.0.0: this is now a Set to make it easier to create and destroy players
 const ablePlayerInstances = new Set();
 
 /**
@@ -469,7 +469,7 @@ function ablePlayerSetupWindow() {
 	};
 
 	// Index to increment every time new player is created.
-	// 4.9.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
+	// 5.0.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
 	AblePlayer.nextIndex = 0;
 
 	AblePlayer.prototype.setup = function() {

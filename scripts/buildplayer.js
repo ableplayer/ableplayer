@@ -1057,7 +1057,7 @@ function addBuildplayerFunctions(AblePlayer) {
 					// because <button> elements are rendered poorly in high contrast mode
 					// in some OS/browser/plugin combinations
 
-					// In 4.9.0, icons are always SVG, so some of the font & image icon edge cases are removed.
+					// In 5.0.0, icons are always SVG, so some of the font & image icon edge cases are removed.
 					$newButton = $('<div>',{
 						'role': 'button',
 						'tabindex': '0',
