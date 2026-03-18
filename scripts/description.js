@@ -238,7 +238,7 @@
 
 		var preferences, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
 		preferences = this.getPref();
-		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefDescVoice() : null;
+		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefVoice() : null;
 
 		this.getBrowserVoices();
 		this.rebuildDescPrefsForm();
@@ -488,7 +488,7 @@
 				} else if (this.speechEnabled) {
 					if ( 'video' !== this.descMethod ) {
 						// use browser's built-in speech synthesis
-						this.announceDescriptionText('description',descText);
+						this.announceText('description',descText);
 					}
 					if (this.prefDescVisible) {
 						// write description to the screen for sighted users
@@ -543,13 +543,14 @@
 		this.prefDescRate = speechRate;
 	};
 
-	AblePlayer.prototype.announceDescriptionText = function(context, text) {
+	AblePlayer.prototype.announceText = function(context, text) {
 
-		// this function announces description text using speech synthesis
+		// this function announces text using speech synthesis
 		// it's only called if already determined that browser supports speech synthesis
 		// context is either:
 		// 'description' - actual description text extracted from WebVTT file
 		// 'sample' - called when user changes a setting in Description Prefs dialog
+		// 'caption' - called when announcing a caption.
 
 		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance,
 			timeElapsed, secondsElapsed;
@@ -586,12 +587,24 @@
 			pitch = $('#' + this.mediaId + '_prefDescPitch').val();
 			rate = $('#' + this.mediaId + '_prefDescRate').val();
 			volume = $('#' + this.mediaId + '_prefDescVolume').val();
-		} else {
+		} else if ( context === 'captionSample' ) {
+			// get settings from form
+			voiceName = $('#' + this.mediaId + '_prefCaptionsVoice').val();
+			pitch = $('#' + this.mediaId + '_prefCaptionsPitch').val();
+			rate = $('#' + this.mediaId + '_prefCaptionsRate').val();
+			volume = $('#' + this.mediaId + '_prefCaptionsVolume').val();
+		} else if ( context === 'description' ) {
 			// get settings from global prefs
 			voiceName = this.prefDescVoice;
 			pitch = this.prefDescPitch;
 			rate = this.prefDescRate;
 			volume = this.prefDescVolume;
+		} else {
+			// get settings from global prefs
+			voiceName = this.prefCaptionsVoice;
+			pitch = this.prefCaptionsPitch;
+			rate = this.prefCaptionsRate;
+			volume = this.prefCaptionsVolume;
 		}
 
 		// get the voice associated with the user's chosen voice name

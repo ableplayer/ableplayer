@@ -239,6 +239,36 @@
 				'group': 'captions',
 				'default': '100%'
 			});
+			prefs.push({
+				'name': 'prefCaptionsSpeak',
+				'label': this.translate( 'prefVoicedCaptions', 'Voiced Captions' ),
+				'group': 'captions',
+				'default': 0
+			});
+			prefs.push({
+				'name': 'prefCaptionsVoice',
+				'label': this.translate( 'prefDescVoice', 'Voice' ),
+				'group': 'captions',
+				'default': null // will be set later, in injectPrefsForm()
+			});
+			prefs.push({
+				'name': 'prefCaptionsPitch',
+				'label': this.translate( 'prefDescPitch', 'Pitch' ),
+				'group': 'captions',
+				'default': 1 // 0 to 2
+			});
+			prefs.push({
+				'name': 'prefCaptionsRate',
+				'label': this.translate( 'prefDescRate', 'Rate' ),
+				'group': 'captions',
+				'default': 1.2 // 0.1 to 10 (1 is normal speech; 2 is fast but decipherable; >2 is super fast)
+			});
+			prefs.push({
+				'name': 'prefCaptionsVolume',
+				'label': this.translate( 'volume', 'Volume' ),
+				'group': 'captions',
+				'default': 1 // 0 to 1
+			});
 		}
 
 		if (this.mediaType === 'video') {
@@ -340,7 +370,7 @@
 		var thisObj, available,
 			$prefsDiv, formTitle, introText, $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId, $legend, legendId, thisPref, $thisDiv, thisClass,
-			thisId, $thisLabel, $thisField, options,$thisOption,optionValue,optionLang,optionText,
+			thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
 			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, $kbHeading,$kbList,
 			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer;
 
@@ -434,7 +464,7 @@
 				thisPref = available[i]['name'];
 				thisClass = 'able-' + thisPref;
 				thisId = this.mediaId + '_' + thisPref;
-				$thisDiv = $('<div>').addClass(thisClass);
+				$thisDiv = $('<div>').addClass(thisClass + ' able-player-setting');
 
 				if (form === 'captions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
@@ -442,44 +472,97 @@
 						name: thisPref,
 						id: thisId,
 					});
-					if (thisPref !== 'prefCaptions' && thisPref !== 'prefCaptionsStyle') {
-						// add a change handler that updates the style of the sample caption text
+					// add a change handler that updates the style of the sample caption text
+					let viewingOptions = ['prefCaptionsPosition','prefCaptionsFont','prefCaptionsSize','prefCaptionsColor','prefCaptionsBGColor','prefCaptionsOpacity'];
+					if ( viewingOptions.indexOf(thisPref) !== -1 ) {
 						$thisField.on( 'change', function() {
 							changedPref = $(this).attr('name');
 							thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
 						});
 					}
-					options = this.getCaptionsOptions(thisPref);
-					for (j=0; j < options.length; j++) {
+					captionsOptions = this.getCaptionsOptions(thisPref);
+					$thisDiv.append($thisLabel,$thisField);
+					for (j=0; j < captionsOptions.length; j++) {
 						if (thisPref === 'prefCaptionsPosition') {
-							optionValue = options[j];
+							optionValue = captionsOptions[j];
 							if (optionValue === 'overlay') {
 								optionText = this.translate( 'captionsPositionOverlay', 'Overlay' );
 							} else if (optionValue === 'below') {
-								optionValue = options[j];
+								optionValue = captionsOptions[j];
 								optionText = this.translate( 'captionsPositionBelow', 'Below video' );
 							}
-						} else if (thisPref === 'prefCaptionsFont' || thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor') {
-							optionValue = options[j][0];
-							optionText = options[j][1];
+						} else if (thisPref === 'prefCaptionsFont' || thisPref === 'prefCaptionsColor' || thisPref === 'prefCaptionsBGColor' || thisPref === 'prefCaptionsSpeak' ) {
+							optionValue = captionsOptions[j][0];
+							optionText = captionsOptions[j][1];
 						} else if (thisPref === 'prefCaptionsOpacity') {
-							optionValue = options[j];
-							optionText = options[j];
+							optionValue = captionsOptions[j];
+							optionText = captionsOptions[j];
 							optionText += (optionValue === '0%') ? ' (' + this.translate( 'transparent', 'transparent' ) + ')' : ' (' + this.translate( 'solid', 'solid' ) + ')';
-						} else {
-							optionValue = options[j];
-							optionText = options[j];
+						} else if (thisPref === 'prefCaptionsSize') {
+							optionValue = captionsOptions[j];
+							optionText = captionsOptions[j];
 						}
-						$thisOption = $('<option>',{
-							value: optionValue,
-							text: optionText
-						});
-						if (this[thisPref] === optionValue) {
-							$thisOption.prop('selected',true);
+						let voicingOptions = ['prefCaptionsVoice','prefCaptionsPitch','prefCaptionsRate','prefCaptionsVolume'];
+						if ( optionValue && voicingOptions.indexOf(thisPref) === -1 ) {
+							$thisOption = $('<option>',{
+								value: optionValue,
+								text: optionText
+							});
+							if (this[thisPref] === optionValue) {
+								$thisOption.prop('selected',true);
+							}
+							$thisField.append($thisOption);
 						}
-						$thisField.append($thisOption);
+						// If synth is possible, show voicing options.
+						if ( this.synth ) {
+							if ( thisPref === 'prefCaptionsVoice' && this.descVoices.length ) {
+								prefDescVoice = this.getPrefVoice();
+								for (j=0; j < this.descVoices.length; j++) {
+									optionValue = this.descVoices[j].name;
+									optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase();
+									optionText = optionValue + ' (' + this.descVoices[j].lang + ')';
+									$thisOption = $('<option>',{
+										'value': optionValue,
+										'data-lang': optionLang,
+										text: optionText
+									});
+									if (prefDescVoice === optionValue) {
+										$thisOption.prop('selected',true);
+									}
+									$thisField.append($thisOption);
+								}
+								this.$voiceSelectField = $thisField;
+							} else {
+								if ( thisPref == 'prefCaptionsPitch' || thisPref == 'prefCaptionsRate' || thisPref == 'prefCaptionsVolume' ) {
+									options = false;
+									// Options values described in audio description preferences.
+									options = (thisPref == 'prefCaptionsPitch') ? [0,0.5,1,1.5,2] : options;
+									options = (thisPref == 'prefCaptionsRate') ? [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3] : options;
+									options = (thisPref == 'prefCaptionsVolume') ? [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1] : options;
+									if ( options ) {
+										for (j=0; j < options.length; j++) {
+											optionValue = options[j];
+											optionText = this.makePrefsValueReadable(thisPref,optionValue);
+											$thisOption = $('<option>',{
+												value: optionValue,
+												text: optionText
+											});
+											if (this[thisPref] == optionValue) {
+												$thisOption.prop('selected',true);
+											}
+											$thisField.append($thisOption);
+										}
+										// add a change handler that announces the sample text
+										$thisField.on('change',function() {
+											let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' )
+											thisObj.announceText('captionSample',captionSample);
+										});
+										$thisDiv.append($thisLabel,$thisField);
+									}
+								}
+							}
+						}
 					}
-					$thisDiv.append($thisLabel,$thisField);
 				} else if (form === 'descriptions') {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
@@ -503,8 +586,8 @@
 							name: thisPref,
 							id: thisId,
 						});
-						if (thisPref === 'prefDescVoice' && this.descVoices.length) {
-							prefDescVoice = this.getPrefDescVoice();
+						if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
+							prefDescVoice = this.getPrefVoice();
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
 								optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase();
@@ -562,7 +645,7 @@
 						}
 						// add a change handler that announces the sample description text
 						$thisField.on('change',function() {
-							thisObj.announceDescriptionText('sample',thisObj.currentSampleText);
+							thisObj.announceText('sample',thisObj.currentSampleText);
 						});
 						$thisDiv.append($thisLabel,$thisField);
 					}
@@ -790,7 +873,7 @@
 		});
 	};
 
-	AblePlayer.prototype.getPrefDescVoice = function () {
+	AblePlayer.prototype.getPrefVoice = function () {
 
 		// return user's preferred voice for the current language from preferences.voices
 		var lang, preferences, i;
@@ -844,7 +927,7 @@
 		// are strange and inconsistent between variables
 		// this function returns text that is more readable than the values themselves
 
-		if (pref === 'prefDescPitch') {
+		if (pref === 'prefDescPitch' || pref === 'prefCaptionsPitch' ) {
 			if (value === 0) {
 				return this.translate( 'prefDescPitch1', 'Very low' );
 			} else if (value === 0.5) {
@@ -856,7 +939,7 @@
 			} else if (value === 2) {
 				return this.translate( 'prefDescPitch5', 'Very high' );
 			}
-		} else if (pref === 'prefDescRate') {
+		} else if (pref === 'prefDescRate' || pref === 'prefCaptionsRate' ) {
 			// default in the API is 0.1 to 10, where 1 is normal speaking voice
 			// our custom range offers several rates close to 1
 			// plus a couple of crazy fast ones for sport
@@ -882,7 +965,7 @@
 			} else if (value === 3) {
 				return 10;
 			}
-		} else if (pref === 'prefDescVolume') {
+		} else if (pref === 'prefDescVolume' || pref === 'prefCaptionsVolume' ) {
 			// values range from 0.1 to 1.0
 			return value * 10;
 		}
@@ -925,7 +1008,7 @@
 		// called when user saves the Preferences form
 		// update preferences with new value
 		var preferences, available, prefName, prefId,
-			voiceSelectId, newVoice, newVoiceLang, numChanges, voiceLangFound,
+			voiceSelectId, newVoice, numChanges, voiceLangFound,
 			numCapChanges, capSizeChanged, capSizeValue, newValue;
 
 		numChanges = 0;
@@ -962,7 +1045,6 @@
 					numChanges++;
 				} else if (prefName == 'prefDescMethod') {
 					// As of v4.0.10, prefDescMethod is no longer a choice
-					// this.prefDescMethod = $('input[name="' + prefName + '"]:checked').val();
 					this.prefDescMethod = 'video';
 					if (this.prefDescMethod !== preferences.preferences['prefDescMethod']) { // user's preference has changed
 						preferences.preferences['prefDescMethod'] = this.prefDescMethod;

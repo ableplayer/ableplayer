@@ -197,7 +197,13 @@
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace( /\n/g, "<br>" );
-
+		// If preference enabled to voice captions, send to synthesizer.
+		if ( this.speechEnabled && this.prefCaptionsSpeak ) {
+			let announceText = new DOMParser().parseFromString( captionText, 'text/html' );
+			let announcement = announceText.body.textContent || '';
+			// use browser's built-in speech synthesis
+			this.announceText( 'caption', announcement );
+		}
         this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {
@@ -323,7 +329,29 @@
         options[0] = "overlay";
         options[1] = "below";
         break;
+
+      case "prefCaptionsSpeak":
+        options[0] = ["0", this.translate( 'off', 'Off' ) ];
+        options[1] = ["1", this.translate( 'on', 'On' ) ];
+        break;
+
+      case "prefCaptionsVoice":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsPitch":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsRate":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsVolume":
+		options[0] = null; // set later.
+        break;
     }
+
     return options;
   };
 
