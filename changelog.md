@@ -1,5 +1,39 @@
 # AblePlayer Changelog
 
+## 5.0.0 March 18, 2026
+
+### Features
+
+- Can be installed and bundled as an NPM package with a new ES module entry point `ableplayer.esm.js`. Tested with Vue and Vite, should also be compatible with other stacks with webpack, React, etc.
+- No longer exposes anything on `window`, except the UMD bundles when used as an IIFE, which only add `AblePlayer`. UMD bundles tested to work properly with RequireJS.
+- Code cleaned up to run in "strict" mode, which is required for ES modules.
+- Can be dynamically created and disposed indefinitely without memory leaks or event handling issues. Use `new AblePlayer(media)` and `instance.dispose()`.
+- TypeScript type definitions for `ableplayer.esm.js`.
+- Source maps for all bundles.
+
+### Breaking changes
+
+- `data-root-path` no longer supported (or needed, in most cases). Translations are now bundled, and icons are always hard-coded SVGs. For most users this is an improvement, since translations and icons no longer need to be hosted separately, and translations are no longer `fetch`ed in a loop. Once you migrate, you can delete `button-icons` and `translations` from your application. However, to add custom translations, you will need to build your own bundle, and custom icons are no longer possible.
+  - Relatedly, `data-icon-type` no longer supported, since the icons are now always hard-coded SVGs.
+  - There are plans for a future release to allow configuration in `new AblePlayer` to add custom translations and icons.
+- Various things Able Player added to `window` are moved or no longer exposed.
+  - `window.AblePlayerInstances` -> `AblePlayer.ablePlayerInstances`. Previously, dynamically creating an Able Player required applications to manually add the new instance to `window.AblePlayerInstances`. Code doing this will no longer work. To migrate, just call `new AblePlayer` and it will automatically add itself to `AblePlayer.ablePlayerInstances`. Don't forget to call `dispose()` to dynamically remove instances from this list. This list is now a `Set` rather than an array, but most applications won't need to access it directly anymore.
+  - UMD bundles that include DOMPurify no longer expose it on `window`. If you need DOMPurify on `window`, migrate to the `separate-dompurify` bundle, and include DOMPurify in a separate `<script>` tag.
+  - Able Player internals are no longer exposed on `window`.
+    - `window.AccessibleDialog`
+    - `window.AccessibleSlider`
+    - `window.validate`
+- Able Player is now built expecting browsers to support ES 2022. 95% of browsers support ES 2022, compared to 96% for ES 2015. Use Babel or similar to transpile to older ES versions, if you're sure you need one. Able Player 4.8.0 was already using `Object.hasOwn` which is part of ES 2022, but those will now be more widespread, so new breakage is possible.
+
+### Bug fixes
+
+- Region-specific language tags are supposed to have the region capitalized. The affected translations are `pt-BR` and `zh-TW`. Able Player was lowercasing them before.
+- Various issues with Vimeo error handling. The `catch` blocks were referencing nonexistent variables.
+
+### Code cleanup
+
+- Able Player now passes `eslint`'s "recommended" rule set. In the process, we fixed some values that were always `undefined` before, for example: `this.lang`, and the `lang` values in `getSampleDescriptionText`. This shouldn't break anything, but, worth mentioning just in case someone was relying on these values being `undefined`.
+
 ## 4.8.0 February 6th, 2026
 
 ### Features
@@ -203,4 +237,4 @@ The following people contributed to this release (if I missed you, please let me
 
 @terrill, @candideu, @xerc, @jbylsma, @amartincua, @zwiastunsw, @conorom, @jeanem, @joedolson, @Justryuz, @dependabot
 
-**Full Changelog**: https://github.com/ableplayer/ableplayer/compare/v4.5.1...v4.6.0
+**Full Changelog**: https://github.com/ableplayer/ableplayer/compare/v4.5.1...v5.0.0
