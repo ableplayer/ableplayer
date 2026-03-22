@@ -34,6 +34,8 @@
 
 - Able Player now passes `eslint`'s "recommended" rule set. In the process, we fixed some values that were always `undefined` before, for example: `this.lang`, and the `lang` values in `getSampleDescriptionText`. This shouldn't break anything, but, worth mentioning just in case someone was relying on these values being `undefined`.
 
+**Full Changelog**: https://github.com/ableplayer/ableplayer/compare/v4.8.0...v5.0.0
+
 ## 4.8.0 February 6th, 2026
 
 ### Features
@@ -236,5 +238,3 @@
 The following people contributed to this release (if I missed you, please let me know!)
 
 @terrill, @candideu, @xerc, @jbylsma, @amartincua, @zwiastunsw, @conorom, @jeanem, @joedolson, @Justryuz, @dependabot
-
-**Full Changelog**: https://github.com/ableplayer/ableplayer/compare/v4.5.1...v5.0.0
