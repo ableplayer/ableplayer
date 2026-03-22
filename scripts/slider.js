@@ -1,4 +1,4 @@
-(function ($) {
+import $ from 'jquery';
 
 
 	// Events:
@@ -6,7 +6,7 @@
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	window.AccessibleSlider = function(div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
+	function AccessibleSlider(div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
 
 		// div is the host element around which the slider will be built
 		// orientation is either 'horizontal' or 'vertical'
@@ -450,4 +450,4 @@
 		return out;
 	};
 
-})(jQuery);
+export default AccessibleSlider;

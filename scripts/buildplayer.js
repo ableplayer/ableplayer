@@ -1,5 +1,9 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+import validate from './validate';
+import AccessibleSlider from './slider';
 
+function addBuildplayerFunctions(AblePlayer) {
 	AblePlayer.prototype.injectPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
@@ -22,7 +26,7 @@
 			// youtube adds its own big play button
 			// don't show ours *unless* video has a poster attribute
 			// (which obstructs the YouTube poster & big play button)
-			if (this.iconType != 'image' && (this.player !== 'youtube' || this.hasPoster)) {
+			if (this.player !== 'youtube' || this.hasPoster) {
 				this.injectBigPlayButton();
 			}
 		}
@@ -50,8 +54,8 @@
 
 	AblePlayer.prototype.injectAudioPoster = function() {
 		if ( this.mediaType === 'audio' && this.hasPoster ) {
-			audioPoster = DOMPurify.sanitize(this.audioPoster);
-			audioPosterAlt = DOMPurify.sanitize(this.audioPosterAlt);
+			const audioPoster = DOMPurify.sanitize(this.audioPoster);
+			const audioPosterAlt = DOMPurify.sanitize(this.audioPosterAlt);
 			let audioPosterImg = document.createElement( 'img' );
 			audioPosterImg.setAttribute( 'src', audioPoster );
 			audioPosterImg.setAttribute( 'alt', audioPosterAlt );
@@ -268,8 +272,8 @@
 					'left': preferencePos['left']
 				});
 				// Check whether the window is above the top of the viewport.
-				topPosition = $window.offset().top;
-				leftPosition = $window.offset().left;
+				let topPosition = $window.offset().top;
+				let leftPosition = $window.offset().left;
 				viewportWidth = window.innerWidth;
 				windowWidth = $window.width();
 				if ( topPosition < 0 ) {
@@ -678,7 +682,7 @@
 		// parameter 'which' is passed if refreshing content of an existing popup ('captions' or 'chapters')
 		// If which is undefined, automatically setup 'captions', 'chapters', and 'prefs' popups
 		// However, only setup 'transcript-window' and 'sign-window' popups if passed as value of which
-		var popups, thisObj, i,	tracks;
+		var popups, i, tracks;
 
 		popups = [];
 		if (typeof which === 'undefined') {
@@ -702,8 +706,7 @@
 			popups.push('sign-window');
 		}
 		if (popups.length > 0) {
-			thisObj = this;
-			for (var i=0; i<popups.length; i++) {
+			for (i=0; i<popups.length; i++) {
 				var popup = popups[i];
 				if (popup == 'prefs') {
 					this.prefsPopup = this.createPopup('prefs');
@@ -824,6 +827,8 @@
 				// inject our own fallback content, defined above
 				this.$newFallbackElement.append($fallback);
 			}
+		} else {
+			console.warn("Able Player encountered a problem, falling back to browser's HTML5 player.");
 		}
 		return;
 	};
@@ -1040,18 +1045,16 @@
 					// this control is a button
 					buttonTitle = this.getButtonTitle(control);
 
-					// icomoon documentation recommends the following markup for screen readers:
-					// 1. link element (or in our case, button). Nested inside this element:
-					// 2. span that contains the icon font (in our case, buttonIcon)
-					// 3. span that contains a visually hidden label for screen readers (buttonLabel)
-					// In addition, we are adding aria-label to the button (but not title)
-					// And if iconType === 'image', we are replacing #2 with an image (with alt="" and role="presentation")
+					// Buttons consist of a <div role="button"> with an <svg> inside.
+					// We add aria-label to the button (but not title)
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
 					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
 					// because <button> elements are rendered poorly in high contrast mode
 					// in some OS/browser/plugin combinations
+
+					// In 5.0.0, icons are always SVG, so the font & image icon edge cases are removed.
 					$newButton = $('<div>',{
 						'role': 'button',
 						'tabindex': '0',
@@ -1283,7 +1286,7 @@
 
 		// combine left and right controls arrays for future reference
 		this.controls = [];
-		for (var sec in controlLayout) if (controlLayout.hasOwnProperty(sec)) {
+		for (var sec in controlLayout) if (Object.hasOwn(controlLayout, sec)) {
 			this.controls = this.controls.concat(controlLayout[sec]);
 		}
 
@@ -1616,4 +1619,6 @@
 			return this.capitalizeFirstLetter( control );
 		}
 	};
-})(jQuery);
+}
+
+export default addBuildplayerFunctions;

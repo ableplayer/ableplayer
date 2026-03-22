@@ -1,4 +1,4 @@
-(function ($) {
+function addLangsFunctions(AblePlayer) {
 	// Look up ISO 639-1 language codes to be used as subtitle labels
 	// In some instances "name" has been trunctation for readability
 	// Sources:
@@ -997,4 +997,6 @@
 		return key;
 	};
 
-})(jQuery);
+}
+
+export default addLangsFunctions;

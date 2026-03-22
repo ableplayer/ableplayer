@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addCaptionFunctions(AblePlayer) {
   AblePlayer.prototype.updateCaption = function (time) {
     if (
       !this.usingYouTubeCaptions &&
@@ -71,38 +73,19 @@
       } else if (thisObj.usingVimeoCaptions) {
         thisObj.vimeoPlayer
           .enableTextTrack(thisObj.captionLang)
-          .then(function (track) {
-            // track.language = the iso code for the language
-            // track.kind = 'captions' or 'subtitles'
-            // track.label = the human-readable label
-          })
           .catch(function (error) {
             switch (error.name) {
-              case "InvalidTrackLanguageError":
-                // no track was available with the specified language
-                console.log(
-                  "No " +
-                    track.kind +
-                    " track is available in the specified language (" +
-                    track.label +
-                    ")"
-                );
+              case 'InvalidTrackLanguageError':
+                // There is no text track for the specified language
+                console.log(`No Vimeo text track is available in the specified language (${thisObj.captionLang})`);
                 break;
-              case "InvalidTrackError":
-                // no track was available with the specified language and kind
-                console.log(
-                  "No " +
-                    track.kind +
-                    " track is available in the specified language (" +
-                    track.label +
-                    ")"
-                );
+              case 'InvalidTrackError':
+                // There is no such text track
+                console.log('No Vimeo text track is available');
                 break;
               default:
                 // some other error occurred
-                console.log(
-                  "Error loading " + track.label + " " + track.kind + " track"
-                );
+                console.log('Error enabling Vimeo text track');
                 break;
             }
           });
@@ -444,4 +427,6 @@
       }
     }
   };
-})(jQuery);
+}
+
+export default addCaptionFunctions;

@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addControlFunctions(AblePlayer) {
 
 	AblePlayer.prototype.seekTo = function (newTime) {
 
@@ -93,11 +95,10 @@
 
 		// returns duration of the current media, expressed in seconds
 		// function is called by getMediaTimes, and return value is sanitized there
-		var deferred, promise, thisObj;
+		var deferred, promise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
-		thisObj = this;
 
 		if (this.player === 'vimeo') {
 			if (this.vimeoPlayer) {
@@ -141,11 +142,10 @@
 		// returns elapsed time of the current media, expressed in seconds
 		// function is called by getMediaTimes, and return value is sanitized there
 
-		var deferred, promise, thisObj;
+		var deferred, promise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
-		thisObj = this;
 
 		if (this.player === 'vimeo') {
 			if (this.vimeoPlayer) {
@@ -387,8 +387,6 @@
 		// Would be better if the video and captions expanded to fill the void
 		// replace JS animation with CSS animation in 12/2025.
 
-		var thisObj = this;
-
 		if (direction == 'out') {
 			// get the original height of two key components:
 			this.$playerDiv.addClass( 'fade-out' ).removeClass( 'fade-in' );
@@ -432,7 +430,7 @@
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 
-		var thisObj, duration,  textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
+		var thisObj, textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
 
 		thisObj = this;
 		// wait until new source has loaded before refreshing controls
@@ -935,25 +933,21 @@
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
 				} else if (this.usingVimeoCaptions) {
-					this.vimeoPlayer.enableTextTrack(this.captionLang).then(function(track) {
-						// track.language = the iso code for the language
-						// track.kind = 'captions' or 'subtitles'
-						// track.label = the human-readable label
-					}).catch(function(error) {
+					this.vimeoPlayer.enableTextTrack(this.captionLang).catch(function(error) {
 						switch (error.name) {
 							case 'InvalidTrackLanguageError':
-								// no track was available with the specified language
-								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								// There is no text track for the specified language
+								console.log(`No Vimeo text track is available in the specified language (${this.captionLang})`);
 								break;
 							case 'InvalidTrackError':
-								// no track was available with the specified language and kind
-								console.log('No ' + track.kind + ' track is available in the specified language (' + track.label + ')');
+								// There is no such text track
+								console.log('No Vimeo text track is available');
 								break;
 							default:
 								// some other error occurred
-								console.log('Error loading ' + track.label + ' ' + track.kind + ' track');
+								console.log('Error enabling Vimeo text track');
 								break;
-							}
+						}
 					});
 				} else {
 					this.$captionsWrapper.show();
@@ -1331,27 +1325,20 @@
 		this.refreshControls('transcript');
 	};
 
-	AblePlayer.prototype.getIcon = function( $button, id, forceImg = false ) {
+	AblePlayer.prototype.getIcon = function( $button, id) {
 		// Remove existing HTML before generating.
-		// iconData: [0 = svg viewbox, 1 = svg path, 2 = icon font class, 3 = image file]
-		var iconType = this.iconType;
+		// iconData: [0 = svg viewbox, 1 = svg path]
+		// Font and image icon functionality was removed in 5.0.0 in favor of SVG.
 		var iconData = this.getIconData( id );
-		iconType = ( null === iconData[3] ) ? 'svg' : iconType;
-		iconType =  ( forceImg === true ) ? 'img' : iconType;
 
-		var existingIcon = $button.find( iconType + '#ableplayer-' + id );
+		var existingIcon = $button.find( 'svg#ableplayer-' + id );
 		// Avoid repainting icon if there's no change.
 		if ( existingIcon.length > 0 ) {
 			return;
 		}
-		$button.find('svg, img, span').remove();
+		$button.find('svg').remove();
 
-		if (iconType === 'font') {
-			var $buttonIcon = $('<span>', {
-				'class': iconData[2],
-			});
-			$button.append( $buttonIcon );
-		} else if (iconType === 'svg') {
+		// Outdented for simpler diff
 			// Function to create SVG nodes.
 			function getNode(n, v) {
 				n = document.createElementNS("http://www.w3.org/2000/svg", n);
@@ -1373,15 +1360,6 @@
 			$button.append( icon );
 			// Refresh the DOM.
 			$button.html($button.html());
-		} else {
-			var $buttonImg = $('<img>',{
-				'src': iconData[3],
-				'alt': '',
-				'role': 'presentation'
-			});
-			$button.append($buttonImg);
-			$button.find('img').attr('src',iconData[3]);
-		}
 	};
 
 	AblePlayer.prototype.setText = function( $button, text ) {
@@ -1770,4 +1748,6 @@
 		this.updateTranscript();
 	};
 
-})(jQuery);
+}
+
+export default addControlFunctions;

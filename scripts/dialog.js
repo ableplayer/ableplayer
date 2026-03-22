@@ -1,8 +1,10 @@
-(function ($) {
+import $ from 'jquery';
+
+// Outdented for a simpler diff
 	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
 	// Based on the incredible accessible modal dialog.
-	window.AccessibleDialog = function( modalDiv, $returnElement, title, closeButtonLabel) {
+	function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 
 		this.title = title;
 		this.closeButtonLabel = closeButtonLabel;
@@ -145,4 +147,4 @@
 		return false;
 	};
 
-})(jQuery);
+export default AccessibleDialog;
