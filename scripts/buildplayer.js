@@ -1045,11 +1045,8 @@ function addBuildplayerFunctions(AblePlayer) {
 					// this control is a button
 					buttonTitle = this.getButtonTitle(control);
 
-					// icomoon documentation recommends the following markup for screen readers:
-					// 1. link element (or in our case, button). Nested inside this element:
-					// 2. span that contains the icon font (in our case, buttonIcon)
-					// 3. span that contains a visually hidden label for screen readers (buttonLabel)
-					// In addition, we are adding aria-label to the button (but not title)
+					// Buttons consist of a <div role="button"> with an <svg> inside.
+					// We add aria-label to the button (but not title)
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
@@ -1057,7 +1054,7 @@ function addBuildplayerFunctions(AblePlayer) {
 					// because <button> elements are rendered poorly in high contrast mode
 					// in some OS/browser/plugin combinations
 
-					// In 5.0.0, icons are always SVG, so some of the font & image icon edge cases are removed.
+					// In 5.0.0, icons are always SVG, so the font & image icon edge cases are removed.
 					$newButton = $('<div>',{
 						'role': 'button',
 						'tabindex': '0',

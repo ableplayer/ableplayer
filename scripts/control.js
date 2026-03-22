@@ -1336,7 +1336,7 @@ function addControlFunctions(AblePlayer) {
 		if ( existingIcon.length > 0 ) {
 			return;
 		}
-		$button.find('svg, img, span').remove();
+		$button.find('svg').remove();
 
 		// Outdented for simpler diff
 			// Function to create SVG nodes.
