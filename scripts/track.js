@@ -396,13 +396,6 @@ function addTrackFunctions(AblePlayer) {
   };
 
   AblePlayer.prototype.loadTextObject = function (src) {
-    // TODO: Incorporate the following function, moved from setupTracks()
-    // convert XML/TTML captions file
-    /*
-	if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
-	  trackContents = thisObj.ttml2webvtt(trackText);
-	}
-	*/
     var deferred, promise, thisObj, $tempDiv;
 
     deferred = new this.defer();

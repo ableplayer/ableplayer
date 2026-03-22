@@ -347,16 +347,6 @@ function ablePlayerSetupWindow() {
 		var showNowPlaying = $(media).data('show-now-playing');
 		this.showNowPlaying = (showNowPlaying !== undefined && showNowPlaying === false) ? false : true;
 
-		// TTML support (experimental); enabled for testing with data-use-ttml (Boolean)
-		if ($(media).data('use-ttml') !== undefined) {
-			this.useTtml = true;
-			// The following may result in a console error.
-			// eslint-disable-next-line no-undef
-			this.convert = require('xml-js');
-		} else {
-			this.useTtml = false;
-		}
-
 		// Fallback
 		// The data-test-fallback attribute can be used to test the fallback solution in any browser
 		var testFallback = $(media).data('test-fallback');
