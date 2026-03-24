@@ -469,8 +469,7 @@
 				thisClass = 'able-' + thisPref;
 				thisId = this.mediaId + '_' + thisPref;
 				$thisDiv = $('<div>').addClass(thisClass + ' able-player-setting');
-
-				if (form === 'captions') {
+				if (form === 'captions' ) {
 					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					$thisField = $('<select>',{
 						name: thisPref,
@@ -485,7 +484,9 @@
 						});
 					}
 					captionsOptions = this.getCaptionsOptions(thisPref);
-					$thisDiv.append($thisLabel,$thisField);
+					if ( thisPref !== 'prefCaptionsVoice' ) {
+						$thisDiv.append($thisLabel,$thisField);
+					}
 					for (j=0; j < captionsOptions.length; j++) {
 						if (thisPref === 'prefCaptionsPosition') {
 							optionValue = captionsOptions[j];
@@ -506,7 +507,7 @@
 							optionValue = captionsOptions[j];
 							optionText = captionsOptions[j];
 						}
-						let voicingOptions = ['prefCaptionsVoice','prefCaptionsPitch','prefCaptionsRate','prefCaptionsVolume'];
+						let voicingOptions = ['prefCaptionsPitch','prefCaptionsRate','prefCaptionsVolume'];
 						if ( optionValue && voicingOptions.indexOf(thisPref) === -1 ) {
 							$thisOption = $('<option>',{
 								value: optionValue,
