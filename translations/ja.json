@@ -68,6 +68,7 @@
   "fallbackError2": "以下のブラウザではこのプレイヤーが利用可能であることが知られています",
   "orHigher": "以降",
   "prefMenuCaptions": "キャプション",
+  "prefVoicedCaptions": "Voiced Captions",
   "prefMenuDescriptions": "音声解説",
   "prefMenuKeyboard": "キーボード",
   "prefMenuTranscript": "字幕",

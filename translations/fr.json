@@ -68,6 +68,7 @@
   "fallbackError2": "Les navigateurs suivants fonctionnent habituellement avec ce lecteur multimédia",
   "orHigher": "ou des versions plus récentes",
   "prefMenuCaptions": "Sous-titres",
+  "prefVoicedCaptions": "Voiced Captions",
   "prefMenuDescriptions": "Descriptions",
   "prefMenuKeyboard": "Clavier",
   "prefMenuTranscript": "Transcription",

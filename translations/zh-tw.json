@@ -68,6 +68,7 @@
   "fallbackError2": "下列瀏覽器應該可以使用本媒體播放器",
   "orHigher": "或更新的版本",
   "prefMenuCaptions": "字幕",
+  "prefVoicedCaptions": "Voiced Captions",
   "prefMenuDescriptions": "口述影像",
   "prefMenuKeyboard": "鍵盤",
   "prefMenuTranscript": "逐字稿",

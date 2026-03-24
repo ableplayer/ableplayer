@@ -68,6 +68,7 @@
   "fallbackError2": "The following browsers are known to work with this media player",
   "orHigher": "or higher",
   "prefMenuCaptions": "Captions",
+  "prefVoicedCaptions": "Voiced Captions",
   "prefMenuDescriptions": "Descriptions",
   "prefMenuKeyboard": "Keyboard",
   "prefMenuTranscript": "Transcript",

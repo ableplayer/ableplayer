@@ -68,6 +68,8 @@
   "fallbackError2": "Los siguientes navegadores se sabe pueden trabajar con este reproductor",
   "orHigher": "o superior",
   "prefMenuCaptions": "Subtítulos",
+  "prefVoicedCaptions": "Voiced Captions",
+  "prefVoicedCaptions": "Voiced Captions",
   "prefMenuDescriptions": "Descripciones",
   "prefMenuKeyboard": "Teclado",
   "prefMenuTranscript": "Transcripción",
