@@ -484,7 +484,7 @@
 						});
 					}
 					captionsOptions = this.getCaptionsOptions(thisPref);
-					if ( thisPref !== 'prefCaptionsVoice' ) {
+					if ( ! ( thisPref === 'prefCaptionsVoice' && ! this.descVoices.length ) ) {
 						$thisDiv.append($thisLabel,$thisField);
 					}
 					for (j=0; j < captionsOptions.length; j++) {
