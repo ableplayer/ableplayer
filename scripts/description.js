@@ -192,7 +192,7 @@ function addDescriptionFunctions(AblePlayer) {
 
 		this.descVoices = [];
 		voices = this.synth.getVoices();
-		descLangs = this.getDescriptionLangs();
+		descLangs = this.getTrackLangs();
 		if (voices.length > 0) {
 			this.descVoices = [];
 			// available languages are identified with local suffixes (e.g., en-US)
@@ -215,7 +215,7 @@ function addDescriptionFunctions(AblePlayer) {
 		return false;
 	};
 
-	AblePlayer.prototype.getDescriptionLangs = function () {
+	AblePlayer.prototype.getTrackLangs = function () {
 
 		// returns an array of languages (from srclang atttributes)
 		// in which there are description tracks
@@ -223,7 +223,7 @@ function addDescriptionFunctions(AblePlayer) {
 		var descLangs = [];
 		if (this.tracks) {
 			for (var i=0; i < this.tracks.length; i++) {
-				if (this.tracks[i].kind === 'descriptions') {
+				if (this.tracks[i].kind === 'descriptions' || this.tracks[i].kind === 'captions' ) {
 					descLangs.push(this.tracks[i].language.substring(0,2).toLowerCase());
 				}
 			}
