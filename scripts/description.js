@@ -186,20 +186,20 @@ function addDescriptionFunctions(AblePlayer) {
 		// define this.descVoices array
 		// includes only languages that match the language of the captions or player
 
-		var voices, descLangs, voiceLang, preferredLang;
+		var voices, trackLangs, voiceLang, preferredLang;
 
 		preferredLang = (this.captionLang) ? this.captionLang.substring(0,2).toLowerCase() : this.lang.substring(0,2).toLowerCase();
 
 		this.descVoices = [];
 		voices = this.synth.getVoices();
-		descLangs = this.getTrackLangs();
+		trackLangs = this.getTrackLangs();
 		if (voices.length > 0) {
 			this.descVoices = [];
 			// available languages are identified with local suffixes (e.g., en-US)
 			for (var i=0; i<voices.length; i++) {
 				// match only the first 2 characters of the lang code
 				voiceLang = voices[i].lang.substring(0,2).toLowerCase();
-				if (voiceLang === preferredLang && (descLangs.indexOf(voiceLang) !== -1)) {
+				if (voiceLang === preferredLang && (trackLangs.indexOf(voiceLang) !== -1)) {
 					// this voice matches preferredLang
 					// AND there's a matching description track in this language
 					// Add this voice to final array
@@ -243,7 +243,8 @@ function addDescriptionFunctions(AblePlayer) {
 		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefVoice() : null;
 
 		this.getBrowserVoices();
-		this.rebuildDescPrefsForm();
+		this.rebuildVoicePrefsForm( '_prefDescVoice' );
+		this.rebuildVoicePrefsForm( '_prefCaptionsVoice' );
 
 		if (this.selectedDescriptions) {
 			descLang = this.selectedDescriptions.language;

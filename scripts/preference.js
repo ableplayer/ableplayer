@@ -901,7 +901,7 @@
 		return null; // user has no saved preference
 	}
 
-	AblePlayer.prototype.rebuildDescPrefsForm = function () {
+	AblePlayer.prototype.rebuildVoicePrefsForm = function ( field ) {
 
 		// Called if this.descVoices changes, which may happen if:
 		//  getBrowserVoices() succeeds after an earlier failure
@@ -909,7 +909,7 @@
 
 		var i, optionValue, optionText, $thisOption;
 
-		this.$voiceSelectField = $('#' + this.mediaId + '_prefDescVoice');
+		this.$voiceSelectField = $('#' + this.mediaId + field);
 		this.$voiceSelectField.empty();
 		for (i=0; i < this.descVoices.length; i++) {
 			optionValue = this.descVoices[i].name;
