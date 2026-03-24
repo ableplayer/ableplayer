@@ -7,3 +7,7 @@ translations/???.js
 .htaccess
 docs
 jsdoc.json
+.git
+.github
+demos
+media

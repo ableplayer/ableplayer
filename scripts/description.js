@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+function addDescriptionFunctions(AblePlayer) {
 	AblePlayer.prototype.initDescription = function() {
 
 		// set default mode for delivering description (open vs closed)
@@ -20,11 +23,10 @@
 		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
 		// descReader == either 'browser' or 'screenreader'
 
-		var deferred, promise, thisObj;
+		var deferred, promise;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
-		thisObj = this;
 
 		if (this.mediaType === 'audio') {
 			deferred.resolve();
@@ -270,7 +272,7 @@
 				}
 				if (!prefVoiceFound) {
 					// select the first language that matches the first 2 characters of the lang code
-					for (var i=0; i<voices.length; i++) {
+					for (i=0; i<voices.length; i++) {
 						if (voices[i].lang.substring(0,2).toLowerCase() === descLang.substring(0,2).toLowerCase()) {
 							descVoice = voices[i].name;
 							break;
@@ -346,7 +348,6 @@
 				for (i=0; i < this.$sources.length; i++) {
 					// for all <source> elements, replace src with data-orig-src
 					origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-orig-src') );
-					srcType = this.$sources[i].getAttribute('type');
 					if (origSrc) {
 						this.$sources[i].setAttribute('src',origSrc);
 					}
@@ -358,7 +359,6 @@
 					// then store original source in a new data-orig-src attribute
 					origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('src') );
 					descSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-desc-src') );
-					srcType = this.$sources[i].getAttribute('type');
 					if (descSrc) {
 						this.$sources[i].setAttribute('src',descSrc);
 						this.$sources[i].setAttribute('data-orig-src',origSrc);
@@ -451,8 +451,7 @@
 			return;
 		}
 
-		var thisObj, cues, d, thisDescription, descText;
-		thisObj = this;
+		var cues, d, thisDescription, descText;
 
 		var flattenComponentForDescription = function (component) {
 			var result = [];
@@ -684,4 +683,6 @@
 		this.speakingDescription = true;
 	};
 
-})(jQuery);
+}
+
+export default addDescriptionFunctions;

@@ -60,6 +60,9 @@
 <script>
 	$(document).ready(function() {
 
+		var audioPlayer = null;
+		var videoPlayer = null;
+
 		$('#addAudio').on('click',function(){
 
 			// Add an audio element dynamically
@@ -78,8 +81,7 @@
 			$('#audio1').html($audio1).show();
 
 			// Create a new Able Player instance from the new audio element
-			// and add it to the global AblePlayerInstances array
-			AblePlayerInstances.push(new AblePlayer($audio1));
+			audioPlayer = new AblePlayer($audio1);
 
 			// Update the alert and button in this demo
 			$('#alert').text('One audio player added. See below.').show();
@@ -131,8 +133,7 @@
 		$('#video1').html($video1).show();
 
 		// Create a new Able Player instance from the new video element
-		// and add it to the global AblePlayerInstances array
-		AblePlayerInstances.push(new AblePlayer($video1));
+		videoPlayer = new AblePlayer($video1);
 
 		// Update the alert and button in this demo
 		$('#alert').text('One video player added. See below.').show();
@@ -141,7 +142,13 @@
 		});
 		$('#reset').on('click',function() {
 			$('#audio1').empty().hide();
+			if (audioPlayer) {
+				audioPlayer.dispose();
+			}
 			$('#video1').empty().hide();
+			if (videoPlayer) {
+				videoPlayer.dispose();
+			}
 			$('#alert').text('All players have been removed.').show();
 			$('#addAudio').removeAttr('aria-disabled');
 			$('#addVideo').removeAttr('aria-disabled');

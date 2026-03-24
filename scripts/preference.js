@@ -1,4 +1,8 @@
-(function ($) {
+ /*  global Cookies */
+ import $ from 'jquery';
+ import AccessibleDialog from './dialog';
+
+ function addPreferenceFunctions(AblePlayer) {
 	AblePlayer.prototype.setPrefs = function(preferences) {
 		if ( typeof Cookies !== 'undefined' ) {
 			Cookies.set('Able-Player', JSON.stringify(preferences), {
@@ -389,7 +393,7 @@
 			formTitle = this.translate( 'prefTitleCaptions', 'Captions Preferences' );
 		} else if (form == 'descriptions') {
 			formTitle = this.translate( 'prefTitleDescriptions', 'Audio Description Preferences' );
-			var $prefsIntro = $('<p>',{
+			$prefsIntro = $('<p>',{
 				text: this.translate( 'prefIntroDescription1', 'This media player supports audio description in two ways: ' )
 			});
 			var $prefsIntroUL = $('<ul>');
@@ -980,9 +984,8 @@
 		// User presses Escape to close Prefs dialog
 		// User clicks Save in Prefs dialog, & there's more than one player on page
 
-		var thisObj, preferences, available, i, prefName;
+		var preferences, available, i, prefName;
 
-		thisObj = this;
 		preferences = this.getPref();
 		available = this.getAvailablePreferences();
 		for (i=0; i<available.length; i++) {
@@ -1108,18 +1111,18 @@
 				// update font size of YouTube captions
 				this.youTubePlayer.setOption('captions','fontSize',this.translatePrefs('size',capSizeValue,'youtube'));
 		}
-		if (AblePlayerInstances.length > 1) {
+		if (!AblePlayer.hasSingleInstance()) {
 			// there are multiple players on this page.
 			// update prefs for ALL of them
-			for (var i=0; i<AblePlayerInstances.length; i++) {
-				AblePlayerInstances[i].updatePlayerPrefs();
-				AblePlayerInstances[i].loadCurrentPreferences();
-				AblePlayerInstances[i].resetPrefsForm();
+			for (const instance of AblePlayer.ablePlayerInstances) {
+				instance.updatePlayerPrefs();
+				instance.loadCurrentPreferences();
+				instance.resetPrefsForm();
 				if (numCapChanges > 0) {
-					AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$captionsDiv);
+					instance.stylizeCaptions(instance.$captionsDiv);
 					// also apply same changes to descriptions, if present
-					if (typeof AblePlayerInstances[i].$descDiv !== 'undefined') {
-						AblePlayerInstances[i].stylizeCaptions(AblePlayerInstances[i].$descDiv);
+					if (typeof instance.$descDiv !== 'undefined') {
+						instance.stylizeCaptions(instance.$descDiv);
 					}
 				}
 			}
@@ -1173,5 +1176,6 @@
 		}
 		return true;
 	};
+}
 
-})(jQuery);
+export default addPreferenceFunctions;

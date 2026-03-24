@@ -9,15 +9,14 @@ const path = require("path");
 describe("validate.js tests", () => {
   beforeAll(async () => {
     await page.goto("http://localhost:8888"); // Replace with your test URL
-    const validatePath = path.resolve(__dirname, "../validate.js");
-    await page.addScriptTag({ path: validatePath });
-
+    const validatePath = path.resolve(__dirname, "../../build/test/validate.umd.js");
     // Add DOMPurify script
     const domPurifyPath = path.resolve(
       __dirname,
       "../../node_modules/dompurify/dist/purify.min.js"
     );
     await page.addScriptTag({ path: domPurifyPath });
+    await page.addScriptTag({ path: validatePath });
   });
 
   /**

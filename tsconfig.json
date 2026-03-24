@@ -1,0 +1,11 @@
+{
+    "include": ["build/ableplayer.esm.js"],
+    "exclude": [],
+    "compilerOptions": {
+        "allowJs": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "outDir": "build",
+        "declarationMap": true
+    }
+}

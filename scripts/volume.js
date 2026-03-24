@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addVolumeFunctions(AblePlayer) {
 
 	AblePlayer.prototype.addVolumeSlider = function($div) {
 
@@ -270,4 +272,6 @@
 		}
 	};
 
-})(jQuery);
+}
+
+export default addVolumeFunctions;

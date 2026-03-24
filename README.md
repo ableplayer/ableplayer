@@ -99,18 +99,37 @@ Since the release of version 4.4, we are no longer supporting Internet Explorer.
 - *AblePlayer*, as of 4.5.1, requires the use of the DOMPurify sanitizing library.
   - The default files in the root of the `/build` directory have DOMPurify bundled in.
   - Alternatively, the `build/separate-dompurify` directory houses copies of the AblePlayer files with AblePlayer code only and a stand-alone copy of the current version of DOMPurify that the project is currently using. These files are available for those who want to load DOMPurify via a separate file or want to use a CDN hosted version.
+- As of 5.0.0, *Able Player* includes an ES module bundle. This bundle `import`s jQuery and doesn't need it on `window`.
 
-To install Able Player, copy the following files from the Able Player repo into a folder on your web server:
+## Installation
+
+### `<script>` tag
+
+Copy the following files from the Able Player repo into a folder on your web server:
 - `build/*`
-- `button-icons/*` (optional, not required for svg)
 - `styles/*` (optional, see note below)
-- `translations/*`
 - `LICENSE`
 
 The *build* folder includes minified production code (*ableplayer.min.js* and *ableplayer.min.css*).
 For debugging and/or style customization purposes, human-readable source files are also available:
 - `build/ableplayer.js`
 - `styles/ableplayer.css`
+
+As of 5.0.0, all bundles also include source maps.
+
+### Bundling via Vite or similar
+
+Install Able Player using NPM, Yarn, or similar.
+
+```sh
+npm install ableplayer
+```
+
+### RequireJS
+
+The UMD bundles also function as RequireJS AMD modules.
+
+Put `ableplayer.min.js` and jQuery alongside your other JavaScript so RequireJS can find them.
 
 ## Fallback
 
@@ -128,11 +147,13 @@ Fallback content can be tested by adding the **data-test-fallback** attribute to
 
 *Able Player* is built on the HTML5 media elements, so at the top of your web page be sure you have the HTML5 doctype:
 
-```HTML
+```html
 <!DOCTYPE html>
 ```
 
 ### Step 2: Add JavaScript and CSS
+
+#### `<script>` tags
 
 Copy and paste the following code into your web page. This code applies to all use cases, both audio and video.
 
@@ -140,7 +161,7 @@ Able Player works with either jQuery or with the slim build of jQuery, which is 
 
 Able Player does not require cookies, but you can add the js-cookie package to save preferences as cookies. Otherwise, preferences are saved in localStorage.
 
-```HTML
+```html
 <!-- Dependencies -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 or
@@ -156,6 +177,38 @@ or
 <script src="build/ableplayer.min.js"></script>
 ```
 
+#### ES module bundling with Vite or similar
+
+Include Able Player's CSS in your bundle. For example:
+
+```js
+import 'ableplayer/styles/ableplayer.css';
+```
+
+Then import the Able Player constructor into your application code.
+
+```js
+import AblePlayer from 'ableplayer';
+```
+
+#### RequireJS
+
+Include the CSS as in the `<script>` tag instructions.
+
+```html
+<!-- CSS -->
+<link rel="stylesheet" href="build/ableplayer.min.css" type="text/css"/>
+```
+
+Instead of using separate `<script>` tags for Able Player and dependencies,
+simply add it as a dependency in your `requirejs` calls, wherever you need it.
+
+```js
+requirejs(["ableplayer"], function(AblePlayer) {
+  // ...
+});
+```
+
 ### Step 3: Add HTML
 
 Add an HTML5 `<audio>` or `<video>` element to your web page, as follows.
@@ -164,7 +217,7 @@ Add an HTML5 `<audio>` or `<video>` element to your web page, as follows.
 
 Copy and paste the following code into your web page, replacing the source files with the path to your own media files. Use both OGG and MP3 to ensure cross-browser compatibility, since some browsers don’t support MP3.
 
-```HTML
+```html
 <audio id="audio1" data-able-player preload="auto">
   <source type="audio/ogg" src="path_to_audio_file.ogg"/>
   <source type="audio/mpeg" src="path_to_audio_file.mp3"/>
@@ -175,7 +228,7 @@ Copy and paste the following code into your web page, replacing the source files
 
 Copy and paste the following code into your web page, replacing the source files with the path to your own media files. Use both WebM and MP4 to ensure cross-browser compatibility, since some browsers don’t support MP4.
 
-```HTML
+```html
 <video id="video1" data-able-player preload="auto" poster="path_to_image.jpg">
   <source type="video/webm" src="path_to_video.webm" data-desc-src="path_to_described_video.webm"/>
   <source type="video/mp4" src="path_to_video.mp4" data-desc-src="path_to_described_video.mp4"/>
@@ -184,6 +237,40 @@ Copy and paste the following code into your web page, replacing the source files
 </video>
 ```
 
+#### Dynamically creating Able Player
+
+If you are making an SPA (single-page app) or are otherwise dynamically creating and removing DOM nodes, you will probably need to create and dispose Able Player dynamically.
+
+Follow the examples above, but omit `data-able-player`. Able Player only looks for this data attribute once, upon being loaded, so it will have no effect on elements added later. Instead, once you have the media element added to the document, get a reference to it and construct Able Player with it.
+
+Keep the other data attributes, if you are using any, since Able Player will need them for its configuration.
+
+HTML:
+
+```html
+<video id="video1" preload="auto" poster="path_to_image.jpg">
+  <source type="video/webm" src="path_to_video.webm" data-desc-src="path_to_described_video.webm"/>
+  <source type="video/mp4" src="path_to_video.mp4" data-desc-src="path_to_described_video.mp4"/>
+  <track kind="captions" src="path_to_captions.vtt"/>
+  <track kind="descriptions" src="path_to_descriptions.vtt"/>
+</video>
+```
+
+JavaScript:
+
+```js
+// After adding the media element
+const video1 = document.getElementById('video1');
+const player = new AblePlayer(video1);
+
+// After removing the media element
+player.dispose();
+```
+
+#### SSR (server-side rendering) or SSG (static site generation)
+
+Able Player performs some initialization upon import, that expects `window` to be present. For example, YouTube API hooks, and global event handlers. If `window` is not available, Able Player will skip these steps. See `AblePlayer.ablePlayerSetupWindow()`. Instantiation will _not_ work, so be sure your `new AblePlayer(media)` calls are inside an `onMounted` hook or similar.
+
 ### Step 4: Review User-Defined Variables in *ableplayer.js*
 
 The JavaScript file *initialize.js* includes a block of user-defined variables that can be modified from their default settings, such as volume, color of controller buttons, seek interval for rewind and forward buttons, and others.
@@ -191,6 +278,8 @@ The JavaScript file *initialize.js* includes a block of user-defined variables t
 Explanations of each variable are provided in the comments.
 
 If you make changes to this or any other JavaScript script files, the player will need to be recompiled before your changes will take effect. To do so, run the npm command `npm run build`.
+
+You can use `npm run watch` to have Rollup rebuild bundles as you change them. This can be useful for making custom bundles of Able Player.
 
 ## Feature Attributes
 
@@ -222,10 +311,10 @@ Video poster images are supported using the `poster` attribute on the video elem
     valuable bandwidth, so preload="metadata" would be a better option.
 - **width** - width of the video player in pixels. This value should reflect the target width of the media itself. If not provided the player will be sized to fit its container. This value is supported for audio as well, but this is not valid HTML so **data-width** should be used instead.
 - **data-width** - width of the media player in pixels (can be used for either audio or video). If neither **width** nor **data-width** are provided, the player will be sized to fit its container.
-- **data-root-path** - define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server
+- **data-root-path** - *(REMOVED IN 5.0.0, no longer needed now that all assets are bundled)* define path to root directory of Able Player; generally not required but may be needed in rare instances where Able Player is unable to identify its current path on the web server
 - **data-heading-level** - optional; Able Player injects an off-screen HTML heading "Media Player" (or localized equivalent) at the top of the player so screen reader users can easily find the player. It automatically assigns a heading level that is one level deeper than the closest parent heading. This attribute can be used to manually set the heading level, rather than relying on Able Player to assign it automatically. Valid values are 1 through 6. A value of 0 is also supported, and instructs Able Player to not inject a heading at all. The latter should be used only if the web page already includes a heading immediately prior to the media player.
 - **data-hide-controls** - optional; set to "true" to hide controls during playback. Controls are visibly hidden but still accessible to assistive technologies. Controls reappear if user presses any key or moves the mouse over the video player region.
-- **data-icon-type** - optional; "svg", "font" or "image"; "svg" is the default with automatic fallback to "font" unless either (a) the browser doesn't support icon fonts or (b) the user has a custom style sheet that may impact the display of icon fonts; in either case falls back to images. Should generally leave as is unless testing the fallback.
+- **data-icon-type** - *(REMOVED 5.0.0, has no effect now that icons are bundled)* optional; "svg", "font" or "image"; "svg" is the default with automatic fallback to "font" unless either (a) the browser doesn't support icon fonts or (b) the user has a custom style sheet that may impact the display of icon fonts; in either case falls back to images. Should generally leave as is unless testing the fallback.
 - **data-skin** - optional; "2020 (default) or "legacy". The default skin has one row of controls, with the seekbar positioned in the full widht of space above them. The "legacy" skin, default until version 4.6, has two rows of controls, with the seekbar sharing space with some of the controls in the first row.
 - **data-speed-icons** - optional; "animals" (default) or "arrows". The default setting uses a turtle icon for *slower* and a rabbit icon for *faster*. Setting this to "arrows" uses the original Able Player icons (prior to version 3.5), arrows pointing up for *faster* and down for *slower*.
 - **data-start-time** - optional; time at which you want the audio to start playing (in seconds)
@@ -443,7 +532,7 @@ The following example shows a playlist with two videos. The first video has one 
 
 Able Player supports mixed playlists, with videos hosted locally or on YouTube. Vimeo videos are not yet supported within playlists.
 
-```HTML
+```html
 <ul class="able-playlist" data-player="my_video_player">
   <li data-poster="video1.jpg">
     <span class="able-source"
@@ -515,7 +604,7 @@ If the chapter starts a millisecond later than its first caption, the chapter na
 
 To help authors/developers attain perfect synchronization between all timed text files, Able Player includes a Video Transcript Sorter (VTS). The VTS displays all timed text content from all sources in a table, and provides several features that enable users to rearrange content and modify start and end times. Users can also insert new content into the table, which can be useful for authoring low frequency content such as chapters and description. To use VTS, add the following HTML to the desired location within any web page that includes an Able Player instance:
 
-```HTML
+```html
 <div id="able-vts"></div>
 ```
 

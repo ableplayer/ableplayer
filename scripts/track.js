@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import validate from './validate';
+
+function addTrackFunctions(AblePlayer) {
   // Loads files referenced in track elements, and performs appropriate setup.
   // For example, captions and text descriptions.
   // This will be called whenever the player is recreated.
@@ -393,13 +396,6 @@
   };
 
   AblePlayer.prototype.loadTextObject = function (src) {
-    // TODO: Incorporate the following function, moved from setupTracks()
-    // convert XML/TTML captions file
-    /*
-	if (thisObj.useTtml && (trackSrc.endsWith('.xml') || trackText.startsWith('<?xml'))) {
-	  trackContents = thisObj.ttml2webvtt(trackText);
-	}
-	*/
     var deferred, promise, thisObj, $tempDiv;
 
     deferred = new this.defer();
@@ -444,4 +440,6 @@
 
     return promise;
   };
-})(jQuery);
+}
+
+export default addTrackFunctions;

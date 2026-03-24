@@ -4,8 +4,8 @@
   <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width,maximum-scale=3">
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ '/stylesheets/custom.css?v=1.0' | prepend: site.github.url }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ 'assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ 'stylesheets/custom.css?v=1.0' | relative_url }}">
 
 {% seo %}
     {% include head-custom.html %}
@@ -25,9 +25,9 @@
 			<nav>
 				<ul>
 					<li><a href="{{ site.github.url }}">Documentation</a></li>
-					<li><a href="{{ "/contributing.html" | prepend: site.github.url }}">Contribute</a></li>
-					<li><a href="{{ "/changelog.html" | prepend: site.github.url }}">Changelog</a></li>
-					<li><a href="{{ "/demos/" | prepend: site.github.url }}">Demos</a></li>
+					<li><a href="{{ "contributing.html" | relative_url }}">Contribute</a></li>
+					<li><a href="{{ "changelog.html" | relative_url }}">Changelog</a></li>
+					<li><a href="{{ "demos/" | relative_url }}">Demos</a></li>
 					<li><a href="{{ "https://www.joedolson.com/donate/" }}">Support</a></li>
 				</ul>
 			</nav>
