@@ -407,8 +407,8 @@
 			$prefsIntroUL.append($prefsIntroLI1,$prefsIntroLI2);
 			if (this.hasOpenDesc && this.hasClosedDesc) {
 				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' ) + ' ';
-				currentDescState += '<strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>';
-				currentDescState += ' <em>' + this.translate( 'and', 'and' ) + '</em> <strong>' + this.translate( 'prefDescFormatOption2b', 'text-based description, announced by screen reader' ) + '</strong>.';
+				currentDescState += '<strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>; ';
+				currentDescState += '<strong>' + this.translate( 'prefDescFormatOption2b', 'text-based description, announced by screen reader' ) + '</strong>.';
 			} else if (this.hasOpenDesc) {
 				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' );
 				currentDescState += ' <strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>.';
@@ -738,7 +738,7 @@
 			for (i=0; i<this.controls.length; i++) {
 				if (this.controls[i] === 'play') {
 					kbLabels.push( this.translate( 'play', 'Play' ) + '/' + this.translate( 'pause', 'Pause' ) );
-					keys.push('p</span> <em>' + this.translate( 'or', 'or' ) + '</em> <span class="able-help-modifiers"> ' + this.translate( 'spacebar', 'spacebar' ));
+					keys.push('p</span>, <span class="able-help-modifiers"> ' + this.translate( 'spacebar', 'spacebar' ));
 				} else if (this.controls[i] === 'restart') {
 					kbLabels.push(this.translate( 'restart', 'Restart' ));
 					keys.push('s');
@@ -756,7 +756,7 @@
 					keys.push('f');
 				} else if (this.controls[i] === 'volume') {
 					kbLabels.push(this.translate( 'volume', 'Volume' ));
-					keys.push('v</span> <em>' + this.translate( 'or', 'or' ) + '</em> <span class="able-modkey">1-9');
+					keys.push('v</span>,' + ' <span class="able-modkey">1-9');
 					// mute toggle
 					kbLabels.push(this.translate( 'mute', 'Mute' ) + '/' + this.translate( 'unmute', 'Unmute' ));
 					keys.push('m');
