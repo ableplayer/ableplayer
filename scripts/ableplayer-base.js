@@ -496,6 +496,30 @@ function ablePlayerSetupWindow() {
 	 */
 	AblePlayer.prototype.dispose = function () {
 		AblePlayer.ablePlayerInstances.delete(this);
+
+		// Look for various dialogs tied to this instance. Elements associated
+		// with these are appended to the body, and they need to be
+		// `.remove()`d here.
+		const dialogs = [
+			this.captionPrefsDialog,
+			this.descPrefsDialog,
+			this.keyboardPrefsDialog,
+			this.transcriptPrefsDialog,
+			this.transcriptResizeDialog,
+			this.signResizeDialog,
+		];
+
+		for (const dialog of dialogs) {
+			if (!dialog) {
+				continue;
+			}
+			if (dialog.modal) {
+				dialog.modal.remove();
+			}
+			if (dialog.overlay) {
+				dialog.overlay.remove();
+			}
+		}
 	}
 
 	AblePlayer.getActiveDOMElement = function () {
