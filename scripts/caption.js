@@ -163,7 +163,7 @@ function addCaptionFunctions(AblePlayer) {
   AblePlayer.prototype.showCaptions = function (now) {
     var c, thisCaption, nextCaption, captionText, announceText, announcement, availableTime, rate, cueLength, estimatedTime;
     var cues;
-    if (this.selectedCaptions.cues.length) {
+    if (null !== this.selectedCaptions.cues && this.selectedCaptions.cues.length) {
       cues = this.selectedCaptions.cues;
     } else if (this.captions.length >= 1) {
       cues = this.captions[0].cues;
@@ -183,7 +183,7 @@ function addCaptionFunctions(AblePlayer) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace( /\n/g, "<br>" );
 		// If preference enabled to voice captions, send to synthesizer.
-		if ( this.speechEnabled && this.prefCaptionsSpeak ) {
+		if ( this.speechEnabled && this.prefCaptionsSpeak == 1 ) {
 			announceText = new DOMParser().parseFromString( captionText, 'text/html' );
 			announcement = announceText.body.textContent || '';
 			availableTime = ( thisCaption ) ? nextCaption.start - cues[thisCaption].start : 0;
