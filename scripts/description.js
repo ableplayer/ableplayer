@@ -653,7 +653,11 @@ function addDescriptionFunctions(AblePlayer) {
 		};
 		utterance.onend = function(e) {
 			// utterance has ended
-			this.speakingDescription = false;
+			if ( 'description' === context ) {
+				this.speakingDescription = false;
+			} elseif ( 'caption' === context ) {
+				this.speakingCaption = false;
+			}
 			timeElapsed = e.elapsedTime;
 			// As of Firefox 95, e.elapsedTime is expressed in seconds
 			// Other browsers (tested in Chrome & Edge) express this in milliseconds
@@ -681,7 +685,11 @@ function addDescriptionFunctions(AblePlayer) {
 			this.synth.resume();
 		}
 		this.synth.speak(utterance);
-		this.speakingDescription = true;
+		if ( 'description' === context ) {
+			this.speakingDescription = true;
+		} elseif ( 'caption' === context ) {
+			this.speakingCaption = true;
+		}
 	};
 
 }
