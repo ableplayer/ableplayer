@@ -543,7 +543,7 @@ function addDescriptionFunctions(AblePlayer) {
 		this.prefDescRate = speechRate;
 	};
 
-	AblePlayer.prototype.announceText = function(context, text) {
+	AblePlayer.prototype.announceText = function(context, text, rate) {
 
 		// this function announces text using speech synthesis
 		// it's only called if already determined that browser supports speech synthesis
@@ -552,7 +552,7 @@ function addDescriptionFunctions(AblePlayer) {
 		// 'sample' - called when user changes a setting in Description Prefs dialog
 		// 'caption' - called when announcing a caption.
 
-		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance,
+		var thisObj, voiceName, i, voice, pitch, volume, utterance,
 			timeElapsed, secondsElapsed;
 
 		thisObj = this;
@@ -603,7 +603,7 @@ function addDescriptionFunctions(AblePlayer) {
 			// get settings from global prefs
 			voiceName = this.prefCaptionsVoice;
 			pitch = this.prefCaptionsPitch;
-			rate = this.prefCaptionsRate;
+			rate = ( rate < this.prefCaptionsRate ) ? this.prefCaptionsRate : rate;
 			volume = this.prefCaptionsVolume;
 		}
 
@@ -655,7 +655,7 @@ function addDescriptionFunctions(AblePlayer) {
 			// utterance has ended
 			if ( 'description' === context ) {
 				this.speakingDescription = false;
-			} elseif ( 'caption' === context ) {
+			} else if ( 'caption' === context ) {
 				this.speakingCaption = false;
 			}
 			timeElapsed = e.elapsedTime;
@@ -687,7 +687,7 @@ function addDescriptionFunctions(AblePlayer) {
 		this.synth.speak(utterance);
 		if ( 'description' === context ) {
 			this.speakingDescription = true;
-		} elseif ( 'caption' === context ) {
+		} else if ( 'caption' === context ) {
 			this.speakingCaption = true;
 		}
 	};

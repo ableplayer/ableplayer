@@ -161,7 +161,7 @@ function addCaptionFunctions(AblePlayer) {
   };
 
   AblePlayer.prototype.showCaptions = function (now) {
-    var c, thisCaption, captionText;
+    var c, thisCaption, nextCaption, captionText, announceText, announcement, availableTime, rate, cueLength, estimatedTime;
     var cues;
     if (this.selectedCaptions.cues.length) {
       cues = this.selectedCaptions.cues;
@@ -173,19 +173,28 @@ function addCaptionFunctions(AblePlayer) {
     for (c = 0; c < cues.length; c++) {
       if (cues[c].start <= now && cues[c].end > now) {
         thisCaption = c;
+		nextCaption = cues[ c + 1 ];
         break;
       }
     }
+
     if (typeof thisCaption !== "undefined") {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace( /\n/g, "<br>" );
 		// If preference enabled to voice captions, send to synthesizer.
 		if ( this.speechEnabled && this.prefCaptionsSpeak ) {
-			let announceText = new DOMParser().parseFromString( captionText, 'text/html' );
-			let announcement = announceText.body.textContent || '';
+			announceText = new DOMParser().parseFromString( captionText, 'text/html' );
+			announcement = announceText.body.textContent || '';
+			availableTime = ( thisCaption ) ? nextCaption.start - cues[thisCaption].start : 0;
+			rate = false, cueLength, estimatedTime;
+			if ( availableTime ) {
+				cueLength = announcement.trim().split(/\W+/).length;
+				estimatedTime = Math.round( ( ( cueLength ) / 135 ) * 60 );
+				rate = ( estimatedTime / availableTime );
+			}
 			// use browser's built-in speech synthesis
-			this.announceText( 'caption', announcement );
+			this.announceText( 'caption', announcement, rate );
 		}
         this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
