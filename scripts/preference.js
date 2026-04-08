@@ -245,7 +245,7 @@
 			});
 			prefs.push({
 				'name': 'prefCaptionsSpeak',
-				'label': this.translate( 'prefVoicedCaptions', 'Voiced Captions' ),
+				'label': this.translate( 'prefVoicedCaptions', 'Spoken Captions' ),
 				'group': 'captions',
 				'default': 0
 			});
@@ -263,7 +263,7 @@
 			});
 			prefs.push({
 				'name': 'prefCaptionsRate',
-				'label': this.translate( 'prefDescRate', 'Rate' ),
+				'label': this.translate( 'prefCaptionRate', 'Spoken Caption Rate' ),
 				'group': 'captions',
 				'default': 1.2 // 0.1 to 10 (1 is normal speech; 2 is fast but decipherable; >2 is super fast)
 			});
@@ -303,7 +303,7 @@
 			});
 			prefs.push({
 				'name': 'prefDescRate',
-				'label': this.translate( 'prefDescRate', 'Rate' ),
+				'label': this.translate( 'prefDescRate', 'Spoken Description Rate' ),
 				'group': 'descriptions',
 				'default': 1 // 0.1 to 10 (1 is normal speech; 2 is fast but decipherable; >2 is super fast)
 			});
@@ -521,7 +521,7 @@
 						// If synth is possible, show voicing options.
 						if ( this.synth ) {
 							if ( thisPref === 'prefCaptionsVoice' && this.descVoices.length ) {
-								prefDescVoice = this.getPrefVoice();
+								prefVoice = this.getPrefVoice();
 								for (j=0; j < this.descVoices.length; j++) {
 									optionValue = this.descVoices[j].name;
 									optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase();
@@ -531,7 +531,7 @@
 										'data-lang': optionLang,
 										text: optionText
 									});
-									if (prefDescVoice === optionValue) {
+									if (prefVoice === optionValue) {
 										$thisOption.prop('selected',true);
 									}
 									$thisField.append($thisOption);
