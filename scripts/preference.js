@@ -972,7 +972,7 @@
 			}
 		} else if (pref === 'prefDescVolume' || pref === 'prefCaptionsVolume' ) {
 			// values range from 0.1 to 1.0
-			return value * 10;
+			return value * 100 + '%';
 		}
 		return value;
 	};
