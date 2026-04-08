@@ -375,7 +375,7 @@
 			$prefsDiv, formTitle, introText, $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, fieldsetClass, fieldsetId, $legend, legendId, thisPref, $thisDiv, thisClass,
 			thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
-			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, $kbHeading,$kbList,
+			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, prefCaptionVoice, $kbHeading,$kbList,
 			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer;
 
 		thisObj = this;
@@ -521,7 +521,7 @@
 						// If synth is possible, show voicing options.
 						if ( this.synth ) {
 							if ( thisPref === 'prefCaptionsVoice' && this.descVoices.length ) {
-								prefVoice = this.getPrefVoice();
+								prefCaptionVoice = this.getPrefVoice();
 								for (j=0; j < this.descVoices.length; j++) {
 									optionValue = this.descVoices[j].name;
 									optionLang = this.descVoices[j].lang.substring(0,2).toLowerCase();
@@ -531,7 +531,7 @@
 										'data-lang': optionLang,
 										text: optionText
 									});
-									if (prefVoice === optionValue) {
+									if (prefCaptionVoice === optionValue) {
 										$thisOption.prop('selected',true);
 									}
 									$thisField.append($thisOption);
