@@ -1333,6 +1333,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		// Determine appropriate player to play this media
 		$newItem = this.$playlist.eq(sourceIndex);
+		this.playlistIndex = sourceIndex;
 		if (this.hasAttr($newItem,'data-youtube-id')) {
 			this.youTubeId = this.getYouTubeId($newItem.attr('data-youtube-id'));
 			if (this.hasAttr($newItem,'data-youtube-desc-id')) {

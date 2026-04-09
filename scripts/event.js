@@ -45,7 +45,6 @@ function addEventFunctions(AblePlayer) {
 			if (this.playlistIndex === (this.$playlist.length - 1)) {
 				// this is the last track in the playlist
 				if (this.loop) {
-					this.playlistIndex = 0;
 					this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
 					this.cuePlaylistItem(0);
 				} else {

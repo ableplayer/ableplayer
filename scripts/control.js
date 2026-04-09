@@ -791,18 +791,18 @@ function addControlFunctions(AblePlayer) {
 
 		// currently on the first track
 		// wrap to bottom and play the last track
-		this.playlistIndex = (this.playlistIndex === 0) ? this.$playlist.length - 1 : this.playlistIndex--;
+		let newIndex = (this.playlistIndex === 0) ? this.$playlist.length - 1 : this.playlistIndex - 1;
 		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
-		this.cuePlaylistItem(this.playlistIndex);
+		this.cuePlaylistItem(newIndex);
 	};
 
 	AblePlayer.prototype.handleNextTrack = function() {
 
 		// currently on the last track
-		// wrap to top and play the forst track
-		this.playlistIndex = (this.playlistIndex === this.$playlist.length - 1) ? 0 : this.playlistIndex++;
+		// wrap to top and play the first track
+		let newIndex = (this.playlistIndex === this.$playlist.length - 1) ? 0 : this.playlistIndex + 1;
 		this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
-		this.cuePlaylistItem(this.playlistIndex);
+		this.cuePlaylistItem(newIndex);
 	};
 
 	AblePlayer.prototype.handleRewind = function() {
