@@ -588,13 +588,13 @@
 							changedPref = $(this).attr('name');
 							if (changedPref === 'prefAltKey') {
 								changedSpan = '.able-modkey-alt';
-								changedText = thisObj.tt.prefAltKey + ' + ';
+								changedText = thisObj.translate( 'prefAltKey', 'Alt' ) + ' + ';
 							} else if (changedPref === 'prefCtrlKey') {
 								changedSpan = '.able-modkey-ctrl';
-								changedText = thisObj.tt.prefCtrlKey + ' + ';
+								changedText = thisObj.translate( 'prefCtrlKey', 'Control' ) + ' + ';
 							} else if (changedPref === 'prefShiftKey') {
 								changedSpan = '.able-modkey-shift';
-								changedText = thisObj.tt.prefShiftKey + ' + ';
+								changedText = thisObj.translate( 'prefShiftKey', 'Shift' ) + ' + ';
 							}
 							if ( changedPref !== 'prefNoKeyShortcuts' ) {
 								if ($(this).is(':checked')) {
@@ -747,7 +747,7 @@
 			$prefsDiv,
 			this.$prefsButton,
 			formTitle,
-			thisObj.tt.closeButtonLabel
+			thisObj.translate( 'closeButtonLabel', 'Close' )
 		);
 
 		// Add save and cancel buttons.

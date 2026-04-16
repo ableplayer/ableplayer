@@ -461,13 +461,13 @@ function addBuildplayerFunctions(AblePlayer) {
 						whichPref = $(this).text();
 						thisObj.showingPrefsDialog = true;
 						thisObj.setFullscreen(false);
-						if (whichPref === thisObj.tt.prefMenuCaptions) {
+						if (whichPref === thisObj.translate( 'prefMenuCaptions', 'Captions' ) ) {
 							thisObj.captionPrefsDialog.show();
-						} else if (whichPref === thisObj.tt.prefMenuDescriptions) {
+						} else if (whichPref === thisObj.translate( 'prefMenuDescriptions', 'Descriptions' ) ) {
 							thisObj.descPrefsDialog.show();
-						} else if (whichPref === thisObj.tt.prefMenuKeyboard) {
+						} else if (whichPref === this.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
 							thisObj.keyboardPrefsDialog.show();
-						} else if (whichPref === thisObj.tt.prefMenuTranscript) {
+						} else if (whichPref === this.translate( 'prefMenuTranscript', 'Transcript' ) ) {
 							thisObj.transcriptPrefsDialog.show();
 						}
 						thisObj.closePopups();
@@ -1487,7 +1487,7 @@ function addBuildplayerFunctions(AblePlayer) {
 					if (typeof itemLang !== 'undefined') {
 						nowPlayingSpan.attr('lang',itemLang);
 					}
-					nowPlayingSpan.html('<span>' + thisObj.tt.selectedTrack + ':</span>' + itemTitle);
+					nowPlayingSpan.html('<span>' + thisObj.translate( 'selectedTrack', 'Selected Track' ) + ':</span>' + itemTitle);
 					thisObj.$nowPlayingDiv.html(nowPlayingSpan);
 				}
 			}

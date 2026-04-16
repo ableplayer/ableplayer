@@ -485,7 +485,7 @@ function addTranscriptFunctions(AblePlayer) {
         class: "able-hidden",
       });
       $descHiddenSpan.attr("lang", thisObj.lang);
-      $descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ": ");
+      $descHiddenSpan.text( thisObj.translate( 'prefHeadingDescription', 'Audio description' ) + ": ");
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function (comp) {
