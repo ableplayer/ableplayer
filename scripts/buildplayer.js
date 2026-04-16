@@ -540,7 +540,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			});
 			windowOptions.push({
 				'name': 'close',
-				'label': this.translate( 'windowClose', 'Close' )
+				'label': this.translate( 'closeButtonLabel', 'Close' )
 			});
 			for (i = 0; i < windowOptions.length; i++) {
 				$menuItem = $('<li></li>',{
