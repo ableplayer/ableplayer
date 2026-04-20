@@ -21,22 +21,22 @@ module.exports = function (grunt) {
     },
     run: {
       rollup: {
-        cmd: 'npm',
-        args: ['exec', 'rollup', '--', '-c'],
+        cmd: 'node',
+        args: ['node_modules/rollup/dist/bin/rollup', '-c'],
       },
       jest: {
-        cmd: 'npm',
-        args: ['exec', 'jest', '--', '--colors']
+        cmd: 'node',
+        args: ['node_modules/jest/bin/jest.js', '--colors']
       },
       types: {
-        cmd: 'npx',
-        args: ['tsc']
+        cmd: 'node',
+        args: ['node_modules/typescript/bin/tsc', '-p', 'tsconfig.json']
       },
     },
     copy: {
       dompurify: {
         files: {
-          'build/separate-dompurify/purify.min.js': ['/node_modules/dompurify/dist/purify.min.js'],
+          'build/separate-dompurify/purify.min.js': ['node_modules/dompurify/dist/purify.min.js'],
         }
       }
     },
