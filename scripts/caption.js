@@ -161,9 +161,9 @@ function addCaptionFunctions(AblePlayer) {
   };
 
   AblePlayer.prototype.showCaptions = function (now) {
-    var c, thisCaption, captionText;
+    var c, thisCaption, nextCaption, captionText, announceText, announcement, availableTime, rate, cueLength, estimatedTime;
     var cues;
-    if (this.selectedCaptions.cues.length) {
+    if (null !== this.selectedCaptions.cues && this.selectedCaptions.cues.length) {
       cues = this.selectedCaptions.cues;
     } else if (this.captions.length >= 1) {
       cues = this.captions[0].cues;
@@ -173,14 +173,29 @@ function addCaptionFunctions(AblePlayer) {
     for (c = 0; c < cues.length; c++) {
       if (cues[c].start <= now && cues[c].end > now) {
         thisCaption = c;
+		nextCaption = cues[ c + 1 ];
         break;
       }
     }
+
     if (typeof thisCaption !== "undefined") {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace( /\n/g, "<br>" );
-
+		// If preference enabled to voice captions, send to synthesizer.
+		if ( this.speechEnabled && this.prefCaptionsSpeak == 1 ) {
+			announceText = new DOMParser().parseFromString( captionText, 'text/html' );
+			announcement = announceText.body.textContent || '';
+			availableTime = ( thisCaption ) ? nextCaption.start - cues[thisCaption].start : 0;
+			rate = false, cueLength, estimatedTime;
+			if ( availableTime ) {
+				cueLength = announcement.trim().split(/\W+/).length;
+				estimatedTime = Math.round( ( ( cueLength ) / 135 ) * 60 );
+				rate = ( estimatedTime / availableTime );
+			}
+			// use browser's built-in speech synthesis
+			this.announceText( 'caption', announcement, rate );
+		}
         this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {
@@ -306,7 +321,29 @@ function addCaptionFunctions(AblePlayer) {
         options[0] = "overlay";
         options[1] = "below";
         break;
+
+      case "prefCaptionsSpeak":
+        options[0] = ["0", this.translate( 'off', 'Off' ) ];
+        options[1] = ["1", this.translate( 'on', 'On' ) ];
+        break;
+
+      case "prefCaptionsVoice":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsPitch":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsRate":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsVolume":
+		options[0] = null; // set later.
+        break;
     }
+
     return options;
   };
 

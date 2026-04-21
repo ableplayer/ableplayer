@@ -186,20 +186,20 @@ function addDescriptionFunctions(AblePlayer) {
 		// define this.descVoices array
 		// includes only languages that match the language of the captions or player
 
-		var voices, descLangs, voiceLang, preferredLang;
+		var voices, trackLangs, voiceLang, preferredLang;
 
 		preferredLang = (this.captionLang) ? this.captionLang.substring(0,2).toLowerCase() : this.lang.substring(0,2).toLowerCase();
 
 		this.descVoices = [];
 		voices = this.synth.getVoices();
-		descLangs = this.getDescriptionLangs();
+		trackLangs = this.getTrackLangs();
 		if (voices.length > 0) {
 			this.descVoices = [];
 			// available languages are identified with local suffixes (e.g., en-US)
 			for (var i=0; i<voices.length; i++) {
 				// match only the first 2 characters of the lang code
 				voiceLang = voices[i].lang.substring(0,2).toLowerCase();
-				if (voiceLang === preferredLang && (descLangs.indexOf(voiceLang) !== -1)) {
+				if (voiceLang === preferredLang && (trackLangs.indexOf(voiceLang) !== -1)) {
 					// this voice matches preferredLang
 					// AND there's a matching description track in this language
 					// Add this voice to final array
@@ -215,7 +215,7 @@ function addDescriptionFunctions(AblePlayer) {
 		return false;
 	};
 
-	AblePlayer.prototype.getDescriptionLangs = function () {
+	AblePlayer.prototype.getTrackLangs = function () {
 
 		// returns an array of languages (from srclang atttributes)
 		// in which there are description tracks
@@ -223,7 +223,7 @@ function addDescriptionFunctions(AblePlayer) {
 		var descLangs = [];
 		if (this.tracks) {
 			for (var i=0; i < this.tracks.length; i++) {
-				if (this.tracks[i].kind === 'descriptions') {
+				if (this.tracks[i].kind === 'descriptions' || this.tracks[i].kind === 'captions' ) {
 					descLangs.push(this.tracks[i].language.substring(0,2).toLowerCase());
 				}
 			}
@@ -240,10 +240,11 @@ function addDescriptionFunctions(AblePlayer) {
 
 		var preferences, voices, prefDescVoice, descVoice, descLang, prefVoiceFound;
 		preferences = this.getPref();
-		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefDescVoice() : null;
+		prefDescVoice = (typeof preferences.voices !== 'undefined') ? this.getPrefVoice() : null;
 
 		this.getBrowserVoices();
-		this.rebuildDescPrefsForm();
+		this.rebuildVoicePrefsForm( '_prefDescVoice' );
+		this.rebuildVoicePrefsForm( '_prefCaptionsVoice' );
 
 		if (this.selectedDescriptions) {
 			descLang = this.selectedDescriptions.language;
@@ -487,7 +488,7 @@ function addDescriptionFunctions(AblePlayer) {
 				} else if (this.speechEnabled) {
 					if ( 'video' !== this.descMethod ) {
 						// use browser's built-in speech synthesis
-						this.announceDescriptionText('description',descText);
+						this.announceText('description',descText);
 					}
 					if (this.prefDescVisible) {
 						// write description to the screen for sighted users
@@ -542,15 +543,16 @@ function addDescriptionFunctions(AblePlayer) {
 		this.prefDescRate = speechRate;
 	};
 
-	AblePlayer.prototype.announceDescriptionText = function(context, text) {
+	AblePlayer.prototype.announceText = function(context, text, rate) {
 
-		// this function announces description text using speech synthesis
+		// this function announces text using speech synthesis
 		// it's only called if already determined that browser supports speech synthesis
 		// context is either:
 		// 'description' - actual description text extracted from WebVTT file
 		// 'sample' - called when user changes a setting in Description Prefs dialog
+		// 'caption' - called when announcing a caption.
 
-		var thisObj, voiceName, i, voice, pitch, rate, volume, utterance,
+		var thisObj, voiceName, i, voice, pitch, volume, utterance,
 			timeElapsed, secondsElapsed;
 
 		thisObj = this;
@@ -585,12 +587,24 @@ function addDescriptionFunctions(AblePlayer) {
 			pitch = $('#' + this.mediaId + '_prefDescPitch').val();
 			rate = $('#' + this.mediaId + '_prefDescRate').val();
 			volume = $('#' + this.mediaId + '_prefDescVolume').val();
-		} else {
+		} else if ( context === 'captionSample' ) {
+			// get settings from form
+			voiceName = $('#' + this.mediaId + '_prefCaptionsVoice').val();
+			pitch = $('#' + this.mediaId + '_prefCaptionsPitch').val();
+			rate = $('#' + this.mediaId + '_prefCaptionsRate').val();
+			volume = $('#' + this.mediaId + '_prefCaptionsVolume').val();
+		} else if ( context === 'description' ) {
 			// get settings from global prefs
 			voiceName = this.prefDescVoice;
 			pitch = this.prefDescPitch;
 			rate = this.prefDescRate;
 			volume = this.prefDescVolume;
+		} else {
+			// get settings from global prefs
+			voiceName = this.prefCaptionsVoice;
+			pitch = this.prefCaptionsPitch;
+			rate = ( rate < this.prefCaptionsRate ) ? this.prefCaptionsRate : rate;
+			volume = this.prefCaptionsVolume;
 		}
 
 		// get the voice associated with the user's chosen voice name
@@ -639,7 +653,11 @@ function addDescriptionFunctions(AblePlayer) {
 		};
 		utterance.onend = function(e) {
 			// utterance has ended
-			this.speakingDescription = false;
+			if ( 'description' === context ) {
+				this.speakingDescription = false;
+			} else if ( 'caption' === context ) {
+				this.speakingCaption = false;
+			}
 			timeElapsed = e.elapsedTime;
 			// As of Firefox 95, e.elapsedTime is expressed in seconds
 			// Other browsers (tested in Chrome & Edge) express this in milliseconds
@@ -667,7 +685,11 @@ function addDescriptionFunctions(AblePlayer) {
 			this.synth.resume();
 		}
 		this.synth.speak(utterance);
-		this.speakingDescription = true;
+		if ( 'description' === context ) {
+			this.speakingDescription = true;
+		} else if ( 'caption' === context ) {
+			this.speakingCaption = true;
+		}
 	};
 
 }
