@@ -246,6 +246,7 @@
 	overflow: visible;
 }
 
+video[data-able-player],
 .able .able-vidcap-container video {
 	max-width: 100%;
 	width: 100%;
