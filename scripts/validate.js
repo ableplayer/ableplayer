@@ -56,45 +56,53 @@ var preProcessing = {
    * @returns {string} The content with <v> tags transformed to include a title attribute and preserved attributes.
    */
   transformVTags: function (content) {
-    return content.replace(/<v\s+([^>]*?)>/g, function (_, tagAttributes) {
-      var classMatch = tagAttributes.match(/class="([^"]*)"/);
-      var classAttr = classMatch ? classMatch[0] : "";
-      var nonClassAttributes = tagAttributes
-        .replace(/class="[^"]*"/, "")
-        .trim()
-        .split(/\s+/);
+	return content.replace(/<v\s+([^>]*?)>/g, function (_, tagAttributes) {
+		var classMatch = tagAttributes.match(/class="([^"]*)"/);
+		var titleMatch = tagAttributes.match(/title="([^"]*)"/);
+		var classAttr = classMatch ? classMatch[0] : "";
+		var titleAttr = titleMatch ? titleMatch[0] : "";
+		var otherAttributes = tagAttributes
+			.replace(/class="[^"]*"/, "")
+			.replace(/title="[^"]*"/, "")
+			.trim()
+			.split(/\s+/);
 
-      var attributes = [];
-      var titleParts = [];
+		var attributes = [];
+		var titleParts = [];
 
-      // Iterate over each token of the tag content
-      nonClassAttributes.forEach(function (token) {
-        if (token.indexOf("=") !== -1) {
-          attributes.push(token);
-        } else {
-          titleParts.push(token);
-        }
+		// Iterate over each token of the tag content
+		otherAttributes.forEach(function (token) {
+			if (token.indexOf("=") !== -1) {
+			attributes.push(token);
+			} else {
+			titleParts.push(token);
+			}
+		});
+
+		var title = ( titleParts ) ? titleParts.join(" ") : false;
+		var newTag = "<v";
+
+		if ( title && ! titleAttr ) {
+			newTag += ' title="' + title + '"';
+		}
+
+		if ( titleAttr && ! title ) {
+			newTag += " " + titleAttr;
+		}
+
+		if (attributes.length > 0) {
+			newTag += " " + attributes.join(" ");
+		}
+
+		if (classAttr) {
+			newTag += " " + classAttr;
+		}
+
+		newTag += ">";
+
+		return newTag;
       });
-
-      var title = titleParts.join(" ");
-      var newTag = "<v";
-
-      if (title) {
-        newTag += ' title="' + title + '"';
-      }
-
-      if (attributes.length > 0) {
-        newTag += " " + attributes.join(" ");
-      }
-
-      if (classAttr) {
-        newTag += " " + classAttr;
-      }
-
-      newTag += ">";
-      return newTag;
-    });
-  },
+    },
 };
 
 /** POST-SANITIZED FUNCTIONS
