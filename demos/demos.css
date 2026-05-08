@@ -86,6 +86,16 @@ a {
 	border-bottom: 1px solid #340449;
 }
 
+#wrapper {
+	display: grid;
+	grid-template-columns: repeat( 2, 1fr );
+	width: 1280px;
+	max-width: 98%;
+	background: #fff;
+	gap: 20px;
+	padding: 1rem;
+}
+
 .offscreen {
 	border: 0;
 	clip-path: inset(50%);
