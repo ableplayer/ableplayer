@@ -1271,7 +1271,7 @@ function addBuildplayerFunctions(AblePlayer) {
 				}
 			}
 			if ((i % 2) == 1) {
-				this.$controllerDiv.append('<div style="clear:both;"></div>');
+				this.$controllerDiv.append('<div class="ableplayer-clear"></div>');
 			}
 		}
 

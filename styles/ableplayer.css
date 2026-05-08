@@ -234,6 +234,10 @@
 	padding: 0;
 }
 
+.ableplayer-clear {
+	clear: both;
+}
+
 .able-poster {
 	position: absolute;
 	top: 0;
