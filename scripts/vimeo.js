@@ -231,7 +231,7 @@ function addVimeoFunctions(AblePlayer) {
 		const thisObj = this;
 
 		// Vimeo Oembed only returns a 640px width image. Hope at some point there's an alternative.
-		var url = 'http://vimeo.com/api/oembed.json?url=https://vimeo.com/' + vimeoId, imageUrl = '';
+		var url = 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/' + vimeoId, imageUrl = '';
 		console.log( url );
 		fetch( url ).then( response => {
 
