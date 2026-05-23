@@ -7,6 +7,7 @@
 - [Feature List](#feature-list)
 - [Supported Languages](#supported-languages)
 - [Compatibility](#compatibility)
+- [Content Security Policies](#content-security-policies)
 - [Dependencies](#dependencies)
 - [Fallback](#fallback)
 - [Setup](#setup)
@@ -85,6 +86,33 @@ During development, *Able Player* is routinely tested with the latest versions o
 - Firefox
 
 Since the release of version 4.4, we are no longer supporting Internet Explorer.
+
+## Content Security Policies
+
+AblePlayer, by default, only references local sources with no inline scripts. However, it is possible to extend it using external scripting, and support for YouTube and Vimeo requires external resources.
+
+These content policies only cover the default requirements for Able Player; the environment you're using it in may have additional requirements.
+
+The Able Players demos get jQuery and jsCookie from content delivery networks. If you use those external sources, you will also need to use `script-src 'self' https://cdn.jsdelivr.net https://code.jquery.com`, or references to whatever external source you are using.
+
+### Using only local sources
+
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self';
+
+### Using Vimeo
+
+Content-Security-Policy: default-src 'self' https://vimeo.com; script-src 'self' https://player.vimeo.com; style-src 'self'; frame-src 'self' https://player.vimeo.com;
+
+### Using YouTube
+
+The YouTube security policy uses both the 'nocookie' and the default YouTube domains. You do not need to allow both, depending on your usage.
+
+Content-Security-Policy: default-src 'self' https://img.youtube.com; script-src 'self' https://youtube.com https://nocookie.youtube.com; style-src 'self'; frame-src 'self' https://nocookie.youtube.com https://www.youtube.com;
+
+### Using YouTube & Vimeo
+
+Content-Security-Policy: default-src 'self' https://img.youtube.com https://vimeo.com; script-src 'self' https://player.vimeo.com https://youtube.com https://nocookie.youtube.com; style-src 'self'; frame-src 'self' https://www.youtube.com https://player.vimeo.com;
+
 
 ## Dependencies
 
