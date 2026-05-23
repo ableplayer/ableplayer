@@ -10,6 +10,18 @@
 - Can be dynamically created and disposed indefinitely without memory leaks or event handling issues. Use `new AblePlayer(media)` and `instance.dispose()`.
 - TypeScript type definitions for `ableplayer.esm.js`.
 - Source maps for all bundles.
+- Support for Spoken Captions. New options in Captions settings menu to enable automatic voicing of captions.
+
+### Design
+
+- Default CSS now limits the max width of the `video` element loading Able Player to 100%.
+- Added new class `.ableplayer-clear`, used only in legacy display options.
+
+
+### Non-breaking changes
+
+- Audited translation files and removed 38 translatable strings that were unused or duplicated by other strings.
+- Removed all inline scripts and styles from Able Player core.
 
 ### Breaking changes
 
@@ -29,10 +41,21 @@
 
 - Region-specific language tags are supposed to have the region capitalized. The affected translations are `pt-BR` and `zh-TW`. Able Player was lowercasing them before.
 - Various issues with Vimeo error handling. The `catch` blocks were referencing nonexistent variables.
+- Fix prev/next item navigation in playlists.
+- Display volume value as a percentage in all cases.
 
 ### Code cleanup
 
 - Able Player now passes `eslint`'s "recommended" rule set. In the process, we fixed some values that were always `undefined` before, for example: `this.lang`, and the `lang` values in `getSampleDescriptionText`. This shouldn't break anything, but, worth mentioning just in case someone was relying on these values being `undefined`.
+
+### Documentation
+
+- Added documentation about Able Player's Content Security Policy requirements.
+
+### Internationalization
+
+- Updated Catalan translation (props @ralcarazm)
+- Updated Dutch translation (props @rianrietveld)
 
 **Full Changelog**: https://github.com/ableplayer/ableplayer/compare/v4.8.0...v5.0.0
 
