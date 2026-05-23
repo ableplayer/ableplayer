@@ -714,7 +714,7 @@ If your site is running on a Windows server, consult the documentation from Micr
 *Able Player* includes several keyboard shortcuts that enable users to control the player from anywhere on the web page, as follows:
 
 - **p or spacebar** = Play/Pause
-- **s** = Stop
+- **s** = Restart
 - **r** = Rewind
 - **f** = Forward
 - **b** = Back (previous track in playlist)
