@@ -465,9 +465,9 @@ function addBuildplayerFunctions(AblePlayer) {
 							thisObj.captionPrefsDialog.show();
 						} else if (whichPref === thisObj.translate( 'prefMenuDescriptions', 'Descriptions' ) ) {
 							thisObj.descPrefsDialog.show();
-						} else if (whichPref === this.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
+						} else if (whichPref === thisObj.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
 							thisObj.keyboardPrefsDialog.show();
-						} else if (whichPref === this.translate( 'prefMenuTranscript', 'Transcript' ) ) {
+						} else if (whichPref === thisObj.translate( 'prefMenuTranscript', 'Transcript' ) ) {
 							thisObj.transcriptPrefsDialog.show();
 						}
 						thisObj.closePopups();
