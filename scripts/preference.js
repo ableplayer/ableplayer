@@ -405,19 +405,20 @@
 			});
 
 			$prefsIntroUL.append($prefsIntroLI1,$prefsIntroLI2);
+			let prefDescription1 = '';
+			let prefDescription2 = '';
+			let prefDescription3 = '';
+			let prefDescriptionNone = '';
 			if (this.hasOpenDesc && this.hasClosedDesc) {
-				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' ) + ' ';
-				currentDescState += '<strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>; ';
-				currentDescState += '<strong>' + this.translate( 'prefDescFormatOption2b', 'text-based description, announced by screen reader' ) + '</strong>.';
+				prefDescription1 = this.translate( 'prefDescription1', 'The current video has an alternative described version and text-based description, announced by screen reader')
 			} else if (this.hasOpenDesc) {
-				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' );
-				currentDescState += ' <strong>' + this.translate( 'prefDescFormatOption1b', 'an alternative described version' ) + '</strong>.';
+				prefDescription2 = this.translate( 'prefDescription2', 'The current video has an alternative described version.' );
 			} else if (this.hasClosedDesc) {
-				currentDescState = this.translate( 'prefIntroDescription2', 'The current video has ' );
-				currentDescState += ' <strong>' + this.translate( 'prefDescFormatOption2b', 'text-based description, announced by screen reader' ) + '</strong>.';
+				prefDescription3 = this.translate( 'prefDescription3', 'The current video has text-based description, announced by screen reader.')
 			} else {
-				currentDescState = this.translate( 'prefIntroDescriptionNone', 'The current video has no audio description in either format.' );
+				prefDescriptionNone = this.translate( 'prefDescriptionNone', 'The current video has no audio description in either format.' );
 			}
+			currentDescState = prefDescription1 + prefDescription2 + prefDescription3 + prefDescriptionNone;
 			$prefsIntroP2 = $('<p>',{
 				html: currentDescState
 			});
