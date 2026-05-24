@@ -42,7 +42,6 @@ function addSearchFunctions(AblePlayer) {
             var itemStartSpan = $("<button>", {
               class: "able-search-results-time",
               "data-start": resultsArray[i]["start"],
-              title: itemLabel,
               "aria-label": itemLabel,
               "aria-describedby": resultId,
             });
