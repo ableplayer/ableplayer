@@ -8,7 +8,7 @@ const path = require("path");
  */
 describe("validate.js tests", () => {
   beforeAll(async () => {
-    await page.goto("http://localhost:8888"); // Replace with your test URL
+    await page.goto("http://localhost:8000"); // Replace with your test URL
     const validatePath = path.resolve(__dirname, "../../build/test/validate.umd.js");
     // Add DOMPurify script
     const domPurifyPath = path.resolve(
@@ -93,7 +93,7 @@ describe("validate.js tests", () => {
       });
     });
   });
-});
+}, 10000 );
 
 /**
  * Test cases for sanitizeVttContent function
@@ -158,35 +158,24 @@ describe("sanitizeVttContent", () => {
     });
   });
 
-  test("should handle large input with vulnerability", async () => {
-    const largeInput =
-      "<v>text</v>".repeat(5000) +
-      '<script>alert("XSS")</script>' +
-      "<v>text</v>".repeat(5000);
-    const result = await page.evaluate((input) => {
-      return window.validate.sanitizeVttContent(input);
-    }, largeInput);
+  // Since 4.8.0, input to sanitizeVttContent over 1000 characters is rejected.
+  test("should reject large input", async () => {
 
-    // Detailed assertions and logging
-    console.log("Result length:", result.length);
-    console.log(
-      "Expected length:",
-      largeInput.length - '<script>alert("XSS")</script>'.length
-    );
-    console.log("Result starts with:", result.slice(0, 30));
-    console.log("Expected starts with:", "<v>text</v>".repeat(3));
-    console.log("Result ends with:", result.slice(-30));
-    console.log("Expected ends with:", "<v>text</v>".repeat(3));
+	const received = await page.evaluate( async() => {
+		const largeInput =
+		"<v>text</v>".repeat(100) +
+		'<script>alert("XSS")</script>' +
+		"<v>text</v>".repeat(100);
+		try {
+			window.validate.sanitizeVttContent(largeInput);
+			return { success: true };
+		} catch (error) {
+			return { error: error.message };
+		}
+	});
 
     // debugger; // Pause execution here to inspect the logs
-
-    expect(result.length).toBe(
-      largeInput.length - '<script>alert("XSS")</script>'.length
-    );
-    expect(result.startsWith("<v>text</v>".repeat(3))).toBe(true);
-    expect(result.endsWith("<v>text</v>".repeat(3))).toBe(true);
-    expect(result.includes("text")).toBe(true);
-    expect(result.includes('<script>alert("XSS")</script>')).toBe(false); // Ensure the script tag is removed
+    expect(received.error).toBe('Input too long');
   });
 
   test("should handle random input", async () => {
