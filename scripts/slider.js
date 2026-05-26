@@ -6,11 +6,10 @@ import $ from 'jquery';
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	function AccessibleSlider(div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
+	function AccessibleSlider(div, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
 
 		// div is the host element around which the slider will be built
-		// orientation is either 'horizontal' or 'vertical'
-		// length is the width or height of the slider, depending on orientation
+		// length is the width
 		// min is the low end of the slider scale
 		// max is the high end of the slider scale
 		// bigInterval is the number of steps supported by page up/page down (set to 0 if not supported)
@@ -43,7 +42,7 @@ import $ from 'jquery';
 
 		// Add a seekhead
 		this.seekHead = $('<div>',{
-			'aria-orientation': orientation,
+			'aria-orientation': 'horizontal',
 			'class': 'able-' + className + '-head'
 		});
 
@@ -85,13 +84,8 @@ import $ from 'jquery';
 		this.wrapperDiv = this.bodyDiv.parent();
 
 		if (this.skin === 'legacy') {
-			if (orientation === 'horizontal') {
-				this.wrapperDiv.width(length);
-				this.loadedDiv.width(0);
-			} else {
-				this.wrapperDiv.height(length);
-				this.loadedDiv.height(0);
-			}
+			this.wrapperDiv.width(length);
+			this.loadedDiv.width(0);
 		}
 		this.wrapperDiv.addClass('able-' + className + '-wrapper');
 
