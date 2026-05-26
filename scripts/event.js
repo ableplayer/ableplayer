@@ -245,7 +245,7 @@ function addEventFunctions(AblePlayer) {
 		var thisObj = this;
 
 		// Handle seek bar events.
-		this.seekBar.bodyDiv.on('startTracking', function (e) {
+		this.seekBar.seekbarDiv.on('startTracking', function (e) {
 			thisObj.pausedBeforeTracking = thisObj.paused;
 			thisObj.pauseMedia();
 		}).on('tracking', function (e, position) {
