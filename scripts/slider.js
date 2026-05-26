@@ -6,11 +6,9 @@ import $ from 'jquery';
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	function AccessibleSlider(div, length, min, max, bigInterval, label) {
+	function AccessibleSlider(div, max, bigInterval, label) {
 
 		// div is the host element around which the slider will be built
-		// length is the width
-		// min is the low end of the slider scale
 		// max is the high end of the slider scale
 		// bigInterval is the number of steps supported by page up/page down (set to 0 if not supported)
 		// (smallInterval, defined as nextStep below, is always set to 1) - this is the interval supported by arrow keys
@@ -47,7 +45,7 @@ import $ from 'jquery';
 		this.seekHead.attr({
 			'role': 'slider',
 			'aria-label': label,
-			'aria-valuemin': min,
+			'aria-valuemin': 0,
 			'aria-valuemax': max
 		});
 
@@ -75,7 +73,7 @@ import $ from 'jquery';
 		this.wrapperDiv = this.bodyDiv.parent();
 
 		if (this.skin === 'legacy') {
-			this.wrapperDiv.width(length);
+			this.wrapperDiv.width( 100 );
 			this.loadedDiv.width(0);
 		}
 		this.wrapperDiv.addClass('able-seekbar-wrapper');

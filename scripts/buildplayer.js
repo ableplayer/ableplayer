@@ -977,15 +977,13 @@ function addBuildplayerFunctions(AblePlayer) {
 		// user preferences (???)
 		// some controls are aligned on the left, and others on the right
 
-		var thisObj, baseSliderWidth, controlLayout, numSections,
+		var thisObj, controlLayout, numSections,
 		i, j, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, control,
 		buttonTitle, $newButton, buttonText, position, buttonHeight,
 		buttonWidth, buttonSide, controllerWidth, tooltipId, tooltipY, tooltipX,
 		tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, captionLabel, popupMenuId;
 
 		thisObj = this;
-
-		baseSliderWidth = 100; // arbitrary value, will be recalculated in refreshControls()
 
 		// Initialize the layout into the this.controlLayout variable.
 		controlLayout = this.calculateControlLayout();
@@ -1004,7 +1002,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			$sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
 			this.$controllerDiv.append($sliderDiv);
-			this.seekBar = new AccessibleSlider($sliderDiv, baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel );
+			this.seekBar = new AccessibleSlider($sliderDiv, this.duration, this.seekInterval, sliderLabel );
 		}
 
 		// add a full-width seek bar
@@ -1036,7 +1034,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						// also set elapsed to 0
 						this.elapsed = 0;
 					}
-					this.seekBar = new AccessibleSlider($sliderDiv, baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel );
+					this.seekBar = new AccessibleSlider( $sliderDiv, this.duration, this.seekInterval, sliderLabel );
 				} else if (control === 'pipe') {
 					$pipe = $('<span>', {
 						'aria-hidden': 'true',
