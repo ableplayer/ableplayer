@@ -53,7 +53,7 @@ function addMiscFunctions(AblePlayer) {
     //	 and show milliseconds	(e.g., 00:00:04.123 as in Video Track Sorter)
     // Otherwise, omits empty hours and milliseconds (e.g., 00:04 as in timer on controller)
 
-    var dHours, dMinutes, dSeconds, parts, milliSeconds, numShort, i;
+    var times,format,parts,milliSeconds,numShort,i;
 
     if (showFullTime) {
       // preserve milliseconds, if included in seconds
@@ -70,36 +70,13 @@ function addMiscFunctions(AblePlayer) {
         milliSeconds = "000";
       }
     }
-    dHours = Math.floor(seconds / 3600);
-    dMinutes = Math.floor(seconds / 60) % 60;
-    dSeconds = Math.floor(seconds % 60);
-    if (dSeconds < 10) {
-      dSeconds = "0" + dSeconds;
-    }
-    if (dHours > 0) {
-      if (dMinutes < 10) {
-        dMinutes = "0" + dMinutes;
-      }
+	times = this.secondsToTime( seconds );
+	format = times['value'];
+
       if (showFullTime) {
-        return dHours + ":" + dMinutes + ":" + dSeconds + "." + milliSeconds;
+        return format + "." + milliSeconds;
       } else {
-        return dHours + ":" + dMinutes + ":" + dSeconds;
-      }
-    } else {
-      if (showFullTime) {
-        if (dHours < 1) {
-          dHours = "00";
-        } else if (dHours < 10) {
-          dHours = "0" + dHours;
-        }
-        if (dMinutes < 1) {
-          dMinutes = "00";
-        } else if (dMinutes < 10) {
-          dMinutes = "0" + dMinutes;
-        }
-        return dHours + ":" + dMinutes + ":" + dSeconds + "." + milliSeconds;
-      } else {
-        return dMinutes + ":" + dSeconds;
+        return format;
       }
     }
   };
