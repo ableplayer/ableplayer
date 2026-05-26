@@ -225,6 +225,7 @@ import $ from 'jquery';
 		}
 	};
 
+	// Set width of the legacy seekbar.
 	AccessibleSlider.prototype.setWidth = function (width) {
 		this.wrapperDiv.width(width);
 		this.resizeDivs();
@@ -236,8 +237,8 @@ import $ from 'jquery';
 	};
 
 	AccessibleSlider.prototype.resizeDivs = function () {
-		this.playedDiv.width(this.seekbarDiv.width() * (this.position / this.duration));
-		this.loadedDiv.width(this.seekbarDiv.width() * this.buffered);
+		this.playedDiv.width( 100 * (this.position / this.duration) + '%' );
+		this.loadedDiv.width( 100 * this.buffered + '%' );
 	};
 
 	// Stops tracking, sets the head location to the current position.
