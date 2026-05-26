@@ -139,7 +139,11 @@ function addBuildplayerFunctions(AblePlayer) {
 		this.$durationContainer = $('<span>',{
 			'class': 'able-duration'
 		});
-		this.$timer.append(this.$elapsedTimeContainer).append(this.$durationContainer);
+		this.$durationSeparator = $('<span>',{
+			'class': 'able-timer-separator',
+			'text': ' / '
+		});
+		this.$timer.append(this.$elapsedTimeContainer).append(this.$durationSeparator).append(this.$durationContainer);
 
 		this.$speed = $('<span>',{
 			'class' : 'able-speed',

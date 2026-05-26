@@ -501,9 +501,9 @@ function addControlFunctions(AblePlayer) {
 			// update elapsed & duration
 			if (typeof this.$durationContainer !== 'undefined') {
 				if (this.useChapterTimes) {
-					this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.chapterDuration));
+					this.$durationContainer.text( this.formatSecondsAsColonTime(this.chapterDuration));
 				} else {
-					this.$durationContainer.text(' / ' + this.formatSecondsAsColonTime(this.duration));
+					this.$durationContainer.text( this.formatSecondsAsColonTime(this.duration));
 				}
 			}
 			if (typeof this.$elapsedTimeContainer !== 'undefined') {
