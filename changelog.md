@@ -16,7 +16,7 @@
 
 - Default CSS now limits the max width of the `video` element loading Able Player to 100%.
 - Added new class `.ableplayer-clear`, used only in legacy display options.
-
+- Separator between elapsed time and total duration is now a separate `span class="able-timer-separator"`.
 
 ### Non-breaking changes
 

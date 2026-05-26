@@ -1039,7 +1039,6 @@ function addBuildplayerFunctions(AblePlayer) {
 					this.seekBar = new AccessibleSlider($sliderDiv, 'horizontal', baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true, 'visible');
 				} else if (control === 'pipe') {
 					$pipe = $('<span>', {
-						'tabindex': '-1',
 						'aria-hidden': 'true',
 						'class': 'able-pipe',
 					});
