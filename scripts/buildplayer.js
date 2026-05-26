@@ -1004,7 +1004,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			$sliderDiv = $('<div class="able-seekbar"></div>');
 			sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
 			this.$controllerDiv.append($sliderDiv);
-			this.seekBar = new AccessibleSlider($sliderDiv, baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true );
+			this.seekBar = new AccessibleSlider($sliderDiv, baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar' );
 		}
 
 		// add a full-width seek bar
@@ -1036,7 +1036,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						// also set elapsed to 0
 						this.elapsed = 0;
 					}
-					this.seekBar = new AccessibleSlider($sliderDiv, baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar', true );
+					this.seekBar = new AccessibleSlider($sliderDiv, baseSliderWidth, 0, this.duration, this.seekInterval, sliderLabel, 'seekbar' );
 				} else if (control === 'pipe') {
 					$pipe = $('<span>', {
 						'aria-hidden': 'true',

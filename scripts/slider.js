@@ -6,7 +6,7 @@ import $ from 'jquery';
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	function AccessibleSlider(div, length, min, max, bigInterval, label, className, trackingMedia) {
+	function AccessibleSlider(div, length, min, max, bigInterval, label, className) {
 
 		// div is the host element around which the slider will be built
 		// length is the width
@@ -16,7 +16,6 @@ import $ from 'jquery';
 		// (smallInterval, defined as nextStep below, is always set to 1) - this is the interval supported by arrow keys
 		// label is used within an aria-label attribute to identify the slider to screen reader users
 		// className is used as the root within class names (e.g., 'able-' + classname + '-head')
-		// trackingMedia is true if this is a media timeline; otherwise false
 
 		var thisObj, coords;
 
@@ -34,10 +33,8 @@ import $ from 'jquery';
 		this.bodyDiv = $(div);
 
 		// Add divs for tracking amount of media loaded and played
-		if (trackingMedia) {
-			this.loadedDiv = $('<div></div>');
-			this.playedDiv = $('<div></div>');
-		}
+		this.loadedDiv = $('<div></div>');
+		this.playedDiv = $('<div></div>');
 
 		// Add a seekhead
 		this.seekHead = $('<div>',{
@@ -75,7 +72,6 @@ import $ from 'jquery';
 		this.bodyDiv.append(this.loadedDiv);
 		this.bodyDiv.append(this.playedDiv);
 		this.bodyDiv.append(this.seekHead);
-
 		this.bodyDiv.wrap('<div></div>');
 		this.wrapperDiv = this.bodyDiv.parent();
 
@@ -84,16 +80,12 @@ import $ from 'jquery';
 			this.loadedDiv.width(0);
 		}
 		this.wrapperDiv.addClass('able-' + className + '-wrapper');
+		this.loadedDiv.addClass('able-' + className + '-loaded');
+		this.playedDiv.width(0);
+		this.playedDiv.addClass('able-' + className + '-played');
 
-		if (trackingMedia) {
-			this.loadedDiv.addClass('able-' + className + '-loaded');
-
-			this.playedDiv.width(0);
-			this.playedDiv.addClass('able-' + className + '-played');
-
-			// Set a default duration. User can call this dynamically if duration changes.
-			this.setDuration(max);
-		}
+		// Set a default duration. User can call this dynamically if duration changes.
+		this.setDuration(max);
 
 		// handle seekHead events
 		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
