@@ -73,12 +73,11 @@ function addMiscFunctions(AblePlayer) {
 	times = this.secondsToTime( seconds );
 	format = times['value'];
 
-      if (showFullTime) {
-        return format + "." + milliSeconds;
-      } else {
-        return format;
-      }
-    }
+	if (showFullTime) {
+		return format + "." + milliSeconds;
+	} else {
+		return format;
+	}
   };
 
   AblePlayer.prototype.getSecondsFromColonTime = function (timeStr) {
