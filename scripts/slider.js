@@ -6,7 +6,7 @@ import $ from 'jquery';
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	function AccessibleSlider(div, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
+	function AccessibleSlider(div, length, min, max, bigInterval, label, className, trackingMedia) {
 
 		// div is the host element around which the slider will be built
 		// length is the width
@@ -17,7 +17,6 @@ import $ from 'jquery';
 		// label is used within an aria-label attribute to identify the slider to screen reader users
 		// className is used as the root within class names (e.g., 'able-' + classname + '-head')
 		// trackingMedia is true if this is a media timeline; otherwise false
-		// initialState is either 'visible' or 'hidden'
 
 		var thisObj, coords;
 
@@ -46,11 +45,8 @@ import $ from 'jquery';
 			'class': 'able-' + className + '-head'
 		});
 
-		if (initialState === 'visible') {
-			this.seekHead.attr('tabindex', '0');
-		} else {
-			this.seekHead.attr('tabindex', '-1');
-		}
+		this.seekHead.attr('tabindex', '0');
+
 		// Since head is focusable, it gets the aria roles/titles.
 		this.seekHead.attr({
 			'role': 'slider',
