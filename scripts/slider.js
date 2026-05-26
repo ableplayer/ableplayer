@@ -6,7 +6,7 @@ import $ from 'jquery';
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	function AccessibleSlider(div, length, min, max, bigInterval, label, className) {
+	function AccessibleSlider(div, length, min, max, bigInterval, label) {
 
 		// div is the host element around which the slider will be built
 		// length is the width
@@ -15,7 +15,6 @@ import $ from 'jquery';
 		// bigInterval is the number of steps supported by page up/page down (set to 0 if not supported)
 		// (smallInterval, defined as nextStep below, is always set to 1) - this is the interval supported by arrow keys
 		// label is used within an aria-label attribute to identify the slider to screen reader users
-		// className is used as the root within class names (e.g., 'able-' + classname + '-head')
 
 		var thisObj, coords;
 
@@ -39,7 +38,7 @@ import $ from 'jquery';
 		// Add a seekhead
 		this.seekHead = $('<div>',{
 			'aria-orientation': 'horizontal',
-			'class': 'able-' + className + '-head'
+			'class': 'able-seekbar-head'
 		});
 
 		this.seekHead.attr('tabindex', '0');
@@ -79,10 +78,10 @@ import $ from 'jquery';
 			this.wrapperDiv.width(length);
 			this.loadedDiv.width(0);
 		}
-		this.wrapperDiv.addClass('able-' + className + '-wrapper');
-		this.loadedDiv.addClass('able-' + className + '-loaded');
+		this.wrapperDiv.addClass('able-seekbar-wrapper');
+		this.loadedDiv.addClass('able-seekbar-loaded');
 		this.playedDiv.width(0);
-		this.playedDiv.addClass('able-' + className + '-played');
+		this.playedDiv.addClass('able-seekbar-played');
 
 		// Set a default duration. User can call this dynamically if duration changes.
 		this.setDuration(max);
