@@ -44,6 +44,7 @@
 - Various issues with Vimeo error handling. The `catch` blocks were referencing nonexistent variables.
 - Fix prev/next item navigation in playlists.
 - Display volume value as a percentage in all cases.
+- Update seekbar width to be expressed in percentages.
 
 ### Code cleanup
 
