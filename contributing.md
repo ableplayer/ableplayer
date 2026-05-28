@@ -30,7 +30,7 @@ Copy the `en.json` source file, then replace the English version of the text wit
 
 ## Building the Able Player source
 
-The source JavaScript files for Able Player are in the */scripts* directory, and the source CSS files are in the */styles* directory. These source files are ultimately combined into several different files (in the */build* directory) using [npm][] and [Grunt][]:
+The source JavaScript files for Able Player are in the */scripts* directory, and the source CSS files are in the */styles* directory. These source files are ultimately combined into several different files (in the */build* directory) using [npm][], [Grunt][], and [Rollup][].
 
 ```sh
 # Install Grunt globally
@@ -45,23 +45,35 @@ npm run build
 
 The npm and Grunt build process is defined by the *Gruntfile.js* and *package.json* files. (Note that the **version number** is specified in *package.json*, and must be updated when a new version is released).
 
+Starting in 5.0.0, which migrated Able Player from IIFE to ES modules, most of the building is instead done by Rollup. Grunt's concatenation bundling was sufficient for combining a series of IIFEs, but ES modules require more complex handling. As of 2026, Rollup is the tool of choice for this task. Grunt is still the overall task manager, since CSS minification is still needed, as well as a new step to generate TypeScript type definitions.
+
 Files created by the build process are put into the */build* directory:
 
 - **build/ableplayer.js** -
-  the default build of *ableplayer.js*
+  the default build of *ableplayer.js*. Useful for debugging.
 - **build/ableplayer.dist.js** -
-  a build of *ableplayer.js* without console logging or comments
+  a build of *ableplayer.js* without console logging
 - **build/ableplayer.min.js** -
   a minified version of the *dist* file
+- **build/ableplayer.esm.js** -
+  The ES module build of Able Player. For use in application bundles produced by Vite, webpack, or similar.
 - **build/ableplayer.min.css** -
   a minified combined version of all Able Player CSS files
 - **build/separate-dompurify/ directory** -
    same files as above, except DOMPurify is provided as a separate file rather than bundled to give the option of loading the library separately or using a CDN-hosted version.
 
+Starting in 5.0.0, all bundles now include source maps. These are helpful for debugging. Include them alongside the bundles, to see the original `/scripts` files instead of the `/build` output, when using browser debuggers.
+
+Also in 5.0.0, we build TypeScript type definitions, to aid IDE development with the ES module bundle.
+
+- **build/ableplayer.esm.d.ts** - Type definitions
+- **build/ableplayer.esm.d.ts.map** - Source map to improve "go to definition" behavior in IDEs
+
 ## Code of Conduct
 
 All contributors to Able Player are expected to follow our [published Code of Conduct](https://github.com/ableplayer/ableplayer/blob/main/code-of-conduct.md).
 
+  [Rollup]: https://rollupjs.org/
   [Grunt]: https://gruntjs.com/
   [issues]: https://github.com/ableplayer/ableplayer/issues
   [npm]: https://www.npmjs.com/

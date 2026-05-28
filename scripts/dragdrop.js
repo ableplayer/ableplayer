@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import AccessibleDialog from './dialog';
+
+function addDragdropFunctions(AblePlayer) {
 	AblePlayer.prototype.initDragDrop = function ( which ) {
 
 		// supported values of which: 'sign', 'transcript'
@@ -12,7 +15,7 @@
 		// There are nevertheless lessons to be learned from Drag & Drop about accessibility:
 		// http://dev.opera.com/articles/accessible-drag-and-drop/
 
-		var thisObj, $window, $toolbar, windowName, $resizeHandle, $resizeSvg,
+		var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, $resizeSvg,
 			i, x1, y1, x2, y2, $resizeLine, resizeZIndex;
 
 		thisObj = this;
@@ -138,7 +141,7 @@
 
 	AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
 
-		var thisObj, $windowAlert, menuId, $newButton, tooltipId, $tooltip, $popup, menuId;
+		var thisObj, menuId, $newButton, tooltipId, $tooltip, $popup;
 
 		thisObj = this;
 
@@ -196,11 +199,11 @@
 		if (which === 'transcript') {
 			this.$transcriptPopupButton = $newButton;
 			this.$transcriptPopup = $popup;
-			this.$transcriptToolbar.prepend($windowAlert,$newButton,$tooltip,$popup);
+			this.$transcriptToolbar.prepend($newButton,$tooltip,$popup);
 		} else if (which === 'sign') {
 			this.$signPopupButton = $newButton;
 			this.$signPopup = $popup;
-			this.$signToolbar.append($windowAlert,$newButton,$tooltip,$popup);
+			this.$signToolbar.append($newButton,$tooltip,$popup);
 		}
 
 		// handle button click
@@ -225,10 +228,10 @@
 		this.addResizeDialog(which, $window);
 	};
 
-	AblePlayer.prototype.addResizeDialog = function (which, $window) {
+	AblePlayer.prototype.addResizeDialog = function (which) {
 
 		var thisObj, $windowPopup, $windowButton, widthId, heightId,
-			$resizeForm, $resizeWrapper, $resizeWidthDiv, $resizeWidthInput, $resizeWidthLabel,
+			$resizeForm, $resizeWrapper, $resizeControls, $resizeWidthDiv, $resizeWidthInput, $resizeWidthLabel,
 			$resizeHeightDiv, $resizeHeightInput, $resizeHeightLabel, $saveButton, $cancelButton,
 			newWidth, newHeight, resizeDialog;
 
@@ -411,8 +414,8 @@
 			aspectRatio = startingWidth / startingHeight;
 			// make height a read-only field
 			// and calculate its value based on width to preserve aspect ratio
-			widthId = this.mediaId + '-resize-' + which + '-width';
-			heightId = this.mediaId + '-resize-' + which + '-height';
+			let widthId = this.mediaId + '-resize-' + which + '-width';
+			let heightId = this.mediaId + '-resize-' + which + '-height';
 			$( '#' + heightId ).prop('readonly',true);
 			$( '#' + widthId ).on('input',function() {
 				tempWidth = $(this).val();
@@ -542,7 +545,6 @@
 			'left': this.dragStartX + 'px'
 		}).trigger('focus');
 
-		var dragDevice = this.dragDevice;
 		// add device-specific event listeners
 		if (this.dragDevice === 'mouse') { // might also be a touchpad
 			$(document).on('mousemove touchmove',function(e) {
@@ -646,14 +648,12 @@
 
 	AblePlayer.prototype.endDrag = function(which) {
 
-		var thisObj, $windowPopup, $windowButton;
+		var thisObj, $windowButton;
 		thisObj = this;
 
 		if (which === 'transcript') {
-			$windowPopup = this.$transcriptPopup;
 			$windowButton = this.$transcriptPopupButton;
 		} else if (which === 'sign') {
-			$windowPopup = this.$signPopup;
 			$windowButton = this.$signPopupButton;
 		}
 
@@ -703,7 +703,6 @@
 		}
 
 		// get starting width and height
-		startPos = this.$activeWindow.position();
 		this.dragKeyX = this.dragStartX;
 		this.dragKeyY = this.dragStartY;
 		this.dragStartWidth = this.$activeWindow.width();
@@ -724,13 +723,11 @@
 
 	AblePlayer.prototype.endResize = function(which) {
 
-		var $windowPopup, $windowButton;
+		var $windowButton;
 
 		if (which === 'transcript') {
-			$windowPopup = this.$transcriptPopup;
 			$windowButton = this.$transcriptPopupButton;
 		} else if (which === 'sign') {
-			$windowPopup = this.$signPopup;
 			$windowButton = this.$signPopupButton;
 		}
 
@@ -755,4 +752,6 @@
 			this.finishingDrag = false;
 		}, 100);
 	};
-})(jQuery);
+}
+
+export default addDragdropFunctions;

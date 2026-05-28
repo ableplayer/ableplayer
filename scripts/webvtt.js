@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+ function addWebvttFunctions(AblePlayer) {
 	// See section 4.1 of dev.w3.org/html5/webvtt for format details.
 	AblePlayer.prototype.parseWebVTT = function(data) {
 
@@ -69,7 +71,7 @@
 		return returnText;
 	}
 
-	function cutLine(state, length) {
+	function cutLine(state) {
 		var nextEOL = state.text.indexOf('\n');
 		var returnText;
 		if (nextEOL === -1) {
@@ -334,7 +336,8 @@
 						current.push(token);
 					}
 				}
-				catch (err) {
+				catch (e) {
+					// Errors are suppressed here, not sure why - VP 2026-03-02
 				}
 			}
 		}
@@ -578,14 +581,6 @@
 		}
 	}
 
-	function eatSingleSpaceOrTab(state) {
-		if (state.text[0] === '\t' || state.text[0] === ' ') {
-			cut(state, 1);
-		} else {
-			state.error = 'Missing space.';
-		}
-	}
-
 	function eatSpacesOrTabs(state) {
 		while (state.text[0] === '\t' || state.text[0] === ' ') {
 			cut(state, 1);
@@ -684,4 +679,6 @@
 
 		return time;
 	}
-})(jQuery);
+ }
+
+ export default addWebvttFunctions;
