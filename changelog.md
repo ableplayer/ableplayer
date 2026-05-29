@@ -1,6 +1,6 @@
 # AblePlayer Changelog
 
-## 5.0.0 March 18, 2026
+## 5.0.0 May 28, 2026
 
 ### Features
 
@@ -22,7 +22,7 @@
 
 - Audited translation files and removed 38 translatable strings that were unused or duplicated by other strings.
 - Removed all inline scripts and styles from Able Player core.
-- Removed the unused 'orientation' parameter from the AccessibleSlider component.
+- Removed unused parameters from the AccessibleSlider component.
 
 ### Breaking changes
 

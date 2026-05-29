@@ -1,13 +1,13 @@
 {
   "name": "ableplayer",
-  "version": "5.0.0-beta1",
+  "version": "5.0.0-RC1",
   "description": "Accessible HTML5 media player",
   "homepage": "https://ableplayer.github.io/ableplayer",
   "bugs": "https://github.com/ableplayer/ableplayer/issues",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ableplayer/ableplayer.git"
+    "url": "git+https://github.com/ableplayer/ableplayer.git"
   },
   "type": "module",
   "main": "build/ableplayer.esm.js",
