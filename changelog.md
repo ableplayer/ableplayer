@@ -1,6 +1,6 @@
 # AblePlayer Changelog
 
-## 5.0.0 March 18, 2026
+## 5.0.0 May 28, 2026
 
 ### Features
 
