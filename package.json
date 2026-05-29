@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ableplayer/ableplayer.git"
+    "url": "git+https://github.com/ableplayer/ableplayer.git"
   },
   "type": "module",
   "main": "build/ableplayer.esm.js",
