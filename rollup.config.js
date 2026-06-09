@@ -141,7 +141,7 @@ export default [
         }
     },
     {
-        // This one is just for jest testing
+        // just for jest testing
         input: 'scripts/validate.js',
         plugins: [nodeResolve(), commonjs()],
         external: ['dompurify'],
@@ -152,6 +152,21 @@ export default [
             format: 'umd',
             globals: {
                 dompurify: 'DOMPurify',
+            },
+        },
+    },
+    {
+        // just for jest testing
+        input: 'scripts/webvtt.js',
+        plugins: [nodeResolve(), commonjs()],
+        external: ['jquery'],
+        output: {
+            name: 'addWebvttFunctions',
+            sourcemap: false,
+            file: 'build/test/webvtt.umd.js',
+            format: 'umd',
+            globals: {
+                jquery: 'jQuery',
             },
         },
     },
