@@ -109,13 +109,13 @@ function addTranslationFunctions(AblePlayer) {
 		supportedLangs = this.getSupportedLangs(); // returns an array
 
 		if (this.lang) { // a data-lang attribute is included on the media element
-			if ( Object.hasOwn( supportedLangs,this.lang ) ) {
+			if ( !Object.hasOwn( supportedLangs,this.lang ) ) {
 				// the specified language is not supported
 				if ( this.lang.indexOf('-') == 2 ) {
 					// this is a localized lang attribute (e.g., fr-CA)
 					// try the parent language, given the first two characters
 					// if parent lang is supported. Use that, else null.
-					this.lang = ( Object.hasOwn(supportedLangs,this.lang.substring(0,2)) !== -1 ) ? this.lang.substring(0,2) : null;
+					this.lang = Object.hasOwn(supportedLangs,this.lang.substring(0,2)) ? this.lang.substring(0,2) : null;
 				} else {
 					// this is not a localized language.
 					// but maybe there's a similar localized language supported

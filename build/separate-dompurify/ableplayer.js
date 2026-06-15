@@ -18299,24 +18299,26 @@
 	var slower$3 = "Pomalšie";
 	var play$3 = "Prehrať";
 	var pause$3 = "Pozastaviť";
-	var restart$3 = "Reštartovať";
+	var restart$3 = "Prehrať odznova";
 	var prevTrack$3 = "Predchádzajúca stopa";
 	var nextTrack$3 = "Nasledujúca stopa";
 	var rewind$3 = "Pretočiť dozadu";
 	var forward$3 = "Pretočiť dopredu";
-	var captions$3 = "Titulky";
-	var showCaptions$3 = "Zobraziť titulky";
-	var hideCaptions$3 = "Skryť titulky";
-	var captionsOff$3 = "Vypnúť titulky";
+	var captions$3 = "Skryté titulky";
+	var showCaptions$3 = "Zobraziť skryté titulky";
+	var hideCaptions$3 = "Vypnúť skryté titulky";
+	var captionsOff$3 = "Vypnúť skryté titulky";
+	var on = "Zapnuté";
+	var off = "Vypnuté";
 	var showTranscript$3 = "Zobraziť prepis";
 	var hideTranscript$3 = "Skryť prepis";
-	var turnOnDescriptions$3 = "Zapnúť popisy";
-	var turnOffDescriptions$3 = "Vypnúť popisy";
+	var turnOnDescriptions$3 = "Zapnúť audiokomentár";
+	var turnOffDescriptions$3 = "Vypnúť audiokomentár";
 	var chapters$3 = "Kapitoly";
 	var language$3 = "Jazyk";
-	var sign$3 = "Posunková reč";
-	var showSign$3 = "Zobraziť posunkovú reč";
-	var hideSign$3 = "Skryť posunkovú reč";
+	var sign$3 = "Posunkový jazyk";
+	var showSign$3 = "Zobraziť posunkový jazyk";
+	var hideSign$3 = "Skryť posunkový jazyk";
 	var seekbarLabel$3 = "časová os";
 	var mute$3 = "Stlmiť";
 	var unmute$3 = "Zrušiť stlmenie";
@@ -18336,42 +18338,45 @@
 	var statusBuffering$3 = "Načítava sa";
 	var statusEnd$3 = "Koniec stopy";
 	var selectedTrack$3 = "Vybraná stopa";
-	var alertDescribedVersion$3 = "Používa sa verzia videa so zvukovým popisom";
-	var alertNonDescribedVersion$3 = "Používa sa verzia videa bez zvukového popisu";
-	var prefMenuCaptions$3 = "Titulky";
-	var prefVoicedCaptions$3 = "Hovorené titulky";
-	var prefMenuDescriptions$3 = "Popisy";
+	var alertDescribedVersion$3 = "Používa sa verzia videa s audiokomentárom";
+	var alertNonDescribedVersion$3 = "Používa sa verzia videa bez audiokomentára";
+	var prefMenuCaptions$3 = "Skryté titulky";
+	var prefVoicedCaptions$3 = "Hovorené skryté titulky";
+	var prefMenuDescriptions$3 = "Audiokomentár";
 	var prefMenuKeyboard$3 = "Klávesnica";
 	var prefMenuTranscript$3 = "Prepis";
-	var prefTitleCaptions$3 = "Nastavenia titulkov";
-	var prefTitleDescriptions$3 = "Nastavenia zvukového popisu";
+	var prefTitleCaptions$3 = "Nastavenia skrytých titulkov";
+	var prefTitleDescriptions$3 = "Nastavenia audiokomentára";
 	var prefTitleKeyboard$3 = "Nastavenia klávesnice";
 	var prefTitleTranscript$3 = "Nastavenia prepisu";
-	var prefIntroDescription1$3 = "Tento prehrávač médií podporuje zvukový popis dvoma spôsobmi: ";
-	var prefDescription1$3 = "Aktuálne video má alternatívnu popísanú verziu a textový popis oznamovaný čítačkou obrazovky.";
-	var prefDescription2$3 = "Aktuálne video má textový popis.";
-	var prefDescription3$3 = "Aktuálne video má alternatívnu popísanú verziu.";
-	var prefIntroDescriptionNone$3 = "Aktuálne video nemá zvukový popis v žiadnom formáte.";
-	var prefIntroDescription3$3 = "Pomocou nasledujúceho formulára nastavte svoje predvoľby týkajúce sa textového zvukového popisu.";
-	var prefIntroDescription4$3 = "Po uložení nastavení je možné zvukový popis zapnúť/vypnúť pomocou tlačidla Popis.";
+	var prefIntroDescription1$3 = "Tento prehrávač médií podporuje audiokomentár dvoma spôsobmi: ";
+	var prefDescription1$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačkou obrazovky.";
+	var prefDescription2$3 = "Aktuálne video má textový audiokomentár.";
+	var prefDescription3$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom.";
+	var prefIntroDescriptionNone$3 = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+	var prefDescriptionNone = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+	var prefDescFormatOption1 = "alternatívna verzia videa s audiokomentárom";
+	var prefDescFormatOption2 = "textový audiokomentár, oznamovaný čítačkou obrazovky";
+	var prefIntroDescription3$3 = "Pomocou nasledujúceho formulára nastavte svoje predvoľby týkajúce sa textového audiokomentára.";
+	var prefIntroDescription4$3 = "Po uložení nastavení je možné audiokomentár zapnúť/vypnúť pomocou príslušného tlačidla.";
 	var prefIntroKeyboard1$3 = "Prehrávač médií na tejto webovej stránke možno ovládať odkiaľkoľvek na stránke pomocou klávesových skratiek (zoznam nájdete nižšie).";
 	var prefIntroKeyboard2$3 = "Modifikačné klávesy (Shift, Alt a Control) je možné priradiť nižšie.";
 	var prefIntroKeyboard3$3 = "POZNÁMKA: Niektoré kombinácie klávesov môžu byť v konflikte s klávesmi používanými vaším prehliadačom a/alebo inými softvérovými aplikáciami. Vyskúšajte rôzne kombinácie modifikačných klávesov, aby ste našli tú, ktorá vám vyhovuje.";
 	var prefHeadingKeyboard1$3 = "Modifikačné klávesy používané pre skratky";
 	var prefHeadingKeyboard2$3 = "Aktuálne klávesové skratky";
-	var prefHeadingDescription$3 = "Zvukový popis";
-	var prefHeadingTextDescription$3 = "Textový zvukový popis";
+	var prefHeadingDescription$3 = "Audiokomentár";
+	var prefHeadingTextDescription$3 = "Textový audiokomentár";
 	var prefAltKey$3 = "Alt";
 	var prefCtrlKey$3 = "Control";
 	var prefShiftKey$3 = "Shift";
 	var prefNoKeyShortcuts$3 = "Zakázať klávesové skratky";
 	var escapeKey$3 = "Escape";
 	var escapeKeyFunction$3 = "Zatvoriť aktuálny dialóg alebo vyskakovacie menu";
-	var prefDescPause$3 = "Automaticky pozastaviť video, keď sa spustí popis";
-	var prefDescVisible$3 = "Zobraziť popis";
+	var prefDescPause$3 = "Automaticky pozastaviť video, keď sa spustí audiokomentár";
+	var prefDescVisible$3 = "Zobraziť audiokomentár";
 	var prefDescVoice$3 = "Hlas";
-	var prefDescRate$3 = "Rýchlosť hovoreného popisu";
-	var prefCaptionRate$3 = "Rýchlosť hovorených titulkov";
+	var prefDescRate$3 = "Rýchlosť hovoreného audiokomentára";
+	var prefCaptionRate$3 = "Rýchlosť hovorených skrytých titulkov";
 	var prefDescPitch$3 = "Výška tónu";
 	var prefDescPitch1$3 = "Veľmi nízka";
 	var prefDescPitch2$3 = "Nízka";
@@ -18407,7 +18412,7 @@
 	var prefCaptionsPosition$3 = "Pozícia";
 	var captionsPositionOverlay$3 = "Prekrytie";
 	var captionsPositionBelow$3 = "Pod videom";
-	var sampleCaptionText$3 = "Vzorový text titulkov";
+	var sampleCaptionText$3 = "Vzorový text skrytých titulkov";
 	var prefSuccess$3 = "Vaše zmeny boli uložené.";
 	var prefNoChange$3 = "Neurobili ste žiadne zmeny.";
 	var save$3 = "Uložiť";
@@ -18421,7 +18426,7 @@
 	var windowMoveDown$3 = "Okno sa presunulo dole";
 	var windowMoveStopped$3 = "Presúvanie okna zastavené";
 	var transcriptControls$3 = "Ovládacie prvky okna prepisu";
-	var signControls$3 = "Ovládacie prvky okna posunkovej reči";
+	var signControls$3 = "Ovládacie prvky okna posunkového jazyka";
 	var windowMoveAlert$3 = "Potiahnite alebo použite šípky na presun okna; stlačením Enter zastavte";
 	var windowResize$3 = "Zmeniť veľkosť";
 	var windowResizeHeading$3 = "Zmeniť veľkosť okna";
@@ -18441,9 +18446,9 @@
 	var seconds$3 = "sekundy";
 	var vtsHeading$3 = "Triedič prepisu videa";
 	var vtsInstructions1$3 = "Použite Triedič prepisu videa na úpravu textových stôp:";
-	var vtsInstructions2$3 = "Zmeňte poradie kapitol, popisov, titulkov a/alebo podtitulkov tak, aby sa zobrazovali v správnom poradí v automaticky generovanom prepise Able Player.";
+	var vtsInstructions2$3 = "Zmeňte poradie kapitol, audiokomentárov, titulkov a/alebo podtitulkov tak, aby sa zobrazovali v správnom poradí v automaticky generovanom prepise Able Player.";
 	var vtsInstructions3$3 = "Upravte obsah alebo časy začiatku/konca (všetky sú priamo upraviteľné v tabuľke).";
-	var vtsInstructions4$3 = "Pridajte nový obsah, napríklad kapitoly alebo popisy.";
+	var vtsInstructions4$3 = "Pridajte nový obsah, napríklad kapitoly alebo audiokomentáre.";
 	var vtsInstructions5$3 = "Po úprave kliknite na tlačidlo \"Uložiť zmeny\", čím vygenerujete nový obsah pre všetky príslušné časované textové súbory. Nový text možno skopírovať a vložiť do nových súborov WebVTT.";
 	var vtsSelectLanguage$3 = "Vyberte jazyk";
 	var vtsSave$3 = "Vygenerovať nový obsah .vtt";
@@ -18476,6 +18481,8 @@
 		showCaptions: showCaptions$3,
 		hideCaptions: hideCaptions$3,
 		captionsOff: captionsOff$3,
+		on: on,
+		off: off,
 		showTranscript: showTranscript$3,
 		hideTranscript: hideTranscript$3,
 		turnOnDescriptions: turnOnDescriptions$3,
@@ -18520,6 +18527,9 @@
 		prefDescription2: prefDescription2$3,
 		prefDescription3: prefDescription3$3,
 		prefIntroDescriptionNone: prefIntroDescriptionNone$3,
+		prefDescriptionNone: prefDescriptionNone,
+		prefDescFormatOption1: prefDescFormatOption1,
+		prefDescFormatOption2: prefDescFormatOption2,
 		prefIntroDescription3: prefIntroDescription3$3,
 		prefIntroDescription4: prefIntroDescription4$3,
 		prefIntroKeyboard1: prefIntroKeyboard1$3,
@@ -19721,13 +19731,13 @@
 			supportedLangs = this.getSupportedLangs(); // returns an array
 
 			if (this.lang) { // a data-lang attribute is included on the media element
-				if ( Object.hasOwn( supportedLangs,this.lang ) ) {
+				if ( !Object.hasOwn( supportedLangs,this.lang ) ) {
 					// the specified language is not supported
 					if ( this.lang.indexOf('-') == 2 ) {
 						// this is a localized lang attribute (e.g., fr-CA)
 						// try the parent language, given the first two characters
 						// if parent lang is supported. Use that, else null.
-						this.lang = ( Object.hasOwn(supportedLangs,this.lang.substring(0,2)) !== -1 ) ? this.lang.substring(0,2) : null;
+						this.lang = Object.hasOwn(supportedLangs,this.lang.substring(0,2)) ? this.lang.substring(0,2) : null;
 					} else {
 						// this is not a localized language.
 						// but maybe there's a similar localized language supported
