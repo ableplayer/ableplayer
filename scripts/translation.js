@@ -16,6 +16,7 @@ import nl from '../translations/nl.json';
 import pl from '../translations/pl.json';
 import pt_br from '../translations/pt-br.json';
 import pt from '../translations/pt.json';
+import sk from '../translations/sk.json';
 import sv from '../translations/sv.json';
 import tr from '../translations/tr.json';
 import zh_tw from '../translations/zh-tw.json';
@@ -38,6 +39,7 @@ const moduleFromTag = {
 	pl,
 	pt,
 	'pt-BR': pt_br,
+	sk,
 	sv,
 	tr,
 	'zh-TW': zh_tw,
@@ -64,6 +66,7 @@ function addTranslationFunctions(AblePlayer) {
 			'pl'    : 'Polish',
 			'pt'    : 'Portuguese',
 			'pt-BR' : 'Brazilian Portuguese',
+			'sk'    : 'Slovak',
 			'sv'    : 'Swedish',
 			'tr'    : 'Turkish',
 			'zh-TW' : 'Chinese (Taiwan)'
@@ -106,13 +109,13 @@ function addTranslationFunctions(AblePlayer) {
 		supportedLangs = this.getSupportedLangs(); // returns an array
 
 		if (this.lang) { // a data-lang attribute is included on the media element
-			if ( Object.hasOwn( supportedLangs,this.lang ) ) {
+			if ( !Object.hasOwn( supportedLangs,this.lang ) ) {
 				// the specified language is not supported
 				if ( this.lang.indexOf('-') == 2 ) {
 					// this is a localized lang attribute (e.g., fr-CA)
 					// try the parent language, given the first two characters
 					// if parent lang is supported. Use that, else null.
-					this.lang = ( Object.hasOwn(supportedLangs,this.lang.substring(0,2)) !== -1 ) ? this.lang.substring(0,2) : null;
+					this.lang = Object.hasOwn(supportedLangs,this.lang.substring(0,2)) ? this.lang.substring(0,2) : null;
 				} else {
 					// this is not a localized language.
 					// but maybe there's a similar localized language supported
