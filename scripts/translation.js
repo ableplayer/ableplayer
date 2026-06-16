@@ -16,6 +16,7 @@ import nl from '../translations/nl.json';
 import pl from '../translations/pl.json';
 import pt_br from '../translations/pt-br.json';
 import pt from '../translations/pt.json';
+import sk from '../translations/sk.json';
 import sv from '../translations/sv.json';
 import tr from '../translations/tr.json';
 import zh_tw from '../translations/zh-tw.json';
@@ -38,6 +39,7 @@ const moduleFromTag = {
 	pl,
 	pt,
 	'pt-BR': pt_br,
+	sk,
 	sv,
 	tr,
 	'zh-TW': zh_tw,
@@ -64,6 +66,7 @@ function addTranslationFunctions(AblePlayer) {
 			'pl'    : 'Polish',
 			'pt'    : 'Portuguese',
 			'pt-BR' : 'Brazilian Portuguese',
+			'sk'    : 'Slovak',
 			'sv'    : 'Swedish',
 			'tr'    : 'Turkish',
 			'zh-TW' : 'Chinese (Taiwan)'
