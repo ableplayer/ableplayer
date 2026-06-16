@@ -1,0 +1,68 @@
+WEBVTT
+kind: captions
+lang: sk
+
+NOTE Tento VTT súbor obsahuje niekoľko špeciálnych prvkov:
+- Metadáta v záhlaví (riadky 2 a 3)
+- Aktuálny blok komentára, označený NOTE a obklopený prázdnymi riadkami
+- Nastavenia stopy na konci prvého časového razítka
+- Rozsah stopy na začiatku druhej stopy
+- (v tomto prípade „voice span" <v> identifikujúci hovoriaceho)
+- Zoznam nastavení stopy WebVTT za časovým razítkom na 39.132
+- AblePlayer momentálne tieto rozšírené funkcie nepodporuje,
+- ale parser ich musí vedieť filtrovať
+
+00:00:00.429 --> 00:00:09.165
+[ hudba ]
+
+00:00:09.165 --> 00:00:10.792
+<v Rozprávač> Títo ľudia sú pre vás <i>dôležití</i>.
+
+00:00:10.792 --> 00:00:13.759
+<b>Objednávajú</b> vaše produkty,
+<b>registrujú sa</b> do vašich služieb,
+
+00:00:13.759 --> 00:00:16.627
+<b>zapisujú sa</b> do vašich kurzov,
+<b>čítajú</b> vaše názory,
+
+00:00:16.627 --> 00:00:18.561
+a <b>sledujú</b> vaše videá.
+
+00:00:18.561 --> 00:00:24.165
+Nikdy ich neuvidíte, ale oni vás poznajú –
+cez vašu webovú stránku.
+
+00:00:24.165 --> 00:00:25.891
+Alebo možno nie.
+
+00:00:25.891 --> 00:00:30.396
+<c.quotable>Návštevníci vašej webovej stránky nie sú
+bezmenná masa rovnakých klikáčov myšou</c>
+
+00:00:30.396 --> 00:00:32.363
+ale živá
+komunita jednotlivcov
+
+00:00:32.363 --> 00:00:35.297
+s rôznymi vkusmi,
+štýlmi a schopnosťami.
+
+00:00:35.297 --> 00:00:36.900
+Patrí sem aj ľudia so zdravotným postihnutím.
+
+00:00:39.132 --> 00:00:41.000 position:10%,start align:start size:35%
+<v Terrill> Je dôležité, aby weboví
+dizajnéri a vývojári
+
+00:00:41.000 --> 00:00:45.500
+si uvedomili, že to, čo vidia
+momentálne na svojom počítači,
+
+00:00:45.500 --> 00:00:49.264
+pri svojom rozlíšení, s ich prehliadačom
+a operačným systémom
+
+00:00:49.264 --> 00:00:52.000
+nemusí byť nevyhnutne
+to isté, čo vidia všetci ostatní.

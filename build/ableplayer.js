@@ -20692,6 +20692,341 @@
   	vtsMovedRow: vtsMovedRow
   };
 
+  var playerHeading$sk = "Prehrávač médií";
+  var audioPlayer$sk = "Prehrávač zvuku";
+  var videoPlayer$sk = "Prehrávač videa";
+  var faster$sk = "Rýchlejšie";
+  var slower$sk = "Pomalšie";
+  var play$sk = "Prehrať";
+  var pause$sk = "Pozastaviť";
+  var restart$sk = "Prehrať odznova";
+  var prevTrack$sk = "Predchádzajúca stopa";
+  var nextTrack$sk = "Nasledujúca stopa";
+  var rewind$sk = "Pretočiť dozadu";
+  var forward$sk = "Pretočiť dopredu";
+  var captions$sk = "Skryté titulky";
+  var showCaptions$sk = "Zobraziť skryté titulky";
+  var hideCaptions$sk = "Vypnúť skryté titulky";
+  var captionsOff$sk = "Vypnúť skryté titulky";
+  var showTranscript$sk = "Zobraziť prepis";
+  var hideTranscript$sk = "Skryť prepis";
+  var turnOnDescriptions$sk = "Zapnúť audiokomentár";
+  var turnOffDescriptions$sk = "Vypnúť audiokomentár";
+  var chapters$sk = "Kapitoly";
+  var language$sk = "Jazyk";
+  var sign$sk = "Posunkový jazyk";
+  var showSign$sk = "Zobraziť posunkový jazyk";
+  var hideSign$sk = "Skryť posunkový jazyk";
+  var seekbarLabel$sk = "časová os";
+  var mute$sk = "Stlmiť";
+  var unmute$sk = "Zrušiť stlmenie";
+  var volume$sk = "Hlasitosť";
+  var volumeUpDown$sk = "Hlasitosť hore dole";
+  var preferences$sk = "Nastavenia";
+  var enterFullScreen$sk = "Prejsť na celú obrazovku";
+  var exitFullScreen$sk = "Ukončiť celú obrazovku";
+  var speed$sk = "Rýchlosť";
+  var spacebar$sk = "medzerník";
+  var transcriptTitle$sk = "Prepis";
+  var lyricsTitle$sk = "Text piesne";
+  var autoScroll$sk = "Automatické posúvanie";
+  var statusPlaying$sk = "Prehráva sa";
+  var statusPaused$sk = "Pozastavené";
+  var statusStopped$sk = "Zastavené";
+  var statusBuffering$sk = "Načítava sa";
+  var statusEnd$sk = "Koniec stopy";
+  var selectedTrack$sk = "Vybraná stopa";
+  var alertDescribedVersion$sk = "Používa sa verzia videa s audiokomentárom";
+  var alertNonDescribedVersion$sk = "Používa sa verzia videa bez audiokomentára";
+  var prefMenuCaptions$sk = "Skryté titulky";
+  var prefVoicedCaptions$sk = "Spoken Captions";
+  var prefMenuDescriptions$sk = "Audiokomentár";
+  var prefMenuKeyboard$sk = "Klávesnica";
+  var prefMenuTranscript$sk = "Prepis";
+  var prefTitleCaptions$sk = "Nastavenia skrytých titulkov";
+  var prefTitleDescriptions$sk = "Nastavenia audiokomentára";
+  var prefTitleKeyboard$sk = "Nastavenia klávesnice";
+  var prefTitleTranscript$sk = "Nastavenia prepisu";
+  var prefIntroDescription1$sk = "Tento prehrávač médií podporuje audiokomentár dvoma spôsobmi: ";
+  var prefDescription1$sk = "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačkou obrazovky.";
+  var prefDescription2$sk = "Aktuálne video má textový audiokomentár.";
+  var prefDescription3$sk = "Aktuálne video má alternatívnu verziu s audiokomentárom.";
+  var prefIntroDescriptionNone$sk = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+  var prefIntroDescription3$sk = "Pomocou nasledujúceho formulára nastavte svoje predvoľby týkajúce sa textového audiokomentára.";
+  var prefIntroDescription4$sk = "Po uložení nastavení je možné audiokomentár zapnúť/vypnúť pomocou príslušného tlačidla.";
+  var prefIntroKeyboard1$sk = "Prehrávač médií na tejto webovej stránke možno ovládať odkiaľkoľvek na stránke pomocou klávesových skratiek (zoznam nájdete nižšie).";
+  var prefIntroKeyboard2$sk = "Modifikačné klávesy (Shift, Alt a Control) je možné priradiť nižšie.";
+  var prefIntroKeyboard3$sk = "POZNÁMKA: Niektoré kombinácie klávesov môžu byť v konflikte s klávesmi používanými vaším prehliadačom a/alebo inými softvérovými aplikáciami. Vyskúšajte rôzne kombinácie modifikačných klávesov, aby ste našli tú, ktorá vám vyhovuje.";
+  var prefHeadingKeyboard1$sk = "Modifikačné klávesy používané pre skratky";
+  var prefHeadingKeyboard2$sk = "Aktuálne klávesové skratky";
+  var prefHeadingDescription$sk = "Audiokomentár";
+  var prefHeadingTextDescription$sk = "Textový audiokomentár";
+  var prefAltKey$sk = "Alt";
+  var prefCtrlKey$sk = "Control";
+  var prefShiftKey$sk = "Shift";
+  var prefNoKeyShortcuts$sk = "Zakázať klávesové skratky";
+  var escapeKey$sk = "Escape";
+  var escapeKeyFunction$sk = "Zatvoriť aktuálny dialóg alebo vyskakovacie menu";
+  var prefDescPause$sk = "Automaticky pozastaviť video, keď sa spustí audiokomentár";
+  var prefDescVisible$sk = "Zobraziť audiokomentár";
+  var prefDescVoice$sk = "Hlas";
+  var prefDescRate$sk = "Rýchlosť hovoreného audiokomentára";
+  var prefCaptionRate$sk = "Rýchlosť hovorených skrytých titulkov";
+  var prefDescPitch$sk = "Výška tónu";
+  var prefDescPitch1$sk = "Veľmi nízka";
+  var prefDescPitch2$sk = "Nízka";
+  var prefDescPitch3$sk = "Predvolená";
+  var prefDescPitch4$sk = "Vysoká";
+  var prefDescPitch5$sk = "Veľmi vysoká";
+  var sampleDescriptionText$sk = "Upravte nastavenia, aby ste počuli tento vzorový text.";
+  var prefHighlight$sk = "Zvýrazniť prepis počas prehrávania médií";
+  var prefTabbable$sk = "Povoliť ovládanie prepisu klávesnicou";
+  var prefCaptionsFont$sk = "Písmo";
+  var prefCaptionsColor$sk = "Farba textu";
+  var prefCaptionsBGColor$sk = "Pozadie";
+  var prefCaptionsSize$sk = "Veľkosť písma";
+  var prefCaptionsOpacity$sk = "Nepriehľadnosť";
+  var prefCaptionsStyle$sk = "Štýl";
+  var serif$sk = "pätkové (serif)";
+  var sans$sk = "bezpätkové (sans-serif)";
+  var cursive$sk = "kurzíva";
+  var fantasy$sk = "ozdobné";
+  var monospace$sk = "stála šírka (monospace)";
+  var white$sk = "biela";
+  var yellow$sk = "žltá";
+  var green$sk = "zelená";
+  var cyan$sk = "azúrová";
+  var blue$sk = "modrá";
+  var magenta$sk = "fialová";
+  var red$sk = "červená";
+  var black$sk = "čierna";
+  var transparent$sk = "priehľadné";
+  var solid$sk = "nepriehľadné";
+  var captionsStylePopOn$sk = "Pop-on";
+  var captionsStyleRollUp$sk = "Roll-up";
+  var prefCaptionsPosition$sk = "Pozícia";
+  var captionsPositionOverlay$sk = "Prekrytie";
+  var captionsPositionBelow$sk = "Pod videom";
+  var sampleCaptionText$sk = "Vzorový text skrytých titulkov";
+  var prefSuccess$sk = "Vaše zmeny boli uložené.";
+  var prefNoChange$sk = "Neurobili ste žiadne zmeny.";
+  var save$sk = "Uložiť";
+  var cancel$sk = "Zrušiť";
+  var dismissButton$sk = "Zatvoriť";
+  var windowButtonLabel$sk = "Možnosti okna";
+  var windowMove$sk = "Presunúť";
+  var windowMoveLeft$sk = "Okno sa presunulo doľava";
+  var windowMoveRight$sk = "Okno sa presunulo doprava";
+  var windowMoveUp$sk = "Okno sa presunulo hore";
+  var windowMoveDown$sk = "Okno sa presunulo dole";
+  var windowMoveStopped$sk = "Presúvanie okna zastavené";
+  var transcriptControls$sk = "Ovládacie prvky okna prepisu";
+  var signControls$sk = "Ovládacie prvky okna posunkového jazyka";
+  var windowMoveAlert$sk = "Potiahnite alebo použite šípky na presun okna; stlačením Enter zastavte";
+  var windowResize$sk = "Zmeniť veľkosť";
+  var windowResizeHeading$sk = "Zmeniť veľkosť okna";
+  var closeButtonLabel$sk = "Zatvoriť";
+  var width$sk = "Šírka";
+  var height$sk = "Výška";
+  var resultsSummary1$sk = "Hľadali ste:";
+  var resultsSummary2$sk = "Nájdených %1 zodpovedajúcich položiek.";
+  var resultsSummary3$sk = "Kliknutím na čas priradený k ľubovoľnej položke prehráte video od daného bodu.";
+  var noResultsFound$sk = "Nenašli sa žiadne výsledky.";
+  var searchButtonLabel$sk = "Prehrať od %1";
+  var hour$sk = "hodina";
+  var minute$sk = "minúta";
+  var second$sk = "sekunda";
+  var hours$sk = "hodiny";
+  var minutes$sk = "minúty";
+  var seconds$sk = "sekundy";
+  var vtsHeading$sk = "Triedič prepisu videa";
+  var vtsInstructions1$sk = "Použite Triedič prepisu videa na úpravu textových stôp:";
+  var vtsInstructions2$sk = "Zmeňte poradie kapitol, audiokomentárov, titulkov a/alebo podtitulkov tak, aby sa zobrazovali v správnom poradí v automaticky generovanom prepise Able Player.";
+  var vtsInstructions3$sk = "Upravte obsah alebo časy začiatku/konca (všetky sú priamo upraviteľné v tabuľke).";
+  var vtsInstructions4$sk = "Pridajte nový obsah, napríklad kapitoly alebo audiokomentáre.";
+  var vtsInstructions5$sk = "Po úprave kliknite na tlačidlo \"Uložiť zmeny\", čím vygenerujete nový obsah pre všetky príslušné časované textové súbory. Nový text možno skopírovať a vložiť do nových súborov WebVTT.";
+  var vtsSelectLanguage$sk = "Vyberte jazyk";
+  var vtsSave$sk = "Vygenerovať nový obsah .vtt";
+  var vtsReturn$sk = "Vrátiť sa do editora";
+  var vtsCancel$sk = "Ukladanie sa ruší. Všetky vykonané úpravy boli v tabuľke VTS obnovené.";
+  var vtsRow$sk = "Riadok";
+  var vtsKind$sk = "Typ";
+  var vtsStart$sk = "Začiatok";
+  var vtsEnd$sk = "Koniec";
+  var vtsContent$sk = "Obsah";
+  var vtsActions$sk = "Akcie";
+  var vtsNewRow$sk = "Bol vložený nový riadok %1.";
+  var vtsDeletedRow$sk = "Riadok %1 bol odstránený.";
+  var vtsMovedRow$sk = "Riadok %1 bol presunutý %2 a teraz je riadkom %3.";
+  var sk = {
+  	playerHeading: playerHeading$sk,
+  	audioPlayer: audioPlayer$sk,
+  	videoPlayer: videoPlayer$sk,
+  	faster: faster$sk,
+  	slower: slower$sk,
+  	play: play$sk,
+  	pause: pause$sk,
+  	restart: restart$sk,
+  	prevTrack: prevTrack$sk,
+  	nextTrack: nextTrack$sk,
+  	rewind: rewind$sk,
+  	forward: forward$sk,
+  	captions: captions$sk,
+  	showCaptions: showCaptions$sk,
+  	hideCaptions: hideCaptions$sk,
+  	captionsOff: captionsOff$sk,
+  	showTranscript: showTranscript$sk,
+  	hideTranscript: hideTranscript$sk,
+  	turnOnDescriptions: turnOnDescriptions$sk,
+  	turnOffDescriptions: turnOffDescriptions$sk,
+  	chapters: chapters$sk,
+  	language: language$sk,
+  	sign: sign$sk,
+  	showSign: showSign$sk,
+  	hideSign: hideSign$sk,
+  	seekbarLabel: seekbarLabel$sk,
+  	mute: mute$sk,
+  	unmute: unmute$sk,
+  	volume: volume$sk,
+  	volumeUpDown: volumeUpDown$sk,
+  	preferences: preferences$sk,
+  	enterFullScreen: enterFullScreen$sk,
+  	exitFullScreen: exitFullScreen$sk,
+  	speed: speed$sk,
+  	spacebar: spacebar$sk,
+  	transcriptTitle: transcriptTitle$sk,
+  	lyricsTitle: lyricsTitle$sk,
+  	autoScroll: autoScroll$sk,
+  	statusPlaying: statusPlaying$sk,
+  	statusPaused: statusPaused$sk,
+  	statusStopped: statusStopped$sk,
+  	statusBuffering: statusBuffering$sk,
+  	statusEnd: statusEnd$sk,
+  	selectedTrack: selectedTrack$sk,
+  	alertDescribedVersion: alertDescribedVersion$sk,
+  	alertNonDescribedVersion: alertNonDescribedVersion$sk,
+  	prefMenuCaptions: prefMenuCaptions$sk,
+  	prefVoicedCaptions: prefVoicedCaptions$sk,
+  	prefMenuDescriptions: prefMenuDescriptions$sk,
+  	prefMenuKeyboard: prefMenuKeyboard$sk,
+  	prefMenuTranscript: prefMenuTranscript$sk,
+  	prefTitleCaptions: prefTitleCaptions$sk,
+  	prefTitleDescriptions: prefTitleDescriptions$sk,
+  	prefTitleKeyboard: prefTitleKeyboard$sk,
+  	prefTitleTranscript: prefTitleTranscript$sk,
+  	prefIntroDescription1: prefIntroDescription1$sk,
+  	prefDescription1: prefDescription1$sk,
+  	prefDescription2: prefDescription2$sk,
+  	prefDescription3: prefDescription3$sk,
+  	prefIntroDescriptionNone: prefIntroDescriptionNone$sk,
+  	prefIntroDescription3: prefIntroDescription3$sk,
+  	prefIntroDescription4: prefIntroDescription4$sk,
+  	prefIntroKeyboard1: prefIntroKeyboard1$sk,
+  	prefIntroKeyboard2: prefIntroKeyboard2$sk,
+  	prefIntroKeyboard3: prefIntroKeyboard3$sk,
+  	prefHeadingKeyboard1: prefHeadingKeyboard1$sk,
+  	prefHeadingKeyboard2: prefHeadingKeyboard2$sk,
+  	prefHeadingDescription: prefHeadingDescription$sk,
+  	prefHeadingTextDescription: prefHeadingTextDescription$sk,
+  	prefAltKey: prefAltKey$sk,
+  	prefCtrlKey: prefCtrlKey$sk,
+  	prefShiftKey: prefShiftKey$sk,
+  	prefNoKeyShortcuts: prefNoKeyShortcuts$sk,
+  	escapeKey: escapeKey$sk,
+  	escapeKeyFunction: escapeKeyFunction$sk,
+  	prefDescPause: prefDescPause$sk,
+  	prefDescVisible: prefDescVisible$sk,
+  	prefDescVoice: prefDescVoice$sk,
+  	prefDescRate: prefDescRate$sk,
+  	prefCaptionRate: prefCaptionRate$sk,
+  	prefDescPitch: prefDescPitch$sk,
+  	prefDescPitch1: prefDescPitch1$sk,
+  	prefDescPitch2: prefDescPitch2$sk,
+  	prefDescPitch3: prefDescPitch3$sk,
+  	prefDescPitch4: prefDescPitch4$sk,
+  	prefDescPitch5: prefDescPitch5$sk,
+  	sampleDescriptionText: sampleDescriptionText$sk,
+  	prefHighlight: prefHighlight$sk,
+  	prefTabbable: prefTabbable$sk,
+  	prefCaptionsFont: prefCaptionsFont$sk,
+  	prefCaptionsColor: prefCaptionsColor$sk,
+  	prefCaptionsBGColor: prefCaptionsBGColor$sk,
+  	prefCaptionsSize: prefCaptionsSize$sk,
+  	prefCaptionsOpacity: prefCaptionsOpacity$sk,
+  	prefCaptionsStyle: prefCaptionsStyle$sk,
+  	serif: serif$sk,
+  	sans: sans$sk,
+  	cursive: cursive$sk,
+  	fantasy: fantasy$sk,
+  	monospace: monospace$sk,
+  	white: white$sk,
+  	yellow: yellow$sk,
+  	green: green$sk,
+  	cyan: cyan$sk,
+  	blue: blue$sk,
+  	magenta: magenta$sk,
+  	red: red$sk,
+  	black: black$sk,
+  	transparent: transparent$sk,
+  	solid: solid$sk,
+  	captionsStylePopOn: captionsStylePopOn$sk,
+  	captionsStyleRollUp: captionsStyleRollUp$sk,
+  	prefCaptionsPosition: prefCaptionsPosition$sk,
+  	captionsPositionOverlay: captionsPositionOverlay$sk,
+  	captionsPositionBelow: captionsPositionBelow$sk,
+  	sampleCaptionText: sampleCaptionText$sk,
+  	prefSuccess: prefSuccess$sk,
+  	prefNoChange: prefNoChange$sk,
+  	save: save$sk,
+  	cancel: cancel$sk,
+  	dismissButton: dismissButton$sk,
+  	windowButtonLabel: windowButtonLabel$sk,
+  	windowMove: windowMove$sk,
+  	windowMoveLeft: windowMoveLeft$sk,
+  	windowMoveRight: windowMoveRight$sk,
+  	windowMoveUp: windowMoveUp$sk,
+  	windowMoveDown: windowMoveDown$sk,
+  	windowMoveStopped: windowMoveStopped$sk,
+  	transcriptControls: transcriptControls$sk,
+  	signControls: signControls$sk,
+  	windowMoveAlert: windowMoveAlert$sk,
+  	windowResize: windowResize$sk,
+  	windowResizeHeading: windowResizeHeading$sk,
+  	closeButtonLabel: closeButtonLabel$sk,
+  	width: width$sk,
+  	height: height$sk,
+  	resultsSummary1: resultsSummary1$sk,
+  	resultsSummary2: resultsSummary2$sk,
+  	resultsSummary3: resultsSummary3$sk,
+  	noResultsFound: noResultsFound$sk,
+  	searchButtonLabel: searchButtonLabel$sk,
+  	hour: hour$sk,
+  	minute: minute$sk,
+  	second: second$sk,
+  	hours: hours$sk,
+  	minutes: minutes$sk,
+  	seconds: seconds$sk,
+  	vtsHeading: vtsHeading$sk,
+  	vtsInstructions1: vtsInstructions1$sk,
+  	vtsInstructions2: vtsInstructions2$sk,
+  	vtsInstructions3: vtsInstructions3$sk,
+  	vtsInstructions4: vtsInstructions4$sk,
+  	vtsInstructions5: vtsInstructions5$sk,
+  	vtsSelectLanguage: vtsSelectLanguage$sk,
+  	vtsSave: vtsSave$sk,
+  	vtsReturn: vtsReturn$sk,
+  	vtsCancel: vtsCancel$sk,
+  	vtsRow: vtsRow$sk,
+  	vtsKind: vtsKind$sk,
+  	vtsStart: vtsStart$sk,
+  	vtsEnd: vtsEnd$sk,
+  	vtsContent: vtsContent$sk,
+  	vtsActions: vtsActions$sk,
+  	vtsNewRow: vtsNewRow$sk,
+  	vtsDeletedRow: vtsDeletedRow$sk,
+  	vtsMovedRow: vtsMovedRow$sk
+  };
+
   const moduleFromTag = {
   	ca,
   	cs,
@@ -20710,6 +21045,7 @@
   	pl,
   	pt,
   	'pt-BR': pt_br,
+  	sk,
   	sv,
   	tr,
   	'zh-TW': zh_tw,
@@ -20736,6 +21072,7 @@
   			'pl'    : 'Polish',
   			'pt'    : 'Portuguese',
   			'pt-BR' : 'Brazilian Portuguese',
+  			'sk'    : 'Slovak',
   			'sv'    : 'Swedish',
   			'tr'    : 'Turkish',
   			'zh-TW' : 'Chinese (Taiwan)'
@@ -20778,13 +21115,13 @@
   		supportedLangs = this.getSupportedLangs(); // returns an array
 
   		if (this.lang) { // a data-lang attribute is included on the media element
-  			if ( Object.hasOwn( supportedLangs,this.lang ) ) {
+  			if ( !Object.hasOwn( supportedLangs,this.lang ) ) {
   				// the specified language is not supported
   				if ( this.lang.indexOf('-') == 2 ) {
   					// this is a localized lang attribute (e.g., fr-CA)
   					// try the parent language, given the first two characters
   					// if parent lang is supported. Use that, else null.
-  					this.lang = ( Object.hasOwn(supportedLangs,this.lang.substring(0,2)) !== -1 ) ? this.lang.substring(0,2) : null;
+  					this.lang = ( Object.hasOwn(supportedLangs,this.lang.substring(0,2)) ) ? this.lang.substring(0,2) : null;
   				} else {
   					// this is not a localized language.
   					// but maybe there's a similar localized language supported
@@ -20792,7 +21129,7 @@
   					similarLangFound = false;
   					for ( const [key,value] of Object.entries(supportedLangs) ) {
   						if ( key.substring(0,2) == this.lang ) {
-  							this.lang = value;
+  							this.lang = key;
   							similarLangFound = true;
   						}
   					}
