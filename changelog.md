@@ -56,6 +56,7 @@
 
 ### Internationalization
 
+- Added Slovak translation (props @rraddatch - Radoslav Ďurač)
 - Updated Catalan translation (props @ralcarazm)
 - Updated Dutch translation (props @rianrietveld)
 
