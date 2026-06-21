@@ -1,4 +1,4 @@
-(function ($) {
+import $ from 'jquery';
 
 
 	// Events:
@@ -6,19 +6,13 @@
 	// - tracking(event, position)
 	// - stopTracking(event, position)
 
-	window.AccessibleSlider = function(div, orientation, length, min, max, bigInterval, label, className, trackingMedia, initialState) {
+	function AccessibleSlider(div, max, bigInterval, label) {
 
 		// div is the host element around which the slider will be built
-		// orientation is either 'horizontal' or 'vertical'
-		// length is the width or height of the slider, depending on orientation
-		// min is the low end of the slider scale
 		// max is the high end of the slider scale
 		// bigInterval is the number of steps supported by page up/page down (set to 0 if not supported)
 		// (smallInterval, defined as nextStep below, is always set to 1) - this is the interval supported by arrow keys
 		// label is used within an aria-label attribute to identify the slider to screen reader users
-		// className is used as the root within class names (e.g., 'able-' + classname + '-head')
-		// trackingMedia is true if this is a media timeline; otherwise false
-		// initialState is either 'visible' or 'hidden'
 
 		var thisObj, coords;
 
@@ -33,37 +27,32 @@
 		this.nextStep = 1;
 		this.inertiaCount = 0;
 
-		this.bodyDiv = $(div);
+		this.seekbarDiv = $(div);
 
 		// Add divs for tracking amount of media loaded and played
-		if (trackingMedia) {
-			this.loadedDiv = $('<div></div>');
-			this.playedDiv = $('<div></div>');
-		}
+		this.loadedDiv = $('<div></div>');
+		this.playedDiv = $('<div></div>');
 
 		// Add a seekhead
 		this.seekHead = $('<div>',{
-			'aria-orientation': orientation,
-			'class': 'able-' + className + '-head'
+			'aria-orientation': 'horizontal',
+			'class': 'able-seekbar-head'
 		});
 
-		if (initialState === 'visible') {
-			this.seekHead.attr('tabindex', '0');
-		} else {
-			this.seekHead.attr('tabindex', '-1');
-		}
+		this.seekHead.attr('tabindex', '0');
+
 		// Since head is focusable, it gets the aria roles/titles.
 		this.seekHead.attr({
 			'role': 'slider',
 			'aria-label': label,
-			'aria-valuemin': min,
+			'aria-valuemin': 0,
 			'aria-valuemax': max
 		});
 
 		this.timeTooltipTimeoutId = null;
 		this.overTooltip = false;
 		this.timeTooltip = $('<div>');
-		this.bodyDiv.append(this.timeTooltip);
+		this.seekbarDiv.append(this.timeTooltip);
 
 		this.timeTooltip.attr('role', 'tooltip');
 		this.timeTooltip.addClass('able-tooltip');
@@ -77,33 +66,23 @@
 		});
 		this.timeTooltip.hide();
 
-		this.bodyDiv.append(this.loadedDiv);
-		this.bodyDiv.append(this.playedDiv);
-		this.bodyDiv.append(this.seekHead);
-
-		this.bodyDiv.wrap('<div></div>');
-		this.wrapperDiv = this.bodyDiv.parent();
+		this.seekbarDiv.append(this.loadedDiv);
+		this.seekbarDiv.append(this.playedDiv);
+		this.seekbarDiv.append(this.seekHead);
+		this.seekbarDiv.wrap('<div></div>');
+		this.wrapperDiv = this.seekbarDiv.parent();
 
 		if (this.skin === 'legacy') {
-			if (orientation === 'horizontal') {
-				this.wrapperDiv.width(length);
-				this.loadedDiv.width(0);
-			} else {
-				this.wrapperDiv.height(length);
-				this.loadedDiv.height(0);
-			}
+			this.wrapperDiv.width( 100 );
+			this.loadedDiv.width(0);
 		}
-		this.wrapperDiv.addClass('able-' + className + '-wrapper');
+		this.wrapperDiv.addClass('able-seekbar-wrapper');
+		this.loadedDiv.addClass('able-seekbar-loaded');
+		this.playedDiv.width(0);
+		this.playedDiv.addClass('able-seekbar-played');
 
-		if (trackingMedia) {
-			this.loadedDiv.addClass('able-' + className + '-loaded');
-
-			this.playedDiv.width(0);
-			this.playedDiv.addClass('able-' + className + '-played');
-
-			// Set a default duration. User can call this dynamically if duration changes.
-			this.setDuration(max);
-		}
+		// Set a default duration. User can call this dynamically if duration changes.
+		this.setDuration(max);
 
 		// handle seekHead events
 		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
@@ -123,8 +102,8 @@
 				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-				if (!thisObj.bodyDiv.is(':focus')) {
-					thisObj.bodyDiv.focus();
+				if (!thisObj.seekbarDiv.is(':focus')) {
+					thisObj.seekbarDiv.focus();
 				}
 				e.preventDefault();
 			} else if (e.type === 'mouseup' || e.type === 'touchend') {
@@ -137,8 +116,8 @@
 			}
 		});
 
-		// handle bodyDiv events
-		this.bodyDiv.on(
+		// handle seekbarDiv events
+		this.seekbarDiv.on(
 			'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
 			// Don't trigger move on right click.
@@ -229,8 +208,8 @@
 	};
 
 	AccessibleSlider.prototype.pageXToPosition = function (pageX) {
-		var offset = pageX - this.bodyDiv.offset().left;
-		var position = this.duration * (offset / this.bodyDiv.width());
+		var offset = pageX - this.seekbarDiv.offset().left;
+		var position = this.duration * (offset / this.seekbarDiv.width());
 		return this.boundPos(position);
 	};
 
@@ -246,6 +225,7 @@
 		}
 	};
 
+	// Set width of the legacy seekbar.
 	AccessibleSlider.prototype.setWidth = function (width) {
 		this.wrapperDiv.width(width);
 		this.resizeDivs();
@@ -257,14 +237,14 @@
 	};
 
 	AccessibleSlider.prototype.resizeDivs = function () {
-		this.playedDiv.width(this.bodyDiv.width() * (this.position / this.duration));
-		this.loadedDiv.width(this.bodyDiv.width() * this.buffered);
+		this.playedDiv.width( 100 * (this.position / this.duration) + '%' );
+		this.loadedDiv.width( 100 * this.buffered + '%' );
 	};
 
 	// Stops tracking, sets the head location to the current position.
 	AccessibleSlider.prototype.resetHeadLocation = function () {
 		var ratio = this.position / this.duration;
-		var center = this.bodyDiv.width() * ratio;
+		var center = this.seekbarDiv.width() * ratio;
 		this.seekHead.css('left', center - (this.seekHead.width() / 2));
 
 		if (this.tracking) {
@@ -294,21 +274,21 @@
 		if (!this.tracking) {
 			this.trackDevice = device;
 			this.tracking = true;
-			this.bodyDiv.trigger('startTracking', [position]);
+			this.seekbarDiv.trigger('startTracking', [position]);
 		}
 	};
 
 	AccessibleSlider.prototype.stopTracking = function (position) {
 		this.trackDevice = null;
 		this.tracking = false;
-		this.bodyDiv.trigger('stopTracking', [position]);
+		this.seekbarDiv.trigger('stopTracking', [position]);
 		this.setPosition(position, true);
 	};
 
 	AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
 		var position = this.pageXToPosition(pageX);
-		var newLeft = pageX - this.bodyDiv.offset().left - (this.seekHead.width() / 2);
-		newLeft = Math.max(0, Math.min(newLeft, this.bodyDiv.width() - this.seekHead.width()));
+		var newLeft = pageX - this.seekbarDiv.offset().left - (this.seekHead.width() / 2);
+		newLeft = Math.max(0, Math.min(newLeft, this.seekbarDiv.width() - this.seekHead.width()));
 		this.lastTrackPosition = position;
 		this.seekHead.css('left', newLeft);
 		this.reportTrackAtPosition(position);
@@ -316,14 +296,14 @@
 
 	AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
 		var ratio = position / this.duration;
-		var center = this.bodyDiv.width() * ratio;
+		var center = this.seekbarDiv.width() * ratio;
 		this.lastTrackPosition = position;
 		this.seekHead.css('left', center - (this.seekHead.width() / 2));
 		this.reportTrackAtPosition(position);
 	};
 
 	AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
-		this.bodyDiv.trigger('tracking', [position]);
+		this.seekbarDiv.trigger('tracking', [position]);
 		this.updateAriaValues(position, true);
 	};
 
@@ -389,7 +369,7 @@
 		} else if (this.overBody && this.overBodyMousePos) {
 			this.timeTooltip.show();
 			this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
-			this.setTooltipPosition(this.overBodyMousePos.x - this.bodyDiv.offset().left);
+			this.setTooltipPosition(this.overBodyMousePos.x - this.seekbarDiv.offset().left);
 		} else {
 
 			clearTimeout(this.timeTooltipTimeoutId);
@@ -450,4 +430,4 @@
 		return out;
 	};
 
-})(jQuery);
+export default AccessibleSlider;

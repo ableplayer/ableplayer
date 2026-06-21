@@ -86,6 +86,22 @@ a {
 	border-bottom: 1px solid #340449;
 }
 
+/* Two-column layouts */
+#wrapper {
+	display: grid;
+	grid-template-columns: repeat( 2, 1fr );
+	width: 1280px;
+	max-width: 98%;
+	background: #fff;
+	gap: 20px;
+	padding: 1rem;
+}
+
+/* One-column layouts */
+#container {
+	background: #fff;
+}
+
 .offscreen {
 	border: 0;
 	clip-path: inset(50%);
@@ -126,4 +142,22 @@ code {
 	nav ul {
 		border-radius: 0 0 0 0;
 	}
+}
+
+/* Styles used only in specific demos. */
+
+/* external2.html */
+#transcript div.able-desc {
+	width: 90%;
+	font-style: italic;
+	border: 1px solid #ccc;
+	background-color: #eee;
+}
+#transcript .able-transcript {
+	height: 550px;
+}
+.larger-text {
+	font-size:1.2em;
+	font-weight:bold;
+	font-style:italic
 }

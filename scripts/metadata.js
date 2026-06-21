@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addMetadataFunctions(AblePlayer) {
   AblePlayer.prototype.updateMeta = function (time) {
     if (this.hasMeta) {
       if (this.metaType === "text") {
@@ -137,4 +139,6 @@
 
     return result.join("");
   };
-})(jQuery);
+}
+
+export default addMetadataFunctions;

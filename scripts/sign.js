@@ -1,4 +1,8 @@
-(function ($) {
+/* global YT */
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+function addSignFunctions(AblePlayer) {
 	AblePlayer.prototype.initSignLanguage = function() {
 		this.hasSignLanguage = false;
 		// Sign language is only currently supported in HTML5 player and YouTube.
@@ -40,9 +44,8 @@
 	AblePlayer.prototype.injectSignPlayerCode = function() {
 
 		// create and inject surrounding HTML structure
-		var thisObj, signVideoId, i, signSrc, srcType, $signSource;
+		var signVideoId, i, signSrc, srcType, $signSource;
 
-		thisObj = this;
 		signVideoId = this.mediaId + '-sign';
 
 		if ( this.signFile || this.signYoutubeId ) {
@@ -153,7 +156,7 @@
 	AblePlayer.prototype.finalizeYoutubeSignInit = function () {
 
 		// This is called once we're sure the Youtube iFrame API is loaded -- see above
-		var deferred, promise, thisObj, containerId, ccLoadPolicy, autoplay;
+		var deferred, promise, thisObj, containerId, autoplay;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
@@ -189,10 +192,10 @@
 
 					deferred.resolve();
 				},
-				onError: function (x) {
+				onError: function (e) {
 					deferred.reject();
 				},
-				onStateChange: function (x) {
+				onStateChange: function (e) {
 					thisObj.getPlayerState().then(function() {
 						// no actions
 					});
@@ -209,4 +212,6 @@
 		return promise;
 	};
 
-})(jQuery);
+}
+
+export default addSignFunctions;

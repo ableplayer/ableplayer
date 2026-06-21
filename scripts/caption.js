@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addCaptionFunctions(AblePlayer) {
   AblePlayer.prototype.updateCaption = function (time) {
     if (
       !this.usingYouTubeCaptions &&
@@ -71,38 +73,19 @@
       } else if (thisObj.usingVimeoCaptions) {
         thisObj.vimeoPlayer
           .enableTextTrack(thisObj.captionLang)
-          .then(function (track) {
-            // track.language = the iso code for the language
-            // track.kind = 'captions' or 'subtitles'
-            // track.label = the human-readable label
-          })
           .catch(function (error) {
             switch (error.name) {
-              case "InvalidTrackLanguageError":
-                // no track was available with the specified language
-                console.log(
-                  "No " +
-                    track.kind +
-                    " track is available in the specified language (" +
-                    track.label +
-                    ")"
-                );
+              case 'InvalidTrackLanguageError':
+                // There is no text track for the specified language
+                console.log(`No Vimeo text track is available in the specified language (${thisObj.captionLang})`);
                 break;
-              case "InvalidTrackError":
-                // no track was available with the specified language and kind
-                console.log(
-                  "No " +
-                    track.kind +
-                    " track is available in the specified language (" +
-                    track.label +
-                    ")"
-                );
+              case 'InvalidTrackError':
+                // There is no such text track
+                console.log('No Vimeo text track is available');
                 break;
               default:
                 // some other error occurred
-                console.log(
-                  "Error loading " + track.label + " " + track.kind + " track"
-                );
+                console.log('Error enabling Vimeo text track');
                 break;
             }
           });
@@ -178,9 +161,9 @@
   };
 
   AblePlayer.prototype.showCaptions = function (now) {
-    var c, thisCaption, captionText;
+    var c, thisCaption, nextCaption, captionText, announceText, announcement, availableTime, rate, cueLength, estimatedTime;
     var cues;
-    if (this.selectedCaptions.cues.length) {
+    if (null !== this.selectedCaptions.cues && this.selectedCaptions.cues.length) {
       cues = this.selectedCaptions.cues;
     } else if (this.captions.length >= 1) {
       cues = this.captions[0].cues;
@@ -190,14 +173,29 @@
     for (c = 0; c < cues.length; c++) {
       if (cues[c].start <= now && cues[c].end > now) {
         thisCaption = c;
+		nextCaption = cues[ c + 1 ];
         break;
       }
     }
+
     if (typeof thisCaption !== "undefined") {
       if (this.currentCaption !== thisCaption) {
         // it's time to load the new caption into the container div
         captionText = this.flattenCueForCaption(cues[thisCaption]).replace( /\n/g, "<br>" );
-
+		// If preference enabled to voice captions, send to synthesizer.
+		if ( this.speechEnabled && this.prefCaptionsSpeak == 1 ) {
+			announceText = new DOMParser().parseFromString( captionText, 'text/html' );
+			announcement = announceText.body.textContent || '';
+			availableTime = ( thisCaption ) ? nextCaption.start - cues[thisCaption].start : 0;
+			rate = false, cueLength, estimatedTime;
+			if ( availableTime ) {
+				cueLength = announcement.trim().split(/\W+/).length;
+				estimatedTime = Math.round( ( ( cueLength ) / 135 ) * 60 );
+				rate = ( estimatedTime / availableTime );
+			}
+			// use browser's built-in speech synthesis
+			this.announceText( 'caption', announcement, rate );
+		}
         this.$captionsDiv.html(captionText);
         this.currentCaption = thisCaption;
         if (captionText.length === 0) {
@@ -323,7 +321,29 @@
         options[0] = "overlay";
         options[1] = "below";
         break;
+
+      case "prefCaptionsSpeak":
+        options[0] = ["0", this.translate( 'off', 'Off' ) ];
+        options[1] = ["1", this.translate( 'on', 'On' ) ];
+        break;
+
+      case "prefCaptionsVoice":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsPitch":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsRate":
+		options[0] = null; // set later.
+        break;
+
+      case "prefCaptionsVolume":
+		options[0] = null; // set later.
+        break;
     }
+
     return options;
   };
 
@@ -444,4 +464,6 @@
       }
     }
   };
-})(jQuery);
+}
+
+export default addCaptionFunctions;

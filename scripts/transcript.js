@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addTranscriptFunctions(AblePlayer) {
   AblePlayer.prototype.setupTranscript = function () {
     var deferred = new this.defer();
     var promise = deferred.promise();
@@ -35,14 +37,13 @@
   };
 
   AblePlayer.prototype.injectTranscriptArea = function () {
-    var thisObj,
-      $autoScrollLabel,
+    var $autoScrollLabel,
+      $autoScrollContainer,
       $languageSelectWrapper,
       $languageSelectLabel,
       i,
       $option;
 
-    thisObj = this;
     this.$transcriptArea = $("<div>", {
       class: "able-transcript-area",
       role: "dialog",
@@ -266,7 +267,7 @@
       } else if (this.descriptions.length > 0) {
         // Try and match the caption language.
         if (this.transcriptLang) {
-          for (var i = 0; i < this.descriptions.length; i++) {
+          for (i = 0; i < this.descriptions.length; i++) {
             if (this.descriptions[i].language === this.transcriptLang) {
               descriptions = this.descriptions[i].cues;
             }
@@ -381,7 +382,7 @@
     var thisObj = this;
 
     var $main = $('<div class="able-transcript-container"></div>');
-    var transcriptTitle;
+    var transcriptTitle, firstStart;
 
     // set language for transcript container
     $main.attr("lang", this.transcriptLang);
@@ -401,10 +402,11 @@
       headingNumber += 1;
       var chapterHeadingNumber = headingNumber + 1;
 
+      let transcriptHeading;
       if (headingNumber <= 6) {
-        var transcriptHeading = "h" + headingNumber.toString();
+        transcriptHeading = "h" + headingNumber.toString();
       } else {
-        var transcriptHeading = "div";
+        transcriptHeading = "div";
       }
       var $transcriptHeadingTag = $("<" + transcriptHeading + ">");
       $transcriptHeadingTag.addClass("able-transcript-heading");
@@ -428,10 +430,11 @@
     var nextDesc = 0;
 
     var addChapter = function (div, chap) {
+      let chapterHeading;
       if (chapterHeadingNumber <= 6) {
-        var chapterHeading = "h" + chapterHeadingNumber.toString();
+        chapterHeading = "h" + chapterHeadingNumber.toString();
       } else {
-        var chapterHeading = "div";
+        chapterHeading = "div";
       }
 
       var $chapterHeadingTag = $("<" + chapterHeading + ">", {
@@ -482,7 +485,7 @@
         class: "able-hidden",
       });
       $descHiddenSpan.attr("lang", thisObj.lang);
-      $descHiddenSpan.text(thisObj.tt.prefHeadingDescription + ": ");
+      $descHiddenSpan.text( thisObj.translate( 'prefHeadingDescription', 'Audio description' ) + ": ");
       $descDiv.append($descHiddenSpan);
 
       var flattenComponentForDescription = function (comp) {
@@ -545,11 +548,12 @@
           var hasParens = openParen !== -1 && closeParen !== -1;
 
           if (hasParens || hasBrackets) {
+            let silentSpanBreak;
             if (parts > 1) {
               // force a line break between sections that contain parens or brackets
-              var silentSpanBreak = "<br/>";
+              silentSpanBreak = "<br/>";
             } else {
-              var silentSpanBreak = "";
+              silentSpanBreak = "";
             }
             var silentSpanOpen =
               silentSpanBreak + '<span class="able-unspoken">';
@@ -592,24 +596,25 @@
             class: "able-unspoken",
           });
           // don't display "title=" when rendering the voice tag title in the transcript
-          comp.value = comp.value.replace(/^title="|\"$/g, "");
+          comp.value = comp.value.replace(/^title="|"$/g, "");
           $vSpan.text("(" + comp.value + ")");
           result.push($vSpan);
           for (var i = 0; i < comp.children.length; i++) {
-            var subResults = flattenComponentForCaption(comp.children[i]);
-            for (var jj = 0; jj < subResults.length; jj++) {
+            let subResults = flattenComponentForCaption(comp.children[i]);
+            for (let jj = 0; jj < subResults.length; jj++) {
               result.push(subResults[jj]);
             }
           }
         } else if (comp.type === "b" || comp.type === "i") {
+          let $tag;
           if (comp.type === "b") {
-            var $tag = $("<strong>");
+            $tag = $("<strong>");
           } else if (comp.type === "i") {
-            var $tag = $("<em>");
+            $tag = $("<em>");
           }
-          for (var i = 0; i < comp.children.length; i++) {
-            var subResults = flattenComponentForCaption(comp.children[i]);
-            for (var jj = 0; jj < subResults.length; jj++) {
+          for (i = 0; i < comp.children.length; i++) {
+            let subResults = flattenComponentForCaption(comp.children[i]);
+            for (let jj = 0; jj < subResults.length; jj++) {
               $tag.append(subResults[jj]);
             }
           }
@@ -617,7 +622,7 @@
             result.push($tag);
           }
         } else {
-          for (var i = 0; i < comp.children.length; i++) {
+          for (i = 0; i < comp.children.length; i++) {
             result = result.concat(
               flattenComponentForCaption(comp.children[i])
             );
@@ -669,7 +674,7 @@
         nextCap < captions.length
       ) {
         // they all three have content
-        var firstStart = Math.min(
+        firstStart = Math.min(
           chapters[nextChapter].start,
           descriptions[nextDesc].start,
           captions[nextCap].start
@@ -679,24 +684,24 @@
         nextDesc < descriptions.length
       ) {
         // chapters & descriptions have content
-        var firstStart = Math.min(
+        firstStart = Math.min(
           chapters[nextChapter].start,
           descriptions[nextDesc].start
         );
       } else if (nextChapter < chapters.length && nextCap < captions.length) {
         // chapters & captions have content
-        var firstStart = Math.min(
+        firstStart = Math.min(
           chapters[nextChapter].start,
           captions[nextCap].start
         );
       } else if (nextDesc < descriptions.length && nextCap < captions.length) {
         // descriptions & captions have content
-        var firstStart = Math.min(
+        firstStart = Math.min(
           descriptions[nextDesc].start,
           captions[nextCap].start
         );
       } else {
-        var firstStart = null;
+        firstStart = null;
       }
       if (firstStart !== null) {
         if (
@@ -767,4 +772,6 @@
 
 	return $main;
   }
-})(jQuery);
+}
+
+export default addTranscriptFunctions;

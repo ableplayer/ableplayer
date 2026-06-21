@@ -1,0 +1,13 @@
+.DS_Store
+test.html
+node_modules/
+npm-debug.log
+translations/???.js
+.idea
+.htaccess
+docs
+jsdoc.json
+.git
+.github
+demos
+media

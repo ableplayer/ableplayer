@@ -3,7 +3,9 @@
  * so they appear in the proper sequence within an auto-generated interactive transcript
 */
 
-(function ($) {
+import $ from 'jquery';
+
+function addVtsFunctions(AblePlayer) {
 	AblePlayer.prototype.injectVTS = function() {
 
 		var thisObj, $heading, $instructions, $p1, $p2, $ul, $li1, $li2, $li3,
@@ -52,7 +54,7 @@
 				$fieldset = $('<fieldset>');
 				$legend = $('<legend>').text( this.translate( 'vtsSelectLanguage', 'Select a language' ) );
 				$fieldset.append($legend);
-				$fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
+				let $fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
 				for (i in this.langs) {
 					radioId = 'vts-lang-radio-' + this.langs[i];
 					$radioDiv = $('<div>',{
@@ -98,7 +100,7 @@
 
 				// TODO: Add drag/drop functionality for mousers
 				// Add event listeners for contenteditable cells
-				var kindOptions, beforeEditing, editedCell, editedContent, i;
+				var kindOptions, beforeEditing, editedCell, editedContent;
 				kindOptions = ['captions','chapters','descriptions','subtitles'];
 				$('td[contenteditable="true"]').on('focus',function() {
 					beforeEditing = $(this).text();
@@ -139,7 +141,7 @@
 					e.stopPropagation();
 					if ($(this).attr('value') == 'save') {
 						// replace table with WebVTT output in textarea fields (for copying/pasting)
-						$(this).attr('value','cancel').text( this.translate( 'vtsReturn', 'Return to Editor' ) );
+						$(this).attr('value','cancel').text( thisObj.translate( 'vtsReturn', 'Return to Editor' ) );
 						$savedTable = $('#able-vts table');
 						$('#able-vts-instructions').hide();
 						$('#able-vts > fieldset').hide();
@@ -154,7 +156,7 @@
 						$('#able-vts > fieldset').show();
 						$('#able-vts').append($savedTable);
 						$('#able-vts').append(thisObj.getIconCredit());
-						thisObj.showVtsAlert( this.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
+						thisObj.showVtsAlert( thisObj.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
 					}
 				});
 			}
@@ -556,7 +558,7 @@
 		// update this.langs with any unique languages found in tracks
 		var i;
 		for (i in tracks) {
-			if (tracks[i].hasOwnProperty('language')) {
+			if (Object.hasOwn(tracks[i], 'language')) {
 				if ($.inArray(tracks[i].language,this.langs) === -1) {
 					// this language is not already in the langs array. Add it.
 					this.langs[this.langs.length] = tracks[i].language;
@@ -739,9 +741,8 @@
 	AblePlayer.prototype.moveRow = function(rowNum,direction) {
 
 		// swap two rows
-		var $rows, $thisRow, otherRowNum, $otherRow, msg;
+		var $thisRow, otherRowNum, $otherRow, msg;
 
-		$rows = $('#able-vts table').find('tr');
 		$thisRow = $('#able-vts table').find('tr').eq(rowNum);
 		if (direction == 'up') {
 			otherRowNum = parseInt(rowNum) - 1;
@@ -820,7 +821,6 @@
 			prevEnd = this.getSecondsFromColonTime($prevRow.find('td').eq(3).text());
 		} else {
 			// this is the first row
-			prevRowNum = null;
 			$prevRow = null;
 			prevKind = null;
 			prevStart = null;
@@ -839,7 +839,6 @@
 			nextEnd = this.getSecondsFromColonTime($nextRow.find('td').eq(3).text());
 		} else {
 			// this is the last row
-			nextRowNum = null;
 			$nextRow = null;
 			nextKind = null;
 			nextStart = null;
@@ -864,7 +863,7 @@
 				// start the new row immediately after the chapter start (not end)
 				start = (parseFloat(prevStart) + .001).toFixed(3);
 				// end the new row immediately before the next row starts
-				end = (nextStart) ? (parseFloat(nextStart) - .001).toFixed(3) : (parseFloat(start) + minDurartion[kind]).toFixed(3);
+				end = (nextStart) ? (parseFloat(nextStart) - .001).toFixed(3) : (parseFloat(start) + minDuration[kind]).toFixed(3);
 			} else if (prevKind === 'descriptions') {
 				// start the new row minDuration['descriptions'] after the description starts
 				// this will theoretically allow at least a small cushion for the description to be read
@@ -977,7 +976,7 @@
 				if ($.inArray(kind,kinds) !== -1) {
 					start = $rows.eq(i).find('td').eq(2).text();
 					end = $rows.eq(i).find('td').eq(3).text();
-					content = $rows.eq(i).find('td').eq(4).text();
+					content = $rows.eq(i).find('td').eq(4)[0].innerText;
 					if (start !== undefined && end !== undefined) {
 						vtt[kind] += start + ' --> ' + end + "\n";
 						if (content !== 'undefined') {
@@ -1021,4 +1020,6 @@
 		$('#able-vts-output').append($heading,$p,$textarea);
 	};
 
-})(jQuery);
+}
+
+export default addVtsFunctions;

@@ -1,4 +1,4 @@
-(function ($) {
+function addBrowserFunctions(AblePlayer) {
 
 	AblePlayer.prototype.isIOS = function(version) {
 
@@ -52,4 +52,6 @@
 		return document.fullscreenEnabled || document.webkitFullscreenEnabled;
 	};
 
-})(jQuery);
+}
+
+export default addBrowserFunctions;

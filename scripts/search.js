@@ -1,4 +1,7 @@
-(function ($) {
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
+
+function addSearchFunctions(AblePlayer) {
   AblePlayer.prototype.showSearchResults = function () {
     // search VTT file for all instances of searchTerms
     // Currently just supports search terms separated with one or more spaces
@@ -39,7 +42,6 @@
             var itemStartSpan = $("<button>", {
               class: "able-search-results-time",
               "data-start": resultsArray[i]["start"],
-              title: itemLabel,
               "aria-label": itemLabel,
               "aria-describedby": resultId,
             });
@@ -145,56 +147,41 @@
     return resultString;
   };
 
-  AblePlayer.prototype.secondsToTime = function (totalSeconds) {
+  /**
+   * Convert a number of seconds into readable time information.
+   *
+   * @param {int} totalSecondsFloat
+   *
+   * @returns {string[]} array 'value' HH:MM:SS and 'title' speakable time.
+   */
+  AblePlayer.prototype.secondsToTime = function (totalSecondsFloat) {
     // return an array of totalSeconds converted into two formats
     // time['value'] = HH:MM:SS with hours dropped if there are none
     // time['title'] = a speakable rendering, so speech rec users can easily speak the link
+    var totalSeconds = Math.floor(totalSecondsFloat);
 
-    // first, round down to nearest second
-    var totalSeconds = Math.floor(totalSeconds);
+    var h = parseInt(totalSeconds / 3600, 10) % 24;
+    var m = parseInt(totalSeconds / 60, 10) % 60;
+    var s = totalSeconds % 60;
+    var value = '';
+    var title = '';
+    if (h > 0) {
+      value += String(h).padStart(2, '0') + ':';
+      title += h > 0 ? h + ' ' + (h === 1 ? this.translate( 'hour', 'hour' ) : this.translate( 'hours', 'hours' ) ) : '';
+    }
 
-    var hours = parseInt(totalSeconds / 3600, 10) % 24;
-    var minutes = parseInt(totalSeconds / 60, 10) % 60;
-    var seconds = totalSeconds % 60;
-    var value = "";
-    var title = "";
-    if (hours > 0) {
-      value += hours + ":";
-      if (hours == 1) {
-        title += "1 " + this.translate( 'hour', 'hour' ) + " ";
-      } else {
-        title += hours + " " + this.translate( 'hours', 'hours' ) + " ";
-      }
-    }
-    if (minutes < 10) {
-      value += "0" + minutes + ":";
-      if (minutes > 0) {
-        if (minutes == 1) {
-          title += "1 " + this.translate( 'minute', 'minute' ) + " ";
-        } else {
-          title += minutes + " " + this.translate( 'minutes', 'minutes' ) + " ";
-        }
-      }
-    } else {
-      value += minutes + ":";
-      title += minutes + " " + this.translate( 'minutes', 'minutes' ) + " ";
-    }
-    if (seconds < 10) {
-      value += "0" + seconds;
-      if (seconds > 0) {
-        if (seconds == 1) {
-          title += "1 " + this.translate( 'second', 'second' ) + " ";
-        } else {
-          title += seconds + " " + this.translate( 'seconds', 'seconds' ) + " ";
-        }
-      }
-    } else {
-      value += seconds;
-      title += seconds + " " + this.translate( 'seconds', 'seconds' ) + " ";
-    }
+    value += String(m).padStart(2, '0') + ':';
+    title += m > 0 ? m + ' ' + (m === 1 ? this.translate( 'minute', 'minute' ) : this.translate( 'minutes', 'minutes' ) ) : '';
+
+	value += String(s).padStart(2, '0');
+    title += s > 0 ? s + ' ' + (s === 1 ? this.translate( 'second', 'second' ) : this.translate( 'seconds', 'seconds' ) ) : '';
+
     var time = [];
     time["value"] = value;
     time["title"] = title;
+
     return time;
   };
-})(jQuery);
+}
+
+export default addSearchFunctions;

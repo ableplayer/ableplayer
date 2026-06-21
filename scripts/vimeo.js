@@ -1,4 +1,7 @@
-(function ($) {
+/* global Vimeo */
+import $ from 'jquery';
+
+function addVimeoFunctions(AblePlayer) {
 
 	AblePlayer.prototype.initVimeoPlayer = function () {
 
@@ -28,8 +31,6 @@
 		// - It automatically autoplays (initializing the player with autoplay:false does not override this)
 		// - It automatically loops (but this can be overridden by initializing the player with loop:false)
 		// - It automatically sets volume to 0 (not sure if this can be overridden, since no longer using the background option)
-
-		autoplay = (this.okToPlay) ? 'true' : 'false';
 
 		if (this.playerWidth) {
 			if (this.vimeoUrlHasParams) {
@@ -226,10 +227,11 @@
 		return promise;
 	};
 
-	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId, width) {
+	AblePlayer.prototype.getVimeoPosterUrl = function (vimeoId) {
+		const thisObj = this;
 
 		// Vimeo Oembed only returns a 640px width image. Hope at some point there's an alternative.
-		var url = 'http://vimeo.com/api/oembed.json?url=https://vimeo.com/' + vimeoId, imageUrl = '';
+		var url = 'https://vimeo.com/api/oembed.json?url=https://vimeo.com/' + vimeoId, imageUrl = '';
 		console.log( url );
 		fetch( url ).then( response => {
 
@@ -259,6 +261,7 @@
 		// as a url parameter, not as an id parameter
 		this.vimeoUrlHasParams = false;
 
+		let urlObject;
 		if (typeof url === 'number') {
 			// this is likely already a vimeo ID
 			return url;
@@ -283,4 +286,6 @@
 		}
 	};
 
-})(jQuery);
+}
+
+export default addVimeoFunctions;

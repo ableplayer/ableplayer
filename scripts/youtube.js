@@ -1,4 +1,7 @@
-(function ($) {
+/* global YT */
+import $ from 'jquery';
+
+function addYoutubeFunctions(AblePlayer) {
 
 	AblePlayer.prototype.initYouTubePlayer = function () {
 
@@ -107,10 +110,10 @@
 					}
 					deferred.resolve();
 				},
-				onError: function (x) {
+				onError: function (e) {
 					deferred.reject();
 				},
-				onStateChange: function (x) {
+				onStateChange: function (e) {
 					thisObj.getPlayerState().then(function(playerState) {
 						// values of playerState: 'playing','paused','buffering','ended'
 						if (playerState === 'playing') {
@@ -165,7 +168,7 @@
 		return promise;
 	};
 
-	AblePlayer.prototype.getYouTubeDimensions = function (youTubeContainerId) {
+	AblePlayer.prototype.getYouTubeDimensions = function () {
 
 		// The YouTube iframe API does not have a getSize() of equivalent method
 		// so, need to get dimensions from YouTube's iframe
@@ -335,4 +338,6 @@
 		}
 };
 
-})(jQuery);
+}
+
+export default addYoutubeFunctions;
