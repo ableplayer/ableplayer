@@ -1,6 +1,6 @@
 # AblePlayer Changelog
 
-## 5.0.0 May 28, 2026
+## 5.0.0 June 21, 2026
 
 ### Features
 
@@ -45,6 +45,7 @@
 - Fix prev/next item navigation in playlists.
 - Display volume value as a percentage in all cases.
 - Update seekbar width to be expressed in percentages.
+- Fix handling of `data-lang` attribute so language is detected more consistently.
 
 ### Code cleanup
 
@@ -56,6 +57,7 @@
 
 ### Internationalization
 
+- Added Slovak translation (props @rraddatch - Radoslav Ďurač)
 - Updated Catalan translation (props @ralcarazm)
 - Updated Dutch translation (props @rianrietveld)
 

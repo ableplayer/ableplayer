@@ -60,6 +60,7 @@ Able Player has been translated into the following languages.
 	<li><strong lang="pt-br">Português - Brasil</strong> (Portuguese - Brazil)</li>
 	<li><strong lang="nb">Norsk Bokmål</strong> (Norwegian)</li>
 	<li><strong lang="nl">Nederlands, Vlaams</strong> (Dutch)</li>
+	<li><strong lang="sk">Slovenčina</strong> (Slovak)</li>
 	<li><strong lang="sv">Svenska</strong> (Swedish)</li>
 	<li><strong lang="tr">Türkçe</strong> (Turkish)</li>
 </ul>
