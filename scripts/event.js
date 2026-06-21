@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addEventFunctions(AblePlayer) {
 	// Media events
 	AblePlayer.prototype.onMediaUpdateTime = function (duration, elapsed) {
 
@@ -43,7 +45,6 @@
 			if (this.playlistIndex === (this.$playlist.length - 1)) {
 				// this is the last track in the playlist
 				if (this.loop) {
-					this.playlistIndex = 0;
 					this.cueingPlaylistItem = true; // stopgap to prevent multiple firings
 					this.cuePlaylistItem(0);
 				} else {
@@ -244,7 +245,7 @@
 		var thisObj = this;
 
 		// Handle seek bar events.
-		this.seekBar.bodyDiv.on('startTracking', function (e) {
+		this.seekBar.seekbarDiv.on('startTracking', function (e) {
 			thisObj.pausedBeforeTracking = thisObj.paused;
 			thisObj.pauseMedia();
 		}).on('tracking', function (e, position) {
@@ -626,14 +627,14 @@
 			 // Triggered when a new video is loaded in the player
 			thisObj.onMediaNewSourceLoad();
 		 });
-		this.vimeoPlayer.on('play', function(data) {
+		this.vimeoPlayer.on('play', function(e) {
 			// Triggered when the video plays
 			thisObj.playing = true;
 			thisObj.startedPlaying = true;
 			thisObj.paused = false;
 			thisObj.refreshControls('playpause');
 		});
-		this.vimeoPlayer.on('ended', function(data) {
+		this.vimeoPlayer.on('ended', function(e) {
 			// Triggered any time the video playback reaches the end.
 			// Note: when loop is turned on, the ended event will not fire.
 			thisObj.playing = false;
@@ -650,25 +651,25 @@
 			// This is also triggered at the end of preload and seeking.
 			// There is no associated data with this event.
 		});
-		this.vimeoPlayer.on('progress', function(data) {
+		this.vimeoPlayer.on('progress', function(e) {
 			// Triggered as the video is loaded.
 			 // Reports back the amount of the video that has been buffered (NOT the amount played)
 			 // Data has keys duration, percent, and seconds
 		});
-		this.vimeoPlayer.on('seeking', function(data) {
+		this.vimeoPlayer.on('seeking', function(e) {
 		 	// Triggered when the player starts seeking to a specific time.
 			 // A timeupdate event will also be fired at the same time.
 		});
-		this.vimeoPlayer.on('seeked', function(data) {
+		this.vimeoPlayer.on('seeked', function(e) {
 			// Triggered when the player seeks to a specific time.
 			// A timeupdate event will also be fired at the same time.
 		});
-		this.vimeoPlayer.on('timeupdate',function(data) {
+		this.vimeoPlayer.on('timeupdate',function(e) {
 			// Triggered as the currentTime of the video updates.
 			 // It generally fires every 250ms, but it may vary depending on the browser.
-			thisObj.onMediaUpdateTime(data['duration'], data['seconds']);
+			thisObj.onMediaUpdateTime(e['duration'], e['seconds']);
 		});
-		this.vimeoPlayer.on('pause',function(data) {
+		this.vimeoPlayer.on('pause',function(e) {
 			// Triggered when the video pauses
 			if (!thisObj.clickedPlay) {
 					// 'pause' was triggered automatically, not initiated by user
@@ -689,26 +690,26 @@
 			thisObj.onMediaPause();
 			thisObj.refreshControls('playpause');
 		});
-		this.vimeoPlayer.on('playbackratechange',function(data) {
+		this.vimeoPlayer.on('playbackratechange',function(e) {
 			// Triggered when the playback rate of the video in the player changes.
 			// The ability to change rate can be disabled by the creator
 			// and the event will not fire for those videos.
 			// data contains one key: 'playbackRate'
-			thisObj.vimeoPlaybackRate = data['playbackRate'];
+			thisObj.vimeoPlaybackRate = e['playbackRate'];
 		});
-		this.vimeoPlayer.on('texttrackchange', function(data) {
+		this.vimeoPlayer.on('texttrackchange', function(e) {
 			// Triggered when the active text track (captions/subtitles) changes.
 			// The values will be null if text tracks are turned off.
 			// data contains three keys: kind, label, language
 		});
-		this.vimeoPlayer.on('volumechange',function(data) {
+		this.vimeoPlayer.on('volumechange',function(e) {
 			// Triggered when the volume in the player changes.
 			// Some devices do not support setting the volume of the video
 			// independently from the system volume,
 			// so this event will never fire on those devices.
-			thisObj.volume = data['volume'] * 10;
+			thisObj.volume = e['volume'] * 10;
 		});
-		this.vimeoPlayer.on('error',function(data) {
+		this.vimeoPlayer.on('error',function(e) {
 			// do something with the available data
 			// data contains three keys: message, method, name
 			// message: A user-friendly error message
@@ -837,7 +838,7 @@
 		// handle local keydown events if this isn't the only player on the page;
 		// otherwise these are dispatched by global handler (see ableplayer-base.js)
 		this.$ableDiv.on( 'keydown', function (e) {
-			if (AblePlayer.nextIndex > 1) {
+			if (!AblePlayer.hasSingleInstance()) {
 				thisObj.onPlayerKeyPress(e);
 			}
 		});
@@ -853,7 +854,7 @@
 		// therefore, must be added separately
 		if (this.$transcriptArea) {
 			this.$transcriptArea.on('keydown',function (e) {
-				if (AblePlayer.nextIndex > 1) {
+				if (!AblePlayer.hasSingleInstance()) {
 					thisObj.onPlayerKeyPress(e);
 				}
 			});
@@ -888,4 +889,6 @@
 			}, 300);
 		}
 	};
-})(jQuery);
+}
+
+export default addEventFunctions;

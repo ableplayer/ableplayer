@@ -234,6 +234,10 @@
 	padding: 0;
 }
 
+.ableplayer-clear {
+	clear: both;
+}
+
 .able-poster {
 	position: absolute;
 	top: 0;
@@ -246,6 +250,7 @@
 	overflow: visible;
 }
 
+video[data-able-player],
 .able .able-vidcap-container video {
 	max-width: 100%;
 	width: 100%;
@@ -669,6 +674,11 @@ div.able-modal-dialog h1 {
 	margin-bottom: .25rem;
 }
 
+.able-prefs-descriptions > div:empty,
+.able-prefs-captions > div:empty {
+	margin-bottom: 0;
+}
+
 .able-prefs-descriptions label,
 .able-prefs-captions label {
 	text-align: end;
@@ -682,6 +692,12 @@ div.able-modal-dialog h1 {
 .able-prefs-descriptions select,
 .able-prefs-captions select {
 	width: 10rem;
+}
+
+.able-prefs-captions .able-prefCaptionsSpeak:not(:empty) {
+	border-top: 1px solid var(--able-medium-light-gray);
+	margin-top: .5rem;
+	padding-top: .5rem;
 }
 
 div.able-prefDescPause {

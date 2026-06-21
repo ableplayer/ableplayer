@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addChaptersFunctions(AblePlayer) {
 
 	AblePlayer.prototype.populateChaptersDiv = function() {
 
@@ -43,7 +45,7 @@
 
 		var thisObj, cues, $chaptersList, c, thisChapter,
 			$chapterItem, $chapterButton, hasDefault,
-			getClickFunction, $clickedItem, $chaptersList;
+			getClickFunction, $clickedItem;
 
 		thisObj = this;
 
@@ -257,4 +259,6 @@
 		}
 	};
 
-})(jQuery);
+}
+
+export default addChaptersFunctions;

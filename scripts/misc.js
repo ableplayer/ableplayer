@@ -1,4 +1,6 @@
-(function ($) {
+import $ from 'jquery';
+
+function addMiscFunctions(AblePlayer) {
   AblePlayer.prototype.getNextHeadingLevel = function ($element) {
     // Finds the nearest heading in the ancestor tree
     // Loops over each parent of the current element until a heading is found
@@ -35,7 +37,7 @@
     var count, prop;
     count = 0;
     for (prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
+      if (Object.hasOwn(obj, prop)) {
         ++count;
       }
     }
@@ -51,7 +53,7 @@
     //	 and show milliseconds	(e.g., 00:00:04.123 as in Video Track Sorter)
     // Otherwise, omits empty hours and milliseconds (e.g., 00:04 as in timer on controller)
 
-    var dHours, dMinutes, dSeconds, parts, milliSeconds, numShort, i;
+    var times,format,parts,milliSeconds,numShort,i;
 
     if (showFullTime) {
       // preserve milliseconds, if included in seconds
@@ -68,38 +70,10 @@
         milliSeconds = "000";
       }
     }
-    dHours = Math.floor(seconds / 3600);
-    dMinutes = Math.floor(seconds / 60) % 60;
-    dSeconds = Math.floor(seconds % 60);
-    if (dSeconds < 10) {
-      dSeconds = "0" + dSeconds;
-    }
-    if (dHours > 0) {
-      if (dMinutes < 10) {
-        dMinutes = "0" + dMinutes;
-      }
-      if (showFullTime) {
-        return dHours + ":" + dMinutes + ":" + dSeconds + "." + milliSeconds;
-      } else {
-        return dHours + ":" + dMinutes + ":" + dSeconds;
-      }
-    } else {
-      if (showFullTime) {
-        if (dHours < 1) {
-          dHours = "00";
-        } else if (dHours < 10) {
-          dHours = "0" + dHours;
-        }
-        if (dMinutes < 1) {
-          dMinutes = "00";
-        } else if (dMinutes < 10) {
-          dMinutes = "0" + dMinutes;
-        }
-        return dHours + ":" + dMinutes + ":" + dSeconds + "." + milliSeconds;
-      } else {
-        return dMinutes + ":" + dSeconds;
-      }
-    }
+	times = this.secondsToTime( seconds );
+	format = times['value'];
+
+	return (showFullTime) ? format + '.' + milliSeconds : format;
   };
 
   AblePlayer.prototype.getSecondsFromColonTime = function (timeStr) {
@@ -178,4 +152,6 @@
     }
   };
 
-})(jQuery);
+}
+
+export default addMiscFunctions;

@@ -14,7 +14,8 @@
 	<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css" />
 
 	<!-- Able Player JavaScript -->
-	<script src="../build/ableplayer.dist.js"></script>
+	<script src="../build/separate-dompurify/purify.min.js"></script>
+	<script src="../build/separate-dompurify/ableplayer.dist.js"></script>
 
 	<!-- Style for this example only -->
 	<style>
@@ -44,32 +45,6 @@
 		#search button {
 			font-size: 1em;
 		}
-
-		div#wrapper {
-			display: flex;
-			flex-direction: row;
-			flex-wrap: wrap;
-			justify-content: flex-start;
-			max-width: 1280px;
-			gap: 20px;
-			padding: 1rem;
-		}
-		#player {
-			max-width: 500px;
-		}
-		#results-wrapper {
-			height: 700px;
-			width: 45%;
-			margin: 0;
-		}
-
-		@media (max-width: 800px) {
-			#player,
-			#results-wrapper {
-				width: 90%;
-				margin: 0;
-			}
-		}
 	</style>
 
 	<!-- JavaScript for this example -->
@@ -83,7 +58,7 @@
 	<nav>
 		<ul>
 			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
 		</ul>
 	</nav>
 	<main>

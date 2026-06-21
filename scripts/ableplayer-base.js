@@ -1,15 +1,30 @@
 /*jslint node: true, browser: true, white: true, indent: 2, unparam: true, plusplus: true */
-/*global $, jQuery */
-"use strict";
+
+import $ from 'jquery';
+import DOMPurify from 'dompurify';
 
 // maintain an array of Able Player instances for use globally (e.g., for keeping prefs in sync)
-var AblePlayerInstances = [];
+// 5.0.0: this is now a Set to make it easier to create and destroy players
+const ablePlayerInstances = new Set();
 
-(function ($) {
+/**
+ * Performs one-time setup on `window`.
+ *
+ * Does nothing if `window` is not available, for example in SSR.
+ */
+function ablePlayerSetupWindow() {
+	if (typeof window === 'undefined') {
+		console.log("`window` is undefined. Skipping one-time Able Player `window` setup.");
+		return;
+	}
 	$(function () {
+		if (typeof DOMPurify === 'undefined') {
+			console.warn('Required dependency DOMPurify not available. Please use the full Able Player bundle which has DOMPurify built in. Or, keep using this bundle, and include DOMPurify separately.')
+		}
+
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {
-				AblePlayerInstances.push(new AblePlayer($(this),$(element)));
+				new AblePlayer($(this),$(element));
 			}
 		});
 	});
@@ -19,25 +34,35 @@ var AblePlayerInstances = [];
 		AblePlayer.youTubeIframeAPIReady = true;
 		$('body').trigger('youTubeIframeAPIReady', []);
 	};
+
 	// If there is only one player on the page, dispatch global keydown events to it
 	// Otherwise, keydowwn events are handled locally (see event.js > handleEventListeners())
 	$(window).on('keydown',function(e) {
-		if (AblePlayer.nextIndex === 1) {
-			AblePlayer.lastCreated.onPlayerKeyPress(e);
+		if (AblePlayer.hasSingleInstance()) {
+			const singleInstance = AblePlayer.getSingleInstance();
+			singleInstance.onPlayerKeyPress(e);
 		}
 	});
+}
 
+// Outdented for a simpler diff during module conversion
 	/**
 	 * Construct the AblePlayer object.
 	 *
+	 * Able Player needs `window` to instantiate, so, skip the constructor if
+	 * you are running outside the browser (for example, SSR).
+	 *
 	 * @param object media jQuery selector or element identifying the media.
 	 */
-	window.AblePlayer = function(media) {
+	function AblePlayer(media) {
+
+		if (typeof window === 'undefined') {
+			console.warn("`window` is undefined. Able Player needs `window` to instantiate. Skip constructing Able Player if you are running outside a browser (for example, SSR).");
+			return;
+		}
 
 		var thisObj = this;
 
-		// Keep track of the last player created for use with global events.
-		AblePlayer.lastCreated = this;
 		this.media = media;
 
 		if ($(media).length === 0) {
@@ -77,19 +102,11 @@ var AblePlayerInstances = [];
 
 		// start-time
 		var startTime = $(media).data('start-time');
-		var isNumeric = ( typeof startTime === 'number' || ( typeof startTime === 'string' && value.trim() !== '' && ! isNaN(value) && isFinite( Number(value) ) ) ) ? true : false;
+		var isNumeric = ( typeof startTime === 'number' || ( typeof startTime === 'string' && startTime.trim() !== '' && ! isNaN(startTime) && isFinite( Number(startTime) ) ) ) ? true : false;
 		this.startTime =  ( startTime !== undefined && isNumeric ) ? startTime : 0;
 
 		// debug
 		this.debug = ($(media).data('debug') !== undefined && $(media).data('debug') !== false) ? true : false;
-
-		// Path to root directory of Able Player code
-		if ($(media).data('root-path') !== undefined) {
-			// add a trailing slash if there is none
-			this.rootPath = $(media).data('root-path').replace(/\/?$/, '/');
-		} else {
-			this.rootPath = this.getRootPath();
-		}
 
 		// Volume
 		// Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
@@ -303,21 +320,6 @@ var AblePlayerInstances = [];
 			this.playerWidth = null;
 		}
 
-		// Icon type
-		// By default, AblePlayer 3.0.33 and higher uses SVG icons for the player controls
-		// Fallback for browsers that don't support SVG is scalable icomoon fonts
-		// Ultimate fallback is images, if the user has a custom style sheet that overrides font-family
-		// Use data-icon-type to force controls to use either 'svg', 'font', or 'images'
-		this.iconType = 'font';
-		this.forceIconType = false;
-		if ($(media).data('icon-type') !== undefined && $(media).data('icon-type') !== "") {
-			var iconType = $(media).data('icon-type');
-			if (iconType === 'font' || iconType === 'image' || iconType === 'svg') {
-				this.iconType = iconType;
-				this.forceIconType = true;
-			}
-		}
-
 		var allowFullScreen = $(media).data('allow-fullscreen');
 		this.allowFullscreen = (allowFullScreen !== undefined && allowFullScreen === false) ? false : true;
 
@@ -344,15 +346,6 @@ var AblePlayerInstances = [];
 		// Only used if there is a playlist
 		var showNowPlaying = $(media).data('show-now-playing');
 		this.showNowPlaying = (showNowPlaying !== undefined && showNowPlaying === false) ? false : true;
-
-		// TTML support (experimental); enabled for testing with data-use-ttml (Boolean)
-		if ($(media).data('use-ttml') !== undefined) {
-			this.useTtml = true;
-			// The following may result in a console error.
-			this.convert = require('xml-js');
-		} else {
-			this.useTtml = false;
-		}
 
 		// Fallback
 		// The data-test-fallback attribute can be used to test the fallback solution in any browser
@@ -453,21 +446,20 @@ var AblePlayerInstances = [];
 		this.title = $(media).attr('title');
 
 		// populate translation object with localized versions of all labels and prompts
-		// use defer method to defer additional processing until text is retrieved
 		this.tt = {};
-		var thisObj = this;
-		async function fetchTranslations(thisObj) {
-			try {
-				await thisObj.getTranslationText();
-				thisObj.setup();
-			} catch {
-				thisObj.provideFallback();
-			}
+		try {
+			this.getTranslationText();
+			this.setup();
+		} catch (e) {
+			console.warn('Error setting up translations:', e);
+			this.provideFallback();
 		}
-		fetchTranslations(thisObj);
+
+		ablePlayerInstances.add(this);
 	};
 
 	// Index to increment every time new player is created.
+	// 5.0.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
 	AblePlayer.nextIndex = 0;
 
 	AblePlayer.prototype.setup = function() {
@@ -495,6 +487,41 @@ var AblePlayerInstances = [];
 		});
 	};
 
+	/**
+	 * Removes this player from the global instance list.
+	 *
+	 * You probably want to call this during/after removing a player from the
+	 * DOM. This avoids memory leaks, and allows the event handling to have the
+	 * correct count of how many players are actually on the page.
+	 */
+	AblePlayer.prototype.dispose = function () {
+		AblePlayer.ablePlayerInstances.delete(this);
+
+		// Look for various dialogs tied to this instance. Elements associated
+		// with these are appended to the body, and they need to be
+		// `.remove()`d here.
+		const dialogs = [
+			this.captionPrefsDialog,
+			this.descPrefsDialog,
+			this.keyboardPrefsDialog,
+			this.transcriptPrefsDialog,
+			this.transcriptResizeDialog,
+			this.signResizeDialog,
+		];
+
+		for (const dialog of dialogs) {
+			if (!dialog) {
+				continue;
+			}
+			if (dialog.modal) {
+				dialog.modal.remove();
+			}
+			if (dialog.overlay) {
+				dialog.overlay.remove();
+			}
+		}
+	}
+
 	AblePlayer.getActiveDOMElement = function () {
 		var activeElement = document.activeElement;
 
@@ -516,6 +543,20 @@ var AblePlayerInstances = [];
 		}
 	};
 
+	AblePlayer.ablePlayerSetupWindow = ablePlayerSetupWindow;
+
 	AblePlayer.youTubeIframeAPIReady = false;
 	AblePlayer.loadingYouTubeIframeAPI = false;
-})(jQuery);
+
+	AblePlayer.ablePlayerInstances = ablePlayerInstances;
+
+	AblePlayer.hasSingleInstance = () => AblePlayer.ablePlayerInstances.size === 1;
+
+	AblePlayer.getSingleInstance = () => {
+		// If there are actually more instances, this returns the first one
+		for (const instance of AblePlayer.ablePlayerInstances) {
+			return instance;
+		}
+	}
+
+export default AblePlayer;
