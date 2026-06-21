@@ -45,6 +45,7 @@
 - Fix prev/next item navigation in playlists.
 - Display volume value as a percentage in all cases.
 - Update seekbar width to be expressed in percentages.
+- Fix handling of `data-lang` attribute so language is detected more consistently.
 
 ### Code cleanup
 
