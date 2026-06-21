@@ -109,8 +109,9 @@ function addTranslationFunctions(AblePlayer) {
 		supportedLangs = this.getSupportedLangs(); // returns an array
 
 		if (this.lang) { // a data-lang attribute is included on the media element
-			if ( Object.hasOwn( supportedLangs,this.lang ) ) {
-				// the specified language is not supported
+			var thisLang = this.lang;
+			if ( ! Object.hasOwn( supportedLangs,this.lang ) ) {
+				// the specified language code is not in the index
 				if ( this.lang.indexOf('-') == 2 ) {
 					// this is a localized lang attribute (e.g., fr-CA)
 					// try the parent language, given the first two characters
@@ -123,7 +124,7 @@ function addTranslationFunctions(AblePlayer) {
 					similarLangFound = false;
 					for ( const [key,value] of Object.entries(supportedLangs) ) {
 						if ( key.substring(0,2) == this.lang ) {
-							this.lang = value;
+							this.lang = key;
 							similarLangFound = true;
 						}
 					}
