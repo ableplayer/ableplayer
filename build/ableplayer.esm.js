@@ -1,4 +1,4 @@
-/*! ableplayer V5.0.0-RC1 - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */
+/*! ableplayer V5.0.0 - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */
 
 import $ from 'jquery';
 import DOMPurify from 'dompurify';
