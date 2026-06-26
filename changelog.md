@@ -1,5 +1,16 @@
 # AblePlayer Changelog
 
+## 5.1.0 TBD
+
+### Bug fixes
+
+- Add the seek interval value to rewind and forward buttons, to provide better user information.
+- Move seekbar tooltip closer to seekbar. It had moved further away when the seekhead size was increased.
+
+### Design
+- Increase size and add hover state to seekbar.
+- Move bottom positioning of seekbar tooltip from JS into CSS.
+
 ## 5.0.0 June 21, 2026
 
 ### Features
