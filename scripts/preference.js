@@ -751,10 +751,10 @@
 					kbLabels.push( this.translate( 'nextTrack', 'Next track' ) );
 					keys.push('n');
 				} else if (this.controls[i] === 'rewind') {
-					kbLabels.push(this.translate( 'rewind', 'Rewind' ));
+					kbLabels.push(this.translate( 'rewind', 'Rewind %s seconds', [ this.seekInterval ] ) );
 					keys.push('r');
 				} else if (this.controls[i] === 'forward') {
-					kbLabels.push(this.translate( 'forward', 'Forward' ));
+					kbLabels.push(this.translate( 'forward', 'Forward %s seconds', [ this.seekInterval ] ) );
 					keys.push('f');
 				} else if (this.controls[i] === 'volume') {
 					kbLabels.push(this.translate( 'volume', 'Volume' ));
