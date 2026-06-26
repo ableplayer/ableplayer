@@ -347,6 +347,10 @@ video[data-able-player],
 	border: 1px solid var(--able-seekbar-border);
 }
 
+.able-seekbar .able-tooltip {
+	bottom: 12px;
+}
+
 .able-controller .able-seekbar:hover {
 	outline: 2px solid var(--able-hover-outline);
 	outline-offset: 2px;
