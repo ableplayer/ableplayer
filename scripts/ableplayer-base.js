@@ -217,6 +217,11 @@ function ablePlayerSetupWindow() {
 		// If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
 		this.lyricsMode = ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) ? true : false;
 
+		// in Strict Mode, parentheses and brackets do not get marked in bold in transcripts, and line breaks are not injected.
+		// In Able Player 5.1, defaults to false.
+		this.strictMode = ($(media).data('strict-mode') !== undefined && $(media).data('strict-mode') !== true) ? false : true;
+
+
 		// Set Transcript Title if defined explicitly. See transcript.js.
 		if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
 			this.transcriptTitle = $(media).data('transcript-title');

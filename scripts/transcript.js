@@ -527,67 +527,67 @@ function addTranscriptFunctions(AblePlayer) {
 
       var flattenComponentForCaption = function (comp) {
         var result = [];
-
         var parts = 0;
 
         var flattenString = function (str) {
-          parts++;
+			parts++;
 
-          var flatStr;
-          var result = [];
-          if (str === "") {
-            return result;
-          }
+			var flatStr;
+			var result = [];
+			if (str === "") {
+				return result;
+			}
 
-          var openBracket = str.indexOf("[");
-          var closeBracket = str.indexOf("]");
-          var openParen = str.indexOf("(");
-          var closeParen = str.indexOf(")");
+			if ( ! thisObj.strictMode ) {
+				var openBracket = str.indexOf("[");
+				var closeBracket = str.indexOf("]");
+				var openParen = str.indexOf("(");
+				var closeParen = str.indexOf(")");
+				var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+				var hasParens = openParen !== -1 && closeParen !== -1;
+			} else {
+				result.push(str);
 
-          var hasBrackets = openBracket !== -1 && closeBracket !== -1;
-          var hasParens = openParen !== -1 && closeParen !== -1;
+				return result;
+			}
 
-          if (hasParens || hasBrackets) {
-            let silentSpanBreak;
-            if (parts > 1) {
-              // force a line break between sections that contain parens or brackets
-              silentSpanBreak = "<br/>";
-            } else {
-              silentSpanBreak = "";
-            }
-            var silentSpanOpen =
-              silentSpanBreak + '<span class="able-unspoken">';
-            var silentSpanClose = "</span>";
-            if (hasParens && hasBrackets) {
-              // string has both!
-              if (openBracket < openParen) {
-                // brackets come first. Parse parens separately
-                hasParens = false;
-              } else {
-                // parens come first. Parse brackets separately
-                hasBrackets = false;
-              }
-            }
-          }
-          if (hasParens) {
-            flatStr = str.substring(0, openParen);
-            flatStr += silentSpanOpen;
-            flatStr += str.substring(openParen, closeParen + 1);
-            flatStr += silentSpanClose;
-            flatStr += flattenString(str.substring(closeParen + 1));
-            result.push(flatStr);
-          } else if (hasBrackets) {
-            flatStr = str.substring(0, openBracket);
-            flatStr += silentSpanOpen;
-            flatStr += str.substring(openBracket, closeBracket + 1);
-            flatStr += silentSpanClose;
-            flatStr += flattenString(str.substring(closeBracket + 1));
-            result.push(flatStr);
-          } else {
-            result.push(str);
-          }
-          return result;
-        };
+			if (hasParens || hasBrackets) {
+				let silentSpanBreak;
+				// force a line break between sections that contain parens or brackets
+				silentSpanBreak = ( parts > 1 ) ? "<br/>" : '';
+
+				var silentSpanOpen = silentSpanBreak + '<span class="able-unspoken">';
+				var silentSpanClose = "</span>";
+				if (hasParens && hasBrackets) {
+					// string has both!
+					if (openBracket < openParen) {
+						// brackets come first. Parse parens separately
+						hasParens = false;
+					} else {
+						// parens come first. Parse brackets separately
+						hasBrackets = false;
+					}
+				}
+			}
+			if (hasParens) {
+				flatStr = str.substring(0, openParen);
+				flatStr += silentSpanOpen;
+				flatStr += str.substring(openParen, closeParen + 1);
+				flatStr += silentSpanClose;
+				flatStr += flattenString(str.substring(closeParen + 1));
+				result.push(flatStr);
+			} else if (hasBrackets) {
+				flatStr = str.substring(0, openBracket);
+				flatStr += silentSpanOpen;
+				flatStr += str.substring(openBracket, closeBracket + 1);
+				flatStr += silentSpanClose;
+				flatStr += flattenString(str.substring(closeBracket + 1));
+				result.push(flatStr);
+			} else {
+				result.push(str);
+			}
+			return result;
+		};
 
         if (comp.type === "string") {
           result = result.concat(flattenString(comp.value));

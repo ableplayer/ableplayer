@@ -380,6 +380,7 @@ If none of the above attributes are present, the transcript will be displayed in
 Additional transcript-related attributes include:
 - **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present)
 - **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript
+- **data-strict-mode** - set to "true" to prevent parentheses or square brackets from being marked with bold with line brekaks. Default "false".
 
 To manually code the transcript, one simple strategy is to first allow Able Player to *automatically* generate a transcript. Then copy and paste its content as a starting point. To manually code a transcript from scratch, use the following markup (see [Video Demo #7] for an example):
 
