@@ -2,10 +2,18 @@
 
 ## 5.1.0 TBD
 
+### Features
+
+- Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
+
 ### Bug fixes
 
 - Add the seek interval value to rewind and forward buttons, to provide better user information.
 - Move seekbar tooltip closer to seekbar. It had moved further away when the seekhead size was increased.
+- Limit sign language resizing to match aspect ratio.
+- Allow YouTube iframe sign language to exceed 640px width.
+- Fix incorrect data-lang check for similar languages.
+- Improve parsing of VTT files to better handle a variety of edge cases. (props @conorom)
 
 ### Design
 - Increase size and add hover state to seekbar.
