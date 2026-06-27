@@ -39,56 +39,19 @@ function addDragdropFunctions(AblePlayer) {
 		$dragHandle = $('<div>',{
 			'class': 'able-drag-handle'
 		});
+		this.getIcon( $dragHandle, 'drag-handle' );
 
-		$dragHandle.html('<svg version="1.1" viewBox="262.48 487.5 675.03 225" xmlns="http://www.w3.org/2000/svg"><path d="m900 562.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path>  <path d="m900 712.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path></svg>');
 		// add resize handle selector to bottom right corner
 		$resizeHandle = $('<div>',{
 			'class': 'able-resizable'
 		});
-
-		// fill it with three parallel diagonal lines
-		$resizeSvg = $('<svg>').attr({
-			'width': '100%',
-			'height': '100%',
-			'viewBox': '0 0 100 100',
-			'preserveAspectRatio': 'none'
-		});
-		for (i=1; i<=3; i++) {
-			if (i === 1) {
-				x1 = '100';
-				y1 = '0';
-				x2 = '0';
-				y2 = '100';
-			} else if (i === 2) {
-				x1 = '33';
-				y1 = '100';
-				x2 = '100';
-				y2 = '33';
-			} else if (i === 3) {
-				x1 = '67';
-				y1 = '100';
-				x2 = '100';
-				y2 = '67';
-			}
-			$resizeLine = $('<line>').attr({
-				'x1': x1,
-				'y1': y1,
-				'x2': x2,
-				'y2': y2,
-				'vector-effect': 'non-scaling-stroke'
-			})
-			$resizeSvg.append($resizeLine);
-		}
-		$resizeHandle.html($resizeSvg);
+		this.getIcon( $resizeHandle, 'resize-handle' );
 
 		// assign z-index that's slightly higher than parent window
 		resizeZIndex = parseInt($window.css('z-index')) + 100;
 		$resizeHandle.css('z-index',resizeZIndex);
 		$window.append($resizeHandle);
 		$toolbar.append($dragHandle);
-
-		// Final step: Need to refresh the DOM in order for browser to process & display the SVG
-		$resizeHandle.html($resizeHandle.html());
 
 		// add event listener to toolbar to start and end drag
 		// other event listeners will be added when drag starts

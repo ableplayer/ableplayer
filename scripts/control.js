@@ -1354,8 +1354,11 @@ function addControlFunctions(AblePlayer) {
 			icon.setAttribute( 'aria-hidden', 'true');
 			icon.setAttribute( 'viewBox', iconData[0] );
 			icon.setAttribute( 'id', 'ableplayer-' + id );
-			let path = getNode( 'path', { d: iconData[1] } );
-			icon.appendChild( path );
+			let paths = iconData[1];
+			paths.forEach( function( pathData ) {
+				let path = getNode( 'path', { d: pathData } );
+				icon.appendChild( path );
+			});
 
 			$button.append( icon );
 			// Refresh the DOM.

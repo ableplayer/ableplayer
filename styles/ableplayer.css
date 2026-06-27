@@ -88,9 +88,9 @@
 	--able-modal-overlay: var(--able-transparent-gray);
 	--able-modal-border: 3px solid var(--able-light-gray);
 	--able-drag-outline: var(--able-bright-orange);
-	--able-sign-background: var(--able-white);
+	--able-sign-background: var(--able-black);
 	--able-sign-border: var(--able-black);
-	--able-resizable-color: var(--able-medium-gray);
+	--able-resizable-color: var(--able-white);
 	--able-chapter-background: transparent;
 	--able-chapter-color: var(--able-black);
 	--able-current-chapter-background: var(--able-black);
@@ -881,9 +881,8 @@ span.able-modkey {
 	cursor: nwse-resize;
 }
 
-.able-resizable svg line {
-	stroke: var(--able-resizable-color);
-	stroke-width: 2px;
+.able-resizable svg {
+	fill: var(--able-resizable-color);
 }
 
 /* Sign Language Window */
@@ -919,18 +918,6 @@ span.able-modkey {
 .able-sign-window video {
 	width: 100%;
 	display: block;
-}
-
-.able-sign-window .able-resizable {
-	background: #00000033;
-	background: linear-gradient(to bottom right, transparent 0%, transparent 51%, #fff3 51%, #fff3 100%);
-	border-top-left-radius: 20px;
-}
-
-.able-sign-window:hover .able-resizable {
-	background: var(--able-very-light-gray);
-	background: linear-gradient(to bottom right, transparent 0%, transparent 51%, #fffe 51%, #fffe 100%);
-
 }
 
 .able-sign-window.able-fixed video {
