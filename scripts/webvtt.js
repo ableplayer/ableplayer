@@ -257,14 +257,19 @@ import $ from 'jquery';
 		var languageStack = [];
 		while (state.text.length > 0) {
 			var nextLine = peekLine(state);
-			if (nextLine.indexOf('-->') !== -1 || /^\s+$/.test(nextLine)) {
-				break; // Handle empty cues
-			}
-			// Have to separately detect double-lines ending cue due to our non-standard parsing.
-			// TODO: Redo outer algorithm to conform to W3 spec?
-			if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
-				cut(state, 2);
-				break;
+			if (nextLine.indexOf('-->') !== -1) {
+				break; // Reached next cue timing line; definitely end of payload
+			} else if (nextLine.length === 0) {
+				// peekLine returns '' when state.text starts with '\n'.
+				// A true blank line (end of cue) is two consecutive newlines, so we'll check for that here
+				if (state.text.length === 1 || state.text[1] === '\n') {
+					break; // True blank line or solitary trailing newline — end of cue
+				}
+				// If we get here we had a single newline left in state.text because the previous "line" ended with a tag;
+				// We'll consume it and keep parsing the rest of the cue.
+				cut(state, 1); // Consume the lone newline
+				current.children.push({type: 'string', value: '\n'}); // preserve as newline in output
+				continue;
 			}
 
 			var token = getCueToken(state);
