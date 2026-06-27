@@ -107,9 +107,7 @@ function addTranslationFunctions(AblePlayer) {
 		thisObj = this;
 
 		supportedLangs = this.getSupportedLangs(); // returns an array
-
 		if (this.lang) { // a data-lang attribute is included on the media element
-			var thisLang = this.lang;
 			if ( ! Object.hasOwn( supportedLangs,this.lang ) ) {
 				// the specified language code is not in the index
 				if ( this.lang.indexOf('-') == 2 ) {
@@ -122,13 +120,14 @@ function addTranslationFunctions(AblePlayer) {
 					// but maybe there's a similar localized language supported
 					// that has the same parent?
 					similarLangFound = false;
-					for ( const [key,value] of Object.entries(supportedLangs) ) {
-						if ( key.substring(0,2) == this.lang ) {
+					let thisLang = this.lang;
+					for ( const [key] of Object.entries(supportedLangs) ) {
+						if ( thisLang.substring(0,2) == key ) {
 							this.lang = key;
 							similarLangFound = true;
 						}
 					}
-					if ( !similarLangFound ) {
+					if ( ! similarLangFound ) {
 						// language requested via data-lang is not supported
 						this.lang = null;
 					}
@@ -136,7 +135,7 @@ function addTranslationFunctions(AblePlayer) {
 			}
 		}
 
-		if (!this.lang) {
+		if ( ! this.lang ) {
 			// try the language of the web page, if specified
 			if ($('body').attr('lang')) {
 				docLang = $('body').attr('lang').toLowerCase();
