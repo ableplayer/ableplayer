@@ -1584,9 +1584,9 @@ function addBuildplayerFunctions(AblePlayer) {
 		} else if (control === 'next') {
 			return this.translate( 'nextTrack', 'Next track' );
 		} else if (control === 'rewind') {
-			return this.translate( 'rewind', 'Rewind' );
+			return this.translate( 'rewind', 'Rewind %1 seconds', [ this.seekInterval ] );
 		} else if (control === 'forward') {
-			return this.translate( 'forward', 'Forward' );
+			return this.translate( 'forward', 'Forward %1 seconds', [ this.seekInterval ] );
 		} else if (control === 'captions') {
 			if (this.captions.length > 1) {
 				return this.translate( 'captions', 'Captions' );

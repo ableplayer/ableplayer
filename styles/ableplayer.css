@@ -223,7 +223,7 @@
 .able-controller {
 	position: relative;
 	background-color: var(--able-controller-background); /* background color of controller bar */
-	padding: 0 4px;
+	padding: 8px 4px 4px;
 }
 
 .able-audio .able-controller {
@@ -347,6 +347,15 @@ video[data-able-player],
 	border: 1px solid var(--able-seekbar-border);
 }
 
+.able-seekbar .able-tooltip {
+	bottom: 12px;
+}
+
+.able-controller .able-seekbar:hover {
+	outline: 2px solid var(--able-hover-outline);
+	outline-offset: 2px;
+}
+
 .able-controller div[role="button"] {
 	background: none;
 	position: relative;
@@ -388,8 +397,8 @@ video[data-able-player],
 	display: flex;
 	align-items: center;
 	position: relative;
-	height: 0.5rem;
-	border: 1px solid;
+	height: 0.75rem;
+	border-radius: 3px;
 	background-color: var(--able-seekbar-background);
 	z-index: 6500;
 }
