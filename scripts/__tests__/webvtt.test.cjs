@@ -35,9 +35,9 @@ function collectTagged(node) {
   return `<${tag}${annotation}>${inner}</${tag}>`;
 }
 
-// Fer expediency I've taken media/wwa_captions_en.vtt at commit d2ee4c0, and
-// added a bunch of corner cases like empty cues, cues only containig whitespace,
-// cues separated by multiple lines (plus shitespace) and tags sitting on lines
+// Uses `media/wwa_captions_en.vtt` at commit `d2ee4c0`, and
+// adds corner cases: empty cues, cues only containing whitespace,
+// cues separated by multiple lines (plus whitespace) and tags sitting on lines
 // by themselves (with and without trailing space).
 // The tests below verify that the parser can handle all of these cases correctly.
 const WVT = `WEBVTT
