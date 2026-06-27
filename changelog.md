@@ -18,6 +18,10 @@
 ### Design
 - Increase size and add hover state to seekbar.
 - Move bottom positioning of seekbar tooltip from JS into CSS.
+- Update drag drop icon and change base background color of sign language container.
+
+### Code Quality
+- Move drag handle and resize handle icons into the icon store.
 
 ## 5.0.0 June 21, 2026
 
