@@ -712,8 +712,9 @@ function addDragdropFunctions(AblePlayer) {
 		$(document).on('mousemove touchmove',function(e) {
 			if (thisObj.resizing) {
 				// calculate new width and height based on changes to mouse position
+				let aspectRatio = thisObj.dragStartWidth / thisObj.dragStartHeight;
 				newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
-				newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
+				newHeight = thisObj.dragStartHeight + ( (e.pageX - thisObj.startMouseX) / aspectRatio );
 				thisObj.resizeObject( which, newWidth, newHeight );
 			}
 		});
