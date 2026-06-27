@@ -262,6 +262,9 @@ video[data-able-player],
 .able-media-container iframe {
 	max-width: 100% !important;
 	display: block !important;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 16 / 9;
 }
 
 /* Controller Buttons & Controls */
