@@ -1390,7 +1390,7 @@ button.able-search-results-time {
 
 #able-vts table td button {
 	width: auto;
-	padding: 2px;
+	padding: 3px;
 	margin: 1px;
 	display: flex;
 	align-items: center;
@@ -1401,8 +1401,8 @@ button.able-search-results-time {
 }
 
 #able-vts table td button svg {
-	width: 22px;
-	height: 22px;
+	width: 18px;
+	height: 18px;
 }
 
 #able-vts table button:hover svg {
