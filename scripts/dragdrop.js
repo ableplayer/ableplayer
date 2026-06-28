@@ -56,34 +56,28 @@ function addDragdropFunctions(AblePlayer) {
 		// other event listeners will be added when drag starts
 		$dragHandle.on('pointerdown', function(e) {
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered) {
-				thisObj.windowMenuClickRegistered = true;
-				thisObj.startMouseX = e.pageX;
-				thisObj.startMouseY = e.pageY;
-				thisObj.dragPointerId = e.pointerId;
-				thisObj.dragDevice = 'mouse'; // pointer input is treated as non-keyboard drag
-				thisObj.startDrag(which, $window);
-			}
+			thisObj.startMouseX = e.pageX;
+			thisObj.startMouseY = e.pageY;
+			thisObj.dragPointerId = e.pointerId;
+			thisObj.dragDevice = 'mouse'; // pointer input is treated as non-keyboard drag
+			thisObj.startDrag(which, $window);
 			return false;
 		});
 
 		// add event listeners for resizing
 		$resizeHandle.on('pointerdown', function(e) {
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered) {
-				thisObj.windowMenuClickRegistered = true;
-				thisObj.startMouseX = e.pageX;
-				thisObj.startMouseY = e.pageY;
-				thisObj.resizePointerId = e.pointerId;
-				thisObj.startResize(which, $window);
-			}
+			thisObj.startMouseX = e.pageX;
+			thisObj.startMouseY = e.pageY;
+			thisObj.resizePointerId = e.pointerId;
+			thisObj.startResize(which, $window);
 			return false;
 		});
 
 		// whenever a window is clicked, bring it to the foreground
 		$window.on('click', function() {
 
-			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+			if (!thisObj.finishingDrag) {
 				thisObj.updateZIndex(which);
 			}
 			thisObj.finishingDrag = false;
@@ -96,11 +90,6 @@ function addDragdropFunctions(AblePlayer) {
 		var thisObj, menuId, $newButton, tooltipId, $tooltip, $popup;
 
 		thisObj = this;
-
-		// Add a Boolean that will be set to true temporarily if window button or a menu item is clicked
-		// This will prevent the click event from also triggering a pointerdown event on the toolbar
-		// (which would unexpectedly send the window into drag mode)
-		this.windowMenuClickRegistered = false;
 
 		// Add another Boolean that will be set to true temporarily when pointerup fires at the end of a drag
 		// this will prevent the click event from being triggered
@@ -174,8 +163,7 @@ function addDragdropFunctions(AblePlayer) {
 			if (e.key === ' ' || e.key === 'Enter') {
 				e.preventDefault();
 			}
-			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-				// don't set windowMenuClickRegistered yet; that happens in handler function
+			if (!thisObj.finishingDrag) {
 				thisObj.handleWindowButtonClick(which, e);
 			}
 			thisObj.finishingDrag = false;
@@ -191,8 +179,7 @@ function addDragdropFunctions(AblePlayer) {
 				return false;
 			}
 			e.stopPropagation();
-			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-				// don't set windowMenuClickRegistered yet; that happens in handler function
+			if (!thisObj.finishingDrag) {
 				thisObj.handleWindowButtonClick(which, e);
 			}
 			thisObj.finishingDrag = false;
@@ -322,15 +309,13 @@ function addDragdropFunctions(AblePlayer) {
 		if (e.type === 'keydown') {
 			// user pressed a key
 			if (e.key === ' ' || e.key === 'Enter') {
-				this.windowMenuClickRegistered = true;
 			} else if (e.key === 'Escape') {
 				if ($windowPopup.is(':visible')) {
 					// close the popup menu
 					$windowPopup.hide();
-					// also reset the Boolean
-					thisObj.windowMenuClickRegistered = false;
 					// also restore menu items to their original state
 					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+					$windowButton.attr('aria-expanded','false');
 					// also return focus to window options button
 					$windowButton.trigger('focus');
 				} else {
@@ -341,17 +326,14 @@ function addDragdropFunctions(AblePlayer) {
 						this.handleTranscriptToggle();
 					}
 				}
+				return false;
 			} else {
 				return false;
 			}
-		} else {
-			// this was a mouse event
-			this.windowMenuClickRegistered = true;
 		}
 
 		if ( $windowPopup.is(':visible') ) {
 			$windowPopup.hide();
-			thisObj.windowMenuClickRegistered = false; // reset
 			$windowPopup.find('li').removeClass('able-focus');
 			$windowButton.attr('aria-expanded','false').trigger('focus');
 		} else {
@@ -362,7 +344,6 @@ function addDragdropFunctions(AblePlayer) {
 			$windowPopup.show();
 			$windowButton.attr('aria-expanded','true');
 			$windowPopup.find('li').first().attr( 'tabindex', '0' ).trigger('focus').addClass('able-focus');
-			thisObj.windowMenuClickRegistered = false; // reset
 		}
 	};
 
@@ -403,8 +384,6 @@ function addDragdropFunctions(AblePlayer) {
 			if (e.key === 'Escape') { // escape
 				// hide the popup menu
 				$windowPopup.hide();
-				// also reset the Boolean
-				thisObj.windowMenuClickRegistered = false;
 				// also restore menu items to their original state
 				$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 				$windowButton.attr('aria-expanded','false');
@@ -423,8 +402,6 @@ function addDragdropFunctions(AblePlayer) {
 
 		// hide the popup menu
 		$windowPopup.hide();
-		// also reset the boolean
-		thisObj.windowMenuClickRegistered = false;
 		// also restore menu items to their original state
 		$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 		$windowButton.attr('aria-expanded','false');
@@ -663,8 +640,6 @@ function addDragdropFunctions(AblePlayer) {
 		this.startMouseY = undefined;
 		this.dragPointerId = undefined;
 
-		// Boolean to stop stray events from firing
-		this.windowMenuClickRegistered = false;
 		this.finishingDrag = true; // will be reset after window click event
 		// finishingDrag should be reset after window click event,
 		// which is triggered automatically after pointerup
@@ -743,8 +718,7 @@ function addDragdropFunctions(AblePlayer) {
 		// save final width and height of dragged element
 		this.updatePreferences(which);
 
-		// Booleans for preventing stray events
-		this.windowMenuClickRegistered = false;
+		// Boolean for preventing stray click events
 		this.finishingDrag = true;
 
 		// finishingDrag should e reset after window click event,

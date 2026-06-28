@@ -561,8 +561,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						// therefore, ignore this click
 						return false;
 					}
-					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-						thisObj.windowMenuClickRegistered = true;
+					if ( !thisObj.finishingDrag ) {
 						thisObj.handleMenuChoice(which.substring(0, which.indexOf('-')), $(this).attr('data-choice'), e);
 					}
 				});
@@ -622,7 +621,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			} else if (e.key === 'Escape') {
 				$thisItem.removeClass('able-focus');
 				thisObj.closePopups();
-				e.stopPropagation;
+				e.stopPropagation();
 			}
 			e.preventDefault();
 		});
