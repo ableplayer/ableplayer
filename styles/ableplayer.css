@@ -885,9 +885,15 @@ span.able-modkey {
 .able-resizable svg {
 	fill: var(--able-medium-light-gray);
 }
+.able-transcript-area .able-resizable svg {
+	fill: var(--able-medium-gray);
+}
 
 .able-resizable:hover svg {
 	fill: var(--able-white);
+}
+.able-transcript-area .able-resizable:hover svg {
+	fill: var(--able-black);
 }
 
 /* Sign Language Window */
