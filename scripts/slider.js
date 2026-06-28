@@ -26,6 +26,11 @@ import $ from 'jquery';
 		this.lastTrackPosition = 0;
 		this.nextStep = 1;
 		this.inertiaCount = 0;
+		this.trackFrameRequestId = null;
+		this.queuedTrackPosition = null;
+		this.queuedTrackLeft = null;
+		this.trackGeometry = null;
+		this.hoverGeometry = null;
 
 		this.seekbarDiv = $(div);
 
@@ -85,20 +90,20 @@ import $ from 'jquery';
 		this.setDuration(max);
 
 		// handle seekHead events
-		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
+		this.seekHead.on('mouseenter mouseleave mousedown mouseup focus blur touchstart touchend', function (e) {
 
 			coords = thisObj.pointerEventToXY(e);
 
 			if (e.type === 'mouseenter' || e.type === 'focus') {
 				thisObj.overHead = true;
+				thisObj.cacheHoverGeometry();
 			} else if (e.type === 'mouseleave' || e.type === 'blur') {
 				thisObj.overHead = false;
+				if (!thisObj.overBody) {
+					thisObj.clearHoverGeometry();
+				}
 				if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
 					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
-			} else if (e.type === 'mousemove' || e.type === 'touchmove') {
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.trackHeadAtPageX(coords.x);
 				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
@@ -111,7 +116,7 @@ import $ from 'jquery';
 					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 				}
 			}
-			if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+			if (e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
 				thisObj.refreshTooltip();
 			}
 		});
@@ -129,6 +134,7 @@ import $ from 'jquery';
 
 			if (e.type === 'mouseenter') {
 				thisObj.overBody = true;
+				thisObj.cacheHoverGeometry();
 				thisObj.overBodyMousePos = {
 					x: coords.x,
 					y: coords.y
@@ -136,6 +142,9 @@ import $ from 'jquery';
 			} else if (e.type === 'mouseleave') {
 				thisObj.overBody = false;
 				thisObj.overBodyMousePos = null;
+				if (!thisObj.overHead) {
+					thisObj.clearHoverGeometry();
+				}
 				if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
 					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
 				}
@@ -208,8 +217,12 @@ import $ from 'jquery';
 	};
 
 	AccessibleSlider.prototype.pageXToPosition = function (pageX) {
-		var offset = pageX - this.seekbarDiv.offset().left;
-		var position = this.duration * (offset / this.seekbarDiv.width());
+		var geometry = this.getTrackingGeometry();
+		var offset = pageX - geometry.left;
+		if (geometry.width === 0) {
+			return 0;
+		}
+		var position = this.duration * (offset / geometry.width);
 		return this.boundPos(position);
 	};
 
@@ -274,11 +287,22 @@ import $ from 'jquery';
 		if (!this.tracking) {
 			this.trackDevice = device;
 			this.tracking = true;
+			if (device === 'mouse') {
+				this.trackGeometry = this.hoverGeometry || this.buildTrackingGeometry();
+			} else {
+				this.clearTrackingGeometry();
+			}
 			this.seekbarDiv.trigger('startTracking', [position]);
 		}
 	};
 
 	AccessibleSlider.prototype.stopTracking = function (position) {
+		if (this.trackFrameRequestId !== null) {
+			window.cancelAnimationFrame(this.trackFrameRequestId);
+			this.trackFrameRequestId = null;
+		}
+		this.flushQueuedTrackUpdate();
+		this.clearTrackingGeometry();
 		this.trackDevice = null;
 		this.tracking = false;
 		this.seekbarDiv.trigger('stopTracking', [position]);
@@ -286,20 +310,92 @@ import $ from 'jquery';
 	};
 
 	AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
+		var geometry = this.getTrackingGeometry();
 		var position = this.pageXToPosition(pageX);
-		var newLeft = pageX - this.seekbarDiv.offset().left - (this.seekHead.width() / 2);
-		newLeft = Math.max(0, Math.min(newLeft, this.seekbarDiv.width() - this.seekHead.width()));
-		this.lastTrackPosition = position;
-		this.seekHead.css('left', newLeft);
-		this.reportTrackAtPosition(position);
+		var newLeft = pageX - geometry.left - geometry.headHalf;
+		newLeft = Math.max(0, Math.min(newLeft, geometry.maxLeft));
+		this.queueTrackUpdate(position, newLeft);
+	};
+
+	AccessibleSlider.prototype.cacheTrackingGeometry = function () {
+		this.trackGeometry = this.buildTrackingGeometry();
+	};
+
+	AccessibleSlider.prototype.clearTrackingGeometry = function () {
+		this.trackGeometry = null;
+	};
+
+	AccessibleSlider.prototype.cacheHoverGeometry = function () {
+		this.hoverGeometry = this.buildTrackingGeometry();
+	};
+
+	AccessibleSlider.prototype.clearHoverGeometry = function () {
+		this.hoverGeometry = null;
+	};
+
+	AccessibleSlider.prototype.buildTrackingGeometry = function () {
+		var seekbarOffset = this.seekbarDiv.offset();
+		var seekbarWidth = this.seekbarDiv.width();
+		var seekHeadWidth = this.seekHead.width();
+		return {
+			left: seekbarOffset.left,
+			width: seekbarWidth,
+			headHalf: seekHeadWidth / 2,
+			maxLeft: Math.max(0, seekbarWidth - seekHeadWidth)
+		};
+	};
+
+	AccessibleSlider.prototype.getTrackingGeometry = function () {
+		if (this.tracking && this.trackDevice === 'mouse') {
+			if (!this.trackGeometry) {
+				this.cacheTrackingGeometry();
+			}
+			return this.trackGeometry;
+		}
+		if (this.overBody || this.overHead) {
+			if (!this.hoverGeometry) {
+				this.cacheHoverGeometry();
+			}
+			return this.hoverGeometry;
+		}
+		return this.buildTrackingGeometry();
 	};
 
 	AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
+		this.flushQueuedTrackUpdate();
 		var ratio = position / this.duration;
 		var center = this.seekbarDiv.width() * ratio;
 		this.lastTrackPosition = position;
 		this.seekHead.css('left', center - (this.seekHead.width() / 2));
 		this.reportTrackAtPosition(position);
+	};
+
+	AccessibleSlider.prototype.queueTrackUpdate = function (position, left) {
+		var thisObj = this;
+		this.queuedTrackPosition = position;
+		this.queuedTrackLeft = left;
+
+		if (this.trackFrameRequestId !== null) {
+			return;
+		}
+
+		this.trackFrameRequestId = window.requestAnimationFrame(function () {
+			thisObj.trackFrameRequestId = null;
+			thisObj.flushQueuedTrackUpdate();
+		});
+	};
+
+	AccessibleSlider.prototype.flushQueuedTrackUpdate = function () {
+		if (this.queuedTrackPosition === null) {
+			return;
+		}
+
+		this.lastTrackPosition = this.queuedTrackPosition;
+		this.seekHead.css('left', this.queuedTrackLeft);
+		this.reportTrackAtPosition(this.queuedTrackPosition);
+
+		this.queuedTrackPosition = null;
+		this.queuedTrackLeft = null;
 	};
 
 	AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
@@ -367,9 +463,10 @@ import $ from 'jquery';
 			}
 			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
 		} else if (this.overBody && this.overBodyMousePos) {
+			var geometry = this.getTrackingGeometry();
 			this.timeTooltip.show();
 			this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
-			this.setTooltipPosition(this.overBodyMousePos.x - this.seekbarDiv.offset().left);
+			this.setTooltipPosition(this.overBodyMousePos.x - geometry.left);
 		} else {
 
 			clearTimeout(this.timeTooltipTimeoutId);
@@ -384,6 +481,7 @@ import $ from 'jquery';
 	AccessibleSlider.prototype.hideSliderTooltips = function () {
 		this.overHead = false;
 		this.overBody = false;
+		this.clearHoverGeometry();
 		this.timeTooltip.hide();
 	};
 
