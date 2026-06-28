@@ -57,10 +57,7 @@ function addVtsFunctions(AblePlayer) {
 				let $fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
 				for (i in this.langs) {
 					radioId = 'vts-lang-radio-' + this.langs[i];
-					$radioDiv = $('<div>',{
-						// uncomment the following if label is native name
-						// 'lang': this.langs[i]
-					});
+					$radioDiv = $('<div>');
 					$radio = $('<input>', {
 						'type': 'radio',
 						'name': 'vts-lang',
