@@ -381,7 +381,7 @@
 		if (options.attrs) {
 			$.extend(fieldAttrs, options.attrs);
 		}
-		labelPosition = options.labelPosition || (options.type === 'select' ? 'before' : 'after');
+		labelPosition = options.labelPosition || ((options.type === 'select' || options.type === 'number') ? 'before' : 'after');
 		checkboxValue = (typeof options.value !== 'undefined') ? options.value : 'true';
 
 		$wrapper = $('<div>').addClass(wrapperClass + 'able-player-setting');
@@ -395,6 +395,12 @@
 
 		if (options.type === 'select') {
 			$field = $('<select>', fieldAttrs);
+		} else if (options.type === 'number') {
+			fieldAttrs.type = 'number';
+			if (typeof options.value !== 'undefined') {
+				fieldAttrs.value = options.value;
+			}
+			$field = $('<input>', fieldAttrs);
 		} else {
 			fieldAttrs.type = options.type || 'checkbox';
 			fieldAttrs.value = checkboxValue;
@@ -545,12 +551,19 @@
 				thisId = this.mediaId + '_' + thisPref;
 				$thisDiv = $('<div>').addClass(thisClass + ' able-player-setting');
 				if (form === 'captions' ) {
+					let isCaptionRateField = (thisPref === 'prefCaptionsRate');
 					let fieldObj = this.createField({
-						wrapperClass: thisClass + ' able-prefs-select',
+						wrapperClass: thisClass + ' ' + (isCaptionRateField ? 'able-prefs-number' : 'able-prefs-select'),
 						name: thisPref,
 						id: thisId,
 						label: available[i]['label'],
-						type: 'select'
+						type: isCaptionRateField ? 'number' : 'select',
+						value: isCaptionRateField ? this[thisPref] : undefined,
+						attrs: isCaptionRateField ? {
+							min: 0.5,
+							max: 3.0,
+							step: 0.1
+						} : undefined
 					});
 					$thisDiv = fieldObj.wrapper;
 					$thisLabel = fieldObj.label;
@@ -563,9 +576,16 @@
 							thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
 						});
 					}
-					captionsOptions = this.getCaptionsOptions(thisPref);
-					if ( ! ( thisPref === 'prefCaptionsVoice' && ! this.descVoices.length ) ) {
-						$thisDiv.append($thisLabel,$thisField);
+					if (isCaptionRateField) {
+						if (this.synth) {
+							$thisField.on('change',function() {
+								let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' );
+								thisObj.announceText('captionSample',captionSample);
+							});
+						}
+						captionsOptions = [];
+					} else {
+						captionsOptions = this.getCaptionsOptions(thisPref);
 					}
 					for (j=0; j < captionsOptions.length; j++) {
 						if (thisPref === 'prefCaptionsPosition') {
@@ -662,18 +682,27 @@
 						$thisLabel = fieldObj.label;
 						$thisField = fieldObj.field;
 					} else if (this.synth) {
+						let isDescRateField = (thisPref === 'prefDescRate');
 						// Only show these options if browser supports speech synthesis
 						let fieldObj = this.createField({
-							wrapperClass: thisClass + ' able-prefs-select',
+							wrapperClass: thisClass + ' ' + (isDescRateField ? 'able-prefs-number' : 'able-prefs-select'),
 							name: thisPref,
 							id: thisId,
 							label: available[i]['label'],
-							type: 'select'
+							type: isDescRateField ? 'number' : 'select',
+							value: isDescRateField ? this[thisPref] : undefined,
+							attrs: isDescRateField ? {
+								min: 0.5,
+								max: 3.0,
+								step: 0.1
+							} : undefined
 						});
 						$thisDiv = fieldObj.wrapper;
 						$thisLabel = fieldObj.label;
 						$thisField = fieldObj.field;
-						if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
+						if (isDescRateField) {
+							// Number field has no options to populate.
+						} else if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
 							prefDescVoice = this.getPrefVoice();
 							for (j=0; j < this.descVoices.length; j++) {
 								optionValue = this.descVoices[j].name;
@@ -708,8 +737,6 @@
 								// 2.5 - fleet
 								// 3 - fast! (some voices don't get any faster than this
 
-								// Note: if these values are modified, must also modfiy them
-								// in makePrefsValueReadable()
 								options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
 							} else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
 								options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
@@ -776,7 +803,7 @@
 						});
 					}
 				}
-				if (thisPref === 'prefDescVoice' && !this.descVoices.length) {
+				if ((thisPref === 'prefDescVoice' || thisPref === 'prefCaptionsVoice') && !this.descVoices.length) {
 					// No voices are available (e.g., in Safari 15.4 on Mac OS)
 				} else {
 					$fieldset.append($thisDiv);
@@ -1023,32 +1050,6 @@
 			} else if (value === 2) {
 				return this.translate( 'prefDescPitch5', 'Very high' );
 			}
-		} else if (pref === 'prefDescRate' || pref === 'prefCaptionsRate' ) {
-			// default in the API is 0.1 to 10, where 1 is normal speaking voice
-			// our custom range offers several rates close to 1
-			// plus a couple of crazy fast ones for sport
-			// Our more readable options (1-10) or mapped here to API values
-			if (value === 0.7) {
-				return 1;
-			} else if (value === 0.8) {
-				return 2;
-			} else if (value === 0.9) {
-				return 3;
-			} else if (value === 1) {
-				return 4;
-			} else if (value === 1.1) {
-				return 5;
-			} else if (value === 1.2) {
-				return 6;
-			} else if (value === 1.5) {
-				return 7;
-			} else if (value === 2) {
-				return 8;
-			} else if (value === 2.5) {
-				return 9;
-			} else if (value === 3) {
-				return 10;
-			}
 		} else if (pref === 'prefDescVolume' || pref === 'prefCaptionsVolume' ) {
 			// values range from 0.1 to 1.0
 			return value * 100 + '%';
@@ -1070,7 +1071,9 @@
 		available = this.getAvailablePreferences();
 		for (i=0; i<available.length; i++) {
 			prefName = available[i]['name'];
-			if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+			if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
+				$('input[name="' + prefName + '"]').val(preferences.preferences[prefName]);
+			} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				// this is a caption-related select box
 				$('select[name="' + prefName + '"]').val(preferences.preferences[prefName]);
 			} else { // all others are checkboxes
@@ -1131,6 +1134,17 @@
 					this.prefDescMethod = 'video';
 					if (this.prefDescMethod !== preferences.preferences['prefDescMethod']) { // user's preference has changed
 						preferences.preferences['prefDescMethod'] = this.prefDescMethod;
+						numChanges++;
+					}
+				} else if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
+					newValue = parseFloat($('input[id="' + prefId + '"]').val());
+					if (isNaN(newValue)) {
+						newValue = this[prefName] || 1;
+					}
+					newValue = Math.min(3.0, Math.max(0.5, newValue));
+					if (preferences.preferences[prefName] !== newValue) {
+						preferences.preferences[prefName] = newValue;
+						this[prefName] = newValue;
 						numChanges++;
 					}
 				} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
