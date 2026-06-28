@@ -8,6 +8,7 @@
 
 ### Accessibility
 - Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.
+- Popup handling for settings in Sign and Transcript windows was broken for keyboard.
 
 ### Bug fixes
 

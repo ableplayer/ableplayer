@@ -361,7 +361,7 @@ function addDragdropFunctions(AblePlayer) {
 			$windowPopup.css('top', popupTop);
 			$windowPopup.show();
 			$windowButton.attr('aria-expanded','true');
-			$windowPopup.find('li:first').attr( 'tabindex', '0' ).trigger('focus').addClass('able-focus');
+			$windowPopup.find('li').first().attr( 'tabindex', '0' ).trigger('focus').addClass('able-focus');
 			thisObj.windowMenuClickRegistered = false; // reset
 		}
 	};
