@@ -1716,26 +1716,21 @@ function addControlFunctions(AblePlayer) {
 				meta = this.meta[i];
 			}
 		}
-		// regardless of source...
-		this.transcriptLang = language;
+		// Change the transcript language if the transcript is not currently visible.
+		if ( ( ! this.$transcriptArea.is(':visible') && source === 'captions' ) || source === 'init' || source === 'transcript' ) {
+			console.log('syncTrackLanguages: transcript is not visible, so changing transcript language to ' + language);
+			this.transcriptCaptions = captions;
+			this.transcriptChapters = chapters;
+			this.transcriptDescriptions = descriptions;
+			this.transcriptLang = language;
+		}
 		if (source === 'init' || source === 'captions') {
 			this.captionLang = language;
 			this.selectedCaptions = captions;
 			this.selectedChapters = chapters;
 			this.selectedDescriptions = descriptions;
 			this.selectedMeta = meta;
-			this.transcriptCaptions = captions;
-			this.transcriptChapters = chapters;
-			this.transcriptDescriptions = descriptions;
 			this.updateChaptersList();
-			// the following was commented out in Oct/Nov 2018.
-			// chapters popup is setup automatically when setupPopups() is called later with no param
-			// not sure why it was included here.
-			// this.setupPopups('chapters');
-		} else if (source === 'transcript') {
-			this.transcriptCaptions = captions;
-			this.transcriptChapters = chapters;
-			this.transcriptDescriptions = descriptions;
 		}
 		if (this.selectedDescriptions) {
 			// updating description voice to match new description language
