@@ -545,11 +545,16 @@
 				thisId = this.mediaId + '_' + thisPref;
 				$thisDiv = $('<div>').addClass(thisClass + ' able-player-setting');
 				if (form === 'captions' ) {
-					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-					$thisField = $('<select>',{
+					let fieldObj = this.createField({
+						wrapperClass: thisClass + ' able-prefs-select',
 						name: thisPref,
 						id: thisId,
+						label: available[i]['label'],
+						type: 'select'
 					});
+					$thisDiv = fieldObj.wrapper;
+					$thisLabel = fieldObj.label;
+					$thisField = fieldObj.field;
 					// add a change handler that updates the style of the sample caption text
 					let viewingOptions = ['prefCaptionsPosition','prefCaptionsFont','prefCaptionsSize','prefCaptionsColor','prefCaptionsBGColor','prefCaptionsOpacity'];
 					if ( viewingOptions.indexOf(thisPref) !== -1 ) {
@@ -637,7 +642,6 @@
 											let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' )
 											thisObj.announceText('captionSample',captionSample);
 										});
-										$thisDiv.append($thisLabel,$thisField);
 									}
 								}
 							}
