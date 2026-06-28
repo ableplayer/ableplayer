@@ -65,7 +65,7 @@ function addTrackFunctions(AblePlayer) {
                 trackDesc,
                 trackLabel,
                 trackSrc,
-                cues
+                data.text
               );
             }
             if (kind === 'captions' || kind === 'subtitles') {
