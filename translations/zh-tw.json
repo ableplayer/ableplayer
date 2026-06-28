@@ -58,7 +58,7 @@
   "prefDescription1": "目前的影片有 錄製口述影像的替代版本 文字式口述影像",
   "prefDescription2": "目前的影片有 影片的口述影像替代版本",
   "prefDescription3": "目前的影片有 文字式口述影像，需搭配螢幕報讀軟體",
-  "prefIntroDescriptionNone": "目前的影片兩種格式都沒提供。",
+  "prefDescriptionNone": "目前的影片兩種格式都沒提供。",
   "prefIntroDescription3": "請使用下列表單設定口述影像的相關偏好。",
   "prefIntroDescription4": "儲存設定後，口述影像功能可以由口述影像按鈕切換開關。",
   "prefIntroKeyboard1": "不論您身處網頁何處，都可以運用下列鍵盤快速鍵操作頁面中的這個媒體播放器（快速鍵清單請見底下）。",

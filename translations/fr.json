@@ -58,7 +58,7 @@
   "prefDescription1": "Il y a une version autre version avec description, description textuelle.",
   "prefDescription2": "Il y a une version autre version de la vidéo avec description.",
   "prefDescription3": "Il y a une version description textuelle, lue à l’aide d’un lecteur d’écran.",
-  "prefIntroDescriptionNone": "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.",
+  "prefDescriptionNone": "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.",
   "prefIntroDescription3": "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelle.",
   "prefIntroDescription4": "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.",
   "prefIntroKeyboard1": "Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous).",

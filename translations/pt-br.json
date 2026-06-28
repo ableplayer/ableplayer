@@ -58,7 +58,7 @@
   "prefDescription1": "O vídeo atual está uma versão alternativa de descrição, texto baseado em descrição.",
   "prefDescription2": "O vídeo atual está versão alternativa de descrição do vídeo.",
   "prefDescription3": "O vídeo atual está texto baseado em descrição, anunciado pelo leitor de tela.",
-  "prefIntroDescriptionNone": "O vídeo atual não possui audiodescrição em nenhum formato.",
+  "prefDescriptionNone": "O vídeo atual não possui audiodescrição em nenhum formato.",
   "prefIntroDescription3": "Use o formulário a seguir para definir suas preferências relacionadas à texto baseado em audiodescrição.",
   "prefIntroDescription4": "Depois que salvar suas configurações, a audiodescrição poderá ser ligada/desligada usando o botão Descrição.",
   "prefIntroKeyboard1": "O reprodutor de mídias desse página web pode ser operado de qualquer lugar nessa página, usando os atalhos de teclado (veja a lista abaixo).",

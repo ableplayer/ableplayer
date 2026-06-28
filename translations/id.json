@@ -58,7 +58,7 @@
   "prefDescription1": "Video ini memiliki versi alternatif berdeskripsi, deskripsi berbasis teks.",
   "prefDescription2": "Video ini memiliki versi alternatif video dengan deskripsi.",
   "prefDescription3": "Video ini memiliki deskripsi berbasis teks, dibacakan oleh pembaca layar.",
-  "prefIntroDescriptionNone": "Video ini tidak memiliki deskripsi audio dalam format mana pun.",
+  "prefDescriptionNone": "Video ini tidak memiliki deskripsi audio dalam format mana pun.",
   "prefIntroDescription3": "Gunakan isian berikut untuk memasang preferensi terkait deskripsi audio berbasis teks.",
   "prefIntroDescription4": "Setelah Anda menyimpan pengaturan, deskripsi audio dapat dinyala/matikan melalui tombol Deskripsi.",
   "prefIntroKeyboard1": "Pemutar media dalam halaman ini dapat dioperasikan dari bagian mana pun pada halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).",

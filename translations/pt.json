@@ -58,7 +58,7 @@
   "prefDescription1": "O vídeo atual tem uma versão descrita alternativa, descrição à base de texto.",
   "prefDescription2": "O vídeo atual tem versão descrita alernativa do vídeo.",
   "prefDescription3": "O vídeo atual tem descrição à base de texto, anunciada pelo leitor de ecrãs.",
-  "prefIntroDescriptionNone": "O vídeo atual não tem descrição de áudio em nenhum formato.",
+  "prefDescriptionNone": "O vídeo atual não tem descrição de áudio em nenhum formato.",
   "prefIntroDescription3": "Utiliza o seguinte formulário para definir as tuas preferências relacionadas com descrição de áudio à base de texto.",
   "prefIntroDescription4": "Depois de guardar as tuas definições, descrição de áudio pode ser alternada on/off usando o botão Descrição.",
   "prefIntroKeyboard1": "O leitor multimédia nesta página pode ser operado de qualquer lugar na página utilizando os atalhos de teclado (vê em baixo a lista).",

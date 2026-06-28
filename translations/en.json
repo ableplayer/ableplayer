@@ -58,7 +58,7 @@
   "prefDescription1": "The current video has an alternative described version and text-based description, announced by screen reader.",
   "prefDescription2": "The current video has text-based description.",
   "prefDescription3": "The current video has an alternative described version.",
-  "prefIntroDescriptionNone": "The current video has no audio description in either format.",
+  "prefDescriptionNone": "The current video has no audio description in either format.",
   "prefIntroDescription3": "Use the following form to set your preferences related to text-based audio description.",
   "prefIntroDescription4": "After you save your settings, audio description can be toggled on/off using the Description button.",
   "prefIntroKeyboard1": "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).",

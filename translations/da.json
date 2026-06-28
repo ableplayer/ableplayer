@@ -58,7 +58,7 @@
   "prefDescription1": "Nuværende videoer har en alternativ synstolket version, textbaseret synstolkning.",
   "prefDescription2": "Nuværende videoer har alternativ synstolket version af videoen.",
   "prefDescription3": "Nuværende videoer har textbaseret synstolkning.",
-  "prefIntroDescriptionNone": "Nuværende video har ingen synstolkning i noget format.",
+  "prefDescriptionNone": "Nuværende video har ingen synstolkning i noget format.",
   "prefIntroDescription3": "Anvende følgende formular for at indstille gældende textbasererede synstolkning.",
   "prefIntroDescription4": "Efter du gemmer dine indstillinger, kan synstolkning slåes til og fra med synstolkningsknappen.",
   "prefIntroKeyboard1": "Medieafspilleren på denne webside kan betjenest med tastuturgenveje (se neden for en liste).",

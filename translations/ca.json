@@ -58,7 +58,7 @@
   "prefDescription1": "L'actual vídeo té una versió alternativa amb audiodescripció, descripció textual anunciada pel lector de pantalla.",
   "prefDescription2": "L'actual vídeo té una versió alternativa amb audiodescripció.",
   "prefDescription3": "L'actual vídeo té descripció textual.",
-  "prefIntroDescriptionNone": "L'actual vídeo no disposa d'audiodescripció en cap format.",
+  "prefDescriptionNone": "L'actual vídeo no disposa d'audiodescripció en cap format.",
   "prefIntroDescription3": "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.",
   "prefIntroDescription4": "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.",
   "prefIntroKeyboard1": "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).",

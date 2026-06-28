@@ -58,7 +58,7 @@
   "prefDescription1": "il video corrente ha Una versione di descrizione alternativa, Descrizione testuale.",
   "prefDescription2": "il video corrente ha Versione di descrizione alternativa per il video.",
   "prefDescription3": "il video corrente ha Descrizione testuale, letta dal lettore di schermo.",
-  "prefIntroDescriptionNone": "Il video corrente non ha audiodescrizioni.",
+  "prefDescriptionNone": "Il video corrente non ha audiodescrizioni.",
   "prefIntroDescription3": "Usa il seguente modulo per impostare le tue preferenze relative all'audiodescrizione testuale.",
   "prefIntroDescription4": "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.",
   "prefIntroKeyboard1": "Il lettore multimediale può essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.",

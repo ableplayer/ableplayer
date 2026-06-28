@@ -58,7 +58,7 @@
   "prefDescription1": "Bieżący film ma alternatywna wersja opisu audio, tekst opisu audio.",
   "prefDescription2": "Bieżący film ma alternatywna wersja wideo z opisem audio.",
   "prefDescription3": "Bieżący film ma tekst opisu audio, ogłaszany przez czytnik ekranu.",
-  "prefIntroDescriptionNone": "Bieżący film nie ma audiodeskprycji.",
+  "prefDescriptionNone": "Bieżący film nie ma audiodeskprycji.",
   "prefIntroDescription3": "Użyj formularza poniższej, aby określić ustawienia odtwarzania tekstowego opisu audio",
   "prefIntroDescription4": "Po zapisaniu ustawień opisu audio można włączać/wyłączać za pomocą przycisku Audiodeskrypcja.",
   "prefIntroKeyboard1": "Odtwarzaczem mediów na tej stronie można sterować z dowolnego miejsca na stronie za pomocą skrótów klawiaturowych (lista poniżej).",

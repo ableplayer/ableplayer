@@ -58,7 +58,7 @@
   "prefDescription1": "Das aktuelle Video hat eine alternative Version der Audiobeschreibung, eine textbasierte Audiobeschreibung.",
   "prefDescription2": "Das aktuelle Video hat Version des Videos, die eine Audiobeschreibung enthält.",
   "prefDescription3": "Das aktuelle Video hat Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird.",
-  "prefIntroDescriptionNone": "Das aktuelle Video hat keine Audiobeschreibung.",
+  "prefDescriptionNone": "Das aktuelle Video hat keine Audiobeschreibung.",
   "prefIntroDescription3": "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.",
   "prefIntroDescription4": "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.",
   "prefIntroKeyboard1": "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).",

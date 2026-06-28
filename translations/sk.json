@@ -59,7 +59,7 @@
   "prefDescription1": "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačkou obrazovky.",
   "prefDescription2": "Aktuálne video má textový audiokomentár.",
   "prefDescription3": "Aktuálne video má alternatívnu verziu s audiokomentárom.",
-  "prefIntroDescriptionNone": "Aktuálne video nemá audiokomentár v žiadnom formáte.",
+  "prefDescriptionNone": "Aktuálne video nemá audiokomentár v žiadnom formáte.",
   "prefIntroDescription3": "Pomocou nasledujúceho formulára nastavte svoje predvoľby týkajúce sa textového audiokomentára.",
   "prefIntroDescription4": "Po uložení nastavení je možné audiokomentár zapnúť/vypnúť pomocou príslušného tlačidla.",
   "prefIntroKeyboard1": "Prehrávač médií na tejto webovej stránke možno ovládať odkiaľkoľvek na stránke pomocou klávesových skratiek (zoznam nájdete nižšie).",

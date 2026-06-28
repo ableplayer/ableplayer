@@ -58,7 +58,7 @@
   "prefDescription1": "Denne videoen har en alternativ synstolket versjon, tekstbasert synstolking.",
   "prefDescription2": "Denne videoen har alternativ synstolket versjon av video.",
   "prefDescription3": "Denne videoen har tekstbasert synstolket versjon opplest av skjermleser.",
-  "prefIntroDescriptionNone": "Denne videoen har ikke synstolking i noen av formatene.",
+  "prefDescriptionNone": "Denne videoen har ikke synstolking i noen av formatene.",
   "prefIntroDescription3": "Bruk følgende skjema for å gjøre dine valg angående tekstbasert synstolking.",
   "prefIntroDescription4": "Etter at du har lagret dine valg kan synstolking slås av og på med synstolkingsknappen.",
   "prefIntroKeyboard1": "Mediespilleren på denne nettsiden kan styres fra hvor som helst på siden ved hjelp av tastatursnarveier (se liste nedenfor).",

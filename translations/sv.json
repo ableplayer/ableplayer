@@ -58,7 +58,7 @@
   "prefDescription1": "Följande video har en alternativ syntolkad version, textbaserad syntolkning.",
   "prefDescription2": "Följande video har alternativ syntolkad version av videon.",
   "prefDescription3": "Följande video har textbaserad syntolkning, uppläst av skärmläsare.",
-  "prefIntroDescriptionNone": "Nuvarande video har ingen syntolkning i något format.",
+  "prefDescriptionNone": "Nuvarande video har ingen syntolkning i något format.",
   "prefIntroDescription3": "Använd följande formulär för att ställa in dina prefenser gällande textbaserad syntolkning.",
   "prefIntroDescription4": "Efter du sparar dina prefenser, kan syntolkning växlas av och på med syntolkningsknappen.",
   "prefIntroKeyboard1": "Mediaspelaren på denna webbsida kan styras från varsomhelst på sidan med hjälp av tangentbordsgenvägar (se nedan för en lista).",

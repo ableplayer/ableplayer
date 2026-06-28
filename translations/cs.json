@@ -58,7 +58,7 @@
   "prefDescription1": "Aktuální video má alternativně popsaná verze, textový popis.",
   "prefDescription2": "Aktuální video má alternativní popsaná verze videa.",
   "prefDescription3": "Aktuální video má textový popis, oznámený čtečkou obrazovky.",
-  "prefIntroDescriptionNone": "Aktuální video nemá žádný zvukový popis v žádném formátu.",
+  "prefDescriptionNone": "Aktuální video nemá žádný zvukový popis v žádném formátu.",
   "prefIntroDescription3": "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.",
   "prefIntroDescription4": "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.",
   "prefIntroKeyboard1": "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).",
