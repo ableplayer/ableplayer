@@ -6,6 +6,9 @@
 
 - Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
 
+### Accessibility
+- Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.
+
 ### Bug fixes
 
 - Add the seek interval value to rewind and forward buttons, to provide better user information.

@@ -110,7 +110,6 @@ function addDragdropFunctions(AblePlayer) {
 		menuId = this.mediaId + '-' + windowName + '-menu';
 		$newButton = $('<button>',{
 			'type': 'button',
-			'tabindex': '0',
 			'aria-haspopup': 'true',
 			'aria-controls': menuId,
 			'aria-expanded': 'false',
@@ -158,8 +157,8 @@ function addDragdropFunctions(AblePlayer) {
 			this.$signToolbar.append($newButton,$tooltip,$popup);
 		}
 
-		// handle button click
-		$newButton.on('click keydown',function(e) {
+		// handle button key activation and click separately
+		$newButton.on('keydown',function(e) {
 
 			if (thisObj.focusNotClick) {
 				return false;
@@ -168,13 +167,36 @@ function addDragdropFunctions(AblePlayer) {
 				thisObj.dragKeys(which, e);
 				return false;
 			}
+			if (e.key !== ' ' && e.key !== 'Enter' && e.key !== 'Escape') {
+				return false;
+			}
 			e.stopPropagation();
+			if (e.key === ' ' || e.key === 'Enter') {
+				e.preventDefault();
+			}
 			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-				console.log( 'firing' );
 				// don't set windowMenuClickRegistered yet; that happens in handler function
 				thisObj.handleWindowButtonClick(which, e);
 			}
 			thisObj.finishingDrag = false;
+			return false;
+		});
+
+		$newButton.on('click',function(e) {
+
+			if (thisObj.focusNotClick) {
+				return false;
+			}
+			if (thisObj.dragging) {
+				return false;
+			}
+			e.stopPropagation();
+			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+				// don't set windowMenuClickRegistered yet; that happens in handler function
+				thisObj.handleWindowButtonClick(which, e);
+			}
+			thisObj.finishingDrag = false;
+			return false;
 		});
 
 		this.addResizeDialog(which, $window);
@@ -339,7 +361,7 @@ function addDragdropFunctions(AblePlayer) {
 			$windowPopup.css('top', popupTop);
 			$windowPopup.show();
 			$windowButton.attr('aria-expanded','true');
-			$(this).find('li').first().trigger('focus').addClass('able-focus');
+			$windowPopup.find('li:first').attr( 'tabindex', '0' ).trigger('focus').addClass('able-focus');
 			thisObj.windowMenuClickRegistered = false; // reset
 		}
 	};
