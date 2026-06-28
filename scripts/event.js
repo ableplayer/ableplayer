@@ -228,7 +228,7 @@ function addEventFunctions(AblePlayer) {
 
 		if ( this.$focusedElement && null !== this.activeMedia ) {
 			$mediaParent = $( '#' + this.activeMedia ).closest( '.able' );
-			if ( (this.$focusedElement).attr('role') === 'button' ) {
+			if ( ( this.$focusedElement).is('button') ) {
 				classList = this.$focusedElement.attr("class").split(/\s+/);
 				$.each(classList, function(index, item) {
 					if (item.substring(0,20) === 'able-button-handler-') {
@@ -437,9 +437,8 @@ function addEventFunctions(AblePlayer) {
 				// disable spacebar support for play/pause toggle as of 4.2.10
 				// spacebar should not be handled everywhere on the page, since users use that to scroll the page
 				// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
-				if ($thisElement.attr('role') === 'button') {
+				if ($thisElement.is('button')) {
 					// register a click on this element
-					e.preventDefault();
 					$thisElement.trigger( 'click' );
 				}
 			} else if ( key === 'p' ) {
@@ -503,11 +502,11 @@ function addEventFunctions(AblePlayer) {
 					this.handlePrefsClick();
 				}
 			} else if (key === 'Enter') {
-				if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+				if ( $thisElement.is('button') || $thisElement.is('span') ) {
 					// register a click on this element
 					// if it's a transcript span the transcript span click handler will take over
 					$thisElement.trigger( 'click' );
-				} else if ($thisElement.prop('tagName') === 'LI') {
+				} else if ($thisElement.is('li')) {
 					$thisElement.trigger( 'click' );
 				}
 			}
@@ -760,7 +759,7 @@ function addEventFunctions(AblePlayer) {
 		}
 
 		// handle clicks on player buttons
-		this.$controllerDiv.find('div[role="button"]').on('click',function(e){
+		this.$controllerDiv.find('button').on('click',function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});

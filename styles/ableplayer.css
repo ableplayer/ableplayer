@@ -21,7 +21,7 @@
  * 	.able-transcript-area = 7000
  *
  * Player controls: (5000 - 6000)
- * 	.able-controller div[role="button"] = 6600
+ * 	.able-controller button = 6600
  * 	.able-big-play-button = 6500
  *	.able-seekbar = 6500
  * 	div.able-captions-wrapper = 6000
@@ -336,8 +336,7 @@ video[data-able-player],
 }
 
 .able-controller,
-.able-controller button,
-.able-controller div[role="button"]{
+.able-controller button {
 	color: var(--able-control-color);
 }
 
@@ -358,7 +357,8 @@ video[data-able-player],
 	outline-offset: 2px;
 }
 
-.able-controller div[role="button"] {
+.able-controller button {
+	all: unset;
 	background: none;
 	position: relative;
 	padding: 2px;
@@ -373,9 +373,10 @@ video[data-able-player],
 	align-items: center;
 	z-index: 6600;
 	border-radius: 3px;
+	box-sizing: border-box;
 }
 
-.able-controller div.able-button-handler-play[role="button"] {
+.able-controller div.able-button-handler-play button {
 	/* The icon appears too large if this button doesn't have padding. */
 	padding: 4px;
 }
@@ -1187,7 +1188,7 @@ div.able-modal-dialog button,
 .able-window-toolbar input,
 .able-window-toolbar select,
 .able-controller input,
-.able-controller div[role="button"],
+.able-controller button,
 .able-seekbar-head {
 	outline-style: solid;
 	outline-width: 3px;
@@ -1200,14 +1201,13 @@ div.able-modal-dialog button,
 .able-modal-dialog button:focus,
 .able-wrapper .able button.able-big-play-button:focus .icon-play,
 .able-wrapper .able button.able-big-play-button:focus svg,
-.able-controller div[role="button"]:focus,
+.able-controller button:focus,
 div.able-modal-dialog input:focus,
 div.able-modal-dialog button:focus,
 .able-window-toolbar .able-button-handler-preferences:focus,
 .able-window-toolbar input:focus,
 .able-window-toolbar select:focus,
 .able-controller input:focus,
-.able-controller	div[role="button"]:focus,
 .able-seekbar-head:focus {
 	outline-color: var(--able-focus-outline);
 }
@@ -1220,14 +1220,13 @@ div.able-modal-dialog button:focus,
 .able-wrapper .able button.able-big-play-button:hover .icon-play,
 .able-wrapper .able button.able-big-play-button:hover svg,
 .able-popup li:hover,
-.able-controller div[role="button"]:hover,
+.able-controller button:hover,
 div.able-modal-dialog input:hover,
 div.able-modal-dialog button:hover,
 .able-window-toolbar .able-button-handler-preferences:hover,
 .able-window-toolbar input:hover,
 .able-window-toolbar select:hover,
 .able-controller input:hover,
-.able-controller div[role="button"]:hover,
 .able-seekbar-head:hover {
 	outline-color: var(--able-hover-outline);
 }
@@ -1339,8 +1338,8 @@ button.able-search-results-time {
 }
 
 /* SVG Icons */
-.able-wrapper div[role="button"] svg,
-.able-modal-dialog div[role="button"] svg,
+.able-wrapper button svg,
+.able-modal-dialog button svg,
 .able-wrapper button svg,
 .able-modal-dialog button svg {
 	display: block;
@@ -1486,7 +1485,7 @@ button#able-vts-save:focus {
 	.able-control-row {
 		gap: 8px;
 	}
-	.able-control-row div[role="button"] {
+	.able-control-row button {
 		min-width: 32px;
 		height: 32px;
 	}

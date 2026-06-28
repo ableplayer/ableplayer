@@ -518,7 +518,7 @@ function addControlFunctions(AblePlayer) {
 					rightControls = leftControls.next('div.able-right-controls');
 					widthUsed = leftControls.outerWidth(true);
 					rightControls.children().each(function () {
-						if ($(this).attr('role')=='button') {
+						if ( $(this).is('button') ) {
 							widthUsed += $(this).outerWidth(true) + 5;
 						}
 					});

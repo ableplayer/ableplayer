@@ -1045,19 +1045,14 @@ function addBuildplayerFunctions(AblePlayer) {
 					// this control is a button
 					buttonTitle = this.getButtonTitle(control);
 
-					// Buttons consist of a <div role="button"> with an <svg> inside.
+					// Buttons consist of a <button> with an <svg> inside.
 					// We add aria-label to the button (but not title)
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
-					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
-					// because <button> elements are rendered poorly in high contrast mode
-					// in some OS/browser/plugin combinations
-
 					// In 5.0.0, icons are always SVG, so the font & image icon edge cases are removed.
-					$newButton = $('<div>',{
-						'role': 'button',
-						'tabindex': '0',
+					$newButton = $('<button>',{
+						'type': 'button',
 						'class': 'able-button-handler-' + control
 					});
 
