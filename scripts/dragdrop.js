@@ -15,8 +15,7 @@ function addDragdropFunctions(AblePlayer) {
 		// There are nevertheless lessons to be learned from Drag & Drop about accessibility:
 		// http://dev.opera.com/articles/accessible-drag-and-drop/
 
-		var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, $resizeSvg,
-			i, x1, y1, x2, y2, $resizeLine, resizeZIndex;
+		var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, resizeZIndex;
 
 		thisObj = this;
 
@@ -53,40 +52,30 @@ function addDragdropFunctions(AblePlayer) {
 		$window.append($resizeHandle);
 		$toolbar.append($dragHandle);
 
-		// add event listener to toolbar to start and end drag
+		// add event listener to toolbar to start drag
 		// other event listeners will be added when drag starts
-		$dragHandle.on('mousedown mouseup touchstart touchend', function(e) {
+		$dragHandle.on('pointerdown', function(e) {
 			e.stopPropagation();
-			if (e.type === 'mousedown' || e.type === 'touchstart' ) {
-				if (!thisObj.windowMenuClickRegistered) {
-					thisObj.windowMenuClickRegistered = true;
-					thisObj.startMouseX = e.pageX;
-					thisObj.startMouseY = e.pageY;
-					thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
-					thisObj.startDrag(which, $window);
-				}
-			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-				if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-					thisObj.endDrag(which);
-				}
+			if (!thisObj.windowMenuClickRegistered) {
+				thisObj.windowMenuClickRegistered = true;
+				thisObj.startMouseX = e.pageX;
+				thisObj.startMouseY = e.pageY;
+				thisObj.dragPointerId = e.pointerId;
+				thisObj.dragDevice = 'mouse'; // pointer input is treated as non-keyboard drag
+				thisObj.startDrag(which, $window);
 			}
 			return false;
 		});
 
 		// add event listeners for resizing
-		$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
+		$resizeHandle.on('pointerdown', function(e) {
 			e.stopPropagation();
-			if (e.type === 'mousedown' || e.type === 'touchstart') {
-				if (!thisObj.windowMenuClickRegistered) {
-					thisObj.windowMenuClickRegistered = true;
-					thisObj.startMouseX = e.pageX;
-					thisObj.startMouseY = e.pageY;
-					thisObj.startResize(which, $window);
-				}
-			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-				if (thisObj.resizing) {
-					thisObj.endResize(which);
-				}
+			if (!thisObj.windowMenuClickRegistered) {
+				thisObj.windowMenuClickRegistered = true;
+				thisObj.startMouseX = e.pageX;
+				thisObj.startMouseY = e.pageY;
+				thisObj.resizePointerId = e.pointerId;
+				thisObj.startResize(which, $window);
 			}
 			return false;
 		});
@@ -109,11 +98,11 @@ function addDragdropFunctions(AblePlayer) {
 		thisObj = this;
 
 		// Add a Boolean that will be set to true temporarily if window button or a menu item is clicked
-		// This will prevent the click event from also triggering a mousedown event on the toolbar
+		// This will prevent the click event from also triggering a pointerdown event on the toolbar
 		// (which would unexpectedly send the window into drag mode)
 		this.windowMenuClickRegistered = false;
 
-		// Add another Boolean that will be set to true temporarily when mouseup fires at the end of a drag
+		// Add another Boolean that will be set to true temporarily when pointerup fires at the end of a drag
 		// this will prevent the click event from being triggered
 		this.finishingDrag = false;
 
@@ -509,14 +498,27 @@ function addDragdropFunctions(AblePlayer) {
 		}).trigger('focus');
 
 		// add device-specific event listeners
-		if (this.dragDevice === 'mouse') { // might also be a touchpad
-			$(document).on('mousemove touchmove',function(e) {
-				if (thisObj.dragging) {
-					// calculate new top left based on current mouse position - offset
-					newX = e.pageX - thisObj.dragOffsetX;
-					newY = e.pageY - thisObj.dragOffsetY;
-					thisObj.resetDraggedObject( newX, newY );
+		if (this.dragDevice === 'mouse') { // pointer input, including mouse/touch/pen
+			$(window).on('pointermove.ableDrag', function(e) {
+				if (!thisObj.dragging) {
+					return;
 				}
+				if (typeof thisObj.dragPointerId !== 'undefined' && e.pointerId !== thisObj.dragPointerId) {
+					return;
+				}
+				// calculate new top left based on current pointer position - offset
+				newX = e.pageX - thisObj.dragOffsetX;
+				newY = e.pageY - thisObj.dragOffsetY;
+				thisObj.resetDraggedObject( newX, newY );
+			});
+			$(window).on('pointerup.ableDrag pointercancel.ableDrag', function(e) {
+				if (!thisObj.dragging) {
+					return;
+				}
+				if (typeof thisObj.dragPointerId !== 'undefined' && e.pointerId !== thisObj.dragPointerId) {
+					return;
+				}
+				thisObj.endDrag(which);
 			});
 		} else if (this.dragDevice === 'keyboard') {
 			this.$activeWindow.on('keydown',function(e) {
@@ -620,7 +622,7 @@ function addDragdropFunctions(AblePlayer) {
 			$windowButton = this.$signPopupButton;
 		}
 
-		$(document).off('mousemove mouseup touchmove touchup');
+		$(window).off('.ableDrag');
 		this.$activeWindow.off('keydown').removeClass('able-drag');
 		// restore activeWindow role from 'application' to 'dialog'
 		this.$activeWindow.attr('role','dialog');
@@ -637,12 +639,13 @@ function addDragdropFunctions(AblePlayer) {
 		// reset starting mouse positions
 		this.startMouseX = undefined;
 		this.startMouseY = undefined;
+		this.dragPointerId = undefined;
 
 		// Boolean to stop stray events from firing
 		this.windowMenuClickRegistered = false;
 		this.finishingDrag = true; // will be reset after window click event
 		// finishingDrag should be reset after window click event,
-		// which is triggered automatically after mouseup
+		// which is triggered automatically after pointerup
 		// However, in case that's not reliable in some browsers
 		// need to ensure this gets cancelled
 		setTimeout(function() {
@@ -672,14 +675,27 @@ function addDragdropFunctions(AblePlayer) {
 		this.dragStartHeight = this.$activeWindow.outerHeight();
 
 		// add event listeners
-		$(document).on('mousemove touchmove',function(e) {
-			if (thisObj.resizing) {
-				// calculate new width and height based on changes to mouse position
-				let aspectRatio = thisObj.dragStartWidth / thisObj.dragStartHeight;
-				newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
-				newHeight = thisObj.dragStartHeight + ( (e.pageX - thisObj.startMouseX) / aspectRatio );
-				thisObj.resizeObject( which, newWidth, newHeight );
+		$(window).on('pointermove.ableResize', function(e) {
+			if (!thisObj.resizing) {
+				return;
 			}
+			if (typeof thisObj.resizePointerId !== 'undefined' && e.pointerId !== thisObj.resizePointerId) {
+				return;
+			}
+			// calculate new width and height based on changes to pointer position
+			let aspectRatio = thisObj.dragStartWidth / thisObj.dragStartHeight;
+			newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
+			newHeight = thisObj.dragStartHeight + ( (e.pageX - thisObj.startMouseX) / aspectRatio );
+			thisObj.resizeObject( which, newWidth, newHeight );
+		});
+		$(window).on('pointerup.ableResize pointercancel.ableResize', function(e) {
+			if (!thisObj.resizing) {
+				return;
+			}
+			if (typeof thisObj.resizePointerId !== 'undefined' && e.pointerId !== thisObj.resizePointerId) {
+				return;
+			}
+			thisObj.endResize(which);
 		});
 
 		return false;
@@ -695,11 +711,12 @@ function addDragdropFunctions(AblePlayer) {
 			$windowButton = this.$signPopupButton;
 		}
 
-		$(document).off('mousemove mouseup touchmove touchup');
+		$(window).off('.ableResize');
 		this.$activeWindow.off('keydown');
 		$windowButton.show().trigger('focus');
 		this.resizing = false;
 		this.$activeWindow.removeClass('able-resize');
+		this.resizePointerId = undefined;
 
 		// save final width and height of dragged element
 		this.updatePreferences(which);
@@ -709,7 +726,7 @@ function addDragdropFunctions(AblePlayer) {
 		this.finishingDrag = true;
 
 		// finishingDrag should e reset after window click event,
-		// which is triggered automatically after mouseup
+		// which is triggered automatically after pointerup
 		// However, in case that's not reliable in some browsers
 		// need to ensure this gets cancelled
 		setTimeout(function() {
