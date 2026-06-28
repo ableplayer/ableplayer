@@ -61,6 +61,9 @@ function addSignFunctions(AblePlayer) {
 				this.$signToolbar = $('<div>',{
 					'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
 				});
+				let signMask = document.createElement( 'div' );
+				signMask.classList.add( 'able-window-mask' );
+				this.$signWindow.append( signMask );
 				this.$signWindow.append(this.$signToolbar);
 			}
 
