@@ -420,6 +420,31 @@
 		};
 	};
 
+	AblePlayer.prototype.createPreferenceGroup = function(options) {
+
+		var fieldsetId, legendId, $group, $heading;
+
+		fieldsetId = this.mediaId + '-prefs-' + options.form;
+		legendId = fieldsetId + '-legend';
+		$group = $('<div>', {
+			id: fieldsetId,
+			role: 'group'
+		}).addClass('able-prefs-' + options.form);
+
+		if (options.heading) {
+			$heading = $('<h2>', {
+				id: legendId,
+				text: options.heading
+			});
+			$group.attr('aria-labelledby', legendId).append($heading);
+		}
+
+		return {
+			group: $group,
+			heading: $heading || null
+		};
+	};
+
 	AblePlayer.prototype.injectPrefsForm = function (form) {
 
 		// Creates a preferences form and injects it.
@@ -427,7 +452,7 @@
 
 		var thisObj, available,
 			$prefsDiv, formTitle, introText, $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
-			$fieldset, fieldsetClass, fieldsetId, $legend, legendId, thisPref, $thisDiv, thisClass,
+			$fieldset, groupHeading, groupObj, thisPref, $thisDiv, thisClass,
 			thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
 			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, prefCaptionVoice, $kbHeading,$kbList,
 			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer;
@@ -499,22 +524,17 @@
 			formTitle = this.translate( 'prefTitleTranscript', 'Transcript Preferences' );
 		}
 
-		$fieldset = $('<div>').attr('role','group');
-		fieldsetClass = 'able-prefs-' + form;
-		fieldsetId = this.mediaId + '-prefs-' + form;
-		legendId = fieldsetId + '-legend';
-		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+		groupHeading = null;
 		if (form === 'keyboard') {
-			$legend = $('<h2>' + this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' ) + '</h2>');
-			$legend.attr('id',legendId);
-			$fieldset.attr('aria-labelledby',legendId);
-			$fieldset.append($legend);
+			groupHeading = this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' );
 		} else if (form === 'descriptions') {
-			$legend = $('<h2>' + this.translate( 'prefHeadingTextDescription', 'Text-based audio description' ) + '</h2>');
-			$legend.attr('id',legendId);
-			$fieldset.attr('aria-labelledby',legendId);
-			$fieldset.append($legend);
+			groupHeading = this.translate( 'prefHeadingTextDescription', 'Text-based audio description' );
 		}
+		groupObj = this.createPreferenceGroup({
+			form: form,
+			heading: groupHeading
+		});
+		$fieldset = groupObj.group;
 		for (i=0; i<available.length; i++) {
 
 			// only include prefs on the current form if they have a label
