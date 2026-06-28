@@ -682,7 +682,11 @@ function addDragdropFunctions(AblePlayer) {
 			// calculate new width and height based on changes to pointer position
 			let aspectRatio = thisObj.dragStartWidth / thisObj.dragStartHeight;
 			newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
-			newHeight = thisObj.dragStartHeight + ( (e.pageX - thisObj.startMouseX) / aspectRatio );
+			if ( 'transcript' === which ) {
+				newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
+			} else {
+				newHeight = thisObj.dragStartHeight + ( (e.pageX - thisObj.startMouseX) / aspectRatio );
+			}
 			thisObj.resizeObject( which, newWidth, newHeight );
 		});
 		$(window).on('pointerup.ableResize pointercancel.ableResize', function(e) {
