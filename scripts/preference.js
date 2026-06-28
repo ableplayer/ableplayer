@@ -366,6 +366,60 @@
 		this.setPrefs(preferences);
 	};
 
+	AblePlayer.prototype.createField = function(options) {
+
+		var wrapperClass, fieldAttrs, checkboxValue, $wrapper, $label, $field, labelPosition;
+
+		wrapperClass = options.wrapperClass ? options.wrapperClass + ' ' : '';
+		fieldAttrs = {};
+		if (options.id) {
+			fieldAttrs.id = options.id;
+		}
+		if (options.name) {
+			fieldAttrs.name = options.name;
+		}
+		if (options.attrs) {
+			$.extend(fieldAttrs, options.attrs);
+		}
+		labelPosition = options.labelPosition || (options.type === 'select' ? 'before' : 'after');
+		checkboxValue = (typeof options.value !== 'undefined') ? options.value : 'true';
+
+		$wrapper = $('<div>').addClass(wrapperClass + 'able-player-setting');
+		$label = $('<label>', {
+			'for': options.id,
+			text: ' ' + options.label
+		});
+		if (options.labelClass) {
+			$label.addClass(options.labelClass);
+		}
+
+		if (options.type === 'select') {
+			$field = $('<select>', fieldAttrs);
+		} else {
+			fieldAttrs.type = options.type || 'checkbox';
+			fieldAttrs.value = checkboxValue;
+			$field = $('<input>', fieldAttrs);
+			if (options.checked) {
+				$field.prop('checked', true);
+			}
+		}
+		if (options.fieldClass) {
+			$field.addClass(options.fieldClass);
+		}
+
+		if (labelPosition === 'before') {
+			$wrapper.append($label, $field);
+		} else {
+			$wrapper.append($field, $label);
+		}
+
+		return {
+			wrapper: $wrapper,
+			label: $label,
+			field: $field
+		};
+	};
+
 	AblePlayer.prototype.injectPrefsForm = function (form) {
 
 		// Creates a preferences form and injects it.
@@ -570,28 +624,31 @@
 						}
 					}
 				} else if (form === 'descriptions') {
-					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 					if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
 						// these preferences are checkboxes
-						$thisDiv.addClass('able-prefs-checkbox');
-						$thisField = $('<input>',{
-							type: 'checkbox',
+						let fieldObj = this.createField({
+							wrapperClass: thisClass + ' able-prefs-checkbox',
 							name: thisPref,
 							id: thisId,
-							value: 'true'
+							label: available[i]['label'],
+							type: 'checkbox',
+							checked: this[thisPref] === 1
 						});
-						// check current active value for this preference
-						if (this[thisPref] === 1) {
-							$thisField.prop('checked',true);
-						}
-						$thisDiv.append($thisField,$thisLabel);
+						$thisDiv = fieldObj.wrapper;
+						$thisLabel = fieldObj.label;
+						$thisField = fieldObj.field;
 					} else if (this.synth) {
 						// Only show these options if browser supports speech synthesis
-						$thisDiv.addClass('able-prefs-select');
-						$thisField = $('<select>',{
+						let fieldObj = this.createField({
+							wrapperClass: thisClass + ' able-prefs-select',
 							name: thisPref,
 							id: thisId,
+							label: available[i]['label'],
+							type: 'select'
 						});
+						$thisDiv = fieldObj.wrapper;
+						$thisLabel = fieldObj.label;
+						$thisField = fieldObj.field;
 						if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
 							prefDescVoice = this.getPrefVoice();
 							for (j=0; j < this.descVoices.length; j++) {
@@ -645,7 +702,6 @@
 										$thisOption.prop('selected',true);
 									}
 									$thisField.append($thisOption);
-									$thisDiv.append($thisLabel,$thisField);
 								}
 							}
 						}
@@ -653,20 +709,19 @@
 						$thisField.on('change',function() {
 							thisObj.announceText('sample',thisObj.currentSampleText);
 						});
-						$thisDiv.append($thisLabel,$thisField);
 					}
 				} else { // all other fields are checkboxes
-					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-					$thisField = $('<input>',{
-						type: 'checkbox',
+					let fieldObj = this.createField({
+						wrapperClass: thisClass,
 						name: thisPref,
 						id: thisId,
-						value: 'true'
+						label: available[i]['label'],
+						type: 'checkbox',
+						checked: this[thisPref] === 1
 					});
-					// check current active value for this preference
-					if (this[thisPref] === 1) {
-						$thisField.prop('checked',true);
-					}
+					$thisDiv = fieldObj.wrapper;
+					$thisLabel = fieldObj.label;
+					$thisField = fieldObj.field;
 					if (form === 'keyboard') {
 						// add a change handler that updates the list of current keyboard shortcuts
 						$thisField.on('change',function() {
@@ -696,7 +751,6 @@
 							}
 						});
 					}
-					$thisDiv.append($thisField,$thisLabel);
 				}
 				if (thisPref === 'prefDescVoice' && !this.descVoices.length) {
 					// No voices are available (e.g., in Safari 15.4 on Mac OS)
