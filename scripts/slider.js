@@ -102,21 +102,14 @@ import $ from 'jquery';
 				if (!thisObj.overBody) {
 					thisObj.clearHoverGeometry();
 				}
-				if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
 				if (!thisObj.seekbarDiv.is(':focus')) {
 					thisObj.seekbarDiv.focus();
 				}
 				e.preventDefault();
-			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
 			}
-			if (e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+			if (e.type !== 'mousedown' && e.type !== 'touchstart') {
 				thisObj.refreshTooltip();
 			}
 		});
@@ -145,17 +138,11 @@ import $ from 'jquery';
 				if (!thisObj.overHead) {
 					thisObj.clearHoverGeometry();
 				}
-				if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
 			} else if (e.type === 'mousemove' || e.type === 'touchmove') {
 				thisObj.overBodyMousePos = {
 					x: coords.x,
 					y: coords.y
 				};
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.trackHeadAtPageX(coords.x);
-				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
 				thisObj.trackHeadAtPageX(coords.x);
@@ -163,10 +150,6 @@ import $ from 'jquery';
 					thisObj.seekHead.focus();
 				}
 				e.preventDefault();
-			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
 			} else if (e.type === 'keydown') {
 				if (e.key === 'Home') {
 					thisObj.trackImmediatelyTo(0);
@@ -289,14 +272,17 @@ import $ from 'jquery';
 			this.tracking = true;
 			if (device === 'mouse') {
 				this.trackGeometry = this.hoverGeometry || this.buildTrackingGeometry();
+				this.bindGlobalTrackingEvents();
 			} else {
 				this.clearTrackingGeometry();
+				this.unbindGlobalTrackingEvents();
 			}
 			this.seekbarDiv.trigger('startTracking', [position]);
 		}
 	};
 
 	AccessibleSlider.prototype.stopTracking = function (position) {
+		this.unbindGlobalTrackingEvents();
 		if (this.trackFrameRequestId !== null) {
 			window.cancelAnimationFrame(this.trackFrameRequestId);
 			this.trackFrameRequestId = null;
@@ -307,6 +293,35 @@ import $ from 'jquery';
 		this.tracking = false;
 		this.seekbarDiv.trigger('stopTracking', [position]);
 		this.setPosition(position, true);
+	};
+
+	AccessibleSlider.prototype.bindGlobalTrackingEvents = function () {
+		var thisObj = this;
+		$(window).off('.ableSliderTrack');
+		$(window).on('mousemove.ableSliderTrack touchmove.ableSliderTrack', function (e) {
+			var coords;
+			if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+				return;
+			}
+			coords = thisObj.pointerEventToXY(e);
+			thisObj.trackHeadAtPageX(coords.x);
+		});
+		$(window).on('mouseup.ableSliderTrack touchend.ableSliderTrack touchcancel.ableSliderTrack', function (e) {
+			var coords;
+			if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+				return;
+			}
+			coords = thisObj.pointerEventToXY(e);
+			if (e.type === 'touchcancel') {
+				thisObj.stopTracking(thisObj.lastTrackPosition);
+			} else {
+				thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+			}
+		});
+	};
+
+	AccessibleSlider.prototype.unbindGlobalTrackingEvents = function () {
+		$(window).off('.ableSliderTrack');
 	};
 
 	AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
