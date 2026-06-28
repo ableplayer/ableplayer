@@ -429,7 +429,7 @@ function addControlFunctions(AblePlayer) {
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 
-		var thisObj, textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
+		var thisObj, textByState, volumeStatus, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
 
 		thisObj = this;
 		// wait until new source has loaded before refreshing controls
@@ -687,7 +687,10 @@ function addControlFunctions(AblePlayer) {
 				// Update the text only if it's changed since it has role="alert";
 				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 				this.getPlayerState().then(function(currentState) {
-					if (thisObj.$status.text() !== textByState[currentState] && !thisObj.seekBar.tracking) {
+					volumeStatus = thisObj.getVolume() === 0 ? thisObj.translate( 'statusMuted', 'Muted' ) : '';
+					volumeStatus = (volumeStatus) ? ', ' + volumeStatus : '';
+					let currentMessage = textByState[currentState] + ' ' + volumeStatus;
+					if (thisObj.$status.text() !== currentMessage && !thisObj.seekBar.tracking) {
 						// Debounce updates; only update after status has stayed steadily different for a while
 						// "A while" is defined differently depending on context
 						if (thisObj.swappingSrc) {
@@ -711,7 +714,7 @@ function addControlFunctions(AblePlayer) {
 								thisObj.refreshControls(context);
 							}, thisObj.statusMessageThreshold);
 						} else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
-							thisObj.$status.text(textByState[currentState]);
+							thisObj.$status.text(currentMessage);
 							thisObj.statusDebounceStart = null;
 							clearTimeout(thisObj.statusTimeout);
 							thisObj.statusTimeout = null;
