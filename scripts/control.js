@@ -420,11 +420,10 @@ function addControlFunctions(AblePlayer) {
 		// 'fullscreen' - a change has been triggered by full screen toggle
 		// 'playpause' - a change triggered by either a 'play' or 'pause' event
 
-		// NOTE: context is not currently supported.
-		// The steps in this function have too many complex interdependencies
-		// The gains in efficiency are offset by the possibility of introducing bugs
-		// For now, executing everything
-		context = 'init';
+		// Normalize context to a known value.
+		if (['init', 'timeline', 'captions', 'descriptions', 'transcript', 'fullscreen', 'playpause'].indexOf(context) === -1) {
+			context = 'init';
+		}
 
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
@@ -442,7 +441,7 @@ function addControlFunctions(AblePlayer) {
 		if ( context === 'timeline' || context === 'init' ) {
 			// Update timeline controls.
 			var lastChapterIndex, displayElapsed, updateLive, widthUsed,
-				leftControls, rightControls, seekbarWidth, buffered;
+				leftControls, rightControls, seekbarWidth, buffered, mediaDuration;
 			// all timeline-related functionality requires duration
 			if (typeof this.duration === 'undefined') {
 				// wait until duration is known before proceeding with refresh
@@ -541,16 +540,17 @@ function addControlFunctions(AblePlayer) {
 			// TODO: Currently only using the first HTML5 buffered interval,
 			// but this fails sometimes when buffering is split into two or more intervals.
 			if (this.player === 'html5' && this.media.buffered.length > 0) {
+				mediaDuration = (typeof duration !== 'undefined' && !isNaN(duration) && duration > 0) ? duration : this.duration;
 				buffered = this.media.buffered.end(0);
 				if (this.useChapterTimes) {
 					if (buffered > this.chapterDuration) {
 						buffered = this.chapterDuration;
 					}
-					if (this.seekBar) {
+					if (this.seekBar && this.chapterDuration > 0) {
 						this.seekBar.setBuffered(buffered / this.chapterDuration);
 					}
-				} else if ( this.seekBar && !isNaN(buffered) ) {
-					this.seekBar.setBuffered(buffered / duration);
+				} else if ( this.seekBar && !isNaN(buffered) && !isNaN(mediaDuration) && mediaDuration > 0 ) {
+					this.seekBar.setBuffered(buffered / mediaDuration);
 				}
 			} else if (this.player === 'youtube' && this.seekBar && this.youTubePlayerReady ) {
 				this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
