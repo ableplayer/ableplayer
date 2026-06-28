@@ -9,6 +9,8 @@
 ### Accessibility
 - Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.
 - Popup handling for settings in Sign and Transcript windows was broken for keyboard.
+- Improvements to design and focus handling in Windows High Contrast Mode.
+- Changed controls from `div[role="button"]` to `button`.
 
 ### Bug fixes
 

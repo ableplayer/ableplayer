@@ -221,8 +221,9 @@
 
 .able-controller {
 	position: relative;
-	background-color: var(--able-controller-background); /* background color of controller bar */
+	background-color: var(--able-controller-background);
 	padding: 8px 4px 4px;
+	border: 1px solid var(--able-controller-background);
 }
 
 .able-audio .able-controller {
@@ -431,6 +432,7 @@ video[data-able-player],
 	position: relative;
 	left: 0;
 	background-color: var(--able-seekbar-head);
+	border: 1px solid var(--able-seekbar-head);
 	min-width: var(--able-base-control-size);
 	min-height: var(--able-base-control-size);
 	width: .875rem;
@@ -790,6 +792,7 @@ span.able-modkey {
 	gap: 12px;
 	z-index: 8002;
 	position: relative;
+	border-bottom: 1px solid var(--able-controller-background);
 }
 
 .able-window-toolbar button {
@@ -1177,24 +1180,6 @@ ul.able-popup li.able-focus,
 	margin-right: 0;
 }
 
-div.able-modal-dialog input,
-div.able-modal-dialog button,
-.able-window-toolbar .able-button-handler-preferences,
-.able-playlist li button,
-.able-search-results li button,
-.able-alert button,
-.able-modal-dialog button,
-.able-popup li,
-.able-window-toolbar input,
-.able-window-toolbar select,
-.able-controller input,
-.able-controller button,
-.able-seekbar-head {
-	outline-style: solid;
-	outline-width: 3px;
-	outline-color: transparent;
-}
-
 .able-playlist button:focus,
 .able-search-results li button:focus,
 .able-alert button:focus,
@@ -1209,7 +1194,7 @@ div.able-modal-dialog button:focus,
 .able-window-toolbar select:focus,
 .able-controller input:focus,
 .able-seekbar-head:focus {
-	outline-color: var(--able-focus-outline);
+	outline: 3px solid var(--able-focus-outline);
 }
 
 /* Control hover colors. */
@@ -1228,7 +1213,7 @@ div.able-modal-dialog button:hover,
 .able-window-toolbar select:hover,
 .able-controller input:hover,
 .able-seekbar-head:hover {
-	outline-color: var(--able-hover-outline);
+	outline: 3px solid var(--able-hover-outline);
 }
 
 /* Playlist (both audio and video) */
