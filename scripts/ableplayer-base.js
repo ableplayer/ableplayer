@@ -219,8 +219,7 @@ function ablePlayerSetupWindow() {
 
 		// in Strict Mode, parentheses and brackets do not get marked in bold in transcripts, and line breaks are not injected.
 		// In Able Player 5.1, defaults to false.
-		this.strictMode = ($(media).data('strict-mode') !== undefined && $(media).data('strict-mode') !== true) ? false : true;
-
+		this.strictMode = ($(media).data('strict-mode') === undefined && $(media).data('strict-mode') !== true) ? false : true;
 
 		// Set Transcript Title if defined explicitly. See transcript.js.
 		if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
