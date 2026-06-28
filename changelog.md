@@ -14,11 +14,15 @@
 - Allow YouTube iframe sign language to exceed 640px width.
 - Fix incorrect data-lang check for similar languages.
 - Improve parsing of VTT files to better handle a variety of edge cases. (props @conorom)
+- Improve handling of drag and resize events.
 
 ### Design
 - Increase size and add hover state to seekbar.
 - Move bottom positioning of seekbar tooltip from JS into CSS.
 - Update drag drop icon and change base background color of sign language container.
+
+### Performance
+- Improve performance of time slider by deduplicating events and adding queues/caching.
 
 ### Code Quality
 - Move drag handle and resize handle icons into the icon store.
