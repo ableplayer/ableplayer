@@ -215,7 +215,6 @@ function addBuildplayerFunctions(AblePlayer) {
 		let preferences, $window;
 		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
-		console.log( $window );
 		if ( which === 'transcript' && $window ) {
 			if (typeof preferences.transcript !== 'undefined') {
 				this.prevTranscriptPosition = preferences.transcript;
@@ -287,7 +286,6 @@ function addBuildplayerFunctions(AblePlayer) {
 				}
 				// If draggable window is off screen to the left.
 				if ( leftPosition < 0 && ! this.restoringAfterFullscreen ) {
-					console.log( leftPosition );
 					$window.css({
 						'left': preferencePos['left'] - leftPosition
 					});
