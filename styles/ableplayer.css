@@ -813,8 +813,10 @@ span.able-modkey {
 .able-window-toolbar .able-drag-handle {
 	order: 2;
 	width: 100%;
-	height: 100%;
+	height: 24px;
 	touch-action: none;
+	display: flex;
+	align-items: center;
 }
 
 .able-window-toolbar .able-drag-handle svg {
@@ -827,8 +829,13 @@ span.able-modkey {
 	fill: var(--able-medium-light-gray);
 }
 
-.able-draggable:hover .able-drag-handle path {
+.able-draggable .able-drag-handle:hover path {
 	fill: var(--able-very-light-gray);
+}
+
+.able-draggable .able-drag-handle:hover {
+	background: rgb( 0,0,0,.1);
+	outline: 1px dashed var(--able-very-light-gray);
 }
 
 .able-window-toolbar > div {
