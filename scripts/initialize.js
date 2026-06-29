@@ -387,12 +387,14 @@ import DOMPurify from 'dompurify';
 			return;
 		}
 
-		var deferred, promise, thisObj, prefsGroups, i;
+		var deferred, promise, thisObj, prefsGroups, i, initVersion;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
 		thisObj = this;
 		this.initializationVersion = (this.initializationVersion || 0) + 1;
+		initVersion = this.initializationVersion;
+		this.startInitTiming(initVersion);
 
 		this.playerDeleted = false; // reset after deletePlayer()
 
@@ -411,12 +413,16 @@ import DOMPurify from 'dompurify';
 		this.initSignLanguage();
 
 		this.initPlayer().then(function() {
+			thisObj.logInitTiming(initVersion, 'initPlayer complete');
 
 			thisObj.getTracks().then(function() {
+				thisObj.logInitTiming(initVersion, 'getTracks complete');
 
 				thisObj.initDescription().then(function() {
+					thisObj.logInitTiming(initVersion, 'initDescription complete');
 
 					thisObj.setupTracks().then(function() {
+						thisObj.logInitTiming(initVersion, 'setupTracks complete');
 						if (thisObj.hasClosedDesc) {
 							if (!thisObj.$descDiv || (thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {
 								// descDiv either doesn't exist, or exists in an orphaned state
@@ -427,7 +433,9 @@ import DOMPurify from 'dompurify';
 						thisObj.initSpeech('init');
 
 						thisObj.setupTranscript().then(function() {
+							thisObj.logInitTiming(initVersion, 'setupTranscript complete');
 							thisObj.getMediaTimes().then(function(mediaTimes) {
+								thisObj.logInitTiming(initVersion, 'getMediaTimes complete');
 
 								thisObj.duration = mediaTimes['duration'];
 								thisObj.elapsed = mediaTimes['elapsed'];
@@ -459,6 +467,7 @@ import DOMPurify from 'dompurify';
 								thisObj.setupPopups();
 								thisObj.updateCaption();
 								thisObj.scheduleDeferredUiInitialization(thisObj.initializationVersion);
+								thisObj.logInitTiming(initVersion, 'critical UI ready');
 
 								// Go ahead and load media, without user requesting it
 								// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
@@ -473,6 +482,7 @@ import DOMPurify from 'dompurify';
 								// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
 								setTimeout(function() {
 									thisObj.refreshControls();
+									thisObj.logInitTiming(initVersion, 'critical initialization complete');
 									deferred.resolve();
 								},100);
 							});
@@ -485,6 +495,34 @@ import DOMPurify from 'dompurify';
 			thisObj.provideFallback();
 		});
 		return promise;
+	};
+
+	AblePlayer.prototype.getInitTimingNow = function() {
+		if (typeof window !== 'undefined' && window.performance && typeof window.performance.now === 'function') {
+			return window.performance.now();
+		}
+		return Date.now();
+	};
+
+	AblePlayer.prototype.startInitTiming = function(version) {
+		if (!this.debug) {
+			return;
+		}
+		this.initTiming = this.initTiming || {};
+		this.initTiming[version] = {
+			start: this.getInitTimingNow()
+		};
+		console.log('[AblePlayer][init v' + version + '] start');
+	};
+
+	AblePlayer.prototype.logInitTiming = function(version, label) {
+		var elapsed, timing;
+		if (!this.debug || !this.initTiming || !this.initTiming[version]) {
+			return;
+		}
+		timing = this.initTiming[version];
+		elapsed = this.getInitTimingNow() - timing.start;
+		console.log('[AblePlayer][init v' + version + '] ' + label + ': ' + elapsed.toFixed(1) + 'ms');
 	};
 
 	AblePlayer.prototype.runWhenIdle = function(callback, timeout) {
@@ -504,6 +542,7 @@ import DOMPurify from 'dompurify';
 			if (version !== thisObj.initializationVersion) {
 				return;
 			}
+			thisObj.logInitTiming(version, 'deferred initialization start');
 
 			thisObj.initStenoFrame().then(function() {
 				if (version !== thisObj.initializationVersion) {
@@ -516,11 +555,15 @@ import DOMPurify from 'dompurify';
 					thisObj.addTranscriptAreaEvents();
 					thisObj.updateTranscript();
 				}
+				thisObj.logInitTiming(version, 'deferred transcript ready');
 			});
 
 			thisObj.populateChaptersDiv();
+			thisObj.logInitTiming(version, 'deferred chapters ready');
 			thisObj.showSearchResults();
+			thisObj.logInitTiming(version, 'deferred search results ready');
 			thisObj.injectVTS();
+			thisObj.logInitTiming(version, 'deferred vts ready');
 		}, 1500);
 	};
 
