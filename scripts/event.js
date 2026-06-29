@@ -436,11 +436,6 @@ function addEventFunctions(AblePlayer) {
 			} else if (key === ' ') {
 				// disable spacebar support for play/pause toggle as of 4.2.10
 				// spacebar should not be handled everywhere on the page, since users use that to scroll the page
-				// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
-				if ($thisElement.is('button')) {
-					// register a click on this element
-					$thisElement.trigger( 'click' );
-				}
 			} else if ( key === 'p' ) {
 				if (this.usingModifierKeys(e)) {
 					e.preventDefault();
