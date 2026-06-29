@@ -981,7 +981,7 @@ function addControlFunctions(AblePlayer) {
 
 					// Gives time to "register" expanded ccButton
 					setTimeout(function() {
-						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight() - 4 );
 						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
 						// Place focus on the first button (even if another button is checked)
 						thisObj.captionsPopup.find('li').removeClass('able-focus');
@@ -1034,7 +1034,7 @@ function addControlFunctions(AblePlayer) {
 			this.closePopups();
 			this.chaptersPopup.show();
 			this.$chaptersButton.attr('aria-expanded','true');
-			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight() - 4 );
 			this.chaptersPopup.css('left', this.$chaptersButton.position().left)
 
 			// Highlight the current chapter, if any chapters are checked
@@ -1110,7 +1110,7 @@ function addControlFunctions(AblePlayer) {
 				prefsButtonPosition = thisObj.$prefsButton.position();
 				prefsMenuRight = thisObj.$ableDiv.width() - 5;
 				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
-				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight() - 4);
 				thisObj.prefsPopup.css('left', prefsMenuLeft);
 				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
