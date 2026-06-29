@@ -306,7 +306,7 @@ video[data-able-player],
 
 .able-wrapper .able button.able-big-play-button:hover,
 .able-wrapper .able button.able-big-play-button:focus {
-	opacity: 100;
+	opacity: 1;
 }
 
 .able-big-play-button svg {
@@ -383,7 +383,7 @@ video[data-able-player],
 	padding: 4px;
 }
 
-.able-controller .buttonOff {
+.able-controller .buttonOff svg {
 	opacity: 0.5;
 }
 
@@ -1065,7 +1065,6 @@ ul.able-popup,
 	background-color: var(--able-menu-background);
 	outline: 1px solid var(--able-menu-outline);
 	color: var(--able-menu-color);
-		opacity: 0.95;
 	border-radius: 4px;
 	display: grid;
 	cursor: default;
