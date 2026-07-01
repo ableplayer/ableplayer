@@ -189,11 +189,13 @@ function addVolumeFunctions(AblePlayer) {
 		// mute is either true (muting) or false (unmuting)
 		if (mute) {
 			// save current volume so it can be restored after unmute
-			this.lastVolume = this.volume;
+			this.lastVolume = ( this.volume === 0 ) ? this.defaultVolume :this.volume;
 			this.volume = 0;
 		} else { // restore to previous volume
 			if (typeof this.lastVolume !== 'undefined') {
-				this.volume = this.lastVolume;
+				this.volume = this.lastVolume === 0 ? this.defaultVolume : this.lastVolume;
+			} else {
+				this.volume = this.defaultVolume;
 			}
 		}
 
@@ -206,6 +208,7 @@ function addVolumeFunctions(AblePlayer) {
 				this.youTubePlayer.unMute();
 			}
 		}
+
 		this.setVolume(this.volume);
 		this.refreshVolumeHelp(this.volume);
 		this.refreshVolumeButton(this.volume);
