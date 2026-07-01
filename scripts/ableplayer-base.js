@@ -96,12 +96,6 @@ class AblePlayer {
 		this.audioPoster = data.poster;
 		this.audioPosterAlt = data.posterAlt;
 
-		// get height and width attributes, if present
-		// and add them to variables
-		// Not currently used, but might be useful for resizing player
-		this.width = $(media).attr('width') ?? 0;
-		this.height = $(media).attr('height') ?? 0;
-
 		// start-time
 		var startTime = data.startTime;
 		var isNumeric = (typeof startTime === 'number' || (typeof startTime === 'string' && startTime.trim() !== '' && !isNaN(startTime) && isFinite(Number(startTime)))) ? true : false;
