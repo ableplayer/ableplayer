@@ -24,7 +24,7 @@ function ablePlayerSetupWindow() {
 
 		$('video, audio').each(function (index, element) {
 			if ($(element).data('able-player') !== undefined) {
-				new AblePlayer($(this),$(element));
+				new AblePlayer($(this));
 			}
 		});
 	});
