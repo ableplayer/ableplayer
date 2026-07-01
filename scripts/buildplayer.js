@@ -78,10 +78,10 @@ function addBuildplayerFunctions(AblePlayer) {
 				this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
 			}
 			headingType = 'h' + this.playerHeadingLevel.toString();
-			this.$headingDiv = $('<' + headingType + '>');
-			this.$ableDiv.prepend(this.$headingDiv);
-			this.$headingDiv.addClass('able-offscreen');
-			this.$headingDiv.text( this.translate( 'playerHeading', 'Media player' ) );
+			this.headingDiv = document.createElement( headingType );
+			this.$ableDiv.prepend(this.headingDiv);
+			this.headingDiv.classList.add('able-offscreen');
+			this.headingDiv.textContent = this.translate( 'playerHeading', 'Media player' );
 		}
 	};
 
