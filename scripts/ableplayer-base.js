@@ -55,7 +55,7 @@ function ablePlayerSetupWindow() {
  * @param object options Optional configuration options for the player.
  */
 class AblePlayer {
-	constructor(media) {
+	constructor(media, options = {}) {
 
 		if (typeof window === 'undefined') {
 			console.warn("`window` is undefined. Able Player needs `window` to instantiate. Skip constructing Able Player if you are running outside a browser (for example, SSR).");
@@ -93,11 +93,11 @@ class AblePlayer {
 		// poster (Boolean, indicating whether media element has a poster attribute)
 		this.hasPoster = ($(media).attr('poster') || data.poster) ? true : false;
 
-		this.audioPoster = data.poster;
-		this.audioPosterAlt = data.posterAlt;
+		this.audioPoster = options.poster ?? data.poster;
+		this.audioPosterAlt = options.posterAlt ?? data.posterAlt;
 
 		// start-time
-		var startTime = data.startTime;
+		var startTime = options.startTime ?? data.startTime;
 		var isNumeric = (typeof startTime === 'number' || (typeof startTime === 'string' && startTime.trim() !== '' && !isNaN(startTime) && isFinite(Number(startTime)))) ? true : false;
 		this.startTime = (startTime !== undefined && isNumeric) ? startTime : 0;
 
@@ -115,25 +115,25 @@ class AblePlayer {
 		}
 		this.volume = this.defaultVolume;
 
+		let useChaptersButton = options.useChaptersButton ?? data.useChaptersButton;
 		// Optional Buttons
 		// Buttons are added to the player controller if relevant media is present
 		// However, in some applications it might be undesirable to show buttons
 		// (e.g., if chapters or transcripts are provided in an external container)
-		if (data.useChaptersButton !== undefined && data.useChaptersButton === false) {
+		if (useChaptersButton !== undefined && useChaptersButton === false) {
 			this.useChaptersButton = false;
 		} else {
 			this.useChaptersButton = true;
 		}
 
+		let descriptionsAudible = options.descriptionsAudible ?? data.descriptionsAudible;
 		// Control whether text descriptions are read aloud
 		// set to "false" if the sole purpose of the WebVTT descriptions file
 		// is to integrate text description into the transcript
 		// set to "true" to write description text to a div
-		// This variable does *not* control the method by which description is read.
-		// For that, see below (this.descMethod)
-		if (data.descriptionsAudible !== undefined && data.descriptionsAudible === false) {
+		if (descriptionsAudible !== undefined && descriptionsAudible === false) {
 			this.readDescriptionsAloud = false;
-		} else if (data.descriptionAudible !== undefined && data.descriptionAudible === false) {
+		} else if (descriptionsAudible !== undefined && descriptionsAudible === false) {
 			// support both singular and plural spelling of attribute
 			this.readDescriptionsAloud = false;
 		} else {
@@ -144,40 +144,45 @@ class AblePlayer {
 		// to be populated later by getBrowserVoices
 		this.descVoices = [];
 
+		let descReader = options.descReader ?? data.descReader;
 		// Method by which text descriptions are read
 		// valid values of data-desc-reader are:
 		// 'brower' (default) - text-based audio description is handled by the browser, if supported
 		// 'screenreader' - text-based audio description is always handled by screen readers
 		// The latter may be preferable by owners of websites in languages that are not well supported
 		// by the Web Speech API
-		this.descReader = (data.descReader == 'screenreader') ? 'screenreader' : 'browser';
+		this.descReader = (descReader == 'screenreader') ? 'screenreader' : 'browser';
 
+		let defaultStateCaptions = options.defaultStateCaptions ?? data.stateCaptions;
+		let defaultStateDescriptions = options.defaultStateDescriptions ?? data.stateDescriptions;
 		// Default state of captions and descriptions
 		// This setting is overridden by user preferences, if they exist
 		// values for data-state-captions and data-state-descriptions are 'on' or 'off'
-		this.defaultStateCaptions = (data.stateCaptions == 'off') ? 0 : 1;
-		this.defaultStateDescriptions = (data.stateDescriptions == 'on') ? 1 : 0;
+		this.defaultStateCaptions = (defaultStateCaptions == 'off') ? 0 : 1;
+		this.defaultStateDescriptions = (defaultStateDescriptions == 'on') ? 1 : 0;
 
+		let defaultDescPause = options.descPauseDefault ?? data.descPauseDefault;
 		// Default setting for prefDescPause
 		// Extended description (i.e., pausing during description) is on by default
 		// but this settings give website owners control over that
 		// since they know the nature of their videos, and whether pausing is necessary
 		// This setting is overridden by user preferences, if they exist
-		this.defaultDescPause = (data.descPauseDefault == 'off') ? 0 : 1;
+		this.defaultDescPause = (defaultDescPause == 'off') ? 0 : 1;
 
+		let headingLevel = options.headingLevel ?? data.headingLevel;
 		// Headings
 		// By default, an off-screen heading is automatically added to the top of the media player
 		// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
 		// Authors can override this behavior by manually assigning a heading level using data-heading-level
 		// Accepted values are 1-6, or 0 which indicates "no heading"
 		// (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
-		if (data.headingLevel !== undefined && data.headingLevel !== "") {
-			var headingLevel = data.headingLevel;
+		if (headingLevel !== undefined && headingLevel !== "") {
 			if (/^[0-6]*$/.test(headingLevel)) { // must be a valid HTML heading level 1-6; or 0
 				this.playerHeadingLevel = headingLevel;
 			}
 		}
 
+		let transcriptDivLocation = options.transcriptDiv ?? data.transcriptDiv
 		// Transcripts
 		// There are three types of interactive transcripts.
 		// In descending of order of precedence (in case there are conflicting tags), they are:
@@ -185,18 +190,18 @@ class AblePlayer {
 		// 2. "external" - Automatically generated, written to an external div (requires data-transcript-div & a valid target element)
 		// 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
 		// If data-include-transcript="false", there is no "popup" transcript
-		var transcriptDivLocation = data.transcriptDiv;
 		if (transcriptDivLocation !== undefined && transcriptDivLocation !== "" && null !== document.getElementById(transcriptDivLocation)) {
 			this.transcriptDivLocation = transcriptDivLocation;
 		} else {
 			this.transcriptDivLocation = null;
 		}
-		var includeTranscript = data.includeTranscript;
+		var includeTranscript = options.includeTranscript ?? data.includeTranscript;
 		this.hideTranscriptButton = (includeTranscript !== undefined && includeTranscript === false) ? true : false;
 
 		this.transcriptType = null;
-		if (data.transcriptSrc !== undefined) {
-			this.transcriptSrc = data.transcriptSrc;
+		let transcriptSrc = options.transcriptSrc ?? data.transcriptSrc;
+		if (transcriptSrc !== undefined) {
+			this.transcriptSrc = transcriptSrc;
 			if (this.transcriptSrcHasRequiredParts()) {
 				this.transcriptType = 'manual';
 			} else {
@@ -207,61 +212,67 @@ class AblePlayer {
 			this.transcriptType = (this.transcriptDivLocation) ? 'external' : 'popup';
 		}
 
+		let lyricsMode = options.lyricsMode ?? data.lyricsMode;
 		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
 		// If false (default), line breaks are are removed from transcripts for a more seamless reading experience
 		// If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-		this.lyricsMode = (data.lyricsMode !== undefined && data.lyricsMode !== false) ? true : false;
+		this.lyricsMode = (lyricsMode !== undefined && lyricsMode !== false) ? true : false;
 
+		let strictMode = options.strictMode ?? data.strictMode;
 		// in Strict Mode, parentheses and brackets do not get marked in bold in transcripts, and line breaks are not injected.
 		// In Able Player 5.1, defaults to false.
-		this.strictMode = (data.strictMode === undefined && data.strictMode !== true) ? false : true;
+		this.strictMode = (strictMode === undefined && strictMode !== true) ? false : true;
 
+		let transcriptTitle = options.transcriptTitle ?? data.transcriptTitle;
 		// Set Transcript Title if defined explicitly. See transcript.js.
-		if (data.transcriptTitle !== undefined && data.transcriptTitle !== "") {
-			this.transcriptTitle = data.transcriptTitle;
+		if (transcriptTitle !== undefined && transcriptTitle !== "") {
+			this.transcriptTitle = transcriptTitle;
 		}
 
 		// Sign Language
 		// sign language can be a modal (default) or assigned to a div on the page.
-		var signDivLocation = data.signDiv;
+		let signDivLocation = options.signDiv ?? data.signDiv;
 		if (signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById(signDivLocation)) {
 			this.$signDivLocation = $('#' + signDivLocation);
 		} else {
 			this.$signDivLocation = null;
 		}
 
+		let captionsPosition = options.captionsPosition ?? data.captionsPosition;
 		// Captions
 		// data-captions-position can be used to set the default captions position
 		// this is only the default, and can be overridden by user preferences
 		// valid values of data-captions-position are 'below' and 'overlay'
-		this.defaultCaptionsPosition = (data.captionsPosition === 'overlay') ? 'overlay' : 'below';
+		this.defaultCaptionsPosition = (captionsPosition === 'overlay') ? 'overlay' : 'below';
 
 		// Chapters
-		var chaptersDiv = data.chaptersDiv;
+		var chaptersDiv = options.chaptersDiv ?? data.chaptersDiv;
 		if (chaptersDiv !== undefined && chaptersDiv !== "") {
 			this.chaptersDivLocation = chaptersDiv;
 		}
 
-		if (data.chaptersTitle !== undefined) {
+		let chaptersTitle = options.chaptersTitle ?? data.chaptersTitle;
+		if (chaptersTitle !== undefined) {
 			// NOTE: empty string is valid; results in no title being displayed
-			this.chaptersTitle = data.chaptersTitle;
+			this.chaptersTitle = chaptersTitle;
 		}
 
-		var defaultChapter = data.chaptersDefault;
+		let defaultChapter = options.chaptersDefault ?? data.chaptersDefault;
 		this.defaultChapter = (defaultChapter !== undefined && defaultChapter !== "") ? defaultChapter : null;
 
 		// Slower/Faster buttons
 		// valid values of data-speed-icons are 'animals' (default) and 'arrows'
 		// 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
-		this.speedIcons = (data.speedIcons === 'arrows') ? 'arrows' : 'animals';
+		let speedIcons = options.speedIcons ?? data.speedIcons;
+		this.speedIcons = (speedIcons === 'arrows') ? 'arrows' : 'animals';
 
 		// Seekbar
 		// valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
-		var seekbarScope = data.seekbarScope;
+		let seekbarScope = options.seekbarScope ?? data.seekbarScope;
 		this.seekbarScope = (seekbarScope === 'chapter' || seekbarScope === 'chapters') ? 'chapter' : 'video';
 
 		// YouTube
-		var youTubeId = data.youTubeId;
+		let youTubeId = options.youTubeId ?? data.youTubeId;
 		if (youTubeId !== undefined && youTubeId !== "") {
 			this.youTubeId = this.getYouTubeId(youTubeId);
 			if (!this.hasPoster) {
@@ -270,21 +281,21 @@ class AblePlayer {
 			}
 		}
 
-		var youTubeDescId = data.youTubeDescId;
+		let youTubeDescId = options.youTubeDescId ?? data.youTubeDescId;
 		if (youTubeDescId !== undefined && youTubeDescId !== "") {
 			this.youTubeDescId = this.getYouTubeId(youTubeDescId);
 		}
 
-		var youTubeSignId = data.youTubeSignId;
+		let youTubeSignId = options.youTubeSignId ?? data.youTubeSignId;
 		if (youTubeSignId !== undefined && youTubeSignId !== "") {
 			this.youTubeSignId = this.getYouTubeId(youTubeSignId);
 		}
 
-		var youTubeNoCookie = data.youTubeNoCookie;
+		let youTubeNoCookie = options.youTubeNoCookie ?? data.youTubeNoCookie;
 		this.youTubeNoCookie = (youTubeNoCookie !== undefined && youTubeNoCookie) ? true : false;
 
 		// Vimeo
-		var vimeoId = data.vimeoId;
+		let vimeoId = options.vimeoId ?? data.vimeoId;
 		if (vimeoId !== undefined && vimeoId !== "") {
 			this.vimeoId = this.getVimeoId(vimeoId);
 			if (!this.hasPoster) {
@@ -292,24 +303,26 @@ class AblePlayer {
 				$(media).attr('poster', poster);
 			}
 		}
-		var vimeoDescId = data.vimeoDescId;
+		let vimeoDescId = options.vimeoDescId ?? data.vimeoDescId;
 		if (vimeoDescId !== undefined && vimeoDescId !== "") {
 			this.vimeoDescId = this.getVimeoId(vimeoDescId);
 		}
 
 		// Skin
+		let skin = options.skin ?? data.skin;
 		// valid values of data-skin are:
 		// '2020' (default as of 4.6), all buttons in one row beneath a full-width seekbar
 		// 'legacy', two rows of controls; seekbar positioned in available space within top row
-		this.skin = (data.skin == 'legacy') ? 'legacy' : '2020';
+		this.skin = (skin == 'legacy') ? 'legacy' : '2020';
 
 		// Size
 		// width of Able Player is determined using the following order of precedence:
 		// 1. data-width attribute
 		// 2. width attribute (for video or audio, although it is not valid HTML for audio)
 		// 3. Intrinsic size from video (video only, determined later)
-		if (data.width !== undefined) {
-			this.playerWidth = parseInt(data.width);
+		let width = options.width ?? data.width;
+		if (width !== undefined) {
+			this.playerWidth = parseInt(width);
 		} else if ($(media)[0].getAttribute('width')) {
 			// NOTE: jQuery attr() returns null for all invalid HTML attributes
 			// (e.g., width on <audio>)
@@ -331,9 +344,9 @@ class AblePlayer {
 		// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
 		// Calculation attempts to intelligently assign a reasonable interval based on media length
 		this.defaultSeekInterval = 10;
+		let seekInterval = options.seekInterval ?? data.seekInterval;
 		this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
-		if (data.seekInterval !== undefined && data.seekInterval !== "") {
-			var seekInterval = data.seekInterval;
+		if (seekInterval !== undefined && seekInterval !== "") {
 			if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
 				this.seekInterval = seekInterval;
 				this.useFixedSeekInterval = true; // do not override with calculuation
@@ -343,12 +356,12 @@ class AblePlayer {
 		// Now Playing
 		// Shows "Now Playing:" plus the title of the current track above player
 		// Only used if there is a playlist
-		var showNowPlaying = data.showNowPlaying;
+		var showNowPlaying = options.showNowPlaying ?? data.showNowPlaying;
 		this.showNowPlaying = (showNowPlaying !== undefined && showNowPlaying === false) ? false : true;
 
 		// Fallback
 		// The data-test-fallback attribute can be used to test the fallback solution in any browser
-		var testFallback = data.testFallback;
+		var testFallback = options.testFallback ?? data.testFallback;
 		if (testFallback !== undefined && testFallback !== false) {
 			// 1: build error; 2: browser doesn't support media.
 			this.testFallback = (testFallback == '2') ? 2 : 1;
@@ -362,45 +375,46 @@ class AblePlayer {
 		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
 		// 3. English
 		// Final calculation occurs in translation.js > getTranslationText()
-		var lang = data.lang;
+		let lang = options.lang ?? data.lang;
 		this.lang = (lang !== undefined && lang !== "") ? lang.toLowerCase() : null;
 
 		// Metadata Tracks
-		var metaType = data.metaType;
+		let metaType = options.metaType ?? data.metaType;
 		if (metaType !== undefined && metaType !== "") {
 			this.metaType = metaType;
 		}
-		var metaDiv = data.metaDiv;
+		let metaDiv = options.metaDiv ?? data.metaDiv;
 		if (metaDiv !== undefined && metaDiv !== "") {
 			this.metaDiv = metaDiv;
 		}
 
 		// Search
 		// conducting a search requires an external div in which to write the results
-		var searchDiv = data.searchDiv;
+		let searchDiv = options.searchDiv ?? data.searchDiv;
 		if (searchDiv !== undefined && searchDiv !== "") {
 
 			this.searchDiv = searchDiv;
 
 			// Search term (optional; could be assigned later in a JavaScript application)
-			var searchString = data.search;
+			let searchString = options.search ?? data.search;
 			if (searchString !== undefined && searchString !== "") {
 				this.searchString = searchString;
 			}
 
 			// Search Language
-			var searchLang = data.searchLang;
+			let searchLang = options.searchLang ?? data.searchLang;
 			this.searchLang = (searchLang !== undefined && searchLang !== "") ? searchLang : null;
 
 			// Search option: Ignore capitalization in search terms
-			var searchIgnoreCaps = data.searchIgnoreCaps;
+			let searchIgnoreCaps = options.searchIgnoreCaps ?? data.searchIgnoreCaps;
 			this.searchIgnoreCaps = (searchIgnoreCaps !== undefined && searchIgnoreCaps !== false) ? true : false;
 		}
 
+		let hideControls = options.hideControls ?? data.hideControls;
 		// Hide controls when video starts playing
 		// They will reappear again when user presses a key or moves the mouse
 		// As of v4.0, controls are hidden automatically on playback in fullscreen mode
-		if (data.hideControls !== undefined && data.hideControls !== false) {
+		if (hideControls !== undefined && hideControls !== false) {
 			this.hideControls = true;
 			this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
 		} else {
@@ -411,11 +425,13 @@ class AblePlayer {
 		// Steno mode
 		// Enable support for Able Player keyboard shortcuts in textaarea fields
 		// so users can control the player while transcribing
-		if (data.stenoMode !== undefined && data.stenoMode !== false) {
+		let stenoMode = options.stenoMode ?? data.stenoMode;
+		if (stenoMode !== undefined && stenoMode !== false) {
 			this.stenoMode = true;
 			// Add support for stenography in an iframe via data-steno-iframe-id
-			if (data.stenoIframeId !== undefined && data.stenoIframeId !== "") {
-				this.stenoFrameId = data.stenoIframeId;
+			let stenoIframeId = options.stenoIframeId ?? data.stenoIframeId;
+			if (stenoIframeId !== undefined && stenoIframeId !== "") {
+				this.stenoFrameId = stenoIframeId;
 				this.$stenoFrame = $('#' + this.stenoFrameId);
 				if (!(this.$stenoFrame.length)) {
 					// iframe not found
