@@ -69,9 +69,7 @@ import DOMPurify from 'dompurify';
 
 		// returns array of values for creating <svg> tag for specified button
 		// 0 = <svg> viewBox attribute
-		// 1 = <path> d (description) attribute
-		// 2 = icon class for font icons
-		// 3 = img URL for images.
+		// 1 = Array of <path> d (description) attributes
 		var svg = Array();
 
 		switch (button) {

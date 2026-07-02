@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import DOMPurify from 'dompurify';
 
 function addControlFunctions(AblePlayer) {
 
@@ -1332,7 +1333,12 @@ function addControlFunctions(AblePlayer) {
 		// Remove existing HTML before generating.
 		// iconData: [0 = svg viewbox, 1 = svg path]
 		// Font and image icon functionality was removed in 5.0.0 in favor of SVG.
-		var iconData = this.getIconData( id );
+		var iconData;
+		if ( Object.hasOwn( this.options, 'icons' ) && Object.hasOwn( this.options.icons, id ) ) {
+			iconData = this.options.icons[id];
+		} else {
+			iconData = this.getIconData( id );
+		}
 
 		var existingIcon = $button.find( 'svg#ableplayer-' + id );
 		// Avoid repainting icon if there's no change.
@@ -1361,7 +1367,8 @@ function addControlFunctions(AblePlayer) {
 			let path = getNode( 'path', { d: pathData } );
 			icon.appendChild( path );
 		});
-
+		let cleanSVG = DOMPurify.sanitize(icon.outerHTML, {RETURN_DOM_FRAGMENT: true});
+		icon = cleanSVG.firstChild;
 		$button.append( icon );
 		// Refresh the DOM.
 		$button.html($button.html());

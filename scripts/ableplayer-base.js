@@ -65,6 +65,7 @@ class AblePlayer {
 		var thisObj = this;
 
 		this.media = media;
+		this.options = options;
 
 		if ($(media).length === 0) {
 			this.provideFallback();
