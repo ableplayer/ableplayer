@@ -20,6 +20,7 @@ import sk from '../translations/sk.json';
 import sv from '../translations/sv.json';
 import tr from '../translations/tr.json';
 import zh_tw from '../translations/zh-tw.json';
+import DOMPurify from 'dompurify';
 
 const moduleFromTag = {
 	ca,
@@ -102,7 +103,7 @@ function addTranslationFunctions(AblePlayer) {
 			}
 		}
 
-		return translation;
+		return DOMPurify.sanitize(translation);
 	}
 
 	AblePlayer.prototype.getTranslationText = function() {
