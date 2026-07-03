@@ -196,9 +196,10 @@ function addEventFunctions(AblePlayer) {
 			this.okToPlay = false;
 		}
 		this.refreshControls();
-		if (this.$focusedElement) {
+		if (this.focusedElement) {
+			console.log( this.focusedElement );
 			this.restoreFocus();
-			this.$focusedElement = null;
+			this.focusedElement = null;
 			this.activeMedia = null;
 		}
 	};
@@ -226,14 +227,15 @@ function addEventFunctions(AblePlayer) {
 
 		var classList, $mediaParent;
 
-		if ( this.$focusedElement && null !== this.activeMedia ) {
+		if ( this.focusedElement && null !== this.activeMedia ) {
 			$mediaParent = $( '#' + this.activeMedia ).closest( '.able' );
-			if ( ( this.$focusedElement).is('button') ) {
-				classList = this.$focusedElement.attr("class");
+			if ( ( this.focusedElement.tagName === 'BUTTON' ) ) {
+				classList = this.focusedElement.getAttribute('class');
 				classList = ( typeof classList === 'string' ) ? classList.split(/\s+/) : [];
 				$.each(classList, function(index, item) {
 					if (item.substring(0,20) === 'able-button-handler-') {
-						$mediaParent.find('div.able-controller div.' + item).trigger('focus');
+						console.log( item );
+						$mediaParent.find('div.able-controller .' + item).trigger('focus');
 					}
 				});
 			}

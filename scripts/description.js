@@ -312,8 +312,7 @@ function addDescriptionFunctions(AblePlayer) {
 
 		// get element that has focus at the time swap is initiated
 		// after player is rebuilt, focus will return to that same element
-		// (if it exists)
-		this.$focusedElement = $(':focus');
+		this.focusedElement = document.activeElement;
 		this.activeMedia = this.mediaId;
 
 		// get current time of current source, and attempt to start new video at the same time
