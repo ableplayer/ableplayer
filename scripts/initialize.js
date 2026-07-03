@@ -307,16 +307,16 @@ import DOMPurify from 'dompurify';
 
 		this.hasPlaylist = false; // will change to true if a matching playlist is found
 
-		$('.able-playlist').each(function() {
-			if ($(this).data('player') === thisObj.mediaId) {
+		document.querySelectorAll('.able-playlist').forEach(function(playlist) {
+			if (playlist.dataset.player === thisObj.mediaId) {
 				// this is the playlist for the current player
 				thisObj.hasPlaylist = true;
 				// If using an embedded player, we'll replace $playlist with the clone later.
-				thisObj.$playlist = $(this).find('li');
+				thisObj.$playlist = $(playlist).find('li');
 
 				// check to see if list item has YouTube as its source
 				// if it does, inject a thumbnail from YouTube
-				var $youTubeVideos = $(this).find('li[data-youtube-id]');
+				var $youTubeVideos = $(playlist).find('li[data-youtube-id]');
 				$youTubeVideos.each(function() {
 					var youTubeId = DOMPurify.sanitize( $(this).attr('data-youtube-id') );
 					var youTubePoster = thisObj.getYouTubePosterUrl(youTubeId,'120');
@@ -329,7 +329,7 @@ import DOMPurify from 'dompurify';
 
 				// check to see if list item has Vimeo as its source
 				// if it does, inject a thumbnail from Vimeo
-				var $vimeoVideos = $(this).find('li[data-vimeo-id]');
+				var $vimeoVideos = $(playlist).find('li[data-vimeo-id]');
 				$vimeoVideos.each(function() {
 					var vimeoId = $(this).attr('data-vimeo-id');
 					var vimeoPoster = thisObj.getVimeoPosterUrl(vimeoId,'120');
@@ -341,9 +341,9 @@ import DOMPurify from 'dompurify';
 				});
 
 				// add accessibility to the list markup
-				$(this).find('li span').attr('aria-hidden','true');
+				$(playlist).find('li span').attr('aria-hidden','true');
 				thisObj.playlistIndex = 0;
-				var dataEmbedded = $(this).data('embedded');
+				var dataEmbedded = $(playlist).data('embedded');
 				// is playlist embedded within player?
 				thisObj.playlistEmbed = (typeof dataEmbedded !== 'undefined' && dataEmbedded !== false) ? true : false;
 			}
