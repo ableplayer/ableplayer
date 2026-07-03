@@ -22,11 +22,11 @@ function ablePlayerSetupWindow() {
 			console.warn('Required dependency DOMPurify not available. Please use the full Able Player bundle which has DOMPurify built in. Or, keep using this bundle, and include DOMPurify separately.')
 		}
 
-		$('video, audio').each(function (index, element) {
-			if ($(element).data('able-player') !== undefined) {
-				new AblePlayer($(this));
+		document.querySelectorAll( 'video,audio' ).forEach( ( element ) => {
+			if ( element.dataset.ablePlayer !== undefined ) {
+				new AblePlayer( $( element ) );
 			}
-		});
+		} );
 	});
 
 	// YouTube player support; pass ready event to jQuery so we can catch in player.
