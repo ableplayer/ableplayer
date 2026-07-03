@@ -225,17 +225,16 @@ function addEventFunctions(AblePlayer) {
 		// but this function finds a match in the new player
 		// and places focus there
 
-		var classList, $mediaParent;
+		var classList, mediaParent;
 
 		if ( this.focusedElement && null !== this.activeMedia ) {
-			$mediaParent = $( '#' + this.activeMedia ).closest( '.able' );
+			mediaParent = document.getElementById(this.activeMedia).closest( '.able' );
 			if ( ( this.focusedElement.tagName === 'BUTTON' ) ) {
 				classList = this.focusedElement.getAttribute('class');
 				classList = ( typeof classList === 'string' ) ? classList.split(/\s+/) : [];
-				$.each(classList, function(index, item) {
+				classList.forEach(function(item) {
 					if (item.substring(0,20) === 'able-button-handler-') {
-						console.log( item );
-						$mediaParent.find('div.able-controller .' + item).trigger('focus');
+						mediaParent.querySelector('div.able-controller .' + item).focus();
 					}
 				});
 			}
