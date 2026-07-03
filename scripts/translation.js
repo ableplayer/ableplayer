@@ -85,16 +85,21 @@ function addTranslationFunctions(AblePlayer) {
 	 */
 	AblePlayer.prototype.translate = function( key, fallback, args = Array() ) {
 		let translation = '';
-		if ( this.tt[ key ] ) {
-			translation = this.tt[ key ];
+
+		if ( Object.hasOwn( this.options, 'text' ) && Object.hasOwn( this.options.text, key ) ) {
+			translation = this.options.text[key];
 		} else {
-			translation = fallback;
-		}
-		if ( args.length > 0 ) {
-			args.forEach( ( val, index ) => {
-				let ref = index + 1;
-				translation = translation.replace( '%' + ref, val );
-			});
+			if ( this.tt[ key ] ) {
+				translation = this.tt[ key ];
+			} else {
+				translation = fallback;
+			}
+			if ( args.length > 0 ) {
+				args.forEach( ( val, index ) => {
+					let ref = index + 1;
+					translation = translation.replace( '%' + ref, val );
+				});
+			}
 		}
 
 		return translation;
