@@ -5,12 +5,14 @@
 ### Features
 
 - Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
+- Add `options` parameter to the AblePlayer class instantiation, supporting all `data-` attributes, strings, and icons.
 
 ### Accessibility
 - Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.
 - Popup handling for settings in Sign and Transcript windows was broken for keyboard.
 - Improvements to design and focus handling in Windows High Contrast Mode.
 - Changed controls from `div[role="button"]` to `button`.
+- Change labels on speaking rates to reflect actual values
 
 ### Bug fixes
 
@@ -21,17 +23,22 @@
 - Fix incorrect data-lang check for similar languages.
 - Improve parsing of VTT files to better handle a variety of edge cases. (props @conorom)
 - Improve handling of drag and resize events.
+- Bug fix: events triggered from outside the player triggered errors due to assumed classes.
 
 ### Design
 - Increase size and add hover state to seekbar.
 - Move bottom positioning of seekbar tooltip from JS into CSS.
-- Update drag drop icon and change base background color of sign language container.
+- Update drag-drop icon and change base background color of sign language container.
+- Move popup menus to prevent collision with focus outlines
+- Adjust size and padding of VTS icons.
+- Change speaking rate input to numeric.
 
 ### Performance
 - Improve performance of time slider by deduplicating events and adding queues/caching.
 
 ### Code Quality
 - Move drag handle and resize handle icons into the icon store.
+- Change constructor into a class instance.
 
 ## 5.0.0 June 21, 2026
 
