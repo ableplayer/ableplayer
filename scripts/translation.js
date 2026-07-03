@@ -95,12 +95,12 @@ function addTranslationFunctions(AblePlayer) {
 			} else {
 				translation = fallback;
 			}
-			if ( args.length > 0 ) {
-				args.forEach( ( val, index ) => {
-					let ref = index + 1;
-					translation = translation.replace( '%' + ref, val );
-				});
-			}
+		}
+		if ( args.length > 0 ) {
+			args.forEach( ( val, index ) => {
+				let ref = index + 1;
+				translation = translation.replace( '%' + ref, val );
+			});
 		}
 
 		return DOMPurify.sanitize(translation);
