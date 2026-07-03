@@ -274,7 +274,7 @@ function addEventFunctions(AblePlayer) {
 
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 		var whichButton, prefsPopup;
-		whichButton = this.getButtonNameFromClass($(el).attr('class'));
+		whichButton = this.getButtonNameFromClass(el.getAttribute('class'));
 		switch ( whichButton ) {
 			case 'play':
 				this.clickedPlay = true;
@@ -333,12 +333,12 @@ function addEventFunctions(AblePlayer) {
 				}
 				break;
 			case 'preferences':
-				if ($(el).attr('data-prefs-popup') === 'menu') {
+				if (el.dataset.prefsPopup === 'menu') {
 					this.handlePrefsClick();
 				} else {
 					this.showingPrefsDialog = true; // stopgap
 					this.closePopups();
-					prefsPopup = $(el).attr('data-prefs-popup');
+					prefsPopup = el.dataset.prefsPopup;
 					if (prefsPopup === 'keyboard') {
 						this.keyboardPrefsDialog.show();
 					} else if (prefsPopup === 'captions') {
@@ -386,7 +386,7 @@ function addEventFunctions(AblePlayer) {
 		// that is likely to need supported keystrokes, including space
 		var activeElement = AblePlayer.getActiveDOMElement();
 
-		return ($(activeElement).prop('tagName') === 'INPUT') ? false : defaultReturn;
+		return (activeElement.tagName === 'INPUT') ? false : defaultReturn;
 	};
 
 	AblePlayer.prototype.onPlayerKeyPress = function (e) {
