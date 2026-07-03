@@ -1596,9 +1596,9 @@ function addBuildplayerFunctions(AblePlayer) {
 		} else if (control === 'volume') {
 			return this.translate( 'volume', 'Volume' );
 		} else if (control === 'faster') {
-			return this.translate( 'faster', 'Faster' );
+			return this.translate( 'faster', 'Faster %1 x', [ this.changeRate(1,false) ] );
 		} else if (control === 'slower') {
-			return this.translate( 'slower', 'Slower' );
+			return this.translate( 'slower', 'Slower %1 x', [ this.changeRate(-1,false) ] );
 		} else if (control === 'preferences') {
 			return this.translate( 'preferences', 'Preferences' );
 		} else if (control === 'fullscreen') {

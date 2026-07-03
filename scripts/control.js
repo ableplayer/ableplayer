@@ -866,12 +866,17 @@ function addControlFunctions(AblePlayer) {
 	};
 
 	// Increases or decreases playback rate, where dir is 1 or -1 indication direction.
-	AblePlayer.prototype.changeRate = function (dir) {
+	AblePlayer.prototype.changeRate = function (dir,change = true) {
 
 		var rates, currentRate, index, newRate, vimeoMin, vimeoMax;
 
 		if (this.player === 'html5') {
-			this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+			if ( change ) {
+				// increase or decrease by 0.25x
+				this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+			} else {
+				return this.getPlaybackRate() + (0.25 * dir);
+			}
 		} else if (this.player === 'youtube') {
 			if (this.youTubePlayerReady) {
 				rates = this.youTubePlayer.getAvailablePlaybackRates();
@@ -883,7 +888,11 @@ function addControlFunctions(AblePlayer) {
 					index += dir;
 					// Can only increase or decrease rate if there's another rate available.
 					if (index < rates.length && index >= 0) {
-						this.setPlaybackRate(rates[index]);
+						if ( change ) {
+							this.setPlaybackRate(rates[index]);
+						} else {
+							return rates[index];
+						}
 					}
 				}
 			}
@@ -897,7 +906,11 @@ function addControlFunctions(AblePlayer) {
 			} else if (dir === -1) {
 				newRate = (this.vimeoPlaybackRate - 0.5 >= vimeoMin) ? this.vimeoPlaybackRate - 0.5 : vimeoMin;
 			}
-			this.setPlaybackRate(newRate);
+			if ( change ) {
+				this.setPlaybackRate(newRate);
+			} else {
+				return newRate;
+			}
 		}
 	};
 
