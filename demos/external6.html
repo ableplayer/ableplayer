@@ -17,26 +17,30 @@
 
 <!-- CSS and JavaScript specifically for this example -->
 <style>
-	div#alert {
+	#alert {
 		display: none;
-		background-color: #FFC;
-		padding: 1em;
+		background-color: #ffc;
+		padding: 1rem;
 		border: 2px solid #340449;
 		font-weight: bold;
 	}
 	section ul {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10px;
+		gap: 12px;
 		list-style-type: none;
-		padding: 0;
+		padding: .5rem;
+		margin: .5rem 0;
+	}
+	section ul li {
+		margin: 0;
 	}
 	section ul li button {
 		color: black;
 		background-color: #E9E9ED;
-		font-size: 1.1em;
+		font-size: 1.125rem;
 		font-weight: bold;
-		padding: 0.75em;
+		padding: 0.5rem;
 		outline-style: solid;
 		outline-width: thick;
 		outline-color: transparent;
@@ -45,12 +49,12 @@
 	section ul li button:hover,
 	section ul li button:active {
 		outline-color: #cc0000;
-  	text-decoration: none !important;
-		border-color: trasparent;
+		border-color: transparent;
 	}
 	section ul li button[aria-disabled="true"] {
 		color: #707070;
 		background-color: #F4F4F6;
+		cursor: text;
 	}
 	div.player-wrapper {
 		margin: 0 0 2em;
@@ -131,9 +135,21 @@
 		});
 		$video1.append($source1,$track1,$track2,$track3,$track4);
 		$('#video1').html($video1).show();
-
+		let options = {
+			hideControls: true,
+			icons: {
+				play: [
+					'0 0 20 20',
+					[ 'M 6 4 L 14 10 L 6 16 Z' ]
+				]
+			},
+			text: {
+				'rewind': 'Jump back %1 seconds',
+				'forward': 'Jump forward %1 seconds'
+			}
+		}
 		// Create a new Able Player instance from the new video element
-		videoPlayer = new AblePlayer($video1);
+		videoPlayer = new AblePlayer($video1, options);
 
 		// Update the alert and button in this demo
 		$('#alert').text('One video player added. See below.').show();
