@@ -17,6 +17,7 @@
 ### Bug fixes
 
 - Add the seek interval value to rewind and forward buttons, to provide better user information.
+- Add the expected new speed value to playback speed controls.
 - Move seekbar tooltip closer to seekbar. It had moved further away when the seekhead size was increased.
 - Limit sign language resizing to match aspect ratio.
 - Allow YouTube iframe sign language to exceed 640px width.
@@ -24,6 +25,7 @@
 - Improve parsing of VTT files to better handle a variety of edge cases. (props @conorom)
 - Improve handling of drag and resize events.
 - Bug fix: events triggered from outside the player triggered errors due to assumed classes.
+- Modified preferences dialog generation so dialogs are only generated once per page and re-used, rather than generating four dialogs per player.
 
 ### Design
 - Increase size and add hover state to seekbar.
@@ -32,6 +34,7 @@
 - Move popup menus to prevent collision with focus outlines
 - Adjust size and padding of VTS icons.
 - Change speaking rate input to numeric.
+- Add generic `able-captions-container` class and set background color to match player.
 
 ### Performance
 - Improve performance of time slider by deduplicating events and adding queues/caching.
@@ -39,6 +42,8 @@
 ### Code Quality
 - Move drag handle and resize handle icons into the icon store.
 - Change constructor into a class instance.
+- Remove obsolete Firefox stopgap in popup keyboard controller.
+- Use AblePlayer.getActiveDOMElement() to get focused elements.
 
 ## 5.0.0 June 21, 2026
 
