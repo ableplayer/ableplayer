@@ -173,7 +173,7 @@ class AblePlayer {
 		let headingLevel = options.headingLevel ?? data.headingLevel;
 		// Headings
 		// By default, an off-screen heading is automatically added to the top of the media player
-		// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
+		// It is assigned a heading level based on context, via misc.js > getNextHeadingLevel()
 		// Authors can override this behavior by manually assigning a heading level using data-heading-level
 		// Accepted values are 1-6, or 0 which indicates "no heading"
 		// (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
