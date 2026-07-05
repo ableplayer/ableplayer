@@ -247,7 +247,7 @@ function addEventFunctions(AblePlayer) {
 		var thisObj = this;
 
 		// Handle seek bar events.
-		this.seekBar.seekbarDiv.on('startTracking', function (e) {
+		this.seekBar.$seekbarDiv.on('startTracking', function (e) {
 			thisObj.pausedBeforeTracking = thisObj.paused;
 			thisObj.pauseMedia();
 		}).on('tracking', function (e, position) {
@@ -390,7 +390,6 @@ function addEventFunctions(AblePlayer) {
 	};
 
 	AblePlayer.prototype.onPlayerKeyPress = function (e) {
-
 		// handle keystrokes (using DHTML Style Guide recommended key combinations)
 		// https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
 		// Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
@@ -422,7 +421,6 @@ function addEventFunctions(AblePlayer) {
 
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		// (or a textarea element with player in stenoMode)
-		let activeEl = AblePlayer.getActiveDOMElement();
 		if (!(
 			$(activeEl).is('[contenteditable]') ||
 			$(activeEl).is('input') ||
@@ -501,7 +499,7 @@ function addEventFunctions(AblePlayer) {
 					this.handlePrefsClick();
 				}
 			} else if (key === 'Enter') {
-				if ( $thisElement.is('button') || $thisElement.is('span') ) {
+				if ( $thisElement.is('span') ) {
 					// register a click on this element
 					// if it's a transcript span the transcript span click handler will take over
 					$thisElement.trigger( 'click' );

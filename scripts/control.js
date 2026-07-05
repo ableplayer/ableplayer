@@ -481,7 +481,7 @@ function addControlFunctions(AblePlayer) {
 					// Only update the aria live region if we have an update pending
 					// (from a seek button control) or if the seekBar has focus.
 					let activeEl = AblePlayer.getActiveDOMElement();
-					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(activeEl));
+					updateLive = this.liveUpdatePending || this.seekBar.$seekHead.is($(activeEl));
 					this.liveUpdatePending = false;
 					if (this.useChapterTimes) {
 						this.seekBar.setPosition(this.chapterElapsed, updateLive);
@@ -513,8 +513,8 @@ function addControlFunctions(AblePlayer) {
 				// Update seekbar width.
 				// To do this, we need to calculate the width of all buttons surrounding it.
 				if (this.seekBar) {
-					let controlWrapper = this.seekBar.wrapperDiv.parent().parent();
-					leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+					let controlWrapper = this.seekBar.$wrapperDiv.parent().parent();
+					leftControls = this.seekBar.$wrapperDiv.parent().prev('div.able-left-controls');
 					rightControls = leftControls.next('div.able-right-controls');
 					widthUsed = leftControls.outerWidth(true);
 					rightControls.children().each(function () {
@@ -914,7 +914,6 @@ function addControlFunctions(AblePlayer) {
 	};
 
 	AblePlayer.prototype.handleCaptionToggle = function() {
-
 		var thisObj = this;
 		var captions, ariaPressed;
 		if (this.hidingPopup) {

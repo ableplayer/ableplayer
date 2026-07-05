@@ -217,19 +217,19 @@ import $ from 'jquery';
 		if (duration !== this.duration) {
 			this.duration = duration;
 			this.resetHeadLocation();
-			this.seekHead.attr('aria-valuemax', duration);
+			this.$seekHead.attr('aria-valuemax', duration);
 		}
 	};
 
 	// Set width of the legacy seekbar.
 	AccessibleSlider.prototype.setWidth = function (width) {
-		this.wrapperDiv.width(width);
+		this.$wrapperDiv.width(width);
 		this.resizeDivs();
 		this.resetHeadLocation();
 	};
 
 	AccessibleSlider.prototype.getWidth = function () {
-		return this.wrapperDiv.width();
+		return this.$wrapperDiv.width();
 	};
 
 	AccessibleSlider.prototype.resizeDivs = function () {
@@ -240,8 +240,8 @@ import $ from 'jquery';
 	// Stops tracking, sets the head location to the current position.
 	AccessibleSlider.prototype.resetHeadLocation = function () {
 		var ratio = this.position / this.duration;
-		var center = this.seekbarDiv.width() * ratio;
-		this.seekHead.css('left', center - (this.seekHead.width() / 2));
+		var center = this.$seekbarDiv.width() * ratio;
+		this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 
 		if (this.tracking) {
 			this.stopTracking(this.position);
@@ -277,7 +277,7 @@ import $ from 'jquery';
 				this.clearTrackingGeometry();
 				this.unbindGlobalTrackingEvents();
 			}
-			this.seekbarDiv.trigger('startTracking', [position]);
+			this.$seekbarDiv.trigger('startTracking', [position]);
 		}
 	};
 
@@ -291,7 +291,7 @@ import $ from 'jquery';
 		this.clearTrackingGeometry();
 		this.trackDevice = null;
 		this.tracking = false;
-		this.seekbarDiv.trigger('stopTracking', [position]);
+		this.$seekbarDiv.trigger('stopTracking', [position]);
 		this.setPosition(position, true);
 	};
 
@@ -349,9 +349,9 @@ import $ from 'jquery';
 	};
 
 	AccessibleSlider.prototype.buildTrackingGeometry = function () {
-		var seekbarOffset = this.seekbarDiv.offset();
-		var seekbarWidth = this.seekbarDiv.width();
-		var seekHeadWidth = this.seekHead.width();
+		var seekbarOffset = this.$seekbarDiv.offset();
+		var seekbarWidth = this.$seekbarDiv.width();
+		var seekHeadWidth = this.$seekHead.width();
 		return {
 			left: seekbarOffset.left,
 			width: seekbarWidth,
@@ -379,9 +379,9 @@ import $ from 'jquery';
 	AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
 		this.flushQueuedTrackUpdate();
 		var ratio = position / this.duration;
-		var center = this.seekbarDiv.width() * ratio;
+		var center = this.$seekbarDiv.width() * ratio;
 		this.lastTrackPosition = position;
-		this.seekHead.css('left', center - (this.seekHead.width() / 2));
+		this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 		this.reportTrackAtPosition(position);
 	};
 
@@ -406,7 +406,7 @@ import $ from 'jquery';
 		}
 
 		this.lastTrackPosition = this.queuedTrackPosition;
-		this.seekHead.css('left', this.queuedTrackLeft);
+		this.$seekHead.css('left', this.queuedTrackLeft);
 		this.reportTrackAtPosition(this.queuedTrackPosition);
 
 		this.queuedTrackPosition = null;
@@ -414,7 +414,7 @@ import $ from 'jquery';
 	};
 
 	AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
-		this.seekbarDiv.trigger('tracking', [position]);
+		this.$seekbarDiv.trigger('tracking', [position]);
 		this.updateAriaValues(position, true);
 	};
 
@@ -451,15 +451,15 @@ import $ from 'jquery';
 				'class': 'able-offscreen',
 				'aria-live': 'polite'
 			});
-			this.wrapperDiv.append(this.liveAriaRegion);
+			this.$wrapperDiv.append(this.liveAriaRegion);
 		}
 		if (updateLive && (this.liveAriaRegion.text() !== descriptionText)) {
 			this.liveAriaRegion.text(descriptionText);
 		}
 
 		// Uncomment the following lines to use aria values instead of separate live region.
-		this.seekHead.attr('aria-valuetext', descriptionText);
-		this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
+		this.$seekHead.attr('aria-valuetext', descriptionText);
+		this.$seekHead.attr('aria-valuenow', Math.floor(position).toString());
 	};
 
 	AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
@@ -470,17 +470,17 @@ import $ from 'jquery';
 
 	AccessibleSlider.prototype.refreshTooltip = function () {
 		if (this.overHead) {
-			this.timeTooltip.show();
+			this.$timeTooltip.show();
 			if (this.tracking) {
-				this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+				this.$timeTooltip.text(this.positionToStr(this.lastTrackPosition));
 			} else {
-				this.timeTooltip.text(this.positionToStr(this.position));
+				this.$timeTooltip.text(this.positionToStr(this.position));
 			}
-			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
+			this.setTooltipPosition(this.$seekHead.position().left + (this.$seekHead.width() / 2));
 		} else if (this.overBody && this.overBodyMousePos) {
 			var geometry = this.getTrackingGeometry();
-			this.timeTooltip.show();
-			this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
+			this.$timeTooltip.show();
+			this.$timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
 			this.setTooltipPosition(this.overBodyMousePos.x - geometry.left);
 		} else {
 
@@ -488,7 +488,7 @@ import $ from 'jquery';
 			var _this = this;
 			this.timeTooltipTimeoutId = setTimeout(function() {
 				// give user a half second move cursor over tooltip
-				_this.timeTooltip.hide();
+				_this.$timeTooltip.hide();
 			}, 500);
 		}
 	};
@@ -497,12 +497,12 @@ import $ from 'jquery';
 		this.overHead = false;
 		this.overBody = false;
 		this.clearHoverGeometry();
-		this.timeTooltip.hide();
+		this.$timeTooltip.hide();
 	};
 
 	AccessibleSlider.prototype.setTooltipPosition = function (x) {
-		this.timeTooltip.css({
-			left: x - (this.timeTooltip.width() / 2) - 10,
+		this.$timeTooltip.css({
+			left: x - (this.$timeTooltip.width() / 2) - 10,
 		});
 	};
 
