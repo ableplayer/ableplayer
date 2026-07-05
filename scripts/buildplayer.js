@@ -34,6 +34,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		// add container that captions or description will be appended to
 		// Note: new Jquery object must be assigned _after_ wrap, hence the temp captionsContainer variable
 		captionsContainer = $('<div>');
+		captionsContainer.addClass('able-captions-container');
 		if (this.mediaType === 'video') {
 			captionsContainer.addClass('able-vidcap-container');
 		} else if (this.mediaType === 'audio') {

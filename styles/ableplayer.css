@@ -188,6 +188,10 @@
 	margin: 0 6px;
 }
 
+.able-captions-container {
+	background: var(--able-control-background);
+}
+
 .able .able-vidcap-container {
 	left: 0;
 	margin: 0;
