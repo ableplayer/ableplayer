@@ -32,22 +32,22 @@ import $ from 'jquery';
 		this.trackGeometry = null;
 		this.hoverGeometry = null;
 
-		this.seekbarDiv = $(div);
+		this.$seekbarDiv = $(div);
 
 		// Add divs for tracking amount of media loaded and played
 		this.loadedDiv = $('<div></div>');
 		this.playedDiv = $('<div></div>');
 
 		// Add a seekhead
-		this.seekHead = $('<div>',{
+		this.$seekHead = $('<div>',{
 			'aria-orientation': 'horizontal',
 			'class': 'able-seekbar-head'
 		});
 
-		this.seekHead.attr('tabindex', '0');
+		this.$seekHead.attr('tabindex', '0');
 
 		// Since head is focusable, it gets the aria roles/titles.
-		this.seekHead.attr({
+		this.$seekHead.attr({
 			'role': 'slider',
 			'aria-label': label,
 			'aria-valuemin': 0,
@@ -56,32 +56,32 @@ import $ from 'jquery';
 
 		this.timeTooltipTimeoutId = null;
 		this.overTooltip = false;
-		this.timeTooltip = $('<div>');
-		this.seekbarDiv.append(this.timeTooltip);
+		this.$timeTooltip = $('<div>');
+		this.$seekbarDiv.append(this.$timeTooltip);
 
-		this.timeTooltip.attr('role', 'tooltip');
-		this.timeTooltip.addClass('able-tooltip');
-		this.timeTooltip.on('mouseenter focus', function(){
+		this.$timeTooltip.attr('role', 'tooltip');
+		this.$timeTooltip.addClass('able-tooltip');
+		this.$timeTooltip.on('mouseenter focus', function(){
 			thisObj.overTooltip = true;
 			clearInterval(thisObj.timeTooltipTimeoutId);
 		});
-		this.timeTooltip.on('mouseleave blur', function(){
+		this.$timeTooltip.on('mouseleave blur', function(){
 			thisObj.overTooltip = false;
 			$(this).hide();
 		});
-		this.timeTooltip.hide();
+		this.$timeTooltip.hide();
 
-		this.seekbarDiv.append(this.loadedDiv);
-		this.seekbarDiv.append(this.playedDiv);
-		this.seekbarDiv.append(this.seekHead);
-		this.seekbarDiv.wrap('<div></div>');
-		this.wrapperDiv = this.seekbarDiv.parent();
+		this.$seekbarDiv.append(this.loadedDiv);
+		this.$seekbarDiv.append(this.playedDiv);
+		this.$seekbarDiv.append(this.$seekHead);
+		this.$seekbarDiv.wrap('<div></div>');
+		this.$wrapperDiv = this.$seekbarDiv.parent();
 
 		if (this.skin === 'legacy') {
-			this.wrapperDiv.width( 100 );
+			this.$wrapperDiv.width( 100 );
 			this.loadedDiv.width(0);
 		}
-		this.wrapperDiv.addClass('able-seekbar-wrapper');
+		this.$wrapperDiv.addClass('able-seekbar-wrapper');
 		this.loadedDiv.addClass('able-seekbar-loaded');
 		this.playedDiv.width(0);
 		this.playedDiv.addClass('able-seekbar-played');
@@ -90,7 +90,7 @@ import $ from 'jquery';
 		this.setDuration(max);
 
 		// handle seekHead events
-		this.seekHead.on('mouseenter mouseleave mousedown mouseup focus blur touchstart touchend', function (e) {
+		this.$seekHead.on('mouseenter mouseleave mousedown mouseup focus blur touchstart touchend', function (e) {
 
 			coords = thisObj.pointerEventToXY(e);
 
@@ -103,9 +103,9 @@ import $ from 'jquery';
 					thisObj.clearHoverGeometry();
 				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
-				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-				if (!thisObj.seekbarDiv.is(':focus')) {
-					thisObj.seekbarDiv.focus();
+				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.$seekHead.offset() + (thisObj.$seekHead.width() / 2)));
+				if (!thisObj.$seekbarDiv.is(':focus')) {
+					thisObj.$seekbarDiv.focus();
 				}
 				e.preventDefault();
 			}
@@ -115,7 +115,7 @@ import $ from 'jquery';
 		});
 
 		// handle seekbarDiv events
-		this.seekbarDiv.on(
+		this.$seekbarDiv.on(
 			'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
 			// Don't trigger move on right click.
@@ -146,8 +146,8 @@ import $ from 'jquery';
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
 				thisObj.trackHeadAtPageX(coords.x);
-				if (!thisObj.seekHead.is(':focus')) {
-					thisObj.seekHead.focus();
+				if (!thisObj.$seekHead.is(':focus')) {
+					thisObj.$seekHead.focus();
 				}
 				e.preventDefault();
 			} else if (e.type === 'keydown') {
