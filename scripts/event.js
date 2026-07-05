@@ -409,7 +409,7 @@ function addEventFunctions(AblePlayer) {
 		$thisElement = $(activeEl);
 
 		if (key === 'Escape') {
-			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0]) && !this.hidingPopup) {
+			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
 				// This element is part of transcript area.
 				this.handleTranscriptToggle();
 				return false;

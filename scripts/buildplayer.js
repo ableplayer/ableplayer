@@ -640,8 +640,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			this.$ccButton.attr('aria-expanded', 'false');
 			this.waitThenFocus(this.$ccButton);
 		}
-		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
-			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
+		if (this.prefsPopup && this.prefsPopup.is(':visible') ) {
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
@@ -649,25 +648,16 @@ function addBuildplayerFunctions(AblePlayer) {
 			if (!this.showingPrefsDialog) {
 				this.waitThenFocus(thisObj.$prefsButton);
 			}
-			// wait briefly, then reset hidingPopup
-			setTimeout(function() {
-				thisObj.hidingPopup = false;
-			},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeButton.attr('aria-expanded', 'false').trigger('focus');
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
-			this.hidingPopup = true;
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$transcriptPopupButton.attr('aria-expanded','false').trigger('focus');
-			// wait briefly, then reset hidingPopup
-			setTimeout(function() {
-				thisObj.hidingPopup = false;
-			},100);
 		}
 		if (this.$signPopup && this.$signPopup.is(':visible')) {
 			this.$signPopup.hide();

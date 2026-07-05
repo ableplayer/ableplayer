@@ -916,12 +916,6 @@ function addControlFunctions(AblePlayer) {
 	AblePlayer.prototype.handleCaptionToggle = function() {
 		var thisObj = this;
 		var captions, ariaPressed;
-		if (this.hidingPopup) {
-			// stopgap to prevent spacebar in Firefox from reopening popup
-			// immediately after closing it
-			this.hidingPopup = false;
-			return false;
-		}
 
 		captions = (this.captions.length) ? this.captions : [];
 		if (captions.length === 1) {
@@ -982,7 +976,6 @@ function addControlFunctions(AblePlayer) {
 			// clicking on a track is handled via caption.js > getCaptionClickFunction()
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
-				this.hidingPopup = false;
 				this.$ccButton.attr('aria-expanded', 'false')
 				this.waitThenFocus(this.$ccButton);
 			} else {
@@ -1032,15 +1025,8 @@ function addControlFunctions(AblePlayer) {
 	}
 
 	AblePlayer.prototype.handleChapters = function () {
-		if (this.hidingPopup) {
-			// stopgap to prevent spacebar in Firefox from reopening popup
-			// immediately after closing it
-			this.hidingPopup = false;
-			return false;
-		}
 		if (this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
-			this.hidingPopup = false;
 			this.$chaptersButton.attr('aria-expanded','false').trigger('focus');
 		} else {
 			this.closePopups();
@@ -1094,12 +1080,6 @@ function addControlFunctions(AblePlayer) {
 		if (this.speechEnabled === null) {
 			this.initSpeech('prefs');
 		}
-		if (this.hidingPopup) {
-			// stopgap to prevent spacebar in Firefox from reopening popup
-			// immediately after closing it
-			this.hidingPopup = false;
-			return false;
-		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
 			this.$prefsButton.attr('aria-expanded','false');
@@ -1108,10 +1088,6 @@ function addControlFunctions(AblePlayer) {
 			if (!this.showingPrefsDialog) {
 				this.$prefsButton.trigger('focus');
 			}
-			// wait briefly, then reset hidingPopup
-			setTimeout(function() {
-				thisObj.hidingPopup = false;
-			},100);
 		} else {
 			this.closePopups();
 			this.prefsPopup.show();
