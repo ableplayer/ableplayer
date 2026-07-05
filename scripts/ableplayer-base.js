@@ -555,6 +555,16 @@ class AblePlayer {
 				dialog.overlay.remove();
 			}
 		}
+
+		if (AblePlayer.ablePlayerInstances.size === 0 && AblePlayer.preferencesDialog) {
+			if (AblePlayer.preferencesDialog.modal) {
+				AblePlayer.preferencesDialog.modal.remove();
+			}
+			if (AblePlayer.preferencesDialog.dialog && AblePlayer.preferencesDialog.dialog.overlay) {
+				AblePlayer.preferencesDialog.dialog.overlay.remove();
+			}
+			AblePlayer.preferencesDialog = null;
+		}
 	}
 };
 
@@ -572,6 +582,7 @@ AblePlayer.youTubeIframeAPIReady = false;
 AblePlayer.loadingYouTubeIframeAPI = false;
 
 AblePlayer.ablePlayerInstances = ablePlayerInstances;
+AblePlayer.preferencesDialog = null;
 
 
 

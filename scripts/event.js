@@ -340,13 +340,13 @@ function addEventFunctions(AblePlayer) {
 					this.closePopups();
 					prefsPopup = el.dataset.prefsPopup;
 					if (prefsPopup === 'keyboard') {
-						this.keyboardPrefsDialog.show();
+						this.showPrefsDialog('keyboard');
 					} else if (prefsPopup === 'captions') {
-						this.captionPrefsDialog.show();
+						this.showPrefsDialog('captions');
 					} else if (prefsPopup === 'descriptions') {
-						this.descPrefsDialog.show();
+						this.showPrefsDialog('descriptions');
 					} else if (prefsPopup === 'transcript') {
-						this.transcriptPrefsDialog.show();
+						this.showPrefsDialog('transcript');
 					}
 					this.showingPrefsDialog = false;
 				}

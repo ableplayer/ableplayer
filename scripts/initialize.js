@@ -385,7 +385,7 @@ import DOMPurify from 'dompurify';
 			return;
 		}
 
-		var deferred, promise, thisObj, prefsGroups, i, initVersion;
+		var deferred, promise, thisObj, initVersion;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
@@ -468,11 +468,7 @@ import DOMPurify from 'dompurify';
 									thisObj.addControls();
 									thisObj.addEventListeners();
 
-									// inject each of the hidden forms that will be accessed from the Preferences popup menu
-									prefsGroups = thisObj.getPreferencesGroups();
-									for (i = 0; i < prefsGroups.length; i++) {
-										thisObj.injectPrefsForm(prefsGroups[i]);
-									}
+									// preferences forms are rendered on demand into a shared dialog
 									thisObj.setupPopups();
 									thisObj.updateCaption();
 									thisObj.logInitTiming(initVersion, 'core UI ready');

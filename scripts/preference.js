@@ -451,7 +451,69 @@
 		};
 	};
 
-	AblePlayer.prototype.injectPrefsForm = function (form) {
+	AblePlayer.prototype.getPreferencesDialog = function () {
+
+		if (AblePlayer.preferencesDialog) {
+			return AblePlayer.preferencesDialog;
+		}
+
+		var thisObj = this;
+		var $prefsDiv = $('<div>', {
+			'class': 'able-prefs-form'
+		});
+		$('body').append($prefsDiv);
+
+		var dialog = new AccessibleDialog(
+			$prefsDiv,
+			this.$prefsButton,
+			this.translate( 'preferences', 'Preferences' ),
+			this.translate( 'closeButtonLabel', 'Close' )
+		);
+
+		$prefsDiv.on('click.ableSharedPrefs', 'button.modalCloseButton', function () {
+			if (AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner) {
+				AblePlayer.preferencesDialog.owner.resetPrefsForm();
+			}
+		});
+
+		$prefsDiv.on('keydown.ableSharedPrefs', function (e) {
+			if (e.key === 'Escape' && AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner) {
+				AblePlayer.preferencesDialog.owner.resetPrefsForm();
+			}
+		});
+
+		AblePlayer.preferencesDialog = {
+			modal: $prefsDiv,
+			dialog: dialog,
+			owner: thisObj,
+			form: null
+		};
+
+		return AblePlayer.preferencesDialog;
+	};
+
+	AblePlayer.prototype.showPrefsDialog = function (form) {
+
+		var shared = this.getPreferencesDialog();
+		shared.owner = this;
+		shared.form = form;
+		this.injectPrefsForm(form, {
+			shared: true,
+			sharedDialog: shared
+		});
+		shared.dialog.focusedElementBeforeModal = this.$prefsButton;
+		shared.dialog.show();
+	};
+
+	AblePlayer.prototype.getActivePrefsForm = function () {
+
+		if (AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner === this) {
+			return AblePlayer.preferencesDialog.modal;
+		}
+		return $('body');
+	};
+
+	AblePlayer.prototype.injectPrefsForm = function (form, dialogOptions) {
 
 		// Creates a preferences form and injects it.
 		// form is one of the supported forms (groups) defined in getPreferencesGroups()
@@ -461,17 +523,28 @@
 			$fieldset, groupHeading, groupObj, thisPref, $thisDiv, thisClass,
 			thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
 			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, prefCaptionVoice, $kbHeading,$kbList,
-			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer;
+			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer, sharedDialog;
 
 		thisObj = this;
 		available = this.getAvailablePreferences();
+		dialogOptions = dialogOptions || {};
+		sharedDialog = dialogOptions.sharedDialog || null;
 
-		// outer container, will be assigned role="dialog"
-		$prefsDiv = $('<div>',{
-			'class': 'able-prefs-form '
-		});
-		var customClass = 'able-prefs-form-' + form;
-		$prefsDiv.addClass(customClass);
+		if (dialogOptions.shared && sharedDialog) {
+			$prefsDiv = sharedDialog.modal;
+			$prefsDiv.removeClass(function (index, className) {
+				return (className.match(/(^|\s)able-prefs-form-\S+/g) || []).join(' ');
+			});
+			$prefsDiv.addClass('able-prefs-form-' + form);
+			$prefsDiv.children().not('.able-modal-header').remove();
+		} else {
+			// outer container, will be assigned role="dialog"
+			$prefsDiv = $('<div>',{
+				'class': 'able-prefs-form '
+			});
+			var customClass = 'able-prefs-form-' + form;
+			$prefsDiv.addClass(customClass);
+		}
 
 		// add titles and intros
 		if (form == 'captions') {
@@ -931,14 +1004,21 @@
 			$prefsDiv.append($kbHeading,$kbList);
 		}
 
-		// $prefsDiv (dialog) must be appended to the BODY!
-		$('body').append($prefsDiv);
-		dialog = new AccessibleDialog(
-			$prefsDiv,
-			this.$prefsButton,
-			formTitle,
-			thisObj.translate( 'closeButtonLabel', 'Close' )
-		);
+		if (dialogOptions.shared && sharedDialog) {
+			dialog = sharedDialog.dialog;
+			dialog.title = formTitle;
+			dialog.titleH1.text(formTitle);
+			dialog.focusedElementBeforeModal = this.$prefsButton;
+		} else {
+			// $prefsDiv (dialog) must be appended to the BODY!
+			$('body').append($prefsDiv);
+			dialog = new AccessibleDialog(
+				$prefsDiv,
+				this.$prefsButton,
+				formTitle,
+				thisObj.translate( 'closeButtonLabel', 'Close' )
+			);
+		}
 
 		// Add save and cancel buttons.
 		$buttonContainer = $( '<div class="able-prefs-buttons"></div>' );
@@ -960,28 +1040,32 @@
 			$fieldset.attr('aria-labelledby',dialog.titleH1.attr('id'));
 		}
 
-		// add global reference for future control
-		if (form === 'captions') {
-			this.captionPrefsDialog = dialog;
-		} else if (form === 'descriptions') {
-			this.descPrefsDialog = dialog;
-		} else if (form === 'keyboard') {
-			this.keyboardPrefsDialog = dialog;
-		} else if (form === 'transcript') {
-			this.transcriptPrefsDialog = dialog;
+		if (!dialogOptions.shared) {
+			// add global reference for future control
+			if (form === 'captions') {
+				this.captionPrefsDialog = dialog;
+			} else if (form === 'descriptions') {
+				this.descPrefsDialog = dialog;
+			} else if (form === 'keyboard') {
+				this.keyboardPrefsDialog = dialog;
+			} else if (form === 'transcript') {
+				this.transcriptPrefsDialog = dialog;
+			}
 		}
 
 		// Add click handler for dialog close button
 		// (button is added in dialog.js)
-		$('div.able-prefs-form button.modalCloseButton').on( 'click', function() {
-			thisObj.resetPrefsForm();
-		})
-		// Add handler for escape key
-		$('div.able-prefs-form').on( 'keydown', function(e) {
-			if (e.key === 'Escape') {
+		if (!dialogOptions.shared) {
+			$('div.able-prefs-form button.modalCloseButton').on( 'click', function() {
 				thisObj.resetPrefsForm();
-			}
-		});
+			})
+			// Add handler for escape key
+			$('div.able-prefs-form').on( 'keydown', function(e) {
+				if (e.key === 'Escape') {
+					thisObj.resetPrefsForm();
+				}
+			});
+		}
 	};
 
 	AblePlayer.prototype.getPrefVoice = function () {
@@ -1065,23 +1149,21 @@
 		// User presses Escape to close Prefs dialog
 		// User clicks Save in Prefs dialog, & there's more than one player on page
 
-		var preferences, available, i, prefName;
+		var preferences, available, i, prefName, prefId, $form;
 
 		preferences = this.getPref();
 		available = this.getAvailablePreferences();
+		$form = this.getActivePrefsForm();
 		for (i=0; i<available.length; i++) {
 			prefName = available[i]['name'];
+			prefId = this.mediaId + '_' + prefName;
 			if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
-				$('input[name="' + prefName + '"]').val(preferences.preferences[prefName]);
+				$form.find('input[id="' + prefId + '"]').val(preferences.preferences[prefName]);
 			} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 				// this is a caption-related select box
-				$('select[name="' + prefName + '"]').val(preferences.preferences[prefName]);
+				$form.find('select[id="' + prefId + '"]').val(preferences.preferences[prefName]);
 			} else { // all others are checkboxes
-				if (this[prefName] === 1) {
-					$('input[name="' + prefName + '"]').prop('checked',true);
-				} else {
-					$('input[name="' + prefName + '"]').prop('checked',false);
-				}
+				$form.find('input[id="' + prefId + '"]').prop('checked', this[prefName] === 1);
 			}
 		}
 		// also restore style of sample caption div
@@ -1095,13 +1177,14 @@
 		// update preferences with new value
 		var preferences, available, prefName, prefId,
 			voiceSelectId, newVoice, numChanges, voiceLangFound,
-			numCapChanges, capSizeChanged, capSizeValue, newValue;
+			numCapChanges, capSizeChanged, capSizeValue, newValue, $form;
 
 		numChanges = 0;
 		numCapChanges = 0; // changes to caption-style-related preferences
 		capSizeChanged = false;
 		preferences = this.getPref();
 		available = this.getAvailablePreferences();
+		$form = this.getActivePrefsForm();
 		for (var i=0; i < available.length; i++) {
 			// only prefs with labels are used in the Prefs form
 			if (available[i]['label']) {
@@ -1112,8 +1195,8 @@
 						preferences.voices = [];
 					}
 					voiceSelectId = this.mediaId + '_prefDescVoice';
-					this.prefDescVoice = $('select#' + voiceSelectId).find(':selected').val();
-					this.prefDescVoiceLang = $('select#' + voiceSelectId).find(':selected').attr('data-lang');
+					this.prefDescVoice = $form.find('select#' + voiceSelectId).find(':selected').val();
+					this.prefDescVoiceLang = $form.find('select#' + voiceSelectId).find(':selected').attr('data-lang');
 					// replace preferred voice for this lang in preferences.voices array, if one exists
 					// otherwise, add it to the array
 					voiceLangFound = false;
@@ -1137,7 +1220,7 @@
 						numChanges++;
 					}
 				} else if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
-					newValue = parseFloat($('input[id="' + prefId + '"]').val());
+					newValue = parseFloat($form.find('input[id="' + prefId + '"]').val());
 					if (isNaN(newValue)) {
 						newValue = this[prefName] || 1;
 					}
@@ -1149,7 +1232,7 @@
 					}
 				} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is one of the caption-related select fields
-					newValue = $('select[id="' + prefId + '"]').val();
+					newValue = $form.find('select[id="' + prefId + '"]').val();
 					if (preferences.preferences[prefName] !== newValue) { // user changed setting
 						preferences.preferences[prefName] = newValue;
 						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -1163,7 +1246,7 @@
 					}
 				} else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
 					// this is one of the description-related select fields
-					newValue = $('select[id="' + prefId + '"]').val();
+					newValue = $form.find('select[id="' + prefId + '"]').val();
 					if (preferences.preferences[prefName] !== newValue) { // user changed setting
 						preferences.preferences[prefName] = newValue;
 						// also update global var for this pref
@@ -1171,7 +1254,7 @@
 						numChanges++;
 					}
 				} else { // all other fields are checkboxes
-					if ($('input[id="' + prefId + '"]').is(':checked')) {
+					if ($form.find('input[id="' + prefId + '"]').is(':checked')) {
 						preferences.preferences[prefName] = 1;
 						if (this[prefName] === 1) {
 							// nothing has changed

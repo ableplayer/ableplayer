@@ -464,13 +464,13 @@ function addBuildplayerFunctions(AblePlayer) {
 						thisObj.showingPrefsDialog = true;
 						thisObj.setFullscreen(false);
 						if (whichPref === thisObj.translate( 'prefMenuCaptions', 'Captions' ) ) {
-							thisObj.captionPrefsDialog.show();
+							thisObj.showPrefsDialog('captions');
 						} else if (whichPref === thisObj.translate( 'prefMenuDescriptions', 'Descriptions' ) ) {
-							thisObj.descPrefsDialog.show();
+							thisObj.showPrefsDialog('descriptions');
 						} else if (whichPref === thisObj.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
-							thisObj.keyboardPrefsDialog.show();
+							thisObj.showPrefsDialog('keyboard');
 						} else if (whichPref === thisObj.translate( 'prefMenuTranscript', 'Transcript' ) ) {
-							thisObj.transcriptPrefsDialog.show();
+							thisObj.showPrefsDialog('transcript');
 						}
 						thisObj.closePopups();
 						thisObj.showingPrefsDialog = false;
