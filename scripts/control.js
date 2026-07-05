@@ -480,9 +480,8 @@ function addControlFunctions(AblePlayer) {
 				if (!(this.seekBar.tracking)) {
 					// Only update the aria live region if we have an update pending
 					// (from a seek button control) or if the seekBar has focus.
-					// We use document.activeElement instead of $(':focus') due to a strange bug:
-					// When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+					let activeEl = AblePlayer.getActiveDOMElement();
+					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(activeEl));
 					this.liveUpdatePending = false;
 					if (this.useChapterTimes) {
 						this.seekBar.setPosition(this.chapterElapsed, updateLive);

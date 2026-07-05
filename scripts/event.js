@@ -402,11 +402,12 @@ function addEventFunctions(AblePlayer) {
 		// including removal of the "media player" design pattern. There's an issue about that:
 		// https://github.com/w3c/aria-practices/issues/27
 
-		var key, $thisElement;
+		var key, $thisElement, activeEl;
 
 		// Convert to lower case.
 		key = e.key;
-		$thisElement = $(document.activeElement);
+		activeEl = AblePlayer.getActiveDOMElement();
+		$thisElement = $(activeEl);
 
 		if (key === 'Escape') {
 			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0]) && !this.hidingPopup) {
@@ -421,11 +422,12 @@ function addEventFunctions(AblePlayer) {
 
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		// (or a textarea element with player in stenoMode)
+		let activeEl = AblePlayer.getActiveDOMElement();
 		if (!(
-			$(':focus').is('[contenteditable]') ||
-			$(':focus').is('input') ||
-			($(':focus').is('textarea') && !this.stenoMode) ||
-			$(':focus').is('select') ||
+			$(activeEl).is('[contenteditable]') ||
+			$(activeEl).is('input') ||
+			($(activeEl).is('textarea') && !this.stenoMode) ||
+			$(activeEl).is('select') ||
 			e.target.hasAttribute('contenteditable') ||
 			e.target.tagName === 'INPUT' ||
 			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||

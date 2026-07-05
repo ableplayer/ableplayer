@@ -62,7 +62,7 @@ function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 				return;
 			}
 
-			var focused = $(':focus');
+			var focused = AblePlayer.getActiveDOMElement();
 			var currentIndex = focusable.index(focused);
 			if (e.shiftKey) {
 				// If backwards from first element, go to last.
