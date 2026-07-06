@@ -1449,7 +1449,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			itemLang = $newItem.attr('lang');
 		}
 		// Update relevant arrays
-		this.$sources = this.$media.find('source');
+		this.sources = this.getSources();
 
 		// recreate player, informed by new attributes and track elements
 		if (this.recreatingPlayer) {

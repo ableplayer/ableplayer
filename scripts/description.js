@@ -35,7 +35,7 @@ function addDescriptionFunctions(AblePlayer) {
 		// check to see if there's an open-described version of this video
 		// checks only the first source since if a described version is provided,
 		// it must be provided for all sources
-		this.descFile = this.$sources.first().attr('data-desc-src');
+		this.descFile = this.sources[0].getAttribute('data-desc-src');
 		if (typeof this.descFile !== 'undefined') {
 			this.hasOpenDesc = true;
 		} else {
@@ -121,7 +121,7 @@ function addDescriptionFunctions(AblePlayer) {
 		} else if (this.player === 'vimeo') {
 			return (this.activeVimeoId === this.vimeoDescId);
 		} else {
-			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+			return (this.sources[0].getAttribute('data-desc-src') === this.sources[0].getAttribute('src'));
 		}
 	};
 
@@ -345,23 +345,23 @@ function addDescriptionFunctions(AblePlayer) {
 
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
-				for (i=0; i < this.$sources.length; i++) {
+				for (i=0; i < this.sources.length; i++) {
 					// for all <source> elements, replace src with data-orig-src
-					origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-orig-src') );
+					origSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-orig-src') );
 					if (origSrc) {
-						this.$sources[i].setAttribute('src',origSrc);
+						this.sources[i].setAttribute('src',origSrc);
 					}
 				}
 			} else {
 				// the non-described version is currently playing. Swap to described.
-				for (i=0; i < this.$sources.length; i++) {
+				for (i=0; i < this.sources.length; i++) {
 					// for all <source> elements, replace src with data-desc-src (if one exists)
 					// then store original source in a new data-orig-src attribute
-					origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('src') );
-					descSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-desc-src') );
+					origSrc = DOMPurify.sanitize( this.sources[i].getAttribute('src') );
+					descSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-desc-src') );
 					if (descSrc) {
-						this.$sources[i].setAttribute('src',descSrc);
-						this.$sources[i].setAttribute('data-orig-src',origSrc);
+						this.sources[i].setAttribute('src',descSrc);
+						this.sources[i].setAttribute('data-orig-src',origSrc);
 					}
 				}
 			}

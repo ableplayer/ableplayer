@@ -6,16 +6,16 @@ function addSignFunctions(AblePlayer) {
 	AblePlayer.prototype.initSignLanguage = function() {
 		this.hasSignLanguage = false;
 		// Sign language is only currently supported in HTML5 player and YouTube.
-		var hasLocalSrc = ( this.$sources.first().attr('data-sign-src') !== undefined && this.$sources.first().attr('data-sign-src') !== "" );
+		var hasLocalSrc = ( this.sources[0].getAttribute('data-sign-src') !== undefined && this.sources[0].getAttribute('data-sign-src') !== "" );
 		// YouTube src can either be on a `source` element or on the `video` element.
 		var hasRemoteSrc = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
-		var hasRemoteSource = ( this.$sources.first().attr('data-youtube-sign-src') !== undefined && this.$sources.first().attr('data-youtube-sign-src') !== '' );
+		var hasRemoteSource = ( this.sources[0].getAttribute('data-youtube-sign-src') !== undefined && this.sources[0].getAttribute('data-youtube-sign-src') !== '' );
 		if ( ! this.isIOS() && ( hasLocalSrc || hasRemoteSrc || hasRemoteSource ) && ( this.player === 'html5' || this.player === 'youtube' ) ) {
 			// check to see if there's a sign language video accompanying this video
 			// check only the first source
 			// If sign language is provided, it must be provided for all sources
-			let ytSignSrc = this.youTubeSignId ?? DOMPurify.sanitize( this.$sources.first().attr('data-youtube-sign-src') );
-			let signSrc = DOMPurify.sanitize( this.$sources.first().attr('data-sign-src') );
+			let ytSignSrc = this.youTubeSignId ?? DOMPurify.sanitize( this.sources[0].getAttribute('data-youtube-sign-src') );
+			let signSrc = DOMPurify.sanitize( this.sources[0].getAttribute('data-sign-src') );
 			let signVideo = DOMPurify.sanitize( this.$media.data('youtube-sign-src') );
 			this.signFile = (hasLocalSrc ) ? signSrc : false;
 			if ( hasRemoteSrc ) {
@@ -86,9 +86,9 @@ function addSignFunctions(AblePlayer) {
 				this.$signVideo.append($signSource);
 			} else {
 				// for each original <source>, add a <source> to the sign <video>
-				for (i=0; i < this.$sources.length; i++) {
-					signSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-sign-src') );
-					srcType = this.$sources[i].getAttribute('type');
+				for (i=0; i < this.sources.length; i++) {
+					signSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-sign-src') );
+					srcType = this.sources[i].getAttribute('type');
 					if (signSrc) {
 						$signSource = $('<source>',{
 							'src' : signSrc,

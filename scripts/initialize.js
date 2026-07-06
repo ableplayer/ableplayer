@@ -259,8 +259,7 @@ import DOMPurify from 'dompurify';
 			deferred.reject();
 			return promise;
 		}
-
-		this.$sources = this.$media.find('source');
+		this.sources = this.getSources();
 
 		this.player = this.getPlayer();
 		if (!this.player) {
@@ -361,13 +360,36 @@ import DOMPurify from 'dompurify';
 			this.$playlistDom = parent.clone();
 			parent.remove();
 		}
-		if (this.hasPlaylist && this.$sources.length === 0) {
+		if (this.hasPlaylist && this.sources.length === 0) {
 			// no source elements were provided. Construct them from the first playlist item
 			this.cuePlaylistItem(0);
-			// redefine this.$sources now that media contains one or more <source> elements
-			this.$sources = this.$media.find('source');
+			// redefine this.sources now that media contains one or more <source> elements
+			this.sources = this.getSources();
 		}
 	};
+
+	/**
+	 * Filters the <source> elements of the media element based on their media queries.
+	 * If no sources match the media query, returns the original sources and allows the browser to handle it.
+	 *
+	 * @returns {Array} Filtered array of sources.
+	 */
+	AblePlayer.prototype.getSources = function () {
+		let sources = this.media.querySelectorAll('source');
+		let newSources = Array.from(sources).filter(source => {
+			const media = source.getAttribute('media');
+			return !media || (window.matchMedia(media) && window.matchMedia(media).matches);
+		});
+		if ( newSources.length === 0 && sources.length > 0 ) {
+			// If no sources match the media query, return the original sources and allow browser to handle.
+			if ( this.debug ) {
+				console.warn('No sources match the media query. Returning original sources.');
+			}
+			newSources = sources;
+		}
+
+		return newSources;
+	}
 
 	AblePlayer.prototype.recreatePlayer = function () {
 
