@@ -1,10 +1,10 @@
 # Continuous integration for Able Player
 #
-# Runs ESLint and the jsdom Jest project on every push and pull request.
-# The puppeteer Jest project (validate.test.cjs) needs a demo server on
-# localhost:8000 and a headed browser, so it is not run here yet — see
-# jest.config.cjs. Build artifacts are compiled to confirm Grunt + Rollup
-# succeed, but are never committed (per contributing.md).
+# Runs ESLint and both Jest projects (jsdom + puppeteer) on every push and
+# pull request. The puppeteer project runs headless with request
+# interception, so no demo server is needed. Build artifacts are compiled
+# to confirm Grunt + Rollup succeed, but are never committed (per
+# contributing.md).
 name: CI
 
 on:
@@ -39,6 +39,20 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx jest --selectProjects jsdom
+
+  test-browser:
+    name: Jest (puppeteer, headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # validate.test.cjs loads build/test/validate.umd.js
+      - run: npm run build
+      - run: npx jest --selectProjects puppeteer
 
   build:
     name: Build (Grunt + Rollup)
