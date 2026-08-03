@@ -1,0 +1,59 @@
+# Continuous integration for Able Player
+#
+# Runs ESLint and the jsdom Jest project on every push and pull request.
+# The puppeteer Jest project (validate.test.cjs) needs a demo server on
+# localhost:8000 and a headed browser, so it is not run here yet — see
+# jest.config.cjs. Build artifacts are compiled to confirm Grunt + Rollup
+# succeed, but are never committed (per contributing.md).
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  test:
+    name: Jest (jsdom)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx jest --selectProjects jsdom
+
+  build:
+    name: Build (Grunt + Rollup)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Confirm build outputs exist
+        run: |
+          test -s build/ableplayer.js
+          test -s build/ableplayer.min.js
+          test -s build/ableplayer.esm.js
+          test -s build/ableplayer.min.css
