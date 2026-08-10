@@ -132,11 +132,7 @@ class AblePlayer {
 		// set to "false" if the sole purpose of the WebVTT descriptions file
 		// is to integrate text description into the transcript
 		// set to "true" to write description text to a div
-		let descriptionAudible = options.descriptionAudible ?? data.descriptionAudible;
 		if (descriptionsAudible !== undefined && descriptionsAudible === false) {
-			this.readDescriptionsAloud = false;
-		} else if (descriptionAudible !== undefined && descriptionAudible === false) {
-			// support both singular and plural spelling of attribute
 			this.readDescriptionsAloud = false;
 		} else {
 			this.readDescriptionsAloud = true;
