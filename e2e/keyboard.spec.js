@@ -39,8 +39,9 @@ async function focusedHasVisibleRing(page) {
     const outlineVisible =
       style.outlineStyle !== "none" &&
       parseFloat(style.outlineWidth) > 0 &&
-      // Able Player idles controls at outline-color: transparent and swaps in
-      // a visible color on :focus — transparent does not count as visible.
+      // A fully transparent outline is not a visible indicator. Able Player's
+      // own :focus rule paints a solid var(--able-focus-outline), so this
+      // guards against a theme that overrides the color to transparent.
       !/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)$/.test(style.outlineColor) &&
       style.outlineColor !== "transparent";
     const shadowVisible = style.boxShadow !== "none" && style.boxShadow !== "";

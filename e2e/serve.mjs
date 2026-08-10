@@ -16,6 +16,9 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = Number(process.env.A11Y_PORT ?? 8901);
+// Loopback only: a test fixture should never expose the repository to the
+// local network.
+const HOST = "127.0.0.1";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -45,8 +48,9 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://localhost:${PORT}`);
     let filePath = path.normalize(path.join(ROOT, decodeURIComponent(url.pathname)));
 
-    // Never serve outside the repository root.
-    if (!filePath.startsWith(ROOT)) {
+    // Never serve outside the repository root. The separator check keeps a
+    // sibling directory (…/ableplayer-other) from matching the prefix.
+    if (filePath !== ROOT && !filePath.startsWith(ROOT + path.sep)) {
       res.writeHead(403).end("Forbidden");
       return;
     }
@@ -65,7 +69,9 @@ const server = http.createServer(async (req, res) => {
     const range = req.headers.range?.match(/^bytes=(\d*)-(\d*)$/);
 
     if (range && (range[1] || range[2])) {
-      const start = range[1] ? Number(range[1]) : stat.size - Number(range[2]);
+      // A suffix range longer than the file (bytes=-N, N > size) clamps to 0
+      // rather than producing a negative offset.
+      const start = range[1] ? Number(range[1]) : Math.max(0, stat.size - Number(range[2]));
       const end = range[1] && range[2] ? Number(range[2]) : stat.size - 1;
       if (start >= stat.size || end >= stat.size || start > end) {
         res.writeHead(416, { "Content-Range": `bytes */${stat.size}` }).end();
@@ -92,6 +98,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`a11y demo server: http://localhost:${PORT}/demos/ (root: ${ROOT})`);
+server.listen(PORT, HOST, () => {
+  console.log(`a11y demo server: http://${HOST}:${PORT}/demos/ (root: ${ROOT})`);
 });
