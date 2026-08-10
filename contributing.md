@@ -78,7 +78,7 @@ Able Player uses [Jest][] to run automated tests. Tests are found in `scripts/__
 npm test
 ```
 
-Because Able Player doesn't configure its own local environment, you can run it in any local setup; but you may need to adjust the test runner's target URL for tests requiring a local URL. The default is `http://localhost:8000`.
+The suite runs headless and needs no local server: the browser-based tests intercept their own navigation. To watch the browser while debugging, run `HEADFUL=1 npm test`.
 
 Please run the test suite against your changes to ensure there are no unexpected changes.
 

@@ -32,7 +32,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # Only the puppeteer job launches a browser; skip puppeteer's Chromium
+      # download elsewhere (setup-node's npm cache does not cover it).
       - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
       - run: npm run lint
 
   test:
@@ -46,6 +50,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
       # webvtt.test.cjs loads build/test/webvtt.umd.js, so the suite must run
       # against a fresh build rather than the committed bundle — otherwise a
       # change to the WebVTT source is never actually exercised.
@@ -78,6 +84,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
       - run: npm run build
       - name: Confirm build outputs exist
         run: |
