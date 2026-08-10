@@ -15,10 +15,17 @@ on:
 permissions:
   contents: read
 
+# Superseded runs on the same ref are cancelled, so a force-push to an open
+# pull request does not leave stale jobs occupying the queue.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: ESLint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,6 +38,7 @@ jobs:
   test:
     name: Jest (jsdom)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,11 +46,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # webvtt.test.cjs loads build/test/webvtt.umd.js, so the suite must run
+      # against a fresh build rather than the committed bundle — otherwise a
+      # change to the WebVTT source is never actually exercised.
+      - run: npm run build
       - run: npx jest --selectProjects jsdom
 
   test-browser:
     name: Jest (puppeteer, headless)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -57,6 +70,7 @@ jobs:
   build:
     name: Build (Grunt + Rollup)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
