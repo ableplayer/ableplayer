@@ -10,11 +10,17 @@ import AxeBuilder from "@axe-core/playwright";
  *   here means "no violations axe can detect on these pages" — it does NOT
  *   mean the player or the demos are accessible or conformant. Manual testing
  *   with assistive technology remains essential.
- * - Each page runs at four viewports (see playwright.config.js): reflow
- *   problems surface only at 320px, density/spacing problems only at 4K.
- * - YouTube/Vimeo iframe internals are third-party documents axe cannot audit
- *   cross-origin; the iframe subtree is excluded so the scan judges the
- *   player chrome and page shell we actually control.
+ * - Each page runs at four viewports (see playwright.config.js): the same
+ *   markup can pass at 1280px and fail at 320px or 4K, so every page is
+ *   scanned at all four rather than at one representative size.
+ * - Violations inside a YouTube or Vimeo document belong to the provider, so
+ *   those subtrees are excluded by policy (axe can reach into frames; we
+ *   choose not to act on findings we cannot fix). The scan judges the player
+ *   chrome and page shell we control.
+ * - Note on the YouTube page: on develop its embed does not currently
+ *   initialize (initSignLanguage throws when the media element has no
+ *   <source> children), so today that entry scans the surrounding page shell
+ *   rather than a live YouTube player.
  */
 
 // Representative demo set: one page per major feature family.
@@ -48,8 +54,12 @@ for (const demo of PAGES) {
       "wcag21aa",
     ]);
 
-    // Third-party iframe internals (YouTube/Vimeo) are cross-origin documents
-    // we neither control nor can meaningfully audit from here.
+    // Policy exclusion, not a technical limit: axe does inject into frames,
+    // but violations inside a YouTube or Vimeo document are the provider's to
+    // fix, and letting them fail this job would make the gate unactionable.
+    // Trade-off worth knowing: excluding the element also drops frame-title
+    // (SC 4.1.2) on the embed itself, which IS ours — worth a dedicated
+    // assertion if the embed path is ever covered directly.
     if (demo.thirdPartyIframe) {
       builder = builder.exclude("iframe");
     }

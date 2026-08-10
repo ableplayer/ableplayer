@@ -5,10 +5,11 @@ import { defineConfig, devices } from "@playwright/test";
  *
  * Every spec runs across four viewport projects — 320×568 (small phone),
  * 768×1024 (tablet), 1280×800 (laptop), 3840×2160 (4K) — because
- * accessibility failures are frequently viewport-specific: content reflow
- * issues appear only at 320px (WCAG 1.4.10), and low-density layouts at 4K
- * can hide focus indicators or spacing problems that a single mid-size
- * viewport scan never sees.
+ * accessibility failures are frequently viewport-specific. Narrow widths are
+ * where overlap, clipping and contrast changes from wrapped controls show up,
+ * and large viewports surface spacing and focus-indicator problems that a
+ * single mid-size scan never sees. (axe has no reflow rule of its own — the
+ * value here is running every other rule against each layout.)
  *
  * The webServer serves the repository root (e2e/serve.mjs) so demo pages
  * resolve their real relative paths (../build, ../media). `npm run build`
