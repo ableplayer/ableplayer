@@ -134,9 +134,6 @@ class AblePlayer {
 		// set to "true" to write description text to a div
 		if (descriptionsAudible !== undefined && descriptionsAudible === false) {
 			this.readDescriptionsAloud = false;
-		} else if (descriptionsAudible !== undefined && descriptionsAudible === false) {
-			// support both singular and plural spelling of attribute
-			this.readDescriptionsAloud = false;
 		} else {
 			this.readDescriptionsAloud = true;
 		}

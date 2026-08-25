@@ -521,7 +521,7 @@
 		var thisObj, available,
 			$prefsDiv, formTitle, introText, $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
 			$fieldset, groupHeading, groupObj, thisPref, $thisDiv, thisClass,
-			thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
+			thisId, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
 			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, prefCaptionVoice, $kbHeading,$kbList,
 			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer, sharedDialog;
 
@@ -639,7 +639,6 @@
 						} : undefined
 					});
 					$thisDiv = fieldObj.wrapper;
-					$thisLabel = fieldObj.label;
 					$thisField = fieldObj.field;
 					// add a change handler that updates the style of the sample caption text
 					let viewingOptions = ['prefCaptionsPosition','prefCaptionsFont','prefCaptionsSize','prefCaptionsColor','prefCaptionsBGColor','prefCaptionsOpacity'];
@@ -752,8 +751,6 @@
 							checked: this[thisPref] === 1
 						});
 						$thisDiv = fieldObj.wrapper;
-						$thisLabel = fieldObj.label;
-						$thisField = fieldObj.field;
 					} else if (this.synth) {
 						let isDescRateField = (thisPref === 'prefDescRate');
 						// Only show these options if browser supports speech synthesis
@@ -771,7 +768,6 @@
 							} : undefined
 						});
 						$thisDiv = fieldObj.wrapper;
-						$thisLabel = fieldObj.label;
 						$thisField = fieldObj.field;
 						if (isDescRateField) {
 							// Number field has no options to populate.
@@ -844,7 +840,6 @@
 						checked: this[thisPref] === 1
 					});
 					$thisDiv = fieldObj.wrapper;
-					$thisLabel = fieldObj.label;
 					$thisField = fieldObj.field;
 					if (form === 'keyboard') {
 						// add a change handler that updates the list of current keyboard shortcuts

@@ -287,9 +287,8 @@ function addDragdropFunctions(AblePlayer) {
 
 	AblePlayer.prototype.handleWindowButtonClick = function (which, e) {
 
-		var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
+		var $windowPopup, $windowButton, $toolbar, popupTop;
 
-		thisObj = this;
 		if (this.focusNotClick) {
 			// transcript or sign window has just opened,
 			// and focus moved to the window button
@@ -309,6 +308,7 @@ function addDragdropFunctions(AblePlayer) {
 		if (e.type === 'keydown') {
 			// user pressed a key
 			if (e.key === ' ' || e.key === 'Enter') {
+				// Space or Enter: fall through to the toggle logic below
 			} else if (e.key === 'Escape') {
 				if ($windowPopup.is(':visible')) {
 					// close the popup menu
@@ -349,10 +349,9 @@ function addDragdropFunctions(AblePlayer) {
 
 	AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
-		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, startingWidth, startingHeight,
+		var $window, $windowPopup, $windowButton, resizeDialog, startingWidth, startingHeight,
 			aspectRatio, tempWidth, tempHeight;
 
-		thisObj = this;
 		if (which === 'transcript') {
 			$window = this.$transcriptArea;
 			$windowPopup = this.$transcriptPopup;
