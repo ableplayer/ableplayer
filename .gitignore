@@ -6,3 +6,5 @@ npm-debug.log
 .htaccess
 docs
 jsdoc.json
+playwright-report/
+test-results/

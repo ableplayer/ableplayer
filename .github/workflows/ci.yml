@@ -5,6 +5,11 @@
 # interception, so no demo server is needed. Build artifacts are compiled
 # to confirm Grunt + Rollup succeed, but are never committed (per
 # contributing.md).
+#
+# The accessibility job runs axe-core (WCAG 2.1 A/AA rules) plus keyboard
+# operability checks over a representative demo set at four viewports
+# (320px -> 4K). Automated checks catch only a fraction of WCAG failures —
+# a green run prevents a class of regressions; it is not a conformance claim.
 name: CI
 
 on:
@@ -93,3 +98,29 @@ jobs:
           test -s build/ableplayer.min.js
           test -s build/ableplayer.esm.js
           test -s build/ableplayer.min.css
+
+  a11y:
+    name: Accessibility (axe + keyboard, 320px-4K)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # The demo pages load ../build/ableplayer.dist.js + ableplayer.min.css,
+      # so the suite always scans a fresh build, never a stale committed one.
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # e2e/serve.mjs serves the repo root so the demos' relative ../build and
+      # ../media references resolve; Playwright boots it via playwright.config.js.
+      - run: npm run test:a11y
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-playwright-report
+          path: playwright-report/
+          retention-days: 14

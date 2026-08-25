@@ -15,7 +15,8 @@
     "build": "grunt",
     "test": "grunt jest",
     "lint": "eslint",
-    "watch": "rollup -c --watch"
+    "watch": "rollup -c --watch",
+    "test:a11y": "playwright test"
   },
   "dependencies": {
     "dompurify": "^3.2.6",
@@ -25,7 +26,9 @@
     "xml-js": "1.6.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
