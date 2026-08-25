@@ -1,0 +1,95 @@
+# Continuous integration for Able Player
+#
+# Runs ESLint and both Jest projects (jsdom + puppeteer) on every push and
+# pull request. The puppeteer project runs headless with request
+# interception, so no demo server is needed. Build artifacts are compiled
+# to confirm Grunt + Rollup succeed, but are never committed (per
+# contributing.md).
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Superseded runs on the same ref are cancelled, so a force-push to an open
+# pull request does not leave stale jobs occupying the queue.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Only the puppeteer job launches a browser; skip puppeteer's Chromium
+      # download elsewhere (setup-node's npm cache does not cover it).
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
+      - run: npm run lint
+
+  test:
+    name: Jest (jsdom)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
+      # webvtt.test.cjs loads build/test/webvtt.umd.js, so the suite must run
+      # against a fresh build rather than the committed bundle — otherwise a
+      # change to the WebVTT source is never actually exercised.
+      - run: npm run build
+      - run: npx jest --selectProjects jsdom
+
+  test-browser:
+    name: Jest (puppeteer, headless)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # validate.test.cjs loads build/test/validate.umd.js
+      - run: npm run build
+      - run: npx jest --selectProjects puppeteer
+
+  build:
+    name: Build (Grunt + Rollup)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "1"
+      - run: npm run build
+      - name: Confirm build outputs exist
+        run: |
+          test -s build/ableplayer.js
+          test -s build/ableplayer.min.js
+          test -s build/ableplayer.esm.js
+          test -s build/ableplayer.min.css
