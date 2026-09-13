@@ -1710,7 +1710,7 @@ function addControlFunctions(AblePlayer) {
 			}
 		}
 		// Change the transcript language if the transcript is not currently visible.
-		if ( ( ! this.$transcriptArea.is(':visible') && source === 'captions' ) || source === 'init' || source === 'transcript' ) {
+		if ( ( source === 'captions' && typeof this.$transcriptArea !== 'undefined' && ! this.$transcriptArea.is(':visible') ) || source === 'init' || source === 'transcript' ) {
 			console.log('syncTrackLanguages: transcript is not visible, so changing transcript language to ' + language);
 			this.transcriptCaptions = captions;
 			this.transcriptChapters = chapters;

@@ -266,7 +266,12 @@ function addVimeoFunctions(AblePlayer) {
 			// this is likely already a vimeo ID
 			return url;
 		} else {
-			urlObject = new URL(url);
+			// Try to parse as a URL. If that fails, return the string as-is. It's probably an ID.
+			try {
+				urlObject = new URL(url);
+			} catch (e) {
+				return url;
+			}
 		}
 		if ( 'vimeo.com' === urlObject.hostname || 'player.vimeo.com' === urlObject.hostname ) {
 			// this is a full Vimeo URL
