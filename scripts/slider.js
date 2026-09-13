@@ -1,5 +1,7 @@
 import $ from 'jquery';
 
+	// Minimum horizontal distance (px) for a touchmove to be treated as a swipe gesture.
+	var SWIPE_THRESHOLD = 50;
 
 	// Events:
 	// - startTracking(event, position)
@@ -31,6 +33,12 @@ import $ from 'jquery';
 		this.queuedTrackLeft = null;
 		this.trackGeometry = null;
 		this.hoverGeometry = null;
+		this.bigInterval = bigInterval;
+
+		// Swipe gesture state (used to fast-forward/rewind via touch when the seek head is focused).
+		this.swipeStartX = null;
+		this.swipeStartY = null;
+		this.swipeHandled = false;
 
 		this.$seekbarDiv = $(div);
 
@@ -90,7 +98,8 @@ import $ from 'jquery';
 		this.setDuration(max);
 
 		// handle seekHead events
-		this.$seekHead.on('mouseenter mouseleave mousedown mouseup focus blur touchstart touchend', function (e) {
+		this.$seekHead.on(
+			'mouseenter mouseleave mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
 			coords = thisObj.pointerEventToXY(e);
 
@@ -103,11 +112,28 @@ import $ from 'jquery';
 					thisObj.clearHoverGeometry();
 				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
+				if (e.type === 'touchstart') {
+					thisObj.swipeStartX = coords.x;
+					thisObj.swipeStartY = coords.y;
+					thisObj.swipeHandled = false;
+				}
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.$seekHead.offset() + (thisObj.$seekHead.width() / 2)));
 				if (!thisObj.$seekbarDiv.is(':focus')) {
 					thisObj.$seekbarDiv.focus();
 				}
 				e.preventDefault();
+			} else if (e.type === 'touchmove') {
+				if (thisObj.swipeStartX !== null && !thisObj.swipeHandled && !thisObj.isPointOverSeekHead(coords.x, coords.y) &&
+					thisObj.detectSwipe(coords.x, coords.y)) {
+					thisObj.swipeHandled = true;
+					thisObj.cancelTracking();
+					// Swipe left rewinds, swipe right fast-forwards.
+					thisObj.swipeSeek(coords.x < thisObj.swipeStartX ? -1 : 1);
+					e.preventDefault();
+				}
+			} else if (e.type === 'touchend') {
+				thisObj.swipeStartX = null;
+				thisObj.swipeStartY = null;
 			}
 			if (e.type !== 'mousedown' && e.type !== 'touchstart') {
 				thisObj.refreshTooltip();
@@ -293,6 +319,44 @@ import $ from 'jquery';
 		this.tracking = false;
 		this.$seekbarDiv.trigger('stopTracking', [position]);
 		this.setPosition(position, true);
+	};
+
+	// Abandons any in-progress tracking (e.g. a touch drag) without committing a new position.
+	AccessibleSlider.prototype.cancelTracking = function () {
+		this.unbindGlobalTrackingEvents();
+		if (this.trackFrameRequestId !== null) {
+			window.cancelAnimationFrame(this.trackFrameRequestId);
+			this.trackFrameRequestId = null;
+		}
+		this.queuedTrackPosition = null;
+		this.queuedTrackLeft = null;
+		this.clearTrackingGeometry();
+		this.trackDevice = null;
+		this.tracking = false;
+		this.resetHeadLocation();
+	};
+
+	// Returns true if a touch move from the recorded swipe start to (x, y) qualifies as a horizontal swipe.
+	AccessibleSlider.prototype.detectSwipe = function (x, y) {
+		var deltaX = x - this.swipeStartX;
+		var deltaY = y - this.swipeStartY;
+		return Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.5;
+	};
+
+	// Returns true if (x, y) is still within the seek head's current bounds, i.e. the finger is dragging it directly.
+	AccessibleSlider.prototype.isPointOverSeekHead = function (x, y) {
+		var offset = this.$seekHead.offset();
+		return x >= offset.left && x <= offset.left + this.$seekHead.outerWidth() &&
+			y >= offset.top && y <= offset.top + this.$seekHead.outerHeight();
+	};
+
+	// Moves the seek head by one seek interval; multiplier of 1 fast-forwards, -1 rewinds.
+	AccessibleSlider.prototype.swipeSeek = function (multiplier) {
+		var step = this.bigInterval > 0 ? this.bigInterval : 1;
+		var newPosition = this.boundPos(this.position + (step * multiplier));
+		this.startTracking('touch', newPosition);
+		this.trackHeadAtPosition(newPosition);
+		this.stopTracking(newPosition);
 	};
 
 	AccessibleSlider.prototype.bindGlobalTrackingEvents = function () {
