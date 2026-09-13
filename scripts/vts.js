@@ -781,17 +781,9 @@ function addVtsFunctions(AblePlayer) {
 
 		// Adjusts start and end times of the current, previous, and next rows in VTS table
 		// after a move or insert
-		// NOTE: Fully automating this process would be extraordinarily complicated
-		// The goal here is simply to make subtle tweaks to ensure rows appear
+		// The goal here is to make subtle tweaks to ensure rows appear
 		// in the new order within the Able Player transcript
 		// Additional tweaking will likely be required by the user
-
-		// HISTORY: Originally set minDuration to 2 seconds for captions and .500 for descriptions
-		// However, this can results in significant changes to existing caption timing,
-		// with not-so-positive results.
-		// As of 3.1.15, setting minDuration to .001 for all track kinds
-		// Users will have to make further adjustments manually if needed
-
 		// TODO: Add WebVTT validation on save, since tweaking times is risky
 
 		var	 minDuration, $rows, prevRowNum, nextRowNum, $row, $prevRow, $nextRow,
@@ -921,15 +913,15 @@ function addVtsFunctions(AblePlayer) {
 		}
 
 		// Update all affected start/end times
-		$row.find('td').eq(2).text(this.formatSecondsAsColonTime(start,true));
-		$row.find('td').eq(3).text(this.formatSecondsAsColonTime(end,true));
+		$row.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(start,true)));
+		$row.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(end,true)));
 		if ($prevRow) {
-			$prevRow.find('td').eq(2).text(this.formatSecondsAsColonTime(prevStart,true));
-			$prevRow.find('td').eq(3).text(this.formatSecondsAsColonTime(prevEnd,true));
+			$prevRow.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(prevStart,true)));
+			$prevRow.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(prevEnd,true)));
 		}
 		if ($nextRow) {
-			$nextRow.find('td').eq(2).text(this.formatSecondsAsColonTime(nextStart,true));
-			$nextRow.find('td').eq(3).text(this.formatSecondsAsColonTime(nextEnd,true));
+			$nextRow.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(nextStart,true)));
+			$nextRow.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(nextEnd,true)));
 		}
 	};
 
