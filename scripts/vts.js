@@ -254,16 +254,29 @@ function addVtsFunctions(AblePlayer) {
 
 		// timestamp is a string in the form "HH:MM:SS.xxx"
 		// Take some simple steps to ensure edited timestamp values still adhere to expected format
+		// All time strings should have all components (hours, minutes, seconds, milliseconds) present.
 
-		var firstPart, lastPart;
+		var firstPart, parts, lastPart, firstParts;
 
-		firstPart = timestamp.substring(0,timestamp.lastIndexOf('.')+1);
-		lastPart = timestamp.substring(timestamp.lastIndexOf('.')+1);
-
-		// TODO: Be sure each component within firstPart has only exactly two digits
-		// Probably can't justify doing this automatically
-		// If users enters '5' for minutes, that could be either '05' or '50'
-		// This should trigger an error and prompt the user to correct the value before proceeding
+		parts      = timestamp.split('.');
+		firstPart  = parts[0];
+		firstParts = firstPart.split(':');
+		let hours, minutes, seconds;
+		if (firstParts.length === 3) {
+			hours   = String(firstParts[0]).padStart(2,'0');
+			minutes = String(firstParts[1]).padStart(2,'0');
+			seconds = String(firstParts[2]).padStart(2,'0');
+		} else if (firstParts.length === 2) {
+			hours   = '00';
+			minutes = String(firstParts[0]).padStart(2,'0');
+			seconds = String(firstParts[1]).padStart(2,'0');
+		} else if (firstParts.length === 1) {
+			hours   = '00';
+			minutes = '00';
+			seconds = String(firstParts[0]).padStart(2,'0');
+		}
+		firstPart = hours + ':' + minutes + ':' + seconds;
+		lastPart  = parts[1] ?? '000';
 
 		// Be sure lastPart has exactly three digits
 		if (lastPart.length > 3) {
@@ -271,11 +284,9 @@ function addVtsFunctions(AblePlayer) {
 			lastPart = lastPart.substring(0,3);
 		} else if (lastPart.length < 3) {
 			// add trailing zeros
-			while (lastPart.length < 3) {
-				lastPart += '0';
-			}
+			lastPart = String(lastPart).padEnd(3,'0');
 		}
-		return firstPart + lastPart;
+		return firstPart + '.' + lastPart;
 	};
 
 
