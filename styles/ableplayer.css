@@ -49,16 +49,7 @@
 	--able-light-orange: #ffbb37;
 	--able-bright-green: #8ab839;
 	--able-light-pink: #fee;
-}
-
-#able-vts,
-.able-modal-overlay,
-.able-playlist,
-.able-search-results,
-.able-chapters-div,
-.able-modal-dialog,
-.able-transcript-area,
-.able-wrapper {
+	/* Able player variable assignments. */
 	--able-base-control-size: 24px;
 	--able-color: var(--able-white);
 	--able-control-background: var(--able-black);
