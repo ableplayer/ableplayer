@@ -69,6 +69,19 @@ Also in 5.0.0, we build TypeScript type definitions, to aid IDE development with
 - **build/ableplayer.esm.d.ts** - Type definitions
 - **build/ableplayer.esm.d.ts.map** - Source map to improve "go to definition" behavior in IDEs
 
+## Automated Testing
+
+Able Player uses [Jest][] to run automated tests. Tests are found in `scripts/__tests__`. Currently, the test suite is fairly small, but expanding the test suite is a high priority.
+
+```sh
+# Run Test Suite
+npm test
+```
+
+The suite runs headless and needs no local server: the browser-based tests intercept their own navigation. To watch the browser while debugging, run `HEADFUL=1 npm test`.
+
+Please run the test suite against your changes to ensure there are no unexpected changes.
+
 ## Code of Conduct
 
 All contributors to Able Player are expected to follow our [published Code of Conduct](https://github.com/ableplayer/ableplayer/blob/main/code-of-conduct.md).
@@ -80,3 +93,4 @@ All contributors to Able Player are expected to follow our [published Code of Co
   [develop]: https://github.com/ableplayer/ableplayer/tree/develop
   [donate]: https://www.joedolson.com/donate/
   [Existing translations]: https://github.com/ableplayer/ableplayer/blob/develop/translations/
+  [Jest]: https://jestjs.io/

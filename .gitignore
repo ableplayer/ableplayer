@@ -2,8 +2,9 @@
 test.html
 node_modules/
 npm-debug.log
-translations/???.js
 .idea
 .htaccess
 docs
 jsdoc.json
+playwright-report/
+test-results/

@@ -4,19 +4,24 @@ import DOMPurify from 'dompurify';
 
 function addSignFunctions(AblePlayer) {
 	AblePlayer.prototype.initSignLanguage = function() {
+		let firstSource, localSignSrc, remoteSignSrc, hasLocalSrc, hasRemoteSrc, hasRemoteSource, ytSignSrc, signSrc, signVideo;
+
 		this.hasSignLanguage = false;
 		// Sign language is only currently supported in HTML5 player and YouTube.
-		var hasLocalSrc = ( this.$sources.first().attr('data-sign-src') !== undefined && this.$sources.first().attr('data-sign-src') !== "" );
+		firstSource   = this.sources[0] ?? null;
+		localSignSrc  = firstSource ? firstSource.getAttribute('data-sign-src') : null;
+		remoteSignSrc = firstSource ? firstSource.getAttribute('data-youtube-sign-src') : null;
+		hasLocalSrc   = ( localSignSrc !== null && localSignSrc !== "" );
 		// YouTube src can either be on a `source` element or on the `video` element.
-		var hasRemoteSrc = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
-		var hasRemoteSource = ( this.$sources.first().attr('data-youtube-sign-src') !== undefined && this.$sources.first().attr('data-youtube-sign-src') !== '' );
+		hasRemoteSrc    = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
+		hasRemoteSource = ( remoteSignSrc !== null && remoteSignSrc !== '' );
 		if ( ! this.isIOS() && ( hasLocalSrc || hasRemoteSrc || hasRemoteSource ) && ( this.player === 'html5' || this.player === 'youtube' ) ) {
 			// check to see if there's a sign language video accompanying this video
 			// check only the first source
 			// If sign language is provided, it must be provided for all sources
-			let ytSignSrc = this.youTubeSignId ?? DOMPurify.sanitize( this.$sources.first().attr('data-youtube-sign-src') );
-			let signSrc = DOMPurify.sanitize( this.$sources.first().attr('data-sign-src') );
-			let signVideo = DOMPurify.sanitize( this.$media.data('youtube-sign-src') );
+			ytSignSrc = this.youTubeSignId ?? DOMPurify.sanitize( remoteSignSrc );
+			signSrc   = DOMPurify.sanitize( localSignSrc );
+			signVideo = DOMPurify.sanitize( this.$media.data('youtube-sign-src') );
 			this.signFile = (hasLocalSrc ) ? signSrc : false;
 			if ( hasRemoteSrc ) {
 				this.signYoutubeId = signVideo;
@@ -61,6 +66,9 @@ function addSignFunctions(AblePlayer) {
 				this.$signToolbar = $('<div>',{
 					'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
 				});
+				let signMask = document.createElement( 'div' );
+				signMask.classList.add( 'able-window-mask' );
+				this.$signWindow.append( signMask );
 				this.$signWindow.append(this.$signToolbar);
 			}
 
@@ -83,9 +91,9 @@ function addSignFunctions(AblePlayer) {
 				this.$signVideo.append($signSource);
 			} else {
 				// for each original <source>, add a <source> to the sign <video>
-				for (i=0; i < this.$sources.length; i++) {
-					signSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-sign-src') );
-					srcType = this.$sources[i].getAttribute('type');
+				for (i=0; i < this.sources.length; i++) {
+					signSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-sign-src') );
+					srcType = this.sources[i].getAttribute('type');
 					if (signSrc) {
 						$signSource = $('<source>',{
 							'src' : signSrc,

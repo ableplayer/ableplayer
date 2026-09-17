@@ -196,9 +196,10 @@ function addEventFunctions(AblePlayer) {
 			this.okToPlay = false;
 		}
 		this.refreshControls();
-		if (this.$focusedElement) {
+		if (this.focusedElement) {
+			console.log( this.focusedElement );
 			this.restoreFocus();
-			this.$focusedElement = null;
+			this.focusedElement = null;
 			this.activeMedia = null;
 		}
 	};
@@ -224,15 +225,16 @@ function addEventFunctions(AblePlayer) {
 		// but this function finds a match in the new player
 		// and places focus there
 
-		var classList, $mediaParent;
+		var classList, mediaParent;
 
-		if ( this.$focusedElement && null !== this.activeMedia ) {
-			$mediaParent = $( '#' + this.activeMedia ).closest( '.able' );
-			if ( (this.$focusedElement).attr('role') === 'button' ) {
-				classList = this.$focusedElement.attr("class").split(/\s+/);
-				$.each(classList, function(index, item) {
+		if ( this.focusedElement && null !== this.activeMedia ) {
+			mediaParent = document.getElementById(this.activeMedia).closest( '.able' );
+			if ( ( this.focusedElement.tagName === 'BUTTON' ) ) {
+				classList = this.focusedElement.getAttribute('class');
+				classList = ( typeof classList === 'string' ) ? classList.split(/\s+/) : [];
+				classList.forEach(function(item) {
 					if (item.substring(0,20) === 'able-button-handler-') {
-						$mediaParent.find('div.able-controller div.' + item).trigger('focus');
+						mediaParent.querySelector('div.able-controller .' + item).focus();
 					}
 				});
 			}
@@ -245,7 +247,7 @@ function addEventFunctions(AblePlayer) {
 		var thisObj = this;
 
 		// Handle seek bar events.
-		this.seekBar.seekbarDiv.on('startTracking', function (e) {
+		this.seekBar.$seekbarDiv.on('startTracking', function (e) {
 			thisObj.pausedBeforeTracking = thisObj.paused;
 			thisObj.pauseMedia();
 		}).on('tracking', function (e, position) {
@@ -272,7 +274,7 @@ function addEventFunctions(AblePlayer) {
 
 	AblePlayer.prototype.onClickPlayerButton = function (el) {
 		var whichButton, prefsPopup;
-		whichButton = this.getButtonNameFromClass($(el).attr('class'));
+		whichButton = this.getButtonNameFromClass(el.getAttribute('class'));
 		switch ( whichButton ) {
 			case 'play':
 				this.clickedPlay = true;
@@ -331,20 +333,20 @@ function addEventFunctions(AblePlayer) {
 				}
 				break;
 			case 'preferences':
-				if ($(el).attr('data-prefs-popup') === 'menu') {
+				if (el.dataset.prefsPopup === 'menu') {
 					this.handlePrefsClick();
 				} else {
 					this.showingPrefsDialog = true; // stopgap
 					this.closePopups();
-					prefsPopup = $(el).attr('data-prefs-popup');
+					prefsPopup = el.dataset.prefsPopup;
 					if (prefsPopup === 'keyboard') {
-						this.keyboardPrefsDialog.show();
+						this.showPrefsDialog('keyboard');
 					} else if (prefsPopup === 'captions') {
-						this.captionPrefsDialog.show();
+						this.showPrefsDialog('captions');
 					} else if (prefsPopup === 'descriptions') {
-						this.descPrefsDialog.show();
+						this.showPrefsDialog('descriptions');
 					} else if (prefsPopup === 'transcript') {
-						this.transcriptPrefsDialog.show();
+						this.showPrefsDialog('transcript');
 					}
 					this.showingPrefsDialog = false;
 				}
@@ -384,11 +386,10 @@ function addEventFunctions(AblePlayer) {
 		// that is likely to need supported keystrokes, including space
 		var activeElement = AblePlayer.getActiveDOMElement();
 
-		return ($(activeElement).prop('tagName') === 'INPUT') ? false : defaultReturn;
+		return (activeElement.tagName === 'INPUT') ? false : defaultReturn;
 	};
 
 	AblePlayer.prototype.onPlayerKeyPress = function (e) {
-
 		// handle keystrokes (using DHTML Style Guide recommended key combinations)
 		// https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
 		// Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
@@ -400,14 +401,15 @@ function addEventFunctions(AblePlayer) {
 		// including removal of the "media player" design pattern. There's an issue about that:
 		// https://github.com/w3c/aria-practices/issues/27
 
-		var key, $thisElement;
+		var key, $thisElement, activeEl;
 
 		// Convert to lower case.
 		key = e.key;
-		$thisElement = $(document.activeElement);
+		activeEl = AblePlayer.getActiveDOMElement();
+		$thisElement = $(activeEl);
 
 		if (key === 'Escape') {
-			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0]) && !this.hidingPopup) {
+			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
 				// This element is part of transcript area.
 				this.handleTranscriptToggle();
 				return false;
@@ -420,10 +422,10 @@ function addEventFunctions(AblePlayer) {
 		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 		// (or a textarea element with player in stenoMode)
 		if (!(
-			$(':focus').is('[contenteditable]') ||
-			$(':focus').is('input') ||
-			($(':focus').is('textarea') && !this.stenoMode) ||
-			$(':focus').is('select') ||
+			$(activeEl).is('[contenteditable]') ||
+			$(activeEl).is('input') ||
+			($(activeEl).is('textarea') && !this.stenoMode) ||
+			$(activeEl).is('select') ||
 			e.target.hasAttribute('contenteditable') ||
 			e.target.tagName === 'INPUT' ||
 			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
@@ -436,12 +438,6 @@ function addEventFunctions(AblePlayer) {
 			} else if (key === ' ') {
 				// disable spacebar support for play/pause toggle as of 4.2.10
 				// spacebar should not be handled everywhere on the page, since users use that to scroll the page
-				// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
-				if ($thisElement.attr('role') === 'button') {
-					// register a click on this element
-					e.preventDefault();
-					$thisElement.trigger( 'click' );
-				}
 			} else if ( key === 'p' ) {
 				if (this.usingModifierKeys(e)) {
 					e.preventDefault();
@@ -503,11 +499,11 @@ function addEventFunctions(AblePlayer) {
 					this.handlePrefsClick();
 				}
 			} else if (key === 'Enter') {
-				if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+				if ( $thisElement.is('span') ) {
 					// register a click on this element
 					// if it's a transcript span the transcript span click handler will take over
 					$thisElement.trigger( 'click' );
-				} else if ($thisElement.prop('tagName') === 'LI') {
+				} else if ($thisElement.is('li')) {
 					$thisElement.trigger( 'click' );
 				}
 			}
@@ -760,7 +756,7 @@ function addEventFunctions(AblePlayer) {
 		}
 
 		// handle clicks on player buttons
-		this.$controllerDiv.find('div[role="button"]').on('click',function(e){
+		this.$controllerDiv.find('button').on('click',function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});

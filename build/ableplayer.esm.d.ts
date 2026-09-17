@@ -45,6 +45,7 @@ declare class AblePlayer {
     transcriptType: string;
     transcriptSrc: any;
     lyricsMode: boolean;
+    strictMode: boolean;
     transcriptTitle: any;
     $signDivLocation: any;
     defaultCaptionsPosition: string;

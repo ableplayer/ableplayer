@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Able Player po slovensky | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.dist.js"></script>
+
+</head>
+
+<body>
+	<header lang="en">
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav lang="en">
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Able Player po slovensky</h1>
+		<div id="container">
+			<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-lang="sk" playsinline>
+				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-sign-src="../media/wwa_sign.mp4"/>
+				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm" data-sign-src="../media/wwa_sign.webm"/>
+				<track kind="captions" src="../media/wwa_captions_sk.vtt" srclang="sk" label="Slovenčina" default/>
+				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+				<track kind="descriptions" src="../media/wwa_description_sk.vtt" srclang="sk"/>
+				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				<track kind="chapters" src="../media/wwa_chapters_sk.vtt" srclang="sk"/>
+				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+			</video>
+		</div>
+	</main>
+</body>
+</html>

@@ -97,11 +97,6 @@ a {
 	padding: 1rem;
 }
 
-/* One-column layouts */
-#container {
-	background: #fff;
-}
-
 .offscreen {
 	border: 0;
 	clip-path: inset(50%);

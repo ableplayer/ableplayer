@@ -23,7 +23,7 @@ function addDescriptionFunctions(AblePlayer) {
 		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
 		// descReader == either 'browser' or 'screenreader'
 
-		var deferred, promise;
+		var deferred, promise, firstSource;
 
 		deferred = new this.defer();
 		promise = deferred.promise();
@@ -35,8 +35,9 @@ function addDescriptionFunctions(AblePlayer) {
 		// check to see if there's an open-described version of this video
 		// checks only the first source since if a described version is provided,
 		// it must be provided for all sources
-		this.descFile = this.$sources.first().attr('data-desc-src');
-		if (typeof this.descFile !== 'undefined') {
+		firstSource   = this.sources[0] ?? null;
+		this.descFile = firstSource ? this.sources[0].getAttribute('data-desc-src') : null;
+		if ( this.descFile !== null && this.descFile !== '' ) {
 			this.hasOpenDesc = true;
 		} else {
 			// there's no open-described version via data-desc-src,
@@ -121,7 +122,10 @@ function addDescriptionFunctions(AblePlayer) {
 		} else if (this.player === 'vimeo') {
 			return (this.activeVimeoId === this.vimeoDescId);
 		} else {
-			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+			const firstSource = this.sources[0] ?? null;
+			const descSrc     = firstSource ? firstSource.getAttribute('data-desc-src') : null;
+			const activeSrc   = firstSource ? firstSource.getAttribute('src') : null;
+			return ( descSrc !== null && descSrc === activeSrc );
 		}
 	};
 
@@ -312,8 +316,7 @@ function addDescriptionFunctions(AblePlayer) {
 
 		// get element that has focus at the time swap is initiated
 		// after player is rebuilt, focus will return to that same element
-		// (if it exists)
-		this.$focusedElement = $(':focus');
+		this.focusedElement = AblePlayer.getActiveDOMElement();
 		this.activeMedia = this.mediaId;
 
 		// get current time of current source, and attempt to start new video at the same time
@@ -346,23 +349,23 @@ function addDescriptionFunctions(AblePlayer) {
 
 			if (this.usingDescribedVersion()) {
 				// the described version is currently playing. Swap to non-described
-				for (i=0; i < this.$sources.length; i++) {
+				for (i=0; i < this.sources.length; i++) {
 					// for all <source> elements, replace src with data-orig-src
-					origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-orig-src') );
+					origSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-orig-src') );
 					if (origSrc) {
-						this.$sources[i].setAttribute('src',origSrc);
+						this.sources[i].setAttribute('src',origSrc);
 					}
 				}
 			} else {
 				// the non-described version is currently playing. Swap to described.
-				for (i=0; i < this.$sources.length; i++) {
+				for (i=0; i < this.sources.length; i++) {
 					// for all <source> elements, replace src with data-desc-src (if one exists)
 					// then store original source in a new data-orig-src attribute
-					origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('src') );
-					descSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-desc-src') );
+					origSrc = DOMPurify.sanitize( this.sources[i].getAttribute('src') );
+					descSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-desc-src') );
 					if (descSrc) {
-						this.$sources[i].setAttribute('src',descSrc);
-						this.$sources[i].setAttribute('data-orig-src',origSrc);
+						this.sources[i].setAttribute('src',descSrc);
+						this.sources[i].setAttribute('data-orig-src',origSrc);
 					}
 				}
 			}
