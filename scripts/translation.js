@@ -3,7 +3,6 @@ import ca from '../translations/ca.json';
 import cs from '../translations/cs.json';
 import da from '../translations/da.json';
 import de from '../translations/de.json';
-import en from '../translations/en.json';
 import es from '../translations/es.json';
 import fr from '../translations/fr.json';
 import he from '../translations/he.json';
@@ -27,7 +26,6 @@ const moduleFromTag = {
 	cs,
 	da,
 	de,
-	en,
 	es,
 	fr,
 	he,
@@ -54,7 +52,6 @@ function addTranslationFunctions(AblePlayer) {
 			'cs'    : 'Czech',
 			'da'    : 'Danish',
 			'de'    : 'German',
-			'en'    : 'English',
 			'es'    : 'Spanish',
 			'fr'    : 'French',
 			'he'    : 'Hebrew',
