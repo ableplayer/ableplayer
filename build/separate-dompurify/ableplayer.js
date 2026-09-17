@@ -1,4 +1,4 @@
-/*! ableplayer V5.0.0 - needs DOMPurify provided separately. Console logs enabled, for development */
+/*! ableplayer V5.1.0-alpha - needs DOMPurify provided separately. Console logs enabled, for development */
 
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery'), require('dompurify')) :
@@ -28,11 +28,11 @@
 				console.warn('Required dependency DOMPurify not available. Please use the full Able Player bundle which has DOMPurify built in. Or, keep using this bundle, and include DOMPurify separately.');
 			}
 
-			$('video, audio').each(function (index, element) {
-				if ($(element).data('able-player') !== undefined) {
-					new AblePlayer($(this),$(element));
+			document.querySelectorAll( 'video,audio' ).forEach( ( element ) => {
+				if ( element.dataset.ablePlayer !== undefined ) {
+					new AblePlayer( $( element ) );
 				}
-			});
+			} );
 		});
 
 		// YouTube player support; pass ready event to jQuery so we can catch in player.
@@ -51,16 +51,17 @@
 		});
 	}
 
-	// Outdented for a simpler diff during module conversion
-		/**
-		 * Construct the AblePlayer object.
-		 *
-		 * Able Player needs `window` to instantiate, so, skip the constructor if
-		 * you are running outside the browser (for example, SSR).
-		 *
-		 * @param object media jQuery selector or element identifying the media.
-		 */
-		function AblePlayer(media) {
+	/**
+	 * Construct the AblePlayer object.
+	 *
+	 * Able Player needs `window` to instantiate, so, skip the constructor if
+	 * you are running outside the browser (for example, SSR).
+	 *
+	 * @param object media jQuery selector or element identifying the media.
+	 * @param object options Optional configuration options for the player.
+	 */
+	class AblePlayer {
+		constructor(media, options = {}) {
 
 			if (typeof window === 'undefined') {
 				console.warn("`window` is undefined. Able Player needs `window` to instantiate. Skip constructing Able Player if you are running outside a browser (for example, SSR).");
@@ -70,6 +71,7 @@
 			var thisObj = this;
 
 			this.media = media;
+			this.options = options;
 
 			if ($(media).length === 0) {
 				this.provideFallback();
@@ -78,7 +80,6 @@
 
 			// Default variables assignment
 			// The following variables CAN be overridden with HTML attributes
-
 			// autoplay (Boolean; if present always resolves to true, regardless of value)
 			if ($(media).attr('autoplay') !== undefined) {
 				this.autoplay = true; // this value remains constant
@@ -88,64 +89,56 @@
 				this.okToPlay = false;
 			}
 
+			let data = $(media)[0].dataset;
+
 			// loop (Boolean; if present always resolves to true, regardless of value)
-			this.loop = ($(media).attr('loop') !== undefined) ? true : false;
+			this.loop = (data.loop !== undefined) ? true : false;
 
 			// playsinline (Boolean; if present always resolves to true, regardless of value)
 			this.playsInline = ($(media).attr('playsinline') !== undefined) ? '1' : '0';
 
 			// poster (Boolean, indicating whether media element has a poster attribute)
-			this.hasPoster = ( $(media).attr('poster') || $(media).data('poster') ) ? true : false;
+			this.hasPoster = ($(media).attr('poster') || data.poster) ? true : false;
 
-			this.audioPoster = $(media).data('poster');
-			this.audioPosterAlt = $(media).data('poster-alt' );
-
-			// get height and width attributes, if present
-			// and add them to variables
-			// Not currently used, but might be useful for resizing player
-			this.width = $(media).attr('width') ?? 0;
-			this.height = $(media).attr('height') ?? 0;
+			this.audioPoster = options.poster ?? data.poster;
+			this.audioPosterAlt = options.posterAlt ?? data.posterAlt;
 
 			// start-time
-			var startTime = $(media).data('start-time');
-			var isNumeric = ( typeof startTime === 'number' || ( typeof startTime === 'string' && startTime.trim() !== '' && ! isNaN(startTime) && isFinite( Number(startTime) ) ) ) ? true : false;
-			this.startTime =  ( startTime !== undefined && isNumeric ) ? startTime : 0;
+			var startTime = options.startTime ?? data.startTime;
+			var isNumeric = (typeof startTime === 'number' || (typeof startTime === 'string' && startTime.trim() !== '' && !isNaN(startTime) && isFinite(Number(startTime)))) ? true : false;
+			this.startTime = (startTime !== undefined && isNumeric) ? startTime : 0;
 
 			// debug
-			this.debug = ($(media).data('debug') !== undefined && $(media).data('debug') !== false) ? true : false;
+			this.debug = (data.debug !== undefined && data.debug !== false) ? true : false;
 
 			// Volume
 			// Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
 			this.defaultVolume = 7;
-			if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
-				var volume = $(media).data('volume');
+			if (data.volume !== undefined && data.volume !== "") {
+				var volume = data.volume;
 				if (volume >= 0 && volume <= 10) {
 					this.defaultVolume = volume;
 				}
 			}
 			this.volume = this.defaultVolume;
 
+			let useChaptersButton = options.useChaptersButton ?? data.useChaptersButton;
 			// Optional Buttons
 			// Buttons are added to the player controller if relevant media is present
 			// However, in some applications it might be undesirable to show buttons
 			// (e.g., if chapters or transcripts are provided in an external container)
-
-			if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
+			if (useChaptersButton !== undefined && useChaptersButton === false) {
 				this.useChaptersButton = false;
 			} else {
 				this.useChaptersButton = true;
 			}
 
+			let descriptionsAudible = options.descriptionsAudible ?? data.descriptionsAudible;
 			// Control whether text descriptions are read aloud
 			// set to "false" if the sole purpose of the WebVTT descriptions file
 			// is to integrate text description into the transcript
 			// set to "true" to write description text to a div
-			// This variable does *not* control the method by which description is read.
-			// For that, see below (this.descMethod)
-			if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
-				this.readDescriptionsAloud = false;
-			} else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-				// support both singular and plural spelling of attribute
+			if (descriptionsAudible !== undefined && descriptionsAudible === false) {
 				this.readDescriptionsAloud = false;
 			} else {
 				this.readDescriptionsAloud = true;
@@ -155,40 +148,45 @@
 			// to be populated later by getBrowserVoices
 			this.descVoices = [];
 
+			let descReader = options.descReader ?? data.descReader;
 			// Method by which text descriptions are read
 			// valid values of data-desc-reader are:
 			// 'brower' (default) - text-based audio description is handled by the browser, if supported
 			// 'screenreader' - text-based audio description is always handled by screen readers
 			// The latter may be preferable by owners of websites in languages that are not well supported
 			// by the Web Speech API
-			this.descReader = ($(media).data('desc-reader') == 'screenreader') ? 'screenreader' : 'browser';
+			this.descReader = (descReader == 'screenreader') ? 'screenreader' : 'browser';
 
+			let defaultStateCaptions = options.defaultStateCaptions ?? data.stateCaptions;
+			let defaultStateDescriptions = options.defaultStateDescriptions ?? data.stateDescriptions;
 			// Default state of captions and descriptions
 			// This setting is overridden by user preferences, if they exist
 			// values for data-state-captions and data-state-descriptions are 'on' or 'off'
-			this.defaultStateCaptions = ($(media).data('state-captions') == 'off') ? 0 : 1;
-			this.defaultStateDescriptions = ($(media).data('state-descriptions') == 'on') ? 1 : 0;
+			this.defaultStateCaptions = (defaultStateCaptions == 'off') ? 0 : 1;
+			this.defaultStateDescriptions = (defaultStateDescriptions == 'on') ? 1 : 0;
 
+			let defaultDescPause = options.descPauseDefault ?? data.descPauseDefault;
 			// Default setting for prefDescPause
 			// Extended description (i.e., pausing during description) is on by default
 			// but this settings give website owners control over that
 			// since they know the nature of their videos, and whether pausing is necessary
 			// This setting is overridden by user preferences, if they exist
-			this.defaultDescPause = ($(media).data('desc-pause-default') == 'off') ? 0 : 1;
+			this.defaultDescPause = (defaultDescPause == 'off') ? 0 : 1;
 
+			let headingLevel = options.headingLevel ?? data.headingLevel;
 			// Headings
 			// By default, an off-screen heading is automatically added to the top of the media player
-			// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
+			// It is assigned a heading level based on context, via misc.js > getNextHeadingLevel()
 			// Authors can override this behavior by manually assigning a heading level using data-heading-level
 			// Accepted values are 1-6, or 0 which indicates "no heading"
 			// (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
-			if ($(media).data('heading-level') !== undefined && $(media).data('heading-level') !== "") {
-				var headingLevel = $(media).data('heading-level');
+			if (headingLevel !== undefined && headingLevel !== "") {
 				if (/^[0-6]*$/.test(headingLevel)) { // must be a valid HTML heading level 1-6; or 0
 					this.playerHeadingLevel = headingLevel;
 				}
 			}
 
+			let transcriptDivLocation = options.transcriptDiv ?? data.transcriptDiv;
 			// Transcripts
 			// There are three types of interactive transcripts.
 			// In descending of order of precedence (in case there are conflicting tags), they are:
@@ -196,18 +194,18 @@
 			// 2. "external" - Automatically generated, written to an external div (requires data-transcript-div & a valid target element)
 			// 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
 			// If data-include-transcript="false", there is no "popup" transcript
-			var transcriptDivLocation = $(media).data('transcript-div');
-			if ( transcriptDivLocation !== undefined && transcriptDivLocation !== "" && null !== document.getElementById( transcriptDivLocation ) ) {
+			if (transcriptDivLocation !== undefined && transcriptDivLocation !== "" && null !== document.getElementById(transcriptDivLocation)) {
 				this.transcriptDivLocation = transcriptDivLocation;
 			} else {
 				this.transcriptDivLocation = null;
 			}
-			var includeTranscript = $(media).data('include-transcript');
-			this.hideTranscriptButton = ( includeTranscript !== undefined && includeTranscript === false) ? true : false;
+			var includeTranscript = options.includeTranscript ?? data.includeTranscript;
+			this.hideTranscriptButton = (includeTranscript !== undefined && includeTranscript === false) ? true : false;
 
 			this.transcriptType = null;
-			if ($(media).data('transcript-src') !== undefined) {
-				this.transcriptSrc = $(media).data('transcript-src');
+			let transcriptSrc = options.transcriptSrc ?? data.transcriptSrc;
+			if (transcriptSrc !== undefined) {
+				this.transcriptSrc = transcriptSrc;
 				if (this.transcriptSrcHasRequiredParts()) {
 					this.transcriptType = 'manual';
 				} else {
@@ -218,105 +216,117 @@
 				this.transcriptType = (this.transcriptDivLocation) ? 'external' : 'popup';
 			}
 
+			let lyricsMode = options.lyricsMode ?? data.lyricsMode;
 			// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
 			// If false (default), line breaks are are removed from transcripts for a more seamless reading experience
 			// If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-			this.lyricsMode = ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) ? true : false;
+			this.lyricsMode = (lyricsMode !== undefined && lyricsMode !== false) ? true : false;
 
+			let strictMode = options.strictMode ?? data.strictMode;
+			// in Strict Mode, parentheses and brackets do not get marked in bold in transcripts, and line breaks are not injected.
+			// In Able Player 5.1, defaults to false.
+			this.strictMode = (strictMode === undefined && strictMode !== true) ? false : true;
+
+			let transcriptTitle = options.transcriptTitle ?? data.transcriptTitle;
 			// Set Transcript Title if defined explicitly. See transcript.js.
-			if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
-				this.transcriptTitle = $(media).data('transcript-title');
+			if (transcriptTitle !== undefined && transcriptTitle !== "") {
+				this.transcriptTitle = transcriptTitle;
 			}
 
 			// Sign Language
 			// sign language can be a modal (default) or assigned to a div on the page.
-			var signDivLocation = $(media).data('sign-div');
-			if ( signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById( signDivLocation ) ) {
-				this.$signDivLocation = $( '#' + signDivLocation );
+			let signDivLocation = options.signDiv ?? data.signDiv;
+			if (signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById(signDivLocation)) {
+				this.$signDivLocation = $('#' + signDivLocation);
 			} else {
 				this.$signDivLocation = null;
 			}
 
+			let captionsPosition = options.captionsPosition ?? data.captionsPosition;
 			// Captions
 			// data-captions-position can be used to set the default captions position
 			// this is only the default, and can be overridden by user preferences
 			// valid values of data-captions-position are 'below' and 'overlay'
-			this.defaultCaptionsPosition = ($(media).data('captions-position') === 'overlay') ? 'overlay' : 'below';
+			this.defaultCaptionsPosition = (captionsPosition === 'overlay') ? 'overlay' : 'below';
 
 			// Chapters
-			var chaptersDiv = $(media).data('chapters-div');
-			if ( chaptersDiv !== undefined && chaptersDiv !== "") {
+			var chaptersDiv = options.chaptersDiv ?? data.chaptersDiv;
+			if (chaptersDiv !== undefined && chaptersDiv !== "") {
 				this.chaptersDivLocation = chaptersDiv;
 			}
 
-			if ($(media).data('chapters-title') !== undefined) {
+			let chaptersTitle = options.chaptersTitle ?? data.chaptersTitle;
+			if (chaptersTitle !== undefined) {
 				// NOTE: empty string is valid; results in no title being displayed
-				this.chaptersTitle = $(media).data('chapters-title');
+				this.chaptersTitle = chaptersTitle;
 			}
 
-			var defaultChapter = $(media).data('chapters-default');
-			this.defaultChapter = ( defaultChapter !== undefined && defaultChapter !== "") ? defaultChapter : null;
+			let defaultChapter = options.chaptersDefault ?? data.chaptersDefault;
+			this.defaultChapter = (defaultChapter !== undefined && defaultChapter !== "") ? defaultChapter : null;
 
 			// Slower/Faster buttons
 			// valid values of data-speed-icons are 'animals' (default) and 'arrows'
 			// 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
-			this.speedIcons = ($(media).data('speed-icons') === 'arrows') ? 'arrows' : 'animals';
+			let speedIcons = options.speedIcons ?? data.speedIcons;
+			this.speedIcons = (speedIcons === 'arrows') ? 'arrows' : 'animals';
 
 			// Seekbar
 			// valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
-			var seekbarScope = $(media).data('seekbar-scope');
-			this.seekbarScope = ( seekbarScope === 'chapter' || seekbarScope === 'chapters') ? 'chapter' : 'video';
+			let seekbarScope = options.seekbarScope ?? data.seekbarScope;
+			this.seekbarScope = (seekbarScope === 'chapter' || seekbarScope === 'chapters') ? 'chapter' : 'video';
 
-			// YouTube
-			var youTubeId = $(media).data('youtube-id');
-			if ( youTubeId !== undefined && youTubeId !== "") {
+			// YouTube converts to youtube in data attributes.
+			let youTubeId = options.youTubeId ?? data.youtubeId;
+			if (youTubeId !== undefined && youTubeId !== "") {
 				this.youTubeId = this.getYouTubeId(youTubeId);
-				if ( ! this.hasPoster ) {
-					let poster = this.getYouTubePosterUrl(this.youTubeId,'640');
-					$(media).attr( 'poster', poster );
+				if (!this.hasPoster) {
+					let poster = this.getYouTubePosterUrl(this.youTubeId, '640');
+					$(media).attr('poster', poster);
 				}
 			}
 
-			var youTubeDescId = $(media).data('youtube-desc-id');
-			if ( youTubeDescId !== undefined && youTubeDescId !== "") {
+			let youTubeDescId = options.youTubeDescId ?? data.youtubeDescId;
+			if (youTubeDescId !== undefined && youTubeDescId !== "") {
 				this.youTubeDescId = this.getYouTubeId(youTubeDescId);
 			}
 
-			var youTubeSignId = $(media).data('youtube-sign-src');
-			if ( youTubeSignId !== undefined && youTubeSignId !== "") {
+			let youTubeSignId = options.youTubeSignId ?? data.youtubeSignSrc;
+			if (youTubeSignId !== undefined && youTubeSignId !== "") {
 				this.youTubeSignId = this.getYouTubeId(youTubeSignId);
 			}
 
-			var youTubeNoCookie = $(media).data('youtube-nocookie');
+			let youTubeNoCookie = options.youTubeNoCookie ?? data.youtubeNoCookie;
 			this.youTubeNoCookie = (youTubeNoCookie !== undefined && youTubeNoCookie) ? true : false;
 
 			// Vimeo
-			var vimeoId = $(media).data('vimeo-id');
-			if ( vimeoId !== undefined && vimeoId !== "") {
+			let vimeoId = options.vimeoId ?? data.vimeoId;
+			if (vimeoId !== undefined && vimeoId !== "") {
 				this.vimeoId = this.getVimeoId(vimeoId);
-				if ( ! this.hasPoster ) {
-					let poster = thisObj.getVimeoPosterUrl(this.vimeoId,'1200');
-					$(media).attr( 'poster', poster );
+				if (!this.hasPoster) {
+					let poster = thisObj.getVimeoPosterUrl(this.vimeoId, '1200');
+					$(media).attr('poster', poster);
 				}
 			}
-			var vimeoDescId = $(media).data('vimeo-desc-id');
-			if ( vimeoDescId !== undefined && vimeoDescId !== "") {
+			let vimeoDescId = options.vimeoDescId ?? data.vimeoDescId;
+			if (vimeoDescId !== undefined && vimeoDescId !== "") {
 				this.vimeoDescId = this.getVimeoId(vimeoDescId);
 			}
 
 			// Skin
+			let skin = options.skin ?? data.skin;
 			// valid values of data-skin are:
 			// '2020' (default as of 4.6), all buttons in one row beneath a full-width seekbar
 			// 'legacy', two rows of controls; seekbar positioned in available space within top row
-			this.skin = ($(media).data('skin') == 'legacy') ? 'legacy' : '2020';
+			this.skin = (skin == 'legacy') ? 'legacy' : '2020';
 
 			// Size
 			// width of Able Player is determined using the following order of precedence:
 			// 1. data-width attribute
 			// 2. width attribute (for video or audio, although it is not valid HTML for audio)
 			// 3. Intrinsic size from video (video only, determined later)
-			if ($(media).data('width') !== undefined) {
-				this.playerWidth = parseInt($(media).data('width'));
+			let width = options.width ?? data.width;
+			if (width !== undefined) {
+				this.playerWidth = parseInt(width);
 			} else if ($(media)[0].getAttribute('width')) {
 				// NOTE: jQuery attr() returns null for all invalid HTML attributes
 				// (e.g., width on <audio>)
@@ -326,7 +336,7 @@
 				this.playerWidth = null;
 			}
 
-			var allowFullScreen = $(media).data('allow-fullscreen');
+			var allowFullScreen = data.allowFullscreen;
 			this.allowFullscreen = (allowFullScreen !== undefined && allowFullScreen === false) ? false : true;
 
 			// Define other variables that are used in fullscreen program flow
@@ -338,9 +348,9 @@
 			// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
 			// Calculation attempts to intelligently assign a reasonable interval based on media length
 			this.defaultSeekInterval = 10;
+			let seekInterval = options.seekInterval ?? data.seekInterval;
 			this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
-			if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
-				var seekInterval = $(media).data('seek-interval');
+			if (seekInterval !== undefined && seekInterval !== "") {
 				if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
 					this.seekInterval = seekInterval;
 					this.useFixedSeekInterval = true; // do not override with calculuation
@@ -350,15 +360,15 @@
 			// Now Playing
 			// Shows "Now Playing:" plus the title of the current track above player
 			// Only used if there is a playlist
-			var showNowPlaying = $(media).data('show-now-playing');
+			var showNowPlaying = options.showNowPlaying ?? data.showNowPlaying;
 			this.showNowPlaying = (showNowPlaying !== undefined && showNowPlaying === false) ? false : true;
 
 			// Fallback
 			// The data-test-fallback attribute can be used to test the fallback solution in any browser
-			var testFallback = $(media).data('test-fallback');
-			if ( testFallback !== undefined && testFallback !== false) {
+			var testFallback = options.testFallback ?? data.testFallback;
+			if (testFallback !== undefined && testFallback !== false) {
 				// 1: build error; 2: browser doesn't support media.
-				this.testFallback = ( testFallback == '2' ) ? 2 : 1;
+				this.testFallback = (testFallback == '2') ? 2 : 1;
 			} else {
 				this.testFallback = false;
 			}
@@ -369,45 +379,46 @@
 			// 2. Lang attribute on <html> or <body>, if a matching translation file is available
 			// 3. English
 			// Final calculation occurs in translation.js > getTranslationText()
-			var lang = $(media).data('lang');
-			this.lang = ( lang !== undefined && lang !== "") ? lang.toLowerCase() : null;
+			let lang = options.lang ?? data.lang;
+			this.lang = (lang !== undefined && lang !== "") ? lang.toLowerCase() : null;
 
 			// Metadata Tracks
-			var metaType = $(media).data('meta-type');
-			if ( metaType !== undefined && metaType !== "") {
+			let metaType = options.metaType ?? data.metaType;
+			if (metaType !== undefined && metaType !== "") {
 				this.metaType = metaType;
 			}
-			var metaDiv = $(media).data('meta-div');
-			if ( metaDiv !== undefined && metaDiv !== "") {
+			let metaDiv = options.metaDiv ?? data.metaDiv;
+			if (metaDiv !== undefined && metaDiv !== "") {
 				this.metaDiv = metaDiv;
 			}
 
 			// Search
 			// conducting a search requires an external div in which to write the results
-			var searchDiv = $(media).data('search-div');
-			if ( searchDiv !== undefined && searchDiv !== "") {
+			let searchDiv = options.searchDiv ?? data.searchDiv;
+			if (searchDiv !== undefined && searchDiv !== "") {
 
 				this.searchDiv = searchDiv;
 
 				// Search term (optional; could be assigned later in a JavaScript application)
-				var searchString = $(media).data('search');
-				if ( searchString !== undefined && searchString !== "") {
+				let searchString = options.search ?? data.search;
+				if (searchString !== undefined && searchString !== "") {
 					this.searchString = searchString;
 				}
 
 				// Search Language
-				var searchLang = $(media).data('search-lang');
-				this.searchLang = ( searchLang !== undefined && searchLang !== "") ? searchLang : null;
+				let searchLang = options.searchLang ?? data.searchLang;
+				this.searchLang = (searchLang !== undefined && searchLang !== "") ? searchLang : null;
 
 				// Search option: Ignore capitalization in search terms
-				var searchIgnoreCaps = $(media).data('search-ignore-caps');
-				this.searchIgnoreCaps = ( searchIgnoreCaps !== undefined && searchIgnoreCaps !== false) ? true : false;
+				let searchIgnoreCaps = options.searchIgnoreCaps ?? data.searchIgnoreCaps;
+				this.searchIgnoreCaps = (searchIgnoreCaps !== undefined && searchIgnoreCaps !== false) ? true : false;
 			}
 
+			let hideControls = options.hideControls ?? data.hideControls;
 			// Hide controls when video starts playing
 			// They will reappear again when user presses a key or moves the mouse
 			// As of v4.0, controls are hidden automatically on playback in fullscreen mode
-			if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
+			if (hideControls !== undefined && hideControls !== false) {
 				this.hideControls = true;
 				this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
 			} else {
@@ -418,11 +429,13 @@
 			// Steno mode
 			// Enable support for Able Player keyboard shortcuts in textaarea fields
 			// so users can control the player while transcribing
-			if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
+			let stenoMode = options.stenoMode ?? data.stenoMode;
+			if (stenoMode !== undefined && stenoMode !== false) {
 				this.stenoMode = true;
 				// Add support for stenography in an iframe via data-steno-iframe-id
-				if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
-					this.stenoFrameId = $(media).data('steno-iframe-id');
+				let stenoIframeId = options.stenoIframeId ?? data.stenoIframeId;
+				if (stenoIframeId !== undefined && stenoIframeId !== "") {
+					this.stenoFrameId = stenoIframeId;
 					this.$stenoFrame = $('#' + this.stenoFrameId);
 					if (!(this.$stenoFrame.length)) {
 						// iframe not found
@@ -445,7 +458,6 @@
 			////////////////////////////////////////
 			// End assignment of default variables
 			////////////////////////////////////////
-
 			this.ableIndex = AblePlayer.nextIndex;
 			AblePlayer.nextIndex += 1;
 
@@ -463,11 +475,33 @@
 
 			ablePlayerInstances.add(this);
 		}
-		// Index to increment every time new player is created.
-		// 5.0.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
-		AblePlayer.nextIndex = 0;
+		static getActiveDOMElement() {
+			var activeElement = document.activeElement;
 
-		AblePlayer.prototype.setup = function() {
+			// For shadow DOMs we need to keep digging down through the DOMs
+			while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+				activeElement = activeElement.shadowRoot.activeElement;
+			}
+
+			return activeElement;
+		}
+		static localGetElementById(element, id) {
+			if (element.getRootNode) {
+				// Use getRootNode() and querySelector() where supported (for shadow DOM support)
+				return $(element.getRootNode().querySelector('#' + id));
+			} else {
+				// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+				return $(document.getElementById(id));
+			}
+		}
+		static hasSingleInstance() { return AblePlayer.ablePlayerInstances.size === 1; }
+		static getSingleInstance() {
+			// If there are actually more instances, this returns the first one
+			for (const instance of AblePlayer.ablePlayerInstances) {
+				return instance;
+			}
+		}
+		setup() {
 
 			var thisObj = this;
 			this.initializing = true; // will remain true until entire sequence of function calls is complete
@@ -480,7 +514,7 @@
 					thisObj.setupInstance().then(function () {
 						thisObj.setupInstancePlaylist();
 						if (thisObj.hasPlaylist) ; else {
-							thisObj.recreatePlayer().then(function() {
+							thisObj.recreatePlayer().then(function () {
 								thisObj.initializing = false;
 								thisObj.playerCreated = true; // remains true until browser is refreshed
 							});
@@ -488,8 +522,7 @@
 					});
 				}
 			});
-		};
-
+		}
 		/**
 		 * Removes this player from the global instance list.
 		 *
@@ -497,7 +530,7 @@
 		 * DOM. This avoids memory leaks, and allows the event handling to have the
 		 * correct count of how many players are actually on the page.
 		 */
-		AblePlayer.prototype.dispose = function () {
+		dispose() {
 			AblePlayer.ablePlayerInstances.delete(this);
 
 			// Look for various dialogs tied to this instance. Elements associated
@@ -523,44 +556,33 @@
 					dialog.overlay.remove();
 				}
 			}
-		};
 
-		AblePlayer.getActiveDOMElement = function () {
-			var activeElement = document.activeElement;
-
-			// For shadow DOMs we need to keep digging down through the DOMs
-			while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
-				activeElement = activeElement.shadowRoot.activeElement;
+			if (AblePlayer.ablePlayerInstances.size === 0 && AblePlayer.preferencesDialog) {
+				if (AblePlayer.preferencesDialog.modal) {
+					AblePlayer.preferencesDialog.modal.remove();
+				}
+				if (AblePlayer.preferencesDialog.dialog && AblePlayer.preferencesDialog.dialog.overlay) {
+					AblePlayer.preferencesDialog.dialog.overlay.remove();
+				}
+				AblePlayer.preferencesDialog = null;
 			}
+		}
+	}
+	// Index to increment every time new player is created.
+	// 5.0.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
+	AblePlayer.nextIndex = 0;
 
-			return activeElement;
-		};
 
-		AblePlayer.localGetElementById = function(element, id) {
-			if (element.getRootNode) {
-				// Use getRootNode() and querySelector() where supported (for shadow DOM support)
-				return $(element.getRootNode().querySelector('#' + id));
-			} else {
-				// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
-				return $(document.getElementById(id));
-			}
-		};
 
-		AblePlayer.ablePlayerSetupWindow = ablePlayerSetupWindow;
 
-		AblePlayer.youTubeIframeAPIReady = false;
-		AblePlayer.loadingYouTubeIframeAPI = false;
 
-		AblePlayer.ablePlayerInstances = ablePlayerInstances;
+	AblePlayer.ablePlayerSetupWindow = ablePlayerSetupWindow;
 
-		AblePlayer.hasSingleInstance = () => AblePlayer.ablePlayerInstances.size === 1;
+	AblePlayer.youTubeIframeAPIReady = false;
+	AblePlayer.loadingYouTubeIframeAPI = false;
 
-		AblePlayer.getSingleInstance = () => {
-			// If there are actually more instances, this returns the first one
-			for (const instance of AblePlayer.ablePlayerInstances) {
-				return instance;
-			}
-		};
+	AblePlayer.ablePlayerInstances = ablePlayerInstances;
+	AblePlayer.preferencesDialog = null;
 
 	function addBrowserFunctions(AblePlayer) {
 
@@ -868,7 +890,10 @@
 	  },
 	};
 
-	// Events:
+	// Minimum horizontal distance (px) for a touchmove to be treated as a swipe gesture.
+		var SWIPE_THRESHOLD = 50;
+
+		// Events:
 		// - startTracking(event, position)
 		// - tracking(event, position)
 		// - stopTracking(event, position)
@@ -893,23 +918,34 @@
 			this.lastTrackPosition = 0;
 			this.nextStep = 1;
 			this.inertiaCount = 0;
+			this.trackFrameRequestId = null;
+			this.queuedTrackPosition = null;
+			this.queuedTrackLeft = null;
+			this.trackGeometry = null;
+			this.hoverGeometry = null;
+			this.bigInterval = bigInterval;
 
-			this.seekbarDiv = $(div);
+			// Swipe gesture state (used to fast-forward/rewind via touch when the seek head is focused).
+			this.swipeStartX = null;
+			this.swipeStartY = null;
+			this.swipeHandled = false;
+
+			this.$seekbarDiv = $(div);
 
 			// Add divs for tracking amount of media loaded and played
 			this.loadedDiv = $('<div></div>');
 			this.playedDiv = $('<div></div>');
 
 			// Add a seekhead
-			this.seekHead = $('<div>',{
+			this.$seekHead = $('<div>',{
 				'aria-orientation': 'horizontal',
 				'class': 'able-seekbar-head'
 			});
 
-			this.seekHead.attr('tabindex', '0');
+			this.$seekHead.attr('tabindex', '0');
 
 			// Since head is focusable, it gets the aria roles/titles.
-			this.seekHead.attr({
+			this.$seekHead.attr({
 				'role': 'slider',
 				'aria-label': label,
 				'aria-valuemin': 0,
@@ -918,32 +954,32 @@
 
 			this.timeTooltipTimeoutId = null;
 			this.overTooltip = false;
-			this.timeTooltip = $('<div>');
-			this.seekbarDiv.append(this.timeTooltip);
+			this.$timeTooltip = $('<div>');
+			this.$seekbarDiv.append(this.$timeTooltip);
 
-			this.timeTooltip.attr('role', 'tooltip');
-			this.timeTooltip.addClass('able-tooltip');
-			this.timeTooltip.on('mouseenter focus', function(){
+			this.$timeTooltip.attr('role', 'tooltip');
+			this.$timeTooltip.addClass('able-tooltip');
+			this.$timeTooltip.on('mouseenter focus', function(){
 				thisObj.overTooltip = true;
 				clearInterval(thisObj.timeTooltipTimeoutId);
 			});
-			this.timeTooltip.on('mouseleave blur', function(){
+			this.$timeTooltip.on('mouseleave blur', function(){
 				thisObj.overTooltip = false;
 				$(this).hide();
 			});
-			this.timeTooltip.hide();
+			this.$timeTooltip.hide();
 
-			this.seekbarDiv.append(this.loadedDiv);
-			this.seekbarDiv.append(this.playedDiv);
-			this.seekbarDiv.append(this.seekHead);
-			this.seekbarDiv.wrap('<div></div>');
-			this.wrapperDiv = this.seekbarDiv.parent();
+			this.$seekbarDiv.append(this.loadedDiv);
+			this.$seekbarDiv.append(this.playedDiv);
+			this.$seekbarDiv.append(this.$seekHead);
+			this.$seekbarDiv.wrap('<div></div>');
+			this.$wrapperDiv = this.$seekbarDiv.parent();
 
 			if (this.skin === 'legacy') {
-				this.wrapperDiv.width( 100 );
+				this.$wrapperDiv.width( 100 );
 				this.loadedDiv.width(0);
 			}
-			this.wrapperDiv.addClass('able-seekbar-wrapper');
+			this.$wrapperDiv.addClass('able-seekbar-wrapper');
 			this.loadedDiv.addClass('able-seekbar-loaded');
 			this.playedDiv.width(0);
 			this.playedDiv.addClass('able-seekbar-played');
@@ -952,39 +988,50 @@
 			this.setDuration(max);
 
 			// handle seekHead events
-			this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
+			this.$seekHead.on(
+				'mouseenter mouseleave mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
 				coords = thisObj.pointerEventToXY(e);
 
 				if (e.type === 'mouseenter' || e.type === 'focus') {
 					thisObj.overHead = true;
+					thisObj.cacheHoverGeometry();
 				} else if (e.type === 'mouseleave' || e.type === 'blur') {
 					thisObj.overHead = false;
-					if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-						thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-					}
-				} else if (e.type === 'mousemove' || e.type === 'touchmove') {
-					if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-						thisObj.trackHeadAtPageX(coords.x);
+					if (!thisObj.overBody) {
+						thisObj.clearHoverGeometry();
 					}
 				} else if (e.type === 'mousedown' || e.type === 'touchstart') {
-					thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-					if (!thisObj.seekbarDiv.is(':focus')) {
-						thisObj.seekbarDiv.focus();
+					if (e.type === 'touchstart') {
+						thisObj.swipeStartX = coords.x;
+						thisObj.swipeStartY = coords.y;
+						thisObj.swipeHandled = false;
+					}
+					thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.$seekHead.offset() + (thisObj.$seekHead.width() / 2)));
+					if (!thisObj.$seekbarDiv.is(':focus')) {
+						thisObj.$seekbarDiv.focus();
 					}
 					e.preventDefault();
-				} else if (e.type === 'mouseup' || e.type === 'touchend') {
-					if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-						thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				} else if (e.type === 'touchmove') {
+					if (thisObj.swipeStartX !== null && !thisObj.swipeHandled && !thisObj.isPointOverSeekHead(coords.x, coords.y) &&
+						thisObj.detectSwipe(coords.x, coords.y)) {
+						thisObj.swipeHandled = true;
+						thisObj.cancelTracking();
+						// Swipe left rewinds, swipe right fast-forwards.
+						thisObj.swipeSeek(coords.x < thisObj.swipeStartX ? -1 : 1);
+						e.preventDefault();
 					}
+				} else if (e.type === 'touchend') {
+					thisObj.swipeStartX = null;
+					thisObj.swipeStartY = null;
 				}
-				if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+				if (e.type !== 'mousedown' && e.type !== 'touchstart') {
 					thisObj.refreshTooltip();
 				}
 			});
 
 			// handle seekbarDiv events
-			this.seekbarDiv.on(
+			this.$seekbarDiv.on(
 				'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
 				// Don't trigger move on right click.
@@ -996,6 +1043,7 @@
 
 				if (e.type === 'mouseenter') {
 					thisObj.overBody = true;
+					thisObj.cacheHoverGeometry();
 					thisObj.overBodyMousePos = {
 						x: coords.x,
 						y: coords.y
@@ -1003,28 +1051,21 @@
 				} else if (e.type === 'mouseleave') {
 					thisObj.overBody = false;
 					thisObj.overBodyMousePos = null;
-					if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-						thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+					if (!thisObj.overHead) {
+						thisObj.clearHoverGeometry();
 					}
 				} else if (e.type === 'mousemove' || e.type === 'touchmove') {
 					thisObj.overBodyMousePos = {
 						x: coords.x,
 						y: coords.y
 					};
-					if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-						thisObj.trackHeadAtPageX(coords.x);
-					}
 				} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 					thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
 					thisObj.trackHeadAtPageX(coords.x);
-					if (!thisObj.seekHead.is(':focus')) {
-						thisObj.seekHead.focus();
+					if (!thisObj.$seekHead.is(':focus')) {
+						thisObj.$seekHead.focus();
 					}
 					e.preventDefault();
-				} else if (e.type === 'mouseup' || e.type === 'touchend') {
-					if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-						thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-					}
 				} else if (e.type === 'keydown') {
 					if (e.key === 'Home') {
 						thisObj.trackImmediatelyTo(0);
@@ -1075,8 +1116,12 @@
 		};
 
 		AccessibleSlider.prototype.pageXToPosition = function (pageX) {
-			var offset = pageX - this.seekbarDiv.offset().left;
-			var position = this.duration * (offset / this.seekbarDiv.width());
+			var geometry = this.getTrackingGeometry();
+			var offset = pageX - geometry.left;
+			if (geometry.width === 0) {
+				return 0;
+			}
+			var position = this.duration * (offset / geometry.width);
 			return this.boundPos(position);
 		};
 
@@ -1088,19 +1133,19 @@
 			if (duration !== this.duration) {
 				this.duration = duration;
 				this.resetHeadLocation();
-				this.seekHead.attr('aria-valuemax', duration);
+				this.$seekHead.attr('aria-valuemax', duration);
 			}
 		};
 
 		// Set width of the legacy seekbar.
 		AccessibleSlider.prototype.setWidth = function (width) {
-			this.wrapperDiv.width(width);
+			this.$wrapperDiv.width(width);
 			this.resizeDivs();
 			this.resetHeadLocation();
 		};
 
 		AccessibleSlider.prototype.getWidth = function () {
-			return this.wrapperDiv.width();
+			return this.$wrapperDiv.width();
 		};
 
 		AccessibleSlider.prototype.resizeDivs = function () {
@@ -1111,8 +1156,8 @@
 		// Stops tracking, sets the head location to the current position.
 		AccessibleSlider.prototype.resetHeadLocation = function () {
 			var ratio = this.position / this.duration;
-			var center = this.seekbarDiv.width() * ratio;
-			this.seekHead.css('left', center - (this.seekHead.width() / 2));
+			var center = this.$seekbarDiv.width() * ratio;
+			this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 
 			if (this.tracking) {
 				this.stopTracking(this.position);
@@ -1141,36 +1186,189 @@
 			if (!this.tracking) {
 				this.trackDevice = device;
 				this.tracking = true;
-				this.seekbarDiv.trigger('startTracking', [position]);
+				if (device === 'mouse') {
+					this.trackGeometry = this.hoverGeometry || this.buildTrackingGeometry();
+					this.bindGlobalTrackingEvents();
+				} else {
+					this.clearTrackingGeometry();
+					this.unbindGlobalTrackingEvents();
+				}
+				this.$seekbarDiv.trigger('startTracking', [position]);
 			}
 		};
 
 		AccessibleSlider.prototype.stopTracking = function (position) {
+			this.unbindGlobalTrackingEvents();
+			if (this.trackFrameRequestId !== null) {
+				window.cancelAnimationFrame(this.trackFrameRequestId);
+				this.trackFrameRequestId = null;
+			}
+			this.flushQueuedTrackUpdate();
+			this.clearTrackingGeometry();
 			this.trackDevice = null;
 			this.tracking = false;
-			this.seekbarDiv.trigger('stopTracking', [position]);
+			this.$seekbarDiv.trigger('stopTracking', [position]);
 			this.setPosition(position, true);
 		};
 
+		// Abandons any in-progress tracking (e.g. a touch drag) without committing a new position.
+		AccessibleSlider.prototype.cancelTracking = function () {
+			this.unbindGlobalTrackingEvents();
+			if (this.trackFrameRequestId !== null) {
+				window.cancelAnimationFrame(this.trackFrameRequestId);
+				this.trackFrameRequestId = null;
+			}
+			this.queuedTrackPosition = null;
+			this.queuedTrackLeft = null;
+			this.clearTrackingGeometry();
+			this.trackDevice = null;
+			this.tracking = false;
+			this.resetHeadLocation();
+		};
+
+		// Returns true if a touch move from the recorded swipe start to (x, y) qualifies as a horizontal swipe.
+		AccessibleSlider.prototype.detectSwipe = function (x, y) {
+			var deltaX = x - this.swipeStartX;
+			var deltaY = y - this.swipeStartY;
+			return Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.5;
+		};
+
+		// Returns true if (x, y) is still within the seek head's current bounds, i.e. the finger is dragging it directly.
+		AccessibleSlider.prototype.isPointOverSeekHead = function (x, y) {
+			var offset = this.$seekHead.offset();
+			return x >= offset.left && x <= offset.left + this.$seekHead.outerWidth() &&
+				y >= offset.top && y <= offset.top + this.$seekHead.outerHeight();
+		};
+
+		// Moves the seek head by one seek interval; multiplier of 1 fast-forwards, -1 rewinds.
+		AccessibleSlider.prototype.swipeSeek = function (multiplier) {
+			var step = this.bigInterval > 0 ? this.bigInterval : 1;
+			var newPosition = this.boundPos(this.position + (step * multiplier));
+			this.startTracking('touch', newPosition);
+			this.trackHeadAtPosition(newPosition);
+			this.stopTracking(newPosition);
+		};
+
+		AccessibleSlider.prototype.bindGlobalTrackingEvents = function () {
+			var thisObj = this;
+			$(window).off('.ableSliderTrack');
+			$(window).on('mousemove.ableSliderTrack touchmove.ableSliderTrack', function (e) {
+				var coords;
+				if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+					return;
+				}
+				coords = thisObj.pointerEventToXY(e);
+				thisObj.trackHeadAtPageX(coords.x);
+			});
+			$(window).on('mouseup.ableSliderTrack touchend.ableSliderTrack touchcancel.ableSliderTrack', function (e) {
+				var coords;
+				if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+					return;
+				}
+				coords = thisObj.pointerEventToXY(e);
+				if (e.type === 'touchcancel') {
+					thisObj.stopTracking(thisObj.lastTrackPosition);
+				} else {
+					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				}
+			});
+		};
+
+		AccessibleSlider.prototype.unbindGlobalTrackingEvents = function () {
+			$(window).off('.ableSliderTrack');
+		};
+
 		AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
+			var geometry = this.getTrackingGeometry();
 			var position = this.pageXToPosition(pageX);
-			var newLeft = pageX - this.seekbarDiv.offset().left - (this.seekHead.width() / 2);
-			newLeft = Math.max(0, Math.min(newLeft, this.seekbarDiv.width() - this.seekHead.width()));
-			this.lastTrackPosition = position;
-			this.seekHead.css('left', newLeft);
-			this.reportTrackAtPosition(position);
+			var newLeft = pageX - geometry.left - geometry.headHalf;
+			newLeft = Math.max(0, Math.min(newLeft, geometry.maxLeft));
+			this.queueTrackUpdate(position, newLeft);
+		};
+
+		AccessibleSlider.prototype.cacheTrackingGeometry = function () {
+			this.trackGeometry = this.buildTrackingGeometry();
+		};
+
+		AccessibleSlider.prototype.clearTrackingGeometry = function () {
+			this.trackGeometry = null;
+		};
+
+		AccessibleSlider.prototype.cacheHoverGeometry = function () {
+			this.hoverGeometry = this.buildTrackingGeometry();
+		};
+
+		AccessibleSlider.prototype.clearHoverGeometry = function () {
+			this.hoverGeometry = null;
+		};
+
+		AccessibleSlider.prototype.buildTrackingGeometry = function () {
+			var seekbarOffset = this.$seekbarDiv.offset();
+			var seekbarWidth = this.$seekbarDiv.width();
+			var seekHeadWidth = this.$seekHead.width();
+			return {
+				left: seekbarOffset.left,
+				width: seekbarWidth,
+				headHalf: seekHeadWidth / 2,
+				maxLeft: Math.max(0, seekbarWidth - seekHeadWidth)
+			};
+		};
+
+		AccessibleSlider.prototype.getTrackingGeometry = function () {
+			if (this.tracking && this.trackDevice === 'mouse') {
+				if (!this.trackGeometry) {
+					this.cacheTrackingGeometry();
+				}
+				return this.trackGeometry;
+			}
+			if (this.overBody || this.overHead) {
+				if (!this.hoverGeometry) {
+					this.cacheHoverGeometry();
+				}
+				return this.hoverGeometry;
+			}
+			return this.buildTrackingGeometry();
 		};
 
 		AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
+			this.flushQueuedTrackUpdate();
 			var ratio = position / this.duration;
-			var center = this.seekbarDiv.width() * ratio;
+			var center = this.$seekbarDiv.width() * ratio;
 			this.lastTrackPosition = position;
-			this.seekHead.css('left', center - (this.seekHead.width() / 2));
+			this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 			this.reportTrackAtPosition(position);
 		};
 
+		AccessibleSlider.prototype.queueTrackUpdate = function (position, left) {
+			var thisObj = this;
+			this.queuedTrackPosition = position;
+			this.queuedTrackLeft = left;
+
+			if (this.trackFrameRequestId !== null) {
+				return;
+			}
+
+			this.trackFrameRequestId = window.requestAnimationFrame(function () {
+				thisObj.trackFrameRequestId = null;
+				thisObj.flushQueuedTrackUpdate();
+			});
+		};
+
+		AccessibleSlider.prototype.flushQueuedTrackUpdate = function () {
+			if (this.queuedTrackPosition === null) {
+				return;
+			}
+
+			this.lastTrackPosition = this.queuedTrackPosition;
+			this.$seekHead.css('left', this.queuedTrackLeft);
+			this.reportTrackAtPosition(this.queuedTrackPosition);
+
+			this.queuedTrackPosition = null;
+			this.queuedTrackLeft = null;
+		};
+
 		AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
-			this.seekbarDiv.trigger('tracking', [position]);
+			this.$seekbarDiv.trigger('tracking', [position]);
 			this.updateAriaValues(position, true);
 		};
 
@@ -1207,15 +1405,15 @@
 					'class': 'able-offscreen',
 					'aria-live': 'polite'
 				});
-				this.wrapperDiv.append(this.liveAriaRegion);
+				this.$wrapperDiv.append(this.liveAriaRegion);
 			}
 			if (updateLive && (this.liveAriaRegion.text() !== descriptionText)) {
 				this.liveAriaRegion.text(descriptionText);
 			}
 
 			// Uncomment the following lines to use aria values instead of separate live region.
-			this.seekHead.attr('aria-valuetext', descriptionText);
-			this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
+			this.$seekHead.attr('aria-valuetext', descriptionText);
+			this.$seekHead.attr('aria-valuenow', Math.floor(position).toString());
 		};
 
 		AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
@@ -1226,24 +1424,25 @@
 
 		AccessibleSlider.prototype.refreshTooltip = function () {
 			if (this.overHead) {
-				this.timeTooltip.show();
+				this.$timeTooltip.show();
 				if (this.tracking) {
-					this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+					this.$timeTooltip.text(this.positionToStr(this.lastTrackPosition));
 				} else {
-					this.timeTooltip.text(this.positionToStr(this.position));
+					this.$timeTooltip.text(this.positionToStr(this.position));
 				}
-				this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
+				this.setTooltipPosition(this.$seekHead.position().left + (this.$seekHead.width() / 2));
 			} else if (this.overBody && this.overBodyMousePos) {
-				this.timeTooltip.show();
-				this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
-				this.setTooltipPosition(this.overBodyMousePos.x - this.seekbarDiv.offset().left);
+				var geometry = this.getTrackingGeometry();
+				this.$timeTooltip.show();
+				this.$timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
+				this.setTooltipPosition(this.overBodyMousePos.x - geometry.left);
 			} else {
 
 				clearTimeout(this.timeTooltipTimeoutId);
 				var _this = this;
 				this.timeTooltipTimeoutId = setTimeout(function() {
 					// give user a half second move cursor over tooltip
-					_this.timeTooltip.hide();
+					_this.$timeTooltip.hide();
 				}, 500);
 			}
 		};
@@ -1251,13 +1450,13 @@
 		AccessibleSlider.prototype.hideSliderTooltips = function () {
 			this.overHead = false;
 			this.overBody = false;
-			this.timeTooltip.hide();
+			this.clearHoverGeometry();
+			this.$timeTooltip.hide();
 		};
 
 		AccessibleSlider.prototype.setTooltipPosition = function (x) {
-			this.timeTooltip.css({
-				left: x - (this.timeTooltip.width() / 2) - 10,
-				bottom: this.seekHead.height()
+			this.$timeTooltip.css({
+				left: x - (this.$timeTooltip.width() / 2) - 10,
 			});
 		};
 
@@ -1328,6 +1527,7 @@
 			// add container that captions or description will be appended to
 			// Note: new Jquery object must be assigned _after_ wrap, hence the temp captionsContainer variable
 			captionsContainer = $('<div>');
+			captionsContainer.addClass('able-captions-container');
 			if (this.mediaType === 'video') {
 				captionsContainer.addClass('able-vidcap-container');
 			} else if (this.mediaType === 'audio') {
@@ -1370,10 +1570,10 @@
 					this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
 				}
 				headingType = 'h' + this.playerHeadingLevel.toString();
-				this.$headingDiv = $('<' + headingType + '>');
-				this.$ableDiv.prepend(this.$headingDiv);
-				this.$headingDiv.addClass('able-offscreen');
-				this.$headingDiv.text( this.translate( 'playerHeading', 'Media player' ) );
+				this.headingDiv = document.createElement( headingType );
+				this.$ableDiv.prepend(this.headingDiv);
+				this.headingDiv.classList.add('able-offscreen');
+				this.headingDiv.textContent = this.translate( 'playerHeading', 'Media player' );
 			}
 		};
 
@@ -1507,7 +1707,6 @@
 			let preferences, $window;
 			preferences = this.getPref();
 			$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
-			console.log( $window );
 			if ( which === 'transcript' && $window ) {
 				if (typeof preferences.transcript !== 'undefined') {
 					this.prevTranscriptPosition = preferences.transcript;
@@ -1579,7 +1778,6 @@
 					}
 					// If draggable window is off screen to the left.
 					if ( leftPosition < 0 && ! this.restoringAfterFullscreen ) {
-						console.log( leftPosition );
 						$window.css({
 							'left': preferencePos['left'] - leftPosition
 						});
@@ -1758,13 +1956,13 @@
 							thisObj.showingPrefsDialog = true;
 							thisObj.setFullscreen(false);
 							if (whichPref === thisObj.translate( 'prefMenuCaptions', 'Captions' ) ) {
-								thisObj.captionPrefsDialog.show();
+								thisObj.showPrefsDialog('captions');
 							} else if (whichPref === thisObj.translate( 'prefMenuDescriptions', 'Descriptions' ) ) {
-								thisObj.descPrefsDialog.show();
+								thisObj.showPrefsDialog('descriptions');
 							} else if (whichPref === thisObj.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
-								thisObj.keyboardPrefsDialog.show();
+								thisObj.showPrefsDialog('keyboard');
 							} else if (whichPref === thisObj.translate( 'prefMenuTranscript', 'Transcript' ) ) {
-								thisObj.transcriptPrefsDialog.show();
+								thisObj.showPrefsDialog('transcript');
 							}
 							thisObj.closePopups();
 							thisObj.showingPrefsDialog = false;
@@ -1853,8 +2051,7 @@
 							// therefore, ignore this click
 							return false;
 						}
-						if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-							thisObj.windowMenuClickRegistered = true;
+						if ( !thisObj.finishingDrag ) {
 							thisObj.handleMenuChoice(which.substring(0, which.indexOf('-')), $(this).attr('data-choice'), e);
 						}
 					});
@@ -1914,7 +2111,7 @@
 				} else if (e.key === 'Escape') {
 					$thisItem.removeClass('able-focus');
 					thisObj.closePopups();
-					e.stopPropagation;
+					e.stopPropagation();
 				}
 				e.preventDefault();
 			});
@@ -1935,8 +2132,7 @@
 				this.$ccButton.attr('aria-expanded', 'false');
 				this.waitThenFocus(this.$ccButton);
 			}
-			if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
-				this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
+			if (this.prefsPopup && this.prefsPopup.is(':visible') ) {
 				this.prefsPopup.hide();
 				// restore menu items to their original state
 				this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
@@ -1944,25 +2140,16 @@
 				if (!this.showingPrefsDialog) {
 					this.waitThenFocus(thisObj.$prefsButton);
 				}
-				// wait briefly, then reset hidingPopup
-				setTimeout(function() {
-					thisObj.hidingPopup = false;
-				},100);
 			}
 			if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 				this.$volumeSlider.hide().attr('aria-hidden','true');
 				this.$volumeButton.attr('aria-expanded', 'false').trigger('focus');
 			}
 			if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
-				this.hidingPopup = true;
 				this.$transcriptPopup.hide();
 				// restore menu items to their original state
 				this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 				this.$transcriptPopupButton.attr('aria-expanded','false').trigger('focus');
-				// wait briefly, then reset hidingPopup
-				setTimeout(function() {
-					thisObj.hidingPopup = false;
-				},100);
 			}
 			if (this.$signPopup && this.$signPopup.is(':visible')) {
 				this.$signPopup.hide();
@@ -2338,19 +2525,14 @@
 						// this control is a button
 						buttonTitle = this.getButtonTitle(control);
 
-						// Buttons consist of a <div role="button"> with an <svg> inside.
+						// Buttons consist of a <button> with an <svg> inside.
 						// We add aria-label to the button (but not title)
 						// This has been thoroughly tested and works well in all screen reader/browser combinations
 						// See https://github.com/ableplayer/ableplayer/issues/81
 
-						// NOTE: Changed from <button> to <div role="button" as of 4.2.18
-						// because <button> elements are rendered poorly in high contrast mode
-						// in some OS/browser/plugin combinations
-
 						// In 5.0.0, icons are always SVG, so the font & image icon edge cases are removed.
-						$newButton = $('<div>',{
-							'role': 'button',
-							'tabindex': '0',
+						$newButton = $('<button>',{
+							'type': 'button',
 							'class': 'able-button-handler-' + control
 						});
 
@@ -2756,7 +2938,7 @@
 				itemLang = $newItem.attr('lang');
 			}
 			// Update relevant arrays
-			this.$sources = this.$media.find('source');
+			this.sources = this.getSources();
 
 			// recreate player, informed by new attributes and track elements
 			if (this.recreatingPlayer) {
@@ -2874,9 +3056,9 @@
 			} else if (control === 'next') {
 				return this.translate( 'nextTrack', 'Next track' );
 			} else if (control === 'rewind') {
-				return this.translate( 'rewind', 'Rewind' );
+				return this.translate( 'rewind', 'Rewind %1 seconds', [ this.seekInterval ] );
 			} else if (control === 'forward') {
-				return this.translate( 'forward', 'Forward' );
+				return this.translate( 'forward', 'Forward %1 seconds', [ this.seekInterval ] );
 			} else if (control === 'captions') {
 				if (this.captions.length > 1) {
 					return this.translate( 'captions', 'Captions' );
@@ -2894,9 +3076,9 @@
 			} else if (control === 'volume') {
 				return this.translate( 'volume', 'Volume' );
 			} else if (control === 'faster') {
-				return this.translate( 'faster', 'Faster' );
+				return this.translate( 'faster', 'Faster %1 x', [ this.changeRate(1,false) ] );
 			} else if (control === 'slower') {
-				return this.translate( 'slower', 'Slower' );
+				return this.translate( 'slower', 'Slower %1 x', [ this.changeRate(-1,false) ] );
 			} else if (control === 'preferences') {
 				return this.translate( 'preferences', 'Preferences' );
 			} else if (control === 'fullscreen') {
@@ -3011,19 +3193,11 @@
 	        }
 	      }
 	      thisObj.captionsOn = true;
-	      // stopgap to prevent spacebar in Firefox from reopening popup
-	      // immediately after closing it (used in handleCaptionToggle())
-	      thisObj.hidingPopup = true;
 	      thisObj.captionsPopup.hide();
 	      thisObj.$ccButton.attr("aria-expanded", "false");
 	      if (thisObj.mediaType === "audio") {
 	        thisObj.$captionsContainer.removeClass("captions-off");
 	      }
-	      // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
-	      // e.g., if user triggered button with Enter or mouse click, not spacebar
-	      setTimeout(function () {
-	        thisObj.hidingPopup = false;
-	      }, 100);
 	      thisObj.updateCaptionsMenu(thisObj.captionLang);
 	      thisObj.waitThenFocus(thisObj.$ccButton);
 
@@ -3050,16 +3224,9 @@
 	        thisObj.$captionsContainer.addClass("captions-off");
 	      }
 
-	      // stopgap to prevent spacebar in Firefox from reopening popup
-	      // immediately after closing it (used in handleCaptionToggle())
-	      thisObj.hidingPopup = true;
 	      thisObj.captionsPopup.hide();
 	      thisObj.$ccButton.attr("aria-expanded", "false");
-	      // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
-	      // e.g., if user triggered button with Enter or mouse click, not spacebar
-	      setTimeout(function () {
-	        thisObj.hidingPopup = false;
-	      }, 100);
+
 	      thisObj.updateCaptionsMenu();
 	      thisObj.waitThenFocus(thisObj.$ccButton);
 
@@ -3625,15 +3792,7 @@
 			return function () {
 				thisObj.seekTrigger = 'chapter';
 				thisObj.seekTo(time);
-				// stopgap to prevent spacebar in Firefox from reopening popup
-				// immediately after closing it (used in handleChapters())
-				thisObj.hidingPopup = true;
 				thisObj.chaptersPopup.hide();
-				// Ensure stopgap gets cancelled if handleChapters() isn't called
-				// e.g., if user triggered button with Enter or mouse click, not spacebar
-				setTimeout(function() {
-					thisObj.hidingPopup = false;
-				}, 100);
 				thisObj.$chaptersButton.trigger('focus');
 			}
 		};
@@ -4060,17 +4219,16 @@
 			// 'fullscreen' - a change has been triggered by full screen toggle
 			// 'playpause' - a change triggered by either a 'play' or 'pause' event
 
-			// NOTE: context is not currently supported.
-			// The steps in this function have too many complex interdependencies
-			// The gains in efficiency are offset by the possibility of introducing bugs
-			// For now, executing everything
-			context = 'init';
+			// Normalize context to a known value.
+			if (['init', 'timeline', 'captions', 'descriptions', 'transcript', 'fullscreen', 'playpause'].indexOf(context) === -1) {
+				context = 'init';
+			}
 
 			// duration and elapsed are passed from callback functions of Vimeo API events
 			// duration is expressed as sss.xxx
 			// elapsed is expressed as sss.xxx
 
-			var thisObj, textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
+			var thisObj, textByState, volumeStatus, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
 
 			thisObj = this;
 			// wait until new source has loaded before refreshing controls
@@ -4082,7 +4240,7 @@
 			if ( context === 'timeline' || context === 'init' ) {
 				// Update timeline controls.
 				var lastChapterIndex, displayElapsed, updateLive, widthUsed,
-					leftControls, rightControls, seekbarWidth, buffered;
+					leftControls, rightControls, seekbarWidth, buffered, mediaDuration;
 				// all timeline-related functionality requires duration
 				if (typeof this.duration === 'undefined') {
 					// wait until duration is known before proceeding with refresh
@@ -4120,9 +4278,8 @@
 					if (!(this.seekBar.tracking)) {
 						// Only update the aria live region if we have an update pending
 						// (from a seek button control) or if the seekBar has focus.
-						// We use document.activeElement instead of $(':focus') due to a strange bug:
-						// When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-						updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+						let activeEl = AblePlayer.getActiveDOMElement();
+						updateLive = this.liveUpdatePending || this.seekBar.$seekHead.is($(activeEl));
 						this.liveUpdatePending = false;
 						if (this.useChapterTimes) {
 							this.seekBar.setPosition(this.chapterElapsed, updateLive);
@@ -4154,12 +4311,12 @@
 					// Update seekbar width.
 					// To do this, we need to calculate the width of all buttons surrounding it.
 					if (this.seekBar) {
-						let controlWrapper = this.seekBar.wrapperDiv.parent().parent();
-						leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+						let controlWrapper = this.seekBar.$wrapperDiv.parent().parent();
+						leftControls = this.seekBar.$wrapperDiv.parent().prev('div.able-left-controls');
 						rightControls = leftControls.next('div.able-right-controls');
 						widthUsed = leftControls.outerWidth(true);
 						rightControls.children().each(function () {
-							if ($(this).attr('role')=='button') {
+							if ( $(this).is('button') ) {
 								widthUsed += $(this).outerWidth(true) + 5;
 							}
 						});
@@ -4181,16 +4338,17 @@
 				// TODO: Currently only using the first HTML5 buffered interval,
 				// but this fails sometimes when buffering is split into two or more intervals.
 				if (this.player === 'html5' && this.media.buffered.length > 0) {
+					mediaDuration = (typeof duration !== 'undefined' && !isNaN(duration) && duration > 0) ? duration : this.duration;
 					buffered = this.media.buffered.end(0);
 					if (this.useChapterTimes) {
 						if (buffered > this.chapterDuration) {
 							buffered = this.chapterDuration;
 						}
-						if (this.seekBar) {
+						if (this.seekBar && this.chapterDuration > 0) {
 							this.seekBar.setBuffered(buffered / this.chapterDuration);
 						}
-					} else if ( this.seekBar && !isNaN(buffered) ) {
-						this.seekBar.setBuffered(buffered / duration);
+					} else if ( this.seekBar && !isNaN(buffered) && !isNaN(mediaDuration) && mediaDuration > 0 ) {
+						this.seekBar.setBuffered(buffered / mediaDuration);
 					}
 				} else if (this.player === 'youtube' && this.seekBar && this.youTubePlayerReady ) {
 					this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
@@ -4325,7 +4483,10 @@
 					// Update the text only if it's changed since it has role="alert";
 					// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 					this.getPlayerState().then(function(currentState) {
-						if (thisObj.$status.text() !== textByState[currentState] && !thisObj.seekBar.tracking) {
+						volumeStatus = thisObj.getVolume() === 0 ? thisObj.translate( 'statusMuted', 'Muted' ) : '';
+						volumeStatus = (volumeStatus) ? ', ' + volumeStatus : '';
+						let currentMessage = textByState[currentState] + ' ' + volumeStatus;
+						if (thisObj.$status.text() !== currentMessage && !thisObj.seekBar.tracking) {
 							// Debounce updates; only update after status has stayed steadily different for a while
 							// "A while" is defined differently depending on context
 							if (thisObj.swappingSrc) {
@@ -4349,7 +4510,7 @@
 									thisObj.refreshControls(context);
 								}, thisObj.statusMessageThreshold);
 							} else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
-								thisObj.$status.text(textByState[currentState]);
+								thisObj.$status.text(currentMessage);
 								thisObj.statusDebounceStart = null;
 								clearTimeout(thisObj.statusTimeout);
 								thisObj.statusTimeout = null;
@@ -4500,12 +4661,17 @@
 		};
 
 		// Increases or decreases playback rate, where dir is 1 or -1 indication direction.
-		AblePlayer.prototype.changeRate = function (dir) {
+		AblePlayer.prototype.changeRate = function (dir,change = true) {
 
 			var rates, currentRate, index, newRate, vimeoMin, vimeoMax;
 
 			if (this.player === 'html5') {
-				this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+				if ( change ) {
+					// increase or decrease by 0.25x
+					this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+				} else {
+					return this.getPlaybackRate() + (0.25 * dir);
+				}
 			} else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
 					rates = this.youTubePlayer.getAvailablePlaybackRates();
@@ -4517,7 +4683,11 @@
 						index += dir;
 						// Can only increase or decrease rate if there's another rate available.
 						if (index < rates.length && index >= 0) {
-							this.setPlaybackRate(rates[index]);
+							if ( change ) {
+								this.setPlaybackRate(rates[index]);
+							} else {
+								return rates[index];
+							}
 						}
 					}
 				}
@@ -4531,20 +4701,17 @@
 				} else if (dir === -1) {
 					newRate = (this.vimeoPlaybackRate - 0.5 >= vimeoMin) ? this.vimeoPlaybackRate - 0.5 : vimeoMin;
 				}
-				this.setPlaybackRate(newRate);
+				if ( change ) {
+					this.setPlaybackRate(newRate);
+				} else {
+					return newRate;
+				}
 			}
 		};
 
 		AblePlayer.prototype.handleCaptionToggle = function() {
-
 			var thisObj = this;
 			var captions, ariaPressed;
-			if (this.hidingPopup) {
-				// stopgap to prevent spacebar in Firefox from reopening popup
-				// immediately after closing it
-				this.hidingPopup = false;
-				return false;
-			}
 
 			captions = (this.captions.length) ? this.captions : [];
 			if (captions.length === 1) {
@@ -4605,7 +4772,6 @@
 				// clicking on a track is handled via caption.js > getCaptionClickFunction()
 				if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 					this.captionsPopup.hide();
-					this.hidingPopup = false;
 					this.$ccButton.attr('aria-expanded', 'false');
 					this.waitThenFocus(this.$ccButton);
 				} else {
@@ -4616,7 +4782,7 @@
 
 						// Gives time to "register" expanded ccButton
 						setTimeout(function() {
-							thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+							thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight() - 4 );
 							thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left);
 							// Place focus on the first button (even if another button is checked)
 							thisObj.captionsPopup.find('li').removeClass('able-focus');
@@ -4655,21 +4821,14 @@
 		};
 
 		AblePlayer.prototype.handleChapters = function () {
-			if (this.hidingPopup) {
-				// stopgap to prevent spacebar in Firefox from reopening popup
-				// immediately after closing it
-				this.hidingPopup = false;
-				return false;
-			}
 			if (this.chaptersPopup.is(':visible')) {
 				this.chaptersPopup.hide();
-				this.hidingPopup = false;
 				this.$chaptersButton.attr('aria-expanded','false').trigger('focus');
 			} else {
 				this.closePopups();
 				this.chaptersPopup.show();
 				this.$chaptersButton.attr('aria-expanded','true');
-				this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+				this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight() - 4 );
 				this.chaptersPopup.css('left', this.$chaptersButton.position().left);
 
 				// Highlight the current chapter, if any chapters are checked
@@ -4717,12 +4876,6 @@
 			if (this.speechEnabled === null) {
 				this.initSpeech('prefs');
 			}
-			if (this.hidingPopup) {
-				// stopgap to prevent spacebar in Firefox from reopening popup
-				// immediately after closing it
-				this.hidingPopup = false;
-				return false;
-			}
 			if (this.prefsPopup.is(':visible')) {
 				this.prefsPopup.hide();
 				this.$prefsButton.attr('aria-expanded','false');
@@ -4731,10 +4884,6 @@
 				if (!this.showingPrefsDialog) {
 					this.$prefsButton.trigger('focus');
 				}
-				// wait briefly, then reset hidingPopup
-				setTimeout(function() {
-					thisObj.hidingPopup = false;
-				},100);
 			} else {
 				this.closePopups();
 				this.prefsPopup.show();
@@ -4745,7 +4894,7 @@
 					prefsButtonPosition = thisObj.$prefsButton.position();
 					prefsMenuRight = thisObj.$ableDiv.width() - 5;
 					prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
-					thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+					thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight() - 4);
 					thisObj.prefsPopup.css('left', prefsMenuLeft);
 					// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 					thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
@@ -4963,7 +5112,12 @@
 			// Remove existing HTML before generating.
 			// iconData: [0 = svg viewbox, 1 = svg path]
 			// Font and image icon functionality was removed in 5.0.0 in favor of SVG.
-			var iconData = this.getIconData( id );
+			var iconData;
+			if ( Object.hasOwn( this.options, 'icons' ) && Object.hasOwn( this.options.icons, id ) ) {
+				iconData = this.options.icons[id];
+			} else {
+				iconData = this.getIconData( id );
+			}
 
 			var existingIcon = $button.find( 'svg#ableplayer-' + id );
 			// Avoid repainting icon if there's no change.
@@ -4972,28 +5126,31 @@
 			}
 			$button.find('svg').remove();
 
-			// Outdented for simpler diff
-				// Function to create SVG nodes.
-				function getNode(n, v) {
-					n = document.createElementNS("http://www.w3.org/2000/svg", n);
-					for (var p in v) {
-						n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
-							return "-" + m.toLowerCase();
-						}), v[p]);
-					}
-					return n;
+			// Function to create SVG nodes.
+			function getNode(n, v) {
+				n = document.createElementNS("http://www.w3.org/2000/svg", n);
+				for (var p in v) {
+					n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
+						return "-" + m.toLowerCase();
+					}), v[p]);
 				}
-				var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-				icon.setAttribute( 'focusable', 'false' );
-				icon.setAttribute( 'aria-hidden', 'true');
-				icon.setAttribute( 'viewBox', iconData[0] );
-				icon.setAttribute( 'id', 'ableplayer-' + id );
-				let path = getNode( 'path', { d: iconData[1] } );
+				return n;
+			}
+			var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+			icon.setAttribute( 'focusable', 'false' );
+			icon.setAttribute( 'aria-hidden', 'true');
+			icon.setAttribute( 'viewBox', iconData[0] );
+			icon.setAttribute( 'id', 'ableplayer-' + id );
+			let paths = iconData[1];
+			paths.forEach( function( pathData ) {
+				let path = getNode( 'path', { d: pathData } );
 				icon.appendChild( path );
-
-				$button.append( icon );
-				// Refresh the DOM.
-				$button.html($button.html());
+			});
+			let cleanSVG = DOMPurify.sanitize(icon.outerHTML, {RETURN_DOM_FRAGMENT: true});
+			icon = cleanSVG.firstChild;
+			$button.append( icon );
+			// Refresh the DOM.
+			$button.html($button.html());
 		};
 
 		AblePlayer.prototype.setText = function( $button, text ) {
@@ -5344,26 +5501,21 @@
 					meta = this.meta[i];
 				}
 			}
-			// regardless of source...
-			this.transcriptLang = language;
+			// Change the transcript language if the transcript is not currently visible.
+			if ( ( source === 'captions' && typeof this.$transcriptArea !== 'undefined' && ! this.$transcriptArea.is(':visible') ) || source === 'init' || source === 'transcript' ) {
+				console.log('syncTrackLanguages: transcript is not visible, so changing transcript language to ' + language);
+				this.transcriptCaptions = captions;
+				this.transcriptChapters = chapters;
+				this.transcriptDescriptions = descriptions;
+				this.transcriptLang = language;
+			}
 			if (source === 'init' || source === 'captions') {
 				this.captionLang = language;
 				this.selectedCaptions = captions;
 				this.selectedChapters = chapters;
 				this.selectedDescriptions = descriptions;
 				this.selectedMeta = meta;
-				this.transcriptCaptions = captions;
-				this.transcriptChapters = chapters;
-				this.transcriptDescriptions = descriptions;
 				this.updateChaptersList();
-				// the following was commented out in Oct/Nov 2018.
-				// chapters popup is setup automatically when setupPopups() is called later with no param
-				// not sure why it was included here.
-				// this.setupPopups('chapters');
-			} else if (source === 'transcript') {
-				this.transcriptCaptions = captions;
-				this.transcriptChapters = chapters;
-				this.transcriptDescriptions = descriptions;
 			}
 			if (this.selectedDescriptions) {
 				// updating description voice to match new description language
@@ -5406,7 +5558,7 @@
 			// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
 			// descReader == either 'browser' or 'screenreader'
 
-			var deferred, promise;
+			var deferred, promise, firstSource;
 
 			deferred = new this.defer();
 			promise = deferred.promise();
@@ -5418,8 +5570,9 @@
 			// check to see if there's an open-described version of this video
 			// checks only the first source since if a described version is provided,
 			// it must be provided for all sources
-			this.descFile = this.$sources.first().attr('data-desc-src');
-			if (typeof this.descFile !== 'undefined') {
+			firstSource   = this.sources[0] ?? null;
+			this.descFile = firstSource ? this.sources[0].getAttribute('data-desc-src') : null;
+			if ( this.descFile !== null && this.descFile !== '' ) {
 				this.hasOpenDesc = true;
 			} else {
 				// there's no open-described version via data-desc-src,
@@ -5504,7 +5657,10 @@
 			} else if (this.player === 'vimeo') {
 				return (this.activeVimeoId === this.vimeoDescId);
 			} else {
-				return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+				const firstSource = this.sources[0] ?? null;
+				const descSrc     = firstSource ? firstSource.getAttribute('data-desc-src') : null;
+				const activeSrc   = firstSource ? firstSource.getAttribute('src') : null;
+				return ( descSrc !== null && descSrc === activeSrc );
 			}
 		};
 
@@ -5695,8 +5851,7 @@
 
 			// get element that has focus at the time swap is initiated
 			// after player is rebuilt, focus will return to that same element
-			// (if it exists)
-			this.$focusedElement = $(':focus');
+			this.focusedElement = AblePlayer.getActiveDOMElement();
 			this.activeMedia = this.mediaId;
 
 			// get current time of current source, and attempt to start new video at the same time
@@ -5729,23 +5884,23 @@
 
 				if (this.usingDescribedVersion()) {
 					// the described version is currently playing. Swap to non-described
-					for (i=0; i < this.$sources.length; i++) {
+					for (i=0; i < this.sources.length; i++) {
 						// for all <source> elements, replace src with data-orig-src
-						origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-orig-src') );
+						origSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-orig-src') );
 						if (origSrc) {
-							this.$sources[i].setAttribute('src',origSrc);
+							this.sources[i].setAttribute('src',origSrc);
 						}
 					}
 				} else {
 					// the non-described version is currently playing. Swap to described.
-					for (i=0; i < this.$sources.length; i++) {
+					for (i=0; i < this.sources.length; i++) {
 						// for all <source> elements, replace src with data-desc-src (if one exists)
 						// then store original source in a new data-orig-src attribute
-						origSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('src') );
-						descSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-desc-src') );
+						origSrc = DOMPurify.sanitize( this.sources[i].getAttribute('src') );
+						descSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-desc-src') );
 						if (descSrc) {
-							this.$sources[i].setAttribute('src',descSrc);
-							this.$sources[i].setAttribute('data-orig-src',origSrc);
+							this.sources[i].setAttribute('src',descSrc);
+							this.sources[i].setAttribute('data-orig-src',origSrc);
 						}
 					}
 				}
@@ -6053,154 +6208,153 @@
 
 	}
 
-	// Outdented for a simpler diff
-		var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
-		// Based on the incredible accessible modal dialog.
-		function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
+	// Based on the incredible accessible modal dialog.
+	function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 
-			this.title = title;
-			this.closeButtonLabel = closeButtonLabel;
-			this.focusedElementBeforeModal = $returnElement;
-			this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
-			var thisObj = this;
-			var modal = modalDiv;
-			this.modal = modal;
+		this.title = title;
+		this.closeButtonLabel = closeButtonLabel;
+		this.focusedElementBeforeModal = $returnElement;
+		this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
+		var thisObj = this;
+		var modal = modalDiv;
+		this.modal = modal;
 
-			modal.addClass('able-modal-dialog');
+		modal.addClass('able-modal-dialog');
 
-			var closeButton = $('<button>',{
-					'class': 'modalCloseButton',
-					'title': thisObj.closeButtonLabel,
-					'aria-label': thisObj.closeButtonLabel
-			}).text('×');
-			closeButton.on( 'keydown', function (e) {
-				if (e.key === ' ') {
-					thisObj.hide();
+		var closeButton = $('<button>',{
+				'class': 'modalCloseButton',
+				'title': thisObj.closeButtonLabel,
+				'aria-label': thisObj.closeButtonLabel
+		}).text('×');
+		closeButton.on( 'keydown', function (e) {
+			if (e.key === ' ') {
+				thisObj.hide();
+			}
+		}).on( 'click', function () {
+			thisObj.hide();
+		});
+
+		var titleH1 = $('<h1></h1>');
+		titleH1.attr('id', 'modalTitle-' + this.baseId);
+		titleH1.text(title);
+		this.titleH1 = titleH1;
+
+		modal.attr({
+			'aria-labelledby': 'modalTitle-' + this.baseId,
+		});
+		var modalHeader = $( '<div>', {
+			'class': 'able-modal-header'
+		});
+		modalHeader.prepend(titleH1);
+		modalHeader.prepend(closeButton);
+		modal.prepend(modalHeader);
+
+		modal.attr({
+			'aria-hidden': 'true',
+			'role': 'dialog',
+			'aria-modal': 'true'
+		});
+
+		modal.on( 'keydown', function (e) {
+			if (e.key === 'Escape') {
+				thisObj.hide();
+				e.preventDefault();
+			} else if (e.key === 'Tab') {
+				// Manually loop tab navigation inside the modal.
+				var parts = modal.find('*');
+				var focusable = parts.filter(focusableElementsSelector).filter(':visible');
+
+				if (focusable.length === 0) {
+					return;
 				}
-			}).on( 'click', function () {
+
+				var focused = AblePlayer.getActiveDOMElement();
+				var currentIndex = focusable.index(focused);
+				if (e.shiftKey) {
+					// If backwards from first element, go to last.
+					if (currentIndex === 0) {
+						focusable.get(focusable.length - 1).trigger('focus');
+						e.preventDefault();
+					}
+				} else {
+					if (currentIndex === focusable.length - 1) {
+						focusable.get(0).trigger('focus');
+						e.preventDefault();
+					}
+				}
+			}
+			e.stopPropagation();
+		});
+
+		if ( $( 'body' ).hasClass( 'able-modal-active' ) ) {
+			$( 'body > *') .not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
+			$( 'body' ).removeClass( 'able-modal-active' );
+		}
+	}
+	AccessibleDialog.prototype.show = function () {
+		if (!this.overlay) {
+			// Generate overlay.
+			var overlay = $('<div></div>').attr({
+					'class': 'able-modal-overlay',
+					'tabindex': '-1'
+			});
+			this.overlay = overlay;
+			$('body').append(overlay);
+
+			// Keep from moving focus out of dialog when clicking outside of it.
+			overlay.on('mousedown.accessibleModal', function (e) {
+				e.preventDefault();
 				thisObj.hide();
 			});
-
-			var titleH1 = $('<h1></h1>');
-			titleH1.attr('id', 'modalTitle-' + this.baseId);
-			titleH1.text(title);
-			this.titleH1 = titleH1;
-
-			modal.attr({
-				'aria-labelledby': 'modalTitle-' + this.baseId,
-			});
-			var modalHeader = $( '<div>', {
-				'class': 'able-modal-header'
-			});
-			modalHeader.prepend(titleH1);
-			modalHeader.prepend(closeButton);
-			modal.prepend(modalHeader);
-
-			modal.attr({
-				'aria-hidden': 'true',
-				'role': 'dialog',
-				'aria-modal': 'true'
-			});
-
-			modal.on( 'keydown', function (e) {
-				if (e.key === 'Escape') {
-					thisObj.hide();
-					e.preventDefault();
-				} else if (e.key === 'Tab') {
-					// Manually loop tab navigation inside the modal.
-					var parts = modal.find('*');
-					var focusable = parts.filter(focusableElementsSelector).filter(':visible');
-
-					if (focusable.length === 0) {
-						return;
-					}
-
-					var focused = $(':focus');
-					var currentIndex = focusable.index(focused);
-					if (e.shiftKey) {
-						// If backwards from first element, go to last.
-						if (currentIndex === 0) {
-							focusable.get(focusable.length - 1).trigger('focus');
-							e.preventDefault();
-						}
-					} else {
-						if (currentIndex === focusable.length - 1) {
-							focusable.get(0).trigger('focus');
-							e.preventDefault();
-						}
-					}
-				}
-				e.stopPropagation();
-			});
-
-			if ( $( 'body' ).hasClass( 'able-modal-active' ) ) {
-				$( 'body > *') .not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
-				$( 'body' ).removeClass( 'able-modal-active' );
-			}
 		}
-		AccessibleDialog.prototype.show = function () {
-			if (!this.overlay) {
-				// Generate overlay.
-				var overlay = $('<div></div>').attr({
-					 'class': 'able-modal-overlay',
-					 'tabindex': '-1'
-				});
-				this.overlay = overlay;
-				$('body').append(overlay);
 
-				// Keep from moving focus out of dialog when clicking outside of it.
-				overlay.on('mousedown.accessibleModal', function (e) {
-					e.preventDefault();
-					thisObj.hide();
-				});
-			}
+		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('inert', true);
+		$( 'body' ).addClass( 'able-modal-active' );
 
-			$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('inert', true);
-			$( 'body' ).addClass( 'able-modal-active' );
+		this.overlay.css('display', 'block');
+		this.modal.css('display', 'block');
+		this.modal.attr({
+			'aria-hidden': 'false',
+			'tabindex': '-1'
+		});
 
-			this.overlay.css('display', 'block');
-			this.modal.css('display', 'block');
-			this.modal.attr({
-				'aria-hidden': 'false',
-				'tabindex': '-1'
-			});
+		var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
+		if (focusable.length === 0) {
+			this.focusedElementBeforeModal.blur();
+		}
+		var thisObj = this;
+		setTimeout(function () {
+			// set focus on the first focusable element
+			thisObj.modal.find('button.modalCloseButton').first().trigger('focus');
+		}, 300);
+	};
 
-			var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
-			if (focusable.length === 0) {
-				this.focusedElementBeforeModal.blur();
-			}
-			var thisObj = this;
-			setTimeout(function () {
-				// set focus on the first focusable element
-				thisObj.modal.find('button.modalCloseButton').first().trigger('focus');
-			}, 300);
-		};
+	AccessibleDialog.prototype.hide = function () {
+		if (this.overlay) {
+			this.overlay.css('display', 'none');
+		}
+		this.modal.css('display', 'none');
+		this.modal.attr('aria-hidden', 'true');
+		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
+		$( 'body' ).removeClass( 'able-modal-active' );
 
-		AccessibleDialog.prototype.hide = function () {
-			if (this.overlay) {
-				this.overlay.css('display', 'none');
-			}
-			this.modal.css('display', 'none');
-			this.modal.attr('aria-hidden', 'true');
-			$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
-			$( 'body' ).removeClass( 'able-modal-active' );
+		this.focusedElementBeforeModal.trigger('focus');
+	};
 
-			this.focusedElementBeforeModal.trigger('focus');
-		};
+	AccessibleDialog.prototype.getInputs = function () {
 
-		AccessibleDialog.prototype.getInputs = function () {
-
-			// return an array of input elements within this dialog
-			if (this.modal) {
-				var inputs = this.modal.find('input');
-				return inputs;
-			}
-			return false;
-		};
+		// return an array of input elements within this dialog
+		if (this.modal) {
+			var inputs = this.modal.find('input');
+			return inputs;
+		}
+		return false;
+	};
 
 	function addDragdropFunctions(AblePlayer) {
-		AblePlayer.prototype.initDragDrop = function ( which ) {
+		AblePlayer.prototype.initDragDrop = function (which) {
 
 			// supported values of which: 'sign', 'transcript'
 
@@ -6213,8 +6367,7 @@
 			// There are nevertheless lessons to be learned from Drag & Drop about accessibility:
 			// http://dev.opera.com/articles/accessible-drag-and-drop/
 
-			var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, $resizeSvg,
-				i, x1, y1, x2, y2, $resizeLine, resizeZIndex;
+			var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, resizeZIndex;
 
 			thisObj = this;
 
@@ -6222,162 +6375,103 @@
 				$window = this.$transcriptArea;
 				windowName = 'transcript-window';
 				$toolbar = this.$transcriptToolbar;
-				$toolbar.attr( 'aria-label', this.translate( 'transcriptControls', 'Transcript Window Controls' ) );
+				$toolbar.attr('aria-label', this.translate('transcriptControls', 'Transcript Window Controls'));
 			} else if (which === 'sign') {
 				$window = this.$signWindow;
 				windowName = 'sign-window';
 				$toolbar = this.$signToolbar;
-				$toolbar.attr( 'aria-label', this.translate( 'signControls', 'Sign Language Window Controls' ) );
+				$toolbar.attr('aria-label', this.translate('signControls', 'Sign Language Window Controls'));
 			}
 
 			// add class to trigger change in cursor on hover
 			$toolbar.addClass('able-draggable');
-			$toolbar.attr( 'role', 'application' );
+			$toolbar.attr('role', 'application');
 
-			$dragHandle = $('<div>',{
+			$dragHandle = $('<div>', {
 				'class': 'able-drag-handle'
 			});
+			this.getIcon($dragHandle, 'drag-handle');
 
-			$dragHandle.html('<svg version="1.1" viewBox="262.48 487.5 675.03 225" xmlns="http://www.w3.org/2000/svg"><path d="m900 562.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path>  <path d="m900 712.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path></svg>');
 			// add resize handle selector to bottom right corner
-			$resizeHandle = $('<div>',{
+			$resizeHandle = $('<div>', {
 				'class': 'able-resizable'
 			});
-
-			// fill it with three parallel diagonal lines
-			$resizeSvg = $('<svg>').attr({
-				'width': '100%',
-				'height': '100%',
-				'viewBox': '0 0 100 100',
-				'preserveAspectRatio': 'none'
-			});
-			for (i=1; i<=3; i++) {
-				if (i === 1) {
-					x1 = '100';
-					y1 = '0';
-					x2 = '0';
-					y2 = '100';
-				} else if (i === 2) {
-					x1 = '33';
-					y1 = '100';
-					x2 = '100';
-					y2 = '33';
-				} else if (i === 3) {
-					x1 = '67';
-					y1 = '100';
-					x2 = '100';
-					y2 = '67';
-				}
-				$resizeLine = $('<line>').attr({
-					'x1': x1,
-					'y1': y1,
-					'x2': x2,
-					'y2': y2,
-					'vector-effect': 'non-scaling-stroke'
-				});
-				$resizeSvg.append($resizeLine);
-			}
-			$resizeHandle.html($resizeSvg);
+			this.getIcon($resizeHandle, 'resize-handle');
 
 			// assign z-index that's slightly higher than parent window
 			resizeZIndex = parseInt($window.css('z-index')) + 100;
-			$resizeHandle.css('z-index',resizeZIndex);
+			$resizeHandle.css('z-index', resizeZIndex);
 			$window.append($resizeHandle);
 			$toolbar.append($dragHandle);
 
-			// Final step: Need to refresh the DOM in order for browser to process & display the SVG
-			$resizeHandle.html($resizeHandle.html());
-
-			// add event listener to toolbar to start and end drag
+			// add event listener to toolbar to start drag
 			// other event listeners will be added when drag starts
-			$dragHandle.on('mousedown mouseup touchstart touchend', function(e) {
+			$dragHandle.on('pointerdown', function (e) {
 				e.stopPropagation();
-				if (e.type === 'mousedown' || e.type === 'touchstart' ) {
-					if (!thisObj.windowMenuClickRegistered) {
-						thisObj.windowMenuClickRegistered = true;
-						thisObj.startMouseX = e.pageX;
-						thisObj.startMouseY = e.pageY;
-						thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
-						thisObj.startDrag(which, $window);
-					}
-				} else if (e.type === 'mouseup' || e.type === 'touchend') {
-					if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-						thisObj.endDrag(which);
-					}
-				}
+				thisObj.startMouseX = e.pageX;
+				thisObj.startMouseY = e.pageY;
+				thisObj.dragPointerId = e.pointerId;
+				thisObj.dragDevice = 'mouse'; // pointer input is treated as non-keyboard drag
+				thisObj.startDrag(which, $window);
 				return false;
 			});
 
 			// add event listeners for resizing
-			$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
+			$resizeHandle.on('pointerdown', function (e) {
 				e.stopPropagation();
-				if (e.type === 'mousedown' || e.type === 'touchstart') {
-					if (!thisObj.windowMenuClickRegistered) {
-						thisObj.windowMenuClickRegistered = true;
-						thisObj.startMouseX = e.pageX;
-						thisObj.startMouseY = e.pageY;
-						thisObj.startResize(which, $window);
-					}
-				} else if (e.type === 'mouseup' || e.type === 'touchend') {
-					if (thisObj.resizing) {
-						thisObj.endResize(which);
-					}
-				}
+				thisObj.startMouseX = e.pageX;
+				thisObj.startMouseY = e.pageY;
+				thisObj.resizePointerId = e.pointerId;
+				thisObj.startResize(which, $window);
 				return false;
 			});
 
 			// whenever a window is clicked, bring it to the foreground
-			$window.on('click', function() {
+			$window.on('click', function () {
 
-				if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+				if (!thisObj.finishingDrag) {
 					thisObj.updateZIndex(which);
 				}
 				thisObj.finishingDrag = false;
 			});
-			this.addWindowMenu(which,$window,windowName);
+			this.addWindowMenu(which, $window, windowName);
 		};
 
-		AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
+		AblePlayer.prototype.addWindowMenu = function (which, $window, windowName) {
 
 			var thisObj, menuId, $newButton, tooltipId, $tooltip, $popup;
 
 			thisObj = this;
 
-			// Add a Boolean that will be set to true temporarily if window button or a menu item is clicked
-			// This will prevent the click event from also triggering a mousedown event on the toolbar
-			// (which would unexpectedly send the window into drag mode)
-			this.windowMenuClickRegistered = false;
-
-			// Add another Boolean that will be set to true temporarily when mouseup fires at the end of a drag
+			// Add another Boolean that will be set to true temporarily when pointerup fires at the end of a drag
 			// this will prevent the click event from being triggered
 			this.finishingDrag = false;
 
 			// add button to draggable window which triggers a popup menu
 			menuId = this.mediaId + '-' + windowName + '-menu';
-			$newButton = $('<button>',{
+			$newButton = $('<button>', {
 				'type': 'button',
-				'tabindex': '0',
 				'aria-haspopup': 'true',
 				'aria-controls': menuId,
 				'aria-expanded': 'false',
 				'class': 'able-button-handler-preferences'
 			});
-			this.getIcon( $newButton, 'preferences' );
-			this.setText( $newButton, this.translate( 'windowButtonLabel', 'Window options' ) );
+			this.getIcon($newButton, 'preferences');
+			this.setText($newButton, this.translate('windowButtonLabel', 'Window options'));
 
 			// add a tooltip that displays aria-label on mouseenter or focus
 			tooltipId = this.mediaId + '-' + windowName + '-tooltip';
-			$tooltip = $('<div>',{
-				'class' : 'able-tooltip',
-				'id' : tooltipId
+			$tooltip = $('<div>', {
+				'class': 'able-tooltip',
+				'id': tooltipId
 			}).hide();
 
-			$newButton.on('mouseenter focus',function(e) {
+			$newButton.on('mouseenter focus', function (e) {
 				var label = $(this).attr('aria-label');
 				var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label);
 				// get height of the tooltip
 				var tooltipHeight = tooltip.height();
-				var tooltipY = ( tooltipHeight + 2 ) * -1;
+				var tooltipY = (tooltipHeight + 2) * -1;
 				var tooltipX = 0;
 				var tooltipStyle = {
 					right: '',
@@ -6386,7 +6480,7 @@
 				};
 				tooltip.css(tooltipStyle);
 				thisObj.showTooltip(tooltip);
-				$(this).on('mouseleave blur',function() {
+				$(this).on('mouseleave blur', function () {
 					AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
 				});
 			});
@@ -6397,15 +6491,15 @@
 			if (which === 'transcript') {
 				this.$transcriptPopupButton = $newButton;
 				this.$transcriptPopup = $popup;
-				this.$transcriptToolbar.prepend($newButton,$tooltip,$popup);
+				this.$transcriptToolbar.prepend($newButton, $tooltip, $popup);
 			} else if (which === 'sign') {
 				this.$signPopupButton = $newButton;
 				this.$signPopup = $popup;
-				this.$signToolbar.append($newButton,$tooltip,$popup);
+				this.$signToolbar.append($newButton, $tooltip, $popup);
 			}
 
-			// handle button click
-			$newButton.on('click keydown',function(e) {
+			// handle button key activation and click separately
+			$newButton.on('keydown', function (e) {
 
 				if (thisObj.focusNotClick) {
 					return false;
@@ -6414,13 +6508,34 @@
 					thisObj.dragKeys(which, e);
 					return false;
 				}
+				if (e.key !== ' ' && e.key !== 'Enter' && e.key !== 'Escape') {
+					return false;
+				}
 				e.stopPropagation();
-				if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-					console.log( 'firing' );
-					// don't set windowMenuClickRegistered yet; that happens in handler function
+				if (e.key === ' ' || e.key === 'Enter') {
+					e.preventDefault();
+				}
+				if (!thisObj.finishingDrag) {
 					thisObj.handleWindowButtonClick(which, e);
 				}
 				thisObj.finishingDrag = false;
+				return false;
+			});
+
+			$newButton.on('click', function (e) {
+
+				if (thisObj.focusNotClick) {
+					return false;
+				}
+				if (thisObj.dragging) {
+					return false;
+				}
+				e.stopPropagation();
+				if (!thisObj.finishingDrag) {
+					thisObj.handleWindowButtonClick(which, e);
+				}
+				thisObj.finishingDrag = false;
+				return false;
 			});
 
 			this.addResizeDialog(which, $window);
@@ -6446,63 +6561,63 @@
 			widthId = this.mediaId + '-resize-' + which + '-width';
 			heightId = this.mediaId + '-resize-' + which + '-height';
 
-			$resizeForm = $('<div></div>',{
-				'class' : 'able-resize-form'
+			$resizeForm = $('<div></div>', {
+				'class': 'able-resize-form'
 			});
 
 			// inner container for all content, will be assigned to modal div's aria-describedby
 			$resizeWrapper = $('<div></div>');
-			$resizeControls = $( '<div class="able-prefs-buttons"></div>' );
+			$resizeControls = $('<div class="able-prefs-buttons"></div>');
 
 			// width field
 			$resizeWidthDiv = $('<div></div>');
-			$resizeWidthInput = $('<input>',{
+			$resizeWidthInput = $('<input>', {
 				'type': 'number',
 				'id': widthId,
 				'min': 0,
 				'value': '',
 			});
-			$resizeWidthLabel = $('<label>',{
+			$resizeWidthLabel = $('<label>', {
 				'for': widthId
-			}).text( this.translate( 'width', 'Width' ) );
+			}).text(this.translate('width', 'Width'));
 
 			// height field
 			$resizeHeightDiv = $('<div></div>');
-			$resizeHeightInput = $('<input>',{
+			$resizeHeightInput = $('<input>', {
 				'type': 'number',
 				'id': heightId,
 				'min': 0,
 				'value': '',
 			});
-			$resizeHeightLabel = $('<label>',{
+			$resizeHeightLabel = $('<label>', {
 				'for': heightId
-			}).text( this.translate( 'height', 'Height' ) );
+			}).text(this.translate('height', 'Height'));
 
 			// Add save and cancel buttons.
-			$saveButton = $('<button class="modal-button">' + this.translate( 'save', 'Save' ) + '</button>');
-			$cancelButton = $('<button class="modal-button">' + this.translate( 'cancel', 'Cancel' ) + '</button>');
-			$saveButton.on('click',function () {
+			$saveButton = $('<button class="modal-button">' + this.translate('save', 'Save') + '</button>');
+			$cancelButton = $('<button class="modal-button">' + this.translate('cancel', 'Cancel') + '</button>');
+			$saveButton.on('click', function () {
 				newWidth = $('#' + widthId).val();
 				newHeight = $('#' + heightId).val();
-				thisObj.resizeObject(which,newWidth,newHeight);
+				thisObj.resizeObject(which, newWidth, newHeight);
 				thisObj.updatePreferences(which);
 
 				resizeDialog.hide();
 				$windowPopup.hide();
 				$windowButton.trigger('focus');
 			});
-			$cancelButton.on('click',function () {
+			$cancelButton.on('click', function () {
 				resizeDialog.hide();
 				$windowPopup.hide();
 				$windowButton.trigger('focus');
 			});
 
 			// Now assemble all the parts
-			$resizeWidthDiv.append($resizeWidthLabel,$resizeWidthInput);
-			$resizeHeightDiv.append($resizeHeightLabel,$resizeHeightInput);
-			$resizeWrapper.append($resizeWidthDiv,$resizeHeightDiv);
-			$resizeControls.append($saveButton,$cancelButton);
-			$resizeForm.append($resizeWrapper,$resizeControls);
+			$resizeWidthDiv.append($resizeWidthLabel, $resizeWidthInput);
+			$resizeHeightDiv.append($resizeHeightLabel, $resizeHeightInput);
+			$resizeWrapper.append($resizeWidthDiv, $resizeHeightDiv);
+			$resizeControls.append($saveButton, $cancelButton);
+			$resizeForm.append($resizeWrapper, $resizeControls);
 
 			// must be appended to the BODY!
 			// otherwise when aria-hidden="true" is applied to all background content
@@ -6512,8 +6627,8 @@
 			resizeDialog = new AccessibleDialog(
 				$resizeForm,
 				$windowButton,
-				this.translate( 'windowResizeHeading', 'Resize Window' ),
-				this.translate( 'closeButtonLabel', 'Close' ),
+				this.translate('windowResizeHeading', 'Resize Window'),
+				this.translate('closeButtonLabel', 'Close'),
 			);
 			if (which === 'transcript') {
 				this.transcriptResizeDialog = resizeDialog;
@@ -6524,9 +6639,8 @@
 
 		AblePlayer.prototype.handleWindowButtonClick = function (which, e) {
 
-			var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
+			var $windowPopup, $windowButton, $toolbar, popupTop;
 
-			thisObj = this;
 			if (this.focusNotClick) {
 				// transcript or sign window has just opened,
 				// and focus moved to the window button
@@ -6545,16 +6659,13 @@
 			}
 			if (e.type === 'keydown') {
 				// user pressed a key
-				if (e.key === ' ' || e.key === 'Enter') {
-					this.windowMenuClickRegistered = true;
-				} else if (e.key === 'Escape') {
+				if (e.key === ' ' || e.key === 'Enter') ; else if (e.key === 'Escape') {
 					if ($windowPopup.is(':visible')) {
 						// close the popup menu
 						$windowPopup.hide();
-						// also reset the Boolean
-						thisObj.windowMenuClickRegistered = false;
 						// also restore menu items to their original state
-						$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+						$windowPopup.find('li').removeClass('able-focus').attr('tabindex', '-1');
+						$windowButton.attr('aria-expanded', 'false');
 						// also return focus to window options button
 						$windowButton.trigger('focus');
 					} else {
@@ -6565,37 +6676,32 @@
 							this.handleTranscriptToggle();
 						}
 					}
+					return false;
 				} else {
 					return false;
 				}
-			} else {
-				// this was a mouse event
-				this.windowMenuClickRegistered = true;
 			}
 
-			if ( $windowPopup.is(':visible') ) {
+			if ($windowPopup.is(':visible')) {
 				$windowPopup.hide();
-				thisObj.windowMenuClickRegistered = false; // reset
 				$windowPopup.find('li').removeClass('able-focus');
-				$windowButton.attr('aria-expanded','false').trigger('focus');
+				$windowButton.attr('aria-expanded', 'false').trigger('focus');
 			} else {
 				// first, be sure window is on top
 				this.updateZIndex(which);
 				popupTop = $toolbar.outerHeight() - 1;
 				$windowPopup.css('top', popupTop);
 				$windowPopup.show();
-				$windowButton.attr('aria-expanded','true');
-				$(this).find('li').first().trigger('focus').addClass('able-focus');
-				thisObj.windowMenuClickRegistered = false; // reset
+				$windowButton.attr('aria-expanded', 'true');
+				$windowPopup.find('li').first().attr('tabindex', '0').trigger('focus').addClass('able-focus');
 			}
 		};
 
 		AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
-			var thisObj, $window, $windowPopup, $windowButton, resizeDialog, startingWidth, startingHeight,
-			aspectRatio, tempWidth, tempHeight;
+			var $window, $windowPopup, $windowButton, resizeDialog, startingWidth, startingHeight,
+				aspectRatio, tempWidth, tempHeight;
 
-			thisObj = this;
 			if (which === 'transcript') {
 				$window = this.$transcriptArea;
 				$windowPopup = this.$transcriptPopup;
@@ -6614,11 +6720,11 @@
 				// and calculate its value based on width to preserve aspect ratio
 				let widthId = this.mediaId + '-resize-' + which + '-width';
 				let heightId = this.mediaId + '-resize-' + which + '-height';
-				$( '#' + heightId ).prop('readonly',true);
-				$( '#' + widthId ).on('input',function() {
+				$('#' + heightId).prop('readonly', true);
+				$('#' + widthId).on('input', function () {
 					tempWidth = $(this).val();
-					tempHeight = Math.round(tempWidth/aspectRatio);
-					$( '#' + heightId ).val(tempHeight);
+					tempHeight = Math.round(tempWidth / aspectRatio);
+					$('#' + heightId).val(tempHeight);
 				});
 			}
 			this.$activeWindow = $window;
@@ -6627,11 +6733,9 @@
 				if (e.key === 'Escape') { // escape
 					// hide the popup menu
 					$windowPopup.hide();
-					// also reset the Boolean
-					thisObj.windowMenuClickRegistered = false;
 					// also restore menu items to their original state
-					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-					$windowButton.attr('aria-expanded','false');
+					$windowPopup.find('li').removeClass('able-focus').attr('tabindex', '-1');
+					$windowButton.attr('aria-expanded', 'false');
 					// also return focus to window options button
 					$windowButton.trigger('focus');
 
@@ -6647,11 +6751,9 @@
 
 			// hide the popup menu
 			$windowPopup.hide();
-			// also reset the boolean
-			thisObj.windowMenuClickRegistered = false;
 			// also restore menu items to their original state
-			$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-			$windowButton.attr('aria-expanded','false');
+			$windowPopup.find('li').removeClass('able-focus').attr('tabindex', '-1');
+			$windowButton.attr('aria-expanded', 'false');
 
 			if (choice !== 'close') {
 				$windowButton.trigger('focus');
@@ -6659,10 +6761,10 @@
 			if (choice === 'move') {
 				// temporarily add role="application" to activeWindow
 				// otherwise, screen readers incercept arrow keys and moving window will not work
-				this.$activeWindow.attr('role','application');
+				this.$activeWindow.attr('role', 'application');
 
 				if (!this.showedAlert(which)) {
-					this.showAlert( this.translate( 'windowMoveAlert', 'Drag or use arrow keys to move the window; Enter to stop' ),which);
+					this.showAlert(this.translate('windowMoveAlert', 'Drag or use arrow keys to move the window; Enter to stop'), which);
 					if (which === 'transcript') {
 						this.showedTranscriptAlert = true;
 					} else if (which === 'sign') {
@@ -6671,14 +6773,14 @@
 				}
 				this.dragDevice = (e.type === 'keydown') ? 'keyboard' : 'mouse';
 				this.startDrag(which, $window);
-				$windowPopup.hide().parent().attr( 'tabindex', '-1' ).trigger('focus');
+				$windowPopup.hide().parent().attr('tabindex', '-1').trigger('focus');
 			} else if (choice == 'resize') {
 				// resize through the menu uses a form, not drag
 				var resizeFields = resizeDialog.getInputs();
 				if (resizeFields) {
 					// reset width and height values in form
-					resizeFields[0].value = Math.round( $window.outerWidth() );
-					resizeFields[1].value = Math.round( $window.outerHeight() );
+					resizeFields[0].value = Math.round($window.outerWidth());
+					resizeFields[1].value = Math.round($window.outerHeight());
 				}
 				resizeDialog.show();
 			} else if (choice == 'close') {
@@ -6693,7 +6795,7 @@
 			}
 		};
 
-		AblePlayer.prototype.startDrag = function(which, $element) {
+		AblePlayer.prototype.startDrag = function (which, $element) {
 
 			var thisObj, $windowPopup, startPos, newX, newY;
 
@@ -6744,17 +6846,30 @@
 			}).trigger('focus');
 
 			// add device-specific event listeners
-			if (this.dragDevice === 'mouse') { // might also be a touchpad
-				$(document).on('mousemove touchmove',function(e) {
-					if (thisObj.dragging) {
-						// calculate new top left based on current mouse position - offset
-						newX = e.pageX - thisObj.dragOffsetX;
-						newY = e.pageY - thisObj.dragOffsetY;
-						thisObj.resetDraggedObject( newX, newY );
+			if (this.dragDevice === 'mouse') { // pointer input, including mouse/touch/pen
+				$(window).on('pointermove.ableDrag', function (e) {
+					if (!thisObj.dragging) {
+						return;
 					}
+					if (typeof thisObj.dragPointerId !== 'undefined' && e.pointerId !== thisObj.dragPointerId) {
+						return;
+					}
+					// calculate new top left based on current pointer position - offset
+					newX = e.pageX - thisObj.dragOffsetX;
+					newY = e.pageY - thisObj.dragOffsetY;
+					thisObj.resetDraggedObject(newX, newY);
+				});
+				$(window).on('pointerup.ableDrag pointercancel.ableDrag', function (e) {
+					if (!thisObj.dragging) {
+						return;
+					}
+					if (typeof thisObj.dragPointerId !== 'undefined' && e.pointerId !== thisObj.dragPointerId) {
+						return;
+					}
+					thisObj.endDrag(which);
 				});
 			} else if (this.dragDevice === 'keyboard') {
-				this.$activeWindow.on('keydown',function(e) {
+				this.$activeWindow.on('keydown', function (e) {
 					if (thisObj.dragging) {
 						thisObj.dragKeys(which, e);
 					}
@@ -6769,7 +6884,7 @@
 		 * @param {string} which 'transcript' or 'sign' window.
 		 * @param {Event} e Triggered event.
 		 */
-		AblePlayer.prototype.dragKeys = function(which, e) {
+		AblePlayer.prototype.dragKeys = function (which, e) {
 
 			var key, keySpeed;
 
@@ -6784,40 +6899,40 @@
 
 			switch (key) {
 				case 'ArrowLeft':	// left
-					 this.dragKeyX -= keySpeed;
-					 this.$srAlertBox.text( this.translate( 'windowMoveLeft', 'Window moved left' ) );
+					this.dragKeyX -= keySpeed;
+					this.$srAlertBox.text(this.translate('windowMoveLeft', 'Window moved left'));
 					break;
 				case 'ArrowUp':	// up
 					this.dragKeyY -= keySpeed;
-					this.$srAlertBox.text( this.translate( 'windowMoveUp', 'Window moved up' ) );
+					this.$srAlertBox.text(this.translate('windowMoveUp', 'Window moved up'));
 					break;
 				case 'ArrowRight':	// right
 					this.dragKeyX += keySpeed;
-					this.$srAlertBox.text( this.translate( 'windowMoveRight', 'Window moved right' ) );
+					this.$srAlertBox.text(this.translate('windowMoveRight', 'Window moved right'));
 					break;
 				case 'ArrowDown':	// down
 					this.dragKeyY += keySpeed;
-					this.$srAlertBox.text( this.translate( 'windowMoveDown', 'Window moved down' ) );
+					this.$srAlertBox.text(this.translate('windowMoveDown', 'Window moved down'));
 					break;
 				case 'Enter': 	// enter
 				case 'Escape': 	// escape
-					this.$srAlertBox.text( this.translate( 'windowMoveStopped', 'Window move stopped' ) );
+					this.$srAlertBox.text(this.translate('windowMoveStopped', 'Window move stopped'));
 					this.endDrag(which);
 					return false;
 				default:
 					return false;
 			}
-			this.resetDraggedObject(this.dragKeyX,this.dragKeyY);
+			this.resetDraggedObject(this.dragKeyX, this.dragKeyY);
 			if (e.preventDefault) {
 				e.preventDefault();
 			}
 			return false;
 		};
 
-		AblePlayer.prototype.resetDraggedObject = function ( x, y) {
-			setTimeout( () => {
-				this.$srAlertBox.text( '' );
-			}, 2000 );
+		AblePlayer.prototype.resetDraggedObject = function (x, y) {
+			setTimeout(() => {
+				this.$srAlertBox.text('');
+			}, 2000);
 
 			this.$activeWindow.css({
 				'left': x + 'px',
@@ -6825,26 +6940,26 @@
 			});
 		},
 
-		AblePlayer.prototype.resizeObject = function ( which, width, height ) {
+			AblePlayer.prototype.resizeObject = function (which, width, height) {
 
-			var innerHeight;
+				var innerHeight;
 
-			// which is either 'transcript' or 'sign'
-			this.$activeWindow.css({
-				'width': width + 'px',
-				'height': height + 'px'
-			});
+				// which is either 'transcript' or 'sign'
+				this.$activeWindow.css({
+					'width': width + 'px',
+					'height': height + 'px'
+				});
 
-			if (which === 'transcript') {
-				// $activeWindow is the outer $transcriptArea
-				// but the inner able-transcript also needs to be resized proportionally
-				// (it's 50px less than its outer container)
-				innerHeight = height - 50;
-				this.$transcriptDiv.css('height', innerHeight + 'px');
-			}
-		};
+				if (which === 'transcript') {
+					// $activeWindow is the outer $transcriptArea
+					// but the inner able-transcript also needs to be resized proportionally
+					// (it's 50px less than its outer container)
+					innerHeight = height - 50;
+					this.$transcriptDiv.css('height', innerHeight + 'px');
+				}
+			};
 
-		AblePlayer.prototype.endDrag = function(which) {
+		AblePlayer.prototype.endDrag = function (which) {
 
 			var thisObj, $windowButton;
 			thisObj = this;
@@ -6855,10 +6970,10 @@
 				$windowButton = this.$signPopupButton;
 			}
 
-			$(document).off('mousemove mouseup touchmove touchup');
+			$(window).off('.ableDrag');
 			this.$activeWindow.off('keydown').removeClass('able-drag');
 			// restore activeWindow role from 'application' to 'dialog'
-			this.$activeWindow.attr('role','dialog');
+			this.$activeWindow.attr('role', 'dialog');
 			this.$activeWindow = null;
 
 			if (this.dragDevice === 'keyboard') {
@@ -6872,20 +6987,19 @@
 			// reset starting mouse positions
 			this.startMouseX = undefined;
 			this.startMouseY = undefined;
+			this.dragPointerId = undefined;
 
-			// Boolean to stop stray events from firing
-			this.windowMenuClickRegistered = false;
 			this.finishingDrag = true; // will be reset after window click event
 			// finishingDrag should be reset after window click event,
-			// which is triggered automatically after mouseup
+			// which is triggered automatically after pointerup
 			// However, in case that's not reliable in some browsers
 			// need to ensure this gets cancelled
-			setTimeout(function() {
+			setTimeout(function () {
 				thisObj.finishingDrag = false;
 			}, 100);
 		};
 
-		AblePlayer.prototype.startResize = function(which, $element) {
+		AblePlayer.prototype.startResize = function (which, $element) {
 
 			var thisObj, $windowPopup, newWidth, newHeight;
 
@@ -6907,19 +7021,37 @@
 			this.dragStartHeight = this.$activeWindow.outerHeight();
 
 			// add event listeners
-			$(document).on('mousemove touchmove',function(e) {
-				if (thisObj.resizing) {
-					// calculate new width and height based on changes to mouse position
-					newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
-					newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
-					thisObj.resizeObject( which, newWidth, newHeight );
+			$(window).on('pointermove.ableResize', function (e) {
+				if (!thisObj.resizing) {
+					return;
 				}
+				if (typeof thisObj.resizePointerId !== 'undefined' && e.pointerId !== thisObj.resizePointerId) {
+					return;
+				}
+				// calculate new width and height based on changes to pointer position
+				let aspectRatio = thisObj.dragStartWidth / thisObj.dragStartHeight;
+				newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
+				if ('transcript' === which) {
+					newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
+				} else {
+					newHeight = thisObj.dragStartHeight + ((e.pageX - thisObj.startMouseX) / aspectRatio);
+				}
+				thisObj.resizeObject(which, newWidth, newHeight);
+			});
+			$(window).on('pointerup.ableResize pointercancel.ableResize', function (e) {
+				if (!thisObj.resizing) {
+					return;
+				}
+				if (typeof thisObj.resizePointerId !== 'undefined' && e.pointerId !== thisObj.resizePointerId) {
+					return;
+				}
+				thisObj.endResize(which);
 			});
 
 			return false;
 		};
 
-		AblePlayer.prototype.endResize = function(which) {
+		AblePlayer.prototype.endResize = function (which) {
 
 			var $windowButton;
 
@@ -6929,24 +7061,24 @@
 				$windowButton = this.$signPopupButton;
 			}
 
-			$(document).off('mousemove mouseup touchmove touchup');
+			$(window).off('.ableResize');
 			this.$activeWindow.off('keydown');
 			$windowButton.show().trigger('focus');
 			this.resizing = false;
 			this.$activeWindow.removeClass('able-resize');
+			this.resizePointerId = undefined;
 
 			// save final width and height of dragged element
 			this.updatePreferences(which);
 
-			// Booleans for preventing stray events
-			this.windowMenuClickRegistered = false;
+			// Boolean for preventing stray click events
 			this.finishingDrag = true;
 
 			// finishingDrag should e reset after window click event,
-			// which is triggered automatically after mouseup
+			// which is triggered automatically after pointerup
 			// However, in case that's not reliable in some browsers
 			// need to ensure this gets cancelled
-			setTimeout(function() {
+			setTimeout(function () {
 				this.finishingDrag = false;
 			}, 100);
 		};
@@ -7146,9 +7278,10 @@
 				this.okToPlay = false;
 			}
 			this.refreshControls();
-			if (this.$focusedElement) {
+			if (this.focusedElement) {
+				console.log( this.focusedElement );
 				this.restoreFocus();
-				this.$focusedElement = null;
+				this.focusedElement = null;
 				this.activeMedia = null;
 			}
 		};
@@ -7174,15 +7307,16 @@
 			// but this function finds a match in the new player
 			// and places focus there
 
-			var classList, $mediaParent;
+			var classList, mediaParent;
 
-			if ( this.$focusedElement && null !== this.activeMedia ) {
-				$mediaParent = $( '#' + this.activeMedia ).closest( '.able' );
-				if ( (this.$focusedElement).attr('role') === 'button' ) {
-					classList = this.$focusedElement.attr("class").split(/\s+/);
-					$.each(classList, function(index, item) {
+			if ( this.focusedElement && null !== this.activeMedia ) {
+				mediaParent = document.getElementById(this.activeMedia).closest( '.able' );
+				if ( ( this.focusedElement.tagName === 'BUTTON' ) ) {
+					classList = this.focusedElement.getAttribute('class');
+					classList = ( typeof classList === 'string' ) ? classList.split(/\s+/) : [];
+					classList.forEach(function(item) {
 						if (item.substring(0,20) === 'able-button-handler-') {
-							$mediaParent.find('div.able-controller div.' + item).trigger('focus');
+							mediaParent.querySelector('div.able-controller .' + item).focus();
 						}
 					});
 				}
@@ -7195,7 +7329,7 @@
 			var thisObj = this;
 
 			// Handle seek bar events.
-			this.seekBar.seekbarDiv.on('startTracking', function (e) {
+			this.seekBar.$seekbarDiv.on('startTracking', function (e) {
 				thisObj.pausedBeforeTracking = thisObj.paused;
 				thisObj.pauseMedia();
 			}).on('tracking', function (e, position) {
@@ -7222,7 +7356,7 @@
 
 		AblePlayer.prototype.onClickPlayerButton = function (el) {
 			var whichButton, prefsPopup;
-			whichButton = this.getButtonNameFromClass($(el).attr('class'));
+			whichButton = this.getButtonNameFromClass(el.getAttribute('class'));
 			switch ( whichButton ) {
 				case 'play':
 					this.clickedPlay = true;
@@ -7281,20 +7415,20 @@
 					}
 					break;
 				case 'preferences':
-					if ($(el).attr('data-prefs-popup') === 'menu') {
+					if (el.dataset.prefsPopup === 'menu') {
 						this.handlePrefsClick();
 					} else {
 						this.showingPrefsDialog = true; // stopgap
 						this.closePopups();
-						prefsPopup = $(el).attr('data-prefs-popup');
+						prefsPopup = el.dataset.prefsPopup;
 						if (prefsPopup === 'keyboard') {
-							this.keyboardPrefsDialog.show();
+							this.showPrefsDialog('keyboard');
 						} else if (prefsPopup === 'captions') {
-							this.captionPrefsDialog.show();
+							this.showPrefsDialog('captions');
 						} else if (prefsPopup === 'descriptions') {
-							this.descPrefsDialog.show();
+							this.showPrefsDialog('descriptions');
 						} else if (prefsPopup === 'transcript') {
-							this.transcriptPrefsDialog.show();
+							this.showPrefsDialog('transcript');
 						}
 						this.showingPrefsDialog = false;
 					}
@@ -7334,11 +7468,10 @@
 			// that is likely to need supported keystrokes, including space
 			var activeElement = AblePlayer.getActiveDOMElement();
 
-			return ($(activeElement).prop('tagName') === 'INPUT') ? false : defaultReturn;
+			return (activeElement.tagName === 'INPUT') ? false : defaultReturn;
 		};
 
 		AblePlayer.prototype.onPlayerKeyPress = function (e) {
-
 			// handle keystrokes (using DHTML Style Guide recommended key combinations)
 			// https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
 			// Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
@@ -7350,14 +7483,15 @@
 			// including removal of the "media player" design pattern. There's an issue about that:
 			// https://github.com/w3c/aria-practices/issues/27
 
-			var key, $thisElement;
+			var key, $thisElement, activeEl;
 
 			// Convert to lower case.
 			key = e.key;
-			$thisElement = $(document.activeElement);
+			activeEl = AblePlayer.getActiveDOMElement();
+			$thisElement = $(activeEl);
 
 			if (key === 'Escape') {
-				if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0]) && !this.hidingPopup) {
+				if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
 					// This element is part of transcript area.
 					this.handleTranscriptToggle();
 					return false;
@@ -7370,10 +7504,10 @@
 			// Only use keypress to control player if focus is NOT on a form field or contenteditable element
 			// (or a textarea element with player in stenoMode)
 			if (!(
-				$(':focus').is('[contenteditable]') ||
-				$(':focus').is('input') ||
-				($(':focus').is('textarea') && !this.stenoMode) ||
-				$(':focus').is('select') ||
+				$(activeEl).is('[contenteditable]') ||
+				$(activeEl).is('input') ||
+				($(activeEl).is('textarea') && !this.stenoMode) ||
+				$(activeEl).is('select') ||
 				e.target.hasAttribute('contenteditable') ||
 				e.target.tagName === 'INPUT' ||
 				(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
@@ -7383,16 +7517,7 @@
 					this.closePopups();
 					this.$tooltipDiv.hide();
 					this.seekBar.hideSliderTooltips();
-				} else if (key === ' ') {
-					// disable spacebar support for play/pause toggle as of 4.2.10
-					// spacebar should not be handled everywhere on the page, since users use that to scroll the page
-					// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
-					if ($thisElement.attr('role') === 'button') {
-						// register a click on this element
-						e.preventDefault();
-						$thisElement.trigger( 'click' );
-					}
-				} else if ( key === 'p' ) {
+				} else if (key === ' ') ; else if ( key === 'p' ) {
 					if (this.usingModifierKeys(e)) {
 						e.preventDefault();
 						this.handlePlay();
@@ -7453,11 +7578,11 @@
 						this.handlePrefsClick();
 					}
 				} else if (key === 'Enter') {
-					if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+					if ( $thisElement.is('span') ) {
 						// register a click on this element
 						// if it's a transcript span the transcript span click handler will take over
 						$thisElement.trigger( 'click' );
-					} else if ($thisElement.prop('tagName') === 'LI') {
+					} else if ($thisElement.is('li')) {
 						$thisElement.trigger( 'click' );
 					}
 				}
@@ -7704,7 +7829,7 @@
 			}
 
 			// handle clicks on player buttons
-			this.$controllerDiv.find('div[role="button"]').on('click',function(e){
+			this.$controllerDiv.find('button').on('click',function(e){
 				e.stopPropagation();
 				thisObj.onClickPlayerButton(this);
 			});
@@ -7902,142 +8027,160 @@
 
 			// returns array of values for creating <svg> tag for specified button
 			// 0 = <svg> viewBox attribute
-			// 1 = <path> d (description) attribute
-			// 2 = icon class for font icons
-			// 3 = img URL for images.
+			// 1 = Array of <path> d (description) attributes
 			var svg = Array();
 
 			switch (button) {
 
 				case 'play':
 					svg[0] = '0 0 16 20';
-					svg[1] = 'M0 18.393v-16.429q0-0.29 0.184-0.402t0.441 0.033l14.821 8.237q0.257 0.145 0.257 0.346t-0.257 0.346l-14.821 8.237q-0.257 0.145-0.441 0.033t-0.184-0.402z';
+					svg[1] = [ 'M0 18.393v-16.429q0-0.29 0.184-0.402t0.441 0.033l14.821 8.237q0.257 0.145 0.257 0.346t-0.257 0.346l-14.821 8.237q-0.257 0.145-0.441 0.033t-0.184-0.402z' ];
 					break;
 
 				case 'pause':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M0 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502zM10 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502z';
+					svg[1] = [ 'M0 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502zM10 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502z' ];
 					break;
 
 				case 'restart':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M18 8h-6l2.243-2.243c-1.133-1.133-2.64-1.757-4.243-1.757s-3.109 0.624-4.243 1.757c-1.133 1.133-1.757 2.64-1.757 4.243s0.624 3.109 1.757 4.243c1.133 1.133 2.64 1.757 4.243 1.757s3.109-0.624 4.243-1.757c0.095-0.095 0.185-0.192 0.273-0.292l1.505 1.317c-1.466 1.674-3.62 2.732-6.020 2.732-4.418 0-8-3.582-8-8s3.582-8 8-8c2.209 0 4.209 0.896 5.656 2.344l2.344-2.344v6z';
+					svg[1] = [ 'M18 8h-6l2.243-2.243c-1.133-1.133-2.64-1.757-4.243-1.757s-3.109 0.624-4.243 1.757c-1.133 1.133-1.757 2.64-1.757 4.243s0.624 3.109 1.757 4.243c1.133 1.133 2.64 1.757 4.243 1.757s3.109-0.624 4.243-1.757c0.095-0.095 0.185-0.192 0.273-0.292l1.505 1.317c-1.466 1.674-3.62 2.732-6.020 2.732-4.418 0-8-3.582-8-8s3.582-8 8-8c2.209 0 4.209 0.896 5.656 2.344l2.344-2.344v6z' ];
 					break;
 
 				case 'rewind':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M11.25 3.125v6.25l6.25-6.25v13.75l-6.25-6.25v6.25l-6.875-6.875z';
+					svg[1] = [ 'M11.25 3.125v6.25l6.25-6.25v13.75l-6.25-6.25v6.25l-6.875-6.875z' ];
 					break;
 
 				case 'forward':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M10 16.875v-6.25l-6.25 6.25v-13.75l6.25 6.25v-6.25l6.875 6.875z';
+					svg[1] = [ 'M10 16.875v-6.25l-6.25 6.25v-13.75l6.25 6.25v-6.25l6.875 6.875z' ];
 					break;
 
 				case 'previous':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M5 17.5v-15h2.5v6.875l6.25-6.25v13.75l-6.25-6.25v6.875z';
+					svg[1] = [ 'M5 17.5v-15h2.5v6.875l6.25-6.25v13.75l-6.25-6.25v6.875z' ];
 					break;
 
 				case 'next':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M15 2.5v15h-2.5v-6.875l-6.25 6.25v-13.75l6.25 6.25v-6.875z';
+					svg[1] = [ 'M15 2.5v15h-2.5v-6.875l-6.25 6.25v-13.75l6.25 6.25v-6.875z' ];
 					break;
 
 				case 'slower':
 					svg[0] = '0 0 11 20';
-					svg[1] = 'M0 7.321q0-0.29 0.212-0.502t0.502-0.212h10q0.29 0 0.502 0.212t0.212 0.502-0.212 0.502l-5 5q-0.212 0.212-0.502 0.212t-0.502-0.212l-5-5q-0.212-0.212-0.212-0.502z';
+					svg[1] = [ 'M0 7.321q0-0.29 0.212-0.502t0.502-0.212h10q0.29 0 0.502 0.212t0.212 0.502-0.212 0.502l-5 5q-0.212 0.212-0.502 0.212t-0.502-0.212l-5-5q-0.212-0.212-0.212-0.502z' ];
 					break;
 
 				case 'faster':
 					svg[0] = '0 0 11 20';
-					svg[1] = 'M0 12.411q0-0.29 0.212-0.502l5-5q0.212-0.212 0.502-0.212t0.502 0.212l5 5q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-10q-0.29 0-0.502-0.212t-0.212-0.502z';
+					svg[1] = [ 'M0 12.411q0-0.29 0.212-0.502l5-5q0.212-0.212 0.502-0.212t0.502 0.212l5 5q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-10q-0.29 0-0.502-0.212t-0.212-0.502z' ];
 					break;
 
 				case 'turtle':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M17.212 3.846c-0.281-0.014-0.549 0.025-0.817 0.144-1.218 0.542-1.662 2.708-2.163 3.942-1.207 2.972-7.090 4.619-11.755 5.216-0.887 0.114-1.749 0.74-2.428 1.466 0.82-0.284 2.126-0.297 2.74 0.144 0.007 0.488-0.376 1.062-0.625 1.37-0.404 0.5-0.398 0.793 0.12 0.793 0.473 0 0.752 0.007 1.635 0 0.393-0.003 0.618-0.16 1.49-1.49 3.592 0.718 5.986-0.264 5.986-0.264s0.407 1.755 1.418 1.755h1.49c0.633 0 0.667-0.331 0.625-0.433-0.448-1.082-0.68-1.873-0.769-2.5-0.263-1.857 0.657-3.836 2.524-5.457 0.585 0.986 2.253 0.845 2.909-0.096s0.446-2.268-0.192-3.221c-0.49-0.732-1.345-1.327-2.188-1.37zM8.221 4.663c-0.722-0.016-1.536 0.111-2.5 0.409-4.211 1.302-4.177 4.951-3.51 5.745 0 0-0.955 0.479-0.409 1.274 0.448 0.652 3.139 0.191 5.409-0.529s4.226-1.793 5.312-2.692c0.948-0.785 0.551-2.106-0.505-1.947-0.494-0.98-1.632-2.212-3.798-2.26zM18.846 5.962c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577z';
+					svg[1] = [ 'M17.212 3.846c-0.281-0.014-0.549 0.025-0.817 0.144-1.218 0.542-1.662 2.708-2.163 3.942-1.207 2.972-7.090 4.619-11.755 5.216-0.887 0.114-1.749 0.74-2.428 1.466 0.82-0.284 2.126-0.297 2.74 0.144 0.007 0.488-0.376 1.062-0.625 1.37-0.404 0.5-0.398 0.793 0.12 0.793 0.473 0 0.752 0.007 1.635 0 0.393-0.003 0.618-0.16 1.49-1.49 3.592 0.718 5.986-0.264 5.986-0.264s0.407 1.755 1.418 1.755h1.49c0.633 0 0.667-0.331 0.625-0.433-0.448-1.082-0.68-1.873-0.769-2.5-0.263-1.857 0.657-3.836 2.524-5.457 0.585 0.986 2.253 0.845 2.909-0.096s0.446-2.268-0.192-3.221c-0.49-0.732-1.345-1.327-2.188-1.37zM8.221 4.663c-0.722-0.016-1.536 0.111-2.5 0.409-4.211 1.302-4.177 4.951-3.51 5.745 0 0-0.955 0.479-0.409 1.274 0.448 0.652 3.139 0.191 5.409-0.529s4.226-1.793 5.312-2.692c0.948-0.785 0.551-2.106-0.505-1.947-0.494-0.98-1.632-2.212-3.798-2.26zM18.846 5.962c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577z' ];
 					break;
 
 				case 'rabbit':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M10.817 0c-2.248 0-1.586 0.525-1.154 0.505 1.551-0.072 5.199 0.044 6.851 2.428 0 0-1.022-2.933-5.697-2.933zM10.529 0.769c-2.572 0-2.837 0.51-2.837 1.106 0 0.545 1.526 0.836 2.524 0.697 2.778-0.386 4.231-0.12 5.264 0.865-1.010 0.779-0.75 1.401-1.274 1.851-1.093 0.941-2.643-0.673-4.976-0.673-2.496 0-4.712 1.92-4.712 4.76-0.157-0.537-0.769-0.913-1.442-0.913-0.974 0-1.514 0.637-1.514 1.49 0 0.769 1.13 1.791 2.861 0.938 0.499 1.208 2.265 1.364 2.452 1.418 0.538 0.154 1.875 0.098 1.875 0.865 0 0.794-1.034 1.094-1.034 1.707 0 1.070 1.758 0.873 2.284 1.034 1.683 0.517 2.103 1.214 2.788 2.212 0.771 1.122 2.572 1.408 2.572 0.625 0-3.185-4.413-4.126-4.399-4.135 0.608-0.382 2.139-1.397 2.139-3.534 0-1.295-0.703-2.256-1.755-2.861 1.256 0.094 2.572 1.205 2.572 2.74 0 1.877-0.653 2.823-0.769 2.957 1.975-1.158 3.193-3.91 3.029-6.37 0.61 0.401 1.27 0.577 1.971 0.625 0.751 0.052 1.475-0.225 1.635-0.529 0.38-0.723 0.162-2.321-0.12-2.837-0.763-1.392-2.236-1.73-3.606-1.683-1.202-1.671-3.812-2.356-5.529-2.356zM1.37 3.077l-0.553 1.538h3.726c0.521-0.576 1.541-1.207 2.284-1.538h-5.457zM18.846 5.192c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577zM0.553 5.385l-0.553 1.538h3.197c0.26-0.824 0.586-1.328 0.769-1.538h-3.413z';
+					svg[1] = [ 'M10.817 0c-2.248 0-1.586 0.525-1.154 0.505 1.551-0.072 5.199 0.044 6.851 2.428 0 0-1.022-2.933-5.697-2.933zM10.529 0.769c-2.572 0-2.837 0.51-2.837 1.106 0 0.545 1.526 0.836 2.524 0.697 2.778-0.386 4.231-0.12 5.264 0.865-1.010 0.779-0.75 1.401-1.274 1.851-1.093 0.941-2.643-0.673-4.976-0.673-2.496 0-4.712 1.92-4.712 4.76-0.157-0.537-0.769-0.913-1.442-0.913-0.974 0-1.514 0.637-1.514 1.49 0 0.769 1.13 1.791 2.861 0.938 0.499 1.208 2.265 1.364 2.452 1.418 0.538 0.154 1.875 0.098 1.875 0.865 0 0.794-1.034 1.094-1.034 1.707 0 1.070 1.758 0.873 2.284 1.034 1.683 0.517 2.103 1.214 2.788 2.212 0.771 1.122 2.572 1.408 2.572 0.625 0-3.185-4.413-4.126-4.399-4.135 0.608-0.382 2.139-1.397 2.139-3.534 0-1.295-0.703-2.256-1.755-2.861 1.256 0.094 2.572 1.205 2.572 2.74 0 1.877-0.653 2.823-0.769 2.957 1.975-1.158 3.193-3.91 3.029-6.37 0.61 0.401 1.27 0.577 1.971 0.625 0.751 0.052 1.475-0.225 1.635-0.529 0.38-0.723 0.162-2.321-0.12-2.837-0.763-1.392-2.236-1.73-3.606-1.683-1.202-1.671-3.812-2.356-5.529-2.356zM1.37 3.077l-0.553 1.538h3.726c0.521-0.576 1.541-1.207 2.284-1.538h-5.457zM18.846 5.192c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577zM0.553 5.385l-0.553 1.538h3.197c0.26-0.824 0.586-1.328 0.769-1.538h-3.413z' ];
 					break;
 
 				case 'ellipsis':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M10.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2zM3.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.986 2.199-2.2s-0.984-2.2-2.199-2.2zM17.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2z';
+					svg[1] = [ 'M10.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2zM3.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.986 2.199-2.2s-0.984-2.2-2.199-2.2zM17.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2z' ];
 					break;
 
 				case 'pipe':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M10.15 0.179h0.623c0.069 0 0.127 0.114 0.127 0.253v19.494c0 0.139-0.057 0.253-0.127 0.253h-1.247c-0.069 0-0.126-0.114-0.126-0.253v-19.494c0-0.139 0.057-0.253 0.126-0.253h0.623z';
+					svg[1] = [ 'M10.15 0.179h0.623c0.069 0 0.127 0.114 0.127 0.253v19.494c0 0.139-0.057 0.253-0.127 0.253h-1.247c-0.069 0-0.126-0.114-0.126-0.253v-19.494c0-0.139 0.057-0.253 0.126-0.253h0.623z' ];
 					break;
 
 				case 'captions':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z';
+					svg[1] = [ 'M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z' ];
 					break;
 
 				case 'descriptions':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M17.623 3.57h-1.555c1.754 1.736 2.763 4.106 2.763 6.572 0 2.191-0.788 4.286-2.189 5.943h1.484c1.247-1.704 1.945-3.792 1.945-5.943-0-2.418-0.886-4.754-2.447-6.572v0zM14.449 3.57h-1.55c1.749 1.736 2.757 4.106 2.757 6.572 0 2.191-0.788 4.286-2.187 5.943h1.476c1.258-1.704 1.951-3.792 1.951-5.943-0-2.418-0.884-4.754-2.447-6.572v0zM11.269 3.57h-1.542c1.752 1.736 2.752 4.106 2.752 6.572 0 2.191-0.791 4.286-2.181 5.943h1.473c1.258-1.704 1.945-3.792 1.945-5.943 0-2.418-0.876-4.754-2.447-6.572v0zM10.24 9.857c0 3.459-2.826 6.265-6.303 6.265v0.011h-3.867v-12.555h3.896c3.477 0 6.274 2.806 6.274 6.279v0zM6.944 9.857c0-1.842-1.492-3.338-3.349-3.338h-0.876v6.686h0.876c1.858 0 3.349-1.498 3.349-3.348v0z';
+					svg[1] = [ 'M17.623 3.57h-1.555c1.754 1.736 2.763 4.106 2.763 6.572 0 2.191-0.788 4.286-2.189 5.943h1.484c1.247-1.704 1.945-3.792 1.945-5.943-0-2.418-0.886-4.754-2.447-6.572v0zM14.449 3.57h-1.55c1.749 1.736 2.757 4.106 2.757 6.572 0 2.191-0.788 4.286-2.187 5.943h1.476c1.258-1.704 1.951-3.792 1.951-5.943-0-2.418-0.884-4.754-2.447-6.572v0zM11.269 3.57h-1.542c1.752 1.736 2.752 4.106 2.752 6.572 0 2.191-0.791 4.286-2.181 5.943h1.473c1.258-1.704 1.945-3.792 1.945-5.943 0-2.418-0.876-4.754-2.447-6.572v0zM10.24 9.857c0 3.459-2.826 6.265-6.303 6.265v0.011h-3.867v-12.555h3.896c3.477 0 6.274 2.806 6.274 6.279v0zM6.944 9.857c0-1.842-1.492-3.338-3.349-3.338h-0.876v6.686h0.876c1.858 0 3.349-1.498 3.349-3.348v0z' ];
 					break;
 
 				case 'sign':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M10.954 10.307c0.378 0.302 0.569 1.202 0.564 1.193 0.697 0.221 1.136 0.682 1.136 0.682 1.070-0.596 1.094-0.326 1.558-0.682 0.383-0.263 0.366-0.344 0.567-1.048 0.187-0.572-0.476-0.518-1.021-1.558-0.95 0.358-1.463 0.196-1.784 0.167-0.145-0.020-0.12 0.562-1.021 1.247zM14.409 17.196c-0.133 0.182-0.196 0.218-0.363 0.454-0.28 0.361 0.076 0.906 0.253 0.82 0.206-0.076 0.341-0.488 0.567-0.623 0.115-0.061 0.422-0.513 0.709-0.82 0.211-0.238 0.363-0.344 0.564-0.594 0.341-0.422 0.412-0.744 0.709-1.193 0.184-0.236 0.312-0.307 0.481-0.594 0.886-1.679 0.628-2.432 1.475-3.629 0.26-0.353 0.552-0.442 0.964-0.653 0.383-2.793-0.888-4.356-0.879-4.361-1.067 0.623-1.644 0.879-2.751 0.82-0.417-0.005-0.636-0.182-1.048-0.145-0.385 0.015-0.582 0.159-0.964 0.29-0.589 0.182-0.91 0.344-1.529 0.535-0.393 0.11-0.643 0.115-1.050 0.255-0.348 0.147-0.182 0.029-0.427 0.312-0.317 0.348-0.238 0.623-0.535 1.222-0.371 0.785-0.326 0.891-0.115 0.987-0.14 0.402-0.174 0.672-0.14 1.107 0.039 0.331-0.101 0.562 0.255 0.825 0.483 0.361 1.499 1.205 1.757 1.217 0.39-0.012 1.521 0.029 2.096-0.368 0.13-0.081 0.167-0.162 0.056 0.145-0.022 0.037-1.433 1.136-1.585 1.131-1.794 0.056-1.193 0.157-1.303 0.115-0.091 0-0.955-1.055-1.477-0.682-0.196 0.12-0.287 0.236-0.363 0.452 0.066 0.137 0.383 0.358 0.675 0.54 0.422 0.27 0.461 0.552 0.881 0.653 0.513 0.115 1.060 0.039 1.387 0.081 0.125 0.034 1.256-0.297 1.961-0.675 0.65-0.336-0.898 0.648-1.276 1.131-1.141 0.358-0.82 0.373-1.362 0.483-0.503 0.115-0.479 0.086-0.822 0.196-0.356 0.086-0.648 0.572-0.312 0.825 0.201 0.167 0.827-0.066 1.445-0.086 0.275-0.005 1.391-0.518 1.644-0.653 0.633-0.339 1.099-0.81 1.472-1.077 0.518-0.361-0.584 0.991-1.050 1.558zM8.855 9.799c-0.378-0.312-0.569-1.212-0.564-1.217-0.697-0.206-1.136-0.667-1.136-0.653-1.070 0.582-1.099 0.312-1.558 0.653-0.388 0.277-0.366 0.363-0.567 1.045-0.187 0.594 0.471 0.535 1.021 1.561 0.95-0.344 1.463-0.182 1.784-0.142 0.145 0.010 0.12-0.572 1.021-1.247zM5.4 2.911c0.133-0.191 0.196-0.228 0.368-0.454 0.27-0.371-0.081-0.915-0.253-0.849-0.211 0.096-0.346 0.508-0.599 0.653-0.093 0.052-0.4 0.503-0.682 0.82-0.211 0.228-0.363 0.334-0.564 0.599-0.346 0.407-0.412 0.729-0.709 1.161-0.184 0.258-0.317 0.324-0.481 0.621-0.886 1.669-0.631 2.422-1.475 3.6-0.26 0.38-0.552 0.461-0.964 0.682-0.383 2.788 0.883 4.346 0.879 4.336 1.068-0.609 1.639-0.861 2.751-0.825 0.417 0.025 0.636 0.201 1.048 0.174 0.385-0.025 0.582-0.169 0.964-0.285 0.589-0.196 0.91-0.358 1.499-0.54 0.422-0.12 0.672-0.125 1.080-0.285 0.348-0.128 0.182-0.010 0.427-0.282 0.312-0.358 0.238-0.633 0.508-1.217 0.398-0.8 0.353-0.906 0.142-0.991 0.135-0.412 0.174-0.677 0.14-1.107-0.044-0.336 0.101-0.572-0.255-0.82-0.483-0.375-1.499-1.22-1.752-1.222-0.395 0.002-1.526-0.039-2.101 0.339-0.13 0.101-0.167 0.182-0.056-0.11 0.022-0.052 1.433-1.148 1.585-1.163 1.794-0.039 1.193-0.14 1.303-0.088 0.091-0.007 0.955 1.045 1.477 0.682 0.191-0.13 0.287-0.245 0.368-0.452-0.071-0.147-0.388-0.368-0.68-0.537-0.422-0.282-0.464-0.564-0.881-0.655-0.513-0.125-1.065-0.049-1.387-0.11-0.125-0.015-1.256 0.317-1.956 0.68-0.66 0.351 0.893-0.631 1.276-1.136 1.136-0.339 0.81-0.353 1.36-0.479 0.501-0.101 0.476-0.071 0.82-0.172 0.351-0.096 0.648-0.577 0.312-0.849-0.206-0.152-0.827 0.081-1.44 0.086-0.28 0.020-1.396 0.533-1.649 0.677-0.633 0.329-1.099 0.8-1.472 1.048-0.523 0.38 0.584-0.967 1.050-1.529z';
+					svg[1] = [ 'M10.954 10.307c0.378 0.302 0.569 1.202 0.564 1.193 0.697 0.221 1.136 0.682 1.136 0.682 1.070-0.596 1.094-0.326 1.558-0.682 0.383-0.263 0.366-0.344 0.567-1.048 0.187-0.572-0.476-0.518-1.021-1.558-0.95 0.358-1.463 0.196-1.784 0.167-0.145-0.020-0.12 0.562-1.021 1.247zM14.409 17.196c-0.133 0.182-0.196 0.218-0.363 0.454-0.28 0.361 0.076 0.906 0.253 0.82 0.206-0.076 0.341-0.488 0.567-0.623 0.115-0.061 0.422-0.513 0.709-0.82 0.211-0.238 0.363-0.344 0.564-0.594 0.341-0.422 0.412-0.744 0.709-1.193 0.184-0.236 0.312-0.307 0.481-0.594 0.886-1.679 0.628-2.432 1.475-3.629 0.26-0.353 0.552-0.442 0.964-0.653 0.383-2.793-0.888-4.356-0.879-4.361-1.067 0.623-1.644 0.879-2.751 0.82-0.417-0.005-0.636-0.182-1.048-0.145-0.385 0.015-0.582 0.159-0.964 0.29-0.589 0.182-0.91 0.344-1.529 0.535-0.393 0.11-0.643 0.115-1.050 0.255-0.348 0.147-0.182 0.029-0.427 0.312-0.317 0.348-0.238 0.623-0.535 1.222-0.371 0.785-0.326 0.891-0.115 0.987-0.14 0.402-0.174 0.672-0.14 1.107 0.039 0.331-0.101 0.562 0.255 0.825 0.483 0.361 1.499 1.205 1.757 1.217 0.39-0.012 1.521 0.029 2.096-0.368 0.13-0.081 0.167-0.162 0.056 0.145-0.022 0.037-1.433 1.136-1.585 1.131-1.794 0.056-1.193 0.157-1.303 0.115-0.091 0-0.955-1.055-1.477-0.682-0.196 0.12-0.287 0.236-0.363 0.452 0.066 0.137 0.383 0.358 0.675 0.54 0.422 0.27 0.461 0.552 0.881 0.653 0.513 0.115 1.060 0.039 1.387 0.081 0.125 0.034 1.256-0.297 1.961-0.675 0.65-0.336-0.898 0.648-1.276 1.131-1.141 0.358-0.82 0.373-1.362 0.483-0.503 0.115-0.479 0.086-0.822 0.196-0.356 0.086-0.648 0.572-0.312 0.825 0.201 0.167 0.827-0.066 1.445-0.086 0.275-0.005 1.391-0.518 1.644-0.653 0.633-0.339 1.099-0.81 1.472-1.077 0.518-0.361-0.584 0.991-1.050 1.558zM8.855 9.799c-0.378-0.312-0.569-1.212-0.564-1.217-0.697-0.206-1.136-0.667-1.136-0.653-1.070 0.582-1.099 0.312-1.558 0.653-0.388 0.277-0.366 0.363-0.567 1.045-0.187 0.594 0.471 0.535 1.021 1.561 0.95-0.344 1.463-0.182 1.784-0.142 0.145 0.010 0.12-0.572 1.021-1.247zM5.4 2.911c0.133-0.191 0.196-0.228 0.368-0.454 0.27-0.371-0.081-0.915-0.253-0.849-0.211 0.096-0.346 0.508-0.599 0.653-0.093 0.052-0.4 0.503-0.682 0.82-0.211 0.228-0.363 0.334-0.564 0.599-0.346 0.407-0.412 0.729-0.709 1.161-0.184 0.258-0.317 0.324-0.481 0.621-0.886 1.669-0.631 2.422-1.475 3.6-0.26 0.38-0.552 0.461-0.964 0.682-0.383 2.788 0.883 4.346 0.879 4.336 1.068-0.609 1.639-0.861 2.751-0.825 0.417 0.025 0.636 0.201 1.048 0.174 0.385-0.025 0.582-0.169 0.964-0.285 0.589-0.196 0.91-0.358 1.499-0.54 0.422-0.12 0.672-0.125 1.080-0.285 0.348-0.128 0.182-0.010 0.427-0.282 0.312-0.358 0.238-0.633 0.508-1.217 0.398-0.8 0.353-0.906 0.142-0.991 0.135-0.412 0.174-0.677 0.14-1.107-0.044-0.336 0.101-0.572-0.255-0.82-0.483-0.375-1.499-1.22-1.752-1.222-0.395 0.002-1.526-0.039-2.101 0.339-0.13 0.101-0.167 0.182-0.056-0.11 0.022-0.052 1.433-1.148 1.585-1.163 1.794-0.039 1.193-0.14 1.303-0.088 0.091-0.007 0.955 1.045 1.477 0.682 0.191-0.13 0.287-0.245 0.368-0.452-0.071-0.147-0.388-0.368-0.68-0.537-0.422-0.282-0.464-0.564-0.881-0.655-0.513-0.125-1.065-0.049-1.387-0.11-0.125-0.015-1.256 0.317-1.956 0.68-0.66 0.351 0.893-0.631 1.276-1.136 1.136-0.339 0.81-0.353 1.36-0.479 0.501-0.101 0.476-0.071 0.82-0.172 0.351-0.096 0.648-0.577 0.312-0.849-0.206-0.152-0.827 0.081-1.44 0.086-0.28 0.020-1.396 0.533-1.649 0.677-0.633 0.329-1.099 0.8-1.472 1.048-0.523 0.38 0.584-0.967 1.050-1.529z' ];
 					break;
 
 				case 'mute':
 				case 'volume-mute':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z';
+					svg[1] = [ 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z' ];
 					break;
 
 				case 'volume-soft':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
+					svg[1] = [ 'M10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z' ];
 					break;
 
 				case 'volume-medium':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
+					svg[1] = [ 'M14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z' ];
 					break;
 
 				case 'volume-loud':
 					svg[0] = '0 0 21 20';
-					svg[1] = 'M17.384 18.009c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.712-1.712 2.654-3.988 2.654-6.408s-0.943-4.696-2.654-6.408c-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.066 2.066 3.204 4.813 3.204 7.734s-1.138 5.668-3.204 7.734c-0.183 0.183-0.423 0.275-0.663 0.275zM14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
+					svg[1] = [ 'M17.384 18.009c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.712-1.712 2.654-3.988 2.654-6.408s-0.943-4.696-2.654-6.408c-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.066 2.066 3.204 4.813 3.204 7.734s-1.138 5.668-3.204 7.734c-0.183 0.183-0.423 0.275-0.663 0.275zM14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z' ];
 					break;
 
 				case 'chapters':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M5 2.5v17.5l6.25-6.25 6.25 6.25v-17.5zM15 0h-12.5v17.5l1.25-1.25v-15h11.25z';
+					svg[1] = [ 'M5 2.5v17.5l6.25-6.25 6.25 6.25v-17.5zM15 0h-12.5v17.5l1.25-1.25v-15h11.25z' ];
 					break;
 
 				case 'transcript':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M0 19.107v-17.857q0-0.446 0.313-0.759t0.759-0.313h8.929v6.071q0 0.446 0.313 0.759t0.759 0.313h6.071v11.786q0 0.446-0.313 0.759t-0.759 0.312h-15q-0.446 0-0.759-0.313t-0.313-0.759zM4.286 15.536q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 12.679q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 9.821q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM11.429 5.893v-5.268q0.246 0.156 0.402 0.313l4.554 4.554q0.156 0.156 0.313 0.402h-5.268z';
+					svg[1] = [ 'M0 19.107v-17.857q0-0.446 0.313-0.759t0.759-0.313h8.929v6.071q0 0.446 0.313 0.759t0.759 0.313h6.071v11.786q0 0.446-0.313 0.759t-0.759 0.312h-15q-0.446 0-0.759-0.313t-0.313-0.759zM4.286 15.536q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 12.679q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 9.821q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM11.429 5.893v-5.268q0.246 0.156 0.402 0.313l4.554 4.554q0.156 0.156 0.313 0.402h-5.268z' ];
 					break;
 
 				case 'preferences':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M18.238 11.919c-1.049-1.817-0.418-4.147 1.409-5.205l-1.965-3.404c-0.562 0.329-1.214 0.518-1.911 0.518-2.1 0-3.803-1.714-3.803-3.828h-3.931c0.005 0.653-0.158 1.314-0.507 1.919-1.049 1.818-3.382 2.436-5.212 1.382l-1.965 3.404c0.566 0.322 1.056 0.793 1.404 1.396 1.048 1.815 0.42 4.139-1.401 5.2l1.965 3.404c0.56-0.326 1.209-0.513 1.902-0.513 2.094 0 3.792 1.703 3.803 3.808h3.931c-0.002-0.646 0.162-1.3 0.507-1.899 1.048-1.815 3.375-2.433 5.203-1.387l1.965-3.404c-0.562-0.322-1.049-0.791-1.395-1.391zM10 14.049c-2.236 0-4.050-1.813-4.050-4.049s1.813-4.049 4.050-4.049 4.049 1.813 4.049 4.049c-0 2.237-1.813 4.049-4.049 4.049z';
+					svg[1] = [ 'M18.238 11.919c-1.049-1.817-0.418-4.147 1.409-5.205l-1.965-3.404c-0.562 0.329-1.214 0.518-1.911 0.518-2.1 0-3.803-1.714-3.803-3.828h-3.931c0.005 0.653-0.158 1.314-0.507 1.919-1.049 1.818-3.382 2.436-5.212 1.382l-1.965 3.404c0.566 0.322 1.056 0.793 1.404 1.396 1.048 1.815 0.42 4.139-1.401 5.2l1.965 3.404c0.56-0.326 1.209-0.513 1.902-0.513 2.094 0 3.792 1.703 3.803 3.808h3.931c-0.002-0.646 0.162-1.3 0.507-1.899 1.048-1.815 3.375-2.433 5.203-1.387l1.965-3.404c-0.562-0.322-1.049-0.791-1.395-1.391zM10 14.049c-2.236 0-4.050-1.813-4.050-4.049s1.813-4.049 4.050-4.049 4.049 1.813 4.049 4.049c-0 2.237-1.813 4.049-4.049 4.049z' ];
 					break;
 
 				case 'close':
 					svg[0] = '0 0 16 20';
-					svg[1] = 'M1.228 14.933q0-0.446 0.312-0.759l3.281-3.281-3.281-3.281q-0.313-0.313-0.313-0.759t0.313-0.759l1.518-1.518q0.313-0.313 0.759-0.313t0.759 0.313l3.281 3.281 3.281-3.281q0.313-0.313 0.759-0.313t0.759 0.313l1.518 1.518q0.313 0.313 0.313 0.759t-0.313 0.759l-3.281 3.281 3.281 3.281q0.313 0.313 0.313 0.759t-0.313 0.759l-1.518 1.518q-0.313 0.313-0.759 0.313t-0.759-0.313l-3.281-3.281-3.281 3.281q-0.313 0.313-0.759 0.313t-0.759-0.313l-1.518-1.518q-0.313-0.313-0.313-0.759z';
+					svg[1] = [ 'M1.228 14.933q0-0.446 0.312-0.759l3.281-3.281-3.281-3.281q-0.313-0.313-0.313-0.759t0.313-0.759l1.518-1.518q0.313-0.313 0.759-0.313t0.759 0.313l3.281 3.281 3.281-3.281q0.313-0.313 0.759-0.313t0.759 0.313l1.518 1.518q0.313 0.313 0.313 0.759t-0.313 0.759l-3.281 3.281 3.281 3.281q0.313 0.313 0.313 0.759t-0.313 0.759l-1.518 1.518q-0.313 0.313-0.759 0.313t-0.759-0.313l-3.281-3.281-3.281 3.281q-0.313 0.313-0.759 0.313t-0.759-0.313l-1.518-1.518q-0.313-0.313-0.313-0.759z' ];
 					break;
 
 				case 'fullscreen-expand':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M0 18.036v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502zM8.717 8.393q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257z';
+					svg[1] = [ 'M0 18.036v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502zM8.717 8.393q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257z' ];
 					break;
 
 				case 'fullscreen-collapse':
 					svg[0] = '0 0 20 20';
-					svg[1] = 'M0.145 16.964q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257zM8.571 9.464v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502z';
+					svg[1] = [ 'M0.145 16.964q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257zM8.571 9.464v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502z' ];
+					break;
+
+				case 'drag-handle':
+					svg[0] = '262.48 487.5 675.03 225';
+					svg[1] = [
+						'm900 562.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z',
+						'm900 712.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z'
+					];
+					break;
+
+				case 'resize-handle':
+					svg[0] = '0 0 26 26';
+					svg[1] = [
+						'M 10.5,24 A 1.5,1.5 0 1 1 13.5,24 A 1.5,1.5 0 1 1 10.5,24',
+						'M 16.5,24 A 1.5,1.5 0 1 1 19.5,24 A 1.5,1.5 0 1 1 16.5,24',
+						'M 16.5,18 A 1.5,1.5 0 1 1 19.5,18 A 1.5,1.5 0 1 1 16.5,18',
+						'M 22.5,12 A 1.5,1.5 0 1 1 25.5,12 A 1.5,1.5 0 1 1 22.5,12',
+						'M 22.5,24 A 1.5,1.5 0 1 1 25.5,24 A 1.5,1.5 0 1 1 22.5,24',
+						'M 22.5,18 A 1.5,1.5 0 1 1 25.5,18 A 1.5,1.5 0 1 1 22.5,18'
+					];
 					break;
 			}
 
@@ -8074,8 +8217,7 @@
 				deferred.reject();
 				return promise;
 			}
-
-			this.$sources = this.$media.find('source');
+			this.sources = this.getSources();
 
 			this.player = this.getPlayer();
 			if (!this.player) {
@@ -8122,16 +8264,16 @@
 
 			this.hasPlaylist = false; // will change to true if a matching playlist is found
 
-			$('.able-playlist').each(function() {
-				if ($(this).data('player') === thisObj.mediaId) {
+			document.querySelectorAll('.able-playlist').forEach(function(playlist) {
+				if (playlist.dataset.player === thisObj.mediaId) {
 					// this is the playlist for the current player
 					thisObj.hasPlaylist = true;
 					// If using an embedded player, we'll replace $playlist with the clone later.
-					thisObj.$playlist = $(this).find('li');
+					thisObj.$playlist = $(playlist).find('li');
 
 					// check to see if list item has YouTube as its source
 					// if it does, inject a thumbnail from YouTube
-					var $youTubeVideos = $(this).find('li[data-youtube-id]');
+					var $youTubeVideos = $(playlist).find('li[data-youtube-id]');
 					$youTubeVideos.each(function() {
 						var youTubeId = DOMPurify.sanitize( $(this).attr('data-youtube-id') );
 						var youTubePoster = thisObj.getYouTubePosterUrl(youTubeId,'120');
@@ -8144,7 +8286,7 @@
 
 					// check to see if list item has Vimeo as its source
 					// if it does, inject a thumbnail from Vimeo
-					var $vimeoVideos = $(this).find('li[data-vimeo-id]');
+					var $vimeoVideos = $(playlist).find('li[data-vimeo-id]');
 					$vimeoVideos.each(function() {
 						var vimeoId = $(this).attr('data-vimeo-id');
 						var vimeoPoster = thisObj.getVimeoPosterUrl(vimeoId,'120');
@@ -8156,9 +8298,9 @@
 					});
 
 					// add accessibility to the list markup
-					$(this).find('li span').attr('aria-hidden','true');
+					$(playlist).find('li span').attr('aria-hidden','true');
 					thisObj.playlistIndex = 0;
-					var dataEmbedded = $(this).data('embedded');
+					var dataEmbedded = $(playlist).data('embedded');
 					// is playlist embedded within player?
 					thisObj.playlistEmbed = (typeof dataEmbedded !== 'undefined' && dataEmbedded !== false) ? true : false;
 				}
@@ -8176,12 +8318,35 @@
 				this.$playlistDom = parent.clone();
 				parent.remove();
 			}
-			if (this.hasPlaylist && this.$sources.length === 0) {
+			if (this.hasPlaylist && this.sources.length === 0) {
 				// no source elements were provided. Construct them from the first playlist item
 				this.cuePlaylistItem(0);
-				// redefine this.$sources now that media contains one or more <source> elements
-				this.$sources = this.$media.find('source');
+				// redefine this.sources now that media contains one or more <source> elements
+				this.sources = this.getSources();
 			}
+		};
+
+		/**
+		 * Filters the <source> elements of the media element based on their media queries.
+		 * If no sources match the media query, returns the original sources and allows the browser to handle it.
+		 *
+		 * @returns {Array} Filtered array of sources.
+		 */
+		AblePlayer.prototype.getSources = function () {
+			let sources = this.media.querySelectorAll('source');
+			let newSources = Array.from(sources).filter(source => {
+				const media = source.getAttribute('media');
+				return !media || (window.matchMedia(media) && window.matchMedia(media).matches);
+			});
+			if ( newSources.length === 0 && sources.length > 0 ) {
+				// If no sources match the media query, return the original sources and allow browser to handle.
+				if ( this.debug ) {
+					console.warn('No sources match the media query. Returning original sources.');
+				}
+				newSources = sources;
+			}
+
+			return newSources;
 		};
 
 		AblePlayer.prototype.recreatePlayer = function () {
@@ -8200,11 +8365,14 @@
 				return;
 			}
 
-			var deferred, promise, thisObj, prefsGroups, i;
+			var deferred, promise, thisObj, initVersion;
 
 			deferred = new this.defer();
 			promise = deferred.promise();
 			thisObj = this;
+			this.initializationVersion = (this.initializationVersion || 0) + 1;
+			initVersion = this.initializationVersion;
+			this.startInitTiming(initVersion);
 
 			this.playerDeleted = false; // reset after deletePlayer()
 
@@ -8223,12 +8391,16 @@
 			this.initSignLanguage();
 
 			this.initPlayer().then(function() {
+				thisObj.logInitTiming(initVersion, 'initPlayer complete');
 
 				thisObj.getTracks().then(function() {
+					thisObj.logInitTiming(initVersion, 'getTracks complete');
 
 					thisObj.initDescription().then(function() {
+						thisObj.logInitTiming(initVersion, 'initDescription complete');
 
 						thisObj.setupTracks().then(function() {
+							thisObj.logInitTiming(initVersion, 'setupTracks complete');
 							if (thisObj.hasClosedDesc) {
 								if (!thisObj.$descDiv || (thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {
 									// descDiv either doesn't exist, or exists in an orphaned state
@@ -8239,13 +8411,16 @@
 							thisObj.initSpeech('init');
 
 							thisObj.setupTranscript().then(function() {
+								thisObj.logInitTiming(initVersion, 'setupTranscript complete');
 
 								thisObj.initStenoFrame().then(function() {
+									thisObj.logInitTiming(initVersion, 'initStenoFrame complete');
 
 									if (thisObj.stenoMode && thisObj.$stenoFrame) {
 										thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
 									}
 									thisObj.getMediaTimes().then(function(mediaTimes) {
+										thisObj.logInitTiming(initVersion, 'getMediaTimes complete');
 
 										thisObj.duration = mediaTimes['duration'];
 										thisObj.elapsed = mediaTimes['elapsed'];
@@ -8273,16 +8448,16 @@
 										thisObj.addControls();
 										thisObj.addEventListeners();
 
-										// inject each of the hidden forms that will be accessed from the Preferences popup menu
-										prefsGroups = thisObj.getPreferencesGroups();
-										for (i = 0; i < prefsGroups.length; i++) {
-											thisObj.injectPrefsForm(prefsGroups[i]);
-										}
+										// preferences forms are rendered on demand into a shared dialog
 										thisObj.setupPopups();
 										thisObj.updateCaption();
+										thisObj.logInitTiming(initVersion, 'core UI ready');
 										thisObj.injectVTS();
+										thisObj.logInitTiming(initVersion, 'vts ready');
 										thisObj.populateChaptersDiv();
+										thisObj.logInitTiming(initVersion, 'chapters ready');
 										thisObj.showSearchResults();
+										thisObj.logInitTiming(initVersion, 'search results ready');
 
 										// Go ahead and load media, without user requesting it
 										// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
@@ -8297,6 +8472,7 @@
 										// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
 										setTimeout(function() {
 											thisObj.refreshControls();
+											thisObj.logInitTiming(initVersion, 'initialization complete');
 											deferred.resolve();
 										},100);
 									});
@@ -8310,6 +8486,34 @@
 				thisObj.provideFallback();
 			});
 			return promise;
+		};
+
+		AblePlayer.prototype.getInitTimingNow = function() {
+			if (typeof window !== 'undefined' && window.performance && typeof window.performance.now === 'function') {
+				return window.performance.now();
+			}
+			return Date.now();
+		};
+
+		AblePlayer.prototype.startInitTiming = function(version) {
+			if (!this.debug) {
+				return;
+			}
+			this.initTiming = this.initTiming || {};
+			this.initTiming[version] = {
+				start: this.getInitTimingNow()
+			};
+			console.log('[AblePlayer][init v' + version + '] start');
+		};
+
+		AblePlayer.prototype.logInitTiming = function(version, label) {
+			var elapsed, timing;
+			if (!this.debug || !this.initTiming || !this.initTiming[version]) {
+				return;
+			}
+			timing = this.initTiming[version];
+			elapsed = this.getInitTimingNow() - timing.start;
+			console.log('[AblePlayer][init v' + version + '] ' + label + ': ' + elapsed.toFixed(1) + 'ms');
 		};
 
 		AblePlayer.prototype.initPlayer = function () {
@@ -10181,27 +10385,185 @@
 			this.setPrefs(preferences);
 		};
 
-		AblePlayer.prototype.injectPrefsForm = function (form) {
+		AblePlayer.prototype.createField = function(options) {
+
+			var wrapperClass, fieldAttrs, checkboxValue, $wrapper, $label, $field, labelPosition;
+
+			wrapperClass = options.wrapperClass ? options.wrapperClass + ' ' : '';
+			fieldAttrs = {};
+			if (options.id) {
+				fieldAttrs.id = options.id;
+			}
+			if (options.name) {
+				fieldAttrs.name = options.name;
+			}
+			if (options.attrs) {
+				$.extend(fieldAttrs, options.attrs);
+			}
+			labelPosition = options.labelPosition || ((options.type === 'select' || options.type === 'number') ? 'before' : 'after');
+			checkboxValue = (typeof options.value !== 'undefined') ? options.value : 'true';
+
+			$wrapper = $('<div>').addClass(wrapperClass + 'able-player-setting');
+			$label = $('<label>', {
+				'for': options.id,
+				text: ' ' + options.label
+			});
+			if (options.labelClass) {
+				$label.addClass(options.labelClass);
+			}
+
+			if (options.type === 'select') {
+				$field = $('<select>', fieldAttrs);
+			} else if (options.type === 'number') {
+				fieldAttrs.type = 'number';
+				if (typeof options.value !== 'undefined') {
+					fieldAttrs.value = options.value;
+				}
+				$field = $('<input>', fieldAttrs);
+			} else {
+				fieldAttrs.type = options.type || 'checkbox';
+				fieldAttrs.value = checkboxValue;
+				$field = $('<input>', fieldAttrs);
+				if (options.checked) {
+					$field.prop('checked', true);
+				}
+			}
+			if (options.fieldClass) {
+				$field.addClass(options.fieldClass);
+			}
+
+			if (labelPosition === 'before') {
+				$wrapper.append($label, $field);
+			} else {
+				$wrapper.append($field, $label);
+			}
+
+			return {
+				wrapper: $wrapper,
+				label: $label,
+				field: $field
+			};
+		};
+
+		AblePlayer.prototype.createPreferenceGroup = function(options) {
+
+			var fieldsetId, legendId, $group, $heading;
+
+			fieldsetId = this.mediaId + '-prefs-' + options.form;
+			legendId = fieldsetId + '-legend';
+			$group = $('<div>', {
+				id: fieldsetId,
+				role: 'group'
+			}).addClass('able-prefs-' + options.form);
+
+			if (options.heading) {
+				$heading = $('<h2>', {
+					id: legendId,
+					text: options.heading
+				});
+				$group.attr('aria-labelledby', legendId).append($heading);
+			}
+
+			return {
+				group: $group,
+				heading: $heading || null
+			};
+		};
+
+		AblePlayer.prototype.getPreferencesDialog = function () {
+
+			if (AblePlayer.preferencesDialog) {
+				return AblePlayer.preferencesDialog;
+			}
+
+			var thisObj = this;
+			var $prefsDiv = $('<div>', {
+				'class': 'able-prefs-form'
+			});
+			$('body').append($prefsDiv);
+
+			var dialog = new AccessibleDialog(
+				$prefsDiv,
+				this.$prefsButton,
+				this.translate( 'preferences', 'Preferences' ),
+				this.translate( 'closeButtonLabel', 'Close' )
+			);
+
+			$prefsDiv.on('click.ableSharedPrefs', 'button.modalCloseButton', function () {
+				if (AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner) {
+					AblePlayer.preferencesDialog.owner.resetPrefsForm();
+				}
+			});
+
+			$prefsDiv.on('keydown.ableSharedPrefs', function (e) {
+				if (e.key === 'Escape' && AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner) {
+					AblePlayer.preferencesDialog.owner.resetPrefsForm();
+				}
+			});
+
+			AblePlayer.preferencesDialog = {
+				modal: $prefsDiv,
+				dialog: dialog,
+				owner: thisObj,
+				form: null
+			};
+
+			return AblePlayer.preferencesDialog;
+		};
+
+		AblePlayer.prototype.showPrefsDialog = function (form) {
+
+			var shared = this.getPreferencesDialog();
+			shared.owner = this;
+			shared.form = form;
+			this.injectPrefsForm(form, {
+				shared: true,
+				sharedDialog: shared
+			});
+			shared.dialog.focusedElementBeforeModal = this.$prefsButton;
+			shared.dialog.show();
+		};
+
+		AblePlayer.prototype.getActivePrefsForm = function () {
+
+			if (AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner === this) {
+				return AblePlayer.preferencesDialog.modal;
+			}
+			return $('body');
+		};
+
+		AblePlayer.prototype.injectPrefsForm = function (form, dialogOptions) {
 
 			// Creates a preferences form and injects it.
 			// form is one of the supported forms (groups) defined in getPreferencesGroups()
 
 			var thisObj, available,
 				$prefsDiv, formTitle, introText, $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
-				$fieldset, fieldsetClass, fieldsetId, $legend, legendId, thisPref, $thisDiv, thisClass,
-				thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
+				$fieldset, groupHeading, groupObj, thisPref, $thisDiv, thisClass,
+				thisId, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
 				changedPref,changedSpan,changedText, currentDescState, prefDescVoice, prefCaptionVoice, $kbHeading,$kbList,
-				kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer;
+				kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer, sharedDialog;
 
 			thisObj = this;
 			available = this.getAvailablePreferences();
+			dialogOptions = dialogOptions || {};
+			sharedDialog = dialogOptions.sharedDialog || null;
 
-			// outer container, will be assigned role="dialog"
-			$prefsDiv = $('<div>',{
-				'class': 'able-prefs-form '
-			});
-			var customClass = 'able-prefs-form-' + form;
-			$prefsDiv.addClass(customClass);
+			if (dialogOptions.shared && sharedDialog) {
+				$prefsDiv = sharedDialog.modal;
+				$prefsDiv.removeClass(function (index, className) {
+					return (className.match(/(^|\s)able-prefs-form-\S+/g) || []).join(' ');
+				});
+				$prefsDiv.addClass('able-prefs-form-' + form);
+				$prefsDiv.children().not('.able-modal-header').remove();
+			} else {
+				// outer container, will be assigned role="dialog"
+				$prefsDiv = $('<div>',{
+					'class': 'able-prefs-form '
+				});
+				var customClass = 'able-prefs-form-' + form;
+				$prefsDiv.addClass(customClass);
+			}
 
 			// add titles and intros
 			if (form == 'captions') {
@@ -10260,22 +10622,17 @@
 				formTitle = this.translate( 'prefTitleTranscript', 'Transcript Preferences' );
 			}
 
-			$fieldset = $('<div>').attr('role','group');
-			fieldsetClass = 'able-prefs-' + form;
-			fieldsetId = this.mediaId + '-prefs-' + form;
-			legendId = fieldsetId + '-legend';
-			$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+			groupHeading = null;
 			if (form === 'keyboard') {
-				$legend = $('<h2>' + this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' ) + '</h2>');
-				$legend.attr('id',legendId);
-				$fieldset.attr('aria-labelledby',legendId);
-				$fieldset.append($legend);
+				groupHeading = this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' );
 			} else if (form === 'descriptions') {
-				$legend = $('<h2>' + this.translate( 'prefHeadingTextDescription', 'Text-based audio description' ) + '</h2>');
-				$legend.attr('id',legendId);
-				$fieldset.attr('aria-labelledby',legendId);
-				$fieldset.append($legend);
+				groupHeading = this.translate( 'prefHeadingTextDescription', 'Text-based audio description' );
 			}
+			groupObj = this.createPreferenceGroup({
+				form: form,
+				heading: groupHeading
+			});
+			$fieldset = groupObj.group;
 			for (i=0; i<available.length; i++) {
 
 				// only include prefs on the current form if they have a label
@@ -10286,11 +10643,22 @@
 					thisId = this.mediaId + '_' + thisPref;
 					$thisDiv = $('<div>').addClass(thisClass + ' able-player-setting');
 					if (form === 'captions' ) {
-						$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-						$thisField = $('<select>',{
+						let isCaptionRateField = (thisPref === 'prefCaptionsRate');
+						let fieldObj = this.createField({
+							wrapperClass: thisClass + ' ' + (isCaptionRateField ? 'able-prefs-number' : 'able-prefs-select'),
 							name: thisPref,
 							id: thisId,
+							label: available[i]['label'],
+							type: isCaptionRateField ? 'number' : 'select',
+							value: isCaptionRateField ? this[thisPref] : undefined,
+							attrs: isCaptionRateField ? {
+								min: 0.5,
+								max: 3.0,
+								step: 0.1
+							} : undefined
 						});
+						$thisDiv = fieldObj.wrapper;
+						$thisField = fieldObj.field;
 						// add a change handler that updates the style of the sample caption text
 						let viewingOptions = ['prefCaptionsPosition','prefCaptionsFont','prefCaptionsSize','prefCaptionsColor','prefCaptionsBGColor','prefCaptionsOpacity'];
 						if ( viewingOptions.indexOf(thisPref) !== -1 ) {
@@ -10299,9 +10667,16 @@
 								thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
 							});
 						}
-						captionsOptions = this.getCaptionsOptions(thisPref);
-						if ( ! ( thisPref === 'prefCaptionsVoice' && ! this.descVoices.length ) ) {
-							$thisDiv.append($thisLabel,$thisField);
+						if (isCaptionRateField) {
+							if (this.synth) {
+								$thisField.on('change',function() {
+									let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' );
+									thisObj.announceText('captionSample',captionSample);
+								});
+							}
+							captionsOptions = [];
+						} else {
+							captionsOptions = this.getCaptionsOptions(thisPref);
 						}
 						for (j=0; j < captionsOptions.length; j++) {
 							if (thisPref === 'prefCaptionsPosition') {
@@ -10378,36 +10753,42 @@
 												let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' );
 												thisObj.announceText('captionSample',captionSample);
 											});
-											$thisDiv.append($thisLabel,$thisField);
 										}
 									}
 								}
 							}
 						}
 					} else if (form === 'descriptions') {
-						$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
 						if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
 							// these preferences are checkboxes
-							$thisDiv.addClass('able-prefs-checkbox');
-							$thisField = $('<input>',{
+							let fieldObj = this.createField({
+								wrapperClass: thisClass + ' able-prefs-checkbox',
+								name: thisPref,
+								id: thisId,
+								label: available[i]['label'],
 								type: 'checkbox',
-								name: thisPref,
-								id: thisId,
-								value: 'true'
+								checked: this[thisPref] === 1
 							});
-							// check current active value for this preference
-							if (this[thisPref] === 1) {
-								$thisField.prop('checked',true);
-							}
-							$thisDiv.append($thisField,$thisLabel);
+							$thisDiv = fieldObj.wrapper;
 						} else if (this.synth) {
+							let isDescRateField = (thisPref === 'prefDescRate');
 							// Only show these options if browser supports speech synthesis
-							$thisDiv.addClass('able-prefs-select');
-							$thisField = $('<select>',{
+							let fieldObj = this.createField({
+								wrapperClass: thisClass + ' ' + (isDescRateField ? 'able-prefs-number' : 'able-prefs-select'),
 								name: thisPref,
 								id: thisId,
+								label: available[i]['label'],
+								type: isDescRateField ? 'number' : 'select',
+								value: isDescRateField ? this[thisPref] : undefined,
+								attrs: isDescRateField ? {
+									min: 0.5,
+									max: 3.0,
+									step: 0.1
+								} : undefined
 							});
-							if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
+							$thisDiv = fieldObj.wrapper;
+							$thisField = fieldObj.field;
+							if (isDescRateField) ; else if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
 								prefDescVoice = this.getPrefVoice();
 								for (j=0; j < this.descVoices.length; j++) {
 									optionValue = this.descVoices[j].name;
@@ -10442,8 +10823,6 @@
 									// 2.5 - fleet
 									// 3 - fast! (some voices don't get any faster than this
 
-									// Note: if these values are modified, must also modfiy them
-									// in makePrefsValueReadable()
 									options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
 								} else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
 									options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
@@ -10460,7 +10839,6 @@
 											$thisOption.prop('selected',true);
 										}
 										$thisField.append($thisOption);
-										$thisDiv.append($thisLabel,$thisField);
 									}
 								}
 							}
@@ -10468,20 +10846,18 @@
 							$thisField.on('change',function() {
 								thisObj.announceText('sample',thisObj.currentSampleText);
 							});
-							$thisDiv.append($thisLabel,$thisField);
 						}
 					} else { // all other fields are checkboxes
-						$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-						$thisField = $('<input>',{
-							type: 'checkbox',
+						let fieldObj = this.createField({
+							wrapperClass: thisClass,
 							name: thisPref,
 							id: thisId,
-							value: 'true'
+							label: available[i]['label'],
+							type: 'checkbox',
+							checked: this[thisPref] === 1
 						});
-						// check current active value for this preference
-						if (this[thisPref] === 1) {
-							$thisField.prop('checked',true);
-						}
+						$thisDiv = fieldObj.wrapper;
+						$thisField = fieldObj.field;
 						if (form === 'keyboard') {
 							// add a change handler that updates the list of current keyboard shortcuts
 							$thisField.on('change',function() {
@@ -10511,9 +10887,8 @@
 								}
 							});
 						}
-						$thisDiv.append($thisField,$thisLabel);
 					}
-					if (thisPref === 'prefDescVoice' && !this.descVoices.length) ; else {
+					if ((thisPref === 'prefDescVoice' || thisPref === 'prefCaptionsVoice') && !this.descVoices.length) ; else {
 						$fieldset.append($thisDiv);
 					}
 				}
@@ -10564,10 +10939,10 @@
 						kbLabels.push( this.translate( 'nextTrack', 'Next track' ) );
 						keys.push('n');
 					} else if (this.controls[i] === 'rewind') {
-						kbLabels.push(this.translate( 'rewind', 'Rewind' ));
+						kbLabels.push(this.translate( 'rewind', 'Rewind %s seconds', [ this.seekInterval ] ) );
 						keys.push('r');
 					} else if (this.controls[i] === 'forward') {
-						kbLabels.push(this.translate( 'forward', 'Forward' ));
+						kbLabels.push(this.translate( 'forward', 'Forward %s seconds', [ this.seekInterval ] ) );
 						keys.push('f');
 					} else if (this.controls[i] === 'volume') {
 						kbLabels.push(this.translate( 'volume', 'Volume' ));
@@ -10639,14 +11014,21 @@
 				$prefsDiv.append($kbHeading,$kbList);
 			}
 
-			// $prefsDiv (dialog) must be appended to the BODY!
-			$('body').append($prefsDiv);
-			dialog = new AccessibleDialog(
-				$prefsDiv,
-				this.$prefsButton,
-				formTitle,
-				thisObj.translate( 'closeButtonLabel', 'Close' )
-			);
+			if (dialogOptions.shared && sharedDialog) {
+				dialog = sharedDialog.dialog;
+				dialog.title = formTitle;
+				dialog.titleH1.text(formTitle);
+				dialog.focusedElementBeforeModal = this.$prefsButton;
+			} else {
+				// $prefsDiv (dialog) must be appended to the BODY!
+				$('body').append($prefsDiv);
+				dialog = new AccessibleDialog(
+					$prefsDiv,
+					this.$prefsButton,
+					formTitle,
+					thisObj.translate( 'closeButtonLabel', 'Close' )
+				);
+			}
 
 			// Add save and cancel buttons.
 			$buttonContainer = $( '<div class="able-prefs-buttons"></div>' );
@@ -10668,28 +11050,32 @@
 				$fieldset.attr('aria-labelledby',dialog.titleH1.attr('id'));
 			}
 
-			// add global reference for future control
-			if (form === 'captions') {
-				this.captionPrefsDialog = dialog;
-			} else if (form === 'descriptions') {
-				this.descPrefsDialog = dialog;
-			} else if (form === 'keyboard') {
-				this.keyboardPrefsDialog = dialog;
-			} else if (form === 'transcript') {
-				this.transcriptPrefsDialog = dialog;
+			if (!dialogOptions.shared) {
+				// add global reference for future control
+				if (form === 'captions') {
+					this.captionPrefsDialog = dialog;
+				} else if (form === 'descriptions') {
+					this.descPrefsDialog = dialog;
+				} else if (form === 'keyboard') {
+					this.keyboardPrefsDialog = dialog;
+				} else if (form === 'transcript') {
+					this.transcriptPrefsDialog = dialog;
+				}
 			}
 
 			// Add click handler for dialog close button
 			// (button is added in dialog.js)
-			$('div.able-prefs-form button.modalCloseButton').on( 'click', function() {
-				thisObj.resetPrefsForm();
-			});
-			// Add handler for escape key
-			$('div.able-prefs-form').on( 'keydown', function(e) {
-				if (e.key === 'Escape') {
+			if (!dialogOptions.shared) {
+				$('div.able-prefs-form button.modalCloseButton').on( 'click', function() {
 					thisObj.resetPrefsForm();
-				}
-			});
+				});
+				// Add handler for escape key
+				$('div.able-prefs-form').on( 'keydown', function(e) {
+					if (e.key === 'Escape') {
+						thisObj.resetPrefsForm();
+					}
+				});
+			}
 		};
 
 		AblePlayer.prototype.getPrefVoice = function () {
@@ -10758,32 +11144,6 @@
 				} else if (value === 2) {
 					return this.translate( 'prefDescPitch5', 'Very high' );
 				}
-			} else if (pref === 'prefDescRate' || pref === 'prefCaptionsRate' ) {
-				// default in the API is 0.1 to 10, where 1 is normal speaking voice
-				// our custom range offers several rates close to 1
-				// plus a couple of crazy fast ones for sport
-				// Our more readable options (1-10) or mapped here to API values
-				if (value === 0.7) {
-					return 1;
-				} else if (value === 0.8) {
-					return 2;
-				} else if (value === 0.9) {
-					return 3;
-				} else if (value === 1) {
-					return 4;
-				} else if (value === 1.1) {
-					return 5;
-				} else if (value === 1.2) {
-					return 6;
-				} else if (value === 1.5) {
-					return 7;
-				} else if (value === 2) {
-					return 8;
-				} else if (value === 2.5) {
-					return 9;
-				} else if (value === 3) {
-					return 10;
-				}
 			} else if (pref === 'prefDescVolume' || pref === 'prefCaptionsVolume' ) {
 				// values range from 0.1 to 1.0
 				return value * 100 + '%';
@@ -10799,21 +11159,21 @@
 			// User presses Escape to close Prefs dialog
 			// User clicks Save in Prefs dialog, & there's more than one player on page
 
-			var preferences, available, i, prefName;
+			var preferences, available, i, prefName, prefId, $form;
 
 			preferences = this.getPref();
 			available = this.getAvailablePreferences();
+			$form = this.getActivePrefsForm();
 			for (i=0; i<available.length; i++) {
 				prefName = available[i]['name'];
-				if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+				prefId = this.mediaId + '_' + prefName;
+				if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
+					$form.find('input[id="' + prefId + '"]').val(preferences.preferences[prefName]);
+				} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 					// this is a caption-related select box
-					$('select[name="' + prefName + '"]').val(preferences.preferences[prefName]);
+					$form.find('select[id="' + prefId + '"]').val(preferences.preferences[prefName]);
 				} else { // all others are checkboxes
-					if (this[prefName] === 1) {
-						$('input[name="' + prefName + '"]').prop('checked',true);
-					} else {
-						$('input[name="' + prefName + '"]').prop('checked',false);
-					}
+					$form.find('input[id="' + prefId + '"]').prop('checked', this[prefName] === 1);
 				}
 			}
 			// also restore style of sample caption div
@@ -10827,13 +11187,14 @@
 			// update preferences with new value
 			var preferences, available, prefName, prefId,
 				voiceSelectId, newVoice, numChanges, voiceLangFound,
-				numCapChanges, capSizeChanged, capSizeValue, newValue;
+				numCapChanges, capSizeChanged, capSizeValue, newValue, $form;
 
 			numChanges = 0;
 			numCapChanges = 0; // changes to caption-style-related preferences
 			capSizeChanged = false;
 			preferences = this.getPref();
 			available = this.getAvailablePreferences();
+			$form = this.getActivePrefsForm();
 			for (var i=0; i < available.length; i++) {
 				// only prefs with labels are used in the Prefs form
 				if (available[i]['label']) {
@@ -10844,8 +11205,8 @@
 							preferences.voices = [];
 						}
 						voiceSelectId = this.mediaId + '_prefDescVoice';
-						this.prefDescVoice = $('select#' + voiceSelectId).find(':selected').val();
-						this.prefDescVoiceLang = $('select#' + voiceSelectId).find(':selected').attr('data-lang');
+						this.prefDescVoice = $form.find('select#' + voiceSelectId).find(':selected').val();
+						this.prefDescVoiceLang = $form.find('select#' + voiceSelectId).find(':selected').attr('data-lang');
 						// replace preferred voice for this lang in preferences.voices array, if one exists
 						// otherwise, add it to the array
 						voiceLangFound = false;
@@ -10868,9 +11229,20 @@
 							preferences.preferences['prefDescMethod'] = this.prefDescMethod;
 							numChanges++;
 						}
+					} else if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
+						newValue = parseFloat($form.find('input[id="' + prefId + '"]').val());
+						if (isNaN(newValue)) {
+							newValue = this[prefName] || 1;
+						}
+						newValue = Math.min(3.0, Math.max(0.5, newValue));
+						if (preferences.preferences[prefName] !== newValue) {
+							preferences.preferences[prefName] = newValue;
+							this[prefName] = newValue;
+							numChanges++;
+						}
 					} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
 						// this is one of the caption-related select fields
-						newValue = $('select[id="' + prefId + '"]').val();
+						newValue = $form.find('select[id="' + prefId + '"]').val();
 						if (preferences.preferences[prefName] !== newValue) { // user changed setting
 							preferences.preferences[prefName] = newValue;
 							// also update global var for this pref (for caption fields, not done elsewhere)
@@ -10884,7 +11256,7 @@
 						}
 					} else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
 						// this is one of the description-related select fields
-						newValue = $('select[id="' + prefId + '"]').val();
+						newValue = $form.find('select[id="' + prefId + '"]').val();
 						if (preferences.preferences[prefName] !== newValue) { // user changed setting
 							preferences.preferences[prefName] = newValue;
 							// also update global var for this pref
@@ -10892,7 +11264,7 @@
 							numChanges++;
 						}
 					} else { // all other fields are checkboxes
-						if ($('input[id="' + prefId + '"]').is(':checked')) {
+						if ($form.find('input[id="' + prefId + '"]').is(':checked')) {
 							preferences.preferences[prefName] = 1;
 							if (this[prefName] === 1) ; else {
 								// user has just turned this pref on
@@ -11176,19 +11548,24 @@
 
 	function addSignFunctions(AblePlayer) {
 		AblePlayer.prototype.initSignLanguage = function() {
+			let firstSource, localSignSrc, remoteSignSrc, hasLocalSrc, hasRemoteSrc, hasRemoteSource, ytSignSrc, signSrc, signVideo;
+
 			this.hasSignLanguage = false;
 			// Sign language is only currently supported in HTML5 player and YouTube.
-			var hasLocalSrc = ( this.$sources.first().attr('data-sign-src') !== undefined && this.$sources.first().attr('data-sign-src') !== "" );
+			firstSource   = this.sources[0] ?? null;
+			localSignSrc  = firstSource ? firstSource.getAttribute('data-sign-src') : null;
+			remoteSignSrc = firstSource ? firstSource.getAttribute('data-youtube-sign-src') : null;
+			hasLocalSrc   = ( localSignSrc !== null && localSignSrc !== "" );
 			// YouTube src can either be on a `source` element or on the `video` element.
-			var hasRemoteSrc = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
-			var hasRemoteSource = ( this.$sources.first().attr('data-youtube-sign-src') !== undefined && this.$sources.first().attr('data-youtube-sign-src') !== '' );
+			hasRemoteSrc    = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
+			hasRemoteSource = ( remoteSignSrc !== null && remoteSignSrc !== '' );
 			if ( ! this.isIOS() && ( hasLocalSrc || hasRemoteSrc || hasRemoteSource ) && ( this.player === 'html5' || this.player === 'youtube' ) ) {
 				// check to see if there's a sign language video accompanying this video
 				// check only the first source
 				// If sign language is provided, it must be provided for all sources
-				let ytSignSrc = this.youTubeSignId ?? DOMPurify.sanitize( this.$sources.first().attr('data-youtube-sign-src') );
-				let signSrc = DOMPurify.sanitize( this.$sources.first().attr('data-sign-src') );
-				let signVideo = DOMPurify.sanitize( this.$media.data('youtube-sign-src') );
+				ytSignSrc = this.youTubeSignId ?? DOMPurify.sanitize( remoteSignSrc );
+				signSrc   = DOMPurify.sanitize( localSignSrc );
+				signVideo = DOMPurify.sanitize( this.$media.data('youtube-sign-src') );
 				this.signFile = (hasLocalSrc ) ? signSrc : false;
 				if ( hasRemoteSrc ) {
 					this.signYoutubeId = signVideo;
@@ -11233,6 +11610,9 @@
 					this.$signToolbar = $('<div>',{
 						'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
 					});
+					let signMask = document.createElement( 'div' );
+					signMask.classList.add( 'able-window-mask' );
+					this.$signWindow.append( signMask );
 					this.$signWindow.append(this.$signToolbar);
 				}
 
@@ -11255,9 +11635,9 @@
 					this.$signVideo.append($signSource);
 				} else {
 					// for each original <source>, add a <source> to the sign <video>
-					for (i=0; i < this.$sources.length; i++) {
-						signSrc = DOMPurify.sanitize( this.$sources[i].getAttribute('data-sign-src') );
-						srcType = this.$sources[i].getAttribute('type');
+					for (i=0; i < this.sources.length; i++) {
+						signSrc = DOMPurify.sanitize( this.sources[i].getAttribute('data-sign-src') );
+						srcType = this.sources[i].getAttribute('type');
 						if (signSrc) {
 							$signSource = $('<source>',{
 								'src' : signSrc,
@@ -11859,10 +12239,9 @@
 	  };
 
 	  AblePlayer.prototype.injectTranscriptArea = function () {
-	    var $autoScrollLabel,
-	      $autoScrollContainer,
+	    var autoScrollField,
 	      $languageSelectWrapper,
-	      $languageSelectLabel,
+	      languageSelectField,
 	      i,
 	      $option;
 
@@ -11883,34 +12262,28 @@
 	    // Transcript toolbar content
 
 	    // Add auto Scroll checkbox
-	    this.$autoScrollTranscriptCheckbox = $("<input>", {
-	      id: "autoscroll-transcript-checkbox-" + this.mediaId,
-	      type: "checkbox",
+	    autoScrollField = this.createField({
+	      wrapperClass: 'autoscroll-transcript',
+	      id: 'autoscroll-transcript-checkbox-' + this.mediaId,
+	      label: this.translate( 'autoScroll', 'Auto scroll' ),
+	      type: 'checkbox',
+	      labelPosition: 'before'
 	    });
-	    $autoScrollLabel = $("<label>", {
-	      for: "autoscroll-transcript-checkbox-" + this.mediaId,
-	    }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
-		$autoScrollContainer = $( '<div>', {
-			'class': 'autoscroll-transcript'
-		});
-		$autoScrollContainer.append(
-			$autoScrollLabel,
-			this.$autoScrollTranscriptCheckbox
-		);
-	    this.$transcriptToolbar.append( $autoScrollContainer );
+	    this.$autoScrollTranscriptCheckbox = autoScrollField.field;
+	    this.$transcriptToolbar.append( autoScrollField.wrapper );
 
 	    // Add field for selecting a transcript language
 	    // Only necessary if there is more than one language
 	    if (this.captions.length > 1) {
-	      $languageSelectWrapper = $("<div>", {
-	        class: "transcript-language-select-wrapper",
+	      languageSelectField = this.createField({
+	        wrapperClass: 'transcript-language-select-wrapper',
+	        id: 'transcript-language-select-' + this.mediaId,
+	        label: this.translate( 'language', 'Language' ),
+	        type: 'select',
+	        labelPosition: 'before'
 	      });
-	      $languageSelectLabel = $("<label>", {
-	        for: "transcript-language-select-" + this.mediaId,
-	      }).text( this.translate( 'language', 'Language' ) );
-	      this.$transcriptLanguageSelect = $("<select>", {
-	        id: "transcript-language-select-" + this.mediaId,
-	      });
+	      $languageSelectWrapper = languageSelectField.wrapper;
+	      this.$transcriptLanguageSelect = languageSelectField.field;
 	      for (i = 0; i < this.captions.length; i++) {
 	        $option = $("<option></option>", {
 	          value: this.captions[i]["language"],
@@ -11923,10 +12296,6 @@
 	      }
 	    }
 	    if ($languageSelectWrapper) {
-	      $languageSelectWrapper.append(
-	        $languageSelectLabel,
-	        this.$transcriptLanguageSelect
-	      );
 	      this.$transcriptToolbar.append($languageSelectWrapper);
 	    }
 	    this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
@@ -12024,20 +12393,19 @@
 	  };
 
 	  AblePlayer.prototype.setupManualTranscript = function () {
-	    var $autoScrollInput, $autoScrollLabel;
+	    var autoScrollField;
 
-	    $autoScrollInput = $("<input>", {
-	      id: "autoscroll-transcript-checkbox-" + this.mediaId,
-	      type: "checkbox",
+	    autoScrollField = this.createField({
+	      id: 'autoscroll-transcript-checkbox-' + this.mediaId,
+	      label: this.translate( 'autoScroll', 'Auto scroll' ),
+	      type: 'checkbox',
+	      labelPosition: 'before'
 	    });
-	    $autoScrollLabel = $("<label>", {
-	      for: "autoscroll-transcript-checkbox-" + this.mediaId,
-	    }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
 
 	    // Add an auto-scroll checkbox to the toolbar.
-	    this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+	    this.$autoScrollTranscriptCheckbox = autoScrollField.field;
 	    this.$transcriptToolbar.append(
-	      $autoScrollLabel,
+	      autoScrollField.label,
 	      this.$autoScrollTranscriptCheckbox
 	    );
 	  };
@@ -12349,67 +12717,67 @@
 
 	      var flattenComponentForCaption = function (comp) {
 	        var result = [];
-
 	        var parts = 0;
 
 	        var flattenString = function (str) {
-	          parts++;
+				parts++;
 
-	          var flatStr;
-	          var result = [];
-	          if (str === "") {
-	            return result;
-	          }
+				var flatStr;
+				var result = [];
+				if (str === "") {
+					return result;
+				}
 
-	          var openBracket = str.indexOf("[");
-	          var closeBracket = str.indexOf("]");
-	          var openParen = str.indexOf("(");
-	          var closeParen = str.indexOf(")");
+				if ( ! thisObj.strictMode ) {
+					var openBracket = str.indexOf("[");
+					var closeBracket = str.indexOf("]");
+					var openParen = str.indexOf("(");
+					var closeParen = str.indexOf(")");
+					var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+					var hasParens = openParen !== -1 && closeParen !== -1;
+				} else {
+					result.push(str);
 
-	          var hasBrackets = openBracket !== -1 && closeBracket !== -1;
-	          var hasParens = openParen !== -1 && closeParen !== -1;
+					return result;
+				}
 
-	          if (hasParens || hasBrackets) {
-	            let silentSpanBreak;
-	            if (parts > 1) {
-	              // force a line break between sections that contain parens or brackets
-	              silentSpanBreak = "<br/>";
-	            } else {
-	              silentSpanBreak = "";
-	            }
-	            var silentSpanOpen =
-	              silentSpanBreak + '<span class="able-unspoken">';
-	            var silentSpanClose = "</span>";
-	            if (hasParens && hasBrackets) {
-	              // string has both!
-	              if (openBracket < openParen) {
-	                // brackets come first. Parse parens separately
-	                hasParens = false;
-	              } else {
-	                // parens come first. Parse brackets separately
-	                hasBrackets = false;
-	              }
-	            }
-	          }
-	          if (hasParens) {
-	            flatStr = str.substring(0, openParen);
-	            flatStr += silentSpanOpen;
-	            flatStr += str.substring(openParen, closeParen + 1);
-	            flatStr += silentSpanClose;
-	            flatStr += flattenString(str.substring(closeParen + 1));
-	            result.push(flatStr);
-	          } else if (hasBrackets) {
-	            flatStr = str.substring(0, openBracket);
-	            flatStr += silentSpanOpen;
-	            flatStr += str.substring(openBracket, closeBracket + 1);
-	            flatStr += silentSpanClose;
-	            flatStr += flattenString(str.substring(closeBracket + 1));
-	            result.push(flatStr);
-	          } else {
-	            result.push(str);
-	          }
-	          return result;
-	        };
+				if (hasParens || hasBrackets) {
+					let silentSpanBreak;
+					// force a line break between sections that contain parens or brackets
+					silentSpanBreak = ( parts > 1 ) ? "<br/>" : '';
+
+					var silentSpanOpen = silentSpanBreak + '<span class="able-unspoken">';
+					var silentSpanClose = "</span>";
+					if (hasParens && hasBrackets) {
+						// string has both!
+						if (openBracket < openParen) {
+							// brackets come first. Parse parens separately
+							hasParens = false;
+						} else {
+							// parens come first. Parse brackets separately
+							hasBrackets = false;
+						}
+					}
+				}
+				if (hasParens) {
+					flatStr = str.substring(0, openParen);
+					flatStr += silentSpanOpen;
+					flatStr += str.substring(openParen, closeParen + 1);
+					flatStr += silentSpanClose;
+					flatStr += flattenString(str.substring(closeParen + 1));
+					result.push(flatStr);
+				} else if (hasBrackets) {
+					flatStr = str.substring(0, openBracket);
+					flatStr += silentSpanOpen;
+					flatStr += str.substring(openBracket, closeBracket + 1);
+					flatStr += silentSpanClose;
+					flatStr += flattenString(str.substring(closeBracket + 1));
+					result.push(flatStr);
+				} else {
+					result.push(str);
+				}
+				return result;
+			};
 
 	        if (comp.type === "string") {
 	          result = result.concat(flattenString(comp.value));
@@ -12599,15 +12967,15 @@
 	var playerHeading$k = "Reproductor";
 	var audioPlayer$k = "Reproductor d'àudio";
 	var videoPlayer$k = "Reproductor de vídeo";
-	var faster$k = "Ràpid";
-	var slower$k = "Lent";
+	var faster$k = "Ràpid: %1x";
+	var slower$k = "Lent: %1x";
 	var play$k = "Reprodueix";
 	var pause$k = "Pausa";
 	var restart$k = "Reinicia";
 	var prevTrack$k = "Pista anterior";
 	var nextTrack$k = "Pista següent";
-	var rewind$k = "Endarrere";
-	var forward$k = "Endavant";
+	var rewind$k = "Endarrere %1 segons";
+	var forward$k = "Endavant %1 segons";
 	var captions$k = "Subtítols";
 	var showCaptions$k = "Mostra els subtítols";
 	var hideCaptions$k = "Oculta els subtítols";
@@ -12630,6 +12998,8 @@
 	var enterFullScreen$k = "Entra en el mode de pantalla completa";
 	var exitFullScreen$k = "Surt del mode de pantalla completa";
 	var speed$k = "Velocitat";
+	var on$k = "On";
+	var off$k = "Off";
 	var spacebar$k = "Barra espaiadora";
 	var transcriptTitle$k = "Transcripció";
 	var lyricsTitle$k = "Lletra";
@@ -12655,7 +13025,9 @@
 	var prefDescription1$k = "L'actual vídeo té una versió alternativa amb audiodescripció, descripció textual anunciada pel lector de pantalla.";
 	var prefDescription2$k = "L'actual vídeo té una versió alternativa amb audiodescripció.";
 	var prefDescription3$k = "L'actual vídeo té descripció textual.";
-	var prefIntroDescriptionNone$k = "L'actual vídeo no disposa d'audiodescripció en cap format.";
+	var prefDescriptionNone$k = "L'actual vídeo no disposa d'audiodescripció en cap format.";
+	var prefDescFormatOption1$k = "alternative described version of video";
+	var prefDescFormatOption2$k = "text-based description, announced by screen reader";
 	var prefIntroDescription3$k = "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.";
 	var prefIntroDescription4$k = "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.";
 	var prefIntroKeyboard1$k = "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).";
@@ -12797,6 +13169,8 @@
 		enterFullScreen: enterFullScreen$k,
 		exitFullScreen: exitFullScreen$k,
 		speed: speed$k,
+		on: on$k,
+		off: off$k,
 		spacebar: spacebar$k,
 		transcriptTitle: transcriptTitle$k,
 		lyricsTitle: lyricsTitle$k,
@@ -12822,7 +13196,9 @@
 		prefDescription1: prefDescription1$k,
 		prefDescription2: prefDescription2$k,
 		prefDescription3: prefDescription3$k,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$k,
+		prefDescriptionNone: prefDescriptionNone$k,
+		prefDescFormatOption1: prefDescFormatOption1$k,
+		prefDescFormatOption2: prefDescFormatOption2$k,
 		prefIntroDescription3: prefIntroDescription3$k,
 		prefIntroDescription4: prefIntroDescription4$k,
 		prefIntroKeyboard1: prefIntroKeyboard1$k,
@@ -12934,15 +13310,15 @@
 	var playerHeading$j = "Přehrávač médií";
 	var audioPlayer$j = "Audio player";
 	var videoPlayer$j = "Video player";
-	var faster$j = "Rychleji";
-	var slower$j = "Pomaleji";
+	var faster$j = "Rychleji: %1x";
+	var slower$j = "Pomaleji: %1x";
 	var play$j = "Spustit";
 	var pause$j = "Pauza";
 	var restart$j = "Přehrát od začátku";
 	var prevTrack$j = "Předchozí stopa";
 	var nextTrack$j = "Další stopa";
-	var rewind$j = "Přetočit vzad";
-	var forward$j = "Přetočit vpřed";
+	var rewind$j = "Přetočit vzad %1 sekund";
+	var forward$j = "Přetočit vpřed %1 sekund";
 	var captions$j = "Titulky";
 	var showCaptions$j = "Zobrazit titulky";
 	var hideCaptions$j = "Skrýt titulky";
@@ -12965,6 +13341,8 @@
 	var enterFullScreen$j = "Zobrazit na celou obrazovku";
 	var exitFullScreen$j = "Ukončit celou obrazovku";
 	var speed$j = "Rychlost";
+	var on$j = "On";
+	var off$j = "Off";
 	var spacebar$j = "mezerník";
 	var transcriptTitle$j = "Přepis";
 	var lyricsTitle$j = "Text";
@@ -12990,7 +13368,9 @@
 	var prefDescription1$j = "Aktuální video má alternativně popsaná verze, textový popis.";
 	var prefDescription2$j = "Aktuální video má alternativní popsaná verze videa.";
 	var prefDescription3$j = "Aktuální video má textový popis, oznámený čtečkou obrazovky.";
-	var prefIntroDescriptionNone$j = "Aktuální video nemá žádný zvukový popis v žádném formátu.";
+	var prefDescriptionNone$j = "Aktuální video nemá žádný zvukový popis v žádném formátu.";
+	var prefDescFormatOption1$j = "alternative described version of video";
+	var prefDescFormatOption2$j = "text-based description, announced by screen reader";
 	var prefIntroDescription3$j = "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.";
 	var prefIntroDescription4$j = "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.";
 	var prefIntroKeyboard1$j = "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).";
@@ -13132,6 +13512,8 @@
 		enterFullScreen: enterFullScreen$j,
 		exitFullScreen: exitFullScreen$j,
 		speed: speed$j,
+		on: on$j,
+		off: off$j,
 		spacebar: spacebar$j,
 		transcriptTitle: transcriptTitle$j,
 		lyricsTitle: lyricsTitle$j,
@@ -13157,7 +13539,9 @@
 		prefDescription1: prefDescription1$j,
 		prefDescription2: prefDescription2$j,
 		prefDescription3: prefDescription3$j,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$j,
+		prefDescriptionNone: prefDescriptionNone$j,
+		prefDescFormatOption1: prefDescFormatOption1$j,
+		prefDescFormatOption2: prefDescFormatOption2$j,
 		prefIntroDescription3: prefIntroDescription3$j,
 		prefIntroDescription4: prefIntroDescription4$j,
 		prefIntroKeyboard1: prefIntroKeyboard1$j,
@@ -13269,15 +13653,15 @@
 	var playerHeading$i = "Medieafspiller";
 	var audioPlayer$i = "Audio player";
 	var videoPlayer$i = "Video player";
-	var faster$i = "Hurtigere";
-	var slower$i = "Langsommere";
+	var faster$i = "Hurtigere: %1x";
+	var slower$i = "Langsommere: %1x";
 	var play$i = "Afspil";
 	var pause$i = "Pause";
 	var restart$i = "Genstart";
 	var prevTrack$i = "Forrige spor";
 	var nextTrack$i = "Næste spor";
-	var rewind$i = "Spol tilbage";
-	var forward$i = "Spol frem";
+	var rewind$i = "Spol tilbage %1 sekunder";
+	var forward$i = "Spol frem %1 sekunder";
 	var captions$i = "Undertekster";
 	var showCaptions$i = "Vis undertekster";
 	var hideCaptions$i = "Gem undertekster";
@@ -13300,6 +13684,8 @@
 	var enterFullScreen$i = "Vis i fuldskærm";
 	var exitFullScreen$i = "Afslut fuldskærmsvisning";
 	var speed$i = "Hastighed";
+	var on$i = "On";
+	var off$i = "Off";
 	var spacebar$i = "mellemrumstast";
 	var transcriptTitle$i = "Transskription";
 	var lyricsTitle$i = "Lyrik";
@@ -13325,7 +13711,9 @@
 	var prefDescription1$i = "Nuværende videoer har en alternativ synstolket version, textbaseret synstolkning.";
 	var prefDescription2$i = "Nuværende videoer har alternativ synstolket version af videoen.";
 	var prefDescription3$i = "Nuværende videoer har textbaseret synstolkning.";
-	var prefIntroDescriptionNone$i = "Nuværende video har ingen synstolkning i noget format.";
+	var prefDescriptionNone$i = "Nuværende video har ingen synstolkning i noget format.";
+	var prefDescFormatOption1$i = "alternative described version of video";
+	var prefDescFormatOption2$i = "text-based description, announced by screen reader";
 	var prefIntroDescription3$i = "Anvende følgende formular for at indstille gældende textbasererede synstolkning.";
 	var prefIntroDescription4$i = "Efter du gemmer dine indstillinger, kan synstolkning slåes til og fra med synstolkningsknappen.";
 	var prefIntroKeyboard1$i = "Medieafspilleren på denne webside kan betjenest med tastuturgenveje (se neden for en liste).";
@@ -13467,6 +13855,8 @@
 		enterFullScreen: enterFullScreen$i,
 		exitFullScreen: exitFullScreen$i,
 		speed: speed$i,
+		on: on$i,
+		off: off$i,
 		spacebar: spacebar$i,
 		transcriptTitle: transcriptTitle$i,
 		lyricsTitle: lyricsTitle$i,
@@ -13492,7 +13882,9 @@
 		prefDescription1: prefDescription1$i,
 		prefDescription2: prefDescription2$i,
 		prefDescription3: prefDescription3$i,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$i,
+		prefDescriptionNone: prefDescriptionNone$i,
+		prefDescFormatOption1: prefDescFormatOption1$i,
+		prefDescFormatOption2: prefDescFormatOption2$i,
 		prefIntroDescription3: prefIntroDescription3$i,
 		prefIntroDescription4: prefIntroDescription4$i,
 		prefIntroKeyboard1: prefIntroKeyboard1$i,
@@ -13604,16 +13996,16 @@
 	var playerHeading$h = "Medienplayer";
 	var audioPlayer$h = "Audioplayer";
 	var videoPlayer$h = "Videoplayer";
-	var faster$h = "Schneller";
-	var slower$h = "Langsamer";
+	var faster$h = "Schneller: %1x";
+	var slower$h = "Langsamer: %1x";
 	var chapters$h = "Kapitel";
 	var play$h = "Abspielen";
 	var pause$h = "Pause";
 	var restart$h = "Neustart";
 	var prevTrack$h = "Vorheriger Titel";
 	var nextTrack$h = "Nächster Titel";
-	var rewind$h = "Zurück";
-	var forward$h = "Vorwärts";
+	var rewind$h = "Zurück %1 Sekunden";
+	var forward$h = "Vorwärts %1 Sekunden";
 	var captions$h = "Untertitel";
 	var showCaptions$h = "Untertitel anzeigen";
 	var hideCaptions$h = "Untertitel ausblenden";
@@ -13635,6 +14027,8 @@
 	var enterFullScreen$h = "Vollbildmodus einschalten";
 	var exitFullScreen$h = "Vollbildmodus verlassen";
 	var speed$h = "Geschwindigkeit";
+	var on$h = "On";
+	var off$h = "Off";
 	var spacebar$h = "Leertaste";
 	var transcriptTitle$h = "Transkription";
 	var lyricsTitle$h = "Text";
@@ -13660,7 +14054,9 @@
 	var prefDescription1$h = "Das aktuelle Video hat eine alternative Version der Audiobeschreibung, eine textbasierte Audiobeschreibung.";
 	var prefDescription2$h = "Das aktuelle Video hat Version des Videos, die eine Audiobeschreibung enthält.";
 	var prefDescription3$h = "Das aktuelle Video hat Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird.";
-	var prefIntroDescriptionNone$h = "Das aktuelle Video hat keine Audiobeschreibung.";
+	var prefDescriptionNone$h = "Das aktuelle Video hat keine Audiobeschreibung.";
+	var prefDescFormatOption1$h = "alternative described version of video";
+	var prefDescFormatOption2$h = "text-based description, announced by screen reader";
 	var prefIntroDescription3$h = "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.";
 	var prefIntroDescription4$h = "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.";
 	var prefIntroKeyboard1$h = "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).";
@@ -13802,6 +14198,8 @@
 		enterFullScreen: enterFullScreen$h,
 		exitFullScreen: exitFullScreen$h,
 		speed: speed$h,
+		on: on$h,
+		off: off$h,
 		spacebar: spacebar$h,
 		transcriptTitle: transcriptTitle$h,
 		lyricsTitle: lyricsTitle$h,
@@ -13827,7 +14225,9 @@
 		prefDescription1: prefDescription1$h,
 		prefDescription2: prefDescription2$h,
 		prefDescription3: prefDescription3$h,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$h,
+		prefDescriptionNone: prefDescriptionNone$h,
+		prefDescFormatOption1: prefDescFormatOption1$h,
+		prefDescFormatOption2: prefDescFormatOption2$h,
 		prefIntroDescription3: prefIntroDescription3$h,
 		prefIntroDescription4: prefIntroDescription4$h,
 		prefIntroKeyboard1: prefIntroKeyboard1$h,
@@ -13939,15 +14339,15 @@
 	var playerHeading$g = "Media player";
 	var audioPlayer$g = "Audio player";
 	var videoPlayer$g = "Video player";
-	var faster$g = "Faster";
-	var slower$g = "Slower";
+	var faster$g = "Faster: %1x";
+	var slower$g = "Slower: %1x";
 	var play$g = "Play";
 	var pause$g = "Pause";
 	var restart$g = "Restart";
 	var prevTrack$g = "Previous track";
 	var nextTrack$g = "Next track";
-	var rewind$g = "Rewind";
-	var forward$g = "Forward";
+	var rewind$g = "Rewind %1 seconds";
+	var forward$g = "Forward %1 seconds";
 	var captions$g = "Captions";
 	var showCaptions$g = "Show captions";
 	var hideCaptions$g = "Hide captions";
@@ -13970,6 +14370,8 @@
 	var enterFullScreen$g = "Enter full screen";
 	var exitFullScreen$g = "Exit full screen";
 	var speed$g = "Speed";
+	var on$g = "On";
+	var off$g = "Off";
 	var spacebar$g = "spacebar";
 	var transcriptTitle$g = "Transcript";
 	var lyricsTitle$g = "Lyrics";
@@ -13995,7 +14397,9 @@
 	var prefDescription1$g = "The current video has an alternative described version and text-based description, announced by screen reader.";
 	var prefDescription2$g = "The current video has text-based description.";
 	var prefDescription3$g = "The current video has an alternative described version.";
-	var prefIntroDescriptionNone$g = "The current video has no audio description in either format.";
+	var prefDescriptionNone$g = "The current video has no audio description in either format.";
+	var prefDescFormatOption1$g = "alternative described version of video";
+	var prefDescFormatOption2$g = "text-based description, announced by screen reader";
 	var prefIntroDescription3$g = "Use the following form to set your preferences related to text-based audio description.";
 	var prefIntroDescription4$g = "After you save your settings, audio description can be toggled on/off using the Description button.";
 	var prefIntroKeyboard1$g = "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).";
@@ -14137,6 +14541,8 @@
 		enterFullScreen: enterFullScreen$g,
 		exitFullScreen: exitFullScreen$g,
 		speed: speed$g,
+		on: on$g,
+		off: off$g,
 		spacebar: spacebar$g,
 		transcriptTitle: transcriptTitle$g,
 		lyricsTitle: lyricsTitle$g,
@@ -14162,7 +14568,9 @@
 		prefDescription1: prefDescription1$g,
 		prefDescription2: prefDescription2$g,
 		prefDescription3: prefDescription3$g,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$g,
+		prefDescriptionNone: prefDescriptionNone$g,
+		prefDescFormatOption1: prefDescFormatOption1$g,
+		prefDescFormatOption2: prefDescFormatOption2$g,
 		prefIntroDescription3: prefIntroDescription3$g,
 		prefIntroDescription4: prefIntroDescription4$g,
 		prefIntroKeyboard1: prefIntroKeyboard1$g,
@@ -14274,15 +14682,15 @@
 	var playerHeading$f = "Media player";
 	var audioPlayer$f = "Audio player";
 	var videoPlayer$f = "Video player";
-	var faster$f = "Rápido";
-	var slower$f = "Lento";
+	var faster$f = "Rápido: %1x";
+	var slower$f = "Lento: %1x";
 	var play$f = "Play";
 	var pause$f = "Pausa";
 	var restart$f = "Reiniciar";
 	var prevTrack$f = "Pista Anterior";
 	var nextTrack$f = "Siguiente Pista";
-	var rewind$f = "Rebobinar";
-	var forward$f = "Adelantar";
+	var rewind$f = "Rebobinar %1 segundos";
+	var forward$f = "Adelantar %1 segundos";
 	var captions$f = "Subtítulos";
 	var showCaptions$f = "Mostrar subtítulos";
 	var hideCaptions$f = "Ocultar subtítulos";
@@ -14305,6 +14713,8 @@
 	var enterFullScreen$f = "Ver a pantalla completa";
 	var exitFullScreen$f = "Salir de pantalla completa";
 	var speed$f = "Velocidad";
+	var on$f = "On";
+	var off$f = "Off";
 	var spacebar$f = "Barra espaciadora";
 	var transcriptTitle$f = "Transcript";
 	var lyricsTitle$f = "Letra";
@@ -14330,7 +14740,9 @@
 	var prefDescription1$f = "El vídeo actual tiene una versión alternativa con descripción, descripción en texto.";
 	var prefDescription2$f = "El vídeo actual tiene versión alternativa del vídeo, descrito.";
 	var prefDescription3$f = "El vídeo actual tiene descripción en texto, leída por el lector de pantalla.";
-	var prefIntroDescriptionNone$f = "El vídeo actual no tiene audiodescripción de ninguna manera.";
+	var prefDescriptionNone$f = "El vídeo actual no tiene audiodescripción de ninguna manera.";
+	var prefDescFormatOption1$f = "alternative described version of video";
+	var prefDescFormatOption2$f = "text-based description, announced by screen reader";
 	var prefIntroDescription3$f = "Utilice el siguiente formulario para establecer sus preferencias en cuanto a la audiodescripción en texto.";
 	var prefIntroDescription4$f = "Una vez guardadas sus preferencias, la audiodescripción puede habilitarse o deshabilitarse mediante el botón Descripción.";
 	var prefIntroKeyboard1$f = "El reproductor en esta página puede manejarse desde cualquier parte de la página utilizando los atajos de teclado (vea la lista más abajo).";
@@ -14472,6 +14884,8 @@
 		enterFullScreen: enterFullScreen$f,
 		exitFullScreen: exitFullScreen$f,
 		speed: speed$f,
+		on: on$f,
+		off: off$f,
 		spacebar: spacebar$f,
 		transcriptTitle: transcriptTitle$f,
 		lyricsTitle: lyricsTitle$f,
@@ -14497,7 +14911,9 @@
 		prefDescription1: prefDescription1$f,
 		prefDescription2: prefDescription2$f,
 		prefDescription3: prefDescription3$f,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$f,
+		prefDescriptionNone: prefDescriptionNone$f,
+		prefDescFormatOption1: prefDescFormatOption1$f,
+		prefDescFormatOption2: prefDescFormatOption2$f,
 		prefIntroDescription3: prefIntroDescription3$f,
 		prefIntroDescription4: prefIntroDescription4$f,
 		prefIntroKeyboard1: prefIntroKeyboard1$f,
@@ -14609,15 +15025,15 @@
 	var playerHeading$e = "Lecteur multimédia";
 	var audioPlayer$e = "Audio player";
 	var videoPlayer$e = "Video player";
-	var faster$e = "Plus rapidement";
-	var slower$e = "Plus lentement";
+	var faster$e = "Plus rapidement: %1x";
+	var slower$e = "Plus lentement: %1x";
 	var play$e = "Lecture";
 	var pause$e = "Pause";
 	var restart$e = "Redémarrer";
 	var prevTrack$e = "Piste Précédente";
 	var nextTrack$e = "Piste Suivante";
-	var rewind$e = "Reculer";
-	var forward$e = "Avancer";
+	var rewind$e = "Reculer %1 seconds";
+	var forward$e = "Avancer %1 seconds";
 	var captions$e = "Sous-titres";
 	var showCaptions$e = "Afficher les sous-titres";
 	var hideCaptions$e = "Masquer les sous-titres";
@@ -14640,6 +15056,8 @@
 	var enterFullScreen$e = "Activer le mode plein écran";
 	var exitFullScreen$e = "Quitter le mode plein écran";
 	var speed$e = "Vitesse";
+	var on$e = "On";
+	var off$e = "Off";
 	var spacebar$e = "barre d’espacement";
 	var transcriptTitle$e = "Transcription";
 	var lyricsTitle$e = "Paroles";
@@ -14665,7 +15083,9 @@
 	var prefDescription1$e = "Il y a une version autre version avec description, description textuelle.";
 	var prefDescription2$e = "Il y a une version autre version de la vidéo avec description.";
 	var prefDescription3$e = "Il y a une version description textuelle, lue à l’aide d’un lecteur d’écran.";
-	var prefIntroDescriptionNone$e = "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.";
+	var prefDescriptionNone$e = "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.";
+	var prefDescFormatOption1$e = "alternative described version of video";
+	var prefDescFormatOption2$e = "text-based description, announced by screen reader";
 	var prefIntroDescription3$e = "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelle.";
 	var prefIntroDescription4$e = "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.";
 	var prefIntroKeyboard1$e = "Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous).";
@@ -14807,6 +15227,8 @@
 		enterFullScreen: enterFullScreen$e,
 		exitFullScreen: exitFullScreen$e,
 		speed: speed$e,
+		on: on$e,
+		off: off$e,
 		spacebar: spacebar$e,
 		transcriptTitle: transcriptTitle$e,
 		lyricsTitle: lyricsTitle$e,
@@ -14832,7 +15254,9 @@
 		prefDescription1: prefDescription1$e,
 		prefDescription2: prefDescription2$e,
 		prefDescription3: prefDescription3$e,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$e,
+		prefDescriptionNone: prefDescriptionNone$e,
+		prefDescFormatOption1: prefDescFormatOption1$e,
+		prefDescFormatOption2: prefDescFormatOption2$e,
 		prefIntroDescription3: prefIntroDescription3$e,
 		prefIntroDescription4: prefIntroDescription4$e,
 		prefIntroKeyboard1: prefIntroKeyboard1$e,
@@ -14944,15 +15368,15 @@
 	var playerHeading$d = "נגן מדיה";
 	var audioPlayer$d = "Audio player";
 	var videoPlayer$d = "Video player";
-	var faster$d = "מהר יותר";
-	var slower$d = "לאט יותר";
+	var faster$d = "מהר יותר: %1x";
+	var slower$d = "לאט יותר: %1x";
 	var play$d = "נגן";
 	var pause$d = "הפסקה";
 	var restart$d = "התחלה מחדש";
 	var prevTrack$d = "המסלול הקודם";
 	var nextTrack$d = "המסלול הבא";
-	var rewind$d = "חזרה";
-	var forward$d = "קדימה";
+	var rewind$d = "חזרה %1 שניות";
+	var forward$d = "קדימה %1 שניות";
 	var captions$d = "כיתובים";
 	var showCaptions$d = "הצגת כיתובים";
 	var hideCaptions$d = "הסתרת כיתובים";
@@ -14975,6 +15399,8 @@
 	var enterFullScreen$d = "מעבר למסך מלא";
 	var exitFullScreen$d = "יציאה ממסך מלא";
 	var speed$d = "מהירות";
+	var on$d = "On";
+	var off$d = "Off";
 	var spacebar$d = "מקש הרווח";
 	var transcriptTitle$d = "תמליל";
 	var lyricsTitle$d = "מילים";
@@ -15000,7 +15426,9 @@
 	var prefDescription1$d = "הווידאו הנוכחי יש גרסה חלופית המתוארתתיאור מבוסס טקסט";
 	var prefDescription2$d = "הווידאו הנוכחי ישגרסה חלופית המתוארת של וידאו";
 	var prefDescription3$d = "הווידאו הנוכחי יש תיאור מבוסס טקסט, הודיעה על ידי קורא מסך";
-	var prefIntroDescriptionNone$d = "לסרטון הנוכחי אין תיאור שמע בתבנית.";
+	var prefDescriptionNone$d = "לסרטון הנוכחי אין תיאור שמע בתבנית.";
+	var prefDescFormatOption1$d = "alternative described version of video";
+	var prefDescFormatOption2$d = "text-based description, announced by screen reader";
 	var prefIntroDescription3$d = "השתמש בטופס הבא כדי לקבוע את ההעדפות שלך הקשורות לתיאור שמע.";
 	var prefIntroDescription4$d = "לאחר שתשמור את ההגדרות שלך, תיאור השמע יכול להיות מוחל על / כיבוי באמצעות לחצן תיאור.";
 	var prefIntroKeyboard1$d = "נגן המדיה בדף אינטרנט זה יכול להיות מופעל מכל מקום בדף באמצעות קיצורי מקשים (ראה להלן רשימה).";
@@ -15142,6 +15570,8 @@
 		enterFullScreen: enterFullScreen$d,
 		exitFullScreen: exitFullScreen$d,
 		speed: speed$d,
+		on: on$d,
+		off: off$d,
 		spacebar: spacebar$d,
 		transcriptTitle: transcriptTitle$d,
 		lyricsTitle: lyricsTitle$d,
@@ -15167,7 +15597,9 @@
 		prefDescription1: prefDescription1$d,
 		prefDescription2: prefDescription2$d,
 		prefDescription3: prefDescription3$d,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$d,
+		prefDescriptionNone: prefDescriptionNone$d,
+		prefDescFormatOption1: prefDescFormatOption1$d,
+		prefDescFormatOption2: prefDescFormatOption2$d,
 		prefIntroDescription3: prefIntroDescription3$d,
 		prefIntroDescription4: prefIntroDescription4$d,
 		prefIntroKeyboard1: prefIntroKeyboard1$d,
@@ -15279,15 +15711,15 @@
 	var playerHeading$c = "Pemutar media";
 	var audioPlayer$c = "Audio player";
 	var videoPlayer$c = "Video player";
-	var faster$c = "Percepat";
-	var slower$c = "Perlambat";
+	var faster$c = "Percepat: %1x";
+	var slower$c = "Perlambat: %1x";
 	var play$c = "Mulai";
 	var pause$c = "Jeda";
 	var restart$c = "Ulangi";
 	var prevTrack$c = "Trek sebelumnya";
 	var nextTrack$c = "Trek berikutnya";
-	var rewind$c = "Mundur";
-	var forward$c = "Maju";
+	var rewind$c = "Mundur %1 detik";
+	var forward$c = "Maju %1 detik";
 	var captions$c = "Takarir";
 	var showCaptions$c = "Tampilkan takarir";
 	var hideCaptions$c = "Sembunyikan takarir";
@@ -15310,6 +15742,8 @@
 	var enterFullScreen$c = "Masuk ke mode layar penuh";
 	var exitFullScreen$c = "Keluar dari mode layar penuh";
 	var speed$c = "Kecepatan";
+	var on$c = "On";
+	var off$c = "Off";
 	var spacebar$c = "tombol spasi";
 	var transcriptTitle$c = "Transkripsi";
 	var lyricsTitle$c = "Lirik";
@@ -15335,7 +15769,9 @@
 	var prefDescription1$c = "Video ini memiliki versi alternatif berdeskripsi, deskripsi berbasis teks.";
 	var prefDescription2$c = "Video ini memiliki versi alternatif video dengan deskripsi.";
 	var prefDescription3$c = "Video ini memiliki deskripsi berbasis teks, dibacakan oleh pembaca layar.";
-	var prefIntroDescriptionNone$c = "Video ini tidak memiliki deskripsi audio dalam format mana pun.";
+	var prefDescriptionNone$c = "Video ini tidak memiliki deskripsi audio dalam format mana pun.";
+	var prefDescFormatOption1$c = "alternative described version of video";
+	var prefDescFormatOption2$c = "text-based description, announced by screen reader";
 	var prefIntroDescription3$c = "Gunakan isian berikut untuk memasang preferensi terkait deskripsi audio berbasis teks.";
 	var prefIntroDescription4$c = "Setelah Anda menyimpan pengaturan, deskripsi audio dapat dinyala/matikan melalui tombol Deskripsi.";
 	var prefIntroKeyboard1$c = "Pemutar media dalam halaman ini dapat dioperasikan dari bagian mana pun pada halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).";
@@ -15477,6 +15913,8 @@
 		enterFullScreen: enterFullScreen$c,
 		exitFullScreen: exitFullScreen$c,
 		speed: speed$c,
+		on: on$c,
+		off: off$c,
 		spacebar: spacebar$c,
 		transcriptTitle: transcriptTitle$c,
 		lyricsTitle: lyricsTitle$c,
@@ -15502,7 +15940,9 @@
 		prefDescription1: prefDescription1$c,
 		prefDescription2: prefDescription2$c,
 		prefDescription3: prefDescription3$c,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$c,
+		prefDescriptionNone: prefDescriptionNone$c,
+		prefDescFormatOption1: prefDescFormatOption1$c,
+		prefDescFormatOption2: prefDescFormatOption2$c,
 		prefIntroDescription3: prefIntroDescription3$c,
 		prefIntroDescription4: prefIntroDescription4$c,
 		prefIntroKeyboard1: prefIntroKeyboard1$c,
@@ -15614,15 +16054,15 @@
 	var playerHeading$b = "Lettore multimediale";
 	var audioPlayer$b = "Audio player";
 	var videoPlayer$b = "Video player";
-	var faster$b = "Più veloce";
-	var slower$b = "Più lento";
+	var faster$b = "Più veloce: %1x";
+	var slower$b = "Più lento: %1x";
 	var play$b = "Riproduci";
 	var pause$b = "Pausa";
 	var restart$b = "Torna all'inizio";
 	var prevTrack$b = "Traccia precedente";
 	var nextTrack$b = "Traccia successiva";
-	var rewind$b = "Indietro";
-	var forward$b = "Avanti";
+	var rewind$b = "Indietro %1 secondi";
+	var forward$b = "Avanti %1 secondi";
 	var captions$b = "Sottotitoli";
 	var showCaptions$b = "Mostra sottotitoli";
 	var hideCaptions$b = "Nascondi sottotitoli";
@@ -15645,6 +16085,8 @@
 	var enterFullScreen$b = "Attiva schermo intero";
 	var exitFullScreen$b = "Disattiva schermo intero";
 	var speed$b = "Velocità";
+	var on$b = "On";
+	var off$b = "Off";
 	var spacebar$b = "barra spaziatrice";
 	var transcriptTitle$b = "Trascrizione";
 	var lyricsTitle$b = "Testi";
@@ -15670,7 +16112,9 @@
 	var prefDescription1$b = "il video corrente ha Una versione di descrizione alternativa, Descrizione testuale.";
 	var prefDescription2$b = "il video corrente ha Versione di descrizione alternativa per il video.";
 	var prefDescription3$b = "il video corrente ha Descrizione testuale, letta dal lettore di schermo.";
-	var prefIntroDescriptionNone$b = "Il video corrente non ha audiodescrizioni.";
+	var prefDescriptionNone$b = "Il video corrente non ha audiodescrizioni.";
+	var prefDescFormatOption1$b = "alternative described version of video";
+	var prefDescFormatOption2$b = "text-based description, announced by screen reader";
 	var prefIntroDescription3$b = "Usa il seguente modulo per impostare le tue preferenze relative all'audiodescrizione testuale.";
 	var prefIntroDescription4$b = "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.";
 	var prefIntroKeyboard1$b = "Il lettore multimediale può essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.";
@@ -15812,6 +16256,8 @@
 		enterFullScreen: enterFullScreen$b,
 		exitFullScreen: exitFullScreen$b,
 		speed: speed$b,
+		on: on$b,
+		off: off$b,
 		spacebar: spacebar$b,
 		transcriptTitle: transcriptTitle$b,
 		lyricsTitle: lyricsTitle$b,
@@ -15837,7 +16283,9 @@
 		prefDescription1: prefDescription1$b,
 		prefDescription2: prefDescription2$b,
 		prefDescription3: prefDescription3$b,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$b,
+		prefDescriptionNone: prefDescriptionNone$b,
+		prefDescFormatOption1: prefDescFormatOption1$b,
+		prefDescFormatOption2: prefDescFormatOption2$b,
 		prefIntroDescription3: prefIntroDescription3$b,
 		prefIntroDescription4: prefIntroDescription4$b,
 		prefIntroKeyboard1: prefIntroKeyboard1$b,
@@ -15949,15 +16397,15 @@
 	var playerHeading$a = "メディアプレイヤー";
 	var audioPlayer$a = "Audio player";
 	var videoPlayer$a = "Video player";
-	var faster$a = "はやく";
-	var slower$a = "おそく";
+	var faster$a = "はやく: %1x";
+	var slower$a = "おそく: %1x";
 	var play$a = "再生";
 	var pause$a = "一時停止";
 	var restart$a = "再開";
 	var prevTrack$a = "前のトラック";
 	var nextTrack$a = "次のトラック";
-	var rewind$a = "巻き戻し";
-	var forward$a = "早送り";
+	var rewind$a = "巻き戻し %1 秒";
+	var forward$a = "早送り %1 秒";
 	var captions$a = "キャプション";
 	var showCaptions$a = "キャプションを表示する";
 	var hideCaptions$a = "キャプションを非表示にする";
@@ -15980,6 +16428,8 @@
 	var enterFullScreen$a = "全画面表示";
 	var exitFullScreen$a = "全画面表示の終了";
 	var speed$a = "再生速度";
+	var on$a = "On";
+	var off$a = "Off";
 	var spacebar$a = "スペースキー";
 	var transcriptTitle$a = "書き起こし";
 	var lyricsTitle$a = "歌詞";
@@ -16005,7 +16455,9 @@
 	var prefDescription1$a = "現在の動画では次の方法が選択可能です: 解説付きの代替バージョン テキストによる解説";
 	var prefDescription2$a = "現在の動画では次の方法が選択可能です: 解説付きの代替バージョンのビデオ";
 	var prefDescription3$a = "現在の動画では次の方法が選択可能です: テキストによる解説(スクリーンリーダーによって読み上げられる)";
-	var prefIntroDescriptionNone$a = "現在の動画にはどちらの形式の音声解説も含まれていません。";
+	var prefDescriptionNone$a = "現在の動画にはどちらの形式の音声解説も含まれていません。";
+	var prefDescFormatOption1$a = "alternative described version of video";
+	var prefDescFormatOption2$a = "text-based description, announced by screen reader";
 	var prefIntroDescription3$a = "次のフォームを使って、音声解説に関連する設定を保存できます。";
 	var prefIntroDescription4$a = "設定が保存されたら、音声解説ボタンによって音声解説の表示・非表示を切り替えることができます。";
 	var prefIntroKeyboard1$a = "このページのメディアプレイヤーは、キーボード・ショートカットを使ってこのページのどこからでも操作できます(下の一覧を参照してください)。";
@@ -16147,6 +16599,8 @@
 		enterFullScreen: enterFullScreen$a,
 		exitFullScreen: exitFullScreen$a,
 		speed: speed$a,
+		on: on$a,
+		off: off$a,
 		spacebar: spacebar$a,
 		transcriptTitle: transcriptTitle$a,
 		lyricsTitle: lyricsTitle$a,
@@ -16172,7 +16626,9 @@
 		prefDescription1: prefDescription1$a,
 		prefDescription2: prefDescription2$a,
 		prefDescription3: prefDescription3$a,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$a,
+		prefDescriptionNone: prefDescriptionNone$a,
+		prefDescFormatOption1: prefDescFormatOption1$a,
+		prefDescFormatOption2: prefDescFormatOption2$a,
 		prefIntroDescription3: prefIntroDescription3$a,
 		prefIntroDescription4: prefIntroDescription4$a,
 		prefIntroKeyboard1: prefIntroKeyboard1$a,
@@ -16284,15 +16740,15 @@
 	var playerHeading$9 = "Pemain media";
 	var audioPlayer$9 = "Audio player";
 	var videoPlayer$9 = "Video player";
-	var faster$9 = "Lebih laju";
-	var slower$9 = "Lebih perlahan";
+	var faster$9 = "Lebih laju: %1x";
+	var slower$9 = "Lebih perlahan: %1x";
 	var play$9 = "Main";
 	var pause$9 = "Jeda";
 	var restart$9 = "Mula semula";
 	var prevTrack$9 = "Trek sebelumnya";
 	var nextTrack$9 = "Trek seterusnya";
-	var rewind$9 = "Undur";
-	var forward$9 = "Majukan";
+	var rewind$9 = "Undur %1 saat";
+	var forward$9 = "Majukan %1 saat";
 	var captions$9 = "Sarikata";
 	var showCaptions$9 = "Tunjuk sarikata";
 	var hideCaptions$9 = "Sembunyi sarikata";
@@ -16315,6 +16771,8 @@
 	var enterFullScreen$9 = "Masuk skrin penuh";
 	var exitFullScreen$9 = "Keluar skrin penuh";
 	var speed$9 = "Kelajuan";
+	var on$9 = "On";
+	var off$9 = "Off";
 	var spacebar$9 = "bar ruang";
 	var transcriptTitle$9 = "Transkrip";
 	var lyricsTitle$9 = "Lirik";
@@ -16328,7 +16786,7 @@
 	var alertDescribedVersion$9 = "Menggunakan versi video dengan deskripsi audio";
 	var alertNonDescribedVersion$9 = "Menggunakan versi video tanpa deskripsi audio";
 	var prefMenuCaptions$9 = "Sarikata";
-	var prefVoicedCaptions$9 = "Spoken Captions";
+	var prefVoicedCaptions$9 = "Sarikata Bersuara";
 	var prefMenuDescriptions$9 = "Deskripsi";
 	var prefMenuKeyboard$9 = "Papan kekunci";
 	var prefMenuTranscript$9 = "Transkrip";
@@ -16340,7 +16798,9 @@
 	var prefDescription1$9 = "Video semasa mempunyai versi berdeskripsi alternatif, deskripsi berasaskan teks.";
 	var prefDescription2$9 = "Video semasa mempunyai versi video berdeskripsi alternatif.";
 	var prefDescription3$9 = "Video semasa mempunyai deskripsi berasaskan teks, diumumkan oleh pembaca skrin.";
-	var prefIntroDescriptionNone$9 = "Video semasa tiada deskripsi audio dalam mana-mana format.";
+	var prefDescriptionNone$9 = "Video semasa tiada deskripsi audio dalam mana-mana format.";
+	var prefDescFormatOption1$9 = "alternative described version of video";
+	var prefDescFormatOption2$9 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$9 = "Gunakan borang berikut untuk menetapkan keutamaan berkaitan deskripsi audio berasaskan teks.";
 	var prefIntroDescription4$9 = "Selepas anda menyimpan tetapan, deskripsi audio boleh dihidupkan/dimatikan menggunakan butang Deskripsi.";
 	var prefIntroKeyboard1$9 = "Pemain media di laman web ini boleh dikendalikan dari mana-mana sahaja di halaman menggunakan pintasan papan kekunci (lihat di bawah untuk senarai).";
@@ -16359,8 +16819,8 @@
 	var prefDescPause$9 = "Jeda video secara automatik apabila deskripsi bermula";
 	var prefDescVisible$9 = "Paparkan deskripsi";
 	var prefDescVoice$9 = "Suara";
-	var prefDescRate$9 = "Spoken Description Rate";
-	var prefCaptionRate$9 = "Spoken Caption Rate";
+	var prefDescRate$9 = "Kadar Deskripsi Bersuara";
+	var prefCaptionRate$9 = "Kadar Sarikata Bersuara";
 	var prefDescPitch$9 = "Nada";
 	var prefDescPitch1$9 = "Sangat rendah";
 	var prefDescPitch2$9 = "Rendah";
@@ -16482,6 +16942,8 @@
 		enterFullScreen: enterFullScreen$9,
 		exitFullScreen: exitFullScreen$9,
 		speed: speed$9,
+		on: on$9,
+		off: off$9,
 		spacebar: spacebar$9,
 		transcriptTitle: transcriptTitle$9,
 		lyricsTitle: lyricsTitle$9,
@@ -16507,7 +16969,9 @@
 		prefDescription1: prefDescription1$9,
 		prefDescription2: prefDescription2$9,
 		prefDescription3: prefDescription3$9,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$9,
+		prefDescriptionNone: prefDescriptionNone$9,
+		prefDescFormatOption1: prefDescFormatOption1$9,
+		prefDescFormatOption2: prefDescFormatOption2$9,
 		prefIntroDescription3: prefIntroDescription3$9,
 		prefIntroDescription4: prefIntroDescription4$9,
 		prefIntroKeyboard1: prefIntroKeyboard1$9,
@@ -16619,15 +17083,15 @@
 	var playerHeading$8 = "Mediespiller";
 	var audioPlayer$8 = "Audio player";
 	var videoPlayer$8 = "Video player";
-	var faster$8 = "Raskere";
-	var slower$8 = "Saktere";
+	var faster$8 = "Raskere: %1x";
+	var slower$8 = "Saktere: %1x";
 	var play$8 = "Spill av";
 	var pause$8 = "Pause";
 	var restart$8 = "Start på nytt";
 	var prevTrack$8 = "Forrige spor";
 	var nextTrack$8 = "Neste spor";
-	var rewind$8 = "Spol tilbake";
-	var forward$8 = "Spol fremover";
+	var rewind$8 = "Spol tilbake %1 sekunder";
+	var forward$8 = "Spol fremover %1 sekunder";
 	var captions$8 = "Undertekster";
 	var showCaptions$8 = "Vis undertekster";
 	var hideCaptions$8 = "Skjul undertekster";
@@ -16650,6 +17114,8 @@
 	var enterFullScreen$8 = "Vis fullskjerm";
 	var exitFullScreen$8 = "Avslutt fullskjerm";
 	var speed$8 = "Hastighet";
+	var on$8 = "On";
+	var off$8 = "Off";
 	var spacebar$8 = "ordskiller";
 	var transcriptTitle$8 = "Transkripsjon";
 	var lyricsTitle$8 = "Teksting, verselinjer";
@@ -16663,7 +17129,7 @@
 	var alertDescribedVersion$8 = "Bruker videoversjon med synstolking";
 	var alertNonDescribedVersion$8 = "Bruker videoversjon uten synstolking";
 	var prefMenuCaptions$8 = "Undertekster";
-	var prefVoicedCaptions$8 = "Spoken Captions";
+	var prefVoicedCaptions$8 = "Talte undertekster";
 	var prefMenuDescriptions$8 = "Synstolking";
 	var prefMenuKeyboard$8 = "Tastatur";
 	var prefMenuTranscript$8 = "Transkripsjon";
@@ -16675,7 +17141,9 @@
 	var prefDescription1$8 = "Denne videoen har en alternativ synstolket versjon, tekstbasert synstolking.";
 	var prefDescription2$8 = "Denne videoen har alternativ synstolket versjon av video.";
 	var prefDescription3$8 = "Denne videoen har tekstbasert synstolket versjon opplest av skjermleser.";
-	var prefIntroDescriptionNone$8 = "Denne videoen har ikke synstolking i noen av formatene.";
+	var prefDescriptionNone$8 = "Denne videoen har ikke synstolking i noen av formatene.";
+	var prefDescFormatOption1$8 = "alternative described version of video";
+	var prefDescFormatOption2$8 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$8 = "Bruk følgende skjema for å gjøre dine valg angående tekstbasert synstolking.";
 	var prefIntroDescription4$8 = "Etter at du har lagret dine valg kan synstolking slås av og på med synstolkingsknappen.";
 	var prefIntroKeyboard1$8 = "Mediespilleren på denne nettsiden kan styres fra hvor som helst på siden ved hjelp av tastatursnarveier (se liste nedenfor).";
@@ -16694,8 +17162,8 @@
 	var prefDescPause$8 = "Sett video automatisk på pause når synstolking starter";
 	var prefDescVisible$8 = "Vis synstolking";
 	var prefDescVoice$8 = "Stemme";
-	var prefDescRate$8 = "Spoken Description Rate";
-	var prefCaptionRate$8 = "Spoken Caption Rate";
+	var prefDescRate$8 = "Kadar for talte beskrivelser";
+	var prefCaptionRate$8 = "Kadar for talte undertekster";
 	var prefDescPitch$8 = "Toneleie";
 	var prefDescPitch1$8 = "Meget lavt";
 	var prefDescPitch2$8 = "Lavt";
@@ -16817,6 +17285,8 @@
 		enterFullScreen: enterFullScreen$8,
 		exitFullScreen: exitFullScreen$8,
 		speed: speed$8,
+		on: on$8,
+		off: off$8,
 		spacebar: spacebar$8,
 		transcriptTitle: transcriptTitle$8,
 		lyricsTitle: lyricsTitle$8,
@@ -16842,7 +17312,9 @@
 		prefDescription1: prefDescription1$8,
 		prefDescription2: prefDescription2$8,
 		prefDescription3: prefDescription3$8,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$8,
+		prefDescriptionNone: prefDescriptionNone$8,
+		prefDescFormatOption1: prefDescFormatOption1$8,
+		prefDescFormatOption2: prefDescFormatOption2$8,
 		prefIntroDescription3: prefIntroDescription3$8,
 		prefIntroDescription4: prefIntroDescription4$8,
 		prefIntroKeyboard1: prefIntroKeyboard1$8,
@@ -16954,15 +17426,15 @@
 	var playerHeading$7 = "Mediaspeler";
 	var audioPlayer$7 = "Audiospeler";
 	var videoPlayer$7 = "Videospeler";
-	var faster$7 = "Sneller";
-	var slower$7 = "Langzamer";
+	var faster$7 = "Sneller: %1x";
+	var slower$7 = "Langzamer: %1x";
 	var play$7 = "Afspelen";
 	var pause$7 = "Pauzeren";
 	var restart$7 = "Herstarten";
 	var prevTrack$7 = "Vorige track";
 	var nextTrack$7 = "Volgend track";
-	var rewind$7 = "Terug";
-	var forward$7 = "Verder";
+	var rewind$7 = "Terug %1 seconden";
+	var forward$7 = "Verder %1 seconden";
 	var captions$7 = "Ondertiteling";
 	var showCaptions$7 = "Toon ondertiteling";
 	var hideCaptions$7 = "Verberg ondertiteling";
@@ -16985,6 +17457,8 @@
 	var enterFullScreen$7 = "Ga naar volledig scherm";
 	var exitFullScreen$7 = "Verlaat volledig scherm";
 	var speed$7 = "Snelheid";
+	var on$7 = "On";
+	var off$7 = "Off";
 	var spacebar$7 = "spatietoets";
 	var transcriptTitle$7 = "Transcript";
 	var lyricsTitle$7 = "Tekst";
@@ -16998,7 +17472,7 @@
 	var alertDescribedVersion$7 = "Versie met audiobeschrijving wordt gebruikt";
 	var alertNonDescribedVersion$7 = "Versie zonder audiobeschrijving wordt gebruikt";
 	var prefMenuCaptions$7 = "Ondertiteling";
-	var prefVoicedCaptions$7 = "Spoken Captions";
+	var prefVoicedCaptions$7 = "Gesproken ondertiteling";
 	var prefMenuDescriptions$7 = "Beschrijvingen";
 	var prefMenuKeyboard$7 = "Toetsenbord";
 	var prefMenuTranscript$7 = "Transcript";
@@ -17010,7 +17484,9 @@
 	var prefDescription1$7 = "De huidige video heeft een alternatief beschreven versie, op tekst gebaseerde beschrijving.";
 	var prefDescription2$7 = "De huidige video heeft Alternatieve beschreven versie van de video.";
 	var prefDescription3$7 = "De huidige video heeft op tekst gebaseerde beschrijving, uitgesproken door de schermlezer.";
-	var prefIntroDescriptionNone$7 = "De huidige video heeft in beide formaten geen audiobeschrijving.";
+	var prefDescriptionNone$7 = "De huidige video heeft in beide formaten geen audiobeschrijving.";
+	var prefDescFormatOption1$7 = "alternative described version of video";
+	var prefDescFormatOption2$7 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$7 = "Gebruik het volgende formulier om je voorkeuren gerelateerd aan tekst-gebaseerde audiobeschrijving in te stellen.";
 	var prefIntroDescription4$7 = "Na het opslaan van je instellingen, kan audiobeschrijving aan of uit gezet worden met de Beschrijving-knop.";
 	var prefIntroKeyboard1$7 = "De mediaspeler op deze pagina kan vanaf elke plek binnen de pagina bestuurd worden met de toetsenbord sneltoetsen (zie de lijst hieronder).";
@@ -17029,8 +17505,8 @@
 	var prefDescPause$7 = "Pauzeer de video automatisch als de beschrijving aan wordt gezet";
 	var prefDescVisible$7 = "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar";
 	var prefDescVoice$7 = "Stem";
-	var prefDescRate$7 = "Spoken Description Rate";
-	var prefCaptionRate$7 = "Spoken Caption Rate";
+	var prefDescRate$7 = "Spreeksnelheid beschrijving";
+	var prefCaptionRate$7 = "Spreeksnelheid ondertiteling";
 	var prefDescPitch$7 = "Toonhoogte";
 	var prefDescPitch1$7 = "Zeer laag";
 	var prefDescPitch2$7 = "Laag";
@@ -17038,7 +17514,7 @@
 	var prefDescPitch4$7 = "Hoog";
 	var prefDescPitch5$7 = "Zeer hoog";
 	var sampleDescriptionText$7 = "Pas de instellingen aan om deze voorbeeldtekst te beluisteren.";
-	var prefHighlight$7 = "Highlight transcript terwijl media speelt";
+	var prefHighlight$7 = "Markeer transcript terwijl media speelt";
 	var prefTabbable$7 = "Maak transcript bedienbaar met toetsenbord";
 	var prefCaptionsFont$7 = "Lettertype";
 	var prefCaptionsColor$7 = "Tekstkleur";
@@ -17152,6 +17628,8 @@
 		enterFullScreen: enterFullScreen$7,
 		exitFullScreen: exitFullScreen$7,
 		speed: speed$7,
+		on: on$7,
+		off: off$7,
 		spacebar: spacebar$7,
 		transcriptTitle: transcriptTitle$7,
 		lyricsTitle: lyricsTitle$7,
@@ -17177,7 +17655,9 @@
 		prefDescription1: prefDescription1$7,
 		prefDescription2: prefDescription2$7,
 		prefDescription3: prefDescription3$7,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$7,
+		prefDescriptionNone: prefDescriptionNone$7,
+		prefDescFormatOption1: prefDescFormatOption1$7,
+		prefDescFormatOption2: prefDescFormatOption2$7,
 		prefIntroDescription3: prefIntroDescription3$7,
 		prefIntroDescription4: prefIntroDescription4$7,
 		prefIntroKeyboard1: prefIntroKeyboard1$7,
@@ -17289,8 +17769,8 @@
 	var playerHeading$6 = "Odtwarzacz mediów";
 	var audioPlayer$6 = "Audio player";
 	var videoPlayer$6 = "Video player";
-	var faster$6 = "Szybciej";
-	var slower$6 = "Wolniej";
+	var faster$6 = "Szybciej: %1x";
+	var slower$6 = "Wolniej: %1x";
 	var play$6 = "Odtwarzaj";
 	var pause$6 = "Pauza";
 	var restart$6 = "Restart";
@@ -17320,6 +17800,8 @@
 	var enterFullScreen$6 = "Wejdź na pełny ekran";
 	var exitFullScreen$6 = "Wyjdź z pełnego ekranu";
 	var speed$6 = "Tempo";
+	var on$6 = "On";
+	var off$6 = "Off";
 	var spacebar$6 = "spacja";
 	var transcriptTitle$6 = "Transkrypcja";
 	var lyricsTitle$6 = "Tekst";
@@ -17345,7 +17827,9 @@
 	var prefDescription1$6 = "Bieżący film ma alternatywna wersja opisu audio, tekst opisu audio.";
 	var prefDescription2$6 = "Bieżący film ma alternatywna wersja wideo z opisem audio.";
 	var prefDescription3$6 = "Bieżący film ma tekst opisu audio, ogłaszany przez czytnik ekranu.";
-	var prefIntroDescriptionNone$6 = "Bieżący film nie ma audiodeskprycji.";
+	var prefDescriptionNone$6 = "Bieżący film nie ma audiodeskprycji.";
+	var prefDescFormatOption1$6 = "alternative described version of video";
+	var prefDescFormatOption2$6 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$6 = "Użyj formularza poniższej, aby określić ustawienia odtwarzania tekstowego opisu audio";
 	var prefIntroDescription4$6 = "Po zapisaniu ustawień opisu audio można włączać/wyłączać za pomocą przycisku Audiodeskrypcja.";
 	var prefIntroKeyboard1$6 = "Odtwarzaczem mediów na tej stronie można sterować z dowolnego miejsca na stronie za pomocą skrótów klawiaturowych (lista poniżej).";
@@ -17487,6 +17971,8 @@
 		enterFullScreen: enterFullScreen$6,
 		exitFullScreen: exitFullScreen$6,
 		speed: speed$6,
+		on: on$6,
+		off: off$6,
 		spacebar: spacebar$6,
 		transcriptTitle: transcriptTitle$6,
 		lyricsTitle: lyricsTitle$6,
@@ -17512,7 +17998,9 @@
 		prefDescription1: prefDescription1$6,
 		prefDescription2: prefDescription2$6,
 		prefDescription3: prefDescription3$6,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$6,
+		prefDescriptionNone: prefDescriptionNone$6,
+		prefDescFormatOption1: prefDescFormatOption1$6,
+		prefDescFormatOption2: prefDescFormatOption2$6,
 		prefIntroDescription3: prefIntroDescription3$6,
 		prefIntroDescription4: prefIntroDescription4$6,
 		prefIntroKeyboard1: prefIntroKeyboard1$6,
@@ -17624,15 +18112,15 @@
 	var playerHeading$5 = "Reprodutor de mídias";
 	var audioPlayer$5 = "Audio player";
 	var videoPlayer$5 = "Video player";
-	var faster$5 = "Rápido";
-	var slower$5 = "Lento";
+	var faster$5 = "Rápido: %1x";
+	var slower$5 = "Lento: %1x";
 	var play$5 = "Reproduzir";
 	var pause$5 = "Pausar";
 	var restart$5 = "Reiniciar";
 	var prevTrack$5 = "Faixa anterior";
 	var nextTrack$5 = "Próxima faixa";
-	var rewind$5 = "Retroceder";
-	var forward$5 = "Avançar";
+	var rewind$5 = "Retroceder %1 segundos";
+	var forward$5 = "Avançar %1 segundos";
 	var captions$5 = "Legendas";
 	var showCaptions$5 = "Mostrar legendas";
 	var hideCaptions$5 = "Ocultar legendas";
@@ -17655,6 +18143,8 @@
 	var enterFullScreen$5 = "Entrar em tela cheia";
 	var exitFullScreen$5 = "Sair da tela cheia";
 	var speed$5 = "Velocidade";
+	var on$5 = "On";
+	var off$5 = "Off";
 	var spacebar$5 = "barra de espaço";
 	var transcriptTitle$5 = "Transcrição";
 	var lyricsTitle$5 = "Letras";
@@ -17680,7 +18170,9 @@
 	var prefDescription1$5 = "O vídeo atual está uma versão alternativa de descrição, texto baseado em descrição.";
 	var prefDescription2$5 = "O vídeo atual está versão alternativa de descrição do vídeo.";
 	var prefDescription3$5 = "O vídeo atual está texto baseado em descrição, anunciado pelo leitor de tela.";
-	var prefIntroDescriptionNone$5 = "O vídeo atual não possui audiodescrição em nenhum formato.";
+	var prefDescFormatOption1$5 = "alternative described version of video";
+	var prefDescFormatOption2$5 = "text-based description, announced by screen reader";
+	var prefDescriptionNone$5 = "O vídeo atual não possui audiodescrição em nenhum formato.";
 	var prefIntroDescription3$5 = "Use o formulário a seguir para definir suas preferências relacionadas à texto baseado em audiodescrição.";
 	var prefIntroDescription4$5 = "Depois que salvar suas configurações, a audiodescrição poderá ser ligada/desligada usando o botão Descrição.";
 	var prefIntroKeyboard1$5 = "O reprodutor de mídias desse página web pode ser operado de qualquer lugar nessa página, usando os atalhos de teclado (veja a lista abaixo).";
@@ -17822,6 +18314,8 @@
 		enterFullScreen: enterFullScreen$5,
 		exitFullScreen: exitFullScreen$5,
 		speed: speed$5,
+		on: on$5,
+		off: off$5,
 		spacebar: spacebar$5,
 		transcriptTitle: transcriptTitle$5,
 		lyricsTitle: lyricsTitle$5,
@@ -17847,7 +18341,9 @@
 		prefDescription1: prefDescription1$5,
 		prefDescription2: prefDescription2$5,
 		prefDescription3: prefDescription3$5,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$5,
+		prefDescFormatOption1: prefDescFormatOption1$5,
+		prefDescFormatOption2: prefDescFormatOption2$5,
+		prefDescriptionNone: prefDescriptionNone$5,
 		prefIntroDescription3: prefIntroDescription3$5,
 		prefIntroDescription4: prefIntroDescription4$5,
 		prefIntroKeyboard1: prefIntroKeyboard1$5,
@@ -17959,15 +18455,15 @@
 	var playerHeading$4 = "Leitor multimédia";
 	var audioPlayer$4 = "Audio player";
 	var videoPlayer$4 = "Video player";
-	var faster$4 = "Mais rápido";
-	var slower$4 = "Mais lento";
+	var faster$4 = "Mais rápido: %1x";
+	var slower$4 = "Mais lento: %1x";
 	var play$4 = "Reproduzir";
 	var pause$4 = "Pausa";
 	var restart$4 = "Reiniciar";
 	var prevTrack$4 = "Faixa anterior";
 	var nextTrack$4 = "Faixa seguinte";
-	var rewind$4 = "Retroceder";
-	var forward$4 = "Avançar";
+	var rewind$4 = "Retroceder %1 segundos";
+	var forward$4 = "Avançar %1 segundos";
 	var captions$4 = "Legendas";
 	var showCaptions$4 = "Mostrar legendas";
 	var hideCaptions$4 = "Esconder legendas";
@@ -17985,11 +18481,13 @@
 	var mute$4 = "Desativar som";
 	var unmute$4 = "Ativar som";
 	var volume$4 = "Volume";
-	var volumeUpDown$4 = "Volume up down";
+	var volumeUpDown$4 = "Aumentar/Diminuir volume";
 	var preferences$4 = "Preferências";
 	var enterFullScreen$4 = "Ativar a vista de ecrã inteiro";
 	var exitFullScreen$4 = "Sair da vista de ecrã inteiro";
 	var speed$4 = "Velocidade";
+	var on$4 = "On";
+	var off$4 = "Off";
 	var spacebar$4 = "barra de espaço";
 	var transcriptTitle$4 = "Transcrição";
 	var lyricsTitle$4 = "Letra";
@@ -18015,7 +18513,9 @@
 	var prefDescription1$4 = "O vídeo atual tem uma versão descrita alternativa, descrição à base de texto.";
 	var prefDescription2$4 = "O vídeo atual tem versão descrita alernativa do vídeo.";
 	var prefDescription3$4 = "O vídeo atual tem descrição à base de texto, anunciada pelo leitor de ecrãs.";
-	var prefIntroDescriptionNone$4 = "O vídeo atual não tem descrição de áudio em nenhum formato.";
+	var prefDescriptionNone$4 = "O vídeo atual não tem descrição de áudio em nenhum formato.";
+	var prefDescFormatOption1$4 = "alternative described version of video";
+	var prefDescFormatOption2$4 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$4 = "Utiliza o seguinte formulário para definir as tuas preferências relacionadas com descrição de áudio à base de texto.";
 	var prefIntroDescription4$4 = "Depois de guardar as tuas definições, descrição de áudio pode ser alternada on/off usando o botão Descrição.";
 	var prefIntroKeyboard1$4 = "O leitor multimédia nesta página pode ser operado de qualquer lugar na página utilizando os atalhos de teclado (vê em baixo a lista).";
@@ -18157,6 +18657,8 @@
 		enterFullScreen: enterFullScreen$4,
 		exitFullScreen: exitFullScreen$4,
 		speed: speed$4,
+		on: on$4,
+		off: off$4,
 		spacebar: spacebar$4,
 		transcriptTitle: transcriptTitle$4,
 		lyricsTitle: lyricsTitle$4,
@@ -18182,7 +18684,9 @@
 		prefDescription1: prefDescription1$4,
 		prefDescription2: prefDescription2$4,
 		prefDescription3: prefDescription3$4,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$4,
+		prefDescriptionNone: prefDescriptionNone$4,
+		prefDescFormatOption1: prefDescFormatOption1$4,
+		prefDescFormatOption2: prefDescFormatOption2$4,
 		prefIntroDescription3: prefIntroDescription3$4,
 		prefIntroDescription4: prefIntroDescription4$4,
 		prefIntroKeyboard1: prefIntroKeyboard1$4,
@@ -18295,15 +18799,15 @@
 	var playerHeading$3 = "Prehrávač médií";
 	var audioPlayer$3 = "Prehrávač zvuku";
 	var videoPlayer$3 = "Prehrávač videa";
-	var faster$3 = "Rýchlejšie";
-	var slower$3 = "Pomalšie";
+	var faster$3 = "Rýchlejšie: %1x";
+	var slower$3 = "Pomalšie: %1x";
 	var play$3 = "Prehrať";
 	var pause$3 = "Pozastaviť";
 	var restart$3 = "Prehrať odznova";
 	var prevTrack$3 = "Predchádzajúca stopa";
 	var nextTrack$3 = "Nasledujúca stopa";
-	var rewind$3 = "Pretočiť dozadu";
-	var forward$3 = "Pretočiť dopredu";
+	var rewind$3 = "Pretočiť dozadu %1 sekúnd";
+	var forward$3 = "Pretočiť dopredu %1 sekúnd";
 	var captions$3 = "Skryté titulky";
 	var showCaptions$3 = "Zobraziť skryté titulky";
 	var hideCaptions$3 = "Vypnúť skryté titulky";
@@ -18321,11 +18825,13 @@
 	var mute$3 = "Stlmiť";
 	var unmute$3 = "Zrušiť stlmenie";
 	var volume$3 = "Hlasitosť";
-	var volumeUpDown$3 = "Hlasitosť hore dole";
+	var volumeUpDown$3 = "Hlasitosť hore/dole";
 	var preferences$3 = "Nastavenia";
 	var enterFullScreen$3 = "Prejsť na celú obrazovku";
 	var exitFullScreen$3 = "Ukončiť celú obrazovku";
 	var speed$3 = "Rýchlosť";
+	var on$3 = "Zapnuté";
+	var off$3 = "Vypnuté";
 	var spacebar$3 = "medzerník";
 	var transcriptTitle$3 = "Prepis";
 	var lyricsTitle$3 = "Text piesne";
@@ -18348,10 +18854,12 @@
 	var prefTitleKeyboard$3 = "Nastavenia klávesnice";
 	var prefTitleTranscript$3 = "Nastavenia prepisu";
 	var prefIntroDescription1$3 = "Tento prehrávač médií podporuje audiokomentár dvoma spôsobmi: ";
-	var prefDescription1$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačkou obrazovky.";
+	var prefDescription1$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačom obrazovky.";
 	var prefDescription2$3 = "Aktuálne video má textový audiokomentár.";
 	var prefDescription3$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom.";
-	var prefIntroDescriptionNone$3 = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+	var prefDescriptionNone$3 = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+	var prefDescFormatOption1$3 = "alternatívna verzia videa s audiokomentárom";
+	var prefDescFormatOption2$3 = "textový audiokomentár oznamovaný čítačom obrazovky";
 	var prefIntroDescription3$3 = "Pomocou nasledujúceho formulára nastavte svoje predvoľby týkajúce sa textového audiokomentára.";
 	var prefIntroDescription4$3 = "Po uložení nastavení je možné audiokomentár zapnúť/vypnúť pomocou príslušného tlačidla.";
 	var prefIntroKeyboard1$3 = "Prehrávač médií na tejto webovej stránke možno ovládať odkiaľkoľvek na stránke pomocou klávesových skratiek (zoznam nájdete nižšie).";
@@ -18494,6 +19002,8 @@
 		enterFullScreen: enterFullScreen$3,
 		exitFullScreen: exitFullScreen$3,
 		speed: speed$3,
+		on: on$3,
+		off: off$3,
 		spacebar: spacebar$3,
 		transcriptTitle: transcriptTitle$3,
 		lyricsTitle: lyricsTitle$3,
@@ -18519,7 +19029,9 @@
 		prefDescription1: prefDescription1$3,
 		prefDescription2: prefDescription2$3,
 		prefDescription3: prefDescription3$3,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$3,
+		prefDescriptionNone: prefDescriptionNone$3,
+		prefDescFormatOption1: prefDescFormatOption1$3,
+		prefDescFormatOption2: prefDescFormatOption2$3,
 		prefIntroDescription3: prefIntroDescription3$3,
 		prefIntroDescription4: prefIntroDescription4$3,
 		prefIntroKeyboard1: prefIntroKeyboard1$3,
@@ -18631,15 +19143,15 @@
 	var playerHeading$2 = "Mediaspelare";
 	var audioPlayer$2 = "Audio player";
 	var videoPlayer$2 = "Video player";
-	var faster$2 = "Snabbare";
-	var slower$2 = "Långsammare";
+	var faster$2 = "Snabbare: %1x";
+	var slower$2 = "Långsammare: %1x";
 	var play$2 = "Spela upp";
 	var pause$2 = "Pausa";
 	var restart$2 = "Starta om";
 	var prevTrack$2 = "Föregående spår";
 	var nextTrack$2 = "Nästa spår";
-	var rewind$2 = "Spola tillbaka";
-	var forward$2 = "Spola framåt";
+	var rewind$2 = "Spola tillbaka %1 sekunder";
+	var forward$2 = "Spola framåt %1 sekunder";
 	var captions$2 = "Undertexter";
 	var showCaptions$2 = "Visa undertexter";
 	var hideCaptions$2 = "Göm undertexter";
@@ -18662,6 +19174,8 @@
 	var enterFullScreen$2 = "Visa i fullskärmsläge";
 	var exitFullScreen$2 = "Gå ur fullskärmsläge";
 	var speed$2 = "Hastighet";
+	var on$2 = "On";
+	var off$2 = "Off";
 	var spacebar$2 = "mellanslag";
 	var transcriptTitle$2 = "Transkript";
 	var lyricsTitle$2 = "Lyrik";
@@ -18675,7 +19189,7 @@
 	var alertDescribedVersion$2 = "Använder syntolkad version av denna video";
 	var alertNonDescribedVersion$2 = "Använder ej syntolkad version av denna video";
 	var prefMenuCaptions$2 = "Undertexter";
-	var prefVoicedCaptions$2 = "Spoken Captions";
+	var prefVoicedCaptions$2 = "Talade undertexter";
 	var prefMenuDescriptions$2 = "Syntolkning";
 	var prefMenuKeyboard$2 = "Tangentbord";
 	var prefMenuTranscript$2 = "Transkript";
@@ -18687,7 +19201,9 @@
 	var prefDescription1$2 = "Följande video har en alternativ syntolkad version, textbaserad syntolkning.";
 	var prefDescription2$2 = "Följande video har alternativ syntolkad version av videon.";
 	var prefDescription3$2 = "Följande video har textbaserad syntolkning, uppläst av skärmläsare.";
-	var prefIntroDescriptionNone$2 = "Nuvarande video har ingen syntolkning i något format.";
+	var prefDescriptionNone$2 = "Nuvarande video har ingen syntolkning i något format.";
+	var prefDescFormatOption1$2 = "alternative described version of video";
+	var prefDescFormatOption2$2 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$2 = "Använd följande formulär för att ställa in dina prefenser gällande textbaserad syntolkning.";
 	var prefIntroDescription4$2 = "Efter du sparar dina prefenser, kan syntolkning växlas av och på med syntolkningsknappen.";
 	var prefIntroKeyboard1$2 = "Mediaspelaren på denna webbsida kan styras från varsomhelst på sidan med hjälp av tangentbordsgenvägar (se nedan för en lista).";
@@ -18829,6 +19345,8 @@
 		enterFullScreen: enterFullScreen$2,
 		exitFullScreen: exitFullScreen$2,
 		speed: speed$2,
+		on: on$2,
+		off: off$2,
 		spacebar: spacebar$2,
 		transcriptTitle: transcriptTitle$2,
 		lyricsTitle: lyricsTitle$2,
@@ -18854,7 +19372,9 @@
 		prefDescription1: prefDescription1$2,
 		prefDescription2: prefDescription2$2,
 		prefDescription3: prefDescription3$2,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$2,
+		prefDescriptionNone: prefDescriptionNone$2,
+		prefDescFormatOption1: prefDescFormatOption1$2,
+		prefDescFormatOption2: prefDescFormatOption2$2,
 		prefIntroDescription3: prefIntroDescription3$2,
 		prefIntroDescription4: prefIntroDescription4$2,
 		prefIntroKeyboard1: prefIntroKeyboard1$2,
@@ -18966,15 +19486,15 @@
 	var playerHeading$1 = "Medya Oynatıcı";
 	var audioPlayer$1 = "Audio player";
 	var videoPlayer$1 = "Video player";
-	var faster$1 = "Hızlandır";
-	var slower$1 = "Yavaşlat";
+	var faster$1 = "Hızlandır: %1x";
+	var slower$1 = "Yavaşlat: %1x";
 	var play$1 = "Oynat";
 	var pause$1 = "Duraklat";
 	var restart$1 = "Yeniden Oynat";
 	var prevTrack$1 = "Önceki Parça";
 	var nextTrack$1 = "Gelecek Parça";
-	var rewind$1 = "Geri Sar";
-	var forward$1 = "İleri Sar";
+	var rewind$1 = "Geri Sar %1 saniye";
+	var forward$1 = "İleri Sar %1 saniye";
 	var captions$1 = "Altyazılar";
 	var showCaptions$1 = "Altyazıları Göster";
 	var hideCaptions$1 = "Altyazıları Gizle";
@@ -18997,6 +19517,8 @@
 	var enterFullScreen$1 = "Tam Ekranı Etkinleştir";
 	var exitFullScreen$1 = "Tam Ekranı Kapa";
 	var speed$1 = "Hız";
+	var on$1 = "On";
+	var off$1 = "Off";
 	var spacebar$1 = "boşluk tuşu";
 	var transcriptTitle$1 = "Belge";
 	var lyricsTitle$1 = "Sözler";
@@ -19022,7 +19544,9 @@
 	var prefDescription1$1 = "Şu anki video'da mevcut alternatif tanımlı versiyon, metin tabanlı açıklama.";
 	var prefDescription2$1 = "Şu anki video'da mevcut Video versiyonu için tanımlı alternatifler.";
 	var prefDescription3$1 = "Şu anki video'da mevcut metin tabanlı açıklama, ekran okuyucusu tarafından duyurulan.";
-	var prefIntroDescriptionNone$1 = "Şu anki video'da her iki format için de ses açıklaması mevcut değil.";
+	var prefDescriptionNone$1 = "Şu anki video'da her iki format için de ses açıklaması mevcut değil.";
+	var prefDescFormatOption1$1 = "alternative described version of video";
+	var prefDescFormatOption2$1 = "text-based description, announced by screen reader";
 	var prefIntroDescription3$1 = "Ses açıklamalarını tercihlerinle ilişkilendirmek için belirtilen biçimi kullan.";
 	var prefIntroDescription4$1 = "Tercihlerini kaydettikten sonra, ses açıklamasını Açıklama butonu aracılığıyla açıp kapatabilirsin.";
 	var prefIntroKeyboard1$1 = "Bu web sayfasındaki medya oynatıcıyı, klavye kısayolları yardımıyla, sayfanın herhangi bir kısmından da yönetebilirsin (Liste için Aşağıyı İncele).";
@@ -19164,6 +19688,8 @@
 		enterFullScreen: enterFullScreen$1,
 		exitFullScreen: exitFullScreen$1,
 		speed: speed$1,
+		on: on$1,
+		off: off$1,
 		spacebar: spacebar$1,
 		transcriptTitle: transcriptTitle$1,
 		lyricsTitle: lyricsTitle$1,
@@ -19189,7 +19715,9 @@
 		prefDescription1: prefDescription1$1,
 		prefDescription2: prefDescription2$1,
 		prefDescription3: prefDescription3$1,
-		prefIntroDescriptionNone: prefIntroDescriptionNone$1,
+		prefDescriptionNone: prefDescriptionNone$1,
+		prefDescFormatOption1: prefDescFormatOption1$1,
+		prefDescFormatOption2: prefDescFormatOption2$1,
 		prefIntroDescription3: prefIntroDescription3$1,
 		prefIntroDescription4: prefIntroDescription4$1,
 		prefIntroKeyboard1: prefIntroKeyboard1$1,
@@ -19301,15 +19829,15 @@
 	var playerHeading = "媒體播放器";
 	var audioPlayer = "Audio player";
 	var videoPlayer = "Video player";
-	var faster = "加快";
-	var slower = "減慢";
+	var faster = "加快: %1x";
+	var slower = "減慢: %1x";
 	var play = "播放";
 	var pause = "暫停";
 	var restart = "從頭開始";
 	var prevTrack = "前一軌";
 	var nextTrack = "後一軌";
-	var rewind = "倒回";
-	var forward = "快轉";
+	var rewind = "倒回 %1 秒";
+	var forward = "快轉 %1 秒";
 	var captions = "字幕";
 	var showCaptions = "顯示字幕";
 	var hideCaptions = "隱藏字幕";
@@ -19332,6 +19860,8 @@
 	var enterFullScreen = "進入全螢幕模式";
 	var exitFullScreen = "離開全螢幕模式";
 	var speed = "播放速度";
+	var on = "On";
+	var off = "Off";
 	var spacebar = "空白鍵";
 	var transcriptTitle = "逐字稿";
 	var lyricsTitle = "歌詞";
@@ -19345,7 +19875,7 @@
 	var alertDescribedVersion = "正在使用本影片的口述影像版本";
 	var alertNonDescribedVersion = "正在使用本影片的非口述影像版本";
 	var prefMenuCaptions = "字幕";
-	var prefVoicedCaptions = "Spoken Captions";
+	var prefVoicedCaptions = "話語字幕";
 	var prefMenuDescriptions = "口述影像";
 	var prefMenuKeyboard = "鍵盤";
 	var prefMenuTranscript = "逐字稿";
@@ -19357,7 +19887,9 @@
 	var prefDescription1 = "目前的影片有 錄製口述影像的替代版本 文字式口述影像";
 	var prefDescription2 = "目前的影片有 影片的口述影像替代版本";
 	var prefDescription3 = "目前的影片有 文字式口述影像，需搭配螢幕報讀軟體";
-	var prefIntroDescriptionNone = "目前的影片兩種格式都沒提供。";
+	var prefDescriptionNone = "目前的影片兩種格式都沒提供。";
+	var prefDescFormatOption1 = "alternative described version of video";
+	var prefDescFormatOption2 = "text-based description, announced by screen reader";
 	var prefIntroDescription3 = "請使用下列表單設定口述影像的相關偏好。";
 	var prefIntroDescription4 = "儲存設定後，口述影像功能可以由口述影像按鈕切換開關。";
 	var prefIntroKeyboard1 = "不論您身處網頁何處，都可以運用下列鍵盤快速鍵操作頁面中的這個媒體播放器（快速鍵清單請見底下）。";
@@ -19370,14 +19902,14 @@
 	var prefAltKey = "Alt";
 	var prefCtrlKey = "Ctrl";
 	var prefShiftKey = "Shift";
-	var prefNoKeyShortcuts = "Disable keyboard shortcuts";
+	var prefNoKeyShortcuts = "停用鍵盤快速鍵";
 	var escapeKey = "Esc";
 	var escapeKeyFunction = "關閉目前的對話視窗或彈出式選單";
 	var prefDescPause = "開始口述時自動暫停影片";
 	var prefDescVisible = "同時以視覺方式呈現口述影像";
 	var prefDescVoice = "語音";
-	var prefDescRate = "Spoken Description Rate";
-	var prefCaptionRate = "Spoken Caption Rate";
+	var prefDescRate = "口述影像語速";
+	var prefCaptionRate = "話語字幕語速";
 	var prefDescPitch = "音調";
 	var prefDescPitch1 = "非常低沈";
 	var prefDescPitch2 = "低沈";
@@ -19418,52 +19950,52 @@
 	var prefNoChange = "您並未提出任何變動。";
 	var save = "儲存";
 	var cancel = "取消";
-	var dismissButton = "Dismiss";
+	var dismissButton = "知道了";
 	var windowButtonLabel = "視窗選項";
 	var windowMove = "移動";
-	var windowMoveLeft = "Window moved left";
-	var windowMoveRight = "Window moved right";
-	var windowMoveUp = "Window moved up";
-	var windowMoveDown = "Window moved down";
-	var windowMoveStopped = "Window move stopped";
-	var transcriptControls = "Transcript Window Controls";
-	var signControls = "Sign Language Window Controls";
+	var windowMoveLeft = "視窗已左移";
+	var windowMoveRight = "視窗已右移";
+	var windowMoveUp = "視窗已上移";
+	var windowMoveDown = "視窗已下移";
+	var windowMoveStopped = "視窗已停止移動";
+	var transcriptControls = "逐字稿視窗控制";
+	var signControls = "手語視窗控制";
 	var windowMoveAlert = "拖曳視窗或以方向鍵移動視窗；確定後按 Enter";
 	var windowResize = "變更大小";
 	var windowResizeHeading = "變更視窗大小";
 	var closeButtonLabel = "閉";
 	var width = "寬度";
 	var height = "高度";
-	var resultsSummary1 = "You searched for:";
-	var resultsSummary2 = "Found %1 matching items.";
-	var resultsSummary3 = "Click the time associated with any item to play the video from that point.";
-	var noResultsFound = "No results found.";
-	var searchButtonLabel = "Play at %1";
-	var hour = "hour";
-	var minute = "minute";
-	var second = "second";
-	var hours = "hours";
-	var minutes = "minutes";
-	var seconds = "seconds";
-	var vtsHeading = "Video Transcript Sorter";
-	var vtsInstructions1 = "Use the Video Transcript Sorter to modify text tracks:";
-	var vtsInstructions2 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-	var vtsInstructions3 = "Modify content or start/end times (all are directly editable within the table).";
-	var vtsInstructions4 = "Add new content, such as chapters or descriptions.";
-	var vtsInstructions5 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-	var vtsSelectLanguage = "Select a language";
-	var vtsSave = "Generate new .vtt content";
-	var vtsReturn = "Return to Editor";
-	var vtsCancel = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-	var vtsRow = "Row";
-	var vtsKind = "Kind";
-	var vtsStart = "Start";
-	var vtsEnd = "End";
-	var vtsContent = "Content";
-	var vtsActions = "Actions";
-	var vtsNewRow = "A new row %1 has been inserted.";
-	var vtsDeletedRow = "Row %1 has been deleted.";
-	var vtsMovedRow = "Row %1 has been moved %2 and is now Row %3.";
+	var resultsSummary1 = "您搜尋的是：";
+	var resultsSummary2 = "共找到 %1 處吻合";
+	var resultsSummary3 = "按一下任何一處的對應時間即可從該處開始播放視訊";
+	var noResultsFound = "沒有找到任何吻合的結果";
+	var searchButtonLabel = "從下列時間點開始播放： %1";
+	var hour = "小時";
+	var minute = "分";
+	var second = "秒";
+	var hours = "小時";
+	var minutes = "分";
+	var seconds = "秒";
+	var vtsHeading = "視訊逐字稿排序器";
+	var vtsInstructions1 = "您可使用視訊逐字稿排序器對文字軌段加以修改：";
+	var vtsInstructions2 = "重排章節、描述、字幕等，如此 Able Player 自動產生的逐字稿能夠以正確的順序呈現。";
+	var vtsInstructions3 = "修改內容或起迄時間（這些都可以在表格中直接編輯）。";
+	var vtsInstructions4 = "新增內容，包括章節標記或描述。";
+	var vtsInstructions5 = "編輯後，請按 \"儲存變更\" 按鈕，如此才能產生所有相關字幕檔案的新內容。這些新的文字內容可以複製貼上到新的 WebVTT 檔案。";
+	var vtsSelectLanguage = "選擇語言";
+	var vtsSave = "產生新的 .vtt 內容";
+	var vtsReturn = "返回編輯器";
+	var vtsCancel = "放棄儲存。您在視訊逐字稿排序器裡的所有編修皆已還原。";
+	var vtsRow = "列次";
+	var vtsKind = "類型";
+	var vtsStart = "開始";
+	var vtsEnd = "結束";
+	var vtsContent = "內容";
+	var vtsActions = "行動";
+	var vtsNewRow = "已插入新的 %1 列次。";
+	var vtsDeletedRow = "已刪除 %1 列次。";
+	var vtsMovedRow = "第 %1 列次已移動 %2 而成為第 %3 列次。";
 	var zh_tw = {
 		playerHeading: playerHeading,
 		audioPlayer: audioPlayer,
@@ -19499,6 +20031,8 @@
 		enterFullScreen: enterFullScreen,
 		exitFullScreen: exitFullScreen,
 		speed: speed,
+		on: on,
+		off: off,
 		spacebar: spacebar,
 		transcriptTitle: transcriptTitle,
 		lyricsTitle: lyricsTitle,
@@ -19524,7 +20058,9 @@
 		prefDescription1: prefDescription1,
 		prefDescription2: prefDescription2,
 		prefDescription3: prefDescription3,
-		prefIntroDescriptionNone: prefIntroDescriptionNone,
+		prefDescriptionNone: prefDescriptionNone,
+		prefDescFormatOption1: prefDescFormatOption1,
+		prefDescFormatOption2: prefDescFormatOption2,
 		prefIntroDescription3: prefIntroDescription3,
 		prefIntroDescription4: prefIntroDescription4,
 		prefIntroKeyboard1: prefIntroKeyboard1,
@@ -19697,10 +20233,15 @@
 		 */
 		AblePlayer.prototype.translate = function( key, fallback, args = Array() ) {
 			let translation = '';
-			if ( this.tt[ key ] ) {
-				translation = this.tt[ key ];
+
+			if ( Object.hasOwn( this.options, 'text' ) && Object.hasOwn( this.options.text, key ) ) {
+				translation = this.options.text[key];
 			} else {
-				translation = fallback;
+				if ( this.tt[ key ] ) {
+					translation = this.tt[ key ];
+				} else {
+					translation = fallback;
+				}
 			}
 			if ( args.length > 0 ) {
 				args.forEach( ( val, index ) => {
@@ -19709,7 +20250,7 @@
 				});
 			}
 
-			return translation;
+			return DOMPurify.sanitize(translation);
 		};
 
 		AblePlayer.prototype.getTranslationText = function() {
@@ -19719,9 +20260,7 @@
 			thisObj = this;
 
 			supportedLangs = this.getSupportedLangs(); // returns an array
-
 			if (this.lang) { // a data-lang attribute is included on the media element
-				this.lang;
 				if ( ! Object.hasOwn( supportedLangs,this.lang ) ) {
 					// the specified language code is not in the index
 					if ( this.lang.indexOf('-') == 2 ) {
@@ -19734,13 +20273,14 @@
 						// but maybe there's a similar localized language supported
 						// that has the same parent?
 						similarLangFound = false;
-						for ( const [key,value] of Object.entries(supportedLangs) ) {
-							if ( key.substring(0,2) == this.lang ) {
+						let thisLang = this.lang;
+						for ( const [key] of Object.entries(supportedLangs) ) {
+							if ( thisLang.substring(0,2) == key ) {
 								this.lang = key;
 								similarLangFound = true;
 							}
 						}
-						if ( !similarLangFound ) {
+						if ( ! similarLangFound ) {
 							// language requested via data-lang is not supported
 							this.lang = null;
 						}
@@ -19748,7 +20288,7 @@
 				}
 			}
 
-			if (!this.lang) {
+			if ( ! this.lang ) {
 				// try the language of the web page, if specified
 				if ($('body').attr('lang')) {
 					docLang = $('body').attr('lang').toLowerCase();
@@ -20087,7 +20627,12 @@
 				// this is likely already a vimeo ID
 				return url;
 			} else {
-				urlObject = new URL(url);
+				// Try to parse as a URL. If that fails, return the string as-is. It's probably an ID.
+				try {
+					urlObject = new URL(url);
+				} catch (e) {
+					return url;
+				}
 			}
 			if ( 'vimeo.com' === urlObject.hostname || 'player.vimeo.com' === urlObject.hostname ) {
 				// this is a full Vimeo URL
@@ -20298,11 +20843,13 @@
 			// mute is either true (muting) or false (unmuting)
 			if (mute) {
 				// save current volume so it can be restored after unmute
-				this.lastVolume = this.volume;
+				this.lastVolume = ( this.volume === 0 ) ? this.defaultVolume :this.volume;
 				this.volume = 0;
 			} else { // restore to previous volume
 				if (typeof this.lastVolume !== 'undefined') {
-					this.volume = this.lastVolume;
+					this.volume = this.lastVolume === 0 ? this.defaultVolume : this.lastVolume;
+				} else {
+					this.volume = this.defaultVolume;
 				}
 			}
 
@@ -20315,6 +20862,7 @@
 					this.youTubePlayer.unMute();
 				}
 			}
+
 			this.setVolume(this.volume);
 			this.refreshVolumeHelp(this.volume);
 			this.refreshVolumeButton(this.volume);
@@ -20441,10 +20989,7 @@
 					let $fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
 					for (i in this.langs) {
 						radioId = 'vts-lang-radio-' + this.langs[i];
-						$radioDiv = $('<div>',{
-							// uncomment the following if label is native name
-							// 'lang': this.langs[i]
-						});
+						$radioDiv = $('<div>');
 						$radio = $('<input>', {
 							'type': 'radio',
 							'name': 'vts-lang',
@@ -20641,16 +21186,29 @@
 
 			// timestamp is a string in the form "HH:MM:SS.xxx"
 			// Take some simple steps to ensure edited timestamp values still adhere to expected format
+			// All time strings should have all components (hours, minutes, seconds, milliseconds) present.
 
-			var firstPart, lastPart;
+			var firstPart, parts, lastPart, firstParts;
 
-			firstPart = timestamp.substring(0,timestamp.lastIndexOf('.')+1);
-			lastPart = timestamp.substring(timestamp.lastIndexOf('.')+1);
-
-			// TODO: Be sure each component within firstPart has only exactly two digits
-			// Probably can't justify doing this automatically
-			// If users enters '5' for minutes, that could be either '05' or '50'
-			// This should trigger an error and prompt the user to correct the value before proceeding
+			parts      = timestamp.split('.');
+			firstPart  = parts[0];
+			firstParts = firstPart.split(':');
+			let hours, minutes, seconds;
+			if (firstParts.length === 3) {
+				hours   = String(firstParts[0]).padStart(2,'0');
+				minutes = String(firstParts[1]).padStart(2,'0');
+				seconds = String(firstParts[2]).padStart(2,'0');
+			} else if (firstParts.length === 2) {
+				hours   = '00';
+				minutes = String(firstParts[0]).padStart(2,'0');
+				seconds = String(firstParts[1]).padStart(2,'0');
+			} else if (firstParts.length === 1) {
+				hours   = '00';
+				minutes = '00';
+				seconds = String(firstParts[0]).padStart(2,'0');
+			}
+			firstPart = hours + ':' + minutes + ':' + seconds;
+			lastPart  = parts[1] ?? '000';
 
 			// Be sure lastPart has exactly three digits
 			if (lastPart.length > 3) {
@@ -20658,11 +21216,9 @@
 				lastPart = lastPart.substring(0,3);
 			} else if (lastPart.length < 3) {
 				// add trailing zeros
-				while (lastPart.length < 3) {
-					lastPart += '0';
-				}
+				lastPart = String(lastPart).padEnd(3,'0');
 			}
-			return firstPart + lastPart;
+			return firstPart + '.' + lastPart;
 		};
 
 
@@ -21157,17 +21713,9 @@
 
 			// Adjusts start and end times of the current, previous, and next rows in VTS table
 			// after a move or insert
-			// NOTE: Fully automating this process would be extraordinarily complicated
-			// The goal here is simply to make subtle tweaks to ensure rows appear
+			// The goal here is to make subtle tweaks to ensure rows appear
 			// in the new order within the Able Player transcript
 			// Additional tweaking will likely be required by the user
-
-			// HISTORY: Originally set minDuration to 2 seconds for captions and .500 for descriptions
-			// However, this can results in significant changes to existing caption timing,
-			// with not-so-positive results.
-			// As of 3.1.15, setting minDuration to .001 for all track kinds
-			// Users will have to make further adjustments manually if needed
-
 			// TODO: Add WebVTT validation on save, since tweaking times is risky
 
 			var	 minDuration, $rows, prevRowNum, nextRowNum, $row, $prevRow, $nextRow,
@@ -21293,15 +21841,15 @@
 			}
 
 			// Update all affected start/end times
-			$row.find('td').eq(2).text(this.formatSecondsAsColonTime(start,true));
-			$row.find('td').eq(3).text(this.formatSecondsAsColonTime(end,true));
+			$row.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(start,true)));
+			$row.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(end,true)));
 			if ($prevRow) {
-				$prevRow.find('td').eq(2).text(this.formatSecondsAsColonTime(prevStart,true));
-				$prevRow.find('td').eq(3).text(this.formatSecondsAsColonTime(prevEnd,true));
+				$prevRow.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(prevStart,true)));
+				$prevRow.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(prevEnd,true)));
 			}
 			if ($nextRow) {
-				$nextRow.find('td').eq(2).text(this.formatSecondsAsColonTime(nextStart,true));
-				$nextRow.find('td').eq(3).text(this.formatSecondsAsColonTime(nextEnd,true));
+				$nextRow.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(nextStart,true)));
+				$nextRow.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(nextEnd,true)));
 			}
 		};
 
@@ -21659,14 +22207,19 @@
 			var languageStack = [];
 			while (state.text.length > 0) {
 				var nextLine = peekLine(state);
-				if (nextLine.indexOf('-->') !== -1 || /^\s+$/.test(nextLine)) {
-					break; // Handle empty cues
-				}
-				// Have to separately detect double-lines ending cue due to our non-standard parsing.
-				// TODO: Redo outer algorithm to conform to W3 spec?
-				if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
-					cut(state, 2);
-					break;
+				if (nextLine.indexOf('-->') !== -1) {
+					break; // Reached next cue timing line; definitely end of payload
+				} else if (nextLine.length === 0) {
+					// peekLine returns '' when state.text starts with '\n'.
+					// A true blank line (end of cue) is two consecutive newlines, so we'll check for that here
+					if (state.text.length === 1 || state.text[1] === '\n') {
+						break; // True blank line or solitary trailing newline — end of cue
+					}
+					// If we get here we had a single newline left in state.text because the previous "line" ended with a tag;
+					// We'll consume it and keep parsing the rest of the cue.
+					cut(state, 1); // Consume the lone newline
+					current.children.push({type: 'string', value: '\n'}); // preserve as newline in output
+					continue;
 				}
 
 				var token = getCueToken(state);

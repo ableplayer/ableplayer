@@ -6,19 +6,16 @@ export { AblePlayer as default };
  * you are running outside the browser (for example, SSR).
  *
  * @param object media jQuery selector or element identifying the media.
+ * @param object options Optional configuration options for the player.
  */
-declare function AblePlayer(media: any): void;
 declare class AblePlayer {
-    /**
-     * Construct the AblePlayer object.
-     *
-     * Able Player needs `window` to instantiate, so, skip the constructor if
-     * you are running outside the browser (for example, SSR).
-     *
-     * @param object media jQuery selector or element identifying the media.
-     */
-    constructor(media: any);
+    static getActiveDOMElement(): Element;
+    static localGetElementById(element: any, id: any): any;
+    static hasSingleInstance(): boolean;
+    static getSingleInstance(): any;
+    constructor(media: any, options?: {});
     media: any;
+    options: {};
     autoplay: boolean;
     okToPlay: boolean;
     loop: boolean;
@@ -26,8 +23,6 @@ declare class AblePlayer {
     hasPoster: boolean;
     audioPoster: any;
     audioPosterAlt: any;
-    width: any;
-    height: any;
     startTime: any;
     debug: boolean;
     defaultVolume: any;
@@ -98,14 +93,11 @@ declare class AblePlayer {
 }
 declare namespace AblePlayer {
     export let nextIndex: number;
-    export function getActiveDOMElement(): Element;
-    export function localGetElementById(element: any, id: any): any;
     export { ablePlayerSetupWindow };
     export let youTubeIframeAPIReady: boolean;
     export let loadingYouTubeIframeAPI: boolean;
     export { ablePlayerInstances };
-    export function hasSingleInstance(): boolean;
-    export function getSingleInstance(): any;
+    export let preferencesDialog: any;
 }
 /**
  * Performs one-time setup on `window`.
