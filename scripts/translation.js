@@ -88,7 +88,7 @@ function addTranslationFunctions(AblePlayer) {
 		let translation = '';
 
 		if ( Object.hasOwn( this.options, 'text' ) && Object.hasOwn( this.options.text, key ) ) {
-			translation = this.options.text[key];
+			translation = this.options.text[key] !== '' ? this.options.text[key] : fallback;
 		} else {
 			if ( this.tt[ key ] ) {
 				translation = this.tt[ key ];
