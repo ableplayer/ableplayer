@@ -15314,520 +15314,177 @@
     };
   }
 
-  var playerHeading$k = "Reproductor";
-  var audioPlayer$k = "Reproductor d'àudio";
-  var videoPlayer$k = "Reproductor de vídeo";
-  var faster$k = "Ràpid: %1x";
-  var slower$k = "Lent: %1x";
-  var play$k = "Reprodueix";
-  var pause$k = "Pausa";
-  var restart$k = "Reinicia";
-  var prevTrack$k = "Pista anterior";
-  var nextTrack$k = "Pista següent";
-  var rewind$k = "Endarrere %1 segons";
-  var forward$k = "Endavant %1 segons";
-  var captions$k = "Subtítols";
-  var showCaptions$k = "Mostra els subtítols";
-  var hideCaptions$k = "Oculta els subtítols";
-  var captionsOff$k = "Desactiva els subtítols";
-  var showTranscript$k = "Mostra la transcripció";
-  var hideTranscript$k = "Oculta la transcripció";
-  var turnOnDescriptions$k = "Activa l'audiodescripció";
-  var turnOffDescriptions$k = "Desactiva l'audiodescripció";
-  var chapters$k = "Capítols";
-  var language$k = "Idioma";
-  var sign$k = "Llengua de signes";
-  var showSign$k = "Mostra la llengua de signes";
-  var hideSign$k = "Oculta la llengua de signes";
-  var seekbarLabel$k = "Línia de temps";
-  var mute$k = "Silencia";
-  var unmute$k = "Activa el so";
-  var volume$k = "Volum";
-  var volumeUpDown$k = "Apuja i abaixa el volum";
-  var preferences$k = "Preferències";
-  var enterFullScreen$k = "Entra en el mode de pantalla completa";
-  var exitFullScreen$k = "Surt del mode de pantalla completa";
-  var speed$k = "Velocitat";
-  var on$k = "";
-  var off$k = "";
-  var spacebar$k = "Barra espaiadora";
-  var transcriptTitle$k = "Transcripció";
-  var lyricsTitle$k = "Lletra";
-  var autoScroll$k = "Desplaçament automàtic";
-  var statusPlaying$k = "S'està reproduint";
-  var statusPaused$k = "En pausa";
-  var statusStopped$k = "Aturat";
-  var statusBuffering$k = "Emmagatzemant";
-  var statusEnd$k = "Fi de pista";
-  var selectedTrack$j = "Pista seleccionada";
-  var alertDescribedVersion$j = "S'està utilitzant la versió amb audiodescripció del vídeo";
-  var alertNonDescribedVersion$j = "S'està utilitzant la versió sense audiodescripció del vídeo";
-  var prefMenuCaptions$k = "Subtítols";
-  var prefVoicedCaptions$k = "Spoken Captions";
-  var prefMenuDescriptions$k = "Descripcions";
-  var prefMenuKeyboard$k = "Teclat";
-  var prefMenuTranscript$k = "Transcripció";
-  var prefTitleCaptions$k = "Preferències dels subtítols";
-  var prefTitleDescriptions$k = "Preferències de l'audiodescripció";
-  var prefTitleKeyboard$k = "Preferències del teclat";
-  var prefTitleTranscript$j = "Preferències de la transcripció";
-  var prefIntroDescription1$j = "Aquest reproductor suporta l'audiodescripció de dues maneres: ";
-  var prefDescription1$k = "L'actual vídeo té una versió alternativa amb audiodescripció, descripció textual anunciada pel lector de pantalla.";
-  var prefDescription2$k = "L'actual vídeo té una versió alternativa amb audiodescripció.";
-  var prefDescription3$k = "L'actual vídeo té descripció textual.";
-  var prefDescriptionNone$k = "L'actual vídeo no disposa d'audiodescripció en cap format.";
-  var prefDescFormatOption1$k = "";
-  var prefDescFormatOption2$k = "";
-  var prefIntroDescription3$k = "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.";
-  var prefIntroDescription4$k = "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.";
-  var prefIntroKeyboard1$k = "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).";
-  var prefIntroKeyboard2$k = "A continuació, podeu asignar les tecles modificadores (Majúscules, Alt, i la tecla d'inserció).";
-  var prefIntroKeyboard3$k = "NOTA: algunes combinacions de tecles poden entrar en conflicte amb les utilitzades pel navegador o altres aplicacions. Proveu diferents combinacions o tecles modificadores fins a trobar les adequades en cada cas.";
-  var prefHeadingKeyboard1$k = "Tecles modificadores emprades com a dreceres de teclat";
-  var prefHeadingKeyboard2$k = "Dreceres de teclat actuals";
-  var prefHeadingDescription$k = "Audiodescripció";
-  var prefHeadingTextDescription$k = "Audiodescripció textual";
-  var prefAltKey$k = "Alt";
-  var prefCtrlKey$k = "Control";
-  var prefShiftKey$k = "Majúscula";
-  var prefNoKeyShortcuts$k = "Desactiva les dreceres de teclat";
-  var escapeKey$k = "Escapada";
-  var escapeKeyFunction$k = "Tanca el diàleg o finestre emergent actual";
-  var prefDescPause$k = "Pausa automàticament el vídeo en el moment que comenci una audiodescripció";
-  var prefDescVisible$k = "Fes visible la audiodescripció textual si es troba activada";
-  var prefDescVoice$k = "Veu";
-  var prefDescRate$k = "Spoken Description Rate";
-  var prefCaptionRate$k = "Spoken Caption Rate";
-  var prefDescPitch$k = "Tonalitat";
-  var prefDescPitch1$k = "Molt baixa";
-  var prefDescPitch2$k = "Baixa";
-  var prefDescPitch3$k = "Per defecte";
-  var prefDescPitch4$k = "Alta";
-  var prefDescPitch5$k = "Molt alta";
-  var sampleDescriptionText$k = "Ajusta la configuració per escoltar aquest text de mostra.";
-  var prefHighlight$k = "Ressalta la transcripció a mesura que avança el contingut";
-  var prefTabbable$k = "Transcripció operable per teclat";
-  var prefCaptionsFont$k = "Tipus de lletra";
-  var prefCaptionsColor$k = "Color del text";
-  var prefCaptionsBGColor$k = "Fons";
-  var prefCaptionsSize$k = "Mida del text";
-  var prefCaptionsOpacity$k = "Opacitat";
-  var prefCaptionsStyle$k = "Estil";
-  var serif$k = "Serifa";
-  var sans$k = "Sensa serifa";
-  var cursive$k = "Cursiva";
-  var fantasy$k = "fantasia";
-  var monospace$k = "Monoespaiada";
-  var white$k = "Blanc";
-  var yellow$k = "Groc";
-  var green$k = "Verd";
-  var cyan$j = "Cian";
-  var blue$k = "Blau";
-  var magenta$k = "Magenta";
-  var red$k = "Vermell";
-  var black$k = "Negre";
-  var transparent$k = "transparent";
-  var solid$k = "Sòlid";
-  var captionsStylePopOn$k = "Aparició instantània";
-  var captionsStyleRollUp$k = "Desplaçament cap amunt";
-  var prefCaptionsPosition$k = "Posició";
-  var captionsPositionOverlay$k = "Superposició";
-  var captionsPositionBelow$k = "A continuació del vídeo";
-  var sampleCaptionText$k = "Text de mostra dels subtítols";
-  var prefSuccess$k = "S'han desat els canvis.";
-  var prefNoChange$k = "No s'ha fet cap canvi.";
-  var save$k = "Desa";
-  var cancel$k = "Cancel·la";
-  var dismissButton$k = "Ignora";
-  var windowButtonLabel$k = "Opcions de la finestra";
-  var windowMove$k = "Moure";
-  var windowMoveLeft$k = "Finestra desplaçada cap a l'esquerra";
-  var windowMoveRight$k = "Finestra desplaçada cap a la dreta";
-  var windowMoveUp$k = "Finestra desplaçada cap amunt";
-  var windowMoveDown$k = "Finestra desplaçada cap avall";
-  var windowMoveStopped$k = "S'ha aturat el desplaçament de la finestra";
-  var transcriptControls$k = "Controls de la finestra de transcripció";
-  var signControls$k = "Controls de la finestra de llengua de signes";
-  var windowMoveAlert$k = "Arrossegueu o feu servir les tecles de direcció per moure la finestra, polseu retorn per aturar.";
-  var windowResize$k = "Redimensiona";
-  var windowResizeHeading$k = "Redimensiona la finestra amb l'intèrpret";
-  var closeButtonLabel$k = "Tanca";
-  var width$k = "Amplada";
-  var height$k = "Alçada";
-  var resultsSummary1$k = "Heu cercat:";
-  var resultsSummary2$k = "S'han trobat %1 elements coincidents.";
-  var resultsSummary3$k = "Feu clic al moment associat a qualsevol element per reproduir el vídeo des d'aquell punt.";
-  var noResultsFound$k = "No s'han trobat resultats.";
-  var searchButtonLabel$k = "Reprodueix a %1";
-  var hour$k = "hora";
-  var minute$j = "minut";
-  var second$k = "segon";
-  var hours$k = "hores";
-  var minutes$k = "minuts";
-  var seconds$k = "segons";
-  var vtsHeading$k = "Gestor de transcripcions de vídeo";
-  var vtsInstructions1$k = "Utilitzeu el gestor de transcripcions de vídeo per modificar les pistes de text:";
-  var vtsInstructions2$k = "Reordeneu capítols, descripcions, subtítols o subtítols per a persones sordes perquè apareguin en la seqüència correcta a la transcripció generada automàticament per Able Player.";
-  var vtsInstructions3$k = "Modifiqueu el contingut o els temps d'inici i final (tots són editables directament a la taula).";
-  var vtsInstructions4$k = "Afegiu contingut nou, com ara capítols o descripcions.";
-  var vtsInstructions5$k = "Després d'editar, feu clic al botó \"Desa els canvis\" per generar contingut nou per a tots els fitxers de text temporitzat rellevants. El text nou es pot copiar i enganxar en fitxers WebVTT nous.";
-  var vtsSelectLanguage$k = "Seleccioneu una llengua";
-  var vtsSave$k = "Genera contingut .vtt nou";
-  var vtsReturn$k = "Torna a l'editor";
-  var vtsCancel$k = "S'ha cancel·lat el desament. Totes les edicions que heu fet s'han restaurat a la taula del GTV.";
-  var vtsRow$k = "Fila";
-  var vtsKind$k = "Tipus";
-  var vtsStart$k = "Inici";
-  var vtsEnd$k = "Final";
-  var vtsContent$k = "Contingut";
-  var vtsActions$k = "Accions";
-  var vtsNewRow$k = "S'ha inserit una fila nova %1.";
-  var vtsDeletedRow$k = "S'ha suprimit la fila %1.";
-  var vtsMovedRow$k = "La fila %1 s'ha mogut %2 i ara és la fila %3.";
-  var ca = {
-  	playerHeading: playerHeading$k,
-  	audioPlayer: audioPlayer$k,
-  	videoPlayer: videoPlayer$k,
-  	faster: faster$k,
-  	slower: slower$k,
-  	play: play$k,
-  	pause: pause$k,
-  	restart: restart$k,
-  	prevTrack: prevTrack$k,
-  	nextTrack: nextTrack$k,
-  	rewind: rewind$k,
-  	forward: forward$k,
-  	captions: captions$k,
-  	showCaptions: showCaptions$k,
-  	hideCaptions: hideCaptions$k,
-  	captionsOff: captionsOff$k,
-  	showTranscript: showTranscript$k,
-  	hideTranscript: hideTranscript$k,
-  	turnOnDescriptions: turnOnDescriptions$k,
-  	turnOffDescriptions: turnOffDescriptions$k,
-  	chapters: chapters$k,
-  	language: language$k,
-  	sign: sign$k,
-  	showSign: showSign$k,
-  	hideSign: hideSign$k,
-  	seekbarLabel: seekbarLabel$k,
-  	mute: mute$k,
-  	unmute: unmute$k,
-  	volume: volume$k,
-  	volumeUpDown: volumeUpDown$k,
-  	preferences: preferences$k,
-  	enterFullScreen: enterFullScreen$k,
-  	exitFullScreen: exitFullScreen$k,
-  	speed: speed$k,
-  	on: on$k,
-  	off: off$k,
-  	spacebar: spacebar$k,
-  	transcriptTitle: transcriptTitle$k,
-  	lyricsTitle: lyricsTitle$k,
-  	autoScroll: autoScroll$k,
-  	statusPlaying: statusPlaying$k,
-  	statusPaused: statusPaused$k,
-  	statusStopped: statusStopped$k,
-  	statusBuffering: statusBuffering$k,
-  	statusEnd: statusEnd$k,
-  	selectedTrack: selectedTrack$j,
-  	alertDescribedVersion: alertDescribedVersion$j,
-  	alertNonDescribedVersion: alertNonDescribedVersion$j,
-  	prefMenuCaptions: prefMenuCaptions$k,
-  	prefVoicedCaptions: prefVoicedCaptions$k,
-  	prefMenuDescriptions: prefMenuDescriptions$k,
-  	prefMenuKeyboard: prefMenuKeyboard$k,
-  	prefMenuTranscript: prefMenuTranscript$k,
-  	prefTitleCaptions: prefTitleCaptions$k,
-  	prefTitleDescriptions: prefTitleDescriptions$k,
-  	prefTitleKeyboard: prefTitleKeyboard$k,
-  	prefTitleTranscript: prefTitleTranscript$j,
-  	prefIntroDescription1: prefIntroDescription1$j,
-  	prefDescription1: prefDescription1$k,
-  	prefDescription2: prefDescription2$k,
-  	prefDescription3: prefDescription3$k,
-  	prefDescriptionNone: prefDescriptionNone$k,
-  	prefDescFormatOption1: prefDescFormatOption1$k,
-  	prefDescFormatOption2: prefDescFormatOption2$k,
-  	prefIntroDescription3: prefIntroDescription3$k,
-  	prefIntroDescription4: prefIntroDescription4$k,
-  	prefIntroKeyboard1: prefIntroKeyboard1$k,
-  	prefIntroKeyboard2: prefIntroKeyboard2$k,
-  	prefIntroKeyboard3: prefIntroKeyboard3$k,
-  	prefHeadingKeyboard1: prefHeadingKeyboard1$k,
-  	prefHeadingKeyboard2: prefHeadingKeyboard2$k,
-  	prefHeadingDescription: prefHeadingDescription$k,
-  	prefHeadingTextDescription: prefHeadingTextDescription$k,
-  	prefAltKey: prefAltKey$k,
-  	prefCtrlKey: prefCtrlKey$k,
-  	prefShiftKey: prefShiftKey$k,
-  	prefNoKeyShortcuts: prefNoKeyShortcuts$k,
-  	escapeKey: escapeKey$k,
-  	escapeKeyFunction: escapeKeyFunction$k,
-  	prefDescPause: prefDescPause$k,
-  	prefDescVisible: prefDescVisible$k,
-  	prefDescVoice: prefDescVoice$k,
-  	prefDescRate: prefDescRate$k,
-  	prefCaptionRate: prefCaptionRate$k,
-  	prefDescPitch: prefDescPitch$k,
-  	prefDescPitch1: prefDescPitch1$k,
-  	prefDescPitch2: prefDescPitch2$k,
-  	prefDescPitch3: prefDescPitch3$k,
-  	prefDescPitch4: prefDescPitch4$k,
-  	prefDescPitch5: prefDescPitch5$k,
-  	sampleDescriptionText: sampleDescriptionText$k,
-  	prefHighlight: prefHighlight$k,
-  	prefTabbable: prefTabbable$k,
-  	prefCaptionsFont: prefCaptionsFont$k,
-  	prefCaptionsColor: prefCaptionsColor$k,
-  	prefCaptionsBGColor: prefCaptionsBGColor$k,
-  	prefCaptionsSize: prefCaptionsSize$k,
-  	prefCaptionsOpacity: prefCaptionsOpacity$k,
-  	prefCaptionsStyle: prefCaptionsStyle$k,
-  	serif: serif$k,
-  	sans: sans$k,
-  	cursive: cursive$k,
-  	fantasy: fantasy$k,
-  	monospace: monospace$k,
-  	white: white$k,
-  	yellow: yellow$k,
-  	green: green$k,
-  	cyan: cyan$j,
-  	blue: blue$k,
-  	magenta: magenta$k,
-  	red: red$k,
-  	black: black$k,
-  	transparent: transparent$k,
-  	solid: solid$k,
-  	captionsStylePopOn: captionsStylePopOn$k,
-  	captionsStyleRollUp: captionsStyleRollUp$k,
-  	prefCaptionsPosition: prefCaptionsPosition$k,
-  	captionsPositionOverlay: captionsPositionOverlay$k,
-  	captionsPositionBelow: captionsPositionBelow$k,
-  	sampleCaptionText: sampleCaptionText$k,
-  	prefSuccess: prefSuccess$k,
-  	prefNoChange: prefNoChange$k,
-  	save: save$k,
-  	cancel: cancel$k,
-  	dismissButton: dismissButton$k,
-  	windowButtonLabel: windowButtonLabel$k,
-  	windowMove: windowMove$k,
-  	windowMoveLeft: windowMoveLeft$k,
-  	windowMoveRight: windowMoveRight$k,
-  	windowMoveUp: windowMoveUp$k,
-  	windowMoveDown: windowMoveDown$k,
-  	windowMoveStopped: windowMoveStopped$k,
-  	transcriptControls: transcriptControls$k,
-  	signControls: signControls$k,
-  	windowMoveAlert: windowMoveAlert$k,
-  	windowResize: windowResize$k,
-  	windowResizeHeading: windowResizeHeading$k,
-  	closeButtonLabel: closeButtonLabel$k,
-  	width: width$k,
-  	height: height$k,
-  	resultsSummary1: resultsSummary1$k,
-  	resultsSummary2: resultsSummary2$k,
-  	resultsSummary3: resultsSummary3$k,
-  	noResultsFound: noResultsFound$k,
-  	searchButtonLabel: searchButtonLabel$k,
-  	hour: hour$k,
-  	minute: minute$j,
-  	second: second$k,
-  	hours: hours$k,
-  	minutes: minutes$k,
-  	seconds: seconds$k,
-  	vtsHeading: vtsHeading$k,
-  	vtsInstructions1: vtsInstructions1$k,
-  	vtsInstructions2: vtsInstructions2$k,
-  	vtsInstructions3: vtsInstructions3$k,
-  	vtsInstructions4: vtsInstructions4$k,
-  	vtsInstructions5: vtsInstructions5$k,
-  	vtsSelectLanguage: vtsSelectLanguage$k,
-  	vtsSave: vtsSave$k,
-  	vtsReturn: vtsReturn$k,
-  	vtsCancel: vtsCancel$k,
-  	vtsRow: vtsRow$k,
-  	vtsKind: vtsKind$k,
-  	vtsStart: vtsStart$k,
-  	vtsEnd: vtsEnd$k,
-  	vtsContent: vtsContent$k,
-  	vtsActions: vtsActions$k,
-  	vtsNewRow: vtsNewRow$k,
-  	vtsDeletedRow: vtsDeletedRow$k,
-  	vtsMovedRow: vtsMovedRow$k
-  };
-
-  var playerHeading$j = "Přehrávač médií";
-  var audioPlayer$j = "Audio player";
-  var videoPlayer$j = "Video player";
-  var faster$j = "Rychleji: %1x";
-  var slower$j = "Pomaleji: %1x";
-  var play$j = "Spustit";
-  var pause$j = "Pauza";
-  var restart$j = "Přehrát od začátku";
-  var prevTrack$j = "Předchozí stopa";
-  var nextTrack$j = "Další stopa";
-  var rewind$j = "Přetočit vzad %1 sekund";
-  var forward$j = "Přetočit vpřed %1 sekund";
-  var captions$j = "Titulky";
-  var showCaptions$j = "Zobrazit titulky";
-  var hideCaptions$j = "Skrýt titulky";
-  var captionsOff$j = "Titulky vypnuty";
-  var showTranscript$j = "Zobrazit přepis";
-  var hideTranscript$j = "Skrýt přepis";
-  var turnOnDescriptions$j = "Zapnout popisy";
-  var turnOffDescriptions$j = "vypnout popisy";
-  var chapters$j = "Kapitoly";
-  var language$j = "Jazyk";
-  var sign$j = "Znaková řeč";
-  var showSign$j = "Zobrazit znakovou řeč";
-  var hideSign$j = "Skrýt znakovou řeč";
-  var seekbarLabel$j = "časová osa";
-  var mute$j = "Vypnout zvuk";
-  var unmute$j = "Zapnout zvuk";
-  var volume$j = "Hlasitost";
-  var volumeUpDown$j = "Hlasitost zvýšit snížit";
-  var preferences$j = "Předvolby";
-  var enterFullScreen$j = "Zobrazit na celou obrazovku";
-  var exitFullScreen$j = "Ukončit celou obrazovku";
-  var speed$j = "Rychlost";
+  var playerHeading$j = "Reproductor";
+  var audioPlayer$j = "Reproductor d'àudio";
+  var videoPlayer$j = "Reproductor de vídeo";
+  var faster$j = "Ràpid: %1x";
+  var slower$j = "Lent: %1x";
+  var play$j = "Reprodueix";
+  var pause$j = "Pausa";
+  var restart$j = "Reinicia";
+  var prevTrack$j = "Pista anterior";
+  var nextTrack$j = "Pista següent";
+  var rewind$j = "Endarrere %1 segons";
+  var forward$j = "Endavant %1 segons";
+  var captions$j = "Subtítols";
+  var showCaptions$j = "Mostra els subtítols";
+  var hideCaptions$j = "Oculta els subtítols";
+  var captionsOff$j = "Desactiva els subtítols";
+  var showTranscript$j = "Mostra la transcripció";
+  var hideTranscript$j = "Oculta la transcripció";
+  var turnOnDescriptions$j = "Activa l'audiodescripció";
+  var turnOffDescriptions$j = "Desactiva l'audiodescripció";
+  var chapters$j = "Capítols";
+  var language$j = "Idioma";
+  var sign$j = "Llengua de signes";
+  var showSign$j = "Mostra la llengua de signes";
+  var hideSign$j = "Oculta la llengua de signes";
+  var seekbarLabel$j = "Línia de temps";
+  var mute$j = "Silencia";
+  var unmute$j = "Activa el so";
+  var volume$j = "Volum";
+  var volumeUpDown$j = "Apuja i abaixa el volum";
+  var preferences$j = "Preferències";
+  var enterFullScreen$j = "Entra en el mode de pantalla completa";
+  var exitFullScreen$j = "Surt del mode de pantalla completa";
+  var speed$j = "Velocitat";
   var on$j = "";
   var off$j = "";
-  var spacebar$j = "mezerník";
-  var transcriptTitle$j = "Přepis";
-  var lyricsTitle$j = "Text";
-  var autoScroll$j = "Automatické posouvání";
-  var statusPlaying$j = "Přehrávání";
-  var statusPaused$j = "Pozastaveno";
-  var statusStopped$j = "Zastaveno";
-  var statusBuffering$j = "Vyrovnávací paměť";
-  var statusEnd$j = "Konec stopy";
-  var selectedTrack$i = "Vybraná stopa";
-  var alertDescribVersion = "Používání zvukově popsané verze tohoto videa";
-  var alertNonDescribVersion = "Použití nepopsané verze tohoto videa";
-  var prefMenuCaptions$j = "Titulky";
+  var spacebar$j = "Barra espaiadora";
+  var transcriptTitle$j = "Transcripció";
+  var lyricsTitle$j = "Lletra";
+  var autoScroll$j = "Desplaçament automàtic";
+  var statusPlaying$j = "S'està reproduint";
+  var statusPaused$j = "En pausa";
+  var statusStopped$j = "Aturat";
+  var statusBuffering$j = "Emmagatzemant";
+  var statusEnd$j = "Fi de pista";
+  var selectedTrack$i = "Pista seleccionada";
+  var alertDescribedVersion$i = "S'està utilitzant la versió amb audiodescripció del vídeo";
+  var alertNonDescribedVersion$i = "S'està utilitzant la versió sense audiodescripció del vídeo";
+  var prefMenuCaptions$j = "Subtítols";
   var prefVoicedCaptions$j = "Spoken Captions";
-  var prefMenuDescriptions$j = "Popisy";
-  var prefMenuKeyboard$j = "Klávesnice";
-  var prefMenuTranscript$j = "Přepis";
-  var prefTitleCaptions$j = "Předvolby titulků";
-  var prefTitleDescriptions$j = "Předvolby zvukového popisu";
-  var prefTitleKeyboard$j = "Předvolby klávesnice";
-  var prefTitleTranscript$i = "Předvolby přepisu";
-  var prefIntroDescription1$i = "Tento přehrávač médií podporuje zvukový popis dvěma způsoby:";
-  var prefDescription1$j = "Aktuální video má alternativně popsaná verze, textový popis.";
-  var prefDescription2$j = "Aktuální video má alternativní popsaná verze videa.";
-  var prefDescription3$j = "Aktuální video má textový popis, oznámený čtečkou obrazovky.";
-  var prefDescriptionNone$j = "Aktuální video nemá žádný zvukový popis v žádném formátu.";
+  var prefMenuDescriptions$j = "Descripcions";
+  var prefMenuKeyboard$j = "Teclat";
+  var prefMenuTranscript$j = "Transcripció";
+  var prefTitleCaptions$j = "Preferències dels subtítols";
+  var prefTitleDescriptions$j = "Preferències de l'audiodescripció";
+  var prefTitleKeyboard$j = "Preferències del teclat";
+  var prefTitleTranscript$i = "Preferències de la transcripció";
+  var prefIntroDescription1$i = "Aquest reproductor suporta l'audiodescripció de dues maneres: ";
+  var prefDescription1$j = "L'actual vídeo té una versió alternativa amb audiodescripció, descripció textual anunciada pel lector de pantalla.";
+  var prefDescription2$j = "L'actual vídeo té una versió alternativa amb audiodescripció.";
+  var prefDescription3$j = "L'actual vídeo té descripció textual.";
+  var prefDescriptionNone$j = "L'actual vídeo no disposa d'audiodescripció en cap format.";
   var prefDescFormatOption1$j = "";
   var prefDescFormatOption2$j = "";
-  var prefIntroDescription3$j = "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.";
-  var prefIntroDescription4$j = "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.";
-  var prefIntroKeyboard1$j = "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).";
-  var prefIntroKeyboard2$j = "Níže lze přiřadit modifikační klávesy (Shift, Alt a Control).";
-  var prefIntroKeyboard3$j = "POZNÁMKA: Některé kombinace kláves mohou být v konfliktu s klávesami používanými vaším prohlížečem nebo jinými softwarovými aplikacemi. Zkuste najít různé kombinace modifikačních kláves, které vám vyhovují.";
-  var prefHeadingKeyboard1$j = "Modifikační klávesy používané pro zástupce";
-  var prefHeadingKeyboard2$j = "Aktuální klávesové zkratky";
-  var prefHeadingDescription$j = "Zvukový popis";
-  var prefHeadingTextDescription$j = "Textový zvukový popis";
+  var prefIntroDescription3$j = "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.";
+  var prefIntroDescription4$j = "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.";
+  var prefIntroKeyboard1$j = "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).";
+  var prefIntroKeyboard2$j = "A continuació, podeu asignar les tecles modificadores (Majúscules, Alt, i la tecla d'inserció).";
+  var prefIntroKeyboard3$j = "NOTA: algunes combinacions de tecles poden entrar en conflicte amb les utilitzades pel navegador o altres aplicacions. Proveu diferents combinacions o tecles modificadores fins a trobar les adequades en cada cas.";
+  var prefHeadingKeyboard1$j = "Tecles modificadores emprades com a dreceres de teclat";
+  var prefHeadingKeyboard2$j = "Dreceres de teclat actuals";
+  var prefHeadingDescription$j = "Audiodescripció";
+  var prefHeadingTextDescription$j = "Audiodescripció textual";
   var prefAltKey$j = "Alt";
   var prefCtrlKey$j = "Control";
-  var prefShiftKey$j = "Shift";
-  var prefNoKeyShortcuts$j = "Disable keyboard shortcuts";
-  var escapeKey$j = "Escape";
-  var escapeKeyFunction$j = "Zavřít aktuální dialogové okno nebo vyskakovací nabídku";
-  var prefDescPause$j = "Automaticky pozastavit video při spuštění popisu";
-  var prefDescVisible$j = "Zviditelnit popis";
-  var prefDescVoice$j = "Voice";
+  var prefShiftKey$j = "Majúscula";
+  var prefNoKeyShortcuts$j = "Desactiva les dreceres de teclat";
+  var escapeKey$j = "Escapada";
+  var escapeKeyFunction$j = "Tanca el diàleg o finestre emergent actual";
+  var prefDescPause$j = "Pausa automàticament el vídeo en el moment que comenci una audiodescripció";
+  var prefDescVisible$j = "Fes visible la audiodescripció textual si es troba activada";
+  var prefDescVoice$j = "Veu";
   var prefDescRate$j = "Spoken Description Rate";
   var prefCaptionRate$j = "Spoken Caption Rate";
-  var prefDescPitch$j = "Pitch";
-  var prefDescPitch1$j = "Very low";
-  var prefDescPitch2$j = "Low";
-  var prefDescPitch3$j = "Default";
-  var prefDescPitch4$j = "High";
-  var prefDescPitch5$j = "Very high";
-  var sampleDescriptionText$j = "Adjust settings to hear this sample text.";
-  var prefHighlight$j = "Zvýraznit přepis při přehrávání médií";
-  var prefTabbable$j = "Přepis umožňující klávesnici";
-  var prefCaptionsFont$j = "Písmo";
-  var prefCaptionsColor$j = "Barva textu";
-  var prefCaptionsBGColor$j = "Pozadí";
-  var prefCaptionsSize$j = "Velikost písma";
-  var prefCaptionsOpacity$j = "Neprůhlednost";
-  var prefCaptionsStyle$j = "Styl";
-  var serif$j = "patkové";
-  var sans$j = "bezpatkové";
-  var cursive$j = "kurzíva";
-  var fantasy$j = "fantasy";
-  var monospace$j = "jednoprostorový";
-  var white$j = "bílá";
-  var yellow$j = "žlutá";
-  var green$j = "zelená";
-  var cyan$i = "azurová";
-  var blue$j = "modrá";
-  var magenta$j = "purpurová";
-  var red$j = "červená";
-  var black$j = "černá";
-  var transparent$j = "transparentní";
-  var solid$j = "jednolitý";
-  var captionsStylePopOn$j = "Vyskakovat";
-  var captionsStyleRollUp$j = "Srolovat";
-  var prefCaptionsPosition$j = "Pozice";
-  var captionsPositionOverlay$j = "Překrytí";
-  var captionsPositionBelow$j = "Níže video";
-  var sampleCaptionText$j = "Ukázkový text titulku";
-  var prefSuccess$j = "Vaše změny byly uloženy.";
-  var prefNoChange$j = "Neprovedli jste žádné změny.";
-  var save$j = "Uložit";
-  var cancel$j = "Zrušit";
-  var dismissButton$j = "Dismiss";
-  var windowButtonLabel$j = "Možnosti okna";
-  var windowMove$j = "Přesunout";
-  var windowMoveLeft$j = "Window moved left";
-  var windowMoveRight$j = "Window moved right";
-  var windowMoveUp$j = "Window moved up";
-  var windowMoveDown$j = "Window moved down";
-  var windowMoveStopped$j = "Window move stopped";
-  var transcriptControls$j = "Transcript Window Controls";
-  var signControls$j = "Sign Language Window Controls";
-  var windowMoveAlert$j = "Přetažením nebo použitím kláves se šipkami přesuňte okno; klávesou Enter zastavíte";
-  var windowResize$j = "Změnit velikost";
-  var windowResizeHeading$j = "Změnit velikost okna";
-  var closeButtonLabel$j = "Zavřít";
-  var width$j = "Šířka";
-  var height$j = "Výška";
-  var resultsSummary1$j = "Hledali jste:";
-  var resultsSummary2$j = "Nalezeno %1 odpovídající položky.";
-  var resultsSummary3$j = "Klepnutím na čas spojený s libovolnou položkou přehrajete video od tohoto bodu.";
-  var noResultsFound$j = "Nebyly nalezeny žádné výsledky.";
-  var searchButtonLabel$j = "Přehrát v %1";
-  var hour$j = "hodina";
-  var minuta = "minuta";
-  var second$j = "sekunda";
-  var hours$j = "hodiny";
-  var minutes$j = "minuty";
-  var seconds$j = "sekundy";
-  var vtsHeading$j = "";
-  var vtsInstructions1$j = "";
-  var vtsInstructions2$j = "";
-  var vtsInstructions3$j = "";
-  var vtsInstructions4$j = "";
-  var vtsInstructions5$j = "";
-  var vtsSelectLanguage$j = "";
-  var vtsSave$j = "";
-  var vtsReturn$j = "";
-  var vtsCancel$j = "";
-  var vtsRow$j = "";
-  var vtsKind$j = "";
-  var vtsStart$j = "";
-  var vtsEnd$j = "";
-  var vtsContent$j = "";
-  var vtsActions$j = "";
-  var vtsNewRow$j = "";
-  var vtsDeletedRow$j = "";
-  var vtsMovedRow$j = "";
-  var cs = {
+  var prefDescPitch$j = "Tonalitat";
+  var prefDescPitch1$j = "Molt baixa";
+  var prefDescPitch2$j = "Baixa";
+  var prefDescPitch3$j = "Per defecte";
+  var prefDescPitch4$j = "Alta";
+  var prefDescPitch5$j = "Molt alta";
+  var sampleDescriptionText$j = "Ajusta la configuració per escoltar aquest text de mostra.";
+  var prefHighlight$j = "Ressalta la transcripció a mesura que avança el contingut";
+  var prefTabbable$j = "Transcripció operable per teclat";
+  var prefCaptionsFont$j = "Tipus de lletra";
+  var prefCaptionsColor$j = "Color del text";
+  var prefCaptionsBGColor$j = "Fons";
+  var prefCaptionsSize$j = "Mida del text";
+  var prefCaptionsOpacity$j = "Opacitat";
+  var prefCaptionsStyle$j = "Estil";
+  var serif$j = "Serifa";
+  var sans$j = "Sensa serifa";
+  var cursive$j = "Cursiva";
+  var fantasy$j = "fantasia";
+  var monospace$j = "Monoespaiada";
+  var white$j = "Blanc";
+  var yellow$j = "Groc";
+  var green$j = "Verd";
+  var cyan$i = "Cian";
+  var blue$j = "Blau";
+  var magenta$j = "Magenta";
+  var red$j = "Vermell";
+  var black$j = "Negre";
+  var transparent$j = "transparent";
+  var solid$j = "Sòlid";
+  var captionsStylePopOn$j = "Aparició instantània";
+  var captionsStyleRollUp$j = "Desplaçament cap amunt";
+  var prefCaptionsPosition$j = "Posició";
+  var captionsPositionOverlay$j = "Superposició";
+  var captionsPositionBelow$j = "A continuació del vídeo";
+  var sampleCaptionText$j = "Text de mostra dels subtítols";
+  var prefSuccess$j = "S'han desat els canvis.";
+  var prefNoChange$j = "No s'ha fet cap canvi.";
+  var save$j = "Desa";
+  var cancel$j = "Cancel·la";
+  var dismissButton$j = "Ignora";
+  var windowButtonLabel$j = "Opcions de la finestra";
+  var windowMove$j = "Moure";
+  var windowMoveLeft$j = "Finestra desplaçada cap a l'esquerra";
+  var windowMoveRight$j = "Finestra desplaçada cap a la dreta";
+  var windowMoveUp$j = "Finestra desplaçada cap amunt";
+  var windowMoveDown$j = "Finestra desplaçada cap avall";
+  var windowMoveStopped$j = "S'ha aturat el desplaçament de la finestra";
+  var transcriptControls$j = "Controls de la finestra de transcripció";
+  var signControls$j = "Controls de la finestra de llengua de signes";
+  var windowMoveAlert$j = "Arrossegueu o feu servir les tecles de direcció per moure la finestra, polseu retorn per aturar.";
+  var windowResize$j = "Redimensiona";
+  var windowResizeHeading$j = "Redimensiona la finestra amb l'intèrpret";
+  var closeButtonLabel$j = "Tanca";
+  var width$j = "Amplada";
+  var height$j = "Alçada";
+  var resultsSummary1$j = "Heu cercat:";
+  var resultsSummary2$j = "S'han trobat %1 elements coincidents.";
+  var resultsSummary3$j = "Feu clic al moment associat a qualsevol element per reproduir el vídeo des d'aquell punt.";
+  var noResultsFound$j = "No s'han trobat resultats.";
+  var searchButtonLabel$j = "Reprodueix a %1";
+  var hour$j = "hora";
+  var minute$i = "minut";
+  var second$j = "segon";
+  var hours$j = "hores";
+  var minutes$j = "minuts";
+  var seconds$j = "segons";
+  var vtsHeading$j = "Gestor de transcripcions de vídeo";
+  var vtsInstructions1$j = "Utilitzeu el gestor de transcripcions de vídeo per modificar les pistes de text:";
+  var vtsInstructions2$j = "Reordeneu capítols, descripcions, subtítols o subtítols per a persones sordes perquè apareguin en la seqüència correcta a la transcripció generada automàticament per Able Player.";
+  var vtsInstructions3$j = "Modifiqueu el contingut o els temps d'inici i final (tots són editables directament a la taula).";
+  var vtsInstructions4$j = "Afegiu contingut nou, com ara capítols o descripcions.";
+  var vtsInstructions5$j = "Després d'editar, feu clic al botó \"Desa els canvis\" per generar contingut nou per a tots els fitxers de text temporitzat rellevants. El text nou es pot copiar i enganxar en fitxers WebVTT nous.";
+  var vtsSelectLanguage$j = "Seleccioneu una llengua";
+  var vtsSave$j = "Genera contingut .vtt nou";
+  var vtsReturn$j = "Torna a l'editor";
+  var vtsCancel$j = "S'ha cancel·lat el desament. Totes les edicions que heu fet s'han restaurat a la taula del GTV.";
+  var vtsRow$j = "Fila";
+  var vtsKind$j = "Tipus";
+  var vtsStart$j = "Inici";
+  var vtsEnd$j = "Final";
+  var vtsContent$j = "Contingut";
+  var vtsActions$j = "Accions";
+  var vtsNewRow$j = "S'ha inserit una fila nova %1.";
+  var vtsDeletedRow$j = "S'ha suprimit la fila %1.";
+  var vtsMovedRow$j = "La fila %1 s'ha mogut %2 i ara és la fila %3.";
+  var ca = {
   	playerHeading: playerHeading$j,
   	audioPlayer: audioPlayer$j,
   	videoPlayer: videoPlayer$j,
@@ -15874,8 +15531,8 @@
   	statusBuffering: statusBuffering$j,
   	statusEnd: statusEnd$j,
   	selectedTrack: selectedTrack$i,
-  	alertDescribVersion: alertDescribVersion,
-  	alertNonDescribVersion: alertNonDescribVersion,
+  	alertDescribedVersion: alertDescribedVersion$i,
+  	alertNonDescribedVersion: alertNonDescribedVersion$i,
   	prefMenuCaptions: prefMenuCaptions$j,
   	prefVoicedCaptions: prefVoicedCaptions$j,
   	prefMenuDescriptions: prefMenuDescriptions$j,
@@ -15974,7 +15631,7 @@
   	noResultsFound: noResultsFound$j,
   	searchButtonLabel: searchButtonLabel$j,
   	hour: hour$j,
-  	minuta: minuta,
+  	minute: minute$i,
   	second: second$j,
   	hours: hours$j,
   	minutes: minutes$j,
@@ -16000,133 +15657,133 @@
   	vtsMovedRow: vtsMovedRow$j
   };
 
-  var playerHeading$i = "Medieafspiller";
+  var playerHeading$i = "Přehrávač médií";
   var audioPlayer$i = "Audio player";
   var videoPlayer$i = "Video player";
-  var faster$i = "Hurtigere: %1x";
-  var slower$i = "Langsommere: %1x";
-  var play$i = "Afspil";
-  var pause$i = "Pause";
-  var restart$i = "Genstart";
-  var prevTrack$i = "Forrige spor";
-  var nextTrack$i = "Næste spor";
-  var rewind$i = "Spol tilbage %1 sekunder";
-  var forward$i = "Spol frem %1 sekunder";
-  var captions$i = "Undertekster";
-  var showCaptions$i = "Vis undertekster";
-  var hideCaptions$i = "Gem undertekster";
-  var captionsOff$i = "Slå undertekster fra";
-  var showTranscript$i = "Vis transskription";
-  var hideTranscript$i = "Gem transskription";
-  var turnOnDescriptions$i = "Start synstolkning";
-  var turnOffDescriptions$i = "Stop synstolkning";
-  var chapters$i = "Kapitler";
-  var language$i = "Sprog";
-  var sign$i = "Tegnsprog";
-  var showSign$i = "Vis tegnsprog";
-  var hideSign$i = "Gen tegnsprog";
-  var seekbarLabel$i = "tidslinie";
-  var mute$i = "Stop lyd";
-  var unmute$i = "Start lyd";
-  var volume$i = "Lydstyrke";
-  var volumeUpDown$i = "Lydstyrke op";
-  var preferences$i = "Indstillinger";
-  var enterFullScreen$i = "Vis i fuldskærm";
-  var exitFullScreen$i = "Afslut fuldskærmsvisning";
-  var speed$i = "Hastighed";
+  var faster$i = "Rychleji: %1x";
+  var slower$i = "Pomaleji: %1x";
+  var play$i = "Spustit";
+  var pause$i = "Pauza";
+  var restart$i = "Přehrát od začátku";
+  var prevTrack$i = "Předchozí stopa";
+  var nextTrack$i = "Další stopa";
+  var rewind$i = "Přetočit vzad %1 sekund";
+  var forward$i = "Přetočit vpřed %1 sekund";
+  var captions$i = "Titulky";
+  var showCaptions$i = "Zobrazit titulky";
+  var hideCaptions$i = "Skrýt titulky";
+  var captionsOff$i = "Titulky vypnuty";
+  var showTranscript$i = "Zobrazit přepis";
+  var hideTranscript$i = "Skrýt přepis";
+  var turnOnDescriptions$i = "Zapnout popisy";
+  var turnOffDescriptions$i = "vypnout popisy";
+  var chapters$i = "Kapitoly";
+  var language$i = "Jazyk";
+  var sign$i = "Znaková řeč";
+  var showSign$i = "Zobrazit znakovou řeč";
+  var hideSign$i = "Skrýt znakovou řeč";
+  var seekbarLabel$i = "časová osa";
+  var mute$i = "Vypnout zvuk";
+  var unmute$i = "Zapnout zvuk";
+  var volume$i = "Hlasitost";
+  var volumeUpDown$i = "Hlasitost zvýšit snížit";
+  var preferences$i = "Předvolby";
+  var enterFullScreen$i = "Zobrazit na celou obrazovku";
+  var exitFullScreen$i = "Ukončit celou obrazovku";
+  var speed$i = "Rychlost";
   var on$i = "";
   var off$i = "";
-  var spacebar$i = "mellemrumstast";
-  var transcriptTitle$i = "Transskription";
-  var lyricsTitle$i = "Lyrik";
-  var autoScroll$i = "Auto scroll";
-  var statusPlaying$i = "Afspiller";
-  var statusPaused$i = "På pause";
-  var statusStopped$i = "Stoppet";
-  var statusBuffering$i = "Henter data";
-  var statusEnd$i = "Slut på spor";
-  var selectedTrack$h = "Valgt spor";
-  var alertDescribedVersion$i = "Anvender synstolket version af denne video";
-  var alertNonDescribedVersion$i = "Anvende ikke synstolket version af denne video";
-  var prefMenuCaptions$i = "Undertekster";
+  var spacebar$i = "mezerník";
+  var transcriptTitle$i = "Přepis";
+  var lyricsTitle$i = "Text";
+  var autoScroll$i = "Automatické posouvání";
+  var statusPlaying$i = "Přehrávání";
+  var statusPaused$i = "Pozastaveno";
+  var statusStopped$i = "Zastaveno";
+  var statusBuffering$i = "Vyrovnávací paměť";
+  var statusEnd$i = "Konec stopy";
+  var selectedTrack$h = "Vybraná stopa";
+  var alertDescribVersion = "Používání zvukově popsané verze tohoto videa";
+  var alertNonDescribVersion = "Použití nepopsané verze tohoto videa";
+  var prefMenuCaptions$i = "Titulky";
   var prefVoicedCaptions$i = "Spoken Captions";
-  var prefMenuDescriptions$i = "Synstolkning";
-  var prefMenuKeyboard$i = "Tastatur";
-  var prefMenuTranscript$i = "Transkript";
-  var prefTitleCaptions$i = "Indstillinger for undertekster";
-  var prefTitleDescriptions$i = "Indstillinger for synstolkning";
-  var prefTitleKeyboard$i = "Indstillinger for tastatur";
-  var prefTitleTranscript$h = "Indstillinger for transskription";
-  var prefIntroDescription1$h = "Denne medieafspiller understøtter audio på to måder: ";
-  var prefDescription1$i = "Nuværende videoer har en alternativ synstolket version, textbaseret synstolkning.";
-  var prefDescription2$i = "Nuværende videoer har alternativ synstolket version af videoen.";
-  var prefDescription3$i = "Nuværende videoer har textbaseret synstolkning.";
-  var prefDescriptionNone$i = "Nuværende video har ingen synstolkning i noget format.";
+  var prefMenuDescriptions$i = "Popisy";
+  var prefMenuKeyboard$i = "Klávesnice";
+  var prefMenuTranscript$i = "Přepis";
+  var prefTitleCaptions$i = "Předvolby titulků";
+  var prefTitleDescriptions$i = "Předvolby zvukového popisu";
+  var prefTitleKeyboard$i = "Předvolby klávesnice";
+  var prefTitleTranscript$h = "Předvolby přepisu";
+  var prefIntroDescription1$h = "Tento přehrávač médií podporuje zvukový popis dvěma způsoby:";
+  var prefDescription1$i = "Aktuální video má alternativně popsaná verze, textový popis.";
+  var prefDescription2$i = "Aktuální video má alternativní popsaná verze videa.";
+  var prefDescription3$i = "Aktuální video má textový popis, oznámený čtečkou obrazovky.";
+  var prefDescriptionNone$i = "Aktuální video nemá žádný zvukový popis v žádném formátu.";
   var prefDescFormatOption1$i = "";
   var prefDescFormatOption2$i = "";
-  var prefIntroDescription3$i = "Anvende følgende formular for at indstille gældende textbasererede synstolkning.";
-  var prefIntroDescription4$i = "Efter du gemmer dine indstillinger, kan synstolkning slåes til og fra med synstolkningsknappen.";
-  var prefIntroKeyboard1$i = "Medieafspilleren på denne webside kan betjenest med tastuturgenveje (se neden for en liste).";
-  var prefIntroKeyboard2$i = "Meta-taster (Shift, Alt, og Ctrl) kan tildeles nedenfor.";
-  var prefIntroKeyboard3$i = "BEMÆRK: Visse tastekombinationer kan være i konflikt med din webbrowser eller andre programmers indstillinger. Benyt de tastekombinationer der virker for dig.";
-  var prefHeadingKeyboard1$i = "Metataster brugt til genveje";
-  var prefHeadingKeyboard2$i = "Nuværende tastatur genveje";
-  var prefHeadingDescription$i = "Synstolkning";
-  var prefHeadingTextDescription$i = "Tekstbaseret synstolkning";
+  var prefIntroDescription3$i = "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.";
+  var prefIntroDescription4$i = "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.";
+  var prefIntroKeyboard1$i = "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).";
+  var prefIntroKeyboard2$i = "Níže lze přiřadit modifikační klávesy (Shift, Alt a Control).";
+  var prefIntroKeyboard3$i = "POZNÁMKA: Některé kombinace kláves mohou být v konfliktu s klávesami používanými vaším prohlížečem nebo jinými softwarovými aplikacemi. Zkuste najít různé kombinace modifikačních kláves, které vám vyhovují.";
+  var prefHeadingKeyboard1$i = "Modifikační klávesy používané pro zástupce";
+  var prefHeadingKeyboard2$i = "Aktuální klávesové zkratky";
+  var prefHeadingDescription$i = "Zvukový popis";
+  var prefHeadingTextDescription$i = "Textový zvukový popis";
   var prefAltKey$i = "Alt";
-  var prefCtrlKey$i = "Ctrl";
+  var prefCtrlKey$i = "Control";
   var prefShiftKey$i = "Shift";
   var prefNoKeyShortcuts$i = "Disable keyboard shortcuts";
   var escapeKey$i = "Escape";
-  var escapeKeyFunction$i = "Luk nuværinde dialog eller popup-menu";
-  var prefDescPause$i = "Pause automatisk video når synstolkning starter";
-  var prefDescVisible$i = "Vis synstolkning";
-  var prefDescVoice$i = "Stemme";
+  var escapeKeyFunction$i = "Zavřít aktuální dialogové okno nebo vyskakovací nabídku";
+  var prefDescPause$i = "Automaticky pozastavit video při spuštění popisu";
+  var prefDescVisible$i = "Zviditelnit popis";
+  var prefDescVoice$i = "Voice";
   var prefDescRate$i = "Spoken Description Rate";
   var prefCaptionRate$i = "Spoken Caption Rate";
-  var prefDescPitch$i = "Tonehøjde";
-  var prefDescPitch1$i = "Meget lavt";
-  var prefDescPitch2$i = "Lavt";
-  var prefDescPitch3$i = "Normal";
-  var prefDescPitch4$i = "Højt";
-  var prefDescPitch5$i = "Meget højt";
-  var sampleDescriptionText$i = "Juster indstillinger for at høre denne eksempel tekst.";
-  var prefHighlight$i = "Marker tekst som læses op i transskriptet";
-  var prefTabbable$i = "Tastaturaktiveret transskription";
-  var prefCaptionsFont$i = "Skrifttype";
-  var prefCaptionsColor$i = "Tekstfarve";
-  var prefCaptionsBGColor$i = "Baggrundsfarve";
-  var prefCaptionsSize$i = "Tekststørrelse";
-  var prefCaptionsOpacity$i = "Gennemsigtighed";
-  var prefCaptionsStyle$i = "Teksttype";
-  var serif$i = "serif";
-  var sans$i = "sans-serif";
-  var cursive$i = "kursiv";
-  var fantasy$i = "fantasi";
-  var monospace$i = "monospace";
-  var white$i = "hvid";
-  var yellow$i = "gul";
-  var green$i = "grøn";
-  var cyan$h = "cyan";
-  var blue$i = "blå";
-  var magenta$i = "lilla";
-  var red$i = "rød";
-  var black$i = "sort";
-  var transparent$i = "gennemsigtig";
-  var solid$i = "massiv";
-  var captionsStylePopOn$i = "Pop op";
-  var captionsStyleRollUp$i = "Pop ned";
-  var prefCaptionsPosition$i = "Position";
-  var captionsPositionOverlay$i = "Vis over video";
-  var captionsPositionBelow$i = "Vis under video";
-  var sampleCaptionText$i = "Eksempel på undertekst";
-  var prefSuccess$i = "Dine ændringer er gemt.";
-  var prefNoChange$i = "Du har ikke lavet nogen ændringer.";
-  var save$i = "Gem";
-  var cancel$i = "Afbryd";
+  var prefDescPitch$i = "Pitch";
+  var prefDescPitch1$i = "Very low";
+  var prefDescPitch2$i = "Low";
+  var prefDescPitch3$i = "Default";
+  var prefDescPitch4$i = "High";
+  var prefDescPitch5$i = "Very high";
+  var sampleDescriptionText$i = "Adjust settings to hear this sample text.";
+  var prefHighlight$i = "Zvýraznit přepis při přehrávání médií";
+  var prefTabbable$i = "Přepis umožňující klávesnici";
+  var prefCaptionsFont$i = "Písmo";
+  var prefCaptionsColor$i = "Barva textu";
+  var prefCaptionsBGColor$i = "Pozadí";
+  var prefCaptionsSize$i = "Velikost písma";
+  var prefCaptionsOpacity$i = "Neprůhlednost";
+  var prefCaptionsStyle$i = "Styl";
+  var serif$i = "patkové";
+  var sans$i = "bezpatkové";
+  var cursive$i = "kurzíva";
+  var fantasy$i = "fantasy";
+  var monospace$i = "jednoprostorový";
+  var white$i = "bílá";
+  var yellow$i = "žlutá";
+  var green$i = "zelená";
+  var cyan$h = "azurová";
+  var blue$i = "modrá";
+  var magenta$i = "purpurová";
+  var red$i = "červená";
+  var black$i = "černá";
+  var transparent$i = "transparentní";
+  var solid$i = "jednolitý";
+  var captionsStylePopOn$i = "Vyskakovat";
+  var captionsStyleRollUp$i = "Srolovat";
+  var prefCaptionsPosition$i = "Pozice";
+  var captionsPositionOverlay$i = "Překrytí";
+  var captionsPositionBelow$i = "Níže video";
+  var sampleCaptionText$i = "Ukázkový text titulku";
+  var prefSuccess$i = "Vaše změny byly uloženy.";
+  var prefNoChange$i = "Neprovedli jste žádné změny.";
+  var save$i = "Uložit";
+  var cancel$i = "Zrušit";
   var dismissButton$i = "Dismiss";
-  var windowButtonLabel$i = "Vindueindstillinger";
-  var windowMove$i = "Flyt";
+  var windowButtonLabel$i = "Možnosti okna";
+  var windowMove$i = "Přesunout";
   var windowMoveLeft$i = "Window moved left";
   var windowMoveRight$i = "Window moved right";
   var windowMoveUp$i = "Window moved up";
@@ -16134,23 +15791,23 @@
   var windowMoveStopped$i = "Window move stopped";
   var transcriptControls$i = "Transcript Window Controls";
   var signControls$i = "Sign Language Window Controls";
-  var windowMoveAlert$i = "Flyt med mus eller anvende piletasterne for at flytte vinduer; Enter for at slutte";
-  var windowResize$i = "Ændre størrelse";
-  var windowResizeHeading$i = "Ændre vinduestørrelse";
-  var closeButtonLabel$i = "Luk";
-  var width$i = "Bredde";
-  var height$i = "Højde";
-  var resultsSummary1$i = "Du søgte efter:";
-  var resultsSummary2$i = "Fundne %1 matchende indhold.";
-  var resultsSummary3$i = "Klik på tidslinien for at afspille derfra.";
-  var noResultsFound$i = "Ingen resultater.";
-  var searchButtonLabel$i = "Afspil fra %1";
-  var hour$i = "time";
-  var minute$i = "minut";
-  var second$i = "sekund";
-  var hours$i = "timer";
-  var minutes$i = "minutter";
-  var seconds$i = "sekunder";
+  var windowMoveAlert$i = "Přetažením nebo použitím kláves se šipkami přesuňte okno; klávesou Enter zastavíte";
+  var windowResize$i = "Změnit velikost";
+  var windowResizeHeading$i = "Změnit velikost okna";
+  var closeButtonLabel$i = "Zavřít";
+  var width$i = "Šířka";
+  var height$i = "Výška";
+  var resultsSummary1$i = "Hledali jste:";
+  var resultsSummary2$i = "Nalezeno %1 odpovídající položky.";
+  var resultsSummary3$i = "Klepnutím na čas spojený s libovolnou položkou přehrajete video od tohoto bodu.";
+  var noResultsFound$i = "Nebyly nalezeny žádné výsledky.";
+  var searchButtonLabel$i = "Přehrát v %1";
+  var hour$i = "hodina";
+  var minuta = "minuta";
+  var second$i = "sekunda";
+  var hours$i = "hodiny";
+  var minutes$i = "minuty";
+  var seconds$i = "sekundy";
   var vtsHeading$i = "";
   var vtsInstructions1$i = "";
   var vtsInstructions2$i = "";
@@ -16170,7 +15827,7 @@
   var vtsNewRow$i = "";
   var vtsDeletedRow$i = "";
   var vtsMovedRow$i = "";
-  var da = {
+  var cs = {
   	playerHeading: playerHeading$i,
   	audioPlayer: audioPlayer$i,
   	videoPlayer: videoPlayer$i,
@@ -16217,8 +15874,8 @@
   	statusBuffering: statusBuffering$i,
   	statusEnd: statusEnd$i,
   	selectedTrack: selectedTrack$h,
-  	alertDescribedVersion: alertDescribedVersion$i,
-  	alertNonDescribedVersion: alertNonDescribedVersion$i,
+  	alertDescribVersion: alertDescribVersion,
+  	alertNonDescribVersion: alertNonDescribVersion,
   	prefMenuCaptions: prefMenuCaptions$i,
   	prefVoicedCaptions: prefVoicedCaptions$i,
   	prefMenuDescriptions: prefMenuDescriptions$i,
@@ -16317,7 +15974,7 @@
   	noResultsFound: noResultsFound$i,
   	searchButtonLabel: searchButtonLabel$i,
   	hour: hour$i,
-  	minute: minute$i,
+  	minuta: minuta,
   	second: second$i,
   	hours: hours$i,
   	minutes: minutes$i,
@@ -16343,183 +16000,182 @@
   	vtsMovedRow: vtsMovedRow$i
   };
 
-  var playerHeading$h = "Medienplayer";
-  var audioPlayer$h = "Audioplayer";
-  var videoPlayer$h = "Videoplayer";
-  var faster$h = "Schneller: %1x";
-  var slower$h = "Langsamer: %1x";
-  var chapters$h = "Kapitel";
-  var play$h = "Abspielen";
+  var playerHeading$h = "Medieafspiller";
+  var audioPlayer$h = "Audio player";
+  var videoPlayer$h = "Video player";
+  var faster$h = "Hurtigere: %1x";
+  var slower$h = "Langsommere: %1x";
+  var play$h = "Afspil";
   var pause$h = "Pause";
-  var restart$h = "Neustart";
-  var prevTrack$h = "Vorheriger Titel";
-  var nextTrack$h = "Nächster Titel";
-  var rewind$h = "Zurück %1 Sekunden";
-  var forward$h = "Vorwärts %1 Sekunden";
-  var captions$h = "Untertitel";
-  var showCaptions$h = "Untertitel anzeigen";
-  var hideCaptions$h = "Untertitel ausblenden";
-  var captionsOff$h = "Untertitel ausschalten";
-  var showTranscript$h = "Transkription anzeigen";
-  var hideTranscript$h = "Transkription entfernen";
-  var turnOnDescriptions$h = "Audiobeschreibung einschalten";
-  var turnOffDescriptions$h = "Audiobeschreibung ausschalten";
-  var language$h = "Sprache";
-  var sign$h = "Gebärdensprache";
-  var showSign$h = "Gebärdensprache anzeigen";
-  var hideSign$h = "Gebärdensprache ausblenden";
-  var seekbarLabel$h = "Suchleiste";
-  var mute$h = "Ton aus";
-  var unmute$h = "Ton an";
-  var volume$h = "Lautstärke";
-  var volumeUpDown$h = "Lautstärkeregler";
-  var preferences$h = "Einstellungen";
-  var enterFullScreen$h = "Vollbildmodus einschalten";
-  var exitFullScreen$h = "Vollbildmodus verlassen";
-  var speed$h = "Geschwindigkeit";
+  var restart$h = "Genstart";
+  var prevTrack$h = "Forrige spor";
+  var nextTrack$h = "Næste spor";
+  var rewind$h = "Spol tilbage %1 sekunder";
+  var forward$h = "Spol frem %1 sekunder";
+  var captions$h = "Undertekster";
+  var showCaptions$h = "Vis undertekster";
+  var hideCaptions$h = "Gem undertekster";
+  var captionsOff$h = "Slå undertekster fra";
+  var showTranscript$h = "Vis transskription";
+  var hideTranscript$h = "Gem transskription";
+  var turnOnDescriptions$h = "Start synstolkning";
+  var turnOffDescriptions$h = "Stop synstolkning";
+  var chapters$h = "Kapitler";
+  var language$h = "Sprog";
+  var sign$h = "Tegnsprog";
+  var showSign$h = "Vis tegnsprog";
+  var hideSign$h = "Gen tegnsprog";
+  var seekbarLabel$h = "tidslinie";
+  var mute$h = "Stop lyd";
+  var unmute$h = "Start lyd";
+  var volume$h = "Lydstyrke";
+  var volumeUpDown$h = "Lydstyrke op";
+  var preferences$h = "Indstillinger";
+  var enterFullScreen$h = "Vis i fuldskærm";
+  var exitFullScreen$h = "Afslut fuldskærmsvisning";
+  var speed$h = "Hastighed";
   var on$h = "";
   var off$h = "";
-  var spacebar$h = "Leertaste";
-  var transcriptTitle$h = "Transkription";
-  var lyricsTitle$h = "Text";
-  var autoScroll$h = "Automatisch scrollen";
-  var statusPlaying$h = "Gestartet";
-  var statusPaused$h = "Pausiert";
-  var statusStopped$h = "Angehalten";
-  var statusBuffering$h = "Daten werden empfangen...";
-  var statusEnd$h = "Ende des Titels";
-  var selectedTrack$g = "Ausgewählter Titel";
-  var alertDescribedVersion$h = "Das Video wird mit Audiobeschreibung abgespielt";
-  var alertNonDescribedVersion$h = "Das Video wird ohne Audiobeschreibung abgespielt";
-  var prefMenuCaptions$h = "Untertitel";
+  var spacebar$h = "mellemrumstast";
+  var transcriptTitle$h = "Transskription";
+  var lyricsTitle$h = "Lyrik";
+  var autoScroll$h = "Auto scroll";
+  var statusPlaying$h = "Afspiller";
+  var statusPaused$h = "På pause";
+  var statusStopped$h = "Stoppet";
+  var statusBuffering$h = "Henter data";
+  var statusEnd$h = "Slut på spor";
+  var selectedTrack$g = "Valgt spor";
+  var alertDescribedVersion$h = "Anvender synstolket version af denne video";
+  var alertNonDescribedVersion$h = "Anvende ikke synstolket version af denne video";
+  var prefMenuCaptions$h = "Undertekster";
   var prefVoicedCaptions$h = "Spoken Captions";
-  var prefMenuDescriptions$h = "Audiobeschreibungen";
+  var prefMenuDescriptions$h = "Synstolkning";
   var prefMenuKeyboard$h = "Tastatur";
-  var prefMenuTranscript$h = "Transkription";
-  var prefTitleCaptions$h = "Untertitel Einstellungen";
-  var prefTitleDescriptions$h = "Audiobeschreibung Einstellungen";
-  var prefTitleKeyboard$h = "Tastatur Einstellungen";
-  var prefTitleTranscript$g = "Transkription Einstellungen";
-  var prefIntroDescription1$g = "Dieser Media Player unterstützt zwei Arten von Untertiteln: ";
-  var prefDescription1$h = "Das aktuelle Video hat eine alternative Version der Audiobeschreibung, eine textbasierte Audiobeschreibung.";
-  var prefDescription2$h = "Das aktuelle Video hat Version des Videos, die eine Audiobeschreibung enthält.";
-  var prefDescription3$h = "Das aktuelle Video hat Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird.";
-  var prefDescriptionNone$h = "Das aktuelle Video hat keine Audiobeschreibung.";
+  var prefMenuTranscript$h = "Transkript";
+  var prefTitleCaptions$h = "Indstillinger for undertekster";
+  var prefTitleDescriptions$h = "Indstillinger for synstolkning";
+  var prefTitleKeyboard$h = "Indstillinger for tastatur";
+  var prefTitleTranscript$g = "Indstillinger for transskription";
+  var prefIntroDescription1$g = "Denne medieafspiller understøtter audio på to måder: ";
+  var prefDescription1$h = "Nuværende videoer har en alternativ synstolket version, textbaseret synstolkning.";
+  var prefDescription2$h = "Nuværende videoer har alternativ synstolket version af videoen.";
+  var prefDescription3$h = "Nuværende videoer har textbaseret synstolkning.";
+  var prefDescriptionNone$h = "Nuværende video har ingen synstolkning i noget format.";
   var prefDescFormatOption1$h = "";
   var prefDescFormatOption2$h = "";
-  var prefIntroDescription3$h = "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.";
-  var prefIntroDescription4$h = "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.";
-  var prefIntroKeyboard1$h = "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).";
-  var prefIntroKeyboard2$h = "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.";
-  var prefIntroKeyboard3$h = "Achtung: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.";
-  var prefHeadingKeyboard1$h = "Modifikatortasten für die Tastenkürzel";
-  var prefHeadingKeyboard2$h = "Aktuell eingestellte Tastenkürzel";
-  var prefHeadingDescription$h = "Audiobeschreibung";
-  var prefHeadingTextDescription$h = "Textbasierte Audiobeschreibung";
+  var prefIntroDescription3$h = "Anvende følgende formular for at indstille gældende textbasererede synstolkning.";
+  var prefIntroDescription4$h = "Efter du gemmer dine indstillinger, kan synstolkning slåes til og fra med synstolkningsknappen.";
+  var prefIntroKeyboard1$h = "Medieafspilleren på denne webside kan betjenest med tastuturgenveje (se neden for en liste).";
+  var prefIntroKeyboard2$h = "Meta-taster (Shift, Alt, og Ctrl) kan tildeles nedenfor.";
+  var prefIntroKeyboard3$h = "BEMÆRK: Visse tastekombinationer kan være i konflikt med din webbrowser eller andre programmers indstillinger. Benyt de tastekombinationer der virker for dig.";
+  var prefHeadingKeyboard1$h = "Metataster brugt til genveje";
+  var prefHeadingKeyboard2$h = "Nuværende tastatur genveje";
+  var prefHeadingDescription$h = "Synstolkning";
+  var prefHeadingTextDescription$h = "Tekstbaseret synstolkning";
   var prefAltKey$h = "Alt";
-  var prefCtrlKey$h = "Strg";
-  var prefShiftKey$h = "Umschalttaste";
-  var prefNoKeyShortcuts$h = "Tastenkombinationen deaktivieren";
-  var escapeKey$h = "ESC Taste";
-  var escapeKeyFunction$h = "Dialogfenster schließen";
-  var prefDescPause$h = "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden";
-  var prefDescVisible$h = "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind";
-  var prefDescVoice$h = "Stimme";
+  var prefCtrlKey$h = "Ctrl";
+  var prefShiftKey$h = "Shift";
+  var prefNoKeyShortcuts$h = "Disable keyboard shortcuts";
+  var escapeKey$h = "Escape";
+  var escapeKeyFunction$h = "Luk nuværinde dialog eller popup-menu";
+  var prefDescPause$h = "Pause automatisk video når synstolkning starter";
+  var prefDescVisible$h = "Vis synstolkning";
+  var prefDescVoice$h = "Stemme";
   var prefDescRate$h = "Spoken Description Rate";
   var prefCaptionRate$h = "Spoken Caption Rate";
-  var prefDescPitch$h = "Tonlage";
-  var prefDescPitch1$h = "Sehr tief";
-  var prefDescPitch2$h = "Tief";
-  var prefDescPitch3$h = "Mittel";
-  var prefDescPitch4$h = "Hoch";
-  var prefDescPitch5$h = "Sehr hoch";
-  var sampleDescriptionText$h = "Einstellungen bearbeiten um diesen Text vorzulesen.";
-  var prefHighlight$h = "Transkription hervorheben, während das Medium abgespielt wird";
-  var prefTabbable$h = "Transkription per Tastatur ein-/ausschaltbar machen";
-  var prefCaptionsFont$h = "Schriftart";
-  var prefCaptionsColor$h = "Schriftfarbe";
-  var prefCaptionsBGColor$h = "Hintergrund";
-  var prefCaptionsSize$h = "Schriftgöße";
-  var prefCaptionsOpacity$h = "Deckkraft";
-  var prefCaptionsStyle$h = "Stil";
-  var serif$h = "Serifenschrift";
-  var sans$h = "Serifenlose Schrift";
+  var prefDescPitch$h = "Tonehøjde";
+  var prefDescPitch1$h = "Meget lavt";
+  var prefDescPitch2$h = "Lavt";
+  var prefDescPitch3$h = "Normal";
+  var prefDescPitch4$h = "Højt";
+  var prefDescPitch5$h = "Meget højt";
+  var sampleDescriptionText$h = "Juster indstillinger for at høre denne eksempel tekst.";
+  var prefHighlight$h = "Marker tekst som læses op i transskriptet";
+  var prefTabbable$h = "Tastaturaktiveret transskription";
+  var prefCaptionsFont$h = "Skrifttype";
+  var prefCaptionsColor$h = "Tekstfarve";
+  var prefCaptionsBGColor$h = "Baggrundsfarve";
+  var prefCaptionsSize$h = "Tekststørrelse";
+  var prefCaptionsOpacity$h = "Gennemsigtighed";
+  var prefCaptionsStyle$h = "Teksttype";
+  var serif$h = "serif";
+  var sans$h = "sans-serif";
   var cursive$h = "kursiv";
-  var fantasy$h = "Fantasieschrift";
-  var monospace$h = "nichtproportionale Schrift";
-  var white$h = "weiß";
-  var yellow$h = "gelb";
-  var green$h = "grün";
+  var fantasy$h = "fantasi";
+  var monospace$h = "monospace";
+  var white$h = "hvid";
+  var yellow$h = "gul";
+  var green$h = "grøn";
   var cyan$g = "cyan";
-  var blue$h = "blau";
-  var magenta$h = "magenta";
-  var red$h = "rot";
-  var black$h = "schwarz";
-  var transparent$h = "transparent";
-  var solid$h = "undurchsichtig";
-  var captionsStylePopOn$h = "Pop-on";
-  var captionsStyleRollUp$h = "Roll-up";
+  var blue$h = "blå";
+  var magenta$h = "lilla";
+  var red$h = "rød";
+  var black$h = "sort";
+  var transparent$h = "gennemsigtig";
+  var solid$h = "massiv";
+  var captionsStylePopOn$h = "Pop op";
+  var captionsStyleRollUp$h = "Pop ned";
   var prefCaptionsPosition$h = "Position";
-  var captionsPositionOverlay$h = "Überlagert";
-  var captionsPositionBelow$h = "Unterhalb";
-  var sampleCaptionText$h = "Textbeispiel";
-  var prefSuccess$h = "Ihre Änderungen wurden gespeichert.";
-  var prefNoChange$h = "Es gab keine Änderungen zu speichern.";
-  var save$h = "Speichern";
-  var cancel$h = "Abbrechen";
+  var captionsPositionOverlay$h = "Vis over video";
+  var captionsPositionBelow$h = "Vis under video";
+  var sampleCaptionText$h = "Eksempel på undertekst";
+  var prefSuccess$h = "Dine ændringer er gemt.";
+  var prefNoChange$h = "Du har ikke lavet nogen ændringer.";
+  var save$h = "Gem";
+  var cancel$h = "Afbryd";
   var dismissButton$h = "Dismiss";
-  var windowButtonLabel$h = "Fenstereinstellungen";
-  var windowMove$h = "Verschieben";
-  var windowMoveLeft$h = "Das Fenster verschob sich nach links";
-  var windowMoveRight$h = "Das Fenster verschob sich nach rechts";
-  var windowMoveUp$h = "Das Fenster verschob sich nach oben";
-  var windowMoveDown$h = "Das Fenster verschob sich nach unten";
-  var windowMoveStopped$h = "Das Fenster hörte auf sich zu verschieben";
-  var transcriptControls$h = "Bedienelemente des Transkriptionsfensters";
-  var signControls$h = "Bedienelemente des Gebärdensprache-Fensters";
-  var windowMoveAlert$h = "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste";
-  var windowResize$h = "Größe verändern";
-  var windowResizeHeading$h = "Größe des Gebärdensprache-Fenster";
-  var closeButtonLabel$h = "Schließen";
-  var width$h = "Breite";
-  var height$h = "Höhe";
-  var resultsSummary1$h = "Suche nach:";
-  var resultsSummary2$h = "Gefunden %1 Treffer.";
-  var resultsSummary3$h = "Auf den Zeitindex klicken, um das Video vom Zeitpunkt des jeweiligen Suchergebnisses abzuspielen.";
-  var noResultsFound$h = "Keine Treffer.";
-  var searchButtonLabel$h = "Abspielen von %1";
-  var hour$h = "Stunde";
-  var minute$h = "Minute";
-  var second$h = "Sekunde";
-  var hours$h = "Stunden";
-  var minutes$h = "Minuten";
-  var seconds$h = "Sekunden";
-  var vtsHeading$h = "Transkriptions-Sortierer für Videos";
-  var vtsInstructions1$h = "Verwenden Sie den Transkription-Sortierer für Videos, um Textspuren zu ändern:";
-  var vtsInstructions2$h = "Ordnen Sie Kapitel, Beschreibungen, Bildunterschriften, und/oder Untertitel so, dass diese in der richtigen Reihenfolge in der selbsterzeugten Transkription des Able Players erscheinen.";
-  var vtsInstructions3$h = "Verändern Sie Inhalt oder Anfangs- bzw. Endzeiten (alle sind direkt innerhalb der Tabelle editierbar).";
-  var vtsInstructions4$h = "Fügen Sie neuen Inhalt, wie Kapitel oder Beschreibungen hinzu.";
-  var vtsInstructions5$h = "Nach dem Editieren klicken Sie auf die Schaltfläche \"Änderungen speichern\" um neuen Inhalt für alle wichtigen zeitgesteuerten Textdateien zu erzeugen. Der neue Text kann in neue WebVTT-Dateien kopiert und eingefügt werden.";
-  var vtsSelectLanguage$h = "Wählen Sie eine Sprache aus";
-  var vtsSave$h = "Erzeugen Sie neuen .vtt-Inhalt";
-  var vtsReturn$h = "Gehen Sie zurück zum Editor";
-  var vtsCancel$h = "Abbruch des Speicherns. Jegliche Bearbeitungen, die Sie vorgenommen haben, wurden in der VTS-Tabelle gesichert.";
-  var vtsRow$h = "Reihe";
-  var vtsKind$h = "Art";
-  var vtsStart$h = "Anfang";
-  var vtsEnd$h = "Ende";
-  var vtsContent$h = "Inhalt";
-  var vtsActions$h = "Aktionen";
-  var vtsNewRow$h = "Eine neue Reihe %1 wurde eingefügt.";
-  var vtsDeletedRow$h = "Reihe %1 wurde gelöscht.";
-  var vtsMovedRow$h = "Reihe %1 wurde verschoben %2 ist nun Reihe %3.";
-  var de = {
+  var windowButtonLabel$h = "Vindueindstillinger";
+  var windowMove$h = "Flyt";
+  var windowMoveLeft$h = "Window moved left";
+  var windowMoveRight$h = "Window moved right";
+  var windowMoveUp$h = "Window moved up";
+  var windowMoveDown$h = "Window moved down";
+  var windowMoveStopped$h = "Window move stopped";
+  var transcriptControls$h = "Transcript Window Controls";
+  var signControls$h = "Sign Language Window Controls";
+  var windowMoveAlert$h = "Flyt med mus eller anvende piletasterne for at flytte vinduer; Enter for at slutte";
+  var windowResize$h = "Ændre størrelse";
+  var windowResizeHeading$h = "Ændre vinduestørrelse";
+  var closeButtonLabel$h = "Luk";
+  var width$h = "Bredde";
+  var height$h = "Højde";
+  var resultsSummary1$h = "Du søgte efter:";
+  var resultsSummary2$h = "Fundne %1 matchende indhold.";
+  var resultsSummary3$h = "Klik på tidslinien for at afspille derfra.";
+  var noResultsFound$h = "Ingen resultater.";
+  var searchButtonLabel$h = "Afspil fra %1";
+  var hour$h = "time";
+  var minute$h = "minut";
+  var second$h = "sekund";
+  var hours$h = "timer";
+  var minutes$h = "minutter";
+  var seconds$h = "sekunder";
+  var vtsHeading$h = "";
+  var vtsInstructions1$h = "";
+  var vtsInstructions2$h = "";
+  var vtsInstructions3$h = "";
+  var vtsInstructions4$h = "";
+  var vtsInstructions5$h = "";
+  var vtsSelectLanguage$h = "";
+  var vtsSave$h = "";
+  var vtsReturn$h = "";
+  var vtsCancel$h = "";
+  var vtsRow$h = "";
+  var vtsKind$h = "";
+  var vtsStart$h = "";
+  var vtsEnd$h = "";
+  var vtsContent$h = "";
+  var vtsActions$h = "";
+  var vtsNewRow$h = "";
+  var vtsDeletedRow$h = "";
+  var vtsMovedRow$h = "";
+  var da = {
   	playerHeading: playerHeading$h,
   	audioPlayer: audioPlayer$h,
   	videoPlayer: videoPlayer$h,
   	faster: faster$h,
   	slower: slower$h,
-  	chapters: chapters$h,
   	play: play$h,
   	pause: pause$h,
   	restart: restart$h,
@@ -16535,6 +16191,7 @@
   	hideTranscript: hideTranscript$h,
   	turnOnDescriptions: turnOnDescriptions$h,
   	turnOffDescriptions: turnOffDescriptions$h,
+  	chapters: chapters$h,
   	language: language$h,
   	sign: sign$h,
   	showSign: showSign$h,
@@ -16686,182 +16343,183 @@
   	vtsMovedRow: vtsMovedRow$h
   };
 
-  var playerHeading$g = "Media player";
-  var audioPlayer$g = "Audio player";
-  var videoPlayer$g = "Video player";
-  var faster$g = "Faster: %1x";
-  var slower$g = "Slower: %1x";
-  var play$g = "Play";
+  var playerHeading$g = "Medienplayer";
+  var audioPlayer$g = "Audioplayer";
+  var videoPlayer$g = "Videoplayer";
+  var faster$g = "Schneller: %1x";
+  var slower$g = "Langsamer: %1x";
+  var chapters$g = "Kapitel";
+  var play$g = "Abspielen";
   var pause$g = "Pause";
-  var restart$g = "Restart";
-  var prevTrack$g = "Previous track";
-  var nextTrack$g = "Next track";
-  var rewind$g = "Rewind %1 seconds";
-  var forward$g = "Forward %1 seconds";
-  var captions$g = "Captions";
-  var showCaptions$g = "Show captions";
-  var hideCaptions$g = "Hide captions";
-  var captionsOff$g = "Captions off";
-  var showTranscript$g = "Show transcript";
-  var hideTranscript$g = "Hide transcript";
-  var turnOnDescriptions$g = "Turn on descriptions";
-  var turnOffDescriptions$g = "Turn off descriptions";
-  var chapters$g = "Chapters";
-  var language$g = "Language";
-  var sign$g = "Sign language";
-  var showSign$g = "Show sign language";
-  var hideSign$g = "Hide sign language";
-  var seekbarLabel$g = "timeline";
-  var mute$g = "Mute";
-  var unmute$g = "Unmute";
-  var volume$g = "Volume";
-  var volumeUpDown$g = "Volume up down";
-  var preferences$g = "Preferences";
-  var enterFullScreen$g = "Enter full screen";
-  var exitFullScreen$g = "Exit full screen";
-  var speed$g = "Speed";
-  var on$g = "On";
-  var off$g = "Off";
-  var spacebar$g = "spacebar";
-  var transcriptTitle$g = "Transcript";
-  var lyricsTitle$g = "Lyrics";
-  var autoScroll$g = "Auto scroll";
-  var statusPlaying$g = "Playing";
-  var statusPaused$g = "Paused";
-  var statusStopped$g = "Stopped";
-  var statusBuffering$g = "Buffering";
-  var statusEnd$g = "End of track";
-  var selectedTrack$f = "Selected Track";
-  var alertDescribedVersion$g = "Using the audio described version of this video";
-  var alertNonDescribedVersion$g = "Using the non-described version of this video";
-  var prefMenuCaptions$g = "Captions";
+  var restart$g = "Neustart";
+  var prevTrack$g = "Vorheriger Titel";
+  var nextTrack$g = "Nächster Titel";
+  var rewind$g = "Zurück %1 Sekunden";
+  var forward$g = "Vorwärts %1 Sekunden";
+  var captions$g = "Untertitel";
+  var showCaptions$g = "Untertitel anzeigen";
+  var hideCaptions$g = "Untertitel ausblenden";
+  var captionsOff$g = "Untertitel ausschalten";
+  var showTranscript$g = "Transkription anzeigen";
+  var hideTranscript$g = "Transkription entfernen";
+  var turnOnDescriptions$g = "Audiobeschreibung einschalten";
+  var turnOffDescriptions$g = "Audiobeschreibung ausschalten";
+  var language$g = "Sprache";
+  var sign$g = "Gebärdensprache";
+  var showSign$g = "Gebärdensprache anzeigen";
+  var hideSign$g = "Gebärdensprache ausblenden";
+  var seekbarLabel$g = "Suchleiste";
+  var mute$g = "Ton aus";
+  var unmute$g = "Ton an";
+  var volume$g = "Lautstärke";
+  var volumeUpDown$g = "Lautstärkeregler";
+  var preferences$g = "Einstellungen";
+  var enterFullScreen$g = "Vollbildmodus einschalten";
+  var exitFullScreen$g = "Vollbildmodus verlassen";
+  var speed$g = "Geschwindigkeit";
+  var on$g = "";
+  var off$g = "";
+  var spacebar$g = "Leertaste";
+  var transcriptTitle$g = "Transkription";
+  var lyricsTitle$g = "Text";
+  var autoScroll$g = "Automatisch scrollen";
+  var statusPlaying$g = "Gestartet";
+  var statusPaused$g = "Pausiert";
+  var statusStopped$g = "Angehalten";
+  var statusBuffering$g = "Daten werden empfangen...";
+  var statusEnd$g = "Ende des Titels";
+  var selectedTrack$f = "Ausgewählter Titel";
+  var alertDescribedVersion$g = "Das Video wird mit Audiobeschreibung abgespielt";
+  var alertNonDescribedVersion$g = "Das Video wird ohne Audiobeschreibung abgespielt";
+  var prefMenuCaptions$g = "Untertitel";
   var prefVoicedCaptions$g = "Spoken Captions";
-  var prefMenuDescriptions$g = "Descriptions";
-  var prefMenuKeyboard$g = "Keyboard";
-  var prefMenuTranscript$g = "Transcript";
-  var prefTitleCaptions$g = "Captions Preferences";
-  var prefTitleDescriptions$g = "Audio Description Preferences";
-  var prefTitleKeyboard$g = "Keyboard Preferences";
-  var prefTitleTranscript$f = "Transcript Preferences";
-  var prefIntroDescription1$f = "This media player supports audio description in two ways: ";
-  var prefDescription1$g = "The current video has an alternative described version and text-based description, announced by screen reader.";
-  var prefDescription2$g = "The current video has text-based description.";
-  var prefDescription3$g = "The current video has an alternative described version.";
-  var prefDescriptionNone$g = "The current video has no audio description in either format.";
-  var prefDescFormatOption1$g = "alternative described version of video";
-  var prefDescFormatOption2$g = "text-based description, announced by screen reader";
-  var prefIntroDescription3$g = "Use the following form to set your preferences related to text-based audio description.";
-  var prefIntroDescription4$g = "After you save your settings, audio description can be toggled on/off using the Description button.";
-  var prefIntroKeyboard1$g = "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).";
-  var prefIntroKeyboard2$g = "Modifier keys (Shift, Alt, and Control) can be assigned below.";
-  var prefIntroKeyboard3$g = "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.";
-  var prefHeadingKeyboard1$g = "Modifier keys used for shortcuts";
-  var prefHeadingKeyboard2$g = "Current keyboard shortcuts";
-  var prefHeadingDescription$g = "Audio description";
-  var prefHeadingTextDescription$g = "Text-based audio description";
+  var prefMenuDescriptions$g = "Audiobeschreibungen";
+  var prefMenuKeyboard$g = "Tastatur";
+  var prefMenuTranscript$g = "Transkription";
+  var prefTitleCaptions$g = "Untertitel Einstellungen";
+  var prefTitleDescriptions$g = "Audiobeschreibung Einstellungen";
+  var prefTitleKeyboard$g = "Tastatur Einstellungen";
+  var prefTitleTranscript$f = "Transkription Einstellungen";
+  var prefIntroDescription1$f = "Dieser Media Player unterstützt zwei Arten von Untertiteln: ";
+  var prefDescription1$g = "Das aktuelle Video hat eine alternative Version der Audiobeschreibung, eine textbasierte Audiobeschreibung.";
+  var prefDescription2$g = "Das aktuelle Video hat Version des Videos, die eine Audiobeschreibung enthält.";
+  var prefDescription3$g = "Das aktuelle Video hat Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird.";
+  var prefDescriptionNone$g = "Das aktuelle Video hat keine Audiobeschreibung.";
+  var prefDescFormatOption1$g = "";
+  var prefDescFormatOption2$g = "";
+  var prefIntroDescription3$g = "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.";
+  var prefIntroDescription4$g = "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.";
+  var prefIntroKeyboard1$g = "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).";
+  var prefIntroKeyboard2$g = "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.";
+  var prefIntroKeyboard3$g = "Achtung: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.";
+  var prefHeadingKeyboard1$g = "Modifikatortasten für die Tastenkürzel";
+  var prefHeadingKeyboard2$g = "Aktuell eingestellte Tastenkürzel";
+  var prefHeadingDescription$g = "Audiobeschreibung";
+  var prefHeadingTextDescription$g = "Textbasierte Audiobeschreibung";
   var prefAltKey$g = "Alt";
-  var prefCtrlKey$g = "Control";
-  var prefShiftKey$g = "Shift";
-  var prefNoKeyShortcuts$g = "Disable keyboard shortcuts";
-  var escapeKey$g = "Escape";
-  var escapeKeyFunction$g = "Close current dialog or popup menu";
-  var prefDescPause$g = "Automatically pause video when description starts";
-  var prefDescVisible$g = "Make description visible";
-  var prefDescVoice$g = "Voice";
+  var prefCtrlKey$g = "Strg";
+  var prefShiftKey$g = "Umschalttaste";
+  var prefNoKeyShortcuts$g = "Tastenkombinationen deaktivieren";
+  var escapeKey$g = "ESC Taste";
+  var escapeKeyFunction$g = "Dialogfenster schließen";
+  var prefDescPause$g = "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden";
+  var prefDescVisible$g = "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind";
+  var prefDescVoice$g = "Stimme";
   var prefDescRate$g = "Spoken Description Rate";
   var prefCaptionRate$g = "Spoken Caption Rate";
-  var prefDescPitch$g = "Pitch";
-  var prefDescPitch1$g = "Very low";
-  var prefDescPitch2$g = "Low";
-  var prefDescPitch3$g = "Default";
-  var prefDescPitch4$g = "High";
-  var prefDescPitch5$g = "Very high";
-  var sampleDescriptionText$g = "Adjust settings to hear this sample text.";
-  var prefHighlight$g = "Highlight transcript as media plays";
-  var prefTabbable$g = "Keyboard-enable transcript";
-  var prefCaptionsFont$g = "Font";
-  var prefCaptionsColor$g = "Text Color";
-  var prefCaptionsBGColor$g = "Background";
-  var prefCaptionsSize$g = "Font Size";
-  var prefCaptionsOpacity$g = "Opacity";
-  var prefCaptionsStyle$g = "Style";
-  var serif$g = "serif";
-  var sans$g = "sans-serif";
-  var cursive$g = "cursive";
-  var fantasy$g = "fantasy";
-  var monospace$g = "monospace";
-  var white$g = "white";
-  var yellow$g = "yellow";
-  var green$g = "green";
+  var prefDescPitch$g = "Tonlage";
+  var prefDescPitch1$g = "Sehr tief";
+  var prefDescPitch2$g = "Tief";
+  var prefDescPitch3$g = "Mittel";
+  var prefDescPitch4$g = "Hoch";
+  var prefDescPitch5$g = "Sehr hoch";
+  var sampleDescriptionText$g = "Einstellungen bearbeiten um diesen Text vorzulesen.";
+  var prefHighlight$g = "Transkription hervorheben, während das Medium abgespielt wird";
+  var prefTabbable$g = "Transkription per Tastatur ein-/ausschaltbar machen";
+  var prefCaptionsFont$g = "Schriftart";
+  var prefCaptionsColor$g = "Schriftfarbe";
+  var prefCaptionsBGColor$g = "Hintergrund";
+  var prefCaptionsSize$g = "Schriftgöße";
+  var prefCaptionsOpacity$g = "Deckkraft";
+  var prefCaptionsStyle$g = "Stil";
+  var serif$g = "Serifenschrift";
+  var sans$g = "Serifenlose Schrift";
+  var cursive$g = "kursiv";
+  var fantasy$g = "Fantasieschrift";
+  var monospace$g = "nichtproportionale Schrift";
+  var white$g = "weiß";
+  var yellow$g = "gelb";
+  var green$g = "grün";
   var cyan$f = "cyan";
-  var blue$g = "blue";
+  var blue$g = "blau";
   var magenta$g = "magenta";
-  var red$g = "red";
-  var black$g = "black";
+  var red$g = "rot";
+  var black$g = "schwarz";
   var transparent$g = "transparent";
-  var solid$g = "solid";
+  var solid$g = "undurchsichtig";
   var captionsStylePopOn$g = "Pop-on";
   var captionsStyleRollUp$g = "Roll-up";
   var prefCaptionsPosition$g = "Position";
-  var captionsPositionOverlay$g = "Overlay";
-  var captionsPositionBelow$g = "Below video";
-  var sampleCaptionText$g = "Sample caption text";
-  var prefSuccess$g = "Your changes have been saved.";
-  var prefNoChange$g = "You didn't make any changes.";
-  var save$g = "Save";
-  var cancel$g = "Cancel";
+  var captionsPositionOverlay$g = "Überlagert";
+  var captionsPositionBelow$g = "Unterhalb";
+  var sampleCaptionText$g = "Textbeispiel";
+  var prefSuccess$g = "Ihre Änderungen wurden gespeichert.";
+  var prefNoChange$g = "Es gab keine Änderungen zu speichern.";
+  var save$g = "Speichern";
+  var cancel$g = "Abbrechen";
   var dismissButton$g = "Dismiss";
-  var windowButtonLabel$g = "Window options";
-  var windowMove$g = "Move";
-  var windowMoveLeft$g = "Window moved left";
-  var windowMoveRight$g = "Window moved right";
-  var windowMoveUp$g = "Window moved up";
-  var windowMoveDown$g = "Window moved down";
-  var windowMoveStopped$g = "Window move stopped";
-  var transcriptControls$g = "Transcript Window Controls";
-  var signControls$g = "Sign Language Window Controls";
-  var windowMoveAlert$g = "Drag or use arrow keys to move the window; Enter to stop";
-  var windowResize$g = "Resize";
-  var windowResizeHeading$g = "Resize Window";
-  var closeButtonLabel$g = "Close";
-  var width$g = "Width";
-  var height$g = "Height";
-  var resultsSummary1$g = "You searched for:";
-  var resultsSummary2$g = "Found %1 matching items.";
-  var resultsSummary3$g = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound$g = "No results found.";
-  var searchButtonLabel$g = "Play at %1";
-  var hour$g = "hour";
-  var minute$g = "minute";
-  var second$g = "second";
-  var hours$g = "hours";
-  var minutes$g = "minutes";
-  var seconds$g = "seconds";
-  var vtsHeading$g = "Video Transcript Sorter";
-  var vtsInstructions1$g = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$g = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$g = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$g = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$g = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$g = "Select a language";
-  var vtsSave$g = "Generate new .vtt content";
-  var vtsReturn$g = "Return to Editor";
-  var vtsCancel$g = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$g = "Row";
-  var vtsKind$g = "Kind";
-  var vtsStart$g = "Start";
-  var vtsEnd$g = "End";
-  var vtsContent$g = "Content";
-  var vtsActions$g = "Actions";
-  var vtsNewRow$g = "A new row %1 has been inserted.";
-  var vtsDeletedRow$g = "Row %1 has been deleted.";
-  var vtsMovedRow$g = "Row %1 has been moved %2 and is now Row %3.";
-  var en = {
+  var windowButtonLabel$g = "Fenstereinstellungen";
+  var windowMove$g = "Verschieben";
+  var windowMoveLeft$g = "Das Fenster verschob sich nach links";
+  var windowMoveRight$g = "Das Fenster verschob sich nach rechts";
+  var windowMoveUp$g = "Das Fenster verschob sich nach oben";
+  var windowMoveDown$g = "Das Fenster verschob sich nach unten";
+  var windowMoveStopped$g = "Das Fenster hörte auf sich zu verschieben";
+  var transcriptControls$g = "Bedienelemente des Transkriptionsfensters";
+  var signControls$g = "Bedienelemente des Gebärdensprache-Fensters";
+  var windowMoveAlert$g = "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste";
+  var windowResize$g = "Größe verändern";
+  var windowResizeHeading$g = "Größe des Gebärdensprache-Fenster";
+  var closeButtonLabel$g = "Schließen";
+  var width$g = "Breite";
+  var height$g = "Höhe";
+  var resultsSummary1$g = "Suche nach:";
+  var resultsSummary2$g = "Gefunden %1 Treffer.";
+  var resultsSummary3$g = "Auf den Zeitindex klicken, um das Video vom Zeitpunkt des jeweiligen Suchergebnisses abzuspielen.";
+  var noResultsFound$g = "Keine Treffer.";
+  var searchButtonLabel$g = "Abspielen von %1";
+  var hour$g = "Stunde";
+  var minute$g = "Minute";
+  var second$g = "Sekunde";
+  var hours$g = "Stunden";
+  var minutes$g = "Minuten";
+  var seconds$g = "Sekunden";
+  var vtsHeading$g = "Transkriptions-Sortierer für Videos";
+  var vtsInstructions1$g = "Verwenden Sie den Transkription-Sortierer für Videos, um Textspuren zu ändern:";
+  var vtsInstructions2$g = "Ordnen Sie Kapitel, Beschreibungen, Bildunterschriften, und/oder Untertitel so, dass diese in der richtigen Reihenfolge in der selbsterzeugten Transkription des Able Players erscheinen.";
+  var vtsInstructions3$g = "Verändern Sie Inhalt oder Anfangs- bzw. Endzeiten (alle sind direkt innerhalb der Tabelle editierbar).";
+  var vtsInstructions4$g = "Fügen Sie neuen Inhalt, wie Kapitel oder Beschreibungen hinzu.";
+  var vtsInstructions5$g = "Nach dem Editieren klicken Sie auf die Schaltfläche \"Änderungen speichern\" um neuen Inhalt für alle wichtigen zeitgesteuerten Textdateien zu erzeugen. Der neue Text kann in neue WebVTT-Dateien kopiert und eingefügt werden.";
+  var vtsSelectLanguage$g = "Wählen Sie eine Sprache aus";
+  var vtsSave$g = "Erzeugen Sie neuen .vtt-Inhalt";
+  var vtsReturn$g = "Gehen Sie zurück zum Editor";
+  var vtsCancel$g = "Abbruch des Speicherns. Jegliche Bearbeitungen, die Sie vorgenommen haben, wurden in der VTS-Tabelle gesichert.";
+  var vtsRow$g = "Reihe";
+  var vtsKind$g = "Art";
+  var vtsStart$g = "Anfang";
+  var vtsEnd$g = "Ende";
+  var vtsContent$g = "Inhalt";
+  var vtsActions$g = "Aktionen";
+  var vtsNewRow$g = "Eine neue Reihe %1 wurde eingefügt.";
+  var vtsDeletedRow$g = "Reihe %1 wurde gelöscht.";
+  var vtsMovedRow$g = "Reihe %1 wurde verschoben %2 ist nun Reihe %3.";
+  var de = {
   	playerHeading: playerHeading$g,
   	audioPlayer: audioPlayer$g,
   	videoPlayer: videoPlayer$g,
   	faster: faster$g,
   	slower: slower$g,
+  	chapters: chapters$g,
   	play: play$g,
   	pause: pause$g,
   	restart: restart$g,
@@ -16877,7 +16535,6 @@
   	hideTranscript: hideTranscript$g,
   	turnOnDescriptions: turnOnDescriptions$g,
   	turnOffDescriptions: turnOffDescriptions$g,
-  	chapters: chapters$g,
   	language: language$g,
   	sign: sign$g,
   	showSign: showSign$g,
@@ -22524,7 +22181,6 @@
   	cs,
   	da,
   	de,
-  	en,
   	es,
   	fr,
   	he,
@@ -22551,7 +22207,6 @@
   			'cs'    : 'Czech',
   			'da'    : 'Danish',
   			'de'    : 'German',
-  			'en'    : 'English',
   			'es'    : 'Spanish',
   			'fr'    : 'French',
   			'he'    : 'Hebrew',
