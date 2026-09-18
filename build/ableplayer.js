@@ -10219,6 +10219,21 @@
   			thisObj.resizePlayer();
   		});
 
+  		// If sources are provided for both landscape and portrait orientations,
+  		// refresh sources when the device orientation changes.
+  		if (this.mediaType === 'video' && this.hasOrientationSources()) {
+  			var orientationMediaQuery = window.matchMedia('(orientation: portrait)');
+  			var handleOrientationChange = function () {
+  				thisObj.refreshSourcesOnOrientationChange();
+  			};
+  			if (typeof orientationMediaQuery.addEventListener === 'function') {
+  				orientationMediaQuery.addEventListener('change', handleOrientationChange);
+  			} else if (typeof orientationMediaQuery.addListener === 'function') {
+  				// Safari < 14
+  				orientationMediaQuery.addListener(handleOrientationChange);
+  			}
+  		}
+
   		// Refresh player if it changes from hidden to visible
   		// There is no event triggered by a change in visibility
   		// but MutationObserver works in most browsers (but NOT in IE 10 or earlier)
@@ -10759,7 +10774,7 @@
   		let sources = this.media.querySelectorAll('source');
   		let newSources = Array.from(sources).filter(source => {
   			const media = source.getAttribute('media');
-  			return !media || (window.matchMedia(media) && window.matchMedia(media).matches);
+  			return (window.matchMedia(media) && window.matchMedia(media).matches);
   		});
   		if ( newSources.length === 0 && sources.length > 0 ) {
   			// If no sources match the media query, return the original sources and allow browser to handle.
@@ -10768,8 +10783,43 @@
   			}
   			newSources = sources;
   		}
+  		// Load the first matching source into the media element.
+  		this.media.src = newSources.length > 0 ? newSources[0].src : '';
+  		this.media.load();
 
   		return newSources;
+  	};
+
+  	/**
+  	 * Checks whether the media element has <source> elements targeting
+  	 * both landscape and portrait orientations via media queries.
+  	 *
+  	 * @returns {Boolean} True if sources exist for both orientations.
+  	 */
+  	AblePlayer.prototype.hasOrientationSources = function () {
+  		let sources = this.media.querySelectorAll('source[media]');
+  		let hasPortrait = false;
+  		let hasLandscape = false;
+  		Array.from(sources).forEach(source => {
+  			const media = source.getAttribute('media');
+  			if (/orientation:\s*portrait/.test(media)) {
+  				hasPortrait = true;
+  			} else if (/orientation:\s*landscape/.test(media)) {
+  				hasLandscape = true;
+  			}
+  		});
+  		return hasPortrait && hasLandscape;
+  	};
+
+  	// Refreshes <source> elements after an orientation change, resuming playback at the same point.
+  	AblePlayer.prototype.refreshSourcesOnOrientationChange = function () {
+  		if (this.player !== 'html5') {
+  			return;
+  		}
+  		this.swapTime = this.elapsed > 0 ? this.elapsed : 0;
+  		this.okToPlay = this.playing;
+  		this.swappingSrc = true;
+  		this.sources = this.getSources();
   	};
 
   	AblePlayer.prototype.recreatePlayer = function () {
@@ -22403,8 +22453,10 @@
   			this.searchLang = this.lang;
   		}
   		const ttModule = moduleFromTag[this.lang];
-  		if (!ttModule) {
-  			console.log( "Error: Unable to load translation module for language:", this.lang);
+  		if ( !ttModule ) {
+  			if ( ! this.lang == 'en' ) {
+  				console.log( "Error: Unable to load translation module for language:", this.lang);
+  			}
   			thisObj.tt = {};
   			thisObj.translationFiles = false;
   		} else {
