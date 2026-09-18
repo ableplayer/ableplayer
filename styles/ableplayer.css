@@ -1366,6 +1366,7 @@ button.able-search-results-time {
 
 #able-vts table {
 	border-collapse: collapse;
+	width: 100%;
 }
 
 #able-vts table,
