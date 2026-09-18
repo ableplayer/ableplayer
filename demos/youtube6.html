@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouTube player (captions & sign language hosted on YouTube) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -20,25 +19,24 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>YouTube player (captions hosted on YouTube)</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>YouTube player (captions hosted on YouTube)</h1>
 
-		<div id="intro">
+			<div id="intro">
 
-			<p>This page features an example of Able Player being used to play a YouTube video with synchronized sign language also hosted on YouTube.</p>
+				<p>This page features an example of Able Player being used to play a YouTube video with synchronized sign language also hosted on YouTube.</p>
 
-		</div>
-		<div class="wrapper">
-			<video id="video1" data-able-player preload="auto" data-youtube-nocookie="true" data-youtube-id="Lf6JLhQXaWg" data-youtube-sign-src="bf6214F7srY" playsinline>
-			</video>
-		</div>
+			</div>
+			<div class="wrapper">
+				<video id="video1" data-able-player preload="auto" data-youtube-nocookie="true" data-youtube-id="Lf6JLhQXaWg" data-youtube-sign-src="bf6214F7srY" playsinline>
+				</video>
+			</div>
 
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

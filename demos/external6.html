@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Player created dynamically | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -178,35 +177,34 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Player created dynamically</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Player created dynamically</h1>
 
-		<p>This page has no <code>&lt;audio&gt;</code> or <code></code>&lt;video&gt;</code> elements, but they can be added dynamically
-			by clicking the following buttons.</p>
-		<p>Dynamically loaded players allow you to incorporate server-side or user-specific information when loading media, or you can obtain consent (e.g. GDPR consent) from users before loading content requiring cookies.</p>
+			<p>This page has no <code>&lt;audio&gt;</code> or <code></code>&lt;video&gt;</code> elements, but they can be added dynamically
+				by clicking the following buttons.</p>
+			<p>Dynamically loaded players allow you to incorporate server-side or user-specific information when loading media, or you can obtain consent (e.g. GDPR consent) from users before loading content requiring cookies.</p>
 
-		<div id="container">
-			<div id="alert" aria-live="assertive"></div>
+			<div id="container">
+				<div id="alert" aria-live="assertive"></div>
 
-			<section aria-label="Action buttons">
-				<ul>
-					<li><button id="addAudio">Add audio player</button></li>
-					<li><button id="addVideo">Add video player</button></li>
-					<li><button id="reset">Remove all players</button></li>
-				</ul>
-			</section>
+				<section aria-label="Action buttons">
+					<ul>
+						<li><button id="addAudio">Add audio player</button></li>
+						<li><button id="addVideo">Add video player</button></li>
+						<li><button id="reset">Remove all players</button></li>
+					</ul>
+				</section>
 
-			<div class="player-wrapper" id="audio1"></div>
+				<div class="player-wrapper" id="audio1"></div>
 
-			<div class="player-wrapper" id="video1"></div>
+				<div class="player-wrapper" id="video1"></div>
 
-		</div>
-	</main>
+			</div>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

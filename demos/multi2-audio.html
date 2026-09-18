@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Multiple audio players (each with its own playlist) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -21,100 +20,99 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Multiple audio players (each with its own playlist)</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Multiple audio players (each with its own playlist)</h1>
 
-		<p>The first player has an embedded playlist; the second player has an external playlist.
-			Both can be customized with CSS, but the external player is more flexible in terms of positioning.
-		</p>
+			<p>The first player has an embedded playlist; the second player has an external playlist.
+				Both can be customized with CSS, but the external player is more flexible in terms of positioning.
+			</p>
 
-		<div id="wrapper">
-			<div class="column">
+			<div id="wrapper">
+				<div class="column">
 
-				<h2>Embedded Playlist</h2>
-				<audio id="audio1" preload="auto" data-able-player>
-					<!-- source elements are optional when there's a playlist. -->
-					<!-- If ommitted, they will be constructed from the first playlist item -->
-				</audio>
+					<h2>Embedded Playlist</h2>
+					<audio id="audio1" preload="auto" data-able-player>
+						<!-- source elements are optional when there's a playlist. -->
+						<!-- If ommitted, they will be constructed from the first playlist item -->
+					</audio>
 
-				<!-- first playlist (embedded) -->
-				<ul class="able-playlist" data-player="audio1" data-embedded>
-					<li>
-						<span class="able-source"
-							data-type="audio/mpeg"
-							data-src="../media/everyday.mp3"></span>
-						<span class="able-source"
-							data-type="audio/ogg"
-							data-src="../media/everyday.ogg"></span>
-						<button>Every Day</button>
-					</li>
-					<li>
-						<span class="able-source"
-							data-type="audio/mpeg"
-							data-src="../media/php70alpha.mp3"></span>
-						<span class="able-source"
-							data-type="audio/ogg"
-							data-src="../media/php70alpha.ogg"></span>
-						<button>PHP 7.0 Alpha</button>
-					</li>
-				</ul>
-
-			</div>
-
-			<div class="column">
-
-				<h2>External Playlist</h2>
-				<audio id="audio2" preload="auto" data-able-player>
-					<!-- source elements are optional when there's a playlist. -->
-					<!-- If ommitted, they will be constructed from the first playlist item -->
-				</audio>
-
-				<!-- second playlist (external) -->
-				<div id="playlist">
-					<ul class="able-playlist" data-player="audio2">
-							<li>
+					<!-- first playlist (embedded) -->
+					<ul class="able-playlist" data-player="audio1" data-embedded>
+						<li>
 							<span class="able-source"
-									data-type="audio/mpeg"
-								data-src="../media/frenchsong.mp3">
-							</span>
+								data-type="audio/mpeg"
+								data-src="../media/everyday.mp3"></span>
 							<span class="able-source"
-									data-type="audio/ogg"
-								data-src="../media/frenchsong.ogg">
-							</span>
-							<button lang="fr">Une Chanson Française</button>
+								data-type="audio/ogg"
+								data-src="../media/everyday.ogg"></span>
+							<button>Every Day</button>
 						</li>
 						<li>
-								<span class="able-source"
-								data-type="audio/mpeg"
-								data-src="../media/paulallen.mp3">
-							</span>
 							<span class="able-source"
-									data-type="audio/ogg"
-								data-src="../media/paulallen.ogg">
-							</span>
-							<button>The Paul Allen Song</button>
-						</li>
-						<li>
-								<span class="able-source"
 								data-type="audio/mpeg"
-								data-src="../media/smallf.mp3">
-							</span>
+								data-src="../media/php70alpha.mp3"></span>
 							<span class="able-source"
-									data-type="audio/ogg"
-								data-src="../media/smallf.ogg">
-							</span>
-							<button>Man With Small F (The Inaccessible PDF Song)</button>
+								data-type="audio/ogg"
+								data-src="../media/php70alpha.ogg"></span>
+							<button>PHP 7.0 Alpha</button>
 						</li>
 					</ul>
+
+				</div>
+
+				<div class="column">
+
+					<h2>External Playlist</h2>
+					<audio id="audio2" preload="auto" data-able-player>
+						<!-- source elements are optional when there's a playlist. -->
+						<!-- If ommitted, they will be constructed from the first playlist item -->
+					</audio>
+
+					<!-- second playlist (external) -->
+					<div id="playlist">
+						<ul class="able-playlist" data-player="audio2">
+								<li>
+								<span class="able-source"
+										data-type="audio/mpeg"
+									data-src="../media/frenchsong.mp3">
+								</span>
+								<span class="able-source"
+										data-type="audio/ogg"
+									data-src="../media/frenchsong.ogg">
+								</span>
+								<button lang="fr">Une Chanson Française</button>
+							</li>
+							<li>
+									<span class="able-source"
+									data-type="audio/mpeg"
+									data-src="../media/paulallen.mp3">
+								</span>
+								<span class="able-source"
+										data-type="audio/ogg"
+									data-src="../media/paulallen.ogg">
+								</span>
+								<button>The Paul Allen Song</button>
+							</li>
+							<li>
+									<span class="able-source"
+									data-type="audio/mpeg"
+									data-src="../media/smallf.mp3">
+								</span>
+								<span class="able-source"
+										data-type="audio/ogg"
+									data-src="../media/smallf.ogg">
+								</span>
+								<button>Man With Small F (The Inaccessible PDF Song)</button>
+							</li>
+						</ul>
+					</div>
 				</div>
 			</div>
-		</div>
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

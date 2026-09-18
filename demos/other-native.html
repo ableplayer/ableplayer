@@ -6,6 +6,7 @@
 <title>Native HTML5 Media Player | Able Player Demos</title>
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 <link rel="stylesheet" href="demos.css" type="text/css">
+
 <style>
 #columns {
 	display: flex;
@@ -147,62 +148,61 @@ $(document).ready(function () {
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Native HTML5 Media Player</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Native HTML5 Media Player</h1>
 
-		<p>This page features HTML5 <code>&lt;audio&gt;</code> and <code>&lt;video&gt;</code> elements,
-			each with multiple source files to ensure cross-browser support.
-			This page was included among the examples for comparison with <em>Able Player</em>;
-			<em>Able Player</em> is not used on this page.</p>
+			<p>This page features HTML5 <code>&lt;audio&gt;</code> and <code>&lt;video&gt;</code> elements,
+				each with multiple source files to ensure cross-browser support.
+				This page was included among the examples for comparison with <em>Able Player</em>;
+				<em>Able Player</em> is not used on this page.</p>
 
-		<div id="container">
-			<h2>Audio</h2>
-			<audio id="audio1" preload="auto" controls>
-				<source type="audio/ogg" src="../media/smallf.ogg"/>
-				<source type="audio/mpeg" src="../media/smallf.mp3"/>
-			</audio>
+			<div id="container">
+				<h2>Audio</h2>
+				<audio id="audio1" preload="auto" controls>
+					<source type="audio/ogg" src="../media/smallf.ogg"/>
+					<source type="audio/mpeg" src="../media/smallf.mp3"/>
+				</audio>
 
-			<h2>Video (with English captions, Spanish subtitles, description, and chapters tracks)</h2>
+				<h2>Video (with English captions, Spanish subtitles, description, and chapters tracks)</h2>
 
-			<video id="video1" preload="auto" poster="../media/wwa.jpg" controls>
-				<source type="video/mp4" src="../media/wwa.mp4">
-				<source type="video/webm" src="../media/wwa.webm">
-				<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-				<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-				<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-				<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-				<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-				<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-				<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-				<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-				<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-				<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-				<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
-			</video>
+				<video id="video1" preload="auto" poster="../media/wwa.jpg" controls>
+					<source type="video/mp4" src="../media/wwa.mp4">
+					<source type="video/webm" src="../media/wwa.webm">
+					<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+					<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+					<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+					<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+					<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+					<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+					<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+					<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+					<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+					<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+					<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+					<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+					<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+				</video>
 
-			<h2>HTML5 Media Events</h2>
-			<div id="columns">
-				<div class="column">
-					<h3>Audio Player Events</h3>
-					<ul id="audio-events" aria-live="assertive" aria-atomic="false">
-					</ul>
-				</div>
-				<div class="column">
-					<h3>Video Player Events</h3>
-					<ul id="video-events" aria-live="assertive" aria-atomic="false">
-					</ul>
+				<h2>HTML5 Media Events</h2>
+				<div id="columns">
+					<div class="column">
+						<h3>Audio Player Events</h3>
+						<ul id="audio-events" aria-live="assertive" aria-atomic="false">
+						</ul>
+					</div>
+					<div class="column">
+						<h3>Video Player Events</h3>
+						<ul id="video-events" aria-live="assertive" aria-atomic="false">
+						</ul>
+					</div>
 				</div>
 			</div>
-		</div>
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>
