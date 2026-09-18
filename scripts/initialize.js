@@ -394,6 +394,38 @@ import DOMPurify from 'dompurify';
 		return newSources;
 	}
 
+	/**
+	 * Checks whether the media element has <source> elements targeting
+	 * both landscape and portrait orientations via media queries.
+	 *
+	 * @returns {Boolean} True if sources exist for both orientations.
+	 */
+	AblePlayer.prototype.hasOrientationSources = function () {
+		let sources = this.media.querySelectorAll('source[media]');
+		let hasPortrait = false;
+		let hasLandscape = false;
+		Array.from(sources).forEach(source => {
+			const media = source.getAttribute('media');
+			if (/orientation:\s*portrait/.test(media)) {
+				hasPortrait = true;
+			} else if (/orientation:\s*landscape/.test(media)) {
+				hasLandscape = true;
+			}
+		});
+		return hasPortrait && hasLandscape;
+	};
+
+	// Refreshes <source> elements after an orientation change, resuming playback at the same point.
+	AblePlayer.prototype.refreshSourcesOnOrientationChange = function () {
+		if (this.player !== 'html5') {
+			return;
+		}
+		this.swapTime = this.elapsed > 0 ? this.elapsed : 0;
+		this.okToPlay = this.playing;
+		this.swappingSrc = true;
+		this.sources = this.getSources();
+	};
+
 	AblePlayer.prototype.recreatePlayer = function () {
 
 		// Creates the appropriate player for the current source.

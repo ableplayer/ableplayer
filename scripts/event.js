@@ -723,6 +723,21 @@ function addEventFunctions(AblePlayer) {
 			thisObj.resizePlayer();
 		});
 
+		// If sources are provided for both landscape and portrait orientations,
+		// refresh sources when the device orientation changes.
+		if (this.mediaType === 'video' && this.hasOrientationSources()) {
+			var orientationMediaQuery = window.matchMedia('(orientation: portrait)');
+			var handleOrientationChange = function () {
+				thisObj.refreshSourcesOnOrientationChange();
+			};
+			if (typeof orientationMediaQuery.addEventListener === 'function') {
+				orientationMediaQuery.addEventListener('change', handleOrientationChange);
+			} else if (typeof orientationMediaQuery.addListener === 'function') {
+				// Safari < 14
+				orientationMediaQuery.addListener(handleOrientationChange);
+			}
+		}
+
 		// Refresh player if it changes from hidden to visible
 		// There is no event triggered by a change in visibility
 		// but MutationObserver works in most browsers (but NOT in IE 10 or earlier)
