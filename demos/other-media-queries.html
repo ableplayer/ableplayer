@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Able Player with media queries | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+<!-- Dependencies -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.js"></script>
+
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Able Player with media queries</h1>
+
+			<p>
+				This demo shows how Able Player behaves when media queries are applied. Resize the browser window or apply media queries like <code>prefers-reduced-motion</code> or <code>prefers-reduced-data</code> to see how sources change.
+			</p>
+			<p>
+				The supported media queries in this demo include <code>prefers-color-scheme</code>, <code>orientation</code>, and <code>prefers-reduced-motion</code>.
+			</p>
+			<p>
+				The files used for this demo were sourced from Adrian Roselli's article <a href="https://adrianroselli.com/2023/12/media-queries-in-html-video.html">Media Queries for Accessible Videos</a>, and are used with permission.
+			</p>
+			<div id="container">
+				<h3>Video with Media Queries: Portrait</h3>
+				<video id="video1" preload="auto"  poster="../media/star-video_poster.jpg" data-able-player>
+					<source src="../media/star-video.mp4" type="video/mp4">
+					<source src="../media/star-video_portrait.mp4" type="video/mp4" media="(orientation: portrait)">
+					<track label="English" kind="subtitles" srclang="en-us" src="../media/star-video_base.vtt" default>
+					<a href="../media/star-video.mp4">Download the video</a> or a <a href="../media/star-video_dark.mp4">darker version</a> is available. The <a href="../media/star-video_base.vtt">caption file</a> is also available in case your video player can import it.
+				</video>
+				<h3>Video with Media Queries: Reduced Motion</h3>
+				<video id="video2" preload="auto"  poster="../media/star-video_poster.jpg" data-able-player>
+					<source src="../media/star-video.mp4" type="video/mp4">
+					<source src="../media/star-video_motion.mp4" type="video/mp4" media="(prefers-reduced-motion: reduce)">
+					<track label="English" kind="subtitles" srclang="en-us" src="../media/star-video_base.vtt" default>
+					<a href="../media/star-video.mp4">Download the video</a> or a <a href="../media/star-video_dark.mp4">darker version</a> is available. The <a href="../media/star-video_base.vtt">caption file</a> is also available in case your video player can import it.
+				</video>
+				<h3>Video with Media Queries: Dark Mode</h3>
+				<video id="video2" preload="auto"  poster="../media/star-video_poster.jpg" data-able-player>
+					<source src="../media/star-video.mp4" type="video/mp4">
+					<source src="../media/star-video_dark.mp4" type="video/mp4" media="(prefers-color-scheme: dark)">
+					<source src="../media/star-video_portrait_dark.mp4" type="video/mp4" media="(prefers-color-scheme: dark) and (orientation: portrait)">
+					<source src="../media/star-video_motion_dark_portrait.mp4" type="video/mp4" media="(prefers-color-scheme: dark) and (orientation: portrait) and (prefers-reduced-motion: reduce)">
+					<track label="English" kind="subtitles" srclang="en-us" src="../media/star-video_base.vtt" default>
+					<a href="../media/star-video.mp4">Download the video</a> or a <a href="../media/star-video_dark.mp4">darker version</a> is available. The <a href="../media/star-video_base.vtt">caption file</a> is also available in case your video player can import it.
+				</video>
+				<h3>Video with Media Queries: Combined</h3>
+				<p>When sources are available that would meet multiple conditions, the more complex conditions should be first in the source order. Able Player will load the first matching source, but a source with <code>prefers-reduced-motion</code> will also match on browsers that have additional conditions present.</p>
+				<ol>
+					<li>Dark Mode and Reduced Motion and Portrait</li>
+					<li>Dark Mode and Portrait</li>
+					<li>Portrait</li>
+					<li>Dark Mode</li>
+					<li>Reduced Motion</li>
+				</ol>
+				<video id="video2" preload="auto"  poster="../media/star-video_poster.jpg" data-able-player>
+					<source src="../media/star-video.mp4" type="video/mp4">
+					<source src="../media/star-video_motion_dark_portrait.mp4" type="video/mp4" media="(prefers-color-scheme: dark) and (orientation: portrait) and (prefers-reduced-motion: reduce)">
+					<source src="../media/star-video_portrait_dark.mp4" type="video/mp4" media="(prefers-color-scheme: dark) and (orientation: portrait)">
+					<source src="../media/star-video_portrait.mp4" type="video/mp4" media="(orientation: portrait)">
+					<source src="../media/star-video_portrait.mp4" type="video/mp4" media="(orientation: portrait)">
+					<source src="../media/star-video_dark.mp4" type="video/mp4" media="(prefers-color-scheme: dark)">
+					<source src="../media/star-video_motion.mp4" type="video/mp4" media="(prefers-reduced-motion: reduce)">
+					<track label="English" kind="subtitles" srclang="en-us" src="../media/star-video_base.vtt" default>
+					<a href="../media/star-video.mp4">Download the video</a> or a <a href="../media/star-video_dark.mp4">darker version</a> is available. The <a href="../media/star-video_base.vtt">caption file</a> is also available in case your video player can import it.
+				</video>
+			</div>
+		</main>
+	</div>
+<script src="demos.js"></script>
+</body>
+</html>

@@ -27,6 +27,7 @@
 - Closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
 - Chapters using WebVTT. Chapters are specific landing points in the video, allowing video content to be more easily navigated.
 - Text-based audio description using WebVTT. Description text is read aloud by the Speech Synthesis API. Users can set their experience to pause when audio description starts to avoid conflicts between the description and program audio.
+- Media Query support. Able Player will switch to an alternate video `source` with a `media` attribute if it matches the current environment.
 - Spoken captions, as described in the "Spoken subtitles" requirement to EN 301 549. If enabled by a user, caption timing will be estimated and speed is dynamically adjusted to fit the available time. User can select a default speed, pitch, and volume for captions.
 - Audio description as a separate video. When two videos are available (one with description and one without), both can use the same player and users can toggle between versions.
 - Adjustable playback rate. Users can slow down or speed up playback to suit their needs.
