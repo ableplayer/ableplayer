@@ -175,8 +175,10 @@ function addTranslationFunctions(AblePlayer) {
 			this.searchLang = this.lang;
 		}
 		const ttModule = moduleFromTag[this.lang];
-		if (!ttModule) {
-			console.log( "Error: Unable to load translation module for language:", this.lang);
+		if ( !ttModule ) {
+			if ( ! this.lang == 'en' ) {
+				console.log( "Error: Unable to load translation module for language:", this.lang);
+			}
 			thisObj.tt = {};
 			thisObj.translationFiles = false;
 		} else {
