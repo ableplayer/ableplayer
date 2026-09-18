@@ -276,3 +276,23 @@ code {
 #search button {
 	font-size: 1em;
 }
+
+/* translations.html */
+.translations .flex {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	margin-bottom: 1.5rem;
+	gap: 4px;
+}
+.translations .flex p {
+	margin: 0;
+	padding: 0;
+}
+.translations .flex select, .translations .flex button {
+	padding: .33rem;
+}
+.translations .notification p {
+	background: #ffc;
+	padding: .5rem;
+}
