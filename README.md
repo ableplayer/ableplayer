@@ -33,7 +33,7 @@
 - Interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playback at that point.  Keyboard users can choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press <code>enter</code> to play the media from that caption.
 - Automatic text highlighting in the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
 - YouTube and Vimeo support.
-- Customizatiopn of caption and subtitle appearance. Users can control font style, size, and color of caption text; plus background color and transparency. They can also choose to position captions *below* the video instead of the default position as a semi-transparent overlay.
+- Customization of caption and subtitle appearance. Users can control font style, size, and color of caption text; plus background color and transparency. They can also choose to position captions *below* the video instead of the default position as a semi-transparent overlay.
 - Supports fallback content if the media cannot be played (see section on **Fallback** for details).
 - User Customization: Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
 
