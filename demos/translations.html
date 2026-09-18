@@ -36,6 +36,7 @@
 			let value = select.value;
 			let langName = select.options[select.selectedIndex].text;
 			if ( value === '' ) {
+				value = 'en';
 				html.setAttribute( 'lang', 'en' );
 				header.removeAttribute( 'lang' );
 				nav.removeAttribute( 'lang' );
@@ -53,6 +54,17 @@
 				player = new AblePlayer( '#video1' );
 			}
 			notification.innerHTML = '<p>Player refreshed in your selected language: <strong>' + langName + '</strong>.</p>';
+
+			fetch( '../translations/' + value + '.json' )
+				.then(response => response.json())
+				.then(data => {
+					const emptyKeys = Object.keys(data).filter( key => ! data[key] );
+					let emptyCount = emptyKeys.length;
+					let link = 'https://github.com/ableplayer/ableplayer/blob/main/translations/' + value + '.json';
+					let textInfo = 'The ' + langName + ' translation has ' + emptyCount + ' untranslated strings: ' + emptyKeys.join(', ') + '. <a href="' + link + '">Help translate it!</a>';
+					notification.innerHTML += '<p>' + textInfo + '</p>';
+				})
+				.catch(error => console.error('Translations not loaded.', error));
 		})
 	});
 </script>
