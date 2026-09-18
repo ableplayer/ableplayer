@@ -17,6 +17,16 @@
 			if (activeDetails) {
 				activeDetails.open = true;
 			}
+			let links = navPlaceholder.querySelectorAll('a');
+			links.forEach( link => {
+				link.addEventListener( 'keyup', ( event ) => {
+					if ( event.key == 'Escape' ) {
+						let parentDetails = link.closest('details');
+						parentDetails.open = false;
+						parentDetails.querySelector('summary').focus();
+					}
+				});
+			});
 		})
 		.catch(error => console.error('Error loading the HTML include component:', error));
 })();
