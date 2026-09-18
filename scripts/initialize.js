@@ -378,7 +378,7 @@ import DOMPurify from 'dompurify';
 		let sources = this.media.querySelectorAll('source');
 		let newSources = Array.from(sources).filter(source => {
 			const media = source.getAttribute('media');
-			return !media || (window.matchMedia(media) && window.matchMedia(media).matches);
+			return (window.matchMedia(media) && window.matchMedia(media).matches);
 		});
 		if ( newSources.length === 0 && sources.length > 0 ) {
 			// If no sources match the media query, return the original sources and allow browser to handle.
@@ -387,6 +387,9 @@ import DOMPurify from 'dompurify';
 			}
 			newSources = sources;
 		}
+		// Load the first matching source into the media element.
+		this.media.src = newSources.length > 0 ? newSources[0].src : '';
+		this.media.load();
 
 		return newSources;
 	}
