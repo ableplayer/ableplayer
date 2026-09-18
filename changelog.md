@@ -3,7 +3,6 @@
 ## 5.1.0 TBD
 
 ### Features
-
 - Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
 - Add `options` parameter to the AblePlayer class instantiation, supporting all `data-` attributes, strings, and icons.
 
@@ -15,7 +14,6 @@
 - Change labels on speaking rates to reflect actual values
 
 ### Bug fixes
-
 - Add the seek interval value to rewind and forward buttons, to provide better user information.
 - Add the expected new speed value to playback speed controls.
 - Move seekbar tooltip closer to seekbar. It had moved further away when the seekhead size was increased.
@@ -26,6 +24,7 @@
 - Improve handling of drag and resize events.
 - Bug fix: events triggered from outside the player triggered errors due to assumed classes.
 - Modified preferences dialog generation so dialogs are only generated once per page and re-used, rather than generating four dialogs per player.
+- Fix bug with timestamp formatting in Video Transcript Sorter.
 
 ### Design
 - Increase size and add hover state to seekbar.
@@ -35,15 +34,36 @@
 - Adjust size and padding of VTS icons.
 - Change speaking rate input to numeric.
 - Add generic `able-captions-container` class and set background color to match player.
+- Change CSS variables to be declared on `:root`. Props @blogcastAI.
+-
 
 ### Performance
 - Improve performance of time slider by deduplicating events and adding queues/caching.
+- Pass context to refreshControls to limit the number of player refreshes.
 
 ### Code Quality
 - Move drag handle and resize handle icons into the icon store.
 - Change constructor into a class instance.
 - Remove obsolete Firefox stopgap in popup keyboard controller.
 - Use AblePlayer.getActiveDOMElement() to get focused elements.
+- Fix 7 linting errors. Props @blogcastAI.
+- Remove undocumented `data-description-audible` variant of `data-descriptions-audible`.
+
+### Internationalization
+
+- Set untranslated strings to have empty value in JSON data.
+- Update translate function to fallback to default if value empty.
+- Update imports to not import the English translation files, used only as a reference for translating.
+ - Update Slovak translation. Props @rraddatch.
+ - Update Taiwanese Chinese translation. Props @JediLin.
+
+### Meta
+
+ - Redesigned demos pages to have better navigation.
+ - Updated translations demo to provide data about missing strings.
+ - Readme updates for easier readability.
+ - Added automated testing with AxeCore to check for regressions. Props @blogcastAI.
+ - Moved jest testing to be headless & to run in Github Actions. Props @blogcastAI.
 
 ## 5.0.0 June 21, 2026
 
