@@ -84,12 +84,6 @@ a, summary {
 	margin: 1rem auto;
 }
 
-.body-wrapper nav {
-	background: #fff;
-	padding: 1rem;
-}
-
-
 .body-wrapper nav ul,
 .body-wrapper nav li {
 	margin: 0;
@@ -100,7 +94,15 @@ a, summary {
 .body-wrapper details > ul,
 .body-wrapper nav details li {
 	list-style-type: disc;
-	list-style-position: inside;
+}
+
+.body-wrapper details > ul {
+	margin: 0 1rem;
+}
+
+.body-wrapper nav details a[aria-current="page"] {
+	font-weight: 700;
+	text-decoration: none;
 }
 
 .body-wrapper details > ul {
@@ -125,7 +127,7 @@ details:open {
 }
 
 .body-wrapper nav h2 {
-	margin: -1rem -1rem .5rem -1rem;
+	margin: 0;
 	padding: .5rem 1rem;
 	background: #fafafa;
 	border-bottom: 1px solid #757575;
@@ -166,6 +168,11 @@ details:open {
 	border-bottom: none;
 	padding: 2px;
 	outline-offset: 0;
+}
+
+.body-wrapper details p {
+	padding: 8px;
+	margin: 0;
 }
 
 .body-wrapper nav a {
