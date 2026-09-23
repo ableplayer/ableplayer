@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>View translations | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -15,30 +14,6 @@
 <!-- Able Player JavaScript -->
 <script src="../build/ableplayer.dist.js"></script>
 
-<!-- CSS for this example -->
-<style>
-	#video-wrapper {
-		width: 500px;
-	}
-	.flex {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: end;
-		margin-bottom: 1.5rem;
-		gap: 4px;
-	}
-	.flex p {
-		margin: 0;
-		padding: 0;
-	}
-	.flex select, .flex button {
-		padding: .33rem;
-	}
-	.notification p {
-		background: #ffc;
-		padding: .5rem;
-	}
-</style>
 <script>
 	$(document).ready(function() {
 		let player = new AblePlayer('#video1');
@@ -60,7 +35,10 @@
 		button.addEventListener( 'click', function() {
 			let value = select.value;
 			let langName = select.options[select.selectedIndex].text;
+			const langCodePattern = /^[a-z]{2,3}(?:-[A-Z]{2})?$/;
+			let safeValue = langCodePattern.test(value) ? value : 'en';
 			if ( value === '' ) {
+				safeValue = 'en';
 				html.setAttribute( 'lang', 'en' );
 				header.removeAttribute( 'lang' );
 				nav.removeAttribute( 'lang' );
@@ -69,7 +47,7 @@
 				wrapper.replaceWith( player.media );
 				player = new AblePlayer( '#video1' );
 			} else {
-				html.setAttribute( 'lang', value );
+				html.setAttribute( 'lang', safeValue );
 				header.setAttribute( 'lang', 'en' );
 				nav.setAttribute( 'lang', 'en' );
 				content.setAttribute( 'lang', 'en' );
@@ -78,6 +56,22 @@
 				player = new AblePlayer( '#video1' );
 			}
 			notification.innerHTML = '<p>Player refreshed in your selected language: <strong>' + langName + '</strong>.</p>';
+
+			fetch( '../translations/' + safeValue + '.json' )
+				.then(response => response.json())
+				.then(data => {
+					const emptyKeys = Object.keys(data).filter( key => ! data[key] );
+					let emptyCount = emptyKeys.length;
+					let link = 'https://github.com/ableplayer/ableplayer/blob/main/translations/' + safeValue + '.json';
+					let p = document.createElement('p');
+					p.textContent = 'The ' + langName + ' translation has ' + emptyCount + ' untranslated strings: ' + emptyKeys.join(', ') + '. ';
+					let a = document.createElement('a');
+					a.href = link;
+					a.textContent = 'Help translate it!';
+					p.appendChild(a);
+					notification.appendChild(p);
+				})
+				.catch(error => console.error('Translations not loaded.', error));
 		})
 	});
 </script>
@@ -87,50 +81,50 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<div class="content">
-			<h1>View translations</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<div class="content translations">
+				<h1>View translations</h1>
 
-			<p>Use this view to check translations of Able Player.</p>
-			<div class="flex">
-				<p>
-					<label for="lang_selector">Select language</label><br />
-					<select id="lang_selector">
-						<option value="">Default Language</option>
-					</select>
-				</p>
-				<button type="button" id="select_lang">Switch Language</button>
+				<p>Use this view to check translations of Able Player.</p>
+				<div class="flex">
+					<p>
+						<label for="lang_selector">Select language</label><br />
+						<select id="lang_selector">
+							<option value="">Default Language</option>
+						</select>
+					</p>
+					<button type="button" id="select_lang">Switch Language</button>
+				</div>
+				<div class="notification" role="alert">
+
+				</div>
 			</div>
-			<div class="notification" role="alert">
-
+			<div id="video-wrapper">
+				<video id="video1" preload="auto" poster="../media/wwa.jpg" playsinline>
+					<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-youtube-sign-src="https://youtu.be/bf6214F7srY"/>
+					<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+					<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+					<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+					<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+					<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+					<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+					<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+					<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+					<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+					<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+					<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+					<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+					<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+				</video>
+				<div id="able-vts"></div>
 			</div>
-		</div>
-		<div id="video-wrapper">
-			<video id="video1" preload="auto" poster="../media/wwa.jpg" playsinline>
-				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4" data-youtube-sign-src="https://youtu.be/bf6214F7srY"/>
-				<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-				<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-				<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-				<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-				<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-				<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-				<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-				<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-				<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-				<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-				<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-				<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
-			</video>
-		</div>
 
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

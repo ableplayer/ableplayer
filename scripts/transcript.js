@@ -37,10 +37,9 @@ function addTranscriptFunctions(AblePlayer) {
   };
 
   AblePlayer.prototype.injectTranscriptArea = function () {
-    var $autoScrollLabel,
-      $autoScrollContainer,
+    var autoScrollField,
       $languageSelectWrapper,
-      $languageSelectLabel,
+      languageSelectField,
       i,
       $option;
 
@@ -61,34 +60,28 @@ function addTranscriptFunctions(AblePlayer) {
     // Transcript toolbar content
 
     // Add auto Scroll checkbox
-    this.$autoScrollTranscriptCheckbox = $("<input>", {
-      id: "autoscroll-transcript-checkbox-" + this.mediaId,
-      type: "checkbox",
+    autoScrollField = this.createField({
+      wrapperClass: 'autoscroll-transcript',
+      id: 'autoscroll-transcript-checkbox-' + this.mediaId,
+      label: this.translate( 'autoScroll', 'Auto scroll' ),
+      type: 'checkbox',
+      labelPosition: 'before'
     });
-    $autoScrollLabel = $("<label>", {
-      for: "autoscroll-transcript-checkbox-" + this.mediaId,
-    }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
-	$autoScrollContainer = $( '<div>', {
-		'class': 'autoscroll-transcript'
-	});
-	$autoScrollContainer.append(
-		$autoScrollLabel,
-		this.$autoScrollTranscriptCheckbox
-	);
-    this.$transcriptToolbar.append( $autoScrollContainer );
+    this.$autoScrollTranscriptCheckbox = autoScrollField.field;
+    this.$transcriptToolbar.append( autoScrollField.wrapper );
 
     // Add field for selecting a transcript language
     // Only necessary if there is more than one language
     if (this.captions.length > 1) {
-      $languageSelectWrapper = $("<div>", {
-        class: "transcript-language-select-wrapper",
+      languageSelectField = this.createField({
+        wrapperClass: 'transcript-language-select-wrapper',
+        id: 'transcript-language-select-' + this.mediaId,
+        label: this.translate( 'language', 'Language' ),
+        type: 'select',
+        labelPosition: 'before'
       });
-      $languageSelectLabel = $("<label>", {
-        for: "transcript-language-select-" + this.mediaId,
-      }).text( this.translate( 'language', 'Language' ) );
-      this.$transcriptLanguageSelect = $("<select>", {
-        id: "transcript-language-select-" + this.mediaId,
-      });
+      $languageSelectWrapper = languageSelectField.wrapper;
+      this.$transcriptLanguageSelect = languageSelectField.field;
       for (i = 0; i < this.captions.length; i++) {
         $option = $("<option></option>", {
           value: this.captions[i]["language"],
@@ -101,10 +94,6 @@ function addTranscriptFunctions(AblePlayer) {
       }
     }
     if ($languageSelectWrapper) {
-      $languageSelectWrapper.append(
-        $languageSelectLabel,
-        this.$transcriptLanguageSelect
-      );
       this.$transcriptToolbar.append($languageSelectWrapper);
     }
     this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
@@ -202,20 +191,19 @@ function addTranscriptFunctions(AblePlayer) {
   };
 
   AblePlayer.prototype.setupManualTranscript = function () {
-    var $autoScrollInput, $autoScrollLabel;
+    var autoScrollField;
 
-    $autoScrollInput = $("<input>", {
-      id: "autoscroll-transcript-checkbox-" + this.mediaId,
-      type: "checkbox",
+    autoScrollField = this.createField({
+      id: 'autoscroll-transcript-checkbox-' + this.mediaId,
+      label: this.translate( 'autoScroll', 'Auto scroll' ),
+      type: 'checkbox',
+      labelPosition: 'before'
     });
-    $autoScrollLabel = $("<label>", {
-      for: "autoscroll-transcript-checkbox-" + this.mediaId,
-    }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
 
     // Add an auto-scroll checkbox to the toolbar.
-    this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+    this.$autoScrollTranscriptCheckbox = autoScrollField.field;
     this.$transcriptToolbar.append(
-      $autoScrollLabel,
+      autoScrollField.label,
       this.$autoScrollTranscriptCheckbox
     );
   };
@@ -527,67 +515,67 @@ function addTranscriptFunctions(AblePlayer) {
 
       var flattenComponentForCaption = function (comp) {
         var result = [];
-
         var parts = 0;
 
         var flattenString = function (str) {
-          parts++;
+			parts++;
 
-          var flatStr;
-          var result = [];
-          if (str === "") {
-            return result;
-          }
+			var flatStr;
+			var result = [];
+			if (str === "") {
+				return result;
+			}
 
-          var openBracket = str.indexOf("[");
-          var closeBracket = str.indexOf("]");
-          var openParen = str.indexOf("(");
-          var closeParen = str.indexOf(")");
+			if ( ! thisObj.strictMode ) {
+				var openBracket = str.indexOf("[");
+				var closeBracket = str.indexOf("]");
+				var openParen = str.indexOf("(");
+				var closeParen = str.indexOf(")");
+				var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+				var hasParens = openParen !== -1 && closeParen !== -1;
+			} else {
+				result.push(str);
 
-          var hasBrackets = openBracket !== -1 && closeBracket !== -1;
-          var hasParens = openParen !== -1 && closeParen !== -1;
+				return result;
+			}
 
-          if (hasParens || hasBrackets) {
-            let silentSpanBreak;
-            if (parts > 1) {
-              // force a line break between sections that contain parens or brackets
-              silentSpanBreak = "<br/>";
-            } else {
-              silentSpanBreak = "";
-            }
-            var silentSpanOpen =
-              silentSpanBreak + '<span class="able-unspoken">';
-            var silentSpanClose = "</span>";
-            if (hasParens && hasBrackets) {
-              // string has both!
-              if (openBracket < openParen) {
-                // brackets come first. Parse parens separately
-                hasParens = false;
-              } else {
-                // parens come first. Parse brackets separately
-                hasBrackets = false;
-              }
-            }
-          }
-          if (hasParens) {
-            flatStr = str.substring(0, openParen);
-            flatStr += silentSpanOpen;
-            flatStr += str.substring(openParen, closeParen + 1);
-            flatStr += silentSpanClose;
-            flatStr += flattenString(str.substring(closeParen + 1));
-            result.push(flatStr);
-          } else if (hasBrackets) {
-            flatStr = str.substring(0, openBracket);
-            flatStr += silentSpanOpen;
-            flatStr += str.substring(openBracket, closeBracket + 1);
-            flatStr += silentSpanClose;
-            flatStr += flattenString(str.substring(closeBracket + 1));
-            result.push(flatStr);
-          } else {
-            result.push(str);
-          }
-          return result;
-        };
+			if (hasParens || hasBrackets) {
+				let silentSpanBreak;
+				// force a line break between sections that contain parens or brackets
+				silentSpanBreak = ( parts > 1 ) ? "<br/>" : '';
+
+				var silentSpanOpen = silentSpanBreak + '<span class="able-unspoken">';
+				var silentSpanClose = "</span>";
+				if (hasParens && hasBrackets) {
+					// string has both!
+					if (openBracket < openParen) {
+						// brackets come first. Parse parens separately
+						hasParens = false;
+					} else {
+						// parens come first. Parse brackets separately
+						hasBrackets = false;
+					}
+				}
+			}
+			if (hasParens) {
+				flatStr = str.substring(0, openParen);
+				flatStr += silentSpanOpen;
+				flatStr += str.substring(openParen, closeParen + 1);
+				flatStr += silentSpanClose;
+				flatStr += flattenString(str.substring(closeParen + 1));
+				result.push(flatStr);
+			} else if (hasBrackets) {
+				flatStr = str.substring(0, openBracket);
+				flatStr += silentSpanOpen;
+				flatStr += str.substring(openBracket, closeBracket + 1);
+				flatStr += silentSpanClose;
+				flatStr += flattenString(str.substring(closeBracket + 1));
+				result.push(flatStr);
+			} else {
+				result.push(str);
+			}
+			return result;
+		};
 
         if (comp.type === "string") {
           result = result.concat(flattenString(comp.value));

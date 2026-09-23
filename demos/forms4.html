@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Video player on a page with form fields | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -66,40 +65,39 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Video player on a page with form fields</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Video player on a page with form fields</h1>
 
-		<form action="#" method="post">
+			<form action="#" method="post">
 
-			<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player playsinline>
-				<source type="video/mp4" src="../media/wwa.mp4"/>
-				<source type="video/webm" src="../media/wwa.webm"/>
-				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
-			</video>
+				<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player playsinline>
+					<source type="video/mp4" src="../media/wwa.mp4"/>
+					<source type="video/webm" src="../media/wwa.webm"/>
+					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
+				</video>
 
-			<h2>Form Fields</h2>
+				<h2>Form Fields</h2>
 
-			<p>When users are interacting with form fields,
-				their keystrokes should not be handled by the player.
-				If the player is contained within a form,
-				no buttons on the player should submit or otherwise affect the form.
-			</p>
+				<p>When users are interacting with form fields,
+					their keystrokes should not be handled by the player.
+					If the player is contained within a form,
+					no buttons on the player should submit or otherwise affect the form.
+				</p>
 
-			<div class="form">
-				<div id="feedback" role="alert"></div>
-				<label for="favplayer">What's your favorite media player?</label>
-				<input type="text" id="favplayer">
-				<input type="submit" value="Submit" id="submit">
-			</div>
+				<div class="form">
+					<div id="feedback" role="alert"></div>
+					<label for="favplayer">What's your favorite media player?</label>
+					<input type="text" id="favplayer">
+					<input type="submit" value="Submit" id="submit">
+				</div>
 
-		</form>
+			</form>
 
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

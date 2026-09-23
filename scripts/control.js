@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import DOMPurify from 'dompurify';
 
 function addControlFunctions(AblePlayer) {
 
@@ -420,17 +421,16 @@ function addControlFunctions(AblePlayer) {
 		// 'fullscreen' - a change has been triggered by full screen toggle
 		// 'playpause' - a change triggered by either a 'play' or 'pause' event
 
-		// NOTE: context is not currently supported.
-		// The steps in this function have too many complex interdependencies
-		// The gains in efficiency are offset by the possibility of introducing bugs
-		// For now, executing everything
-		context = 'init';
+		// Normalize context to a known value.
+		if (['init', 'timeline', 'captions', 'descriptions', 'transcript', 'fullscreen', 'playpause'].indexOf(context) === -1) {
+			context = 'init';
+		}
 
 		// duration and elapsed are passed from callback functions of Vimeo API events
 		// duration is expressed as sss.xxx
 		// elapsed is expressed as sss.xxx
 
-		var thisObj, textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
+		var thisObj, textByState, volumeStatus, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
 
 		thisObj = this;
 		// wait until new source has loaded before refreshing controls
@@ -442,7 +442,7 @@ function addControlFunctions(AblePlayer) {
 		if ( context === 'timeline' || context === 'init' ) {
 			// Update timeline controls.
 			var lastChapterIndex, displayElapsed, updateLive, widthUsed,
-				leftControls, rightControls, seekbarWidth, buffered;
+				leftControls, rightControls, seekbarWidth, buffered, mediaDuration;
 			// all timeline-related functionality requires duration
 			if (typeof this.duration === 'undefined') {
 				// wait until duration is known before proceeding with refresh
@@ -480,9 +480,8 @@ function addControlFunctions(AblePlayer) {
 				if (!(this.seekBar.tracking)) {
 					// Only update the aria live region if we have an update pending
 					// (from a seek button control) or if the seekBar has focus.
-					// We use document.activeElement instead of $(':focus') due to a strange bug:
-					// When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+					let activeEl = AblePlayer.getActiveDOMElement();
+					updateLive = this.liveUpdatePending || this.seekBar.$seekHead.is($(activeEl));
 					this.liveUpdatePending = false;
 					if (this.useChapterTimes) {
 						this.seekBar.setPosition(this.chapterElapsed, updateLive);
@@ -514,12 +513,12 @@ function addControlFunctions(AblePlayer) {
 				// Update seekbar width.
 				// To do this, we need to calculate the width of all buttons surrounding it.
 				if (this.seekBar) {
-					let controlWrapper = this.seekBar.wrapperDiv.parent().parent();
-					leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+					let controlWrapper = this.seekBar.$wrapperDiv.parent().parent();
+					leftControls = this.seekBar.$wrapperDiv.parent().prev('div.able-left-controls');
 					rightControls = leftControls.next('div.able-right-controls');
 					widthUsed = leftControls.outerWidth(true);
 					rightControls.children().each(function () {
-						if ($(this).attr('role')=='button') {
+						if ( $(this).is('button') ) {
 							widthUsed += $(this).outerWidth(true) + 5;
 						}
 					});
@@ -541,16 +540,17 @@ function addControlFunctions(AblePlayer) {
 			// TODO: Currently only using the first HTML5 buffered interval,
 			// but this fails sometimes when buffering is split into two or more intervals.
 			if (this.player === 'html5' && this.media.buffered.length > 0) {
+				mediaDuration = (typeof duration !== 'undefined' && !isNaN(duration) && duration > 0) ? duration : this.duration;
 				buffered = this.media.buffered.end(0);
 				if (this.useChapterTimes) {
 					if (buffered > this.chapterDuration) {
 						buffered = this.chapterDuration;
 					}
-					if (this.seekBar) {
+					if (this.seekBar && this.chapterDuration > 0) {
 						this.seekBar.setBuffered(buffered / this.chapterDuration);
 					}
-				} else if ( this.seekBar && !isNaN(buffered) ) {
-					this.seekBar.setBuffered(buffered / duration);
+				} else if ( this.seekBar && !isNaN(buffered) && !isNaN(mediaDuration) && mediaDuration > 0 ) {
+					this.seekBar.setBuffered(buffered / mediaDuration);
 				}
 			} else if (this.player === 'youtube' && this.seekBar && this.youTubePlayerReady ) {
 				this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
@@ -687,7 +687,10 @@ function addControlFunctions(AblePlayer) {
 				// Update the text only if it's changed since it has role="alert";
 				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 				this.getPlayerState().then(function(currentState) {
-					if (thisObj.$status.text() !== textByState[currentState] && !thisObj.seekBar.tracking) {
+					volumeStatus = thisObj.getVolume() === 0 ? thisObj.translate( 'statusMuted', 'Muted' ) : '';
+					volumeStatus = (volumeStatus) ? ', ' + volumeStatus : '';
+					let currentMessage = textByState[currentState] + ' ' + volumeStatus;
+					if (thisObj.$status.text() !== currentMessage && !thisObj.seekBar.tracking) {
 						// Debounce updates; only update after status has stayed steadily different for a while
 						// "A while" is defined differently depending on context
 						if (thisObj.swappingSrc) {
@@ -711,7 +714,7 @@ function addControlFunctions(AblePlayer) {
 								thisObj.refreshControls(context);
 							}, thisObj.statusMessageThreshold);
 						} else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
-							thisObj.$status.text(textByState[currentState]);
+							thisObj.$status.text(currentMessage);
 							thisObj.statusDebounceStart = null;
 							clearTimeout(thisObj.statusTimeout);
 							thisObj.statusTimeout = null;
@@ -862,12 +865,17 @@ function addControlFunctions(AblePlayer) {
 	};
 
 	// Increases or decreases playback rate, where dir is 1 or -1 indication direction.
-	AblePlayer.prototype.changeRate = function (dir) {
+	AblePlayer.prototype.changeRate = function (dir,change = true) {
 
 		var rates, currentRate, index, newRate, vimeoMin, vimeoMax;
 
 		if (this.player === 'html5') {
-			this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+			if ( change ) {
+				// increase or decrease by 0.25x
+				this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+			} else {
+				return this.getPlaybackRate() + (0.25 * dir);
+			}
 		} else if (this.player === 'youtube') {
 			if (this.youTubePlayerReady) {
 				rates = this.youTubePlayer.getAvailablePlaybackRates();
@@ -879,7 +887,11 @@ function addControlFunctions(AblePlayer) {
 					index += dir;
 					// Can only increase or decrease rate if there's another rate available.
 					if (index < rates.length && index >= 0) {
-						this.setPlaybackRate(rates[index]);
+						if ( change ) {
+							this.setPlaybackRate(rates[index]);
+						} else {
+							return rates[index];
+						}
 					}
 				}
 			}
@@ -893,20 +905,17 @@ function addControlFunctions(AblePlayer) {
 			} else if (dir === -1) {
 				newRate = (this.vimeoPlaybackRate - 0.5 >= vimeoMin) ? this.vimeoPlaybackRate - 0.5 : vimeoMin;
 			}
-			this.setPlaybackRate(newRate);
+			if ( change ) {
+				this.setPlaybackRate(newRate);
+			} else {
+				return newRate;
+			}
 		}
 	};
 
 	AblePlayer.prototype.handleCaptionToggle = function() {
-
 		var thisObj = this;
 		var captions, ariaPressed;
-		if (this.hidingPopup) {
-			// stopgap to prevent spacebar in Firefox from reopening popup
-			// immediately after closing it
-			this.hidingPopup = false;
-			return false;
-		}
 
 		captions = (this.captions.length) ? this.captions : [];
 		if (captions.length === 1) {
@@ -967,7 +976,6 @@ function addControlFunctions(AblePlayer) {
 			// clicking on a track is handled via caption.js > getCaptionClickFunction()
 			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
 				this.captionsPopup.hide();
-				this.hidingPopup = false;
 				this.$ccButton.attr('aria-expanded', 'false')
 				this.waitThenFocus(this.$ccButton);
 			} else {
@@ -978,7 +986,7 @@ function addControlFunctions(AblePlayer) {
 
 					// Gives time to "register" expanded ccButton
 					setTimeout(function() {
-						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight() - 4 );
 						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left)
 						// Place focus on the first button (even if another button is checked)
 						thisObj.captionsPopup.find('li').removeClass('able-focus');
@@ -1017,21 +1025,14 @@ function addControlFunctions(AblePlayer) {
 	}
 
 	AblePlayer.prototype.handleChapters = function () {
-		if (this.hidingPopup) {
-			// stopgap to prevent spacebar in Firefox from reopening popup
-			// immediately after closing it
-			this.hidingPopup = false;
-			return false;
-		}
 		if (this.chaptersPopup.is(':visible')) {
 			this.chaptersPopup.hide();
-			this.hidingPopup = false;
 			this.$chaptersButton.attr('aria-expanded','false').trigger('focus');
 		} else {
 			this.closePopups();
 			this.chaptersPopup.show();
 			this.$chaptersButton.attr('aria-expanded','true');
-			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight() - 4 );
 			this.chaptersPopup.css('left', this.$chaptersButton.position().left)
 
 			// Highlight the current chapter, if any chapters are checked
@@ -1079,12 +1080,6 @@ function addControlFunctions(AblePlayer) {
 		if (this.speechEnabled === null) {
 			this.initSpeech('prefs');
 		}
-		if (this.hidingPopup) {
-			// stopgap to prevent spacebar in Firefox from reopening popup
-			// immediately after closing it
-			this.hidingPopup = false;
-			return false;
-		}
 		if (this.prefsPopup.is(':visible')) {
 			this.prefsPopup.hide();
 			this.$prefsButton.attr('aria-expanded','false');
@@ -1093,10 +1088,6 @@ function addControlFunctions(AblePlayer) {
 			if (!this.showingPrefsDialog) {
 				this.$prefsButton.trigger('focus');
 			}
-			// wait briefly, then reset hidingPopup
-			setTimeout(function() {
-				thisObj.hidingPopup = false;
-			},100);
 		} else {
 			this.closePopups();
 			this.prefsPopup.show();
@@ -1107,7 +1098,7 @@ function addControlFunctions(AblePlayer) {
 				prefsButtonPosition = thisObj.$prefsButton.position();
 				prefsMenuRight = thisObj.$ableDiv.width() - 5;
 				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
-				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight() - 4);
 				thisObj.prefsPopup.css('left', prefsMenuLeft);
 				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
 				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
@@ -1329,7 +1320,12 @@ function addControlFunctions(AblePlayer) {
 		// Remove existing HTML before generating.
 		// iconData: [0 = svg viewbox, 1 = svg path]
 		// Font and image icon functionality was removed in 5.0.0 in favor of SVG.
-		var iconData = this.getIconData( id );
+		var iconData;
+		if ( Object.hasOwn( this.options, 'icons' ) && Object.hasOwn( this.options.icons, id ) ) {
+			iconData = this.options.icons[id];
+		} else {
+			iconData = this.getIconData( id );
+		}
 
 		var existingIcon = $button.find( 'svg#ableplayer-' + id );
 		// Avoid repainting icon if there's no change.
@@ -1338,28 +1334,31 @@ function addControlFunctions(AblePlayer) {
 		}
 		$button.find('svg').remove();
 
-		// Outdented for simpler diff
-			// Function to create SVG nodes.
-			function getNode(n, v) {
-				n = document.createElementNS("http://www.w3.org/2000/svg", n);
-				for (var p in v) {
-					n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
-						return "-" + m.toLowerCase();
-					}), v[p]);
-				}
-				return n;
+		// Function to create SVG nodes.
+		function getNode(n, v) {
+			n = document.createElementNS("http://www.w3.org/2000/svg", n);
+			for (var p in v) {
+				n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
+					return "-" + m.toLowerCase();
+				}), v[p]);
 			}
-			var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-			icon.setAttribute( 'focusable', 'false' );
-			icon.setAttribute( 'aria-hidden', 'true');
-			icon.setAttribute( 'viewBox', iconData[0] );
-			icon.setAttribute( 'id', 'ableplayer-' + id );
-			let path = getNode( 'path', { d: iconData[1] } );
+			return n;
+		}
+		var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+		icon.setAttribute( 'focusable', 'false' );
+		icon.setAttribute( 'aria-hidden', 'true');
+		icon.setAttribute( 'viewBox', iconData[0] );
+		icon.setAttribute( 'id', 'ableplayer-' + id );
+		let paths = iconData[1];
+		paths.forEach( function( pathData ) {
+			let path = getNode( 'path', { d: pathData } );
 			icon.appendChild( path );
-
-			$button.append( icon );
-			// Refresh the DOM.
-			$button.html($button.html());
+		});
+		let cleanSVG = DOMPurify.sanitize(icon.outerHTML, {RETURN_DOM_FRAGMENT: true});
+		icon = cleanSVG.firstChild;
+		$button.append( icon );
+		// Refresh the DOM.
+		$button.html($button.html());
 	};
 
 	AblePlayer.prototype.setText = function( $button, text ) {
@@ -1710,26 +1709,21 @@ function addControlFunctions(AblePlayer) {
 				meta = this.meta[i];
 			}
 		}
-		// regardless of source...
-		this.transcriptLang = language;
+		// Change the transcript language if the transcript is not currently visible.
+		if ( ( source === 'captions' && typeof this.$transcriptArea !== 'undefined' && ! this.$transcriptArea.is(':visible') ) || source === 'init' || source === 'transcript' ) {
+			console.log('syncTrackLanguages: transcript is not visible, so changing transcript language to ' + language);
+			this.transcriptCaptions = captions;
+			this.transcriptChapters = chapters;
+			this.transcriptDescriptions = descriptions;
+			this.transcriptLang = language;
+		}
 		if (source === 'init' || source === 'captions') {
 			this.captionLang = language;
 			this.selectedCaptions = captions;
 			this.selectedChapters = chapters;
 			this.selectedDescriptions = descriptions;
 			this.selectedMeta = meta;
-			this.transcriptCaptions = captions;
-			this.transcriptChapters = chapters;
-			this.transcriptDescriptions = descriptions;
 			this.updateChaptersList();
-			// the following was commented out in Oct/Nov 2018.
-			// chapters popup is setup automatically when setupPopups() is called later with no param
-			// not sure why it was included here.
-			// this.setupPopups('chapters');
-		} else if (source === 'transcript') {
-			this.transcriptCaptions = captions;
-			this.transcriptChapters = chapters;
-			this.transcriptDescriptions = descriptions;
 		}
 		if (this.selectedDescriptions) {
 			// updating description voice to match new description language

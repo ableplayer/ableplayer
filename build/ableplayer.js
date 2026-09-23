@@ -1,4 +1,4 @@
-/*! ableplayer V5.0.0 - with DOMPurify included. Console logs enabled, for development */
+/*! ableplayer V5.1.0-beta1 - with DOMPurify included. Console logs enabled, for development */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery')) :
@@ -6,24 +6,65 @@
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.AblePlayer = factory(global.jQuery));
 })(this, (function ($) { 'use strict';
 
-  /*! @license DOMPurify 3.4.0 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.0/LICENSE */
+  /*! @license DOMPurify 3.4.12 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.12/LICENSE */
 
-  const {
-    entries,
-    setPrototypeOf,
-    isFrozen,
-    getPrototypeOf,
-    getOwnPropertyDescriptor
-  } = Object;
-  let {
-    freeze,
-    seal,
-    create
-  } = Object; // eslint-disable-line import/no-mutable-exports
-  let {
-    apply,
-    construct
-  } = typeof Reflect !== 'undefined' && Reflect;
+  function _arrayLikeToArray(r, a) {
+    (null == a || a > r.length) && (a = r.length);
+    for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+    return n;
+  }
+  function _arrayWithHoles(r) {
+    if (Array.isArray(r)) return r;
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e,
+        n,
+        i,
+        u,
+        a = [],
+        f = true,
+        o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) ; else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
+      } catch (r) {
+        o = true, n = r;
+      } finally {
+        try {
+          if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _slicedToArray(r, e) {
+    return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+  }
+  function _unsupportedIterableToArray(r, a) {
+    if (r) {
+      if ("string" == typeof r) return _arrayLikeToArray(r, a);
+      var t = {}.toString.call(r).slice(8, -1);
+      return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
+    }
+  }
+
+  const entries = Object.entries,
+    setPrototypeOf = Object.setPrototypeOf,
+    isFrozen = Object.isFrozen,
+    getPrototypeOf = Object.getPrototypeOf,
+    getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+  let freeze = Object.freeze,
+    seal = Object.seal,
+    create = Object.create; // eslint-disable-line import/no-mutable-exports
+  let _ref = typeof Reflect !== 'undefined' && Reflect,
+    apply = _ref.apply,
+    construct = _ref.construct;
   if (!freeze) {
     freeze = function freeze(x) {
       return x;
@@ -55,13 +96,19 @@
   const arrayPop = unapply(Array.prototype.pop);
   const arrayPush = unapply(Array.prototype.push);
   const arraySplice = unapply(Array.prototype.splice);
+  const arrayIsArray = Array.isArray;
   const stringToLowerCase = unapply(String.prototype.toLowerCase);
   const stringToString = unapply(String.prototype.toString);
   const stringMatch = unapply(String.prototype.match);
   const stringReplace = unapply(String.prototype.replace);
   const stringIndexOf = unapply(String.prototype.indexOf);
   const stringTrim = unapply(String.prototype.trim);
+  const numberToString = unapply(Number.prototype.toString);
+  const booleanToString = unapply(Boolean.prototype.toString);
+  const bigintToString = typeof BigInt === 'undefined' ? null : unapply(BigInt.prototype.toString);
+  const symbolToString = typeof Symbol === 'undefined' ? null : unapply(Symbol.prototype.toString);
   const objectHasOwnProperty = unapply(Object.prototype.hasOwnProperty);
+  const objectToString = unapply(Object.prototype.toString);
   const regExpTest = unapply(RegExp.prototype.test);
   const typeErrorCreate = unconstruct(TypeError);
   /**
@@ -111,6 +158,9 @@
       // Prevent prototype setters from intercepting set as a this value.
       setPrototypeOf(set, null);
     }
+    if (!arrayIsArray(array)) {
+      return set;
+    }
     let l = array.length;
     while (l--) {
       let element = array[l];
@@ -151,10 +201,13 @@
    */
   function clone(object) {
     const newObject = create(null);
-    for (const [property, value] of entries(object)) {
+    for (const _ref2 of entries(object)) {
+      var _ref3 = _slicedToArray(_ref2, 2);
+      const property = _ref3[0];
+      const value = _ref3[1];
       const isPropertyExist = objectHasOwnProperty(object, property);
       if (isPropertyExist) {
-        if (Array.isArray(value)) {
+        if (arrayIsArray(value)) {
           newObject[property] = cleanArray(value);
         } else if (value && typeof value === 'object' && value.constructor === Object) {
           newObject[property] = clone(value);
@@ -164,6 +217,58 @@
       }
     }
     return newObject;
+  }
+  /**
+   * Convert non-node values into strings without depending on direct property access.
+   *
+   * @param value - The value to stringify.
+   * @returns A string representation of the provided value.
+   */
+  function stringifyValue(value) {
+    switch (typeof value) {
+      case 'string':
+        {
+          return value;
+        }
+      case 'number':
+        {
+          return numberToString(value);
+        }
+      case 'boolean':
+        {
+          return booleanToString(value);
+        }
+      case 'bigint':
+        {
+          return bigintToString ? bigintToString(value) : '0';
+        }
+      case 'symbol':
+        {
+          return symbolToString ? symbolToString(value) : 'Symbol()';
+        }
+      case 'undefined':
+        {
+          return objectToString(value);
+        }
+      case 'function':
+      case 'object':
+        {
+          if (value === null) {
+            return objectToString(value);
+          }
+          const valueAsRecord = value;
+          const valueToString = lookupGetter(valueAsRecord, 'toString');
+          if (typeof valueToString === 'function') {
+            const stringified = valueToString(valueAsRecord);
+            return typeof stringified === 'string' ? stringified : objectToString(stringified);
+          }
+          return objectToString(value);
+        }
+      default:
+        {
+          return objectToString(value);
+        }
+    }
   }
   /**
    * This method automatically checks if the prop is function or getter and behaves accordingly.
@@ -190,6 +295,14 @@
     }
     return fallbackValue;
   }
+  function isRegex(value) {
+    try {
+      regExpTest(value, '');
+      return true;
+    } catch (_unused) {
+      return false;
+    }
+  }
 
   const html$1 = freeze(['a', 'abbr', 'acronym', 'address', 'area', 'article', 'aside', 'audio', 'b', 'bdi', 'bdo', 'big', 'blink', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center', 'cite', 'code', 'col', 'colgroup', 'content', 'data', 'datalist', 'dd', 'decorator', 'del', 'details', 'dfn', 'dialog', 'dir', 'div', 'dl', 'dt', 'element', 'em', 'fieldset', 'figcaption', 'figure', 'font', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hgroup', 'hr', 'html', 'i', 'img', 'input', 'ins', 'kbd', 'label', 'legend', 'li', 'main', 'map', 'mark', 'marquee', 'menu', 'menuitem', 'meter', 'nav', 'nobr', 'ol', 'optgroup', 'option', 'output', 'p', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'search', 'section', 'select', 'shadow', 'slot', 'small', 'source', 'spacer', 'span', 'strike', 'strong', 'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template', 'textarea', 'tfoot', 'th', 'thead', 'time', 'tr', 'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr']);
   const svg$1 = freeze(['svg', 'a', 'altglyph', 'altglyphdef', 'altglyphitem', 'animatecolor', 'animatemotion', 'animatetransform', 'circle', 'clippath', 'defs', 'desc', 'ellipse', 'enterkeyhint', 'exportparts', 'filter', 'font', 'g', 'glyph', 'glyphref', 'hkern', 'image', 'inputmode', 'line', 'lineargradient', 'marker', 'mask', 'metadata', 'mpath', 'part', 'path', 'pattern', 'polygon', 'polyline', 'radialgradient', 'rect', 'stop', 'style', 'switch', 'symbol', 'text', 'textpath', 'title', 'tref', 'tspan', 'view', 'vkern']);
@@ -205,15 +318,14 @@
   const mathMlDisallowed = freeze(['maction', 'maligngroup', 'malignmark', 'mlongdiv', 'mscarries', 'mscarry', 'msgroup', 'mstack', 'msline', 'msrow', 'semantics', 'annotation', 'annotation-xml', 'mprescripts', 'none']);
   const text = freeze(['#text']);
 
-  const html = freeze(['accept', 'action', 'align', 'alt', 'autocapitalize', 'autocomplete', 'autopictureinpicture', 'autoplay', 'background', 'bgcolor', 'border', 'capture', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'controls', 'controlslist', 'coords', 'crossorigin', 'datetime', 'decoding', 'default', 'dir', 'disabled', 'disablepictureinpicture', 'disableremoteplayback', 'download', 'draggable', 'enctype', 'enterkeyhint', 'exportparts', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'inert', 'inputmode', 'integrity', 'ismap', 'kind', 'label', 'lang', 'list', 'loading', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'minlength', 'multiple', 'muted', 'name', 'nonce', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'part', 'pattern', 'placeholder', 'playsinline', 'popover', 'popovertarget', 'popovertargetaction', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'sizes', 'slot', 'span', 'srclang', 'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex', 'title', 'translate', 'type', 'usemap', 'valign', 'value', 'width', 'wrap', 'xmlns', 'slot']);
-  const svg = freeze(['accent-height', 'accumulate', 'additive', 'alignment-baseline', 'amplitude', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clippathunits', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dur', 'edgemode', 'elevation', 'end', 'exponent', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'filterunits', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'intercept', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'mask-type', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'preserveaspectratio', 'primitiveunits', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'slope', 'specularconstant', 'specularexponent', 'spreadmethod', 'startoffset', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'systemlanguage', 'tabindex', 'tablevalues', 'targetx', 'targety', 'transform', 'transform-origin', 'text-anchor', 'text-decoration', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'version', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan']);
+  const html = freeze(['accept', 'action', 'align', 'alt', 'autocapitalize', 'autocomplete', 'autopictureinpicture', 'autoplay', 'background', 'bgcolor', 'border', 'capture', 'cellpadding', 'cellspacing', 'checked', 'cite', 'class', 'clear', 'color', 'cols', 'colspan', 'command', 'commandfor', 'controls', 'controlslist', 'coords', 'crossorigin', 'datetime', 'decoding', 'default', 'dir', 'disabled', 'disablepictureinpicture', 'disableremoteplayback', 'download', 'draggable', 'enctype', 'enterkeyhint', 'exportparts', 'face', 'for', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang', 'id', 'inert', 'inputmode', 'integrity', 'ismap', 'kind', 'label', 'lang', 'list', 'loading', 'loop', 'low', 'max', 'maxlength', 'media', 'method', 'min', 'minlength', 'multiple', 'muted', 'name', 'nonce', 'noshade', 'novalidate', 'nowrap', 'open', 'optimum', 'part', 'pattern', 'placeholder', 'playsinline', 'popover', 'popovertarget', 'popovertargetaction', 'poster', 'preload', 'pubdate', 'radiogroup', 'readonly', 'rel', 'required', 'rev', 'reversed', 'role', 'rows', 'rowspan', 'spellcheck', 'scope', 'selected', 'shape', 'size', 'sizes', 'slot', 'span', 'srclang', 'start', 'src', 'srcset', 'step', 'style', 'summary', 'tabindex', 'title', 'translate', 'type', 'usemap', 'valign', 'value', 'width', 'wrap', 'xmlns']);
+  const svg = freeze(['accent-height', 'accumulate', 'additive', 'alignment-baseline', 'amplitude', 'ascent', 'attributename', 'attributetype', 'azimuth', 'basefrequency', 'baseline-shift', 'begin', 'bias', 'by', 'class', 'clip', 'clippathunits', 'clip-path', 'clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cx', 'cy', 'd', 'dx', 'dy', 'diffuseconstant', 'direction', 'display', 'divisor', 'dominant-baseline', 'dur', 'edgemode', 'elevation', 'end', 'exponent', 'fill', 'fill-opacity', 'fill-rule', 'filter', 'filterunits', 'flood-color', 'flood-opacity', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'fx', 'fy', 'g1', 'g2', 'glyph-name', 'glyphref', 'gradientunits', 'gradienttransform', 'height', 'href', 'id', 'image-rendering', 'in', 'in2', 'intercept', 'k', 'k1', 'k2', 'k3', 'k4', 'kerning', 'keypoints', 'keysplines', 'keytimes', 'lang', 'lengthadjust', 'letter-spacing', 'kernelmatrix', 'kernelunitlength', 'lighting-color', 'local', 'marker-end', 'marker-mid', 'marker-start', 'markerheight', 'markerunits', 'markerwidth', 'maskcontentunits', 'maskunits', 'max', 'mask', 'mask-type', 'media', 'method', 'mode', 'min', 'name', 'numoctaves', 'offset', 'operator', 'opacity', 'order', 'orient', 'orientation', 'origin', 'overflow', 'paint-order', 'path', 'pathlength', 'patterncontentunits', 'patterntransform', 'patternunits', 'points', 'preservealpha', 'preserveaspectratio', 'primitiveunits', 'r', 'rx', 'ry', 'radius', 'refx', 'refy', 'repeatcount', 'repeatdur', 'restart', 'result', 'rotate', 'scale', 'seed', 'shape-rendering', 'slope', 'specularconstant', 'specularexponent', 'spreadmethod', 'startoffset', 'stddeviation', 'stitchtiles', 'stop-color', 'stop-opacity', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke', 'stroke-width', 'style', 'surfacescale', 'systemlanguage', 'tabindex', 'tablevalues', 'targetx', 'targety', 'transform', 'transform-origin', 'text-anchor', 'text-decoration', 'text-orientation', 'text-rendering', 'textlength', 'type', 'u1', 'u2', 'unicode', 'values', 'viewbox', 'visibility', 'version', 'vert-adv-y', 'vert-origin-x', 'vert-origin-y', 'width', 'word-spacing', 'wrap', 'writing-mode', 'xchannelselector', 'ychannelselector', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2', 'z', 'zoomandpan']);
   const mathMl = freeze(['accent', 'accentunder', 'align', 'bevelled', 'close', 'columnalign', 'columnlines', 'columnspacing', 'columnspan', 'denomalign', 'depth', 'dir', 'display', 'displaystyle', 'encoding', 'fence', 'frame', 'height', 'href', 'id', 'largeop', 'length', 'linethickness', 'lquote', 'lspace', 'mathbackground', 'mathcolor', 'mathsize', 'mathvariant', 'maxsize', 'minsize', 'movablelimits', 'notation', 'numalign', 'open', 'rowalign', 'rowlines', 'rowspacing', 'rowspan', 'rspace', 'rquote', 'scriptlevel', 'scriptminsize', 'scriptsizemultiplier', 'selection', 'separator', 'separators', 'stretchy', 'subscriptshift', 'supscriptshift', 'symmetric', 'voffset', 'width', 'xmlns']);
   const xml = freeze(['xlink:href', 'xml:id', 'xlink:title', 'xml:space', 'xmlns:xlink']);
 
-  // eslint-disable-next-line unicorn/better-regex
-  const MUSTACHE_EXPR = seal(/\{\{[\w\W]*|[\w\W]*\}\}/gm); // Specify template detection regex for SAFE_FOR_TEMPLATES mode
-  const ERB_EXPR = seal(/<%[\w\W]*|[\w\W]*%>/gm);
-  const TMPLIT_EXPR = seal(/\$\{[\w\W]*/gm); // eslint-disable-line unicorn/better-regex
+  const MUSTACHE_EXPR = seal(/{{[\w\W]*|^[\w\W]*}}/g);
+  const ERB_EXPR = seal(/<%[\w\W]*|^[\w\W]*%>/g);
+  const TMPLIT_EXPR = seal(/\${[\w\W]*/g);
   const DATA_ATTR = seal(/^data-[\-\w.\u00B7-\uFFFF]+$/); // eslint-disable-line no-useless-escape
   const ARIA_ATTR = seal(/^aria-[\-\w]+$/); // eslint-disable-line no-useless-escape
   const IS_ALLOWED_URI = seal(/^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|matrix):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i // eslint-disable-line no-useless-escape
@@ -223,30 +335,31 @@
   );
   const DOCTYPE_NAME = seal(/^html$/i);
   const CUSTOM_ELEMENT = seal(/^[a-z][.\w]*(-[.\w]+)+$/i);
+  // Markup-significant character probes used by _sanitizeElements.
+  // Shared module-level instances are safe despite the sticky /g flags:
+  // unapply() resets lastIndex for RegExp receivers before every call.
+  const ELEMENT_MARKUP_PROBE = seal(/<[/\w!]/g);
+  const COMMENT_MARKUP_PROBE = seal(/<[/\w]/g);
+  const FALLBACK_TAG_CLOSE = seal(/<\/no(script|embed|frames)/i);
+  const SELF_CLOSING_TAG = seal(/\/>/i);
 
-  var EXPRESSIONS = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    ARIA_ATTR: ARIA_ATTR,
-    ATTR_WHITESPACE: ATTR_WHITESPACE,
-    CUSTOM_ELEMENT: CUSTOM_ELEMENT,
-    DATA_ATTR: DATA_ATTR,
-    DOCTYPE_NAME: DOCTYPE_NAME,
-    ERB_EXPR: ERB_EXPR,
-    IS_ALLOWED_URI: IS_ALLOWED_URI,
-    IS_SCRIPT_OR_DATA: IS_SCRIPT_OR_DATA,
-    MUSTACHE_EXPR: MUSTACHE_EXPR,
-    TMPLIT_EXPR: TMPLIT_EXPR
-  });
-
-  /* eslint-disable @typescript-eslint/indent */
   // https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType
   const NODE_TYPE = {
     element: 1,
+    attribute: 2,
     text: 3,
+    cdataSection: 4,
+    entityReference: 5,
     // Deprecated
-    progressingInstruction: 7,
+    entityNode: 6,
+    // Deprecated
+    processingInstruction: 7,
     comment: 8,
-    document: 9};
+    document: 9,
+    documentType: 10,
+    documentFragment: 11,
+    notation: 12 // Deprecated
+  };
   const getGlobal = function getGlobal() {
     return typeof window === 'undefined' ? null : window;
   };
@@ -301,10 +414,25 @@
       uponSanitizeShadowNode: []
     };
   };
+  /**
+   * Resolve a set-valued configuration option: a fresh set built from
+   * cfg[key] when it is an own array property (seeded with a clone of
+   * options.base when given, case-normalized via options.transform),
+   * the fallback set otherwise.
+   *
+   * @param cfg the cloned, prototype-free configuration object
+   * @param key the configuration property to read
+   * @param fallback the set to use when the option is absent or not an array
+   * @param options transform and optional base set to merge into
+   * @returns the resolved set
+   */
+  const _resolveSetOption = function _resolveSetOption(cfg, key, fallback, options) {
+    return objectHasOwnProperty(cfg, key) && arrayIsArray(cfg[key]) ? addToSet(options.base ? clone(options.base) : {}, cfg[key], options.transform) : fallback;
+  };
   function createDOMPurify() {
     let window = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : getGlobal();
     const DOMPurify = root => createDOMPurify(root);
-    DOMPurify.version = '3.4.0';
+    DOMPurify.version = '3.4.12';
     DOMPurify.removed = [];
     if (!window || !window.document || window.document.nodeType !== NODE_TYPE.document || !window.Element) {
       // Not running in a browser, provide a factory function
@@ -312,28 +440,29 @@
       DOMPurify.isSupported = false;
       return DOMPurify;
     }
-    let {
-      document
-    } = window;
+    let document = window.document;
     const originalDocument = document;
     const currentScript = originalDocument.currentScript;
-    const {
-      DocumentFragment,
-      HTMLTemplateElement,
-      Node,
-      Element,
-      NodeFilter,
-      NamedNodeMap = window.NamedNodeMap || window.MozNamedAttrMap,
-      HTMLFormElement,
-      DOMParser,
-      trustedTypes
-    } = window;
+    window.DocumentFragment;
+      const HTMLTemplateElement = window.HTMLTemplateElement,
+      Node = window.Node,
+      Element = window.Element,
+      NodeFilter = window.NodeFilter,
+      _window$NamedNodeMap = window.NamedNodeMap;
+      _window$NamedNodeMap === void 0 ? window.NamedNodeMap || window.MozNamedAttrMap : _window$NamedNodeMap;
+      window.HTMLFormElement;
+      const DOMParser = window.DOMParser,
+      trustedTypes = window.trustedTypes;
     const ElementPrototype = Element.prototype;
     const cloneNode = lookupGetter(ElementPrototype, 'cloneNode');
     const remove = lookupGetter(ElementPrototype, 'remove');
     const getNextSibling = lookupGetter(ElementPrototype, 'nextSibling');
     const getChildNodes = lookupGetter(ElementPrototype, 'childNodes');
     const getParentNode = lookupGetter(ElementPrototype, 'parentNode');
+    const getShadowRoot = lookupGetter(ElementPrototype, 'shadowRoot');
+    const getAttributes = lookupGetter(ElementPrototype, 'attributes');
+    const getNodeType = Node && Node.prototype ? lookupGetter(Node.prototype, 'nodeType') : null;
+    const getNodeName = Node && Node.prototype ? lookupGetter(Node.prototype, 'nodeName') : null;
     // As per issue #47, the web-components registry is inherited by a
     // new document created via createHTMLDocument. As per the spec
     // (http://w3c.github.io/webcomponents/spec/custom/#creating-and-passing-registries)
@@ -348,33 +477,74 @@
     }
     let trustedTypesPolicy;
     let emptyHTML = '';
-    const {
-      implementation,
-      createNodeIterator,
-      createDocumentFragment,
-      getElementsByTagName
-    } = document;
-    const {
-      importNode
-    } = originalDocument;
+    // The instance's own internal Trusted Types policy. Unlike a caller-supplied
+    // `TRUSTED_TYPES_POLICY`, this is created at most once — Trusted Types throws
+    // on duplicate policy names — and is the only policy allowed to persist
+    // across configurations and survive `clearConfig()`.
+    let defaultTrustedTypesPolicy;
+    let defaultTrustedTypesPolicyResolved = false;
+    // Tracks whether we are already inside a call to the configured Trusted Types
+    // policy (`createHTML` or `createScriptURL`). If a supplied policy callback
+    // itself calls `DOMPurify.sanitize` (the cause of #1422), `sanitize` would
+    // re-enter the policy and recurse until the stack overflows. We detect that
+    // re-entry and throw a clear, actionable error instead. The guard is shared
+    // across both callbacks, because either one re-entering `sanitize` triggers
+    // the same unbounded recursion.
+    let IN_TRUSTED_TYPES_POLICY = 0;
+    const _assertNotInTrustedTypesPolicy = function _assertNotInTrustedTypesPolicy() {
+      if (IN_TRUSTED_TYPES_POLICY > 0) {
+        throw typeErrorCreate('A configured TRUSTED_TYPES_POLICY callback (createHTML or ' + 'createScriptURL) must not call DOMPurify.sanitize, as that causes ' + 'infinite recursion. Do not pass a policy whose callbacks wrap ' + 'DOMPurify as TRUSTED_TYPES_POLICY; see the "DOMPurify and Trusted ' + 'Types" section of the README.');
+      }
+    };
+    const _createTrustedHTML = function _createTrustedHTML(html) {
+      _assertNotInTrustedTypesPolicy();
+      IN_TRUSTED_TYPES_POLICY++;
+      try {
+        return trustedTypesPolicy.createHTML(html);
+      } finally {
+        IN_TRUSTED_TYPES_POLICY--;
+      }
+    };
+    const _createTrustedScriptURL = function _createTrustedScriptURL(scriptUrl) {
+      _assertNotInTrustedTypesPolicy();
+      IN_TRUSTED_TYPES_POLICY++;
+      try {
+        return trustedTypesPolicy.createScriptURL(scriptUrl);
+      } finally {
+        IN_TRUSTED_TYPES_POLICY--;
+      }
+    };
+    // Lazily resolve (and cache) the instance's internal default policy.
+    // Resolution is attempted at most once: a successful `createPolicy` cannot be
+    // repeated (Trusted Types throws on duplicate names), and a failed or
+    // unsupported attempt must not be retried on every parse.
+    const _getDefaultTrustedTypesPolicy = function _getDefaultTrustedTypesPolicy() {
+      if (!defaultTrustedTypesPolicyResolved) {
+        defaultTrustedTypesPolicy = _createTrustedTypesPolicy(trustedTypes, currentScript);
+        defaultTrustedTypesPolicyResolved = true;
+      }
+      return defaultTrustedTypesPolicy;
+    };
+    const _document = document,
+      implementation = _document.implementation,
+      createNodeIterator = _document.createNodeIterator,
+      createDocumentFragment = _document.createDocumentFragment,
+      getElementsByTagName = _document.getElementsByTagName;
+    const importNode = originalDocument.importNode;
     let hooks = _createHooksMap();
     /**
      * Expose whether this browser supports running the full DOMPurify.
      */
     DOMPurify.isSupported = typeof entries === 'function' && typeof getParentNode === 'function' && implementation && implementation.createHTMLDocument !== undefined;
-    const {
-      MUSTACHE_EXPR,
-      ERB_EXPR,
-      TMPLIT_EXPR,
-      DATA_ATTR,
-      ARIA_ATTR,
-      IS_SCRIPT_OR_DATA,
-      ATTR_WHITESPACE,
-      CUSTOM_ELEMENT
-    } = EXPRESSIONS;
-    let {
-      IS_ALLOWED_URI: IS_ALLOWED_URI$1
-    } = EXPRESSIONS;
+    const MUSTACHE_EXPR$1 = MUSTACHE_EXPR,
+      ERB_EXPR$1 = ERB_EXPR,
+      TMPLIT_EXPR$1 = TMPLIT_EXPR,
+      DATA_ATTR$1 = DATA_ATTR,
+      ARIA_ATTR$1 = ARIA_ATTR,
+      IS_SCRIPT_OR_DATA$1 = IS_SCRIPT_OR_DATA,
+      ATTR_WHITESPACE$1 = ATTR_WHITESPACE,
+      CUSTOM_ELEMENT$1 = CUSTOM_ELEMENT;
+    let IS_ALLOWED_URI$1 = IS_ALLOWED_URI;
     /**
      * We consider the elements and attributes below to be safe. Ideally
      * don't add any new ones but feel free to remove unwanted ones.
@@ -451,6 +621,13 @@
     let WHOLE_DOCUMENT = false;
     /* Track whether config is already set on this instance of DOMPurify. */
     let SET_CONFIG = false;
+    /* Pristine allowlist bindings captured at setConfig() time. On the
+     * persistent-config path sanitize() restores the sets from these before
+     * the per-walk hook clone-guard, so a hook's in-call widening cannot
+     * carry across calls. Null until setConfig() is called; reset by
+     * clearConfig(). */
+    let SET_CONFIG_ALLOWED_TAGS = null;
+    let SET_CONFIG_ALLOWED_ATTR = null;
     /* Decide if all elements (e.g. style, script) must be children of
      * document.body. By default, browsers might move them to document.head */
     let FORCE_BODY = false;
@@ -493,7 +670,17 @@
     let USE_PROFILES = {};
     /* Tags to ignore content of when KEEP_CONTENT is true */
     let FORBID_CONTENTS = null;
-    const DEFAULT_FORBID_CONTENTS = addToSet({}, ['annotation-xml', 'audio', 'colgroup', 'desc', 'foreignobject', 'head', 'iframe', 'math', 'mi', 'mn', 'mo', 'ms', 'mtext', 'noembed', 'noframes', 'noscript', 'plaintext', 'script', 'style', 'svg', 'template', 'thead', 'title', 'video', 'xmp']);
+    const DEFAULT_FORBID_CONTENTS = addToSet({}, ['annotation-xml', 'audio', 'colgroup', 'desc', 'foreignobject', 'head', 'iframe', 'math', 'mi', 'mn', 'mo', 'ms', 'mtext', 'noembed', 'noframes', 'noscript', 'plaintext', 'script',
+    // <selectedcontent> mirrors the selected <option>'s subtree, cloned by
+    // the UA (customizable <select>) — including any on* handlers — and the
+    // engine re-mirrors synchronously whenever a removal changes which
+    // option/selectedcontent is current, even inside DOMPurify's inert
+    // DOMParser document. Hoisting its children on removal re-inserts a fresh
+    // mirror target ahead of the walk, which the engine refills, looping
+    // forever (DoS) and amplifying output. Dropping its content on removal
+    // (rather than hoisting) breaks that cascade; the content is a duplicate
+    // of the option, which is sanitized on its own. See campaign-3 F1/F6.
+    'selectedcontent', 'style', 'svg', 'template', 'thead', 'title', 'video', 'xmp']);
     /* Tags that are safe for data: URIs */
     let DATA_URI_TAGS = null;
     const DEFAULT_DATA_URI_TAGS = addToSet({}, ['audio', 'video', 'img', 'source', 'image', 'track']);
@@ -509,8 +696,10 @@
     /* Allowed XHTML+XML namespaces */
     let ALLOWED_NAMESPACES = null;
     const DEFAULT_ALLOWED_NAMESPACES = addToSet({}, [MATHML_NAMESPACE, SVG_NAMESPACE, HTML_NAMESPACE], stringToString);
-    let MATHML_TEXT_INTEGRATION_POINTS = addToSet({}, ['mi', 'mo', 'mn', 'ms', 'mtext']);
-    let HTML_INTEGRATION_POINTS = addToSet({}, ['annotation-xml']);
+    const DEFAULT_MATHML_TEXT_INTEGRATION_POINTS = freeze(['mi', 'mo', 'mn', 'ms', 'mtext']);
+    let MATHML_TEXT_INTEGRATION_POINTS = addToSet({}, DEFAULT_MATHML_TEXT_INTEGRATION_POINTS);
+    const DEFAULT_HTML_INTEGRATION_POINTS = freeze(['annotation-xml']);
+    let HTML_INTEGRATION_POINTS = addToSet({}, DEFAULT_HTML_INTEGRATION_POINTS);
     // Certain elements are allowed in both SVG and HTML
     // namespace. We need to specify them explicitly
     // so that they don't get erroneously deleted from
@@ -552,15 +741,33 @@
       // HTML tags and attributes are not case-sensitive, converting to lowercase. Keeping XHTML as is.
       transformCaseFunc = PARSER_MEDIA_TYPE === 'application/xhtml+xml' ? stringToString : stringToLowerCase;
       /* Set configuration parameters */
-      ALLOWED_TAGS = objectHasOwnProperty(cfg, 'ALLOWED_TAGS') ? addToSet({}, cfg.ALLOWED_TAGS, transformCaseFunc) : DEFAULT_ALLOWED_TAGS;
-      ALLOWED_ATTR = objectHasOwnProperty(cfg, 'ALLOWED_ATTR') ? addToSet({}, cfg.ALLOWED_ATTR, transformCaseFunc) : DEFAULT_ALLOWED_ATTR;
-      ALLOWED_NAMESPACES = objectHasOwnProperty(cfg, 'ALLOWED_NAMESPACES') ? addToSet({}, cfg.ALLOWED_NAMESPACES, stringToString) : DEFAULT_ALLOWED_NAMESPACES;
-      URI_SAFE_ATTRIBUTES = objectHasOwnProperty(cfg, 'ADD_URI_SAFE_ATTR') ? addToSet(clone(DEFAULT_URI_SAFE_ATTRIBUTES), cfg.ADD_URI_SAFE_ATTR, transformCaseFunc) : DEFAULT_URI_SAFE_ATTRIBUTES;
-      DATA_URI_TAGS = objectHasOwnProperty(cfg, 'ADD_DATA_URI_TAGS') ? addToSet(clone(DEFAULT_DATA_URI_TAGS), cfg.ADD_DATA_URI_TAGS, transformCaseFunc) : DEFAULT_DATA_URI_TAGS;
-      FORBID_CONTENTS = objectHasOwnProperty(cfg, 'FORBID_CONTENTS') ? addToSet({}, cfg.FORBID_CONTENTS, transformCaseFunc) : DEFAULT_FORBID_CONTENTS;
-      FORBID_TAGS = objectHasOwnProperty(cfg, 'FORBID_TAGS') ? addToSet({}, cfg.FORBID_TAGS, transformCaseFunc) : clone({});
-      FORBID_ATTR = objectHasOwnProperty(cfg, 'FORBID_ATTR') ? addToSet({}, cfg.FORBID_ATTR, transformCaseFunc) : clone({});
-      USE_PROFILES = objectHasOwnProperty(cfg, 'USE_PROFILES') ? cfg.USE_PROFILES : false;
+      ALLOWED_TAGS = _resolveSetOption(cfg, 'ALLOWED_TAGS', DEFAULT_ALLOWED_TAGS, {
+        transform: transformCaseFunc
+      });
+      ALLOWED_ATTR = _resolveSetOption(cfg, 'ALLOWED_ATTR', DEFAULT_ALLOWED_ATTR, {
+        transform: transformCaseFunc
+      });
+      ALLOWED_NAMESPACES = _resolveSetOption(cfg, 'ALLOWED_NAMESPACES', DEFAULT_ALLOWED_NAMESPACES, {
+        transform: stringToString
+      });
+      URI_SAFE_ATTRIBUTES = _resolveSetOption(cfg, 'ADD_URI_SAFE_ATTR', DEFAULT_URI_SAFE_ATTRIBUTES, {
+        transform: transformCaseFunc,
+        base: DEFAULT_URI_SAFE_ATTRIBUTES
+      });
+      DATA_URI_TAGS = _resolveSetOption(cfg, 'ADD_DATA_URI_TAGS', DEFAULT_DATA_URI_TAGS, {
+        transform: transformCaseFunc,
+        base: DEFAULT_DATA_URI_TAGS
+      });
+      FORBID_CONTENTS = _resolveSetOption(cfg, 'FORBID_CONTENTS', DEFAULT_FORBID_CONTENTS, {
+        transform: transformCaseFunc
+      });
+      FORBID_TAGS = _resolveSetOption(cfg, 'FORBID_TAGS', clone({}), {
+        transform: transformCaseFunc
+      });
+      FORBID_ATTR = _resolveSetOption(cfg, 'FORBID_ATTR', clone({}), {
+        transform: transformCaseFunc
+      });
+      USE_PROFILES = objectHasOwnProperty(cfg, 'USE_PROFILES') ? cfg.USE_PROFILES && typeof cfg.USE_PROFILES === 'object' ? clone(cfg.USE_PROFILES) : cfg.USE_PROFILES : false;
       ALLOW_ARIA_ATTR = cfg.ALLOW_ARIA_ATTR !== false; // Default true
       ALLOW_DATA_ATTR = cfg.ALLOW_DATA_ATTR !== false; // Default true
       ALLOW_UNKNOWN_PROTOCOLS = cfg.ALLOW_UNKNOWN_PROTOCOLS || false; // Default false
@@ -576,20 +783,22 @@
       SANITIZE_NAMED_PROPS = cfg.SANITIZE_NAMED_PROPS || false; // Default false
       KEEP_CONTENT = cfg.KEEP_CONTENT !== false; // Default true
       IN_PLACE = cfg.IN_PLACE || false; // Default false
-      IS_ALLOWED_URI$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI;
-      NAMESPACE = cfg.NAMESPACE || HTML_NAMESPACE;
-      MATHML_TEXT_INTEGRATION_POINTS = cfg.MATHML_TEXT_INTEGRATION_POINTS || MATHML_TEXT_INTEGRATION_POINTS;
-      HTML_INTEGRATION_POINTS = cfg.HTML_INTEGRATION_POINTS || HTML_INTEGRATION_POINTS;
-      CUSTOM_ELEMENT_HANDLING = cfg.CUSTOM_ELEMENT_HANDLING || create(null);
-      if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck)) {
-        CUSTOM_ELEMENT_HANDLING.tagNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck;
+      IS_ALLOWED_URI$1 = isRegex(cfg.ALLOWED_URI_REGEXP) ? cfg.ALLOWED_URI_REGEXP : IS_ALLOWED_URI; // Default regexp
+      NAMESPACE = typeof cfg.NAMESPACE === 'string' ? cfg.NAMESPACE : HTML_NAMESPACE; // Default HTML namespace
+      MATHML_TEXT_INTEGRATION_POINTS = objectHasOwnProperty(cfg, 'MATHML_TEXT_INTEGRATION_POINTS') && cfg.MATHML_TEXT_INTEGRATION_POINTS && typeof cfg.MATHML_TEXT_INTEGRATION_POINTS === 'object' ? clone(cfg.MATHML_TEXT_INTEGRATION_POINTS) : addToSet({}, DEFAULT_MATHML_TEXT_INTEGRATION_POINTS); // Default built-in map
+      HTML_INTEGRATION_POINTS = objectHasOwnProperty(cfg, 'HTML_INTEGRATION_POINTS') && cfg.HTML_INTEGRATION_POINTS && typeof cfg.HTML_INTEGRATION_POINTS === 'object' ? clone(cfg.HTML_INTEGRATION_POINTS) : addToSet({}, DEFAULT_HTML_INTEGRATION_POINTS); // Default built-in map
+      const customElementHandling = objectHasOwnProperty(cfg, 'CUSTOM_ELEMENT_HANDLING') && cfg.CUSTOM_ELEMENT_HANDLING && typeof cfg.CUSTOM_ELEMENT_HANDLING === 'object' ? clone(cfg.CUSTOM_ELEMENT_HANDLING) : create(null);
+      CUSTOM_ELEMENT_HANDLING = create(null);
+      if (objectHasOwnProperty(customElementHandling, 'tagNameCheck') && isRegexOrFunction(customElementHandling.tagNameCheck)) {
+        CUSTOM_ELEMENT_HANDLING.tagNameCheck = customElementHandling.tagNameCheck; // Default undefined
       }
-      if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck)) {
-        CUSTOM_ELEMENT_HANDLING.attributeNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck;
+      if (objectHasOwnProperty(customElementHandling, 'attributeNameCheck') && isRegexOrFunction(customElementHandling.attributeNameCheck)) {
+        CUSTOM_ELEMENT_HANDLING.attributeNameCheck = customElementHandling.attributeNameCheck; // Default undefined
       }
-      if (cfg.CUSTOM_ELEMENT_HANDLING && typeof cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements === 'boolean') {
-        CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements = cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements;
+      if (objectHasOwnProperty(customElementHandling, 'allowCustomizedBuiltInElements') && typeof customElementHandling.allowCustomizedBuiltInElements === 'boolean') {
+        CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements = customElementHandling.allowCustomizedBuiltInElements; // Default undefined
       }
+      seal(CUSTOM_ELEMENT_HANDLING);
       if (SAFE_FOR_TEMPLATES) {
         ALLOW_DATA_ATTR = false;
       }
@@ -625,36 +834,36 @@
       EXTRA_ELEMENT_HANDLING.tagCheck = null;
       EXTRA_ELEMENT_HANDLING.attributeCheck = null;
       /* Merge configuration parameters */
-      if (cfg.ADD_TAGS) {
+      if (objectHasOwnProperty(cfg, 'ADD_TAGS')) {
         if (typeof cfg.ADD_TAGS === 'function') {
           EXTRA_ELEMENT_HANDLING.tagCheck = cfg.ADD_TAGS;
-        } else {
+        } else if (arrayIsArray(cfg.ADD_TAGS)) {
           if (ALLOWED_TAGS === DEFAULT_ALLOWED_TAGS) {
             ALLOWED_TAGS = clone(ALLOWED_TAGS);
           }
           addToSet(ALLOWED_TAGS, cfg.ADD_TAGS, transformCaseFunc);
         }
       }
-      if (cfg.ADD_ATTR) {
+      if (objectHasOwnProperty(cfg, 'ADD_ATTR')) {
         if (typeof cfg.ADD_ATTR === 'function') {
           EXTRA_ELEMENT_HANDLING.attributeCheck = cfg.ADD_ATTR;
-        } else {
+        } else if (arrayIsArray(cfg.ADD_ATTR)) {
           if (ALLOWED_ATTR === DEFAULT_ALLOWED_ATTR) {
             ALLOWED_ATTR = clone(ALLOWED_ATTR);
           }
           addToSet(ALLOWED_ATTR, cfg.ADD_ATTR, transformCaseFunc);
         }
       }
-      if (cfg.ADD_URI_SAFE_ATTR) {
+      if (objectHasOwnProperty(cfg, 'ADD_URI_SAFE_ATTR') && arrayIsArray(cfg.ADD_URI_SAFE_ATTR)) {
         addToSet(URI_SAFE_ATTRIBUTES, cfg.ADD_URI_SAFE_ATTR, transformCaseFunc);
       }
-      if (cfg.FORBID_CONTENTS) {
+      if (objectHasOwnProperty(cfg, 'FORBID_CONTENTS') && arrayIsArray(cfg.FORBID_CONTENTS)) {
         if (FORBID_CONTENTS === DEFAULT_FORBID_CONTENTS) {
           FORBID_CONTENTS = clone(FORBID_CONTENTS);
         }
         addToSet(FORBID_CONTENTS, cfg.FORBID_CONTENTS, transformCaseFunc);
       }
-      if (cfg.ADD_FORBID_CONTENTS) {
+      if (objectHasOwnProperty(cfg, 'ADD_FORBID_CONTENTS') && arrayIsArray(cfg.ADD_FORBID_CONTENTS)) {
         if (FORBID_CONTENTS === DEFAULT_FORBID_CONTENTS) {
           FORBID_CONTENTS = clone(FORBID_CONTENTS);
         }
@@ -673,6 +882,13 @@
         addToSet(ALLOWED_TAGS, ['tbody']);
         delete FORBID_TAGS.tbody;
       }
+      // Re-derive the active Trusted Types policy from this configuration on
+      // every parse. The active policy must never be sticky closure state that
+      // outlives the config that set it: a caller-supplied policy left in place
+      // after `clearConfig()` — or after a later call that supplied none, or
+      // `TRUSTED_TYPES_POLICY: null` — could sign a subsequent "default"
+      // `RETURN_TRUSTED_TYPE` result with a foreign, possibly unsafe policy.
+      // See GHSA-vxr8-fq34-vvx9.
       if (cfg.TRUSTED_TYPES_POLICY) {
         if (typeof cfg.TRUSTED_TYPES_POLICY.createHTML !== 'function') {
           throw typeErrorCreate('TRUSTED_TYPES_POLICY configuration option must provide a "createHTML" hook.');
@@ -680,18 +896,45 @@
         if (typeof cfg.TRUSTED_TYPES_POLICY.createScriptURL !== 'function') {
           throw typeErrorCreate('TRUSTED_TYPES_POLICY configuration option must provide a "createScriptURL" hook.');
         }
-        // Overwrite existing TrustedTypes policy.
+        // A caller-supplied policy applies to this configuration only.
+        const previousTrustedTypesPolicy = trustedTypesPolicy;
         trustedTypesPolicy = cfg.TRUSTED_TYPES_POLICY;
-        // Sign local variables required by `sanitize`.
-        emptyHTML = trustedTypesPolicy.createHTML('');
-      } else {
-        // Uninitialized policy, attempt to initialize the internal dompurify policy.
-        if (trustedTypesPolicy === undefined) {
-          trustedTypesPolicy = _createTrustedTypesPolicy(trustedTypes, currentScript);
+        // Sign local variables required by `sanitize`. If the supplied policy's
+        // `createHTML` is circular (i.e. it calls `DOMPurify.sanitize`), this
+        // throws via the re-entrancy guard. Restore the previous policy first so
+        // the instance is not left in a poisoned state. See #1422.
+        try {
+          emptyHTML = _createTrustedHTML('');
+        } catch (error) {
+          trustedTypesPolicy = previousTrustedTypesPolicy;
+          throw error;
         }
-        // If creating the internal policy succeeded sign internal variables.
-        if (trustedTypesPolicy !== null && typeof emptyHTML === 'string') {
-          emptyHTML = trustedTypesPolicy.createHTML('');
+      } else if (cfg.TRUSTED_TYPES_POLICY === null) {
+        // Explicit opt-out for this call: perform no Trusted Types signing and
+        // create nothing (so a strict `trusted-types` CSP that disallows a
+        // `dompurify` policy can still call `sanitize` from inside its own
+        // policy — see #1422). Resetting to `undefined` rather than a sticky
+        // `null` also drops any previously retained caller policy, so it cannot
+        // resurface on a later call, while still allowing the next config-less
+        // call to restore the internal default policy. See GHSA-vxr8-fq34-vvx9.
+        trustedTypesPolicy = undefined;
+        emptyHTML = '';
+      } else {
+        // No policy supplied: keep the currently active policy if one is set — a
+        // previously supplied policy is intentionally sticky across config-less
+        // calls — otherwise fall back to the instance's own internal policy,
+        // created at most once. (A policy supplied for a *single* call still
+        // lingers by design; what must not linger is a policy whose configuration
+        // has been torn down via `clearConfig()`, which restores the default.)
+        if (trustedTypesPolicy === undefined) {
+          trustedTypesPolicy = _getDefaultTrustedTypesPolicy();
+        }
+        // Sign internal variables only when a policy is active. A falsy policy
+        // (Trusted Types unsupported, creation failed, or an explicit opt-out)
+        // leaves `emptyHTML` as a plain string, so we never call `.createHTML` on
+        // a non-policy and throw. See #1422.
+        if (trustedTypesPolicy && typeof emptyHTML === 'string') {
+          emptyHTML = _createTrustedHTML('');
         }
       }
       // Prevent further manipulation of configuration.
@@ -706,6 +949,77 @@
      * correctly. */
     const ALL_SVG_TAGS = addToSet({}, [...svg$1, ...svgFilters, ...svgDisallowed]);
     const ALL_MATHML_TAGS = addToSet({}, [...mathMl$1, ...mathMlDisallowed]);
+    /**
+     * Namespace rules for an element in the SVG namespace.
+     *
+     * @param tagName the element's lowercase tag name
+     * @param parent the (possibly simulated) parent node
+     * @param parentTagName the parent's lowercase tag name
+     * @returns true if a spec-compliant parser could produce this element
+     */
+    const _checkSvgNamespace = function _checkSvgNamespace(tagName, parent, parentTagName) {
+      // The only way to switch from HTML namespace to SVG
+      // is via <svg>. If it happens via any other tag, then
+      // it should be killed.
+      if (parent.namespaceURI === HTML_NAMESPACE) {
+        return tagName === 'svg';
+      }
+      // The only way to switch from MathML to SVG is via <svg>
+      // if the parent is either <annotation-xml> or a MathML
+      // text integration point.
+      if (parent.namespaceURI === MATHML_NAMESPACE) {
+        return tagName === 'svg' && (parentTagName === 'annotation-xml' || MATHML_TEXT_INTEGRATION_POINTS[parentTagName]);
+      }
+      // We only allow elements that are defined in SVG
+      // spec. All others are disallowed in SVG namespace.
+      return Boolean(ALL_SVG_TAGS[tagName]);
+    };
+    /**
+     * Namespace rules for an element in the MathML namespace.
+     *
+     * @param tagName the element's lowercase tag name
+     * @param parent the (possibly simulated) parent node
+     * @param parentTagName the parent's lowercase tag name
+     * @returns true if a spec-compliant parser could produce this element
+     */
+    const _checkMathMlNamespace = function _checkMathMlNamespace(tagName, parent, parentTagName) {
+      // The only way to switch from HTML namespace to MathML
+      // is via <math>. If it happens via any other tag, then
+      // it should be killed.
+      if (parent.namespaceURI === HTML_NAMESPACE) {
+        return tagName === 'math';
+      }
+      // The only way to switch from SVG to MathML is via
+      // <math> and HTML integration points
+      if (parent.namespaceURI === SVG_NAMESPACE) {
+        return tagName === 'math' && HTML_INTEGRATION_POINTS[parentTagName];
+      }
+      // We only allow elements that are defined in MathML
+      // spec. All others are disallowed in MathML namespace.
+      return Boolean(ALL_MATHML_TAGS[tagName]);
+    };
+    /**
+     * Namespace rules for an element in the HTML namespace.
+     *
+     * @param tagName the element's lowercase tag name
+     * @param parent the (possibly simulated) parent node
+     * @param parentTagName the parent's lowercase tag name
+     * @returns true if a spec-compliant parser could produce this element
+     */
+    const _checkHtmlNamespace = function _checkHtmlNamespace(tagName, parent, parentTagName) {
+      // The only way to switch from SVG to HTML is via
+      // HTML integration points, and from MathML to HTML
+      // is via MathML text integration points
+      if (parent.namespaceURI === SVG_NAMESPACE && !HTML_INTEGRATION_POINTS[parentTagName]) {
+        return false;
+      }
+      if (parent.namespaceURI === MATHML_NAMESPACE && !MATHML_TEXT_INTEGRATION_POINTS[parentTagName]) {
+        return false;
+      }
+      // We disallow tags that are specific for MathML
+      // or SVG and should never appear in HTML namespace
+      return !ALL_MATHML_TAGS[tagName] && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]);
+    };
     /**
      * @param element a DOM element whose namespace is being checked
      * @returns Return false if the element has a
@@ -728,51 +1042,13 @@
         return false;
       }
       if (element.namespaceURI === SVG_NAMESPACE) {
-        // The only way to switch from HTML namespace to SVG
-        // is via <svg>. If it happens via any other tag, then
-        // it should be killed.
-        if (parent.namespaceURI === HTML_NAMESPACE) {
-          return tagName === 'svg';
-        }
-        // The only way to switch from MathML to SVG is via`
-        // svg if parent is either <annotation-xml> or MathML
-        // text integration points.
-        if (parent.namespaceURI === MATHML_NAMESPACE) {
-          return tagName === 'svg' && (parentTagName === 'annotation-xml' || MATHML_TEXT_INTEGRATION_POINTS[parentTagName]);
-        }
-        // We only allow elements that are defined in SVG
-        // spec. All others are disallowed in SVG namespace.
-        return Boolean(ALL_SVG_TAGS[tagName]);
+        return _checkSvgNamespace(tagName, parent, parentTagName);
       }
       if (element.namespaceURI === MATHML_NAMESPACE) {
-        // The only way to switch from HTML namespace to MathML
-        // is via <math>. If it happens via any other tag, then
-        // it should be killed.
-        if (parent.namespaceURI === HTML_NAMESPACE) {
-          return tagName === 'math';
-        }
-        // The only way to switch from SVG to MathML is via
-        // <math> and HTML integration points
-        if (parent.namespaceURI === SVG_NAMESPACE) {
-          return tagName === 'math' && HTML_INTEGRATION_POINTS[parentTagName];
-        }
-        // We only allow elements that are defined in MathML
-        // spec. All others are disallowed in MathML namespace.
-        return Boolean(ALL_MATHML_TAGS[tagName]);
+        return _checkMathMlNamespace(tagName, parent, parentTagName);
       }
       if (element.namespaceURI === HTML_NAMESPACE) {
-        // The only way to switch from SVG to HTML is via
-        // HTML integration points, and from MathML to HTML
-        // is via MathML text integration points
-        if (parent.namespaceURI === SVG_NAMESPACE && !HTML_INTEGRATION_POINTS[parentTagName]) {
-          return false;
-        }
-        if (parent.namespaceURI === MATHML_NAMESPACE && !MATHML_TEXT_INTEGRATION_POINTS[parentTagName]) {
-          return false;
-        }
-        // We disallow tags that are specific for MathML
-        // or SVG and should never appear in HTML namespace
-        return !ALL_MATHML_TAGS[tagName] && (COMMON_SVG_AND_HTML_ELEMENTS[tagName] || !ALL_SVG_TAGS[tagName]);
+        return _checkHtmlNamespace(tagName, parent, parentTagName);
       }
       // For XHTML and XML documents that support custom namespaces
       if (PARSER_MEDIA_TYPE === 'application/xhtml+xml' && ALLOWED_NAMESPACES[element.namespaceURI]) {
@@ -797,7 +1073,81 @@
         // eslint-disable-next-line unicorn/prefer-dom-node-remove
         getParentNode(node).removeChild(node);
       } catch (_) {
+        /* The normal detach failed — this is reached for a parentless node
+           (getParentNode() is null, so .removeChild throws). Element.prototype
+           .remove() is itself a spec no-op on a parentless node, so a recorded
+           "removal" would otherwise hand the caller back an intact,
+           payload-bearing node (e.g. a detached IN_PLACE root the mXSS canary or
+           the style-with-element-child rule decided to kill). Fail closed by
+           throwing — exactly as a clobbered root does at the IN_PLACE entry —
+           rather than trying to "neutralize" the node via its own methods.
+           Neutralizing would mean calling getAttributeNames()/removeAttribute()
+           on the node, both of which a <form> root can clobber via a named child
+           (and _isClobbered does not even probe getAttributeNames), so the
+           neutralize step could itself be silently defeated, leaving the payload
+           intact. A throw touches only the cached, clobber-safe remove() and
+           getParentNode(). Generalizes GHSA-r47g-fvhr-h676 (clobbered-form root)
+           to every root-kill reason. REPORT-3.
+                  This lives inside the catch, so it never fires for a normally-removed
+           in-tree node: those have a parent, removeChild() succeeds, and the
+           catch is not entered. Only a kept (parentless) root reaches here. */
         remove(node);
+        if (!getParentNode(node)) {
+          throw typeErrorCreate('a node selected for removal could not be detached from its tree ' + 'and cannot be safely returned; refusing to sanitize in place');
+        }
+      }
+    };
+    /**
+     * _neutralizeRoot
+     *
+     * Fail-closed teardown of an in-place root after the sanitize walk aborts
+     * (campaign-3 F2). An internal throw mid-walk — e.g. a page-registered
+     * custom element's reaction detaches a node so `_forceRemove`'s deliberate
+     * parentless guard throws, or any other re-entrant engine mutation — would
+     * otherwise leave the caller's *live* tree half-sanitized, with everything
+     * after the abort point still carrying its handlers. There is no safe way
+     * to resume the walk (the tree mutated under us), so we strip the root bare:
+     * remove every child and every attribute, then let the caller's catch see
+     * the original error. Clobber-safe (cached `remove`/`childNodes`/`attributes`
+     * getters; the root was already clobber-pre-flighted at the IN_PLACE entry).
+     *
+     * @param root the in-place root to empty
+     */
+    const _neutralizeRoot = function _neutralizeRoot(root) {
+      /* Strip every disallowed attribute (on* handlers included) off the whole
+         subtree BEFORE detaching anything. Detaching first would hand back
+         handler-bearing originals (e.g. an already-loading `<img onerror>`)
+         whose queued resource event still fires in page scope after we throw.
+         Clobber-safe reads; a doomed clobbered node's own attributes are
+         irrelevant while its non-clobbered descendants are reached and scrubbed. */
+      _neutralizeSubtree(root);
+      const childNodes = getChildNodes(root);
+      if (childNodes) {
+        const snapshot = [];
+        arrayForEach(childNodes, child => {
+          arrayPush(snapshot, child);
+        });
+        arrayForEach(snapshot, child => {
+          try {
+            remove(child);
+          } catch (_) {
+            /* Best-effort teardown; a still-attached child is handled below */
+          }
+        });
+      }
+      const attributes = getAttributes(root);
+      if (attributes) {
+        for (let i = attributes.length - 1; i >= 0; --i) {
+          const attribute = attributes[i];
+          const name = attribute && attribute.name;
+          if (typeof name === 'string') {
+            try {
+              root.removeAttribute(name);
+            } catch (_) {
+              /* Clobbered removeAttribute — ignore (fail-closed best effort) */
+            }
+          }
+        }
       }
     };
     /**
@@ -833,6 +1183,148 @@
       }
     };
     /**
+     * _stripDisallowedAttributes
+     *
+     * Removes every attribute the active configuration does not allow from a
+     * single element, using the same allowlist as the main attribute pass (so
+     * `on*` handlers go, but no `/^on/` blocklist is introduced). Used only to
+     * neutralise nodes that are being discarded from an in-place tree.
+     *
+     * @param element the element to strip
+     */
+    const _stripDisallowedAttributes = function _stripDisallowedAttributes(element) {
+      const attributes = getAttributes(element);
+      if (!attributes) {
+        return;
+      }
+      for (let i = attributes.length - 1; i >= 0; --i) {
+        const attribute = attributes[i];
+        const name = attribute && attribute.name;
+        if (typeof name !== 'string' || ALLOWED_ATTR[transformCaseFunc(name)]) {
+          continue;
+        }
+        try {
+          element.removeAttribute(name);
+        } catch (_) {
+          /* Clobbered removeAttribute on a doomed node — ignore */
+        }
+      }
+    };
+    /**
+     * _neutralizeSubtree
+     *
+     * Completes the audit-5 F1 fix across every removal path. The KEEP_CONTENT
+     * move-hoist neutralises only disallowed-tag removals; clobber, mXSS-canary,
+     * namespace, comment, processing-instruction and KEEP_CONTENT:false removals
+     * all drop their subtree wholesale via `_forceRemove`. On the IN_PLACE path
+     * those dropped nodes are detached from the caller's LIVE tree but a
+     * handler-bearing original among them (an `<img onerror>`/`<video>` that was
+     * loading) keeps its queued resource event, which fires in page scope after
+     * sanitize returns. This walks a removed subtree and strips every attribute
+     * the active configuration does not allow — so `on*` handlers are cancelled
+     * through the SAME allowlist that governs kept nodes, not a separate `/^on/`
+     * blocklist. Run synchronously before sanitize returns, i.e. before any
+     * queued event can fire. Hook-free by design: these nodes leave the output,
+     * so firing attribute hooks for them would be surprising. Clobber-safe reads;
+     * a doomed clobbered node may shadow `removeAttribute` (its own attributes are
+     * irrelevant — it is discarded — while its non-clobbered descendants, e.g.
+     * the `<img>`, are reached and scrubbed).
+     *
+     * @param root the root of a removed subtree to neutralise
+     */
+    const _neutralizeSubtree = function _neutralizeSubtree(root) {
+      const stack = [root];
+      while (stack.length > 0) {
+        const node = stack.pop();
+        const nodeType = getNodeType ? getNodeType(node) : node.nodeType;
+        if (nodeType === NODE_TYPE.element) {
+          _stripDisallowedAttributes(node);
+        }
+        const childNodes = getChildNodes(node);
+        if (childNodes) {
+          for (let i = childNodes.length - 1; i >= 0; --i) {
+            stack.push(childNodes[i]);
+          }
+        }
+      }
+    };
+    /**
+     * _neutralizePatchLinkage
+     *
+     * IN_PLACE entry pre-pass (declarative-partial-updates / streaming
+     * hardening, https://github.com/WICG/declarative-partial-updates).
+     *
+     * The main walk strips patch linkage (`for`/`patchsrc`) and removes range
+     * markers (PIs / markup comments) node-by-node, in document order, AS it
+     * reaches each node. On a live in-place root that leaves a window: from the
+     * moment the root is connected until the walk arrives at a given node, that
+     * node's linkage is live. A patch applied on connection/stream can fire as
+     * a microtask during the walk and inject or teleport an unsanitized DOM
+     * range into a region the iterator has already passed and will not revisit,
+     * so the post-return "tree is sanitized" contract is violated. Sweep the
+     * whole tree once up front and sever every linkage before the walk begins,
+     * closing that window.
+     *
+     * This CANNOT undo a patch that already fired before sanitize ran — that is
+     * the irreducible "do not IN_PLACE a live-connected attacker tree" caveat —
+     * but it closes everything from sanitize-start onward. Gated on SAFE_FOR_XML
+     * to group with the rest of the declarative-partial-updates handling and
+     * stay overridable, consistent with the codebase.
+     *
+     * Clobber-safe traversal (cached childNodes getter); per-node try/catch so a
+     * clobbered root cannot defeat the sweep of its non-clobbered descendants.
+     *
+     * NOTE (pending real-Chrome confirmation, see test/declarative-patch-probe
+     * .html Q1): this mirrors the existing policy of keeping `for` on
+     * <label>/<output>. If the shipping feature can drive a patch through a
+     * surviving `for`-on-label/output + `id` pair, this pre-pass and the
+     * attribute check at _isBasicCustomElement's caller must additionally drop
+     * that pair on the IN_PLACE path. Left as-is until the taxonomy is verified.
+     *
+     * @param root the in-place root to sweep
+     */
+    const _neutralizePatchLinkage = function _neutralizePatchLinkage(root) {
+      if (!SAFE_FOR_XML) {
+        return;
+      }
+      const stack = [root];
+      while (stack.length > 0) {
+        const node = stack.pop();
+        const nodeType = getNodeType ? getNodeType(node) : node.nodeType;
+        /* Remove range markers (the target side of a patch linkage): every
+           processing instruction, and any markup-bearing comment. */
+        if (nodeType === NODE_TYPE.processingInstruction || nodeType === NODE_TYPE.comment && regExpTest(COMMENT_MARKUP_PROBE, node.data)) {
+          try {
+            remove(node);
+          } catch (_) {
+            /* Best-effort */
+          }
+          continue;
+        }
+        /* Strip patch-source attributes (the source side) off elements. */
+        if (nodeType === NODE_TYPE.element) {
+          const element = node;
+          const lcTag = transformCaseFunc(getNodeName ? getNodeName(node) : node.nodeName);
+          try {
+            if (element.hasAttribute && element.hasAttribute('patchsrc')) {
+              element.removeAttribute('patchsrc');
+            }
+            if (element.hasAttribute && element.hasAttribute('for') && lcTag !== 'label' && lcTag !== 'output') {
+              element.removeAttribute('for');
+            }
+          } catch (_) {
+            /* Clobbered removeAttribute/hasAttribute on a doomed node — ignore */
+          }
+        }
+        const childNodes = getChildNodes(node);
+        if (childNodes) {
+          for (let i = childNodes.length - 1; i >= 0; --i) {
+            stack.push(childNodes[i]);
+          }
+        }
+      }
+    };
+    /**
      * _initDocument
      *
      * @param dirty - a string of dirty markup
@@ -853,7 +1345,7 @@
         // Root of XHTML doc must contain xmlns declaration (see https://www.w3.org/TR/xhtml1/normative.html#strict)
         dirty = '<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>' + dirty + '</body></html>';
       }
-      const dirtyPayload = trustedTypesPolicy ? trustedTypesPolicy.createHTML(dirty) : dirty;
+      const dirtyPayload = trustedTypesPolicy ? _createTrustedHTML(dirty) : dirty;
       /*
        * Use the DOMParser API by default, fallback later if needs be
        * DOMParser not work for svg when has multiple root element.
@@ -894,28 +1386,259 @@
       NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT | NodeFilter.SHOW_PROCESSING_INSTRUCTION | NodeFilter.SHOW_CDATA_SECTION, null);
     };
     /**
+     * Replace template expression syntax (mustache, ERB, template
+     * literal) with a space; shared by all SAFE_FOR_TEMPLATES scrub
+     * sites. Order matters: mustache, then ERB, then template literal.
+     *
+     * @param value the string to scrub
+     * @returns the scrubbed string
+     */
+    const _stripTemplateExpressions = function _stripTemplateExpressions(value) {
+      value = stringReplace(value, MUSTACHE_EXPR$1, ' ');
+      value = stringReplace(value, ERB_EXPR$1, ' ');
+      value = stringReplace(value, TMPLIT_EXPR$1, ' ');
+      return value;
+    };
+    /**
+     * Strip template-engine expressions ({{...}}, ${...}, <%...%>) from the
+     * character data of an element subtree. Used as the final safety net for
+     * SAFE_FOR_TEMPLATES on every DOM-returning code path so that expressions
+     * which only form after text-node normalization (e.g. fragments split across
+     * stripped elements) cannot survive into a template-evaluating framework.
+     *
+     * Walks text/comment/CDATA/processing-instruction nodes and mutates `.data`
+     * in place rather than round-tripping through innerHTML. This preserves
+     * descendant node references (important for IN_PLACE callers), avoids a
+     * serialize/reparse cycle, and reads literal character data — which means
+     * `<%...%>` in text content matches the ERB regex against its real bytes
+     * instead of the HTML-entity-escaped form innerHTML would produce.
+     *
+     * Attribute values are not visited here; SAFE_FOR_TEMPLATES handling for
+     * attributes is performed during the per-node `_sanitizeAttributes` pass.
+     *
+     * @param node The root element whose character data should be scrubbed.
+     */
+    const _scrubTemplateExpressions2 = function _scrubTemplateExpressions(node) {
+      var _node$querySelectorAl;
+      node.normalize();
+      const walker = createNodeIterator.call(node.ownerDocument || node, node,
+      // eslint-disable-next-line no-bitwise
+      NodeFilter.SHOW_TEXT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_CDATA_SECTION | NodeFilter.SHOW_PROCESSING_INSTRUCTION, null);
+      let currentNode = walker.nextNode();
+      while (currentNode) {
+        currentNode.data = _stripTemplateExpressions(currentNode.data);
+        currentNode = walker.nextNode();
+      }
+      // NodeIterator does not descend into <template>.content per the DOM spec,
+      // so we must explicitly recurse into each template's content fragment,
+      // mirroring the approach used by _sanitizeShadowDOM.
+      const templates = (_node$querySelectorAl = node.querySelectorAll) === null || _node$querySelectorAl === void 0 ? void 0 : _node$querySelectorAl.call(node, 'template');
+      if (templates) {
+        arrayForEach(templates, tmpl => {
+          if (_isDocumentFragment(tmpl.content)) {
+            _scrubTemplateExpressions2(tmpl.content);
+          }
+        });
+      }
+    };
+    /**
      * _isClobbered
+     *
+     * Detect DOM-clobbering on HTMLFormElement nodes. Form is the only HTML
+     * interface with [LegacyOverrideBuiltIns]; a descendant element with a
+     * `name` attribute matching a prototype property shadows that property
+     * on direct reads. We use this check at the IN_PLACE entry-point and
+     * during attribute sanitization to refuse clobbered forms.
      *
      * @param element element to check for clobbering attacks
      * @return true if clobbered, false if safe
      */
     const _isClobbered = function _isClobbered(element) {
-      return element instanceof HTMLFormElement && (typeof element.nodeName !== 'string' || typeof element.textContent !== 'string' || typeof element.removeChild !== 'function' || !(element.attributes instanceof NamedNodeMap) || typeof element.removeAttribute !== 'function' || typeof element.setAttribute !== 'function' || typeof element.namespaceURI !== 'string' || typeof element.insertBefore !== 'function' || typeof element.hasChildNodes !== 'function');
+      // Realm-independent tag-name probe. If we can't determine the tag
+      // name at all, we can't reason about clobbering — return false
+      // (the caller's other defences still apply).
+      const realTagName = getNodeName ? getNodeName(element) : null;
+      if (typeof realTagName !== 'string') {
+        return false;
+      }
+      if (transformCaseFunc(realTagName) !== 'form') {
+        return false;
+      }
+      return typeof element.nodeName !== 'string' || typeof element.textContent !== 'string' || typeof element.removeChild !== 'function' ||
+      // Realm-safe NamedNodeMap detection: equality against the cached
+      // prototype getter. Clobbered .attributes (e.g. <input name="attributes">)
+      // makes the direct read diverge from the cached read; a clean form
+      // (same-realm OR foreign-realm) has both reads pointing at the same
+      // canonical NamedNodeMap.
+      element.attributes !== getAttributes(element) || typeof element.removeAttribute !== 'function' || typeof element.setAttribute !== 'function' || typeof element.namespaceURI !== 'string' || typeof element.insertBefore !== 'function' || typeof element.hasChildNodes !== 'function' ||
+      // NodeType clobbering probe. Cached Node.prototype.nodeType getter
+      // returns the integer 1 for any Element regardless of realm; direct
+      // read on a clobbered form (e.g. <input name="nodeType">) returns
+      // the named child element. Cheap addition — nodeType is read from
+      // an internal slot, no serialization cost — and removes a residual
+      // clobbering surface used by several mXSS / PI / comment branches
+      // in _sanitizeElements that compare currentNode.nodeType directly.
+      element.nodeType !== getNodeType(element) ||
+      // HTMLFormElement has [LegacyOverrideBuiltIns]: a descendant named
+      // "childNodes" shadows the prototype getter. Direct reads of
+      // form.childNodes from a clobbered form return the named child
+      // instead of the real NodeList, so any walk that reads it directly
+      // skips the form's real children. Compare the direct read to the
+      // cached Node.prototype getter — when the form's named-property
+      // getter intercepts the read, the two values differ and we flag
+      // the form. This catches every clobbering child type (input,
+      // select, etc.) regardless of whether the named child happens to
+      // carry a numeric .length, which a typeof-based probe would miss
+      // (e.g. HTMLSelectElement.length is a defined unsigned-long).
+      element.childNodes !== getChildNodes(element);
     };
     /**
-     * Checks whether the given object is a DOM node.
+     * Checks whether the given value is a DocumentFragment from any realm.
+     *
+     * The realm-independent replacement reads `nodeType` through the cached
+     * Node.prototype getter and compares to the DOCUMENT_FRAGMENT_NODE
+     * constant (11). nodeType is a numeric value resolved from the node's
+     * internal slot, identical across realms for the same kind of node.
+     *
+     * @param value object to check
+     * @return true if value is a DocumentFragment-shaped node from any realm
+     */
+    const _isDocumentFragment = function _isDocumentFragment(value) {
+      if (!getNodeType || typeof value !== 'object' || value === null) {
+        return false;
+      }
+      try {
+        return getNodeType(value) === NODE_TYPE.documentFragment;
+      } catch (_) {
+        return false;
+      }
+    };
+    /**
+     * Checks whether the given object is a DOM node, including nodes that
+     * originate from a different window/realm (e.g. an iframe's
+     * contentDocument). The previous `value instanceof Node` check was
+     * realm-bound: nodes from a different window failed it, causing
+     * sanitize() to silently stringify them and reset IN_PLACE to false,
+     * returning the original node unsanitized. See GHSA-4w3q-35jp-p934.
      *
      * @param value object to check whether it's a DOM node
-     * @return true is object is a DOM node
+     * @return true if value is a DOM node from any realm
      */
     const _isNode = function _isNode(value) {
-      return typeof Node === 'function' && value instanceof Node;
+      if (!getNodeType || typeof value !== 'object' || value === null) {
+        return false;
+      }
+      try {
+        return typeof getNodeType(value) === 'number';
+      } catch (_) {
+        return false;
+      }
     };
     function _executeHooks(hooks, currentNode, data) {
+      if (hooks.length === 0) {
+        return;
+      }
       arrayForEach(hooks, hook => {
         hook.call(DOMPurify, currentNode, data, CONFIG);
       });
     }
+    /**
+     * Structural-threat checks that condemn a node regardless of the
+     * allowlists: mXSS via namespace confusion, risky CSS construction,
+     * processing instructions, markup-bearing comments. Pure predicate;
+     * the caller removes. Check order is load-bearing.
+     *
+     * @param currentNode the node to inspect
+     * @param tagName the node's transformCaseFunc'd tag name
+     * @return true if the node must be removed
+     */
+    const _isUnsafeNode = function _isUnsafeNode(currentNode, tagName) {
+      /* Detect mXSS attempts abusing namespace confusion */
+      if (SAFE_FOR_XML && currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && regExpTest(ELEMENT_MARKUP_PROBE, currentNode.textContent) && regExpTest(ELEMENT_MARKUP_PROBE, currentNode.innerHTML)) {
+        return true;
+      }
+      /* Remove risky CSS construction leading to mXSS */
+      if (SAFE_FOR_XML && currentNode.namespaceURI === HTML_NAMESPACE && tagName === 'style' && _isNode(currentNode.firstElementChild)) {
+        return true;
+      }
+      /* Remove any occurrence of processing instructions */
+      if (currentNode.nodeType === NODE_TYPE.processingInstruction) {
+        return true;
+      }
+      /* Remove any kind of possibly harmful comments */
+      if (SAFE_FOR_XML && currentNode.nodeType === NODE_TYPE.comment && regExpTest(COMMENT_MARKUP_PROBE, currentNode.data)) {
+        return true;
+      }
+      return false;
+    };
+    /**
+     * Handle a node whose tag is forbidden or not allowlisted: keep
+     * allowed custom elements (false return exits _sanitizeElements
+     * early - the namespace and fallback-tag removal checks are
+     * intentionally skipped for kept custom elements), else hoist
+     * content per KEEP_CONTENT and remove.
+     *
+     * A kept custom element is the ONLY case in which this function
+     * returns false, so the caller uses that return value to run the
+     * afterSanitizeElements hook on the kept element and keep the
+     * element-hook lifecycle consistent with normal allowlisted
+     * elements (GHSA-c2j3-45gr-mqc4).
+     *
+     * @param currentNode the disallowed node
+     * @param tagName the node's transformCaseFunc'd tag name
+     * @return true if the node was removed, false if kept
+     */
+    const _sanitizeDisallowedNode = function _sanitizeDisallowedNode(currentNode, tagName) {
+      /* Check if we have a custom element to handle */
+      if (!FORBID_TAGS[tagName] && _isBasicCustomElement(tagName)) {
+        if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName)) {
+          return false;
+        }
+        if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName)) {
+          return false;
+        }
+      }
+      /* Keep content except for bad-listed elements.
+           Use the cached prototype getters exclusively — the previous code
+           had `|| currentNode.parentNode` / `|| currentNode.childNodes`
+           fallbacks, but the cached getters always return the canonical
+           value (or null for a real parent-less node), so the fallback
+           path was dead in safe cases and a clobbering surface in unsafe
+           ones. Falsy cached results stay falsy; the `if (childNodes &&
+           parentNode)` check already gates correctly. */
+      if (KEEP_CONTENT && !FORBID_CONTENTS[tagName]) {
+        const parentNode = getParentNode(currentNode);
+        const childNodes = getChildNodes(currentNode);
+        if (childNodes && parentNode) {
+          const childCount = childNodes.length;
+          /* In-place: hoist the *original* children so the iterator visits
+               and sanitises them through the same allowlist pass as every other
+               node. The caller built the tree in the live document, so the
+               originals carry already-queued resource events (`<img onerror>`,
+               `<video>`/`<audio>` error, lazy/`onload`, …); cloning would leave
+               those originals detached but still armed, firing in page scope
+               while the returned tree looked clean. Moving is safe in-place: the
+               root is pre-validated as an allowed tag and so is never the node
+               being removed, which keeps `parentNode` inside the iterator root
+               and the relocated child inside the serialised tree.
+                        Otherwise (string / DOM-copy paths): clone. The iterator is rooted
+               at — and the result serialised from — `body`, so a restrictive
+               ALLOWED_TAGS that removes `body` itself must leave its content in
+               place, which only cloning does; and those paths parse into an
+               inert document, so their discarded originals never had a queued
+               event to neutralise.
+                        `childNodes` is live; a tail-to-head walk keeps `childNodes[i]`
+               valid whether we move (drops the trailing entry) or clone (leaves
+               the list intact). */
+          for (let i = childCount - 1; i >= 0; --i) {
+            const hoisted = IN_PLACE ? childNodes[i] : cloneNode(childNodes[i], true);
+            parentNode.insertBefore(hoisted, getNextSibling(currentNode));
+          }
+        }
+      }
+      _forceRemove(currentNode);
+      return true;
+    };
     /**
      * _sanitizeElements
      *
@@ -925,86 +1648,89 @@
      * @param currentNode to check for permission to exist
      * @return true if node was killed, false if left alive
      */
-    const _sanitizeElements = function _sanitizeElements(currentNode) {
-      let content = null;
+    // eslint-disable-next-line complexity
+    const _sanitizeElements = function _sanitizeElements(currentNode, root) {
       /* Execute a hook if present */
       _executeHooks(hooks.beforeSanitizeElements, currentNode, null);
+      /* A hook may have detached the node — treat it as removed (see the
+         detached-node comment after the uponSanitizeElement hook below). */
+      if (currentNode !== root && getParentNode(currentNode) === null) {
+        return true;
+      }
       /* Check if element is clobbered or can clobber */
       if (_isClobbered(currentNode)) {
         _forceRemove(currentNode);
         return true;
       }
       /* Now let's check the element's type and name */
-      const tagName = transformCaseFunc(currentNode.nodeName);
+      const tagName = transformCaseFunc(getNodeName ? getNodeName(currentNode) : currentNode.nodeName);
       /* Execute a hook if present */
       _executeHooks(hooks.uponSanitizeElement, currentNode, {
         tagName,
         allowedTags: ALLOWED_TAGS
       });
-      /* Detect mXSS attempts abusing namespace confusion */
-      if (SAFE_FOR_XML && currentNode.hasChildNodes() && !_isNode(currentNode.firstElementChild) && regExpTest(/<[/\w!]/g, currentNode.innerHTML) && regExpTest(/<[/\w!]/g, currentNode.textContent)) {
-        _forceRemove(currentNode);
+      /* A hook may have detached the node from the tree — a long-standing
+         user pattern (issue #469; draw.io-style foreignObject filtering).
+         Per the cached, unclobberable parentNode getter the node is
+         genuinely out of the tree, so it can reach neither the serialized
+         output nor an IN_PLACE live tree; treat it as removed and stop
+         processing it. Without this guard, the unsafe-node / namespace
+         checks below would call _forceRemove on a parentless node and hit
+         the REPORT-3 fail-closed throw — which exists for nodes DOMPurify
+         wants gone but *cannot* detach (clobbered / parentless roots), the
+         opposite of a node that is already safely gone. The walk root is
+         exempt: a detached IN_PLACE root is legitimate input and must still
+         be fully sanitized, and a kill-decision on it must keep hitting the
+         REPORT-3 throw. Nodes detached by hooks are the hook's
+         responsibility: they are not recorded in DOMPurify.removed and are
+         not neutralized by the post-walk IN_PLACE pass. */
+      if (currentNode !== root && getParentNode(currentNode) === null) {
         return true;
       }
-      /* Remove risky CSS construction leading to mXSS */
-      if (SAFE_FOR_XML && currentNode.namespaceURI === HTML_NAMESPACE && tagName === 'style' && _isNode(currentNode.firstElementChild)) {
-        _forceRemove(currentNode);
-        return true;
-      }
-      /* Remove any occurrence of processing instructions */
-      if (currentNode.nodeType === NODE_TYPE.progressingInstruction) {
-        _forceRemove(currentNode);
-        return true;
-      }
-      /* Remove any kind of possibly harmful comments */
-      if (SAFE_FOR_XML && currentNode.nodeType === NODE_TYPE.comment && regExpTest(/<[/\w]/g, currentNode.data)) {
+      /* Remove mXSS vectors, processing instructions and risky comments */
+      if (_isUnsafeNode(currentNode, tagName)) {
         _forceRemove(currentNode);
         return true;
       }
       /* Remove element if anything forbids its presence */
       if (FORBID_TAGS[tagName] || !(EXTRA_ELEMENT_HANDLING.tagCheck instanceof Function && EXTRA_ELEMENT_HANDLING.tagCheck(tagName)) && !ALLOWED_TAGS[tagName]) {
-        /* Check if we have a custom element to handle */
-        if (!FORBID_TAGS[tagName] && _isBasicCustomElement(tagName)) {
-          if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName)) {
-            return false;
-          }
-          if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName)) {
-            return false;
-          }
+        const removed = _sanitizeDisallowedNode(currentNode, tagName);
+        /* A false return means the node is a custom element kept via
+           CUSTOM_ELEMENT_HANDLING - the only keep path through
+           _sanitizeDisallowedNode. Run afterSanitizeElements on it so the
+           element-hook lifecycle matches normal allowlisted elements: a
+           security policy applied in this hook (e.g. stripping an attribute
+           from every surviving element) must not silently skip kept custom
+           elements (GHSA-c2j3-45gr-mqc4). This mirrors the normal-element
+           tail below - the hook runs, then the walker's subsequent
+           _sanitizeAttributes pass sanitizes the element's attributes. The
+           deliberately skipped namespace and fallback-tag removal checks stay
+           skipped; they are removal decisions, not the hook contract. */
+        if (removed === false) {
+          _executeHooks(hooks.afterSanitizeElements, currentNode, null);
         }
-        /* Keep content except for bad-listed elements */
-        if (KEEP_CONTENT && !FORBID_CONTENTS[tagName]) {
-          const parentNode = getParentNode(currentNode) || currentNode.parentNode;
-          const childNodes = getChildNodes(currentNode) || currentNode.childNodes;
-          if (childNodes && parentNode) {
-            const childCount = childNodes.length;
-            for (let i = childCount - 1; i >= 0; --i) {
-              const childClone = cloneNode(childNodes[i], true);
-              childClone.__removalCount = (currentNode.__removalCount || 0) + 1;
-              parentNode.insertBefore(childClone, getNextSibling(currentNode));
-            }
-          }
-        }
-        _forceRemove(currentNode);
-        return true;
+        return removed;
       }
-      /* Check whether element has a valid namespace */
-      if (currentNode instanceof Element && !_checkValidNamespace(currentNode)) {
+      /* Check whether element has a valid namespace.
+         Realm-safe check (GHSA-hpcv-96wg-7vj8): use the cached Node.prototype
+         nodeType getter rather than `instanceof Element`, which is realm-
+         bound and short-circuits to false for any node minted in a different
+         realm — letting a foreign-realm element with a forbidden namespace
+         slip past the namespace check entirely. */
+      const nt = getNodeType ? getNodeType(currentNode) : currentNode.nodeType;
+      if (nt === NODE_TYPE.element && !_checkValidNamespace(currentNode)) {
         _forceRemove(currentNode);
         return true;
       }
       /* Make sure that older browsers don't get fallback-tag mXSS */
-      if ((tagName === 'noscript' || tagName === 'noembed' || tagName === 'noframes') && regExpTest(/<\/no(script|embed|frames)/i, currentNode.innerHTML)) {
+      if ((tagName === 'noscript' || tagName === 'noembed' || tagName === 'noframes') && regExpTest(FALLBACK_TAG_CLOSE, currentNode.innerHTML)) {
         _forceRemove(currentNode);
         return true;
       }
       /* Sanitize element content to be template-safe */
       if (SAFE_FOR_TEMPLATES && currentNode.nodeType === NODE_TYPE.text) {
         /* Get the element's text content */
-        content = currentNode.textContent;
-        arrayForEach([MUSTACHE_EXPR, ERB_EXPR, TMPLIT_EXPR], expr => {
-          content = stringReplace(content, expr, ' ');
-        });
+        const content = _stripTemplateExpressions(currentNode.textContent);
         if (currentNode.textContent !== content) {
           arrayPush(DOMPurify.removed, {
             element: currentNode.cloneNode()
@@ -1030,15 +1756,43 @@
       if (FORBID_ATTR[lcName]) {
         return false;
       }
+      /* Reject declarative-partial-updates patch-linkage attributes
+         (https://github.com/WICG/declarative-partial-updates).
+              Empirical note (Chrome 150, verified — see
+         test/declarative-patch-probe-v3.html): expansion is NOT applied after
+         sanitization. For the string path it fires during sanitize()'s own
+         parse, so the walk sees and sanitizes the fully materialized expanded
+         tree — teleports into MathML/SVG integration points included; a
+         weaponized `<template for>`->`<img onerror>` comes back with the handler
+         stripped. For the IN_PLACE path it fires on connection, before the walk.
+         Either way DOMPurify is NOT blind to the patch.
+              This removal is therefore defense-in-depth rather than the sole barrier:
+         it prevents live linkage from surviving into the OUTPUT and re-expanding
+         in the caller's context, and keeps behaviour deterministic if a future
+         engine defers expansion. `for` is legitimate only on <label>/<output>;
+         anywhere else (notably <template for>) it links the element to a patch
+         target and teleports or removes an arbitrary DOM range by id/marker name.
+         `patchsrc` fetches remote markup and is treated as a script-loading
+         mechanism (CSP). Gated on SAFE_FOR_XML so the removal groups with the
+         other structural-threat checks and stays overridable, consistent with
+         the rest of the codebase. PI range markers are already removed by
+         _isUnsafeNode. */
+      if (SAFE_FOR_XML && lcName === 'patchsrc') {
+        return false;
+      }
+      if (SAFE_FOR_XML && lcName === 'for' && lcTag !== 'label' && lcTag !== 'output') {
+        return false;
+      }
       /* Make sure attribute cannot clobber */
       if (SANITIZE_DOM && (lcName === 'id' || lcName === 'name') && (value in document || value in formElement)) {
         return false;
       }
+      const nameIsPermitted = ALLOWED_ATTR[lcName] || EXTRA_ELEMENT_HANDLING.attributeCheck instanceof Function && EXTRA_ELEMENT_HANDLING.attributeCheck(lcName, lcTag);
       /* Allow valid data-* attributes: At least one character after "-"
           (https://html.spec.whatwg.org/multipage/dom.html#embedding-custom-non-visible-data-with-the-data-*-attributes)
           XML-compatible (https://html.spec.whatwg.org/multipage/infrastructure.html#xml-compatible and http://www.w3.org/TR/xml/#d0e804)
           We don't need to check the value; it's always URI safe. */
-      if (ALLOW_DATA_ATTR && !FORBID_ATTR[lcName] && regExpTest(DATA_ATTR, lcName)) ; else if (ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR, lcName)) ; else if (EXTRA_ELEMENT_HANDLING.attributeCheck instanceof Function && EXTRA_ELEMENT_HANDLING.attributeCheck(lcName, lcTag)) ; else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
+      if (ALLOW_DATA_ATTR && regExpTest(DATA_ATTR$1, lcName)) ; else if (ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR$1, lcName)) ; else if (!nameIsPermitted) {
         if (
         // First condition does a very basic check if a) it's basically a valid custom element tagname AND
         // b) if the tagName passes whatever the user has configured for CUSTOM_ELEMENT_HANDLING.tagNameCheck
@@ -1050,11 +1804,15 @@
           return false;
         }
         /* Check value is safe. First, is attr inert? If so, is safe */
-      } else if (URI_SAFE_ATTRIBUTES[lcName]) ; else if (regExpTest(IS_ALLOWED_URI$1, stringReplace(value, ATTR_WHITESPACE, ''))) ; else if ((lcName === 'src' || lcName === 'xlink:href' || lcName === 'href') && lcTag !== 'script' && stringIndexOf(value, 'data:') === 0 && DATA_URI_TAGS[lcTag]) ; else if (ALLOW_UNKNOWN_PROTOCOLS && !regExpTest(IS_SCRIPT_OR_DATA, stringReplace(value, ATTR_WHITESPACE, ''))) ; else if (value) {
+      } else if (URI_SAFE_ATTRIBUTES[lcName]) ; else if (regExpTest(IS_ALLOWED_URI$1, stringReplace(value, ATTR_WHITESPACE$1, ''))) ; else if ((lcName === 'src' || lcName === 'xlink:href' || lcName === 'href') && lcTag !== 'script' && stringIndexOf(value, 'data:') === 0 && DATA_URI_TAGS[lcTag]) ; else if (ALLOW_UNKNOWN_PROTOCOLS && !regExpTest(IS_SCRIPT_OR_DATA$1, stringReplace(value, ATTR_WHITESPACE$1, ''))) ; else if (value) {
         return false;
       } else ;
       return true;
     };
+    /* Names the HTML spec reserves from valid-custom-element-name; these must
+     * never be treated as basic custom elements even when a permissive
+     * CUSTOM_ELEMENT_HANDLING.tagNameCheck is configured. */
+    const RESERVED_CUSTOM_ELEMENT_NAMES = addToSet({}, ['annotation-xml', 'color-profile', 'font-face', 'font-face-format', 'font-face-name', 'font-face-src', 'font-face-uri', 'missing-glyph']);
     /**
      * _isBasicCustomElement
      * checks if at least one dash is included in tagName, and it's not the first char
@@ -1064,7 +1822,64 @@
      * @returns Returns true if the tag name meets the basic criteria for a custom element, otherwise false.
      */
     const _isBasicCustomElement = function _isBasicCustomElement(tagName) {
-      return tagName !== 'annotation-xml' && stringMatch(tagName, CUSTOM_ELEMENT);
+      return !RESERVED_CUSTOM_ELEMENT_NAMES[stringToLowerCase(tagName)] && regExpTest(CUSTOM_ELEMENT$1, tagName);
+    };
+    /**
+     * Wrap an attribute value in the matching Trusted Types object when
+     * the active policy requires it. Namespaced attributes pass through
+     * unchanged (no TT support yet, see
+     * https://bugs.chromium.org/p/chromium/issues/detail?id=1305293).
+     *
+     * @param lcTag lowercase tag name of the containing element
+     * @param lcName lowercase attribute name
+     * @param namespaceURI the attribute's namespace, if any
+     * @param value the attribute value to wrap
+     * @return the value, wrapped when Trusted Types demand it
+     */
+    const _applyTrustedTypesToAttribute = function _applyTrustedTypesToAttribute(lcTag, lcName, namespaceURI, value) {
+      if (trustedTypesPolicy && typeof trustedTypes === 'object' && typeof trustedTypes.getAttributeType === 'function' && !namespaceURI) {
+        switch (trustedTypes.getAttributeType(lcTag, lcName)) {
+          case 'TrustedHTML':
+            {
+              return _createTrustedHTML(value);
+            }
+          case 'TrustedScriptURL':
+            {
+              return _createTrustedScriptURL(value);
+            }
+        }
+      }
+      return value;
+    };
+    /**
+     * Write a modified attribute value back onto the element. On
+     * success, re-probe for clobbering introduced by the new value and
+     * remove the element when found; otherwise pop the removal entry
+     * recorded by the earlier _removeAttribute (long-standing pairing
+     * with the SANITIZE_NAMED_PROPS path - do not "fix" casually). On
+     * failure, remove the attribute instead.
+     *
+     * @param currentNode the element carrying the attribute
+     * @param name the attribute name as present on the element
+     * @param namespaceURI the attribute's namespace, if any
+     * @param value the new attribute value
+     */
+    const _setAttributeValue = function _setAttributeValue(currentNode, name, namespaceURI, value) {
+      try {
+        if (namespaceURI) {
+          currentNode.setAttributeNS(namespaceURI, name, value);
+        } else {
+          /* Fallback to setAttribute() for browser-unrecognized namespaces e.g. "x-schema". */
+          currentNode.setAttribute(name, value);
+        }
+        if (_isClobbered(currentNode)) {
+          _forceRemove(currentNode);
+        } else {
+          arrayPop(DOMPurify.removed);
+        }
+      } catch (_) {
+        _removeAttribute(name, currentNode);
+      }
     };
     /**
      * _sanitizeAttributes
@@ -1079,9 +1894,7 @@
     const _sanitizeAttributes = function _sanitizeAttributes(currentNode) {
       /* Execute a hook if present */
       _executeHooks(hooks.beforeSanitizeAttributes, currentNode, null);
-      const {
-        attributes
-      } = currentNode;
+      const attributes = currentNode.attributes;
       /* Check if we have attributes; if not we might have a text node */
       if (!attributes || _isClobbered(currentNode)) {
         return;
@@ -1094,14 +1907,13 @@
         forceKeepAttr: undefined
       };
       let l = attributes.length;
+      const lcTag = transformCaseFunc(currentNode.nodeName);
       /* Go backwards over all attributes; safely remove bad ones */
       while (l--) {
         const attr = attributes[l];
-        const {
-          name,
-          namespaceURI,
-          value: attrValue
-        } = attr;
+        const name = attr.name,
+          namespaceURI = attr.namespaceURI,
+          attrValue = attr.value;
         const lcName = transformCaseFunc(name);
         const initValue = attrValue;
         let value = name === 'value' ? initValue : stringTrim(initValue);
@@ -1115,12 +1927,14 @@
         /* Full DOM Clobbering protection via namespace isolation,
          * Prefix id and name attributes with `user-content-`
          */
-        if (SANITIZE_NAMED_PROPS && (lcName === 'id' || lcName === 'name')) {
+        if (SANITIZE_NAMED_PROPS && (lcName === 'id' || lcName === 'name') && stringIndexOf(value, SANITIZE_NAMED_PROPS_PREFIX) !== 0) {
           // Remove the attribute with this value
           _removeAttribute(name, currentNode);
           // Prefix the value and later re-create the attribute with the sanitized value
           value = SANITIZE_NAMED_PROPS_PREFIX + value;
         }
+        // Else: already prefixed, leave the attribute alone — the prefix is
+        // itself the clobbering protection, and re-applying it is incorrect.
         /* Work around a security issue with comments inside attributes */
         if (SAFE_FOR_XML && regExpTest(/((--!?|])>)|<\/(style|script|title|xmp|textarea|noscript|iframe|noembed|noframes)/i, value)) {
           _removeAttribute(name, currentNode);
@@ -1131,7 +1945,7 @@
           _removeAttribute(name, currentNode);
           continue;
         }
-        /* Did the hooks approve of the attribute? */
+        /* Did the hooks force-keep the attribute? */
         if (hookEvent.forceKeepAttr) {
           continue;
         }
@@ -1141,56 +1955,24 @@
           continue;
         }
         /* Work around a security issue in jQuery 3.0 */
-        if (!ALLOW_SELF_CLOSE_IN_ATTR && regExpTest(/\/>/i, value)) {
+        if (!ALLOW_SELF_CLOSE_IN_ATTR && regExpTest(SELF_CLOSING_TAG, value)) {
           _removeAttribute(name, currentNode);
           continue;
         }
         /* Sanitize attribute content to be template-safe */
         if (SAFE_FOR_TEMPLATES) {
-          arrayForEach([MUSTACHE_EXPR, ERB_EXPR, TMPLIT_EXPR], expr => {
-            value = stringReplace(value, expr, ' ');
-          });
+          value = _stripTemplateExpressions(value);
         }
         /* Is `value` valid for this attribute? */
-        const lcTag = transformCaseFunc(currentNode.nodeName);
         if (!_isValidAttribute(lcTag, lcName, value)) {
           _removeAttribute(name, currentNode);
           continue;
         }
         /* Handle attributes that require Trusted Types */
-        if (trustedTypesPolicy && typeof trustedTypes === 'object' && typeof trustedTypes.getAttributeType === 'function') {
-          if (namespaceURI) ; else {
-            switch (trustedTypes.getAttributeType(lcTag, lcName)) {
-              case 'TrustedHTML':
-                {
-                  value = trustedTypesPolicy.createHTML(value);
-                  break;
-                }
-              case 'TrustedScriptURL':
-                {
-                  value = trustedTypesPolicy.createScriptURL(value);
-                  break;
-                }
-            }
-          }
-        }
+        value = _applyTrustedTypesToAttribute(lcTag, lcName, namespaceURI, value);
         /* Handle invalid data-* attribute set by try-catching it */
         if (value !== initValue) {
-          try {
-            if (namespaceURI) {
-              currentNode.setAttributeNS(namespaceURI, name, value);
-            } else {
-              /* Fallback to setAttribute() for browser-unrecognized namespaces e.g. "x-schema". */
-              currentNode.setAttribute(name, value);
-            }
-            if (_isClobbered(currentNode)) {
-              _forceRemove(currentNode);
-            } else {
-              arrayPop(DOMPurify.removed);
-            }
-          } catch (_) {
-            _removeAttribute(name, currentNode);
-          }
+          _setAttributeValue(currentNode, name, namespaceURI, value);
         }
       }
       /* Execute a hook if present */
@@ -1210,16 +1992,135 @@
         /* Execute a hook if present */
         _executeHooks(hooks.uponSanitizeShadowNode, shadowNode, null);
         /* Sanitize tags and elements */
-        _sanitizeElements(shadowNode);
+        _sanitizeElements(shadowNode, fragment);
         /* Check attributes next */
         _sanitizeAttributes(shadowNode);
-        /* Deep shadow DOM detected */
-        if (shadowNode.content instanceof DocumentFragment) {
+        /* Deep shadow DOM detected.
+           Realm-safe check (GHSA-hpcv-96wg-7vj8): use nodeType against the
+           DOCUMENT_FRAGMENT_NODE constant rather than instanceof, so we
+           recurse into <template>.content from foreign realms too. */
+        if (_isDocumentFragment(shadowNode.content)) {
           _sanitizeShadowDOM2(shadowNode.content);
+        }
+        /* An element iterated here may itself host an attached
+           shadow root. The default NodeIterator does not enter shadow
+           trees, so a shadow root nested inside template.content was
+           previously reached by no walk at all (the pre-pass at
+           _sanitizeAttachedShadowRoots descends via childNodes, which
+           doesn't enter template.content; the template-content recursion
+           above iterates the content but never inspected shadowRoot).
+           Walk it explicitly. The nodeType guard avoids reading
+           shadowRoot off text / comment / CDATA / PI nodes that the
+           iterator also surfaces. */
+        const shadowNodeType = getNodeType ? getNodeType(shadowNode) : shadowNode.nodeType;
+        if (shadowNodeType === NODE_TYPE.element) {
+          const innerSr = getShadowRoot(shadowNode);
+          if (_isDocumentFragment(innerSr)) {
+            _sanitizeAttachedShadowRoots(innerSr);
+            _sanitizeShadowDOM2(innerSr);
+          }
         }
       }
       /* Execute a hook if present */
       _executeHooks(hooks.afterSanitizeShadowDOM, fragment, null);
+    };
+    /**
+     * _sanitizeAttachedShadowRoots
+     *
+     * Walks `root` and feeds every attached shadow root we encounter into
+     * the existing _sanitizeShadowDOM pipeline. The default node iterator
+     * does not descend into shadow trees, so nodes inside an attached
+     * shadow root would otherwise be skipped entirely.
+     *
+     * Two real input paths put attached shadow roots in front of us:
+     *   1. IN_PLACE on a DOM node that already has shadow roots attached.
+     *   2. DOM-node input where importNode(dirty, true) deep-clones the
+     *      shadow root because it was created with `clonable: true`.
+     *
+     * This pass runs once, up front, so the main iteration loop (and the
+     * existing _sanitizeShadowDOM template-content recursion) stay
+     * untouched — string-input paths are not affected.
+     *
+     * @param root the subtree root to walk for attached shadow roots
+     */
+    const _sanitizeAttachedShadowRoots = function _sanitizeAttachedShadowRoots(root) {
+      /* Iterative (explicit stack) rather than per-child recursion. DOM APIs
+         impose no depth cap, so an attacker-shaped tree (JSON/CRDT/editor data
+         built straight into the DOM — the IN_PLACE surface) deeper than the JS
+         call-stack budget would otherwise overflow native recursion here and
+         throw at the IN_PLACE entry pre-pass, before a single node is
+         sanitized, leaving the caller's live tree untouched (fail-open). See
+         campaign-3 F4. A heap stack keeps depth off the call stack.
+              Each work item is either a node to descend into, or a deferred
+         `_sanitizeShadowDOM` for an already-walked shadow root. The deferred
+         form preserves the original post-order discipline: a shadow root's
+         nested shadow roots are discovered before the outer shadow is
+         sanitized (which may remove hosts). Pushes are in reverse of the
+         desired processing order (LIFO): template content, then children, then
+         the shadow-sanitize, then the shadow walk — so the order matches the
+         previous recursion exactly. */
+      const stack = [{
+        node: root,
+        shadow: null
+      }];
+      while (stack.length > 0) {
+        const item = stack.pop();
+        /* Deferred shadow-DOM sanitisation: runs after its subtree was walked. */
+        if (item.shadow) {
+          _sanitizeShadowDOM2(item.shadow);
+          continue;
+        }
+        const node = item.node;
+        const nodeType = getNodeType ? getNodeType(node) : node.nodeType;
+        const isElement = nodeType === NODE_TYPE.element;
+        /* (pushed last → processed first) Children, snapshotted in reverse so
+           the first child is processed first. Snapshotting matters because a
+           hook may detach siblings mid-walk. */
+        const childNodes = getChildNodes(node);
+        if (childNodes) {
+          for (let i = childNodes.length - 1; i >= 0; --i) {
+            stack.push({
+              node: childNodes[i],
+              shadow: null
+            });
+          }
+        }
+        /* (pushed before children → processed after them, matching the old
+           "template content last" order) When the node is a <template>,
+           descend into its content. */
+        if (isElement) {
+          const rootName = getNodeName ? getNodeName(node) : null;
+          if (typeof rootName === 'string' && transformCaseFunc(rootName) === 'template') {
+            const content = node.content;
+            if (_isDocumentFragment(content)) {
+              stack.push({
+                node: content,
+                shadow: null
+              });
+            }
+          }
+        }
+        /* Shadow root (processed first): walk its subtree, then sanitise it.
+           Realm-safe check (GHSA-hpcv-96wg-7vj8): nodeType-based detection
+           rather than `instanceof DocumentFragment`, which is realm-bound and
+           silently skipped foreign-realm shadow roots (e.g.
+           iframe.contentDocument attachShadow). */
+        if (isElement) {
+          const sr = getShadowRoot(node);
+          if (_isDocumentFragment(sr)) {
+            /* Push the deferred sanitise first so it pops after the shadow
+               walk we push next, i.e. nested shadow roots are discovered
+               before this one is sanitised. */
+            stack.push({
+              node: null,
+              shadow: sr
+            }, {
+              node: sr,
+              shadow: null
+            });
+          }
+        }
+      }
     };
     // eslint-disable-next-line complexity
     DOMPurify.sanitize = function (dirty) {
@@ -1237,13 +2138,9 @@
       }
       /* Stringify, in case dirty is an object */
       if (typeof dirty !== 'string' && !_isNode(dirty)) {
-        if (typeof dirty.toString === 'function') {
-          dirty = dirty.toString();
-          if (typeof dirty !== 'string') {
-            throw typeErrorCreate('dirty is not a string, aborting');
-          }
-        } else {
-          throw typeErrorCreate('toString is not a function');
+        dirty = stringifyValue(dirty);
+        if (typeof dirty !== 'string') {
+          throw typeErrorCreate('dirty is not a string, aborting');
         }
       }
       /* Return dirty HTML if DOMPurify cannot run */
@@ -1251,24 +2148,90 @@
         return dirty;
       }
       /* Assign config vars */
-      if (!SET_CONFIG) {
+      if (SET_CONFIG) {
+        /* Persistent setConfig() path: _parseConfig is skipped, so the sets are
+         * not re-derived per call. Restore them from the pristine bindings
+         * captured at setConfig() time so a previous call's hook clone (mutated
+         * below) does not carry over. */
+        ALLOWED_TAGS = SET_CONFIG_ALLOWED_TAGS;
+        ALLOWED_ATTR = SET_CONFIG_ALLOWED_ATTR;
+      } else {
         _parseConfig(cfg);
+      }
+      /* Clone the hook-mutable allowlists before the walk whenever an
+       * uponSanitize* hook is registered. The hook event exposes ALLOWED_TAGS
+       * and ALLOWED_ATTR by reference (as allowedTags / allowedAttributes), so
+       * a hook that widens them would otherwise mutate the shared set
+       * permanently: across later calls and across every element. Cloning per
+       * walk keeps documented in-call widening working while scoping it to the
+       * call. A single guard for both config paths - the per-call path rebinds
+       * the sets in _parseConfig each call, the persistent path restores them
+       * from the captured bindings just above - so the two cannot diverge. */
+      if (hooks.uponSanitizeElement.length > 0 || hooks.uponSanitizeAttribute.length > 0) {
+        ALLOWED_TAGS = clone(ALLOWED_TAGS);
+      }
+      if (hooks.uponSanitizeAttribute.length > 0) {
+        ALLOWED_ATTR = clone(ALLOWED_ATTR);
       }
       /* Clean up removed elements */
       DOMPurify.removed = [];
-      /* Check if dirty is correctly typed for IN_PLACE */
-      if (typeof dirty === 'string') {
-        IN_PLACE = false;
-      }
-      if (IN_PLACE) {
-        /* Do some early pre-sanitization to avoid unsafe root nodes */
-        if (dirty.nodeName) {
-          const tagName = transformCaseFunc(dirty.nodeName);
+      /* Resolve IN_PLACE for this call without mutating persistent config.
+         Writing the IN_PLACE closure variable here leaks under setConfig(),
+         where _parseConfig is skipped on later calls: a single string call would
+         disable in-place mode for every subsequent node call, returning a
+         sanitized copy while leaving the caller's node — which in-place callers
+         keep using and whose return value they ignore — unsanitized. REPORT-2. */
+      const inPlace = IN_PLACE && typeof dirty !== 'string' && _isNode(dirty);
+      if (inPlace) {
+        /* Declarative-partial-updates / streaming pre-pass: sever every patch
+           linkage across the live tree BEFORE the walk, so no patch can fire
+           mid-walk and inject into an already-processed region. Runs first, so
+           it also covers the forbidden/clobbered roots that throw below. */
+        _neutralizePatchLinkage(dirty);
+        /* Do some early pre-sanitization to avoid unsafe root nodes.
+           Read nodeName through the cached prototype getter — a clobbering
+           child named "nodeName" on the form root would otherwise shadow
+           the property and let this check skip the root-allowlist
+           validation entirely. */
+        const nn = getNodeName ? getNodeName(dirty) : dirty.nodeName;
+        if (typeof nn === 'string') {
+          const tagName = transformCaseFunc(nn);
           if (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName]) {
+            /* Fail closed on a live root: neutralize handlers/children before
+               throwing, exactly as the mid-walk abort path does. */
+            _neutralizeRoot(dirty);
             throw typeErrorCreate('root node is forbidden and cannot be sanitized in-place');
           }
         }
-      } else if (dirty instanceof Node) {
+        /* Pre-flight the root through _isClobbered. The iterator-driven
+           removal path can not detach a parent-less root: _forceRemove
+           falls through to Element.prototype.remove(), which per spec
+           is a no-op on a node with no parent. A clobbered root would
+           then survive the main loop with its attributes uninspected,
+           because _sanitizeAttributes early-returns on _isClobbered. The
+           result would be an attacker-controlled form, complete with any
+           event-handler attributes the caller passed in, handed back to
+           the application unsanitized. Refuse to sanitize such a root
+           the same way we refuse a forbidden tag. GHSA-r47g-fvhr-h676. */
+        if (_isClobbered(dirty)) {
+          /* Fail closed on a live clobbered root before throwing.
+             _neutralizeRoot's reads are clobber-safe (cached getters); the
+             form's non-clobbered descendants, e.g. an armed <img>, are scrubbed. */
+          _neutralizeRoot(dirty);
+          throw typeErrorCreate('root node is clobbered and cannot be sanitized in-place');
+        }
+        /* Sanitize attached shadow roots before the main iterator runs.
+           The iterator does not descend into shadow trees. Same fail-closed
+           barrier as the main walk (campaign-3 F2): a custom-element reaction
+           inside a shadow root could abort this pre-pass before the walk runs,
+           which would otherwise leave the entire live tree unsanitized. */
+        try {
+          _sanitizeAttachedShadowRoots(dirty);
+        } catch (error) {
+          _neutralizeRoot(dirty);
+          throw error;
+        }
+      } else if (_isNode(dirty)) {
         /* If dirty is a DOM element, append to an empty document to avoid
            elements being stripped by the parser */
         body = _initDocument('<!---->');
@@ -1282,12 +2245,18 @@
           // eslint-disable-next-line unicorn/prefer-dom-node-append
           body.appendChild(importedNode);
         }
+        /* Clonable shadow roots are deep-cloned by importNode(); sanitize
+           them before the main iterator runs, since the iterator does not
+           descend into shadow trees. The walk routes every read through a
+           cached prototype getter so clobbering descendants on a form root
+           cannot hide a shadow host from this pass. */
+        _sanitizeAttachedShadowRoots(importedNode);
       } else {
         /* Exit directly if we have nothing to do */
         if (!RETURN_DOM && !SAFE_FOR_TEMPLATES && !WHOLE_DOCUMENT &&
         // eslint-disable-next-line unicorn/prefer-includes
         dirty.indexOf('<') === -1) {
-          return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(dirty) : dirty;
+          return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? _createTrustedHTML(dirty) : dirty;
         }
         /* Initialize the document to work on */
         body = _initDocument(dirty);
@@ -1301,31 +2270,68 @@
         _forceRemove(body.firstChild);
       }
       /* Get node iterator */
-      const nodeIterator = _createNodeIterator(IN_PLACE ? dirty : body);
-      /* Now start iterating over the created document */
-      while (currentNode = nodeIterator.nextNode()) {
-        /* Sanitize tags and elements */
-        _sanitizeElements(currentNode);
-        /* Check attributes next */
-        _sanitizeAttributes(currentNode);
-        /* Shadow DOM detected, sanitize it */
-        if (currentNode.content instanceof DocumentFragment) {
-          _sanitizeShadowDOM2(currentNode.content);
+      const walkRoot = inPlace ? dirty : body;
+      const nodeIterator = _createNodeIterator(walkRoot);
+      /* Now start iterating over the created document.
+         The walk runs inside an exception barrier (campaign-3 F2): a re-entrant
+         engine/custom-element mutation can detach a node mid-walk so
+         `_forceRemove`'s parentless guard throws, aborting the loop. Without the
+         barrier the caller's in-place tree would be left half-sanitized with the
+         unvisited tail still armed. On any throw we fail closed — strip the
+         in-place root bare — then rethrow so the existing throw contract is
+         preserved. (String/DOM-copy paths never return the partial body, so the
+         propagating throw is already fail-closed there.) */
+      try {
+        while (currentNode = nodeIterator.nextNode()) {
+          /* Sanitize tags and elements */
+          _sanitizeElements(currentNode, walkRoot);
+          /* Check attributes next */
+          _sanitizeAttributes(currentNode);
+          /* Shadow DOM detected, sanitize it.
+             Realm-safe check (GHSA-hpcv-96wg-7vj8): nodeType-based detection
+             instead of instanceof, so foreign-realm <template>.content is
+             walked correctly. */
+          if (_isDocumentFragment(currentNode.content)) {
+            _sanitizeShadowDOM2(currentNode.content);
+          }
         }
+      } catch (error) {
+        if (inPlace) {
+          _neutralizeRoot(dirty);
+          /* Nodes _forceRemove'd earlier in the aborted walk are already
+             detached from the root, so _neutralizeRoot's subtree pass does not
+             reach them. Defuse them too, mirroring the success-path loop below. */
+          arrayForEach(DOMPurify.removed, entry => {
+            if (entry.element) {
+              _neutralizeSubtree(entry.element);
+            }
+          });
+        }
+        throw error;
       }
       /* If we sanitized `dirty` in-place, return it. */
-      if (IN_PLACE) {
+      if (inPlace) {
+        /* Fail-closed completion of the audit-5 F1 fix: every node removed from
+           the caller's live tree is detached but may still hold a queued
+           resource-event handler that fires in page scope after we return. The
+           move-hoist covers only disallowed-tag KEEP_CONTENT removals; strip the
+           non-allow-listed attributes off every other removed subtree (clobber,
+           mXSS, namespace, comments, KEEP_CONTENT:false, …) so those handlers are
+           cancelled before any event can fire. Runs synchronously, pre-return. */
+        arrayForEach(DOMPurify.removed, entry => {
+          if (entry.element) {
+            _neutralizeSubtree(entry.element);
+          }
+        });
+        if (SAFE_FOR_TEMPLATES) {
+          _scrubTemplateExpressions2(dirty);
+        }
         return dirty;
       }
       /* Return sanitized string or DOM */
       if (RETURN_DOM) {
         if (SAFE_FOR_TEMPLATES) {
-          body.normalize();
-          let html = body.innerHTML;
-          arrayForEach([MUSTACHE_EXPR, ERB_EXPR, TMPLIT_EXPR], expr => {
-            html = stringReplace(html, expr, ' ');
-          });
-          body.innerHTML = html;
+          _scrubTemplateExpressions2(body);
         }
         if (RETURN_DOM_FRAGMENT) {
           returnNode = createDocumentFragment.call(body.ownerDocument);
@@ -1355,20 +2361,28 @@
       }
       /* Sanitize final string template-safe */
       if (SAFE_FOR_TEMPLATES) {
-        arrayForEach([MUSTACHE_EXPR, ERB_EXPR, TMPLIT_EXPR], expr => {
-          serializedHTML = stringReplace(serializedHTML, expr, ' ');
-        });
+        serializedHTML = _stripTemplateExpressions(serializedHTML);
       }
-      return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? trustedTypesPolicy.createHTML(serializedHTML) : serializedHTML;
+      return trustedTypesPolicy && RETURN_TRUSTED_TYPE ? _createTrustedHTML(serializedHTML) : serializedHTML;
     };
     DOMPurify.setConfig = function () {
       let cfg = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       _parseConfig(cfg);
       SET_CONFIG = true;
+      SET_CONFIG_ALLOWED_TAGS = ALLOWED_TAGS;
+      SET_CONFIG_ALLOWED_ATTR = ALLOWED_ATTR;
     };
     DOMPurify.clearConfig = function () {
       CONFIG = null;
       SET_CONFIG = false;
+      SET_CONFIG_ALLOWED_TAGS = null;
+      SET_CONFIG_ALLOWED_ATTR = null;
+      // Drop any caller-supplied Trusted Types policy so it cannot poison later
+      // `RETURN_TRUSTED_TYPE` output. The internal default policy (cached, and
+      // never recreated — Trusted Types throws on duplicate names) is restored by
+      // the next `_parseConfig`. See GHSA-vxr8-fq34-vvx9.
+      trustedTypesPolicy = defaultTrustedTypesPolicy;
+      emptyHTML = '';
     };
     DOMPurify.isValidAttribute = function (tag, attr, value) {
       /* Initialize shared config vars if necessary. */
@@ -1383,9 +2397,19 @@
       if (typeof hookFunction !== 'function') {
         return;
       }
+      /* Reject unknown entry points. Without this, a non-hook key (e.g.
+       * '__proto__') indexes off the prototype chain rather than a real
+       * hook array, and arrayPush then writes to Object.prototype. Guard
+       * with an own-property check against the known hook names. */
+      if (!objectHasOwnProperty(hooks, entryPoint)) {
+        return;
+      }
       arrayPush(hooks[entryPoint], hookFunction);
     };
     DOMPurify.removeHook = function (entryPoint, hookFunction) {
+      if (!objectHasOwnProperty(hooks, entryPoint)) {
+        return undefined;
+      }
       if (hookFunction !== undefined) {
         const index = arrayLastIndexOf(hooks[entryPoint], hookFunction);
         return index === -1 ? undefined : arraySplice(hooks[entryPoint], index, 1)[0];
@@ -1393,6 +2417,9 @@
       return arrayPop(hooks[entryPoint]);
     };
     DOMPurify.removeHooks = function (entryPoint) {
+      if (!objectHasOwnProperty(hooks, entryPoint)) {
+        return;
+      }
       hooks[entryPoint] = [];
     };
     DOMPurify.removeAllHooks = function () {
@@ -1424,11 +2451,11 @@
   			console.warn('Required dependency DOMPurify not available. Please use the full Able Player bundle which has DOMPurify built in. Or, keep using this bundle, and include DOMPurify separately.');
   		}
 
-  		$('video, audio').each(function (index, element) {
-  			if ($(element).data('able-player') !== undefined) {
-  				new AblePlayer($(this),$(element));
+  		document.querySelectorAll( 'video,audio' ).forEach( ( element ) => {
+  			if ( element.dataset.ablePlayer !== undefined ) {
+  				new AblePlayer( $( element ) );
   			}
-  		});
+  		} );
   	});
 
   	// YouTube player support; pass ready event to jQuery so we can catch in player.
@@ -1447,16 +2474,17 @@
   	});
   }
 
-  // Outdented for a simpler diff during module conversion
-  	/**
-  	 * Construct the AblePlayer object.
-  	 *
-  	 * Able Player needs `window` to instantiate, so, skip the constructor if
-  	 * you are running outside the browser (for example, SSR).
-  	 *
-  	 * @param object media jQuery selector or element identifying the media.
-  	 */
-  	function AblePlayer(media) {
+  /**
+   * Construct the AblePlayer object.
+   *
+   * Able Player needs `window` to instantiate, so, skip the constructor if
+   * you are running outside the browser (for example, SSR).
+   *
+   * @param object media jQuery selector or element identifying the media.
+   * @param object options Optional configuration options for the player.
+   */
+  class AblePlayer {
+  	constructor(media, options = {}) {
 
   		if (typeof window === 'undefined') {
   			console.warn("`window` is undefined. Able Player needs `window` to instantiate. Skip constructing Able Player if you are running outside a browser (for example, SSR).");
@@ -1466,6 +2494,7 @@
   		var thisObj = this;
 
   		this.media = media;
+  		this.options = options;
 
   		if ($(media).length === 0) {
   			this.provideFallback();
@@ -1474,7 +2503,6 @@
 
   		// Default variables assignment
   		// The following variables CAN be overridden with HTML attributes
-
   		// autoplay (Boolean; if present always resolves to true, regardless of value)
   		if ($(media).attr('autoplay') !== undefined) {
   			this.autoplay = true; // this value remains constant
@@ -1484,64 +2512,56 @@
   			this.okToPlay = false;
   		}
 
+  		let data = $(media)[0].dataset;
+
   		// loop (Boolean; if present always resolves to true, regardless of value)
-  		this.loop = ($(media).attr('loop') !== undefined) ? true : false;
+  		this.loop = (data.loop !== undefined) ? true : false;
 
   		// playsinline (Boolean; if present always resolves to true, regardless of value)
   		this.playsInline = ($(media).attr('playsinline') !== undefined) ? '1' : '0';
 
   		// poster (Boolean, indicating whether media element has a poster attribute)
-  		this.hasPoster = ( $(media).attr('poster') || $(media).data('poster') ) ? true : false;
+  		this.hasPoster = ($(media).attr('poster') || data.poster) ? true : false;
 
-  		this.audioPoster = $(media).data('poster');
-  		this.audioPosterAlt = $(media).data('poster-alt' );
-
-  		// get height and width attributes, if present
-  		// and add them to variables
-  		// Not currently used, but might be useful for resizing player
-  		this.width = $(media).attr('width') ?? 0;
-  		this.height = $(media).attr('height') ?? 0;
+  		this.audioPoster = options.poster ?? data.poster;
+  		this.audioPosterAlt = options.posterAlt ?? data.posterAlt;
 
   		// start-time
-  		var startTime = $(media).data('start-time');
-  		var isNumeric = ( typeof startTime === 'number' || ( typeof startTime === 'string' && startTime.trim() !== '' && ! isNaN(startTime) && isFinite( Number(startTime) ) ) ) ? true : false;
-  		this.startTime =  ( startTime !== undefined && isNumeric ) ? startTime : 0;
+  		var startTime = options.startTime ?? data.startTime;
+  		var isNumeric = (typeof startTime === 'number' || (typeof startTime === 'string' && startTime.trim() !== '' && !isNaN(startTime) && isFinite(Number(startTime)))) ? true : false;
+  		this.startTime = (startTime !== undefined && isNumeric) ? startTime : 0;
 
   		// debug
-  		this.debug = ($(media).data('debug') !== undefined && $(media).data('debug') !== false) ? true : false;
+  		this.debug = (data.debug !== undefined && data.debug !== false) ? true : false;
 
   		// Volume
   		// Range is 0 to 10. Best not to crank it to avoid overpowering screen readers
   		this.defaultVolume = 7;
-  		if ($(media).data('volume') !== undefined && $(media).data('volume') !== "") {
-  			var volume = $(media).data('volume');
+  		if (data.volume !== undefined && data.volume !== "") {
+  			var volume = data.volume;
   			if (volume >= 0 && volume <= 10) {
   				this.defaultVolume = volume;
   			}
   		}
   		this.volume = this.defaultVolume;
 
+  		let useChaptersButton = options.useChaptersButton ?? data.useChaptersButton;
   		// Optional Buttons
   		// Buttons are added to the player controller if relevant media is present
   		// However, in some applications it might be undesirable to show buttons
   		// (e.g., if chapters or transcripts are provided in an external container)
-
-  		if ($(media).data('use-chapters-button') !== undefined && $(media).data('use-chapters-button') === false) {
+  		if (useChaptersButton !== undefined && useChaptersButton === false) {
   			this.useChaptersButton = false;
   		} else {
   			this.useChaptersButton = true;
   		}
 
+  		let descriptionsAudible = options.descriptionsAudible ?? data.descriptionsAudible;
   		// Control whether text descriptions are read aloud
   		// set to "false" if the sole purpose of the WebVTT descriptions file
   		// is to integrate text description into the transcript
   		// set to "true" to write description text to a div
-  		// This variable does *not* control the method by which description is read.
-  		// For that, see below (this.descMethod)
-  		if ($(media).data('descriptions-audible') !== undefined && $(media).data('descriptions-audible') === false) {
-  			this.readDescriptionsAloud = false;
-  		} else if ($(media).data('description-audible') !== undefined && $(media).data('description-audible') === false) {
-  			// support both singular and plural spelling of attribute
+  		if (descriptionsAudible !== undefined && descriptionsAudible === false) {
   			this.readDescriptionsAloud = false;
   		} else {
   			this.readDescriptionsAloud = true;
@@ -1551,40 +2571,45 @@
   		// to be populated later by getBrowserVoices
   		this.descVoices = [];
 
+  		let descReader = options.descReader ?? data.descReader;
   		// Method by which text descriptions are read
   		// valid values of data-desc-reader are:
   		// 'brower' (default) - text-based audio description is handled by the browser, if supported
   		// 'screenreader' - text-based audio description is always handled by screen readers
   		// The latter may be preferable by owners of websites in languages that are not well supported
   		// by the Web Speech API
-  		this.descReader = ($(media).data('desc-reader') == 'screenreader') ? 'screenreader' : 'browser';
+  		this.descReader = (descReader == 'screenreader') ? 'screenreader' : 'browser';
 
+  		let defaultStateCaptions = options.defaultStateCaptions ?? data.stateCaptions;
+  		let defaultStateDescriptions = options.defaultStateDescriptions ?? data.stateDescriptions;
   		// Default state of captions and descriptions
   		// This setting is overridden by user preferences, if they exist
   		// values for data-state-captions and data-state-descriptions are 'on' or 'off'
-  		this.defaultStateCaptions = ($(media).data('state-captions') == 'off') ? 0 : 1;
-  		this.defaultStateDescriptions = ($(media).data('state-descriptions') == 'on') ? 1 : 0;
+  		this.defaultStateCaptions = (defaultStateCaptions == 'off') ? 0 : 1;
+  		this.defaultStateDescriptions = (defaultStateDescriptions == 'on') ? 1 : 0;
 
+  		let defaultDescPause = options.descPauseDefault ?? data.descPauseDefault;
   		// Default setting for prefDescPause
   		// Extended description (i.e., pausing during description) is on by default
   		// but this settings give website owners control over that
   		// since they know the nature of their videos, and whether pausing is necessary
   		// This setting is overridden by user preferences, if they exist
-  		this.defaultDescPause = ($(media).data('desc-pause-default') == 'off') ? 0 : 1;
+  		this.defaultDescPause = (defaultDescPause == 'off') ? 0 : 1;
 
+  		let headingLevel = options.headingLevel ?? data.headingLevel;
   		// Headings
   		// By default, an off-screen heading is automatically added to the top of the media player
-  		// It is intelligently assigned a heading level based on context, via misc.js > getNextHeadingLevel()
+  		// It is assigned a heading level based on context, via misc.js > getNextHeadingLevel()
   		// Authors can override this behavior by manually assigning a heading level using data-heading-level
   		// Accepted values are 1-6, or 0 which indicates "no heading"
   		// (i.e., author has already hard-coded a heading before the media player; Able Player doesn't need to do this)
-  		if ($(media).data('heading-level') !== undefined && $(media).data('heading-level') !== "") {
-  			var headingLevel = $(media).data('heading-level');
+  		if (headingLevel !== undefined && headingLevel !== "") {
   			if (/^[0-6]*$/.test(headingLevel)) { // must be a valid HTML heading level 1-6; or 0
   				this.playerHeadingLevel = headingLevel;
   			}
   		}
 
+  		let transcriptDivLocation = options.transcriptDiv ?? data.transcriptDiv;
   		// Transcripts
   		// There are three types of interactive transcripts.
   		// In descending of order of precedence (in case there are conflicting tags), they are:
@@ -1592,18 +2617,18 @@
   		// 2. "external" - Automatically generated, written to an external div (requires data-transcript-div & a valid target element)
   		// 3. "popup" - Automatically generated, written to a draggable, resizable popup window that can be toggled on/off with a button
   		// If data-include-transcript="false", there is no "popup" transcript
-  		var transcriptDivLocation = $(media).data('transcript-div');
-  		if ( transcriptDivLocation !== undefined && transcriptDivLocation !== "" && null !== document.getElementById( transcriptDivLocation ) ) {
+  		if (transcriptDivLocation !== undefined && transcriptDivLocation !== "" && null !== document.getElementById(transcriptDivLocation)) {
   			this.transcriptDivLocation = transcriptDivLocation;
   		} else {
   			this.transcriptDivLocation = null;
   		}
-  		var includeTranscript = $(media).data('include-transcript');
-  		this.hideTranscriptButton = ( includeTranscript !== undefined && includeTranscript === false) ? true : false;
+  		var includeTranscript = options.includeTranscript ?? data.includeTranscript;
+  		this.hideTranscriptButton = (includeTranscript !== undefined && includeTranscript === false) ? true : false;
 
   		this.transcriptType = null;
-  		if ($(media).data('transcript-src') !== undefined) {
-  			this.transcriptSrc = $(media).data('transcript-src');
+  		let transcriptSrc = options.transcriptSrc ?? data.transcriptSrc;
+  		if (transcriptSrc !== undefined) {
+  			this.transcriptSrc = transcriptSrc;
   			if (this.transcriptSrcHasRequiredParts()) {
   				this.transcriptType = 'manual';
   			} else {
@@ -1614,105 +2639,117 @@
   			this.transcriptType = (this.transcriptDivLocation) ? 'external' : 'popup';
   		}
 
+  		let lyricsMode = options.lyricsMode ?? data.lyricsMode;
   		// In "Lyrics Mode", line breaks in WebVTT caption files are supported in the transcript
   		// If false (default), line breaks are are removed from transcripts for a more seamless reading experience
   		// If true, line breaks are preserved, so content can be presented karaoke-style, or as lines in a poem
-  		this.lyricsMode = ($(media).data('lyrics-mode') !== undefined && $(media).data('lyrics-mode') !== false) ? true : false;
+  		this.lyricsMode = (lyricsMode !== undefined && lyricsMode !== false) ? true : false;
 
+  		let strictMode = options.strictMode ?? data.strictMode;
+  		// in Strict Mode, parentheses and brackets do not get marked in bold in transcripts, and line breaks are not injected.
+  		// In Able Player 5.1, defaults to false.
+  		this.strictMode = (strictMode === undefined && strictMode !== true) ? false : true;
+
+  		let transcriptTitle = options.transcriptTitle ?? data.transcriptTitle;
   		// Set Transcript Title if defined explicitly. See transcript.js.
-  		if ($(media).data('transcript-title') !== undefined && $(media).data('transcript-title') !== "") {
-  			this.transcriptTitle = $(media).data('transcript-title');
+  		if (transcriptTitle !== undefined && transcriptTitle !== "") {
+  			this.transcriptTitle = transcriptTitle;
   		}
 
   		// Sign Language
   		// sign language can be a modal (default) or assigned to a div on the page.
-  		var signDivLocation = $(media).data('sign-div');
-  		if ( signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById( signDivLocation ) ) {
-  			this.$signDivLocation = $( '#' + signDivLocation );
+  		let signDivLocation = options.signDiv ?? data.signDiv;
+  		if (signDivLocation !== undefined && signDivLocation !== "" && null !== document.getElementById(signDivLocation)) {
+  			this.$signDivLocation = $('#' + signDivLocation);
   		} else {
   			this.$signDivLocation = null;
   		}
 
+  		let captionsPosition = options.captionsPosition ?? data.captionsPosition;
   		// Captions
   		// data-captions-position can be used to set the default captions position
   		// this is only the default, and can be overridden by user preferences
   		// valid values of data-captions-position are 'below' and 'overlay'
-  		this.defaultCaptionsPosition = ($(media).data('captions-position') === 'overlay') ? 'overlay' : 'below';
+  		this.defaultCaptionsPosition = (captionsPosition === 'overlay') ? 'overlay' : 'below';
 
   		// Chapters
-  		var chaptersDiv = $(media).data('chapters-div');
-  		if ( chaptersDiv !== undefined && chaptersDiv !== "") {
+  		var chaptersDiv = options.chaptersDiv ?? data.chaptersDiv;
+  		if (chaptersDiv !== undefined && chaptersDiv !== "") {
   			this.chaptersDivLocation = chaptersDiv;
   		}
 
-  		if ($(media).data('chapters-title') !== undefined) {
+  		let chaptersTitle = options.chaptersTitle ?? data.chaptersTitle;
+  		if (chaptersTitle !== undefined) {
   			// NOTE: empty string is valid; results in no title being displayed
-  			this.chaptersTitle = $(media).data('chapters-title');
+  			this.chaptersTitle = chaptersTitle;
   		}
 
-  		var defaultChapter = $(media).data('chapters-default');
-  		this.defaultChapter = ( defaultChapter !== undefined && defaultChapter !== "") ? defaultChapter : null;
+  		let defaultChapter = options.chaptersDefault ?? data.chaptersDefault;
+  		this.defaultChapter = (defaultChapter !== undefined && defaultChapter !== "") ? defaultChapter : null;
 
   		// Slower/Faster buttons
   		// valid values of data-speed-icons are 'animals' (default) and 'arrows'
   		// 'animals' uses turtle and rabbit; 'arrows' uses up/down arrows
-  		this.speedIcons = ($(media).data('speed-icons') === 'arrows') ? 'arrows' : 'animals';
+  		let speedIcons = options.speedIcons ?? data.speedIcons;
+  		this.speedIcons = (speedIcons === 'arrows') ? 'arrows' : 'animals';
 
   		// Seekbar
   		// valid values of data-seekbar-scope are 'chapter' and 'video'; will also accept 'chapters'
-  		var seekbarScope = $(media).data('seekbar-scope');
-  		this.seekbarScope = ( seekbarScope === 'chapter' || seekbarScope === 'chapters') ? 'chapter' : 'video';
+  		let seekbarScope = options.seekbarScope ?? data.seekbarScope;
+  		this.seekbarScope = (seekbarScope === 'chapter' || seekbarScope === 'chapters') ? 'chapter' : 'video';
 
-  		// YouTube
-  		var youTubeId = $(media).data('youtube-id');
-  		if ( youTubeId !== undefined && youTubeId !== "") {
+  		// YouTube converts to youtube in data attributes.
+  		let youTubeId = options.youTubeId ?? data.youtubeId;
+  		if (youTubeId !== undefined && youTubeId !== "") {
   			this.youTubeId = this.getYouTubeId(youTubeId);
-  			if ( ! this.hasPoster ) {
-  				let poster = this.getYouTubePosterUrl(this.youTubeId,'640');
-  				$(media).attr( 'poster', poster );
+  			if (!this.hasPoster) {
+  				let poster = this.getYouTubePosterUrl(this.youTubeId, '640');
+  				$(media).attr('poster', poster);
   			}
   		}
 
-  		var youTubeDescId = $(media).data('youtube-desc-id');
-  		if ( youTubeDescId !== undefined && youTubeDescId !== "") {
+  		let youTubeDescId = options.youTubeDescId ?? data.youtubeDescId;
+  		if (youTubeDescId !== undefined && youTubeDescId !== "") {
   			this.youTubeDescId = this.getYouTubeId(youTubeDescId);
   		}
 
-  		var youTubeSignId = $(media).data('youtube-sign-src');
-  		if ( youTubeSignId !== undefined && youTubeSignId !== "") {
+  		let youTubeSignId = options.youTubeSignId ?? data.youtubeSignSrc;
+  		if (youTubeSignId !== undefined && youTubeSignId !== "") {
   			this.youTubeSignId = this.getYouTubeId(youTubeSignId);
   		}
 
-  		var youTubeNoCookie = $(media).data('youtube-nocookie');
+  		let youTubeNoCookie = options.youTubeNoCookie ?? data.youtubeNoCookie;
   		this.youTubeNoCookie = (youTubeNoCookie !== undefined && youTubeNoCookie) ? true : false;
 
   		// Vimeo
-  		var vimeoId = $(media).data('vimeo-id');
-  		if ( vimeoId !== undefined && vimeoId !== "") {
+  		let vimeoId = options.vimeoId ?? data.vimeoId;
+  		if (vimeoId !== undefined && vimeoId !== "") {
   			this.vimeoId = this.getVimeoId(vimeoId);
-  			if ( ! this.hasPoster ) {
-  				let poster = thisObj.getVimeoPosterUrl(this.vimeoId,'1200');
-  				$(media).attr( 'poster', poster );
+  			if (!this.hasPoster) {
+  				let poster = thisObj.getVimeoPosterUrl(this.vimeoId, '1200');
+  				$(media).attr('poster', poster);
   			}
   		}
-  		var vimeoDescId = $(media).data('vimeo-desc-id');
-  		if ( vimeoDescId !== undefined && vimeoDescId !== "") {
+  		let vimeoDescId = options.vimeoDescId ?? data.vimeoDescId;
+  		if (vimeoDescId !== undefined && vimeoDescId !== "") {
   			this.vimeoDescId = this.getVimeoId(vimeoDescId);
   		}
 
   		// Skin
+  		let skin = options.skin ?? data.skin;
   		// valid values of data-skin are:
   		// '2020' (default as of 4.6), all buttons in one row beneath a full-width seekbar
   		// 'legacy', two rows of controls; seekbar positioned in available space within top row
-  		this.skin = ($(media).data('skin') == 'legacy') ? 'legacy' : '2020';
+  		this.skin = (skin == 'legacy') ? 'legacy' : '2020';
 
   		// Size
   		// width of Able Player is determined using the following order of precedence:
   		// 1. data-width attribute
   		// 2. width attribute (for video or audio, although it is not valid HTML for audio)
   		// 3. Intrinsic size from video (video only, determined later)
-  		if ($(media).data('width') !== undefined) {
-  			this.playerWidth = parseInt($(media).data('width'));
+  		let width = options.width ?? data.width;
+  		if (width !== undefined) {
+  			this.playerWidth = parseInt(width);
   		} else if ($(media)[0].getAttribute('width')) {
   			// NOTE: jQuery attr() returns null for all invalid HTML attributes
   			// (e.g., width on <audio>)
@@ -1722,7 +2759,7 @@
   			this.playerWidth = null;
   		}
 
-  		var allowFullScreen = $(media).data('allow-fullscreen');
+  		var allowFullScreen = data.allowFullscreen;
   		this.allowFullscreen = (allowFullScreen !== undefined && allowFullScreen === false) ? false : true;
 
   		// Define other variables that are used in fullscreen program flow
@@ -1734,9 +2771,9 @@
   		// Unless specified with data-seek-interval, the default value is re-calculated in initialize.js > setSeekInterval();
   		// Calculation attempts to intelligently assign a reasonable interval based on media length
   		this.defaultSeekInterval = 10;
+  		let seekInterval = options.seekInterval ?? data.seekInterval;
   		this.useFixedSeekInterval = false; // will change to true if media has valid data-seek-interval attribute
-  		if ($(media).data('seek-interval') !== undefined && $(media).data('seek-interval') !== "") {
-  			var seekInterval = $(media).data('seek-interval');
+  		if (seekInterval !== undefined && seekInterval !== "") {
   			if (/^[1-9][0-9]*$/.test(seekInterval)) { // must be a whole number greater than 0
   				this.seekInterval = seekInterval;
   				this.useFixedSeekInterval = true; // do not override with calculuation
@@ -1746,15 +2783,15 @@
   		// Now Playing
   		// Shows "Now Playing:" plus the title of the current track above player
   		// Only used if there is a playlist
-  		var showNowPlaying = $(media).data('show-now-playing');
+  		var showNowPlaying = options.showNowPlaying ?? data.showNowPlaying;
   		this.showNowPlaying = (showNowPlaying !== undefined && showNowPlaying === false) ? false : true;
 
   		// Fallback
   		// The data-test-fallback attribute can be used to test the fallback solution in any browser
-  		var testFallback = $(media).data('test-fallback');
-  		if ( testFallback !== undefined && testFallback !== false) {
+  		var testFallback = options.testFallback ?? data.testFallback;
+  		if (testFallback !== undefined && testFallback !== false) {
   			// 1: build error; 2: browser doesn't support media.
-  			this.testFallback = ( testFallback == '2' ) ? 2 : 1;
+  			this.testFallback = (testFallback == '2') ? 2 : 1;
   		} else {
   			this.testFallback = false;
   		}
@@ -1765,45 +2802,46 @@
   		// 2. Lang attribute on <html> or <body>, if a matching translation file is available
   		// 3. English
   		// Final calculation occurs in translation.js > getTranslationText()
-  		var lang = $(media).data('lang');
-  		this.lang = ( lang !== undefined && lang !== "") ? lang.toLowerCase() : null;
+  		let lang = options.lang ?? data.lang;
+  		this.lang = (lang !== undefined && lang !== "") ? lang.toLowerCase() : null;
 
   		// Metadata Tracks
-  		var metaType = $(media).data('meta-type');
-  		if ( metaType !== undefined && metaType !== "") {
+  		let metaType = options.metaType ?? data.metaType;
+  		if (metaType !== undefined && metaType !== "") {
   			this.metaType = metaType;
   		}
-  		var metaDiv = $(media).data('meta-div');
-  		if ( metaDiv !== undefined && metaDiv !== "") {
+  		let metaDiv = options.metaDiv ?? data.metaDiv;
+  		if (metaDiv !== undefined && metaDiv !== "") {
   			this.metaDiv = metaDiv;
   		}
 
   		// Search
   		// conducting a search requires an external div in which to write the results
-  		var searchDiv = $(media).data('search-div');
-  		if ( searchDiv !== undefined && searchDiv !== "") {
+  		let searchDiv = options.searchDiv ?? data.searchDiv;
+  		if (searchDiv !== undefined && searchDiv !== "") {
 
   			this.searchDiv = searchDiv;
 
   			// Search term (optional; could be assigned later in a JavaScript application)
-  			var searchString = $(media).data('search');
-  			if ( searchString !== undefined && searchString !== "") {
+  			let searchString = options.search ?? data.search;
+  			if (searchString !== undefined && searchString !== "") {
   				this.searchString = searchString;
   			}
 
   			// Search Language
-  			var searchLang = $(media).data('search-lang');
-  			this.searchLang = ( searchLang !== undefined && searchLang !== "") ? searchLang : null;
+  			let searchLang = options.searchLang ?? data.searchLang;
+  			this.searchLang = (searchLang !== undefined && searchLang !== "") ? searchLang : null;
 
   			// Search option: Ignore capitalization in search terms
-  			var searchIgnoreCaps = $(media).data('search-ignore-caps');
-  			this.searchIgnoreCaps = ( searchIgnoreCaps !== undefined && searchIgnoreCaps !== false) ? true : false;
+  			let searchIgnoreCaps = options.searchIgnoreCaps ?? data.searchIgnoreCaps;
+  			this.searchIgnoreCaps = (searchIgnoreCaps !== undefined && searchIgnoreCaps !== false) ? true : false;
   		}
 
+  		let hideControls = options.hideControls ?? data.hideControls;
   		// Hide controls when video starts playing
   		// They will reappear again when user presses a key or moves the mouse
   		// As of v4.0, controls are hidden automatically on playback in fullscreen mode
-  		if ($(media).data('hide-controls') !== undefined && $(media).data('hide-controls') !== false) {
+  		if (hideControls !== undefined && hideControls !== false) {
   			this.hideControls = true;
   			this.hideControlsOriginal = true; // a copy of hideControls, since the former may change if user enters full screen mode
   		} else {
@@ -1814,11 +2852,13 @@
   		// Steno mode
   		// Enable support for Able Player keyboard shortcuts in textaarea fields
   		// so users can control the player while transcribing
-  		if ($(media).data('steno-mode') !== undefined && $(media).data('steno-mode') !== false) {
+  		let stenoMode = options.stenoMode ?? data.stenoMode;
+  		if (stenoMode !== undefined && stenoMode !== false) {
   			this.stenoMode = true;
   			// Add support for stenography in an iframe via data-steno-iframe-id
-  			if ($(media).data('steno-iframe-id') !== undefined && $(media).data('steno-iframe-id') !== "") {
-  				this.stenoFrameId = $(media).data('steno-iframe-id');
+  			let stenoIframeId = options.stenoIframeId ?? data.stenoIframeId;
+  			if (stenoIframeId !== undefined && stenoIframeId !== "") {
+  				this.stenoFrameId = stenoIframeId;
   				this.$stenoFrame = $('#' + this.stenoFrameId);
   				if (!(this.$stenoFrame.length)) {
   					// iframe not found
@@ -1841,7 +2881,6 @@
   		////////////////////////////////////////
   		// End assignment of default variables
   		////////////////////////////////////////
-
   		this.ableIndex = AblePlayer.nextIndex;
   		AblePlayer.nextIndex += 1;
 
@@ -1859,11 +2898,33 @@
 
   		ablePlayerInstances.add(this);
   	}
-  	// Index to increment every time new player is created.
-  	// 5.0.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
-  	AblePlayer.nextIndex = 0;
+  	static getActiveDOMElement() {
+  		var activeElement = document.activeElement;
 
-  	AblePlayer.prototype.setup = function() {
+  		// For shadow DOMs we need to keep digging down through the DOMs
+  		while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+  			activeElement = activeElement.shadowRoot.activeElement;
+  		}
+
+  		return activeElement;
+  	}
+  	static localGetElementById(element, id) {
+  		if (element.getRootNode) {
+  			// Use getRootNode() and querySelector() where supported (for shadow DOM support)
+  			return $(element.getRootNode().querySelector('#' + id));
+  		} else {
+  			// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
+  			return $(document.getElementById(id));
+  		}
+  	}
+  	static hasSingleInstance() { return AblePlayer.ablePlayerInstances.size === 1; }
+  	static getSingleInstance() {
+  		// If there are actually more instances, this returns the first one
+  		for (const instance of AblePlayer.ablePlayerInstances) {
+  			return instance;
+  		}
+  	}
+  	setup() {
 
   		var thisObj = this;
   		this.initializing = true; // will remain true until entire sequence of function calls is complete
@@ -1876,7 +2937,7 @@
   				thisObj.setupInstance().then(function () {
   					thisObj.setupInstancePlaylist();
   					if (thisObj.hasPlaylist) ; else {
-  						thisObj.recreatePlayer().then(function() {
+  						thisObj.recreatePlayer().then(function () {
   							thisObj.initializing = false;
   							thisObj.playerCreated = true; // remains true until browser is refreshed
   						});
@@ -1884,8 +2945,7 @@
   				});
   			}
   		});
-  	};
-
+  	}
   	/**
   	 * Removes this player from the global instance list.
   	 *
@@ -1893,7 +2953,7 @@
   	 * DOM. This avoids memory leaks, and allows the event handling to have the
   	 * correct count of how many players are actually on the page.
   	 */
-  	AblePlayer.prototype.dispose = function () {
+  	dispose() {
   		AblePlayer.ablePlayerInstances.delete(this);
 
   		// Look for various dialogs tied to this instance. Elements associated
@@ -1919,44 +2979,33 @@
   				dialog.overlay.remove();
   			}
   		}
-  	};
 
-  	AblePlayer.getActiveDOMElement = function () {
-  		var activeElement = document.activeElement;
-
-  		// For shadow DOMs we need to keep digging down through the DOMs
-  		while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
-  			activeElement = activeElement.shadowRoot.activeElement;
+  		if (AblePlayer.ablePlayerInstances.size === 0 && AblePlayer.preferencesDialog) {
+  			if (AblePlayer.preferencesDialog.modal) {
+  				AblePlayer.preferencesDialog.modal.remove();
+  			}
+  			if (AblePlayer.preferencesDialog.dialog && AblePlayer.preferencesDialog.dialog.overlay) {
+  				AblePlayer.preferencesDialog.dialog.overlay.remove();
+  			}
+  			AblePlayer.preferencesDialog = null;
   		}
+  	}
+  }
+  // Index to increment every time new player is created.
+  // 5.0.0: this is now only used to generate unique IDs. Otherwise use hasSingleInstance.
+  AblePlayer.nextIndex = 0;
 
-  		return activeElement;
-  	};
 
-  	AblePlayer.localGetElementById = function(element, id) {
-  		if (element.getRootNode) {
-  			// Use getRootNode() and querySelector() where supported (for shadow DOM support)
-  			return $(element.getRootNode().querySelector('#' + id));
-  		} else {
-  			// If getRootNode is not supported it should be safe to use document.getElementById (since there is no shadow DOM support)
-  			return $(document.getElementById(id));
-  		}
-  	};
 
-  	AblePlayer.ablePlayerSetupWindow = ablePlayerSetupWindow;
 
-  	AblePlayer.youTubeIframeAPIReady = false;
-  	AblePlayer.loadingYouTubeIframeAPI = false;
 
-  	AblePlayer.ablePlayerInstances = ablePlayerInstances;
+  AblePlayer.ablePlayerSetupWindow = ablePlayerSetupWindow;
 
-  	AblePlayer.hasSingleInstance = () => AblePlayer.ablePlayerInstances.size === 1;
+  AblePlayer.youTubeIframeAPIReady = false;
+  AblePlayer.loadingYouTubeIframeAPI = false;
 
-  	AblePlayer.getSingleInstance = () => {
-  		// If there are actually more instances, this returns the first one
-  		for (const instance of AblePlayer.ablePlayerInstances) {
-  			return instance;
-  		}
-  	};
+  AblePlayer.ablePlayerInstances = ablePlayerInstances;
+  AblePlayer.preferencesDialog = null;
 
   function addBrowserFunctions(AblePlayer) {
 
@@ -2264,7 +3313,10 @@
     },
   };
 
-  // Events:
+  // Minimum horizontal distance (px) for a touchmove to be treated as a swipe gesture.
+  	var SWIPE_THRESHOLD = 50;
+
+  	// Events:
   	// - startTracking(event, position)
   	// - tracking(event, position)
   	// - stopTracking(event, position)
@@ -2289,23 +3341,34 @@
   		this.lastTrackPosition = 0;
   		this.nextStep = 1;
   		this.inertiaCount = 0;
+  		this.trackFrameRequestId = null;
+  		this.queuedTrackPosition = null;
+  		this.queuedTrackLeft = null;
+  		this.trackGeometry = null;
+  		this.hoverGeometry = null;
+  		this.bigInterval = bigInterval;
 
-  		this.seekbarDiv = $(div);
+  		// Swipe gesture state (used to fast-forward/rewind via touch when the seek head is focused).
+  		this.swipeStartX = null;
+  		this.swipeStartY = null;
+  		this.swipeHandled = false;
+
+  		this.$seekbarDiv = $(div);
 
   		// Add divs for tracking amount of media loaded and played
   		this.loadedDiv = $('<div></div>');
   		this.playedDiv = $('<div></div>');
 
   		// Add a seekhead
-  		this.seekHead = $('<div>',{
+  		this.$seekHead = $('<div>',{
   			'aria-orientation': 'horizontal',
   			'class': 'able-seekbar-head'
   		});
 
-  		this.seekHead.attr('tabindex', '0');
+  		this.$seekHead.attr('tabindex', '0');
 
   		// Since head is focusable, it gets the aria roles/titles.
-  		this.seekHead.attr({
+  		this.$seekHead.attr({
   			'role': 'slider',
   			'aria-label': label,
   			'aria-valuemin': 0,
@@ -2314,32 +3377,32 @@
 
   		this.timeTooltipTimeoutId = null;
   		this.overTooltip = false;
-  		this.timeTooltip = $('<div>');
-  		this.seekbarDiv.append(this.timeTooltip);
+  		this.$timeTooltip = $('<div>');
+  		this.$seekbarDiv.append(this.$timeTooltip);
 
-  		this.timeTooltip.attr('role', 'tooltip');
-  		this.timeTooltip.addClass('able-tooltip');
-  		this.timeTooltip.on('mouseenter focus', function(){
+  		this.$timeTooltip.attr('role', 'tooltip');
+  		this.$timeTooltip.addClass('able-tooltip');
+  		this.$timeTooltip.on('mouseenter focus', function(){
   			thisObj.overTooltip = true;
   			clearInterval(thisObj.timeTooltipTimeoutId);
   		});
-  		this.timeTooltip.on('mouseleave blur', function(){
+  		this.$timeTooltip.on('mouseleave blur', function(){
   			thisObj.overTooltip = false;
   			$(this).hide();
   		});
-  		this.timeTooltip.hide();
+  		this.$timeTooltip.hide();
 
-  		this.seekbarDiv.append(this.loadedDiv);
-  		this.seekbarDiv.append(this.playedDiv);
-  		this.seekbarDiv.append(this.seekHead);
-  		this.seekbarDiv.wrap('<div></div>');
-  		this.wrapperDiv = this.seekbarDiv.parent();
+  		this.$seekbarDiv.append(this.loadedDiv);
+  		this.$seekbarDiv.append(this.playedDiv);
+  		this.$seekbarDiv.append(this.$seekHead);
+  		this.$seekbarDiv.wrap('<div></div>');
+  		this.$wrapperDiv = this.$seekbarDiv.parent();
 
   		if (this.skin === 'legacy') {
-  			this.wrapperDiv.width( 100 );
+  			this.$wrapperDiv.width( 100 );
   			this.loadedDiv.width(0);
   		}
-  		this.wrapperDiv.addClass('able-seekbar-wrapper');
+  		this.$wrapperDiv.addClass('able-seekbar-wrapper');
   		this.loadedDiv.addClass('able-seekbar-loaded');
   		this.playedDiv.width(0);
   		this.playedDiv.addClass('able-seekbar-played');
@@ -2348,39 +3411,50 @@
   		this.setDuration(max);
 
   		// handle seekHead events
-  		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
+  		this.$seekHead.on(
+  			'mouseenter mouseleave mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
   			coords = thisObj.pointerEventToXY(e);
 
   			if (e.type === 'mouseenter' || e.type === 'focus') {
   				thisObj.overHead = true;
+  				thisObj.cacheHoverGeometry();
   			} else if (e.type === 'mouseleave' || e.type === 'blur') {
   				thisObj.overHead = false;
-  				if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-  					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-  				}
-  			} else if (e.type === 'mousemove' || e.type === 'touchmove') {
-  				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-  					thisObj.trackHeadAtPageX(coords.x);
+  				if (!thisObj.overBody) {
+  					thisObj.clearHoverGeometry();
   				}
   			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
-  				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-  				if (!thisObj.seekbarDiv.is(':focus')) {
-  					thisObj.seekbarDiv.focus();
+  				if (e.type === 'touchstart') {
+  					thisObj.swipeStartX = coords.x;
+  					thisObj.swipeStartY = coords.y;
+  					thisObj.swipeHandled = false;
+  				}
+  				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.$seekHead.offset() + (thisObj.$seekHead.width() / 2)));
+  				if (!thisObj.$seekbarDiv.is(':focus')) {
+  					thisObj.$seekbarDiv.focus();
   				}
   				e.preventDefault();
-  			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-  				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-  					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+  			} else if (e.type === 'touchmove') {
+  				if (thisObj.swipeStartX !== null && !thisObj.swipeHandled && !thisObj.isPointOverSeekHead(coords.x, coords.y) &&
+  					thisObj.detectSwipe(coords.x, coords.y)) {
+  					thisObj.swipeHandled = true;
+  					thisObj.cancelTracking();
+  					// Swipe left rewinds, swipe right fast-forwards.
+  					thisObj.swipeSeek(coords.x < thisObj.swipeStartX ? -1 : 1);
+  					e.preventDefault();
   				}
+  			} else if (e.type === 'touchend') {
+  				thisObj.swipeStartX = null;
+  				thisObj.swipeStartY = null;
   			}
-  			if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+  			if (e.type !== 'mousedown' && e.type !== 'touchstart') {
   				thisObj.refreshTooltip();
   			}
   		});
 
   		// handle seekbarDiv events
-  		this.seekbarDiv.on(
+  		this.$seekbarDiv.on(
   			'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
   			// Don't trigger move on right click.
@@ -2392,6 +3466,7 @@
 
   			if (e.type === 'mouseenter') {
   				thisObj.overBody = true;
+  				thisObj.cacheHoverGeometry();
   				thisObj.overBodyMousePos = {
   					x: coords.x,
   					y: coords.y
@@ -2399,28 +3474,21 @@
   			} else if (e.type === 'mouseleave') {
   				thisObj.overBody = false;
   				thisObj.overBodyMousePos = null;
-  				if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-  					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+  				if (!thisObj.overHead) {
+  					thisObj.clearHoverGeometry();
   				}
   			} else if (e.type === 'mousemove' || e.type === 'touchmove') {
   				thisObj.overBodyMousePos = {
   					x: coords.x,
   					y: coords.y
   				};
-  				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-  					thisObj.trackHeadAtPageX(coords.x);
-  				}
   			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
   				thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
   				thisObj.trackHeadAtPageX(coords.x);
-  				if (!thisObj.seekHead.is(':focus')) {
-  					thisObj.seekHead.focus();
+  				if (!thisObj.$seekHead.is(':focus')) {
+  					thisObj.$seekHead.focus();
   				}
   				e.preventDefault();
-  			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-  				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-  					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-  				}
   			} else if (e.type === 'keydown') {
   				if (e.key === 'Home') {
   					thisObj.trackImmediatelyTo(0);
@@ -2471,8 +3539,12 @@
   	};
 
   	AccessibleSlider.prototype.pageXToPosition = function (pageX) {
-  		var offset = pageX - this.seekbarDiv.offset().left;
-  		var position = this.duration * (offset / this.seekbarDiv.width());
+  		var geometry = this.getTrackingGeometry();
+  		var offset = pageX - geometry.left;
+  		if (geometry.width === 0) {
+  			return 0;
+  		}
+  		var position = this.duration * (offset / geometry.width);
   		return this.boundPos(position);
   	};
 
@@ -2484,19 +3556,19 @@
   		if (duration !== this.duration) {
   			this.duration = duration;
   			this.resetHeadLocation();
-  			this.seekHead.attr('aria-valuemax', duration);
+  			this.$seekHead.attr('aria-valuemax', duration);
   		}
   	};
 
   	// Set width of the legacy seekbar.
   	AccessibleSlider.prototype.setWidth = function (width) {
-  		this.wrapperDiv.width(width);
+  		this.$wrapperDiv.width(width);
   		this.resizeDivs();
   		this.resetHeadLocation();
   	};
 
   	AccessibleSlider.prototype.getWidth = function () {
-  		return this.wrapperDiv.width();
+  		return this.$wrapperDiv.width();
   	};
 
   	AccessibleSlider.prototype.resizeDivs = function () {
@@ -2507,8 +3579,8 @@
   	// Stops tracking, sets the head location to the current position.
   	AccessibleSlider.prototype.resetHeadLocation = function () {
   		var ratio = this.position / this.duration;
-  		var center = this.seekbarDiv.width() * ratio;
-  		this.seekHead.css('left', center - (this.seekHead.width() / 2));
+  		var center = this.$seekbarDiv.width() * ratio;
+  		this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 
   		if (this.tracking) {
   			this.stopTracking(this.position);
@@ -2537,36 +3609,189 @@
   		if (!this.tracking) {
   			this.trackDevice = device;
   			this.tracking = true;
-  			this.seekbarDiv.trigger('startTracking', [position]);
+  			if (device === 'mouse') {
+  				this.trackGeometry = this.hoverGeometry || this.buildTrackingGeometry();
+  				this.bindGlobalTrackingEvents();
+  			} else {
+  				this.clearTrackingGeometry();
+  				this.unbindGlobalTrackingEvents();
+  			}
+  			this.$seekbarDiv.trigger('startTracking', [position]);
   		}
   	};
 
   	AccessibleSlider.prototype.stopTracking = function (position) {
+  		this.unbindGlobalTrackingEvents();
+  		if (this.trackFrameRequestId !== null) {
+  			window.cancelAnimationFrame(this.trackFrameRequestId);
+  			this.trackFrameRequestId = null;
+  		}
+  		this.flushQueuedTrackUpdate();
+  		this.clearTrackingGeometry();
   		this.trackDevice = null;
   		this.tracking = false;
-  		this.seekbarDiv.trigger('stopTracking', [position]);
+  		this.$seekbarDiv.trigger('stopTracking', [position]);
   		this.setPosition(position, true);
   	};
 
+  	// Abandons any in-progress tracking (e.g. a touch drag) without committing a new position.
+  	AccessibleSlider.prototype.cancelTracking = function () {
+  		this.unbindGlobalTrackingEvents();
+  		if (this.trackFrameRequestId !== null) {
+  			window.cancelAnimationFrame(this.trackFrameRequestId);
+  			this.trackFrameRequestId = null;
+  		}
+  		this.queuedTrackPosition = null;
+  		this.queuedTrackLeft = null;
+  		this.clearTrackingGeometry();
+  		this.trackDevice = null;
+  		this.tracking = false;
+  		this.resetHeadLocation();
+  	};
+
+  	// Returns true if a touch move from the recorded swipe start to (x, y) qualifies as a horizontal swipe.
+  	AccessibleSlider.prototype.detectSwipe = function (x, y) {
+  		var deltaX = x - this.swipeStartX;
+  		var deltaY = y - this.swipeStartY;
+  		return Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.5;
+  	};
+
+  	// Returns true if (x, y) is still within the seek head's current bounds, i.e. the finger is dragging it directly.
+  	AccessibleSlider.prototype.isPointOverSeekHead = function (x, y) {
+  		var offset = this.$seekHead.offset();
+  		return x >= offset.left && x <= offset.left + this.$seekHead.outerWidth() &&
+  			y >= offset.top && y <= offset.top + this.$seekHead.outerHeight();
+  	};
+
+  	// Moves the seek head by one seek interval; multiplier of 1 fast-forwards, -1 rewinds.
+  	AccessibleSlider.prototype.swipeSeek = function (multiplier) {
+  		var step = this.bigInterval > 0 ? this.bigInterval : 1;
+  		var newPosition = this.boundPos(this.position + (step * multiplier));
+  		this.startTracking('touch', newPosition);
+  		this.trackHeadAtPosition(newPosition);
+  		this.stopTracking(newPosition);
+  	};
+
+  	AccessibleSlider.prototype.bindGlobalTrackingEvents = function () {
+  		var thisObj = this;
+  		$(window).off('.ableSliderTrack');
+  		$(window).on('mousemove.ableSliderTrack touchmove.ableSliderTrack', function (e) {
+  			var coords;
+  			if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+  				return;
+  			}
+  			coords = thisObj.pointerEventToXY(e);
+  			thisObj.trackHeadAtPageX(coords.x);
+  		});
+  		$(window).on('mouseup.ableSliderTrack touchend.ableSliderTrack touchcancel.ableSliderTrack', function (e) {
+  			var coords;
+  			if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+  				return;
+  			}
+  			coords = thisObj.pointerEventToXY(e);
+  			if (e.type === 'touchcancel') {
+  				thisObj.stopTracking(thisObj.lastTrackPosition);
+  			} else {
+  				thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+  			}
+  		});
+  	};
+
+  	AccessibleSlider.prototype.unbindGlobalTrackingEvents = function () {
+  		$(window).off('.ableSliderTrack');
+  	};
+
   	AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
+  		var geometry = this.getTrackingGeometry();
   		var position = this.pageXToPosition(pageX);
-  		var newLeft = pageX - this.seekbarDiv.offset().left - (this.seekHead.width() / 2);
-  		newLeft = Math.max(0, Math.min(newLeft, this.seekbarDiv.width() - this.seekHead.width()));
-  		this.lastTrackPosition = position;
-  		this.seekHead.css('left', newLeft);
-  		this.reportTrackAtPosition(position);
+  		var newLeft = pageX - geometry.left - geometry.headHalf;
+  		newLeft = Math.max(0, Math.min(newLeft, geometry.maxLeft));
+  		this.queueTrackUpdate(position, newLeft);
+  	};
+
+  	AccessibleSlider.prototype.cacheTrackingGeometry = function () {
+  		this.trackGeometry = this.buildTrackingGeometry();
+  	};
+
+  	AccessibleSlider.prototype.clearTrackingGeometry = function () {
+  		this.trackGeometry = null;
+  	};
+
+  	AccessibleSlider.prototype.cacheHoverGeometry = function () {
+  		this.hoverGeometry = this.buildTrackingGeometry();
+  	};
+
+  	AccessibleSlider.prototype.clearHoverGeometry = function () {
+  		this.hoverGeometry = null;
+  	};
+
+  	AccessibleSlider.prototype.buildTrackingGeometry = function () {
+  		var seekbarOffset = this.$seekbarDiv.offset();
+  		var seekbarWidth = this.$seekbarDiv.width();
+  		var seekHeadWidth = this.$seekHead.width();
+  		return {
+  			left: seekbarOffset.left,
+  			width: seekbarWidth,
+  			headHalf: seekHeadWidth / 2,
+  			maxLeft: Math.max(0, seekbarWidth - seekHeadWidth)
+  		};
+  	};
+
+  	AccessibleSlider.prototype.getTrackingGeometry = function () {
+  		if (this.tracking && this.trackDevice === 'mouse') {
+  			if (!this.trackGeometry) {
+  				this.cacheTrackingGeometry();
+  			}
+  			return this.trackGeometry;
+  		}
+  		if (this.overBody || this.overHead) {
+  			if (!this.hoverGeometry) {
+  				this.cacheHoverGeometry();
+  			}
+  			return this.hoverGeometry;
+  		}
+  		return this.buildTrackingGeometry();
   	};
 
   	AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
+  		this.flushQueuedTrackUpdate();
   		var ratio = position / this.duration;
-  		var center = this.seekbarDiv.width() * ratio;
+  		var center = this.$seekbarDiv.width() * ratio;
   		this.lastTrackPosition = position;
-  		this.seekHead.css('left', center - (this.seekHead.width() / 2));
+  		this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
   		this.reportTrackAtPosition(position);
   	};
 
+  	AccessibleSlider.prototype.queueTrackUpdate = function (position, left) {
+  		var thisObj = this;
+  		this.queuedTrackPosition = position;
+  		this.queuedTrackLeft = left;
+
+  		if (this.trackFrameRequestId !== null) {
+  			return;
+  		}
+
+  		this.trackFrameRequestId = window.requestAnimationFrame(function () {
+  			thisObj.trackFrameRequestId = null;
+  			thisObj.flushQueuedTrackUpdate();
+  		});
+  	};
+
+  	AccessibleSlider.prototype.flushQueuedTrackUpdate = function () {
+  		if (this.queuedTrackPosition === null) {
+  			return;
+  		}
+
+  		this.lastTrackPosition = this.queuedTrackPosition;
+  		this.$seekHead.css('left', this.queuedTrackLeft);
+  		this.reportTrackAtPosition(this.queuedTrackPosition);
+
+  		this.queuedTrackPosition = null;
+  		this.queuedTrackLeft = null;
+  	};
+
   	AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
-  		this.seekbarDiv.trigger('tracking', [position]);
+  		this.$seekbarDiv.trigger('tracking', [position]);
   		this.updateAriaValues(position, true);
   	};
 
@@ -2603,15 +3828,15 @@
   				'class': 'able-offscreen',
   				'aria-live': 'polite'
   			});
-  			this.wrapperDiv.append(this.liveAriaRegion);
+  			this.$wrapperDiv.append(this.liveAriaRegion);
   		}
   		if (updateLive && (this.liveAriaRegion.text() !== descriptionText)) {
   			this.liveAriaRegion.text(descriptionText);
   		}
 
   		// Uncomment the following lines to use aria values instead of separate live region.
-  		this.seekHead.attr('aria-valuetext', descriptionText);
-  		this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
+  		this.$seekHead.attr('aria-valuetext', descriptionText);
+  		this.$seekHead.attr('aria-valuenow', Math.floor(position).toString());
   	};
 
   	AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
@@ -2622,24 +3847,25 @@
 
   	AccessibleSlider.prototype.refreshTooltip = function () {
   		if (this.overHead) {
-  			this.timeTooltip.show();
+  			this.$timeTooltip.show();
   			if (this.tracking) {
-  				this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+  				this.$timeTooltip.text(this.positionToStr(this.lastTrackPosition));
   			} else {
-  				this.timeTooltip.text(this.positionToStr(this.position));
+  				this.$timeTooltip.text(this.positionToStr(this.position));
   			}
-  			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
+  			this.setTooltipPosition(this.$seekHead.position().left + (this.$seekHead.width() / 2));
   		} else if (this.overBody && this.overBodyMousePos) {
-  			this.timeTooltip.show();
-  			this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
-  			this.setTooltipPosition(this.overBodyMousePos.x - this.seekbarDiv.offset().left);
+  			var geometry = this.getTrackingGeometry();
+  			this.$timeTooltip.show();
+  			this.$timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
+  			this.setTooltipPosition(this.overBodyMousePos.x - geometry.left);
   		} else {
 
   			clearTimeout(this.timeTooltipTimeoutId);
   			var _this = this;
   			this.timeTooltipTimeoutId = setTimeout(function() {
   				// give user a half second move cursor over tooltip
-  				_this.timeTooltip.hide();
+  				_this.$timeTooltip.hide();
   			}, 500);
   		}
   	};
@@ -2647,13 +3873,13 @@
   	AccessibleSlider.prototype.hideSliderTooltips = function () {
   		this.overHead = false;
   		this.overBody = false;
-  		this.timeTooltip.hide();
+  		this.clearHoverGeometry();
+  		this.$timeTooltip.hide();
   	};
 
   	AccessibleSlider.prototype.setTooltipPosition = function (x) {
-  		this.timeTooltip.css({
-  			left: x - (this.timeTooltip.width() / 2) - 10,
-  			bottom: this.seekHead.height()
+  		this.$timeTooltip.css({
+  			left: x - (this.$timeTooltip.width() / 2) - 10,
   		});
   	};
 
@@ -2724,6 +3950,7 @@
   		// add container that captions or description will be appended to
   		// Note: new Jquery object must be assigned _after_ wrap, hence the temp captionsContainer variable
   		captionsContainer = $('<div>');
+  		captionsContainer.addClass('able-captions-container');
   		if (this.mediaType === 'video') {
   			captionsContainer.addClass('able-vidcap-container');
   		} else if (this.mediaType === 'audio') {
@@ -2766,10 +3993,10 @@
   				this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
   			}
   			headingType = 'h' + this.playerHeadingLevel.toString();
-  			this.$headingDiv = $('<' + headingType + '>');
-  			this.$ableDiv.prepend(this.$headingDiv);
-  			this.$headingDiv.addClass('able-offscreen');
-  			this.$headingDiv.text( this.translate( 'playerHeading', 'Media player' ) );
+  			this.headingDiv = document.createElement( headingType );
+  			this.$ableDiv.prepend(this.headingDiv);
+  			this.headingDiv.classList.add('able-offscreen');
+  			this.headingDiv.textContent = this.translate( 'playerHeading', 'Media player' );
   		}
   	};
 
@@ -2903,7 +4130,6 @@
   		let preferences, $window;
   		preferences = this.getPref();
   		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
-  		console.log( $window );
   		if ( which === 'transcript' && $window ) {
   			if (typeof preferences.transcript !== 'undefined') {
   				this.prevTranscriptPosition = preferences.transcript;
@@ -2975,7 +4201,6 @@
   				}
   				// If draggable window is off screen to the left.
   				if ( leftPosition < 0 && ! this.restoringAfterFullscreen ) {
-  					console.log( leftPosition );
   					$window.css({
   						'left': preferencePos['left'] - leftPosition
   					});
@@ -3154,13 +4379,13 @@
   						thisObj.showingPrefsDialog = true;
   						thisObj.setFullscreen(false);
   						if (whichPref === thisObj.translate( 'prefMenuCaptions', 'Captions' ) ) {
-  							thisObj.captionPrefsDialog.show();
+  							thisObj.showPrefsDialog('captions');
   						} else if (whichPref === thisObj.translate( 'prefMenuDescriptions', 'Descriptions' ) ) {
-  							thisObj.descPrefsDialog.show();
+  							thisObj.showPrefsDialog('descriptions');
   						} else if (whichPref === thisObj.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
-  							thisObj.keyboardPrefsDialog.show();
+  							thisObj.showPrefsDialog('keyboard');
   						} else if (whichPref === thisObj.translate( 'prefMenuTranscript', 'Transcript' ) ) {
-  							thisObj.transcriptPrefsDialog.show();
+  							thisObj.showPrefsDialog('transcript');
   						}
   						thisObj.closePopups();
   						thisObj.showingPrefsDialog = false;
@@ -3249,8 +4474,7 @@
   						// therefore, ignore this click
   						return false;
   					}
-  					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-  						thisObj.windowMenuClickRegistered = true;
+  					if ( !thisObj.finishingDrag ) {
   						thisObj.handleMenuChoice(which.substring(0, which.indexOf('-')), $(this).attr('data-choice'), e);
   					}
   				});
@@ -3310,7 +4534,7 @@
   			} else if (e.key === 'Escape') {
   				$thisItem.removeClass('able-focus');
   				thisObj.closePopups();
-  				e.stopPropagation;
+  				e.stopPropagation();
   			}
   			e.preventDefault();
   		});
@@ -3331,8 +4555,7 @@
   			this.$ccButton.attr('aria-expanded', 'false');
   			this.waitThenFocus(this.$ccButton);
   		}
-  		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
-  			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
+  		if (this.prefsPopup && this.prefsPopup.is(':visible') ) {
   			this.prefsPopup.hide();
   			// restore menu items to their original state
   			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
@@ -3340,25 +4563,16 @@
   			if (!this.showingPrefsDialog) {
   				this.waitThenFocus(thisObj.$prefsButton);
   			}
-  			// wait briefly, then reset hidingPopup
-  			setTimeout(function() {
-  				thisObj.hidingPopup = false;
-  			},100);
   		}
   		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
   			this.$volumeSlider.hide().attr('aria-hidden','true');
   			this.$volumeButton.attr('aria-expanded', 'false').trigger('focus');
   		}
   		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
-  			this.hidingPopup = true;
   			this.$transcriptPopup.hide();
   			// restore menu items to their original state
   			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
   			this.$transcriptPopupButton.attr('aria-expanded','false').trigger('focus');
-  			// wait briefly, then reset hidingPopup
-  			setTimeout(function() {
-  				thisObj.hidingPopup = false;
-  			},100);
   		}
   		if (this.$signPopup && this.$signPopup.is(':visible')) {
   			this.$signPopup.hide();
@@ -3734,19 +4948,14 @@
   					// this control is a button
   					buttonTitle = this.getButtonTitle(control);
 
-  					// Buttons consist of a <div role="button"> with an <svg> inside.
+  					// Buttons consist of a <button> with an <svg> inside.
   					// We add aria-label to the button (but not title)
   					// This has been thoroughly tested and works well in all screen reader/browser combinations
   					// See https://github.com/ableplayer/ableplayer/issues/81
 
-  					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
-  					// because <button> elements are rendered poorly in high contrast mode
-  					// in some OS/browser/plugin combinations
-
   					// In 5.0.0, icons are always SVG, so the font & image icon edge cases are removed.
-  					$newButton = $('<div>',{
-  						'role': 'button',
-  						'tabindex': '0',
+  					$newButton = $('<button>',{
+  						'type': 'button',
   						'class': 'able-button-handler-' + control
   					});
 
@@ -4152,7 +5361,7 @@
   			itemLang = $newItem.attr('lang');
   		}
   		// Update relevant arrays
-  		this.$sources = this.$media.find('source');
+  		this.sources = this.getSources();
 
   		// recreate player, informed by new attributes and track elements
   		if (this.recreatingPlayer) {
@@ -4270,9 +5479,9 @@
   		} else if (control === 'next') {
   			return this.translate( 'nextTrack', 'Next track' );
   		} else if (control === 'rewind') {
-  			return this.translate( 'rewind', 'Rewind' );
+  			return this.translate( 'rewind', 'Rewind %1 seconds', [ this.seekInterval ] );
   		} else if (control === 'forward') {
-  			return this.translate( 'forward', 'Forward' );
+  			return this.translate( 'forward', 'Forward %1 seconds', [ this.seekInterval ] );
   		} else if (control === 'captions') {
   			if (this.captions.length > 1) {
   				return this.translate( 'captions', 'Captions' );
@@ -4290,9 +5499,9 @@
   		} else if (control === 'volume') {
   			return this.translate( 'volume', 'Volume' );
   		} else if (control === 'faster') {
-  			return this.translate( 'faster', 'Faster' );
+  			return this.translate( 'faster', 'Faster %1 x', [ this.changeRate(1,false) ] );
   		} else if (control === 'slower') {
-  			return this.translate( 'slower', 'Slower' );
+  			return this.translate( 'slower', 'Slower %1 x', [ this.changeRate(-1,false) ] );
   		} else if (control === 'preferences') {
   			return this.translate( 'preferences', 'Preferences' );
   		} else if (control === 'fullscreen') {
@@ -4407,19 +5616,11 @@
           }
         }
         thisObj.captionsOn = true;
-        // stopgap to prevent spacebar in Firefox from reopening popup
-        // immediately after closing it (used in handleCaptionToggle())
-        thisObj.hidingPopup = true;
         thisObj.captionsPopup.hide();
         thisObj.$ccButton.attr("aria-expanded", "false");
         if (thisObj.mediaType === "audio") {
           thisObj.$captionsContainer.removeClass("captions-off");
         }
-        // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
-        // e.g., if user triggered button with Enter or mouse click, not spacebar
-        setTimeout(function () {
-          thisObj.hidingPopup = false;
-        }, 100);
         thisObj.updateCaptionsMenu(thisObj.captionLang);
         thisObj.waitThenFocus(thisObj.$ccButton);
 
@@ -4446,16 +5647,9 @@
           thisObj.$captionsContainer.addClass("captions-off");
         }
 
-        // stopgap to prevent spacebar in Firefox from reopening popup
-        // immediately after closing it (used in handleCaptionToggle())
-        thisObj.hidingPopup = true;
         thisObj.captionsPopup.hide();
         thisObj.$ccButton.attr("aria-expanded", "false");
-        // Ensure stopgap gets cancelled if handleCaptionToggle() isn't called
-        // e.g., if user triggered button with Enter or mouse click, not spacebar
-        setTimeout(function () {
-          thisObj.hidingPopup = false;
-        }, 100);
+
         thisObj.updateCaptionsMenu();
         thisObj.waitThenFocus(thisObj.$ccButton);
 
@@ -5021,15 +6215,7 @@
   		return function () {
   			thisObj.seekTrigger = 'chapter';
   			thisObj.seekTo(time);
-  			// stopgap to prevent spacebar in Firefox from reopening popup
-  			// immediately after closing it (used in handleChapters())
-  			thisObj.hidingPopup = true;
   			thisObj.chaptersPopup.hide();
-  			// Ensure stopgap gets cancelled if handleChapters() isn't called
-  			// e.g., if user triggered button with Enter or mouse click, not spacebar
-  			setTimeout(function() {
-  				thisObj.hidingPopup = false;
-  			}, 100);
   			thisObj.$chaptersButton.trigger('focus');
   		}
   	};
@@ -5456,17 +6642,16 @@
   		// 'fullscreen' - a change has been triggered by full screen toggle
   		// 'playpause' - a change triggered by either a 'play' or 'pause' event
 
-  		// NOTE: context is not currently supported.
-  		// The steps in this function have too many complex interdependencies
-  		// The gains in efficiency are offset by the possibility of introducing bugs
-  		// For now, executing everything
-  		context = 'init';
+  		// Normalize context to a known value.
+  		if (['init', 'timeline', 'captions', 'descriptions', 'transcript', 'fullscreen', 'playpause'].indexOf(context) === -1) {
+  			context = 'init';
+  		}
 
   		// duration and elapsed are passed from callback functions of Vimeo API events
   		// duration is expressed as sss.xxx
   		// elapsed is expressed as sss.xxx
 
-  		var thisObj, textByState, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
+  		var thisObj, textByState, volumeStatus, timestamp,  captionsCount, newTop,	statusBarWidthBreakpoint;
 
   		thisObj = this;
   		// wait until new source has loaded before refreshing controls
@@ -5478,7 +6663,7 @@
   		if ( context === 'timeline' || context === 'init' ) {
   			// Update timeline controls.
   			var lastChapterIndex, displayElapsed, updateLive, widthUsed,
-  				leftControls, rightControls, seekbarWidth, buffered;
+  				leftControls, rightControls, seekbarWidth, buffered, mediaDuration;
   			// all timeline-related functionality requires duration
   			if (typeof this.duration === 'undefined') {
   				// wait until duration is known before proceeding with refresh
@@ -5516,9 +6701,8 @@
   				if (!(this.seekBar.tracking)) {
   					// Only update the aria live region if we have an update pending
   					// (from a seek button control) or if the seekBar has focus.
-  					// We use document.activeElement instead of $(':focus') due to a strange bug:
-  					// When the seekHead element is focused, .is(':focus') is failing and $(':focus') is returning an undefined element.
-  					updateLive = this.liveUpdatePending || this.seekBar.seekHead.is($(document.activeElement));
+  					let activeEl = AblePlayer.getActiveDOMElement();
+  					updateLive = this.liveUpdatePending || this.seekBar.$seekHead.is($(activeEl));
   					this.liveUpdatePending = false;
   					if (this.useChapterTimes) {
   						this.seekBar.setPosition(this.chapterElapsed, updateLive);
@@ -5550,12 +6734,12 @@
   				// Update seekbar width.
   				// To do this, we need to calculate the width of all buttons surrounding it.
   				if (this.seekBar) {
-  					let controlWrapper = this.seekBar.wrapperDiv.parent().parent();
-  					leftControls = this.seekBar.wrapperDiv.parent().prev('div.able-left-controls');
+  					let controlWrapper = this.seekBar.$wrapperDiv.parent().parent();
+  					leftControls = this.seekBar.$wrapperDiv.parent().prev('div.able-left-controls');
   					rightControls = leftControls.next('div.able-right-controls');
   					widthUsed = leftControls.outerWidth(true);
   					rightControls.children().each(function () {
-  						if ($(this).attr('role')=='button') {
+  						if ( $(this).is('button') ) {
   							widthUsed += $(this).outerWidth(true) + 5;
   						}
   					});
@@ -5577,16 +6761,17 @@
   			// TODO: Currently only using the first HTML5 buffered interval,
   			// but this fails sometimes when buffering is split into two or more intervals.
   			if (this.player === 'html5' && this.media.buffered.length > 0) {
+  				mediaDuration = (typeof duration !== 'undefined' && !isNaN(duration) && duration > 0) ? duration : this.duration;
   				buffered = this.media.buffered.end(0);
   				if (this.useChapterTimes) {
   					if (buffered > this.chapterDuration) {
   						buffered = this.chapterDuration;
   					}
-  					if (this.seekBar) {
+  					if (this.seekBar && this.chapterDuration > 0) {
   						this.seekBar.setBuffered(buffered / this.chapterDuration);
   					}
-  				} else if ( this.seekBar && !isNaN(buffered) ) {
-  					this.seekBar.setBuffered(buffered / duration);
+  				} else if ( this.seekBar && !isNaN(buffered) && !isNaN(mediaDuration) && mediaDuration > 0 ) {
+  					this.seekBar.setBuffered(buffered / mediaDuration);
   				}
   			} else if (this.player === 'youtube' && this.seekBar && this.youTubePlayerReady ) {
   				this.seekBar.setBuffered(this.youTubePlayer.getVideoLoadedFraction());
@@ -5721,7 +6906,10 @@
   				// Update the text only if it's changed since it has role="alert";
   				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
   				this.getPlayerState().then(function(currentState) {
-  					if (thisObj.$status.text() !== textByState[currentState] && !thisObj.seekBar.tracking) {
+  					volumeStatus = thisObj.getVolume() === 0 ? thisObj.translate( 'statusMuted', 'Muted' ) : '';
+  					volumeStatus = (volumeStatus) ? ', ' + volumeStatus : '';
+  					let currentMessage = textByState[currentState] + ' ' + volumeStatus;
+  					if (thisObj.$status.text() !== currentMessage && !thisObj.seekBar.tracking) {
   						// Debounce updates; only update after status has stayed steadily different for a while
   						// "A while" is defined differently depending on context
   						if (thisObj.swappingSrc) {
@@ -5745,7 +6933,7 @@
   								thisObj.refreshControls(context);
   							}, thisObj.statusMessageThreshold);
   						} else if ((timestamp - thisObj.statusDebounceStart) > thisObj.statusMessageThreshold) {
-  							thisObj.$status.text(textByState[currentState]);
+  							thisObj.$status.text(currentMessage);
   							thisObj.statusDebounceStart = null;
   							clearTimeout(thisObj.statusTimeout);
   							thisObj.statusTimeout = null;
@@ -5896,12 +7084,17 @@
   	};
 
   	// Increases or decreases playback rate, where dir is 1 or -1 indication direction.
-  	AblePlayer.prototype.changeRate = function (dir) {
+  	AblePlayer.prototype.changeRate = function (dir,change = true) {
 
   		var rates, currentRate, index, newRate, vimeoMin, vimeoMax;
 
   		if (this.player === 'html5') {
-  			this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+  			if ( change ) {
+  				// increase or decrease by 0.25x
+  				this.setPlaybackRate(this.getPlaybackRate() + (0.25 * dir));
+  			} else {
+  				return this.getPlaybackRate() + (0.25 * dir);
+  			}
   		} else if (this.player === 'youtube') {
   			if (this.youTubePlayerReady) {
   				rates = this.youTubePlayer.getAvailablePlaybackRates();
@@ -5913,7 +7106,11 @@
   					index += dir;
   					// Can only increase or decrease rate if there's another rate available.
   					if (index < rates.length && index >= 0) {
-  						this.setPlaybackRate(rates[index]);
+  						if ( change ) {
+  							this.setPlaybackRate(rates[index]);
+  						} else {
+  							return rates[index];
+  						}
   					}
   				}
   			}
@@ -5927,20 +7124,17 @@
   			} else if (dir === -1) {
   				newRate = (this.vimeoPlaybackRate - 0.5 >= vimeoMin) ? this.vimeoPlaybackRate - 0.5 : vimeoMin;
   			}
-  			this.setPlaybackRate(newRate);
+  			if ( change ) {
+  				this.setPlaybackRate(newRate);
+  			} else {
+  				return newRate;
+  			}
   		}
   	};
 
   	AblePlayer.prototype.handleCaptionToggle = function() {
-
   		var thisObj = this;
   		var captions, ariaPressed;
-  		if (this.hidingPopup) {
-  			// stopgap to prevent spacebar in Firefox from reopening popup
-  			// immediately after closing it
-  			this.hidingPopup = false;
-  			return false;
-  		}
 
   		captions = (this.captions.length) ? this.captions : [];
   		if (captions.length === 1) {
@@ -6001,7 +7195,6 @@
   			// clicking on a track is handled via caption.js > getCaptionClickFunction()
   			if (this.captionsPopup && this.captionsPopup.is(':visible')) {
   				this.captionsPopup.hide();
-  				this.hidingPopup = false;
   				this.$ccButton.attr('aria-expanded', 'false');
   				this.waitThenFocus(this.$ccButton);
   			} else {
@@ -6012,7 +7205,7 @@
 
   					// Gives time to "register" expanded ccButton
   					setTimeout(function() {
-  						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight());
+  						thisObj.captionsPopup.css('top', thisObj.$ccButton.position().top - thisObj.captionsPopup.outerHeight() - 4 );
   						thisObj.captionsPopup.css('left', thisObj.$ccButton.position().left);
   						// Place focus on the first button (even if another button is checked)
   						thisObj.captionsPopup.find('li').removeClass('able-focus');
@@ -6051,21 +7244,14 @@
   	};
 
   	AblePlayer.prototype.handleChapters = function () {
-  		if (this.hidingPopup) {
-  			// stopgap to prevent spacebar in Firefox from reopening popup
-  			// immediately after closing it
-  			this.hidingPopup = false;
-  			return false;
-  		}
   		if (this.chaptersPopup.is(':visible')) {
   			this.chaptersPopup.hide();
-  			this.hidingPopup = false;
   			this.$chaptersButton.attr('aria-expanded','false').trigger('focus');
   		} else {
   			this.closePopups();
   			this.chaptersPopup.show();
   			this.$chaptersButton.attr('aria-expanded','true');
-  			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight());
+  			this.chaptersPopup.css('top', this.$chaptersButton.position().top - this.chaptersPopup.outerHeight() - 4 );
   			this.chaptersPopup.css('left', this.$chaptersButton.position().left);
 
   			// Highlight the current chapter, if any chapters are checked
@@ -6113,12 +7299,6 @@
   		if (this.speechEnabled === null) {
   			this.initSpeech('prefs');
   		}
-  		if (this.hidingPopup) {
-  			// stopgap to prevent spacebar in Firefox from reopening popup
-  			// immediately after closing it
-  			this.hidingPopup = false;
-  			return false;
-  		}
   		if (this.prefsPopup.is(':visible')) {
   			this.prefsPopup.hide();
   			this.$prefsButton.attr('aria-expanded','false');
@@ -6127,10 +7307,6 @@
   			if (!this.showingPrefsDialog) {
   				this.$prefsButton.trigger('focus');
   			}
-  			// wait briefly, then reset hidingPopup
-  			setTimeout(function() {
-  				thisObj.hidingPopup = false;
-  			},100);
   		} else {
   			this.closePopups();
   			this.prefsPopup.show();
@@ -6141,7 +7317,7 @@
   				prefsButtonPosition = thisObj.$prefsButton.position();
   				prefsMenuRight = thisObj.$ableDiv.width() - 5;
   				prefsMenuLeft = prefsMenuRight - thisObj.prefsPopup.width();
-  				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight());
+  				thisObj.prefsPopup.css('top', prefsButtonPosition.top - thisObj.prefsPopup.outerHeight() - 4);
   				thisObj.prefsPopup.css('left', prefsMenuLeft);
   				// remove prior focus and set focus on first item; also change tabindex from -1 to 0
   				thisObj.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','0');
@@ -6359,7 +7535,12 @@
   		// Remove existing HTML before generating.
   		// iconData: [0 = svg viewbox, 1 = svg path]
   		// Font and image icon functionality was removed in 5.0.0 in favor of SVG.
-  		var iconData = this.getIconData( id );
+  		var iconData;
+  		if ( Object.hasOwn( this.options, 'icons' ) && Object.hasOwn( this.options.icons, id ) ) {
+  			iconData = this.options.icons[id];
+  		} else {
+  			iconData = this.getIconData( id );
+  		}
 
   		var existingIcon = $button.find( 'svg#ableplayer-' + id );
   		// Avoid repainting icon if there's no change.
@@ -6368,28 +7549,31 @@
   		}
   		$button.find('svg').remove();
 
-  		// Outdented for simpler diff
-  			// Function to create SVG nodes.
-  			function getNode(n, v) {
-  				n = document.createElementNS("http://www.w3.org/2000/svg", n);
-  				for (var p in v) {
-  					n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
-  						return "-" + m.toLowerCase();
-  					}), v[p]);
-  				}
-  				return n;
+  		// Function to create SVG nodes.
+  		function getNode(n, v) {
+  			n = document.createElementNS("http://www.w3.org/2000/svg", n);
+  			for (var p in v) {
+  				n.setAttributeNS(null, p.replace(/[A-Z]/g, function(m) {
+  					return "-" + m.toLowerCase();
+  				}), v[p]);
   			}
-  			var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
-  			icon.setAttribute( 'focusable', 'false' );
-  			icon.setAttribute( 'aria-hidden', 'true');
-  			icon.setAttribute( 'viewBox', iconData[0] );
-  			icon.setAttribute( 'id', 'ableplayer-' + id );
-  			let path = getNode( 'path', { d: iconData[1] } );
+  			return n;
+  		}
+  		var icon = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+  		icon.setAttribute( 'focusable', 'false' );
+  		icon.setAttribute( 'aria-hidden', 'true');
+  		icon.setAttribute( 'viewBox', iconData[0] );
+  		icon.setAttribute( 'id', 'ableplayer-' + id );
+  		let paths = iconData[1];
+  		paths.forEach( function( pathData ) {
+  			let path = getNode( 'path', { d: pathData } );
   			icon.appendChild( path );
-
-  			$button.append( icon );
-  			// Refresh the DOM.
-  			$button.html($button.html());
+  		});
+  		let cleanSVG = purify.sanitize(icon.outerHTML, {RETURN_DOM_FRAGMENT: true});
+  		icon = cleanSVG.firstChild;
+  		$button.append( icon );
+  		// Refresh the DOM.
+  		$button.html($button.html());
   	};
 
   	AblePlayer.prototype.setText = function( $button, text ) {
@@ -6740,26 +7924,21 @@
   				meta = this.meta[i];
   			}
   		}
-  		// regardless of source...
-  		this.transcriptLang = language;
+  		// Change the transcript language if the transcript is not currently visible.
+  		if ( ( source === 'captions' && typeof this.$transcriptArea !== 'undefined' && ! this.$transcriptArea.is(':visible') ) || source === 'init' || source === 'transcript' ) {
+  			console.log('syncTrackLanguages: transcript is not visible, so changing transcript language to ' + language);
+  			this.transcriptCaptions = captions;
+  			this.transcriptChapters = chapters;
+  			this.transcriptDescriptions = descriptions;
+  			this.transcriptLang = language;
+  		}
   		if (source === 'init' || source === 'captions') {
   			this.captionLang = language;
   			this.selectedCaptions = captions;
   			this.selectedChapters = chapters;
   			this.selectedDescriptions = descriptions;
   			this.selectedMeta = meta;
-  			this.transcriptCaptions = captions;
-  			this.transcriptChapters = chapters;
-  			this.transcriptDescriptions = descriptions;
   			this.updateChaptersList();
-  			// the following was commented out in Oct/Nov 2018.
-  			// chapters popup is setup automatically when setupPopups() is called later with no param
-  			// not sure why it was included here.
-  			// this.setupPopups('chapters');
-  		} else if (source === 'transcript') {
-  			this.transcriptCaptions = captions;
-  			this.transcriptChapters = chapters;
-  			this.transcriptDescriptions = descriptions;
   		}
   		if (this.selectedDescriptions) {
   			// updating description voice to match new description language
@@ -6802,7 +7981,7 @@
   		// readDescriptionsAloud == true if text description is to be announced audibly; otherwise false
   		// descReader == either 'browser' or 'screenreader'
 
-  		var deferred, promise;
+  		var deferred, promise, firstSource;
 
   		deferred = new this.defer();
   		promise = deferred.promise();
@@ -6814,8 +7993,9 @@
   		// check to see if there's an open-described version of this video
   		// checks only the first source since if a described version is provided,
   		// it must be provided for all sources
-  		this.descFile = this.$sources.first().attr('data-desc-src');
-  		if (typeof this.descFile !== 'undefined') {
+  		firstSource   = this.sources[0] ?? null;
+  		this.descFile = firstSource ? this.sources[0].getAttribute('data-desc-src') : null;
+  		if ( this.descFile !== null && this.descFile !== '' ) {
   			this.hasOpenDesc = true;
   		} else {
   			// there's no open-described version via data-desc-src,
@@ -6900,7 +8080,10 @@
   		} else if (this.player === 'vimeo') {
   			return (this.activeVimeoId === this.vimeoDescId);
   		} else {
-  			return (this.$sources.first().attr('data-desc-src') === this.$sources.first().attr('src'));
+  			const firstSource = this.sources[0] ?? null;
+  			const descSrc     = firstSource ? firstSource.getAttribute('data-desc-src') : null;
+  			const activeSrc   = firstSource ? firstSource.getAttribute('src') : null;
+  			return ( descSrc !== null && descSrc === activeSrc );
   		}
   	};
 
@@ -7091,8 +8274,7 @@
 
   		// get element that has focus at the time swap is initiated
   		// after player is rebuilt, focus will return to that same element
-  		// (if it exists)
-  		this.$focusedElement = $(':focus');
+  		this.focusedElement = AblePlayer.getActiveDOMElement();
   		this.activeMedia = this.mediaId;
 
   		// get current time of current source, and attempt to start new video at the same time
@@ -7125,23 +8307,23 @@
 
   			if (this.usingDescribedVersion()) {
   				// the described version is currently playing. Swap to non-described
-  				for (i=0; i < this.$sources.length; i++) {
+  				for (i=0; i < this.sources.length; i++) {
   					// for all <source> elements, replace src with data-orig-src
-  					origSrc = purify.sanitize( this.$sources[i].getAttribute('data-orig-src') );
+  					origSrc = purify.sanitize( this.sources[i].getAttribute('data-orig-src') );
   					if (origSrc) {
-  						this.$sources[i].setAttribute('src',origSrc);
+  						this.sources[i].setAttribute('src',origSrc);
   					}
   				}
   			} else {
   				// the non-described version is currently playing. Swap to described.
-  				for (i=0; i < this.$sources.length; i++) {
+  				for (i=0; i < this.sources.length; i++) {
   					// for all <source> elements, replace src with data-desc-src (if one exists)
   					// then store original source in a new data-orig-src attribute
-  					origSrc = purify.sanitize( this.$sources[i].getAttribute('src') );
-  					descSrc = purify.sanitize( this.$sources[i].getAttribute('data-desc-src') );
+  					origSrc = purify.sanitize( this.sources[i].getAttribute('src') );
+  					descSrc = purify.sanitize( this.sources[i].getAttribute('data-desc-src') );
   					if (descSrc) {
-  						this.$sources[i].setAttribute('src',descSrc);
-  						this.$sources[i].setAttribute('data-orig-src',origSrc);
+  						this.sources[i].setAttribute('src',descSrc);
+  						this.sources[i].setAttribute('data-orig-src',origSrc);
   					}
   				}
   			}
@@ -7449,154 +8631,153 @@
 
   }
 
-  // Outdented for a simpler diff
-  	var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
+  var focusableElementsSelector = "a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]";
 
-  	// Based on the incredible accessible modal dialog.
-  	function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
+  // Based on the incredible accessible modal dialog.
+  function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 
-  		this.title = title;
-  		this.closeButtonLabel = closeButtonLabel;
-  		this.focusedElementBeforeModal = $returnElement;
-  		this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
-  		var thisObj = this;
-  		var modal = modalDiv;
-  		this.modal = modal;
+  	this.title = title;
+  	this.closeButtonLabel = closeButtonLabel;
+  	this.focusedElementBeforeModal = $returnElement;
+  	this.baseId = $(modalDiv).attr('id') || Math.floor(Math.random() * 1000000000).toString();
+  	var thisObj = this;
+  	var modal = modalDiv;
+  	this.modal = modal;
 
-  		modal.addClass('able-modal-dialog');
+  	modal.addClass('able-modal-dialog');
 
-  		var closeButton = $('<button>',{
-  				'class': 'modalCloseButton',
-  				'title': thisObj.closeButtonLabel,
-  				'aria-label': thisObj.closeButtonLabel
-  		}).text('×');
-  		closeButton.on( 'keydown', function (e) {
-  			if (e.key === ' ') {
-  				thisObj.hide();
+  	var closeButton = $('<button>',{
+  			'class': 'modalCloseButton',
+  			'title': thisObj.closeButtonLabel,
+  			'aria-label': thisObj.closeButtonLabel
+  	}).text('×');
+  	closeButton.on( 'keydown', function (e) {
+  		if (e.key === ' ') {
+  			thisObj.hide();
+  		}
+  	}).on( 'click', function () {
+  		thisObj.hide();
+  	});
+
+  	var titleH1 = $('<h1></h1>');
+  	titleH1.attr('id', 'modalTitle-' + this.baseId);
+  	titleH1.text(title);
+  	this.titleH1 = titleH1;
+
+  	modal.attr({
+  		'aria-labelledby': 'modalTitle-' + this.baseId,
+  	});
+  	var modalHeader = $( '<div>', {
+  		'class': 'able-modal-header'
+  	});
+  	modalHeader.prepend(titleH1);
+  	modalHeader.prepend(closeButton);
+  	modal.prepend(modalHeader);
+
+  	modal.attr({
+  		'aria-hidden': 'true',
+  		'role': 'dialog',
+  		'aria-modal': 'true'
+  	});
+
+  	modal.on( 'keydown', function (e) {
+  		if (e.key === 'Escape') {
+  			thisObj.hide();
+  			e.preventDefault();
+  		} else if (e.key === 'Tab') {
+  			// Manually loop tab navigation inside the modal.
+  			var parts = modal.find('*');
+  			var focusable = parts.filter(focusableElementsSelector).filter(':visible');
+
+  			if (focusable.length === 0) {
+  				return;
   			}
-  		}).on( 'click', function () {
+
+  			var focused = AblePlayer.getActiveDOMElement();
+  			var currentIndex = focusable.index(focused);
+  			if (e.shiftKey) {
+  				// If backwards from first element, go to last.
+  				if (currentIndex === 0) {
+  					focusable.get(focusable.length - 1).trigger('focus');
+  					e.preventDefault();
+  				}
+  			} else {
+  				if (currentIndex === focusable.length - 1) {
+  					focusable.get(0).trigger('focus');
+  					e.preventDefault();
+  				}
+  			}
+  		}
+  		e.stopPropagation();
+  	});
+
+  	if ( $( 'body' ).hasClass( 'able-modal-active' ) ) {
+  		$( 'body > *') .not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
+  		$( 'body' ).removeClass( 'able-modal-active' );
+  	}
+  }
+  AccessibleDialog.prototype.show = function () {
+  	if (!this.overlay) {
+  		// Generate overlay.
+  		var overlay = $('<div></div>').attr({
+  				'class': 'able-modal-overlay',
+  				'tabindex': '-1'
+  		});
+  		this.overlay = overlay;
+  		$('body').append(overlay);
+
+  		// Keep from moving focus out of dialog when clicking outside of it.
+  		overlay.on('mousedown.accessibleModal', function (e) {
+  			e.preventDefault();
   			thisObj.hide();
   		});
-
-  		var titleH1 = $('<h1></h1>');
-  		titleH1.attr('id', 'modalTitle-' + this.baseId);
-  		titleH1.text(title);
-  		this.titleH1 = titleH1;
-
-  		modal.attr({
-  			'aria-labelledby': 'modalTitle-' + this.baseId,
-  		});
-  		var modalHeader = $( '<div>', {
-  			'class': 'able-modal-header'
-  		});
-  		modalHeader.prepend(titleH1);
-  		modalHeader.prepend(closeButton);
-  		modal.prepend(modalHeader);
-
-  		modal.attr({
-  			'aria-hidden': 'true',
-  			'role': 'dialog',
-  			'aria-modal': 'true'
-  		});
-
-  		modal.on( 'keydown', function (e) {
-  			if (e.key === 'Escape') {
-  				thisObj.hide();
-  				e.preventDefault();
-  			} else if (e.key === 'Tab') {
-  				// Manually loop tab navigation inside the modal.
-  				var parts = modal.find('*');
-  				var focusable = parts.filter(focusableElementsSelector).filter(':visible');
-
-  				if (focusable.length === 0) {
-  					return;
-  				}
-
-  				var focused = $(':focus');
-  				var currentIndex = focusable.index(focused);
-  				if (e.shiftKey) {
-  					// If backwards from first element, go to last.
-  					if (currentIndex === 0) {
-  						focusable.get(focusable.length - 1).trigger('focus');
-  						e.preventDefault();
-  					}
-  				} else {
-  					if (currentIndex === focusable.length - 1) {
-  						focusable.get(0).trigger('focus');
-  						e.preventDefault();
-  					}
-  				}
-  			}
-  			e.stopPropagation();
-  		});
-
-  		if ( $( 'body' ).hasClass( 'able-modal-active' ) ) {
-  			$( 'body > *') .not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
-  			$( 'body' ).removeClass( 'able-modal-active' );
-  		}
   	}
-  	AccessibleDialog.prototype.show = function () {
-  		if (!this.overlay) {
-  			// Generate overlay.
-  			var overlay = $('<div></div>').attr({
-  				 'class': 'able-modal-overlay',
-  				 'tabindex': '-1'
-  			});
-  			this.overlay = overlay;
-  			$('body').append(overlay);
 
-  			// Keep from moving focus out of dialog when clicking outside of it.
-  			overlay.on('mousedown.accessibleModal', function (e) {
-  				e.preventDefault();
-  				thisObj.hide();
-  			});
-  		}
+  	$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('inert', true);
+  	$( 'body' ).addClass( 'able-modal-active' );
 
-  		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').attr('inert', true);
-  		$( 'body' ).addClass( 'able-modal-active' );
+  	this.overlay.css('display', 'block');
+  	this.modal.css('display', 'block');
+  	this.modal.attr({
+  		'aria-hidden': 'false',
+  		'tabindex': '-1'
+  	});
 
-  		this.overlay.css('display', 'block');
-  		this.modal.css('display', 'block');
-  		this.modal.attr({
-  			'aria-hidden': 'false',
-  			'tabindex': '-1'
-  		});
+  	var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
+  	if (focusable.length === 0) {
+  		this.focusedElementBeforeModal.blur();
+  	}
+  	var thisObj = this;
+  	setTimeout(function () {
+  		// set focus on the first focusable element
+  		thisObj.modal.find('button.modalCloseButton').first().trigger('focus');
+  	}, 300);
+  };
 
-  		var focusable = this.modal.find("*").filter(focusableElementsSelector).filter(':visible');
-  		if (focusable.length === 0) {
-  			this.focusedElementBeforeModal.blur();
-  		}
-  		var thisObj = this;
-  		setTimeout(function () {
-  			// set focus on the first focusable element
-  			thisObj.modal.find('button.modalCloseButton').first().trigger('focus');
-  		}, 300);
-  	};
+  AccessibleDialog.prototype.hide = function () {
+  	if (this.overlay) {
+  		this.overlay.css('display', 'none');
+  	}
+  	this.modal.css('display', 'none');
+  	this.modal.attr('aria-hidden', 'true');
+  	$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
+  	$( 'body' ).removeClass( 'able-modal-active' );
 
-  	AccessibleDialog.prototype.hide = function () {
-  		if (this.overlay) {
-  			this.overlay.css('display', 'none');
-  		}
-  		this.modal.css('display', 'none');
-  		this.modal.attr('aria-hidden', 'true');
-  		$('body > *').not('.able-modal-overlay').not('.able-modal-dialog').removeAttr('inert');
-  		$( 'body' ).removeClass( 'able-modal-active' );
+  	this.focusedElementBeforeModal.trigger('focus');
+  };
 
-  		this.focusedElementBeforeModal.trigger('focus');
-  	};
+  AccessibleDialog.prototype.getInputs = function () {
 
-  	AccessibleDialog.prototype.getInputs = function () {
-
-  		// return an array of input elements within this dialog
-  		if (this.modal) {
-  			var inputs = this.modal.find('input');
-  			return inputs;
-  		}
-  		return false;
-  	};
+  	// return an array of input elements within this dialog
+  	if (this.modal) {
+  		var inputs = this.modal.find('input');
+  		return inputs;
+  	}
+  	return false;
+  };
 
   function addDragdropFunctions(AblePlayer) {
-  	AblePlayer.prototype.initDragDrop = function ( which ) {
+  	AblePlayer.prototype.initDragDrop = function (which) {
 
   		// supported values of which: 'sign', 'transcript'
 
@@ -7609,8 +8790,7 @@
   		// There are nevertheless lessons to be learned from Drag & Drop about accessibility:
   		// http://dev.opera.com/articles/accessible-drag-and-drop/
 
-  		var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, $resizeSvg,
-  			i, x1, y1, x2, y2, $resizeLine, resizeZIndex;
+  		var thisObj, $window, $toolbar, windowName, $dragHandle, $resizeHandle, resizeZIndex;
 
   		thisObj = this;
 
@@ -7618,162 +8798,103 @@
   			$window = this.$transcriptArea;
   			windowName = 'transcript-window';
   			$toolbar = this.$transcriptToolbar;
-  			$toolbar.attr( 'aria-label', this.translate( 'transcriptControls', 'Transcript Window Controls' ) );
+  			$toolbar.attr('aria-label', this.translate('transcriptControls', 'Transcript Window Controls'));
   		} else if (which === 'sign') {
   			$window = this.$signWindow;
   			windowName = 'sign-window';
   			$toolbar = this.$signToolbar;
-  			$toolbar.attr( 'aria-label', this.translate( 'signControls', 'Sign Language Window Controls' ) );
+  			$toolbar.attr('aria-label', this.translate('signControls', 'Sign Language Window Controls'));
   		}
 
   		// add class to trigger change in cursor on hover
   		$toolbar.addClass('able-draggable');
-  		$toolbar.attr( 'role', 'application' );
+  		$toolbar.attr('role', 'application');
 
-  		$dragHandle = $('<div>',{
+  		$dragHandle = $('<div>', {
   			'class': 'able-drag-handle'
   		});
+  		this.getIcon($dragHandle, 'drag-handle');
 
-  		$dragHandle.html('<svg version="1.1" viewBox="262.48 487.5 675.03 225" xmlns="http://www.w3.org/2000/svg"><path d="m900 562.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path>  <path d="m900 712.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z" fill="#fff"></path></svg>');
   		// add resize handle selector to bottom right corner
-  		$resizeHandle = $('<div>',{
+  		$resizeHandle = $('<div>', {
   			'class': 'able-resizable'
   		});
-
-  		// fill it with three parallel diagonal lines
-  		$resizeSvg = $('<svg>').attr({
-  			'width': '100%',
-  			'height': '100%',
-  			'viewBox': '0 0 100 100',
-  			'preserveAspectRatio': 'none'
-  		});
-  		for (i=1; i<=3; i++) {
-  			if (i === 1) {
-  				x1 = '100';
-  				y1 = '0';
-  				x2 = '0';
-  				y2 = '100';
-  			} else if (i === 2) {
-  				x1 = '33';
-  				y1 = '100';
-  				x2 = '100';
-  				y2 = '33';
-  			} else if (i === 3) {
-  				x1 = '67';
-  				y1 = '100';
-  				x2 = '100';
-  				y2 = '67';
-  			}
-  			$resizeLine = $('<line>').attr({
-  				'x1': x1,
-  				'y1': y1,
-  				'x2': x2,
-  				'y2': y2,
-  				'vector-effect': 'non-scaling-stroke'
-  			});
-  			$resizeSvg.append($resizeLine);
-  		}
-  		$resizeHandle.html($resizeSvg);
+  		this.getIcon($resizeHandle, 'resize-handle');
 
   		// assign z-index that's slightly higher than parent window
   		resizeZIndex = parseInt($window.css('z-index')) + 100;
-  		$resizeHandle.css('z-index',resizeZIndex);
+  		$resizeHandle.css('z-index', resizeZIndex);
   		$window.append($resizeHandle);
   		$toolbar.append($dragHandle);
 
-  		// Final step: Need to refresh the DOM in order for browser to process & display the SVG
-  		$resizeHandle.html($resizeHandle.html());
-
-  		// add event listener to toolbar to start and end drag
+  		// add event listener to toolbar to start drag
   		// other event listeners will be added when drag starts
-  		$dragHandle.on('mousedown mouseup touchstart touchend', function(e) {
+  		$dragHandle.on('pointerdown', function (e) {
   			e.stopPropagation();
-  			if (e.type === 'mousedown' || e.type === 'touchstart' ) {
-  				if (!thisObj.windowMenuClickRegistered) {
-  					thisObj.windowMenuClickRegistered = true;
-  					thisObj.startMouseX = e.pageX;
-  					thisObj.startMouseY = e.pageY;
-  					thisObj.dragDevice = 'mouse'; // ok to use this even if device is a touchpad
-  					thisObj.startDrag(which, $window);
-  				}
-  			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-  				if (thisObj.dragging && thisObj.dragDevice === 'mouse') {
-  					thisObj.endDrag(which);
-  				}
-  			}
+  			thisObj.startMouseX = e.pageX;
+  			thisObj.startMouseY = e.pageY;
+  			thisObj.dragPointerId = e.pointerId;
+  			thisObj.dragDevice = 'mouse'; // pointer input is treated as non-keyboard drag
+  			thisObj.startDrag(which, $window);
   			return false;
   		});
 
   		// add event listeners for resizing
-  		$resizeHandle.on('mousedown mouseup touchstart touchend', function(e) {
+  		$resizeHandle.on('pointerdown', function (e) {
   			e.stopPropagation();
-  			if (e.type === 'mousedown' || e.type === 'touchstart') {
-  				if (!thisObj.windowMenuClickRegistered) {
-  					thisObj.windowMenuClickRegistered = true;
-  					thisObj.startMouseX = e.pageX;
-  					thisObj.startMouseY = e.pageY;
-  					thisObj.startResize(which, $window);
-  				}
-  			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-  				if (thisObj.resizing) {
-  					thisObj.endResize(which);
-  				}
-  			}
+  			thisObj.startMouseX = e.pageX;
+  			thisObj.startMouseY = e.pageY;
+  			thisObj.resizePointerId = e.pointerId;
+  			thisObj.startResize(which, $window);
   			return false;
   		});
 
   		// whenever a window is clicked, bring it to the foreground
-  		$window.on('click', function() {
+  		$window.on('click', function () {
 
-  			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
+  			if (!thisObj.finishingDrag) {
   				thisObj.updateZIndex(which);
   			}
   			thisObj.finishingDrag = false;
   		});
-  		this.addWindowMenu(which,$window,windowName);
+  		this.addWindowMenu(which, $window, windowName);
   	};
 
-  	AblePlayer.prototype.addWindowMenu = function(which, $window, windowName) {
+  	AblePlayer.prototype.addWindowMenu = function (which, $window, windowName) {
 
   		var thisObj, menuId, $newButton, tooltipId, $tooltip, $popup;
 
   		thisObj = this;
 
-  		// Add a Boolean that will be set to true temporarily if window button or a menu item is clicked
-  		// This will prevent the click event from also triggering a mousedown event on the toolbar
-  		// (which would unexpectedly send the window into drag mode)
-  		this.windowMenuClickRegistered = false;
-
-  		// Add another Boolean that will be set to true temporarily when mouseup fires at the end of a drag
+  		// Add another Boolean that will be set to true temporarily when pointerup fires at the end of a drag
   		// this will prevent the click event from being triggered
   		this.finishingDrag = false;
 
   		// add button to draggable window which triggers a popup menu
   		menuId = this.mediaId + '-' + windowName + '-menu';
-  		$newButton = $('<button>',{
+  		$newButton = $('<button>', {
   			'type': 'button',
-  			'tabindex': '0',
   			'aria-haspopup': 'true',
   			'aria-controls': menuId,
   			'aria-expanded': 'false',
   			'class': 'able-button-handler-preferences'
   		});
-  		this.getIcon( $newButton, 'preferences' );
-  		this.setText( $newButton, this.translate( 'windowButtonLabel', 'Window options' ) );
+  		this.getIcon($newButton, 'preferences');
+  		this.setText($newButton, this.translate('windowButtonLabel', 'Window options'));
 
   		// add a tooltip that displays aria-label on mouseenter or focus
   		tooltipId = this.mediaId + '-' + windowName + '-tooltip';
-  		$tooltip = $('<div>',{
-  			'class' : 'able-tooltip',
-  			'id' : tooltipId
+  		$tooltip = $('<div>', {
+  			'class': 'able-tooltip',
+  			'id': tooltipId
   		}).hide();
 
-  		$newButton.on('mouseenter focus',function(e) {
+  		$newButton.on('mouseenter focus', function (e) {
   			var label = $(this).attr('aria-label');
   			var tooltip = AblePlayer.localGetElementById($newButton[0], tooltipId).text(label);
   			// get height of the tooltip
   			var tooltipHeight = tooltip.height();
-  			var tooltipY = ( tooltipHeight + 2 ) * -1;
+  			var tooltipY = (tooltipHeight + 2) * -1;
   			var tooltipX = 0;
   			var tooltipStyle = {
   				right: '',
@@ -7782,7 +8903,7 @@
   			};
   			tooltip.css(tooltipStyle);
   			thisObj.showTooltip(tooltip);
-  			$(this).on('mouseleave blur',function() {
+  			$(this).on('mouseleave blur', function () {
   				AblePlayer.localGetElementById($newButton[0], tooltipId).text('').hide();
   			});
   		});
@@ -7793,15 +8914,15 @@
   		if (which === 'transcript') {
   			this.$transcriptPopupButton = $newButton;
   			this.$transcriptPopup = $popup;
-  			this.$transcriptToolbar.prepend($newButton,$tooltip,$popup);
+  			this.$transcriptToolbar.prepend($newButton, $tooltip, $popup);
   		} else if (which === 'sign') {
   			this.$signPopupButton = $newButton;
   			this.$signPopup = $popup;
-  			this.$signToolbar.append($newButton,$tooltip,$popup);
+  			this.$signToolbar.append($newButton, $tooltip, $popup);
   		}
 
-  		// handle button click
-  		$newButton.on('click keydown',function(e) {
+  		// handle button key activation and click separately
+  		$newButton.on('keydown', function (e) {
 
   			if (thisObj.focusNotClick) {
   				return false;
@@ -7810,13 +8931,34 @@
   				thisObj.dragKeys(which, e);
   				return false;
   			}
+  			if (e.key !== ' ' && e.key !== 'Enter' && e.key !== 'Escape') {
+  				return false;
+  			}
   			e.stopPropagation();
-  			if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-  				console.log( 'firing' );
-  				// don't set windowMenuClickRegistered yet; that happens in handler function
+  			if (e.key === ' ' || e.key === 'Enter') {
+  				e.preventDefault();
+  			}
+  			if (!thisObj.finishingDrag) {
   				thisObj.handleWindowButtonClick(which, e);
   			}
   			thisObj.finishingDrag = false;
+  			return false;
+  		});
+
+  		$newButton.on('click', function (e) {
+
+  			if (thisObj.focusNotClick) {
+  				return false;
+  			}
+  			if (thisObj.dragging) {
+  				return false;
+  			}
+  			e.stopPropagation();
+  			if (!thisObj.finishingDrag) {
+  				thisObj.handleWindowButtonClick(which, e);
+  			}
+  			thisObj.finishingDrag = false;
+  			return false;
   		});
 
   		this.addResizeDialog(which, $window);
@@ -7842,63 +8984,63 @@
   		widthId = this.mediaId + '-resize-' + which + '-width';
   		heightId = this.mediaId + '-resize-' + which + '-height';
 
-  		$resizeForm = $('<div></div>',{
-  			'class' : 'able-resize-form'
+  		$resizeForm = $('<div></div>', {
+  			'class': 'able-resize-form'
   		});
 
   		// inner container for all content, will be assigned to modal div's aria-describedby
   		$resizeWrapper = $('<div></div>');
-  		$resizeControls = $( '<div class="able-prefs-buttons"></div>' );
+  		$resizeControls = $('<div class="able-prefs-buttons"></div>');
 
   		// width field
   		$resizeWidthDiv = $('<div></div>');
-  		$resizeWidthInput = $('<input>',{
+  		$resizeWidthInput = $('<input>', {
   			'type': 'number',
   			'id': widthId,
   			'min': 0,
   			'value': '',
   		});
-  		$resizeWidthLabel = $('<label>',{
+  		$resizeWidthLabel = $('<label>', {
   			'for': widthId
-  		}).text( this.translate( 'width', 'Width' ) );
+  		}).text(this.translate('width', 'Width'));
 
   		// height field
   		$resizeHeightDiv = $('<div></div>');
-  		$resizeHeightInput = $('<input>',{
+  		$resizeHeightInput = $('<input>', {
   			'type': 'number',
   			'id': heightId,
   			'min': 0,
   			'value': '',
   		});
-  		$resizeHeightLabel = $('<label>',{
+  		$resizeHeightLabel = $('<label>', {
   			'for': heightId
-  		}).text( this.translate( 'height', 'Height' ) );
+  		}).text(this.translate('height', 'Height'));
 
   		// Add save and cancel buttons.
-  		$saveButton = $('<button class="modal-button">' + this.translate( 'save', 'Save' ) + '</button>');
-  		$cancelButton = $('<button class="modal-button">' + this.translate( 'cancel', 'Cancel' ) + '</button>');
-  		$saveButton.on('click',function () {
+  		$saveButton = $('<button class="modal-button">' + this.translate('save', 'Save') + '</button>');
+  		$cancelButton = $('<button class="modal-button">' + this.translate('cancel', 'Cancel') + '</button>');
+  		$saveButton.on('click', function () {
   			newWidth = $('#' + widthId).val();
   			newHeight = $('#' + heightId).val();
-  			thisObj.resizeObject(which,newWidth,newHeight);
+  			thisObj.resizeObject(which, newWidth, newHeight);
   			thisObj.updatePreferences(which);
 
   			resizeDialog.hide();
   			$windowPopup.hide();
   			$windowButton.trigger('focus');
   		});
-  		$cancelButton.on('click',function () {
+  		$cancelButton.on('click', function () {
   			resizeDialog.hide();
   			$windowPopup.hide();
   			$windowButton.trigger('focus');
   		});
 
   		// Now assemble all the parts
-  		$resizeWidthDiv.append($resizeWidthLabel,$resizeWidthInput);
-  		$resizeHeightDiv.append($resizeHeightLabel,$resizeHeightInput);
-  		$resizeWrapper.append($resizeWidthDiv,$resizeHeightDiv);
-  		$resizeControls.append($saveButton,$cancelButton);
-  		$resizeForm.append($resizeWrapper,$resizeControls);
+  		$resizeWidthDiv.append($resizeWidthLabel, $resizeWidthInput);
+  		$resizeHeightDiv.append($resizeHeightLabel, $resizeHeightInput);
+  		$resizeWrapper.append($resizeWidthDiv, $resizeHeightDiv);
+  		$resizeControls.append($saveButton, $cancelButton);
+  		$resizeForm.append($resizeWrapper, $resizeControls);
 
   		// must be appended to the BODY!
   		// otherwise when aria-hidden="true" is applied to all background content
@@ -7908,8 +9050,8 @@
   		resizeDialog = new AccessibleDialog(
   			$resizeForm,
   			$windowButton,
-  			this.translate( 'windowResizeHeading', 'Resize Window' ),
-  			this.translate( 'closeButtonLabel', 'Close' ),
+  			this.translate('windowResizeHeading', 'Resize Window'),
+  			this.translate('closeButtonLabel', 'Close'),
   		);
   		if (which === 'transcript') {
   			this.transcriptResizeDialog = resizeDialog;
@@ -7920,9 +9062,8 @@
 
   	AblePlayer.prototype.handleWindowButtonClick = function (which, e) {
 
-  		var thisObj, $windowPopup, $windowButton, $toolbar, popupTop;
+  		var $windowPopup, $windowButton, $toolbar, popupTop;
 
-  		thisObj = this;
   		if (this.focusNotClick) {
   			// transcript or sign window has just opened,
   			// and focus moved to the window button
@@ -7941,16 +9082,13 @@
   		}
   		if (e.type === 'keydown') {
   			// user pressed a key
-  			if (e.key === ' ' || e.key === 'Enter') {
-  				this.windowMenuClickRegistered = true;
-  			} else if (e.key === 'Escape') {
+  			if (e.key === ' ' || e.key === 'Enter') ; else if (e.key === 'Escape') {
   				if ($windowPopup.is(':visible')) {
   					// close the popup menu
   					$windowPopup.hide();
-  					// also reset the Boolean
-  					thisObj.windowMenuClickRegistered = false;
   					// also restore menu items to their original state
-  					$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
+  					$windowPopup.find('li').removeClass('able-focus').attr('tabindex', '-1');
+  					$windowButton.attr('aria-expanded', 'false');
   					// also return focus to window options button
   					$windowButton.trigger('focus');
   				} else {
@@ -7961,37 +9099,32 @@
   						this.handleTranscriptToggle();
   					}
   				}
+  				return false;
   			} else {
   				return false;
   			}
-  		} else {
-  			// this was a mouse event
-  			this.windowMenuClickRegistered = true;
   		}
 
-  		if ( $windowPopup.is(':visible') ) {
+  		if ($windowPopup.is(':visible')) {
   			$windowPopup.hide();
-  			thisObj.windowMenuClickRegistered = false; // reset
   			$windowPopup.find('li').removeClass('able-focus');
-  			$windowButton.attr('aria-expanded','false').trigger('focus');
+  			$windowButton.attr('aria-expanded', 'false').trigger('focus');
   		} else {
   			// first, be sure window is on top
   			this.updateZIndex(which);
   			popupTop = $toolbar.outerHeight() - 1;
   			$windowPopup.css('top', popupTop);
   			$windowPopup.show();
-  			$windowButton.attr('aria-expanded','true');
-  			$(this).find('li').first().trigger('focus').addClass('able-focus');
-  			thisObj.windowMenuClickRegistered = false; // reset
+  			$windowButton.attr('aria-expanded', 'true');
+  			$windowPopup.find('li').first().attr('tabindex', '0').trigger('focus').addClass('able-focus');
   		}
   	};
 
   	AblePlayer.prototype.handleMenuChoice = function (which, choice, e) {
 
-  		var thisObj, $window, $windowPopup, $windowButton, resizeDialog, startingWidth, startingHeight,
-  		aspectRatio, tempWidth, tempHeight;
+  		var $window, $windowPopup, $windowButton, resizeDialog, startingWidth, startingHeight,
+  			aspectRatio, tempWidth, tempHeight;
 
-  		thisObj = this;
   		if (which === 'transcript') {
   			$window = this.$transcriptArea;
   			$windowPopup = this.$transcriptPopup;
@@ -8010,11 +9143,11 @@
   			// and calculate its value based on width to preserve aspect ratio
   			let widthId = this.mediaId + '-resize-' + which + '-width';
   			let heightId = this.mediaId + '-resize-' + which + '-height';
-  			$( '#' + heightId ).prop('readonly',true);
-  			$( '#' + widthId ).on('input',function() {
+  			$('#' + heightId).prop('readonly', true);
+  			$('#' + widthId).on('input', function () {
   				tempWidth = $(this).val();
-  				tempHeight = Math.round(tempWidth/aspectRatio);
-  				$( '#' + heightId ).val(tempHeight);
+  				tempHeight = Math.round(tempWidth / aspectRatio);
+  				$('#' + heightId).val(tempHeight);
   			});
   		}
   		this.$activeWindow = $window;
@@ -8023,11 +9156,9 @@
   			if (e.key === 'Escape') { // escape
   				// hide the popup menu
   				$windowPopup.hide();
-  				// also reset the Boolean
-  				thisObj.windowMenuClickRegistered = false;
   				// also restore menu items to their original state
-  				$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-  				$windowButton.attr('aria-expanded','false');
+  				$windowPopup.find('li').removeClass('able-focus').attr('tabindex', '-1');
+  				$windowButton.attr('aria-expanded', 'false');
   				// also return focus to window options button
   				$windowButton.trigger('focus');
 
@@ -8043,11 +9174,9 @@
 
   		// hide the popup menu
   		$windowPopup.hide();
-  		// also reset the boolean
-  		thisObj.windowMenuClickRegistered = false;
   		// also restore menu items to their original state
-  		$windowPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
-  		$windowButton.attr('aria-expanded','false');
+  		$windowPopup.find('li').removeClass('able-focus').attr('tabindex', '-1');
+  		$windowButton.attr('aria-expanded', 'false');
 
   		if (choice !== 'close') {
   			$windowButton.trigger('focus');
@@ -8055,10 +9184,10 @@
   		if (choice === 'move') {
   			// temporarily add role="application" to activeWindow
   			// otherwise, screen readers incercept arrow keys and moving window will not work
-  			this.$activeWindow.attr('role','application');
+  			this.$activeWindow.attr('role', 'application');
 
   			if (!this.showedAlert(which)) {
-  				this.showAlert( this.translate( 'windowMoveAlert', 'Drag or use arrow keys to move the window; Enter to stop' ),which);
+  				this.showAlert(this.translate('windowMoveAlert', 'Drag or use arrow keys to move the window; Enter to stop'), which);
   				if (which === 'transcript') {
   					this.showedTranscriptAlert = true;
   				} else if (which === 'sign') {
@@ -8067,14 +9196,14 @@
   			}
   			this.dragDevice = (e.type === 'keydown') ? 'keyboard' : 'mouse';
   			this.startDrag(which, $window);
-  			$windowPopup.hide().parent().attr( 'tabindex', '-1' ).trigger('focus');
+  			$windowPopup.hide().parent().attr('tabindex', '-1').trigger('focus');
   		} else if (choice == 'resize') {
   			// resize through the menu uses a form, not drag
   			var resizeFields = resizeDialog.getInputs();
   			if (resizeFields) {
   				// reset width and height values in form
-  				resizeFields[0].value = Math.round( $window.outerWidth() );
-  				resizeFields[1].value = Math.round( $window.outerHeight() );
+  				resizeFields[0].value = Math.round($window.outerWidth());
+  				resizeFields[1].value = Math.round($window.outerHeight());
   			}
   			resizeDialog.show();
   		} else if (choice == 'close') {
@@ -8089,7 +9218,7 @@
   		}
   	};
 
-  	AblePlayer.prototype.startDrag = function(which, $element) {
+  	AblePlayer.prototype.startDrag = function (which, $element) {
 
   		var thisObj, $windowPopup, startPos, newX, newY;
 
@@ -8140,17 +9269,30 @@
   		}).trigger('focus');
 
   		// add device-specific event listeners
-  		if (this.dragDevice === 'mouse') { // might also be a touchpad
-  			$(document).on('mousemove touchmove',function(e) {
-  				if (thisObj.dragging) {
-  					// calculate new top left based on current mouse position - offset
-  					newX = e.pageX - thisObj.dragOffsetX;
-  					newY = e.pageY - thisObj.dragOffsetY;
-  					thisObj.resetDraggedObject( newX, newY );
+  		if (this.dragDevice === 'mouse') { // pointer input, including mouse/touch/pen
+  			$(window).on('pointermove.ableDrag', function (e) {
+  				if (!thisObj.dragging) {
+  					return;
   				}
+  				if (typeof thisObj.dragPointerId !== 'undefined' && e.pointerId !== thisObj.dragPointerId) {
+  					return;
+  				}
+  				// calculate new top left based on current pointer position - offset
+  				newX = e.pageX - thisObj.dragOffsetX;
+  				newY = e.pageY - thisObj.dragOffsetY;
+  				thisObj.resetDraggedObject(newX, newY);
+  			});
+  			$(window).on('pointerup.ableDrag pointercancel.ableDrag', function (e) {
+  				if (!thisObj.dragging) {
+  					return;
+  				}
+  				if (typeof thisObj.dragPointerId !== 'undefined' && e.pointerId !== thisObj.dragPointerId) {
+  					return;
+  				}
+  				thisObj.endDrag(which);
   			});
   		} else if (this.dragDevice === 'keyboard') {
-  			this.$activeWindow.on('keydown',function(e) {
+  			this.$activeWindow.on('keydown', function (e) {
   				if (thisObj.dragging) {
   					thisObj.dragKeys(which, e);
   				}
@@ -8165,7 +9307,7 @@
   	 * @param {string} which 'transcript' or 'sign' window.
   	 * @param {Event} e Triggered event.
   	 */
-  	AblePlayer.prototype.dragKeys = function(which, e) {
+  	AblePlayer.prototype.dragKeys = function (which, e) {
 
   		var key, keySpeed;
 
@@ -8180,40 +9322,40 @@
 
   		switch (key) {
   			case 'ArrowLeft':	// left
-  				 this.dragKeyX -= keySpeed;
-  				 this.$srAlertBox.text( this.translate( 'windowMoveLeft', 'Window moved left' ) );
+  				this.dragKeyX -= keySpeed;
+  				this.$srAlertBox.text(this.translate('windowMoveLeft', 'Window moved left'));
   				break;
   			case 'ArrowUp':	// up
   				this.dragKeyY -= keySpeed;
-  				this.$srAlertBox.text( this.translate( 'windowMoveUp', 'Window moved up' ) );
+  				this.$srAlertBox.text(this.translate('windowMoveUp', 'Window moved up'));
   				break;
   			case 'ArrowRight':	// right
   				this.dragKeyX += keySpeed;
-  				this.$srAlertBox.text( this.translate( 'windowMoveRight', 'Window moved right' ) );
+  				this.$srAlertBox.text(this.translate('windowMoveRight', 'Window moved right'));
   				break;
   			case 'ArrowDown':	// down
   				this.dragKeyY += keySpeed;
-  				this.$srAlertBox.text( this.translate( 'windowMoveDown', 'Window moved down' ) );
+  				this.$srAlertBox.text(this.translate('windowMoveDown', 'Window moved down'));
   				break;
   			case 'Enter': 	// enter
   			case 'Escape': 	// escape
-  				this.$srAlertBox.text( this.translate( 'windowMoveStopped', 'Window move stopped' ) );
+  				this.$srAlertBox.text(this.translate('windowMoveStopped', 'Window move stopped'));
   				this.endDrag(which);
   				return false;
   			default:
   				return false;
   		}
-  		this.resetDraggedObject(this.dragKeyX,this.dragKeyY);
+  		this.resetDraggedObject(this.dragKeyX, this.dragKeyY);
   		if (e.preventDefault) {
   			e.preventDefault();
   		}
   		return false;
   	};
 
-  	AblePlayer.prototype.resetDraggedObject = function ( x, y) {
-  		setTimeout( () => {
-  			this.$srAlertBox.text( '' );
-  		}, 2000 );
+  	AblePlayer.prototype.resetDraggedObject = function (x, y) {
+  		setTimeout(() => {
+  			this.$srAlertBox.text('');
+  		}, 2000);
 
   		this.$activeWindow.css({
   			'left': x + 'px',
@@ -8221,26 +9363,26 @@
   		});
   	},
 
-  	AblePlayer.prototype.resizeObject = function ( which, width, height ) {
+  		AblePlayer.prototype.resizeObject = function (which, width, height) {
 
-  		var innerHeight;
+  			var innerHeight;
 
-  		// which is either 'transcript' or 'sign'
-  		this.$activeWindow.css({
-  			'width': width + 'px',
-  			'height': height + 'px'
-  		});
+  			// which is either 'transcript' or 'sign'
+  			this.$activeWindow.css({
+  				'width': width + 'px',
+  				'height': height + 'px'
+  			});
 
-  		if (which === 'transcript') {
-  			// $activeWindow is the outer $transcriptArea
-  			// but the inner able-transcript also needs to be resized proportionally
-  			// (it's 50px less than its outer container)
-  			innerHeight = height - 50;
-  			this.$transcriptDiv.css('height', innerHeight + 'px');
-  		}
-  	};
+  			if (which === 'transcript') {
+  				// $activeWindow is the outer $transcriptArea
+  				// but the inner able-transcript also needs to be resized proportionally
+  				// (it's 50px less than its outer container)
+  				innerHeight = height - 50;
+  				this.$transcriptDiv.css('height', innerHeight + 'px');
+  			}
+  		};
 
-  	AblePlayer.prototype.endDrag = function(which) {
+  	AblePlayer.prototype.endDrag = function (which) {
 
   		var thisObj, $windowButton;
   		thisObj = this;
@@ -8251,10 +9393,10 @@
   			$windowButton = this.$signPopupButton;
   		}
 
-  		$(document).off('mousemove mouseup touchmove touchup');
+  		$(window).off('.ableDrag');
   		this.$activeWindow.off('keydown').removeClass('able-drag');
   		// restore activeWindow role from 'application' to 'dialog'
-  		this.$activeWindow.attr('role','dialog');
+  		this.$activeWindow.attr('role', 'dialog');
   		this.$activeWindow = null;
 
   		if (this.dragDevice === 'keyboard') {
@@ -8268,20 +9410,19 @@
   		// reset starting mouse positions
   		this.startMouseX = undefined;
   		this.startMouseY = undefined;
+  		this.dragPointerId = undefined;
 
-  		// Boolean to stop stray events from firing
-  		this.windowMenuClickRegistered = false;
   		this.finishingDrag = true; // will be reset after window click event
   		// finishingDrag should be reset after window click event,
-  		// which is triggered automatically after mouseup
+  		// which is triggered automatically after pointerup
   		// However, in case that's not reliable in some browsers
   		// need to ensure this gets cancelled
-  		setTimeout(function() {
+  		setTimeout(function () {
   			thisObj.finishingDrag = false;
   		}, 100);
   	};
 
-  	AblePlayer.prototype.startResize = function(which, $element) {
+  	AblePlayer.prototype.startResize = function (which, $element) {
 
   		var thisObj, $windowPopup, newWidth, newHeight;
 
@@ -8303,19 +9444,37 @@
   		this.dragStartHeight = this.$activeWindow.outerHeight();
 
   		// add event listeners
-  		$(document).on('mousemove touchmove',function(e) {
-  			if (thisObj.resizing) {
-  				// calculate new width and height based on changes to mouse position
-  				newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
-  				newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
-  				thisObj.resizeObject( which, newWidth, newHeight );
+  		$(window).on('pointermove.ableResize', function (e) {
+  			if (!thisObj.resizing) {
+  				return;
   			}
+  			if (typeof thisObj.resizePointerId !== 'undefined' && e.pointerId !== thisObj.resizePointerId) {
+  				return;
+  			}
+  			// calculate new width and height based on changes to pointer position
+  			let aspectRatio = thisObj.dragStartWidth / thisObj.dragStartHeight;
+  			newWidth = thisObj.dragStartWidth + (e.pageX - thisObj.startMouseX);
+  			if ('transcript' === which) {
+  				newHeight = thisObj.dragStartHeight + (e.pageY - thisObj.startMouseY);
+  			} else {
+  				newHeight = thisObj.dragStartHeight + ((e.pageX - thisObj.startMouseX) / aspectRatio);
+  			}
+  			thisObj.resizeObject(which, newWidth, newHeight);
+  		});
+  		$(window).on('pointerup.ableResize pointercancel.ableResize', function (e) {
+  			if (!thisObj.resizing) {
+  				return;
+  			}
+  			if (typeof thisObj.resizePointerId !== 'undefined' && e.pointerId !== thisObj.resizePointerId) {
+  				return;
+  			}
+  			thisObj.endResize(which);
   		});
 
   		return false;
   	};
 
-  	AblePlayer.prototype.endResize = function(which) {
+  	AblePlayer.prototype.endResize = function (which) {
 
   		var $windowButton;
 
@@ -8325,24 +9484,24 @@
   			$windowButton = this.$signPopupButton;
   		}
 
-  		$(document).off('mousemove mouseup touchmove touchup');
+  		$(window).off('.ableResize');
   		this.$activeWindow.off('keydown');
   		$windowButton.show().trigger('focus');
   		this.resizing = false;
   		this.$activeWindow.removeClass('able-resize');
+  		this.resizePointerId = undefined;
 
   		// save final width and height of dragged element
   		this.updatePreferences(which);
 
-  		// Booleans for preventing stray events
-  		this.windowMenuClickRegistered = false;
+  		// Boolean for preventing stray click events
   		this.finishingDrag = true;
 
   		// finishingDrag should e reset after window click event,
-  		// which is triggered automatically after mouseup
+  		// which is triggered automatically after pointerup
   		// However, in case that's not reliable in some browsers
   		// need to ensure this gets cancelled
-  		setTimeout(function() {
+  		setTimeout(function () {
   			this.finishingDrag = false;
   		}, 100);
   	};
@@ -8542,9 +9701,10 @@
   			this.okToPlay = false;
   		}
   		this.refreshControls();
-  		if (this.$focusedElement) {
+  		if (this.focusedElement) {
+  			console.log( this.focusedElement );
   			this.restoreFocus();
-  			this.$focusedElement = null;
+  			this.focusedElement = null;
   			this.activeMedia = null;
   		}
   	};
@@ -8570,15 +9730,16 @@
   		// but this function finds a match in the new player
   		// and places focus there
 
-  		var classList, $mediaParent;
+  		var classList, mediaParent;
 
-  		if ( this.$focusedElement && null !== this.activeMedia ) {
-  			$mediaParent = $( '#' + this.activeMedia ).closest( '.able' );
-  			if ( (this.$focusedElement).attr('role') === 'button' ) {
-  				classList = this.$focusedElement.attr("class").split(/\s+/);
-  				$.each(classList, function(index, item) {
+  		if ( this.focusedElement && null !== this.activeMedia ) {
+  			mediaParent = document.getElementById(this.activeMedia).closest( '.able' );
+  			if ( ( this.focusedElement.tagName === 'BUTTON' ) ) {
+  				classList = this.focusedElement.getAttribute('class');
+  				classList = ( typeof classList === 'string' ) ? classList.split(/\s+/) : [];
+  				classList.forEach(function(item) {
   					if (item.substring(0,20) === 'able-button-handler-') {
-  						$mediaParent.find('div.able-controller div.' + item).trigger('focus');
+  						mediaParent.querySelector('div.able-controller .' + item).focus();
   					}
   				});
   			}
@@ -8591,7 +9752,7 @@
   		var thisObj = this;
 
   		// Handle seek bar events.
-  		this.seekBar.seekbarDiv.on('startTracking', function (e) {
+  		this.seekBar.$seekbarDiv.on('startTracking', function (e) {
   			thisObj.pausedBeforeTracking = thisObj.paused;
   			thisObj.pauseMedia();
   		}).on('tracking', function (e, position) {
@@ -8618,7 +9779,7 @@
 
   	AblePlayer.prototype.onClickPlayerButton = function (el) {
   		var whichButton, prefsPopup;
-  		whichButton = this.getButtonNameFromClass($(el).attr('class'));
+  		whichButton = this.getButtonNameFromClass(el.getAttribute('class'));
   		switch ( whichButton ) {
   			case 'play':
   				this.clickedPlay = true;
@@ -8677,20 +9838,20 @@
   				}
   				break;
   			case 'preferences':
-  				if ($(el).attr('data-prefs-popup') === 'menu') {
+  				if (el.dataset.prefsPopup === 'menu') {
   					this.handlePrefsClick();
   				} else {
   					this.showingPrefsDialog = true; // stopgap
   					this.closePopups();
-  					prefsPopup = $(el).attr('data-prefs-popup');
+  					prefsPopup = el.dataset.prefsPopup;
   					if (prefsPopup === 'keyboard') {
-  						this.keyboardPrefsDialog.show();
+  						this.showPrefsDialog('keyboard');
   					} else if (prefsPopup === 'captions') {
-  						this.captionPrefsDialog.show();
+  						this.showPrefsDialog('captions');
   					} else if (prefsPopup === 'descriptions') {
-  						this.descPrefsDialog.show();
+  						this.showPrefsDialog('descriptions');
   					} else if (prefsPopup === 'transcript') {
-  						this.transcriptPrefsDialog.show();
+  						this.showPrefsDialog('transcript');
   					}
   					this.showingPrefsDialog = false;
   				}
@@ -8730,11 +9891,10 @@
   		// that is likely to need supported keystrokes, including space
   		var activeElement = AblePlayer.getActiveDOMElement();
 
-  		return ($(activeElement).prop('tagName') === 'INPUT') ? false : defaultReturn;
+  		return (activeElement.tagName === 'INPUT') ? false : defaultReturn;
   	};
 
   	AblePlayer.prototype.onPlayerKeyPress = function (e) {
-
   		// handle keystrokes (using DHTML Style Guide recommended key combinations)
   		// https://web.archive.org/web/20130127004544/http://dev.aol.com/dhtml_style_guide/#mediaplayer
   		// Modifier keys Alt + Ctrl are on by default, but can be changed within Preferences
@@ -8746,14 +9906,15 @@
   		// including removal of the "media player" design pattern. There's an issue about that:
   		// https://github.com/w3c/aria-practices/issues/27
 
-  		var key, $thisElement;
+  		var key, $thisElement, activeEl;
 
   		// Convert to lower case.
   		key = e.key;
-  		$thisElement = $(document.activeElement);
+  		activeEl = AblePlayer.getActiveDOMElement();
+  		$thisElement = $(activeEl);
 
   		if (key === 'Escape') {
-  			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0]) && !this.hidingPopup) {
+  			if (this.$transcriptArea && $.contains(this.$transcriptArea[0],$thisElement[0])) {
   				// This element is part of transcript area.
   				this.handleTranscriptToggle();
   				return false;
@@ -8766,10 +9927,10 @@
   		// Only use keypress to control player if focus is NOT on a form field or contenteditable element
   		// (or a textarea element with player in stenoMode)
   		if (!(
-  			$(':focus').is('[contenteditable]') ||
-  			$(':focus').is('input') ||
-  			($(':focus').is('textarea') && !this.stenoMode) ||
-  			$(':focus').is('select') ||
+  			$(activeEl).is('[contenteditable]') ||
+  			$(activeEl).is('input') ||
+  			($(activeEl).is('textarea') && !this.stenoMode) ||
+  			$(activeEl).is('select') ||
   			e.target.hasAttribute('contenteditable') ||
   			e.target.tagName === 'INPUT' ||
   			(e.target.tagName === 'TEXTAREA' && !this.stenoMode) ||
@@ -8779,16 +9940,7 @@
   				this.closePopups();
   				this.$tooltipDiv.hide();
   				this.seekBar.hideSliderTooltips();
-  			} else if (key === ' ') {
-  				// disable spacebar support for play/pause toggle as of 4.2.10
-  				// spacebar should not be handled everywhere on the page, since users use that to scroll the page
-  				// when the player has focus, most controls are buttons so spacebar should be used to trigger the buttons
-  				if ($thisElement.attr('role') === 'button') {
-  					// register a click on this element
-  					e.preventDefault();
-  					$thisElement.trigger( 'click' );
-  				}
-  			} else if ( key === 'p' ) {
+  			} else if (key === ' ') ; else if ( key === 'p' ) {
   				if (this.usingModifierKeys(e)) {
   					e.preventDefault();
   					this.handlePlay();
@@ -8849,11 +10001,11 @@
   					this.handlePrefsClick();
   				}
   			} else if (key === 'Enter') {
-  				if ($thisElement.attr('role') === 'button' || $thisElement.prop('tagName') === 'SPAN') {
+  				if ( $thisElement.is('span') ) {
   					// register a click on this element
   					// if it's a transcript span the transcript span click handler will take over
   					$thisElement.trigger( 'click' );
-  				} else if ($thisElement.prop('tagName') === 'LI') {
+  				} else if ($thisElement.is('li')) {
   					$thisElement.trigger( 'click' );
   				}
   			}
@@ -9067,6 +10219,21 @@
   			thisObj.resizePlayer();
   		});
 
+  		// If sources are provided for both landscape and portrait orientations,
+  		// refresh sources when the device orientation changes.
+  		if (this.mediaType === 'video' && this.hasOrientationSources()) {
+  			var orientationMediaQuery = window.matchMedia('(orientation: portrait)');
+  			var handleOrientationChange = function () {
+  				thisObj.refreshSourcesOnOrientationChange();
+  			};
+  			if (typeof orientationMediaQuery.addEventListener === 'function') {
+  				orientationMediaQuery.addEventListener('change', handleOrientationChange);
+  			} else if (typeof orientationMediaQuery.addListener === 'function') {
+  				// Safari < 14
+  				orientationMediaQuery.addListener(handleOrientationChange);
+  			}
+  		}
+
   		// Refresh player if it changes from hidden to visible
   		// There is no event triggered by a change in visibility
   		// but MutationObserver works in most browsers (but NOT in IE 10 or earlier)
@@ -9100,7 +10267,7 @@
   		}
 
   		// handle clicks on player buttons
-  		this.$controllerDiv.find('div[role="button"]').on('click',function(e){
+  		this.$controllerDiv.find('button').on('click',function(e){
   			e.stopPropagation();
   			thisObj.onClickPlayerButton(this);
   		});
@@ -9298,142 +10465,160 @@
 
   		// returns array of values for creating <svg> tag for specified button
   		// 0 = <svg> viewBox attribute
-  		// 1 = <path> d (description) attribute
-  		// 2 = icon class for font icons
-  		// 3 = img URL for images.
+  		// 1 = Array of <path> d (description) attributes
   		var svg = Array();
 
   		switch (button) {
 
   			case 'play':
   				svg[0] = '0 0 16 20';
-  				svg[1] = 'M0 18.393v-16.429q0-0.29 0.184-0.402t0.441 0.033l14.821 8.237q0.257 0.145 0.257 0.346t-0.257 0.346l-14.821 8.237q-0.257 0.145-0.441 0.033t-0.184-0.402z';
+  				svg[1] = [ 'M0 18.393v-16.429q0-0.29 0.184-0.402t0.441 0.033l14.821 8.237q0.257 0.145 0.257 0.346t-0.257 0.346l-14.821 8.237q-0.257 0.145-0.441 0.033t-0.184-0.402z' ];
   				break;
 
   			case 'pause':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M0 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502zM10 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502z';
+  				svg[1] = [ 'M0 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502zM10 18.036v-15.714q0-0.29 0.212-0.502t0.502-0.212h5.714q0.29 0 0.502 0.212t0.212 0.502v15.714q0 0.29-0.212 0.502t-0.502 0.212h-5.714q-0.29 0-0.502-0.212t-0.212-0.502z' ];
   				break;
 
   			case 'restart':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M18 8h-6l2.243-2.243c-1.133-1.133-2.64-1.757-4.243-1.757s-3.109 0.624-4.243 1.757c-1.133 1.133-1.757 2.64-1.757 4.243s0.624 3.109 1.757 4.243c1.133 1.133 2.64 1.757 4.243 1.757s3.109-0.624 4.243-1.757c0.095-0.095 0.185-0.192 0.273-0.292l1.505 1.317c-1.466 1.674-3.62 2.732-6.020 2.732-4.418 0-8-3.582-8-8s3.582-8 8-8c2.209 0 4.209 0.896 5.656 2.344l2.344-2.344v6z';
+  				svg[1] = [ 'M18 8h-6l2.243-2.243c-1.133-1.133-2.64-1.757-4.243-1.757s-3.109 0.624-4.243 1.757c-1.133 1.133-1.757 2.64-1.757 4.243s0.624 3.109 1.757 4.243c1.133 1.133 2.64 1.757 4.243 1.757s3.109-0.624 4.243-1.757c0.095-0.095 0.185-0.192 0.273-0.292l1.505 1.317c-1.466 1.674-3.62 2.732-6.020 2.732-4.418 0-8-3.582-8-8s3.582-8 8-8c2.209 0 4.209 0.896 5.656 2.344l2.344-2.344v6z' ];
   				break;
 
   			case 'rewind':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M11.25 3.125v6.25l6.25-6.25v13.75l-6.25-6.25v6.25l-6.875-6.875z';
+  				svg[1] = [ 'M11.25 3.125v6.25l6.25-6.25v13.75l-6.25-6.25v6.25l-6.875-6.875z' ];
   				break;
 
   			case 'forward':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M10 16.875v-6.25l-6.25 6.25v-13.75l6.25 6.25v-6.25l6.875 6.875z';
+  				svg[1] = [ 'M10 16.875v-6.25l-6.25 6.25v-13.75l6.25 6.25v-6.25l6.875 6.875z' ];
   				break;
 
   			case 'previous':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M5 17.5v-15h2.5v6.875l6.25-6.25v13.75l-6.25-6.25v6.875z';
+  				svg[1] = [ 'M5 17.5v-15h2.5v6.875l6.25-6.25v13.75l-6.25-6.25v6.875z' ];
   				break;
 
   			case 'next':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M15 2.5v15h-2.5v-6.875l-6.25 6.25v-13.75l6.25 6.25v-6.875z';
+  				svg[1] = [ 'M15 2.5v15h-2.5v-6.875l-6.25 6.25v-13.75l6.25 6.25v-6.875z' ];
   				break;
 
   			case 'slower':
   				svg[0] = '0 0 11 20';
-  				svg[1] = 'M0 7.321q0-0.29 0.212-0.502t0.502-0.212h10q0.29 0 0.502 0.212t0.212 0.502-0.212 0.502l-5 5q-0.212 0.212-0.502 0.212t-0.502-0.212l-5-5q-0.212-0.212-0.212-0.502z';
+  				svg[1] = [ 'M0 7.321q0-0.29 0.212-0.502t0.502-0.212h10q0.29 0 0.502 0.212t0.212 0.502-0.212 0.502l-5 5q-0.212 0.212-0.502 0.212t-0.502-0.212l-5-5q-0.212-0.212-0.212-0.502z' ];
   				break;
 
   			case 'faster':
   				svg[0] = '0 0 11 20';
-  				svg[1] = 'M0 12.411q0-0.29 0.212-0.502l5-5q0.212-0.212 0.502-0.212t0.502 0.212l5 5q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-10q-0.29 0-0.502-0.212t-0.212-0.502z';
+  				svg[1] = [ 'M0 12.411q0-0.29 0.212-0.502l5-5q0.212-0.212 0.502-0.212t0.502 0.212l5 5q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-10q-0.29 0-0.502-0.212t-0.212-0.502z' ];
   				break;
 
   			case 'turtle':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M17.212 3.846c-0.281-0.014-0.549 0.025-0.817 0.144-1.218 0.542-1.662 2.708-2.163 3.942-1.207 2.972-7.090 4.619-11.755 5.216-0.887 0.114-1.749 0.74-2.428 1.466 0.82-0.284 2.126-0.297 2.74 0.144 0.007 0.488-0.376 1.062-0.625 1.37-0.404 0.5-0.398 0.793 0.12 0.793 0.473 0 0.752 0.007 1.635 0 0.393-0.003 0.618-0.16 1.49-1.49 3.592 0.718 5.986-0.264 5.986-0.264s0.407 1.755 1.418 1.755h1.49c0.633 0 0.667-0.331 0.625-0.433-0.448-1.082-0.68-1.873-0.769-2.5-0.263-1.857 0.657-3.836 2.524-5.457 0.585 0.986 2.253 0.845 2.909-0.096s0.446-2.268-0.192-3.221c-0.49-0.732-1.345-1.327-2.188-1.37zM8.221 4.663c-0.722-0.016-1.536 0.111-2.5 0.409-4.211 1.302-4.177 4.951-3.51 5.745 0 0-0.955 0.479-0.409 1.274 0.448 0.652 3.139 0.191 5.409-0.529s4.226-1.793 5.312-2.692c0.948-0.785 0.551-2.106-0.505-1.947-0.494-0.98-1.632-2.212-3.798-2.26zM18.846 5.962c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577z';
+  				svg[1] = [ 'M17.212 3.846c-0.281-0.014-0.549 0.025-0.817 0.144-1.218 0.542-1.662 2.708-2.163 3.942-1.207 2.972-7.090 4.619-11.755 5.216-0.887 0.114-1.749 0.74-2.428 1.466 0.82-0.284 2.126-0.297 2.74 0.144 0.007 0.488-0.376 1.062-0.625 1.37-0.404 0.5-0.398 0.793 0.12 0.793 0.473 0 0.752 0.007 1.635 0 0.393-0.003 0.618-0.16 1.49-1.49 3.592 0.718 5.986-0.264 5.986-0.264s0.407 1.755 1.418 1.755h1.49c0.633 0 0.667-0.331 0.625-0.433-0.448-1.082-0.68-1.873-0.769-2.5-0.263-1.857 0.657-3.836 2.524-5.457 0.585 0.986 2.253 0.845 2.909-0.096s0.446-2.268-0.192-3.221c-0.49-0.732-1.345-1.327-2.188-1.37zM8.221 4.663c-0.722-0.016-1.536 0.111-2.5 0.409-4.211 1.302-4.177 4.951-3.51 5.745 0 0-0.955 0.479-0.409 1.274 0.448 0.652 3.139 0.191 5.409-0.529s4.226-1.793 5.312-2.692c0.948-0.785 0.551-2.106-0.505-1.947-0.494-0.98-1.632-2.212-3.798-2.26zM18.846 5.962c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577z' ];
   				break;
 
   			case 'rabbit':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M10.817 0c-2.248 0-1.586 0.525-1.154 0.505 1.551-0.072 5.199 0.044 6.851 2.428 0 0-1.022-2.933-5.697-2.933zM10.529 0.769c-2.572 0-2.837 0.51-2.837 1.106 0 0.545 1.526 0.836 2.524 0.697 2.778-0.386 4.231-0.12 5.264 0.865-1.010 0.779-0.75 1.401-1.274 1.851-1.093 0.941-2.643-0.673-4.976-0.673-2.496 0-4.712 1.92-4.712 4.76-0.157-0.537-0.769-0.913-1.442-0.913-0.974 0-1.514 0.637-1.514 1.49 0 0.769 1.13 1.791 2.861 0.938 0.499 1.208 2.265 1.364 2.452 1.418 0.538 0.154 1.875 0.098 1.875 0.865 0 0.794-1.034 1.094-1.034 1.707 0 1.070 1.758 0.873 2.284 1.034 1.683 0.517 2.103 1.214 2.788 2.212 0.771 1.122 2.572 1.408 2.572 0.625 0-3.185-4.413-4.126-4.399-4.135 0.608-0.382 2.139-1.397 2.139-3.534 0-1.295-0.703-2.256-1.755-2.861 1.256 0.094 2.572 1.205 2.572 2.74 0 1.877-0.653 2.823-0.769 2.957 1.975-1.158 3.193-3.91 3.029-6.37 0.61 0.401 1.27 0.577 1.971 0.625 0.751 0.052 1.475-0.225 1.635-0.529 0.38-0.723 0.162-2.321-0.12-2.837-0.763-1.392-2.236-1.73-3.606-1.683-1.202-1.671-3.812-2.356-5.529-2.356zM1.37 3.077l-0.553 1.538h3.726c0.521-0.576 1.541-1.207 2.284-1.538h-5.457zM18.846 5.192c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577zM0.553 5.385l-0.553 1.538h3.197c0.26-0.824 0.586-1.328 0.769-1.538h-3.413z';
+  				svg[1] = [ 'M10.817 0c-2.248 0-1.586 0.525-1.154 0.505 1.551-0.072 5.199 0.044 6.851 2.428 0 0-1.022-2.933-5.697-2.933zM10.529 0.769c-2.572 0-2.837 0.51-2.837 1.106 0 0.545 1.526 0.836 2.524 0.697 2.778-0.386 4.231-0.12 5.264 0.865-1.010 0.779-0.75 1.401-1.274 1.851-1.093 0.941-2.643-0.673-4.976-0.673-2.496 0-4.712 1.92-4.712 4.76-0.157-0.537-0.769-0.913-1.442-0.913-0.974 0-1.514 0.637-1.514 1.49 0 0.769 1.13 1.791 2.861 0.938 0.499 1.208 2.265 1.364 2.452 1.418 0.538 0.154 1.875 0.098 1.875 0.865 0 0.794-1.034 1.094-1.034 1.707 0 1.070 1.758 0.873 2.284 1.034 1.683 0.517 2.103 1.214 2.788 2.212 0.771 1.122 2.572 1.408 2.572 0.625 0-3.185-4.413-4.126-4.399-4.135 0.608-0.382 2.139-1.397 2.139-3.534 0-1.295-0.703-2.256-1.755-2.861 1.256 0.094 2.572 1.205 2.572 2.74 0 1.877-0.653 2.823-0.769 2.957 1.975-1.158 3.193-3.91 3.029-6.37 0.61 0.401 1.27 0.577 1.971 0.625 0.751 0.052 1.475-0.225 1.635-0.529 0.38-0.723 0.162-2.321-0.12-2.837-0.763-1.392-2.236-1.73-3.606-1.683-1.202-1.671-3.812-2.356-5.529-2.356zM1.37 3.077l-0.553 1.538h3.726c0.521-0.576 1.541-1.207 2.284-1.538h-5.457zM18.846 5.192c0.325 0 0.577 0.252 0.577 0.577s-0.252 0.577-0.577 0.577c-0.325 0-0.577-0.252-0.577-0.577s0.252-0.577 0.577-0.577zM0.553 5.385l-0.553 1.538h3.197c0.26-0.824 0.586-1.328 0.769-1.538h-3.413z' ];
   				break;
 
   			case 'ellipsis':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M10.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2zM3.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.986 2.199-2.2s-0.984-2.2-2.199-2.2zM17.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2z';
+  				svg[1] = [ 'M10.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2zM3.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.986 2.199-2.2s-0.984-2.2-2.199-2.2zM17.001 7.8c-1.215 0-2.201 0.985-2.201 2.2s0.986 2.2 2.201 2.2c1.215 0 2.199-0.985 2.199-2.2s-0.984-2.2-2.199-2.2z' ];
   				break;
 
   			case 'pipe':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M10.15 0.179h0.623c0.069 0 0.127 0.114 0.127 0.253v19.494c0 0.139-0.057 0.253-0.127 0.253h-1.247c-0.069 0-0.126-0.114-0.126-0.253v-19.494c0-0.139 0.057-0.253 0.126-0.253h0.623z';
+  				svg[1] = [ 'M10.15 0.179h0.623c0.069 0 0.127 0.114 0.127 0.253v19.494c0 0.139-0.057 0.253-0.127 0.253h-1.247c-0.069 0-0.126-0.114-0.126-0.253v-19.494c0-0.139 0.057-0.253 0.126-0.253h0.623z' ];
   				break;
 
   			case 'captions':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z';
+  				svg[1] = [ 'M0.033 3.624h19.933v12.956h-19.933v-12.956zM18.098 10.045c-0.025-2.264-0.124-3.251-0.743-3.948-0.112-0.151-0.322-0.236-0.496-0.344-0.606-0.386-3.465-0.526-6.782-0.526s-6.313 0.14-6.907 0.526c-0.185 0.108-0.396 0.193-0.519 0.344-0.607 0.697-0.693 1.684-0.731 3.948 0.037 2.265 0.124 3.252 0.731 3.949 0.124 0.161 0.335 0.236 0.519 0.344 0.594 0.396 3.59 0.526 6.907 0.547 3.317-0.022 6.176-0.151 6.782-0.547 0.174-0.108 0.384-0.183 0.496-0.344 0.619-0.697 0.717-1.684 0.743-3.949v0 0zM9.689 9.281c-0.168-1.77-1.253-2.813-3.196-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.442-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.977zM16.607 9.281c-0.167-1.77-1.252-2.813-3.194-2.813-1.773 0-3.168 1.387-3.168 3.617 0 2.239 1.271 3.636 3.372 3.636 1.676 0 2.851-1.071 3.035-2.852h-2.003c-0.079 0.661-0.397 1.168-1.068 1.168-1.059 0-1.253-0.91-1.253-1.876 0-1.33 0.441-2.010 1.174-2.010 0.653 0 1.068 0.412 1.13 1.129h1.976z' ];
   				break;
 
   			case 'descriptions':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M17.623 3.57h-1.555c1.754 1.736 2.763 4.106 2.763 6.572 0 2.191-0.788 4.286-2.189 5.943h1.484c1.247-1.704 1.945-3.792 1.945-5.943-0-2.418-0.886-4.754-2.447-6.572v0zM14.449 3.57h-1.55c1.749 1.736 2.757 4.106 2.757 6.572 0 2.191-0.788 4.286-2.187 5.943h1.476c1.258-1.704 1.951-3.792 1.951-5.943-0-2.418-0.884-4.754-2.447-6.572v0zM11.269 3.57h-1.542c1.752 1.736 2.752 4.106 2.752 6.572 0 2.191-0.791 4.286-2.181 5.943h1.473c1.258-1.704 1.945-3.792 1.945-5.943 0-2.418-0.876-4.754-2.447-6.572v0zM10.24 9.857c0 3.459-2.826 6.265-6.303 6.265v0.011h-3.867v-12.555h3.896c3.477 0 6.274 2.806 6.274 6.279v0zM6.944 9.857c0-1.842-1.492-3.338-3.349-3.338h-0.876v6.686h0.876c1.858 0 3.349-1.498 3.349-3.348v0z';
+  				svg[1] = [ 'M17.623 3.57h-1.555c1.754 1.736 2.763 4.106 2.763 6.572 0 2.191-0.788 4.286-2.189 5.943h1.484c1.247-1.704 1.945-3.792 1.945-5.943-0-2.418-0.886-4.754-2.447-6.572v0zM14.449 3.57h-1.55c1.749 1.736 2.757 4.106 2.757 6.572 0 2.191-0.788 4.286-2.187 5.943h1.476c1.258-1.704 1.951-3.792 1.951-5.943-0-2.418-0.884-4.754-2.447-6.572v0zM11.269 3.57h-1.542c1.752 1.736 2.752 4.106 2.752 6.572 0 2.191-0.791 4.286-2.181 5.943h1.473c1.258-1.704 1.945-3.792 1.945-5.943 0-2.418-0.876-4.754-2.447-6.572v0zM10.24 9.857c0 3.459-2.826 6.265-6.303 6.265v0.011h-3.867v-12.555h3.896c3.477 0 6.274 2.806 6.274 6.279v0zM6.944 9.857c0-1.842-1.492-3.338-3.349-3.338h-0.876v6.686h0.876c1.858 0 3.349-1.498 3.349-3.348v0z' ];
   				break;
 
   			case 'sign':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M10.954 10.307c0.378 0.302 0.569 1.202 0.564 1.193 0.697 0.221 1.136 0.682 1.136 0.682 1.070-0.596 1.094-0.326 1.558-0.682 0.383-0.263 0.366-0.344 0.567-1.048 0.187-0.572-0.476-0.518-1.021-1.558-0.95 0.358-1.463 0.196-1.784 0.167-0.145-0.020-0.12 0.562-1.021 1.247zM14.409 17.196c-0.133 0.182-0.196 0.218-0.363 0.454-0.28 0.361 0.076 0.906 0.253 0.82 0.206-0.076 0.341-0.488 0.567-0.623 0.115-0.061 0.422-0.513 0.709-0.82 0.211-0.238 0.363-0.344 0.564-0.594 0.341-0.422 0.412-0.744 0.709-1.193 0.184-0.236 0.312-0.307 0.481-0.594 0.886-1.679 0.628-2.432 1.475-3.629 0.26-0.353 0.552-0.442 0.964-0.653 0.383-2.793-0.888-4.356-0.879-4.361-1.067 0.623-1.644 0.879-2.751 0.82-0.417-0.005-0.636-0.182-1.048-0.145-0.385 0.015-0.582 0.159-0.964 0.29-0.589 0.182-0.91 0.344-1.529 0.535-0.393 0.11-0.643 0.115-1.050 0.255-0.348 0.147-0.182 0.029-0.427 0.312-0.317 0.348-0.238 0.623-0.535 1.222-0.371 0.785-0.326 0.891-0.115 0.987-0.14 0.402-0.174 0.672-0.14 1.107 0.039 0.331-0.101 0.562 0.255 0.825 0.483 0.361 1.499 1.205 1.757 1.217 0.39-0.012 1.521 0.029 2.096-0.368 0.13-0.081 0.167-0.162 0.056 0.145-0.022 0.037-1.433 1.136-1.585 1.131-1.794 0.056-1.193 0.157-1.303 0.115-0.091 0-0.955-1.055-1.477-0.682-0.196 0.12-0.287 0.236-0.363 0.452 0.066 0.137 0.383 0.358 0.675 0.54 0.422 0.27 0.461 0.552 0.881 0.653 0.513 0.115 1.060 0.039 1.387 0.081 0.125 0.034 1.256-0.297 1.961-0.675 0.65-0.336-0.898 0.648-1.276 1.131-1.141 0.358-0.82 0.373-1.362 0.483-0.503 0.115-0.479 0.086-0.822 0.196-0.356 0.086-0.648 0.572-0.312 0.825 0.201 0.167 0.827-0.066 1.445-0.086 0.275-0.005 1.391-0.518 1.644-0.653 0.633-0.339 1.099-0.81 1.472-1.077 0.518-0.361-0.584 0.991-1.050 1.558zM8.855 9.799c-0.378-0.312-0.569-1.212-0.564-1.217-0.697-0.206-1.136-0.667-1.136-0.653-1.070 0.582-1.099 0.312-1.558 0.653-0.388 0.277-0.366 0.363-0.567 1.045-0.187 0.594 0.471 0.535 1.021 1.561 0.95-0.344 1.463-0.182 1.784-0.142 0.145 0.010 0.12-0.572 1.021-1.247zM5.4 2.911c0.133-0.191 0.196-0.228 0.368-0.454 0.27-0.371-0.081-0.915-0.253-0.849-0.211 0.096-0.346 0.508-0.599 0.653-0.093 0.052-0.4 0.503-0.682 0.82-0.211 0.228-0.363 0.334-0.564 0.599-0.346 0.407-0.412 0.729-0.709 1.161-0.184 0.258-0.317 0.324-0.481 0.621-0.886 1.669-0.631 2.422-1.475 3.6-0.26 0.38-0.552 0.461-0.964 0.682-0.383 2.788 0.883 4.346 0.879 4.336 1.068-0.609 1.639-0.861 2.751-0.825 0.417 0.025 0.636 0.201 1.048 0.174 0.385-0.025 0.582-0.169 0.964-0.285 0.589-0.196 0.91-0.358 1.499-0.54 0.422-0.12 0.672-0.125 1.080-0.285 0.348-0.128 0.182-0.010 0.427-0.282 0.312-0.358 0.238-0.633 0.508-1.217 0.398-0.8 0.353-0.906 0.142-0.991 0.135-0.412 0.174-0.677 0.14-1.107-0.044-0.336 0.101-0.572-0.255-0.82-0.483-0.375-1.499-1.22-1.752-1.222-0.395 0.002-1.526-0.039-2.101 0.339-0.13 0.101-0.167 0.182-0.056-0.11 0.022-0.052 1.433-1.148 1.585-1.163 1.794-0.039 1.193-0.14 1.303-0.088 0.091-0.007 0.955 1.045 1.477 0.682 0.191-0.13 0.287-0.245 0.368-0.452-0.071-0.147-0.388-0.368-0.68-0.537-0.422-0.282-0.464-0.564-0.881-0.655-0.513-0.125-1.065-0.049-1.387-0.11-0.125-0.015-1.256 0.317-1.956 0.68-0.66 0.351 0.893-0.631 1.276-1.136 1.136-0.339 0.81-0.353 1.36-0.479 0.501-0.101 0.476-0.071 0.82-0.172 0.351-0.096 0.648-0.577 0.312-0.849-0.206-0.152-0.827 0.081-1.44 0.086-0.28 0.020-1.396 0.533-1.649 0.677-0.633 0.329-1.099 0.8-1.472 1.048-0.523 0.38 0.584-0.967 1.050-1.529z';
+  				svg[1] = [ 'M10.954 10.307c0.378 0.302 0.569 1.202 0.564 1.193 0.697 0.221 1.136 0.682 1.136 0.682 1.070-0.596 1.094-0.326 1.558-0.682 0.383-0.263 0.366-0.344 0.567-1.048 0.187-0.572-0.476-0.518-1.021-1.558-0.95 0.358-1.463 0.196-1.784 0.167-0.145-0.020-0.12 0.562-1.021 1.247zM14.409 17.196c-0.133 0.182-0.196 0.218-0.363 0.454-0.28 0.361 0.076 0.906 0.253 0.82 0.206-0.076 0.341-0.488 0.567-0.623 0.115-0.061 0.422-0.513 0.709-0.82 0.211-0.238 0.363-0.344 0.564-0.594 0.341-0.422 0.412-0.744 0.709-1.193 0.184-0.236 0.312-0.307 0.481-0.594 0.886-1.679 0.628-2.432 1.475-3.629 0.26-0.353 0.552-0.442 0.964-0.653 0.383-2.793-0.888-4.356-0.879-4.361-1.067 0.623-1.644 0.879-2.751 0.82-0.417-0.005-0.636-0.182-1.048-0.145-0.385 0.015-0.582 0.159-0.964 0.29-0.589 0.182-0.91 0.344-1.529 0.535-0.393 0.11-0.643 0.115-1.050 0.255-0.348 0.147-0.182 0.029-0.427 0.312-0.317 0.348-0.238 0.623-0.535 1.222-0.371 0.785-0.326 0.891-0.115 0.987-0.14 0.402-0.174 0.672-0.14 1.107 0.039 0.331-0.101 0.562 0.255 0.825 0.483 0.361 1.499 1.205 1.757 1.217 0.39-0.012 1.521 0.029 2.096-0.368 0.13-0.081 0.167-0.162 0.056 0.145-0.022 0.037-1.433 1.136-1.585 1.131-1.794 0.056-1.193 0.157-1.303 0.115-0.091 0-0.955-1.055-1.477-0.682-0.196 0.12-0.287 0.236-0.363 0.452 0.066 0.137 0.383 0.358 0.675 0.54 0.422 0.27 0.461 0.552 0.881 0.653 0.513 0.115 1.060 0.039 1.387 0.081 0.125 0.034 1.256-0.297 1.961-0.675 0.65-0.336-0.898 0.648-1.276 1.131-1.141 0.358-0.82 0.373-1.362 0.483-0.503 0.115-0.479 0.086-0.822 0.196-0.356 0.086-0.648 0.572-0.312 0.825 0.201 0.167 0.827-0.066 1.445-0.086 0.275-0.005 1.391-0.518 1.644-0.653 0.633-0.339 1.099-0.81 1.472-1.077 0.518-0.361-0.584 0.991-1.050 1.558zM8.855 9.799c-0.378-0.312-0.569-1.212-0.564-1.217-0.697-0.206-1.136-0.667-1.136-0.653-1.070 0.582-1.099 0.312-1.558 0.653-0.388 0.277-0.366 0.363-0.567 1.045-0.187 0.594 0.471 0.535 1.021 1.561 0.95-0.344 1.463-0.182 1.784-0.142 0.145 0.010 0.12-0.572 1.021-1.247zM5.4 2.911c0.133-0.191 0.196-0.228 0.368-0.454 0.27-0.371-0.081-0.915-0.253-0.849-0.211 0.096-0.346 0.508-0.599 0.653-0.093 0.052-0.4 0.503-0.682 0.82-0.211 0.228-0.363 0.334-0.564 0.599-0.346 0.407-0.412 0.729-0.709 1.161-0.184 0.258-0.317 0.324-0.481 0.621-0.886 1.669-0.631 2.422-1.475 3.6-0.26 0.38-0.552 0.461-0.964 0.682-0.383 2.788 0.883 4.346 0.879 4.336 1.068-0.609 1.639-0.861 2.751-0.825 0.417 0.025 0.636 0.201 1.048 0.174 0.385-0.025 0.582-0.169 0.964-0.285 0.589-0.196 0.91-0.358 1.499-0.54 0.422-0.12 0.672-0.125 1.080-0.285 0.348-0.128 0.182-0.010 0.427-0.282 0.312-0.358 0.238-0.633 0.508-1.217 0.398-0.8 0.353-0.906 0.142-0.991 0.135-0.412 0.174-0.677 0.14-1.107-0.044-0.336 0.101-0.572-0.255-0.82-0.483-0.375-1.499-1.22-1.752-1.222-0.395 0.002-1.526-0.039-2.101 0.339-0.13 0.101-0.167 0.182-0.056-0.11 0.022-0.052 1.433-1.148 1.585-1.163 1.794-0.039 1.193-0.14 1.303-0.088 0.091-0.007 0.955 1.045 1.477 0.682 0.191-0.13 0.287-0.245 0.368-0.452-0.071-0.147-0.388-0.368-0.68-0.537-0.422-0.282-0.464-0.564-0.881-0.655-0.513-0.125-1.065-0.049-1.387-0.11-0.125-0.015-1.256 0.317-1.956 0.68-0.66 0.351 0.893-0.631 1.276-1.136 1.136-0.339 0.81-0.353 1.36-0.479 0.501-0.101 0.476-0.071 0.82-0.172 0.351-0.096 0.648-0.577 0.312-0.849-0.206-0.152-0.827 0.081-1.44 0.086-0.28 0.020-1.396 0.533-1.649 0.677-0.633 0.329-1.099 0.8-1.472 1.048-0.523 0.38 0.584-0.967 1.050-1.529z' ];
   				break;
 
   			case 'mute':
   			case 'volume-mute':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z';
+  				svg[1] = [ 'M7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714zM18.75 12.093v1.657h-1.657l-2.093-2.093-2.093 2.093h-1.657v-1.657l2.093-2.093-2.093-2.093v-1.657h1.657l2.093 2.093 2.093-2.093h1.657v1.657l-2.093 2.093z' ];
   				break;
 
   			case 'volume-soft':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
+  				svg[1] = [ 'M10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z' ];
   				break;
 
   			case 'volume-medium':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
+  				svg[1] = [ 'M14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z' ];
   				break;
 
   			case 'volume-loud':
   				svg[0] = '0 0 21 20';
-  				svg[1] = 'M17.384 18.009c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.712-1.712 2.654-3.988 2.654-6.408s-0.943-4.696-2.654-6.408c-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.066 2.066 3.204 4.813 3.204 7.734s-1.138 5.668-3.204 7.734c-0.183 0.183-0.423 0.275-0.663 0.275zM14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z';
+  				svg[1] = [ 'M17.384 18.009c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.712-1.712 2.654-3.988 2.654-6.408s-0.943-4.696-2.654-6.408c-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.066 2.066 3.204 4.813 3.204 7.734s-1.138 5.668-3.204 7.734c-0.183 0.183-0.423 0.275-0.663 0.275zM14.053 16.241c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 2.559-2.559 2.559-6.722 0-9.281-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c1.594 1.594 2.471 3.712 2.471 5.966s-0.878 4.373-2.471 5.966c-0.183 0.183-0.423 0.275-0.663 0.275zM10.723 14.473c-0.24 0-0.48-0.092-0.663-0.275-0.366-0.366-0.366-0.96 0-1.326 1.584-1.584 1.584-4.161 0-5.745-0.366-0.366-0.366-0.96 0-1.326s0.96-0.366 1.326 0c2.315 2.315 2.315 6.082 0 8.397-0.183 0.183-0.423 0.275-0.663 0.275zM7.839 1.536c0.501-0.501 0.911-0.331 0.911 0.378v16.172c0 0.709-0.41 0.879-0.911 0.378l-4.714-4.713h-3.125v-7.5h3.125l4.714-4.714z' ];
   				break;
 
   			case 'chapters':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M5 2.5v17.5l6.25-6.25 6.25 6.25v-17.5zM15 0h-12.5v17.5l1.25-1.25v-15h11.25z';
+  				svg[1] = [ 'M5 2.5v17.5l6.25-6.25 6.25 6.25v-17.5zM15 0h-12.5v17.5l1.25-1.25v-15h11.25z' ];
   				break;
 
   			case 'transcript':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M0 19.107v-17.857q0-0.446 0.313-0.759t0.759-0.313h8.929v6.071q0 0.446 0.313 0.759t0.759 0.313h6.071v11.786q0 0.446-0.313 0.759t-0.759 0.312h-15q-0.446 0-0.759-0.313t-0.313-0.759zM4.286 15.536q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 12.679q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 9.821q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM11.429 5.893v-5.268q0.246 0.156 0.402 0.313l4.554 4.554q0.156 0.156 0.313 0.402h-5.268z';
+  				svg[1] = [ 'M0 19.107v-17.857q0-0.446 0.313-0.759t0.759-0.313h8.929v6.071q0 0.446 0.313 0.759t0.759 0.313h6.071v11.786q0 0.446-0.313 0.759t-0.759 0.312h-15q-0.446 0-0.759-0.313t-0.313-0.759zM4.286 15.536q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 12.679q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM4.286 9.821q0 0.156 0.1 0.257t0.257 0.1h7.857q0.156 0 0.257-0.1t0.1-0.257v-0.714q0-0.156-0.1-0.257t-0.257-0.1h-7.857q-0.156 0-0.257 0.1t-0.1 0.257v0.714zM11.429 5.893v-5.268q0.246 0.156 0.402 0.313l4.554 4.554q0.156 0.156 0.313 0.402h-5.268z' ];
   				break;
 
   			case 'preferences':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M18.238 11.919c-1.049-1.817-0.418-4.147 1.409-5.205l-1.965-3.404c-0.562 0.329-1.214 0.518-1.911 0.518-2.1 0-3.803-1.714-3.803-3.828h-3.931c0.005 0.653-0.158 1.314-0.507 1.919-1.049 1.818-3.382 2.436-5.212 1.382l-1.965 3.404c0.566 0.322 1.056 0.793 1.404 1.396 1.048 1.815 0.42 4.139-1.401 5.2l1.965 3.404c0.56-0.326 1.209-0.513 1.902-0.513 2.094 0 3.792 1.703 3.803 3.808h3.931c-0.002-0.646 0.162-1.3 0.507-1.899 1.048-1.815 3.375-2.433 5.203-1.387l1.965-3.404c-0.562-0.322-1.049-0.791-1.395-1.391zM10 14.049c-2.236 0-4.050-1.813-4.050-4.049s1.813-4.049 4.050-4.049 4.049 1.813 4.049 4.049c-0 2.237-1.813 4.049-4.049 4.049z';
+  				svg[1] = [ 'M18.238 11.919c-1.049-1.817-0.418-4.147 1.409-5.205l-1.965-3.404c-0.562 0.329-1.214 0.518-1.911 0.518-2.1 0-3.803-1.714-3.803-3.828h-3.931c0.005 0.653-0.158 1.314-0.507 1.919-1.049 1.818-3.382 2.436-5.212 1.382l-1.965 3.404c0.566 0.322 1.056 0.793 1.404 1.396 1.048 1.815 0.42 4.139-1.401 5.2l1.965 3.404c0.56-0.326 1.209-0.513 1.902-0.513 2.094 0 3.792 1.703 3.803 3.808h3.931c-0.002-0.646 0.162-1.3 0.507-1.899 1.048-1.815 3.375-2.433 5.203-1.387l1.965-3.404c-0.562-0.322-1.049-0.791-1.395-1.391zM10 14.049c-2.236 0-4.050-1.813-4.050-4.049s1.813-4.049 4.050-4.049 4.049 1.813 4.049 4.049c-0 2.237-1.813 4.049-4.049 4.049z' ];
   				break;
 
   			case 'close':
   				svg[0] = '0 0 16 20';
-  				svg[1] = 'M1.228 14.933q0-0.446 0.312-0.759l3.281-3.281-3.281-3.281q-0.313-0.313-0.313-0.759t0.313-0.759l1.518-1.518q0.313-0.313 0.759-0.313t0.759 0.313l3.281 3.281 3.281-3.281q0.313-0.313 0.759-0.313t0.759 0.313l1.518 1.518q0.313 0.313 0.313 0.759t-0.313 0.759l-3.281 3.281 3.281 3.281q0.313 0.313 0.313 0.759t-0.313 0.759l-1.518 1.518q-0.313 0.313-0.759 0.313t-0.759-0.313l-3.281-3.281-3.281 3.281q-0.313 0.313-0.759 0.313t-0.759-0.313l-1.518-1.518q-0.313-0.313-0.313-0.759z';
+  				svg[1] = [ 'M1.228 14.933q0-0.446 0.312-0.759l3.281-3.281-3.281-3.281q-0.313-0.313-0.313-0.759t0.313-0.759l1.518-1.518q0.313-0.313 0.759-0.313t0.759 0.313l3.281 3.281 3.281-3.281q0.313-0.313 0.759-0.313t0.759 0.313l1.518 1.518q0.313 0.313 0.313 0.759t-0.313 0.759l-3.281 3.281 3.281 3.281q0.313 0.313 0.313 0.759t-0.313 0.759l-1.518 1.518q-0.313 0.313-0.759 0.313t-0.759-0.313l-3.281-3.281-3.281 3.281q-0.313 0.313-0.759 0.313t-0.759-0.313l-1.518-1.518q-0.313-0.313-0.313-0.759z' ];
   				break;
 
   			case 'fullscreen-expand':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M0 18.036v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502zM8.717 8.393q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257z';
+  				svg[1] = [ 'M0 18.036v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502zM8.717 8.393q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257z' ];
   				break;
 
   			case 'fullscreen-collapse':
   				svg[0] = '0 0 20 20';
-  				svg[1] = 'M0.145 16.964q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257zM8.571 9.464v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502z';
+  				svg[1] = [ 'M0.145 16.964q0-0.145 0.112-0.257l3.705-3.705-1.607-1.607q-0.212-0.212-0.212-0.502t0.212-0.502 0.502-0.212h5q0.29 0 0.502 0.212t0.212 0.502v5q0 0.29-0.212 0.502t-0.502 0.212-0.502-0.212l-1.607-1.607-3.705 3.705q-0.112 0.112-0.257 0.112t-0.257-0.112l-1.272-1.272q-0.112-0.112-0.112-0.257zM8.571 9.464v-5q0-0.29 0.212-0.502t0.502-0.212 0.502 0.212l1.607 1.607 3.705-3.705q0.112-0.112 0.257-0.112t0.257 0.112l1.272 1.272q0.112 0.112 0.112 0.257t-0.112 0.257l-3.705 3.705 1.607 1.607q0.212 0.212 0.212 0.502t-0.212 0.502-0.502 0.212h-5q-0.29 0-0.502-0.212t-0.212-0.502z' ];
+  				break;
+
+  			case 'drag-handle':
+  				svg[0] = '262.48 487.5 675.03 225';
+  				svg[1] = [
+  					'm900 562.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z',
+  					'm900 712.5h-600c-13.398 0-25.777-7.1484-32.477-18.75-6.6992-11.602-6.6992-25.898 0-37.5 6.6992-11.602 19.078-18.75 32.477-18.75h600c13.398 0 25.777 7.1484 32.477 18.75 6.6992 11.602 6.6992 25.898 0 37.5-6.6992 11.602-19.078 18.75-32.477 18.75z'
+  				];
+  				break;
+
+  			case 'resize-handle':
+  				svg[0] = '0 0 26 26';
+  				svg[1] = [
+  					'M 10.5,24 A 1.5,1.5 0 1 1 13.5,24 A 1.5,1.5 0 1 1 10.5,24',
+  					'M 16.5,24 A 1.5,1.5 0 1 1 19.5,24 A 1.5,1.5 0 1 1 16.5,24',
+  					'M 16.5,18 A 1.5,1.5 0 1 1 19.5,18 A 1.5,1.5 0 1 1 16.5,18',
+  					'M 22.5,12 A 1.5,1.5 0 1 1 25.5,12 A 1.5,1.5 0 1 1 22.5,12',
+  					'M 22.5,24 A 1.5,1.5 0 1 1 25.5,24 A 1.5,1.5 0 1 1 22.5,24',
+  					'M 22.5,18 A 1.5,1.5 0 1 1 25.5,18 A 1.5,1.5 0 1 1 22.5,18'
+  				];
   				break;
   		}
 
@@ -9470,8 +10655,7 @@
   			deferred.reject();
   			return promise;
   		}
-
-  		this.$sources = this.$media.find('source');
+  		this.sources = this.getSources();
 
   		this.player = this.getPlayer();
   		if (!this.player) {
@@ -9518,16 +10702,16 @@
 
   		this.hasPlaylist = false; // will change to true if a matching playlist is found
 
-  		$('.able-playlist').each(function() {
-  			if ($(this).data('player') === thisObj.mediaId) {
+  		document.querySelectorAll('.able-playlist').forEach(function(playlist) {
+  			if (playlist.dataset.player === thisObj.mediaId) {
   				// this is the playlist for the current player
   				thisObj.hasPlaylist = true;
   				// If using an embedded player, we'll replace $playlist with the clone later.
-  				thisObj.$playlist = $(this).find('li');
+  				thisObj.$playlist = $(playlist).find('li');
 
   				// check to see if list item has YouTube as its source
   				// if it does, inject a thumbnail from YouTube
-  				var $youTubeVideos = $(this).find('li[data-youtube-id]');
+  				var $youTubeVideos = $(playlist).find('li[data-youtube-id]');
   				$youTubeVideos.each(function() {
   					var youTubeId = purify.sanitize( $(this).attr('data-youtube-id') );
   					var youTubePoster = thisObj.getYouTubePosterUrl(youTubeId,'120');
@@ -9540,7 +10724,7 @@
 
   				// check to see if list item has Vimeo as its source
   				// if it does, inject a thumbnail from Vimeo
-  				var $vimeoVideos = $(this).find('li[data-vimeo-id]');
+  				var $vimeoVideos = $(playlist).find('li[data-vimeo-id]');
   				$vimeoVideos.each(function() {
   					var vimeoId = $(this).attr('data-vimeo-id');
   					var vimeoPoster = thisObj.getVimeoPosterUrl(vimeoId,'120');
@@ -9552,9 +10736,9 @@
   				});
 
   				// add accessibility to the list markup
-  				$(this).find('li span').attr('aria-hidden','true');
+  				$(playlist).find('li span').attr('aria-hidden','true');
   				thisObj.playlistIndex = 0;
-  				var dataEmbedded = $(this).data('embedded');
+  				var dataEmbedded = $(playlist).data('embedded');
   				// is playlist embedded within player?
   				thisObj.playlistEmbed = (typeof dataEmbedded !== 'undefined' && dataEmbedded !== false) ? true : false;
   			}
@@ -9572,12 +10756,70 @@
   			this.$playlistDom = parent.clone();
   			parent.remove();
   		}
-  		if (this.hasPlaylist && this.$sources.length === 0) {
+  		if (this.hasPlaylist && this.sources.length === 0) {
   			// no source elements were provided. Construct them from the first playlist item
   			this.cuePlaylistItem(0);
-  			// redefine this.$sources now that media contains one or more <source> elements
-  			this.$sources = this.$media.find('source');
+  			// redefine this.sources now that media contains one or more <source> elements
+  			this.sources = this.getSources();
   		}
+  	};
+
+  	/**
+  	 * Filters the <source> elements of the media element based on their media queries.
+  	 * If no sources match the media query, returns the original sources and allows the browser to handle it.
+  	 *
+  	 * @returns {Array} Filtered array of sources.
+  	 */
+  	AblePlayer.prototype.getSources = function () {
+  		let sources = this.media.querySelectorAll('source');
+  		let newSources = Array.from(sources).filter(source => {
+  			const media = source.getAttribute('media');
+  			return (window.matchMedia(media) && window.matchMedia(media).matches);
+  		});
+  		if ( newSources.length === 0 && sources.length > 0 ) {
+  			// If no sources match the media query, return the original sources and allow browser to handle.
+  			if ( this.debug ) {
+  				console.warn('No sources match the media query. Returning original sources.');
+  			}
+  			newSources = sources;
+  		}
+  		// Load the first matching source into the media element.
+  		this.media.src = newSources.length > 0 ? newSources[0].src : '';
+  		this.media.load();
+
+  		return newSources;
+  	};
+
+  	/**
+  	 * Checks whether the media element has <source> elements targeting
+  	 * both landscape and portrait orientations via media queries.
+  	 *
+  	 * @returns {Boolean} True if sources exist for both orientations.
+  	 */
+  	AblePlayer.prototype.hasOrientationSources = function () {
+  		let sources = this.media.querySelectorAll('source[media]');
+  		let hasPortrait = false;
+  		let hasLandscape = false;
+  		Array.from(sources).forEach(source => {
+  			const media = source.getAttribute('media');
+  			if (/orientation:\s*portrait/.test(media)) {
+  				hasPortrait = true;
+  			} else if (/orientation:\s*landscape/.test(media)) {
+  				hasLandscape = true;
+  			}
+  		});
+  		return hasPortrait && hasLandscape;
+  	};
+
+  	// Refreshes <source> elements after an orientation change, resuming playback at the same point.
+  	AblePlayer.prototype.refreshSourcesOnOrientationChange = function () {
+  		if (this.player !== 'html5') {
+  			return;
+  		}
+  		this.swapTime = this.elapsed > 0 ? this.elapsed : 0;
+  		this.okToPlay = this.playing;
+  		this.swappingSrc = true;
+  		this.sources = this.getSources();
   	};
 
   	AblePlayer.prototype.recreatePlayer = function () {
@@ -9596,11 +10838,14 @@
   			return;
   		}
 
-  		var deferred, promise, thisObj, prefsGroups, i;
+  		var deferred, promise, thisObj, initVersion;
 
   		deferred = new this.defer();
   		promise = deferred.promise();
   		thisObj = this;
+  		this.initializationVersion = (this.initializationVersion || 0) + 1;
+  		initVersion = this.initializationVersion;
+  		this.startInitTiming(initVersion);
 
   		this.playerDeleted = false; // reset after deletePlayer()
 
@@ -9619,12 +10864,16 @@
   		this.initSignLanguage();
 
   		this.initPlayer().then(function() {
+  			thisObj.logInitTiming(initVersion, 'initPlayer complete');
 
   			thisObj.getTracks().then(function() {
+  				thisObj.logInitTiming(initVersion, 'getTracks complete');
 
   				thisObj.initDescription().then(function() {
+  					thisObj.logInitTiming(initVersion, 'initDescription complete');
 
   					thisObj.setupTracks().then(function() {
+  						thisObj.logInitTiming(initVersion, 'setupTracks complete');
   						if (thisObj.hasClosedDesc) {
   							if (!thisObj.$descDiv || (thisObj.$descDiv && !($.contains(thisObj.$ableDiv[0], thisObj.$descDiv[0])))) {
   								// descDiv either doesn't exist, or exists in an orphaned state
@@ -9635,13 +10884,16 @@
   						thisObj.initSpeech('init');
 
   						thisObj.setupTranscript().then(function() {
+  							thisObj.logInitTiming(initVersion, 'setupTranscript complete');
 
   							thisObj.initStenoFrame().then(function() {
+  								thisObj.logInitTiming(initVersion, 'initStenoFrame complete');
 
   								if (thisObj.stenoMode && thisObj.$stenoFrame) {
   									thisObj.stenoFrameContents = thisObj.$stenoFrame.contents();
   								}
   								thisObj.getMediaTimes().then(function(mediaTimes) {
+  									thisObj.logInitTiming(initVersion, 'getMediaTimes complete');
 
   									thisObj.duration = mediaTimes['duration'];
   									thisObj.elapsed = mediaTimes['elapsed'];
@@ -9669,16 +10921,16 @@
   									thisObj.addControls();
   									thisObj.addEventListeners();
 
-  									// inject each of the hidden forms that will be accessed from the Preferences popup menu
-  									prefsGroups = thisObj.getPreferencesGroups();
-  									for (i = 0; i < prefsGroups.length; i++) {
-  										thisObj.injectPrefsForm(prefsGroups[i]);
-  									}
+  									// preferences forms are rendered on demand into a shared dialog
   									thisObj.setupPopups();
   									thisObj.updateCaption();
+  									thisObj.logInitTiming(initVersion, 'core UI ready');
   									thisObj.injectVTS();
+  									thisObj.logInitTiming(initVersion, 'vts ready');
   									thisObj.populateChaptersDiv();
+  									thisObj.logInitTiming(initVersion, 'chapters ready');
   									thisObj.showSearchResults();
+  									thisObj.logInitTiming(initVersion, 'search results ready');
 
   									// Go ahead and load media, without user requesting it
   									// Ideally, we would wait until user clicks play, rather than unnecessarily consume their bandwidth
@@ -9693,6 +10945,7 @@
   									// this is the second. Best to pause a bit before executing, to be sure all prior steps are complete
   									setTimeout(function() {
   										thisObj.refreshControls();
+  										thisObj.logInitTiming(initVersion, 'initialization complete');
   										deferred.resolve();
   									},100);
   								});
@@ -9706,6 +10959,34 @@
   			thisObj.provideFallback();
   		});
   		return promise;
+  	};
+
+  	AblePlayer.prototype.getInitTimingNow = function() {
+  		if (typeof window !== 'undefined' && window.performance && typeof window.performance.now === 'function') {
+  			return window.performance.now();
+  		}
+  		return Date.now();
+  	};
+
+  	AblePlayer.prototype.startInitTiming = function(version) {
+  		if (!this.debug) {
+  			return;
+  		}
+  		this.initTiming = this.initTiming || {};
+  		this.initTiming[version] = {
+  			start: this.getInitTimingNow()
+  		};
+  		console.log('[AblePlayer][init v' + version + '] start');
+  	};
+
+  	AblePlayer.prototype.logInitTiming = function(version, label) {
+  		var elapsed, timing;
+  		if (!this.debug || !this.initTiming || !this.initTiming[version]) {
+  			return;
+  		}
+  		timing = this.initTiming[version];
+  		elapsed = this.getInitTimingNow() - timing.start;
+  		console.log('[AblePlayer][init v' + version + '] ' + label + ': ' + elapsed.toFixed(1) + 'ms');
   	};
 
   	AblePlayer.prototype.initPlayer = function () {
@@ -11577,27 +12858,185 @@
   		this.setPrefs(preferences);
   	};
 
-  	AblePlayer.prototype.injectPrefsForm = function (form) {
+  	AblePlayer.prototype.createField = function(options) {
+
+  		var wrapperClass, fieldAttrs, checkboxValue, $wrapper, $label, $field, labelPosition;
+
+  		wrapperClass = options.wrapperClass ? options.wrapperClass + ' ' : '';
+  		fieldAttrs = {};
+  		if (options.id) {
+  			fieldAttrs.id = options.id;
+  		}
+  		if (options.name) {
+  			fieldAttrs.name = options.name;
+  		}
+  		if (options.attrs) {
+  			$.extend(fieldAttrs, options.attrs);
+  		}
+  		labelPosition = options.labelPosition || ((options.type === 'select' || options.type === 'number') ? 'before' : 'after');
+  		checkboxValue = (typeof options.value !== 'undefined') ? options.value : 'true';
+
+  		$wrapper = $('<div>').addClass(wrapperClass + 'able-player-setting');
+  		$label = $('<label>', {
+  			'for': options.id,
+  			text: ' ' + options.label
+  		});
+  		if (options.labelClass) {
+  			$label.addClass(options.labelClass);
+  		}
+
+  		if (options.type === 'select') {
+  			$field = $('<select>', fieldAttrs);
+  		} else if (options.type === 'number') {
+  			fieldAttrs.type = 'number';
+  			if (typeof options.value !== 'undefined') {
+  				fieldAttrs.value = options.value;
+  			}
+  			$field = $('<input>', fieldAttrs);
+  		} else {
+  			fieldAttrs.type = options.type || 'checkbox';
+  			fieldAttrs.value = checkboxValue;
+  			$field = $('<input>', fieldAttrs);
+  			if (options.checked) {
+  				$field.prop('checked', true);
+  			}
+  		}
+  		if (options.fieldClass) {
+  			$field.addClass(options.fieldClass);
+  		}
+
+  		if (labelPosition === 'before') {
+  			$wrapper.append($label, $field);
+  		} else {
+  			$wrapper.append($field, $label);
+  		}
+
+  		return {
+  			wrapper: $wrapper,
+  			label: $label,
+  			field: $field
+  		};
+  	};
+
+  	AblePlayer.prototype.createPreferenceGroup = function(options) {
+
+  		var fieldsetId, legendId, $group, $heading;
+
+  		fieldsetId = this.mediaId + '-prefs-' + options.form;
+  		legendId = fieldsetId + '-legend';
+  		$group = $('<div>', {
+  			id: fieldsetId,
+  			role: 'group'
+  		}).addClass('able-prefs-' + options.form);
+
+  		if (options.heading) {
+  			$heading = $('<h2>', {
+  				id: legendId,
+  				text: options.heading
+  			});
+  			$group.attr('aria-labelledby', legendId).append($heading);
+  		}
+
+  		return {
+  			group: $group,
+  			heading: $heading || null
+  		};
+  	};
+
+  	AblePlayer.prototype.getPreferencesDialog = function () {
+
+  		if (AblePlayer.preferencesDialog) {
+  			return AblePlayer.preferencesDialog;
+  		}
+
+  		var thisObj = this;
+  		var $prefsDiv = $('<div>', {
+  			'class': 'able-prefs-form'
+  		});
+  		$('body').append($prefsDiv);
+
+  		var dialog = new AccessibleDialog(
+  			$prefsDiv,
+  			this.$prefsButton,
+  			this.translate( 'preferences', 'Preferences' ),
+  			this.translate( 'closeButtonLabel', 'Close' )
+  		);
+
+  		$prefsDiv.on('click.ableSharedPrefs', 'button.modalCloseButton', function () {
+  			if (AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner) {
+  				AblePlayer.preferencesDialog.owner.resetPrefsForm();
+  			}
+  		});
+
+  		$prefsDiv.on('keydown.ableSharedPrefs', function (e) {
+  			if (e.key === 'Escape' && AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner) {
+  				AblePlayer.preferencesDialog.owner.resetPrefsForm();
+  			}
+  		});
+
+  		AblePlayer.preferencesDialog = {
+  			modal: $prefsDiv,
+  			dialog: dialog,
+  			owner: thisObj,
+  			form: null
+  		};
+
+  		return AblePlayer.preferencesDialog;
+  	};
+
+  	AblePlayer.prototype.showPrefsDialog = function (form) {
+
+  		var shared = this.getPreferencesDialog();
+  		shared.owner = this;
+  		shared.form = form;
+  		this.injectPrefsForm(form, {
+  			shared: true,
+  			sharedDialog: shared
+  		});
+  		shared.dialog.focusedElementBeforeModal = this.$prefsButton;
+  		shared.dialog.show();
+  	};
+
+  	AblePlayer.prototype.getActivePrefsForm = function () {
+
+  		if (AblePlayer.preferencesDialog && AblePlayer.preferencesDialog.owner === this) {
+  			return AblePlayer.preferencesDialog.modal;
+  		}
+  		return $('body');
+  	};
+
+  	AblePlayer.prototype.injectPrefsForm = function (form, dialogOptions) {
 
   		// Creates a preferences form and injects it.
   		// form is one of the supported forms (groups) defined in getPreferencesGroups()
 
   		var thisObj, available,
   			$prefsDiv, formTitle, introText, $prefsIntro,$prefsIntroP2,p3Text,$prefsIntroP3,i, j,
-  			$fieldset, fieldsetClass, fieldsetId, $legend, legendId, thisPref, $thisDiv, thisClass,
-  			thisId, $thisLabel, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
+  			$fieldset, groupHeading, groupObj, thisPref, $thisDiv, thisClass,
+  			thisId, $thisField, captionsOptions,options,$thisOption,optionValue,optionLang,optionText,
   			changedPref,changedSpan,changedText, currentDescState, prefDescVoice, prefCaptionVoice, $kbHeading,$kbList,
-  			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer;
+  			kbLabels,keys,kbListText,$kbListItem, dialog,$saveButton,$cancelButton,$buttonContainer, sharedDialog;
 
   		thisObj = this;
   		available = this.getAvailablePreferences();
+  		dialogOptions = dialogOptions || {};
+  		sharedDialog = dialogOptions.sharedDialog || null;
 
-  		// outer container, will be assigned role="dialog"
-  		$prefsDiv = $('<div>',{
-  			'class': 'able-prefs-form '
-  		});
-  		var customClass = 'able-prefs-form-' + form;
-  		$prefsDiv.addClass(customClass);
+  		if (dialogOptions.shared && sharedDialog) {
+  			$prefsDiv = sharedDialog.modal;
+  			$prefsDiv.removeClass(function (index, className) {
+  				return (className.match(/(^|\s)able-prefs-form-\S+/g) || []).join(' ');
+  			});
+  			$prefsDiv.addClass('able-prefs-form-' + form);
+  			$prefsDiv.children().not('.able-modal-header').remove();
+  		} else {
+  			// outer container, will be assigned role="dialog"
+  			$prefsDiv = $('<div>',{
+  				'class': 'able-prefs-form '
+  			});
+  			var customClass = 'able-prefs-form-' + form;
+  			$prefsDiv.addClass(customClass);
+  		}
 
   		// add titles and intros
   		if (form == 'captions') {
@@ -11656,22 +13095,17 @@
   			formTitle = this.translate( 'prefTitleTranscript', 'Transcript Preferences' );
   		}
 
-  		$fieldset = $('<div>').attr('role','group');
-  		fieldsetClass = 'able-prefs-' + form;
-  		fieldsetId = this.mediaId + '-prefs-' + form;
-  		legendId = fieldsetId + '-legend';
-  		$fieldset.addClass(fieldsetClass).attr('id',fieldsetId);
+  		groupHeading = null;
   		if (form === 'keyboard') {
-  			$legend = $('<h2>' + this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' ) + '</h2>');
-  			$legend.attr('id',legendId);
-  			$fieldset.attr('aria-labelledby',legendId);
-  			$fieldset.append($legend);
+  			groupHeading = this.translate( 'prefHeadingKeyboard1', 'Modifier keys used for shortcuts' );
   		} else if (form === 'descriptions') {
-  			$legend = $('<h2>' + this.translate( 'prefHeadingTextDescription', 'Text-based audio description' ) + '</h2>');
-  			$legend.attr('id',legendId);
-  			$fieldset.attr('aria-labelledby',legendId);
-  			$fieldset.append($legend);
+  			groupHeading = this.translate( 'prefHeadingTextDescription', 'Text-based audio description' );
   		}
+  		groupObj = this.createPreferenceGroup({
+  			form: form,
+  			heading: groupHeading
+  		});
+  		$fieldset = groupObj.group;
   		for (i=0; i<available.length; i++) {
 
   			// only include prefs on the current form if they have a label
@@ -11682,11 +13116,22 @@
   				thisId = this.mediaId + '_' + thisPref;
   				$thisDiv = $('<div>').addClass(thisClass + ' able-player-setting');
   				if (form === 'captions' ) {
-  					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-  					$thisField = $('<select>',{
+  					let isCaptionRateField = (thisPref === 'prefCaptionsRate');
+  					let fieldObj = this.createField({
+  						wrapperClass: thisClass + ' ' + (isCaptionRateField ? 'able-prefs-number' : 'able-prefs-select'),
   						name: thisPref,
   						id: thisId,
+  						label: available[i]['label'],
+  						type: isCaptionRateField ? 'number' : 'select',
+  						value: isCaptionRateField ? this[thisPref] : undefined,
+  						attrs: isCaptionRateField ? {
+  							min: 0.5,
+  							max: 3.0,
+  							step: 0.1
+  						} : undefined
   					});
+  					$thisDiv = fieldObj.wrapper;
+  					$thisField = fieldObj.field;
   					// add a change handler that updates the style of the sample caption text
   					let viewingOptions = ['prefCaptionsPosition','prefCaptionsFont','prefCaptionsSize','prefCaptionsColor','prefCaptionsBGColor','prefCaptionsOpacity'];
   					if ( viewingOptions.indexOf(thisPref) !== -1 ) {
@@ -11695,9 +13140,16 @@
   							thisObj.stylizeCaptions(thisObj.$sampleCapsDiv,changedPref);
   						});
   					}
-  					captionsOptions = this.getCaptionsOptions(thisPref);
-  					if ( ! ( thisPref === 'prefCaptionsVoice' && ! this.descVoices.length ) ) {
-  						$thisDiv.append($thisLabel,$thisField);
+  					if (isCaptionRateField) {
+  						if (this.synth) {
+  							$thisField.on('change',function() {
+  								let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' );
+  								thisObj.announceText('captionSample',captionSample);
+  							});
+  						}
+  						captionsOptions = [];
+  					} else {
+  						captionsOptions = this.getCaptionsOptions(thisPref);
   					}
   					for (j=0; j < captionsOptions.length; j++) {
   						if (thisPref === 'prefCaptionsPosition') {
@@ -11774,36 +13226,42 @@
   											let captionSample = thisObj.translate( 'sampleCaptionText', 'Sample caption text' );
   											thisObj.announceText('captionSample',captionSample);
   										});
-  										$thisDiv.append($thisLabel,$thisField);
   									}
   								}
   							}
   						}
   					}
   				} else if (form === 'descriptions') {
-  					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
   					if (thisPref === 'prefDescPause' || thisPref === 'prefDescVisible') {
   						// these preferences are checkboxes
-  						$thisDiv.addClass('able-prefs-checkbox');
-  						$thisField = $('<input>',{
+  						let fieldObj = this.createField({
+  							wrapperClass: thisClass + ' able-prefs-checkbox',
+  							name: thisPref,
+  							id: thisId,
+  							label: available[i]['label'],
   							type: 'checkbox',
-  							name: thisPref,
-  							id: thisId,
-  							value: 'true'
+  							checked: this[thisPref] === 1
   						});
-  						// check current active value for this preference
-  						if (this[thisPref] === 1) {
-  							$thisField.prop('checked',true);
-  						}
-  						$thisDiv.append($thisField,$thisLabel);
+  						$thisDiv = fieldObj.wrapper;
   					} else if (this.synth) {
+  						let isDescRateField = (thisPref === 'prefDescRate');
   						// Only show these options if browser supports speech synthesis
-  						$thisDiv.addClass('able-prefs-select');
-  						$thisField = $('<select>',{
+  						let fieldObj = this.createField({
+  							wrapperClass: thisClass + ' ' + (isDescRateField ? 'able-prefs-number' : 'able-prefs-select'),
   							name: thisPref,
   							id: thisId,
+  							label: available[i]['label'],
+  							type: isDescRateField ? 'number' : 'select',
+  							value: isDescRateField ? this[thisPref] : undefined,
+  							attrs: isDescRateField ? {
+  								min: 0.5,
+  								max: 3.0,
+  								step: 0.1
+  							} : undefined
   						});
-  						if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
+  						$thisDiv = fieldObj.wrapper;
+  						$thisField = fieldObj.field;
+  						if (isDescRateField) ; else if ( thisPref === 'prefDescVoice' && this.descVoices.length) {
   							prefDescVoice = this.getPrefVoice();
   							for (j=0; j < this.descVoices.length; j++) {
   								optionValue = this.descVoices[j].name;
@@ -11838,8 +13296,6 @@
   								// 2.5 - fleet
   								// 3 - fast! (some voices don't get any faster than this
 
-  								// Note: if these values are modified, must also modfiy them
-  								// in makePrefsValueReadable()
   								options = [0.7,0.8,0.9,1,1.1,1.2,1.5,2,2.5,3];
   							} else if (thisPref == 'prefDescVolume') { // 0 (mute) to 1
   								options = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
@@ -11856,7 +13312,6 @@
   										$thisOption.prop('selected',true);
   									}
   									$thisField.append($thisOption);
-  									$thisDiv.append($thisLabel,$thisField);
   								}
   							}
   						}
@@ -11864,20 +13319,18 @@
   						$thisField.on('change',function() {
   							thisObj.announceText('sample',thisObj.currentSampleText);
   						});
-  						$thisDiv.append($thisLabel,$thisField);
   					}
   				} else { // all other fields are checkboxes
-  					$thisLabel = $('<label for="' + thisId + '"> ' + available[i]['label'] + '</label>');
-  					$thisField = $('<input>',{
-  						type: 'checkbox',
+  					let fieldObj = this.createField({
+  						wrapperClass: thisClass,
   						name: thisPref,
   						id: thisId,
-  						value: 'true'
+  						label: available[i]['label'],
+  						type: 'checkbox',
+  						checked: this[thisPref] === 1
   					});
-  					// check current active value for this preference
-  					if (this[thisPref] === 1) {
-  						$thisField.prop('checked',true);
-  					}
+  					$thisDiv = fieldObj.wrapper;
+  					$thisField = fieldObj.field;
   					if (form === 'keyboard') {
   						// add a change handler that updates the list of current keyboard shortcuts
   						$thisField.on('change',function() {
@@ -11907,9 +13360,8 @@
   							}
   						});
   					}
-  					$thisDiv.append($thisField,$thisLabel);
   				}
-  				if (thisPref === 'prefDescVoice' && !this.descVoices.length) ; else {
+  				if ((thisPref === 'prefDescVoice' || thisPref === 'prefCaptionsVoice') && !this.descVoices.length) ; else {
   					$fieldset.append($thisDiv);
   				}
   			}
@@ -11960,10 +13412,10 @@
   					kbLabels.push( this.translate( 'nextTrack', 'Next track' ) );
   					keys.push('n');
   				} else if (this.controls[i] === 'rewind') {
-  					kbLabels.push(this.translate( 'rewind', 'Rewind' ));
+  					kbLabels.push(this.translate( 'rewind', 'Rewind %s seconds', [ this.seekInterval ] ) );
   					keys.push('r');
   				} else if (this.controls[i] === 'forward') {
-  					kbLabels.push(this.translate( 'forward', 'Forward' ));
+  					kbLabels.push(this.translate( 'forward', 'Forward %s seconds', [ this.seekInterval ] ) );
   					keys.push('f');
   				} else if (this.controls[i] === 'volume') {
   					kbLabels.push(this.translate( 'volume', 'Volume' ));
@@ -12035,14 +13487,21 @@
   			$prefsDiv.append($kbHeading,$kbList);
   		}
 
-  		// $prefsDiv (dialog) must be appended to the BODY!
-  		$('body').append($prefsDiv);
-  		dialog = new AccessibleDialog(
-  			$prefsDiv,
-  			this.$prefsButton,
-  			formTitle,
-  			thisObj.translate( 'closeButtonLabel', 'Close' )
-  		);
+  		if (dialogOptions.shared && sharedDialog) {
+  			dialog = sharedDialog.dialog;
+  			dialog.title = formTitle;
+  			dialog.titleH1.text(formTitle);
+  			dialog.focusedElementBeforeModal = this.$prefsButton;
+  		} else {
+  			// $prefsDiv (dialog) must be appended to the BODY!
+  			$('body').append($prefsDiv);
+  			dialog = new AccessibleDialog(
+  				$prefsDiv,
+  				this.$prefsButton,
+  				formTitle,
+  				thisObj.translate( 'closeButtonLabel', 'Close' )
+  			);
+  		}
 
   		// Add save and cancel buttons.
   		$buttonContainer = $( '<div class="able-prefs-buttons"></div>' );
@@ -12064,28 +13523,32 @@
   			$fieldset.attr('aria-labelledby',dialog.titleH1.attr('id'));
   		}
 
-  		// add global reference for future control
-  		if (form === 'captions') {
-  			this.captionPrefsDialog = dialog;
-  		} else if (form === 'descriptions') {
-  			this.descPrefsDialog = dialog;
-  		} else if (form === 'keyboard') {
-  			this.keyboardPrefsDialog = dialog;
-  		} else if (form === 'transcript') {
-  			this.transcriptPrefsDialog = dialog;
+  		if (!dialogOptions.shared) {
+  			// add global reference for future control
+  			if (form === 'captions') {
+  				this.captionPrefsDialog = dialog;
+  			} else if (form === 'descriptions') {
+  				this.descPrefsDialog = dialog;
+  			} else if (form === 'keyboard') {
+  				this.keyboardPrefsDialog = dialog;
+  			} else if (form === 'transcript') {
+  				this.transcriptPrefsDialog = dialog;
+  			}
   		}
 
   		// Add click handler for dialog close button
   		// (button is added in dialog.js)
-  		$('div.able-prefs-form button.modalCloseButton').on( 'click', function() {
-  			thisObj.resetPrefsForm();
-  		});
-  		// Add handler for escape key
-  		$('div.able-prefs-form').on( 'keydown', function(e) {
-  			if (e.key === 'Escape') {
+  		if (!dialogOptions.shared) {
+  			$('div.able-prefs-form button.modalCloseButton').on( 'click', function() {
   				thisObj.resetPrefsForm();
-  			}
-  		});
+  			});
+  			// Add handler for escape key
+  			$('div.able-prefs-form').on( 'keydown', function(e) {
+  				if (e.key === 'Escape') {
+  					thisObj.resetPrefsForm();
+  				}
+  			});
+  		}
   	};
 
   	AblePlayer.prototype.getPrefVoice = function () {
@@ -12154,32 +13617,6 @@
   			} else if (value === 2) {
   				return this.translate( 'prefDescPitch5', 'Very high' );
   			}
-  		} else if (pref === 'prefDescRate' || pref === 'prefCaptionsRate' ) {
-  			// default in the API is 0.1 to 10, where 1 is normal speaking voice
-  			// our custom range offers several rates close to 1
-  			// plus a couple of crazy fast ones for sport
-  			// Our more readable options (1-10) or mapped here to API values
-  			if (value === 0.7) {
-  				return 1;
-  			} else if (value === 0.8) {
-  				return 2;
-  			} else if (value === 0.9) {
-  				return 3;
-  			} else if (value === 1) {
-  				return 4;
-  			} else if (value === 1.1) {
-  				return 5;
-  			} else if (value === 1.2) {
-  				return 6;
-  			} else if (value === 1.5) {
-  				return 7;
-  			} else if (value === 2) {
-  				return 8;
-  			} else if (value === 2.5) {
-  				return 9;
-  			} else if (value === 3) {
-  				return 10;
-  			}
   		} else if (pref === 'prefDescVolume' || pref === 'prefCaptionsVolume' ) {
   			// values range from 0.1 to 1.0
   			return value * 100 + '%';
@@ -12195,21 +13632,21 @@
   		// User presses Escape to close Prefs dialog
   		// User clicks Save in Prefs dialog, & there's more than one player on page
 
-  		var preferences, available, i, prefName;
+  		var preferences, available, i, prefName, prefId, $form;
 
   		preferences = this.getPref();
   		available = this.getAvailablePreferences();
+  		$form = this.getActivePrefsForm();
   		for (i=0; i<available.length; i++) {
   			prefName = available[i]['name'];
-  			if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
+  			prefId = this.mediaId + '_' + prefName;
+  			if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
+  				$form.find('input[id="' + prefId + '"]').val(preferences.preferences[prefName]);
+  			} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
   				// this is a caption-related select box
-  				$('select[name="' + prefName + '"]').val(preferences.preferences[prefName]);
+  				$form.find('select[id="' + prefId + '"]').val(preferences.preferences[prefName]);
   			} else { // all others are checkboxes
-  				if (this[prefName] === 1) {
-  					$('input[name="' + prefName + '"]').prop('checked',true);
-  				} else {
-  					$('input[name="' + prefName + '"]').prop('checked',false);
-  				}
+  				$form.find('input[id="' + prefId + '"]').prop('checked', this[prefName] === 1);
   			}
   		}
   		// also restore style of sample caption div
@@ -12223,13 +13660,14 @@
   		// update preferences with new value
   		var preferences, available, prefName, prefId,
   			voiceSelectId, newVoice, numChanges, voiceLangFound,
-  			numCapChanges, capSizeChanged, capSizeValue, newValue;
+  			numCapChanges, capSizeChanged, capSizeValue, newValue, $form;
 
   		numChanges = 0;
   		numCapChanges = 0; // changes to caption-style-related preferences
   		capSizeChanged = false;
   		preferences = this.getPref();
   		available = this.getAvailablePreferences();
+  		$form = this.getActivePrefsForm();
   		for (var i=0; i < available.length; i++) {
   			// only prefs with labels are used in the Prefs form
   			if (available[i]['label']) {
@@ -12240,8 +13678,8 @@
   						preferences.voices = [];
   					}
   					voiceSelectId = this.mediaId + '_prefDescVoice';
-  					this.prefDescVoice = $('select#' + voiceSelectId).find(':selected').val();
-  					this.prefDescVoiceLang = $('select#' + voiceSelectId).find(':selected').attr('data-lang');
+  					this.prefDescVoice = $form.find('select#' + voiceSelectId).find(':selected').val();
+  					this.prefDescVoiceLang = $form.find('select#' + voiceSelectId).find(':selected').attr('data-lang');
   					// replace preferred voice for this lang in preferences.voices array, if one exists
   					// otherwise, add it to the array
   					voiceLangFound = false;
@@ -12264,9 +13702,20 @@
   						preferences.preferences['prefDescMethod'] = this.prefDescMethod;
   						numChanges++;
   					}
+  				} else if (prefName === 'prefCaptionsRate' || prefName === 'prefDescRate') {
+  					newValue = parseFloat($form.find('input[id="' + prefId + '"]').val());
+  					if (isNaN(newValue)) {
+  						newValue = this[prefName] || 1;
+  					}
+  					newValue = Math.min(3.0, Math.max(0.5, newValue));
+  					if (preferences.preferences[prefName] !== newValue) {
+  						preferences.preferences[prefName] = newValue;
+  						this[prefName] = newValue;
+  						numChanges++;
+  					}
   				} else if ((prefName.indexOf('Captions') !== -1) && (prefName !== 'prefCaptions')) {
   					// this is one of the caption-related select fields
-  					newValue = $('select[id="' + prefId + '"]').val();
+  					newValue = $form.find('select[id="' + prefId + '"]').val();
   					if (preferences.preferences[prefName] !== newValue) { // user changed setting
   						preferences.preferences[prefName] = newValue;
   						// also update global var for this pref (for caption fields, not done elsewhere)
@@ -12280,7 +13729,7 @@
   					}
   				} else if ((prefName.indexOf('Desc') !== -1) && (prefName !== 'prefDescPause') && prefName !== 'prefDescVisible') {
   					// this is one of the description-related select fields
-  					newValue = $('select[id="' + prefId + '"]').val();
+  					newValue = $form.find('select[id="' + prefId + '"]').val();
   					if (preferences.preferences[prefName] !== newValue) { // user changed setting
   						preferences.preferences[prefName] = newValue;
   						// also update global var for this pref
@@ -12288,7 +13737,7 @@
   						numChanges++;
   					}
   				} else { // all other fields are checkboxes
-  					if ($('input[id="' + prefId + '"]').is(':checked')) {
+  					if ($form.find('input[id="' + prefId + '"]').is(':checked')) {
   						preferences.preferences[prefName] = 1;
   						if (this[prefName] === 1) ; else {
   							// user has just turned this pref on
@@ -12572,19 +14021,24 @@
 
   function addSignFunctions(AblePlayer) {
   	AblePlayer.prototype.initSignLanguage = function() {
+  		let firstSource, localSignSrc, remoteSignSrc, hasLocalSrc, hasRemoteSrc, hasRemoteSource, ytSignSrc, signSrc, signVideo;
+
   		this.hasSignLanguage = false;
   		// Sign language is only currently supported in HTML5 player and YouTube.
-  		var hasLocalSrc = ( this.$sources.first().attr('data-sign-src') !== undefined && this.$sources.first().attr('data-sign-src') !== "" );
+  		firstSource   = this.sources[0] ?? null;
+  		localSignSrc  = firstSource ? firstSource.getAttribute('data-sign-src') : null;
+  		remoteSignSrc = firstSource ? firstSource.getAttribute('data-youtube-sign-src') : null;
+  		hasLocalSrc   = ( localSignSrc !== null && localSignSrc !== "" );
   		// YouTube src can either be on a `source` element or on the `video` element.
-  		var hasRemoteSrc = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
-  		var hasRemoteSource = ( this.$sources.first().attr('data-youtube-sign-src') !== undefined && this.$sources.first().attr('data-youtube-sign-src') !== '' );
+  		hasRemoteSrc    = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
+  		hasRemoteSource = ( remoteSignSrc !== null && remoteSignSrc !== '' );
   		if ( ! this.isIOS() && ( hasLocalSrc || hasRemoteSrc || hasRemoteSource ) && ( this.player === 'html5' || this.player === 'youtube' ) ) {
   			// check to see if there's a sign language video accompanying this video
   			// check only the first source
   			// If sign language is provided, it must be provided for all sources
-  			let ytSignSrc = this.youTubeSignId ?? purify.sanitize( this.$sources.first().attr('data-youtube-sign-src') );
-  			let signSrc = purify.sanitize( this.$sources.first().attr('data-sign-src') );
-  			let signVideo = purify.sanitize( this.$media.data('youtube-sign-src') );
+  			ytSignSrc = this.youTubeSignId ?? purify.sanitize( remoteSignSrc );
+  			signSrc   = purify.sanitize( localSignSrc );
+  			signVideo = purify.sanitize( this.$media.data('youtube-sign-src') );
   			this.signFile = (hasLocalSrc ) ? signSrc : false;
   			if ( hasRemoteSrc ) {
   				this.signYoutubeId = signVideo;
@@ -12629,6 +14083,9 @@
   				this.$signToolbar = $('<div>',{
   					'class': 'able-window-toolbar able-' + this.toolbarIconColor + '-controls'
   				});
+  				let signMask = document.createElement( 'div' );
+  				signMask.classList.add( 'able-window-mask' );
+  				this.$signWindow.append( signMask );
   				this.$signWindow.append(this.$signToolbar);
   			}
 
@@ -12651,9 +14108,9 @@
   				this.$signVideo.append($signSource);
   			} else {
   				// for each original <source>, add a <source> to the sign <video>
-  				for (i=0; i < this.$sources.length; i++) {
-  					signSrc = purify.sanitize( this.$sources[i].getAttribute('data-sign-src') );
-  					srcType = this.$sources[i].getAttribute('type');
+  				for (i=0; i < this.sources.length; i++) {
+  					signSrc = purify.sanitize( this.sources[i].getAttribute('data-sign-src') );
+  					srcType = this.sources[i].getAttribute('type');
   					if (signSrc) {
   						$signSource = $('<source>',{
   							'src' : signSrc,
@@ -13255,10 +14712,9 @@
     };
 
     AblePlayer.prototype.injectTranscriptArea = function () {
-      var $autoScrollLabel,
-        $autoScrollContainer,
+      var autoScrollField,
         $languageSelectWrapper,
-        $languageSelectLabel,
+        languageSelectField,
         i,
         $option;
 
@@ -13279,34 +14735,28 @@
       // Transcript toolbar content
 
       // Add auto Scroll checkbox
-      this.$autoScrollTranscriptCheckbox = $("<input>", {
-        id: "autoscroll-transcript-checkbox-" + this.mediaId,
-        type: "checkbox",
+      autoScrollField = this.createField({
+        wrapperClass: 'autoscroll-transcript',
+        id: 'autoscroll-transcript-checkbox-' + this.mediaId,
+        label: this.translate( 'autoScroll', 'Auto scroll' ),
+        type: 'checkbox',
+        labelPosition: 'before'
       });
-      $autoScrollLabel = $("<label>", {
-        for: "autoscroll-transcript-checkbox-" + this.mediaId,
-      }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
-  	$autoScrollContainer = $( '<div>', {
-  		'class': 'autoscroll-transcript'
-  	});
-  	$autoScrollContainer.append(
-  		$autoScrollLabel,
-  		this.$autoScrollTranscriptCheckbox
-  	);
-      this.$transcriptToolbar.append( $autoScrollContainer );
+      this.$autoScrollTranscriptCheckbox = autoScrollField.field;
+      this.$transcriptToolbar.append( autoScrollField.wrapper );
 
       // Add field for selecting a transcript language
       // Only necessary if there is more than one language
       if (this.captions.length > 1) {
-        $languageSelectWrapper = $("<div>", {
-          class: "transcript-language-select-wrapper",
+        languageSelectField = this.createField({
+          wrapperClass: 'transcript-language-select-wrapper',
+          id: 'transcript-language-select-' + this.mediaId,
+          label: this.translate( 'language', 'Language' ),
+          type: 'select',
+          labelPosition: 'before'
         });
-        $languageSelectLabel = $("<label>", {
-          for: "transcript-language-select-" + this.mediaId,
-        }).text( this.translate( 'language', 'Language' ) );
-        this.$transcriptLanguageSelect = $("<select>", {
-          id: "transcript-language-select-" + this.mediaId,
-        });
+        $languageSelectWrapper = languageSelectField.wrapper;
+        this.$transcriptLanguageSelect = languageSelectField.field;
         for (i = 0; i < this.captions.length; i++) {
           $option = $("<option></option>", {
             value: this.captions[i]["language"],
@@ -13319,10 +14769,6 @@
         }
       }
       if ($languageSelectWrapper) {
-        $languageSelectWrapper.append(
-          $languageSelectLabel,
-          this.$transcriptLanguageSelect
-        );
         this.$transcriptToolbar.append($languageSelectWrapper);
       }
       this.$transcriptArea.append(this.$transcriptToolbar, this.$transcriptDiv);
@@ -13420,20 +14866,19 @@
     };
 
     AblePlayer.prototype.setupManualTranscript = function () {
-      var $autoScrollInput, $autoScrollLabel;
+      var autoScrollField;
 
-      $autoScrollInput = $("<input>", {
-        id: "autoscroll-transcript-checkbox-" + this.mediaId,
-        type: "checkbox",
+      autoScrollField = this.createField({
+        id: 'autoscroll-transcript-checkbox-' + this.mediaId,
+        label: this.translate( 'autoScroll', 'Auto scroll' ),
+        type: 'checkbox',
+        labelPosition: 'before'
       });
-      $autoScrollLabel = $("<label>", {
-        for: "autoscroll-transcript-checkbox-" + this.mediaId,
-      }).text( this.translate( 'autoScroll', 'Auto scroll' ) );
 
       // Add an auto-scroll checkbox to the toolbar.
-      this.$autoScrollTranscriptCheckbox = $autoScrollInput;
+      this.$autoScrollTranscriptCheckbox = autoScrollField.field;
       this.$transcriptToolbar.append(
-        $autoScrollLabel,
+        autoScrollField.label,
         this.$autoScrollTranscriptCheckbox
       );
     };
@@ -13745,67 +15190,67 @@
 
         var flattenComponentForCaption = function (comp) {
           var result = [];
-
           var parts = 0;
 
           var flattenString = function (str) {
-            parts++;
+  			parts++;
 
-            var flatStr;
-            var result = [];
-            if (str === "") {
-              return result;
-            }
+  			var flatStr;
+  			var result = [];
+  			if (str === "") {
+  				return result;
+  			}
 
-            var openBracket = str.indexOf("[");
-            var closeBracket = str.indexOf("]");
-            var openParen = str.indexOf("(");
-            var closeParen = str.indexOf(")");
+  			if ( ! thisObj.strictMode ) {
+  				var openBracket = str.indexOf("[");
+  				var closeBracket = str.indexOf("]");
+  				var openParen = str.indexOf("(");
+  				var closeParen = str.indexOf(")");
+  				var hasBrackets = openBracket !== -1 && closeBracket !== -1;
+  				var hasParens = openParen !== -1 && closeParen !== -1;
+  			} else {
+  				result.push(str);
 
-            var hasBrackets = openBracket !== -1 && closeBracket !== -1;
-            var hasParens = openParen !== -1 && closeParen !== -1;
+  				return result;
+  			}
 
-            if (hasParens || hasBrackets) {
-              let silentSpanBreak;
-              if (parts > 1) {
-                // force a line break between sections that contain parens or brackets
-                silentSpanBreak = "<br/>";
-              } else {
-                silentSpanBreak = "";
-              }
-              var silentSpanOpen =
-                silentSpanBreak + '<span class="able-unspoken">';
-              var silentSpanClose = "</span>";
-              if (hasParens && hasBrackets) {
-                // string has both!
-                if (openBracket < openParen) {
-                  // brackets come first. Parse parens separately
-                  hasParens = false;
-                } else {
-                  // parens come first. Parse brackets separately
-                  hasBrackets = false;
-                }
-              }
-            }
-            if (hasParens) {
-              flatStr = str.substring(0, openParen);
-              flatStr += silentSpanOpen;
-              flatStr += str.substring(openParen, closeParen + 1);
-              flatStr += silentSpanClose;
-              flatStr += flattenString(str.substring(closeParen + 1));
-              result.push(flatStr);
-            } else if (hasBrackets) {
-              flatStr = str.substring(0, openBracket);
-              flatStr += silentSpanOpen;
-              flatStr += str.substring(openBracket, closeBracket + 1);
-              flatStr += silentSpanClose;
-              flatStr += flattenString(str.substring(closeBracket + 1));
-              result.push(flatStr);
-            } else {
-              result.push(str);
-            }
-            return result;
-          };
+  			if (hasParens || hasBrackets) {
+  				let silentSpanBreak;
+  				// force a line break between sections that contain parens or brackets
+  				silentSpanBreak = ( parts > 1 ) ? "<br/>" : '';
+
+  				var silentSpanOpen = silentSpanBreak + '<span class="able-unspoken">';
+  				var silentSpanClose = "</span>";
+  				if (hasParens && hasBrackets) {
+  					// string has both!
+  					if (openBracket < openParen) {
+  						// brackets come first. Parse parens separately
+  						hasParens = false;
+  					} else {
+  						// parens come first. Parse brackets separately
+  						hasBrackets = false;
+  					}
+  				}
+  			}
+  			if (hasParens) {
+  				flatStr = str.substring(0, openParen);
+  				flatStr += silentSpanOpen;
+  				flatStr += str.substring(openParen, closeParen + 1);
+  				flatStr += silentSpanClose;
+  				flatStr += flattenString(str.substring(closeParen + 1));
+  				result.push(flatStr);
+  			} else if (hasBrackets) {
+  				flatStr = str.substring(0, openBracket);
+  				flatStr += silentSpanOpen;
+  				flatStr += str.substring(openBracket, closeBracket + 1);
+  				flatStr += silentSpanClose;
+  				flatStr += flattenString(str.substring(closeBracket + 1));
+  				result.push(flatStr);
+  			} else {
+  				result.push(str);
+  			}
+  			return result;
+  		};
 
           if (comp.type === "string") {
             result = result.concat(flattenString(comp.value));
@@ -13992,508 +15437,177 @@
     };
   }
 
-  var playerHeading$k = "Reproductor";
-  var audioPlayer$k = "Reproductor d'àudio";
-  var videoPlayer$k = "Reproductor de vídeo";
-  var faster$k = "Ràpid";
-  var slower$k = "Lent";
-  var play$k = "Reprodueix";
-  var pause$k = "Pausa";
-  var restart$k = "Reinicia";
-  var prevTrack$k = "Pista anterior";
-  var nextTrack$k = "Pista següent";
-  var rewind$k = "Endarrere";
-  var forward$k = "Endavant";
-  var captions$k = "Subtítols";
-  var showCaptions$k = "Mostra els subtítols";
-  var hideCaptions$k = "Oculta els subtítols";
-  var captionsOff$k = "Desactiva els subtítols";
-  var showTranscript$k = "Mostra la transcripció";
-  var hideTranscript$k = "Oculta la transcripció";
-  var turnOnDescriptions$k = "Activa l'audiodescripció";
-  var turnOffDescriptions$k = "Desactiva l'audiodescripció";
-  var chapters$k = "Capítols";
-  var language$k = "Idioma";
-  var sign$k = "Llengua de signes";
-  var showSign$k = "Mostra la llengua de signes";
-  var hideSign$k = "Oculta la llengua de signes";
-  var seekbarLabel$k = "Línia de temps";
-  var mute$k = "Silencia";
-  var unmute$k = "Activa el so";
-  var volume$k = "Volum";
-  var volumeUpDown$k = "Apuja i abaixa el volum";
-  var preferences$k = "Preferències";
-  var enterFullScreen$k = "Entra en el mode de pantalla completa";
-  var exitFullScreen$k = "Surt del mode de pantalla completa";
-  var speed$k = "Velocitat";
-  var spacebar$k = "Barra espaiadora";
-  var transcriptTitle$k = "Transcripció";
-  var lyricsTitle$k = "Lletra";
-  var autoScroll$k = "Desplaçament automàtic";
-  var statusPlaying$k = "S'està reproduint";
-  var statusPaused$k = "En pausa";
-  var statusStopped$k = "Aturat";
-  var statusBuffering$k = "Emmagatzemant";
-  var statusEnd$k = "Fi de pista";
-  var selectedTrack$j = "Pista seleccionada";
-  var alertDescribedVersion$j = "S'està utilitzant la versió amb audiodescripció del vídeo";
-  var alertNonDescribedVersion$j = "S'està utilitzant la versió sense audiodescripció del vídeo";
-  var prefMenuCaptions$k = "Subtítols";
-  var prefVoicedCaptions$k = "Spoken Captions";
-  var prefMenuDescriptions$k = "Descripcions";
-  var prefMenuKeyboard$k = "Teclat";
-  var prefMenuTranscript$k = "Transcripció";
-  var prefTitleCaptions$k = "Preferències dels subtítols";
-  var prefTitleDescriptions$k = "Preferències de l'audiodescripció";
-  var prefTitleKeyboard$k = "Preferències del teclat";
-  var prefTitleTranscript$j = "Preferències de la transcripció";
-  var prefIntroDescription1$j = "Aquest reproductor suporta l'audiodescripció de dues maneres: ";
-  var prefDescription1$k = "L'actual vídeo té una versió alternativa amb audiodescripció, descripció textual anunciada pel lector de pantalla.";
-  var prefDescription2$k = "L'actual vídeo té una versió alternativa amb audiodescripció.";
-  var prefDescription3$k = "L'actual vídeo té descripció textual.";
-  var prefIntroDescriptionNone$k = "L'actual vídeo no disposa d'audiodescripció en cap format.";
-  var prefIntroDescription3$k = "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.";
-  var prefIntroDescription4$k = "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.";
-  var prefIntroKeyboard1$k = "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).";
-  var prefIntroKeyboard2$k = "A continuació, podeu asignar les tecles modificadores (Majúscules, Alt, i la tecla d'inserció).";
-  var prefIntroKeyboard3$k = "NOTA: algunes combinacions de tecles poden entrar en conflicte amb les utilitzades pel navegador o altres aplicacions. Proveu diferents combinacions o tecles modificadores fins a trobar les adequades en cada cas.";
-  var prefHeadingKeyboard1$k = "Tecles modificadores emprades com a dreceres de teclat";
-  var prefHeadingKeyboard2$k = "Dreceres de teclat actuals";
-  var prefHeadingDescription$k = "Audiodescripció";
-  var prefHeadingTextDescription$k = "Audiodescripció textual";
-  var prefAltKey$k = "Alt";
-  var prefCtrlKey$k = "Control";
-  var prefShiftKey$k = "Majúscula";
-  var prefNoKeyShortcuts$k = "Desactiva les dreceres de teclat";
-  var escapeKey$k = "Escapada";
-  var escapeKeyFunction$k = "Tanca el diàleg o finestre emergent actual";
-  var prefDescPause$k = "Pausa automàticament el vídeo en el moment que comenci una audiodescripció";
-  var prefDescVisible$k = "Fes visible la audiodescripció textual si es troba activada";
-  var prefDescVoice$k = "Veu";
-  var prefDescRate$k = "Spoken Description Rate";
-  var prefCaptionRate$k = "Spoken Caption Rate";
-  var prefDescPitch$k = "Tonalitat";
-  var prefDescPitch1$k = "Molt baixa";
-  var prefDescPitch2$k = "Baixa";
-  var prefDescPitch3$k = "Per defecte";
-  var prefDescPitch4$k = "Alta";
-  var prefDescPitch5$k = "Molt alta";
-  var sampleDescriptionText$k = "Ajusta la configuració per escoltar aquest text de mostra.";
-  var prefHighlight$k = "Ressalta la transcripció a mesura que avança el contingut";
-  var prefTabbable$k = "Transcripció operable per teclat";
-  var prefCaptionsFont$k = "Tipus de lletra";
-  var prefCaptionsColor$k = "Color del text";
-  var prefCaptionsBGColor$k = "Fons";
-  var prefCaptionsSize$k = "Mida del text";
-  var prefCaptionsOpacity$k = "Opacitat";
-  var prefCaptionsStyle$k = "Estil";
-  var serif$k = "Serifa";
-  var sans$k = "Sensa serifa";
-  var cursive$k = "Cursiva";
-  var fantasy$k = "fantasia";
-  var monospace$k = "Monoespaiada";
-  var white$k = "Blanc";
-  var yellow$k = "Groc";
-  var green$k = "Verd";
-  var cyan$j = "Cian";
-  var blue$k = "Blau";
-  var magenta$k = "Magenta";
-  var red$k = "Vermell";
-  var black$k = "Negre";
-  var transparent$k = "transparent";
-  var solid$k = "Sòlid";
-  var captionsStylePopOn$k = "Aparició instantània";
-  var captionsStyleRollUp$k = "Desplaçament cap amunt";
-  var prefCaptionsPosition$k = "Posició";
-  var captionsPositionOverlay$k = "Superposició";
-  var captionsPositionBelow$k = "A continuació del vídeo";
-  var sampleCaptionText$k = "Text de mostra dels subtítols";
-  var prefSuccess$k = "S'han desat els canvis.";
-  var prefNoChange$k = "No s'ha fet cap canvi.";
-  var save$k = "Desa";
-  var cancel$k = "Cancel·la";
-  var dismissButton$k = "Ignora";
-  var windowButtonLabel$k = "Opcions de la finestra";
-  var windowMove$k = "Moure";
-  var windowMoveLeft$k = "Finestra desplaçada cap a l'esquerra";
-  var windowMoveRight$k = "Finestra desplaçada cap a la dreta";
-  var windowMoveUp$k = "Finestra desplaçada cap amunt";
-  var windowMoveDown$k = "Finestra desplaçada cap avall";
-  var windowMoveStopped$k = "S'ha aturat el desplaçament de la finestra";
-  var transcriptControls$k = "Controls de la finestra de transcripció";
-  var signControls$k = "Controls de la finestra de llengua de signes";
-  var windowMoveAlert$k = "Arrossegueu o feu servir les tecles de direcció per moure la finestra, polseu retorn per aturar.";
-  var windowResize$k = "Redimensiona";
-  var windowResizeHeading$k = "Redimensiona la finestra amb l'intèrpret";
-  var closeButtonLabel$k = "Tanca";
-  var width$k = "Amplada";
-  var height$k = "Alçada";
-  var resultsSummary1$k = "Heu cercat:";
-  var resultsSummary2$k = "S'han trobat %1 elements coincidents.";
-  var resultsSummary3$k = "Feu clic al moment associat a qualsevol element per reproduir el vídeo des d'aquell punt.";
-  var noResultsFound$k = "No s'han trobat resultats.";
-  var searchButtonLabel$k = "Reprodueix a %1";
-  var hour$k = "hora";
-  var minute$j = "minut";
-  var second$k = "segon";
-  var hours$k = "hores";
-  var minutes$k = "minuts";
-  var seconds$k = "segons";
-  var vtsHeading$k = "Gestor de transcripcions de vídeo";
-  var vtsInstructions1$k = "Utilitzeu el gestor de transcripcions de vídeo per modificar les pistes de text:";
-  var vtsInstructions2$k = "Reordeneu capítols, descripcions, subtítols o subtítols per a persones sordes perquè apareguin en la seqüència correcta a la transcripció generada automàticament per Able Player.";
-  var vtsInstructions3$k = "Modifiqueu el contingut o els temps d'inici i final (tots són editables directament a la taula).";
-  var vtsInstructions4$k = "Afegiu contingut nou, com ara capítols o descripcions.";
-  var vtsInstructions5$k = "Després d'editar, feu clic al botó \"Desa els canvis\" per generar contingut nou per a tots els fitxers de text temporitzat rellevants. El text nou es pot copiar i enganxar en fitxers WebVTT nous.";
-  var vtsSelectLanguage$k = "Seleccioneu una llengua";
-  var vtsSave$k = "Genera contingut .vtt nou";
-  var vtsReturn$k = "Torna a l'editor";
-  var vtsCancel$k = "S'ha cancel·lat el desament. Totes les edicions que heu fet s'han restaurat a la taula del GTV.";
-  var vtsRow$k = "Fila";
-  var vtsKind$k = "Tipus";
-  var vtsStart$k = "Inici";
-  var vtsEnd$k = "Final";
-  var vtsContent$k = "Contingut";
-  var vtsActions$k = "Accions";
-  var vtsNewRow$k = "S'ha inserit una fila nova %1.";
-  var vtsDeletedRow$k = "S'ha suprimit la fila %1.";
-  var vtsMovedRow$k = "La fila %1 s'ha mogut %2 i ara és la fila %3.";
-  var ca = {
-  	playerHeading: playerHeading$k,
-  	audioPlayer: audioPlayer$k,
-  	videoPlayer: videoPlayer$k,
-  	faster: faster$k,
-  	slower: slower$k,
-  	play: play$k,
-  	pause: pause$k,
-  	restart: restart$k,
-  	prevTrack: prevTrack$k,
-  	nextTrack: nextTrack$k,
-  	rewind: rewind$k,
-  	forward: forward$k,
-  	captions: captions$k,
-  	showCaptions: showCaptions$k,
-  	hideCaptions: hideCaptions$k,
-  	captionsOff: captionsOff$k,
-  	showTranscript: showTranscript$k,
-  	hideTranscript: hideTranscript$k,
-  	turnOnDescriptions: turnOnDescriptions$k,
-  	turnOffDescriptions: turnOffDescriptions$k,
-  	chapters: chapters$k,
-  	language: language$k,
-  	sign: sign$k,
-  	showSign: showSign$k,
-  	hideSign: hideSign$k,
-  	seekbarLabel: seekbarLabel$k,
-  	mute: mute$k,
-  	unmute: unmute$k,
-  	volume: volume$k,
-  	volumeUpDown: volumeUpDown$k,
-  	preferences: preferences$k,
-  	enterFullScreen: enterFullScreen$k,
-  	exitFullScreen: exitFullScreen$k,
-  	speed: speed$k,
-  	spacebar: spacebar$k,
-  	transcriptTitle: transcriptTitle$k,
-  	lyricsTitle: lyricsTitle$k,
-  	autoScroll: autoScroll$k,
-  	statusPlaying: statusPlaying$k,
-  	statusPaused: statusPaused$k,
-  	statusStopped: statusStopped$k,
-  	statusBuffering: statusBuffering$k,
-  	statusEnd: statusEnd$k,
-  	selectedTrack: selectedTrack$j,
-  	alertDescribedVersion: alertDescribedVersion$j,
-  	alertNonDescribedVersion: alertNonDescribedVersion$j,
-  	prefMenuCaptions: prefMenuCaptions$k,
-  	prefVoicedCaptions: prefVoicedCaptions$k,
-  	prefMenuDescriptions: prefMenuDescriptions$k,
-  	prefMenuKeyboard: prefMenuKeyboard$k,
-  	prefMenuTranscript: prefMenuTranscript$k,
-  	prefTitleCaptions: prefTitleCaptions$k,
-  	prefTitleDescriptions: prefTitleDescriptions$k,
-  	prefTitleKeyboard: prefTitleKeyboard$k,
-  	prefTitleTranscript: prefTitleTranscript$j,
-  	prefIntroDescription1: prefIntroDescription1$j,
-  	prefDescription1: prefDescription1$k,
-  	prefDescription2: prefDescription2$k,
-  	prefDescription3: prefDescription3$k,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$k,
-  	prefIntroDescription3: prefIntroDescription3$k,
-  	prefIntroDescription4: prefIntroDescription4$k,
-  	prefIntroKeyboard1: prefIntroKeyboard1$k,
-  	prefIntroKeyboard2: prefIntroKeyboard2$k,
-  	prefIntroKeyboard3: prefIntroKeyboard3$k,
-  	prefHeadingKeyboard1: prefHeadingKeyboard1$k,
-  	prefHeadingKeyboard2: prefHeadingKeyboard2$k,
-  	prefHeadingDescription: prefHeadingDescription$k,
-  	prefHeadingTextDescription: prefHeadingTextDescription$k,
-  	prefAltKey: prefAltKey$k,
-  	prefCtrlKey: prefCtrlKey$k,
-  	prefShiftKey: prefShiftKey$k,
-  	prefNoKeyShortcuts: prefNoKeyShortcuts$k,
-  	escapeKey: escapeKey$k,
-  	escapeKeyFunction: escapeKeyFunction$k,
-  	prefDescPause: prefDescPause$k,
-  	prefDescVisible: prefDescVisible$k,
-  	prefDescVoice: prefDescVoice$k,
-  	prefDescRate: prefDescRate$k,
-  	prefCaptionRate: prefCaptionRate$k,
-  	prefDescPitch: prefDescPitch$k,
-  	prefDescPitch1: prefDescPitch1$k,
-  	prefDescPitch2: prefDescPitch2$k,
-  	prefDescPitch3: prefDescPitch3$k,
-  	prefDescPitch4: prefDescPitch4$k,
-  	prefDescPitch5: prefDescPitch5$k,
-  	sampleDescriptionText: sampleDescriptionText$k,
-  	prefHighlight: prefHighlight$k,
-  	prefTabbable: prefTabbable$k,
-  	prefCaptionsFont: prefCaptionsFont$k,
-  	prefCaptionsColor: prefCaptionsColor$k,
-  	prefCaptionsBGColor: prefCaptionsBGColor$k,
-  	prefCaptionsSize: prefCaptionsSize$k,
-  	prefCaptionsOpacity: prefCaptionsOpacity$k,
-  	prefCaptionsStyle: prefCaptionsStyle$k,
-  	serif: serif$k,
-  	sans: sans$k,
-  	cursive: cursive$k,
-  	fantasy: fantasy$k,
-  	monospace: monospace$k,
-  	white: white$k,
-  	yellow: yellow$k,
-  	green: green$k,
-  	cyan: cyan$j,
-  	blue: blue$k,
-  	magenta: magenta$k,
-  	red: red$k,
-  	black: black$k,
-  	transparent: transparent$k,
-  	solid: solid$k,
-  	captionsStylePopOn: captionsStylePopOn$k,
-  	captionsStyleRollUp: captionsStyleRollUp$k,
-  	prefCaptionsPosition: prefCaptionsPosition$k,
-  	captionsPositionOverlay: captionsPositionOverlay$k,
-  	captionsPositionBelow: captionsPositionBelow$k,
-  	sampleCaptionText: sampleCaptionText$k,
-  	prefSuccess: prefSuccess$k,
-  	prefNoChange: prefNoChange$k,
-  	save: save$k,
-  	cancel: cancel$k,
-  	dismissButton: dismissButton$k,
-  	windowButtonLabel: windowButtonLabel$k,
-  	windowMove: windowMove$k,
-  	windowMoveLeft: windowMoveLeft$k,
-  	windowMoveRight: windowMoveRight$k,
-  	windowMoveUp: windowMoveUp$k,
-  	windowMoveDown: windowMoveDown$k,
-  	windowMoveStopped: windowMoveStopped$k,
-  	transcriptControls: transcriptControls$k,
-  	signControls: signControls$k,
-  	windowMoveAlert: windowMoveAlert$k,
-  	windowResize: windowResize$k,
-  	windowResizeHeading: windowResizeHeading$k,
-  	closeButtonLabel: closeButtonLabel$k,
-  	width: width$k,
-  	height: height$k,
-  	resultsSummary1: resultsSummary1$k,
-  	resultsSummary2: resultsSummary2$k,
-  	resultsSummary3: resultsSummary3$k,
-  	noResultsFound: noResultsFound$k,
-  	searchButtonLabel: searchButtonLabel$k,
-  	hour: hour$k,
-  	minute: minute$j,
-  	second: second$k,
-  	hours: hours$k,
-  	minutes: minutes$k,
-  	seconds: seconds$k,
-  	vtsHeading: vtsHeading$k,
-  	vtsInstructions1: vtsInstructions1$k,
-  	vtsInstructions2: vtsInstructions2$k,
-  	vtsInstructions3: vtsInstructions3$k,
-  	vtsInstructions4: vtsInstructions4$k,
-  	vtsInstructions5: vtsInstructions5$k,
-  	vtsSelectLanguage: vtsSelectLanguage$k,
-  	vtsSave: vtsSave$k,
-  	vtsReturn: vtsReturn$k,
-  	vtsCancel: vtsCancel$k,
-  	vtsRow: vtsRow$k,
-  	vtsKind: vtsKind$k,
-  	vtsStart: vtsStart$k,
-  	vtsEnd: vtsEnd$k,
-  	vtsContent: vtsContent$k,
-  	vtsActions: vtsActions$k,
-  	vtsNewRow: vtsNewRow$k,
-  	vtsDeletedRow: vtsDeletedRow$k,
-  	vtsMovedRow: vtsMovedRow$k
-  };
-
-  var playerHeading$j = "Přehrávač médií";
-  var audioPlayer$j = "Audio player";
-  var videoPlayer$j = "Video player";
-  var faster$j = "Rychleji";
-  var slower$j = "Pomaleji";
-  var play$j = "Spustit";
-  var pause$j = "Pauza";
-  var restart$j = "Přehrát od začátku";
-  var prevTrack$j = "Předchozí stopa";
-  var nextTrack$j = "Další stopa";
-  var rewind$j = "Přetočit vzad";
-  var forward$j = "Přetočit vpřed";
-  var captions$j = "Titulky";
-  var showCaptions$j = "Zobrazit titulky";
-  var hideCaptions$j = "Skrýt titulky";
-  var captionsOff$j = "Titulky vypnuty";
-  var showTranscript$j = "Zobrazit přepis";
-  var hideTranscript$j = "Skrýt přepis";
-  var turnOnDescriptions$j = "Zapnout popisy";
-  var turnOffDescriptions$j = "vypnout popisy";
-  var chapters$j = "Kapitoly";
-  var language$j = "Jazyk";
-  var sign$j = "Znaková řeč";
-  var showSign$j = "Zobrazit znakovou řeč";
-  var hideSign$j = "Skrýt znakovou řeč";
-  var seekbarLabel$j = "časová osa";
-  var mute$j = "Vypnout zvuk";
-  var unmute$j = "Zapnout zvuk";
-  var volume$j = "Hlasitost";
-  var volumeUpDown$j = "Hlasitost zvýšit snížit";
-  var preferences$j = "Předvolby";
-  var enterFullScreen$j = "Zobrazit na celou obrazovku";
-  var exitFullScreen$j = "Ukončit celou obrazovku";
-  var speed$j = "Rychlost";
-  var spacebar$j = "mezerník";
-  var transcriptTitle$j = "Přepis";
-  var lyricsTitle$j = "Text";
-  var autoScroll$j = "Automatické posouvání";
-  var statusPlaying$j = "Přehrávání";
-  var statusPaused$j = "Pozastaveno";
-  var statusStopped$j = "Zastaveno";
-  var statusBuffering$j = "Vyrovnávací paměť";
-  var statusEnd$j = "Konec stopy";
-  var selectedTrack$i = "Vybraná stopa";
-  var alertDescribVersion = "Používání zvukově popsané verze tohoto videa";
-  var alertNonDescribVersion = "Použití nepopsané verze tohoto videa";
-  var prefMenuCaptions$j = "Titulky";
+  var playerHeading$j = "Reproductor";
+  var audioPlayer$j = "Reproductor d'àudio";
+  var videoPlayer$j = "Reproductor de vídeo";
+  var faster$j = "Ràpid: %1x";
+  var slower$j = "Lent: %1x";
+  var play$j = "Reprodueix";
+  var pause$j = "Pausa";
+  var restart$j = "Reinicia";
+  var prevTrack$j = "Pista anterior";
+  var nextTrack$j = "Pista següent";
+  var rewind$j = "Endarrere %1 segons";
+  var forward$j = "Endavant %1 segons";
+  var captions$j = "Subtítols";
+  var showCaptions$j = "Mostra els subtítols";
+  var hideCaptions$j = "Oculta els subtítols";
+  var captionsOff$j = "Desactiva els subtítols";
+  var showTranscript$j = "Mostra la transcripció";
+  var hideTranscript$j = "Oculta la transcripció";
+  var turnOnDescriptions$j = "Activa l'audiodescripció";
+  var turnOffDescriptions$j = "Desactiva l'audiodescripció";
+  var chapters$j = "Capítols";
+  var language$j = "Idioma";
+  var sign$j = "Llengua de signes";
+  var showSign$j = "Mostra la llengua de signes";
+  var hideSign$j = "Oculta la llengua de signes";
+  var seekbarLabel$j = "Línia de temps";
+  var mute$j = "Silencia";
+  var unmute$j = "Activa el so";
+  var volume$j = "Volum";
+  var volumeUpDown$j = "Apuja i abaixa el volum";
+  var preferences$j = "Preferències";
+  var enterFullScreen$j = "Entra en el mode de pantalla completa";
+  var exitFullScreen$j = "Surt del mode de pantalla completa";
+  var speed$j = "Velocitat";
+  var on$j = "";
+  var off$j = "";
+  var spacebar$j = "Barra espaiadora";
+  var transcriptTitle$j = "Transcripció";
+  var lyricsTitle$j = "Lletra";
+  var autoScroll$j = "Desplaçament automàtic";
+  var statusPlaying$j = "S'està reproduint";
+  var statusPaused$j = "En pausa";
+  var statusStopped$j = "Aturat";
+  var statusBuffering$j = "Emmagatzemant";
+  var statusEnd$j = "Fi de pista";
+  var selectedTrack$i = "Pista seleccionada";
+  var alertDescribedVersion$i = "S'està utilitzant la versió amb audiodescripció del vídeo";
+  var alertNonDescribedVersion$i = "S'està utilitzant la versió sense audiodescripció del vídeo";
+  var prefMenuCaptions$j = "Subtítols";
   var prefVoicedCaptions$j = "Spoken Captions";
-  var prefMenuDescriptions$j = "Popisy";
-  var prefMenuKeyboard$j = "Klávesnice";
-  var prefMenuTranscript$j = "Přepis";
-  var prefTitleCaptions$j = "Předvolby titulků";
-  var prefTitleDescriptions$j = "Předvolby zvukového popisu";
-  var prefTitleKeyboard$j = "Předvolby klávesnice";
-  var prefTitleTranscript$i = "Předvolby přepisu";
-  var prefIntroDescription1$i = "Tento přehrávač médií podporuje zvukový popis dvěma způsoby:";
-  var prefDescription1$j = "Aktuální video má alternativně popsaná verze, textový popis.";
-  var prefDescription2$j = "Aktuální video má alternativní popsaná verze videa.";
-  var prefDescription3$j = "Aktuální video má textový popis, oznámený čtečkou obrazovky.";
-  var prefIntroDescriptionNone$j = "Aktuální video nemá žádný zvukový popis v žádném formátu.";
-  var prefIntroDescription3$j = "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.";
-  var prefIntroDescription4$j = "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.";
-  var prefIntroKeyboard1$j = "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).";
-  var prefIntroKeyboard2$j = "Níže lze přiřadit modifikační klávesy (Shift, Alt a Control).";
-  var prefIntroKeyboard3$j = "POZNÁMKA: Některé kombinace kláves mohou být v konfliktu s klávesami používanými vaším prohlížečem nebo jinými softwarovými aplikacemi. Zkuste najít různé kombinace modifikačních kláves, které vám vyhovují.";
-  var prefHeadingKeyboard1$j = "Modifikační klávesy používané pro zástupce";
-  var prefHeadingKeyboard2$j = "Aktuální klávesové zkratky";
-  var prefHeadingDescription$j = "Zvukový popis";
-  var prefHeadingTextDescription$j = "Textový zvukový popis";
+  var prefMenuDescriptions$j = "Descripcions";
+  var prefMenuKeyboard$j = "Teclat";
+  var prefMenuTranscript$j = "Transcripció";
+  var prefTitleCaptions$j = "Preferències dels subtítols";
+  var prefTitleDescriptions$j = "Preferències de l'audiodescripció";
+  var prefTitleKeyboard$j = "Preferències del teclat";
+  var prefTitleTranscript$i = "Preferències de la transcripció";
+  var prefIntroDescription1$i = "Aquest reproductor suporta l'audiodescripció de dues maneres: ";
+  var prefDescription1$j = "L'actual vídeo té una versió alternativa amb audiodescripció, descripció textual anunciada pel lector de pantalla.";
+  var prefDescription2$j = "L'actual vídeo té una versió alternativa amb audiodescripció.";
+  var prefDescription3$j = "L'actual vídeo té descripció textual.";
+  var prefDescriptionNone$j = "L'actual vídeo no disposa d'audiodescripció en cap format.";
+  var prefDescFormatOption1$j = "";
+  var prefDescFormatOption2$j = "";
+  var prefIntroDescription3$j = "Utilitzeu el formulari següent per definir les preferències relacionades amb l'audiodescripció textual.";
+  var prefIntroDescription4$j = "Desprès de desar la configuració, podeu commutar l'ús de l'audiodescripció amb el mateix botó.";
+  var prefIntroKeyboard1$j = "Aquest reproductor pot ser utilitzat des de qualsevol lloc de la pàgina utilitzant les dreceres de teclat (vegeu la llista a continuació).";
+  var prefIntroKeyboard2$j = "A continuació, podeu asignar les tecles modificadores (Majúscules, Alt, i la tecla d'inserció).";
+  var prefIntroKeyboard3$j = "NOTA: algunes combinacions de tecles poden entrar en conflicte amb les utilitzades pel navegador o altres aplicacions. Proveu diferents combinacions o tecles modificadores fins a trobar les adequades en cada cas.";
+  var prefHeadingKeyboard1$j = "Tecles modificadores emprades com a dreceres de teclat";
+  var prefHeadingKeyboard2$j = "Dreceres de teclat actuals";
+  var prefHeadingDescription$j = "Audiodescripció";
+  var prefHeadingTextDescription$j = "Audiodescripció textual";
   var prefAltKey$j = "Alt";
   var prefCtrlKey$j = "Control";
-  var prefShiftKey$j = "Shift";
-  var prefNoKeyShortcuts$j = "Disable keyboard shortcuts";
-  var escapeKey$j = "Escape";
-  var escapeKeyFunction$j = "Zavřít aktuální dialogové okno nebo vyskakovací nabídku";
-  var prefDescPause$j = "Automaticky pozastavit video při spuštění popisu";
-  var prefDescVisible$j = "Zviditelnit popis";
-  var prefDescVoice$j = "Voice";
+  var prefShiftKey$j = "Majúscula";
+  var prefNoKeyShortcuts$j = "Desactiva les dreceres de teclat";
+  var escapeKey$j = "Escapada";
+  var escapeKeyFunction$j = "Tanca el diàleg o finestre emergent actual";
+  var prefDescPause$j = "Pausa automàticament el vídeo en el moment que comenci una audiodescripció";
+  var prefDescVisible$j = "Fes visible la audiodescripció textual si es troba activada";
+  var prefDescVoice$j = "Veu";
   var prefDescRate$j = "Spoken Description Rate";
   var prefCaptionRate$j = "Spoken Caption Rate";
-  var prefDescPitch$j = "Pitch";
-  var prefDescPitch1$j = "Very low";
-  var prefDescPitch2$j = "Low";
-  var prefDescPitch3$j = "Default";
-  var prefDescPitch4$j = "High";
-  var prefDescPitch5$j = "Very high";
-  var sampleDescriptionText$j = "Adjust settings to hear this sample text.";
-  var prefHighlight$j = "Zvýraznit přepis při přehrávání médií";
-  var prefTabbable$j = "Přepis umožňující klávesnici";
-  var prefCaptionsFont$j = "Písmo";
-  var prefCaptionsColor$j = "Barva textu";
-  var prefCaptionsBGColor$j = "Pozadí";
-  var prefCaptionsSize$j = "Velikost písma";
-  var prefCaptionsOpacity$j = "Neprůhlednost";
-  var prefCaptionsStyle$j = "Styl";
-  var serif$j = "patkové";
-  var sans$j = "bezpatkové";
-  var cursive$j = "kurzíva";
-  var fantasy$j = "fantasy";
-  var monospace$j = "jednoprostorový";
-  var white$j = "bílá";
-  var yellow$j = "žlutá";
-  var green$j = "zelená";
-  var cyan$i = "azurová";
-  var blue$j = "modrá";
-  var magenta$j = "purpurová";
-  var red$j = "červená";
-  var black$j = "černá";
-  var transparent$j = "transparentní";
-  var solid$j = "jednolitý";
-  var captionsStylePopOn$j = "Vyskakovat";
-  var captionsStyleRollUp$j = "Srolovat";
-  var prefCaptionsPosition$j = "Pozice";
-  var captionsPositionOverlay$j = "Překrytí";
-  var captionsPositionBelow$j = "Níže video";
-  var sampleCaptionText$j = "Ukázkový text titulku";
-  var prefSuccess$j = "Vaše změny byly uloženy.";
-  var prefNoChange$j = "Neprovedli jste žádné změny.";
-  var save$j = "Uložit";
-  var cancel$j = "Zrušit";
-  var dismissButton$j = "Dismiss";
-  var windowButtonLabel$j = "Možnosti okna";
-  var windowMove$j = "Přesunout";
-  var windowMoveLeft$j = "Window moved left";
-  var windowMoveRight$j = "Window moved right";
-  var windowMoveUp$j = "Window moved up";
-  var windowMoveDown$j = "Window moved down";
-  var windowMoveStopped$j = "Window move stopped";
-  var transcriptControls$j = "Transcript Window Controls";
-  var signControls$j = "Sign Language Window Controls";
-  var windowMoveAlert$j = "Přetažením nebo použitím kláves se šipkami přesuňte okno; klávesou Enter zastavíte";
-  var windowResize$j = "Změnit velikost";
-  var windowResizeHeading$j = "Změnit velikost okna";
-  var closeButtonLabel$j = "Zavřít";
-  var width$j = "Šířka";
-  var height$j = "Výška";
-  var resultsSummary1$j = "Hledali jste:";
-  var resultsSummary2$j = "Nalezeno %1 odpovídající položky.";
-  var resultsSummary3$j = "Klepnutím na čas spojený s libovolnou položkou přehrajete video od tohoto bodu.";
-  var noResultsFound$j = "Nebyly nalezeny žádné výsledky.";
-  var searchButtonLabel$j = "Přehrát v %1";
-  var hour$j = "hodina";
-  var minuta = "minuta";
-  var second$j = "sekunda";
-  var hours$j = "hodiny";
-  var minutes$j = "minuty";
-  var seconds$j = "sekundy";
-  var vtsHeading$j = "Video Transcript Sorter";
-  var vtsInstructions1$j = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$j = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$j = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$j = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$j = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$j = "Select a language";
-  var vtsSave$j = "Generate new .vtt content";
-  var vtsReturn$j = "Return to Editor";
-  var vtsCancel$j = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$j = "Row";
-  var vtsKind$j = "Kind";
-  var vtsStart$j = "Start";
-  var vtsEnd$j = "End";
-  var vtsContent$j = "Content";
-  var vtsActions$j = "Actions";
-  var vtsNewRow$j = "A new row %1 has been inserted.";
-  var vtsDeletedRow$j = "Row %1 has been deleted.";
-  var vtsMovedRow$j = "Row %1 has been moved %2 and is now Row %3.";
-  var cs = {
+  var prefDescPitch$j = "Tonalitat";
+  var prefDescPitch1$j = "Molt baixa";
+  var prefDescPitch2$j = "Baixa";
+  var prefDescPitch3$j = "Per defecte";
+  var prefDescPitch4$j = "Alta";
+  var prefDescPitch5$j = "Molt alta";
+  var sampleDescriptionText$j = "Ajusta la configuració per escoltar aquest text de mostra.";
+  var prefHighlight$j = "Ressalta la transcripció a mesura que avança el contingut";
+  var prefTabbable$j = "Transcripció operable per teclat";
+  var prefCaptionsFont$j = "Tipus de lletra";
+  var prefCaptionsColor$j = "Color del text";
+  var prefCaptionsBGColor$j = "Fons";
+  var prefCaptionsSize$j = "Mida del text";
+  var prefCaptionsOpacity$j = "Opacitat";
+  var prefCaptionsStyle$j = "Estil";
+  var serif$j = "Serifa";
+  var sans$j = "Sensa serifa";
+  var cursive$j = "Cursiva";
+  var fantasy$j = "fantasia";
+  var monospace$j = "Monoespaiada";
+  var white$j = "Blanc";
+  var yellow$j = "Groc";
+  var green$j = "Verd";
+  var cyan$i = "Cian";
+  var blue$j = "Blau";
+  var magenta$j = "Magenta";
+  var red$j = "Vermell";
+  var black$j = "Negre";
+  var transparent$j = "transparent";
+  var solid$j = "Sòlid";
+  var captionsStylePopOn$j = "Aparició instantània";
+  var captionsStyleRollUp$j = "Desplaçament cap amunt";
+  var prefCaptionsPosition$j = "Posició";
+  var captionsPositionOverlay$j = "Superposició";
+  var captionsPositionBelow$j = "A continuació del vídeo";
+  var sampleCaptionText$j = "Text de mostra dels subtítols";
+  var prefSuccess$j = "S'han desat els canvis.";
+  var prefNoChange$j = "No s'ha fet cap canvi.";
+  var save$j = "Desa";
+  var cancel$j = "Cancel·la";
+  var dismissButton$j = "Ignora";
+  var windowButtonLabel$j = "Opcions de la finestra";
+  var windowMove$j = "Moure";
+  var windowMoveLeft$j = "Finestra desplaçada cap a l'esquerra";
+  var windowMoveRight$j = "Finestra desplaçada cap a la dreta";
+  var windowMoveUp$j = "Finestra desplaçada cap amunt";
+  var windowMoveDown$j = "Finestra desplaçada cap avall";
+  var windowMoveStopped$j = "S'ha aturat el desplaçament de la finestra";
+  var transcriptControls$j = "Controls de la finestra de transcripció";
+  var signControls$j = "Controls de la finestra de llengua de signes";
+  var windowMoveAlert$j = "Arrossegueu o feu servir les tecles de direcció per moure la finestra, polseu retorn per aturar.";
+  var windowResize$j = "Redimensiona";
+  var windowResizeHeading$j = "Redimensiona la finestra amb l'intèrpret";
+  var closeButtonLabel$j = "Tanca";
+  var width$j = "Amplada";
+  var height$j = "Alçada";
+  var resultsSummary1$j = "Heu cercat:";
+  var resultsSummary2$j = "S'han trobat %1 elements coincidents.";
+  var resultsSummary3$j = "Feu clic al moment associat a qualsevol element per reproduir el vídeo des d'aquell punt.";
+  var noResultsFound$j = "No s'han trobat resultats.";
+  var searchButtonLabel$j = "Reprodueix a %1";
+  var hour$j = "hora";
+  var minute$i = "minut";
+  var second$j = "segon";
+  var hours$j = "hores";
+  var minutes$j = "minuts";
+  var seconds$j = "segons";
+  var vtsHeading$j = "Gestor de transcripcions de vídeo";
+  var vtsInstructions1$j = "Utilitzeu el gestor de transcripcions de vídeo per modificar les pistes de text:";
+  var vtsInstructions2$j = "Reordeneu capítols, descripcions, subtítols o subtítols per a persones sordes perquè apareguin en la seqüència correcta a la transcripció generada automàticament per Able Player.";
+  var vtsInstructions3$j = "Modifiqueu el contingut o els temps d'inici i final (tots són editables directament a la taula).";
+  var vtsInstructions4$j = "Afegiu contingut nou, com ara capítols o descripcions.";
+  var vtsInstructions5$j = "Després d'editar, feu clic al botó \"Desa els canvis\" per generar contingut nou per a tots els fitxers de text temporitzat rellevants. El text nou es pot copiar i enganxar en fitxers WebVTT nous.";
+  var vtsSelectLanguage$j = "Seleccioneu una llengua";
+  var vtsSave$j = "Genera contingut .vtt nou";
+  var vtsReturn$j = "Torna a l'editor";
+  var vtsCancel$j = "S'ha cancel·lat el desament. Totes les edicions que heu fet s'han restaurat a la taula del GTV.";
+  var vtsRow$j = "Fila";
+  var vtsKind$j = "Tipus";
+  var vtsStart$j = "Inici";
+  var vtsEnd$j = "Final";
+  var vtsContent$j = "Contingut";
+  var vtsActions$j = "Accions";
+  var vtsNewRow$j = "S'ha inserit una fila nova %1.";
+  var vtsDeletedRow$j = "S'ha suprimit la fila %1.";
+  var vtsMovedRow$j = "La fila %1 s'ha mogut %2 i ara és la fila %3.";
+  var ca = {
   	playerHeading: playerHeading$j,
   	audioPlayer: audioPlayer$j,
   	videoPlayer: videoPlayer$j,
@@ -14528,6 +15642,8 @@
   	enterFullScreen: enterFullScreen$j,
   	exitFullScreen: exitFullScreen$j,
   	speed: speed$j,
+  	on: on$j,
+  	off: off$j,
   	spacebar: spacebar$j,
   	transcriptTitle: transcriptTitle$j,
   	lyricsTitle: lyricsTitle$j,
@@ -14538,8 +15654,8 @@
   	statusBuffering: statusBuffering$j,
   	statusEnd: statusEnd$j,
   	selectedTrack: selectedTrack$i,
-  	alertDescribVersion: alertDescribVersion,
-  	alertNonDescribVersion: alertNonDescribVersion,
+  	alertDescribedVersion: alertDescribedVersion$i,
+  	alertNonDescribedVersion: alertNonDescribedVersion$i,
   	prefMenuCaptions: prefMenuCaptions$j,
   	prefVoicedCaptions: prefVoicedCaptions$j,
   	prefMenuDescriptions: prefMenuDescriptions$j,
@@ -14553,7 +15669,9 @@
   	prefDescription1: prefDescription1$j,
   	prefDescription2: prefDescription2$j,
   	prefDescription3: prefDescription3$j,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$j,
+  	prefDescriptionNone: prefDescriptionNone$j,
+  	prefDescFormatOption1: prefDescFormatOption1$j,
+  	prefDescFormatOption2: prefDescFormatOption2$j,
   	prefIntroDescription3: prefIntroDescription3$j,
   	prefIntroDescription4: prefIntroDescription4$j,
   	prefIntroKeyboard1: prefIntroKeyboard1$j,
@@ -14636,7 +15754,7 @@
   	noResultsFound: noResultsFound$j,
   	searchButtonLabel: searchButtonLabel$j,
   	hour: hour$j,
-  	minuta: minuta,
+  	minute: minute$i,
   	second: second$j,
   	hours: hours$j,
   	minutes: minutes$j,
@@ -14662,129 +15780,133 @@
   	vtsMovedRow: vtsMovedRow$j
   };
 
-  var playerHeading$i = "Medieafspiller";
+  var playerHeading$i = "Přehrávač médií";
   var audioPlayer$i = "Audio player";
   var videoPlayer$i = "Video player";
-  var faster$i = "Hurtigere";
-  var slower$i = "Langsommere";
-  var play$i = "Afspil";
-  var pause$i = "Pause";
-  var restart$i = "Genstart";
-  var prevTrack$i = "Forrige spor";
-  var nextTrack$i = "Næste spor";
-  var rewind$i = "Spol tilbage";
-  var forward$i = "Spol frem";
-  var captions$i = "Undertekster";
-  var showCaptions$i = "Vis undertekster";
-  var hideCaptions$i = "Gem undertekster";
-  var captionsOff$i = "Slå undertekster fra";
-  var showTranscript$i = "Vis transskription";
-  var hideTranscript$i = "Gem transskription";
-  var turnOnDescriptions$i = "Start synstolkning";
-  var turnOffDescriptions$i = "Stop synstolkning";
-  var chapters$i = "Kapitler";
-  var language$i = "Sprog";
-  var sign$i = "Tegnsprog";
-  var showSign$i = "Vis tegnsprog";
-  var hideSign$i = "Gen tegnsprog";
-  var seekbarLabel$i = "tidslinie";
-  var mute$i = "Stop lyd";
-  var unmute$i = "Start lyd";
-  var volume$i = "Lydstyrke";
-  var volumeUpDown$i = "Lydstyrke op";
-  var preferences$i = "Indstillinger";
-  var enterFullScreen$i = "Vis i fuldskærm";
-  var exitFullScreen$i = "Afslut fuldskærmsvisning";
-  var speed$i = "Hastighed";
-  var spacebar$i = "mellemrumstast";
-  var transcriptTitle$i = "Transskription";
-  var lyricsTitle$i = "Lyrik";
-  var autoScroll$i = "Auto scroll";
-  var statusPlaying$i = "Afspiller";
-  var statusPaused$i = "På pause";
-  var statusStopped$i = "Stoppet";
-  var statusBuffering$i = "Henter data";
-  var statusEnd$i = "Slut på spor";
-  var selectedTrack$h = "Valgt spor";
-  var alertDescribedVersion$i = "Anvender synstolket version af denne video";
-  var alertNonDescribedVersion$i = "Anvende ikke synstolket version af denne video";
-  var prefMenuCaptions$i = "Undertekster";
+  var faster$i = "Rychleji: %1x";
+  var slower$i = "Pomaleji: %1x";
+  var play$i = "Spustit";
+  var pause$i = "Pauza";
+  var restart$i = "Přehrát od začátku";
+  var prevTrack$i = "Předchozí stopa";
+  var nextTrack$i = "Další stopa";
+  var rewind$i = "Přetočit vzad %1 sekund";
+  var forward$i = "Přetočit vpřed %1 sekund";
+  var captions$i = "Titulky";
+  var showCaptions$i = "Zobrazit titulky";
+  var hideCaptions$i = "Skrýt titulky";
+  var captionsOff$i = "Titulky vypnuty";
+  var showTranscript$i = "Zobrazit přepis";
+  var hideTranscript$i = "Skrýt přepis";
+  var turnOnDescriptions$i = "Zapnout popisy";
+  var turnOffDescriptions$i = "vypnout popisy";
+  var chapters$i = "Kapitoly";
+  var language$i = "Jazyk";
+  var sign$i = "Znaková řeč";
+  var showSign$i = "Zobrazit znakovou řeč";
+  var hideSign$i = "Skrýt znakovou řeč";
+  var seekbarLabel$i = "časová osa";
+  var mute$i = "Vypnout zvuk";
+  var unmute$i = "Zapnout zvuk";
+  var volume$i = "Hlasitost";
+  var volumeUpDown$i = "Hlasitost zvýšit snížit";
+  var preferences$i = "Předvolby";
+  var enterFullScreen$i = "Zobrazit na celou obrazovku";
+  var exitFullScreen$i = "Ukončit celou obrazovku";
+  var speed$i = "Rychlost";
+  var on$i = "";
+  var off$i = "";
+  var spacebar$i = "mezerník";
+  var transcriptTitle$i = "Přepis";
+  var lyricsTitle$i = "Text";
+  var autoScroll$i = "Automatické posouvání";
+  var statusPlaying$i = "Přehrávání";
+  var statusPaused$i = "Pozastaveno";
+  var statusStopped$i = "Zastaveno";
+  var statusBuffering$i = "Vyrovnávací paměť";
+  var statusEnd$i = "Konec stopy";
+  var selectedTrack$h = "Vybraná stopa";
+  var alertDescribVersion = "Používání zvukově popsané verze tohoto videa";
+  var alertNonDescribVersion = "Použití nepopsané verze tohoto videa";
+  var prefMenuCaptions$i = "Titulky";
   var prefVoicedCaptions$i = "Spoken Captions";
-  var prefMenuDescriptions$i = "Synstolkning";
-  var prefMenuKeyboard$i = "Tastatur";
-  var prefMenuTranscript$i = "Transkript";
-  var prefTitleCaptions$i = "Indstillinger for undertekster";
-  var prefTitleDescriptions$i = "Indstillinger for synstolkning";
-  var prefTitleKeyboard$i = "Indstillinger for tastatur";
-  var prefTitleTranscript$h = "Indstillinger for transskription";
-  var prefIntroDescription1$h = "Denne medieafspiller understøtter audio på to måder: ";
-  var prefDescription1$i = "Nuværende videoer har en alternativ synstolket version, textbaseret synstolkning.";
-  var prefDescription2$i = "Nuværende videoer har alternativ synstolket version af videoen.";
-  var prefDescription3$i = "Nuværende videoer har textbaseret synstolkning.";
-  var prefIntroDescriptionNone$i = "Nuværende video har ingen synstolkning i noget format.";
-  var prefIntroDescription3$i = "Anvende følgende formular for at indstille gældende textbasererede synstolkning.";
-  var prefIntroDescription4$i = "Efter du gemmer dine indstillinger, kan synstolkning slåes til og fra med synstolkningsknappen.";
-  var prefIntroKeyboard1$i = "Medieafspilleren på denne webside kan betjenest med tastuturgenveje (se neden for en liste).";
-  var prefIntroKeyboard2$i = "Meta-taster (Shift, Alt, og Ctrl) kan tildeles nedenfor.";
-  var prefIntroKeyboard3$i = "BEMÆRK: Visse tastekombinationer kan være i konflikt med din webbrowser eller andre programmers indstillinger. Benyt de tastekombinationer der virker for dig.";
-  var prefHeadingKeyboard1$i = "Metataster brugt til genveje";
-  var prefHeadingKeyboard2$i = "Nuværende tastatur genveje";
-  var prefHeadingDescription$i = "Synstolkning";
-  var prefHeadingTextDescription$i = "Tekstbaseret synstolkning";
+  var prefMenuDescriptions$i = "Popisy";
+  var prefMenuKeyboard$i = "Klávesnice";
+  var prefMenuTranscript$i = "Přepis";
+  var prefTitleCaptions$i = "Předvolby titulků";
+  var prefTitleDescriptions$i = "Předvolby zvukového popisu";
+  var prefTitleKeyboard$i = "Předvolby klávesnice";
+  var prefTitleTranscript$h = "Předvolby přepisu";
+  var prefIntroDescription1$h = "Tento přehrávač médií podporuje zvukový popis dvěma způsoby:";
+  var prefDescription1$i = "Aktuální video má alternativně popsaná verze, textový popis.";
+  var prefDescription2$i = "Aktuální video má alternativní popsaná verze videa.";
+  var prefDescription3$i = "Aktuální video má textový popis, oznámený čtečkou obrazovky.";
+  var prefDescriptionNone$i = "Aktuální video nemá žádný zvukový popis v žádném formátu.";
+  var prefDescFormatOption1$i = "";
+  var prefDescFormatOption2$i = "";
+  var prefIntroDescription3$i = "Pomocí následujícího formuláře můžete nastavit předvolby týkající se textového zvukového popisu.";
+  var prefIntroDescription4$i = "Po uložení nastavení lze zvukový popis zapnout / vypnout pomocí tlačítka Popis.";
+  var prefIntroKeyboard1$i = "Přehrávač médií na této webové stránce lze ovládat odkudkoli na stránce pomocí klávesových zkratek (seznam níže).";
+  var prefIntroKeyboard2$i = "Níže lze přiřadit modifikační klávesy (Shift, Alt a Control).";
+  var prefIntroKeyboard3$i = "POZNÁMKA: Některé kombinace kláves mohou být v konfliktu s klávesami používanými vaším prohlížečem nebo jinými softwarovými aplikacemi. Zkuste najít různé kombinace modifikačních kláves, které vám vyhovují.";
+  var prefHeadingKeyboard1$i = "Modifikační klávesy používané pro zástupce";
+  var prefHeadingKeyboard2$i = "Aktuální klávesové zkratky";
+  var prefHeadingDescription$i = "Zvukový popis";
+  var prefHeadingTextDescription$i = "Textový zvukový popis";
   var prefAltKey$i = "Alt";
-  var prefCtrlKey$i = "Ctrl";
+  var prefCtrlKey$i = "Control";
   var prefShiftKey$i = "Shift";
   var prefNoKeyShortcuts$i = "Disable keyboard shortcuts";
   var escapeKey$i = "Escape";
-  var escapeKeyFunction$i = "Luk nuværinde dialog eller popup-menu";
-  var prefDescPause$i = "Pause automatisk video når synstolkning starter";
-  var prefDescVisible$i = "Vis synstolkning";
-  var prefDescVoice$i = "Stemme";
+  var escapeKeyFunction$i = "Zavřít aktuální dialogové okno nebo vyskakovací nabídku";
+  var prefDescPause$i = "Automaticky pozastavit video při spuštění popisu";
+  var prefDescVisible$i = "Zviditelnit popis";
+  var prefDescVoice$i = "Voice";
   var prefDescRate$i = "Spoken Description Rate";
   var prefCaptionRate$i = "Spoken Caption Rate";
-  var prefDescPitch$i = "Tonehøjde";
-  var prefDescPitch1$i = "Meget lavt";
-  var prefDescPitch2$i = "Lavt";
-  var prefDescPitch3$i = "Normal";
-  var prefDescPitch4$i = "Højt";
-  var prefDescPitch5$i = "Meget højt";
-  var sampleDescriptionText$i = "Juster indstillinger for at høre denne eksempel tekst.";
-  var prefHighlight$i = "Marker tekst som læses op i transskriptet";
-  var prefTabbable$i = "Tastaturaktiveret transskription";
-  var prefCaptionsFont$i = "Skrifttype";
-  var prefCaptionsColor$i = "Tekstfarve";
-  var prefCaptionsBGColor$i = "Baggrundsfarve";
-  var prefCaptionsSize$i = "Tekststørrelse";
-  var prefCaptionsOpacity$i = "Gennemsigtighed";
-  var prefCaptionsStyle$i = "Teksttype";
-  var serif$i = "serif";
-  var sans$i = "sans-serif";
-  var cursive$i = "kursiv";
-  var fantasy$i = "fantasi";
-  var monospace$i = "monospace";
-  var white$i = "hvid";
-  var yellow$i = "gul";
-  var green$i = "grøn";
-  var cyan$h = "cyan";
-  var blue$i = "blå";
-  var magenta$i = "lilla";
-  var red$i = "rød";
-  var black$i = "sort";
-  var transparent$i = "gennemsigtig";
-  var solid$i = "massiv";
-  var captionsStylePopOn$i = "Pop op";
-  var captionsStyleRollUp$i = "Pop ned";
-  var prefCaptionsPosition$i = "Position";
-  var captionsPositionOverlay$i = "Vis over video";
-  var captionsPositionBelow$i = "Vis under video";
-  var sampleCaptionText$i = "Eksempel på undertekst";
-  var prefSuccess$i = "Dine ændringer er gemt.";
-  var prefNoChange$i = "Du har ikke lavet nogen ændringer.";
-  var save$i = "Gem";
-  var cancel$i = "Afbryd";
+  var prefDescPitch$i = "Pitch";
+  var prefDescPitch1$i = "Very low";
+  var prefDescPitch2$i = "Low";
+  var prefDescPitch3$i = "Default";
+  var prefDescPitch4$i = "High";
+  var prefDescPitch5$i = "Very high";
+  var sampleDescriptionText$i = "Adjust settings to hear this sample text.";
+  var prefHighlight$i = "Zvýraznit přepis při přehrávání médií";
+  var prefTabbable$i = "Přepis umožňující klávesnici";
+  var prefCaptionsFont$i = "Písmo";
+  var prefCaptionsColor$i = "Barva textu";
+  var prefCaptionsBGColor$i = "Pozadí";
+  var prefCaptionsSize$i = "Velikost písma";
+  var prefCaptionsOpacity$i = "Neprůhlednost";
+  var prefCaptionsStyle$i = "Styl";
+  var serif$i = "patkové";
+  var sans$i = "bezpatkové";
+  var cursive$i = "kurzíva";
+  var fantasy$i = "fantasy";
+  var monospace$i = "jednoprostorový";
+  var white$i = "bílá";
+  var yellow$i = "žlutá";
+  var green$i = "zelená";
+  var cyan$h = "azurová";
+  var blue$i = "modrá";
+  var magenta$i = "purpurová";
+  var red$i = "červená";
+  var black$i = "černá";
+  var transparent$i = "transparentní";
+  var solid$i = "jednolitý";
+  var captionsStylePopOn$i = "Vyskakovat";
+  var captionsStyleRollUp$i = "Srolovat";
+  var prefCaptionsPosition$i = "Pozice";
+  var captionsPositionOverlay$i = "Překrytí";
+  var captionsPositionBelow$i = "Níže video";
+  var sampleCaptionText$i = "Ukázkový text titulku";
+  var prefSuccess$i = "Vaše změny byly uloženy.";
+  var prefNoChange$i = "Neprovedli jste žádné změny.";
+  var save$i = "Uložit";
+  var cancel$i = "Zrušit";
   var dismissButton$i = "Dismiss";
-  var windowButtonLabel$i = "Vindueindstillinger";
-  var windowMove$i = "Flyt";
+  var windowButtonLabel$i = "Možnosti okna";
+  var windowMove$i = "Přesunout";
   var windowMoveLeft$i = "Window moved left";
   var windowMoveRight$i = "Window moved right";
   var windowMoveUp$i = "Window moved up";
@@ -14792,43 +15914,43 @@
   var windowMoveStopped$i = "Window move stopped";
   var transcriptControls$i = "Transcript Window Controls";
   var signControls$i = "Sign Language Window Controls";
-  var windowMoveAlert$i = "Flyt med mus eller anvende piletasterne for at flytte vinduer; Enter for at slutte";
-  var windowResize$i = "Ændre størrelse";
-  var windowResizeHeading$i = "Ændre vinduestørrelse";
-  var closeButtonLabel$i = "Luk";
-  var width$i = "Bredde";
-  var height$i = "Højde";
-  var resultsSummary1$i = "Du søgte efter:";
-  var resultsSummary2$i = "Fundne %1 matchende indhold.";
-  var resultsSummary3$i = "Klik på tidslinien for at afspille derfra.";
-  var noResultsFound$i = "Ingen resultater.";
-  var searchButtonLabel$i = "Afspil fra %1";
-  var hour$i = "time";
-  var minute$i = "minut";
-  var second$i = "sekund";
-  var hours$i = "timer";
-  var minutes$i = "minutter";
-  var seconds$i = "sekunder";
-  var vtsHeading$i = "Video Transcript Sorter";
-  var vtsInstructions1$i = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$i = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$i = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$i = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$i = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$i = "Select a language";
-  var vtsSave$i = "Generate new .vtt content";
-  var vtsReturn$i = "Return to Editor";
-  var vtsCancel$i = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$i = "Row";
-  var vtsKind$i = "Kind";
-  var vtsStart$i = "Start";
-  var vtsEnd$i = "End";
-  var vtsContent$i = "Content";
-  var vtsActions$i = "Actions";
-  var vtsNewRow$i = "A new row %1 has been inserted.";
-  var vtsDeletedRow$i = "Row %1 has been deleted.";
-  var vtsMovedRow$i = "Row %1 has been moved %2 and is now Row %3.";
-  var da = {
+  var windowMoveAlert$i = "Přetažením nebo použitím kláves se šipkami přesuňte okno; klávesou Enter zastavíte";
+  var windowResize$i = "Změnit velikost";
+  var windowResizeHeading$i = "Změnit velikost okna";
+  var closeButtonLabel$i = "Zavřít";
+  var width$i = "Šířka";
+  var height$i = "Výška";
+  var resultsSummary1$i = "Hledali jste:";
+  var resultsSummary2$i = "Nalezeno %1 odpovídající položky.";
+  var resultsSummary3$i = "Klepnutím na čas spojený s libovolnou položkou přehrajete video od tohoto bodu.";
+  var noResultsFound$i = "Nebyly nalezeny žádné výsledky.";
+  var searchButtonLabel$i = "Přehrát v %1";
+  var hour$i = "hodina";
+  var minuta = "minuta";
+  var second$i = "sekunda";
+  var hours$i = "hodiny";
+  var minutes$i = "minuty";
+  var seconds$i = "sekundy";
+  var vtsHeading$i = "";
+  var vtsInstructions1$i = "";
+  var vtsInstructions2$i = "";
+  var vtsInstructions3$i = "";
+  var vtsInstructions4$i = "";
+  var vtsInstructions5$i = "";
+  var vtsSelectLanguage$i = "";
+  var vtsSave$i = "";
+  var vtsReturn$i = "";
+  var vtsCancel$i = "";
+  var vtsRow$i = "";
+  var vtsKind$i = "";
+  var vtsStart$i = "";
+  var vtsEnd$i = "";
+  var vtsContent$i = "";
+  var vtsActions$i = "";
+  var vtsNewRow$i = "";
+  var vtsDeletedRow$i = "";
+  var vtsMovedRow$i = "";
+  var cs = {
   	playerHeading: playerHeading$i,
   	audioPlayer: audioPlayer$i,
   	videoPlayer: videoPlayer$i,
@@ -14863,6 +15985,8 @@
   	enterFullScreen: enterFullScreen$i,
   	exitFullScreen: exitFullScreen$i,
   	speed: speed$i,
+  	on: on$i,
+  	off: off$i,
   	spacebar: spacebar$i,
   	transcriptTitle: transcriptTitle$i,
   	lyricsTitle: lyricsTitle$i,
@@ -14873,8 +15997,8 @@
   	statusBuffering: statusBuffering$i,
   	statusEnd: statusEnd$i,
   	selectedTrack: selectedTrack$h,
-  	alertDescribedVersion: alertDescribedVersion$i,
-  	alertNonDescribedVersion: alertNonDescribedVersion$i,
+  	alertDescribVersion: alertDescribVersion,
+  	alertNonDescribVersion: alertNonDescribVersion,
   	prefMenuCaptions: prefMenuCaptions$i,
   	prefVoicedCaptions: prefVoicedCaptions$i,
   	prefMenuDescriptions: prefMenuDescriptions$i,
@@ -14888,7 +16012,9 @@
   	prefDescription1: prefDescription1$i,
   	prefDescription2: prefDescription2$i,
   	prefDescription3: prefDescription3$i,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$i,
+  	prefDescriptionNone: prefDescriptionNone$i,
+  	prefDescFormatOption1: prefDescFormatOption1$i,
+  	prefDescFormatOption2: prefDescFormatOption2$i,
   	prefIntroDescription3: prefIntroDescription3$i,
   	prefIntroDescription4: prefIntroDescription4$i,
   	prefIntroKeyboard1: prefIntroKeyboard1$i,
@@ -14971,7 +16097,7 @@
   	noResultsFound: noResultsFound$i,
   	searchButtonLabel: searchButtonLabel$i,
   	hour: hour$i,
-  	minute: minute$i,
+  	minuta: minuta,
   	second: second$i,
   	hours: hours$i,
   	minutes: minutes$i,
@@ -14997,179 +16123,182 @@
   	vtsMovedRow: vtsMovedRow$i
   };
 
-  var playerHeading$h = "Medienplayer";
-  var audioPlayer$h = "Audioplayer";
-  var videoPlayer$h = "Videoplayer";
-  var faster$h = "Schneller";
-  var slower$h = "Langsamer";
-  var chapters$h = "Kapitel";
-  var play$h = "Abspielen";
+  var playerHeading$h = "Medieafspiller";
+  var audioPlayer$h = "Audio player";
+  var videoPlayer$h = "Video player";
+  var faster$h = "Hurtigere: %1x";
+  var slower$h = "Langsommere: %1x";
+  var play$h = "Afspil";
   var pause$h = "Pause";
-  var restart$h = "Neustart";
-  var prevTrack$h = "Vorheriger Titel";
-  var nextTrack$h = "Nächster Titel";
-  var rewind$h = "Zurück";
-  var forward$h = "Vorwärts";
-  var captions$h = "Untertitel";
-  var showCaptions$h = "Untertitel anzeigen";
-  var hideCaptions$h = "Untertitel ausblenden";
-  var captionsOff$h = "Untertitel ausschalten";
-  var showTranscript$h = "Transkription anzeigen";
-  var hideTranscript$h = "Transkription entfernen";
-  var turnOnDescriptions$h = "Audiobeschreibung einschalten";
-  var turnOffDescriptions$h = "Audiobeschreibung ausschalten";
-  var language$h = "Sprache";
-  var sign$h = "Gebärdensprache";
-  var showSign$h = "Gebärdensprache anzeigen";
-  var hideSign$h = "Gebärdensprache ausblenden";
-  var seekbarLabel$h = "Suchleiste";
-  var mute$h = "Ton aus";
-  var unmute$h = "Ton an";
-  var volume$h = "Lautstärke";
-  var volumeUpDown$h = "Lautstärkeregler";
-  var preferences$h = "Einstellungen";
-  var enterFullScreen$h = "Vollbildmodus einschalten";
-  var exitFullScreen$h = "Vollbildmodus verlassen";
-  var speed$h = "Geschwindigkeit";
-  var spacebar$h = "Leertaste";
-  var transcriptTitle$h = "Transkription";
-  var lyricsTitle$h = "Text";
-  var autoScroll$h = "Automatisch scrollen";
-  var statusPlaying$h = "Gestartet";
-  var statusPaused$h = "Pausiert";
-  var statusStopped$h = "Angehalten";
-  var statusBuffering$h = "Daten werden empfangen...";
-  var statusEnd$h = "Ende des Titels";
-  var selectedTrack$g = "Ausgewählter Titel";
-  var alertDescribedVersion$h = "Das Video wird mit Audiobeschreibung abgespielt";
-  var alertNonDescribedVersion$h = "Das Video wird ohne Audiobeschreibung abgespielt";
-  var prefMenuCaptions$h = "Untertitel";
+  var restart$h = "Genstart";
+  var prevTrack$h = "Forrige spor";
+  var nextTrack$h = "Næste spor";
+  var rewind$h = "Spol tilbage %1 sekunder";
+  var forward$h = "Spol frem %1 sekunder";
+  var captions$h = "Undertekster";
+  var showCaptions$h = "Vis undertekster";
+  var hideCaptions$h = "Gem undertekster";
+  var captionsOff$h = "Slå undertekster fra";
+  var showTranscript$h = "Vis transskription";
+  var hideTranscript$h = "Gem transskription";
+  var turnOnDescriptions$h = "Start synstolkning";
+  var turnOffDescriptions$h = "Stop synstolkning";
+  var chapters$h = "Kapitler";
+  var language$h = "Sprog";
+  var sign$h = "Tegnsprog";
+  var showSign$h = "Vis tegnsprog";
+  var hideSign$h = "Gen tegnsprog";
+  var seekbarLabel$h = "tidslinie";
+  var mute$h = "Stop lyd";
+  var unmute$h = "Start lyd";
+  var volume$h = "Lydstyrke";
+  var volumeUpDown$h = "Lydstyrke op";
+  var preferences$h = "Indstillinger";
+  var enterFullScreen$h = "Vis i fuldskærm";
+  var exitFullScreen$h = "Afslut fuldskærmsvisning";
+  var speed$h = "Hastighed";
+  var on$h = "";
+  var off$h = "";
+  var spacebar$h = "mellemrumstast";
+  var transcriptTitle$h = "Transskription";
+  var lyricsTitle$h = "Lyrik";
+  var autoScroll$h = "Auto scroll";
+  var statusPlaying$h = "Afspiller";
+  var statusPaused$h = "På pause";
+  var statusStopped$h = "Stoppet";
+  var statusBuffering$h = "Henter data";
+  var statusEnd$h = "Slut på spor";
+  var selectedTrack$g = "Valgt spor";
+  var alertDescribedVersion$h = "Anvender synstolket version af denne video";
+  var alertNonDescribedVersion$h = "Anvende ikke synstolket version af denne video";
+  var prefMenuCaptions$h = "Undertekster";
   var prefVoicedCaptions$h = "Spoken Captions";
-  var prefMenuDescriptions$h = "Audiobeschreibungen";
+  var prefMenuDescriptions$h = "Synstolkning";
   var prefMenuKeyboard$h = "Tastatur";
-  var prefMenuTranscript$h = "Transkription";
-  var prefTitleCaptions$h = "Untertitel Einstellungen";
-  var prefTitleDescriptions$h = "Audiobeschreibung Einstellungen";
-  var prefTitleKeyboard$h = "Tastatur Einstellungen";
-  var prefTitleTranscript$g = "Transkription Einstellungen";
-  var prefIntroDescription1$g = "Dieser Media Player unterstützt zwei Arten von Untertiteln: ";
-  var prefDescription1$h = "Das aktuelle Video hat eine alternative Version der Audiobeschreibung, eine textbasierte Audiobeschreibung.";
-  var prefDescription2$h = "Das aktuelle Video hat Version des Videos, die eine Audiobeschreibung enthält.";
-  var prefDescription3$h = "Das aktuelle Video hat Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird.";
-  var prefIntroDescriptionNone$h = "Das aktuelle Video hat keine Audiobeschreibung.";
-  var prefIntroDescription3$h = "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.";
-  var prefIntroDescription4$h = "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.";
-  var prefIntroKeyboard1$h = "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).";
-  var prefIntroKeyboard2$h = "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.";
-  var prefIntroKeyboard3$h = "Achtung: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.";
-  var prefHeadingKeyboard1$h = "Modifikatortasten für die Tastenkürzel";
-  var prefHeadingKeyboard2$h = "Aktuell eingestellte Tastenkürzel";
-  var prefHeadingDescription$h = "Audiobeschreibung";
-  var prefHeadingTextDescription$h = "Textbasierte Audiobeschreibung";
+  var prefMenuTranscript$h = "Transkript";
+  var prefTitleCaptions$h = "Indstillinger for undertekster";
+  var prefTitleDescriptions$h = "Indstillinger for synstolkning";
+  var prefTitleKeyboard$h = "Indstillinger for tastatur";
+  var prefTitleTranscript$g = "Indstillinger for transskription";
+  var prefIntroDescription1$g = "Denne medieafspiller understøtter audio på to måder: ";
+  var prefDescription1$h = "Nuværende videoer har en alternativ synstolket version, textbaseret synstolkning.";
+  var prefDescription2$h = "Nuværende videoer har alternativ synstolket version af videoen.";
+  var prefDescription3$h = "Nuværende videoer har textbaseret synstolkning.";
+  var prefDescriptionNone$h = "Nuværende video har ingen synstolkning i noget format.";
+  var prefDescFormatOption1$h = "";
+  var prefDescFormatOption2$h = "";
+  var prefIntroDescription3$h = "Anvende følgende formular for at indstille gældende textbasererede synstolkning.";
+  var prefIntroDescription4$h = "Efter du gemmer dine indstillinger, kan synstolkning slåes til og fra med synstolkningsknappen.";
+  var prefIntroKeyboard1$h = "Medieafspilleren på denne webside kan betjenest med tastuturgenveje (se neden for en liste).";
+  var prefIntroKeyboard2$h = "Meta-taster (Shift, Alt, og Ctrl) kan tildeles nedenfor.";
+  var prefIntroKeyboard3$h = "BEMÆRK: Visse tastekombinationer kan være i konflikt med din webbrowser eller andre programmers indstillinger. Benyt de tastekombinationer der virker for dig.";
+  var prefHeadingKeyboard1$h = "Metataster brugt til genveje";
+  var prefHeadingKeyboard2$h = "Nuværende tastatur genveje";
+  var prefHeadingDescription$h = "Synstolkning";
+  var prefHeadingTextDescription$h = "Tekstbaseret synstolkning";
   var prefAltKey$h = "Alt";
-  var prefCtrlKey$h = "Strg";
-  var prefShiftKey$h = "Umschalttaste";
-  var prefNoKeyShortcuts$h = "Tastenkombinationen deaktivieren";
-  var escapeKey$h = "ESC Taste";
-  var escapeKeyFunction$h = "Dialogfenster schließen";
-  var prefDescPause$h = "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden";
-  var prefDescVisible$h = "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind";
-  var prefDescVoice$h = "Stimme";
+  var prefCtrlKey$h = "Ctrl";
+  var prefShiftKey$h = "Shift";
+  var prefNoKeyShortcuts$h = "Disable keyboard shortcuts";
+  var escapeKey$h = "Escape";
+  var escapeKeyFunction$h = "Luk nuværinde dialog eller popup-menu";
+  var prefDescPause$h = "Pause automatisk video når synstolkning starter";
+  var prefDescVisible$h = "Vis synstolkning";
+  var prefDescVoice$h = "Stemme";
   var prefDescRate$h = "Spoken Description Rate";
   var prefCaptionRate$h = "Spoken Caption Rate";
-  var prefDescPitch$h = "Tonlage";
-  var prefDescPitch1$h = "Sehr tief";
-  var prefDescPitch2$h = "Tief";
-  var prefDescPitch3$h = "Mittel";
-  var prefDescPitch4$h = "Hoch";
-  var prefDescPitch5$h = "Sehr hoch";
-  var sampleDescriptionText$h = "Einstellungen bearbeiten um diesen Text vorzulesen.";
-  var prefHighlight$h = "Transkription hervorheben, während das Medium abgespielt wird";
-  var prefTabbable$h = "Transkription per Tastatur ein-/ausschaltbar machen";
-  var prefCaptionsFont$h = "Schriftart";
-  var prefCaptionsColor$h = "Schriftfarbe";
-  var prefCaptionsBGColor$h = "Hintergrund";
-  var prefCaptionsSize$h = "Schriftgöße";
-  var prefCaptionsOpacity$h = "Deckkraft";
-  var prefCaptionsStyle$h = "Stil";
-  var serif$h = "Serifenschrift";
-  var sans$h = "Serifenlose Schrift";
+  var prefDescPitch$h = "Tonehøjde";
+  var prefDescPitch1$h = "Meget lavt";
+  var prefDescPitch2$h = "Lavt";
+  var prefDescPitch3$h = "Normal";
+  var prefDescPitch4$h = "Højt";
+  var prefDescPitch5$h = "Meget højt";
+  var sampleDescriptionText$h = "Juster indstillinger for at høre denne eksempel tekst.";
+  var prefHighlight$h = "Marker tekst som læses op i transskriptet";
+  var prefTabbable$h = "Tastaturaktiveret transskription";
+  var prefCaptionsFont$h = "Skrifttype";
+  var prefCaptionsColor$h = "Tekstfarve";
+  var prefCaptionsBGColor$h = "Baggrundsfarve";
+  var prefCaptionsSize$h = "Tekststørrelse";
+  var prefCaptionsOpacity$h = "Gennemsigtighed";
+  var prefCaptionsStyle$h = "Teksttype";
+  var serif$h = "serif";
+  var sans$h = "sans-serif";
   var cursive$h = "kursiv";
-  var fantasy$h = "Fantasieschrift";
-  var monospace$h = "nichtproportionale Schrift";
-  var white$h = "weiß";
-  var yellow$h = "gelb";
-  var green$h = "grün";
+  var fantasy$h = "fantasi";
+  var monospace$h = "monospace";
+  var white$h = "hvid";
+  var yellow$h = "gul";
+  var green$h = "grøn";
   var cyan$g = "cyan";
-  var blue$h = "blau";
-  var magenta$h = "magenta";
-  var red$h = "rot";
-  var black$h = "schwarz";
-  var transparent$h = "transparent";
-  var solid$h = "undurchsichtig";
-  var captionsStylePopOn$h = "Pop-on";
-  var captionsStyleRollUp$h = "Roll-up";
+  var blue$h = "blå";
+  var magenta$h = "lilla";
+  var red$h = "rød";
+  var black$h = "sort";
+  var transparent$h = "gennemsigtig";
+  var solid$h = "massiv";
+  var captionsStylePopOn$h = "Pop op";
+  var captionsStyleRollUp$h = "Pop ned";
   var prefCaptionsPosition$h = "Position";
-  var captionsPositionOverlay$h = "Überlagert";
-  var captionsPositionBelow$h = "Unterhalb";
-  var sampleCaptionText$h = "Textbeispiel";
-  var prefSuccess$h = "Ihre Änderungen wurden gespeichert.";
-  var prefNoChange$h = "Es gab keine Änderungen zu speichern.";
-  var save$h = "Speichern";
-  var cancel$h = "Abbrechen";
+  var captionsPositionOverlay$h = "Vis over video";
+  var captionsPositionBelow$h = "Vis under video";
+  var sampleCaptionText$h = "Eksempel på undertekst";
+  var prefSuccess$h = "Dine ændringer er gemt.";
+  var prefNoChange$h = "Du har ikke lavet nogen ændringer.";
+  var save$h = "Gem";
+  var cancel$h = "Afbryd";
   var dismissButton$h = "Dismiss";
-  var windowButtonLabel$h = "Fenstereinstellungen";
-  var windowMove$h = "Verschieben";
-  var windowMoveLeft$h = "Das Fenster verschob sich nach links";
-  var windowMoveRight$h = "Das Fenster verschob sich nach rechts";
-  var windowMoveUp$h = "Das Fenster verschob sich nach oben";
-  var windowMoveDown$h = "Das Fenster verschob sich nach unten";
-  var windowMoveStopped$h = "Das Fenster hörte auf sich zu verschieben";
-  var transcriptControls$h = "Bedienelemente des Transkriptionsfensters";
-  var signControls$h = "Bedienelemente des Gebärdensprache-Fensters";
-  var windowMoveAlert$h = "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste";
-  var windowResize$h = "Größe verändern";
-  var windowResizeHeading$h = "Größe des Gebärdensprache-Fenster";
-  var closeButtonLabel$h = "Schließen";
-  var width$h = "Breite";
-  var height$h = "Höhe";
-  var resultsSummary1$h = "Suche nach:";
-  var resultsSummary2$h = "Gefunden %1 Treffer.";
-  var resultsSummary3$h = "Auf den Zeitindex klicken, um das Video vom Zeitpunkt des jeweiligen Suchergebnisses abzuspielen.";
-  var noResultsFound$h = "Keine Treffer.";
-  var searchButtonLabel$h = "Abspielen von %1";
-  var hour$h = "Stunde";
-  var minute$h = "Minute";
-  var second$h = "Sekunde";
-  var hours$h = "Stunden";
-  var minutes$h = "Minuten";
-  var seconds$h = "Sekunden";
-  var vtsHeading$h = "Transkriptions-Sortierer für Videos";
-  var vtsInstructions1$h = "Verwenden Sie den Transkription-Sortierer für Videos, um Textspuren zu ändern:";
-  var vtsInstructions2$h = "Ordnen Sie Kapitel, Beschreibungen, Bildunterschriften, und/oder Untertitel so, dass diese in der richtigen Reihenfolge in der selbsterzeugten Transkription des Able Players erscheinen.";
-  var vtsInstructions3$h = "Verändern Sie Inhalt oder Anfangs- bzw. Endzeiten (alle sind direkt innerhalb der Tabelle editierbar).";
-  var vtsInstructions4$h = "Fügen Sie neuen Inhalt, wie Kapitel oder Beschreibungen hinzu.";
-  var vtsInstructions5$h = "Nach dem Editieren klicken Sie auf die Schaltfläche \"Änderungen speichern\" um neuen Inhalt für alle wichtigen zeitgesteuerten Textdateien zu erzeugen. Der neue Text kann in neue WebVTT-Dateien kopiert und eingefügt werden.";
-  var vtsSelectLanguage$h = "Wählen Sie eine Sprache aus";
-  var vtsSave$h = "Erzeugen Sie neuen .vtt-Inhalt";
-  var vtsReturn$h = "Gehen Sie zurück zum Editor";
-  var vtsCancel$h = "Abbruch des Speicherns. Jegliche Bearbeitungen, die Sie vorgenommen haben, wurden in der VTS-Tabelle gesichert.";
-  var vtsRow$h = "Reihe";
-  var vtsKind$h = "Art";
-  var vtsStart$h = "Anfang";
-  var vtsEnd$h = "Ende";
-  var vtsContent$h = "Inhalt";
-  var vtsActions$h = "Aktionen";
-  var vtsNewRow$h = "Eine neue Reihe %1 wurde eingefügt.";
-  var vtsDeletedRow$h = "Reihe %1 wurde gelöscht.";
-  var vtsMovedRow$h = "Reihe %1 wurde verschoben %2 ist nun Reihe %3.";
-  var de = {
+  var windowButtonLabel$h = "Vindueindstillinger";
+  var windowMove$h = "Flyt";
+  var windowMoveLeft$h = "Window moved left";
+  var windowMoveRight$h = "Window moved right";
+  var windowMoveUp$h = "Window moved up";
+  var windowMoveDown$h = "Window moved down";
+  var windowMoveStopped$h = "Window move stopped";
+  var transcriptControls$h = "Transcript Window Controls";
+  var signControls$h = "Sign Language Window Controls";
+  var windowMoveAlert$h = "Flyt med mus eller anvende piletasterne for at flytte vinduer; Enter for at slutte";
+  var windowResize$h = "Ændre størrelse";
+  var windowResizeHeading$h = "Ændre vinduestørrelse";
+  var closeButtonLabel$h = "Luk";
+  var width$h = "Bredde";
+  var height$h = "Højde";
+  var resultsSummary1$h = "Du søgte efter:";
+  var resultsSummary2$h = "Fundne %1 matchende indhold.";
+  var resultsSummary3$h = "Klik på tidslinien for at afspille derfra.";
+  var noResultsFound$h = "Ingen resultater.";
+  var searchButtonLabel$h = "Afspil fra %1";
+  var hour$h = "time";
+  var minute$h = "minut";
+  var second$h = "sekund";
+  var hours$h = "timer";
+  var minutes$h = "minutter";
+  var seconds$h = "sekunder";
+  var vtsHeading$h = "";
+  var vtsInstructions1$h = "";
+  var vtsInstructions2$h = "";
+  var vtsInstructions3$h = "";
+  var vtsInstructions4$h = "";
+  var vtsInstructions5$h = "";
+  var vtsSelectLanguage$h = "";
+  var vtsSave$h = "";
+  var vtsReturn$h = "";
+  var vtsCancel$h = "";
+  var vtsRow$h = "";
+  var vtsKind$h = "";
+  var vtsStart$h = "";
+  var vtsEnd$h = "";
+  var vtsContent$h = "";
+  var vtsActions$h = "";
+  var vtsNewRow$h = "";
+  var vtsDeletedRow$h = "";
+  var vtsMovedRow$h = "";
+  var da = {
   	playerHeading: playerHeading$h,
   	audioPlayer: audioPlayer$h,
   	videoPlayer: videoPlayer$h,
   	faster: faster$h,
   	slower: slower$h,
-  	chapters: chapters$h,
   	play: play$h,
   	pause: pause$h,
   	restart: restart$h,
@@ -15185,6 +16314,7 @@
   	hideTranscript: hideTranscript$h,
   	turnOnDescriptions: turnOnDescriptions$h,
   	turnOffDescriptions: turnOffDescriptions$h,
+  	chapters: chapters$h,
   	language: language$h,
   	sign: sign$h,
   	showSign: showSign$h,
@@ -15198,6 +16328,8 @@
   	enterFullScreen: enterFullScreen$h,
   	exitFullScreen: exitFullScreen$h,
   	speed: speed$h,
+  	on: on$h,
+  	off: off$h,
   	spacebar: spacebar$h,
   	transcriptTitle: transcriptTitle$h,
   	lyricsTitle: lyricsTitle$h,
@@ -15223,7 +16355,9 @@
   	prefDescription1: prefDescription1$h,
   	prefDescription2: prefDescription2$h,
   	prefDescription3: prefDescription3$h,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$h,
+  	prefDescriptionNone: prefDescriptionNone$h,
+  	prefDescFormatOption1: prefDescFormatOption1$h,
+  	prefDescFormatOption2: prefDescFormatOption2$h,
   	prefIntroDescription3: prefIntroDescription3$h,
   	prefIntroDescription4: prefIntroDescription4$h,
   	prefIntroKeyboard1: prefIntroKeyboard1$h,
@@ -15332,178 +16466,183 @@
   	vtsMovedRow: vtsMovedRow$h
   };
 
-  var playerHeading$g = "Media player";
-  var audioPlayer$g = "Audio player";
-  var videoPlayer$g = "Video player";
-  var faster$g = "Faster";
-  var slower$g = "Slower";
-  var play$g = "Play";
+  var playerHeading$g = "Medienplayer";
+  var audioPlayer$g = "Audioplayer";
+  var videoPlayer$g = "Videoplayer";
+  var faster$g = "Schneller: %1x";
+  var slower$g = "Langsamer: %1x";
+  var chapters$g = "Kapitel";
+  var play$g = "Abspielen";
   var pause$g = "Pause";
-  var restart$g = "Restart";
-  var prevTrack$g = "Previous track";
-  var nextTrack$g = "Next track";
-  var rewind$g = "Rewind";
-  var forward$g = "Forward";
-  var captions$g = "Captions";
-  var showCaptions$g = "Show captions";
-  var hideCaptions$g = "Hide captions";
-  var captionsOff$g = "Captions off";
-  var showTranscript$g = "Show transcript";
-  var hideTranscript$g = "Hide transcript";
-  var turnOnDescriptions$g = "Turn on descriptions";
-  var turnOffDescriptions$g = "Turn off descriptions";
-  var chapters$g = "Chapters";
-  var language$g = "Language";
-  var sign$g = "Sign language";
-  var showSign$g = "Show sign language";
-  var hideSign$g = "Hide sign language";
-  var seekbarLabel$g = "timeline";
-  var mute$g = "Mute";
-  var unmute$g = "Unmute";
-  var volume$g = "Volume";
-  var volumeUpDown$g = "Volume up down";
-  var preferences$g = "Preferences";
-  var enterFullScreen$g = "Enter full screen";
-  var exitFullScreen$g = "Exit full screen";
-  var speed$g = "Speed";
-  var spacebar$g = "spacebar";
-  var transcriptTitle$g = "Transcript";
-  var lyricsTitle$g = "Lyrics";
-  var autoScroll$g = "Auto scroll";
-  var statusPlaying$g = "Playing";
-  var statusPaused$g = "Paused";
-  var statusStopped$g = "Stopped";
-  var statusBuffering$g = "Buffering";
-  var statusEnd$g = "End of track";
-  var selectedTrack$f = "Selected Track";
-  var alertDescribedVersion$g = "Using the audio described version of this video";
-  var alertNonDescribedVersion$g = "Using the non-described version of this video";
-  var prefMenuCaptions$g = "Captions";
+  var restart$g = "Neustart";
+  var prevTrack$g = "Vorheriger Titel";
+  var nextTrack$g = "Nächster Titel";
+  var rewind$g = "Zurück %1 Sekunden";
+  var forward$g = "Vorwärts %1 Sekunden";
+  var captions$g = "Untertitel";
+  var showCaptions$g = "Untertitel anzeigen";
+  var hideCaptions$g = "Untertitel ausblenden";
+  var captionsOff$g = "Untertitel ausschalten";
+  var showTranscript$g = "Transkription anzeigen";
+  var hideTranscript$g = "Transkription entfernen";
+  var turnOnDescriptions$g = "Audiobeschreibung einschalten";
+  var turnOffDescriptions$g = "Audiobeschreibung ausschalten";
+  var language$g = "Sprache";
+  var sign$g = "Gebärdensprache";
+  var showSign$g = "Gebärdensprache anzeigen";
+  var hideSign$g = "Gebärdensprache ausblenden";
+  var seekbarLabel$g = "Suchleiste";
+  var mute$g = "Ton aus";
+  var unmute$g = "Ton an";
+  var volume$g = "Lautstärke";
+  var volumeUpDown$g = "Lautstärkeregler";
+  var preferences$g = "Einstellungen";
+  var enterFullScreen$g = "Vollbildmodus einschalten";
+  var exitFullScreen$g = "Vollbildmodus verlassen";
+  var speed$g = "Geschwindigkeit";
+  var on$g = "";
+  var off$g = "";
+  var spacebar$g = "Leertaste";
+  var transcriptTitle$g = "Transkription";
+  var lyricsTitle$g = "Text";
+  var autoScroll$g = "Automatisch scrollen";
+  var statusPlaying$g = "Gestartet";
+  var statusPaused$g = "Pausiert";
+  var statusStopped$g = "Angehalten";
+  var statusBuffering$g = "Daten werden empfangen...";
+  var statusEnd$g = "Ende des Titels";
+  var selectedTrack$f = "Ausgewählter Titel";
+  var alertDescribedVersion$g = "Das Video wird mit Audiobeschreibung abgespielt";
+  var alertNonDescribedVersion$g = "Das Video wird ohne Audiobeschreibung abgespielt";
+  var prefMenuCaptions$g = "Untertitel";
   var prefVoicedCaptions$g = "Spoken Captions";
-  var prefMenuDescriptions$g = "Descriptions";
-  var prefMenuKeyboard$g = "Keyboard";
-  var prefMenuTranscript$g = "Transcript";
-  var prefTitleCaptions$g = "Captions Preferences";
-  var prefTitleDescriptions$g = "Audio Description Preferences";
-  var prefTitleKeyboard$g = "Keyboard Preferences";
-  var prefTitleTranscript$f = "Transcript Preferences";
-  var prefIntroDescription1$f = "This media player supports audio description in two ways: ";
-  var prefDescription1$g = "The current video has an alternative described version and text-based description, announced by screen reader.";
-  var prefDescription2$g = "The current video has text-based description.";
-  var prefDescription3$g = "The current video has an alternative described version.";
-  var prefIntroDescriptionNone$g = "The current video has no audio description in either format.";
-  var prefIntroDescription3$g = "Use the following form to set your preferences related to text-based audio description.";
-  var prefIntroDescription4$g = "After you save your settings, audio description can be toggled on/off using the Description button.";
-  var prefIntroKeyboard1$g = "The media player on this web page can be operated from anywhere on the page using keyboard shortcuts (see below for a list).";
-  var prefIntroKeyboard2$g = "Modifier keys (Shift, Alt, and Control) can be assigned below.";
-  var prefIntroKeyboard3$g = "NOTE: Some key combinations might conflict with keys used by your browser and/or other software applications. Try various combinations of modifier keys to find one that works for you.";
-  var prefHeadingKeyboard1$g = "Modifier keys used for shortcuts";
-  var prefHeadingKeyboard2$g = "Current keyboard shortcuts";
-  var prefHeadingDescription$g = "Audio description";
-  var prefHeadingTextDescription$g = "Text-based audio description";
+  var prefMenuDescriptions$g = "Audiobeschreibungen";
+  var prefMenuKeyboard$g = "Tastatur";
+  var prefMenuTranscript$g = "Transkription";
+  var prefTitleCaptions$g = "Untertitel Einstellungen";
+  var prefTitleDescriptions$g = "Audiobeschreibung Einstellungen";
+  var prefTitleKeyboard$g = "Tastatur Einstellungen";
+  var prefTitleTranscript$f = "Transkription Einstellungen";
+  var prefIntroDescription1$f = "Dieser Media Player unterstützt zwei Arten von Untertiteln: ";
+  var prefDescription1$g = "Das aktuelle Video hat eine alternative Version der Audiobeschreibung, eine textbasierte Audiobeschreibung.";
+  var prefDescription2$g = "Das aktuelle Video hat Version des Videos, die eine Audiobeschreibung enthält.";
+  var prefDescription3$g = "Das aktuelle Video hat Textbasierte Audiobeschreibung, die vom Screen-Reader vorgelesen wird.";
+  var prefDescriptionNone$g = "Das aktuelle Video hat keine Audiobeschreibung.";
+  var prefDescFormatOption1$g = "";
+  var prefDescFormatOption2$g = "";
+  var prefIntroDescription3$g = "Mit der folgenden Auswahl steuern Sie das Abspielen der textbasierten Audiobeschreibung.";
+  var prefIntroDescription4$g = "Wenn die Audiobeschreibung aktiviert ist, kann sie per Schaltfläche ein- und ausgeschaltet werden.";
+  var prefIntroKeyboard1$g = "Dieser Media Player lässt sich innerhalb der gesamten Seite per Tastenkürzel bedienen (siehe unten).";
+  var prefIntroKeyboard2$g = "Die Modifikatortasten (Umschalt, Alt, und Strg) können hier zugeordnet werden.";
+  var prefIntroKeyboard3$g = "Achtung: Einige Tastenkombinationen sind je nach Browser und Betriebssystem nicht möglich. Versuchen Sie gegebenenfalls andere Kombinationen.";
+  var prefHeadingKeyboard1$g = "Modifikatortasten für die Tastenkürzel";
+  var prefHeadingKeyboard2$g = "Aktuell eingestellte Tastenkürzel";
+  var prefHeadingDescription$g = "Audiobeschreibung";
+  var prefHeadingTextDescription$g = "Textbasierte Audiobeschreibung";
   var prefAltKey$g = "Alt";
-  var prefCtrlKey$g = "Control";
-  var prefShiftKey$g = "Shift";
-  var prefNoKeyShortcuts$g = "Disable keyboard shortcuts";
-  var escapeKey$g = "Escape";
-  var escapeKeyFunction$g = "Close current dialog or popup menu";
-  var prefDescPause$g = "Automatically pause video when description starts";
-  var prefDescVisible$g = "Make description visible";
-  var prefDescVoice$g = "Voice";
+  var prefCtrlKey$g = "Strg";
+  var prefShiftKey$g = "Umschalttaste";
+  var prefNoKeyShortcuts$g = "Tastenkombinationen deaktivieren";
+  var escapeKey$g = "ESC Taste";
+  var escapeKeyFunction$g = "Dialogfenster schließen";
+  var prefDescPause$g = "Video automatisch anhalten, wenn Szenenbeschreibungen eingeblendet werden";
+  var prefDescVisible$g = "Textbasierte Szenenbeschreibungen einblenden, wenn diese aktiviert sind";
+  var prefDescVoice$g = "Stimme";
   var prefDescRate$g = "Spoken Description Rate";
   var prefCaptionRate$g = "Spoken Caption Rate";
-  var prefDescPitch$g = "Pitch";
-  var prefDescPitch1$g = "Very low";
-  var prefDescPitch2$g = "Low";
-  var prefDescPitch3$g = "Default";
-  var prefDescPitch4$g = "High";
-  var prefDescPitch5$g = "Very high";
-  var sampleDescriptionText$g = "Adjust settings to hear this sample text.";
-  var prefHighlight$g = "Highlight transcript as media plays";
-  var prefTabbable$g = "Keyboard-enable transcript";
-  var prefCaptionsFont$g = "Font";
-  var prefCaptionsColor$g = "Text Color";
-  var prefCaptionsBGColor$g = "Background";
-  var prefCaptionsSize$g = "Font Size";
-  var prefCaptionsOpacity$g = "Opacity";
-  var prefCaptionsStyle$g = "Style";
-  var serif$g = "serif";
-  var sans$g = "sans-serif";
-  var cursive$g = "cursive";
-  var fantasy$g = "fantasy";
-  var monospace$g = "monospace";
-  var white$g = "white";
-  var yellow$g = "yellow";
-  var green$g = "green";
+  var prefDescPitch$g = "Tonlage";
+  var prefDescPitch1$g = "Sehr tief";
+  var prefDescPitch2$g = "Tief";
+  var prefDescPitch3$g = "Mittel";
+  var prefDescPitch4$g = "Hoch";
+  var prefDescPitch5$g = "Sehr hoch";
+  var sampleDescriptionText$g = "Einstellungen bearbeiten um diesen Text vorzulesen.";
+  var prefHighlight$g = "Transkription hervorheben, während das Medium abgespielt wird";
+  var prefTabbable$g = "Transkription per Tastatur ein-/ausschaltbar machen";
+  var prefCaptionsFont$g = "Schriftart";
+  var prefCaptionsColor$g = "Schriftfarbe";
+  var prefCaptionsBGColor$g = "Hintergrund";
+  var prefCaptionsSize$g = "Schriftgöße";
+  var prefCaptionsOpacity$g = "Deckkraft";
+  var prefCaptionsStyle$g = "Stil";
+  var serif$g = "Serifenschrift";
+  var sans$g = "Serifenlose Schrift";
+  var cursive$g = "kursiv";
+  var fantasy$g = "Fantasieschrift";
+  var monospace$g = "nichtproportionale Schrift";
+  var white$g = "weiß";
+  var yellow$g = "gelb";
+  var green$g = "grün";
   var cyan$f = "cyan";
-  var blue$g = "blue";
+  var blue$g = "blau";
   var magenta$g = "magenta";
-  var red$g = "red";
-  var black$g = "black";
+  var red$g = "rot";
+  var black$g = "schwarz";
   var transparent$g = "transparent";
-  var solid$g = "solid";
+  var solid$g = "undurchsichtig";
   var captionsStylePopOn$g = "Pop-on";
   var captionsStyleRollUp$g = "Roll-up";
   var prefCaptionsPosition$g = "Position";
-  var captionsPositionOverlay$g = "Overlay";
-  var captionsPositionBelow$g = "Below video";
-  var sampleCaptionText$g = "Sample caption text";
-  var prefSuccess$g = "Your changes have been saved.";
-  var prefNoChange$g = "You didn't make any changes.";
-  var save$g = "Save";
-  var cancel$g = "Cancel";
+  var captionsPositionOverlay$g = "Überlagert";
+  var captionsPositionBelow$g = "Unterhalb";
+  var sampleCaptionText$g = "Textbeispiel";
+  var prefSuccess$g = "Ihre Änderungen wurden gespeichert.";
+  var prefNoChange$g = "Es gab keine Änderungen zu speichern.";
+  var save$g = "Speichern";
+  var cancel$g = "Abbrechen";
   var dismissButton$g = "Dismiss";
-  var windowButtonLabel$g = "Window options";
-  var windowMove$g = "Move";
-  var windowMoveLeft$g = "Window moved left";
-  var windowMoveRight$g = "Window moved right";
-  var windowMoveUp$g = "Window moved up";
-  var windowMoveDown$g = "Window moved down";
-  var windowMoveStopped$g = "Window move stopped";
-  var transcriptControls$g = "Transcript Window Controls";
-  var signControls$g = "Sign Language Window Controls";
-  var windowMoveAlert$g = "Drag or use arrow keys to move the window; Enter to stop";
-  var windowResize$g = "Resize";
-  var windowResizeHeading$g = "Resize Window";
-  var closeButtonLabel$g = "Close";
-  var width$g = "Width";
-  var height$g = "Height";
-  var resultsSummary1$g = "You searched for:";
-  var resultsSummary2$g = "Found %1 matching items.";
-  var resultsSummary3$g = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound$g = "No results found.";
-  var searchButtonLabel$g = "Play at %1";
-  var hour$g = "hour";
-  var minute$g = "minute";
-  var second$g = "second";
-  var hours$g = "hours";
-  var minutes$g = "minutes";
-  var seconds$g = "seconds";
-  var vtsHeading$g = "Video Transcript Sorter";
-  var vtsInstructions1$g = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$g = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$g = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$g = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$g = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$g = "Select a language";
-  var vtsSave$g = "Generate new .vtt content";
-  var vtsReturn$g = "Return to Editor";
-  var vtsCancel$g = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$g = "Row";
-  var vtsKind$g = "Kind";
-  var vtsStart$g = "Start";
-  var vtsEnd$g = "End";
-  var vtsContent$g = "Content";
-  var vtsActions$g = "Actions";
-  var vtsNewRow$g = "A new row %1 has been inserted.";
-  var vtsDeletedRow$g = "Row %1 has been deleted.";
-  var vtsMovedRow$g = "Row %1 has been moved %2 and is now Row %3.";
-  var en = {
+  var windowButtonLabel$g = "Fenstereinstellungen";
+  var windowMove$g = "Verschieben";
+  var windowMoveLeft$g = "Das Fenster verschob sich nach links";
+  var windowMoveRight$g = "Das Fenster verschob sich nach rechts";
+  var windowMoveUp$g = "Das Fenster verschob sich nach oben";
+  var windowMoveDown$g = "Das Fenster verschob sich nach unten";
+  var windowMoveStopped$g = "Das Fenster hörte auf sich zu verschieben";
+  var transcriptControls$g = "Bedienelemente des Transkriptionsfensters";
+  var signControls$g = "Bedienelemente des Gebärdensprache-Fensters";
+  var windowMoveAlert$g = "Fenster mit Pfeiltasten oder Maus verschieben; beenden mit Eingabetaste";
+  var windowResize$g = "Größe verändern";
+  var windowResizeHeading$g = "Größe des Gebärdensprache-Fenster";
+  var closeButtonLabel$g = "Schließen";
+  var width$g = "Breite";
+  var height$g = "Höhe";
+  var resultsSummary1$g = "Suche nach:";
+  var resultsSummary2$g = "Gefunden %1 Treffer.";
+  var resultsSummary3$g = "Auf den Zeitindex klicken, um das Video vom Zeitpunkt des jeweiligen Suchergebnisses abzuspielen.";
+  var noResultsFound$g = "Keine Treffer.";
+  var searchButtonLabel$g = "Abspielen von %1";
+  var hour$g = "Stunde";
+  var minute$g = "Minute";
+  var second$g = "Sekunde";
+  var hours$g = "Stunden";
+  var minutes$g = "Minuten";
+  var seconds$g = "Sekunden";
+  var vtsHeading$g = "Transkriptions-Sortierer für Videos";
+  var vtsInstructions1$g = "Verwenden Sie den Transkription-Sortierer für Videos, um Textspuren zu ändern:";
+  var vtsInstructions2$g = "Ordnen Sie Kapitel, Beschreibungen, Bildunterschriften, und/oder Untertitel so, dass diese in der richtigen Reihenfolge in der selbsterzeugten Transkription des Able Players erscheinen.";
+  var vtsInstructions3$g = "Verändern Sie Inhalt oder Anfangs- bzw. Endzeiten (alle sind direkt innerhalb der Tabelle editierbar).";
+  var vtsInstructions4$g = "Fügen Sie neuen Inhalt, wie Kapitel oder Beschreibungen hinzu.";
+  var vtsInstructions5$g = "Nach dem Editieren klicken Sie auf die Schaltfläche \"Änderungen speichern\" um neuen Inhalt für alle wichtigen zeitgesteuerten Textdateien zu erzeugen. Der neue Text kann in neue WebVTT-Dateien kopiert und eingefügt werden.";
+  var vtsSelectLanguage$g = "Wählen Sie eine Sprache aus";
+  var vtsSave$g = "Erzeugen Sie neuen .vtt-Inhalt";
+  var vtsReturn$g = "Gehen Sie zurück zum Editor";
+  var vtsCancel$g = "Abbruch des Speicherns. Jegliche Bearbeitungen, die Sie vorgenommen haben, wurden in der VTS-Tabelle gesichert.";
+  var vtsRow$g = "Reihe";
+  var vtsKind$g = "Art";
+  var vtsStart$g = "Anfang";
+  var vtsEnd$g = "Ende";
+  var vtsContent$g = "Inhalt";
+  var vtsActions$g = "Aktionen";
+  var vtsNewRow$g = "Eine neue Reihe %1 wurde eingefügt.";
+  var vtsDeletedRow$g = "Reihe %1 wurde gelöscht.";
+  var vtsMovedRow$g = "Reihe %1 wurde verschoben %2 ist nun Reihe %3.";
+  var de = {
   	playerHeading: playerHeading$g,
   	audioPlayer: audioPlayer$g,
   	videoPlayer: videoPlayer$g,
   	faster: faster$g,
   	slower: slower$g,
+  	chapters: chapters$g,
   	play: play$g,
   	pause: pause$g,
   	restart: restart$g,
@@ -15519,7 +16658,6 @@
   	hideTranscript: hideTranscript$g,
   	turnOnDescriptions: turnOnDescriptions$g,
   	turnOffDescriptions: turnOffDescriptions$g,
-  	chapters: chapters$g,
   	language: language$g,
   	sign: sign$g,
   	showSign: showSign$g,
@@ -15533,6 +16671,8 @@
   	enterFullScreen: enterFullScreen$g,
   	exitFullScreen: exitFullScreen$g,
   	speed: speed$g,
+  	on: on$g,
+  	off: off$g,
   	spacebar: spacebar$g,
   	transcriptTitle: transcriptTitle$g,
   	lyricsTitle: lyricsTitle$g,
@@ -15558,7 +16698,9 @@
   	prefDescription1: prefDescription1$g,
   	prefDescription2: prefDescription2$g,
   	prefDescription3: prefDescription3$g,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$g,
+  	prefDescriptionNone: prefDescriptionNone$g,
+  	prefDescFormatOption1: prefDescFormatOption1$g,
+  	prefDescFormatOption2: prefDescFormatOption2$g,
   	prefIntroDescription3: prefIntroDescription3$g,
   	prefIntroDescription4: prefIntroDescription4$g,
   	prefIntroKeyboard1: prefIntroKeyboard1$g,
@@ -15667,18 +16809,18 @@
   	vtsMovedRow: vtsMovedRow$g
   };
 
-  var playerHeading$f = "Media player";
-  var audioPlayer$f = "Audio player";
-  var videoPlayer$f = "Video player";
-  var faster$f = "Rápido";
-  var slower$f = "Lento";
-  var play$f = "Play";
+  var playerHeading$f = "";
+  var audioPlayer$f = "";
+  var videoPlayer$f = "";
+  var faster$f = "Rápido: %1x";
+  var slower$f = "Lento: %1x";
+  var play$f = "";
   var pause$f = "Pausa";
   var restart$f = "Reiniciar";
   var prevTrack$f = "Pista Anterior";
   var nextTrack$f = "Siguiente Pista";
-  var rewind$f = "Rebobinar";
-  var forward$f = "Adelantar";
+  var rewind$f = "Rebobinar %1 segundos";
+  var forward$f = "Adelantar %1 segundos";
   var captions$f = "Subtítulos";
   var showCaptions$f = "Mostrar subtítulos";
   var hideCaptions$f = "Ocultar subtítulos";
@@ -15701,6 +16843,8 @@
   var enterFullScreen$f = "Ver a pantalla completa";
   var exitFullScreen$f = "Salir de pantalla completa";
   var speed$f = "Velocidad";
+  var on$f = "";
+  var off$f = "";
   var spacebar$f = "Barra espaciadora";
   var transcriptTitle$f = "Transcript";
   var lyricsTitle$f = "Letra";
@@ -15726,7 +16870,9 @@
   var prefDescription1$f = "El vídeo actual tiene una versión alternativa con descripción, descripción en texto.";
   var prefDescription2$f = "El vídeo actual tiene versión alternativa del vídeo, descrito.";
   var prefDescription3$f = "El vídeo actual tiene descripción en texto, leída por el lector de pantalla.";
-  var prefIntroDescriptionNone$f = "El vídeo actual no tiene audiodescripción de ninguna manera.";
+  var prefDescriptionNone$f = "El vídeo actual no tiene audiodescripción de ninguna manera.";
+  var prefDescFormatOption1$f = "";
+  var prefDescFormatOption2$f = "";
   var prefIntroDescription3$f = "Utilice el siguiente formulario para establecer sus preferencias en cuanto a la audiodescripción en texto.";
   var prefIntroDescription4$f = "Una vez guardadas sus preferencias, la audiodescripción puede habilitarse o deshabilitarse mediante el botón Descripción.";
   var prefIntroKeyboard1$f = "El reproductor en esta página puede manejarse desde cualquier parte de la página utilizando los atajos de teclado (vea la lista más abajo).";
@@ -15777,8 +16923,8 @@
   var black$f = "negro";
   var transparent$f = "transparente";
   var solid$f = "sólido";
-  var captionsStylePopOn$f = "Pop-on";
-  var captionsStyleRollUp$f = "Roll-up";
+  var captionsStylePopOn$f = "";
+  var captionsStyleRollUp$f = "";
   var prefCaptionsPosition$f = "Posición";
   var captionsPositionOverlay$f = "Cubrir";
   var captionsPositionBelow$f = "Debajo del vídeo";
@@ -15787,52 +16933,52 @@
   var prefNoChange$f = "No se ha hecho ningún cambio.";
   var save$f = "Guardar";
   var cancel$f = "Cancelar";
-  var dismissButton$f = "Dismiss";
+  var dismissButton$f = "";
   var windowButtonLabel$f = "Opciones en Windows";
-  var windowMove$f = "Mover";
-  var windowMoveLeft$f = "Window moved left";
-  var windowMoveRight$f = "Window moved right";
-  var windowMoveUp$f = "Window moved up";
-  var windowMoveDown$f = "Window moved down";
-  var windowMoveStopped$f = "Window move stopped";
-  var transcriptControls$f = "Transcript Window Controls";
-  var signControls$f = "Sign Language Window Controls";
+  var windowMove$f = "";
+  var windowMoveLeft$f = "";
+  var windowMoveRight$f = "";
+  var windowMoveUp$f = "";
+  var windowMoveDown$f = "";
+  var windowMoveStopped$f = "";
+  var transcriptControls$f = "";
+  var signControls$f = "";
   var windowMoveAlert$f = "Arrastre o use las teclas de flecha para mover la ventana, pulse Enter para parar.";
   var windowResize$f = "Redimensionar";
   var windowResizeHeading$f = "Redimensionar la ventana con el intérprete";
   var closeButtonLabel$f = "Cerrar";
   var width$f = "Ancho";
   var height$f = "Alto";
-  var resultsSummary1$f = "You searched for:";
-  var resultsSummary2$f = "Found %1 matching items.";
-  var resultsSummary3$f = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound$f = "No results found.";
-  var searchButtonLabel$f = "Play at %1";
-  var hour$f = "hour";
-  var minute$f = "minute";
-  var second$f = "second";
-  var hours$f = "hours";
-  var minutes$f = "minutes";
-  var seconds$f = "seconds";
-  var vtsHeading$f = "Video Transcript Sorter";
-  var vtsInstructions1$f = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$f = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$f = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$f = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$f = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$f = "Select a language";
-  var vtsSave$f = "Generate new .vtt content";
-  var vtsReturn$f = "Return to Editor";
-  var vtsCancel$f = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$f = "Row";
-  var vtsKind$f = "Kind";
-  var vtsStart$f = "Start";
-  var vtsEnd$f = "End";
-  var vtsContent$f = "Content";
-  var vtsActions$f = "Actions";
-  var vtsNewRow$f = "A new row %1 has been inserted.";
-  var vtsDeletedRow$f = "Row %1 has been deleted.";
-  var vtsMovedRow$f = "Row %1 has been moved %2 and is now Row %3.";
+  var resultsSummary1$f = "";
+  var resultsSummary2$f = "";
+  var resultsSummary3$f = "";
+  var noResultsFound$f = "";
+  var searchButtonLabel$f = "";
+  var hour$f = "";
+  var minute$f = "";
+  var second$f = "";
+  var hours$f = "";
+  var minutes$f = "";
+  var seconds$f = "";
+  var vtsHeading$f = "";
+  var vtsInstructions1$f = "";
+  var vtsInstructions2$f = "";
+  var vtsInstructions3$f = "";
+  var vtsInstructions4$f = "";
+  var vtsInstructions5$f = "";
+  var vtsSelectLanguage$f = "";
+  var vtsSave$f = "";
+  var vtsReturn$f = "";
+  var vtsCancel$f = "";
+  var vtsRow$f = "";
+  var vtsKind$f = "";
+  var vtsStart$f = "";
+  var vtsEnd$f = "";
+  var vtsContent$f = "";
+  var vtsActions$f = "";
+  var vtsNewRow$f = "";
+  var vtsDeletedRow$f = "";
+  var vtsMovedRow$f = "";
   var es = {
   	playerHeading: playerHeading$f,
   	audioPlayer: audioPlayer$f,
@@ -15868,6 +17014,8 @@
   	enterFullScreen: enterFullScreen$f,
   	exitFullScreen: exitFullScreen$f,
   	speed: speed$f,
+  	on: on$f,
+  	off: off$f,
   	spacebar: spacebar$f,
   	transcriptTitle: transcriptTitle$f,
   	lyricsTitle: lyricsTitle$f,
@@ -15893,7 +17041,9 @@
   	prefDescription1: prefDescription1$f,
   	prefDescription2: prefDescription2$f,
   	prefDescription3: prefDescription3$f,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$f,
+  	prefDescriptionNone: prefDescriptionNone$f,
+  	prefDescFormatOption1: prefDescFormatOption1$f,
+  	prefDescFormatOption2: prefDescFormatOption2$f,
   	prefIntroDescription3: prefIntroDescription3$f,
   	prefIntroDescription4: prefIntroDescription4$f,
   	prefIntroKeyboard1: prefIntroKeyboard1$f,
@@ -16003,17 +17153,17 @@
   };
 
   var playerHeading$e = "Lecteur multimédia";
-  var audioPlayer$e = "Audio player";
-  var videoPlayer$e = "Video player";
-  var faster$e = "Plus rapidement";
-  var slower$e = "Plus lentement";
+  var audioPlayer$e = "";
+  var videoPlayer$e = "";
+  var faster$e = "Plus rapidement: %1x";
+  var slower$e = "Plus lentement: %1x";
   var play$e = "Lecture";
-  var pause$e = "Pause";
+  var pause$e = "";
   var restart$e = "Redémarrer";
   var prevTrack$e = "Piste Précédente";
   var nextTrack$e = "Piste Suivante";
-  var rewind$e = "Reculer";
-  var forward$e = "Avancer";
+  var rewind$e = "Reculer %1 seconds";
+  var forward$e = "Avancer %1 seconds";
   var captions$e = "Sous-titres";
   var showCaptions$e = "Afficher les sous-titres";
   var hideCaptions$e = "Masquer les sous-titres";
@@ -16036,6 +17186,8 @@
   var enterFullScreen$e = "Activer le mode plein écran";
   var exitFullScreen$e = "Quitter le mode plein écran";
   var speed$e = "Vitesse";
+  var on$e = "";
+  var off$e = "";
   var spacebar$e = "barre d’espacement";
   var transcriptTitle$e = "Transcription";
   var lyricsTitle$e = "Paroles";
@@ -16049,10 +17201,10 @@
   var alertDescribedVersion$e = "Utilisation de la version avec description sonore de cette vidéo";
   var alertNonDescribedVersion$e = "Utilisation de la version non décrite de cette vidéo";
   var prefMenuCaptions$e = "Sous-titres";
-  var prefVoicedCaptions$e = "Spoken Captions";
-  var prefMenuDescriptions$e = "Descriptions";
+  var prefVoicedCaptions$e = "";
+  var prefMenuDescriptions$e = "";
   var prefMenuKeyboard$e = "Clavier";
-  var prefMenuTranscript$e = "Transcription";
+  var prefMenuTranscript$e = "";
   var prefTitleCaptions$e = "Préférences liées au sous-titrage";
   var prefTitleDescriptions$e = "Préférences liées aux descriptions sonores";
   var prefTitleKeyboard$e = "Préférences liées au clavier";
@@ -16061,7 +17213,9 @@
   var prefDescription1$e = "Il y a une version autre version avec description, description textuelle.";
   var prefDescription2$e = "Il y a une version autre version de la vidéo avec description.";
   var prefDescription3$e = "Il y a une version description textuelle, lue à l’aide d’un lecteur d’écran.";
-  var prefIntroDescriptionNone$e = "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.";
+  var prefDescriptionNone$e = "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.";
+  var prefDescFormatOption1$e = "";
+  var prefDescFormatOption2$e = "";
   var prefIntroDescription3$e = "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelle.";
   var prefIntroDescription4$e = "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.";
   var prefIntroKeyboard1$e = "Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous).";
@@ -16071,18 +17225,18 @@
   var prefHeadingKeyboard2$e = "Raccourcis du clavier assignés actuellement";
   var prefHeadingDescription$e = "Description sonore";
   var prefHeadingTextDescription$e = "Description sonore textuelle";
-  var prefAltKey$e = "Alt";
-  var prefCtrlKey$e = "Ctrl";
-  var prefShiftKey$e = "Shift";
-  var prefNoKeyShortcuts$e = "Disable keyboard shortcuts";
-  var escapeKey$e = "Esc";
+  var prefAltKey$e = "";
+  var prefCtrlKey$e = "";
+  var prefShiftKey$e = "";
+  var prefNoKeyShortcuts$e = "";
+  var escapeKey$e = "";
   var escapeKeyFunction$e = "Fermer la fenêtre de dialogue ou le menu contextuel";
   var prefDescPause$e = "Mettre la vidéo en pause automatiquement quand la description commence";
   var prefDescVisible$e = "Affichez la description";
   var prefDescVoice$e = "Voix";
-  var prefDescRate$e = "Spoken Description Rate";
-  var prefCaptionRate$e = "Spoken Caption Rate";
-  var prefDescPitch$e = "Volume";
+  var prefDescRate$e = "";
+  var prefCaptionRate$e = "";
+  var prefDescPitch$e = "";
   var prefDescPitch1$e = "Très faible";
   var prefDescPitch2$e = "Faible";
   var prefDescPitch3$e = "Par défaut";
@@ -16096,7 +17250,7 @@
   var prefCaptionsBGColor$e = "Arrière-plan";
   var prefCaptionsSize$e = "Taille de la police";
   var prefCaptionsOpacity$e = "Opacité";
-  var prefCaptionsStyle$e = "Style";
+  var prefCaptionsStyle$e = "";
   var serif$e = "avec empattement";
   var sans$e = "sans empattement";
   var cursive$e = "écriture cursive";
@@ -16112,9 +17266,9 @@
   var black$e = "noir";
   var transparent$e = "transparent";
   var solid$e = "solide";
-  var captionsStylePopOn$e = "Pop-on";
-  var captionsStyleRollUp$e = "Roll-up";
-  var prefCaptionsPosition$e = "Position";
+  var captionsStylePopOn$e = "";
+  var captionsStyleRollUp$e = "";
+  var prefCaptionsPosition$e = "";
   var captionsPositionOverlay$e = "Superposés";
   var captionsPositionBelow$e = "Sous la vidéo";
   var sampleCaptionText$e = "Échantillon de sous-titre";
@@ -16125,13 +17279,13 @@
   var dismissButton$e = "Dismiss";
   var windowButtonLabel$e = "Options de fenêtre";
   var windowMove$e = "Déplacer";
-  var windowMoveLeft$e = "Window moved left";
-  var windowMoveRight$e = "Window moved right";
-  var windowMoveUp$e = "Window moved up";
-  var windowMoveDown$e = "Window moved down";
-  var windowMoveStopped$e = "Window move stopped";
-  var transcriptControls$e = "Transcript Window Controls";
-  var signControls$e = "Sign Language Window Controls";
+  var windowMoveLeft$e = "";
+  var windowMoveRight$e = "";
+  var windowMoveUp$e = "";
+  var windowMoveDown$e = "";
+  var windowMoveStopped$e = "";
+  var transcriptControls$e = "";
+  var signControls$e = "";
   var windowMoveAlert$e = "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre; appuyez sur « Enter » pour arrêter.";
   var windowResize$e = "Redimensionner";
   var windowResizeHeading$e = "Redimensionner la fenêtre de l’interprète";
@@ -16144,30 +17298,30 @@
   var noResultsFound$e = "Aucun résultat trouvé.";
   var searchButtonLabel$e = "Lecture à %1";
   var hour$e = "heure";
-  var minute$e = "minute";
+  var minute$e = "";
   var second$e = "seconde";
   var hours$e = "heures";
-  var minutes$e = "minutes";
-  var seconds$e = "seconds";
-  var vtsHeading$e = "Video Transcript Sorter";
-  var vtsInstructions1$e = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$e = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$e = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$e = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$e = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$e = "Select a language";
-  var vtsSave$e = "Generate new .vtt content";
-  var vtsReturn$e = "Return to Editor";
-  var vtsCancel$e = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$e = "Row";
-  var vtsKind$e = "Kind";
-  var vtsStart$e = "Start";
-  var vtsEnd$e = "End";
-  var vtsContent$e = "Content";
-  var vtsActions$e = "Actions";
-  var vtsNewRow$e = "A new row %1 has been inserted.";
-  var vtsDeletedRow$e = "Row %1 has been deleted.";
-  var vtsMovedRow$e = "Row %1 has been moved %2 and is now Row %3.";
+  var minutes$e = "";
+  var seconds$e = "";
+  var vtsHeading$e = "";
+  var vtsInstructions1$e = "";
+  var vtsInstructions2$e = "";
+  var vtsInstructions3$e = "";
+  var vtsInstructions4$e = "";
+  var vtsInstructions5$e = "";
+  var vtsSelectLanguage$e = "";
+  var vtsSave$e = "";
+  var vtsReturn$e = "";
+  var vtsCancel$e = "";
+  var vtsRow$e = "";
+  var vtsKind$e = "";
+  var vtsStart$e = "";
+  var vtsEnd$e = "";
+  var vtsContent$e = "";
+  var vtsActions$e = "";
+  var vtsNewRow$e = "";
+  var vtsDeletedRow$e = "";
+  var vtsMovedRow$e = "";
   var fr = {
   	playerHeading: playerHeading$e,
   	audioPlayer: audioPlayer$e,
@@ -16203,6 +17357,8 @@
   	enterFullScreen: enterFullScreen$e,
   	exitFullScreen: exitFullScreen$e,
   	speed: speed$e,
+  	on: on$e,
+  	off: off$e,
   	spacebar: spacebar$e,
   	transcriptTitle: transcriptTitle$e,
   	lyricsTitle: lyricsTitle$e,
@@ -16228,7 +17384,9 @@
   	prefDescription1: prefDescription1$e,
   	prefDescription2: prefDescription2$e,
   	prefDescription3: prefDescription3$e,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$e,
+  	prefDescriptionNone: prefDescriptionNone$e,
+  	prefDescFormatOption1: prefDescFormatOption1$e,
+  	prefDescFormatOption2: prefDescFormatOption2$e,
   	prefIntroDescription3: prefIntroDescription3$e,
   	prefIntroDescription4: prefIntroDescription4$e,
   	prefIntroKeyboard1: prefIntroKeyboard1$e,
@@ -16338,17 +17496,17 @@
   };
 
   var playerHeading$d = "נגן מדיה";
-  var audioPlayer$d = "Audio player";
-  var videoPlayer$d = "Video player";
-  var faster$d = "מהר יותר";
-  var slower$d = "לאט יותר";
+  var audioPlayer$d = "";
+  var videoPlayer$d = "";
+  var faster$d = "מהר יותר: %1x";
+  var slower$d = "לאט יותר: %1x";
   var play$d = "נגן";
   var pause$d = "הפסקה";
   var restart$d = "התחלה מחדש";
   var prevTrack$d = "המסלול הקודם";
   var nextTrack$d = "המסלול הבא";
-  var rewind$d = "חזרה";
-  var forward$d = "קדימה";
+  var rewind$d = "חזרה %1 שניות";
+  var forward$d = "קדימה %1 שניות";
   var captions$d = "כיתובים";
   var showCaptions$d = "הצגת כיתובים";
   var hideCaptions$d = "הסתרת כיתובים";
@@ -16366,11 +17524,13 @@
   var mute$d = "השתקה";
   var unmute$d = "הפסקת השתקה";
   var volume$d = "עצמה";
-  var volumeUpDown$d = "Volume up down";
+  var volumeUpDown$d = "";
   var preferences$d = "העדפות";
   var enterFullScreen$d = "מעבר למסך מלא";
   var exitFullScreen$d = "יציאה ממסך מלא";
   var speed$d = "מהירות";
+  var on$d = "";
+  var off$d = "";
   var spacebar$d = "מקש הרווח";
   var transcriptTitle$d = "תמליל";
   var lyricsTitle$d = "מילים";
@@ -16384,7 +17544,7 @@
   var alertDescribedVersion$d = "שימוש בגירסת אודיו המתוארת של סרטון זה";
   var alertNonDescribedVersion$d = "שימוש בגרסה הלא מתוארת של סרטון זה";
   var prefMenuCaptions$d = "כיתובים";
-  var prefVoicedCaptions$d = "Spoken Captions";
+  var prefVoicedCaptions$d = "";
   var prefMenuDescriptions$d = "תיאורים";
   var prefMenuKeyboard$d = "מקלדת";
   var prefMenuTranscript$d = "תמליל";
@@ -16396,7 +17556,9 @@
   var prefDescription1$d = "הווידאו הנוכחי יש גרסה חלופית המתוארתתיאור מבוסס טקסט";
   var prefDescription2$d = "הווידאו הנוכחי ישגרסה חלופית המתוארת של וידאו";
   var prefDescription3$d = "הווידאו הנוכחי יש תיאור מבוסס טקסט, הודיעה על ידי קורא מסך";
-  var prefIntroDescriptionNone$d = "לסרטון הנוכחי אין תיאור שמע בתבנית.";
+  var prefDescriptionNone$d = "לסרטון הנוכחי אין תיאור שמע בתבנית.";
+  var prefDescFormatOption1$d = "";
+  var prefDescFormatOption2$d = "";
   var prefIntroDescription3$d = "השתמש בטופס הבא כדי לקבוע את ההעדפות שלך הקשורות לתיאור שמע.";
   var prefIntroDescription4$d = "לאחר שתשמור את ההגדרות שלך, תיאור השמע יכול להיות מוחל על / כיבוי באמצעות לחצן תיאור.";
   var prefIntroKeyboard1$d = "נגן המדיה בדף אינטרנט זה יכול להיות מופעל מכל מקום בדף באמצעות קיצורי מקשים (ראה להלן רשימה).";
@@ -16406,24 +17568,24 @@
   var prefHeadingKeyboard2$d = "קיצורי מקשים נוכחיים";
   var prefHeadingDescription$d = "תיאור שמע";
   var prefHeadingTextDescription$d = "תיאור מבוסס טקסט מבוסס טקסט";
-  var prefAltKey$d = "Alt";
-  var prefCtrlKey$d = "Control";
-  var prefShiftKey$d = "Shift";
-  var prefNoKeyShortcuts$d = "Disable keyboard shortcuts";
-  var escapeKey$d = "Escape";
+  var prefAltKey$d = "";
+  var prefCtrlKey$d = "";
+  var prefShiftKey$d = "";
+  var prefNoKeyShortcuts$d = "";
+  var escapeKey$d = "";
   var escapeKeyFunction$d = "סגור את תיבת הדו שיח הנוכחית או תפריט קופץ";
   var prefDescPause$d = "השהה את הווידאו באופן אוטומטי כאשר התיאור מתחיל";
   var prefDescVisible$d = "הפוך תיאור גלוי";
-  var prefDescVoice$d = "Voice";
-  var prefDescRate$d = "Spoken Description Rate";
-  var prefCaptionRate$d = "Spoken Caption Rate";
-  var prefDescPitch$d = "Pitch";
-  var prefDescPitch1$d = "Very low";
-  var prefDescPitch2$d = "Low";
-  var prefDescPitch3$d = "Default";
-  var prefDescPitch4$d = "High";
-  var prefDescPitch5$d = "Very high";
-  var sampleDescriptionText$d = "Adjust settings to hear this sample text.";
+  var prefDescVoice$d = "";
+  var prefDescRate$d = "";
+  var prefCaptionRate$d = "";
+  var prefDescPitch$d = "";
+  var prefDescPitch1$d = "";
+  var prefDescPitch2$d = "";
+  var prefDescPitch3$d = "";
+  var prefDescPitch4$d = "";
+  var prefDescPitch5$d = "";
+  var sampleDescriptionText$d = "";
   var prefHighlight$d = "הדגש תמליל כמו משחק מדיה";
   var prefTabbable$d = "הפעל תמליל";
   var prefCaptionsFont$d = "גופן";
@@ -16447,62 +17609,62 @@
   var black$d = "שחור";
   var transparent$d = "שקוף";
   var solid$d = "מלא";
-  var captionsStylePopOn$d = "Pop-on";
-  var captionsStyleRollUp$d = "Roll-up";
+  var captionsStylePopOn$d = "";
+  var captionsStyleRollUp$d = "";
   var prefCaptionsPosition$d = "מיקום";
-  var captionsPositionOverlay$d = "Overlay";
+  var captionsPositionOverlay$d = "";
   var captionsPositionBelow$d = "מתחת לוידאו";
   var sampleCaptionText$d = "דוגמת טקסט כיתוביות";
   var prefSuccess$d = "השינויים שלכם נשמרו.";
   var prefNoChange$d = "לא בצעתם כל שינוי.";
   var save$d = "שמירה";
   var cancel$d = "ביטול";
-  var dismissButton$d = "Dismiss";
+  var dismissButton$d = "";
   var windowButtonLabel$d = "אפשרויות חלון";
   var windowMove$d = "הזזה";
-  var windowMoveLeft$d = "Window moved left";
-  var windowMoveRight$d = "Window moved right";
-  var windowMoveUp$d = "Window moved up";
-  var windowMoveDown$d = "Window moved down";
-  var windowMoveStopped$d = "Window move stopped";
-  var transcriptControls$d = "Transcript Window Controls";
-  var signControls$d = "Sign Language Window Controls";
+  var windowMoveLeft$d = "";
+  var windowMoveRight$d = "";
+  var windowMoveUp$d = "";
+  var windowMoveDown$d = "";
+  var windowMoveStopped$d = "";
+  var transcriptControls$d = "";
+  var signControls$d = "";
   var windowMoveAlert$d = "גרור או השתמשו מקשי החצים להזזת החלון; כפתור Enter להפסקה";
   var windowResize$d = "שיוי גודל";
   var windowResizeHeading$d = "שינוי גודל חלון";
   var closeButtonLabel$d = "סגירת";
   var width$d = "רוחב";
   var height$d = "גובה";
-  var resultsSummary1$d = "You searched for:";
-  var resultsSummary2$d = "Found %1 matching items.";
-  var resultsSummary3$d = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound$d = "No results found.";
-  var searchButtonLabel$d = "Play at %1";
-  var hour$d = "hour";
-  var minute$d = "minute";
-  var second$d = "second";
-  var hours$d = "hours";
-  var minutes$d = "minutes";
-  var seconds$d = "seconds";
-  var vtsHeading$d = "Video Transcript Sorter";
-  var vtsInstructions1$d = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$d = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$d = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$d = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$d = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$d = "Select a language";
-  var vtsSave$d = "Generate new .vtt content";
-  var vtsReturn$d = "Return to Editor";
-  var vtsCancel$d = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$d = "Row";
-  var vtsKind$d = "Kind";
-  var vtsStart$d = "Start";
-  var vtsEnd$d = "End";
-  var vtsContent$d = "Content";
-  var vtsActions$d = "Actions";
-  var vtsNewRow$d = "A new row %1 has been inserted.";
-  var vtsDeletedRow$d = "Row %1 has been deleted.";
-  var vtsMovedRow$d = "Row %1 has been moved %2 and is now Row %3.";
+  var resultsSummary1$d = "";
+  var resultsSummary2$d = "";
+  var resultsSummary3$d = "";
+  var noResultsFound$d = "";
+  var searchButtonLabel$d = "";
+  var hour$d = "";
+  var minute$d = "";
+  var second$d = "";
+  var hours$d = "";
+  var minutes$d = "";
+  var seconds$d = "";
+  var vtsHeading$d = "";
+  var vtsInstructions1$d = "";
+  var vtsInstructions2$d = "";
+  var vtsInstructions3$d = "";
+  var vtsInstructions4$d = "";
+  var vtsInstructions5$d = "";
+  var vtsSelectLanguage$d = "";
+  var vtsSave$d = "";
+  var vtsReturn$d = "";
+  var vtsCancel$d = "";
+  var vtsRow$d = "";
+  var vtsKind$d = "";
+  var vtsStart$d = "";
+  var vtsEnd$d = "";
+  var vtsContent$d = "";
+  var vtsActions$d = "";
+  var vtsNewRow$d = "";
+  var vtsDeletedRow$d = "";
+  var vtsMovedRow$d = "";
   var he = {
   	playerHeading: playerHeading$d,
   	audioPlayer: audioPlayer$d,
@@ -16538,6 +17700,8 @@
   	enterFullScreen: enterFullScreen$d,
   	exitFullScreen: exitFullScreen$d,
   	speed: speed$d,
+  	on: on$d,
+  	off: off$d,
   	spacebar: spacebar$d,
   	transcriptTitle: transcriptTitle$d,
   	lyricsTitle: lyricsTitle$d,
@@ -16563,7 +17727,9 @@
   	prefDescription1: prefDescription1$d,
   	prefDescription2: prefDescription2$d,
   	prefDescription3: prefDescription3$d,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$d,
+  	prefDescriptionNone: prefDescriptionNone$d,
+  	prefDescFormatOption1: prefDescFormatOption1$d,
+  	prefDescFormatOption2: prefDescFormatOption2$d,
   	prefIntroDescription3: prefIntroDescription3$d,
   	prefIntroDescription4: prefIntroDescription4$d,
   	prefIntroKeyboard1: prefIntroKeyboard1$d,
@@ -16673,17 +17839,17 @@
   };
 
   var playerHeading$c = "Pemutar media";
-  var audioPlayer$c = "Audio player";
-  var videoPlayer$c = "Video player";
-  var faster$c = "Percepat";
-  var slower$c = "Perlambat";
+  var audioPlayer$c = "";
+  var videoPlayer$c = "";
+  var faster$c = "Percepat: %1x";
+  var slower$c = "Perlambat: %1x";
   var play$c = "Mulai";
   var pause$c = "Jeda";
   var restart$c = "Ulangi";
   var prevTrack$c = "Trek sebelumnya";
   var nextTrack$c = "Trek berikutnya";
-  var rewind$c = "Mundur";
-  var forward$c = "Maju";
+  var rewind$c = "Mundur %1 detik";
+  var forward$c = "Maju %1 detik";
   var captions$c = "Takarir";
   var showCaptions$c = "Tampilkan takarir";
   var hideCaptions$c = "Sembunyikan takarir";
@@ -16706,6 +17872,8 @@
   var enterFullScreen$c = "Masuk ke mode layar penuh";
   var exitFullScreen$c = "Keluar dari mode layar penuh";
   var speed$c = "Kecepatan";
+  var on$c = "";
+  var off$c = "";
   var spacebar$c = "tombol spasi";
   var transcriptTitle$c = "Transkripsi";
   var lyricsTitle$c = "Lirik";
@@ -16719,7 +17887,7 @@
   var alertDescribedVersion$c = "Menggunakan versi dengan deskripsi audio pada video ini";
   var alertNonDescribedVersion$c = "Menggunakan versi tanpa deskripsi pada video ini";
   var prefMenuCaptions$c = "Takarir";
-  var prefVoicedCaptions$c = "Spoken Captions";
+  var prefVoicedCaptions$c = "";
   var prefMenuDescriptions$c = "Deskripsi";
   var prefMenuKeyboard$c = "Kibor";
   var prefMenuTranscript$c = "Transkripsi";
@@ -16731,7 +17899,9 @@
   var prefDescription1$c = "Video ini memiliki versi alternatif berdeskripsi, deskripsi berbasis teks.";
   var prefDescription2$c = "Video ini memiliki versi alternatif video dengan deskripsi.";
   var prefDescription3$c = "Video ini memiliki deskripsi berbasis teks, dibacakan oleh pembaca layar.";
-  var prefIntroDescriptionNone$c = "Video ini tidak memiliki deskripsi audio dalam format mana pun.";
+  var prefDescriptionNone$c = "Video ini tidak memiliki deskripsi audio dalam format mana pun.";
+  var prefDescFormatOption1$c = "";
+  var prefDescFormatOption2$c = "";
   var prefIntroDescription3$c = "Gunakan isian berikut untuk memasang preferensi terkait deskripsi audio berbasis teks.";
   var prefIntroDescription4$c = "Setelah Anda menyimpan pengaturan, deskripsi audio dapat dinyala/matikan melalui tombol Deskripsi.";
   var prefIntroKeyboard1$c = "Pemutar media dalam halaman ini dapat dioperasikan dari bagian mana pun pada halaman dengan menggunakan pintasan kibor (lihat daftar di bawah).";
@@ -16741,17 +17911,17 @@
   var prefHeadingKeyboard2$c = "Pintasan kibor saat ini";
   var prefHeadingDescription$c = "Deskripsi audio";
   var prefHeadingTextDescription$c = "Deskripsi audio berbasis teks";
-  var prefAltKey$c = "Alt";
-  var prefCtrlKey$c = "Control";
-  var prefShiftKey$c = "Shift";
-  var prefNoKeyShortcuts$c = "Disable keyboard shortcuts";
-  var escapeKey$c = "Escape";
+  var prefAltKey$c = "";
+  var prefCtrlKey$c = "";
+  var prefShiftKey$c = "";
+  var prefNoKeyShortcuts$c = "";
+  var escapeKey$c = "";
   var escapeKeyFunction$c = "Tutup dialog atau menu sembulan yang tampil";
   var prefDescPause$c = "Otomatis jedakan video ketika deskripsi dimulai";
   var prefDescVisible$c = "Tampilkan deskripsi";
   var prefDescVoice$c = "Suara";
-  var prefDescRate$c = "Spoken Description Rate";
-  var prefCaptionRate$c = "Spoken Caption Rate";
+  var prefDescRate$c = "";
+  var prefCaptionRate$c = "";
   var prefDescPitch$c = "Titinada";
   var prefDescPitch1$c = "Sangat rendah";
   var prefDescPitch2$c = "Rendah";
@@ -16792,16 +17962,16 @@
   var prefNoChange$c = "Anda tidak melakukan perubahan apa pun.";
   var save$c = "Simpan";
   var cancel$c = "Batal";
-  var dismissButton$c = "Dismiss";
+  var dismissButton$c = "";
   var windowButtonLabel$c = "Opsi jendela";
   var windowMove$c = "Geser";
-  var windowMoveLeft$c = "Window moved left";
-  var windowMoveRight$c = "Window moved right";
-  var windowMoveUp$c = "Window moved up";
-  var windowMoveDown$c = "Window moved down";
-  var windowMoveStopped$c = "Window move stopped";
-  var transcriptControls$c = "Transcript Window Controls";
-  var signControls$c = "Sign Language Window Controls";
+  var windowMoveLeft$c = "";
+  var windowMoveRight$c = "";
+  var windowMoveUp$c = "";
+  var windowMoveDown$c = "";
+  var windowMoveStopped$c = "";
+  var transcriptControls$c = "";
+  var signControls$c = "";
   var windowMoveAlert$c = "Seret atau gunakan tombol panah untuk menggeser jendela; Tekan Enter untuk berhenti";
   var windowResize$c = "Ubah ukuran";
   var windowResizeHeading$c = "Ubah Ukuran Jendela";
@@ -16819,25 +17989,25 @@
   var hours$c = "jam";
   var minutes$c = "menit";
   var seconds$c = "detik";
-  var vtsHeading$c = "Video Transcript Sorter";
-  var vtsInstructions1$c = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$c = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$c = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$c = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$c = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$c = "Select a language";
-  var vtsSave$c = "Generate new .vtt content";
-  var vtsReturn$c = "Return to Editor";
-  var vtsCancel$c = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$c = "Row";
-  var vtsKind$c = "Kind";
-  var vtsStart$c = "Start";
-  var vtsEnd$c = "End";
-  var vtsContent$c = "Content";
-  var vtsActions$c = "Actions";
-  var vtsNewRow$c = "A new row %1 has been inserted.";
-  var vtsDeletedRow$c = "Row %1 has been deleted.";
-  var vtsMovedRow$c = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$c = "";
+  var vtsInstructions1$c = "";
+  var vtsInstructions2$c = "";
+  var vtsInstructions3$c = "";
+  var vtsInstructions4$c = "";
+  var vtsInstructions5$c = "";
+  var vtsSelectLanguage$c = "";
+  var vtsSave$c = "";
+  var vtsReturn$c = "";
+  var vtsCancel$c = "";
+  var vtsRow$c = "";
+  var vtsKind$c = "";
+  var vtsStart$c = "";
+  var vtsEnd$c = "";
+  var vtsContent$c = "";
+  var vtsActions$c = "";
+  var vtsNewRow$c = "";
+  var vtsDeletedRow$c = "";
+  var vtsMovedRow$c = "";
   var id = {
   	playerHeading: playerHeading$c,
   	audioPlayer: audioPlayer$c,
@@ -16873,6 +18043,8 @@
   	enterFullScreen: enterFullScreen$c,
   	exitFullScreen: exitFullScreen$c,
   	speed: speed$c,
+  	on: on$c,
+  	off: off$c,
   	spacebar: spacebar$c,
   	transcriptTitle: transcriptTitle$c,
   	lyricsTitle: lyricsTitle$c,
@@ -16898,7 +18070,9 @@
   	prefDescription1: prefDescription1$c,
   	prefDescription2: prefDescription2$c,
   	prefDescription3: prefDescription3$c,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$c,
+  	prefDescriptionNone: prefDescriptionNone$c,
+  	prefDescFormatOption1: prefDescFormatOption1$c,
+  	prefDescFormatOption2: prefDescFormatOption2$c,
   	prefIntroDescription3: prefIntroDescription3$c,
   	prefIntroDescription4: prefIntroDescription4$c,
   	prefIntroKeyboard1: prefIntroKeyboard1$c,
@@ -17008,17 +18182,17 @@
   };
 
   var playerHeading$b = "Lettore multimediale";
-  var audioPlayer$b = "Audio player";
-  var videoPlayer$b = "Video player";
-  var faster$b = "Più veloce";
-  var slower$b = "Più lento";
+  var audioPlayer$b = "";
+  var videoPlayer$b = "";
+  var faster$b = "Più veloce: %1x";
+  var slower$b = "Più lento: %1x";
   var play$b = "Riproduci";
   var pause$b = "Pausa";
   var restart$b = "Torna all'inizio";
   var prevTrack$b = "Traccia precedente";
   var nextTrack$b = "Traccia successiva";
-  var rewind$b = "Indietro";
-  var forward$b = "Avanti";
+  var rewind$b = "Indietro %1 secondi";
+  var forward$b = "Avanti %1 secondi";
   var captions$b = "Sottotitoli";
   var showCaptions$b = "Mostra sottotitoli";
   var hideCaptions$b = "Nascondi sottotitoli";
@@ -17035,12 +18209,14 @@
   var seekbarLabel$b = "Tempo trascorso";
   var mute$b = "Muto";
   var unmute$b = "Riattiva l'audio";
-  var volume$b = "Volume";
+  var volume$b = "";
   var volumeUpDown$b = "Incremento e diminuzione volume";
   var preferences$b = "Preferenze";
   var enterFullScreen$b = "Attiva schermo intero";
   var exitFullScreen$b = "Disattiva schermo intero";
   var speed$b = "Velocità";
+  var on$b = "";
+  var off$b = "";
   var spacebar$b = "barra spaziatrice";
   var transcriptTitle$b = "Trascrizione";
   var lyricsTitle$b = "Testi";
@@ -17048,13 +18224,13 @@
   var statusPlaying$b = "In riproduzione";
   var statusPaused$b = "In pausa";
   var statusStopped$b = "Fermato";
-  var statusBuffering$b = "Buffering";
+  var statusBuffering$b = "";
   var statusEnd$b = "Fine traccia";
   var selectedTrack$b = "Traccia selezionata";
   var alertDescribedVersion$b = "Sto usando la versione audiodescritta di questo video";
   var alertNonDescribedVersion$b = "Sto usando la versione non audiodescritta di questo video";
   var prefMenuCaptions$b = "Sottotitoli";
-  var prefVoicedCaptions$b = "Spoken Captions";
+  var prefVoicedCaptions$b = "";
   var prefMenuDescriptions$b = "Audioescrizioni";
   var prefMenuKeyboard$b = "Tastiera";
   var prefMenuTranscript$b = "Trascrizione";
@@ -17066,7 +18242,9 @@
   var prefDescription1$b = "il video corrente ha Una versione di descrizione alternativa, Descrizione testuale.";
   var prefDescription2$b = "il video corrente ha Versione di descrizione alternativa per il video.";
   var prefDescription3$b = "il video corrente ha Descrizione testuale, letta dal lettore di schermo.";
-  var prefIntroDescriptionNone$b = "Il video corrente non ha audiodescrizioni.";
+  var prefDescriptionNone$b = "Il video corrente non ha audiodescrizioni.";
+  var prefDescFormatOption1$b = "";
+  var prefDescFormatOption2$b = "";
   var prefIntroDescription3$b = "Usa il seguente modulo per impostare le tue preferenze relative all'audiodescrizione testuale.";
   var prefIntroDescription4$b = "Dopo aver salvato le tue impostazioni, le audiodescrizioni possono essere attivate o disattivate usando i pulsanti descrizione.";
   var prefIntroKeyboard1$b = "Il lettore multimediale può essere usato dovunque in questa pagina, attraverso la tastiera. Vedi sotto per un elenco di tasti di scelta rapida.";
@@ -17076,24 +18254,24 @@
   var prefHeadingKeyboard2$b = "Tasti di scelta rapida correnti";
   var prefHeadingDescription$b = "Audiodescrizione";
   var prefHeadingTextDescription$b = "audiodescrizione testuale";
-  var prefAltKey$b = "Alt";
-  var prefCtrlKey$b = "Control";
-  var prefShiftKey$b = "Shift";
-  var prefNoKeyShortcuts$b = "Disable keyboard shortcuts";
-  var escapeKey$b = "Escape";
+  var prefAltKey$b = "";
+  var prefCtrlKey$b = "";
+  var prefShiftKey$b = "";
+  var prefNoKeyShortcuts$b = "";
+  var escapeKey$b = "";
   var escapeKeyFunction$b = "Chiude il menu o la finestra corrente";
   var prefDescPause$b = "Mette automaticamente il video in pausa, quando inizia la descrizione";
   var prefDescVisible$b = "Rende la descrizione visibile";
-  var prefDescVoice$b = "Voice";
-  var prefDescRate$b = "Spoken Description Rate";
-  var prefCaptionRate$b = "Spoken Caption Rate";
-  var prefDescPitch$b = "Pitch";
-  var prefDescPitch1$b = "Very low";
-  var prefDescPitch2$b = "Low";
-  var prefDescPitch3$b = "Default";
-  var prefDescPitch4$b = "High";
-  var prefDescPitch5$b = "Very high";
-  var sampleDescriptionText$b = "Adjust settings to hear this sample text.";
+  var prefDescVoice$b = "";
+  var prefDescRate$b = "";
+  var prefCaptionRate$b = "";
+  var prefDescPitch$b = "";
+  var prefDescPitch1$b = "";
+  var prefDescPitch2$b = "";
+  var prefDescPitch3$b = "";
+  var prefDescPitch4$b = "";
+  var prefDescPitch5$b = "";
+  var sampleDescriptionText$b = "";
   var prefHighlight$b = "Evidenzia la descrizione";
   var prefTabbable$b = "Abilita la descrizione";
   var prefCaptionsFont$b = "Carattere";
@@ -17127,52 +18305,52 @@
   var prefNoChange$b = "Non è stato effettuato alcun cambiamento.";
   var save$b = "Salva";
   var cancel$b = "Annulla";
-  var dismissButton$b = "Dismiss";
+  var dismissButton$b = "";
   var windowButtonLabel$b = "Opzioni finestra";
   var windowMove$b = "Sposta";
-  var windowMoveLeft$b = "Window moved left";
-  var windowMoveRight$b = "Window moved right";
-  var windowMoveUp$b = "Window moved up";
-  var windowMoveDown$b = "Window moved down";
-  var windowMoveStopped$b = "Window move stopped";
-  var transcriptControls$b = "Transcript Window Controls";
-  var signControls$b = "Sign Language Window Controls";
+  var windowMoveLeft$b = "";
+  var windowMoveRight$b = "";
+  var windowMoveUp$b = "";
+  var windowMoveDown$b = "";
+  var windowMoveStopped$b = "";
+  var transcriptControls$b = "";
+  var signControls$b = "";
   var windowMoveAlert$b = "Trascina o usa le frecce per spostare la finestra. Invio per fermare.";
   var windowResize$b = "Ridimensiona";
   var windowResizeHeading$b = "Ridimensiona finestra";
   var closeButtonLabel$b = "Chiudi";
   var width$b = "Larghezza";
   var height$b = "Altezza";
-  var resultsSummary1$b = "You searched for:";
-  var resultsSummary2$b = "Found %1 matching items.";
-  var resultsSummary3$b = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound$b = "No results found.";
-  var searchButtonLabel$b = "Play at %1";
-  var hour$b = "hour";
-  var minute$b = "minute";
-  var second$b = "second";
-  var hours$b = "hours";
-  var minutes$b = "minutes";
-  var seconds$b = "seconds";
-  var vtsHeading$b = "Video Transcript Sorter";
-  var vtsInstructions1$b = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$b = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$b = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$b = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$b = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$b = "Select a language";
-  var vtsSave$b = "Generate new .vtt content";
-  var vtsReturn$b = "Return to Editor";
-  var vtsCancel$b = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$b = "Row";
-  var vtsKind$b = "Kind";
-  var vtsStart$b = "Start";
-  var vtsEnd$b = "End";
-  var vtsContent$b = "Content";
-  var vtsActions$b = "Actions";
-  var vtsNewRow$b = "A new row %1 has been inserted.";
-  var vtsDeletedRow$b = "Row %1 has been deleted.";
-  var vtsMovedRow$b = "Row %1 has been moved %2 and is now Row %3.";
+  var resultsSummary1$b = "";
+  var resultsSummary2$b = "";
+  var resultsSummary3$b = "";
+  var noResultsFound$b = "";
+  var searchButtonLabel$b = "";
+  var hour$b = "";
+  var minute$b = "";
+  var second$b = "";
+  var hours$b = "";
+  var minutes$b = "";
+  var seconds$b = "";
+  var vtsHeading$b = "";
+  var vtsInstructions1$b = "";
+  var vtsInstructions2$b = "";
+  var vtsInstructions3$b = "";
+  var vtsInstructions4$b = "";
+  var vtsInstructions5$b = "";
+  var vtsSelectLanguage$b = "";
+  var vtsSave$b = "";
+  var vtsReturn$b = "";
+  var vtsCancel$b = "";
+  var vtsRow$b = "";
+  var vtsKind$b = "";
+  var vtsStart$b = "";
+  var vtsEnd$b = "";
+  var vtsContent$b = "";
+  var vtsActions$b = "";
+  var vtsNewRow$b = "";
+  var vtsDeletedRow$b = "";
+  var vtsMovedRow$b = "";
   var it = {
   	playerHeading: playerHeading$b,
   	audioPlayer: audioPlayer$b,
@@ -17208,6 +18386,8 @@
   	enterFullScreen: enterFullScreen$b,
   	exitFullScreen: exitFullScreen$b,
   	speed: speed$b,
+  	on: on$b,
+  	off: off$b,
   	spacebar: spacebar$b,
   	transcriptTitle: transcriptTitle$b,
   	lyricsTitle: lyricsTitle$b,
@@ -17233,7 +18413,9 @@
   	prefDescription1: prefDescription1$b,
   	prefDescription2: prefDescription2$b,
   	prefDescription3: prefDescription3$b,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$b,
+  	prefDescriptionNone: prefDescriptionNone$b,
+  	prefDescFormatOption1: prefDescFormatOption1$b,
+  	prefDescFormatOption2: prefDescFormatOption2$b,
   	prefIntroDescription3: prefIntroDescription3$b,
   	prefIntroDescription4: prefIntroDescription4$b,
   	prefIntroKeyboard1: prefIntroKeyboard1$b,
@@ -17343,17 +18525,17 @@
   };
 
   var playerHeading$a = "メディアプレイヤー";
-  var audioPlayer$a = "Audio player";
-  var videoPlayer$a = "Video player";
-  var faster$a = "はやく";
-  var slower$a = "おそく";
+  var audioPlayer$a = "";
+  var videoPlayer$a = "";
+  var faster$a = "はやく: %1x";
+  var slower$a = "おそく: %1x";
   var play$a = "再生";
   var pause$a = "一時停止";
   var restart$a = "再開";
   var prevTrack$a = "前のトラック";
   var nextTrack$a = "次のトラック";
-  var rewind$a = "巻き戻し";
-  var forward$a = "早送り";
+  var rewind$a = "巻き戻し %1 秒";
+  var forward$a = "早送り %1 秒";
   var captions$a = "キャプション";
   var showCaptions$a = "キャプションを表示する";
   var hideCaptions$a = "キャプションを非表示にする";
@@ -17376,6 +18558,8 @@
   var enterFullScreen$a = "全画面表示";
   var exitFullScreen$a = "全画面表示の終了";
   var speed$a = "再生速度";
+  var on$a = "";
+  var off$a = "";
   var spacebar$a = "スペースキー";
   var transcriptTitle$a = "書き起こし";
   var lyricsTitle$a = "歌詞";
@@ -17401,7 +18585,9 @@
   var prefDescription1$a = "現在の動画では次の方法が選択可能です: 解説付きの代替バージョン テキストによる解説";
   var prefDescription2$a = "現在の動画では次の方法が選択可能です: 解説付きの代替バージョンのビデオ";
   var prefDescription3$a = "現在の動画では次の方法が選択可能です: テキストによる解説(スクリーンリーダーによって読み上げられる)";
-  var prefIntroDescriptionNone$a = "現在の動画にはどちらの形式の音声解説も含まれていません。";
+  var prefDescriptionNone$a = "現在の動画にはどちらの形式の音声解説も含まれていません。";
+  var prefDescFormatOption1$a = "";
+  var prefDescFormatOption2$a = "";
   var prefIntroDescription3$a = "次のフォームを使って、音声解説に関連する設定を保存できます。";
   var prefIntroDescription4$a = "設定が保存されたら、音声解説ボタンによって音声解説の表示・非表示を切り替えることができます。";
   var prefIntroKeyboard1$a = "このページのメディアプレイヤーは、キーボード・ショートカットを使ってこのページのどこからでも操作できます(下の一覧を参照してください)。";
@@ -17411,17 +18597,17 @@
   var prefHeadingKeyboard2$a = "現在のキーボード・ショートカット";
   var prefHeadingDescription$a = "音声解説";
   var prefHeadingTextDescription$a = "テキストによる音声解説";
-  var prefAltKey$a = "Alt";
-  var prefCtrlKey$a = "Control";
-  var prefShiftKey$a = "Shift";
-  var prefNoKeyShortcuts$a = "Disable keyboard shortcuts";
+  var prefAltKey$a = "";
+  var prefCtrlKey$a = "";
+  var prefShiftKey$a = "";
+  var prefNoKeyShortcuts$a = "";
   var escapeKey$a = "エスケープ";
   var escapeKeyFunction$a = "現在のダイアログやポップアップメニューを閉じる";
   var prefDescPause$a = "解説が表示されたら動画を自動的に停止する";
   var prefDescVisible$a = "解説が見えるようにする";
   var prefDescVoice$a = "音";
-  var prefDescRate$a = "Spoken Description Rate";
-  var prefCaptionRate$a = "Spoken Caption Rate";
+  var prefDescRate$a = "";
+  var prefCaptionRate$a = "";
   var prefDescPitch$a = "ピッチ";
   var prefDescPitch1$a = "非常に低い";
   var prefDescPitch2$a = "低い";
@@ -17439,9 +18625,9 @@
   var prefCaptionsStyle$a = "書式";
   var serif$a = "セリフ";
   var sans$a = "サンセリフ";
-  var cursive$a = "cursive";
-  var fantasy$a = "fantasy";
-  var monospace$a = "monospace";
+  var cursive$a = "";
+  var fantasy$a = "";
+  var monospace$a = "";
   var white$a = "白";
   var yellow$a = "黄色";
   var green$a = "緑";
@@ -17462,16 +18648,16 @@
   var prefNoChange$a = "設定が変更されていません。";
   var save$a = "保存";
   var cancel$a = "キャンセル";
-  var dismissButton$a = "Dismiss";
+  var dismissButton$a = "";
   var windowButtonLabel$a = "ウィンドウの設定";
   var windowMove$a = "移動";
-  var windowMoveLeft$a = "Window moved left";
-  var windowMoveRight$a = "Window moved right";
-  var windowMoveUp$a = "Window moved up";
-  var windowMoveDown$a = "Window moved down";
-  var windowMoveStopped$a = "Window move stopped";
-  var transcriptControls$a = "Transcript Window Controls";
-  var signControls$a = "Sign Language Window Controls";
+  var windowMoveLeft$a = "";
+  var windowMoveRight$a = "";
+  var windowMoveUp$a = "";
+  var windowMoveDown$a = "";
+  var windowMoveStopped$a = "";
+  var transcriptControls$a = "";
+  var signControls$a = "";
   var windowMoveAlert$a = "マウスをドラッグするか矢印キーでウィンドウを移動できます; Enterで終了";
   var windowResize$a = "サイズを変える";
   var windowResizeHeading$a = "ウィンドウのサイズ変更";
@@ -17489,25 +18675,25 @@
   var hours$a = "時間";
   var minutes$a = "分";
   var seconds$a = "秒";
-  var vtsHeading$a = "Video Transcript Sorter";
-  var vtsInstructions1$a = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$a = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$a = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$a = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$a = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$a = "Select a language";
-  var vtsSave$a = "Generate new .vtt content";
-  var vtsReturn$a = "Return to Editor";
-  var vtsCancel$a = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$a = "Row";
-  var vtsKind$a = "Kind";
-  var vtsStart$a = "Start";
-  var vtsEnd$a = "End";
-  var vtsContent$a = "Content";
-  var vtsActions$a = "Actions";
-  var vtsNewRow$a = "A new row %1 has been inserted.";
-  var vtsDeletedRow$a = "Row %1 has been deleted.";
-  var vtsMovedRow$a = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$a = "";
+  var vtsInstructions1$a = "";
+  var vtsInstructions2$a = "";
+  var vtsInstructions3$a = "";
+  var vtsInstructions4$a = "";
+  var vtsInstructions5$a = "";
+  var vtsSelectLanguage$a = "";
+  var vtsSave$a = "";
+  var vtsReturn$a = "";
+  var vtsCancel$a = "";
+  var vtsRow$a = "";
+  var vtsKind$a = "";
+  var vtsStart$a = "";
+  var vtsEnd$a = "";
+  var vtsContent$a = "";
+  var vtsActions$a = "";
+  var vtsNewRow$a = "";
+  var vtsDeletedRow$a = "";
+  var vtsMovedRow$a = "";
   var ja = {
   	playerHeading: playerHeading$a,
   	audioPlayer: audioPlayer$a,
@@ -17543,6 +18729,8 @@
   	enterFullScreen: enterFullScreen$a,
   	exitFullScreen: exitFullScreen$a,
   	speed: speed$a,
+  	on: on$a,
+  	off: off$a,
   	spacebar: spacebar$a,
   	transcriptTitle: transcriptTitle$a,
   	lyricsTitle: lyricsTitle$a,
@@ -17568,7 +18756,9 @@
   	prefDescription1: prefDescription1$a,
   	prefDescription2: prefDescription2$a,
   	prefDescription3: prefDescription3$a,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$a,
+  	prefDescriptionNone: prefDescriptionNone$a,
+  	prefDescFormatOption1: prefDescFormatOption1$a,
+  	prefDescFormatOption2: prefDescFormatOption2$a,
   	prefIntroDescription3: prefIntroDescription3$a,
   	prefIntroDescription4: prefIntroDescription4$a,
   	prefIntroKeyboard1: prefIntroKeyboard1$a,
@@ -17678,17 +18868,17 @@
   };
 
   var playerHeading$9 = "Pemain media";
-  var audioPlayer$9 = "Audio player";
-  var videoPlayer$9 = "Video player";
-  var faster$9 = "Lebih laju";
-  var slower$9 = "Lebih perlahan";
+  var audioPlayer$9 = "";
+  var videoPlayer$9 = "";
+  var faster$9 = "Lebih laju: %1x";
+  var slower$9 = "Lebih perlahan: %1x";
   var play$9 = "Main";
   var pause$9 = "Jeda";
   var restart$9 = "Mula semula";
   var prevTrack$9 = "Trek sebelumnya";
   var nextTrack$9 = "Trek seterusnya";
-  var rewind$9 = "Undur";
-  var forward$9 = "Majukan";
+  var rewind$9 = "Undur %1 saat";
+  var forward$9 = "Majukan %1 saat";
   var captions$9 = "Sarikata";
   var showCaptions$9 = "Tunjuk sarikata";
   var hideCaptions$9 = "Sembunyi sarikata";
@@ -17711,6 +18901,8 @@
   var enterFullScreen$9 = "Masuk skrin penuh";
   var exitFullScreen$9 = "Keluar skrin penuh";
   var speed$9 = "Kelajuan";
+  var on$9 = "";
+  var off$9 = "";
   var spacebar$9 = "bar ruang";
   var transcriptTitle$9 = "Transkrip";
   var lyricsTitle$9 = "Lirik";
@@ -17724,7 +18916,7 @@
   var alertDescribedVersion$9 = "Menggunakan versi video dengan deskripsi audio";
   var alertNonDescribedVersion$9 = "Menggunakan versi video tanpa deskripsi audio";
   var prefMenuCaptions$9 = "Sarikata";
-  var prefVoicedCaptions$9 = "Spoken Captions";
+  var prefVoicedCaptions$9 = "Sarikata Bersuara";
   var prefMenuDescriptions$9 = "Deskripsi";
   var prefMenuKeyboard$9 = "Papan kekunci";
   var prefMenuTranscript$9 = "Transkrip";
@@ -17736,7 +18928,9 @@
   var prefDescription1$9 = "Video semasa mempunyai versi berdeskripsi alternatif, deskripsi berasaskan teks.";
   var prefDescription2$9 = "Video semasa mempunyai versi video berdeskripsi alternatif.";
   var prefDescription3$9 = "Video semasa mempunyai deskripsi berasaskan teks, diumumkan oleh pembaca skrin.";
-  var prefIntroDescriptionNone$9 = "Video semasa tiada deskripsi audio dalam mana-mana format.";
+  var prefDescriptionNone$9 = "Video semasa tiada deskripsi audio dalam mana-mana format.";
+  var prefDescFormatOption1$9 = "";
+  var prefDescFormatOption2$9 = "";
   var prefIntroDescription3$9 = "Gunakan borang berikut untuk menetapkan keutamaan berkaitan deskripsi audio berasaskan teks.";
   var prefIntroDescription4$9 = "Selepas anda menyimpan tetapan, deskripsi audio boleh dihidupkan/dimatikan menggunakan butang Deskripsi.";
   var prefIntroKeyboard1$9 = "Pemain media di laman web ini boleh dikendalikan dari mana-mana sahaja di halaman menggunakan pintasan papan kekunci (lihat di bawah untuk senarai).";
@@ -17746,17 +18940,17 @@
   var prefHeadingKeyboard2$9 = "Pintasan papan kekunci semasa";
   var prefHeadingDescription$9 = "Deskripsi audio";
   var prefHeadingTextDescription$9 = "Deskripsi audio berasaskan teks";
-  var prefAltKey$9 = "Alt";
-  var prefCtrlKey$9 = "Control";
-  var prefShiftKey$9 = "Shift";
-  var prefNoKeyShortcuts$9 = "Disable keyboard shortcuts";
-  var escapeKey$9 = "Escape";
+  var prefAltKey$9 = "";
+  var prefCtrlKey$9 = "";
+  var prefShiftKey$9 = "";
+  var prefNoKeyShortcuts$9 = "";
+  var escapeKey$9 = "";
   var escapeKeyFunction$9 = "Tutup dialog atau menu popup semasa";
   var prefDescPause$9 = "Jeda video secara automatik apabila deskripsi bermula";
   var prefDescVisible$9 = "Paparkan deskripsi";
   var prefDescVoice$9 = "Suara";
-  var prefDescRate$9 = "Spoken Description Rate";
-  var prefCaptionRate$9 = "Spoken Caption Rate";
+  var prefDescRate$9 = "Kadar Deskripsi Bersuara";
+  var prefCaptionRate$9 = "Kadar Sarikata Bersuara";
   var prefDescPitch$9 = "Nada";
   var prefDescPitch1$9 = "Sangat rendah";
   var prefDescPitch2$9 = "Rendah";
@@ -17772,11 +18966,11 @@
   var prefCaptionsSize$9 = "Saiz Fon";
   var prefCaptionsOpacity$9 = "Kelegapan";
   var prefCaptionsStyle$9 = "Gaya";
-  var serif$9 = "serif";
-  var sans$9 = "sans-serif";
-  var cursive$9 = "cursive";
-  var fantasy$9 = "fantasy";
-  var monospace$9 = "monospace";
+  var serif$9 = "";
+  var sans$9 = "";
+  var cursive$9 = "";
+  var fantasy$9 = "";
+  var monospace$9 = "";
   var white$9 = "putih";
   var yellow$9 = "kuning";
   var green$9 = "hijau";
@@ -17787,8 +18981,8 @@
   var black$9 = "hitam";
   var transparent$9 = "telus";
   var solid$9 = "pepejal";
-  var captionsStylePopOn$9 = "Pop-on";
-  var captionsStyleRollUp$9 = "Roll-up";
+  var captionsStylePopOn$9 = "";
+  var captionsStyleRollUp$9 = "";
   var prefCaptionsPosition$9 = "Kedudukan";
   var captionsPositionOverlay$9 = "Lapisan atas";
   var captionsPositionBelow$9 = "Di bawah video";
@@ -17797,16 +18991,16 @@
   var prefNoChange$9 = "Anda tidak membuat sebarang perubahan.";
   var save$9 = "Simpan";
   var cancel$9 = "Batal";
-  var dismissButton$9 = "Dismiss";
+  var dismissButton$9 = "";
   var windowButtonLabel$9 = "Pilihan tetingkap";
   var windowMove$9 = "Alih";
-  var windowMoveLeft$9 = "Window moved left";
-  var windowMoveRight$9 = "Window moved right";
-  var windowMoveUp$9 = "Window moved up";
-  var windowMoveDown$9 = "Window moved down";
-  var windowMoveStopped$9 = "Window move stopped";
-  var transcriptControls$9 = "Transcript Window Controls";
-  var signControls$9 = "Sign Language Window Controls";
+  var windowMoveLeft$9 = "";
+  var windowMoveRight$9 = "";
+  var windowMoveUp$9 = "";
+  var windowMoveDown$9 = "";
+  var windowMoveStopped$9 = "";
+  var transcriptControls$9 = "";
+  var signControls$9 = "";
   var windowMoveAlert$9 = "Seret atau gunakan kekunci anak panah untuk mengalih tetingkap; Enter untuk berhenti";
   var windowResize$9 = "Ubah saiz";
   var windowResizeHeading$9 = "Ubah Saiz Tetingkap";
@@ -17824,25 +19018,25 @@
   var hours$9 = "jam";
   var minutes$9 = "minit";
   var seconds$9 = "saat";
-  var vtsHeading$9 = "Video Transcript Sorter";
-  var vtsInstructions1$9 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$9 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$9 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$9 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$9 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$9 = "Select a language";
-  var vtsSave$9 = "Generate new .vtt content";
-  var vtsReturn$9 = "Return to Editor";
-  var vtsCancel$9 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$9 = "Row";
-  var vtsKind$9 = "Kind";
-  var vtsStart$9 = "Start";
-  var vtsEnd$9 = "End";
-  var vtsContent$9 = "Content";
-  var vtsActions$9 = "Actions";
-  var vtsNewRow$9 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$9 = "Row %1 has been deleted.";
-  var vtsMovedRow$9 = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$9 = "";
+  var vtsInstructions1$9 = "";
+  var vtsInstructions2$9 = "";
+  var vtsInstructions3$9 = "";
+  var vtsInstructions4$9 = "";
+  var vtsInstructions5$9 = "";
+  var vtsSelectLanguage$9 = "";
+  var vtsSave$9 = "";
+  var vtsReturn$9 = "";
+  var vtsCancel$9 = "";
+  var vtsRow$9 = "";
+  var vtsKind$9 = "";
+  var vtsStart$9 = "";
+  var vtsEnd$9 = "";
+  var vtsContent$9 = "";
+  var vtsActions$9 = "";
+  var vtsNewRow$9 = "";
+  var vtsDeletedRow$9 = "";
+  var vtsMovedRow$9 = "";
   var ms = {
   	playerHeading: playerHeading$9,
   	audioPlayer: audioPlayer$9,
@@ -17878,6 +19072,8 @@
   	enterFullScreen: enterFullScreen$9,
   	exitFullScreen: exitFullScreen$9,
   	speed: speed$9,
+  	on: on$9,
+  	off: off$9,
   	spacebar: spacebar$9,
   	transcriptTitle: transcriptTitle$9,
   	lyricsTitle: lyricsTitle$9,
@@ -17903,7 +19099,9 @@
   	prefDescription1: prefDescription1$9,
   	prefDescription2: prefDescription2$9,
   	prefDescription3: prefDescription3$9,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$9,
+  	prefDescriptionNone: prefDescriptionNone$9,
+  	prefDescFormatOption1: prefDescFormatOption1$9,
+  	prefDescFormatOption2: prefDescFormatOption2$9,
   	prefIntroDescription3: prefIntroDescription3$9,
   	prefIntroDescription4: prefIntroDescription4$9,
   	prefIntroKeyboard1: prefIntroKeyboard1$9,
@@ -18013,17 +19211,17 @@
   };
 
   var playerHeading$8 = "Mediespiller";
-  var audioPlayer$8 = "Audio player";
-  var videoPlayer$8 = "Video player";
-  var faster$8 = "Raskere";
-  var slower$8 = "Saktere";
+  var audioPlayer$8 = "";
+  var videoPlayer$8 = "";
+  var faster$8 = "Raskere: %1x";
+  var slower$8 = "Saktere: %1x";
   var play$8 = "Spill av";
   var pause$8 = "Pause";
   var restart$8 = "Start på nytt";
   var prevTrack$8 = "Forrige spor";
   var nextTrack$8 = "Neste spor";
-  var rewind$8 = "Spol tilbake";
-  var forward$8 = "Spol fremover";
+  var rewind$8 = "Spol tilbake %1 sekunder";
+  var forward$8 = "Spol fremover %1 sekunder";
   var captions$8 = "Undertekster";
   var showCaptions$8 = "Vis undertekster";
   var hideCaptions$8 = "Skjul undertekster";
@@ -18046,6 +19244,8 @@
   var enterFullScreen$8 = "Vis fullskjerm";
   var exitFullScreen$8 = "Avslutt fullskjerm";
   var speed$8 = "Hastighet";
+  var on$8 = "";
+  var off$8 = "";
   var spacebar$8 = "ordskiller";
   var transcriptTitle$8 = "Transkripsjon";
   var lyricsTitle$8 = "Teksting, verselinjer";
@@ -18059,7 +19259,7 @@
   var alertDescribedVersion$8 = "Bruker videoversjon med synstolking";
   var alertNonDescribedVersion$8 = "Bruker videoversjon uten synstolking";
   var prefMenuCaptions$8 = "Undertekster";
-  var prefVoicedCaptions$8 = "Spoken Captions";
+  var prefVoicedCaptions$8 = "Talte undertekster";
   var prefMenuDescriptions$8 = "Synstolking";
   var prefMenuKeyboard$8 = "Tastatur";
   var prefMenuTranscript$8 = "Transkripsjon";
@@ -18071,7 +19271,9 @@
   var prefDescription1$8 = "Denne videoen har en alternativ synstolket versjon, tekstbasert synstolking.";
   var prefDescription2$8 = "Denne videoen har alternativ synstolket versjon av video.";
   var prefDescription3$8 = "Denne videoen har tekstbasert synstolket versjon opplest av skjermleser.";
-  var prefIntroDescriptionNone$8 = "Denne videoen har ikke synstolking i noen av formatene.";
+  var prefDescriptionNone$8 = "Denne videoen har ikke synstolking i noen av formatene.";
+  var prefDescFormatOption1$8 = "";
+  var prefDescFormatOption2$8 = "";
   var prefIntroDescription3$8 = "Bruk følgende skjema for å gjøre dine valg angående tekstbasert synstolking.";
   var prefIntroDescription4$8 = "Etter at du har lagret dine valg kan synstolking slås av og på med synstolkingsknappen.";
   var prefIntroKeyboard1$8 = "Mediespilleren på denne nettsiden kan styres fra hvor som helst på siden ved hjelp av tastatursnarveier (se liste nedenfor).";
@@ -18081,17 +19283,17 @@
   var prefHeadingKeyboard2$8 = "Nåværende tastekombinasjoner";
   var prefHeadingDescription$8 = "Synstolking";
   var prefHeadingTextDescription$8 = "Tekstbasert synstolking";
-  var prefAltKey$8 = "Alt";
-  var prefCtrlKey$8 = "Control";
-  var prefShiftKey$8 = "Shift";
-  var prefNoKeyShortcuts$8 = "Disable keyboard shortcuts";
-  var escapeKey$8 = "Escape";
+  var prefAltKey$8 = "";
+  var prefCtrlKey$8 = "";
+  var prefShiftKey$8 = "";
+  var prefNoKeyShortcuts$8 = "";
+  var escapeKey$8 = "";
   var escapeKeyFunction$8 = "Lukk dialogboks eller popup-meny";
   var prefDescPause$8 = "Sett video automatisk på pause når synstolking starter";
   var prefDescVisible$8 = "Vis synstolking";
   var prefDescVoice$8 = "Stemme";
-  var prefDescRate$8 = "Spoken Description Rate";
-  var prefCaptionRate$8 = "Spoken Caption Rate";
+  var prefDescRate$8 = "Kadar for talte beskrivelser";
+  var prefCaptionRate$8 = "Kadar for talte undertekster";
   var prefDescPitch$8 = "Toneleie";
   var prefDescPitch1$8 = "Meget lavt";
   var prefDescPitch2$8 = "Lavt";
@@ -18107,8 +19309,8 @@
   var prefCaptionsSize$8 = "Skriftstørrelse";
   var prefCaptionsOpacity$8 = "Ugjennomsiktighet";
   var prefCaptionsStyle$8 = "Stil";
-  var serif$8 = "serif";
-  var sans$8 = "sans-serif";
+  var serif$8 = "";
+  var sans$8 = "";
   var cursive$8 = "kursiv";
   var fantasy$8 = "fantasi";
   var monospace$8 = "ikke proporsjonal";
@@ -18135,13 +19337,13 @@
   var dismissButton$8 = "Dismiss";
   var windowButtonLabel$8 = "Vindusinnstillinger";
   var windowMove$8 = "Flytt";
-  var windowMoveLeft$8 = "Window moved left";
-  var windowMoveRight$8 = "Window moved right";
-  var windowMoveUp$8 = "Window moved up";
-  var windowMoveDown$8 = "Window moved down";
-  var windowMoveStopped$8 = "Window move stopped";
-  var transcriptControls$8 = "Transcript Window Controls";
-  var signControls$8 = "Sign Language Window Controls";
+  var windowMoveLeft$8 = "";
+  var windowMoveRight$8 = "";
+  var windowMoveUp$8 = "";
+  var windowMoveDown$8 = "";
+  var windowMoveStopped$8 = "";
+  var transcriptControls$8 = "";
+  var signControls$8 = "";
   var windowMoveAlert$8 = "Dra eller bruk piltaster for å flytte vinduet; Enter-tast for å stoppe";
   var windowResize$8 = "Endre størrelse";
   var windowResizeHeading$8 = "Endre vindusstørrelse";
@@ -18159,25 +19361,25 @@
   var hours$8 = "timer";
   var minutes$8 = "minutter";
   var seconds$8 = "sekunder";
-  var vtsHeading$8 = "Video Transcript Sorter";
-  var vtsInstructions1$8 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$8 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$8 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$8 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$8 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$8 = "Select a language";
-  var vtsSave$8 = "Generate new .vtt content";
-  var vtsReturn$8 = "Return to Editor";
-  var vtsCancel$8 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$8 = "Row";
-  var vtsKind$8 = "Kind";
-  var vtsStart$8 = "Start";
-  var vtsEnd$8 = "End";
-  var vtsContent$8 = "Content";
-  var vtsActions$8 = "Actions";
-  var vtsNewRow$8 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$8 = "Row %1 has been deleted.";
-  var vtsMovedRow$8 = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$8 = "";
+  var vtsInstructions1$8 = "";
+  var vtsInstructions2$8 = "";
+  var vtsInstructions3$8 = "";
+  var vtsInstructions4$8 = "";
+  var vtsInstructions5$8 = "";
+  var vtsSelectLanguage$8 = "";
+  var vtsSave$8 = "";
+  var vtsReturn$8 = "";
+  var vtsCancel$8 = "";
+  var vtsRow$8 = "";
+  var vtsKind$8 = "";
+  var vtsStart$8 = "";
+  var vtsEnd$8 = "";
+  var vtsContent$8 = "";
+  var vtsActions$8 = "";
+  var vtsNewRow$8 = "";
+  var vtsDeletedRow$8 = "";
+  var vtsMovedRow$8 = "";
   var nb = {
   	playerHeading: playerHeading$8,
   	audioPlayer: audioPlayer$8,
@@ -18213,6 +19415,8 @@
   	enterFullScreen: enterFullScreen$8,
   	exitFullScreen: exitFullScreen$8,
   	speed: speed$8,
+  	on: on$8,
+  	off: off$8,
   	spacebar: spacebar$8,
   	transcriptTitle: transcriptTitle$8,
   	lyricsTitle: lyricsTitle$8,
@@ -18238,7 +19442,9 @@
   	prefDescription1: prefDescription1$8,
   	prefDescription2: prefDescription2$8,
   	prefDescription3: prefDescription3$8,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$8,
+  	prefDescriptionNone: prefDescriptionNone$8,
+  	prefDescFormatOption1: prefDescFormatOption1$8,
+  	prefDescFormatOption2: prefDescFormatOption2$8,
   	prefIntroDescription3: prefIntroDescription3$8,
   	prefIntroDescription4: prefIntroDescription4$8,
   	prefIntroKeyboard1: prefIntroKeyboard1$8,
@@ -18350,15 +19556,15 @@
   var playerHeading$7 = "Mediaspeler";
   var audioPlayer$7 = "Audiospeler";
   var videoPlayer$7 = "Videospeler";
-  var faster$7 = "Sneller";
-  var slower$7 = "Langzamer";
+  var faster$7 = "Sneller: %1x";
+  var slower$7 = "Langzamer: %1x";
   var play$7 = "Afspelen";
   var pause$7 = "Pauzeren";
   var restart$7 = "Herstarten";
   var prevTrack$7 = "Vorige track";
   var nextTrack$7 = "Volgend track";
-  var rewind$7 = "Terug";
-  var forward$7 = "Verder";
+  var rewind$7 = "Terug %1 seconden";
+  var forward$7 = "Verder %1 seconden";
   var captions$7 = "Ondertiteling";
   var showCaptions$7 = "Toon ondertiteling";
   var hideCaptions$7 = "Verberg ondertiteling";
@@ -18381,6 +19587,8 @@
   var enterFullScreen$7 = "Ga naar volledig scherm";
   var exitFullScreen$7 = "Verlaat volledig scherm";
   var speed$7 = "Snelheid";
+  var on$7 = "";
+  var off$7 = "";
   var spacebar$7 = "spatietoets";
   var transcriptTitle$7 = "Transcript";
   var lyricsTitle$7 = "Tekst";
@@ -18394,7 +19602,7 @@
   var alertDescribedVersion$7 = "Versie met audiobeschrijving wordt gebruikt";
   var alertNonDescribedVersion$7 = "Versie zonder audiobeschrijving wordt gebruikt";
   var prefMenuCaptions$7 = "Ondertiteling";
-  var prefVoicedCaptions$7 = "Spoken Captions";
+  var prefVoicedCaptions$7 = "Gesproken ondertiteling";
   var prefMenuDescriptions$7 = "Beschrijvingen";
   var prefMenuKeyboard$7 = "Toetsenbord";
   var prefMenuTranscript$7 = "Transcript";
@@ -18406,7 +19614,9 @@
   var prefDescription1$7 = "De huidige video heeft een alternatief beschreven versie, op tekst gebaseerde beschrijving.";
   var prefDescription2$7 = "De huidige video heeft Alternatieve beschreven versie van de video.";
   var prefDescription3$7 = "De huidige video heeft op tekst gebaseerde beschrijving, uitgesproken door de schermlezer.";
-  var prefIntroDescriptionNone$7 = "De huidige video heeft in beide formaten geen audiobeschrijving.";
+  var prefDescriptionNone$7 = "De huidige video heeft in beide formaten geen audiobeschrijving.";
+  var prefDescFormatOption1$7 = "";
+  var prefDescFormatOption2$7 = "";
   var prefIntroDescription3$7 = "Gebruik het volgende formulier om je voorkeuren gerelateerd aan tekst-gebaseerde audiobeschrijving in te stellen.";
   var prefIntroDescription4$7 = "Na het opslaan van je instellingen, kan audiobeschrijving aan of uit gezet worden met de Beschrijving-knop.";
   var prefIntroKeyboard1$7 = "De mediaspeler op deze pagina kan vanaf elke plek binnen de pagina bestuurd worden met de toetsenbord sneltoetsen (zie de lijst hieronder).";
@@ -18416,17 +19626,17 @@
   var prefHeadingKeyboard2$7 = "Huidige toetsenbord sneltoetsen";
   var prefHeadingDescription$7 = "Audiobeschrijving";
   var prefHeadingTextDescription$7 = "Tekst-gebaseerde audiobeschrijving";
-  var prefAltKey$7 = "Alt";
-  var prefCtrlKey$7 = "Control";
-  var prefShiftKey$7 = "Shift";
+  var prefAltKey$7 = "";
+  var prefCtrlKey$7 = "";
+  var prefShiftKey$7 = "";
   var prefNoKeyShortcuts$7 = "Schakel sneltoetsen uit";
-  var escapeKey$7 = "Escape";
+  var escapeKey$7 = "";
   var escapeKeyFunction$7 = "Sluit huidige dialoog of pop-up menu";
   var prefDescPause$7 = "Pauzeer de video automatisch als de beschrijving aan wordt gezet";
   var prefDescVisible$7 = "Als er een tekst-gebaseerde beschrijving is, maak deze dan zichtbaar";
   var prefDescVoice$7 = "Stem";
-  var prefDescRate$7 = "Spoken Description Rate";
-  var prefCaptionRate$7 = "Spoken Caption Rate";
+  var prefDescRate$7 = "Spreeksnelheid beschrijving";
+  var prefCaptionRate$7 = "Spreeksnelheid ondertiteling";
   var prefDescPitch$7 = "Toonhoogte";
   var prefDescPitch1$7 = "Zeer laag";
   var prefDescPitch2$7 = "Laag";
@@ -18434,7 +19644,7 @@
   var prefDescPitch4$7 = "Hoog";
   var prefDescPitch5$7 = "Zeer hoog";
   var sampleDescriptionText$7 = "Pas de instellingen aan om deze voorbeeldtekst te beluisteren.";
-  var prefHighlight$7 = "Highlight transcript terwijl media speelt";
+  var prefHighlight$7 = "Markeer transcript terwijl media speelt";
   var prefTabbable$7 = "Maak transcript bedienbaar met toetsenbord";
   var prefCaptionsFont$7 = "Lettertype";
   var prefCaptionsColor$7 = "Tekstkleur";
@@ -18442,11 +19652,11 @@
   var prefCaptionsSize$7 = "Grootte lettertype ";
   var prefCaptionsOpacity$7 = "Ondoorzichtigheid";
   var prefCaptionsStyle$7 = "Stijl";
-  var serif$7 = "serif";
-  var sans$7 = "sans-serif";
+  var serif$7 = "";
+  var sans$7 = "";
   var cursive$7 = "cursief";
-  var fantasy$7 = "fantasy";
-  var monospace$7 = "monospace";
+  var fantasy$7 = "";
+  var monospace$7 = "";
   var white$7 = "wit";
   var yellow$7 = "geel";
   var green$7 = "groen";
@@ -18460,7 +19670,7 @@
   var captionsStylePopOn$7 = "Verschijn";
   var captionsStyleRollUp$7 = "Rol omhoog";
   var prefCaptionsPosition$7 = "Positie";
-  var captionsPositionOverlay$7 = "Overlay";
+  var captionsPositionOverlay$7 = "";
   var captionsPositionBelow$7 = "Onder video";
   var sampleCaptionText$7 = "Voorbeeld ondertiteling";
   var prefSuccess$7 = "Je wijzigingen zijn opgeslagen.";
@@ -18494,7 +19704,7 @@
   var hours$7 = "hours";
   var minutes$7 = "minuten";
   var seconds$7 = "seconden";
-  var vtsHeading$7 = "Video Transcript Sorter";
+  var vtsHeading$7 = "";
   var vtsInstructions1$7 = "Gebruik de Video Transcript Sorter om teksttracks te wijzigen:";
   var vtsInstructions2$7 = "Herschik hoofdstukken, beschrijvingen, bijschriften en/of ondertiteling zodat ze in de juiste volgorde verschijnen in het automatisch gegenereerde transcript van Able Player.";
   var vtsInstructions3$7 = "Wijzig de inhoud of de begin-/eindtijden (alles is direct bewerkbaar in de tabel).";
@@ -18506,7 +19716,7 @@
   var vtsCancel$7 = "Opslaan annuleren. Alle bewerkingen die je hebt gedaan, zijn hersteld in de VTS-tabel";
   var vtsRow$7 = "Rij";
   var vtsKind$7 = "Sorteer";
-  var vtsStart$7 = "Start";
+  var vtsStart$7 = "";
   var vtsEnd$7 = "Eind";
   var vtsContent$7 = "Inhoud";
   var vtsActions$7 = "Acties";
@@ -18548,6 +19758,8 @@
   	enterFullScreen: enterFullScreen$7,
   	exitFullScreen: exitFullScreen$7,
   	speed: speed$7,
+  	on: on$7,
+  	off: off$7,
   	spacebar: spacebar$7,
   	transcriptTitle: transcriptTitle$7,
   	lyricsTitle: lyricsTitle$7,
@@ -18573,7 +19785,9 @@
   	prefDescription1: prefDescription1$7,
   	prefDescription2: prefDescription2$7,
   	prefDescription3: prefDescription3$7,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$7,
+  	prefDescriptionNone: prefDescriptionNone$7,
+  	prefDescFormatOption1: prefDescFormatOption1$7,
+  	prefDescFormatOption2: prefDescFormatOption2$7,
   	prefIntroDescription3: prefIntroDescription3$7,
   	prefIntroDescription4: prefIntroDescription4$7,
   	prefIntroKeyboard1: prefIntroKeyboard1$7,
@@ -18683,13 +19897,13 @@
   };
 
   var playerHeading$6 = "Odtwarzacz mediów";
-  var audioPlayer$6 = "Audio player";
-  var videoPlayer$6 = "Video player";
-  var faster$6 = "Szybciej";
-  var slower$6 = "Wolniej";
+  var audioPlayer$6 = "";
+  var videoPlayer$6 = "";
+  var faster$6 = "Szybciej: %1x";
+  var slower$6 = "Wolniej: %1x";
   var play$6 = "Odtwarzaj";
   var pause$6 = "Pauza";
-  var restart$6 = "Restart";
+  var restart$6 = "";
   var prevTrack$6 = "Poprzednia ścieżka";
   var nextTrack$6 = "Następna ścieżka";
   var rewind$6 = "Przewiń w tył";
@@ -18716,6 +19930,8 @@
   var enterFullScreen$6 = "Wejdź na pełny ekran";
   var exitFullScreen$6 = "Wyjdź z pełnego ekranu";
   var speed$6 = "Tempo";
+  var on$6 = "";
+  var off$6 = "";
   var spacebar$6 = "spacja";
   var transcriptTitle$6 = "Transkrypcja";
   var lyricsTitle$6 = "Tekst";
@@ -18741,7 +19957,9 @@
   var prefDescription1$6 = "Bieżący film ma alternatywna wersja opisu audio, tekst opisu audio.";
   var prefDescription2$6 = "Bieżący film ma alternatywna wersja wideo z opisem audio.";
   var prefDescription3$6 = "Bieżący film ma tekst opisu audio, ogłaszany przez czytnik ekranu.";
-  var prefIntroDescriptionNone$6 = "Bieżący film nie ma audiodeskprycji.";
+  var prefDescriptionNone$6 = "Bieżący film nie ma audiodeskprycji.";
+  var prefDescFormatOption1$6 = "";
+  var prefDescFormatOption2$6 = "";
   var prefIntroDescription3$6 = "Użyj formularza poniższej, aby określić ustawienia odtwarzania tekstowego opisu audio";
   var prefIntroDescription4$6 = "Po zapisaniu ustawień opisu audio można włączać/wyłączać za pomocą przycisku Audiodeskrypcja.";
   var prefIntroKeyboard1$6 = "Odtwarzaczem mediów na tej stronie można sterować z dowolnego miejsca na stronie za pomocą skrótów klawiaturowych (lista poniżej).";
@@ -18751,17 +19969,17 @@
   var prefHeadingKeyboard2$6 = "Bieżące skróty klawiaturowe";
   var prefHeadingDescription$6 = "Audiodeskrypcja";
   var prefHeadingTextDescription$6 = "Tekst oparty na audiodeskrypcji";
-  var prefAltKey$6 = "Alt";
-  var prefCtrlKey$6 = "Control";
-  var prefShiftKey$6 = "Shift";
-  var prefNoKeyShortcuts$6 = "Disable keyboard shortcuts";
-  var escapeKey$6 = "Escape";
+  var prefAltKey$6 = "";
+  var prefCtrlKey$6 = "";
+  var prefShiftKey$6 = "";
+  var prefNoKeyShortcuts$6 = "";
+  var escapeKey$6 = "";
   var escapeKeyFunction$6 = "Zamknij bieżące okno dialogowe lub menu podręczne";
   var prefDescPause$6 = "Automatycznie wstrzymuj wideo po rozpoczęciu audiodeskrypcji";
   var prefDescVisible$6 = "Wyświetlaj opis audio";
   var prefDescVoice$6 = "Głos";
-  var prefDescRate$6 = "Spoken Description Rate";
-  var prefCaptionRate$6 = "Spoken Caption Rate";
+  var prefDescRate$6 = "";
+  var prefCaptionRate$6 = "";
   var prefDescPitch$6 = "Wysokość";
   var prefDescPitch1$6 = "Bardzo niska";
   var prefDescPitch2$6 = "Niska";
@@ -18802,16 +20020,16 @@
   var prefNoChange$6 = "Nie wprowadzono żadnych zmian.";
   var save$6 = "Zapisz";
   var cancel$6 = "Anuluj";
-  var dismissButton$6 = "Dismiss";
+  var dismissButton$6 = "";
   var windowButtonLabel$6 = "Opcje okna";
   var windowMove$6 = "Przenieś";
-  var windowMoveLeft$6 = "Window moved left";
-  var windowMoveRight$6 = "Window moved right";
-  var windowMoveUp$6 = "Window moved up";
-  var windowMoveDown$6 = "Window moved down";
-  var windowMoveStopped$6 = "Window move stopped";
-  var transcriptControls$6 = "Transcript Window Controls";
-  var signControls$6 = "Sign Language Window Controls";
+  var windowMoveLeft$6 = "";
+  var windowMoveRight$6 = "";
+  var windowMoveUp$6 = "";
+  var windowMoveDown$6 = "";
+  var windowMoveStopped$6 = "";
+  var transcriptControls$6 = "";
+  var signControls$6 = "";
   var windowMoveAlert$6 = "Przeciągnij lub użyj strzałek, aby przesunąć okno; Enter, aby zatrzymać";
   var windowResize$6 = "Zmień rozmiar";
   var windowResizeHeading$6 = "Zmień rozmiar okna";
@@ -18829,25 +20047,25 @@
   var hours$6 = "godziny";
   var minutes$6 = "minuty";
   var seconds$6 = "sekundy";
-  var vtsHeading$6 = "Video Transcript Sorter";
-  var vtsInstructions1$6 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$6 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$6 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$6 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$6 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$6 = "Select a language";
-  var vtsSave$6 = "Generate new .vtt content";
-  var vtsReturn$6 = "Return to Editor";
-  var vtsCancel$6 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$6 = "Row";
-  var vtsKind$6 = "Kind";
-  var vtsStart$6 = "Start";
-  var vtsEnd$6 = "End";
-  var vtsContent$6 = "Content";
-  var vtsActions$6 = "Actions";
-  var vtsNewRow$6 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$6 = "Row %1 has been deleted.";
-  var vtsMovedRow$6 = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$6 = "";
+  var vtsInstructions1$6 = "";
+  var vtsInstructions2$6 = "";
+  var vtsInstructions3$6 = "";
+  var vtsInstructions4$6 = "";
+  var vtsInstructions5$6 = "";
+  var vtsSelectLanguage$6 = "";
+  var vtsSave$6 = "";
+  var vtsReturn$6 = "";
+  var vtsCancel$6 = "";
+  var vtsRow$6 = "";
+  var vtsKind$6 = "";
+  var vtsStart$6 = "";
+  var vtsEnd$6 = "";
+  var vtsContent$6 = "";
+  var vtsActions$6 = "";
+  var vtsNewRow$6 = "";
+  var vtsDeletedRow$6 = "";
+  var vtsMovedRow$6 = "";
   var pl = {
   	playerHeading: playerHeading$6,
   	audioPlayer: audioPlayer$6,
@@ -18883,6 +20101,8 @@
   	enterFullScreen: enterFullScreen$6,
   	exitFullScreen: exitFullScreen$6,
   	speed: speed$6,
+  	on: on$6,
+  	off: off$6,
   	spacebar: spacebar$6,
   	transcriptTitle: transcriptTitle$6,
   	lyricsTitle: lyricsTitle$6,
@@ -18908,7 +20128,9 @@
   	prefDescription1: prefDescription1$6,
   	prefDescription2: prefDescription2$6,
   	prefDescription3: prefDescription3$6,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$6,
+  	prefDescriptionNone: prefDescriptionNone$6,
+  	prefDescFormatOption1: prefDescFormatOption1$6,
+  	prefDescFormatOption2: prefDescFormatOption2$6,
   	prefIntroDescription3: prefIntroDescription3$6,
   	prefIntroDescription4: prefIntroDescription4$6,
   	prefIntroKeyboard1: prefIntroKeyboard1$6,
@@ -19018,17 +20240,17 @@
   };
 
   var playerHeading$5 = "Reprodutor de mídias";
-  var audioPlayer$5 = "Audio player";
-  var videoPlayer$5 = "Video player";
-  var faster$5 = "Rápido";
-  var slower$5 = "Lento";
+  var audioPlayer$5 = "";
+  var videoPlayer$5 = "";
+  var faster$5 = "Rápido: %1x";
+  var slower$5 = "Lento: %1x";
   var play$5 = "Reproduzir";
   var pause$5 = "Pausar";
   var restart$5 = "Reiniciar";
   var prevTrack$5 = "Faixa anterior";
   var nextTrack$5 = "Próxima faixa";
-  var rewind$5 = "Retroceder";
-  var forward$5 = "Avançar";
+  var rewind$5 = "Retroceder %1 segundos";
+  var forward$5 = "Avançar %1 segundos";
   var captions$5 = "Legendas";
   var showCaptions$5 = "Mostrar legendas";
   var hideCaptions$5 = "Ocultar legendas";
@@ -19045,12 +20267,14 @@
   var seekbarLabel$5 = "Linha do tempo";
   var mute$5 = "Silenciar";
   var unmute$5 = "Ativar som";
-  var volume$5 = "Volume";
+  var volume$5 = "";
   var volumeUpDown$5 = "Ampliar/reduzir volume";
   var preferences$5 = "Preferências";
   var enterFullScreen$5 = "Entrar em tela cheia";
   var exitFullScreen$5 = "Sair da tela cheia";
   var speed$5 = "Velocidade";
+  var on$5 = "";
+  var off$5 = "";
   var spacebar$5 = "barra de espaço";
   var transcriptTitle$5 = "Transcrição";
   var lyricsTitle$5 = "Letras";
@@ -19076,7 +20300,9 @@
   var prefDescription1$5 = "O vídeo atual está uma versão alternativa de descrição, texto baseado em descrição.";
   var prefDescription2$5 = "O vídeo atual está versão alternativa de descrição do vídeo.";
   var prefDescription3$5 = "O vídeo atual está texto baseado em descrição, anunciado pelo leitor de tela.";
-  var prefIntroDescriptionNone$5 = "O vídeo atual não possui audiodescrição em nenhum formato.";
+  var prefDescFormatOption1$5 = "";
+  var prefDescFormatOption2$5 = "";
+  var prefDescriptionNone$5 = "O vídeo atual não possui audiodescrição em nenhum formato.";
   var prefIntroDescription3$5 = "Use o formulário a seguir para definir suas preferências relacionadas à texto baseado em audiodescrição.";
   var prefIntroDescription4$5 = "Depois que salvar suas configurações, a audiodescrição poderá ser ligada/desligada usando o botão Descrição.";
   var prefIntroKeyboard1$5 = "O reprodutor de mídias desse página web pode ser operado de qualquer lugar nessa página, usando os atalhos de teclado (veja a lista abaixo).";
@@ -19086,17 +20312,17 @@
   var prefHeadingKeyboard2$5 = "Atual atalho de teclado";
   var prefHeadingDescription$5 = "Audiodescrição";
   var prefHeadingTextDescription$5 = "Texto baseado em audiodescrição";
-  var prefAltKey$5 = "Alt";
-  var prefCtrlKey$5 = "Control";
-  var prefShiftKey$5 = "Shift";
-  var prefNoKeyShortcuts$5 = "Disable keyboard shortcuts";
+  var prefAltKey$5 = "";
+  var prefCtrlKey$5 = "";
+  var prefShiftKey$5 = "";
+  var prefNoKeyShortcuts$5 = "";
   var escapeKey$5 = "ESC";
   var escapeKeyFunction$5 = "Fechar diálogo ou caixa pop-up atual";
   var prefDescPause$5 = "Automaticamente pausar um vídeo quando a descrição iniciar";
   var prefDescVisible$5 = "Fazer com que a descrição esteja visível";
   var prefDescVoice$5 = "Voz";
-  var prefDescRate$5 = "Spoken Description Rate";
-  var prefCaptionRate$5 = "Spoken Caption Rate";
+  var prefDescRate$5 = "";
+  var prefCaptionRate$5 = "";
   var prefDescPitch$5 = "Tom";
   var prefDescPitch1$5 = "Muito baixo";
   var prefDescPitch2$5 = "Baixo";
@@ -19137,16 +20363,16 @@
   var prefNoChange$5 = "Você não fez nenhuma alteração";
   var save$5 = "Salvar";
   var cancel$5 = "Cancelar";
-  var dismissButton$5 = "Dismiss";
+  var dismissButton$5 = "";
   var windowButtonLabel$5 = "Opções de janela";
   var windowMove$5 = "Mover";
-  var windowMoveLeft$5 = "Window moved left";
-  var windowMoveRight$5 = "Window moved right";
-  var windowMoveUp$5 = "Window moved up";
-  var windowMoveDown$5 = "Window moved down";
-  var windowMoveStopped$5 = "Window move stopped";
-  var transcriptControls$5 = "Transcript Window Controls";
-  var signControls$5 = "Sign Language Window Controls";
+  var windowMoveLeft$5 = "";
+  var windowMoveRight$5 = "";
+  var windowMoveUp$5 = "";
+  var windowMoveDown$5 = "";
+  var windowMoveStopped$5 = "";
+  var transcriptControls$5 = "";
+  var signControls$5 = "";
   var windowMoveAlert$5 = "Arraste ou use as setas do seu teclado para mover; Enter para parar";
   var windowResize$5 = "Redimensionar";
   var windowResizeHeading$5 = "Redimensionar Janela";
@@ -19164,25 +20390,25 @@
   var hours$5 = "horas";
   var minutes$5 = "minutos";
   var seconds$5 = "segundos";
-  var vtsHeading$5 = "Video Transcript Sorter";
-  var vtsInstructions1$5 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$5 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$5 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$5 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$5 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$5 = "Select a language";
-  var vtsSave$5 = "Generate new .vtt content";
-  var vtsReturn$5 = "Return to Editor";
-  var vtsCancel$5 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$5 = "Row";
-  var vtsKind$5 = "Kind";
-  var vtsStart$5 = "Start";
-  var vtsEnd$5 = "End";
-  var vtsContent$5 = "Content";
-  var vtsActions$5 = "Actions";
-  var vtsNewRow$5 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$5 = "Row %1 has been deleted.";
-  var vtsMovedRow$5 = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$5 = "";
+  var vtsInstructions1$5 = "";
+  var vtsInstructions2$5 = "";
+  var vtsInstructions3$5 = "";
+  var vtsInstructions4$5 = "";
+  var vtsInstructions5$5 = "";
+  var vtsSelectLanguage$5 = "";
+  var vtsSave$5 = "";
+  var vtsReturn$5 = "";
+  var vtsCancel$5 = "";
+  var vtsRow$5 = "";
+  var vtsKind$5 = "";
+  var vtsStart$5 = "";
+  var vtsEnd$5 = "";
+  var vtsContent$5 = "";
+  var vtsActions$5 = "";
+  var vtsNewRow$5 = "";
+  var vtsDeletedRow$5 = "";
+  var vtsMovedRow$5 = "";
   var pt_br = {
   	playerHeading: playerHeading$5,
   	audioPlayer: audioPlayer$5,
@@ -19218,6 +20444,8 @@
   	enterFullScreen: enterFullScreen$5,
   	exitFullScreen: exitFullScreen$5,
   	speed: speed$5,
+  	on: on$5,
+  	off: off$5,
   	spacebar: spacebar$5,
   	transcriptTitle: transcriptTitle$5,
   	lyricsTitle: lyricsTitle$5,
@@ -19243,7 +20471,9 @@
   	prefDescription1: prefDescription1$5,
   	prefDescription2: prefDescription2$5,
   	prefDescription3: prefDescription3$5,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$5,
+  	prefDescFormatOption1: prefDescFormatOption1$5,
+  	prefDescFormatOption2: prefDescFormatOption2$5,
+  	prefDescriptionNone: prefDescriptionNone$5,
   	prefIntroDescription3: prefIntroDescription3$5,
   	prefIntroDescription4: prefIntroDescription4$5,
   	prefIntroKeyboard1: prefIntroKeyboard1$5,
@@ -19353,17 +20583,17 @@
   };
 
   var playerHeading$4 = "Leitor multimédia";
-  var audioPlayer$4 = "Audio player";
-  var videoPlayer$4 = "Video player";
-  var faster$4 = "Mais rápido";
-  var slower$4 = "Mais lento";
+  var audioPlayer$4 = "";
+  var videoPlayer$4 = "";
+  var faster$4 = "Mais rápido: %1x";
+  var slower$4 = "Mais lento: %1x";
   var play$4 = "Reproduzir";
   var pause$4 = "Pausa";
   var restart$4 = "Reiniciar";
   var prevTrack$4 = "Faixa anterior";
   var nextTrack$4 = "Faixa seguinte";
-  var rewind$4 = "Retroceder";
-  var forward$4 = "Avançar";
+  var rewind$4 = "Retroceder %1 segundos";
+  var forward$4 = "Avançar %1 segundos";
   var captions$4 = "Legendas";
   var showCaptions$4 = "Mostrar legendas";
   var hideCaptions$4 = "Esconder legendas";
@@ -19381,11 +20611,13 @@
   var mute$4 = "Desativar som";
   var unmute$4 = "Ativar som";
   var volume$4 = "Volume";
-  var volumeUpDown$4 = "Volume up down";
+  var volumeUpDown$4 = "Aumentar/Diminuir volume";
   var preferences$4 = "Preferências";
   var enterFullScreen$4 = "Ativar a vista de ecrã inteiro";
   var exitFullScreen$4 = "Sair da vista de ecrã inteiro";
   var speed$4 = "Velocidade";
+  var on$4 = "";
+  var off$4 = "";
   var spacebar$4 = "barra de espaço";
   var transcriptTitle$4 = "Transcrição";
   var lyricsTitle$4 = "Letra";
@@ -19399,7 +20631,7 @@
   var alertDescribedVersion$4 = "A usar versão de áudio descrita deste vídeo";
   var alertNonDescribedVersion$4 = "A usar versão não descrita deste vídeo";
   var prefMenuCaptions$4 = "Legendas";
-  var prefVoicedCaptions$4 = "Spoken Captions";
+  var prefVoicedCaptions$4 = "";
   var prefMenuDescriptions$4 = "Descrições";
   var prefMenuKeyboard$4 = "Teclado";
   var prefMenuTranscript$4 = "Transcrição";
@@ -19411,7 +20643,9 @@
   var prefDescription1$4 = "O vídeo atual tem uma versão descrita alternativa, descrição à base de texto.";
   var prefDescription2$4 = "O vídeo atual tem versão descrita alernativa do vídeo.";
   var prefDescription3$4 = "O vídeo atual tem descrição à base de texto, anunciada pelo leitor de ecrãs.";
-  var prefIntroDescriptionNone$4 = "O vídeo atual não tem descrição de áudio em nenhum formato.";
+  var prefDescriptionNone$4 = "O vídeo atual não tem descrição de áudio em nenhum formato.";
+  var prefDescFormatOption1$4 = "";
+  var prefDescFormatOption2$4 = "";
   var prefIntroDescription3$4 = "Utiliza o seguinte formulário para definir as tuas preferências relacionadas com descrição de áudio à base de texto.";
   var prefIntroDescription4$4 = "Depois de guardar as tuas definições, descrição de áudio pode ser alternada on/off usando o botão Descrição.";
   var prefIntroKeyboard1$4 = "O leitor multimédia nesta página pode ser operado de qualquer lugar na página utilizando os atalhos de teclado (vê em baixo a lista).";
@@ -19421,17 +20655,17 @@
   var prefHeadingKeyboard2$4 = "Atalhos de teclado em uso";
   var prefHeadingDescription$4 = "Descrição de áudio";
   var prefHeadingTextDescription$4 = "Descrição de áudio à base de texto";
-  var prefAltKey$4 = "Alt";
-  var prefCtrlKey$4 = "Control";
-  var prefShiftKey$4 = "Shift";
-  var prefNoKeyShortcuts$4 = "Disable keyboard shortcuts";
-  var escapeKey$4 = "Escape";
+  var prefAltKey$4 = "";
+  var prefCtrlKey$4 = "";
+  var prefShiftKey$4 = "";
+  var prefNoKeyShortcuts$4 = "";
+  var escapeKey$4 = "";
   var escapeKeyFunction$4 = "Fecha o diálogo ou menu popup";
   var prefDescPause$4 = "Pausar vídeo automaticamente quando a descrição começa";
   var prefDescVisible$4 = "Torna a descrição visível";
   var prefDescVoice$4 = "Voz";
-  var prefDescRate$4 = "Spoken Description Rate";
-  var prefCaptionRate$4 = "Spoken Caption Rate";
+  var prefDescRate$4 = "";
+  var prefCaptionRate$4 = "";
   var prefDescPitch$4 = "Tom";
   var prefDescPitch1$4 = "Muito baixo";
   var prefDescPitch2$4 = "Baixo";
@@ -19472,16 +20706,16 @@
   var prefNoChange$4 = "Não fizeste nenhuma alteração.";
   var save$4 = "Guardar";
   var cancel$4 = "Cancelar";
-  var dismissButton$4 = "Dismiss";
+  var dismissButton$4 = "";
   var windowButtonLabel$4 = "Opções de janela";
   var windowMove$4 = "Mover";
-  var windowMoveLeft$4 = "Window moved left";
-  var windowMoveRight$4 = "Window moved right";
-  var windowMoveUp$4 = "Window moved up";
-  var windowMoveDown$4 = "Window moved down";
-  var windowMoveStopped$4 = "Window move stopped";
-  var transcriptControls$4 = "Transcript Window Controls";
-  var signControls$4 = "Sign Language Window Controls";
+  var windowMoveLeft$4 = "";
+  var windowMoveRight$4 = "";
+  var windowMoveUp$4 = "";
+  var windowMoveDown$4 = "";
+  var windowMoveStopped$4 = "";
+  var transcriptControls$4 = "";
+  var signControls$4 = "";
   var windowMoveAlert$4 = "Arrasta ou usa as teclas de seta para mover a janela; Enter para parar.";
   var windowResize$4 = "Redimencionar";
   var windowResizeHeading$4 = "Redimencionar janela";
@@ -19499,25 +20733,25 @@
   var hours$4 = "horas";
   var minutes$4 = "minutos";
   var seconds$4 = "segundos";
-  var vtsHeading$4 = "Video Transcript Sorter";
-  var vtsInstructions1$4 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$4 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$4 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$4 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$4 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$4 = "Select a language";
-  var vtsSave$4 = "Generate new .vtt content";
-  var vtsReturn$4 = "Return to Editor";
-  var vtsCancel$4 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$4 = "Row";
-  var vtsKind$4 = "Kind";
-  var vtsStart$4 = "Start";
-  var vtsEnd$4 = "End";
-  var vtsContent$4 = "Content";
-  var vtsActions$4 = "Actions";
-  var vtsNewRow$4 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$4 = "Row %1 has been deleted.";
-  var vtsMovedRow$4 = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$4 = "";
+  var vtsInstructions1$4 = "";
+  var vtsInstructions2$4 = "";
+  var vtsInstructions3$4 = "";
+  var vtsInstructions4$4 = "";
+  var vtsInstructions5$4 = "";
+  var vtsSelectLanguage$4 = "";
+  var vtsSave$4 = "";
+  var vtsReturn$4 = "";
+  var vtsCancel$4 = "";
+  var vtsRow$4 = "";
+  var vtsKind$4 = "";
+  var vtsStart$4 = "";
+  var vtsEnd$4 = "";
+  var vtsContent$4 = "";
+  var vtsActions$4 = "";
+  var vtsNewRow$4 = "";
+  var vtsDeletedRow$4 = "";
+  var vtsMovedRow$4 = "";
   var pt = {
   	playerHeading: playerHeading$4,
   	audioPlayer: audioPlayer$4,
@@ -19553,6 +20787,8 @@
   	enterFullScreen: enterFullScreen$4,
   	exitFullScreen: exitFullScreen$4,
   	speed: speed$4,
+  	on: on$4,
+  	off: off$4,
   	spacebar: spacebar$4,
   	transcriptTitle: transcriptTitle$4,
   	lyricsTitle: lyricsTitle$4,
@@ -19578,7 +20814,9 @@
   	prefDescription1: prefDescription1$4,
   	prefDescription2: prefDescription2$4,
   	prefDescription3: prefDescription3$4,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$4,
+  	prefDescriptionNone: prefDescriptionNone$4,
+  	prefDescFormatOption1: prefDescFormatOption1$4,
+  	prefDescFormatOption2: prefDescFormatOption2$4,
   	prefIntroDescription3: prefIntroDescription3$4,
   	prefIntroDescription4: prefIntroDescription4$4,
   	prefIntroKeyboard1: prefIntroKeyboard1$4,
@@ -19691,15 +20929,15 @@
   var playerHeading$3 = "Prehrávač médií";
   var audioPlayer$3 = "Prehrávač zvuku";
   var videoPlayer$3 = "Prehrávač videa";
-  var faster$3 = "Rýchlejšie";
-  var slower$3 = "Pomalšie";
+  var faster$3 = "Rýchlejšie: %1x";
+  var slower$3 = "Pomalšie: %1x";
   var play$3 = "Prehrať";
   var pause$3 = "Pozastaviť";
   var restart$3 = "Prehrať odznova";
   var prevTrack$3 = "Predchádzajúca stopa";
   var nextTrack$3 = "Nasledujúca stopa";
-  var rewind$3 = "Pretočiť dozadu";
-  var forward$3 = "Pretočiť dopredu";
+  var rewind$3 = "Pretočiť dozadu %1 sekúnd";
+  var forward$3 = "Pretočiť dopredu %1 sekúnd";
   var captions$3 = "Skryté titulky";
   var showCaptions$3 = "Zobraziť skryté titulky";
   var hideCaptions$3 = "Vypnúť skryté titulky";
@@ -19717,11 +20955,13 @@
   var mute$3 = "Stlmiť";
   var unmute$3 = "Zrušiť stlmenie";
   var volume$3 = "Hlasitosť";
-  var volumeUpDown$3 = "Hlasitosť hore dole";
+  var volumeUpDown$3 = "Hlasitosť hore/dole";
   var preferences$3 = "Nastavenia";
   var enterFullScreen$3 = "Prejsť na celú obrazovku";
   var exitFullScreen$3 = "Ukončiť celú obrazovku";
   var speed$3 = "Rýchlosť";
+  var on$3 = "Zapnuté";
+  var off$3 = "Vypnuté";
   var spacebar$3 = "medzerník";
   var transcriptTitle$3 = "Prepis";
   var lyricsTitle$3 = "Text piesne";
@@ -19744,10 +20984,12 @@
   var prefTitleKeyboard$3 = "Nastavenia klávesnice";
   var prefTitleTranscript$3 = "Nastavenia prepisu";
   var prefIntroDescription1$3 = "Tento prehrávač médií podporuje audiokomentár dvoma spôsobmi: ";
-  var prefDescription1$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačkou obrazovky.";
+  var prefDescription1$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom a textový audiokomentár oznamovaný čítačom obrazovky.";
   var prefDescription2$3 = "Aktuálne video má textový audiokomentár.";
   var prefDescription3$3 = "Aktuálne video má alternatívnu verziu s audiokomentárom.";
-  var prefIntroDescriptionNone$3 = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+  var prefDescriptionNone$3 = "Aktuálne video nemá audiokomentár v žiadnom formáte.";
+  var prefDescFormatOption1$3 = "alternatívna verzia videa s audiokomentárom";
+  var prefDescFormatOption2$3 = "textový audiokomentár oznamovaný čítačom obrazovky";
   var prefIntroDescription3$3 = "Pomocou nasledujúceho formulára nastavte svoje predvoľby týkajúce sa textového audiokomentára.";
   var prefIntroDescription4$3 = "Po uložení nastavení je možné audiokomentár zapnúť/vypnúť pomocou príslušného tlačidla.";
   var prefIntroKeyboard1$3 = "Prehrávač médií na tejto webovej stránke možno ovládať odkiaľkoľvek na stránke pomocou klávesových skratiek (zoznam nájdete nižšie).";
@@ -19890,6 +21132,8 @@
   	enterFullScreen: enterFullScreen$3,
   	exitFullScreen: exitFullScreen$3,
   	speed: speed$3,
+  	on: on$3,
+  	off: off$3,
   	spacebar: spacebar$3,
   	transcriptTitle: transcriptTitle$3,
   	lyricsTitle: lyricsTitle$3,
@@ -19915,7 +21159,9 @@
   	prefDescription1: prefDescription1$3,
   	prefDescription2: prefDescription2$3,
   	prefDescription3: prefDescription3$3,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$3,
+  	prefDescriptionNone: prefDescriptionNone$3,
+  	prefDescFormatOption1: prefDescFormatOption1$3,
+  	prefDescFormatOption2: prefDescFormatOption2$3,
   	prefIntroDescription3: prefIntroDescription3$3,
   	prefIntroDescription4: prefIntroDescription4$3,
   	prefIntroKeyboard1: prefIntroKeyboard1$3,
@@ -20025,17 +21271,17 @@
   };
 
   var playerHeading$2 = "Mediaspelare";
-  var audioPlayer$2 = "Audio player";
-  var videoPlayer$2 = "Video player";
-  var faster$2 = "Snabbare";
-  var slower$2 = "Långsammare";
+  var audioPlayer$2 = "";
+  var videoPlayer$2 = "";
+  var faster$2 = "Snabbare: %1x";
+  var slower$2 = "Långsammare: %1x";
   var play$2 = "Spela upp";
   var pause$2 = "Pausa";
   var restart$2 = "Starta om";
   var prevTrack$2 = "Föregående spår";
   var nextTrack$2 = "Nästa spår";
-  var rewind$2 = "Spola tillbaka";
-  var forward$2 = "Spola framåt";
+  var rewind$2 = "Spola tillbaka %1 sekunder";
+  var forward$2 = "Spola framåt %1 sekunder";
   var captions$2 = "Undertexter";
   var showCaptions$2 = "Visa undertexter";
   var hideCaptions$2 = "Göm undertexter";
@@ -20058,6 +21304,8 @@
   var enterFullScreen$2 = "Visa i fullskärmsläge";
   var exitFullScreen$2 = "Gå ur fullskärmsläge";
   var speed$2 = "Hastighet";
+  var on$2 = "";
+  var off$2 = "";
   var spacebar$2 = "mellanslag";
   var transcriptTitle$2 = "Transkript";
   var lyricsTitle$2 = "Lyrik";
@@ -20071,7 +21319,7 @@
   var alertDescribedVersion$2 = "Använder syntolkad version av denna video";
   var alertNonDescribedVersion$2 = "Använder ej syntolkad version av denna video";
   var prefMenuCaptions$2 = "Undertexter";
-  var prefVoicedCaptions$2 = "Spoken Captions";
+  var prefVoicedCaptions$2 = "Talade undertexter";
   var prefMenuDescriptions$2 = "Syntolkning";
   var prefMenuKeyboard$2 = "Tangentbord";
   var prefMenuTranscript$2 = "Transkript";
@@ -20083,7 +21331,9 @@
   var prefDescription1$2 = "Följande video har en alternativ syntolkad version, textbaserad syntolkning.";
   var prefDescription2$2 = "Följande video har alternativ syntolkad version av videon.";
   var prefDescription3$2 = "Följande video har textbaserad syntolkning, uppläst av skärmläsare.";
-  var prefIntroDescriptionNone$2 = "Nuvarande video har ingen syntolkning i något format.";
+  var prefDescriptionNone$2 = "Nuvarande video har ingen syntolkning i något format.";
+  var prefDescFormatOption1$2 = "";
+  var prefDescFormatOption2$2 = "";
   var prefIntroDescription3$2 = "Använd följande formulär för att ställa in dina prefenser gällande textbaserad syntolkning.";
   var prefIntroDescription4$2 = "Efter du sparar dina prefenser, kan syntolkning växlas av och på med syntolkningsknappen.";
   var prefIntroKeyboard1$2 = "Mediaspelaren på denna webbsida kan styras från varsomhelst på sidan med hjälp av tangentbordsgenvägar (se nedan för en lista).";
@@ -20093,17 +21343,17 @@
   var prefHeadingKeyboard2$2 = "Nuvarande tangentbordsgenvägar";
   var prefHeadingDescription$2 = "Syntolkning";
   var prefHeadingTextDescription$2 = "Textbaserad syntolkning";
-  var prefAltKey$2 = "Alt";
-  var prefCtrlKey$2 = "Ctrl";
-  var prefShiftKey$2 = "Shift";
-  var prefNoKeyShortcuts$2 = "Disable keyboard shortcuts";
-  var escapeKey$2 = "Escape";
+  var prefAltKey$2 = "";
+  var prefCtrlKey$2 = "";
+  var prefShiftKey$2 = "";
+  var prefNoKeyShortcuts$2 = "";
+  var escapeKey$2 = "";
   var escapeKeyFunction$2 = "Stäng nuvarande dialog eller popupmeny";
   var prefDescPause$2 = "Pausa automatiskt video när syntolkning startar";
   var prefDescVisible$2 = "Synliggör syntolkning";
   var prefDescVoice$2 = "Röst";
-  var prefDescRate$2 = "Spoken Description Rate";
-  var prefCaptionRate$2 = "Spoken Caption Rate";
+  var prefDescRate$2 = "";
+  var prefCaptionRate$2 = "";
   var prefDescPitch$2 = "Tonhöjd";
   var prefDescPitch1$2 = "Mycket lågt";
   var prefDescPitch2$2 = "Låg";
@@ -20144,16 +21394,16 @@
   var prefNoChange$2 = "Du gjorde inga ändringar.";
   var save$2 = "Spara";
   var cancel$2 = "Avbryt";
-  var dismissButton$2 = "Dismiss";
+  var dismissButton$2 = "";
   var windowButtonLabel$2 = "Fönsteralternativ";
   var windowMove$2 = "Flytta";
-  var windowMoveLeft$2 = "Window moved left";
-  var windowMoveRight$2 = "Window moved right";
-  var windowMoveUp$2 = "Window moved up";
-  var windowMoveDown$2 = "Window moved down";
-  var windowMoveStopped$2 = "Window move stopped";
-  var transcriptControls$2 = "Transcript Window Controls";
-  var signControls$2 = "Sign Language Window Controls";
+  var windowMoveLeft$2 = "";
+  var windowMoveRight$2 = "";
+  var windowMoveUp$2 = "";
+  var windowMoveDown$2 = "";
+  var windowMoveStopped$2 = "";
+  var transcriptControls$2 = "";
+  var signControls$2 = "";
   var windowMoveAlert$2 = "Drag eller använd piltangenter för att flytta fönstret; Enter för att sluta";
   var windowResize$2 = "Ändra storlek";
   var windowResizeHeading$2 = "Ändra fönsterstorlek";
@@ -20171,25 +21421,25 @@
   var hours$2 = "timmar";
   var minutes$2 = "minuter";
   var seconds$2 = "sekunder";
-  var vtsHeading$2 = "Video Transcript Sorter";
-  var vtsInstructions1$2 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$2 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$2 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$2 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$2 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$2 = "Select a language";
-  var vtsSave$2 = "Generate new .vtt content";
-  var vtsReturn$2 = "Return to Editor";
-  var vtsCancel$2 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$2 = "Row";
-  var vtsKind$2 = "Kind";
-  var vtsStart$2 = "Start";
-  var vtsEnd$2 = "End";
-  var vtsContent$2 = "Content";
-  var vtsActions$2 = "Actions";
-  var vtsNewRow$2 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$2 = "Row %1 has been deleted.";
-  var vtsMovedRow$2 = "Row %1 has been moved %2 and is now Row %3.";
+  var vtsHeading$2 = "";
+  var vtsInstructions1$2 = "";
+  var vtsInstructions2$2 = "";
+  var vtsInstructions3$2 = "";
+  var vtsInstructions4$2 = "";
+  var vtsInstructions5$2 = "";
+  var vtsSelectLanguage$2 = "";
+  var vtsSave$2 = "";
+  var vtsReturn$2 = "";
+  var vtsCancel$2 = "";
+  var vtsRow$2 = "";
+  var vtsKind$2 = "";
+  var vtsStart$2 = "";
+  var vtsEnd$2 = "";
+  var vtsContent$2 = "";
+  var vtsActions$2 = "";
+  var vtsNewRow$2 = "";
+  var vtsDeletedRow$2 = "";
+  var vtsMovedRow$2 = "";
   var sv = {
   	playerHeading: playerHeading$2,
   	audioPlayer: audioPlayer$2,
@@ -20225,6 +21475,8 @@
   	enterFullScreen: enterFullScreen$2,
   	exitFullScreen: exitFullScreen$2,
   	speed: speed$2,
+  	on: on$2,
+  	off: off$2,
   	spacebar: spacebar$2,
   	transcriptTitle: transcriptTitle$2,
   	lyricsTitle: lyricsTitle$2,
@@ -20250,7 +21502,9 @@
   	prefDescription1: prefDescription1$2,
   	prefDescription2: prefDescription2$2,
   	prefDescription3: prefDescription3$2,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$2,
+  	prefDescriptionNone: prefDescriptionNone$2,
+  	prefDescFormatOption1: prefDescFormatOption1$2,
+  	prefDescFormatOption2: prefDescFormatOption2$2,
   	prefIntroDescription3: prefIntroDescription3$2,
   	prefIntroDescription4: prefIntroDescription4$2,
   	prefIntroKeyboard1: prefIntroKeyboard1$2,
@@ -20360,17 +21614,17 @@
   };
 
   var playerHeading$1 = "Medya Oynatıcı";
-  var audioPlayer$1 = "Audio player";
-  var videoPlayer$1 = "Video player";
-  var faster$1 = "Hızlandır";
-  var slower$1 = "Yavaşlat";
+  var audioPlayer$1 = "";
+  var videoPlayer$1 = "";
+  var faster$1 = "Hızlandır: %1x";
+  var slower$1 = "Yavaşlat: %1x";
   var play$1 = "Oynat";
   var pause$1 = "Duraklat";
   var restart$1 = "Yeniden Oynat";
   var prevTrack$1 = "Önceki Parça";
   var nextTrack$1 = "Gelecek Parça";
-  var rewind$1 = "Geri Sar";
-  var forward$1 = "İleri Sar";
+  var rewind$1 = "Geri Sar %1 saniye";
+  var forward$1 = "İleri Sar %1 saniye";
   var captions$1 = "Altyazılar";
   var showCaptions$1 = "Altyazıları Göster";
   var hideCaptions$1 = "Altyazıları Gizle";
@@ -20393,6 +21647,8 @@
   var enterFullScreen$1 = "Tam Ekranı Etkinleştir";
   var exitFullScreen$1 = "Tam Ekranı Kapa";
   var speed$1 = "Hız";
+  var on$1 = "";
+  var off$1 = "";
   var spacebar$1 = "boşluk tuşu";
   var transcriptTitle$1 = "Belge";
   var lyricsTitle$1 = "Sözler";
@@ -20406,7 +21662,7 @@
   var alertDescribedVersion$1 = "Tanımlı video versiyonu için ses kullanılıyor";
   var alertNonDescribedVersion$1 = "Tanımlanmamış video versiyonu için kullanılıyor";
   var prefMenuCaptions$1 = "Altyazılar";
-  var prefVoicedCaptions$1 = "Spoken Captions";
+  var prefVoicedCaptions$1 = "";
   var prefMenuDescriptions$1 = "Açıklamalar";
   var prefMenuKeyboard$1 = "Klavye";
   var prefMenuTranscript$1 = "Belgeler";
@@ -20418,7 +21674,9 @@
   var prefDescription1$1 = "Şu anki video'da mevcut alternatif tanımlı versiyon, metin tabanlı açıklama.";
   var prefDescription2$1 = "Şu anki video'da mevcut Video versiyonu için tanımlı alternatifler.";
   var prefDescription3$1 = "Şu anki video'da mevcut metin tabanlı açıklama, ekran okuyucusu tarafından duyurulan.";
-  var prefIntroDescriptionNone$1 = "Şu anki video'da her iki format için de ses açıklaması mevcut değil.";
+  var prefDescriptionNone$1 = "Şu anki video'da her iki format için de ses açıklaması mevcut değil.";
+  var prefDescFormatOption1$1 = "";
+  var prefDescFormatOption2$1 = "";
   var prefIntroDescription3$1 = "Ses açıklamalarını tercihlerinle ilişkilendirmek için belirtilen biçimi kullan.";
   var prefIntroDescription4$1 = "Tercihlerini kaydettikten sonra, ses açıklamasını Açıklama butonu aracılığıyla açıp kapatabilirsin.";
   var prefIntroKeyboard1$1 = "Bu web sayfasındaki medya oynatıcıyı, klavye kısayolları yardımıyla, sayfanın herhangi bir kısmından da yönetebilirsin (Liste için Aşağıyı İncele).";
@@ -20428,24 +21686,24 @@
   var prefHeadingKeyboard2$1 = "Şu anki klavye kısayolları";
   var prefHeadingDescription$1 = "Ses açıklaması";
   var prefHeadingTextDescription$1 = "Metin tabanlı ses açıklaması";
-  var prefAltKey$1 = "Alt";
-  var prefCtrlKey$1 = "Control";
-  var prefShiftKey$1 = "Shift";
-  var prefNoKeyShortcuts$1 = "Disable keyboard shortcuts";
-  var escapeKey$1 = "Escape";
+  var prefAltKey$1 = "";
+  var prefCtrlKey$1 = "";
+  var prefShiftKey$1 = "";
+  var prefNoKeyShortcuts$1 = "";
+  var escapeKey$1 = "";
   var escapeKeyFunction$1 = "Şu anki diyalogu veya açılır menüyü kapa";
   var prefDescPause$1 = "Açıklama başladığında video'yu otomatik olarak durdur";
   var prefDescVisible$1 = "Açıklamayı görünür yap";
-  var prefDescVoice$1 = "Voice";
-  var prefDescRate$1 = "Spoken Description Rate";
-  var prefCaptionRate$1 = "Spoken Caption Rate";
-  var prefDescPitch$1 = "Pitch";
-  var prefDescPitch1$1 = "Very low";
-  var prefDescPitch2$1 = "Low";
-  var prefDescPitch3$1 = "Default";
-  var prefDescPitch4$1 = "High";
-  var prefDescPitch5$1 = "Very high";
-  var sampleDescriptionText$1 = "Adjust settings to hear this sample text.";
+  var prefDescVoice$1 = "";
+  var prefDescRate$1 = "";
+  var prefCaptionRate$1 = "";
+  var prefDescPitch$1 = "";
+  var prefDescPitch1$1 = "";
+  var prefDescPitch2$1 = "";
+  var prefDescPitch3$1 = "";
+  var prefDescPitch4$1 = "";
+  var prefDescPitch5$1 = "";
+  var sampleDescriptionText$1 = "";
   var prefHighlight$1 = "Medya'daki belgeyi öne çıkar";
   var prefTabbable$1 = "Klavye ile aktif edilen belge";
   var prefCaptionsFont$1 = "Yazı Tipi";
@@ -20454,8 +21712,8 @@
   var prefCaptionsSize$1 = "Yazı Boyutu";
   var prefCaptionsOpacity$1 = "Opasite";
   var prefCaptionsStyle$1 = "Stil";
-  var serif$1 = "serif";
-  var sans$1 = "sans-serif";
+  var serif$1 = "";
+  var sans$1 = "";
   var cursive$1 = "el yazısı";
   var fantasy$1 = "fantezi";
   var monospace$1 = "tek hacimli";
@@ -20469,8 +21727,8 @@
   var black$1 = "siyah";
   var transparent$1 = "transparan";
   var solid$1 = "düz renk";
-  var captionsStylePopOn$1 = "Pop-on";
-  var captionsStyleRollUp$1 = "Roll-up";
+  var captionsStylePopOn$1 = "";
+  var captionsStyleRollUp$1 = "";
   var prefCaptionsPosition$1 = "Pozisyon";
   var captionsPositionOverlay$1 = "Kaplama";
   var captionsPositionBelow$1 = "Video'nun altında";
@@ -20479,52 +21737,52 @@
   var prefNoChange$1 = "Hiçbir değişiklik yapmadın.";
   var save$1 = "Kaydet";
   var cancel$1 = "İptal Et";
-  var dismissButton$1 = "Dismiss";
+  var dismissButton$1 = "";
   var windowButtonLabel$1 = "Pencere Seçenekleri";
   var windowMove$1 = "Hareket";
-  var windowMoveLeft$1 = "Window moved left";
-  var windowMoveRight$1 = "Window moved right";
-  var windowMoveUp$1 = "Window moved up";
-  var windowMoveDown$1 = "Window moved down";
-  var windowMoveStopped$1 = "Window move stopped";
-  var transcriptControls$1 = "Transcript Window Controls";
-  var signControls$1 = "Sign Language Window Controls";
+  var windowMoveLeft$1 = "";
+  var windowMoveRight$1 = "";
+  var windowMoveUp$1 = "";
+  var windowMoveDown$1 = "";
+  var windowMoveStopped$1 = "";
+  var transcriptControls$1 = "";
+  var signControls$1 = "";
   var windowMoveAlert$1 = "Pencereyi hareket ettirmek için mouse'unu sürü veya ok tuşlarını kullan; Durdurmak için Enter'a bas";
   var windowResize$1 = "Yeniden Boyutlandır";
   var windowResizeHeading$1 = "Pencereyi yeniden Boyutlandır";
   var closeButtonLabel$1 = "Kapat";
   var width$1 = "En";
   var height$1 = "Boy";
-  var resultsSummary1$1 = "You searched for:";
-  var resultsSummary2$1 = "Found %1 matching items.";
-  var resultsSummary3$1 = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound$1 = "No results found.";
-  var searchButtonLabel$1 = "Play at %1";
-  var hour$1 = "hour";
-  var minute$1 = "minute";
-  var second$1 = "second";
-  var hours$1 = "hours";
-  var minutes$1 = "minutes";
-  var seconds$1 = "seconds";
-  var vtsHeading$1 = "Video Transcript Sorter";
-  var vtsInstructions1$1 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2$1 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3$1 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4$1 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5$1 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage$1 = "Select a language";
-  var vtsSave$1 = "Generate new .vtt content";
-  var vtsReturn$1 = "Return to Editor";
-  var vtsCancel$1 = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow$1 = "Row";
-  var vtsKind$1 = "Kind";
-  var vtsStart$1 = "Start";
-  var vtsEnd$1 = "End";
-  var vtsContent$1 = "Content";
-  var vtsActions$1 = "Actions";
-  var vtsNewRow$1 = "A new row %1 has been inserted.";
-  var vtsDeletedRow$1 = "Row %1 has been deleted.";
-  var vtsMovedRow$1 = "Row %1 has been moved %2 and is now Row %3.";
+  var resultsSummary1$1 = "";
+  var resultsSummary2$1 = "";
+  var resultsSummary3$1 = "";
+  var noResultsFound$1 = "";
+  var searchButtonLabel$1 = "";
+  var hour$1 = "";
+  var minute$1 = "";
+  var second$1 = "";
+  var hours$1 = "";
+  var minutes$1 = "";
+  var seconds$1 = "";
+  var vtsHeading$1 = "";
+  var vtsInstructions1$1 = "";
+  var vtsInstructions2$1 = "";
+  var vtsInstructions3$1 = "";
+  var vtsInstructions4$1 = "";
+  var vtsInstructions5$1 = "";
+  var vtsSelectLanguage$1 = "";
+  var vtsSave$1 = "";
+  var vtsReturn$1 = "";
+  var vtsCancel$1 = "";
+  var vtsRow$1 = "";
+  var vtsKind$1 = "";
+  var vtsStart$1 = "";
+  var vtsEnd$1 = "";
+  var vtsContent$1 = "";
+  var vtsActions$1 = "";
+  var vtsNewRow$1 = "";
+  var vtsDeletedRow$1 = "";
+  var vtsMovedRow$1 = "";
   var tr = {
   	playerHeading: playerHeading$1,
   	audioPlayer: audioPlayer$1,
@@ -20560,6 +21818,8 @@
   	enterFullScreen: enterFullScreen$1,
   	exitFullScreen: exitFullScreen$1,
   	speed: speed$1,
+  	on: on$1,
+  	off: off$1,
   	spacebar: spacebar$1,
   	transcriptTitle: transcriptTitle$1,
   	lyricsTitle: lyricsTitle$1,
@@ -20585,7 +21845,9 @@
   	prefDescription1: prefDescription1$1,
   	prefDescription2: prefDescription2$1,
   	prefDescription3: prefDescription3$1,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone$1,
+  	prefDescriptionNone: prefDescriptionNone$1,
+  	prefDescFormatOption1: prefDescFormatOption1$1,
+  	prefDescFormatOption2: prefDescFormatOption2$1,
   	prefIntroDescription3: prefIntroDescription3$1,
   	prefIntroDescription4: prefIntroDescription4$1,
   	prefIntroKeyboard1: prefIntroKeyboard1$1,
@@ -20695,17 +21957,17 @@
   };
 
   var playerHeading = "媒體播放器";
-  var audioPlayer = "Audio player";
-  var videoPlayer = "Video player";
-  var faster = "加快";
-  var slower = "減慢";
+  var audioPlayer = "";
+  var videoPlayer = "";
+  var faster = "加快: %1x";
+  var slower = "減慢: %1x";
   var play = "播放";
   var pause = "暫停";
   var restart = "從頭開始";
   var prevTrack = "前一軌";
   var nextTrack = "後一軌";
-  var rewind = "倒回";
-  var forward = "快轉";
+  var rewind = "倒回 %1 秒";
+  var forward = "快轉 %1 秒";
   var captions = "字幕";
   var showCaptions = "顯示字幕";
   var hideCaptions = "隱藏字幕";
@@ -20728,6 +21990,8 @@
   var enterFullScreen = "進入全螢幕模式";
   var exitFullScreen = "離開全螢幕模式";
   var speed = "播放速度";
+  var on = "";
+  var off = "";
   var spacebar = "空白鍵";
   var transcriptTitle = "逐字稿";
   var lyricsTitle = "歌詞";
@@ -20741,7 +22005,7 @@
   var alertDescribedVersion = "正在使用本影片的口述影像版本";
   var alertNonDescribedVersion = "正在使用本影片的非口述影像版本";
   var prefMenuCaptions = "字幕";
-  var prefVoicedCaptions = "Spoken Captions";
+  var prefVoicedCaptions = "話語字幕";
   var prefMenuDescriptions = "口述影像";
   var prefMenuKeyboard = "鍵盤";
   var prefMenuTranscript = "逐字稿";
@@ -20753,7 +22017,9 @@
   var prefDescription1 = "目前的影片有 錄製口述影像的替代版本 文字式口述影像";
   var prefDescription2 = "目前的影片有 影片的口述影像替代版本";
   var prefDescription3 = "目前的影片有 文字式口述影像，需搭配螢幕報讀軟體";
-  var prefIntroDescriptionNone = "目前的影片兩種格式都沒提供。";
+  var prefDescriptionNone = "目前的影片兩種格式都沒提供。";
+  var prefDescFormatOption1 = "";
+  var prefDescFormatOption2 = "";
   var prefIntroDescription3 = "請使用下列表單設定口述影像的相關偏好。";
   var prefIntroDescription4 = "儲存設定後，口述影像功能可以由口述影像按鈕切換開關。";
   var prefIntroKeyboard1 = "不論您身處網頁何處，都可以運用下列鍵盤快速鍵操作頁面中的這個媒體播放器（快速鍵清單請見底下）。";
@@ -20763,17 +22029,17 @@
   var prefHeadingKeyboard2 = "目前的快速鍵";
   var prefHeadingDescription = "口述影像";
   var prefHeadingTextDescription = "文字式口述影像";
-  var prefAltKey = "Alt";
-  var prefCtrlKey = "Ctrl";
-  var prefShiftKey = "Shift";
-  var prefNoKeyShortcuts = "Disable keyboard shortcuts";
-  var escapeKey = "Esc";
+  var prefAltKey = "";
+  var prefCtrlKey = "";
+  var prefShiftKey = "";
+  var prefNoKeyShortcuts = "停用鍵盤快速鍵";
+  var escapeKey = "";
   var escapeKeyFunction = "關閉目前的對話視窗或彈出式選單";
   var prefDescPause = "開始口述時自動暫停影片";
   var prefDescVisible = "同時以視覺方式呈現口述影像";
   var prefDescVoice = "語音";
-  var prefDescRate = "Spoken Description Rate";
-  var prefCaptionRate = "Spoken Caption Rate";
+  var prefDescRate = "口述影像語速";
+  var prefCaptionRate = "話語字幕語速";
   var prefDescPitch = "音調";
   var prefDescPitch1 = "非常低沈";
   var prefDescPitch2 = "低沈";
@@ -20814,52 +22080,52 @@
   var prefNoChange = "您並未提出任何變動。";
   var save = "儲存";
   var cancel = "取消";
-  var dismissButton = "Dismiss";
+  var dismissButton = "知道了";
   var windowButtonLabel = "視窗選項";
   var windowMove = "移動";
-  var windowMoveLeft = "Window moved left";
-  var windowMoveRight = "Window moved right";
-  var windowMoveUp = "Window moved up";
-  var windowMoveDown = "Window moved down";
-  var windowMoveStopped = "Window move stopped";
-  var transcriptControls = "Transcript Window Controls";
-  var signControls = "Sign Language Window Controls";
+  var windowMoveLeft = "視窗已左移";
+  var windowMoveRight = "視窗已右移";
+  var windowMoveUp = "視窗已上移";
+  var windowMoveDown = "視窗已下移";
+  var windowMoveStopped = "視窗已停止移動";
+  var transcriptControls = "逐字稿視窗控制";
+  var signControls = "手語視窗控制";
   var windowMoveAlert = "拖曳視窗或以方向鍵移動視窗；確定後按 Enter";
   var windowResize = "變更大小";
   var windowResizeHeading = "變更視窗大小";
   var closeButtonLabel = "閉";
   var width = "寬度";
   var height = "高度";
-  var resultsSummary1 = "You searched for:";
-  var resultsSummary2 = "Found %1 matching items.";
-  var resultsSummary3 = "Click the time associated with any item to play the video from that point.";
-  var noResultsFound = "No results found.";
-  var searchButtonLabel = "Play at %1";
-  var hour = "hour";
-  var minute = "minute";
-  var second = "second";
-  var hours = "hours";
-  var minutes = "minutes";
-  var seconds = "seconds";
-  var vtsHeading = "Video Transcript Sorter";
-  var vtsInstructions1 = "Use the Video Transcript Sorter to modify text tracks:";
-  var vtsInstructions2 = "Reorder chapters, descriptions, captions, and/or subtitles so they appear in the proper sequence in Able Player's auto-generated transcript.";
-  var vtsInstructions3 = "Modify content or start/end times (all are directly editable within the table).";
-  var vtsInstructions4 = "Add new content, such as chapters or descriptions.";
-  var vtsInstructions5 = "After editing, click the \"Save Changes\" button to generate new content for all relevant timed text files. The new text can be copied and pasted into new WebVTT files.";
-  var vtsSelectLanguage = "Select a language";
-  var vtsSave = "Generate new .vtt content";
-  var vtsReturn = "Return to Editor";
-  var vtsCancel = "Cancelling saving. Any edits you made have been restored in the VTS table.";
-  var vtsRow = "Row";
-  var vtsKind = "Kind";
-  var vtsStart = "Start";
-  var vtsEnd = "End";
-  var vtsContent = "Content";
-  var vtsActions = "Actions";
-  var vtsNewRow = "A new row %1 has been inserted.";
-  var vtsDeletedRow = "Row %1 has been deleted.";
-  var vtsMovedRow = "Row %1 has been moved %2 and is now Row %3.";
+  var resultsSummary1 = "您搜尋的是：";
+  var resultsSummary2 = "共找到 %1 處吻合";
+  var resultsSummary3 = "按一下任何一處的對應時間即可從該處開始播放視訊";
+  var noResultsFound = "沒有找到任何吻合的結果";
+  var searchButtonLabel = "從下列時間點開始播放： %1";
+  var hour = "小時";
+  var minute = "分";
+  var second = "秒";
+  var hours = "小時";
+  var minutes = "分";
+  var seconds = "秒";
+  var vtsHeading = "視訊逐字稿排序器";
+  var vtsInstructions1 = "您可使用視訊逐字稿排序器對文字軌段加以修改：";
+  var vtsInstructions2 = "重排章節、描述、字幕等，如此 Able Player 自動產生的逐字稿能夠以正確的順序呈現。";
+  var vtsInstructions3 = "修改內容或起迄時間（這些都可以在表格中直接編輯）。";
+  var vtsInstructions4 = "新增內容，包括章節標記或描述。";
+  var vtsInstructions5 = "編輯後，請按 \"儲存變更\" 按鈕，如此才能產生所有相關字幕檔案的新內容。這些新的文字內容可以複製貼上到新的 WebVTT 檔案。";
+  var vtsSelectLanguage = "選擇語言";
+  var vtsSave = "產生新的 .vtt 內容";
+  var vtsReturn = "返回編輯器";
+  var vtsCancel = "放棄儲存。您在視訊逐字稿排序器裡的所有編修皆已還原。";
+  var vtsRow = "列次";
+  var vtsKind = "類型";
+  var vtsStart = "開始";
+  var vtsEnd = "結束";
+  var vtsContent = "內容";
+  var vtsActions = "行動";
+  var vtsNewRow = "已插入新的 %1 列次。";
+  var vtsDeletedRow = "已刪除 %1 列次。";
+  var vtsMovedRow = "第 %1 列次已移動 %2 而成為第 %3 列次。";
   var zh_tw = {
   	playerHeading: playerHeading,
   	audioPlayer: audioPlayer,
@@ -20895,6 +22161,8 @@
   	enterFullScreen: enterFullScreen,
   	exitFullScreen: exitFullScreen,
   	speed: speed,
+  	on: on,
+  	off: off,
   	spacebar: spacebar,
   	transcriptTitle: transcriptTitle,
   	lyricsTitle: lyricsTitle,
@@ -20920,7 +22188,9 @@
   	prefDescription1: prefDescription1,
   	prefDescription2: prefDescription2,
   	prefDescription3: prefDescription3,
-  	prefIntroDescriptionNone: prefIntroDescriptionNone,
+  	prefDescriptionNone: prefDescriptionNone,
+  	prefDescFormatOption1: prefDescFormatOption1,
+  	prefDescFormatOption2: prefDescFormatOption2,
   	prefIntroDescription3: prefIntroDescription3,
   	prefIntroDescription4: prefIntroDescription4,
   	prefIntroKeyboard1: prefIntroKeyboard1,
@@ -21034,7 +22304,6 @@
   	cs,
   	da,
   	de,
-  	en,
   	es,
   	fr,
   	he,
@@ -21061,7 +22330,6 @@
   			'cs'    : 'Czech',
   			'da'    : 'Danish',
   			'de'    : 'German',
-  			'en'    : 'English',
   			'es'    : 'Spanish',
   			'fr'    : 'French',
   			'he'    : 'Hebrew',
@@ -21093,10 +22361,15 @@
   	 */
   	AblePlayer.prototype.translate = function( key, fallback, args = Array() ) {
   		let translation = '';
-  		if ( this.tt[ key ] ) {
-  			translation = this.tt[ key ];
+
+  		if ( Object.hasOwn( this.options, 'text' ) && Object.hasOwn( this.options.text, key ) ) {
+  			translation = this.options.text[key] !== '' ? this.options.text[key] : fallback;
   		} else {
-  			translation = fallback;
+  			if ( this.tt[ key ] ) {
+  				translation = this.tt[ key ];
+  			} else {
+  				translation = fallback;
+  			}
   		}
   		if ( args.length > 0 ) {
   			args.forEach( ( val, index ) => {
@@ -21105,7 +22378,7 @@
   			});
   		}
 
-  		return translation;
+  		return purify.sanitize(translation);
   	};
 
   	AblePlayer.prototype.getTranslationText = function() {
@@ -21115,9 +22388,7 @@
   		thisObj = this;
 
   		supportedLangs = this.getSupportedLangs(); // returns an array
-
   		if (this.lang) { // a data-lang attribute is included on the media element
-  			this.lang;
   			if ( ! Object.hasOwn( supportedLangs,this.lang ) ) {
   				// the specified language code is not in the index
   				if ( this.lang.indexOf('-') == 2 ) {
@@ -21130,13 +22401,14 @@
   					// but maybe there's a similar localized language supported
   					// that has the same parent?
   					similarLangFound = false;
-  					for ( const [key,value] of Object.entries(supportedLangs) ) {
-  						if ( key.substring(0,2) == this.lang ) {
+  					let thisLang = this.lang;
+  					for ( const [key] of Object.entries(supportedLangs) ) {
+  						if ( thisLang.substring(0,2) == key ) {
   							this.lang = key;
   							similarLangFound = true;
   						}
   					}
-  					if ( !similarLangFound ) {
+  					if ( ! similarLangFound ) {
   						// language requested via data-lang is not supported
   						this.lang = null;
   					}
@@ -21144,7 +22416,7 @@
   			}
   		}
 
-  		if (!this.lang) {
+  		if ( ! this.lang ) {
   			// try the language of the web page, if specified
   			if ($('body').attr('lang')) {
   				docLang = $('body').attr('lang').toLowerCase();
@@ -21181,8 +22453,10 @@
   			this.searchLang = this.lang;
   		}
   		const ttModule = moduleFromTag[this.lang];
-  		if (!ttModule) {
-  			console.log( "Error: Unable to load translation module for language:", this.lang);
+  		if ( !ttModule ) {
+  			if ( ! this.lang == 'en' ) {
+  				console.log( "Error: Unable to load translation module for language:", this.lang);
+  			}
   			thisObj.tt = {};
   			thisObj.translationFiles = false;
   		} else {
@@ -21483,7 +22757,12 @@
   			// this is likely already a vimeo ID
   			return url;
   		} else {
-  			urlObject = new URL(url);
+  			// Try to parse as a URL. If that fails, return the string as-is. It's probably an ID.
+  			try {
+  				urlObject = new URL(url);
+  			} catch (e) {
+  				return url;
+  			}
   		}
   		if ( 'vimeo.com' === urlObject.hostname || 'player.vimeo.com' === urlObject.hostname ) {
   			// this is a full Vimeo URL
@@ -21694,11 +22973,13 @@
   		// mute is either true (muting) or false (unmuting)
   		if (mute) {
   			// save current volume so it can be restored after unmute
-  			this.lastVolume = this.volume;
+  			this.lastVolume = ( this.volume === 0 ) ? this.defaultVolume :this.volume;
   			this.volume = 0;
   		} else { // restore to previous volume
   			if (typeof this.lastVolume !== 'undefined') {
-  				this.volume = this.lastVolume;
+  				this.volume = this.lastVolume === 0 ? this.defaultVolume : this.lastVolume;
+  			} else {
+  				this.volume = this.defaultVolume;
   			}
   		}
 
@@ -21711,6 +22992,7 @@
   				this.youTubePlayer.unMute();
   			}
   		}
+
   		this.setVolume(this.volume);
   		this.refreshVolumeHelp(this.volume);
   		this.refreshVolumeButton(this.volume);
@@ -21837,10 +23119,7 @@
   				let $fieldWrapper = $( '<div class="vts-lang-selector"></div>' );
   				for (i in this.langs) {
   					radioId = 'vts-lang-radio-' + this.langs[i];
-  					$radioDiv = $('<div>',{
-  						// uncomment the following if label is native name
-  						// 'lang': this.langs[i]
-  					});
+  					$radioDiv = $('<div>');
   					$radio = $('<input>', {
   						'type': 'radio',
   						'name': 'vts-lang',
@@ -22037,16 +23316,29 @@
 
   		// timestamp is a string in the form "HH:MM:SS.xxx"
   		// Take some simple steps to ensure edited timestamp values still adhere to expected format
+  		// All time strings should have all components (hours, minutes, seconds, milliseconds) present.
 
-  		var firstPart, lastPart;
+  		var firstPart, parts, lastPart, firstParts;
 
-  		firstPart = timestamp.substring(0,timestamp.lastIndexOf('.')+1);
-  		lastPart = timestamp.substring(timestamp.lastIndexOf('.')+1);
-
-  		// TODO: Be sure each component within firstPart has only exactly two digits
-  		// Probably can't justify doing this automatically
-  		// If users enters '5' for minutes, that could be either '05' or '50'
-  		// This should trigger an error and prompt the user to correct the value before proceeding
+  		parts      = timestamp.split('.');
+  		firstPart  = parts[0];
+  		firstParts = firstPart.split(':');
+  		let hours, minutes, seconds;
+  		if (firstParts.length === 3) {
+  			hours   = String(firstParts[0]).padStart(2,'0');
+  			minutes = String(firstParts[1]).padStart(2,'0');
+  			seconds = String(firstParts[2]).padStart(2,'0');
+  		} else if (firstParts.length === 2) {
+  			hours   = '00';
+  			minutes = String(firstParts[0]).padStart(2,'0');
+  			seconds = String(firstParts[1]).padStart(2,'0');
+  		} else if (firstParts.length === 1) {
+  			hours   = '00';
+  			minutes = '00';
+  			seconds = String(firstParts[0]).padStart(2,'0');
+  		}
+  		firstPart = hours + ':' + minutes + ':' + seconds;
+  		lastPart  = parts[1] ?? '000';
 
   		// Be sure lastPart has exactly three digits
   		if (lastPart.length > 3) {
@@ -22054,11 +23346,9 @@
   			lastPart = lastPart.substring(0,3);
   		} else if (lastPart.length < 3) {
   			// add trailing zeros
-  			while (lastPart.length < 3) {
-  				lastPart += '0';
-  			}
+  			lastPart = String(lastPart).padEnd(3,'0');
   		}
-  		return firstPart + lastPart;
+  		return firstPart + '.' + lastPart;
   	};
 
 
@@ -22553,17 +23843,9 @@
 
   		// Adjusts start and end times of the current, previous, and next rows in VTS table
   		// after a move or insert
-  		// NOTE: Fully automating this process would be extraordinarily complicated
-  		// The goal here is simply to make subtle tweaks to ensure rows appear
+  		// The goal here is to make subtle tweaks to ensure rows appear
   		// in the new order within the Able Player transcript
   		// Additional tweaking will likely be required by the user
-
-  		// HISTORY: Originally set minDuration to 2 seconds for captions and .500 for descriptions
-  		// However, this can results in significant changes to existing caption timing,
-  		// with not-so-positive results.
-  		// As of 3.1.15, setting minDuration to .001 for all track kinds
-  		// Users will have to make further adjustments manually if needed
-
   		// TODO: Add WebVTT validation on save, since tweaking times is risky
 
   		var	 minDuration, $rows, prevRowNum, nextRowNum, $row, $prevRow, $nextRow,
@@ -22689,15 +23971,15 @@
   		}
 
   		// Update all affected start/end times
-  		$row.find('td').eq(2).text(this.formatSecondsAsColonTime(start,true));
-  		$row.find('td').eq(3).text(this.formatSecondsAsColonTime(end,true));
+  		$row.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(start,true)));
+  		$row.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(end,true)));
   		if ($prevRow) {
-  			$prevRow.find('td').eq(2).text(this.formatSecondsAsColonTime(prevStart,true));
-  			$prevRow.find('td').eq(3).text(this.formatSecondsAsColonTime(prevEnd,true));
+  			$prevRow.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(prevStart,true)));
+  			$prevRow.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(prevEnd,true)));
   		}
   		if ($nextRow) {
-  			$nextRow.find('td').eq(2).text(this.formatSecondsAsColonTime(nextStart,true));
-  			$nextRow.find('td').eq(3).text(this.formatSecondsAsColonTime(nextEnd,true));
+  			$nextRow.find('td').eq(2).text(this.formatTimestamp( this.formatSecondsAsColonTime(nextStart,true)));
+  			$nextRow.find('td').eq(3).text(this.formatTimestamp( this.formatSecondsAsColonTime(nextEnd,true)));
   		}
   	};
 
@@ -23055,14 +24337,19 @@
   		var languageStack = [];
   		while (state.text.length > 0) {
   			var nextLine = peekLine(state);
-  			if (nextLine.indexOf('-->') !== -1 || /^\s+$/.test(nextLine)) {
-  				break; // Handle empty cues
-  			}
-  			// Have to separately detect double-lines ending cue due to our non-standard parsing.
-  			// TODO: Redo outer algorithm to conform to W3 spec?
-  			if (state.text.length >= 2 && state.text[0] === '\n' && state.text[1] === '\n') {
-  				cut(state, 2);
-  				break;
+  			if (nextLine.indexOf('-->') !== -1) {
+  				break; // Reached next cue timing line; definitely end of payload
+  			} else if (nextLine.length === 0) {
+  				// peekLine returns '' when state.text starts with '\n'.
+  				// A true blank line (end of cue) is two consecutive newlines, so we'll check for that here
+  				if (state.text.length === 1 || state.text[1] === '\n') {
+  					break; // True blank line or solitary trailing newline — end of cue
+  				}
+  				// If we get here we had a single newline left in state.text because the previous "line" ended with a tag;
+  				// We'll consume it and keep parsing the rest of the cue.
+  				cut(state, 1); // Consume the lone newline
+  				current.children.push({type: 'string', value: '\n'}); // preserve as newline in output
+  				continue;
   			}
 
   			var token = getCueToken(state);

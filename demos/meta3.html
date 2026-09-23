@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Responsive video with clickable hotspots | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -150,41 +149,39 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Responsive video with clickable hotspots</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Responsive video with clickable hotspots</h1>
 
-		<p>This example has the same functionality as <a href="meta2.html">Metadata Demo #2</a>.
-			Both examples demonstrate using a WebVTT metadata track to expose content
-			as an overlay on the video.
-		</p>
-		<p>
-			However, in the other demo the video is positioned with fixed width and height.
-			This is necessary to precisely position overlay content atop the video using pixel values.
-			The current example implements this same feature in a responsive design,
-			with overlay content positioned using percentage values.
-		</p>
+			<p>This example has the same functionality as <a href="meta2.html">Metadata Demo #2</a>.
+				Both examples demonstrate using a WebVTT metadata track to expose content
+				as an overlay on the video.
+			</p>
+			<p>
+				However, in the other demo the video is positioned with fixed width and height.
+				This is necessary to precisely position overlay content atop the video using pixel values.
+				The current example implements this same feature in a responsive design,
+				with overlay content positioned using percentage values.
+			</p>
 
-		<div id="video-and-meta-wrapper">
-			<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-meta-type="selector" playsinline>
-				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-				<!-- Able Player will display tracks alphabetically by label -->
-				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
-				<track kind="metadata" src="../media/wwa_meta.vtt" srclang="en"/>
-			</video>
-			<!-- metadata content -->
-			<div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
-			<div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
-			<div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
-			<div class="meta" id="response" role="alert">Ouch!</div>
-		</div>
-
-</main>
+			<div id="video-and-meta-wrapper">
+				<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-meta-type="selector" playsinline>
+					<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+					<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+					<!-- Able Player will display tracks alphabetically by label -->
+					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English"/>
+					<track kind="metadata" src="../media/wwa_meta.vtt" srclang="en"/>
+				</video>
+				<!-- metadata content -->
+				<div class="meta" id="info" role="alert">Supplemental content displayed briefly during a break in the audio</div>
+				<div class="meta" id="instructions" role="alert" tabindex="-1">What happens if you click Terrill's face?</div>
+				<div class="meta" id="terrill" role="button" aria-label="Terrill's face" tabindex="-1"></div>
+				<div class="meta" id="response" role="alert">Ouch!</div>
+			</div>
+		</main>
+	</div>
+	<script src="demos.js"></script>
 </body>
 </html>

@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Chapters in an external container | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -21,43 +20,42 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Chapters in an external container</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Chapters in an external container</h1>
 
-		<p>The <code>data-chapters-div</code> attribute is used to identify
-			the <code>id</code> of the container, and
-			the <code>data-use-chapters-button</code> attribute is set to <em>false</em>
-			so the external chapters container cannot be toggled off.</p>
+			<p>The <code>data-chapters-div</code> attribute is used to identify
+				the <code>id</code> of the container, and
+				the <code>data-use-chapters-button</code> attribute is set to <em>false</em>
+				so the external chapters container cannot be toggled off.</p>
 
-		<div id="wrapper">
-			<div id="chapters"></div>
-			<div id="player">
-				<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-chapters-div="chapters" data-use-chapters-button="false" data-chapters-title="Table of Contents" data-chapters-default="Chapter 2" data-seekbar-scope="chapter" data-prevnext-unit="chapter" playsinline>
-					<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-					<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-					<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-					<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-					<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-					<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-					<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-					<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-					<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-					<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-					<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-					<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-					<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-					<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-					<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
-				</video>
+			<div id="wrapper">
+				<div id="chapters"></div>
+				<div id="player">
+					<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-chapters-div="chapters" data-use-chapters-button="false" data-chapters-title="Table of Contents" data-chapters-default="Chapter 2" data-seekbar-scope="chapter" data-prevnext-unit="chapter" playsinline>
+						<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+						<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+						<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+						<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+						<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+						<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+						<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+						<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+						<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+						<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+						<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+						<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+						<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+						<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+						<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+						<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+					</video>
+				</div>
 			</div>
-		</div>
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

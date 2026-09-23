@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>YouTube player (chapters and transcript in external containers) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -58,67 +57,66 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>YouTube player (chapters and transcript in external containers)</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>YouTube player (chapters and transcript in external containers)</h1>
 
-		<section id="intro" aria-label="Intro">
+			<section id="intro" aria-label="Intro">
 
-			<p>This page features a relatively complex example of Able Player being used to play a YouTube video. Its features include:</p>
+				<p>This page features a relatively complex example of Able Player being used to play a YouTube video. Its features include:</p>
 
-			<ul>
-				<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
-				<li>Captions, subtitles, and chapters, all hosted in local WebVTT files, and referenced within <code>&lt;track&gt;</code> elements.</li>
-				<li>An interactive transcript that combines all of the above text tracks.</li>
-				<li>External containers to which Able Player adds chapters and the interactive transcript.</li>
-			</ul>
+				<ul>
+					<li>A described and non-described version of the video, both hosted on YouTube. Swap between the two versions using the <em>Description</em> button.</li>
+					<li>Captions, subtitles, and chapters, all hosted in local WebVTT files, and referenced within <code>&lt;track&gt;</code> elements.</li>
+					<li>An interactive transcript that combines all of the above text tracks.</li>
+					<li>External containers to which Able Player adds chapters and the interactive transcript.</li>
+				</ul>
 
-		</section>
-		<div id="columns">
-			<div class="column" id="col1">
-				<section id="speakers" aria-labelledby="speakers-heading">
-					<h2 id="speakers-heading">Speakers</h2>
-					<p>Click the name of a speaker to jump to their section
-						of the video.
-					</p>
-					<div id="chapters"></div>
-				</section>
+			</section>
+			<div id="columns">
+				<div class="column" id="col1">
+					<section id="speakers" aria-labelledby="speakers-heading">
+						<h2 id="speakers-heading">Speakers</h2>
+						<p>Click the name of a speaker to jump to their section
+							of the video.
+						</p>
+						<div id="chapters"></div>
+					</section>
+				</div>
+
+				<div class="column" id="col2">
+					<section id="player" aria-label="Video player">
+						<video data-able-player
+							data-skin="2020"
+							id="video1"
+							preload="auto"
+							data-youtube-nocookie="true" data-youtube-id="dhwpLACAls8"
+							data-youtube-desc-id="Ck2TdVMhWcU"
+							data-transcript-div="transcript"
+							data-transcript-title=""
+							data-chapters-div="chapters"
+							data-chapters-title=""
+							data-use-chapters-button="false"
+							data-include-transcript="false"
+							playsinline
+						>
+							<track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
+							<track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Español"/>
+							<track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-cn" label="中文(中华人民共和国)"/>
+							<track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
+						</video>
+					</section>
+
+					<section id="transcript-wrapper" aria-label="Transcript">
+						<div id="transcript"></div>
+					</section>
+				</div>
 			</div>
 
-			<div class="column" id="col2">
-				<section id="player" aria-label="Video player">
-					<video data-able-player
-						data-skin="2020"
-						id="video1"
-						preload="auto"
-						data-youtube-nocookie="true" data-youtube-id="dhwpLACAls8"
-						data-youtube-desc-id="Ck2TdVMhWcU"
-						data-transcript-div="transcript"
-						data-transcript-title=""
-						data-chapters-div="chapters"
-						data-chapters-title=""
-						data-use-chapters-button="false"
-						data-include-transcript="false"
-						playsinline
-					>
-						<track kind="captions" src="../media/itaccess_captions_en.vtt" srclang="en" label="English"/>
-						<track kind="subtitles" src="../media/itaccess_subtitles_es.vtt" srclang="es" label="Español"/>
-						<track kind="subtitles" src="../media/itaccess_subtitles_zh-cn.vtt" srclang="zh-cn" label="中文(中华人民共和国)"/>
-						<track kind="chapters" src="../media/itaccess_chapters_en.vtt" srclang="en" label="Speakers"/>
-					</video>
-				</section>
-
-				<section id="transcript-wrapper" aria-label="Transcript">
-					<div id="transcript"></div>
-				</section>
-			</div>
-		</div>
-
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

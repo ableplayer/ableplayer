@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Audio with One Track and a Poster Image | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -21,21 +20,20 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Audio with One Track and a Poster Image</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Audio with One Track and a Poster Image</h1>
 
-		<div id="conbtainer">
-			<audio id="audio1" preload="auto" data-able-player data-poster="../media/flavors_cover.jpg" data-poster-alt="Flow Theory Flavors (Cover art)">
-				<source type="audio/mpeg" src="../media/smallf.mp3"/>
-				<source type="audio/ogg" src="../media/smallf.ogg"/>
-			</audio>
-		</div>
-	</main>
+			<div id="conbtainer">
+				<audio id="audio1" preload="auto" data-able-player data-poster="../media/flavors_cover.jpg" data-poster-alt="Flow Theory Flavors (Cover art)">
+					<source type="audio/mpeg" src="../media/smallf.mp3"/>
+					<source type="audio/ogg" src="../media/smallf.ogg"/>
+				</audio>
+			</div>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>
