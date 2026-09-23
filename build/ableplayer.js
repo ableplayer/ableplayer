@@ -1,4 +1,4 @@
-/*! ableplayer V5.1.0-alpha - with DOMPurify included. Console logs enabled, for development */
+/*! ableplayer V5.1.0-beta1 - with DOMPurify included. Console logs enabled, for development */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery')) :

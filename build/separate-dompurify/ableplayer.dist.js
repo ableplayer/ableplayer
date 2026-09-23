@@ -1,4 +1,4 @@
-/*! ableplayer V5.1.0-alpha - needs DOMPurify provided separately. Console logs disabled, but not minified, for demos. */
+/*! ableplayer V5.1.0-beta1 - needs DOMPurify provided separately. Console logs disabled, but not minified, for demos. */
 
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery'), require('dompurify')) :
