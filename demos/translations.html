@@ -35,8 +35,10 @@
 		button.addEventListener( 'click', function() {
 			let value = select.value;
 			let langName = select.options[select.selectedIndex].text;
+			const langCodePattern = /^[a-z]{2,3}(?:-[A-Z]{2})?$/;
+			let safeValue = langCodePattern.test(value) ? value : 'en';
 			if ( value === '' ) {
-				value = 'en';
+				safeValue = 'en';
 				html.setAttribute( 'lang', 'en' );
 				header.removeAttribute( 'lang' );
 				nav.removeAttribute( 'lang' );
@@ -45,7 +47,7 @@
 				wrapper.replaceWith( player.media );
 				player = new AblePlayer( '#video1' );
 			} else {
-				html.setAttribute( 'lang', value );
+				html.setAttribute( 'lang', safeValue );
 				header.setAttribute( 'lang', 'en' );
 				nav.setAttribute( 'lang', 'en' );
 				content.setAttribute( 'lang', 'en' );
@@ -55,12 +57,12 @@
 			}
 			notification.innerHTML = '<p>Player refreshed in your selected language: <strong>' + langName + '</strong>.</p>';
 
-			fetch( '../translations/' + value + '.json' )
+			fetch( '../translations/' + safeValue + '.json' )
 				.then(response => response.json())
 				.then(data => {
 					const emptyKeys = Object.keys(data).filter( key => ! data[key] );
 					let emptyCount = emptyKeys.length;
-					let link = 'https://github.com/ableplayer/ableplayer/blob/main/translations/' + value + '.json';
+					let link = 'https://github.com/ableplayer/ableplayer/blob/main/translations/' + safeValue + '.json';
 					let p = document.createElement('p');
 					p.textContent = 'The ' + langName + ' translation has ' + emptyCount + ' untranslated strings: ' + emptyKeys.join(', ') + '. ';
 					let a = document.createElement('a');
