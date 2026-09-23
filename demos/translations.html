@@ -61,8 +61,13 @@
 					const emptyKeys = Object.keys(data).filter( key => ! data[key] );
 					let emptyCount = emptyKeys.length;
 					let link = 'https://github.com/ableplayer/ableplayer/blob/main/translations/' + value + '.json';
-					let textInfo = 'The ' + langName + ' translation has ' + emptyCount + ' untranslated strings: ' + emptyKeys.join(', ') + '. <a href="' + link + '">Help translate it!</a>';
-					notification.innerHTML += '<p>' + textInfo + '</p>';
+					let p = document.createElement('p');
+					p.textContent = 'The ' + langName + ' translation has ' + emptyCount + ' untranslated strings: ' + emptyKeys.join(', ') + '. ';
+					let a = document.createElement('a');
+					a.href = link;
+					a.textContent = 'Help translate it!';
+					p.appendChild(a);
+					notification.appendChild(p);
 				})
 				.catch(error => console.error('Translations not loaded.', error));
 		})
