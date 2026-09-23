@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Video player with search (server-side) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -16,64 +15,62 @@
 <script src="../build/ableplayer.dist.js"></script>
 
 </head>
-
 <body>
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Video player with search (server-side)</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Video player with search (server-side)</h1>
 
-		<p>Search terms are provided to the player using the <code>data-search</code> attribute.
-			In this hypothetical example, we have entered the search term "you" into a search field.
-			After the user submits the form, their input would be sanitized by the web application
-			and Able Player would be loaded with the following attributes:</p>
+			<p>Search terms are provided to the player using the <code>data-search</code> attribute.
+				In this hypothetical example, we have entered the search term "you" into a search field.
+				After the user submits the form, their input would be sanitized by the web application
+				and Able Player would be loaded with the following attributes:</p>
 
-		<ul>
-			<li><code>data-search</code> - the search term, expressed as one or more words, separated with space. Able Player will search for any of these words (using <em>OR</em> logic).</li>
-			<li><code>data-search-div</code> - contains the id of a <code>&lt;div&gt;</code> in which to display the search results.</li>
-			<li><code>data-search-lang</code> - optional, specifies the language of the caption or subtitle track to search. If omitted it will search the caption track for the default language.</li>
-			<li><code>data-search-ignore-caps</code> - true to ignore case; false for case sensitive search.</li>
-		</ul>
+			<ul>
+				<li><code>data-search</code> - the search term, expressed as one or more words, separated with space. Able Player will search for any of these words (using <em>OR</em> logic).</li>
+				<li><code>data-search-div</code> - contains the id of a <code>&lt;div&gt;</code> in which to display the search results.</li>
+				<li><code>data-search-lang</code> - optional, specifies the language of the caption or subtitle track to search. If omitted it will search the caption track for the default language.</li>
+				<li><code>data-search-ignore-caps</code> - true to ignore case; false for case sensitive search.</li>
+			</ul>
 
-		<p>Also in this example, <code>data-include-transcript</code> is set to "false", since there isn't room on this page for both search results and a transcript. A better design would accommodate both features.
-		</p>
+			<p>Also in this example, <code>data-include-transcript</code> is set to "false", since there isn't room on this page for both search results and a transcript. A better design would accommodate both features.
+			</p>
 
-		<p>See also the <a href="search2.html">client-side search demo</a>.</p>
+			<p>See also the <a href="search2.html">client-side search demo</a>.</p>
 
-		<div id="wrapper">
-			<div id="player">
-				<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-search="you" data-search-div="results" data-include-transcript="false" playsinline data-search-ignore-caps>
-					<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-					<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-					<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
-					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
-					<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
-					<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
-					<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
-					<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
-					<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-					<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
-					<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
-					<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
-					<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
-					<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
-					<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
-					<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
-				</video>
+			<div id="wrapper">
+				<div id="player">
+					<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player data-search="you" data-search-div="results" data-include-transcript="false" playsinline data-search-ignore-caps>
+						<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+						<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+						<track kind="captions" src="../media/wwa_captions_de.vtt" srclang="de" label="Deutsche"/>
+						<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English" default/>
+						<track kind="captions" src="../media/wwa_captions_es.vtt" srclang="es" label="Español"/>
+						<track kind="subtitles" src="../media/wwa_captions_fr.vtt" srclang="fr" label="Français"/>
+						<track kind="subtitles" src="../media/wwa_captions_ja.vtt" srclang="ja" lang="ja" label="日本語"/>
+						<track kind="descriptions" src="../media/wwa_description_de.vtt" srclang="de"/>
+						<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+						<track kind="descriptions" src="../media/wwa_description_es.vtt" srclang="es"/>
+						<track kind="descriptions" src="../media/wwa_description_fr.vtt" srclang="fr"/>
+						<track kind="descriptions" src="../media/wwa_description_ja.vtt" srclang="ja"/>
+						<track kind="chapters" src="../media/wwa_chapters_de.vtt" srclang="de"/>
+						<track kind="chapters" src="../media/wwa_chapters_en.vtt" srclang="en"/>
+						<track kind="chapters" src="../media/wwa_chapters_es.vtt" srclang="es"/>
+						<track kind="chapters" src="../media/wwa_chapters_fr.vtt" srclang="fr"/>
+					</video>
+				</div>
+				<div id="results-wrapper">
+					<h2>Your Search Results</h2>
+					<div id="results" class="able-search-results"></div>
+				</div>
+				<div id="transcript"></div>
 			</div>
-			<div id="results-wrapper">
-				<h2>Your Search Results</h2>
-				<div id="results" class="able-search-results"></div>
-			</div>
-			<div id="transcript"></div>
-		</div>
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

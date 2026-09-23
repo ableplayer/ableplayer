@@ -8,7 +8,23 @@ const path = require("path");
  */
 describe("validate.js tests", () => {
   beforeAll(async () => {
-    await page.goto("http://localhost:8000"); // Replace with your test URL
+    // The suite needs a real http(s) origin (isProtocolSafe resolves
+    // relative URLs against window.location.origin, which is opaque on
+    // about:blank), but no actual server: intercept the navigation and
+    // fulfill it with an empty page.
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      if (request.url().startsWith("http://ableplayer.test/")) {
+        request.respond({
+          status: 200,
+          contentType: "text/html",
+          body: "<!doctype html><html><head></head><body></body></html>",
+        });
+      } else {
+        request.continue();
+      }
+    });
+    await page.goto("http://ableplayer.test/");
     const validatePath = path.resolve(__dirname, "../../build/test/validate.umd.js");
     // Add DOMPurify script
     const domPurifyPath = path.resolve(

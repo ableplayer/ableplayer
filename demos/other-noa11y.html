@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Able Player with no HTML tracks | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -21,32 +20,31 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Able Player with no HTML tracks<br/>(don't do this)</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Able Player with no HTML tracks<br/>(don't do this)</h1>
 
-		<p>Why would you use an accessible media player to deliver inaccessible media? Makes no sense.</p>
+			<p>Why would you use an accessible media player to deliver inaccessible media? Makes no sense.</p>
 
-		<p>But if you have a compelling reason (e.g., you have to share the video with a small private audience while waiting for captions and descriptions to be finished) this test shows that Able Player is capable of handling it.</p>
+			<p>But if you have a compelling reason (e.g., you have to share the video with a small private audience while waiting for captions and descriptions to be finished) this test shows that Able Player is capable of handling it.</p>
 
-		<div id="container">
-			<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player>
-				<source type="video/mp4" src="../media/wwa.mp4"/>
-				<source type="video/webm" src="../media/wwa.webm"/>
-			</video>
-		</div>
+			<div id="container">
+				<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player>
+					<source type="video/mp4" src="../media/wwa.mp4"/>
+					<source type="video/webm" src="../media/wwa.webm"/>
+				</video>
+			</div>
 
-		<h2>YouTube Player with no Captions</h2>
-		<p>This also makes relatively little sense, but at least your videos can have a consistent interface.</p>
+			<h2>YouTube Player with no Captions</h2>
+			<p>This also makes relatively little sense, but at least your videos can have a consistent interface.</p>
 
-		<div class="wrapper">
-			<video id="video1" data-able-player preload="auto" data-youtube-nocookie="true" data-youtube-nocookie="true" data-youtube-id="G5M1mdiEesw" playsinline></video>
-		</div>
-	</main>
+			<div class="wrapper">
+				<video id="video1" data-able-player preload="auto" data-youtube-nocookie="true" data-youtube-nocookie="true" data-youtube-id="G5M1mdiEesw" playsinline></video>
+			</div>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

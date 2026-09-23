@@ -19,27 +19,28 @@
 
 ## Feature List
 
-- Supports both audio and video.
+- Both Audio & Video.
 - Supports either a single audio track or an entire playlist.
-- Includes a full set of player controls that are keyboard-accessible, properly labeled for screen reader users, and controllable by speech recognition users.
-- Includes customizable keyboard shortcuts that enable the player to be operated from anywhere on the web page (unless there are multiple instances of the player on a given page; then the player must have focus for keyboard shortcuts to work).
-- Features high contrast, scalable controls that remain visible in Windows High Contrast mode, plus an easy-to-see focus indicator so keyboard users can easily tell which control currently has focus.
-- Supports closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
-- Supports chapters, also using WebVTT. Chapters are specific landing points in the video, allowing video content to have structure and be more easily navigated.
-- Supports text-based audio description, also using WebVTT. At designated times, the description text is read aloud by browsers, or by screen readers for browsers that don't support the Web Speech API. Users can optionally set their player to pause when audio description starts to avoid conflicts between the description and program audio.
-- Supports spoken captions, as described in the "Spoken subtitles" requirement to EN 301 549. If enabled by a user, caption timing will be estimated and speed is dynamically adjusted to fit the available time. User can select a default speed, pitch, and volume for captions.
-- Supports audio description as a separate video. When two videos are available (one with description and one without), both can be delivered together using the same player and users can toggle between the versions.
-- Supports adjustable playback rate. Users who need to slow down the video to better process and understand its content can do so; and users who need to speed up the video to maintain better focus can do so.
-- Includes an interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playing the video (or audio) at that point.  Keyboard users can also choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press enter to play the media at the desired point.
-- Features automatic text highlighting within the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
-- Supports YouTube and Vimeo videos.
-- Provides users with the ability to customize the display of captions and subtitles. Users can control the font style, size, and color of caption text; plus background color and transparency; all from the Preferences dialog. They can also choose to position captions *below* the video instead of the default position (an semi-transparent overlay).
+- All player controls are keyboard-accessible, properly labeled for screen reader users, and controllable by speech recognition users.
+- Customizable keyboard shortcuts that enable the player to be operated from anywhere on the web page (if there are multiple instances of the player on a page, then the player must have focus for keyboard shortcuts to work).
+- High contrast, scalable controls supported in Windows High Contrast mode, plus an easy-to-see focus indicator so users can easily tell which control has focus.
+- Closed captions and subtitles in Web Video Timed Text (WebVTT) format, the standard format recommended by the HTML5 specification.
+- Chapters using WebVTT. Chapters are specific landing points in the video, allowing video content to be more easily navigated.
+- Text-based audio description using WebVTT. Description text is read aloud by the Speech Synthesis API. Users can set their experience to pause when audio description starts to avoid conflicts between the description and program audio.
+- Media Query support. Able Player will switch to an alternate video `source` with a `media` attribute if it matches the current environment.
+- Spoken captions, as described in the "Spoken subtitles" requirement to EN 301 549. If enabled by a user, caption timing will be estimated and speed is dynamically adjusted to fit the available time. User can select a default speed, pitch, and volume for captions.
+- Audio description as a separate video. When two videos are available (one with description and one without), both can use the same player and users can toggle between versions.
+- Adjustable playback rate. Users can slow down or speed up playback to suit their needs.
+- Interactive transcript feature, built from the WebVTT chapter, caption and description files as the page is loaded. Users can click anywhere in the transcript to start playback at that point.  Keyboard users can choose to keyboard-enable the transcript, so they can tab through its content one caption at a time and press <code>enter</code> to play the media from that caption.
+- Automatic text highlighting in the transcript as the media plays. This feature is enabled by default but can be turned off if users find it distracting.
+- YouTube and Vimeo support.
+- Customization of caption and subtitle appearance. Users can control font style, size, and color of caption text; plus background color and transparency. They can also choose to position captions *below* the video instead of the default position as a semi-transparent overlay.
 - Supports fallback content if the media cannot be played (see section on **Fallback** for details).
-- Includes extensive customization options. Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
+- User Customization: Many of the features described above are controlled by user preferences. This is based on the belief that every user has different needs and there are no one-size-fits-all solutions. This is the heart of universal design.
 
 ## Supported Languages
 
-Able Player has been translated into the following languages.
+Able Player has been translated into the following languages. Able Player's native language is American English.
 
 <ul>
 	<li><strong lang="id">Bahasa Indonesia</strong> (Indonesian)</li>
@@ -48,7 +49,6 @@ Able Player has been translated into the following languages.
 	<li><strong>Chinese, Traditional (Taiwan)</strong></li>
 	<li><strong lang="da">Dansk</strong> (Danish)</li>
 	<li><strong lang="de">Deutsch</strong> (German)</li>
-	<li><strong>English</strong></li>
 	<li><strong lang="en">Español</strong> (Spanish)</li>
 	<li><strong lang="fr">Français</strong> (French)</li>
 	<li><strong lang="he">עִברִית</strong> (Hebrew)</li>
@@ -380,6 +380,7 @@ If none of the above attributes are present, the transcript will be displayed in
 Additional transcript-related attributes include:
 - **data-transcript-title** - optional; override default transcript title (default is "Transcript", or "Lyrics" if the data-lyrics-mode attribute is present)
 - **data-lyrics-mode** - optional; forces a line break between and within captions in the transcript
+- **data-strict-mode** - set to "true" to prevent parentheses or square brackets from being marked with bold with line brekaks. Default "false".
 
 To manually code the transcript, one simple strategy is to first allow Able Player to *automatically* generate a transcript. Then copy and paste its content as a starting point. To manually code a transcript from scratch, use the following markup (see [Video Demo #7] for an example):
 

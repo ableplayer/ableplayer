@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vimeo player (captions hosted on Vimeo) | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -23,36 +22,35 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Vimeo player (captions hosted on Vimeo)</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Vimeo player (captions hosted on Vimeo)</h1>
 
-		<div id="intro">
+			<div id="intro">
 
-			<p>This page features an example of Able Player being used to play a Vimeo video.
-				The video featured is hosted in a Vimeo Pro account,
-				required for hiding the controller and for being able to
-				control playback rate with faster/slower buttons.
-				Captions and subtitles in this demo are stored solely on Vimeo,
-				therefore Able Player is unable to auto-generate an interactive transcript,
-				and users have no control of the appearance of captions.</p>
+				<p>This page features an example of Able Player being used to play a Vimeo video.
+					The video featured is hosted in a Vimeo Pro account,
+					required for hiding the controller and for being able to
+					control playback rate with faster/slower buttons.
+					Captions and subtitles in this demo are stored solely on Vimeo,
+					therefore Able Player is unable to auto-generate an interactive transcript,
+					and users have no control of the appearance of captions.</p>
 
-		</div>
+			</div>
 
-		<div class="wrapper">
-			<h3>Vimeo using video ID parameter.</h3>
-			<video id="video1" data-able-player preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442"></video>
-			<h3>Vimeo using video URL as `data-vimeo-id`.</h3>
-			<video id="video2" data-able-player preload="auto" data-vimeo-id="https://player.vimeo.com/video/328769500"></video>
-			<h3>Vimeo using video URL with parameters as `data-vimeo-id`.</h3>
-			<video id="video3" data-able-player preload="auto" data-vimeo-id="https://vimeo.com/766411266"></video>
-		</div>
+			<div class="wrapper">
+				<h3>Vimeo using video ID parameter.</h3>
+				<video id="video1" data-able-player preload="auto" data-vimeo-id="328769500" data-vimeo-desc-id="328769442"></video>
+				<h3>Vimeo using video URL as `data-vimeo-id`.</h3>
+				<video id="video2" data-able-player preload="auto" data-vimeo-id="https://player.vimeo.com/video/328769500"></video>
+				<h3>Vimeo using video URL with parameters as `data-vimeo-id`.</h3>
+				<video id="video3" data-able-player preload="auto" data-vimeo-id="https://vimeo.com/766411266"></video>
+			</div>
 
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 import $ from 'jquery';
 
+	// Minimum horizontal distance (px) for a touchmove to be treated as a swipe gesture.
+	var SWIPE_THRESHOLD = 50;
 
 	// Events:
 	// - startTracking(event, position)
@@ -26,23 +28,34 @@ import $ from 'jquery';
 		this.lastTrackPosition = 0;
 		this.nextStep = 1;
 		this.inertiaCount = 0;
+		this.trackFrameRequestId = null;
+		this.queuedTrackPosition = null;
+		this.queuedTrackLeft = null;
+		this.trackGeometry = null;
+		this.hoverGeometry = null;
+		this.bigInterval = bigInterval;
 
-		this.seekbarDiv = $(div);
+		// Swipe gesture state (used to fast-forward/rewind via touch when the seek head is focused).
+		this.swipeStartX = null;
+		this.swipeStartY = null;
+		this.swipeHandled = false;
+
+		this.$seekbarDiv = $(div);
 
 		// Add divs for tracking amount of media loaded and played
 		this.loadedDiv = $('<div></div>');
 		this.playedDiv = $('<div></div>');
 
 		// Add a seekhead
-		this.seekHead = $('<div>',{
+		this.$seekHead = $('<div>',{
 			'aria-orientation': 'horizontal',
 			'class': 'able-seekbar-head'
 		});
 
-		this.seekHead.attr('tabindex', '0');
+		this.$seekHead.attr('tabindex', '0');
 
 		// Since head is focusable, it gets the aria roles/titles.
-		this.seekHead.attr({
+		this.$seekHead.attr({
 			'role': 'slider',
 			'aria-label': label,
 			'aria-valuemin': 0,
@@ -51,32 +64,32 @@ import $ from 'jquery';
 
 		this.timeTooltipTimeoutId = null;
 		this.overTooltip = false;
-		this.timeTooltip = $('<div>');
-		this.seekbarDiv.append(this.timeTooltip);
+		this.$timeTooltip = $('<div>');
+		this.$seekbarDiv.append(this.$timeTooltip);
 
-		this.timeTooltip.attr('role', 'tooltip');
-		this.timeTooltip.addClass('able-tooltip');
-		this.timeTooltip.on('mouseenter focus', function(){
+		this.$timeTooltip.attr('role', 'tooltip');
+		this.$timeTooltip.addClass('able-tooltip');
+		this.$timeTooltip.on('mouseenter focus', function(){
 			thisObj.overTooltip = true;
 			clearInterval(thisObj.timeTooltipTimeoutId);
 		});
-		this.timeTooltip.on('mouseleave blur', function(){
+		this.$timeTooltip.on('mouseleave blur', function(){
 			thisObj.overTooltip = false;
 			$(this).hide();
 		});
-		this.timeTooltip.hide();
+		this.$timeTooltip.hide();
 
-		this.seekbarDiv.append(this.loadedDiv);
-		this.seekbarDiv.append(this.playedDiv);
-		this.seekbarDiv.append(this.seekHead);
-		this.seekbarDiv.wrap('<div></div>');
-		this.wrapperDiv = this.seekbarDiv.parent();
+		this.$seekbarDiv.append(this.loadedDiv);
+		this.$seekbarDiv.append(this.playedDiv);
+		this.$seekbarDiv.append(this.$seekHead);
+		this.$seekbarDiv.wrap('<div></div>');
+		this.$wrapperDiv = this.$seekbarDiv.parent();
 
 		if (this.skin === 'legacy') {
-			this.wrapperDiv.width( 100 );
+			this.$wrapperDiv.width( 100 );
 			this.loadedDiv.width(0);
 		}
-		this.wrapperDiv.addClass('able-seekbar-wrapper');
+		this.$wrapperDiv.addClass('able-seekbar-wrapper');
 		this.loadedDiv.addClass('able-seekbar-loaded');
 		this.playedDiv.width(0);
 		this.playedDiv.addClass('able-seekbar-played');
@@ -85,39 +98,50 @@ import $ from 'jquery';
 		this.setDuration(max);
 
 		// handle seekHead events
-		this.seekHead.on('mouseenter mouseleave mousemove mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
+		this.$seekHead.on(
+			'mouseenter mouseleave mousedown mouseup focus blur touchstart touchmove touchend', function (e) {
 
 			coords = thisObj.pointerEventToXY(e);
 
 			if (e.type === 'mouseenter' || e.type === 'focus') {
 				thisObj.overHead = true;
+				thisObj.cacheHoverGeometry();
 			} else if (e.type === 'mouseleave' || e.type === 'blur') {
 				thisObj.overHead = false;
-				if (!thisObj.overBody && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
-			} else if (e.type === 'mousemove' || e.type === 'touchmove') {
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.trackHeadAtPageX(coords.x);
+				if (!thisObj.overBody) {
+					thisObj.clearHoverGeometry();
 				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
-				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.seekHead.offset() + (thisObj.seekHead.width() / 2)));
-				if (!thisObj.seekbarDiv.is(':focus')) {
-					thisObj.seekbarDiv.focus();
+				if (e.type === 'touchstart') {
+					thisObj.swipeStartX = coords.x;
+					thisObj.swipeStartY = coords.y;
+					thisObj.swipeHandled = false;
+				}
+				thisObj.startTracking('mouse', thisObj.pageXToPosition(thisObj.$seekHead.offset() + (thisObj.$seekHead.width() / 2)));
+				if (!thisObj.$seekbarDiv.is(':focus')) {
+					thisObj.$seekbarDiv.focus();
 				}
 				e.preventDefault();
-			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+			} else if (e.type === 'touchmove') {
+				if (thisObj.swipeStartX !== null && !thisObj.swipeHandled && !thisObj.isPointOverSeekHead(coords.x, coords.y) &&
+					thisObj.detectSwipe(coords.x, coords.y)) {
+					thisObj.swipeHandled = true;
+					thisObj.cancelTracking();
+					// Swipe left rewinds, swipe right fast-forwards.
+					thisObj.swipeSeek(coords.x < thisObj.swipeStartX ? -1 : 1);
+					e.preventDefault();
 				}
+			} else if (e.type === 'touchend') {
+				thisObj.swipeStartX = null;
+				thisObj.swipeStartY = null;
 			}
-			if (e.type !== 'mousemove' && e.type !== 'mousedown' && e.type !== 'mouseup' && e.type !== 'touchstart' && e.type !== 'touchend') {
+			if (e.type !== 'mousedown' && e.type !== 'touchstart') {
 				thisObj.refreshTooltip();
 			}
 		});
 
 		// handle seekbarDiv events
-		this.seekbarDiv.on(
+		this.$seekbarDiv.on(
 			'mouseenter mouseleave mousemove mousedown mouseup keydown keyup touchstart touchmove touchend', function (e) {
 
 			// Don't trigger move on right click.
@@ -129,6 +153,7 @@ import $ from 'jquery';
 
 			if (e.type === 'mouseenter') {
 				thisObj.overBody = true;
+				thisObj.cacheHoverGeometry();
 				thisObj.overBodyMousePos = {
 					x: coords.x,
 					y: coords.y
@@ -136,28 +161,21 @@ import $ from 'jquery';
 			} else if (e.type === 'mouseleave') {
 				thisObj.overBody = false;
 				thisObj.overBodyMousePos = null;
-				if (!thisObj.overHead && thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+				if (!thisObj.overHead) {
+					thisObj.clearHoverGeometry();
 				}
 			} else if (e.type === 'mousemove' || e.type === 'touchmove') {
 				thisObj.overBodyMousePos = {
 					x: coords.x,
 					y: coords.y
 				};
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.trackHeadAtPageX(coords.x);
-				}
 			} else if (e.type === 'mousedown' || e.type === 'touchstart') {
 				thisObj.startTracking('mouse', thisObj.pageXToPosition(coords.x));
 				thisObj.trackHeadAtPageX(coords.x);
-				if (!thisObj.seekHead.is(':focus')) {
-					thisObj.seekHead.focus();
+				if (!thisObj.$seekHead.is(':focus')) {
+					thisObj.$seekHead.focus();
 				}
 				e.preventDefault();
-			} else if (e.type === 'mouseup' || e.type === 'touchend') {
-				if (thisObj.tracking && thisObj.trackDevice === 'mouse') {
-					thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
-				}
 			} else if (e.type === 'keydown') {
 				if (e.key === 'Home') {
 					thisObj.trackImmediatelyTo(0);
@@ -208,8 +226,12 @@ import $ from 'jquery';
 	};
 
 	AccessibleSlider.prototype.pageXToPosition = function (pageX) {
-		var offset = pageX - this.seekbarDiv.offset().left;
-		var position = this.duration * (offset / this.seekbarDiv.width());
+		var geometry = this.getTrackingGeometry();
+		var offset = pageX - geometry.left;
+		if (geometry.width === 0) {
+			return 0;
+		}
+		var position = this.duration * (offset / geometry.width);
 		return this.boundPos(position);
 	};
 
@@ -221,19 +243,19 @@ import $ from 'jquery';
 		if (duration !== this.duration) {
 			this.duration = duration;
 			this.resetHeadLocation();
-			this.seekHead.attr('aria-valuemax', duration);
+			this.$seekHead.attr('aria-valuemax', duration);
 		}
 	};
 
 	// Set width of the legacy seekbar.
 	AccessibleSlider.prototype.setWidth = function (width) {
-		this.wrapperDiv.width(width);
+		this.$wrapperDiv.width(width);
 		this.resizeDivs();
 		this.resetHeadLocation();
 	};
 
 	AccessibleSlider.prototype.getWidth = function () {
-		return this.wrapperDiv.width();
+		return this.$wrapperDiv.width();
 	};
 
 	AccessibleSlider.prototype.resizeDivs = function () {
@@ -244,8 +266,8 @@ import $ from 'jquery';
 	// Stops tracking, sets the head location to the current position.
 	AccessibleSlider.prototype.resetHeadLocation = function () {
 		var ratio = this.position / this.duration;
-		var center = this.seekbarDiv.width() * ratio;
-		this.seekHead.css('left', center - (this.seekHead.width() / 2));
+		var center = this.$seekbarDiv.width() * ratio;
+		this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 
 		if (this.tracking) {
 			this.stopTracking(this.position);
@@ -274,36 +296,189 @@ import $ from 'jquery';
 		if (!this.tracking) {
 			this.trackDevice = device;
 			this.tracking = true;
-			this.seekbarDiv.trigger('startTracking', [position]);
+			if (device === 'mouse') {
+				this.trackGeometry = this.hoverGeometry || this.buildTrackingGeometry();
+				this.bindGlobalTrackingEvents();
+			} else {
+				this.clearTrackingGeometry();
+				this.unbindGlobalTrackingEvents();
+			}
+			this.$seekbarDiv.trigger('startTracking', [position]);
 		}
 	};
 
 	AccessibleSlider.prototype.stopTracking = function (position) {
+		this.unbindGlobalTrackingEvents();
+		if (this.trackFrameRequestId !== null) {
+			window.cancelAnimationFrame(this.trackFrameRequestId);
+			this.trackFrameRequestId = null;
+		}
+		this.flushQueuedTrackUpdate();
+		this.clearTrackingGeometry();
 		this.trackDevice = null;
 		this.tracking = false;
-		this.seekbarDiv.trigger('stopTracking', [position]);
+		this.$seekbarDiv.trigger('stopTracking', [position]);
 		this.setPosition(position, true);
 	};
 
+	// Abandons any in-progress tracking (e.g. a touch drag) without committing a new position.
+	AccessibleSlider.prototype.cancelTracking = function () {
+		this.unbindGlobalTrackingEvents();
+		if (this.trackFrameRequestId !== null) {
+			window.cancelAnimationFrame(this.trackFrameRequestId);
+			this.trackFrameRequestId = null;
+		}
+		this.queuedTrackPosition = null;
+		this.queuedTrackLeft = null;
+		this.clearTrackingGeometry();
+		this.trackDevice = null;
+		this.tracking = false;
+		this.resetHeadLocation();
+	};
+
+	// Returns true if a touch move from the recorded swipe start to (x, y) qualifies as a horizontal swipe.
+	AccessibleSlider.prototype.detectSwipe = function (x, y) {
+		var deltaX = x - this.swipeStartX;
+		var deltaY = y - this.swipeStartY;
+		return Math.abs(deltaX) >= SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.5;
+	};
+
+	// Returns true if (x, y) is still within the seek head's current bounds, i.e. the finger is dragging it directly.
+	AccessibleSlider.prototype.isPointOverSeekHead = function (x, y) {
+		var offset = this.$seekHead.offset();
+		return x >= offset.left && x <= offset.left + this.$seekHead.outerWidth() &&
+			y >= offset.top && y <= offset.top + this.$seekHead.outerHeight();
+	};
+
+	// Moves the seek head by one seek interval; multiplier of 1 fast-forwards, -1 rewinds.
+	AccessibleSlider.prototype.swipeSeek = function (multiplier) {
+		var step = this.bigInterval > 0 ? this.bigInterval : 1;
+		var newPosition = this.boundPos(this.position + (step * multiplier));
+		this.startTracking('touch', newPosition);
+		this.trackHeadAtPosition(newPosition);
+		this.stopTracking(newPosition);
+	};
+
+	AccessibleSlider.prototype.bindGlobalTrackingEvents = function () {
+		var thisObj = this;
+		$(window).off('.ableSliderTrack');
+		$(window).on('mousemove.ableSliderTrack touchmove.ableSliderTrack', function (e) {
+			var coords;
+			if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+				return;
+			}
+			coords = thisObj.pointerEventToXY(e);
+			thisObj.trackHeadAtPageX(coords.x);
+		});
+		$(window).on('mouseup.ableSliderTrack touchend.ableSliderTrack touchcancel.ableSliderTrack', function (e) {
+			var coords;
+			if (!(thisObj.tracking && thisObj.trackDevice === 'mouse')) {
+				return;
+			}
+			coords = thisObj.pointerEventToXY(e);
+			if (e.type === 'touchcancel') {
+				thisObj.stopTracking(thisObj.lastTrackPosition);
+			} else {
+				thisObj.stopTracking(thisObj.pageXToPosition(coords.x));
+			}
+		});
+	};
+
+	AccessibleSlider.prototype.unbindGlobalTrackingEvents = function () {
+		$(window).off('.ableSliderTrack');
+	};
+
 	AccessibleSlider.prototype.trackHeadAtPageX = function (pageX) {
+		var geometry = this.getTrackingGeometry();
 		var position = this.pageXToPosition(pageX);
-		var newLeft = pageX - this.seekbarDiv.offset().left - (this.seekHead.width() / 2);
-		newLeft = Math.max(0, Math.min(newLeft, this.seekbarDiv.width() - this.seekHead.width()));
-		this.lastTrackPosition = position;
-		this.seekHead.css('left', newLeft);
-		this.reportTrackAtPosition(position);
+		var newLeft = pageX - geometry.left - geometry.headHalf;
+		newLeft = Math.max(0, Math.min(newLeft, geometry.maxLeft));
+		this.queueTrackUpdate(position, newLeft);
+	};
+
+	AccessibleSlider.prototype.cacheTrackingGeometry = function () {
+		this.trackGeometry = this.buildTrackingGeometry();
+	};
+
+	AccessibleSlider.prototype.clearTrackingGeometry = function () {
+		this.trackGeometry = null;
+	};
+
+	AccessibleSlider.prototype.cacheHoverGeometry = function () {
+		this.hoverGeometry = this.buildTrackingGeometry();
+	};
+
+	AccessibleSlider.prototype.clearHoverGeometry = function () {
+		this.hoverGeometry = null;
+	};
+
+	AccessibleSlider.prototype.buildTrackingGeometry = function () {
+		var seekbarOffset = this.$seekbarDiv.offset();
+		var seekbarWidth = this.$seekbarDiv.width();
+		var seekHeadWidth = this.$seekHead.width();
+		return {
+			left: seekbarOffset.left,
+			width: seekbarWidth,
+			headHalf: seekHeadWidth / 2,
+			maxLeft: Math.max(0, seekbarWidth - seekHeadWidth)
+		};
+	};
+
+	AccessibleSlider.prototype.getTrackingGeometry = function () {
+		if (this.tracking && this.trackDevice === 'mouse') {
+			if (!this.trackGeometry) {
+				this.cacheTrackingGeometry();
+			}
+			return this.trackGeometry;
+		}
+		if (this.overBody || this.overHead) {
+			if (!this.hoverGeometry) {
+				this.cacheHoverGeometry();
+			}
+			return this.hoverGeometry;
+		}
+		return this.buildTrackingGeometry();
 	};
 
 	AccessibleSlider.prototype.trackHeadAtPosition = function (position) {
+		this.flushQueuedTrackUpdate();
 		var ratio = position / this.duration;
-		var center = this.seekbarDiv.width() * ratio;
+		var center = this.$seekbarDiv.width() * ratio;
 		this.lastTrackPosition = position;
-		this.seekHead.css('left', center - (this.seekHead.width() / 2));
+		this.$seekHead.css('left', center - (this.$seekHead.width() / 2));
 		this.reportTrackAtPosition(position);
 	};
 
+	AccessibleSlider.prototype.queueTrackUpdate = function (position, left) {
+		var thisObj = this;
+		this.queuedTrackPosition = position;
+		this.queuedTrackLeft = left;
+
+		if (this.trackFrameRequestId !== null) {
+			return;
+		}
+
+		this.trackFrameRequestId = window.requestAnimationFrame(function () {
+			thisObj.trackFrameRequestId = null;
+			thisObj.flushQueuedTrackUpdate();
+		});
+	};
+
+	AccessibleSlider.prototype.flushQueuedTrackUpdate = function () {
+		if (this.queuedTrackPosition === null) {
+			return;
+		}
+
+		this.lastTrackPosition = this.queuedTrackPosition;
+		this.$seekHead.css('left', this.queuedTrackLeft);
+		this.reportTrackAtPosition(this.queuedTrackPosition);
+
+		this.queuedTrackPosition = null;
+		this.queuedTrackLeft = null;
+	};
+
 	AccessibleSlider.prototype.reportTrackAtPosition = function (position) {
-		this.seekbarDiv.trigger('tracking', [position]);
+		this.$seekbarDiv.trigger('tracking', [position]);
 		this.updateAriaValues(position, true);
 	};
 
@@ -340,15 +515,15 @@ import $ from 'jquery';
 				'class': 'able-offscreen',
 				'aria-live': 'polite'
 			});
-			this.wrapperDiv.append(this.liveAriaRegion);
+			this.$wrapperDiv.append(this.liveAriaRegion);
 		}
 		if (updateLive && (this.liveAriaRegion.text() !== descriptionText)) {
 			this.liveAriaRegion.text(descriptionText);
 		}
 
 		// Uncomment the following lines to use aria values instead of separate live region.
-		this.seekHead.attr('aria-valuetext', descriptionText);
-		this.seekHead.attr('aria-valuenow', Math.floor(position).toString());
+		this.$seekHead.attr('aria-valuetext', descriptionText);
+		this.$seekHead.attr('aria-valuenow', Math.floor(position).toString());
 	};
 
 	AccessibleSlider.prototype.trackImmediatelyTo = function (position) {
@@ -359,24 +534,25 @@ import $ from 'jquery';
 
 	AccessibleSlider.prototype.refreshTooltip = function () {
 		if (this.overHead) {
-			this.timeTooltip.show();
+			this.$timeTooltip.show();
 			if (this.tracking) {
-				this.timeTooltip.text(this.positionToStr(this.lastTrackPosition));
+				this.$timeTooltip.text(this.positionToStr(this.lastTrackPosition));
 			} else {
-				this.timeTooltip.text(this.positionToStr(this.position));
+				this.$timeTooltip.text(this.positionToStr(this.position));
 			}
-			this.setTooltipPosition(this.seekHead.position().left + (this.seekHead.width() / 2));
+			this.setTooltipPosition(this.$seekHead.position().left + (this.$seekHead.width() / 2));
 		} else if (this.overBody && this.overBodyMousePos) {
-			this.timeTooltip.show();
-			this.timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
-			this.setTooltipPosition(this.overBodyMousePos.x - this.seekbarDiv.offset().left);
+			var geometry = this.getTrackingGeometry();
+			this.$timeTooltip.show();
+			this.$timeTooltip.text(this.positionToStr(this.pageXToPosition(this.overBodyMousePos.x)));
+			this.setTooltipPosition(this.overBodyMousePos.x - geometry.left);
 		} else {
 
 			clearTimeout(this.timeTooltipTimeoutId);
 			var _this = this;
 			this.timeTooltipTimeoutId = setTimeout(function() {
 				// give user a half second move cursor over tooltip
-				_this.timeTooltip.hide();
+				_this.$timeTooltip.hide();
 			}, 500);
 		}
 	};
@@ -384,13 +560,13 @@ import $ from 'jquery';
 	AccessibleSlider.prototype.hideSliderTooltips = function () {
 		this.overHead = false;
 		this.overBody = false;
-		this.timeTooltip.hide();
+		this.clearHoverGeometry();
+		this.$timeTooltip.hide();
 	};
 
 	AccessibleSlider.prototype.setTooltipPosition = function (x) {
-		this.timeTooltip.css({
-			left: x - (this.timeTooltip.width() / 2) - 10,
-			bottom: this.seekHead.height()
+		this.$timeTooltip.css({
+			left: x - (this.$timeTooltip.width() / 2) - 10,
 		});
 	};
 

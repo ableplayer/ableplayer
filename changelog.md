@@ -1,5 +1,70 @@
 # AblePlayer Changelog
 
+## 5.1.0 TBD
+
+### Features
+- Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
+- Add `options` parameter to the AblePlayer class instantiation, supporting all `data-` attributes, strings, and icons.
+- Add support for media queries in sources, allowing the player to toggle to different versions of the media based on pre-existing user preferences, orientation, or viewport sizes. Props @aardrian.
+
+### Accessibility
+- Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.
+- Popup handling for settings in Sign and Transcript windows was broken for keyboard.
+- Improvements to design and focus handling in Windows High Contrast Mode.
+- Changed controls from `div[role="button"]` to `button`.
+- Change labels on speaking rates to reflect actual values
+
+### Bug fixes
+- Add the seek interval value to rewind and forward buttons, to provide better user information.
+- Add the expected new speed value to playback speed controls.
+- Move seekbar tooltip closer to seekbar. It had moved further away when the seekhead size was increased.
+- Limit sign language resizing to match aspect ratio.
+- Allow YouTube iframe sign language to exceed 640px width.
+- Fix incorrect data-lang check for similar languages.
+- Improve parsing of VTT files to better handle a variety of edge cases. (props @conorom)
+- Improve handling of drag and resize events.
+- Bug fix: events triggered from outside the player triggered errors due to assumed classes.
+- Modified preferences dialog generation so dialogs are only generated once per page and re-used, rather than generating four dialogs per player.
+- Fix bug with timestamp formatting in Video Transcript Sorter.
+
+### Design
+- Increase size and add hover state to seekbar.
+- Move bottom positioning of seekbar tooltip from JS into CSS.
+- Update drag-drop icon and change base background color of sign language container.
+- Move popup menus to prevent collision with focus outlines
+- Adjust size and padding of VTS icons.
+- Change speaking rate input to numeric.
+- Add generic `able-captions-container` class and set background color to match player.
+- Change CSS variables to be declared on `:root`. Props @blogcastAI.
+
+### Performance
+- Improve performance of time slider by deduplicating events and adding queues/caching.
+- Pass context to refreshControls to limit the number of player refreshes.
+
+### Code Quality
+- Move drag handle and resize handle icons into the icon store.
+- Change constructor into a class instance.
+- Remove obsolete Firefox stopgap in popup keyboard controller.
+- Use AblePlayer.getActiveDOMElement() to get focused elements.
+- Fix 7 linting errors. Props @blogcastAI.
+- Remove undocumented `data-description-audible` variant of `data-descriptions-audible`.
+
+### Internationalization
+
+- Set untranslated strings to have empty value in JSON data.
+- Update translate function to fallback to default if value empty.
+- Update imports to not import the English translation files, used only as a reference for translating.
+ - Update Slovak translation. Props @rraddatch.
+ - Update Taiwanese Chinese translation. Props @JediLin.
+
+### Meta
+
+ - Redesigned demos pages to have better navigation.
+ - Updated translations demo to provide data about missing strings.
+ - Readme updates for easier readability.
+ - Added automated testing with AxeCore to check for regressions. Props @blogcastAI.
+ - Moved jest testing to be headless & to run in Github Actions. Props @blogcastAI.
+
 ## 5.0.0 June 21, 2026
 
 ### Features

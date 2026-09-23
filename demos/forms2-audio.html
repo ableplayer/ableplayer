@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Audio player in "Steno Mode" | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -31,7 +30,6 @@
 .form textarea {
 	width: 95%;
 	max-width: 70em;
-	font-family: Arial, Helvetica, sans-serif;
 	font-size: 1em;
 }
 </style>
@@ -50,44 +48,45 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Audio player in "Steno Mode"</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Audio player in "Steno Mode"</h1>
 
-		<div id="container">
-			<audio id="audio1" preload="auto" data-able-player data-steno-mode>
-				<source type="audio/mpeg" src="../media/smallf.mp3"/>
-				<source type="audio/ogg" src="../media/smallf.ogg"/>
-			</audio>
+			<div id="container">
+				<audio id="audio1" preload="auto" data-able-player data-steno-mode>
+					<source type="audio/mpeg" src="../media/smallf.mp3"/>
+					<source type="audio/ogg" src="../media/smallf.ogg"/>
+				</audio>
 
-			<h2>Audio Transcription Example</h2>
+				<h2>Audio Transcription Example</h2>
 
-			<p>
-			Ordinarily, when users are interacting with form fields, their keystrokes should not be handled by the player.
-			However, in some contexts (e.g., in a transcription application), users may want to control the player
-			from within a textarea field. To enable this functionality, add <code>data-steno-mode</code> to the
-			<code><code>&lt;audio&gt;</code></code> or <code><code>&lt;video&gt;</code></code> element. Note: Modifier keys for keyboard shortcuts can be configured within <em>Preferences > Keyboard</em>.
-			</p>
+				<p>
+				Ordinarily, when users are interacting with form fields, their keystrokes should not be handled by the player.
+				However, in some contexts (e.g., in a transcription application), users may want to control the player
+				from within a textarea field. To enable this functionality, add <code>data-steno-mode</code> to the
+				<code><code>&lt;audio&gt;</code></code> or <code><code>&lt;video&gt;</code></code> element. All Able Player keyboard shortcuts will be available while in the form.
+				</p>
+				<p>Note: Modifier keys for keyboard shortcuts can be configured within <em>Preferences > Keyboard</em>. Steno mode does not work well if you do not have any modifier keys configured.
+				</p>
 
-			<div class="form">
-				<div>
-					<label for="transcriber">Name of transcriber:</label>
-					<input type="text" id="transcriber">
-				</div>
-				<div>
-					<label for="transcript">Transcript:</label>
-					<textarea id="transcript" rows="20"></textarea>
-				</div>
-				<div>
-					<input type="reset">
+				<div class="form">
+					<div>
+						<label for="transcriber">Name of transcriber:</label>
+						<input type="text" id="transcriber">
+					</div>
+					<div>
+						<label for="transcript">Transcript:</label>
+						<textarea id="transcript" rows="20"></textarea>
+					</div>
+					<div>
+						<input type="reset">
+					</div>
 				</div>
 			</div>
-		</div>
-	</main>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>

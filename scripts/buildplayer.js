@@ -34,6 +34,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		// add container that captions or description will be appended to
 		// Note: new Jquery object must be assigned _after_ wrap, hence the temp captionsContainer variable
 		captionsContainer = $('<div>');
+		captionsContainer.addClass('able-captions-container');
 		if (this.mediaType === 'video') {
 			captionsContainer.addClass('able-vidcap-container');
 		} else if (this.mediaType === 'audio') {
@@ -78,10 +79,10 @@ function addBuildplayerFunctions(AblePlayer) {
 				this.playerHeadingLevel = this.getNextHeadingLevel(this.$ableDiv); // returns in integer 1-6
 			}
 			headingType = 'h' + this.playerHeadingLevel.toString();
-			this.$headingDiv = $('<' + headingType + '>');
-			this.$ableDiv.prepend(this.$headingDiv);
-			this.$headingDiv.addClass('able-offscreen');
-			this.$headingDiv.text( this.translate( 'playerHeading', 'Media player' ) );
+			this.headingDiv = document.createElement( headingType );
+			this.$ableDiv.prepend(this.headingDiv);
+			this.headingDiv.classList.add('able-offscreen');
+			this.headingDiv.textContent = this.translate( 'playerHeading', 'Media player' );
 		}
 	};
 
@@ -215,7 +216,6 @@ function addBuildplayerFunctions(AblePlayer) {
 		let preferences, $window;
 		preferences = this.getPref();
 		$window = ( which === 'transcript' ) ? this.$transcriptArea : this.$signWindow;
-		console.log( $window );
 		if ( which === 'transcript' && $window ) {
 			if (typeof preferences.transcript !== 'undefined') {
 				this.prevTranscriptPosition = preferences.transcript;
@@ -287,7 +287,6 @@ function addBuildplayerFunctions(AblePlayer) {
 				}
 				// If draggable window is off screen to the left.
 				if ( leftPosition < 0 && ! this.restoringAfterFullscreen ) {
-					console.log( leftPosition );
 					$window.css({
 						'left': preferencePos['left'] - leftPosition
 					});
@@ -466,13 +465,13 @@ function addBuildplayerFunctions(AblePlayer) {
 						thisObj.showingPrefsDialog = true;
 						thisObj.setFullscreen(false);
 						if (whichPref === thisObj.translate( 'prefMenuCaptions', 'Captions' ) ) {
-							thisObj.captionPrefsDialog.show();
+							thisObj.showPrefsDialog('captions');
 						} else if (whichPref === thisObj.translate( 'prefMenuDescriptions', 'Descriptions' ) ) {
-							thisObj.descPrefsDialog.show();
+							thisObj.showPrefsDialog('descriptions');
 						} else if (whichPref === thisObj.translate( 'prefMenuKeyboard', 'Keyboard' ) ) {
-							thisObj.keyboardPrefsDialog.show();
+							thisObj.showPrefsDialog('keyboard');
 						} else if (whichPref === thisObj.translate( 'prefMenuTranscript', 'Transcript' ) ) {
-							thisObj.transcriptPrefsDialog.show();
+							thisObj.showPrefsDialog('transcript');
 						}
 						thisObj.closePopups();
 						thisObj.showingPrefsDialog = false;
@@ -561,8 +560,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						// therefore, ignore this click
 						return false;
 					}
-					if (!thisObj.windowMenuClickRegistered && !thisObj.finishingDrag) {
-						thisObj.windowMenuClickRegistered = true;
+					if ( !thisObj.finishingDrag ) {
 						thisObj.handleMenuChoice(which.substring(0, which.indexOf('-')), $(this).attr('data-choice'), e);
 					}
 				});
@@ -622,7 +620,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			} else if (e.key === 'Escape') {
 				$thisItem.removeClass('able-focus');
 				thisObj.closePopups();
-				e.stopPropagation;
+				e.stopPropagation();
 			}
 			e.preventDefault();
 		});
@@ -643,8 +641,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			this.$ccButton.attr('aria-expanded', 'false');
 			this.waitThenFocus(this.$ccButton);
 		}
-		if (this.prefsPopup && this.prefsPopup.is(':visible') && !this.hidingPopup) {
-			this.hidingPopup = true; // stopgap to prevent popup from re-opening again on keypress
+		if (this.prefsPopup && this.prefsPopup.is(':visible') ) {
 			this.prefsPopup.hide();
 			// restore menu items to their original state
 			this.prefsPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
@@ -652,25 +649,16 @@ function addBuildplayerFunctions(AblePlayer) {
 			if (!this.showingPrefsDialog) {
 				this.waitThenFocus(thisObj.$prefsButton);
 			}
-			// wait briefly, then reset hidingPopup
-			setTimeout(function() {
-				thisObj.hidingPopup = false;
-			},100);
 		}
 		if (this.$volumeSlider && this.$volumeSlider.is(':visible')) {
 			this.$volumeSlider.hide().attr('aria-hidden','true');
 			this.$volumeButton.attr('aria-expanded', 'false').trigger('focus');
 		}
 		if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
-			this.hidingPopup = true;
 			this.$transcriptPopup.hide();
 			// restore menu items to their original state
 			this.$transcriptPopup.find('li').removeClass('able-focus').attr('tabindex','-1');
 			this.$transcriptPopupButton.attr('aria-expanded','false').trigger('focus');
-			// wait briefly, then reset hidingPopup
-			setTimeout(function() {
-				thisObj.hidingPopup = false;
-			},100);
 		}
 		if (this.$signPopup && this.$signPopup.is(':visible')) {
 			this.$signPopup.hide();
@@ -1046,19 +1034,14 @@ function addBuildplayerFunctions(AblePlayer) {
 					// this control is a button
 					buttonTitle = this.getButtonTitle(control);
 
-					// Buttons consist of a <div role="button"> with an <svg> inside.
+					// Buttons consist of a <button> with an <svg> inside.
 					// We add aria-label to the button (but not title)
 					// This has been thoroughly tested and works well in all screen reader/browser combinations
 					// See https://github.com/ableplayer/ableplayer/issues/81
 
-					// NOTE: Changed from <button> to <div role="button" as of 4.2.18
-					// because <button> elements are rendered poorly in high contrast mode
-					// in some OS/browser/plugin combinations
-
 					// In 5.0.0, icons are always SVG, so the font & image icon edge cases are removed.
-					$newButton = $('<div>',{
-						'role': 'button',
-						'tabindex': '0',
+					$newButton = $('<button>',{
+						'type': 'button',
 						'class': 'able-button-handler-' + control
 					});
 
@@ -1466,7 +1449,7 @@ function addBuildplayerFunctions(AblePlayer) {
 			itemLang = $newItem.attr('lang');
 		}
 		// Update relevant arrays
-		this.$sources = this.$media.find('source');
+		this.sources = this.getSources();
 
 		// recreate player, informed by new attributes and track elements
 		if (this.recreatingPlayer) {
@@ -1584,9 +1567,9 @@ function addBuildplayerFunctions(AblePlayer) {
 		} else if (control === 'next') {
 			return this.translate( 'nextTrack', 'Next track' );
 		} else if (control === 'rewind') {
-			return this.translate( 'rewind', 'Rewind' );
+			return this.translate( 'rewind', 'Rewind %1 seconds', [ this.seekInterval ] );
 		} else if (control === 'forward') {
-			return this.translate( 'forward', 'Forward' );
+			return this.translate( 'forward', 'Forward %1 seconds', [ this.seekInterval ] );
 		} else if (control === 'captions') {
 			if (this.captions.length > 1) {
 				return this.translate( 'captions', 'Captions' );
@@ -1604,9 +1587,9 @@ function addBuildplayerFunctions(AblePlayer) {
 		} else if (control === 'volume') {
 			return this.translate( 'volume', 'Volume' );
 		} else if (control === 'faster') {
-			return this.translate( 'faster', 'Faster' );
+			return this.translate( 'faster', 'Faster %1 x', [ this.changeRate(1,false) ] );
 		} else if (control === 'slower') {
-			return this.translate( 'slower', 'Slower' );
+			return this.translate( 'slower', 'Slower %1 x', [ this.changeRate(-1,false) ] );
 		} else if (control === 'preferences') {
 			return this.translate( 'preferences', 'Preferences' );
 		} else if (control === 'fullscreen') {

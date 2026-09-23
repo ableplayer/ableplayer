@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Audio description via video swap | Able Player Demos</title>
 <link rel="stylesheet" href="demos.css" type="text/css">
-
 <!-- Dependencies -->
 <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
@@ -22,31 +21,30 @@
 	<header>
 		<div class="title">Able Player Demos</div>
 	</header>
-	<nav>
-		<ul>
-			<li><a href="index.html">More demos</a></li>
-			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Docs</a></li>
-		</ul>
-	</nav>
-	<main>
-		<h1>Audio description via video swap</h1>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Audio description via video swap</h1>
 
-		<p>
-			This demo uses a separate video to deliver audio description. If Description is toggled on, the user gets the described version; otherwise they get the non-described version.
-		</p>
-		<p>
-			One limitation of this method, as opposed to <a href="desc1.html">using a WebVTT file for audio description</a>, is that the description text
-			is not included in the interactive transcript. This limitation can be overcome by adding a transcript of the description content
-			in a WebVTT descriptions track.
-		</p>
-		<div id="container">
-			<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player playsinline>
-				<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
-				<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
-				<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
-				<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
-			</video>
-		</div>
-	</main>
+			<p>
+				This demo uses a separate video to deliver audio description. If Description is toggled on, the user gets the described version; otherwise they get the non-described version.
+			</p>
+			<p>
+				One limitation of this method, as opposed to <a href="desc1.html">using a WebVTT file for audio description</a>, is that the description text
+				is not included in the interactive transcript. This limitation can be overcome by adding a transcript of the description content
+				in a WebVTT descriptions track.
+			</p>
+			<div id="container">
+				<video id="video1" preload="auto" poster="../media/wwa.jpg" data-able-player playsinline>
+					<source type="video/mp4" src="../media/wwa.mp4" data-desc-src="../media/wwa_described.mp4"/>
+					<source type="video/webm" src="../media/wwa.webm" data-desc-src="../media/wwa_described.webm"/>
+					<track kind="captions" src="../media/wwa_captions_en.vtt" srclang="en" label="English captions"/>
+					<track kind="descriptions" src="../media/wwa_description_en.vtt" srclang="en"/>
+				</video>
+			</div>
+		</main>
+	</div>
+<script src="demos.js"></script>
 </body>
 </html>
