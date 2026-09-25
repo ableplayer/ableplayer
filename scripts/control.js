@@ -245,7 +245,13 @@ function addControlFunctions(AblePlayer) {
 			// Youtube supports varying playback rates per video.
 			// Only expose controls if more than one playback rate is available.
 			if (this.youTubePlayerReady) {
-				return (this.youTubePlayer.getAvailablePlaybackRates().length > 1) ? true : false;
+				try {
+					// can throw/return undefined if the player is mid-reload (e.g., just after cueVideoById)
+					var rates = this.youTubePlayer.getAvailablePlaybackRates();
+					return (rates && rates.length > 1) ? true : false;
+				} catch (e) {
+					return false;
+				}
 			} else {
 				return false;
 			}
@@ -879,6 +885,10 @@ function addControlFunctions(AblePlayer) {
 		} else if (this.player === 'youtube') {
 			if (this.youTubePlayerReady) {
 				rates = this.youTubePlayer.getAvailablePlaybackRates();
+				if (!rates) {
+					// player is mid-reload (e.g., just after cueVideoById); nothing to do yet
+					return;
+				}
 				currentRate = this.getPlaybackRate();
 				index = rates.indexOf(currentRate);
 				if (index === -1) {

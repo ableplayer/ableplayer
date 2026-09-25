@@ -771,7 +771,9 @@ function addEventFunctions(AblePlayer) {
 		}
 
 		// handle clicks on player buttons
-		this.$controllerDiv.find('button').on('click',function(e){
+		// delegated so buttons added later (e.g., a captions button added after
+		// YouTube captions are discovered mid-playback) work without rebinding
+		this.$controllerDiv.on('click', 'button', function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});
