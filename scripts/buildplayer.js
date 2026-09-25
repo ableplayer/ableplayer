@@ -977,6 +977,11 @@ function addBuildplayerFunctions(AblePlayer) {
 		controlLayout = this.calculateControlLayout();
 		numSections = controlLayout.length;
 
+		// addControls() may be called again after initial build (e.g., when YouTube
+		// captions are discovered mid-playback). Remove anything from a prior build
+		// so controls aren't duplicated.
+		this.$controllerDiv.find('.able-tooltip, .able-seekbar, .able-control-row, .ableplayer-clear').remove();
+
 		// add an empty div to serve as a tooltip
 		tooltipId = this.mediaId + '-tooltip';
 		this.$tooltipDiv = $('<div>',{

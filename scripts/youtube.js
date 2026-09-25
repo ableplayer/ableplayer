@@ -188,7 +188,8 @@ function addYoutubeFunctions(AblePlayer) {
 
 	/**
 	 * Get data from the YouTube iFrame API. Pushes data into `this.tracks` and `this.captions`.
-	 * Initiates play to trigger loading the captions module, then stops and collects data.
+	 * The captions module doesn't finish loading until the video plays, so playback
+	 * is triggered briefly here, then the player is cued back to an unplayed state.
 	 *
 	 * @returns {Promise} promise
 	 */
@@ -196,95 +197,116 @@ function addYoutubeFunctions(AblePlayer) {
 
 		var deferred = new this.defer();
 		var promise = deferred.promise();
-		var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack, apiTriggered = false;
+		var thisObj = this;
 
-		thisObj = this;
-		if (!this.youTubePlayer.getOption('captions','tracklist') ) {
-			// no tracks were found, probably because the captions module hasn't loaded
-			// play video briefly (required to load the captions module)
-			// and after the apiChange event is triggered, try again to retrieve tracks
-			this.youTubePlayer.addEventListener('onApiChange',function() {
-				apiTriggered = true;
-				// getDuration() also requires video to play briefly
-				// so, let's set that while we're here
-				thisObj.duration = thisObj.youTubePlayer.getDuration();
+		var processTracklist = function () {
+			var ytTracks, i, trackLang, trackLabel, isDefaultTrack;
 
-				if (thisObj.loadingYouTubeCaptions) {
-					// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once
-					ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
-					if ( ! thisObj.okToPlay ) {
-						// Don't stopVideo() - that cancels loading, just pause.
-						// No need to seekTo(0) - the time passed isn't noticeable to the user
-						thisObj.youTubePlayer.pauseVideo();
-					}
-					if (ytTracks && ytTracks.length) {
-						// Step through ytTracks and add them to global tracks array
-						// Note: Unlike YouTube Data API, the IFrame Player API only returns
-						// tracks that are published, and does NOT include ASR captions
-						// So, no additional filtering is required
-						for (i=0; i < ytTracks.length; i++) {
-							trackLang = ytTracks[i].languageCode;
-							trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
-							isDefaultTrack = false;
-							if (typeof thisObj.captionLang !== 'undefined' && (trackLang === thisObj.captionLang) ) {
-								isDefaultTrack = true;
-							} else if (typeof thisObj.lang !== 'undefined') {
-								if (trackLang === thisObj.lang) {
-									isDefaultTrack = true;
-								}
-							}
-							thisObj.tracks.push({
-								'kind': 'captions',
-								'language': trackLang,
-								'label': trackLabel,
-								'def': isDefaultTrack
-							});
-							thisObj.captions.push({
-								'language': trackLang,
-								'label': trackLabel,
-								'def': isDefaultTrack,
-								'cues': null
-							});
+			if (!thisObj.loadingYouTubeCaptions) {
+				// already processed (stopgap in case onApiChange fires more than once)
+				return;
+			}
+			thisObj.loadingYouTubeCaptions = false;
+
+			ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
+			if (ytTracks && ytTracks.length) {
+				// Step through ytTracks and add them to global tracks array
+				// Note: Unlike YouTube Data API, the IFrame Player API only returns
+				// tracks that are published, and does NOT include ASR captions
+				// So, no additional filtering is required
+				for (i=0; i < ytTracks.length; i++) {
+					trackLang = ytTracks[i].languageCode;
+					trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+					isDefaultTrack = false;
+					if (typeof thisObj.captionLang !== 'undefined' && (trackLang === thisObj.captionLang) ) {
+						isDefaultTrack = true;
+					} else if (typeof thisObj.lang !== 'undefined') {
+						if (trackLang === thisObj.lang) {
+							isDefaultTrack = true;
 						}
-						thisObj.hasCaptions = true;
-						// setupPopups again with new captions array, replacing original
-						thisObj.setupPopups('captions');
-					} else {
-						// there are no YouTube captions
-						thisObj.usingYouTubeCaptions = false;
-						thisObj.hasCaptions = false;
 					}
-					thisObj.loadingYouTubeCaptions = false;
-					if (thisObj.okToPlay) {
-						thisObj.youTubePlayer.playVideo();
-					}
+					thisObj.tracks.push({
+						'kind': 'captions',
+						'language': trackLang,
+						'label': trackLabel,
+						'def': isDefaultTrack
+					});
+					thisObj.captions.push({
+						'language': trackLang,
+						'label': trackLabel,
+						'def': isDefaultTrack,
+						'cues': null
+					});
 				}
-				if (thisObj.captionLangPending) {
-					// user selected a new caption language prior to playback starting
-					// set it now
-					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
-					thisObj.captionLangPending = null;
-				}
-				if (typeof thisObj.prefCaptionsSize !== 'undefined') {
-					// set the default caption size
-					// this doesn't work until the captions module is loaded
-					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
-				}
+				thisObj.hasCaptions = true;
+				// setupPopups again with new captions array, replacing original
+				thisObj.setupPopups('captions');
+			} else {
+				// there are no YouTube captions
+				thisObj.usingYouTubeCaptions = false;
+				thisObj.hasCaptions = false;
+			}
+			if (thisObj.captionLangPending) {
+				// user selected a new caption language prior to playback starting
+				// set it now
+				thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
+				thisObj.captionLangPending = null;
+			}
+			if (typeof thisObj.prefCaptionsSize !== 'undefined') {
+				// set the default caption size
+				// this doesn't work until the captions module is loaded
+				thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
+			}
+			if (!thisObj.okToPlay) {
+				// this playback was only to trigger loading of the captions module
+				// cue the video back up so it's ready for the user's (or autoplay's) real play request
+				thisObj.youTubePlayer.cueVideoById({
+					videoId: thisObj.activeYouTubeId,
+					startSeconds: 0
+				});
+				// give the player a moment to settle after the reload triggered by cueVideoById
+				// before letting downstream code (e.g., addControls) query the player again
+				setTimeout(function() {
+					deferred.resolve();
+				}, 300);
+			} else {
 				deferred.resolve();
+			}
+		};
+
+		if (this.youTubePlayer.getOption('captions','tracklist')) {
+			// captions module has already loaded
+			this.loadingYouTubeCaptions = true;
+			processTracklist();
+		} else {
+			// wait for the captions module to finish loading
+			this.youTubePlayer.addEventListener('onApiChange',function() {
+				thisObj.duration = thisObj.youTubePlayer.getDuration();
+				processTracklist();
 			});
-			// Trigger the above event listener by briefly playing the video
+			// trigger the captions module to start loading by briefly playing the video
 			this.loadingYouTubeCaptions = true;
 			this.youTubePlayer.playVideo();
-			// If onApiChange has not been triggered, the captions module is not loading.
-			setTimeout(() => {
-				if ( ! apiTriggered ) {
-					setTimeout(() => {
-						// If a second passes without loading captions, assume there are none.
-						thisObj.youTubePlayer.pauseVideo();
+			// fallback in case there really are no captions and onApiChange never fires
+			setTimeout(function() {
+				if (thisObj.loadingYouTubeCaptions) {
+					thisObj.loadingYouTubeCaptions = false;
+					thisObj.usingYouTubeCaptions = false;
+					thisObj.hasCaptions = false;
+					if (!thisObj.okToPlay) {
+						thisObj.youTubePlayer.cueVideoById({
+							videoId: thisObj.activeYouTubeId,
+							startSeconds: 0
+						});
+						// give the player a moment to settle after the reload before resolving
+						setTimeout(function() {
+							deferred.resolve();
+						}, 300);
+					} else {
 						deferred.resolve();
-					}, 500);
+					}
 				}
-			},500);
+			}, 1500);
 		}
 		return promise;
 	};
