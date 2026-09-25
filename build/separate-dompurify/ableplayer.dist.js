@@ -2465,6 +2465,11 @@
 			controlLayout = this.calculateControlLayout();
 			numSections = controlLayout.length;
 
+			// addControls() may be called again after initial build (e.g., when YouTube
+			// captions are discovered mid-playback). Remove anything from a prior build
+			// so controls aren't duplicated.
+			this.$controllerDiv.find('.able-tooltip, .able-seekbar, .able-control-row, .ableplayer-clear').remove();
+
 			// add an empty div to serve as a tooltip
 			tooltipId = this.mediaId + '-tooltip';
 			this.$tooltipDiv = $('<div>',{
@@ -4026,7 +4031,13 @@
 				// Youtube supports varying playback rates per video.
 				// Only expose controls if more than one playback rate is available.
 				if (this.youTubePlayerReady) {
-					return (this.youTubePlayer.getAvailablePlaybackRates().length > 1) ? true : false;
+					try {
+						// can throw/return undefined if the player is mid-reload (e.g., just after cueVideoById)
+						var rates = this.youTubePlayer.getAvailablePlaybackRates();
+						return (rates && rates.length > 1) ? true : false;
+					} catch (e) {
+						return false;
+					}
 				} else {
 					return false;
 				}
@@ -4658,6 +4669,10 @@
 			} else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
 					rates = this.youTubePlayer.getAvailablePlaybackRates();
+					if (!rates) {
+						// player is mid-reload (e.g., just after cueVideoById); nothing to do yet
+						return;
+					}
 					currentRate = this.getPlaybackRate();
 					index = rates.indexOf(currentRate);
 					if (index === -1) ; else {
@@ -7794,7 +7809,9 @@
 			}
 
 			// handle clicks on player buttons
-			this.$controllerDiv.find('button').on('click',function(e){
+			// delegated so buttons added later (e.g., a captions button added after
+			// YouTube captions are discovered mid-playback) work without rebinding
+			this.$controllerDiv.on('click', 'button', function(e){
 				e.stopPropagation();
 				thisObj.onClickPlayerButton(this);
 			});
@@ -8298,11 +8315,18 @@
 		 * @returns {Array} Filtered array of sources.
 		 */
 		AblePlayer.prototype.getSources = function () {
+
 			let sources = this.media.querySelectorAll('source');
 			let newSources = Array.from(sources).filter(source => {
 				const media = source.getAttribute('media');
 				return (window.matchMedia(media) && window.matchMedia(media).matches);
 			});
+			let videoSource = this.media.hasAttribute( 'src' ) ? this.media.getAttribute('src') : '';
+			if ( videoSource ) {
+				let sourceSource = document.createElement( 'source' );
+				sourceSource.src = videoSource;
+				newSources.push(sourceSource);
+			}
 			if ( newSources.length === 0 && sources.length > 0 ) {
 				// If no sources match the media query, return the original sources and allow browser to handle.
 				if ( this.debug ) {
@@ -8521,6 +8545,7 @@
 			if (this.player === 'html5') {
 				playerPromise = this.initHtml5Player();
 			} else if (this.player === 'youtube') {
+				this.$mediaContainer.attr( 'referrerpolicy', 'strict-origin-when-cross-origin' );
 				playerPromise = this.initYouTubePlayer();
 			} else if (this.player === 'vimeo') {
 				playerPromise = this.initVimeoPlayer();
@@ -22449,7 +22474,8 @@
 
 		/**
 		 * Get data from the YouTube iFrame API. Pushes data into `this.tracks` and `this.captions`.
-		 * Initiates play to trigger loading the captions module, then stops and collects data.
+		 * The captions module doesn't finish loading until the video plays, so playback
+		 * is triggered briefly here, then the player is cued back to an unplayed state.
 		 *
 		 * @returns {Promise} promise
 		 */
@@ -22457,95 +22483,116 @@
 
 			var deferred = new this.defer();
 			var promise = deferred.promise();
-			var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack, apiTriggered = false;
+			var thisObj = this;
 
-			thisObj = this;
-			if (!this.youTubePlayer.getOption('captions','tracklist') ) {
-				// no tracks were found, probably because the captions module hasn't loaded
-				// play video briefly (required to load the captions module)
-				// and after the apiChange event is triggered, try again to retrieve tracks
-				this.youTubePlayer.addEventListener('onApiChange',function() {
-					apiTriggered = true;
-					// getDuration() also requires video to play briefly
-					// so, let's set that while we're here
-					thisObj.duration = thisObj.youTubePlayer.getDuration();
+			var processTracklist = function () {
+				var ytTracks, i, trackLang, trackLabel, isDefaultTrack;
 
-					if (thisObj.loadingYouTubeCaptions) {
-						// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once
-						ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
-						if ( ! thisObj.okToPlay ) {
-							// Don't stopVideo() - that cancels loading, just pause.
-							// No need to seekTo(0) - the time passed isn't noticeable to the user
-							thisObj.youTubePlayer.pauseVideo();
-						}
-						if (ytTracks && ytTracks.length) {
-							// Step through ytTracks and add them to global tracks array
-							// Note: Unlike YouTube Data API, the IFrame Player API only returns
-							// tracks that are published, and does NOT include ASR captions
-							// So, no additional filtering is required
-							for (i=0; i < ytTracks.length; i++) {
-								trackLang = ytTracks[i].languageCode;
-								trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
-								isDefaultTrack = false;
-								if (typeof thisObj.captionLang !== 'undefined' && (trackLang === thisObj.captionLang) ) {
-									isDefaultTrack = true;
-								} else if (typeof thisObj.lang !== 'undefined') {
-									if (trackLang === thisObj.lang) {
-										isDefaultTrack = true;
-									}
-								}
-								thisObj.tracks.push({
-									'kind': 'captions',
-									'language': trackLang,
-									'label': trackLabel,
-									'def': isDefaultTrack
-								});
-								thisObj.captions.push({
-									'language': trackLang,
-									'label': trackLabel,
-									'def': isDefaultTrack,
-									'cues': null
-								});
+				if (!thisObj.loadingYouTubeCaptions) {
+					// already processed (stopgap in case onApiChange fires more than once)
+					return;
+				}
+				thisObj.loadingYouTubeCaptions = false;
+
+				ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
+				if (ytTracks && ytTracks.length) {
+					// Step through ytTracks and add them to global tracks array
+					// Note: Unlike YouTube Data API, the IFrame Player API only returns
+					// tracks that are published, and does NOT include ASR captions
+					// So, no additional filtering is required
+					for (i=0; i < ytTracks.length; i++) {
+						trackLang = ytTracks[i].languageCode;
+						trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+						isDefaultTrack = false;
+						if (typeof thisObj.captionLang !== 'undefined' && (trackLang === thisObj.captionLang) ) {
+							isDefaultTrack = true;
+						} else if (typeof thisObj.lang !== 'undefined') {
+							if (trackLang === thisObj.lang) {
+								isDefaultTrack = true;
 							}
-							thisObj.hasCaptions = true;
-							// setupPopups again with new captions array, replacing original
-							thisObj.setupPopups('captions');
-						} else {
-							// there are no YouTube captions
-							thisObj.usingYouTubeCaptions = false;
-							thisObj.hasCaptions = false;
 						}
-						thisObj.loadingYouTubeCaptions = false;
-						if (thisObj.okToPlay) {
-							thisObj.youTubePlayer.playVideo();
-						}
+						thisObj.tracks.push({
+							'kind': 'captions',
+							'language': trackLang,
+							'label': trackLabel,
+							'def': isDefaultTrack
+						});
+						thisObj.captions.push({
+							'language': trackLang,
+							'label': trackLabel,
+							'def': isDefaultTrack,
+							'cues': null
+						});
 					}
-					if (thisObj.captionLangPending) {
-						// user selected a new caption language prior to playback starting
-						// set it now
-						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
-						thisObj.captionLangPending = null;
-					}
-					if (typeof thisObj.prefCaptionsSize !== 'undefined') {
-						// set the default caption size
-						// this doesn't work until the captions module is loaded
-						thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
-					}
+					thisObj.hasCaptions = true;
+					// setupPopups again with new captions array, replacing original
+					thisObj.setupPopups('captions');
+				} else {
+					// there are no YouTube captions
+					thisObj.usingYouTubeCaptions = false;
+					thisObj.hasCaptions = false;
+				}
+				if (thisObj.captionLangPending) {
+					// user selected a new caption language prior to playback starting
+					// set it now
+					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
+					thisObj.captionLangPending = null;
+				}
+				if (typeof thisObj.prefCaptionsSize !== 'undefined') {
+					// set the default caption size
+					// this doesn't work until the captions module is loaded
+					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
+				}
+				if (!thisObj.okToPlay) {
+					// this playback was only to trigger loading of the captions module
+					// cue the video back up so it's ready for the user's (or autoplay's) real play request
+					thisObj.youTubePlayer.cueVideoById({
+						videoId: thisObj.activeYouTubeId,
+						startSeconds: 0
+					});
+					// give the player a moment to settle after the reload triggered by cueVideoById
+					// before letting downstream code (e.g., addControls) query the player again
+					setTimeout(function() {
+						deferred.resolve();
+					}, 300);
+				} else {
 					deferred.resolve();
+				}
+			};
+
+			if (this.youTubePlayer.getOption('captions','tracklist')) {
+				// captions module has already loaded
+				this.loadingYouTubeCaptions = true;
+				processTracklist();
+			} else {
+				// wait for the captions module to finish loading
+				this.youTubePlayer.addEventListener('onApiChange',function() {
+					thisObj.duration = thisObj.youTubePlayer.getDuration();
+					processTracklist();
 				});
-				// Trigger the above event listener by briefly playing the video
+				// trigger the captions module to start loading by briefly playing the video
 				this.loadingYouTubeCaptions = true;
 				this.youTubePlayer.playVideo();
-				// If onApiChange has not been triggered, the captions module is not loading.
-				setTimeout(() => {
-					if ( ! apiTriggered ) {
-						setTimeout(() => {
-							// If a second passes without loading captions, assume there are none.
-							thisObj.youTubePlayer.pauseVideo();
+				// fallback in case there really are no captions and onApiChange never fires
+				setTimeout(function() {
+					if (thisObj.loadingYouTubeCaptions) {
+						thisObj.loadingYouTubeCaptions = false;
+						thisObj.usingYouTubeCaptions = false;
+						thisObj.hasCaptions = false;
+						if (!thisObj.okToPlay) {
+							thisObj.youTubePlayer.cueVideoById({
+								videoId: thisObj.activeYouTubeId,
+								startSeconds: 0
+							});
+							// give the player a moment to settle after the reload before resolving
+							setTimeout(function() {
+								deferred.resolve();
+							}, 300);
+						} else {
 							deferred.resolve();
-						}, 500);
+						}
 					}
-				},500);
+				}, 1500);
 			}
 			return promise;
 		};
