@@ -375,15 +375,18 @@ import DOMPurify from 'dompurify';
 	 * @returns {Array} Filtered array of sources.
 	 */
 	AblePlayer.prototype.getSources = function () {
-		let videoSource = this.media.getAttribute('src');
-		let sourceSource = document.createElement( 'source' );
-		sourceSource.src = videoSource;
+
 		let sources = this.media.querySelectorAll('source');
 		let newSources = Array.from(sources).filter(source => {
 			const media = source.getAttribute('media');
 			return (window.matchMedia(media) && window.matchMedia(media).matches);
 		});
-		newSources.push(sourceSource);
+		let videoSource = this.media.hasAttribute( 'src' ) ? this.media.getAttribute('src') : '';
+		if ( videoSource ) {
+			let sourceSource = document.createElement( 'source' );
+			sourceSource.src = videoSource;
+			newSources.push(sourceSource);
+		}
 		if ( newSources.length === 0 && sources.length > 0 ) {
 			// If no sources match the media query, return the original sources and allow browser to handle.
 			if ( this.debug ) {
@@ -605,6 +608,7 @@ import DOMPurify from 'dompurify';
 		if (this.player === 'html5') {
 			playerPromise = this.initHtml5Player();
 		} else if (this.player === 'youtube') {
+			this.$mediaContainer.attr( 'referrerpolicy', 'strict-origin-when-cross-origin' );
 			playerPromise = this.initYouTubePlayer();
 		} else if (this.player === 'vimeo') {
 			playerPromise = this.initVimeoPlayer();
