@@ -988,7 +988,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		if (this.skin == '2020') {
 			// add a full-width seek bar
 			$sliderDiv = $('<div class="able-seekbar"></div>');
-			sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
+			sliderLabel = this.translate( 'seekbarLabel', '%1 timeline', [ this.mediaType ] );
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider($sliderDiv, this.duration, this.seekInterval, sliderLabel );
 		}
@@ -1014,7 +1014,7 @@ function addBuildplayerFunctions(AblePlayer) {
 				control = controls[j];
 				if (control === 'seek') {
 					$sliderDiv = $('<div class="able-seekbar"></div>');
-					sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
+					sliderLabel = this.translate( 'seekbarLabel', '%1 timeline', [ this.mediaType ] );
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
