@@ -24,7 +24,7 @@
   "sign": "手話",
   "showSign": "手話を表示",
   "hideSign": "手話を非表示",
-  "seekbarLabel": "タイムライン",
+  "seekbarLabel": "%1 タイムライン",
   "mute": "消音",
   "unmute": "消音解除",
   "volume": "音量",

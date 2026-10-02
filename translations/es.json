@@ -24,7 +24,7 @@
   "sign": "Lengua de señas",
   "showSign": "Mostrar lengua de señas",
   "hideSign": "Ocultar lengua de señas",
-  "seekbarLabel": "timeline",
+  "seekbarLabel": "%1 timeline",
   "mute": "Silenciar",
   "unmute": "Habilitar sonido",
   "volume": "Volumen",

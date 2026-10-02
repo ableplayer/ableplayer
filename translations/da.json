@@ -24,7 +24,7 @@
   "sign": "Tegnsprog",
   "showSign": "Vis tegnsprog",
   "hideSign": "Gen tegnsprog",
-  "seekbarLabel": "tidslinie",
+  "seekbarLabel": "%1 tidslinie",
   "mute": "Stop lyd",
   "unmute": "Start lyd",
   "volume": "Lydstyrke",

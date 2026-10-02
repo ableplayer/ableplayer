@@ -24,7 +24,7 @@
   "sign": "Língua de sinais",
   "showSign": "Mostrar língua de sinais",
   "hideSign": "Ocultar língua de sinais",
-  "seekbarLabel": "Linha do tempo",
+  "seekbarLabel": "Linha do tempo de %1",
   "mute": "Silenciar",
   "unmute": "Ativar som",
   "volume": "",
