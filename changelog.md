@@ -54,8 +54,9 @@
 - Set untranslated strings to have empty value in JSON data.
 - Update translate function to fallback to default if value empty.
 - Update imports to not import the English translation files, used only as a reference for translating.
- - Update Slovak translation. Props @rraddatch.
- - Update Taiwanese Chinese translation. Props @JediLin.
+- Update Slovak translation. Props @rraddatch.
+- Update Taiwanese Chinese translation. Props @JediLin.
+- Fixed concatenated translated string in seekbar. Props @DuaelFr.
 
 ### Meta
 
