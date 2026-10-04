@@ -56,6 +56,7 @@
 - Update imports to not import the English translation files, used only as a reference for translating.
 - Update Slovak translation. Props @rraddatch.
 - Update Taiwanese Chinese translation. Props @JediLin.
+- Update French translation. Props @DuaelFr.
 - Fixed concatenated translated string in seekbar. Props @DuaelFr.
 
 ### Meta
