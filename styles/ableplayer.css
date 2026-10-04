@@ -99,6 +99,7 @@
 	--able-menu-focus-background: var(--able-very-light-gray);
 	--able-menu-focus-color: var(--able-black);
 	--able-transcript-background: var(--able-white);
+	--able-transcript-color: var(--able-dark-gray);
 	--able-cue-audio-description-background: var(--able-light-pink);
 	--able-cue-audio-description-color: var(--able-dark-gray);
 	--able-cue-highlighted-background: var(--able-black);
@@ -264,7 +265,8 @@ video[data-able-player],
 }
 
 /* Controller Buttons & Controls */
-.able-wrapper .able button.able-big-play-button {
+.able-wrapper .able button.able-big-play-button,
+.able-wrapper .able button.able-big-play-button:not(:hover):not(:focus):not(:active) {
 	position: absolute;
 	color: var(--able-control-color);
 	background-color: var(--able-big-play-background);
@@ -353,10 +355,11 @@ video[data-able-player],
 	outline: 2px solid var(--able-hover-outline);
 	outline-offset: 2px;
 }
-
-.able-controller button {
+.able-controller button,
+.able-controller button:not(:hover):not(:focus):not(:active) {
 	all: unset;
 	background: none;
+	background-color: none;
 	position: relative;
 	padding: 2px;
 	min-width: var(--able-base-control-size);
@@ -371,6 +374,7 @@ video[data-able-player],
 	z-index: 6600;
 	border-radius: 3px;
 	box-sizing: border-box;
+	outline-offset: 0;
 }
 
 .able-controller div.able-button-handler-play button {
@@ -1115,7 +1119,8 @@ ul.able-popup li.able-focus,
 	overflow-y: scroll;
 	padding-left: 1rem;
 	padding-right: 1rem;
-	background-color: #fff;
+	background-color: var(--able-transcript-background);
+	color: var(--able-transcript-color);
 	height: 350px;
 }
 
@@ -1197,6 +1202,8 @@ div.able-modal-dialog button:focus,
 .able-controller input:focus,
 .able-seekbar-head:focus {
 	outline: 3px solid var(--able-focus-outline);
+	outline-offset: 0;
+	background-color: transparent;
 }
 
 /* Control hover colors. */
@@ -1216,6 +1223,13 @@ div.able-modal-dialog button:hover,
 .able-controller input:hover,
 .able-seekbar-head:hover {
 	outline: 3px solid var(--able-hover-outline);
+	outline-offset: 0;
+	background-color: transparent;
+}
+
+.able-seekbar-head:focus,
+.able-seekbar-head:hover {
+	background-color: var(--able-seekbar-head);
 }
 
 /* Playlist (both audio and video) */
