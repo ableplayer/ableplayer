@@ -1,4 +1,4 @@
-/*! ableplayer V5.1.0-beta1 - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */
+/*! ableplayer V5.1.0-beta2 - ECMAScript module suitable for use in other bundlers. Console logs stripped out. */
 
 import $ from 'jquery';
 import DOMPurify from 'dompurify';
@@ -7814,7 +7814,12 @@ function addEventFunctions(AblePlayer) {
 		// handle clicks (left only) anywhere on the page. If any popups are open, close them.
 		$('body').on('click', function(e) {
 
-			if (e.button !== 0) { // not a left click
+			// not a left click
+			if (e.button !== 0) {
+				return false;
+			}
+			// not a click inside the volume slider
+			if (e.target.closest('.able-volume-slider')) {
 				return false;
 			}
 			if ($('.able-popup:visible').length || $('.able-volume-slider:visible').length ) {

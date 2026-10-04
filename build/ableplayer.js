@@ -1,4 +1,4 @@
-/*! ableplayer V5.1.0-beta1 - with DOMPurify included. Console logs enabled, for development */
+/*! ableplayer V5.1.0-beta2 - with DOMPurify included. Console logs enabled, for development */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery')) :
@@ -10290,7 +10290,12 @@
   		// handle clicks (left only) anywhere on the page. If any popups are open, close them.
   		$('body').on('click', function(e) {
 
-  			if (e.button !== 0) { // not a left click
+  			// not a left click
+  			if (e.button !== 0) {
+  				return false;
+  			}
+  			// not a click inside the volume slider
+  			if (e.target.closest('.able-volume-slider')) {
   				return false;
   			}
   			if ($('.able-popup:visible').length || $('.able-volume-slider:visible').length ) {
