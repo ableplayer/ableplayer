@@ -26,6 +26,7 @@
 - Bug fix: events triggered from outside the player triggered errors due to assumed classes.
 - Modified preferences dialog generation so dialogs are only generated once per page and re-used, rather than generating four dialogs per player.
 - Fix bug with timestamp formatting in Video Transcript Sorter.
+- Don't immediately close the volume slider on any click inside its container.
 
 ### Design
 - Increase size and add hover state to seekbar.
