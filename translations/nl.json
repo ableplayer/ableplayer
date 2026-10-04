@@ -23,7 +23,7 @@
   "language": "Taal",
   "sign": "Gebarentaal",
   "showSign": "Toon gebarentaal",
-  "seekbarLabel": "tijdlijn",
+  "seekbarLabel": "%1 tijdlijn",
   "hideSign": "Verberg gebarentaal",
   "mute": "Dempen",
   "unmute": "Dempen uit",

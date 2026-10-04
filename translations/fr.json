@@ -24,7 +24,7 @@
   "sign": "Langage gestuel",
   "showSign": "Afficher le langage gestuel",
   "hideSign": "Masque le langage gestuel",
-  "seekbarLabel": "barre de progression",
+  "seekbarLabel": "Barre de progression %1",
   "mute": "Son désactivé",
   "unmute": "Son activé",
   "volume": "Volume",

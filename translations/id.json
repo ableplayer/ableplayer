@@ -24,7 +24,7 @@
   "sign": "Bahasa isyarat",
   "showSign": "Tampilkan bahasa isyarat",
   "hideSign": "Sembunyikan bahasa isyarat",
-  "seekbarLabel": "lini masa",
+  "seekbarLabel": "lini masa %1",
   "mute": "Matikan Suara",
   "unmute": "Nyalakan Suara",
   "volume": "Volume",

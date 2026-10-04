@@ -24,7 +24,7 @@
   "sign": "Gebärdensprache",
   "showSign": "Gebärdensprache anzeigen",
   "hideSign": "Gebärdensprache ausblenden",
-  "seekbarLabel": "Suchleiste",
+  "seekbarLabel": "%1 Suchleiste",
   "mute": "Ton aus",
   "unmute": "Ton an",
   "volume": "Lautstärke",

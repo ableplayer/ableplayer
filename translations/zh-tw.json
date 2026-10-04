@@ -24,7 +24,7 @@
   "sign": "手語",
   "showSign": "顯示手語",
   "hideSign": "隱藏手語",
-  "seekbarLabel": "時間軸",
+  "seekbarLabel": "%1 時間軸",
   "mute": "靜音",
   "unmute": "取消靜音",
   "volume": "音量",

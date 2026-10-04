@@ -24,7 +24,7 @@
   "sign": "Tegnspråk",
   "showSign": "Vis tegnspråk",
   "hideSign": "Skjul tegnspråk",
-  "seekbarLabel": "tidslinje",
+  "seekbarLabel": "%1 tidslinje",
   "mute": "Lyd av",
   "unmute": "Lyd på",
   "volume": "Volum",
