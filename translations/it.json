@@ -24,7 +24,7 @@
   "sign": "Lingua dei segni",
   "showSign": "Mostra lingua dei segni",
   "hideSign": "Nascondi lingua dei segni",
-  "seekbarLabel": "Tempo trascorso",
+  "seekbarLabel": "Tempo trascorso %1",
   "mute": "Muto",
   "unmute": "Riattiva l'audio",
   "volume": "",

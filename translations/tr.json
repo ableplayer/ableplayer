@@ -24,7 +24,7 @@
   "sign": "İşaret Dili",
   "showSign": "İşaret Dilini Göster",
   "hideSign": "İşaret Dilini Gizle",
-  "seekbarLabel": "Zaman Cetveli",
+  "seekbarLabel": "%1 Zaman Cetveli",
   "mute": "Sessize Al",
   "unmute": "Sesi Aç",
   "volume": "Ses Ayarı",

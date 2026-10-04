@@ -25,7 +25,7 @@
   "sign": "Posunkový jazyk",
   "showSign": "Zobraziť posunkový jazyk",
   "hideSign": "Skryť posunkový jazyk",
-  "seekbarLabel": "časová os",
+  "seekbarLabel": "%1 časová os",
   "mute": "Stlmiť",
   "unmute": "Zrušiť stlmenie",
   "volume": "Hlasitosť",

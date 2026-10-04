@@ -24,7 +24,7 @@
   "sign": "Linguagem gestual",
   "showSign": "Mostrar linguagem gestual",
   "hideSign": "Esconder linguagem gestual",
-  "seekbarLabel": "linha temporal",
+  "seekbarLabel": "linha temporal de %1",
   "mute": "Desativar som",
   "unmute": "Ativar som",
   "volume": "Volume",
