@@ -780,7 +780,12 @@ function addEventFunctions(AblePlayer) {
 		// handle clicks (left only) anywhere on the page. If any popups are open, close them.
 		$('body').on('click', function(e) {
 
-			if (e.button !== 0) { // not a left click
+			// not a left click
+			if (e.button !== 0) {
+				return false;
+			}
+			// not a click inside the volume slider
+			if (e.target.closest('.able-volume-slider')) {
 				return false;
 			}
 			if ($('.able-popup:visible').length || $('.able-volume-slider:visible').length ) {
