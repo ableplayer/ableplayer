@@ -2468,6 +2468,10 @@
 			controlLayout = this.calculateControlLayout();
 			numSections = controlLayout.length;
 
+			// if addControls() is called after initial build, controls would be duplicated.
+			// Remove anything from a prior build to prevent duplication.
+			this.$controllerDiv.find('.able-tooltip, .able-seekbar, .able-control-row, .ableplayer-clear').remove();
+
 			// add an empty div to serve as a tooltip
 			tooltipId = this.mediaId + '-tooltip';
 			this.$tooltipDiv = $('<div>',{
@@ -2479,7 +2483,7 @@
 			if (this.skin == '2020') {
 				// add a full-width seek bar
 				$sliderDiv = $('<div class="able-seekbar"></div>');
-				sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
+				sliderLabel = this.translate( 'seekbarLabel', '%1 timeline', [ this.mediaType ] );
 				this.$controllerDiv.append($sliderDiv);
 				this.seekBar = new AccessibleSlider($sliderDiv, this.duration, this.seekInterval, sliderLabel );
 			}
@@ -2505,7 +2509,7 @@
 					control = controls[j];
 					if (control === 'seek') {
 						$sliderDiv = $('<div class="able-seekbar"></div>');
-						sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
+						sliderLabel = this.translate( 'seekbarLabel', '%1 timeline', [ this.mediaType ] );
 						$controllerSpan.append($sliderDiv);
 						if (typeof this.duration === 'undefined' || this.duration === 0) {
 							// set arbitrary starting duration, and change it when duration is known
@@ -4042,12 +4046,18 @@
 			} else if (this.player === 'youtube') {
 				// Youtube supports varying playback rates per video.
 				// Only expose controls if more than one playback rate is available.
-				if (this.youTubePlayerReady) {
-					return (this.youTubePlayer.getAvailablePlaybackRates().length > 1) ? true : false;
+				if ( this.youTubePlayerReady ) {
+					try {
+						// can return undefined if player is mid-reload (e.g., just after cueVideoById)
+						var rates = this.youTubePlayer.getAvailablePlaybackRates();
+						return ( rates && rates.length > 1 ) ? true : false;
+					} catch (e) {
+						return false;
+					}
 				} else {
 					return false;
 				}
-			} else if (this.player === 'vimeo') {
+			} else if ( this.player === 'vimeo' ) {
 				// since this takes longer to determine, it was set previously in initVimeoPlayer()
 				return this.vimeoSupportsPlaybackRateChange;
 			}
@@ -4675,6 +4685,10 @@
 			} else if (this.player === 'youtube') {
 				if (this.youTubePlayerReady) {
 					rates = this.youTubePlayer.getAvailablePlaybackRates();
+					if ( !rates ) {
+						// player is mid-reload (e.g., just after cueVideoById); nothing to do yet
+						return;
+					}
 					currentRate = this.getPlaybackRate();
 					index = rates.indexOf(currentRate);
 					if (index === -1) {
@@ -7843,8 +7857,9 @@
 				},2000);
 			}
 
-			// handle clicks on player buttons
-			this.$controllerDiv.find('button').on('click',function(e){
+			// handle clicks on player buttons.
+			// Use event delegation to handle clicks on any button within the controller div.
+			this.$controllerDiv.on('click', 'button', function(e){
 				e.stopPropagation();
 				thisObj.onClickPlayerButton(this);
 			});
@@ -13047,7 +13062,7 @@
 	var sign$j = "Llengua de signes";
 	var showSign$j = "Mostra la llengua de signes";
 	var hideSign$j = "Oculta la llengua de signes";
-	var seekbarLabel$j = "Línia de temps";
+	var seekbarLabel$j = "Línia de temps %1";
 	var mute$j = "Silencia";
 	var unmute$j = "Activa el so";
 	var volume$j = "Volum";
@@ -13390,7 +13405,7 @@
 	var sign$i = "Znaková řeč";
 	var showSign$i = "Zobrazit znakovou řeč";
 	var hideSign$i = "Skrýt znakovou řeč";
-	var seekbarLabel$i = "časová osa";
+	var seekbarLabel$i = "%1 časová osa";
 	var mute$i = "Vypnout zvuk";
 	var unmute$i = "Zapnout zvuk";
 	var volume$i = "Hlasitost";
@@ -13733,7 +13748,7 @@
 	var sign$h = "Tegnsprog";
 	var showSign$h = "Vis tegnsprog";
 	var hideSign$h = "Gen tegnsprog";
-	var seekbarLabel$h = "tidslinie";
+	var seekbarLabel$h = "%1 tidslinie";
 	var mute$h = "Stop lyd";
 	var unmute$h = "Start lyd";
 	var volume$h = "Lydstyrke";
@@ -14076,7 +14091,7 @@
 	var sign$g = "Gebärdensprache";
 	var showSign$g = "Gebärdensprache anzeigen";
 	var hideSign$g = "Gebärdensprache ausblenden";
-	var seekbarLabel$g = "Suchleiste";
+	var seekbarLabel$g = "%1 Suchleiste";
 	var mute$g = "Ton aus";
 	var unmute$g = "Ton an";
 	var volume$g = "Lautstärke";
@@ -14419,7 +14434,7 @@
 	var sign$f = "Lengua de señas";
 	var showSign$f = "Mostrar lengua de señas";
 	var hideSign$f = "Ocultar lengua de señas";
-	var seekbarLabel$f = "timeline";
+	var seekbarLabel$f = "%1 timeline";
 	var mute$f = "Silenciar";
 	var unmute$f = "Habilitar sonido";
 	var volume$f = "Volumen";
@@ -14738,12 +14753,12 @@
 	};
 
 	var playerHeading$e = "Lecteur multimédia";
-	var audioPlayer$e = "";
-	var videoPlayer$e = "";
-	var faster$e = "Plus rapidement: %1x";
-	var slower$e = "Plus lentement: %1x";
+	var audioPlayer$e = "Lecteur audio";
+	var videoPlayer$e = "Lecteur vidéo";
+	var faster$e = "Accélérer : %1x";
+	var slower$e = "Ralentir : %1x";
 	var play$e = "Lecture";
-	var pause$e = "";
+	var pause$e = "Pause";
 	var restart$e = "Redémarrer";
 	var prevTrack$e = "Piste Précédente";
 	var nextTrack$e = "Piste Suivante";
@@ -14762,7 +14777,7 @@
 	var sign$e = "Langage gestuel";
 	var showSign$e = "Afficher le langage gestuel";
 	var hideSign$e = "Masque le langage gestuel";
-	var seekbarLabel$e = "timeline";
+	var seekbarLabel$e = "Barre de progression %1";
 	var mute$e = "Son désactivé";
 	var unmute$e = "Son activé";
 	var volume$e = "Volume";
@@ -14771,9 +14786,9 @@
 	var enterFullScreen$e = "Activer le mode plein écran";
 	var exitFullScreen$e = "Quitter le mode plein écran";
 	var speed$e = "Vitesse";
-	var on$e = "";
-	var off$e = "";
-	var spacebar$e = "barre d’espacement";
+	var on$e = "Activé";
+	var off$e = "Désactivé";
+	var spacebar$e = "barre d’espace";
 	var transcriptTitle$e = "Transcription";
 	var lyricsTitle$e = "Paroles";
 	var autoScroll$e = "Défilement automatique";
@@ -14786,42 +14801,42 @@
 	var alertDescribedVersion$e = "Utilisation de la version avec description sonore de cette vidéo";
 	var alertNonDescribedVersion$e = "Utilisation de la version non décrite de cette vidéo";
 	var prefMenuCaptions$e = "Sous-titres";
-	var prefVoicedCaptions$e = "";
-	var prefMenuDescriptions$e = "";
+	var prefVoicedCaptions$e = "Sous-titres vocaux";
+	var prefMenuDescriptions$e = "Descriptions";
 	var prefMenuKeyboard$e = "Clavier";
-	var prefMenuTranscript$e = "";
+	var prefMenuTranscript$e = "Transcription";
 	var prefTitleCaptions$e = "Préférences liées au sous-titrage";
 	var prefTitleDescriptions$e = "Préférences liées aux descriptions sonores";
 	var prefTitleKeyboard$e = "Préférences liées au clavier";
-	var prefTitleTranscript$d = "Préférence liées à la transcription";
-	var prefIntroDescription1$d = "Ce lecteur multimédia permet d’entendre les descriptions sonores de deux façons:";
-	var prefDescription1$e = "Il y a une version autre version avec description, description textuelle.";
-	var prefDescription2$e = "Il y a une version autre version de la vidéo avec description.";
-	var prefDescription3$e = "Il y a une version description textuelle, lue à l’aide d’un lecteur d’écran.";
-	var prefDescriptionNone$e = "Il n’y a pas de version avec description sonore (dans ni l’un ni l’autre des formats) de la présente vidéo.";
-	var prefDescFormatOption1$e = "";
-	var prefDescFormatOption2$e = "";
-	var prefIntroDescription3$e = "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelle.";
+	var prefTitleTranscript$d = "Préférences liées à la transcription";
+	var prefIntroDescription1$d = "Ce lecteur multimédia permet d’entendre les descriptions sonores de deux façons :";
+	var prefDescription1$e = "La vidéo dispose d'une version en audiodescription et d'une description textuelle, lue à l’aide d’un lecteur d’écran.";
+	var prefDescription2$e = "La vidéo dispose d'une version en audiodescription.";
+	var prefDescription3$e = "La vidéo dispose d'une description textuelle, lue à l’aide d’un lecteur d’écran.";
+	var prefDescriptionNone$e = "La vidéo ne dispose d'aucune version avec description sonore (dans aucun des formats).";
+	var prefDescFormatOption1$e = "version de la vidéo en audiodescription";
+	var prefDescFormatOption2$e = "description textuelle, lue à l’aide d’un lecteur d’écran";
+	var prefIntroDescription3$e = "Utilisez le formulaire suivant pour établir vos préférences liées aux descriptions sonores textuelles.";
 	var prefIntroDescription4$e = "Après avoir enregistré vos préférences, vous pouvez activer ou désactiver la description sonore avec le bouton Description.";
 	var prefIntroKeyboard1$e = "Le lecteur multimédia de cette page Web peut être utilisé à partir de n’importe quel endroit sur la page avec des raccourcis du clavier (voir la liste ci-dessous).";
-	var prefIntroKeyboard2$e = "Des rôles peuvent être assignés aux touches de modification (Shift, Alt, Ctrl) ci-dessous.";
+	var prefIntroKeyboard2$e = "Des rôles peuvent être assignés aux touches de modification (Maj, Alt, Ctrl) ci-dessous.";
 	var prefIntroKeyboard3$e = "Certaines combinaisons de touches pourraient entrer en conflit avec les touches utilisées par votre navigateur ou autres applications logicielles. Essayez diverses combinaisons de touches de modification pour en trouver qui fonctionnent pour vous.";
 	var prefHeadingKeyboard1$e = "Touches de modification utilisées pour des raccourcis";
 	var prefHeadingKeyboard2$e = "Raccourcis du clavier assignés actuellement";
 	var prefHeadingDescription$e = "Description sonore";
 	var prefHeadingTextDescription$e = "Description sonore textuelle";
-	var prefAltKey$e = "";
-	var prefCtrlKey$e = "";
-	var prefShiftKey$e = "";
-	var prefNoKeyShortcuts$e = "";
-	var escapeKey$e = "";
+	var prefAltKey$e = "Alt";
+	var prefCtrlKey$e = "Ctrl";
+	var prefShiftKey$e = "Maj";
+	var prefNoKeyShortcuts$e = "Désactiver les raccourcis clavier";
+	var escapeKey$e = "Échap";
 	var escapeKeyFunction$e = "Fermer la fenêtre de dialogue ou le menu contextuel";
 	var prefDescPause$e = "Mettre la vidéo en pause automatiquement quand la description commence";
 	var prefDescVisible$e = "Affichez la description";
 	var prefDescVoice$e = "Voix";
-	var prefDescRate$e = "";
-	var prefCaptionRate$e = "";
-	var prefDescPitch$e = "";
+	var prefDescRate$e = "Vitesse de la description vocale";
+	var prefCaptionRate$e = "Vitesse des sous-titres vocaux";
+	var prefDescPitch$e = "Ton";
 	var prefDescPitch1$e = "Très faible";
 	var prefDescPitch2$e = "Faible";
 	var prefDescPitch3$e = "Par défaut";
@@ -14835,7 +14850,7 @@
 	var prefCaptionsBGColor$e = "Arrière-plan";
 	var prefCaptionsSize$e = "Taille de la police";
 	var prefCaptionsOpacity$e = "Opacité";
-	var prefCaptionsStyle$e = "";
+	var prefCaptionsStyle$e = "Style";
 	var serif$e = "avec empattement";
 	var sans$e = "sans empattement";
 	var cursive$e = "écriture cursive";
@@ -14853,7 +14868,7 @@
 	var solid$e = "solide";
 	var captionsStylePopOn$e = "";
 	var captionsStyleRollUp$e = "";
-	var prefCaptionsPosition$e = "";
+	var prefCaptionsPosition$e = "Position";
 	var captionsPositionOverlay$e = "Superposés";
 	var captionsPositionBelow$e = "Sous la vidéo";
 	var sampleCaptionText$e = "Échantillon de sous-titre";
@@ -14861,17 +14876,17 @@
 	var prefNoChange$e = "Vous n’avez pas fait de changements.";
 	var save$e = "Enregistrer";
 	var cancel$e = "Annuler";
-	var dismissButton$e = "Dismiss";
+	var dismissButton$e = "Cacher";
 	var windowButtonLabel$e = "Options de fenêtre";
 	var windowMove$e = "Déplacer";
-	var windowMoveLeft$e = "";
-	var windowMoveRight$e = "";
-	var windowMoveUp$e = "";
-	var windowMoveDown$e = "";
-	var windowMoveStopped$e = "";
-	var transcriptControls$e = "";
-	var signControls$e = "";
-	var windowMoveAlert$e = "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre; appuyez sur « Enter » pour arrêter.";
+	var windowMoveLeft$e = "Fenêtre déplacée vers la gauche";
+	var windowMoveRight$e = "Fenêtre déplacée vers la droite";
+	var windowMoveUp$e = "Fenêtre déplacée vers le haut";
+	var windowMoveDown$e = "Fenêtre déplacée vers le bas";
+	var windowMoveStopped$e = "Déplacement de la fenêtre terminé";
+	var transcriptControls$e = "Contrôles de la fenêtre de transcription";
+	var signControls$e = "Contrôles de la fenêtre de langage gestuel";
+	var windowMoveAlert$e = "Faites glisser avec la souris ou utilisez les touches fléchées pour déplacer la fenêtre ; appuyez sur « Enter » pour arrêter.";
 	var windowResize$e = "Redimensionner";
 	var windowResizeHeading$e = "Redimensionner la fenêtre de l’interprète";
 	var closeButtonLabel$e = "Fermer";
@@ -14883,30 +14898,30 @@
 	var noResultsFound$e = "Aucun résultat trouvé.";
 	var searchButtonLabel$e = "Lecture à %1";
 	var hour$e = "heure";
-	var minute$e = "";
+	var minute$e = "minute";
 	var second$e = "seconde";
 	var hours$e = "heures";
-	var minutes$e = "";
-	var seconds$e = "";
-	var vtsHeading$e = "";
-	var vtsInstructions1$e = "";
-	var vtsInstructions2$e = "";
-	var vtsInstructions3$e = "";
-	var vtsInstructions4$e = "";
-	var vtsInstructions5$e = "";
-	var vtsSelectLanguage$e = "";
-	var vtsSave$e = "";
-	var vtsReturn$e = "";
-	var vtsCancel$e = "";
-	var vtsRow$e = "";
-	var vtsKind$e = "";
-	var vtsStart$e = "";
-	var vtsEnd$e = "";
-	var vtsContent$e = "";
-	var vtsActions$e = "";
-	var vtsNewRow$e = "";
-	var vtsDeletedRow$e = "";
-	var vtsMovedRow$e = "";
+	var minutes$e = "minutes";
+	var seconds$e = "secondes";
+	var vtsHeading$e = "Trieur de Transcription Vidéo";
+	var vtsInstructions1$e = "Utiliser le Trieur de Transcription Vidéo pour modifier les pistes de texte :";
+	var vtsInstructions2$e = "Réordonner les chapitres, descriptions, légendes, et/ou sous-titres pour qu'ils apparaissent dans l'ordre approprié dans la transcription autogénérée d'Able Player.";
+	var vtsInstructions3$e = "Modifier le contenu ou le moment d'apparition/disparition (tous sont directement modifiables depuis le tableau).";
+	var vtsInstructions4$e = "Ajouter du nouveau contenu, comme des chapitres ou des descriptions.";
+	var vtsInstructions5$e = "Après les modifications, cliquer sur le bouton \"Enregistrer les modifications\" pour générer le nouveau contenu pour tous les fichiers texte horodatés concernés. Le nouveau texte peut être copié et collé dans de nouveaux fichiers WebVTT.";
+	var vtsSelectLanguage$e = "Sélectionner une langue";
+	var vtsSave$e = "Générer le nouveau contenu .vtt";
+	var vtsReturn$e = "Retour à l'Éditeur";
+	var vtsCancel$e = "Annulation de l'enregistrement. Tous les contenus modifiés ont été restaurés dans le tableau du TTV.";
+	var vtsRow$e = "Ligne";
+	var vtsKind$e = "Genre";
+	var vtsStart$e = "Début";
+	var vtsEnd$e = "Fin";
+	var vtsContent$e = "Contenu";
+	var vtsActions$e = "Actions";
+	var vtsNewRow$e = "Une nouvelle ligne %1 a été insérée.";
+	var vtsDeletedRow$e = "La ligne %1 a été supprimée.";
+	var vtsMovedRow$e = "La ligne %1 a été déplacée %2 et est maintenant la ligne %3.";
 	var fr = {
 		playerHeading: playerHeading$e,
 		audioPlayer: audioPlayer$e,
@@ -15105,7 +15120,7 @@
 	var sign$d = "שפת סימנים";
 	var showSign$d = "הצג שפת סימנים";
 	var hideSign$d = "הסתר שפת סימנים";
-	var seekbarLabel$d = "ציר זמן";
+	var seekbarLabel$d = "ציר זמן %1";
 	var mute$d = "השתקה";
 	var unmute$d = "הפסקת השתקה";
 	var volume$d = "עצמה";
@@ -15448,7 +15463,7 @@
 	var sign$c = "Bahasa isyarat";
 	var showSign$c = "Tampilkan bahasa isyarat";
 	var hideSign$c = "Sembunyikan bahasa isyarat";
-	var seekbarLabel$c = "lini masa";
+	var seekbarLabel$c = "lini masa %1";
 	var mute$c = "Matikan Suara";
 	var unmute$c = "Nyalakan Suara";
 	var volume$c = "Volume";
@@ -15791,7 +15806,7 @@
 	var sign$b = "Lingua dei segni";
 	var showSign$b = "Mostra lingua dei segni";
 	var hideSign$b = "Nascondi lingua dei segni";
-	var seekbarLabel$b = "Tempo trascorso";
+	var seekbarLabel$b = "Tempo trascorso %1";
 	var mute$b = "Muto";
 	var unmute$b = "Riattiva l'audio";
 	var volume$b = "";
@@ -16134,7 +16149,7 @@
 	var sign$a = "手話";
 	var showSign$a = "手話を表示";
 	var hideSign$a = "手話を非表示";
-	var seekbarLabel$a = "タイムライン";
+	var seekbarLabel$a = "%1 タイムライン";
 	var mute$a = "消音";
 	var unmute$a = "消音解除";
 	var volume$a = "音量";
@@ -16477,7 +16492,7 @@
 	var sign$9 = "Bahasa isyarat";
 	var showSign$9 = "Tunjuk bahasa isyarat";
 	var hideSign$9 = "Sembunyi bahasa isyarat";
-	var seekbarLabel$9 = "garis masa";
+	var seekbarLabel$9 = "garis masa %1";
 	var mute$9 = "Bisukan";
 	var unmute$9 = "Nyahbisukan";
 	var volume$9 = "Volum";
@@ -16820,7 +16835,7 @@
 	var sign$8 = "Tegnspråk";
 	var showSign$8 = "Vis tegnspråk";
 	var hideSign$8 = "Skjul tegnspråk";
-	var seekbarLabel$8 = "tidslinje";
+	var seekbarLabel$8 = "%1 tidslinje";
 	var mute$8 = "Lyd av";
 	var unmute$8 = "Lyd på";
 	var volume$8 = "Volum";
@@ -17162,7 +17177,7 @@
 	var language$7 = "Taal";
 	var sign$7 = "Gebarentaal";
 	var showSign$7 = "Toon gebarentaal";
-	var seekbarLabel$7 = "tijdlijn";
+	var seekbarLabel$7 = "%1 tijdlijn";
 	var hideSign$7 = "Verberg gebarentaal";
 	var mute$7 = "Dempen";
 	var unmute$7 = "Dempen uit";
@@ -17506,7 +17521,7 @@
 	var sign$6 = "Język migowy";
 	var showSign$6 = "Pokaż język migowy";
 	var hideSign$6 = "Ukryj język migowy";
-	var seekbarLabel$6 = "Linia czasu";
+	var seekbarLabel$6 = "%1 Linia czasu";
 	var mute$6 = "Wycisz";
 	var unmute$6 = "Pogłośnij";
 	var volume$6 = "Głośność";
@@ -17849,7 +17864,7 @@
 	var sign$5 = "Língua de sinais";
 	var showSign$5 = "Mostrar língua de sinais";
 	var hideSign$5 = "Ocultar língua de sinais";
-	var seekbarLabel$5 = "Linha do tempo";
+	var seekbarLabel$5 = "Linha do tempo de %1";
 	var mute$5 = "Silenciar";
 	var unmute$5 = "Ativar som";
 	var volume$5 = "";
@@ -18192,7 +18207,7 @@
 	var sign$4 = "Linguagem gestual";
 	var showSign$4 = "Mostrar linguagem gestual";
 	var hideSign$4 = "Esconder linguagem gestual";
-	var seekbarLabel$4 = "linha temporal";
+	var seekbarLabel$4 = "linha temporal de %1";
 	var mute$4 = "Desativar som";
 	var unmute$4 = "Ativar som";
 	var volume$4 = "Volume";
@@ -18536,7 +18551,7 @@
 	var sign$3 = "Posunkový jazyk";
 	var showSign$3 = "Zobraziť posunkový jazyk";
 	var hideSign$3 = "Skryť posunkový jazyk";
-	var seekbarLabel$3 = "časová os";
+	var seekbarLabel$3 = "%1 časová os";
 	var mute$3 = "Stlmiť";
 	var unmute$3 = "Zrušiť stlmenie";
 	var volume$3 = "Hlasitosť";
@@ -18880,7 +18895,7 @@
 	var sign$2 = "Teckenspråk";
 	var showSign$2 = "Visa teckenspråk";
 	var hideSign$2 = "Göm teckenspråk";
-	var seekbarLabel$2 = "tidslinje";
+	var seekbarLabel$2 = "%1 tidslinje";
 	var mute$2 = "Slå av ljud";
 	var unmute$2 = "Slå på ljud";
 	var volume$2 = "Volym";
@@ -19223,7 +19238,7 @@
 	var sign$1 = "İşaret Dili";
 	var showSign$1 = "İşaret Dilini Göster";
 	var hideSign$1 = "İşaret Dilini Gizle";
-	var seekbarLabel$1 = "Zaman Cetveli";
+	var seekbarLabel$1 = "%1 Zaman Cetveli";
 	var mute$1 = "Sessize Al";
 	var unmute$1 = "Sesi Aç";
 	var volume$1 = "Ses Ayarı";
@@ -19566,7 +19581,7 @@
 	var sign = "手語";
 	var showSign = "顯示手語";
 	var hideSign = "隱藏手語";
-	var seekbarLabel = "時間軸";
+	var seekbarLabel = "%1 時間軸";
 	var mute = "靜音";
 	var unmute = "取消靜音";
 	var volume = "音量";
@@ -22540,7 +22555,9 @@
 
 		/**
 		 * Get data from the YouTube iFrame API. Pushes data into `this.tracks` and `this.captions`.
-		 * Initiates play to trigger loading the captions module, then stops and collects data.
+		 *
+		 * The captions module doesn't finish loading until the video plays, so playback
+		 * is triggered briefly here, then the player is cued back to an unplayed state.
 		 *
 		 * @returns {Promise} promise
 		 */
@@ -22548,95 +22565,116 @@
 
 			var deferred = new this.defer();
 			var promise = deferred.promise();
-			var thisObj, ytTracks, i, trackLang, trackLabel, isDefaultTrack, apiTriggered = false;
+			var thisObj = this;
 
-			thisObj = this;
-			if (!this.youTubePlayer.getOption('captions','tracklist') ) {
-				// no tracks were found, probably because the captions module hasn't loaded
-				// play video briefly (required to load the captions module)
-				// and after the apiChange event is triggered, try again to retrieve tracks
-				this.youTubePlayer.addEventListener('onApiChange',function() {
-					apiTriggered = true;
-					// getDuration() also requires video to play briefly
-					// so, let's set that while we're here
-					thisObj.duration = thisObj.youTubePlayer.getDuration();
+			var processTracklist = function () {
+				var ytTracks, i, trackLang, trackLabel, isDefaultTrack;
 
-					if (thisObj.loadingYouTubeCaptions) {
-						// loadingYouTubeCaptions is a stopgap in case onApiChange is called more than once
-						ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
-						if ( ! thisObj.okToPlay ) {
-							// Don't stopVideo() - that cancels loading, just pause.
-							// No need to seekTo(0) - the time passed isn't noticeable to the user
-							thisObj.youTubePlayer.pauseVideo();
-						}
-						if (ytTracks && ytTracks.length) {
-							// Step through ytTracks and add them to global tracks array
-							// Note: Unlike YouTube Data API, the IFrame Player API only returns
-							// tracks that are published, and does NOT include ASR captions
-							// So, no additional filtering is required
-							for (i=0; i < ytTracks.length; i++) {
-								trackLang = ytTracks[i].languageCode;
-								trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
-								isDefaultTrack = false;
-								if (typeof thisObj.captionLang !== 'undefined' && (trackLang === thisObj.captionLang) ) {
-									isDefaultTrack = true;
-								} else if (typeof thisObj.lang !== 'undefined') {
-									if (trackLang === thisObj.lang) {
-										isDefaultTrack = true;
-									}
-								}
-								thisObj.tracks.push({
-									'kind': 'captions',
-									'language': trackLang,
-									'label': trackLabel,
-									'def': isDefaultTrack
-								});
-								thisObj.captions.push({
-									'language': trackLang,
-									'label': trackLabel,
-									'def': isDefaultTrack,
-									'cues': null
-								});
+				if (!thisObj.loadingYouTubeCaptions) {
+					// already processed (stopgap in case onApiChange fires more than once)
+					return;
+				}
+				thisObj.loadingYouTubeCaptions = false;
+
+				ytTracks = thisObj.youTubePlayer.getOption('captions','tracklist');
+				if (ytTracks && ytTracks.length) {
+					// Step through ytTracks and add them to global tracks array
+					// Note: Unlike YouTube Data API, the IFrame Player API only returns
+					// tracks that are published, and does NOT include ASR captions
+					// So, no additional filtering is required
+					for (i=0; i < ytTracks.length; i++) {
+						trackLang = ytTracks[i].languageCode;
+						trackLabel = ytTracks[i].languageName; // displayName and languageName seem to always have the same value
+						isDefaultTrack = false;
+						if (typeof thisObj.captionLang !== 'undefined' && (trackLang === thisObj.captionLang) ) {
+							isDefaultTrack = true;
+						} else if (typeof thisObj.lang !== 'undefined') {
+							if (trackLang === thisObj.lang) {
+								isDefaultTrack = true;
 							}
-							thisObj.hasCaptions = true;
-							// setupPopups again with new captions array, replacing original
-							thisObj.setupPopups('captions');
-						} else {
-							// there are no YouTube captions
-							thisObj.usingYouTubeCaptions = false;
-							thisObj.hasCaptions = false;
 						}
-						thisObj.loadingYouTubeCaptions = false;
-						if (thisObj.okToPlay) {
-							thisObj.youTubePlayer.playVideo();
-						}
+						thisObj.tracks.push({
+							'kind': 'captions',
+							'language': trackLang,
+							'label': trackLabel,
+							'def': isDefaultTrack
+						});
+						thisObj.captions.push({
+							'language': trackLang,
+							'label': trackLabel,
+							'def': isDefaultTrack,
+							'cues': null
+						});
 					}
-					if (thisObj.captionLangPending) {
-						// user selected a new caption language prior to playback starting
-						// set it now
-						thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
-						thisObj.captionLangPending = null;
-					}
-					if (typeof thisObj.prefCaptionsSize !== 'undefined') {
-						// set the default caption size
-						// this doesn't work until the captions module is loaded
-						thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
-					}
+					thisObj.hasCaptions = true;
+					// setupPopups again with new captions array, replacing original
+					thisObj.setupPopups('captions');
+				} else {
+					// there are no YouTube captions
+					thisObj.usingYouTubeCaptions = false;
+					thisObj.hasCaptions = false;
+				}
+				if (thisObj.captionLangPending) {
+					// user selected a new caption language prior to playback starting
+					// set it now
+					thisObj.youTubePlayer.setOption('captions', 'track', {'languageCode': thisObj.captionLangPending});
+					thisObj.captionLangPending = null;
+				}
+				if (typeof thisObj.prefCaptionsSize !== 'undefined') {
+					// set the default caption size
+					// this doesn't work until the captions module is loaded
+					thisObj.youTubePlayer.setOption('captions','fontSize',thisObj.translatePrefs('size',thisObj.prefCaptionsSize,'youtube'));
+				}
+				if (!thisObj.okToPlay) {
+					// this playback was only to trigger loading of the captions module
+					// cue the video back up so it's ready for the user's (or autoplay's) real play request
+					thisObj.youTubePlayer.cueVideoById({
+						videoId: thisObj.activeYouTubeId,
+						startSeconds: 0
+					});
+					// give the player a moment to settle after the reload triggered by cueVideoById
+					// before letting downstream code (e.g., addControls) query the player again
+					setTimeout(function() {
+						deferred.resolve();
+					}, 300);
+				} else {
 					deferred.resolve();
+				}
+			};
+
+			if (this.youTubePlayer.getOption('captions','tracklist')) {
+				// captions module has already loaded
+				this.loadingYouTubeCaptions = true;
+				processTracklist();
+			} else {
+				// wait for the captions module to finish loading
+				this.youTubePlayer.addEventListener('onApiChange',function() {
+					thisObj.duration = thisObj.youTubePlayer.getDuration();
+					processTracklist();
 				});
-				// Trigger the above event listener by briefly playing the video
+				// trigger the captions module to start loading by briefly playing the video
 				this.loadingYouTubeCaptions = true;
 				this.youTubePlayer.playVideo();
-				// If onApiChange has not been triggered, the captions module is not loading.
-				setTimeout(() => {
-					if ( ! apiTriggered ) {
-						setTimeout(() => {
-							// If a second passes without loading captions, assume there are none.
-							thisObj.youTubePlayer.pauseVideo();
+				// fallback in case there really are no captions and onApiChange never fires
+				setTimeout(function() {
+					if (thisObj.loadingYouTubeCaptions) {
+						thisObj.loadingYouTubeCaptions = false;
+						thisObj.usingYouTubeCaptions = false;
+						thisObj.hasCaptions = false;
+						if (!thisObj.okToPlay) {
+							thisObj.youTubePlayer.cueVideoById({
+								videoId: thisObj.activeYouTubeId,
+								startSeconds: 0
+							});
+							// give the player a moment to settle after the reload before resolving
+							setTimeout(function() {
+								deferred.resolve();
+							}, 300);
+						} else {
 							deferred.resolve();
-						}, 500);
+						}
 					}
-				},500);
+				}, 1500);
 			}
 			return promise;
 		};
