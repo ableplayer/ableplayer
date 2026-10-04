@@ -470,17 +470,22 @@ video[data-able-player],
 .able-volume-slider input[type=range]::-moz-range-track {
 	border: 1px solid #fff;
 	width: 7px;
+	height: 100%;
 	cursor: pointer;
 	background: #000;
+	box-shadow: none;
+	border-radius: 3px;
 }
 
-input[type=range]::-moz-range-thumb {
+.able-volume-slider input[type=range]::-moz-range-thumb {
 	background-color: var(--able-control-color);
 	outline: 1px solid var(--able-volume-outline);
 	outline-offset: -2px;
 	height: var(--able-base-control-size);
 	width: var(--able-base-control-size);
 	border-radius: 100%;
+	box-shadow: none;
+	border: 1px solid var(--able-volume-outline);
 }
 
 /* Status Bar */
