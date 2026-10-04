@@ -977,6 +977,10 @@ function addBuildplayerFunctions(AblePlayer) {
 		controlLayout = this.calculateControlLayout();
 		numSections = controlLayout.length;
 
+		// if addControls() is called after initial build, controls would be duplicated.
+		// Remove anything from a prior build to prevent duplication.
+		this.$controllerDiv.find('.able-tooltip, .able-seekbar, .able-control-row, .ableplayer-clear').remove();
+
 		// add an empty div to serve as a tooltip
 		tooltipId = this.mediaId + '-tooltip';
 		this.$tooltipDiv = $('<div>',{

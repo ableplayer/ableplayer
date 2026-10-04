@@ -770,8 +770,9 @@ function addEventFunctions(AblePlayer) {
 			},2000);
 		}
 
-		// handle clicks on player buttons
-		this.$controllerDiv.find('button').on('click',function(e){
+		// handle clicks on player buttons.
+		// Use event delegation to handle clicks on any button within the controller div.
+		this.$controllerDiv.on('click', 'button', function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});
