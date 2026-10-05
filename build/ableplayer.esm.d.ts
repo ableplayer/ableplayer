@@ -55,6 +55,9 @@ declare class AblePlayer {
     youTubeNoCookie: boolean;
     vimeoId: any;
     vimeoDescId: any;
+    vimeoSignId: any;
+    vimeoSignUrlHasParams: any;
+    vimeoUrlHasParams: any;
     skin: string;
     playerWidth: number;
     allowFullscreen: boolean;

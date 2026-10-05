@@ -2731,6 +2731,14 @@
   		if (vimeoDescId !== undefined && vimeoDescId !== "") {
   			this.vimeoDescId = this.getVimeoId(vimeoDescId);
   		}
+  		let vimeoSignId = options.vimeoSignId ?? data.vimeoSignSrc;
+  		if (vimeoSignId !== undefined && vimeoSignId !== "") {
+  			// getVimeoId() sets a shared flag; keep the main video's value.
+  			let mainUrlHasParams = this.vimeoUrlHasParams;
+  			this.vimeoSignId = this.getVimeoId(vimeoSignId);
+  			this.vimeoSignUrlHasParams = this.vimeoUrlHasParams;
+  			this.vimeoUrlHasParams = mainUrlHasParams;
+  		}
 
   		// Skin
   		let skin = options.skin ?? data.skin;
@@ -6519,6 +6527,29 @@
   	};
 
   	AblePlayer.prototype.syncSignVideo = function(options) {
+  		if (this.hasSignLanguage && this.vimeoSignPlayer && options) {
+  			const sign = this.vimeoSignPlayer;
+  			const thisObj = this;
+  			const ignore = function(error) {
+  				if (thisObj.debug) ;
+  			};
+  			if (typeof options.time !== 'undefined') {
+  				sign.setCurrentTime(options.time).catch(ignore);
+  			}
+  			if (typeof options.rate !== 'undefined') {
+  				sign.setPlaybackRate(options.rate).catch(ignore);
+  			}
+  			if (typeof options.pause !== 'undefined') {
+  				sign.pause().catch(ignore);
+  			}
+  			if (typeof options.play !== 'undefined') {
+  				sign.play().catch(ignore);
+  			}
+  			if (typeof options.volume !== 'undefined') {
+  				sign.setVolume(0).catch(ignore);
+  			}
+  			return;
+  		}
   		if (this.hasSignLanguage && ( this.signVideo || this.signYoutube ) ) {
   			if (options && typeof options.time !== 'undefined') {
   				if ( this.signVideo ) {
@@ -10092,6 +10123,7 @@
   			thisObj.startedPlaying = true;
   			thisObj.paused = false;
   			thisObj.refreshControls('playpause');
+  			thisObj.syncSignVideo( { 'play' : true } );
   		});
   		this.vimeoPlayer.on('ended', function(e) {
   			// Triggered any time the video playback reaches the end.
@@ -10145,6 +10177,7 @@
   			thisObj.clickedPlay = false; // done with this variable
   			thisObj.onMediaPause();
   			thisObj.refreshControls('playpause');
+  			thisObj.syncSignVideo( { 'pause' : true } );
   		});
   		this.vimeoPlayer.on('playbackratechange',function(e) {
   			// Triggered when the playback rate of the video in the player changes.
@@ -12468,6 +12501,49 @@
   		}
   	};
 
+  	// Migrate a legacy Able-Player cookie into localStorage, then delete the cookie.
+  	// Only used when the Cookies library is unavailable.
+  	AblePlayer.prototype.migrateCookiePrefs = function() {
+  		var match = document.cookie.match( /(?:^|;\s*)Able-Player=([^;]*)/ );
+  		if ( ! match ) {
+  			return;
+  		}
+  		try {
+  			var parsed = JSON.parse( decodeURIComponent( match[1] ) );
+  			if ( parsed && typeof parsed === 'object' && ! Array.isArray( parsed ) ) {
+  				// Copy only expected keys, with expected types.
+  				var clean = {
+  					preferences: {},
+  					sign: {},
+  					transcript: {},
+  					voices: []
+  				};
+  				[ 'preferences', 'sign', 'transcript' ].forEach( function( key ) {
+  					if ( parsed[key] && typeof parsed[key] === 'object' && ! Array.isArray( parsed[key] ) ) {
+  						Object.keys( parsed[key] ).forEach( function( k ) {
+  							if ( k !== '__proto__' && k !== 'constructor' && k !== 'prototype' ) {
+  								clean[key][k] = parsed[key][k];
+  							}
+  						} );
+  					}
+  				} );
+  				if ( Array.isArray( parsed.voices ) ) {
+  					clean.voices = parsed.voices;
+  				}
+  				// Don't overwrite preferences already in localStorage.
+  				if ( localStorage.getItem( 'Able-Player' ) === null ) {
+  					localStorage.setItem( 'Able-Player', JSON.stringify( clean ) );
+  				}
+  			}
+  		} catch ( err ) {
+  			// Invalid cookie; discard it.
+  		}
+  		var secure = location.protocol === 'https:' ? '; Secure' : '';
+  		var expired = 'Able-Player=; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict' + secure;
+  		document.cookie = expired + '; path=/';
+  		document.cookie = expired;
+  	};
+
   	AblePlayer.prototype.getPref = function() {
 
   		var defaultPrefs = {
@@ -12482,6 +12558,7 @@
   			if ( typeof Cookies !== 'undefined' ) {
   				preferences = JSON.parse( Cookies.get('Able-Player') );
   			} else {
+  				this.migrateCookiePrefs();
   				preferences = JSON.parse( localStorage.getItem('Able-Player') );
   			}
   		}
@@ -13979,22 +14056,31 @@
     };
   }
 
-  /* global YT */
+  /* global YT, Vimeo */
 
   function addSignFunctions(AblePlayer) {
   	AblePlayer.prototype.initSignLanguage = function() {
-  		let firstSource, localSignSrc, remoteSignSrc, hasLocalSrc, hasRemoteSrc, hasRemoteSource, ytSignSrc, signSrc, signVideo;
+  		let firstSource, localSignSrc, remoteSignSrc, vimeoSignSrc, hasLocalSrc, hasRemoteSrc, hasRemoteSource, hasVimeoSign, ytSignSrc, signSrc, signVideo;
 
   		this.hasSignLanguage = false;
-  		// Sign language is only currently supported in HTML5 player and YouTube.
+  		// Sign language is supported on all players.
   		firstSource   = this.sources[0] ?? null;
   		localSignSrc  = firstSource ? firstSource.getAttribute('data-sign-src') : null;
   		remoteSignSrc = firstSource ? firstSource.getAttribute('data-youtube-sign-src') : null;
+  		vimeoSignSrc  = firstSource ? firstSource.getAttribute('data-vimeo-sign-src') : null;
   		hasLocalSrc   = ( localSignSrc !== null && localSignSrc !== "" );
   		// YouTube src can either be on a `source` element or on the `video` element.
   		hasRemoteSrc    = ( this.$media.data('youtube-sign-src') !== undefined && this.$media.data('youtube-sign-src') !== "" );
   		hasRemoteSource = ( remoteSignSrc !== null && remoteSignSrc !== '' );
-  		if ( ! this.isIOS() && ( hasLocalSrc || hasRemoteSrc || hasRemoteSource ) && ( this.player === 'html5' || this.player === 'youtube' ) ) {
+  		// Vimeo src can also be on either element.
+  		if ( ! this.vimeoSignId && vimeoSignSrc ) {
+  			let mainUrlHasParams = this.vimeoUrlHasParams;
+  			this.vimeoSignId = this.getVimeoId( vimeoSignSrc );
+  			this.vimeoSignUrlHasParams = this.vimeoUrlHasParams;
+  			this.vimeoUrlHasParams = mainUrlHasParams;
+  		}
+  		hasVimeoSign = !! this.vimeoSignId;
+  		if ( ! this.isIOS() && ( hasLocalSrc || hasRemoteSrc || hasRemoteSource || hasVimeoSign ) && ( this.player === 'html5' || this.player === 'youtube' || this.player === 'vimeo' ) ) {
   			// check to see if there's a sign language video accompanying this video
   			// check only the first source
   			// If sign language is provided, it must be provided for all sources
@@ -14007,7 +14093,7 @@
   			} else if ( hasRemoteSource ) {
   				this.signYoutubeId = ytSignSrc;
   			}
-  			if ( this.signFile || this.signYoutubeId ) {
+  			if ( this.signFile || this.signYoutubeId || this.vimeoSignId ) {
   				if (this.isIOS()) {
   					// iOS does not allow multiple videos to play simultaneously
   					// Therefore, sign language as rendered by Able Player unfortunately won't work
@@ -14028,7 +14114,7 @@
 
   		signVideoId = this.mediaId + '-sign';
 
-  		if ( this.signFile || this.signYoutubeId ) {
+  		if ( this.signFile || this.signYoutubeId || this.vimeoSignId ) {
   			if ( null !== this.$signDivLocation ) {
   				this.$signDivLocation.addClass( 'able-sign-window able-fixed' );
   				this.$signWindow = this.$signDivLocation;
@@ -14086,6 +14172,8 @@
   			this.$signWindow.append( this.$signVideo );
   		} else if ( this.signYoutubeId ) {
   			this.signYoutube = this.initYouTubeSignPlayer();
+  		} else if ( this.vimeoSignId ) {
+  			this.signVimeo = this.initVimeoSignPlayer();
   		}
 
   		// make it draggable
@@ -14103,6 +14191,35 @@
   		}
   	};
 
+
+  	AblePlayer.prototype.initVimeoSignPlayer = function () {
+
+  		var thisObj, containerId, id, options;
+  		thisObj = this;
+  		containerId = this.mediaId + '_vimeo_sign';
+  		id = purify.sanitize( String( this.vimeoSignId ) );
+
+  		this.vimeoSignPlayerReady = false;
+  		this.$signWindow.append( $('<div>').attr('id', containerId) );
+
+  		options = this.vimeoSignUrlHasParams ? { url: id } : { id: id };
+  		options.controls = false;
+  		options.muted = true;
+  		options.autoplay = false;
+
+  		this.vimeoSignPlayer = new Vimeo.Player( containerId, options );
+  		return this.vimeoSignPlayer.ready().then( function() {
+  			$('#' + containerId).children('iframe').attr({
+  				'tabindex': '-1',
+  				'aria-hidden': true
+  			});
+  			thisObj.vimeoSignPlayer.setVolume(0).catch(function() {});
+  			if ( thisObj.startTime ) {
+  				thisObj.vimeoSignPlayer.setCurrentTime( thisObj.startTime ).catch(function() {});
+  			}
+  			thisObj.vimeoSignPlayerReady = true;
+  		}).catch( function() {} );
+  	};
 
   	AblePlayer.prototype.initYouTubeSignPlayer = function () {
 
