@@ -39,6 +39,7 @@
 - Change speaking rate input to numeric.
 - Add generic `able-captions-container` class and set background color to match player.
 - Change CSS variables to be declared on `:root`. Props @blogcastAI.
+- Replace close button with SVG icon instead of multiply sign.
 
 ### Performance
 - Improve performance of time slider by deduplicating events and adding queues/caching.

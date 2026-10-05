@@ -4306,7 +4306,7 @@
 
   		var $alertDismiss = $('<button type="button"></button>' );
   		$alertDismiss.attr( 'aria-label', this.translate( 'dismissButton', 'Dismiss' ) );
-  		$alertDismiss.text( '×' );
+  		this.getIcon( $alertDismiss, 'close' );
   		$alertDismiss.appendTo(this.$alertBox);
 
   		$alertDismiss.on( 'click', function(e) {
@@ -8654,12 +8654,13 @@
 
   	modal.addClass('able-modal-dialog');
 
-  	var closeButton = $('<button>',{
+  	var $closeButton = $('<button>',{
   			'class': 'modalCloseButton',
   			'title': thisObj.closeButtonLabel,
   			'aria-label': thisObj.closeButtonLabel
-  	}).text('×');
-  	closeButton.on( 'keydown', function (e) {
+  	});
+  	AblePlayer.getSingleInstance().getIcon( $closeButton, 'close' );
+  	$closeButton.on( 'keydown', function (e) {
   		if (e.key === ' ') {
   			thisObj.hide();
   		}
@@ -8679,7 +8680,7 @@
   		'class': 'able-modal-header'
   	});
   	modalHeader.prepend(titleH1);
-  	modalHeader.prepend(closeButton);
+  	modalHeader.prepend($closeButton);
   	modal.prepend(modalHeader);
 
   	modal.attr({
@@ -8706,12 +8707,12 @@
   			if (e.shiftKey) {
   				// If backwards from first element, go to last.
   				if (currentIndex === 0) {
-  					focusable.get(focusable.length - 1).trigger('focus');
+  					$(focusable.get(focusable.length - 1)).trigger('focus');
   					e.preventDefault();
   				}
   			} else {
   				if (currentIndex === focusable.length - 1) {
-  					focusable.get(0).trigger('focus');
+  					$(focusable.get(0)).trigger('focus');
   					e.preventDefault();
   				}
   			}
@@ -10590,8 +10591,8 @@
   				break;
 
   			case 'close':
-  				svg[0] = '0 0 16 20';
-  				svg[1] = [ 'M1.228 14.933q0-0.446 0.312-0.759l3.281-3.281-3.281-3.281q-0.313-0.313-0.313-0.759t0.313-0.759l1.518-1.518q0.313-0.313 0.759-0.313t0.759 0.313l3.281 3.281 3.281-3.281q0.313-0.313 0.759-0.313t0.759 0.313l1.518 1.518q0.313 0.313 0.313 0.759t-0.313 0.759l-3.281 3.281 3.281 3.281q0.313 0.313 0.313 0.759t-0.313 0.759l-1.518 1.518q-0.313 0.313-0.759 0.313t-0.759-0.313l-3.281-3.281-3.281 3.281q-0.313 0.313-0.759 0.313t-0.759-0.313l-1.518-1.518q-0.313-0.313-0.313-0.759z' ];
+  				svg[0] = '0 0 16 16';
+  				svg[1] = [ 'M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708' ];
   				break;
 
   			case 'fullscreen-expand':
