@@ -305,6 +305,14 @@ class AblePlayer {
 		if (vimeoDescId !== undefined && vimeoDescId !== "") {
 			this.vimeoDescId = this.getVimeoId(vimeoDescId);
 		}
+		let vimeoSignId = options.vimeoSignId ?? data.vimeoSignSrc;
+		if (vimeoSignId !== undefined && vimeoSignId !== "") {
+			// getVimeoId() sets a shared flag; keep the main video's value.
+			let mainUrlHasParams = this.vimeoUrlHasParams;
+			this.vimeoSignId = this.getVimeoId(vimeoSignId);
+			this.vimeoSignUrlHasParams = this.vimeoUrlHasParams;
+			this.vimeoUrlHasParams = mainUrlHasParams;
+		}
 
 		// Skin
 		let skin = options.skin ?? data.skin;

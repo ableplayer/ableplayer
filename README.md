@@ -506,6 +506,10 @@ If multiple video sources are already provided (e.g., an MP4 and WebM file), the
 
 You can also load your sign language source video from YouTube. If you're using a local source, add the attribute `data-youtube-sign-src` to your `<source>` element with a YouTube video ID or URL. If all your sources are remote, add the attribute directly to your `video` element.
 
+#### Loading from Vimeo
+
+Sign language videos can also be loaded from Vimeo. Add the attribute `data-vimeo-sign-src` with a Vimeo video ID or URL to your `<source>` element, or directly to your `video` element if all your sources are remote. The Vimeo Player API script (`https://player.vimeo.com/api/player.js`) must be loaded on the page.
+
 If a sign language version is available, a sign language button will be added to the media controller. This button will toggle the display of a pop-up window in which the sign language video will appear. Users can move or resize the pop-up window with either mouse or keyboard.
 
 Unfortunately this feature is not supported on iOS.

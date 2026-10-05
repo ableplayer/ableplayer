@@ -311,6 +311,31 @@ function addControlFunctions(AblePlayer) {
 	};
 
 	AblePlayer.prototype.syncSignVideo = function(options) {
+		if (this.hasSignLanguage && this.vimeoSignPlayer && options) {
+			const sign = this.vimeoSignPlayer;
+			const thisObj = this;
+			const ignore = function(error) {
+				if (thisObj.debug) {
+					console.log('Vimeo sign player error: ', error);
+				}
+			};
+			if (typeof options.time !== 'undefined') {
+				sign.setCurrentTime(options.time).catch(ignore);
+			}
+			if (typeof options.rate !== 'undefined') {
+				sign.setPlaybackRate(options.rate).catch(ignore);
+			}
+			if (typeof options.pause !== 'undefined') {
+				sign.pause().catch(ignore);
+			}
+			if (typeof options.play !== 'undefined') {
+				sign.play().catch(ignore);
+			}
+			if (typeof options.volume !== 'undefined') {
+				sign.setVolume(0).catch(ignore);
+			}
+			return;
+		}
 		if (this.hasSignLanguage && ( this.signVideo || this.signYoutube ) ) {
 			if (options && typeof options.time !== 'undefined') {
 				if ( this.signVideo ) {

@@ -7,6 +7,7 @@
 - Add `options` parameter to the AblePlayer class instantiation, supporting all `data-` attributes, strings, and icons.
 - Add support for media queries in sources, allowing the player to toggle to different versions of the media based on pre-existing user preferences, orientation, or viewport sizes. Props @aardrian.
 - Add a function that migrates existing settings from the Able-Player cookie to local storage if JS Cookie is not available.
+- Added feature parity for Vimeo with synchronized sign language support.
 
 ### Accessibility
 - Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.

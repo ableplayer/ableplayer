@@ -629,6 +629,7 @@ function addEventFunctions(AblePlayer) {
 			thisObj.startedPlaying = true;
 			thisObj.paused = false;
 			thisObj.refreshControls('playpause');
+			thisObj.syncSignVideo( { 'play' : true } );
 		});
 		this.vimeoPlayer.on('ended', function(e) {
 			// Triggered any time the video playback reaches the end.
@@ -685,6 +686,7 @@ function addEventFunctions(AblePlayer) {
 			thisObj.clickedPlay = false; // done with this variable
 			thisObj.onMediaPause();
 			thisObj.refreshControls('playpause');
+			thisObj.syncSignVideo( { 'pause' : true } );
 		});
 		this.vimeoPlayer.on('playbackratechange',function(e) {
 			// Triggered when the playback rate of the video in the player changes.
