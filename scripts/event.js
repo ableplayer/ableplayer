@@ -629,6 +629,7 @@ function addEventFunctions(AblePlayer) {
 			thisObj.startedPlaying = true;
 			thisObj.paused = false;
 			thisObj.refreshControls('playpause');
+			thisObj.syncSignVideo( { 'play' : true } );
 		});
 		this.vimeoPlayer.on('ended', function(e) {
 			// Triggered any time the video playback reaches the end.
@@ -685,6 +686,7 @@ function addEventFunctions(AblePlayer) {
 			thisObj.clickedPlay = false; // done with this variable
 			thisObj.onMediaPause();
 			thisObj.refreshControls('playpause');
+			thisObj.syncSignVideo( { 'pause' : true } );
 		});
 		this.vimeoPlayer.on('playbackratechange',function(e) {
 			// Triggered when the playback rate of the video in the player changes.
@@ -770,8 +772,9 @@ function addEventFunctions(AblePlayer) {
 			},2000);
 		}
 
-		// handle clicks on player buttons
-		this.$controllerDiv.find('button').on('click',function(e){
+		// handle clicks on player buttons.
+		// Use event delegation to handle clicks on any button within the controller div.
+		this.$controllerDiv.on('click', 'button', function(e){
 			e.stopPropagation();
 			thisObj.onClickPlayerButton(this);
 		});
@@ -779,7 +782,12 @@ function addEventFunctions(AblePlayer) {
 		// handle clicks (left only) anywhere on the page. If any popups are open, close them.
 		$('body').on('click', function(e) {
 
-			if (e.button !== 0) { // not a left click
+			// not a left click
+			if (e.button !== 0) {
+				return false;
+			}
+			// not a click inside the volume slider
+			if (e.target.closest('.able-volume-slider')) {
 				return false;
 			}
 			if ($('.able-popup:visible').length || $('.able-volume-slider:visible').length ) {

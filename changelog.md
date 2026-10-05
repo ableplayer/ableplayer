@@ -6,6 +6,8 @@
 - Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
 - Add `options` parameter to the AblePlayer class instantiation, supporting all `data-` attributes, strings, and icons.
 - Add support for media queries in sources, allowing the player to toggle to different versions of the media based on pre-existing user preferences, orientation, or viewport sizes. Props @aardrian.
+- Add a function that migrates existing settings from the Able-Player cookie to local storage if JS Cookie is not available.
+- Added feature parity for Vimeo with synchronized sign language support.
 
 ### Accessibility
 - Fix behavior of seekhead so that rapid or shaky mouse movements don't cause tracking to be lost.
@@ -26,6 +28,7 @@
 - Bug fix: events triggered from outside the player triggered errors due to assumed classes.
 - Modified preferences dialog generation so dialogs are only generated once per page and re-used, rather than generating four dialogs per player.
 - Fix bug with timestamp formatting in Video Transcript Sorter.
+- Don't immediately close the volume slider on any click inside its container.
 
 ### Design
 - Increase size and add hover state to seekbar.
@@ -36,6 +39,7 @@
 - Change speaking rate input to numeric.
 - Add generic `able-captions-container` class and set background color to match player.
 - Change CSS variables to be declared on `:root`. Props @blogcastAI.
+- Replace close button with SVG icon instead of multiply sign.
 
 ### Performance
 - Improve performance of time slider by deduplicating events and adding queues/caching.
@@ -54,8 +58,10 @@
 - Set untranslated strings to have empty value in JSON data.
 - Update translate function to fallback to default if value empty.
 - Update imports to not import the English translation files, used only as a reference for translating.
- - Update Slovak translation. Props @rraddatch.
- - Update Taiwanese Chinese translation. Props @JediLin.
+- Update Slovak translation. Props @rraddatch.
+- Update Taiwanese Chinese translation. Props @JediLin.
+- Update French translation. Props @DuaelFr.
+- Fixed concatenated translated string in seekbar. Props @DuaelFr.
 
 ### Meta
 

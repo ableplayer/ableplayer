@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vimeo player with synchronized sign language | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+<!-- Dependencies -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.dist.js"></script>
+
+<!-- Vimeo JavaScript -->
+<script src="https://player.vimeo.com/api/player.js"></script>
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>Vimeo player with synchronized sign language</h1>
+
+			<div id="intro">
+
+				<p>This page features an example of Able Player being used to play a Vimeo video with synchronized sign language also hosted on Vimeo.</p>
+
+			</div>
+			<div class="wrapper">
+				<video id="video1" data-able-player preload="auto" data-vimeo-id="1233074845" data-vimeo-sign-src="1233074846" playsinline>
+				</video>
+			</div>
+
+		</main>
+	</div>
+<script src="demos.js"></script>
+</body>
+</html>

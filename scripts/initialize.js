@@ -191,8 +191,8 @@ import DOMPurify from 'dompurify';
 				break;
 
 			case 'close':
-				svg[0] = '0 0 16 20';
-				svg[1] = [ 'M1.228 14.933q0-0.446 0.312-0.759l3.281-3.281-3.281-3.281q-0.313-0.313-0.313-0.759t0.313-0.759l1.518-1.518q0.313-0.313 0.759-0.313t0.759 0.313l3.281 3.281 3.281-3.281q0.313-0.313 0.759-0.313t0.759 0.313l1.518 1.518q0.313 0.313 0.313 0.759t-0.313 0.759l-3.281 3.281 3.281 3.281q0.313 0.313 0.313 0.759t-0.313 0.759l-1.518 1.518q-0.313 0.313-0.759 0.313t-0.759-0.313l-3.281-3.281-3.281 3.281q-0.313 0.313-0.759 0.313t-0.759-0.313l-1.518-1.518q-0.313-0.313-0.313-0.759z' ];
+				svg[0] = '0 0 16 16';
+				svg[1] = [ 'M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708' ];
 				break;
 
 			case 'fullscreen-expand':
@@ -375,11 +375,18 @@ import DOMPurify from 'dompurify';
 	 * @returns {Array} Filtered array of sources.
 	 */
 	AblePlayer.prototype.getSources = function () {
+
 		let sources = this.media.querySelectorAll('source');
 		let newSources = Array.from(sources).filter(source => {
 			const media = source.getAttribute('media');
 			return (window.matchMedia(media) && window.matchMedia(media).matches);
 		});
+		let videoSource = this.media.hasAttribute( 'src' ) ? this.media.getAttribute('src') : '';
+		if ( videoSource ) {
+			let sourceSource = document.createElement( 'source' );
+			sourceSource.src = videoSource;
+			newSources.push(sourceSource);
+		}
 		if ( newSources.length === 0 && sources.length > 0 ) {
 			// If no sources match the media query, return the original sources and allow browser to handle.
 			if ( this.debug ) {
@@ -601,6 +608,7 @@ import DOMPurify from 'dompurify';
 		if (this.player === 'html5') {
 			playerPromise = this.initHtml5Player();
 		} else if (this.player === 'youtube') {
+			this.$mediaContainer.attr( 'referrerpolicy', 'strict-origin-when-cross-origin' );
 			playerPromise = this.initYouTubePlayer();
 		} else if (this.player === 'vimeo') {
 			playerPromise = this.initVimeoPlayer();

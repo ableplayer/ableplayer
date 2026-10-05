@@ -117,10 +117,6 @@ details:open {
 	text-decoration: underline;
 }
 
-.body-wrapper nav details a {
-	display: inline;
-}
-
 .body-wrapper nav li {
 	padding: 2px 4px;
 	margin: 0;

@@ -24,7 +24,7 @@
   "sign": "Znaková řeč",
   "showSign": "Zobrazit znakovou řeč",
   "hideSign": "Skrýt znakovou řeč",
-  "seekbarLabel": "časová osa",
+  "seekbarLabel": "%1 časová osa",
   "mute": "Vypnout zvuk",
   "unmute": "Zapnout zvuk",
   "volume": "Hlasitost",

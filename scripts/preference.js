@@ -14,6 +14,49 @@
 		}
 	};
 
+	// Migrate a legacy Able-Player cookie into localStorage, then delete the cookie.
+	// Only used when the Cookies library is unavailable.
+	AblePlayer.prototype.migrateCookiePrefs = function() {
+		var match = document.cookie.match( /(?:^|;\s*)Able-Player=([^;]*)/ );
+		if ( ! match ) {
+			return;
+		}
+		try {
+			var parsed = JSON.parse( decodeURIComponent( match[1] ) );
+			if ( parsed && typeof parsed === 'object' && ! Array.isArray( parsed ) ) {
+				// Copy only expected keys, with expected types.
+				var clean = {
+					preferences: {},
+					sign: {},
+					transcript: {},
+					voices: []
+				};
+				[ 'preferences', 'sign', 'transcript' ].forEach( function( key ) {
+					if ( parsed[key] && typeof parsed[key] === 'object' && ! Array.isArray( parsed[key] ) ) {
+						Object.keys( parsed[key] ).forEach( function( k ) {
+							if ( k !== '__proto__' && k !== 'constructor' && k !== 'prototype' ) {
+								clean[key][k] = parsed[key][k];
+							}
+						} );
+					}
+				} );
+				if ( Array.isArray( parsed.voices ) ) {
+					clean.voices = parsed.voices;
+				}
+				// Don't overwrite preferences already in localStorage.
+				if ( localStorage.getItem( 'Able-Player' ) === null ) {
+					localStorage.setItem( 'Able-Player', JSON.stringify( clean ) );
+				}
+			}
+		} catch ( err ) {
+			// Invalid cookie; discard it.
+		}
+		var secure = location.protocol === 'https:' ? '; Secure' : '';
+		var expired = 'Able-Player=; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict' + secure;
+		document.cookie = expired + '; path=/';
+		document.cookie = expired;
+	};
+
 	AblePlayer.prototype.getPref = function() {
 
 		var defaultPrefs = {
@@ -28,6 +71,7 @@
 			if ( typeof Cookies !== 'undefined' ) {
 				preferences = JSON.parse( Cookies.get('Able-Player') );
 			} else {
+				this.migrateCookiePrefs();
 				preferences = JSON.parse( localStorage.getItem('Able-Player') );
 			}
 		}

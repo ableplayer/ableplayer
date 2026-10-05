@@ -387,7 +387,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		var $alertDismiss = $('<button type="button"></button>' );
 		$alertDismiss.attr( 'aria-label', this.translate( 'dismissButton', 'Dismiss' ) );
-		$alertDismiss.text( '×' );
+		this.getIcon( $alertDismiss, 'close' );
 		$alertDismiss.appendTo(this.$alertBox);
 
 		$alertDismiss.on( 'click', function(e) {
@@ -977,6 +977,10 @@ function addBuildplayerFunctions(AblePlayer) {
 		controlLayout = this.calculateControlLayout();
 		numSections = controlLayout.length;
 
+		// if addControls() is called after initial build, controls would be duplicated.
+		// Remove anything from a prior build to prevent duplication.
+		this.$controllerDiv.find('.able-tooltip, .able-seekbar, .able-control-row, .ableplayer-clear').remove();
+
 		// add an empty div to serve as a tooltip
 		tooltipId = this.mediaId + '-tooltip';
 		this.$tooltipDiv = $('<div>',{
@@ -988,7 +992,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		if (this.skin == '2020') {
 			// add a full-width seek bar
 			$sliderDiv = $('<div class="able-seekbar"></div>');
-			sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
+			sliderLabel = this.translate( 'seekbarLabel', '%1 timeline', [ this.mediaType ] );
 			this.$controllerDiv.append($sliderDiv);
 			this.seekBar = new AccessibleSlider($sliderDiv, this.duration, this.seekInterval, sliderLabel );
 		}
@@ -1014,7 +1018,7 @@ function addBuildplayerFunctions(AblePlayer) {
 				control = controls[j];
 				if (control === 'seek') {
 					$sliderDiv = $('<div class="able-seekbar"></div>');
-					sliderLabel = this.mediaType + ' ' + this.translate( 'seekbarLabel', 'timeline' );
+					sliderLabel = this.translate( 'seekbarLabel', '%1 timeline', [ this.mediaType ] );
 					$controllerSpan.append($sliderDiv);
 					if (typeof this.duration === 'undefined' || this.duration === 0) {
 						// set arbitrary starting duration, and change it when duration is known
