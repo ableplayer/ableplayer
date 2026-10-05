@@ -387,7 +387,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		var $alertDismiss = $('<button type="button"></button>' );
 		$alertDismiss.attr( 'aria-label', this.translate( 'dismissButton', 'Dismiss' ) );
-		$alertDismiss.text( '×' );
+		this.getIcon( $alertDismiss, 'close' );
 		$alertDismiss.appendTo(this.$alertBox);
 
 		$alertDismiss.on( 'click', function(e) {

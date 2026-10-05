@@ -16,12 +16,13 @@ function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 
 	modal.addClass('able-modal-dialog');
 
-	var closeButton = $('<button>',{
+	var $closeButton = $('<button>',{
 			'class': 'modalCloseButton',
 			'title': thisObj.closeButtonLabel,
 			'aria-label': thisObj.closeButtonLabel
-	}).text('×');
-	closeButton.on( 'keydown', function (e) {
+	});
+	AblePlayer.getSingleInstance().getIcon( $closeButton, 'close' );
+	$closeButton.on( 'keydown', function (e) {
 		if (e.key === ' ') {
 			thisObj.hide();
 		}
@@ -41,7 +42,7 @@ function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 		'class': 'able-modal-header'
 	});
 	modalHeader.prepend(titleH1);
-	modalHeader.prepend(closeButton);
+	modalHeader.prepend($closeButton);
 	modal.prepend(modalHeader);
 
 	modal.attr({
@@ -68,12 +69,12 @@ function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 			if (e.shiftKey) {
 				// If backwards from first element, go to last.
 				if (currentIndex === 0) {
-					focusable.get(focusable.length - 1).trigger('focus');
+					$(focusable.get(focusable.length - 1)).trigger('focus');
 					e.preventDefault();
 				}
 			} else {
 				if (currentIndex === focusable.length - 1) {
-					focusable.get(0).trigger('focus');
+					$(focusable.get(0)).trigger('focus');
 					e.preventDefault();
 				}
 			}

@@ -652,9 +652,11 @@ div.able-modal-overlay {
 	gap: 8px;
 }
 
+.able-alert button,
 .able-modal-dialog .modalCloseButton {
-	margin: 0;
-	align-self: flex-start;
+	width: 24px;
+	height: 24px;
+	padding: 2px;
 }
 
 div.able-modal-dialog h1 {
