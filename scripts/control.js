@@ -282,6 +282,21 @@ function addControlFunctions(AblePlayer) {
 		this.syncSignVideo( { 'rate' : rate } );
 		this.playbackRate = rate;
 		this.$speed.text( this.translate( 'speed', 'Speed' ) + ': ' + rate.toFixed(2).toString() + 'x');
+		this.updateSpeedButtonLabels();
+	};
+
+	// Refresh the faster/slower button labels so they reflect the rate each button would now select.
+	AblePlayer.prototype.updateSpeedButtonLabels = function () {
+		if (!this.$controllerDiv) {
+			return;
+		}
+		var thisObj = this;
+		[ 'faster', 'slower' ].forEach( function( control ) {
+			var $button = thisObj.$controllerDiv.find( '.able-button-handler-' + control );
+			if ( $button.length ) {
+				thisObj.setText( $button, thisObj.getButtonTitle( control ) );
+			}
+		});
 	};
 
 	AblePlayer.prototype.getPlaybackRate = function () {

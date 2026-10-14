@@ -694,6 +694,7 @@ function addEventFunctions(AblePlayer) {
 			// and the event will not fire for those videos.
 			// data contains one key: 'playbackRate'
 			thisObj.vimeoPlaybackRate = e['playbackRate'];
+			thisObj.updateSpeedButtonLabels();
 		});
 		this.vimeoPlayer.on('texttrackchange', function(e) {
 			// Triggered when the active text track (captions/subtitles) changes.
