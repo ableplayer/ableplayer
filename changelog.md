@@ -28,6 +28,11 @@
 - Bug fix: events triggered from outside the player triggered errors due to assumed classes.
 - Modified preferences dialog generation so dialogs are only generated once per page and re-used, rather than generating four dialogs per player.
 - Fix bug with timestamp formatting in Video Transcript Sorter.
+- Fix sign language not appearing after switching between described and non-described versions: the `<video>` `src` set for media queries overrode the swapped `<source>` elements, and control bar click handlers were bound again on each player rebuild.
+- Prevent event listeners on window, document and body from being duplicated each time the player is rebuilt, or fullscreen is toggled.
+- Update the labels of the faster and slower buttons when the playback rate changes.
+- Reset the "paused for description" state correctly after a spoken description finishes.
+- Document that when descriptions are read by a screen reader, automatic pausing for descriptions requires the user to resume playback manually.
 - Don't immediately close the volume slider on any click inside its container.
 
 ### Design
