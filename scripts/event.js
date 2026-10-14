@@ -719,9 +719,11 @@ function addEventFunctions(AblePlayer) {
 	AblePlayer.prototype.addEventListeners = function () {
 
 		var thisObj = this;
+		// Per-instance namespace, so listeners can be replaced when the player is rebuilt.
+		var ns = '.ableEvents' + this.ableIndex;
 
 		// Appropriately resize media player for full screen.
-		$(window).on('resize',function () {
+		$(window).off('resize' + ns).on('resize' + ns, function () {
 			thisObj.resizePlayer();
 		});
 
@@ -732,6 +734,14 @@ function addEventFunctions(AblePlayer) {
 			var handleOrientationChange = function () {
 				thisObj.refreshSourcesOnOrientationChange();
 			};
+			if (this.orientationListener) {
+				if (typeof orientationMediaQuery.removeEventListener === 'function') {
+					orientationMediaQuery.removeEventListener('change', this.orientationListener);
+				} else if (typeof orientationMediaQuery.removeListener === 'function') {
+					orientationMediaQuery.removeListener(this.orientationListener);
+				}
+			}
+			this.orientationListener = handleOrientationChange;
 			if (typeof orientationMediaQuery.addEventListener === 'function') {
 				orientationMediaQuery.addEventListener('change', handleOrientationChange);
 			} else if (typeof orientationMediaQuery.addListener === 'function') {
@@ -746,7 +756,10 @@ function addEventFunctions(AblePlayer) {
 		// http://caniuse.com/#feat=mutationobserver
 		if (window.MutationObserver) {
 			var target = this.$ableDiv[0];
-			var observer = new MutationObserver(function(mutations) {
+			if (this.visibilityObserver) {
+				this.visibilityObserver.disconnect();
+			}
+			var observer = this.visibilityObserver = new MutationObserver(function(mutations) {
 				mutations.forEach(function(mutation) {
 					if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
 						// the player's style attribute has changed. Check to see if it's visible
@@ -781,7 +794,7 @@ function addEventFunctions(AblePlayer) {
 		});
 
 		// handle clicks (left only) anywhere on the page. If any popups are open, close them.
-		$('body').on('click', function(e) {
+		$('body').off('click' + ns).on('click' + ns, function(e) {
 
 			// not a left click
 			if (e.button !== 0) {
@@ -829,7 +842,7 @@ function addEventFunctions(AblePlayer) {
 		});
 
 		// if user presses a key from anywhere on the page, show player controls
-		$(document).on( 'keydown', function(e) {
+		$(document).off('keydown' + ns).on( 'keydown' + ns, function(e) {
 			if (thisObj.controlsHidden) {
 				thisObj.fadeControls('in');
 				thisObj.controlsHidden = false;

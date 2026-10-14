@@ -1276,7 +1276,8 @@ function addControlFunctions(AblePlayer) {
 		// add event handlers for changes in fullscreen mode.
 		// Browsers natively trigger this event with the Escape key,
 		// in addition to clicking the exit fullscreen button
-		$(document).on('fullscreenchange webkitfullscreenchange', function(e) {
+		var fsNs = '.ableFullscreen' + this.ableIndex;
+		$(document).off('fullscreenchange' + fsNs + ' webkitfullscreenchange' + fsNs).on('fullscreenchange' + fsNs + ' webkitfullscreenchange' + fsNs, function(e) {
 			// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
 			if (!thisObj.fullscreen) {
 				// user has just exited full screen
