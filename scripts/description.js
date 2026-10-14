@@ -370,6 +370,11 @@ function addDescriptionFunctions(AblePlayer) {
 				}
 			}
 
+			// getSources() sets the media element's src attribute, which takes precedence over <source> children.
+			if (this.sources.length > 0 && this.sources[0].getAttribute('src')) {
+				this.media.src = this.sources[0].getAttribute('src');
+			}
+
 			if (this.recreatingPlayer) {
 				// stopgap to prevent multiple firings of recreatePlayer()
 				return;
