@@ -509,6 +509,8 @@ function addDescriptionFunctions(AblePlayer) {
 					this.$descDiv.html(descText);
 				}
 				// Only pause video if not using a described video.
+				// When descriptions are read by a screen reader (data-desc-reader="screenreader"),
+				// there is no end event, so the video stays paused until the user resumes playback.
 				if (this.prefDescPause && this.descMethod === 'text') {
 					this.pauseMedia();
 					this.pausedForDescription = true;
@@ -680,7 +682,7 @@ function addDescriptionFunctions(AblePlayer) {
 				if (thisObj.prefDescPause) {
 					if (thisObj.pausedForDescription) {
 						thisObj.playMedia();
-						this.pausedForDescription = false;
+						thisObj.pausedForDescription = false;
 					}
 				}
 			}
