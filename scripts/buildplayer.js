@@ -1357,6 +1357,8 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		// remove source and track elements from previous playlist item
 		this.$media.empty();
+		// getSources() sets a src attribute for the previous item; drop it so it can't override the new sources
+		this.$media.removeAttr('src');
 
 		// transfer media attributes from playlist to media element
 		if (this.hasAttr($newItem,'data-poster')) {

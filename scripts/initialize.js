@@ -379,6 +379,10 @@ import DOMPurify from 'dompurify';
 		let sources = this.media.querySelectorAll('source');
 		let newSources = Array.from(sources).filter(source => {
 			const media = source.getAttribute('media');
+			if (!media) {
+				// A source without a media query always applies.
+				return true;
+			}
 			return (window.matchMedia(media) && window.matchMedia(media).matches);
 		});
 		let videoSource = this.media.hasAttribute( 'src' ) ? this.media.getAttribute('src') : '';
