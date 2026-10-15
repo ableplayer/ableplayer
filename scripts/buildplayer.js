@@ -969,7 +969,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		i, j, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, control,
 		buttonTitle, $newButton, buttonText, position, buttonHeight,
 		buttonWidth, buttonSide, controllerWidth, tooltipId, tooltipY, tooltipX,
-		tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, captionLabel, popupMenuId;
+		tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, popupMenuId;
 
 		thisObj = this;
 
