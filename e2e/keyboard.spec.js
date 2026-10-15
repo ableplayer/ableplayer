@@ -327,3 +327,143 @@ test("clicking a transcript line seeks to that line and plays", async ({ page })
   expect(t).toBeGreaterThanOrEqual(start - 0.5);
   expect(t).toBeLessThan(start + 3);
 });
+
+/* ---------- Chapters (video3), sign language (video5), playlist (playlist2) ---------- */
+
+async function openDemo(page, name) {
+  await page.goto(`/demos/${name}.html`);
+  await page.waitForSelector(".able-controller", { timeout: 20_000 });
+}
+
+test("video3: selecting a chapter seeks to it and starts playback", async ({ page }) => {
+  await openDemo(page, "video3");
+  const chapters = btn(page, "chapters");
+  const menu = page.locator('.able-popup[id$="-chapters-menu"]');
+  const items = menu.locator("> li");
+  await expect(items).toHaveCount(2);
+
+  await chapters.focus();
+  await page.keyboard.press("Enter");
+  await expect(menu).toBeVisible();
+  await expect(items.nth(0)).toBeFocused();
+
+  await page.keyboard.press("ArrowDown");
+  await expect(items.nth(1)).toBeFocused();
+  const start = await page.evaluate(() => {
+    const m = document.querySelector('.able-popup[id$="-chapters-menu"] > li:nth-child(2)').textContent;
+    const [mm, ss] = m.split(" - ")[1].split(":").map(Number);
+    return mm * 60 + ss;
+  });
+  expect(start).toBe(37);
+
+  await page.keyboard.press("Enter");
+  await expect(menu).toBeHidden();
+  await expect(chapters).toBeFocused();
+  await expect.poll(async () => (await mediaState(page)).t).toBeGreaterThanOrEqual(start - 0.5);
+  expect((await mediaState(page)).t).toBeLessThan(start + 3);
+  await expect.poll(async () => (await mediaState(page)).paused, {
+    message: "selecting a chapter must start playback",
+  }).toBe(false);
+});
+
+test("video5: sign language window opens and both videos play in sync", async ({ page }) => {
+  await openDemo(page, "video5");
+  const sign = page.locator(".able-sign-window");
+  await expect(sign).toBeHidden();
+
+  await btn(page, "sign").focus();
+  await page.keyboard.press("Enter");
+  await expect(sign).toBeVisible();
+  const signVideo = sign.locator("video");
+  await expect(signVideo).toHaveCount(1);
+
+  const times = () =>
+    page.evaluate(() => {
+      const [main, sign] = document.querySelectorAll("video");
+      return { main: main.currentTime, sign: sign.currentTime, mp: main.paused, sp: sign.paused };
+    });
+
+  await btn(page, "play").click();
+  await expect
+    .poll(async () => {
+      const s = await times();
+      return !s.mp && !s.sp && s.main > 1;
+    }, { timeout: 15_000, message: "both videos must be playing" })
+    .toBe(true);
+  const s = await times();
+  expect(Math.abs(s.main - s.sign)).toBeLessThan(1);
+
+  // Seeking the main video re-syncs the sign video.
+  await btn(page, "forward").click();
+  await expect
+    .poll(async () => {
+      const t = await times();
+      return Math.abs(t.main - t.sign);
+    }, { timeout: 10_000 })
+    .toBeLessThan(1);
+
+  await btn(page, "play").click();
+  await expect.poll(async () => {
+    const t = await times();
+    return t.mp && t.sp;
+  }).toBe(true);
+});
+
+test.describe("playlist2", () => {
+  const current = (page) =>
+    page.evaluate(() => {
+      const lis = [...document.querySelectorAll(".able-playlist > li")];
+      return {
+        index: lis.findIndex((li) => li.classList.contains("able-current")),
+        src: document.querySelector("video").currentSrc,
+      };
+    });
+
+  // A track change rebuilds the player; further presses are ignored until it settles.
+  const settle = async (page) => {
+    await page.waitForFunction(() => document.querySelector(".able-wrapper video")?.readyState >= 3);
+    await page.waitForTimeout(1000);
+  };
+
+  test.beforeEach(async ({ page }) => {
+    await openDemo(page, "playlist2");
+    await expect(page.locator(".able-playlist > li")).toHaveCount(3);
+    await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(0);
+    await settle(page);
+  });
+
+  test("playlist items take focus and start playback when activated", async ({ page }) => {
+    const itemButton = page.locator(".able-playlist > li button").nth(2);
+    await itemButton.focus();
+    await expect(itemButton).toBeFocused();
+    await page.keyboard.press("Enter");
+
+    await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(2);
+    await expect(itemButton).toHaveAttribute("aria-current", "true");
+    await expect.poll(async () => (await mediaState(page)).paused, { timeout: 15_000 }).toBe(false);
+  });
+
+  test("next and previous track buttons navigate the playlist", async ({ page }) => {
+    await btn(page, "next").focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(1);
+    await settle(page);
+
+    await btn(page, "previous").focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(0);
+    await settle(page);
+
+    // Previous on the first track wraps to the last.
+    await btn(page, "previous").focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(2);
+    await settle(page);
+
+    // Next on the last track wraps to the first.
+    await btn(page, "next").focus();
+    await page.keyboard.press("Enter");
+    await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(0);
+    await settle(page);
+  });
+});
