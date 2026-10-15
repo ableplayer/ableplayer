@@ -15,7 +15,8 @@
 - Improvements to design and focus handling in Windows High Contrast Mode.
 - Changed controls from `div[role="button"]` to `button`.
 - Change labels on speaking rates to reflect actual values
-- Add missing `aria-haspopup` and `aria-expanded` on transcript trigger; remove extraneous `title` attribute.
+- Add missing `aria-haspopup`, `aria-expanded`, and `aria-controls` on transcript trigger; remove extraneous `title` attribute.
+- Improve consistency of `aria-pressed` and `aria-expanded` usage and management.
 
 ### Bug fixes
 - Add the seek interval value to rewind and forward buttons, to provide better user information.
@@ -35,6 +36,7 @@
 - Reset the "paused for description" state correctly after a spoken description finishes.
 - Document that when descriptions are read by a screen reader, automatic pausing for descriptions requires the user to resume playback manually.
 - Don't immediately close the volume slider on any click inside its container.
+- Simplify the `toggleButtonState` prototype so that it requires fewer arguments, and derives more state information from the control itself.
 
 ### Design
 - Increase size and add hover state to seekbar.
