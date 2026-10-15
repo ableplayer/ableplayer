@@ -2468,7 +2468,7 @@
 			i, j, controls, $controllerSpan, $sliderDiv, sliderLabel, $pipe, control,
 			buttonTitle, $newButton, buttonText, position, buttonHeight,
 			buttonWidth, buttonSide, controllerWidth, tooltipId, tooltipY, tooltipX,
-			tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, captionLabel, popupMenuId;
+			tooltipWidth, tooltipStyle, tooltip, tooltipTimerId, popupMenuId;
 
 			thisObj = this;
 
@@ -2577,7 +2577,11 @@
 								if (this.captions.length > 1) {
 									$newButton.attr('aria-expanded', 'false');
 								} else {
-									$newButton.attr('aria-pressed', 'false');
+									if ( this.captionsOn ) {
+										$newButton.attr('aria-pressed', 'true');
+									} else {
+										$newButton.attr('aria-pressed', 'false');
+									}
 								}
 							}
 						}
@@ -2685,20 +2689,17 @@
 						if (control === 'captions') {
 							if (!this.prefCaptions || this.prefCaptions !== 1) {
 								// captions are available, but user has them turned off
-								if (this.captions.length > 1) {
-									captionLabel = this.translate( 'captions', 'Captions' );
-								} else {
-									captionLabel = this.translate( 'showCaptions', 'Show captions' );
+								if (this.captions.length <= 1) {
+									$newButton.attr('aria-pressed', 'true');
 								}
-								$newButton.addClass('buttonOff').attr('title',captionLabel);
-								$newButton.attr('aria-pressed', 'false');
+								$newButton.addClass('buttonOff');
 							}
 						} else if (control === 'descriptions') {
 							if (!this.prefDesc || this.prefDesc !== 1) {
 								// user prefer non-audio described version
 								// Therefore, load media without description
 								// Description can be toggled on later with this button
-								$newButton.addClass('buttonOff').attr( 'title', this.translate( 'turnOnDescriptions', 'Turn on descriptions' ) );
+								$newButton.addClass('buttonOff').attr('aria-pressed', 'true');
 							}
 						}
 
@@ -2727,9 +2728,11 @@
 							this.$ccButton = $newButton;
 						} else if (control === 'sign') {
 							this.$signButton = $newButton;
+							this.$signButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'false' );
 							// gray out sign button if sign language window is not active
 							if (!(this.$signWindow.is(':visible'))) {
 								this.$signButton.addClass('buttonOff');
+								this.$signButton.attr( 'aria-expanded', 'false' );
 							}
 						} else if (control === 'descriptions') {
 							this.$descButton = $newButton;
@@ -2738,9 +2741,11 @@
 							this.$muteButton = $newButton;
 						} else if (control === 'transcript') {
 							this.$transcriptButton = $newButton;
+							this.$transcriptButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'true' );
+							this.$transcriptButton.attr( 'aria-controls', this.$transcriptDiv.attr('id') );
 							// gray out transcript button if transcript is not active
 							if (!(this.$transcriptDiv.is(':visible'))) {
-								this.$transcriptButton.addClass('buttonOff').attr( 'title', this.translate( 'showTranscript', 'Show transcript' ) );
+								this.$transcriptButton.addClass('buttonOff').attr( 'aria-expanded', 'false' );
 							}
 						} else if (control === 'fullscreen') {
 							this.$fullscreenButton = $newButton;
@@ -2854,6 +2859,8 @@
 
 			// remove source and track elements from previous playlist item
 			this.$media.empty();
+			// getSources() sets a src attribute for the previous item; drop it so it can't override the new sources
+			this.$media.removeAttr('src');
 
 			// transfer media attributes from playlist to media element
 			if (this.hasAttr($newItem,'data-poster')) {
@@ -4092,6 +4099,21 @@
 			this.syncSignVideo( { 'rate' : rate } );
 			this.playbackRate = rate;
 			this.$speed.text( this.translate( 'speed', 'Speed' ) + ': ' + rate.toFixed(2).toString() + 'x');
+			this.updateSpeedButtonLabels();
+		};
+
+		// Refresh the faster/slower button labels so they reflect the rate each button would now select.
+		AblePlayer.prototype.updateSpeedButtonLabels = function () {
+			if (!this.$controllerDiv) {
+				return;
+			}
+			var thisObj = this;
+			[ 'faster', 'slower' ].forEach( function( control ) {
+				var $button = thisObj.$controllerDiv.find( '.able-button-handler-' + control );
+				if ( $button.length ) {
+					thisObj.setText( $button, thisObj.getButtonTitle( control ) );
+				}
+			});
 		};
 
 		AblePlayer.prototype.getPlaybackRate = function () {
@@ -4409,12 +4431,12 @@
 				}
 			}
 
-			if (context === 'captions' || context == 'init') {
+			if ( context === 'captions' || context == 'init' ) {
 
 				if (this.$ccButton) {
 
 					captionsCount = this.captions.length;
-					if (captionsCount > 1) {
+					if ( captionsCount > 1 ) {
 						this.$ccButton.attr({
 							'aria-haspopup': 'true',
 							'aria-controls': this.mediaId + '-captions-menu'
@@ -4422,14 +4444,12 @@
 					}
 					var ariaLabelOn = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'showCaptions', 'Show captions' );
 					var ariaLabelOff = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'hideCaptions', 'Hide captions' );
-					var ariaPressed = ( captionsCount > 1 ) ? true : false;
 
 					this.toggleButtonState(
 						this.$ccButton,
 						this.captionsOn,
 						ariaLabelOff,
-						ariaLabelOn,
-						ariaPressed
+						ariaLabelOn
 					);
 				}
 			}
@@ -4758,7 +4778,7 @@
 
 		AblePlayer.prototype.handleCaptionToggle = function() {
 			var thisObj = this;
-			var captions, ariaPressed;
+			var captions;
 
 			captions = (this.captions.length) ? this.captions : [];
 			if (captions.length === 1) {
@@ -4767,7 +4787,6 @@
 					// turn them off
 					this.captionsOn = false;
 					this.prefCaptions = 0;
-					ariaPressed = false;
 					this.updatePreferences('prefCaptions');
 					if (this.usingYouTubeCaptions) {
 						this.youTubePlayer.unloadModule('captions');
@@ -4780,7 +4799,6 @@
 					// captions are off. Turn them on.
 					this.captionsOn = true;
 					this.prefCaptions = 1;
-					ariaPressed = true;
 					this.updatePreferences('prefCaptions');
 					if (this.usingYouTubeCaptions) {
 						this.youTubePlayer.loadModule('captions');
@@ -4845,8 +4863,7 @@
 				this.$ccButton,
 				this.captionsOn,
 				ariaLabelOff,
-				ariaLabelOn,
-				ariaPressed
+				ariaLabelOn
 			);
 		};
 
@@ -4955,7 +4972,12 @@
 			var visible = this.$transcriptDiv.is(':visible');
 			if ( visible ) {
 				this.$transcriptArea.hide();
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
+				this.toggleButtonState(
+					this.$transcriptButton,
+					! visible,
+					this.translate( 'hideTranscript', 'Hide transcript' ),
+					this.translate( 'showTranscript', 'Show transcript' )
+				);
 				this.prefTranscript = 0;
 				if ( this.transcriptType === 'popup' ) {
 					this.$transcriptButton.trigger('focus').addClass('able-focus');
@@ -4974,7 +4996,12 @@
 					// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
 					// need to re-hide the popup menu
 					this.$transcriptPopup.hide();
-					this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
+					this.toggleButtonState(
+						this.$transcriptButton,
+						! visible,
+						this.translate( 'hideTranscript', 'Hide transcript' ),
+						this.translate( 'showTranscript', 'Show transcript' )
+					);
 					this.prefTranscript = 1;
 					// move focus to first focusable element (window options button)
 					this.focusNotClick = true;
@@ -4984,7 +5011,12 @@
 						thisObj.focusNotClick = false;
 					}, 100);
 				} else {
-					this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
+					this.toggleButtonState(
+						this.$transcriptButton,
+						! visible,
+						this.translate( 'hideTranscript', 'Hide transcript' ),
+						this.translate( 'showTranscript', 'Show transcript' )
+					);
 					this.$transcriptArea.show();
 				}
 			}
@@ -4997,7 +5029,12 @@
 			var visible = this.$signWindow.is(':visible');
 			if ( visible ) {
 				this.$signWindow.hide();
-				this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
+				this.toggleButtonState(
+					this.$signButton,
+					! visible,
+					this.translate( 'hideSign', 'Hide sign language' ),
+					this.translate( 'showSign', 'Show sign language' )
+				);
 				this.prefSign = 0;
 				this.$signButton.trigger('focus').addClass('able-focus');
 				// wait briefly before resetting stopgap var
@@ -5011,7 +5048,12 @@
 				// showing signWindow has a cascading effect of showing all content *within* signWindow
 				// need to re-hide the popup menu
 				this.$signPopup.hide();
-				this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
+				this.toggleButtonState(
+					this.$signButton,
+					! visible,
+					this.translate( 'hideSign', 'Hide sign language' ),
+					this.translate( 'showSign', 'Show sign language' )
+				);
 				this.prefSign = 1;
 				this.focusNotClick = true;
 				this.$signWindow.find('button').first().trigger('focus');
@@ -5080,7 +5122,8 @@
 			// add event handlers for changes in fullscreen mode.
 			// Browsers natively trigger this event with the Escape key,
 			// in addition to clicking the exit fullscreen button
-			$(document).on('fullscreenchange webkitfullscreenchange', function(e) {
+			var fsNs = '.ableFullscreen' + this.ableIndex;
+			$(document).off('fullscreenchange' + fsNs + ' webkitfullscreenchange' + fsNs).on('fullscreenchange' + fsNs + ' webkitfullscreenchange' + fsNs, function(e) {
 				// NOTE: e.type = the specific event that fired (in case needing to control for browser-specific idiosyncrasies)
 				if (!thisObj.fullscreen) {
 					// user has just exited full screen
@@ -5204,29 +5247,37 @@
 			$button.attr( 'aria-label', text );
 		};
 
-		AblePlayer.prototype.toggleButtonState = function($button, isOn, onLabel, offLabel, ariaPressed = false, ariaExpanded = false) {
+		/**
+		 * Toggle the state of a button based on the feature it controls.
+		 *
+		 * @param {jQuery Object} $button The button to toggle state for.
+		 * @param {boolean} isOn Whether the feature is currently on.
+		 * @param {string} onLabel The label to use when the feature is on.
+		 * @param {string} offLabel The label to use when the feature is off.
+		 * @returns {void}
+		 */
+		AblePlayer.prototype.toggleButtonState = function($button, isOn, onLabel, offLabel) {
 			// isOn means "the feature is being turned on".
 			let buttonOff = ( $button.hasClass( 'buttonOff' ) ) ? true : false;
+			// For toggle buttons, 'buttonOff' is the pressed state (the label describes the action to take).
 			if ( buttonOff && ! isOn || ! buttonOff && isOn ) {
 				// Only toggle state if button state does not match feature state.
 				return;
 			}
-			if (! isOn) {
+			let ariaPressed = $button[0].hasAttribute( 'aria-pressed' );
+			let ariaExpanded = $button[0].hasAttribute( 'aria-expanded' );
+			if ( ! buttonOff ) {
 				$button.addClass('buttonOff').attr('aria-label', offLabel);
-				if ( ariaPressed ) {
-					$button.attr('aria-pressed', 'false');
-				}
-				if ( ariaExpanded ) {
-					$button.attr( 'aria-expanded', 'false' );
-				}
 			} else {
 				$button.removeClass('buttonOff').attr('aria-label', onLabel);
-				if ( ariaPressed ) {
-					$button.attr('aria-pressed', 'true');
-				}
-				if ( ariaExpanded ) {
-					$button.attr( 'aria-expanded', 'true' );
-				}
+			}
+			if ( ariaPressed ) {
+				let ariaPressedState = $button.attr( 'aria-pressed' );
+				$button.attr('aria-pressed', ariaPressedState === 'true' ? 'false' : 'true');
+			}
+			if ( ariaExpanded ) {
+				let ariaExpandedState = $button.attr( 'aria-expanded' );
+				$button.attr( 'aria-expanded', ariaExpandedState === 'true' ? 'false' : 'true' );
 			}
 		};
 
@@ -5952,6 +6003,11 @@
 					}
 				}
 
+				// getSources() sets the media element's src attribute, which takes precedence over <source> children.
+				if (this.sources.length > 0 && this.sources[0].getAttribute('src')) {
+					this.media.src = this.sources[0].getAttribute('src');
+				}
+
 				if (this.recreatingPlayer) {
 					// stopgap to prevent multiple firings of recreatePlayer()
 					return;
@@ -6083,6 +6139,8 @@
 						this.$descDiv.html(descText);
 					}
 					// Only pause video if not using a described video.
+					// When descriptions are read by a screen reader (data-desc-reader="screenreader"),
+					// there is no end event, so the video stays paused until the user resumes playback.
 					if (this.prefDescPause && this.descMethod === 'text') {
 						this.pauseMedia();
 						this.pausedForDescription = true;
@@ -6233,7 +6291,7 @@
 					if (thisObj.prefDescPause) {
 						if (thisObj.pausedForDescription) {
 							thisObj.playMedia();
-							this.pausedForDescription = false;
+							thisObj.pausedForDescription = false;
 						}
 					}
 				}
@@ -6272,7 +6330,6 @@
 
 		var $closeButton = $('<button>',{
 				'class': 'modalCloseButton',
-				'title': thisObj.closeButtonLabel,
 				'aria-label': thisObj.closeButtonLabel
 		});
 		AblePlayer.getSingleInstance().getIcon( $closeButton, 'close' );
@@ -7815,6 +7872,7 @@
 				// and the event will not fire for those videos.
 				// data contains one key: 'playbackRate'
 				thisObj.vimeoPlaybackRate = e['playbackRate'];
+				thisObj.updateSpeedButtonLabels();
 			});
 			this.vimeoPlayer.on('texttrackchange', function(e) {
 				// Triggered when the active text track (captions/subtitles) changes.
@@ -7840,9 +7898,11 @@
 		AblePlayer.prototype.addEventListeners = function () {
 
 			var thisObj = this;
+			// Per-instance namespace, so listeners can be replaced when the player is rebuilt.
+			var ns = '.ableEvents' + this.ableIndex;
 
 			// Appropriately resize media player for full screen.
-			$(window).on('resize',function () {
+			$(window).off('resize' + ns).on('resize' + ns, function () {
 				thisObj.resizePlayer();
 			});
 
@@ -7853,6 +7913,14 @@
 				var handleOrientationChange = function () {
 					thisObj.refreshSourcesOnOrientationChange();
 				};
+				if (this.orientationListener) {
+					if (typeof orientationMediaQuery.removeEventListener === 'function') {
+						orientationMediaQuery.removeEventListener('change', this.orientationListener);
+					} else if (typeof orientationMediaQuery.removeListener === 'function') {
+						orientationMediaQuery.removeListener(this.orientationListener);
+					}
+				}
+				this.orientationListener = handleOrientationChange;
 				if (typeof orientationMediaQuery.addEventListener === 'function') {
 					orientationMediaQuery.addEventListener('change', handleOrientationChange);
 				} else if (typeof orientationMediaQuery.addListener === 'function') {
@@ -7867,7 +7935,10 @@
 			// http://caniuse.com/#feat=mutationobserver
 			if (window.MutationObserver) {
 				var target = this.$ableDiv[0];
-				var observer = new MutationObserver(function(mutations) {
+				if (this.visibilityObserver) {
+					this.visibilityObserver.disconnect();
+				}
+				var observer = this.visibilityObserver = new MutationObserver(function(mutations) {
 					mutations.forEach(function(mutation) {
 						if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
 							// the player's style attribute has changed. Check to see if it's visible
@@ -7895,13 +7966,14 @@
 
 			// handle clicks on player buttons.
 			// Use event delegation to handle clicks on any button within the controller div.
-			this.$controllerDiv.on('click', 'button', function(e){
+			// The controller div persists when the player is rebuilt, so remove any previous handler to avoid duplicates.
+			this.$controllerDiv.off('click.ableControls').on('click.ableControls', 'button', function(e){
 				e.stopPropagation();
 				thisObj.onClickPlayerButton(this);
 			});
 
 			// handle clicks (left only) anywhere on the page. If any popups are open, close them.
-			$('body').on('click', function(e) {
+			$('body').off('click' + ns).on('click' + ns, function(e) {
 
 				// not a left click
 				if (e.button !== 0) {
@@ -7949,7 +8021,7 @@
 			});
 
 			// if user presses a key from anywhere on the page, show player controls
-			$(document).on( 'keydown', function(e) {
+			$(document).off('keydown' + ns).on( 'keydown' + ns, function(e) {
 				if (thisObj.controlsHidden) {
 					thisObj.fadeControls('in');
 					thisObj.controlsHidden = false;
@@ -8408,6 +8480,10 @@
 			let sources = this.media.querySelectorAll('source');
 			let newSources = Array.from(sources).filter(source => {
 				const media = source.getAttribute('media');
+				if (!media) {
+					// A source without a media query always applies.
+					return true;
+				}
 				return (window.matchMedia(media) && window.matchMedia(media).matches);
 			});
 			let videoSource = this.media.hasAttribute( 'src' ) ? this.media.getAttribute('src') : '';
@@ -12455,6 +12531,7 @@
 
 	    this.$transcriptDiv = $("<div>", {
 	      class: "able-transcript",
+	      id: "transcript-" + this.mediaId
 	    });
 
 	    // Transcript toolbar content
@@ -21180,7 +21257,6 @@
 					if (rowNum > 1) {
 						$button = $('<button>',{
 							'id': 'able-vts-button-up-' + rowNum,
-							'title': 'Move up',
 							'aria-label': 'Move Row ' + rowNum + ' up'
 						}).on('click', function(el) {
 							thisObj.onClickVtsActionButton(el.currentTarget);
@@ -21212,7 +21288,6 @@
 					if (rowNum < numRows) {
 						$button = $('<button>',{
 							'id': 'able-vts-button-down-' + rowNum,
-							'title': 'Move down',
 							'aria-label': 'Move Row ' + rowNum + ' down'
 						}).on('click', function(el) {
 							thisObj.onClickVtsActionButton(el.currentTarget);
@@ -21244,7 +21319,6 @@
 					// Add Insert button to all rows
 					$button = $('<button>',{
 						'id': 'able-vts-button-insert-' + rowNum,
-						'title': 'Insert row below',
 						'aria-label': 'Insert row before Row ' + rowNum
 					}).on('click', function(el) {
 						thisObj.onClickVtsActionButton(el.currentTarget);
@@ -21278,7 +21352,6 @@
 					// Add Delete button to all rows
 					$button = $('<button>',{
 						'id': 'able-vts-button-delete-' + rowNum,
-						'title': 'Delete row ',
 						'aria-label': 'Delete Row ' + rowNum
 					}).on('click', function(el) {
 						thisObj.onClickVtsActionButton(el.currentTarget);
