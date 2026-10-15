@@ -471,3 +471,139 @@ test.describe("playlist2", () => {
     await settle(page);
   });
 });
+
+/* ---------- Keyboard shortcuts (default modifiers: Alt + Control) ---------- */
+
+const SHORTCUT = "Alt+Control+";
+
+/** Snapshot of one player's media state; `i` is the player's index on the page (sign-language videos are excluded). */
+const playerState = (page, i = 0) =>
+  page.evaluate((idx) => {
+    const v = document.querySelectorAll("video[data-able-player]")[idx];
+    const w = v.closest(".able-wrapper");
+    return {
+      paused: v.paused,
+      muted: v.muted,
+      volume: v.volume,
+      // Players with several caption tracks open a menu (aria-expanded) instead of toggling.
+      captions: ["aria-label", "aria-expanded"]
+        .map((a) => w.querySelector(".able-button-handler-captions").getAttribute(a))
+        .join("|"),
+      volumeOpen: w.querySelector(".able-button-handler-volume").getAttribute("aria-expanded"),
+    };
+  }, i);
+
+test.describe("keyboard shortcuts: single player (video1)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.locator(".able-button-handler-restart").first().focus();
+  });
+
+  test("Alt+Ctrl+P toggles play/pause", async ({ page }) => {
+    await page.keyboard.press(`${SHORTCUT}p`);
+    await expect.poll(async () => (await playerState(page)).paused, { timeout: 10_000 }).toBe(false);
+    await page.keyboard.press(`${SHORTCUT}p`);
+    await expect.poll(async () => (await playerState(page)).paused).toBe(true);
+  });
+
+  test("Alt+Ctrl+M toggles mute", async ({ page }) => {
+    await page.keyboard.press(`${SHORTCUT}m`);
+    await expect.poll(async () => (await playerState(page)).muted).toBe(true);
+    await page.keyboard.press(`${SHORTCUT}m`);
+    await expect.poll(async () => (await playerState(page)).muted).toBe(false);
+  });
+
+  test("Alt+Ctrl+C toggles captions", async ({ page }) => {
+    const before = (await playerState(page)).captions;
+    await page.keyboard.press(`${SHORTCUT}c`);
+    await expect.poll(async () => (await playerState(page)).captions).not.toBe(before);
+    await page.keyboard.press(`${SHORTCUT}c`);
+    await expect.poll(async () => (await playerState(page)).captions).toBe(before);
+  });
+
+  test("Alt+Ctrl+V opens the volume slider", async ({ page }) => {
+    await page.keyboard.press(`${SHORTCUT}v`);
+    await expect.poll(async () => (await playerState(page)).volumeOpen).toBe("true");
+    await expect(page.locator(".able-volume-slider")).toBeVisible();
+  });
+
+  test("Alt+Ctrl+1 through 9 set the volume", async ({ page }) => {
+    for (const n of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+      await page.keyboard.press(`${SHORTCUT}${n}`);
+      await expect.poll(async () => (await playerState(page)).volume).toBeCloseTo(n / 10, 2);
+      await expect(page.locator(".able-button-handler-volume")).toHaveAttribute(
+        "aria-label",
+        new RegExp(`${n * 10}%`),
+      );
+    }
+  });
+
+  test("shortcuts do not fire without the modifier keys", async ({ page }) => {
+    await page.keyboard.press("p");
+    await page.keyboard.press("m");
+    await page.keyboard.press("5");
+    await page.waitForTimeout(500);
+    const s = await playerState(page);
+    expect(s.paused).toBe(true);
+    expect(s.muted).toBe(false);
+    expect(s.volume).toBeCloseTo(0.7, 2);
+  });
+});
+
+test.describe("keyboard shortcuts: multiple players (multi3)", () => {
+  const players = (page) => page.locator(".able-wrapper");
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/demos/multi3.html");
+    await expect(players(page)).toHaveCount(2);
+    await page.waitForSelector(".able-controller", { timeout: 20_000 });
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll("video[data-able-player]")].every((v) => v.readyState >= 1),
+    );
+  });
+
+  const focusPlayer = (page, i) => players(page).nth(i).locator(".able-button-handler-restart").focus();
+
+  for (const i of [0, 1]) {
+    const other = 1 - i;
+
+    test(`play/pause and mute affect only player ${i + 1} when it is focused`, async ({ page }) => {
+      await focusPlayer(page, i);
+
+      await page.keyboard.press(`${SHORTCUT}p`);
+      await expect.poll(async () => (await playerState(page, i)).paused, { timeout: 10_000 }).toBe(false);
+      expect((await playerState(page, other)).paused).toBe(true);
+
+      await page.keyboard.press(`${SHORTCUT}m`);
+      await expect.poll(async () => (await playerState(page, i)).muted).toBe(true);
+      expect((await playerState(page, other)).muted).toBe(false);
+    });
+
+    test(`captions and volume affect only player ${i + 1} when it is focused`, async ({ page }) => {
+      const otherBefore = await playerState(page, other);
+      const before = await playerState(page, i);
+      await focusPlayer(page, i);
+
+      await page.keyboard.press(`${SHORTCUT}c`);
+      await expect.poll(async () => (await playerState(page, i)).captions).not.toBe(before.captions);
+      expect((await playerState(page, other)).captions).toBe(otherBefore.captions);
+
+      await page.keyboard.press(`${SHORTCUT}3`);
+      await expect.poll(async () => (await playerState(page, i)).volume).toBeCloseTo(0.3, 2);
+      expect((await playerState(page, other)).volume).toBeCloseTo(otherBefore.volume, 2);
+
+      await page.keyboard.press(`${SHORTCUT}v`);
+      await expect.poll(async () => (await playerState(page, i)).volumeOpen).toBe("true");
+      expect((await playerState(page, other)).volumeOpen).toBe("false");
+    });
+  }
+
+  test("shortcuts do nothing when focus is outside every player", async ({ page }) => {
+    const before = [await playerState(page, 0), await playerState(page, 1)];
+    await page.evaluate(() => document.activeElement?.blur());
+    for (const key of ["p", "m", "c", "5", "v"]) {
+      await page.keyboard.press(`${SHORTCUT}${key}`);
+    }
+    await page.waitForTimeout(500);
+    expect([await playerState(page, 0), await playerState(page, 1)]).toEqual(before);
+  });
+});
