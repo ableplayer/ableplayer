@@ -118,3 +118,212 @@ test("focused player controls show a visible focus indicator", async ({ page }) 
     "the focused play control must render a visible focus ring",
   ).toBe(true);
 });
+
+/* ---------- Full control coverage for video1.html ---------- */
+
+const mediaState = (page) =>
+  page.evaluate(() => {
+    const v = document.querySelector("video");
+    return { t: v.currentTime, paused: v.paused, rate: v.playbackRate, volume: v.volume };
+  });
+
+/** Pause and seek the media to a known position before a control test. */
+async function seedTime(page, seconds) {
+  await page.evaluate(async (s) => {
+    const v = document.querySelector("video");
+    v.pause();
+    await new Promise((resolve) => {
+      v.addEventListener("seeked", resolve, { once: true });
+      v.currentTime = s;
+    });
+  }, seconds);
+}
+
+const btn = (page, name) => page.locator(`.able-controller button.able-button-handler-${name}`);
+
+test("restart returns to the beginning and starts playback", async ({ page }) => {
+  await seedTime(page, 20);
+  await btn(page, "restart").focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await mediaState(page)).paused, { timeout: 10_000 }).toBe(false);
+  // Playback began from the start, not from 20s.
+  expect((await mediaState(page)).t).toBeLessThan(5);
+});
+
+test("rewind and forward move the playhead by the seek interval", async ({ page }) => {
+  await seedTime(page, 20);
+  const interval = await page.evaluate(() => {
+    const m = document.querySelector(".able-button-handler-forward").getAttribute("aria-label");
+    return Number(m.match(/\d+/)[0]);
+  });
+  expect(interval).toBeGreaterThan(0);
+
+  await btn(page, "forward").focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await mediaState(page)).t).toBeCloseTo(20 + interval, 0);
+  // Able Player tracks elapsed time from timeupdate; wait for its display to catch up.
+  await expect(page.locator(".able-elapsedTime")).toHaveText(`00:${20 + interval}`);
+
+  await btn(page, "rewind").focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await mediaState(page)).t).toBeCloseTo(20, 0);
+});
+
+test("rewind does not go below zero", async ({ page }) => {
+  await seedTime(page, 3);
+  await btn(page, "rewind").focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await mediaState(page)).t).toBeLessThan(0.5);
+});
+
+test("faster and slower adjust the playback rate in 0.25 steps", async ({ page }) => {
+  expect((await mediaState(page)).rate).toBe(1);
+
+  await btn(page, "faster").focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await mediaState(page)).rate).toBe(1.25);
+  await expect(page.locator(".able-speed")).toContainText("1.25");
+
+  await btn(page, "slower").focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await mediaState(page)).rate).toBe(0.75);
+  await expect(page.locator(".able-speed")).toContainText("0.75");
+});
+
+test("able-popup menus contain the expected items", async ({ page }) => {
+  const items = async (idSuffix) =>
+    page.evaluate(
+      (s) =>
+        [...document.querySelectorAll(`.able-popup[id$="${s}"] > li`)].map((li) => ({
+          text: li.textContent.trim(),
+          role: li.getAttribute("role"),
+        })),
+      idSuffix,
+    );
+
+  expect(await items("-prefs-menu")).toEqual([
+    { text: "Captions", role: "menuitem" },
+    { text: "Keyboard", role: "menuitem" },
+    { text: "Transcript", role: "menuitem" },
+  ]);
+  expect(await items("-captions-menu")).toEqual([
+    { text: "English captions", role: "menuitemradio" },
+    { text: "Captions off", role: "menuitemradio" },
+  ]);
+  expect(await items("-transcript-window-menu")).toEqual([
+    { text: "Move", role: "menuitem" },
+    { text: "Resize", role: "menuitem" },
+    { text: "Close", role: "menuitem" },
+  ]);
+});
+
+test("preferences menu opens, focuses its first item, and arrows move focus", async ({ page }) => {
+  const prefs = btn(page, "preferences");
+  await prefs.focus();
+  await page.keyboard.press("Enter");
+  await expect(prefs).toHaveAttribute("aria-expanded", "true");
+
+  const menuItems = page.locator('.able-popup[id$="-prefs-menu"] > li');
+  await expect(menuItems.nth(0)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(menuItems.nth(1)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(menuItems.nth(2)).toBeFocused();
+  await page.keyboard.press("ArrowUp");
+  await expect(menuItems.nth(1)).toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(prefs).toHaveAttribute("aria-expanded", "false");
+  await expect(prefs).toBeFocused();
+});
+
+test("volume slider sets the expected volume", async ({ page }) => {
+  const volume = btn(page, "volume");
+  await volume.focus();
+  await page.keyboard.press("Enter");
+  await expect(volume).toHaveAttribute("aria-expanded", "true");
+
+  const range = page.locator(".able-volume-slider input[type=range]");
+  await expect(range).toBeFocused();
+
+  await range.fill("3");
+  await expect.poll(async () => (await mediaState(page)).volume).toBeCloseTo(0.3, 2);
+  await expect(volume).toHaveAttribute("aria-label", /30%/);
+
+  await page.keyboard.press("ArrowUp");
+  await expect.poll(async () => (await mediaState(page)).volume).toBeCloseTo(0.4, 2);
+  await expect(volume).toHaveAttribute("aria-label", /40%/);
+});
+
+test("captions button toggles captions on and off", async ({ page }) => {
+  const captions = btn(page, "captions");
+  const labelBefore = await captions.getAttribute("aria-label");
+
+  await captions.focus();
+  await page.keyboard.press("Enter");
+  await expect(captions).not.toHaveAttribute("aria-label", labelBefore);
+  const labelOff = await captions.getAttribute("aria-label");
+
+  await page.keyboard.press("Enter");
+  await expect(captions).toHaveAttribute("aria-label", labelBefore);
+  expect(labelOff).not.toBe(labelBefore);
+});
+
+test("transcript button opens the transcript and moves focus into it", async ({ page }) => {
+  const toggle = btn(page, "transcript");
+  const area = page.locator(".able-transcript-area");
+  await expect(area).toBeHidden();
+
+  await toggle.focus();
+  await page.keyboard.press("Enter");
+  await expect(area).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => Boolean(document.activeElement?.closest(".able-transcript-area"))))
+    .toBe(true);
+
+  // The window menu moves focus between Move / Resize / Close. Able Player
+  // ignores keys on the window button for ~100ms after it takes focus.
+  await page.waitForTimeout(250);
+  await page.keyboard.press("Enter");
+  const windowItems = page.locator('.able-popup[id$="-transcript-window-menu"] > li');
+  await expect(windowItems.nth(0)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(windowItems.nth(1)).toBeFocused();
+  await page.keyboard.press("ArrowDown");
+  await expect(windowItems.nth(2)).toBeFocused();
+});
+
+test("fullscreen toggles on and off without losing focus", async ({ page }) => {
+  const fs = btn(page, "fullscreen");
+  const state = () =>
+    page.evaluate(() => ({
+      full: Boolean(document.fullscreenElement),
+      inPlayer: Boolean(document.activeElement?.closest(".able-wrapper")),
+    }));
+
+  await fs.focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await state()).full, { timeout: 10_000 }).toBe(true);
+  expect((await state()).inPlayer, "focus stays in the player in fullscreen").toBe(true);
+
+  await page.keyboard.press("Enter");
+  await expect.poll(async () => (await state()).full, { timeout: 10_000 }).toBe(false);
+  expect((await state()).inPlayer, "focus stays in the player after exit").toBe(true);
+});
+
+test("clicking a transcript line seeks to that line and plays", async ({ page }) => {
+  await btn(page, "transcript").click();
+  const area = page.locator(".able-transcript-area");
+  await expect(area).toBeVisible();
+
+  const target = area.locator("span.able-transcript-seekpoint[data-start]").nth(3);
+  const start = Number(await target.getAttribute("data-start"));
+  expect(start).toBeGreaterThan(0);
+
+  await target.click();
+  await expect.poll(async () => (await mediaState(page)).paused, { timeout: 10_000 }).toBe(false);
+  const { t } = await mediaState(page);
+  expect(t).toBeGreaterThanOrEqual(start - 0.5);
+  expect(t).toBeLessThan(start + 3);
+});
