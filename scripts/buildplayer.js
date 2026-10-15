@@ -1246,6 +1246,7 @@ function addBuildplayerFunctions(AblePlayer) {
 					} else if (control === 'transcript') {
 						this.$transcriptButton = $newButton;
 						this.$transcriptButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'true' );
+						this.$transcriptButton.attr( 'aria-controls', this.$transcriptDiv.attr('id') );
 						// gray out transcript button if transcript is not active
 						if (!(this.$transcriptDiv.is(':visible'))) {
 							this.$transcriptButton.addClass('buttonOff').attr( 'aria-expanded', 'false' );

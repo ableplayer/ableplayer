@@ -55,6 +55,7 @@ function addTranscriptFunctions(AblePlayer) {
 
     this.$transcriptDiv = $("<div>", {
       class: "able-transcript",
+      id: "transcript-" + this.mediaId
     });
 
     // Transcript toolbar content
