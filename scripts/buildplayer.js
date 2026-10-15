@@ -1078,7 +1078,11 @@ function addBuildplayerFunctions(AblePlayer) {
 							if (this.captions.length > 1) {
 								$newButton.attr('aria-expanded', 'false')
 							} else {
-								$newButton.attr('aria-pressed', 'false')
+								if ( this.captionsOn ) {
+									$newButton.attr('aria-pressed', 'true')
+								} else {
+									$newButton.attr('aria-pressed', 'false')
+								}
 							}
 						}
 					}
@@ -1190,16 +1194,16 @@ function addBuildplayerFunctions(AblePlayer) {
 								captionLabel = this.translate( 'captions', 'Captions' );
 							} else {
 								captionLabel = this.translate( 'showCaptions', 'Show captions' );
+								$newButton.attr('aria-pressed', 'true');
 							}
-							$newButton.addClass('buttonOff').attr('title',captionLabel);
-							$newButton.attr('aria-pressed', 'false');
+							$newButton.addClass('buttonOff');
 						}
 					} else if (control === 'descriptions') {
 						if (!this.prefDesc || this.prefDesc !== 1) {
 							// user prefer non-audio described version
 							// Therefore, load media without description
 							// Description can be toggled on later with this button
-							$newButton.addClass('buttonOff').attr( 'title', this.translate( 'turnOnDescriptions', 'Turn on descriptions' ) );
+							$newButton.addClass('buttonOff').attr('aria-pressed', 'true');
 						}
 					}
 
@@ -1228,9 +1232,11 @@ function addBuildplayerFunctions(AblePlayer) {
 						this.$ccButton = $newButton;
 					} else if (control === 'sign') {
 						this.$signButton = $newButton;
+						this.$signButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'false' );
 						// gray out sign button if sign language window is not active
 						if (!(this.$signWindow.is(':visible'))) {
 							this.$signButton.addClass('buttonOff');
+							this.$signButton.attr( 'aria-expanded', 'false' );
 						}
 					} else if (control === 'descriptions') {
 						this.$descButton = $newButton;
@@ -1239,10 +1245,10 @@ function addBuildplayerFunctions(AblePlayer) {
 						this.$muteButton = $newButton;
 					} else if (control === 'transcript') {
 						this.$transcriptButton = $newButton;
-						this.$transcriptButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'false' );
+						this.$transcriptButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'true' );
 						// gray out transcript button if transcript is not active
 						if (!(this.$transcriptDiv.is(':visible'))) {
-							this.$transcriptButton.addClass('buttonOff').attr( 'aria-expanded', 'true' );
+							this.$transcriptButton.addClass('buttonOff').attr( 'aria-expanded', 'false' );
 						}
 					} else if (control === 'fullscreen') {
 						this.$fullscreenButton = $newButton;

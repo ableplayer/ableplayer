@@ -616,12 +616,12 @@ function addControlFunctions(AblePlayer) {
 			}
 		}
 
-		if (context === 'captions' || context == 'init') {
+		if ( context === 'captions' || context == 'init' ) {
 
 			if (this.$ccButton) {
 
 				captionsCount = this.captions.length;
-				if (captionsCount > 1) {
+				if ( captionsCount > 1 ) {
 					this.$ccButton.attr({
 						'aria-haspopup': 'true',
 						'aria-controls': this.mediaId + '-captions-menu'
@@ -629,14 +629,12 @@ function addControlFunctions(AblePlayer) {
 				}
 				var ariaLabelOn = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'showCaptions', 'Show captions' );
 				var ariaLabelOff = ( captionsCount > 1 ) ? this.translate( 'captions', 'Captions' ) : this.translate( 'hideCaptions', 'Hide captions' );
-				var ariaPressed = ( captionsCount > 1 ) ? true : false;
 
 				this.toggleButtonState(
 					this.$ccButton,
 					this.captionsOn,
 					ariaLabelOff,
-					ariaLabelOn,
-					ariaPressed
+					ariaLabelOn
 				);
 			}
 		}
@@ -965,7 +963,7 @@ function addControlFunctions(AblePlayer) {
 
 	AblePlayer.prototype.handleCaptionToggle = function() {
 		var thisObj = this;
-		var captions, ariaPressed;
+		var captions;
 
 		captions = (this.captions.length) ? this.captions : [];
 		if (captions.length === 1) {
@@ -974,7 +972,6 @@ function addControlFunctions(AblePlayer) {
 				// turn them off
 				this.captionsOn = false;
 				this.prefCaptions = 0;
-				ariaPressed = false;
 				this.updatePreferences('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.unloadModule('captions');
@@ -987,7 +984,6 @@ function addControlFunctions(AblePlayer) {
 				// captions are off. Turn them on.
 				this.captionsOn = true;
 				this.prefCaptions = 1;
-				ariaPressed = true;
 				this.updatePreferences('prefCaptions');
 				if (this.usingYouTubeCaptions) {
 					this.youTubePlayer.loadModule('captions');
@@ -1052,8 +1048,7 @@ function addControlFunctions(AblePlayer) {
 			this.$ccButton,
 			this.captionsOn,
 			ariaLabelOff,
-			ariaLabelOn,
-			ariaPressed
+			ariaLabelOn
 		);
 	};
 
@@ -1162,7 +1157,12 @@ function addControlFunctions(AblePlayer) {
 		var visible = this.$transcriptDiv.is(':visible');
 		if ( visible ) {
 			this.$transcriptArea.hide();
-			this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
+			this.toggleButtonState(
+				this.$transcriptButton,
+				! visible,
+				this.translate( 'hideTranscript', 'Hide transcript' ),
+				this.translate( 'showTranscript', 'Show transcript' )
+			);
 			this.prefTranscript = 0;
 			if ( this.transcriptType === 'popup' ) {
 				this.$transcriptButton.trigger('focus').addClass('able-focus');
@@ -1181,7 +1181,12 @@ function addControlFunctions(AblePlayer) {
 				// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
 				// need to re-hide the popup menu
 				this.$transcriptPopup.hide();
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
+				this.toggleButtonState(
+					this.$transcriptButton,
+					! visible,
+					this.translate( 'hideTranscript', 'Hide transcript' ),
+					this.translate( 'showTranscript', 'Show transcript' )
+				);
 				this.prefTranscript = 1;
 				// move focus to first focusable element (window options button)
 				this.focusNotClick = true;
@@ -1191,7 +1196,12 @@ function addControlFunctions(AblePlayer) {
 					thisObj.focusNotClick = false;
 				}, 100);
 			} else {
-				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
+				this.toggleButtonState(
+					this.$transcriptButton,
+					! visible,
+					this.translate( 'hideTranscript', 'Hide transcript' ),
+					this.translate( 'showTranscript', 'Show transcript' )
+				);
 				this.$transcriptArea.show();
 			}
 		}
@@ -1204,7 +1214,12 @@ function addControlFunctions(AblePlayer) {
 		var visible = this.$signWindow.is(':visible');
 		if ( visible ) {
 			this.$signWindow.hide();
-			this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
+			this.toggleButtonState(
+				this.$signButton,
+				! visible,
+				this.translate( 'hideSign', 'Hide sign language' ),
+				this.translate( 'showSign', 'Show sign language' )
+			);
 			this.prefSign = 0;
 			this.$signButton.trigger('focus').addClass('able-focus');
 			// wait briefly before resetting stopgap var
@@ -1218,7 +1233,12 @@ function addControlFunctions(AblePlayer) {
 			// showing signWindow has a cascading effect of showing all content *within* signWindow
 			// need to re-hide the popup menu
 			this.$signPopup.hide();
-			this.toggleButtonState( this.$signButton, ! visible, this.translate( 'hideSign', 'Hide sign language' ), this.translate( 'showSign', 'Show sign language' ) );
+			this.toggleButtonState(
+				this.$signButton,
+				! visible,
+				this.translate( 'hideSign', 'Hide sign language' ),
+				this.translate( 'showSign', 'Show sign language' )
+			);
 			this.prefSign = 1;
 			this.focusNotClick = true;
 			this.$signWindow.find('button').first().trigger('focus');
@@ -1416,29 +1436,37 @@ function addControlFunctions(AblePlayer) {
 		$button.attr( 'aria-label', text );
 	};
 
-	AblePlayer.prototype.toggleButtonState = function($button, isOn, onLabel, offLabel, ariaPressed = false, ariaExpanded = false) {
+	/**
+	 * Toggle the state of a button based on the feature it controls.
+	 *
+	 * @param {jQuery Object} $button The button to toggle state for.
+	 * @param {boolean} isOn Whether the feature is currently on.
+	 * @param {string} onLabel The label to use when the feature is on.
+	 * @param {string} offLabel The label to use when the feature is off.
+	 * @returns {void}
+	 */
+	AblePlayer.prototype.toggleButtonState = function($button, isOn, onLabel, offLabel) {
 		// isOn means "the feature is being turned on".
 		let buttonOff = ( $button.hasClass( 'buttonOff' ) ) ? true : false;
+		// For toggle buttons, 'buttonOff' is the pressed state (the label describes the action to take).
 		if ( buttonOff && ! isOn || ! buttonOff && isOn ) {
 			// Only toggle state if button state does not match feature state.
 			return;
 		}
-		if (! isOn) {
+		let ariaPressed = $button[0].hasAttribute( 'aria-pressed' );
+		let ariaExpanded = $button[0].hasAttribute( 'aria-expanded' );
+		if ( ! buttonOff ) {
 			$button.addClass('buttonOff').attr('aria-label', offLabel);
-			if ( ariaPressed ) {
-				$button.attr('aria-pressed', 'false');
-			}
-			if ( ariaExpanded ) {
-				$button.attr( 'aria-expanded', 'false' );
-			}
 		} else {
 			$button.removeClass('buttonOff').attr('aria-label', onLabel);
-			if ( ariaPressed ) {
-				$button.attr('aria-pressed', 'true');
-			}
-			if ( ariaExpanded ) {
-				$button.attr( 'aria-expanded', 'true' );
-			}
+		}
+		if ( ariaPressed ) {
+			let ariaPressedState = $button.attr( 'aria-pressed' );
+			$button.attr('aria-pressed', ariaPressedState === 'true' ? 'false' : 'true');
+		}
+		if ( ariaExpanded ) {
+			let ariaExpandedState = $button.attr( 'aria-expanded' );
+			$button.attr( 'aria-expanded', ariaExpandedState === 'true' ? 'false' : 'true' );
 		}
 	};
 
