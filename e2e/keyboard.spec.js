@@ -501,6 +501,9 @@ test.describe("keyboard shortcuts: single player (video1)", () => {
   test("Alt+Ctrl+P toggles play/pause", async ({ page }) => {
     await page.keyboard.press(`${SHORTCUT}p`);
     await expect.poll(async () => (await playerState(page)).paused, { timeout: 10_000 }).toBe(false);
+    // The player toggles on its own paused flag, which updates on the media's
+    // play event; wait for the button to reflect it before pressing again.
+    await expect(page.locator(".able-button-handler-play").first()).toHaveAttribute("aria-label", /pause/i);
     await page.keyboard.press(`${SHORTCUT}p`);
     await expect.poll(async () => (await playerState(page)).paused).toBe(true);
   });
