@@ -18,7 +18,6 @@ function AccessibleDialog( modalDiv, $returnElement, title, closeButtonLabel) {
 
 	var $closeButton = $('<button>',{
 			'class': 'modalCloseButton',
-			'title': thisObj.closeButtonLabel,
 			'aria-label': thisObj.closeButtonLabel
 	});
 	AblePlayer.getSingleInstance().getIcon( $closeButton, 'close' );

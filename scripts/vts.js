@@ -393,7 +393,6 @@ function addVtsFunctions(AblePlayer) {
 				if (rowNum > 1) {
 					$button = $('<button>',{
 						'id': 'able-vts-button-up-' + rowNum,
-						'title': 'Move up',
 						'aria-label': 'Move Row ' + rowNum + ' up'
 					}).on('click', function(el) {
 						thisObj.onClickVtsActionButton(el.currentTarget);
@@ -425,7 +424,6 @@ function addVtsFunctions(AblePlayer) {
 				if (rowNum < numRows) {
 					$button = $('<button>',{
 						'id': 'able-vts-button-down-' + rowNum,
-						'title': 'Move down',
 						'aria-label': 'Move Row ' + rowNum + ' down'
 					}).on('click', function(el) {
 						thisObj.onClickVtsActionButton(el.currentTarget);
@@ -457,7 +455,6 @@ function addVtsFunctions(AblePlayer) {
 				// Add Insert button to all rows
 				$button = $('<button>',{
 					'id': 'able-vts-button-insert-' + rowNum,
-					'title': 'Insert row below',
 					'aria-label': 'Insert row before Row ' + rowNum
 				}).on('click', function(el) {
 					thisObj.onClickVtsActionButton(el.currentTarget);
@@ -491,7 +488,6 @@ function addVtsFunctions(AblePlayer) {
 				// Add Delete button to all rows
 				$button = $('<button>',{
 					'id': 'able-vts-button-delete-' + rowNum,
-					'title': 'Delete row ',
 					'aria-label': 'Delete Row ' + rowNum
 				}).on('click', function(el) {
 					thisObj.onClickVtsActionButton(el.currentTarget);
