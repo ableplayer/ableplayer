@@ -15,6 +15,7 @@
 - Improvements to design and focus handling in Windows High Contrast Mode.
 - Changed controls from `div[role="button"]` to `button`.
 - Change labels on speaking rates to reflect actual values
+- Add missing `aria-haspopup` and `aria-expanded` on transcript trigger; remove extraneous `title` attribute.
 
 ### Bug fixes
 - Add the seek interval value to rewind and forward buttons, to provide better user information.

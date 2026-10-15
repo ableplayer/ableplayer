@@ -1239,9 +1239,10 @@ function addBuildplayerFunctions(AblePlayer) {
 						this.$muteButton = $newButton;
 					} else if (control === 'transcript') {
 						this.$transcriptButton = $newButton;
+						this.$transcriptButton.attr( 'aria-haspopup', 'dialog' ).attr( 'aria-expanded', 'false' );
 						// gray out transcript button if transcript is not active
 						if (!(this.$transcriptDiv.is(':visible'))) {
-							this.$transcriptButton.addClass('buttonOff').attr( 'title', this.translate( 'showTranscript', 'Show transcript' ) );
+							this.$transcriptButton.addClass('buttonOff').attr( 'aria-expanded', 'true' );
 						}
 					} else if (control === 'fullscreen') {
 						this.$fullscreenButton = $newButton;
