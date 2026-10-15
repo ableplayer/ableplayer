@@ -1190,10 +1190,7 @@ function addBuildplayerFunctions(AblePlayer) {
 					if (control === 'captions') {
 						if (!this.prefCaptions || this.prefCaptions !== 1) {
 							// captions are available, but user has them turned off
-							if (this.captions.length > 1) {
-								captionLabel = this.translate( 'captions', 'Captions' );
-							} else {
-								captionLabel = this.translate( 'showCaptions', 'Show captions' );
+							if (this.captions.length <= 1) {
 								$newButton.attr('aria-pressed', 'true');
 							}
 							$newButton.addClass('buttonOff');
