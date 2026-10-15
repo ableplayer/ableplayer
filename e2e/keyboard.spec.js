@@ -415,7 +415,7 @@ test.describe("playlist2", () => {
       const lis = [...document.querySelectorAll(".able-playlist > li")];
       return {
         index: lis.findIndex((li) => li.classList.contains("able-current")),
-        src: document.querySelector("video").currentSrc,
+        src: document.querySelector("video").currentSrc.split("/").pop(),
       };
     });
 
@@ -439,6 +439,7 @@ test.describe("playlist2", () => {
     await page.keyboard.press("Enter");
 
     await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(2);
+    await expect.poll(async () => (await current(page)).src).toBe("deadline.mp4");
     await expect(itemButton).toHaveAttribute("aria-current", "true");
     await expect.poll(async () => (await mediaState(page)).paused, { timeout: 15_000 }).toBe(false);
   });
@@ -447,17 +448,20 @@ test.describe("playlist2", () => {
     await btn(page, "next").focus();
     await page.keyboard.press("Enter");
     await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(1);
+    await expect.poll(async () => (await current(page)).src).toBe("itaccess-excerpt.mp4");
     await settle(page);
 
     await btn(page, "previous").focus();
     await page.keyboard.press("Enter");
     await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(0);
+    await expect.poll(async () => (await current(page)).src).toBe("wwa.mp4");
     await settle(page);
 
     // Previous on the first track wraps to the last.
     await btn(page, "previous").focus();
     await page.keyboard.press("Enter");
     await expect.poll(async () => (await current(page)).index, { timeout: 15_000 }).toBe(2);
+    await expect.poll(async () => (await current(page)).src).toBe("deadline.mp4");
     await settle(page);
 
     // Next on the last track wraps to the first.
