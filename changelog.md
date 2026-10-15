@@ -3,7 +3,7 @@
 ## 5.1.0 TBD
 
 ### Features
-- Add `strict-mode` to have transcripts to handle parentheses and square brackets as normal text.
+- Add `strict-mode` to have transcripts handle parentheses and square brackets as normal text.
 - Add `options` parameter to the AblePlayer class instantiation, supporting all `data-` attributes, strings, and icons.
 - Add support for media queries in sources, allowing the player to toggle to different versions of the media based on pre-existing user preferences, orientation, or viewport sizes. Props @aardrian.
 - Add a function that migrates existing settings from the Able-Player cookie to local storage if JS Cookie is not available.
