@@ -1175,7 +1175,9 @@ function addControlFunctions(AblePlayer) {
 				this.$transcriptArea.show();
 				// showing transcriptArea has a cascading effect of showing all content *within* transcriptArea
 				// need to re-hide the popup menu
-				this.$transcriptPopup.hide();
+				if (this.$transcriptPopup && this.$transcriptPopup.is(':visible')) {
+					this.$transcriptPopup.hide();
+				}
 				this.toggleButtonState( this.$transcriptButton, ! visible, this.translate( 'hideTranscript', 'Hide transcript' ), this.translate( 'showTranscript', 'Show transcript' ) );
 				this.prefTranscript = 1;
 				// move focus to first focusable element (window options button)
