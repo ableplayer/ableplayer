@@ -1292,7 +1292,11 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		var thisObj = this;
 
-		prevPlayer = this.player;
+		// bail out if a previous rebuild (e.g. from a rapid prior click) is still in progress;
+		// otherwise deletePlayer() below would empty the controller div with nothing left to rebuild it
+		if (this.recreatingPlayer) {
+			return;
+		}
 
 		if (this.initializing) { // this is the first track - user hasn't pressed play yet
 			// do nothing.
@@ -1456,10 +1460,6 @@ function addBuildplayerFunctions(AblePlayer) {
 		this.sources = this.getSources();
 
 		// recreate player, informed by new attributes and track elements
-		if (this.recreatingPlayer) {
-			// stopgap to prevent multiple firings of recreatePlayer()
-			return;
-		}
 		this.recreatePlayer().then(function() {
 
 			// update playlist to indicate which item is playing
