@@ -118,7 +118,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		if (this.hasPlaylist && this.showNowPlaying) {
 			this.$nowPlayingDiv = $('<div>',{
 				'class' : 'able-now-playing',
-				'aria-live' : 'assertive',
+				'aria-live' : 'polite',
 				'aria-atomic': 'true'
 			});
 		}
@@ -148,7 +148,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 		this.$speed = $('<span>',{
 			'class' : 'able-speed',
-			'aria-live' : 'assertive',
+			'aria-live' : 'polite',
 			'aria-atomic' : 'true'
 		}).text(this.translate( 'speed', 'Speed' ) + ': 1x');
 
@@ -378,7 +378,7 @@ function addBuildplayerFunctions(AblePlayer) {
 
 	AblePlayer.prototype.injectAlert = function ($container) {
 		// inject two alerts, one visible for all users and one for screen reader users only
-		this.$alertBox = $('<div role="alert"></div>');
+		this.$alertBox = $('<div aria-live="polite" aria-atomic="true"></div>');
 		this.$alertBox.addClass('able-alert');
 		this.$alertBox.hide();
 
@@ -397,7 +397,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		this.$alertBox.appendTo($container);
 
 		if ( ! this.$srAlertBox ) {
-			this.$srAlertBox = $('<div role="alert"></div>');
+			this.$srAlertBox = $('<div aria-live="polite" aria-atomic="true"></div>');
 			this.$srAlertBox.addClass('able-screenreader-alert');
 			this.$srAlertBox.appendTo($container);
 		}

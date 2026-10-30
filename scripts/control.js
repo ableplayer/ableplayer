@@ -728,7 +728,7 @@ function addControlFunctions(AblePlayer) {
 				}
 				this.getIcon( this.$playpauseButton, 'play' );
 			} else if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
-				// Update the text only if it's changed since it has role="alert";
+				// Update the text only if it's changed since it has aria-live="polite";
 				// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 				this.getPlayerState().then(function(currentState) {
 					volumeStatus = thisObj.getVolume() === 0 ? thisObj.translate( 'statusMuted', 'Muted' ) : '';
