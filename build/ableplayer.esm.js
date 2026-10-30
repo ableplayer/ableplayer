@@ -2684,7 +2684,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						if (!this.prefCaptions || this.prefCaptions !== 1) {
 							// captions are available, but user has them turned off
 							if (this.captions.length <= 1) {
-								$newButton.attr('aria-pressed', 'false');
+								$newButton.attr('aria-pressed', 'true');
 							}
 							$newButton.addClass('buttonOff');
 						}
@@ -20512,13 +20512,12 @@ function addVolumeFunctions(AblePlayer) {
 		// including screen reader support
 		// TODO: Improve presentation of vertical slider. That requires some CSS finesse.
 
-		var thisObj, volumeSliderId, volumeHelpId, volumePct, volumeLabel, volumeHeight;
+		var thisObj, volumeSliderId, volumePct, volumeLabel, volumeHeight;
 
 		thisObj = this;
 
 		// define a few variables
 		volumeSliderId = this.mediaId + '-volume-slider';
-		volumeHelpId = this.mediaId + '-volume-help';
 
 		this.$volumeSlider = $('<div>',{
 			'id': volumeSliderId,
@@ -20529,6 +20528,8 @@ function addVolumeFunctions(AblePlayer) {
 			'class': 'able-tooltip',
 			'role': 'tooltip'
 		}).hide();
+
+		volumePct = parseInt(thisObj.volume) / 10 * 100;
 		this.$volumeRange = $('<input>',{
 			'type': 'range',
 			'min': '0',
@@ -20536,17 +20537,14 @@ function addVolumeFunctions(AblePlayer) {
 			'step': '1',
 			'orient': 'vertical', // non-standard, but required for Firefox
 			'aria-label': this.translate( 'volumeUpDown', 'Volume up down' ),
-			'value': this.volume
+			'value': this.volume,
+			'aria-valuenow': this.volume,
+			'aria-valuetext': volumePct + '%'
 		});
-		volumePct = parseInt(thisObj.volume) / 10 * 100;
-		this.$volumeHelp = $('<div>',{
-			'id': volumeHelpId,
-			'class': 'able-volume-help',
-			'aria-live': 'polite'
-		}).text(volumePct + '%');
+
 		volumeLabel = this.$volumeButton.attr( 'aria-label' );
 		this.$volumeButton.attr( 'aria-label', volumeLabel + ' ' + volumePct + '%');
-		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeRange,this.$volumeHelp);
+		this.$volumeSlider.append(this.$volumeSliderTooltip,this.$volumeRange);
 		volumeHeight = this.$volumeButton.parents( '.able-control-row' )[0];
 		this.$volumeSlider.css( 'bottom', volumeHeight.offsetHeight );
 
@@ -20585,15 +20583,12 @@ function addVolumeFunctions(AblePlayer) {
 		var volumePct;
 		volumePct = (volume/10) * 100;
 
-		// Update help text
-		if (this.$volumeHelp) {
-			this.$volumeHelp.text(volumePct + '%');
-		}
-
 		// Update the default value of the volume slider input field
 		// This doesn't seem to be necessary; browsers remember the previous setting during a session
 		// but this is a fallback in case they don't
 		this.$volumeRange.attr('value',volume);
+		this.$volumeRange.attr('aria-valuenow',volume);
+		this.$volumeRange.attr('aria-valuetext',volumePct + '%');
 	};
 
 	AblePlayer.prototype.refreshVolumeButton = function(volume) {
