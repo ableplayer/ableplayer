@@ -2684,7 +2684,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						if (!this.prefCaptions || this.prefCaptions !== 1) {
 							// captions are available, but user has them turned off
 							if (this.captions.length <= 1) {
-								$newButton.attr('aria-pressed', 'false');
+								$newButton.attr('aria-pressed', 'true');
 							}
 							$newButton.addClass('buttonOff');
 						}
@@ -11062,7 +11062,7 @@ function addMiscFunctions(AblePlayer) {
 			// add a sample closed caption div to prefs dialog
 			// do not show this for YouTube captions, since it's not an accurate reflection
 			if (!this.usingYouTubeCaptions) {
-				this.$sampleCapsDiv = $('<div>',{
+				this.$sampleCapsDiv = $('<p>',{
 					'class': 'able-captions-sample'
 				}).text( this.translate( 'sampleCaptionText', 'Sample caption text' ) );
 				$prefsDiv.append(this.$sampleCapsDiv);
@@ -11071,7 +11071,7 @@ function addMiscFunctions(AblePlayer) {
 		} else if (form === 'descriptions') {
 			if (this.synth) {
 				// add a div with sample audio description text
-				this.$sampleDescDiv = $('<div>',{
+				this.$sampleDescDiv = $('<p>',{
 					'class': 'able-desc-sample'
 				}).text( this.translate( 'sampleDescriptionText', 'Adjust settings to hear this sample text.' ) );
 				$prefsDiv.append(this.$sampleDescDiv);
