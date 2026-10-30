@@ -819,6 +819,9 @@ div.able-wrapper.fullscreen {
   position: absolute;
   top: 1em;
 }
+.able-alert > p {
+  margin: 0;
+}
 .able-popup {
   z-index: 9200;
 }

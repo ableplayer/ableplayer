@@ -1875,7 +1875,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		this.$alertBox.addClass('able-alert');
 		this.$alertBox.hide();
 
-		var $alertText = $( '<span></span>' );
+		var $alertText = $( '<p></p>' );
 		$alertText.appendTo(this.$alertBox);
 
 		var $alertDismiss = $('<button type="button"></button>' );
@@ -2684,7 +2684,7 @@ function addBuildplayerFunctions(AblePlayer) {
 						if (!this.prefCaptions || this.prefCaptions !== 1) {
 							// captions are available, but user has them turned off
 							if (this.captions.length <= 1) {
-								$newButton.attr('aria-pressed', 'false');
+								$newButton.attr('aria-pressed', 'true');
 							}
 							$newButton.addClass('buttonOff');
 						}
@@ -5269,7 +5269,7 @@ function addControlFunctions(AblePlayer) {
 		} else if (location === 'screenreader') {
 			$alertBox = thisObj.$srAlertBox;
 		}
-		$alertBox.find('span').text(msg);
+		$alertBox.find('p').text(msg);
 		$alertBox.appendTo($parentWindow);
 		$alertBox.css( {'display': 'flex'} );
 

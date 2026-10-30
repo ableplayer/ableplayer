@@ -1057,6 +1057,10 @@ div.able-wrapper.fullscreen {
 	left: 0;
 }
 
+.able-alert > p {
+	margin: 0;
+}
+
 .able-popup {
 	z-index: 9200;
 }
