@@ -336,7 +336,7 @@ video[data-able-player],
 
 .able-controller,
 .able-controller button {
-	color: var(--able-control-color);
+	color: var(--able-control-color) !important;
 }
 
 .able-controller .able-alert button {
