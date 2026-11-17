@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>YouTube player (captions & sign language hosted on YouTube, added poster image) | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+<!-- Dependencies -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="../build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="../build/ableplayer.dist.js"></script>
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<div class="body-wrapper">
+		<nav id="navigation-placeholder">
+		</nav>
+		<main>
+			<h1>YouTube player (captions & sign language hosted on YouTube, added poster image)</h1>
+
+			<div id="intro">
+				<p>This page features an example of Able Player being used to play a YouTube video with synchronized sign language also hosted on YouTube.</p>
+				<p>The example adds a poster image to the YouTube player, which causes the big play button to show.</p>
+			</div>
+			<div class="wrapper">
+				<video id="video1" data-able-player data-poster="../media/wwa_hq_thumbnail.jpg" preload="auto" data-youtube-nocookie="true" data-youtube-id="Lf6JLhQXaWg" data-youtube-sign-src="bf6214F7srY" playsinline>
+				</video>
+			</div>
+
+		</main>
+	</div>
+<script src="demos.js"></script>
+</body>
+</html>

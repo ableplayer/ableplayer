@@ -208,12 +208,28 @@ function addControlFunctions(AblePlayer) {
 			var state = this.youTubePlayer.getPlayerState();
 			if (state === -1 || state === 5) {
 				deferred.resolve('stopped');
+				if ( typeof this.$bigPlayButton !== 'undefined' && this.$bigPlayButton.length ) {
+					this.$bigPlayButton.show();
+					this.$bigPlayButton.attr('aria-hidden', 'false');
+				}
 			} else if (state === 0) {
 				deferred.resolve('ended');
+				if ( typeof this.$bigPlayButton !== 'undefined' && this.$bigPlayButton.length ) {
+					this.$bigPlayButton.show();
+					this.$bigPlayButton.attr('aria-hidden', 'false');
+				}
 			} else if (state === 1) {
 				deferred.resolve('playing');
+				if ( typeof this.$bigPlayButton !== 'undefined' && this.$bigPlayButton.length ) {
+					this.$bigPlayButton.hide();
+					this.$bigPlayButton.attr('aria-hidden', 'true');
+				}
 			} else if (state === 2) {
 				deferred.resolve('paused');
+				if ( typeof this.$bigPlayButton !== 'undefined' && this.$bigPlayButton.length ) {
+					this.$bigPlayButton.show();
+					this.$bigPlayButton.attr('aria-hidden', 'false');
+				}
 			} else if (state === 3) {
 				deferred.resolve('buffering');
 			}
