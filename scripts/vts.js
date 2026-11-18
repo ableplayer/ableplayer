@@ -96,42 +96,8 @@ function addVtsFunctions(AblePlayer) {
 				this.injectVtsTable('add',this.vtsLang);
 
 				// TODO: Add drag/drop functionality for mousers
-				// Add event listeners for contenteditable cells
-				var kindOptions, beforeEditing, editedCell, editedContent;
-				kindOptions = ['captions','chapters','descriptions','subtitles'];
-				$('td[contenteditable="true"]').on('focus',function() {
-					beforeEditing = $(this).text();
-				}).on('blur',function() {
-					if (beforeEditing != $(this).text()) {
-						editedCell = $(this).index();
-						editedContent = $(this).text();
-						if (editedCell === 1) {
-							// do some simple spelling auto-correct
-							if ($.inArray(editedContent,kindOptions) === -1) {
-								// whatever user typed is not a valid kind
-								// assume they correctly typed the first character
-								if (editedContent.substring(0,1) === 's') {
-									$(this).text('subtitles');
-								} else if (editedContent.substring(0,1) === 'd') {
-									$(this).text('descriptions');
-								} else if (editedContent.substring(0,2) === 'ch') {
-									$(this).text('chapters');
-								} else {
-									// whatever else they types, assume 'captions'
-									$(this).text('captions');
-								}
-							}
-						} else if (editedCell === 2 || editedCell === 3) {
-							// start or end time
-							// ensure proper formatting (with 3 decimal places)
-							$(this).text(thisObj.formatTimestamp(editedContent));
-						}
-					}
-				}).on('keydown',function(e) {
-					// don't allow keystrokes to trigger Able Player (or other) functions
-					// while user is editing
-					e.stopPropagation();
-				});
+				// Add event listeners for contenteditable cells and action buttons
+				this.setupVtsTableEvents();
 
 				// handle click on the Save button
 				$('#able-vts-save').on('click',function(e) {
@@ -153,6 +119,7 @@ function addVtsFunctions(AblePlayer) {
 						$('#able-vts > fieldset').show();
 						$('#able-vts').append($savedTable);
 						$('#able-vts').append(thisObj.getIconCredit());
+						thisObj.setupVtsTableEvents();
 						thisObj.showVtsAlert( thisObj.translate( 'vtsCancel', 'Cancelling saving. Any edits you made have been restored in the VTS table.' ) );
 					}
 				});
@@ -382,8 +349,7 @@ function addVtsFunctions(AblePlayer) {
 		// rowNum is the number of the current table row (starting with 1)
 		// numRows is the total number of rows (excluding the header row)
 		// TODO: Position buttons so they're vertically aligned, even if missing an Up or Down button
-		var thisObj, $td, buttons, i, button, $button, $svg, $g, pathString, pathString2, $path, $path2;
-		thisObj = this;
+		var $td, buttons, i, button, $button, $svg, $g, pathString, pathString2, $path, $path2;
 		$td = $('<td>');
 		buttons = ['up','down','insert','delete'];
 
@@ -394,8 +360,6 @@ function addVtsFunctions(AblePlayer) {
 					$button = $('<button>',{
 						'id': 'able-vts-button-up-' + rowNum,
 						'aria-label': 'Move Row ' + rowNum + ' up'
-					}).on('click', function(el) {
-						thisObj.onClickVtsActionButton(el.currentTarget);
 					});
 					$svg = $('<svg>',{
 						'focusable': 'false',
@@ -425,8 +389,6 @@ function addVtsFunctions(AblePlayer) {
 					$button = $('<button>',{
 						'id': 'able-vts-button-down-' + rowNum,
 						'aria-label': 'Move Row ' + rowNum + ' down'
-					}).on('click', function(el) {
-						thisObj.onClickVtsActionButton(el.currentTarget);
 					});
 					$svg = $('<svg>',{
 						'focusable': 'false',
@@ -456,8 +418,6 @@ function addVtsFunctions(AblePlayer) {
 				$button = $('<button>',{
 					'id': 'able-vts-button-insert-' + rowNum,
 					'aria-label': 'Insert row before Row ' + rowNum
-				}).on('click', function(el) {
-					thisObj.onClickVtsActionButton(el.currentTarget);
 				});
 				$svg = $('<svg>',{
 					'focusable': 'false',
@@ -489,8 +449,6 @@ function addVtsFunctions(AblePlayer) {
 				$button = $('<button>',{
 					'id': 'able-vts-button-delete-' + rowNum,
 					'aria-label': 'Delete Row ' + rowNum
-				}).on('click', function(el) {
-					thisObj.onClickVtsActionButton(el.currentTarget);
 				});
 				$svg = $('<svg>',{
 					'focusable': 'false',
@@ -546,6 +504,54 @@ function addVtsFunctions(AblePlayer) {
 			$thisButton.attr('aria-label',newLabel);
 		}
 	}
+
+	AblePlayer.prototype.setupVtsTableEvents = function() {
+
+		var thisObj = this;
+		var kindOptions = ['captions','chapters','descriptions','subtitles'];
+		var beforeEditing, editedCell, editedContent;
+
+		// Add event listeners for contenteditable cells
+		$('#able-vts table td[contenteditable="true"]').off('focus blur keydown').on('focus',function() {
+			beforeEditing = $(this).text();
+		}).on('blur',function() {
+			if (beforeEditing != $(this).text()) {
+				editedCell = $(this).index();
+				editedContent = $(this).text();
+				if (editedCell === 1) {
+					// do some simple spelling auto-correct
+					if ($.inArray(editedContent,kindOptions) === -1) {
+						// whatever user typed is not a valid kind
+						// assume they correctly typed the first character
+						if (editedContent.substring(0,1) === 's') {
+							$(this).text('subtitles');
+						} else if (editedContent.substring(0,1) === 'd') {
+							$(this).text('descriptions');
+						} else if (editedContent.substring(0,2) === 'ch') {
+							$(this).text('chapters');
+						} else {
+							// whatever else they types, assume 'captions'
+							$(this).text('captions');
+						}
+					}
+				} else if (editedCell === 2 || editedCell === 3) {
+					// start or end time
+					// ensure proper formatting (with 3 decimal places)
+					$(this).text(thisObj.formatTimestamp(editedContent));
+				}
+			}
+		}).on('keydown',function(e) {
+			// don't allow keystrokes to trigger Able Player (or other) functions
+			// while user is editing
+			e.stopPropagation();
+		});
+
+		// Add event listeners for action buttons
+		$('#able-vts table button').off('click').on('click', function(event) {
+			thisObj.onClickVtsActionButton(event.currentTarget);
+		});
+	}
+
 
 	AblePlayer.prototype.getIconCredit = function() {
 
