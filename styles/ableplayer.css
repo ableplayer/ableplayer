@@ -358,8 +358,8 @@ video[data-able-player],
 .able-controller button,
 .able-controller button:not(:hover):not(:focus):not(:active) {
 	all: unset;
-	background: none;
-	background-color: none;
+	background: transparent;
+	background-color: transparent;
 	position: relative;
 	padding: 2px;
 	min-width: var(--able-base-control-size);
