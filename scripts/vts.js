@@ -511,10 +511,15 @@ function addVtsFunctions(AblePlayer) {
 		var kindOptions = ['captions','chapters','descriptions','subtitles'];
 		var beforeEditing, editedCell, editedContent;
 
-		// Add event listeners for contenteditable cells
-		$('#able-vts table td[contenteditable="true"]').off('focus blur keydown').on('focus',function() {
+		// First, remove any existing delegated event handlers
+		$('#able-vts').off('focus blur keydown', 'table td[contenteditable="true"]');
+		$('#able-vts').off('click', 'table button');
+
+		// Add event listeners for contenteditable cells using event delegation
+		// This works for both existing and dynamically added cells
+		$('#able-vts').on('focus', 'table td[contenteditable="true"]', function() {
 			beforeEditing = $(this).text();
-		}).on('blur',function() {
+		}).on('blur', 'table td[contenteditable="true"]', function() {
 			if (beforeEditing != $(this).text()) {
 				editedCell = $(this).index();
 				editedContent = $(this).text();
@@ -540,14 +545,15 @@ function addVtsFunctions(AblePlayer) {
 					$(this).text(thisObj.formatTimestamp(editedContent));
 				}
 			}
-		}).on('keydown',function(e) {
+		}).on('keydown', 'table td[contenteditable="true"]', function(e) {
 			// don't allow keystrokes to trigger Able Player (or other) functions
 			// while user is editing
 			e.stopPropagation();
 		});
 
-		// Add event listeners for action buttons
-		$('#able-vts table button').off('click').on('click', function(event) {
+		// Add event listeners for action buttons using event delegation
+		// This works for both existing and dynamically added buttons
+		$('#able-vts').on('click', 'table button', function(event) {
 			thisObj.onClickVtsActionButton(event.currentTarget);
 		});
 	}
