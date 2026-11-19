@@ -1510,7 +1510,7 @@ function addControlFunctions(AblePlayer) {
 		} else if (location === 'screenreader') {
 			$alertBox = thisObj.$srAlertBox;
 		}
-		$alertBox.find('span').text(msg);
+		$alertBox.find('p').text(msg);
 		$alertBox.appendTo($parentWindow)
 		$alertBox.css( {'display': 'flex'} );
 

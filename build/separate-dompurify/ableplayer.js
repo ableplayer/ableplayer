@@ -1881,7 +1881,7 @@
 			this.$alertBox.addClass('able-alert');
 			this.$alertBox.hide();
 
-			var $alertText = $( '<span></span>' );
+			var $alertText = $( '<p></p>' );
 			$alertText.appendTo(this.$alertBox);
 
 			var $alertDismiss = $('<button type="button"></button>' );
@@ -5305,7 +5305,7 @@
 			} else if (location === 'screenreader') {
 				$alertBox = thisObj.$srAlertBox;
 			}
-			$alertBox.find('span').text(msg);
+			$alertBox.find('p').text(msg);
 			$alertBox.appendTo($parentWindow);
 			$alertBox.css( {'display': 'flex'} );
 

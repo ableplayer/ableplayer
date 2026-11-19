@@ -382,7 +382,7 @@ function addBuildplayerFunctions(AblePlayer) {
 		this.$alertBox.addClass('able-alert');
 		this.$alertBox.hide();
 
-		var $alertText = $( '<span></span>' );
+		var $alertText = $( '<p></p>' );
 		$alertText.appendTo(this.$alertBox);
 
 		var $alertDismiss = $('<button type="button"></button>' );
