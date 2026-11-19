@@ -1614,7 +1614,7 @@
 			if (this.hasPlaylist && this.showNowPlaying) {
 				this.$nowPlayingDiv = $('<div>',{
 					'class' : 'able-now-playing',
-					'aria-live' : 'assertive',
+					'aria-live' : 'polite',
 					'aria-atomic': 'true'
 				});
 			}
@@ -1644,7 +1644,7 @@
 
 			this.$speed = $('<span>',{
 				'class' : 'able-speed',
-				'aria-live' : 'assertive',
+				'aria-live' : 'polite',
 				'aria-atomic' : 'true'
 			}).text(this.translate( 'speed', 'Speed' ) + ': 1x');
 
@@ -1874,7 +1874,7 @@
 
 		AblePlayer.prototype.injectAlert = function ($container) {
 			// inject two alerts, one visible for all users and one for screen reader users only
-			this.$alertBox = $('<div role="alert"></div>');
+			this.$alertBox = $('<div aria-live="polite" aria-atomic="true"></div>');
 			this.$alertBox.addClass('able-alert');
 			this.$alertBox.hide();
 
@@ -1893,7 +1893,7 @@
 			this.$alertBox.appendTo($container);
 
 			if ( ! this.$srAlertBox ) {
-				this.$srAlertBox = $('<div role="alert"></div>');
+				this.$srAlertBox = $('<div aria-live="polite" aria-atomic="true"></div>');
 				this.$srAlertBox.addClass('able-screenreader-alert');
 				this.$srAlertBox.appendTo($container);
 			}
@@ -4524,7 +4524,7 @@
 					}
 					this.getIcon( this.$playpauseButton, 'play' );
 				} else if (typeof this.$status !== 'undefined' && typeof this.seekBar !== 'undefined') {
-					// Update the text only if it's changed since it has role="alert";
+					// Update the text only if it's changed since it has aria-live="polite";
 					// also don't update while tracking, since this may Pause/Play the player but we don't want to send a Pause/Play update.
 					this.getPlayerState().then(function(currentState) {
 						volumeStatus = thisObj.getVolume() === 0 ? thisObj.translate( 'statusMuted', 'Muted' ) : '';
