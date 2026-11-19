@@ -602,11 +602,13 @@ div.able-modal-dialog h1 {
 div.able-prefDescPause {
   margin-top: 1em;
 }
-.able-prefs-form div.able-captions-sample {
+.able-prefs-form p.able-captions-sample {
+  margin: 0;
   padding: 0.5em;
   text-align: center;
 }
-.able-prefs-form div.able-desc-sample {
+.able-prefs-form p.able-desc-sample {
+  margin: 0;
   padding: 0.5em;
   text-align: center;
   color: #fff;

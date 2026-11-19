@@ -725,12 +725,14 @@ div.able-prefDescPause {
 	margin-top: 1rem;
 }
 
-.able-prefs-form div.able-captions-sample {
+.able-prefs-form p.able-captions-sample {
+	margin: 0;
 	padding: 0.5rem;
 	text-align: center;
 }
 
-.able-prefs-form div.able-desc-sample {
+.able-prefs-form p.able-desc-sample {
+	margin: 0;
 	padding: 0.5rem;
 	text-align: center;
 	color: #fff;

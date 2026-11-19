@@ -928,7 +928,7 @@
 			// add a sample closed caption div to prefs dialog
 			// do not show this for YouTube captions, since it's not an accurate reflection
 			if (!this.usingYouTubeCaptions) {
-				this.$sampleCapsDiv = $('<div>',{
+				this.$sampleCapsDiv = $('<p>',{
 					'class': 'able-captions-sample'
 				}).text( this.translate( 'sampleCaptionText', 'Sample caption text' ) );
 				$prefsDiv.append(this.$sampleCapsDiv);
@@ -937,7 +937,7 @@
 		} else if (form === 'descriptions') {
 			if (this.synth) {
 				// add a div with sample audio description text
-				this.$sampleDescDiv = $('<div>',{
+				this.$sampleDescDiv = $('<p>',{
 					'class': 'able-desc-sample'
 				}).text( this.translate( 'sampleDescriptionText', 'Adjust settings to hear this sample text.' ) );
 				$prefsDiv.append(this.$sampleDescDiv);
