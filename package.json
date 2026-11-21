@@ -47,7 +47,7 @@
     "jest-puppeteer": "^10.1.0",
     "jsdoc": "^4.0.4",
     "jsdom": "^25.0.1",
-    "puppeteer": "^23.2.2",
+    "puppeteer": "^25.18.1",
     "rollup": "^4.59.0",
     "typescript": "^5.9.3"
   }
