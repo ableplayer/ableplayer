@@ -1234,6 +1234,16 @@ div.able-modal-dialog button:hover,
 	background-color: transparent;
 }
 
+.able-wrapper .able-window-toolbar select {
+	color: var(--able-control-background);
+	background-color: var(--able-control-color);
+}
+
+.able-wrapper .able-window-toolbar select:focus,
+.able-wrapper .able-window-toolbar select:hover {
+	background-color: var(--able-control-color);
+}
+
 .able-seekbar-head:focus,
 .able-seekbar-head:hover {
 	background-color: var(--able-seekbar-head);
