@@ -424,6 +424,7 @@
 						return token;
 					} else {
 						result.push(buffer);
+						result.push(c);
 						tokenState = 'data';
 					}
 				} else if (tokenState === 'tag') {
