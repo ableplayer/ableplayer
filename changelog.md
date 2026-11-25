@@ -29,12 +29,14 @@
 - Allow YouTube iframe sign language to exceed 640px width.
 - Fix incorrect data-lang check for similar languages.
 - Improve parsing of VTT files to better handle a variety of edge cases. (props @conorom)
+- Fix dropped character after unconverted HTML entities in WebVTT parsing. E.g. 'Q&A' becoming 'Q&'.
 - Improve handling of drag and resize events.
 - Bug fix: events triggered from outside the player triggered errors due to assumed classes.
 - Fix bug with timestamp formatting in Video Transcript Sorter.
 - Reset the "paused for description" state correctly after a spoken description finishes.
 - Don't immediately close the volume slider on any click inside its container.
 - Simplify the `toggleButtonState` prototype so that it requires fewer arguments, and derives more state information from the control itself.
+- Fix event assignment in VTS so events aren't dropped on new or moved rows.
 
 ### Design
 
