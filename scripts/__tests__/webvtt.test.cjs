@@ -382,3 +382,28 @@ the same thing that everybody else sees.`
     );
   });
 });
+
+describe('parseWebVTT – ampersands in cue text', () => {
+  test.each([
+    ['Q&A', 'Q&A'],
+    ['Q&?', 'Q&?'],
+    ['Q&É', 'Q&É'],
+    ['Q&name?', 'Q&name?'],
+    ['Q&amp;A', 'Q&A'],
+    ['Q&unknown;', 'Q&unknown;'],
+  ])('preserves %s as %s', (input, expected) => {
+    const player = new AblePlayer();
+    const text = `WEBVTT\n\n00:00:00.000 --> 00:00:01.000\n${input}\n\n`;
+    const result = player.parseWebVTT({ src: 'ampersand.vtt', text });
+
+    expect(collectText(result.cues[0].components)).toBe(expected);
+  });
+
+  test('preserves an ampersand immediately before markup', () => {
+    const player = new AblePlayer();
+    const text = 'WEBVTT\n\n00:00:00.000 --> 00:00:01.000\nQ&<b>A</b>\n\n';
+    const result = player.parseWebVTT({ src: 'ampersand.vtt', text });
+
+    expect(collectTagged(result.cues[0].components)).toBe('Q&<b>A</b>');
+  });
+});
